@@ -1,0 +1,19 @@
+{
+  "name": "tools",
+  "description": "",
+  "main": "index.js",
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "../dist/lib",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "1.3.4"
+  }
+}
