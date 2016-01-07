@@ -1,4 +1,4 @@
 {
-  "directory": "../dist/lib",
+  "directory": "../src/lib",
   "interactive": false
 }
