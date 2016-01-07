@@ -15,12 +15,14 @@ var paths = {
 
 
 var jsSourceFiles = [
-  paths.src + '**/*.js',
+  paths.src + '**/*.js'
 ];
 
 
 var jsLibs = [
-  paths.dist + 'lib/angular/angular.js'
+  paths.dist + 'lib/angular/angular.js',
+  paths.dist + 'lib/helion-ui-framework/**/*.module.js',
+  paths.dist + 'lib/helion-ui-framework/**/*.js'
 ];
 
 
@@ -30,9 +32,7 @@ var plugins = [
 
 var jsFiles = [
   paths.dist + 'index.module.js',
-  paths.dist + 'framework/**/*.module.js',
   paths.dist + 'app/**/*.module.js',
-  paths.dist + 'framework/**/*.js',
   paths.dist + 'app/**/*.js',
   '!' + paths.dist + '**/*.mock.js',
   '!' + paths.dist + '**/*.spec.js'
@@ -50,8 +50,6 @@ var cssFiles = [
 
 
 var partials = [
-  paths.src + 'lib/**/*.html',
-  paths.src + 'framework/**/*.html',
   paths.src + 'app/**/*.html'
 ];
 
@@ -75,6 +73,13 @@ gulp.task('html', function () {
   return gulp
     .src(partials, { base: paths.src })
     .pipe(gulp.dest(paths.dist))  ;
+});
+
+
+gulp.task('lib', function () {
+  return gulp
+    .src(paths.src + 'lib/**')
+    .pipe(gulp.dest(paths.dist + 'lib/'));
 });
 
 
@@ -111,6 +116,7 @@ gulp.task('default', function (next) {
     'js',
     'css',
     'html',
+    'lib',
     'index:copy',
     'index:inject',
     next
