@@ -5,10 +5,11 @@
   ];
 
   var otherModules = [
+    'helion.framework'
   ];
 
   angular
-    .module('my-webapp', [
+    .module('green-box-ui', [
       'app'
     ]
     .concat(angularModules)
