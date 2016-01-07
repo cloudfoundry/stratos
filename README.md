@@ -7,7 +7,7 @@ docker build -t stratos-ui .
 
 ## Create and start docker container
 ```
-docker run -it --rm --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework stratos-ui /bin/bash
+docker run -it --rm --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework -v $(pwd)/../helion-ui-theme:/usr/src/helion-ui-theme stratos-ui /bin/bash
 ```
 
 ## provision container
