@@ -7,4 +7,4 @@ RUN apt-get update && \
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-CMD [ "/bin/bash" ]
+CMD bash provision.sh && cd tools && node_modules/.bin/gulp watch

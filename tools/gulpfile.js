@@ -44,6 +44,11 @@ var scssSourceFiles = [
 ];
 
 
+var scssFiles = [
+  paths.src + '**/*.scss'
+]
+
+
 var cssFiles = [
    paths.dist + 'index.css'
 ];
@@ -72,7 +77,7 @@ gulp.task('css', function () {
 gulp.task('html', function () {
   return gulp
     .src(partials, { base: paths.src })
-    .pipe(gulp.dest(paths.dist))  ;
+    .pipe(gulp.dest(paths.dist));
 });
 
 
@@ -103,6 +108,13 @@ gulp.task('index:inject', function () {
     .pipe(gulpinject(sources, { relative: true }))
     .pipe(concat.header())
     .pipe(gulp.dest(paths.dist));
+});
+
+
+gulp.task('watch', function () {
+  gulp.watch(jsFiles, [ 'js' ]);
+  gulp.watch(scssFiles, [ 'css' ]);
+  gulp.watch(partials, [ 'html' ]);
 });
 
 
