@@ -1,7 +1,7 @@
 # stratos-ui
 
 ## Pre-requisite
-If running on OSX and VirtualBox, you will likely need to create a Docker machine with the `--virtualbox-cpu-count=2`.
+If running on OSX and VirtualBox, you will likely need to create a Docker machine with the `--virtualbox-cpu-count=2` flag.
 ```
 docker-machine create --driver virtualbox --virtualbox-cpu-count=2 default
 ```
