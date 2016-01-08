@@ -2,7 +2,12 @@
   'use strict';
 
   expose({
-    gettext: gettext
+    gettext: gettext,
+
+    env: {
+      HELION_UI_FRAMEWORK_BASE_PATH: 'lib/helion-ui-framework/'
+    }
+
   });
 
   function gettext(text) {
