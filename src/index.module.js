@@ -2,10 +2,14 @@
   'use strict';
 
   var angularModules = [
+    'ngSanitize'
   ];
 
   var otherModules = [
-    'helion.framework'
+    'gettext',
+    'helion.framework',
+    'ui.bootstrap',
+    'ui.router'
   ];
 
   angular

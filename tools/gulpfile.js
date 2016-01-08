@@ -21,6 +21,12 @@ var jsSourceFiles = [
 
 var jsLibs = [
   paths.dist + 'lib/angular/angular.js',
+  paths.dist + 'lib/angular-gettext/dist/angular-gettext.js',
+  paths.dist + 'lib/angular-sanitize/angular-sanitize.js',
+  paths.dist + 'lib/angular-bootstrap/ui-bootstrap.js',
+  paths.dist + 'lib/angular-bootstrap/ui-bootstrap-tpls.js',
+  paths.dist + 'lib/angular-ui-router/release/angular-ui-router.js',
+  paths.dist + 'lib/lodash/lodash.js',
   paths.dist + 'lib/helion-ui-framework/**/*.module.js',
   paths.dist + 'lib/helion-ui-framework/**/*.js'
 ];
