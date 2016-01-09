@@ -18,7 +18,14 @@ module.exports = function (config) {
     files: [
       'config.js',
 
-      'lib/angular/angular.min.js',
+      'lib/angular/angular.js',
+      'lib/angular-gettext/dist/angular-gettext.js',
+      'lib/angular-sanitize/angular-sanitize.js',
+      'lib/angular-bootstrap/ui-bootstrap.js',
+      'lib/angular-bootstrap/ui-bootstrap-tpls.js',
+      'lib/angular-ui-router/release/angular-ui-router.js',
+      'lib/lodash/lodash.js',
+
       'lib/helion-ui-framework/**/*.module.js',
       'lib/helion-ui-framework/**/!(*.mock|*.spec).js',
       'lib/helion-ui-framework/**/!(*.mock).html',
