@@ -1,4 +1,13 @@
-//@import "lib/helion-ui-theme/mixins";
-//@import "lib/helion-ui-theme/variables";
+// theme
+@import "lib/helion-ui-theme/default/variables";
+@import "lib/helion-ui-theme/mixins";
+@import "lib/helion-ui-theme/variables";
+
+// libs
+$fa-font-path: "lib/font-awesome/fonts";
+@import "lib/font-awesome/scss/font-awesome";
+@import "lib/bootstrap-sass-official/assets/stylesheets/bootstrap";
 @import "lib/helion-ui-framework/framework";
+
+// app
 @import "app/app";
