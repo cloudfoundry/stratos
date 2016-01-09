@@ -1,21 +1,26 @@
 # stratos-ui
 
 ## Pre-requisite
-If running on OSX and VirtualBox, you will likely need to create a docker machine with the `--virtualbox-cpu-count=2`.
+If running on OSX and VirtualBox, you will likely need to create a Docker machine with the `--virtualbox-cpu-count=2` flag.
 ```
 docker-machine create --driver virtualbox --virtualbox-cpu-count=2 default
 ```
 
-## Build docker image
+## Build Docker image
 ```
 docker build -t stratos-ui .
 ```
 
-## Create and start docker container
+## Create and start Docker container
 ```
 docker run -it --rm --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework -v $(pwd)/../helion-ui-theme:/usr/src/helion-ui-theme stratos-ui /bin/bash
 
 $ bash provision.sh
+```
+
+## Create and start Docker container with Gulp watch
+```
+docker run -d --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework -v $(pwd)/../helion-ui-theme:/usr/src/helion-ui-theme stratos-ui
 ```
 
 ## Provision container
@@ -42,7 +47,7 @@ $ ./node_modules/protractor/bin/webdriver-manager update
 $ ./node_modules/protractor/bin/webdriver-manager start
 ```
 
-Open another terminal and run Protractor. You'll need to run 'eval' again for your docker machine (replace 'default' with your machine name).
+Open another terminal and run Protractor. You'll need to run 'eval' again for your Docker machine (replace 'default' with your machine name).
 ```
 eval "$(docker-machine env default)"
 docker exec -it stratos-ui /bin/bash
