@@ -3,23 +3,34 @@
 
   angular
     .module('app.model')
-    .run(accountModelFactory);
+    .run(registerAccountModel);
 
-  accountModelFactory.$inject = [
+  registerAccountModel.$inject = [
     'app.model.modelManager'
   ];
 
-  function accountModelFactory(modelManager) {
-    modelManager.register('app.model.account', {
-      name: 'Sean',
-      actions: {
-        login: login,
-        logout: logout
+  function registerAccountModel(modelManager) {
+
+    modelManager.register('app.model.account', new Account());
+
+    // TODO: this is just a fake implementation for Account model.
+    function Account() {
+      this.name = null;
+      this.loggedIn = false;
+    }
+
+    angular.extend(Account.prototype, {
+
+      login: function (name) {
+        this.name = name;
+        this.loggedIn = true;
+      },
+
+      logout: function () {
+        this.name = null;
+        this.loggedIn = false;
       }
     });
-
-    function login() {}
-    function logout() {}
   }
 
 })();
