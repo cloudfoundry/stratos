@@ -13,7 +13,7 @@
   ];
 
   angular
-    .module('green-box-ui', [
+    .module('green-box-console', [
       'app'
     ]
     .concat(angularModules)

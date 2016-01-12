@@ -11,7 +11,7 @@
 
   function console(path) {
     return {
-      templateUrl: path + '/view/console/console.html'
+      templateUrl: path + 'view/console/console.html'
     };
   }
 
