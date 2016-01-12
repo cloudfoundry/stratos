@@ -101,9 +101,9 @@ gulp.task('index:copy', function () {
 });
 
 
-gulp.task('index:inject', function () {
+gulp.task('index:inject', [ 'index:copy' ], function () {
   var sources = gulp.src(
-    [paths.dist + 'config.js']
+    [ paths.dist + 'config.js' ]
     .concat(jsLibs)
     .concat(plugins)
     .concat(jsFiles)
@@ -118,9 +118,10 @@ gulp.task('index:inject', function () {
 
 
 gulp.task('watch', function () {
-  gulp.watch(jsFiles, [ 'js' ]);
-  gulp.watch(scssFiles, [ 'css' ]);
+  gulp.watch(jsSourceFiles, [ 'js' ]);
+  gulp.watch(scssSourceFiles, [ 'css' ]);
   gulp.watch(partials, [ 'html' ]);
+  gulp.watch(paths.src + 'index.html', [ 'index:inject' ]);
 });
 
 
@@ -135,7 +136,6 @@ gulp.task('default', function (next) {
     'css',
     'html',
     'lib',
-    'index:copy',
     'index:inject',
     next
   );
