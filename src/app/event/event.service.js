@@ -13,15 +13,10 @@
    * @name app.event.eventService
    * @example
    ```js
+   // subscribe to an event:
+   eventService.$on(events.HTTP_401, handler);
 
-   // 1. subscribe to a event:
-   eventService.$on(events.HTTP_401, handle);
-
-   function handler(event, context) {
-     //...
-   }
-
-   // 2. emit event
+   // emit an event
    eventService.$emit(events.HTTP_401);
    ```
    */
