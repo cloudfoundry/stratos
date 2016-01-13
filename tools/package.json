@@ -18,6 +18,8 @@
     "run-sequence": "^1.1.5"
   },
   "devDependencies": {
+    "eslint": "^1.10.3",
+    "gulp-eslint": "^1.1.1",
     "jasmine-core": "^2.4.1",
     "karma": "^0.13.19",
     "karma-cli": "^0.1.2",
