@@ -5,6 +5,7 @@ var concat = require('gulp-concat-util');
 var gulpinject = require('gulp-inject');
 var runSequence = require('run-sequence');
 var sass = require('gulp-sass');
+var eslint = require('gulp-eslint');
 var del = require('del');
 
 
@@ -125,6 +126,18 @@ gulp.task('watch', function () {
 });
 
 
+gulp.task('lint', function () {
+  return gulp
+    .src([
+      paths.src + '**/*.js',
+      '!' + paths.src + 'lib/**/*.js'
+    ])
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
+});
+
+
 gulp.task('clean', function (next) {
   del(paths.dist, { force: true }, next);
 });
@@ -132,6 +145,7 @@ gulp.task('clean', function (next) {
 
 gulp.task('default', function (next) {
   runSequence(
+    'lint',
     'js',
     'css',
     'html',

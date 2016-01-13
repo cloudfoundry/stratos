@@ -54,3 +54,9 @@ docker exec -it stratos-ui /bin/bash
 
 $ ./node_modules/protractor/bin/protractor protractor.conf.js
 ```
+
+## Running ESLint
+```
+$ cd tools
+$ ./node_modules/.bin/gulp lint
+```
