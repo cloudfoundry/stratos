@@ -50,11 +50,6 @@ var scssSourceFiles = [
 ];
 
 
-var scssFiles = [
-  paths.src + '**/*.scss'
-]
-
-
 var cssFiles = [
    paths.dist + 'index.css'
 ];
