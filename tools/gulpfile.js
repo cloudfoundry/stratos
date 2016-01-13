@@ -144,6 +144,7 @@ gulp.task('clean', function (next) {
 
 gulp.task('default', function (next) {
   runSequence(
+    'lint',
     'js',
     'css',
     'html',
