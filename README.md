@@ -19,8 +19,12 @@ $ bash provision.sh
 ```
 
 ## Create and start Docker container with Gulp watch
+This will take a few minutes to provision. Any changes to source Javascript, SCSS or HTML files will automatically update the 'dist' folder. Be sure to stop the container before switching branches.
 ```
 docker run -d --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework -v $(pwd)/../helion-ui-theme:/usr/src/helion-ui-theme stratos-ui
+
+# Show log and see provisioning status
+docker logs stratos-ui
 ```
 
 ## Provision container
