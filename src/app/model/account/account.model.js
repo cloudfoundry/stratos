@@ -20,7 +20,6 @@
     }
 
     angular.extend(Account.prototype, {
-
       login: function (name) {
         this.name = name;
         this.loggedIn = true;

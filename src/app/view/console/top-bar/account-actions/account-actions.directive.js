@@ -12,12 +12,14 @@
   function accountActions(path) {
     return {
       controller: Controller,
-      controllerAs: 'ctrl',
+      controllerAs: 'accountActionsCtrl',
       templateUrl: path + '/view/console/top-bar/account-actions/account-actions.html'
     };
   }
 
-  Controller.$inject = ['app.model.modelManager'];
+  Controller.$inject = [
+    'app.model.modelManager'
+  ];
 
   function Controller(modelManager) {
     this.model = modelManager.retrieve('app.model.account');
