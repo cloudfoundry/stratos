@@ -31,10 +31,7 @@
   angular.extend(Controller.prototype, {
     login: function (name) {
       this.account.login(name);
-      this.navigation
-        .reset()
-        .addMenuItem('applications', 'applications', gettext('Applications'))
-        .addMenuItem('organizations', 'organizations', gettext('Organizations'));
+      this.navigation.reset();
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
     },
 

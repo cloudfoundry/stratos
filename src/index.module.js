@@ -12,14 +12,12 @@
     'ui.router'
   ];
 
+  var pluginModules = Object.keys(env.plugins).map(function (key) {
+    return env.plugins[key].moduleName;
+  });
+
   angular
-    .module('green-box-console', [
-      'app'
-    ]
-    .concat(angularModules)
-    .concat(otherModules),
-    config
-  );
+    .module('green-box-console', ['app'].concat(angularModules, otherModules, pluginModules), config);
 
   config.$inject = [
     '$compileProvider'

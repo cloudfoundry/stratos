@@ -5,7 +5,17 @@
     gettext: gettext,
 
     env: {
-      HELION_UI_FRAMEWORK_BASE_PATH: 'lib/helion-ui-framework/'
+
+      HELION_UI_FRAMEWORK_BASE_PATH: 'lib/helion-ui-framework/',
+
+      plugins: {
+
+        cloudFoundry: {
+          moduleName: 'cloud-foundry',
+          basePath: 'plugins/cloud-foundry/',
+          dependencies: []
+        }
+      }
     }
 
   });
