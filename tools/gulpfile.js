@@ -139,7 +139,7 @@ gulp.task('lint', function () {
 
 
 gulp.task('clean', function (next) {
-  del(paths.dist, { force: true }, next);
+  del(paths.dist + '**/*', { force: true }, next);
 });
 
 
