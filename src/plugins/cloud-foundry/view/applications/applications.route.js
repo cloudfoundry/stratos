@@ -12,7 +12,7 @@
 
   function registerRoute($stateProvider, basePath) {
     $stateProvider.state('cf.applications', {
-      url: 'applications/',
+      url: '/applications',
       templateUrl: basePath + 'view/applications/applications.html'
     });
   }
