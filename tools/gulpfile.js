@@ -6,6 +6,8 @@ var gulpinject = require('gulp-inject');
 var runSequence = require('run-sequence');
 var sass = require('gulp-sass');
 var del = require('del');
+var sh = require('shelljs');
+var file = require('gulp-file');
 
 
 var paths = {
@@ -40,6 +42,8 @@ var jsFiles = [
   paths.dist + 'index.module.js',
   paths.dist + 'app/**/*.module.js',
   paths.dist + 'app/**/*.js',
+  paths.dist + 'plugins/**/*.module.js',
+  paths.dist + 'plugins/**/*.js',
   '!' + paths.dist + '**/*.mock.js',
   '!' + paths.dist + '**/*.spec.js'
 ];
@@ -52,7 +56,7 @@ var scssSourceFiles = [
 
 var scssFiles = [
   paths.src + '**/*.scss'
-]
+];
 
 
 var cssFiles = [
@@ -61,8 +65,24 @@ var cssFiles = [
 
 
 var partials = [
-  paths.src + 'app/**/*.html'
+  paths.src + 'app/**/*.html',
+  paths.src + 'plugins/**/*.html'
 ];
+
+
+gulp.task('plugin', function() {
+  var CMD = 'cd ../src/plugins && ls */*.scss';
+  var pluginsScssFiles  = sh.exec(CMD, { silent: true })
+    .output
+    .trim()
+    .split(/\s+/)
+    .map(function (scss) {
+      return '@import "' + scss + '";'
+    });
+
+  return file('.plugins.scss', pluginsScssFiles.join('\n'), { src: true })
+    .pipe(gulp.dest(paths.src + 'plugins'));
+});
 
 
 gulp.task('js', function () {
@@ -131,6 +151,7 @@ gulp.task('clean', function (next) {
 
 gulp.task('default', function (next) {
   runSequence(
+    'plugin',
     'js',
     'css',
     'html',

@@ -11,3 +11,4 @@ $fa-font-path: "lib/font-awesome/fonts";
 
 // app
 @import "app/app";
+@import "plugins/.plugins"; // auto-generated after running gulp
