@@ -17,19 +17,31 @@
     };
   }
 
-  Controller.$inject = ['app.model.modelManager'];
+  Controller.$inject = [
+    'app.event.eventService',
+    'app.model.modelManager'
+  ];
 
-  function Controller(modelManager) {
-    this.model = modelManager.retrieve('app.model.account');
+  function Controller(eventService, modelManager) {
+    this.eventService = eventService;
+    this.account = modelManager.retrieve('app.model.account');
+    this.navigation = modelManager.retrieve('app.model.navigation');
   }
 
   angular.extend(Controller.prototype, {
     login: function (name) {
-      this.model.login(name);
+      this.account.login(name);
+      this.navigation
+        .reset()
+        .addMenuItem('applications', 'applications', gettext('Applications'))
+        .addMenuItem('organizations', 'organizations', gettext('Organizations'));
+      this.eventService.$emit(this.eventService.events.LOGGED_IN);
     },
 
     logout: function () {
-      this.model.logout();
+      this.account.logout();
+      this.navigation.reset();
+      this.eventService.$emit(this.eventService.events.LOGGED_OUT);
     }
   });
 
