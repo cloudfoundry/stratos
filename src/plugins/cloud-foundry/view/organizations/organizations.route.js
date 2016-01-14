@@ -12,7 +12,7 @@
 
   function registerRoute($stateProvider, basePath) {
     $stateProvider.state('cf.organizations', {
-      url: 'organizations/',
+      url: '/organizations',
       templateUrl: basePath + 'view/organizations/organizations.html'
     });
   }
