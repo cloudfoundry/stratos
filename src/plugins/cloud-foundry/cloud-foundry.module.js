@@ -40,8 +40,8 @@
 
     registerNavigation: function () {
       this.modelManager.retrieve('app.model.navigation')
-        .addMenuItem('applications', 'applications', gettext('Applications'))
-        .addMenuItem('organizations', 'organizations', gettext('Organizations'));
+        .addMenuItem('cf.applications', 'cf.applications', gettext('Applications'))
+        .addMenuItem('cf.organizations', 'cf.organizations', gettext('Organizations'));
     }
   });
 
