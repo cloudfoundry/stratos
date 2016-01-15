@@ -1,5 +1,6 @@
 .idea
 **/.*/*
+**/.*.*
 npm-debug.log
 phantomjsdriver.log
 node_modules

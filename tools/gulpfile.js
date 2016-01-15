@@ -7,9 +7,10 @@ var runSequence = require('run-sequence');
 var sass = require('gulp-sass');
 var eslint = require('gulp-eslint');
 var del = require('del');
-
-// Paths are stored in gulp.config.js
+var sh = require('shelljs');
+var file = require('gulp-file');
 var config = require('./gulp.config')();
+
 var paths = config.paths,
   jsSourceFiles = config.jsSourceFiles,
   jsLibs = config.jsLibs,
@@ -19,6 +20,21 @@ var paths = config.paths,
   scssFiles = config.scssFiles,
   cssFiles = config.cssFiles,
   partials = config.partials;
+
+
+gulp.task('plugin', function() {
+  var CMD = 'cd ../src/plugins && ls */*.scss';
+  var pluginsScssFiles  = sh.exec(CMD, { silent: true })
+    .output
+    .trim()
+    .split(/\s+/)
+    .map(function (scss) {
+      return '@import "' + scss + '";'
+    });
+
+  return file('.plugins.scss', pluginsScssFiles.join('\n'), { src: true })
+    .pipe(gulp.dest(paths.src + 'plugins'));
+});
 
 
 gulp.task('js', function () {
@@ -100,6 +116,7 @@ gulp.task('clean', function (next) {
 
 gulp.task('default', function (next) {
   runSequence(
+    'plugin',
     'lint',
     'js',
     'css',
