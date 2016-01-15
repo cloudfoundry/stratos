@@ -8,7 +8,6 @@
       'cloud-foundry.model',
       'cloud-foundry.view'
     ])
-    .constant('cloud-foundry.basePath', env.plugins.cloudFoundry.basePath)
     .run(register);
 
   register.$inject = [
@@ -40,8 +39,8 @@
 
     registerNavigation: function () {
       this.modelManager.retrieve('app.model.navigation')
-        .addMenuItem('applications', 'applications', gettext('Applications'))
-        .addMenuItem('organizations', 'organizations', gettext('Organizations'));
+        .addMenuItem('cf.applications', 'cf.applications', gettext('Applications'))
+        .addMenuItem('cf.organizations', 'cf.organizations', gettext('Organizations'));
     }
   });
 
