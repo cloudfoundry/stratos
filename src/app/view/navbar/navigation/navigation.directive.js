@@ -13,7 +13,7 @@
     return {
       controller: Controller,
       controllerAs: 'NavigationCtrl',
-      templateUrl: path + '/view/console/top-bar/navigation/navigation.html'
+      templateUrl: path + '/view/navbar/navigation/navigation.html'
     };
   }
 

@@ -21,15 +21,7 @@
            * whole app the be initialized.
            *
            */
-          moduleName: 'cloud-foundry',
-
-          /**
-           * @ngdoc plugins
-           * @property basePath {String} defines the base path to the root folder where
-           * the plugin app resides or is installed.  The basePath is relative
-           * to the src folder.
-           */
-          basePath: 'plugins/cloud-foundry/'
+          moduleName: 'cloud-foundry'
         }
       }
     }
