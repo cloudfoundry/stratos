@@ -11,9 +11,9 @@
   ];
 
   function registerRoute($stateProvider, basePath) {
-    $stateProvider.state('cf', {
-      url: '/cf',
-      templateUrl: basePath + 'view/index.html'
+    $stateProvider.state('cf.applications', {
+      url: 'applications/',
+      templateUrl: basePath + 'view/applications/applications.html'
     });
   }
 
