@@ -8,7 +8,6 @@
       'cloud-foundry.model',
       'cloud-foundry.view'
     ])
-    .constant('cloud-foundry.basePath', env.plugins.cloudFoundry.basePath)
     .run(register);
 
   register.$inject = [
