@@ -32,6 +32,8 @@ module.exports = function () {
       paths.dist + 'index.module.js',
       paths.dist + 'app/**/*.module.js',
       paths.dist + 'app/**/*.js',
+      paths.dist + 'plugins/**/*.module.js',
+      paths.dist + 'plugins/**/*.js',
       '!' + paths.dist + '**/*.mock.js',
       '!' + paths.dist + '**/*.spec.js'
     ],
@@ -49,7 +51,8 @@ module.exports = function () {
     ],
 
     partials: [
-      paths.src + 'app/**/*.html'
+      paths.src + 'app/**/*.html',
+      paths.src + 'plugins/**/*.html'
     ]
   };
 
