@@ -10,73 +10,82 @@ var del = require('del');
 
 // Paths are stored in gulp.config.js
 var config = require('./gulp.config')();
+var paths = config.paths,
+  jsSourceFiles = config.jsSourceFiles,
+  jsLibs = config.jsLibs,
+  plugins = config.plugins,
+  jsFiles = config.jsFiles,
+  scssSourceFiles = config.scssSourceFiles,
+  scssFiles = config.scssFiles,
+  cssFiles = config.cssFiles,
+  partials = config.partials;
 
 
 gulp.task('js', function () {
   return gulp
-    .src(config.jsSourceFiles, { base: config.paths.src })
-    .pipe(gulp.dest(config.paths.dist));
+    .src(jsSourceFiles, { base: paths.src })
+    .pipe(gulp.dest(paths.dist));
 });
 
 
 gulp.task('css', function () {
   return gulp
-    .src(config.scssSourceFiles, { base: config.paths.src })
+    .src(scssSourceFiles, { base: paths.src })
     .pipe(sass())
-    .pipe(gulp.dest(config.paths.dist));
+    .pipe(gulp.dest(paths.dist));
 });
 
 
 gulp.task('html', function () {
   return gulp
-    .src(config.partials, { base: config.paths.src })
-    .pipe(gulp.dest(config.paths.dist));
+    .src(partials, { base: paths.src })
+    .pipe(gulp.dest(paths.dist));
 });
 
 
 gulp.task('lib', function () {
   return gulp
-    .src(config.paths.src + 'lib/**')
-    .pipe(gulp.dest(config.paths.dist + 'lib/'));
+    .src(paths.src + 'lib/**')
+    .pipe(gulp.dest(paths.dist + 'lib/'));
 });
 
 
 gulp.task('index:copy', function () {
   return gulp
-    .src(config.paths.src + 'index.html')
-    .pipe(gulp.dest(config.paths.dist));
+    .src(paths.src + 'index.html')
+    .pipe(gulp.dest(paths.dist));
 });
 
 
 gulp.task('index:inject', [ 'index:copy' ], function () {
   var sources = gulp.src(
-    [ config.paths.dist + 'config.js' ]
-    .concat(config.jsLibs)
-    .concat(config.plugins)
-    .concat(config.jsFiles)
-    .concat(config.cssFiles), { read: false });
+    [ paths.dist + 'config.js' ]
+    .concat(jsLibs)
+    .concat(plugins)
+    .concat(jsFiles)
+    .concat(cssFiles), { read: false });
 
   return gulp
-    .src(config.paths.dist + 'index.html')
+    .src(paths.dist + 'index.html')
     .pipe(gulpinject(sources, { relative: true }))
     .pipe(concat.header())
-    .pipe(gulp.dest(config.paths.dist));
+    .pipe(gulp.dest(paths.dist));
 });
 
 
 gulp.task('watch', function () {
-  gulp.watch(config.jsSourceFiles, { interval: 1000, usePoll: true }, [ 'js' ]);
-  gulp.watch(config.scssFiles, [ 'css' ]);
-  gulp.watch(config.partials, { interval: 1000, usePoll: true }, [ 'html' ]);
-  gulp.watch(config.paths.src + 'index.html', [ 'index:inject' ]);
+  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, [ 'js' ]);
+  gulp.watch(scssFiles, [ 'css' ]);
+  gulp.watch(partials, { interval: 1000, usePoll: true }, [ 'html' ]);
+  gulp.watch(paths.src + 'index.html', [ 'index:inject' ]);
 });
 
 
 gulp.task('lint', function () {
   return gulp
     .src([
-      config.paths.src + '**/*.js',
-      '!' + config.paths.src + 'lib/**/*.js'
+      paths.src + '**/*.js',
+      '!' + paths.src + 'lib/**/*.js'
     ])
     .pipe(eslint())
     .pipe(eslint.format())
@@ -85,7 +94,7 @@ gulp.task('lint', function () {
 
 
 gulp.task('clean', function (next) {
-  del(config.paths.dist + '**/*', { force: true }, next);
+  del(paths.dist + '**/*', { force: true }, next);
 });
 
 
