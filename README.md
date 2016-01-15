@@ -1,9 +1,9 @@
 # stratos-ui
 
 ## Pre-requisite
-If running on OSX and VirtualBox, you will likely need to create a Docker machine with the `--virtualbox-cpu-count=2` flag.
+If running on OSX and VirtualBox, you will likely need to create a Docker machine with the `--virtualbox-cpu-count` flag.
 ```
-docker-machine create --driver virtualbox --virtualbox-cpu-count=2 default
+docker-machine create --driver virtualbox --virtualbox-cpu-count "2" default
 ```
 
 ## Build Docker image
@@ -40,15 +40,15 @@ docker exec -it stratos-ui /bin/bash
 ## Running Karma tests
 ```
 $ cd tools
-$ ./node_modules/karma/bin/karma start
+$ npm test
 ```
 
 ## Running Protractor tests
 Start the Selenium server:
 ```
 $ cd tools
-$ ./node_modules/protractor/bin/webdriver-manager update
-$ ./node_modules/protractor/bin/webdriver-manager start
+$ ./node_modules/.bin/webdriver-manager update
+$ ./node_modules/.bin/webdriver-manager start
 ```
 
 Open another terminal and run Protractor. You'll need to run 'eval' again for your Docker machine (replace 'default' with your machine name).
@@ -56,7 +56,7 @@ Open another terminal and run Protractor. You'll need to run 'eval' again for yo
 eval "$(docker-machine env default)"
 docker exec -it stratos-ui /bin/bash
 
-$ ./node_modules/protractor/bin/protractor protractor.conf.js
+$ ./node_modules/.bin/protractor protractor.conf.js
 ```
 
 ## Running ESLint
