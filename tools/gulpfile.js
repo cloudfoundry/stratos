@@ -8,62 +8,17 @@ var sass = require('gulp-sass');
 var eslint = require('gulp-eslint');
 var del = require('del');
 
-
-var paths = {
-  src: '../src/',
-  dist: '../dist/'
-};
-
-
-var jsSourceFiles = [
-  paths.src + '**/*.js'
-];
-
-
-var jsLibs = [
-  paths.dist + 'lib/angular/angular.js',
-  paths.dist + 'lib/angular-gettext/dist/angular-gettext.js',
-  paths.dist + 'lib/angular-sanitize/angular-sanitize.js',
-  paths.dist + 'lib/angular-bootstrap/ui-bootstrap.js',
-  paths.dist + 'lib/angular-bootstrap/ui-bootstrap-tpls.js',
-  paths.dist + 'lib/angular-ui-router/release/angular-ui-router.js',
-  paths.dist + 'lib/lodash/lodash.js',
-  paths.dist + 'lib/helion-ui-framework/**/*.module.js',
-  paths.dist + 'lib/helion-ui-framework/**/*.js'
-];
-
-
-var plugins = [
-];
-
-
-var jsFiles = [
-  paths.dist + 'index.module.js',
-  paths.dist + 'app/**/*.module.js',
-  paths.dist + 'app/**/*.js',
-  '!' + paths.dist + '**/*.mock.js',
-  '!' + paths.dist + '**/*.spec.js'
-];
-
-
-var scssSourceFiles = [
-  paths.src + 'index.scss'
-];
-
-
-var scssFiles = [
-  paths.src + '**/*.scss'
-]
-
-
-var cssFiles = [
-   paths.dist + 'index.css'
-];
-
-
-var partials = [
-  paths.src + 'app/**/*.html'
-];
+// Paths are stored in gulp.config.js
+var config = require('./gulp.config')();
+var paths = config.paths,
+  jsSourceFiles = config.jsSourceFiles,
+  jsLibs = config.jsLibs,
+  plugins = config.plugins,
+  jsFiles = config.jsFiles,
+  scssSourceFiles = config.scssSourceFiles,
+  scssFiles = config.scssFiles,
+  cssFiles = config.cssFiles,
+  partials = config.partials;
 
 
 gulp.task('js', function () {
