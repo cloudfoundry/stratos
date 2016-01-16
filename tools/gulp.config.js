@@ -29,6 +29,7 @@ module.exports = function () {
     plugins: [],
 
     jsFiles: [
+      paths.dist + 'plugins/**/plugin.config.js',
       paths.dist + 'index.module.js',
       paths.dist + 'app/**/*.module.js',
       paths.dist + 'app/**/*.js',
