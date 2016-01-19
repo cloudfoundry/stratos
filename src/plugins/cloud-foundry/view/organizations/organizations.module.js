@@ -3,19 +3,16 @@
 
   angular
     .module('cloud-foundry.view.organizations', [])
-    .constant('cloud-foundry.view.organizations.basePath',
-              env.plugins.cloudFoundry.basePath + 'view/organizations/')
     .config(registerRoute);
 
   registerRoute.$inject = [
-    '$stateProvider',
-    'cloud-foundry.view.organizations.basePath'
+    '$stateProvider'
   ];
 
   function registerRoute($stateProvider, basePath) {
     $stateProvider.state('cf.organizations', {
       url: '/organizations',
-      templateUrl: basePath + 'organizations.html'
+      templateUrl: 'plugins/cloud-foundry/view/organizations/organizations.html'
     });
   }
 })();
