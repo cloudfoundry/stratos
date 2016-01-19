@@ -3,6 +3,7 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat-util');
 var gulpinject = require('gulp-inject');
+var wiredep = require('wiredep').stream;
 var runSequence = require('run-sequence');
 var sass = require('gulp-sass');
 var eslint = require('gulp-eslint');
@@ -83,6 +84,7 @@ gulp.task('index:inject', [ 'index:copy' ], function () {
 
   return gulp
     .src(paths.dist + 'index.html')
+    .pipe(wiredep(config.bower))
     .pipe(gulpinject(sources, { relative: true }))
     .pipe(concat.header())
     .pipe(gulp.dest(paths.dist));
