@@ -10,6 +10,7 @@ var eslint = require('gulp-eslint');
 var del = require('del');
 var sh = require('shelljs');
 var file = require('gulp-file');
+var plumber = require('gulp-plumber');
 var config = require('./gulp.config')();
 
 var paths = config.paths,
@@ -48,6 +49,12 @@ gulp.task('js', function () {
 gulp.task('css', function () {
   return gulp
     .src(scssSourceFiles, { base: paths.src })
+    .pipe(plumber({
+      errorHandler: function (err) {
+        console.log(err);
+        this.emit('end');
+      }
+    }))
     .pipe(sass())
     .pipe(gulp.dest(paths.dist));
 });
