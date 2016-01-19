@@ -39,10 +39,8 @@
 
     registerNavigation: function () {
       this.modelManager.retrieve('app.model.navigation')
-        .addMenuItem('cf.hosts', 'cf.hosts', gettext('Hosts'))
-        .addMenuItem('cf.organizations', 'cf.organizations', gettext('Organizations'))
         .addMenuItem('cf.applications', 'cf.applications', gettext('Applications'))
-        .addMenuItem('cf.services', 'cf.services', gettext('Services'));
+        .addMenuItem('cf.organizations', 'cf.organizations', gettext('Organizations'));
     }
   });
 
