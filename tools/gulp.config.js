@@ -8,25 +8,15 @@ module.exports = function () {
   };
 
   var config = {
-    paths: paths,
+    bower: {
+      directory: '../src/lib/',
+      ignorePath: '../src/',
+      json: require('./bower.json')
+    },
 
-    jsSourceFiles: [
-      paths.src + '**/*.js'
+    cssFiles: [
+      paths.dist + 'index.css'
     ],
-
-    jsLibs: [
-      paths.dist + 'lib/angular/angular.js',
-      paths.dist + 'lib/angular-gettext/dist/angular-gettext.js',
-      paths.dist + 'lib/angular-sanitize/angular-sanitize.js',
-      paths.dist + 'lib/angular-bootstrap/ui-bootstrap.js',
-      paths.dist + 'lib/angular-bootstrap/ui-bootstrap-tpls.js',
-      paths.dist + 'lib/angular-ui-router/release/angular-ui-router.js',
-      paths.dist + 'lib/lodash/lodash.js',
-      paths.dist + 'lib/helion-ui-framework/**/*.module.js',
-      paths.dist + 'lib/helion-ui-framework/**/*.js'
-    ],
-
-    plugins: [],
 
     jsFiles: [
       paths.dist + 'index.module.js',
@@ -38,22 +28,45 @@ module.exports = function () {
       '!' + paths.dist + '**/*.spec.js'
     ],
 
-    scssSourceFiles: [
-      paths.src + 'index.scss'
+    jsLibs: [
+      paths.dist + 'lib/helion-ui-framework/**/*.module.js',
+      paths.dist + 'lib/helion-ui-framework/**/*.js'
+    ],
+
+    jsSourceFiles: [
+      paths.src + '**/*.js'
     ],
 
     scssFiles: [
       paths.src + '**/*.scss'
     ],
 
-    cssFiles: [
-      paths.dist + 'index.css'
+    scssSourceFiles: [
+      paths.src + 'index.scss'
     ],
 
     partials: [
       paths.src + 'app/**/*.html',
       paths.src + 'plugins/**/*.html'
-    ]
+    ],
+
+    paths: paths,
+
+    plugins: []
+  };
+
+
+  /**
+   * Wiredep options for Bower components
+   */
+  config.getWiredepOptions = function() {
+    var options = {
+      bowerJson: config.bower.json,
+      directory: config.bower.directory,
+      ignorePath: config.bower.ignorePath
+    };
+
+    return options;
   };
 
   return config;

@@ -16,7 +16,8 @@
     "gulp-file": "^0.2.0",
     "gulp-inject": "^3.0.0",
     "gulp-sass": "^2.1.1",
-    "run-sequence": "^1.1.5"
+    "run-sequence": "^1.1.5",
+    "wiredep": "^3.0.0"
   },
   "devDependencies": {
     "eslint": "^1.10.3",
