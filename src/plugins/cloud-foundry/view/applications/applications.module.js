@@ -3,19 +3,16 @@
 
   angular
     .module('cloud-foundry.view.applications', [])
-    .constant('cloud-foundry.view.applications.basePath',
-              env.plugins.cloudFoundry.basePath + 'view/applications/')
     .config(registerRoute);
 
   registerRoute.$inject = [
-    '$stateProvider',
-    'cloud-foundry.view.applications.basePath'
+    '$stateProvider'
   ];
 
-  function registerRoute($stateProvider, basePath) {
+  function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications', {
       url: '/applications',
-      templateUrl: basePath + 'applications.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/applications.html'
     });
   }
 

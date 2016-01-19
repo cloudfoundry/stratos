@@ -15,6 +15,8 @@ module.exports = function () {
     ],
 
     jsLibs: [
+      paths.dist + 'lib/jquery/dist/jquery.js',
+      paths.dist + 'lib/bootstrap/dist/js/bootstrap.js',
       paths.dist + 'lib/angular/angular.js',
       paths.dist + 'lib/angular-gettext/dist/angular-gettext.js',
       paths.dist + 'lib/angular-sanitize/angular-sanitize.js',
