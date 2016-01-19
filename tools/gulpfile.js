@@ -82,11 +82,9 @@ gulp.task('index:inject', [ 'index:copy' ], function () {
     .concat(jsFiles)
     .concat(cssFiles), { read: false });
 
-  var wiredepOptions = config.getWiredepOptions();
-
   return gulp
     .src(paths.dist + 'index.html')
-    .pipe(wiredep(wiredepOptions))
+    .pipe(wiredep(config.bower))
     .pipe(gulpinject(sources, { relative: true }))
     .pipe(concat.header())
     .pipe(gulp.dest(paths.dist));

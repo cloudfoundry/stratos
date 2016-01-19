@@ -9,9 +9,9 @@ module.exports = function () {
 
   var config = {
     bower: {
+      bowerJson: require('./bower.json'),
       directory: '../src/lib/',
-      ignorePath: '../src/',
-      json: require('./bower.json')
+      ignorePath: '../src/'
     },
 
     cssFiles: [
@@ -53,20 +53,6 @@ module.exports = function () {
     paths: paths,
 
     plugins: []
-  };
-
-
-  /**
-   * Wiredep options for Bower components
-   */
-  config.getWiredepOptions = function() {
-    var options = {
-      bowerJson: config.bower.json,
-      directory: config.bower.directory,
-      ignorePath: config.bower.ignorePath
-    };
-
-    return options;
   };
 
   return config;
