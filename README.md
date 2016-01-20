@@ -1,10 +1,13 @@
 # stratos-ui
 
 ## Pre-requisite
-If running on OSX and VirtualBox, you will likely need to create a Docker machine with the `--virtualbox-cpu-count` flag.
+1. Create a Docker machine. If running on OSX and VirtualBox, you will likely need to create a Docker machine with the `--virtualbox-cpu-count` flag.
 ```
 docker-machine create --driver virtualbox --virtualbox-cpu-count "2" default
+eval $(docker-machine env default)
 ```
+2. Create and start [stratos-server](https://github.com/hpcloud/stratos-server).
+
 
 ## Build Docker image
 ```
@@ -17,6 +20,11 @@ docker run -it --rm --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion
 
 $ bash provision.sh
 ```
+Once the script has finished, you'll be able to view the application at the IP of your Docker machine:
+```
+docker-machine ip default
+```
+
 
 ## Create and start Docker container with Gulp watch
 This will take a few minutes to provision. Any changes to source Javascript, SCSS or HTML files will automatically update the 'dist' folder. Be sure to stop the container before switching branches.
@@ -27,10 +35,6 @@ docker run -d --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion-ui-fr
 docker logs stratos-ui
 ```
 
-## Provision container
-```
-docker exec -d stratos-ui /bin/bash provision.sh
-```
 
 ## SSH into the running container
 ```
