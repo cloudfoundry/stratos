@@ -35,7 +35,8 @@ module.exports = function () {
     ],
 
     jsSourceFiles: [
-      paths.src + '**/*.js'
+      paths.src + '**/*.js',
+      '!' + paths.src + 'lib/**/*.js'
     ],
 
     scssFiles: [
