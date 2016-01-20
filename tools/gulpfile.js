@@ -128,9 +128,9 @@ gulp.task('default', function (next) {
     'plugin',
     'lint',
     'js',
+    'lib',
     'css',
     'html',
-    'lib',
     'index:inject',
     next
   );
