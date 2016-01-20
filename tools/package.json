@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bower": "^1.7.1",
+    "bower": "1.7.1",
     "del": "^2.2.0",
     "gulp": "^3.9.0",
     "gulp-concat-util": "^0.5.4",
