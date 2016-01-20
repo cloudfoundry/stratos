@@ -99,7 +99,7 @@ gulp.task('index:inject', [ 'index:copy' ], function () {
 
 
 gulp.task('watch', function () {
-  gulp.watch(jsSourceFiles, { interval: 2000, usePoll: true }, [ 'js' ]);
+  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, [ 'js' ]);
   gulp.watch(scssFiles, [ 'css' ]);
   gulp.watch(partials, [ 'html' ]);
   gulp.watch(paths.src + 'index.html', [ 'index:inject' ]);
