@@ -147,12 +147,12 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * creates a root scss file with one comment line.
-   * @param filesName, the file name.
-   * @param code, the JavaScript code.
+   * creates a JavaScript file with the given file name and code.
+   * @param filesName {String} the file name.
+   * @param code {String} the JavaScript code.
    */
   function createJavaScriptFile(fileName, code) {
-    writeFile(fileName, wrapCodeAsIIEF(code));
+    writeFile(fileName, wrapCodeAsIIFE(code));
   }
 
   /**
@@ -171,7 +171,7 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
     })();
     ```
    */
-  function wrapCodeAsIIEF(code) {
+  function wrapCodeAsIIFE(code) {
     if (Array.isArray(code)) {
       code = code.join('\n');
     }
