@@ -32,6 +32,7 @@
     "karma-phantomjs-launcher": "^0.2.3",
     "karma-wiredep": "^1.0.1",
     "phantomjs": "^1.9.19",
+    "prompt": "^0.2.14",
     "protractor": "^3.0.0",
     "shelljs": "^0.5.3"
   }
