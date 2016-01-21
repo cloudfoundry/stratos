@@ -2,7 +2,7 @@
 
 This framework is composed of three layers (View, Model and API) and an event bus that spans all three layers.
 
-![layers](docs/images/greenbox_architecture.png?raw=true "Three layers and an event bus")
+![layers](images/greenbox_architecture.png?raw=true "Three layers and an event bus")
 
 Each layer only has access to the layer directly below.
 

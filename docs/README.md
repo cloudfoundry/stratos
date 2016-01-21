@@ -3,8 +3,8 @@ The Helion Stratos Console UI provides a single comprehensive and ubiquitous use
 
 The Angular-based application is composed of three layers and an event bus. The source code is therefore organized by those four components: `api`, `event`, `model` and `view`. The application can be extended by registering plugins with the same organizational structure.
 
-* [Architecture](docs/architecture.md)
-* [Plugins](docs/plugins.md)
+* [Architecture](architecture.md)
+* [Plugins](plugins.md)
 
 ### Source Code Structure
 ```
