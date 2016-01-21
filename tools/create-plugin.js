@@ -6,34 +6,32 @@ var writeFile = require('fs').writeFile
   , cd = process.chdir;
 
 /**
- *
- * This script scaffolds a plugin application. For example if you want to
- * create a plugin with name helion.my-app, by running:
-  ```
-   node create-plugin
-  ```
- * you will be prompt for a unique plugin application name. once you provide,
- * it will create:
-  ```
-   plugins
-    └── helion.my-app
-        ├── api
-        │   └── api.module.js
-        ├── event
-        │   └── event.module.js
-        ├── model
-        │   └── model.module.js
-        ├── view
-        │   └── view.module.js
-        ├── helion.my-app.module.js
-        ├── helion.my-app.scss
-        └── plugin.config.js
-   ```
- * Then, after re-running
-   ```
-   node_modules/.bin/gulp
-   ```
- * the plugin will be integrated onto the ui platform.
+ * This script scaffolds a plugin application. For example, if you want to
+ * create a plugin with the name helion.my-app, run:
+ * ```
+ *   node create-plugin
+ * ```
+ * You will be prompted for a unique plugin application name. On submit,
+ * it will create the following file structure:
+ * ```
+ *   plugins
+ *   └── helion.my-app
+ *       ├── api
+ *       │   └── api.module.js
+ *       ├── event
+ *       │   └── event.module.js
+ *       ├── model
+ *       │   └── model.module.js
+ *       ├── view
+ *       │   └── view.module.js
+ *       ├── helion.my-app.module.js
+ *       ├── helion.my-app.scss
+ *       └── plugin.config.js
+ * ```
+ * Finally, run the default Gulp task to integrate the plugin with the UI platform:
+ * ```
+ *   node_modules/.bin/gulp
+ * ```
  */
 
 prompt.start();
@@ -72,12 +70,12 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * create an angular module file, in given folder, with given file name,
-   * angular module name, and dependent sub module names.
+   * Create an Angular module file, in given folder, with given file name,
+   * Angular module name, and dependent sub-module names.
    *
-   * @param folderName {String}
-   * @param fileName {String} the generated file name is suffixed with `.module.js`.
-   * @param moduleName {String} the generated module name is prefixed with `helio.`.
+   * @param folderName {String} the folder name
+   * @param fileName {String} the generated file name that will be suffixed with `.module.js`
+   * @param moduleName {String} the generated module name that will be prefixed with `helion.`
    * @param subModules {Array}, [optional], if provided, the generated dependency
    * modules will be prefixed with the generated module name.
    *
@@ -130,7 +128,7 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * runs shell command mkdir.
+   * Run shell command mkdir
    * @param folderName the name of the folder to create.
    */
   function mkdir(folderName) {
@@ -138,7 +136,7 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * creates a root scss file with one comment line in it.
+   * Create a root scss file with one comment line in it
    * @param fileName
    */
   function createRootScssFile(fileName) {
@@ -147,21 +145,21 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * creates a JavaScript file with the given file name and code.
-   * @param filesName {String} the file name.
-   * @param code {String} the JavaScript code.
+   * Create a Javascript file with the given file name and code wrapped in an IIFE
+   * @param filesName, the file name
+   * @param code, the JavaScript code.
    */
   function createJavaScriptFile(fileName, code) {
     writeFile(fileName, wrapCodeAsIIFE(code));
   }
 
   /**
-   * wraps code as Immediately-invoked function expressions.
+   * Wrap code with immediately-invoked function expression
    * @param code {String} the code to wrap.
-   * @returns {String} wrapped code.
+   * @returns {String} the wrapped code.
    * @description
    *
-   * wrapped code looks like:
+   * Wrapped code looks like:
     ```
     (function () {
       'use strict';
@@ -182,7 +180,7 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * wrap a string with single quotes.
+   * Wrap a string with single quotes
    * @param str {String} the string to wrap
    * @returns {String} a new wrapped string
    */
