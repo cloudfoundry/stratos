@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-
   var events = {
     LOGGED_IN: 'LOGGED_IN',
     LOGGED_OUT: 'LOGGED_OUT',
@@ -20,17 +19,19 @@
   ];
 
   /**
-   * @name app.event.eventService
+   * @memberof app.event
+   * @name eventService
+   * @description The event bus that allows communication between the
+   * view, model and API layers
    * @example
-   ```js
-   // subscribe to an event:
-   eventService.$on(events.HTTP_401, handler);
-
-   // emit an event
-   eventService.$emit(events.HTTP_401);
-   ```
+   * ```
+   * // subscribe to an event
+   * eventService.$on(events.HTTP_401, handler);
+   *
+   * // emit an event
+   * eventService.$emit(events.HTTP_401);
+   * ```
    */
-
   function eventServiceFactory($rootScope) {
     var eventService = $rootScope.$new();
     eventService.events = events;

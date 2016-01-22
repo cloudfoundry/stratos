@@ -7,6 +7,13 @@
 
   modelManagerFactory.$inject = [];
 
+  /**
+   * @memberof app.model
+   * @name modelManager
+   * @description The model layer of the UI platform that contains
+   * the business data objects and methods to retrieve/update the
+   * data
+   */
   function modelManagerFactory() {
     var models = {};
 

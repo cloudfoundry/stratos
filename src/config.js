@@ -1,6 +1,10 @@
 (function (global) {
   'use strict';
 
+  /**
+   * @namespace env
+   * @property {string} HELION_UI_FRAMEWORK_BASE_PATH - the Helion UI framework path
+   */
   var env = {
     registerApplication: registerApplication,
 
@@ -13,34 +17,27 @@
   });
 
   /**
-   * @ngdoc registerApplication {Function} registers a plugin-able application to
-   * the platform.
+   * @memberof env
+   * @name registerApplication
+   * @description
+   * Register a plugin application with the UI platform and include its
+   * Angular module as a dependency of the UI platform module.
    *
-   * @param id {String} the id to identify the registered application.
-   *
-   * @param angularModuleName {String} defines the root angular module
-   * name of the plugin application. Each plugin app MUST have one and
-   * only one angular module name.
-   *
-   * This module will be added to the system as a dependency for the
-   * whole app the be initialized.
-   *
-   * @param basePath {String} defines the base path to the root folder
-   * where the plugin app resides or is installed.  The basePath is
-   * relative to the src folder.
-   *
-   * IMPORTANT: Every plugin-able application should have a plugin.config.js
-   * resides with the application and register itself by:
-
-   ```js
-    // register this plugin application to the platform:
-
-    env && env.registerApplication && env.env.registerApplication(
-      'My Application ID',
-      'my-application-angular-module-name',
-      'plugins/my-application/'
-    );
-   ```
+   * IMPORTANT: Every plugin application MUST include a `plugin.config.js`
+   * file at its root directory that will register itself with the UI platform.
+   * ```
+   * env && env.registerApplication && env.env.registerApplication(
+   *   'My Application ID',
+   *   'my-application-angular-module-name',
+   *   'plugins/my-application/'
+   * );
+   * ```
+   * @param {string} id - the ID to identify the application being registered
+   * @param {string} angularModuleName - the unique Angular module name of the
+   * plugin application
+   * @param {string} basePath - the base path to the root folder where the
+   * plugin application resides or is installed. The basePath is relative to
+   * the 'src' folder.
    */
   function registerApplication(id, angularModuleName, basePath) {
     env.plugins = env.plugins || {};

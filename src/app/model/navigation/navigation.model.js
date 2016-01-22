@@ -11,28 +11,30 @@
 
   function registerModel(modelManager) {
     /**
-     * @name 'app.model.navigation'
-     * @description
-     *
-     * This model hosts application navigation tree.
+     * Register 'app.model.navigation' with the model manager service.
+     * This model hosts the application's navigation tree.
      */
     modelManager.register('app.model.navigation', new Menu());
   }
 
+  /**
+   * @namespace Menu
+   * @name Menu
+   */
   function Menu() {}
 
   Menu.prototype = [];
 
   angular.extend(Menu.prototype, {
     /**
-     * Appends a new menu item into the menu list. Each menu item will
-     * has a sub-menu which is also of type Menu and it is empty when
-     * initialized. When the sub-menu is populated, clicking on the menu
-     * item will show the sub-menu, a drop-down list for instance.
-     *
-     * @param name {String} used to identify the item.
-     * @param href {String} the href / ng-router state.
-     * @param text {String} display text.
+     * @function addMenuItem
+     * @memberof Menu
+     * @description Appends a new menu item into the menu list. Each menu item
+     * is a sub-menu which is also of type Menu and is empty initially.
+     * @param {string} name - the name/ID of the menu item
+     * @param {string} href - the href / ng-router state
+     * @param {string} text - the displayed text of the menu item
+     * @param {string} icon - the icon of the menu item
      * @returns {Menu}
      *
      * Each menu item has a sub-menu defined is `items`.
@@ -49,7 +51,9 @@
     },
 
     /**
-     * Cleans up menu items.
+     * @function reset
+     * @memberof Menu
+     * @description Clear the menu list
      * @returns {Menu}
      */
     reset: function () {

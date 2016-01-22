@@ -3,8 +3,14 @@
 
   angular
     .module('app.api')
-    .factory('app.api.api-manager', apiManagerFactory);
+    .factory('app.api.apiManager', apiManagerFactory);
 
+  /**
+   * @memberof app.api
+   * @name apiManager
+   * @description The API layer of the UI platform that handles
+   * HTTP requests
+   */
   function apiManagerFactory() {
     var apis = {};
 

@@ -1,6 +1,11 @@
 (function () {
   'use strict';
 
+  /**
+   * @namespace app.api
+   * @memberof app
+   * @name api
+   */
   angular
     .module('app.api', [], config);
 

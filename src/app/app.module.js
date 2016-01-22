@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  /**
+   * @namespace app
+   */
   angular
     .module('app', [
       'app.api',
