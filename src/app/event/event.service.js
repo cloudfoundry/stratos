@@ -19,10 +19,11 @@
   ];
 
   /**
+   * @namespace app.event.eventService
    * @memberof app.event
    * @name eventService
-   * @description The event bus that allows communication between the
-   * view, model and API layers
+   * @description The event bus service
+   * @property {object} events - the default set of events (i.e. HTTP status codes)
    * @example
    * ```
    * // subscribe to an event

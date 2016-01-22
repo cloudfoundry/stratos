@@ -8,8 +8,7 @@
   /**
    * @memberof app.api
    * @name apiManager
-   * @description The API layer of the UI platform that handles
-   * HTTP requests
+   * @description The manager that handles registration and retrieval of APIs
    */
   function apiManagerFactory() {
     var apis = {};

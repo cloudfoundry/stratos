@@ -3,6 +3,7 @@
 
   /**
    * @namespace app
+   * @name app
    */
   angular
     .module('app', [

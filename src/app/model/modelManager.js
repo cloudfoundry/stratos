@@ -8,11 +8,10 @@
   modelManagerFactory.$inject = [];
 
   /**
+   * @namespace app.model.modelManager
    * @memberof app.model
-   * @name modelManager
-   * @description The model layer of the UI platform that contains
-   * the business data objects and methods to retrieve/update the
-   * data
+   * @name app.model.modelManager
+   * @description The manager that handles registration and retrieval of models
    */
   function modelManagerFactory() {
     var models = {};
@@ -23,10 +22,22 @@
       retrieve: retrieve
     };
 
+    /**
+     * @function register
+     * @memberof app.model.modelManager
+     * @param {string} name - the name of the model to register
+     * @param {object} model - the model object to register
+     */
     function register(name, model) {
       models[name] = model;
     }
 
+    /**
+     * @function retrieve
+     * @memberof app.model.modelManager
+     * @param {string} name - the name of the model to retrieve
+     * @returns {object} the requested model
+     */
     function retrieve(name) {
       return models[name];
     }

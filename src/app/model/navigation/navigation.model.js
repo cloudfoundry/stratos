@@ -1,6 +1,12 @@
 (function () {
   'use strict';
 
+  /**
+   * @namespace app.model.navigation
+   * @memberOf app.model
+   * @name navigation
+   * @description Navigation model
+   */
   angular
     .module('app.model')
     .run(registerModel);
@@ -18,8 +24,9 @@
   }
 
   /**
-   * @namespace Menu
-   * @name Menu
+   * @namespace app.model.navigation.Menu
+   * @memberof app.model.navigation
+   * @name app.model.navigation.Menu
    */
   function Menu() {}
 
@@ -28,16 +35,14 @@
   angular.extend(Menu.prototype, {
     /**
      * @function addMenuItem
-     * @memberof Menu
+     * @memberof app.model.navigation.Menu
      * @description Appends a new menu item into the menu list. Each menu item
      * is a sub-menu which is also of type Menu and is empty initially.
      * @param {string} name - the name/ID of the menu item
      * @param {string} href - the href / ng-router state
      * @param {string} text - the displayed text of the menu item
      * @param {string} icon - the icon of the menu item
-     * @returns {Menu}
-     *
-     * Each menu item has a sub-menu defined is `items`.
+     * @returns {app.model.navigation.Menu}
      */
     addMenuItem: function (name, href, text, icon) {
       this.push({
@@ -45,16 +50,16 @@
         href: href,
         text: text,
         icon: icon,
-        items: new Menu()
+        items: new Menu()   // sub-menu
       });
       return this;
     },
 
     /**
      * @function reset
-     * @memberof Menu
+     * @memberof app.model.navigation.Menu
      * @description Clear the menu list
-     * @returns {Menu}
+     * @returns {app.model.navigation.Menu}
      */
     reset: function () {
       this.length = 0;

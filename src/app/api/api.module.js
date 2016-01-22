@@ -5,6 +5,7 @@
    * @namespace app.api
    * @memberof app
    * @name api
+   * @description The API layer of the UI platform that handles HTTP requests
    */
   angular
     .module('app.api', [], config);
