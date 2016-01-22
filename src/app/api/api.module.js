@@ -4,10 +4,12 @@
   angular
     .module('app.api', [], config);
 
-  config.$inject = ['$httpProvider'];
+  config.$inject = [
+    '$httpProvider'
+  ];
 
   function config($httpProvider) {
-    $httpProvider.responseInterceptors.push(interceptor);
+    $httpProvider.interceptors.push(interceptor);
   }
 
   /**
@@ -17,18 +19,17 @@
    * check https://docs.angularjs.org/api/ng/service/$http for details on
    * $http interceptors.
    */
-  interceptor.$inject = ['$q', 'app.event.eventService'];
+  interceptor.$inject = [
+    '$q',
+    'app.event.eventService'
+  ];
 
   function interceptor($q, eventService) {
-    return function (promise) {
-      return promise.then(success, error);
+    return {
+      responseError: responseError
     };
 
-    function success(response) {
-      return response;
-    }
-
-    function error(response) {
+    function responseError(response) {
       eventService.$emit('HTTP_' + response.status, response);
       return $q.reject(response);
     }
