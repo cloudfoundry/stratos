@@ -30,8 +30,8 @@ module.exports = function () {
     ],
 
     jsLibs: [
-      paths.dist + 'lib/helion-ui-framework/**/*.module.js',
-      paths.dist + 'lib/helion-ui-framework/**/*.js'
+      paths.dist + 'lib/helion-ui-framework/src/**/*.module.js',
+      paths.dist + 'lib/helion-ui-framework/src/**/*.js'
     ],
 
     jsSourceFiles: [
