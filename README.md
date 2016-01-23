@@ -68,3 +68,10 @@ $ ./node_modules/.bin/protractor protractor.conf.js
 $ cd tools
 $ ./node_modules/.bin/gulp lint
 ```
+
+## Generate Documentation (Experimental)
+Locally, run the following command to generate documentation in the `docs/src` folder.
+```
+cd tools
+./node_modules/.bin/jsdoc ../src/app ../src/*.js -r -d ../docs/src
+```
