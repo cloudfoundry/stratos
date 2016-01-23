@@ -25,13 +25,11 @@
    * @description The event bus service
    * @property {object} events - the default set of events (i.e. HTTP status codes)
    * @example
-   * ```
    * // subscribe to an event
    * eventService.$on(events.HTTP_401, handler);
    *
    * // emit an event
    * eventService.$emit(events.HTTP_401);
-   * ```
    */
   function eventServiceFactory($rootScope) {
     var eventService = $rootScope.$new();
