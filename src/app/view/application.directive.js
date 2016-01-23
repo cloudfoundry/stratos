@@ -31,7 +31,7 @@
   ];
 
   /**
-   * @namespace app.view.ApplicationController
+   * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
    * @param {app.event.eventService} eventService - the event bus service
@@ -49,9 +49,10 @@
   angular.extend(ApplicationController.prototype, {
     /**
      * @function login
-     * @memberof app.view.ApplicationController
-     * @description Log in to the application and emit the LOGGED_IN event
+     * @memberof app.view.application.ApplicationController
+     * @description Log in to the application
      * @param {string} name - the username
+     * @emits LOGGED_IN
      */
     login: function (name) {
       this.account.login(name);
@@ -61,8 +62,9 @@
 
     /**
      * @function logout
-     * @memberof app.view.ApplicationController
-     * @description Log out of the application and emit the LOGGED_OUT event
+     * @memberof app.view.application.ApplicationController
+     * @description Log out of the application
+     * @emits LOGGED_OUT
      */
     logout: function () {
       this.account.logout();

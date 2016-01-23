@@ -14,6 +14,10 @@
 
   var pluginModules = _.chain(env.plugins).map('moduleName').value();
 
+  /**
+   * @namespace green-box-console
+   * @name green-box-console
+   */
   angular
     .module('green-box-console', ['app'].concat(angularModules, otherModules, pluginModules), config);
 
