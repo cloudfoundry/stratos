@@ -15,30 +15,30 @@
    * @name accountActions
    * @description An account-actions UI component directive
    * @param {string} path - the application base path
-   * @property {app.view.AccountActionsController} controller - the controller
+   * @property {app.view.accountActionsController} controller - the controller
    * @property {string} controllerAs - the identifier for the controller
    * @property {string} templateUrl - the template filepath
    */
   function accountActions(path) {
     return {
-      controller: AccountActionsController,
+      controller: accountActionsController,
       controllerAs: 'accountActionsCtrl',
       templateUrl: path + '/view/navbar/account-actions/account-actions.html'
     };
   }
 
-  AccountActionsController.$inject = [
+  accountActionsController.$inject = [
     'app.model.modelManager'
   ];
 
   /**
-   * @namespace app.view.AccountActionsController
+   * @namespace app.view.accountActionsController
    * @memberof app.view
-   * @name AccountActionsController
+   * @name accountActionsController
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.model.account} account - the account model
    */
-  function AccountActionsController(modelManager) {
+  function accountActionsController(modelManager) {
     this.account = modelManager.retrieve('app.model.account');
   }
 

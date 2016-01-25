@@ -15,30 +15,30 @@
    * @name navigation
    * @description A navigation UI component directive
    * @param {string} path - the application base path
-   * @property {app.view.NavigationController} controller - the controller
+   * @property {app.view.navigationController} controller - the controller
    * @property {string} controllerAs - the identifier for the controller
    * @property {string} templateUrl - the template filepath
    */
   function navigation(path) {
     return {
-      controller: NavigationController,
-      controllerAs: 'NavigationCtrl',
+      controller: navigationController,
+      controllerAs: 'navigationCtrl',
       templateUrl: path + '/view/navbar/navigation/navigation.html'
     };
   }
 
-  NavigationController.$inject = [
+  navigationController.$inject = [
     'app.model.modelManager'
   ];
 
   /**
-   * @namespace app.view.NavigationController
+   * @namespace app.view.navigationController
    * @memberof app.view
-   * @name NavigationController
+   * @name navigationController
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.model.navigation} menu - the navigation model
    */
-  function NavigationController(modelManager) {
+  function navigationController(modelManager) {
     this.menu = modelManager.retrieve('app.model.navigation');
   }
 
