@@ -3,11 +3,13 @@
 //@import "lib/helion-ui-theme/mixins";
 //@import "lib/helion-ui-theme/variables";
 
-// libs
+// libs - auto-populated by wiredep from bower.json
 $fa-font-path: "lib/font-awesome/fonts";
-@import "lib/font-awesome/scss/font-awesome";
-@import "lib/bootstrap-sass-official/assets/stylesheets/bootstrap";
-@import "lib/helion-ui-framework/src/framework";
+// bower:scss
+@import "lib/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
+@import "lib/font-awesome/scss/font-awesome.scss";
+@import "lib/helion-ui-framework/src/framework.scss";
+// endbower
 
 // app
 @import "app/app";

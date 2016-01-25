@@ -98,6 +98,15 @@ gulp.task('index:inject', [ 'index:copy' ], function () {
 });
 
 
+// Automatically inject SCSS file imports from Bower packages
+gulp.task('scss:inject', function () {
+  return gulp
+    .src(paths.src + 'index.scss')
+    .pipe(wiredep(config.bower))
+    .pipe(gulp.dest(paths.src));
+});
+
+
 gulp.task('watch', function () {
   gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, [ 'js' ]);
   gulp.watch(scssFiles, [ 'css' ]);
@@ -129,6 +138,7 @@ gulp.task('default', function (next) {
     'lint',
     'js',
     'lib',
+    'scss:inject',
     'css',
     'html',
     'index:inject',
