@@ -12,35 +12,47 @@
     .run(registerAccountModel);
 
   registerAccountModel.$inject = [
+    'app.api.api-manager',
     'app.model.modelManager'
   ];
 
-  function registerAccountModel(modelManager) {
+  function registerAccountModel(modelManager, apiMnager) {
+    var accountApi = apiMnager.retrieve('app.api.account');
+    modelManager.register('app.model.account', new Account(accountApi));
+  }
 
-    modelManager.register('app.model.account', new Account());
+  /**
+   * @namespace app.model.account.Account
+   * @memberof app.model.account
+   * @name app.model.account.Account
+   */
 
-    /**
-     * @namespace app.model.account.Account
-     * @memberof app.model.account
-     * @name app.model.account.Account
-     * @todo This is just a fake implementation for Account model
-     */
-    function Account() {
-      this.name = null;
+  function Account(accountApi) {
+    this.accountApi = accountApi;
+    this.loggedIn = false;
+  }
+
+  angular.extend(Account.prototype, {
+    login: function (username, password) {
+      this.accountApi.login(username, password)
+        .then(this.onLoggedIn);
+    },
+
+    logout: function () {
+      this.accountApi.logout()
+        .then(this.onLoggedOut);
+    },
+
+    onLoggedIn: function (response) {
+      this.loggedIn = true;
+      this.data = response.data;
+    },
+
+    onLoggedOut: function () {
       this.loggedIn = false;
+      delete this.data;
     }
 
-    angular.extend(Account.prototype, {
-      login: function (name) {
-        this.name = name;
-        this.loggedIn = true;
-      },
-
-      logout: function () {
-        this.name = null;
-        this.loggedIn = false;
-      }
-    });
-  }
+  });
 
 })();
