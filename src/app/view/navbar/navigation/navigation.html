@@ -1,7 +1,7 @@
 <ul class="nav navbar-nav">
-  <li ng-repeat="menuItem in NavigationCtrl.menu"
-      ng-class="{ active: NavigationCtrl.activeMenuitem === menuItem }"
-      ng-click="NavigationCtrl.activeMenuitem = menuItem">
+  <li ng-repeat="menuItem in navigationCtrl.menu"
+      ng-class="{ active: navigationCtrl.activeMenuitem === menuItem }"
+      ng-click="navigationCtrl.activeMenuitem = menuItem">
     <a ui-sref="{{ menuItem.href }}">{{ menuItem.text }}</a>
   </li>
 </ul>
