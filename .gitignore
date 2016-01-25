@@ -5,4 +5,5 @@ npm-debug.log
 phantomjsdriver.log
 node_modules
 dist
+docs/src
 lib
