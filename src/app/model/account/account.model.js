@@ -1,6 +1,12 @@
 (function () {
   'use strict';
 
+  /**
+   * @namespace app.model.account
+   * @memberOf app.model
+   * @name account
+   * @description Account model
+   */
   angular
     .module('app.model')
     .run(registerAccountModel);
@@ -13,7 +19,12 @@
 
     modelManager.register('app.model.account', new Account());
 
-    // TODO: this is just a fake implementation for Account model.
+    /**
+     * @namespace app.model.account.Account
+     * @memberof app.model.account
+     * @name app.model.account.Account
+     * @todo This is just a fake implementation for Account model
+     */
     function Account() {
       this.name = null;
       this.loggedIn = false;

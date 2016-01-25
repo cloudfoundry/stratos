@@ -9,28 +9,28 @@ The Angular-based application is composed of three layers and an event bus. The 
 ### Source Code Structure
 ```
   src
-      └── app
-          ├── api
-          ├── event
-          ├── model
-          ├── view
-          ├── app.scss
-          ├── app.module.js
-          └── app.spec.js
-      └── lib
-      └── plugins
-          └── my-app
-              ├── api
-              │   └── api.module.js
-              ├── event
-              │   └── event.module.js
-              ├── model
-              │   └── model.module.js
-              ├── view
-              │   └── view.module.js
-              ├── my-app.scss
-              ├── my-app.module.js
-              └── plugin.config.js
+    └── app
+        ├── api
+        ├── event
+        ├── model
+        ├── view
+        ├── app.scss
+        ├── app.module.js
+        └── app.spec.js
+    └── lib
+    └── plugins
+        └── my-app
+            ├── api
+            │   └── api.module.js
+            ├── event
+            │   └── event.module.js
+            ├── model
+            │   └── model.module.js
+            ├── view
+            │   └── view.module.js
+            ├── my-app.scss
+            ├── my-app.module.js
+            └── plugin.config.js
 ```
 
 ### Style Sheets

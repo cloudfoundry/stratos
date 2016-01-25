@@ -3,8 +3,13 @@
 
   angular
     .module('app.api')
-    .factory('app.api.api-manager', apiManagerFactory);
+    .factory('app.api.apiManager', apiManagerFactory);
 
+  /**
+   * @memberof app.api
+   * @name apiManager
+   * @description The manager that handles registration and retrieval of APIs
+   */
   function apiManagerFactory() {
     var apis = {};
 

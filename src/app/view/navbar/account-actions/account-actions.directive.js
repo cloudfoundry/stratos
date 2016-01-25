@@ -3,25 +3,42 @@
 
   angular
     .module('app.view')
-    .directive('accountAction', accountAction);
+    .directive('accountActions', accountActions);
 
-  accountAction.$inject = [
+  accountActions.$inject = [
     'app.basePath'
   ];
 
-  function accountAction(path) {
+  /**
+   * @namespace app.view.accountActions
+   * @memberof app.view
+   * @name accountActions
+   * @description An account-actions UI component directive
+   * @param {string} path - the application base path
+   * @property {app.view.AccountActionsController} controller - the controller
+   * @property {string} controllerAs - the identifier for the controller
+   * @property {string} templateUrl - the template filepath
+   */
+  function accountActions(path) {
     return {
-      controller: Controller,
-      controllerAs: 'accountActionCtrl',
+      controller: AccountActionsController,
+      controllerAs: 'accountActionsCtrl',
       templateUrl: path + '/view/navbar/account-actions/account-actions.html'
     };
   }
 
-  Controller.$inject = [
+  AccountActionsController.$inject = [
     'app.model.modelManager'
   ];
 
-  function Controller(modelManager) {
+  /**
+   * @namespace app.view.AccountActionsController
+   * @memberof app.view
+   * @name AccountActionsController
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @property {app.model.account} account - the account model
+   */
+  function AccountActionsController(modelManager) {
     this.account = modelManager.retrieve('app.model.account');
   }
 

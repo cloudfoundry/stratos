@@ -1,12 +1,12 @@
 # stratos-ui
 
 ## Pre-requisite
-1. Create a Docker machine. If running on OSX and VirtualBox, you will likely need to create a Docker machine with the `--virtualbox-cpu-count` flag.
+* Create a Docker machine. If running on OSX and VirtualBox, you may need to set the `--virtualbox-cpu-count` flag.
 ```
 docker-machine create --driver virtualbox --virtualbox-cpu-count "2" default
 eval $(docker-machine env default)
 ```
-2. Create and start [stratos-server](https://github.com/hpcloud/stratos-server).
+* Create and start [stratos-server](https://github.com/hpcloud/stratos-server).
 
 
 ## Build Docker image
@@ -67,4 +67,11 @@ $ ./node_modules/.bin/protractor protractor.conf.js
 ```
 $ cd tools
 $ ./node_modules/.bin/gulp lint
+```
+
+## Generate Documentation (Experimental)
+Locally, run the following command to generate documentation in the `docs/src` folder.
+```
+cd tools
+./node_modules/.bin/jsdoc ../src/app ../src/*.js -r -d ../docs/src
 ```

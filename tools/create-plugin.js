@@ -6,34 +6,32 @@ var writeFile = require('fs').writeFile
   , cd = process.chdir;
 
 /**
- *
- * This script scaffolds a plugin application. For example if you want to
- * create a plugin with name helion.my-app, by running:
-  ```
-   node create-plugin
-  ```
- * you will be prompt for a unique plugin application name. once you provide,
- * it will create:
-  ```
-   plugins
-    └── helion.my-app
-        ├── api
-        │   └── api.module.js
-        ├── event
-        │   └── event.module.js
-        ├── model
-        │   └── model.module.js
-        ├── view
-        │   └── view.module.js
-        ├── helion.my-app.module.js
-        ├── helion.my-app.scss
-        └── plugin.config.js
-   ```
- * Then, after re-running
-   ```
-   node_modules/.bin/gulp
-   ```
- * the plugin will be integrated onto the ui platform.
+ * This script generates a scaffold for a plugin application. For example, if
+ * you want to create a plugin with the name 'helion.my-app', run:
+ * ```
+ * node create-plugin
+ * ```
+ * You will be prompted for a unique plugin application name. On submit,
+ * it will create the following file structure:
+ * ```
+ * plugins
+ *  └── helion.my-app
+ *       ├── api
+ *       │   └── api.module.js
+ *       ├── event
+ *       │   └── event.module.js
+ *       ├── model
+ *       │   └── model.module.js
+ *       ├── view
+ *       │   └── view.module.js
+ *       ├── helion.my-app.module.js
+ *       ├── helion.my-app.scss
+ *       └── plugin.config.js
+ * ```
+ * Finally, run the default Gulp task to integrate the plugin with the UI platform:
+ * ```
+ *   node_modules/.bin/gulp
+ * ```
  */
 
 prompt.start();
@@ -43,17 +41,20 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
 
   cd('../src/plugins');
 
-  // create a folder with the module name
+  // Create a directory with the plugin application name
   mkdir(plugininName);
   cd(plugininName);
 
   createPluginConfigFile();
 
-  // create `my-app.scss`
+  // Create `helion.my-app.scss`
   createRootScssFile(plugininName + '.scss');
 
-  // create folders `api`, `event`, `model`, `view` and files
-  // `api/api.module.js`, `event/event.module.js`, `model/model.module.js`, `view/view.module.js`,
+  /**
+   * Create directories: `api`, `event`, `model`, `view`
+   * Create Angular module files: `api/api.module.js`, `event/event.module.js`,
+   * `model/model.module.js`, `view/view.module.js`
+   */
   ['api', 'event', 'model', 'view'].forEach(function (one) {
     mkdir(one);
     createModuleFile(one, one, plugininName + '.' + one, null);
@@ -72,47 +73,45 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * create an angular module file, in given folder, with given file name,
-   * angular module name, and dependent sub module names.
+   * Create an Angular module file, in given folder, with given file name,
+   * Angular module name, and dependent sub-module names.
    *
-   * @param folderName {String}
-   * @param fileName {String} the generated file name is suffixed with `.module.js`.
-   * @param moduleName {String} the generated module name is prefixed with `helio.`.
-   * @param subModules {Array}, [optional], if provided, the generated dependency
-   * modules will be prefixed with the generated module name.
+   * @param {string} folderName - the folder name
+   * @param {string} fileName - the generated file name, suffixed with `.module.js`
+   * @param {string} moduleName - the generated module name
+   * @param {Array} [subModules] - if provided, the generated dependency modules
+   * will be prefixed with the generated module name
    *
    * @example
+   * createModuleFile('api', 'api', 'my-app.api');
    *
-    ```js
-    createModuleFile('api', 'api', 'my-app.api');
-
-   // creates api/api.module.js with code:
-
-    (function () {
-      'use strict';
-
-      angular
-        .module('helion.my-app.api', []);
-
-    })();
-
-    createModuleFile('.', 'my-app.module', 'helion.my-app',
-        ['api', 'event', 'model', 'view']);
-
-    // creates ./my-app.module.js with code:
-
-    (function () {
-      'use strict';
-
-      angular
-        .module('helion.my-app', [
-          'helion.my-app.api',
-          'helion.my-app.event',
-          'helion.my-app.model',
-          'helion.my-app.view'
-        ]);
-
-    })();
+   * // Generates api/api.module.js with code:
+   * //
+   * // (function () {
+   * //   'use strict';
+   * //
+   * //   angular
+   * //     .module('my-app.api', []);
+   * //
+   * // })();
+   *
+   * createModuleFile('.', 'my-app', 'helion.my-app',
+   *   ['api', 'event', 'model', 'view']);
+   *
+   * // Generates ./my-app.module.js with code:
+   * //
+   * // (function () {
+   * //   'use strict';
+   * //
+   * //   angular
+   * //     .module('helion.my-app', [
+   * //       'helion.my-app.api',
+   * //       'helion.my-app.event',
+   * //       'helion.my-app.model',
+   * //       'helion.my-app.view'
+   * //     ]);
+   * //
+   * // })();
    */
   function createModuleFile(folderName, fileName, moduleName, subModules) {
     subModules = subModules || '';
@@ -124,22 +123,24 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
     }
     var code = [
       '  angular',
-      '    .module(\'' +moduleName + '\', [' + subModules + ']);'
+      '    .module(\'' + moduleName + '\', [' + subModules + ']);'
     ];
     createJavaScriptFile(folderName + '/' + fileName + '.module.js', code);
   }
 
   /**
-   * runs shell command mkdir.
-   * @param folderName the name of the folder to create.
+   * Create a directory using mkdir
+   *
+   * @param {string} folderName - the name of the folder to create
    */
   function mkdir(folderName) {
     bash('mkdir -p ' + folderName);
   }
 
   /**
-   * creates a root scss file with one comment line in it.
-   * @param fileName
+   * Create a root SCSS file with one comment line in it
+   *
+   * @param {string} fileName - the SCSS file name
    */
   function createRootScssFile(fileName) {
     var commentLine = '// ' + fileName;
@@ -147,29 +148,28 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * creates a JavaScript file with the given file name and code.
-   * @param filesName {String} the file name.
-   * @param code {String} the JavaScript code.
+   * Create a Javascript file with the given file name and code wrapped in an IIFE
+   *
+   * @param {string} fileName - the Javascript file name
+   * @param {string} code - the JavaScript code
    */
   function createJavaScriptFile(fileName, code) {
     writeFile(fileName, wrapCodeAsIIFE(code));
   }
 
   /**
-   * wraps code as Immediately-invoked function expressions.
-   * @param code {String} the code to wrap.
-   * @returns {String} wrapped code.
-   * @description
+   * Wrap code with immediately-invoked function expression
+   * ```
+   * (function () {
+   *   'use strict';
    *
-   * wrapped code looks like:
-    ```
-    (function () {
-      'use strict';
-
-       // code goes here
-
-    })();
-    ```
+   *   // code goes here
+   *
+   * })();
+   * ```
+   *
+   * @param {string} code - the code to wrap.
+   * @returns {string} The wrapped code
    */
   function wrapCodeAsIIFE(code) {
     if (Array.isArray(code)) {
@@ -182,9 +182,10 @@ prompt.get(['Input a unique plugin application name'], function (err, result) {
   }
 
   /**
-   * wrap a string with single quotes.
-   * @param str {String} the string to wrap
-   * @returns {String} a new wrapped string
+   * Wrap a string with single quotes
+   *
+   * @param {string} str - the string to wrap
+   * @returns {string} A single-quoted string
    */
   function asString(str) {
     return ['\'',  '\''].join(str);
