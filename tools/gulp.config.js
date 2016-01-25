@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * This stores all the configuration information for Gulp
  */
