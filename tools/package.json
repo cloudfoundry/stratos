@@ -23,6 +23,7 @@
     "eslint": "^1.10.3",
     "gulp-eslint": "^1.1.1",
     "gulp-plumber": "^1.0.1",
+    "gulp-rename": "^1.2.2",
     "jasmine-core": "^2.4.1",
     "jsdoc": "^3.4.0",
     "karma": "^0.13.19",
