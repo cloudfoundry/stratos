@@ -37,13 +37,14 @@
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.event.eventService} eventService - the event bus service
-   * @property {app.model.account} account - the account model
-   * @property {app.model.navigation} navigation - the navigation model
+   * @property {app.model.modelManager} modelManager - the application model manager
+   * @property {boolean} loggedIn - a flag indicating if user logged in
+   * @class
    */
   function ApplicationController(eventService, modelManager) {
     this.eventService = eventService;
-    this.account = modelManager.retrieve('app.model.account');
-    this.navigation = modelManager.retrieve('app.model.navigation');
+    this.modelManager = modelManager;
+    this.loggedIn = false;
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -51,25 +52,52 @@
      * @function login
      * @memberof app.view.application.ApplicationController
      * @description Log in to the application
-     * @param {string} name - the username
-     * @emits LOGGED_IN
+     * @param {string} username - the username
+     * @param {string} password - the password
+     * @public
      */
-    login: function (name) {
-      this.account.login(name);
-      this.navigation.reset();
+    login: function (username, password) {
+      this.modelManager.retrieve('app.model.account')
+        .login(username, password)
+        .then(this.onLoggedIn.bind(this));
+    },
+
+    /**
+     * @function onLoggedIn
+     * @memberof app.view.application.ApplicationController
+     * @description Logged-in event handler
+     * @emits LOGGED_IN
+     * @private
+     */
+    onLoggedIn: function () {
+      this.modelManager.retrieve('app.model.navigation').reset();
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
+      this.loggedIn = true;
     },
 
     /**
      * @function logout
      * @memberof app.view.application.ApplicationController
      * @description Log out of the application
-     * @emits LOGGED_OUT
+     * @public
      */
     logout: function () {
-      this.account.logout();
-      this.navigation.reset();
+      this.modelManager.retrieve('app.model.account')
+        .logout()
+        .then(this.onLoggedOut.bind(this));
+    },
+
+    /**
+     * @function onLoggedOut
+     * @memberof app.view.application.ApplicationController
+     * @description Logged-out event handler
+     * @emits LOGGED_OUT
+     * @private
+     */
+    onLoggedOut: function () {
+      this.modelManager.retrieve('app.model.navigation').reset();
       this.eventService.$emit(this.eventService.events.LOGGED_OUT);
+      this.loggedIn = false;
     }
   });
 
