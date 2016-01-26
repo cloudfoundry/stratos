@@ -11,6 +11,7 @@ var del = require('del');
 var sh = require('shelljs');
 var file = require('gulp-file');
 var plumber = require('gulp-plumber');
+var rename = require('gulp-rename');
 var config = require('./gulp.config')();
 
 var paths = config.paths,
@@ -101,8 +102,9 @@ gulp.task('index:inject', [ 'index:copy' ], function () {
 // Automatically inject SCSS file imports from Bower packages
 gulp.task('scss:inject', function () {
   return gulp
-    .src(paths.src + 'index.scss')
+    .src(paths.src + 'index.tmpl.scss')
     .pipe(wiredep(config.bower))
+    .pipe(rename('index.scss'))
     .pipe(gulp.dest(paths.src));
 });
 
