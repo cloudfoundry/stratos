@@ -22,7 +22,7 @@
   function navigation(path) {
     return {
       controller: NavigationController,
-      controllerAs: 'NavigationCtrl',
+      controllerAs: 'navigationCtrl',
       templateUrl: path + '/view/navbar/navigation/navigation.html'
     };
   }
