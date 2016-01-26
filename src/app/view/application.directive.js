@@ -42,8 +42,9 @@
    */
   function ApplicationController(eventService, modelManager) {
     this.eventService = eventService;
-    this.account = modelManager.retrieve('app.model.account');
+    this.modelManager = modelManager;
     this.navigation = modelManager.retrieve('app.model.navigation');
+    this.loggedIn = false;
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -54,10 +55,21 @@
      * @param {string} name - the username
      * @emits LOGGED_IN
      */
-    login: function (name) {
-      this.account.login(name);
+    login: function (username, password) {
+      this.modelManager.retrieve('app.model.account')
+        .login(username, password)
+        .then(this.onLoggedIn.bind(this));
+    },
+
+    /**
+     * @function onLoggedIn
+     * @memberof app.view.application.ApplicationController
+     * @description Logged-in event handler
+     */
+    onLoggedIn: function () {
       this.navigation.reset();
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
+      this.loggedIn = true;
     },
 
     /**
@@ -67,9 +79,20 @@
      * @emits LOGGED_OUT
      */
     logout: function () {
-      this.account.logout();
+      this.modelManager.retrieve('app.model.account')
+        .logout()
+        .then(this.onLoggedOut.bind(this));
+    },
+
+    /**
+     * @function onLoggedOut
+     * @memberof app.view.application.ApplicationController
+     * @description Logged-out event handler
+     */
+    onLoggedOut: function () {
       this.navigation.reset();
       this.eventService.$emit(this.eventService.events.LOGGED_OUT);
+      this.loggedIn = false;
     }
   });
 

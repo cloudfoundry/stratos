@@ -12,13 +12,12 @@
     .run(registerAccountModel);
 
   registerAccountModel.$inject = [
-    'app.api.api-manager',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.api.apiManager'
   ];
 
-  function registerAccountModel(modelManager, apiMnager) {
-    var accountApi = apiMnager.retrieve('app.api.account');
-    modelManager.register('app.model.account', new Account(accountApi));
+  function registerAccountModel(modelManager, apiManager) {
+    modelManager.register('app.model.account', new Account(apiManager));
   }
 
   /**
@@ -26,28 +25,49 @@
    * @memberof app.model.account
    * @name app.model.account.Account
    */
-
-  function Account(accountApi) {
-    this.accountApi = accountApi;
+  function Account(apiManager) {
+    this.apiManager = apiManager;
     this.loggedIn = false;
   }
 
   angular.extend(Account.prototype, {
+    /**
+     * @function login
+     * @memberof app.model.account
+     * @description Log in of the application at model layer
+     */
     login: function (username, password) {
-      this.accountApi.login(username, password)
-        .then(this.onLoggedIn);
+      var accountApi = this.apiManager.retrieve('app.api.account');
+      return accountApi.login(username, password)
+        .then(this.onLoggedIn.bind(this));
     },
 
+    /**
+     * @function logout
+     * @memberof app.model.account
+     * @description Log out of the application at model layer
+     */
     logout: function () {
-      this.accountApi.logout()
-        .then(this.onLoggedOut);
+      var accountApi = this.apiManager.retrieve('app.api.account');
+      return accountApi.logout()
+        .then(this.onLoggedOut.bind(this));
     },
 
+    /**
+     * @function onLoggedOut
+     * @memberof app.model.account
+     * @description Logged-in handler at model layer
+     */
     onLoggedIn: function (response) {
       this.loggedIn = true;
       this.data = response.data;
     },
 
+    /**
+     * @function onLoggedOut
+     * @memberof app.model.account
+     * @description Logged-out handler at model layer
+     */
     onLoggedOut: function () {
       this.loggedIn = false;
       delete this.data;

@@ -19,12 +19,12 @@
       <div class="navbar-form navbar-right">
         <button type="button"
                 class="btn btn-success"
-                ng-if="!applicationCtrl.account.loggedIn"
-                ng-click="applicationCtrl.login('Cloud Developer')"
+                ng-if="!applicationCtrl.loggedIn"
+                ng-click="applicationCtrl.login('dev', 'dev')"
                 translate>
           Sign in
         </button>
-        <account-actions ng-if="applicationCtrl.account.loggedIn"></account-actions>
+        <account-actions ng-if="applicationCtrl.loggedIn"></account-actions>
       </div>
     </div><!--/.nav-collapse -->
   </div>
