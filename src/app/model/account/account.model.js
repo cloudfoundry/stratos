@@ -24,6 +24,10 @@
    * @namespace app.model.account.Account
    * @memberof app.model.account
    * @name app.model.account.Account
+   * @param {app.api.apiManager} apiManager - the application API manager
+   * @property {app.api.apiManager} apiManager - the application API manager
+   * @property {boolean} loggedIn - a flag indicating if user logged in
+   * @class
    */
   function Account(apiManager) {
     this.apiManager = apiManager;
@@ -33,8 +37,12 @@
   angular.extend(Account.prototype, {
     /**
      * @function login
-     * @memberof app.model.account
+     * @memberof app.model.account.Account
      * @description Log in of the application at model layer
+     * @param {string} username - the username
+     * @param {string} password - the password
+     * @returns {Promise} returns a promise
+     * @public
      */
     login: function (username, password) {
       var accountApi = this.apiManager.retrieve('app.api.account');
@@ -44,8 +52,10 @@
 
     /**
      * @function logout
-     * @memberof app.model.account
+     * @memberof app.model.account.Account
      * @description Log out of the application at model layer
+     * @returns {Promise} returns a promise
+     * @public
      */
     logout: function () {
       var accountApi = this.apiManager.retrieve('app.api.account');
@@ -55,8 +65,9 @@
 
     /**
      * @function onLoggedOut
-     * @memberof app.model.account
+     * @memberof app.model.account.Account
      * @description Logged-in handler at model layer
+     * @private
      */
     onLoggedIn: function (response) {
       this.loggedIn = true;
@@ -65,8 +76,9 @@
 
     /**
      * @function onLoggedOut
-     * @memberof app.model.account
+     * @memberof app.model.account.Account
      * @description Logged-out handler at model layer
+     * @private
      */
     onLoggedOut: function () {
       this.loggedIn = false;
