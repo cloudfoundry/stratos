@@ -1,6 +1,10 @@
 # Helion Stratos Console UI
 The Helion Stratos Console UI is written in Javascript and uses Angular 1.4.x. It currently runs locally in a Docker container.
 
+For more implementation details, please see the following pages:
+* [Architecture](docs/architecture.md)
+* [Plugins](docs/plugins.md)
+
 ## System Requirements
 For development, Nginx is used to serve static files while Express is used to host the mock REST API backend. A third container hosting Elasticsearch will provide the cache component.
 
@@ -29,7 +33,10 @@ docker-machine create --driver virtualbox --virtualbox-cpu-count "2" default
 ```
 cd ../stratos-node-server
 docker build -t stratos-node-server .
-docker run -it --rm --name stratos-node-server -v $(pwd):/usr/src/app -p 3000:3000 stratos-node-server
+docker run -it --rm --name stratos-node-server \
+           -v $(pwd):/usr/src/app \
+           -p 3000:3000 \
+           stratos-node-server
 npm install && npm start
 ```
 
@@ -38,7 +45,7 @@ npm install && npm start
 docker run --name stratos-es -d elasticsearch elasticsearch
 ```
 
-### Build and run Nginx ([stratos-server](https://github.com/hpcloud/stratos-server))
+### Build and run Nginx
 ```
 cd ../stratos-server
 docker build -t stratos-server .
@@ -54,7 +61,11 @@ docker run --name stratos-server \
 ### Build and run Helion Stratos Console UI
 ```
 docker build -t stratos-ui .
-docker run -it --rm --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework -v $(pwd)/../helion-ui-theme:/usr/src/helion-ui-theme stratos-ui /bin/bash
+docker run -it --rm --name stratos-ui \
+           -v $(pwd):/usr/src/app \
+           -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework \
+           -v $(pwd)/../helion-ui-theme:/usr/src/helion-ui-theme \
+           stratos-ui /bin/bash
 bash provision.sh
 ```
 Once the script has finished, you'll be able to view the application at the IP of your Docker machine:
@@ -64,7 +75,11 @@ docker-machine ip default
 
 Alternatively, you can run this UI with Gulp watch. Any changes to source Javascript, SCSS or HTML files will automatically update the 'dist' folder. Be sure to stop the container before switching branches. This will take a few minutes to provision.
 ```
-docker run -d --name stratos-ui -v $(pwd):/usr/src/app -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework -v $(pwd)/../helion-ui-theme:/usr/src/helion-ui-theme stratos-ui
+docker run -d --name stratos-ui \
+           -v $(pwd):/usr/src/app \
+           -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework \
+           -v $(pwd)/../helion-ui-theme:/usr/src/helion-ui-theme \
+           stratos-ui
 
 # Show log and see provisioning status
 docker logs stratos-ui
