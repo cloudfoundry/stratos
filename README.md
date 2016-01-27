@@ -2,6 +2,7 @@
 The Helion Stratos Console UI is written in Javascript and uses Angular 1.4.x. It currently runs locally in a Docker container.
 
 For more implementation details, please see the following pages:
+* [Overview](docs/README.md)
 * [Architecture](docs/architecture.md)
 * [Plugins](docs/plugins.md)
 
