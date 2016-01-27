@@ -1,5 +1,5 @@
 # Helion Stratos Console UI
-The Helion Stratos Console UI is written in Javascript and uses Angular 1.4.x. It currently runs locally in a Docker container.
+The Helion Stratos Console UI is written in JavaScript and runs in a Docker container. It also uses Angular 1.4.x to maintain compability with Angular UI Bootstrap.
 
 For more implementation details, please see the following pages:
 * [Overview](docs/README.md)
@@ -7,18 +7,18 @@ For more implementation details, please see the following pages:
 * [Plugins](docs/plugins.md)
 
 ## System Requirements
-For development, Nginx is used to serve static files while Express is used to host the mock REST API backend. A third container hosting Elasticsearch will provide the cache component.
+Nginx is used to serve static files while Node.js + Express is used to host the mock REST API backend (which is in development). A third container hosting Elasticsearch will provide the cache component.
 
 This project depends on the following:
 * [Docker](https://docs.docker.com/mac)
-* [NodeJS](https://nodejs.org)
+* [Node.js](https://nodejs.org) - to easily install Node.js modules
 * [stratos-node-server](https://github.com/hpcloud/stratos-node-server) - mock REST API Express server
 * [stratos-server](https://github.com/hpcloud/stratos-server) - Nginx server
 * [helion-ui-framework](https://github.com/hpcloud/helion-ui-framework) - reusable Angular-based UI components
 * [helion-ui-theme](https://github.com/hpcloud/helion-ui-theme) - Helion branding, assets, styles, theme
 
 ## Installation
-Before continuing, please install Docker and NodeJS. Then, clone the repositories listed above at the same level as this project.
+Before continuing, please install Docker and Node.js. Then, clone the repositories listed above at the same level as this project.
 
 ### Create a Docker machine
 ```
@@ -69,12 +69,12 @@ docker run -it --rm --name stratos-ui \
            stratos-ui /bin/bash
 bash provision.sh
 ```
-Once the script has finished, you'll be able to view the application at the IP of your Docker machine:
+Once the script has finished, you'll be able to view the application at the IP of your Docker machine. This is usually `192.168.99.100`. If you have multiple Docker machines, you can retrieve the IP of your Docker machine with the following command:
 ```
-docker-machine ip default
+docker-machine ip [YOUR_DOCKER_MACHINE_NAME]
 ```
 
-Alternatively, you can run this UI with Gulp watch. Any changes to source Javascript, SCSS or HTML files will automatically update the 'dist' folder. Be sure to stop the container before switching branches. This will take a few minutes to provision.
+Alternatively, you can run this UI with Gulp watch. Any changes to source Javascript, SCSS or HTML files will automatically update the 'dist' folder. This will take a few minutes to provision.
 ```
 docker run -d --name stratos-ui \
            -v $(pwd):/usr/src/app \
