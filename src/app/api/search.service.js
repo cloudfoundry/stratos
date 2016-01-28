@@ -69,7 +69,7 @@
      ```
      */
     function search(type, query, params) {
-      return $http.post([INDEX, type, '/_search'].join('/'),
+      return $http.post([INDEX, type, '_search'].join('/'),
         { query: query },
         { params: params }
       );
