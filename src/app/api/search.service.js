@@ -44,7 +44,7 @@
     }
 
     /**
-     * List all the resources describes by the query, with pagination
+     * Search for all resources described by the query, with pagination
      * information
      * @param type {string} the resource type
      * @param query {object} the Elasticsearch query object
