@@ -1,0 +1,28 @@
+<form name="loginForm" role="form">
+  <label for="login-form-username"
+         class="required"
+         translate>
+    Username
+  </label>
+  <input id="login-form-username"
+         type="text" name="username"
+         ng-model="loginFormCtrl.username" required autofocus />
+  <ng-messages role="alert"></ng-messages>
+
+  <label for="login-form-password"
+         class="required"
+         translate>
+    Password
+  </label>
+  <input id="login-form-password"
+         type="text" name="password"
+         ng-model="loginFormCtrl.password" required />
+  <ng-messages role="alert"</ng-messages>
+
+  <button type="button"
+          ng-disabled="loginForm.$invalid"
+          ng-click="loginFormCtrl.login()"
+          translate>
+    Login
+  </button>
+</form>
