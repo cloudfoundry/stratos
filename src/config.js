@@ -44,7 +44,7 @@
     env.plugins[id] = {
       moduleName: angularModuleName,
       basePath: basePath
-    }
+    };
   }
 
   /**

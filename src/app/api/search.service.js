@@ -18,8 +18,8 @@
    */
   function serviceFactory($http) {
     return {
-      'delete': remove,
-      'get': retrieve,
+      delete: remove,
+      get: retrieve,
       index: index,
       search: search,
       update: update
