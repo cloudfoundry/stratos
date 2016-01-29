@@ -24,8 +24,11 @@
    */
   function serviceFactory($http) {
     return {
+      'delete': remove,
+      'get': retrieve,
       index: index,
-      search: search
+      search: search,
+      update: update
     };
 
     /**
@@ -40,7 +43,40 @@
      ```
      */
     function index(type, options) {
-      return $http.post([INDEX, type].join('/'), options);
+      return $http.post(path(INDEX, type), options);
+    }
+
+    /**
+     * Delete a resource from the index
+     * @param type {string} the resource type
+     * @param id {string} the resource id
+     * @returns {HttpPromise}
+     * @public
+     */
+    function remove(type, id) {
+      return $http.delete(path(INDEX, type, id));
+    }
+
+    /**
+     * Get a resource from the index
+     * @param type {string} the resource type
+     * @param id {string} the resource id
+     * @returns {HttpPromise}
+     */
+    function retrieve(type, id) {
+      return $http.get(path(INDEX, type, id, '_source'));
+    }
+
+    /**
+     * Update an resource in the index
+     * @param type {string} the resource type
+     * @param id {string} the resource id
+     * @param data {Object} the given partial update data object
+     * @returns {HttpPromise}
+     * @public
+     */
+    function update(type, id, data) {
+      return $http.put(path(INDEX, type, id), data);
     }
 
     /**
@@ -69,10 +105,20 @@
      ```
      */
     function search(type, query, params) {
-      return $http.post([INDEX, type, '_search'].join('/'),
+      return $http.post(path(INDEX, type, '_search'),
         { query: query },
         { params: params }
       );
+    }
+
+    /**
+     * Util function, join all the passed arguments to form a path
+     * @returns {string}
+     * @private
+     */
+    function path() {
+      var args = [].slice.call(arguments);
+      return args.join('/').replace(/\/+/g, '/');
     }
   }
 
