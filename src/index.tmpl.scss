@@ -1,13 +1,24 @@
-// theme
-//@import "lib/helion-ui-theme/default/variables";
-//@import "lib/helion-ui-theme/mixins";
-//@import "lib/helion-ui-theme/variables";
+// font-path
+$fa-font-path:    "lib/font-awesome/fonts";
+$font-path:       "lib/helion-ui-theme/src/grommet/fonts/helion-icons/fonts";
+$icon-font-path:  "lib/helion-ui-theme/src/grommet/fonts/metric-font";
 
+// fonts
+@import 'lib/helion-ui-theme/src/grommet/fonts/index';
+
+// theme
+//@import 'lib/helion-ui-theme/src/grommet/theme';
+
+// mixin
+//@import 'lib/helion-ui-theme/src/grommet/mixin';
+
+// style
 // libs - auto-populated by wiredep from bower.json
-$fa-font-path: "lib/font-awesome/fonts";
 // bower:scss
 // endbower
-
-// app
+//@import 'lib/helion-ui-theme/src/grommet/styles';
 @import "app/app";
 @import "plugins/.plugins"; // auto-generated after running gulp
+
+
+// !!! commented out grommet for now, it is too ugly !!!
