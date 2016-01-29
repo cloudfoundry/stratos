@@ -3,12 +3,6 @@
 
   var INDEX = 'data';
 
-  /**
-   * @namespace app.api
-   * @memberof app.api
-   * @name app.api.searchService
-   * @description search service provider
-   */
   angular
     .module('app.api')
     .factory('app.api.searchService', serviceFactory);
@@ -18,9 +12,9 @@
   ];
 
   /**
-   * Factory function to create searchService
-   * @parma $http {function}
-   * @return {Object} searchService
+   * @memberof app.api
+   * @name app.api.searchService
+   * @description search service provider
    */
   function serviceFactory($http) {
     return {
@@ -32,7 +26,8 @@
     };
 
     /**
-     * Index a resource with given type
+     * @function index, index a resource with given type
+     * @memberof app.api.searchService
      * @param type {string} the resource type
      * @param options {object} the specification object
      * @returns {HttpPromise}
@@ -47,7 +42,8 @@
     }
 
     /**
-     * Delete a resource from the index
+     * @function remove, remove a resource from the index
+     * @memberof app.api.searchService
      * @param type {string} the resource type
      * @param id {string} the resource id
      * @returns {HttpPromise}
@@ -58,7 +54,8 @@
     }
 
     /**
-     * Get a resource from the index
+     * @function retrieve, retrieve a resource from the index
+     * @memberof app.api.searchService
      * @param type {string} the resource type
      * @param id {string} the resource id
      * @returns {HttpPromise}
@@ -68,7 +65,8 @@
     }
 
     /**
-     * Update an resource in the index
+     * @function update, update a resource in the index
+     * @memberof app.api.searchService
      * @param type {string} the resource type
      * @param id {string} the resource id
      * @param data {Object} the given partial update data object
@@ -80,8 +78,9 @@
     }
 
     /**
-     * Search for all resources described by the query, with pagination
-     * information
+     * @function search, search for all resources described by the query,
+     * with pagination information
+     * @memberof app.api.searchService
      * @param type {string} the resource type
      * @param query {object} the Elasticsearch query object
      * @param params {object} specify pagination if provided.
@@ -112,7 +111,7 @@
     }
 
     /**
-     * Util function, join all the passed arguments to form a path
+     * Util function, join all arguments to form a path
      * @returns {string}
      * @private
      */
