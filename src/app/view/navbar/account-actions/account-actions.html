@@ -1,13 +1,12 @@
 <span class="btn">
-  <span class="dropdown">
-    <a class="dropdown-toggle "
-       data-toggle="dropdown"
+  <span uib-dropdown>
+    <a href id="login-button" uib-dropdown-toggle
        role="button"
        aria-haspopup="true"
        aria-expanded="false">
-      <i class="fa fa-user fa-3"></i>
+      <span class="fa fa-user fa-3"></span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="drop3">
+    <ul uib-dropdown-menu aria-labelledby="login-button">
       <li>
         <a href="#" ng-click="applicationCtrl.logout()">Sign Out</a>
       </li>
