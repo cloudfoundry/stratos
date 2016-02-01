@@ -1,3 +1,5 @@
+'use strict';
+
 var concat = require('gulp-concat-util'),
   del = require('del'),
   eslint = require('gulp-eslint'),
