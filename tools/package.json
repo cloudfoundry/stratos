@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "gate-check": "npm test && gulp lint",
     "test": "karma start karma.conf.js --single-run"
   },
   "author": "",
