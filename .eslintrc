@@ -131,7 +131,7 @@ rules:
 
   # Ensure JSDoc comments are valid
   # http://eslint.org/docs/rules/valid-jsdoc
-  # valid-jsdoc: 2
+  valid-jsdoc: 1
 
   # Ensure that the results of typeof are compared against a valid string
   # http://eslint.org/docs/rules/valid-typeof
@@ -204,6 +204,10 @@ rules:
   # http://eslint.org/docs/rules/no-empty-label
   no-empty-label: 2
 
+  # Disallow use of empty destructuring patterns
+  # http://eslint.org/docs/rules/no-empty-pattern
+  no-empty-pattern: 0
+
   # Disallow comparisons to null without a type-checking operator
   # http://eslint.org/docs/rules/no-eq-null
   no-eq-null: 2
@@ -255,6 +259,10 @@ rules:
   # Disallow creation of functions within loops
   # http://eslint.org/docs/rules/no-loop-func
   no-loop-func: 2
+
+  # Disallow the use of magic numbers
+  # http://eslint.org/docs/rules/no-magic-numbers
+  no-magic-numbers: 0
 
   # Disallow use of multiple spaces
   # http://eslint.org/docs/rules/no-multi-spaces
@@ -380,16 +388,19 @@ rules:
   #############################################################################
   # Strict Mode
   #############################################################################
-  # controls location of Use Strict Directives
+
+  # Controls location of Use Strict Directives
   # http://eslint.org/docs/rules/strict
   strict:
     - 2
     - "function"
 
+
   #############################################################################
-  # Variable declaration rules
+  # Variables
   #############################################################################
-  # enforce or disallow variable initializations at definition
+
+  # Enforce or disallow variable initializations at definition
   # http://eslint.org/docs/rules/init-declarations
   init-declarations: 0
 
@@ -436,19 +447,20 @@ rules:
     - 2
     - "nofunc"
 
+
   #############################################################################
-  # Node.js rules
+  # Node.js and Common.JS
   #############################################################################
 
-  # enforce return after a callback
+  # Enforce return after a callback
   # http://eslint.org/docs/rules/callback-return
   callback-return: 2
 
-  # disallow require() outside of the top-level module scope
+  # Enforce require() on top-level module scope
   # http://eslint.org/docs/rules/global-require
   global-require: 0
 
-  # Enforces error handling in callbacks
+  # Enforce error handling in callbacks
   # http://eslint.org/docs/rules/handle-callback-err
   handle-callback-err: 2
 
@@ -478,14 +490,14 @@ rules:
 
 
   #############################################################################
-  # Stylistic Changes
+  # Stylistic Issues
   #############################################################################
 
-  # enforce spacing inside array brackets
+  # Enforce spacing inside array brackets
   # http://eslint.org/docs/rules/array-bracket-spacing
   array-bracket-spacing: 0
 
-  # disallow or enforce spaces inside of single line blocks
+  # Disallow or enforce spaces inside of single line blocks
   # http://eslint.org/docs/rules/block-spacing
   block-spacing: 0
 
@@ -510,11 +522,11 @@ rules:
   # http://eslint.org/docs/rules/comma-style
   comma-style: 2
 
-  # require or disallow padding inside computed properties.
+  # Require or disallow padding inside computed properties
   # http://eslint.org/docs/rules/computed-property-spacing
   computed-property-spacing: 0
 
-  # Enforces consistent naming when capturing the current execution context
+  # Enforce consistent naming when capturing the current execution context
   # http://eslint.org/docs/rules/consistent-this
   consistent-this:
     - 0
@@ -528,36 +540,32 @@ rules:
   # http://eslint.org/docs/rules/func-names
   func-names: 0
 
-  # Enforces use of function declarations or expressions
+  # Enforce use of function declarations or expressions
   # http://eslint.org/docs/rules/func-style
   func-style: 0
 
-  # this option enforces minimum and maximum identifier lengths (variable names, property names...)
+  # This option enforces minimum and maximum identifier lengths (variable names, property names...)
   # http://eslint.org/docs/rules/id-length
   id-length: 0
 
-  # require identifiers to match the provided regular expression
+  # Require identifiers to match the provided regular expression
   # http://eslint.org/docs/rules/id-match
   id-match: 0
 
-  # This option sets a specific tab width for your code
+  # Specify tab or space width for your code
   # http://eslint.org/docs/rules/indent
   indent:
     - 2
     - 2
     - SwitchCase: 1
 
-  # specify whether double or single quotes should be used in JSX attributes
+  # Specify whether double or single quotes should be used in JSX attributes
   # http://eslint.org/docs/rules/jsx-quotes
   jsx-quotes: 0
 
-  # Enforces spacing between keys and values in object literal properties
+  # Enforce spacing between keys and values in object literal properties
   # http://eslint.org/docs/rules/key-spacing
   key-spacing: 0
-
-  # Enforces empty lines around comments
-  # http://eslint.org/docs/rules/lines-around-comment
-  lines-around-comment: 0
 
   # Disallow mixed 'LF' and 'CRLF' as linebreaks
   # http://eslint.org/docs/rules/linebreak-style
@@ -565,27 +573,51 @@ rules:
     - 2
     - "unix"
 
+  # Enforce empty lines around comments
+  # http://eslint.org/docs/rules/lines-around-comment
+  lines-around-comment: 0
+
+  # Specify the maximum depth that blocks can be nested
+  # http://eslint.org/docs/rules/max-depth
+  max-depth: 0
+
+  # Specify the maximum length of a line in your program
+  # http://eslint.org/docs/rules/max-len
+  max-len: 0
+
   # Specify the maximum depth callbacks can be nested
   # http://eslint.org/docs/rules/max-nested-callbacks
   max-nested-callbacks:
     - 0
     - 3
 
+  # Limits the number of parameters that can be used in the function declaration
+  # http://eslint.org/docs/rules/max-params
+  max-params: 0
+
+  # Specify the maximum number of statement allowed in a function
+  # http://eslint.org/docs/rules/max-statements
+  max-statements: 0
+
   # Require a capital letter for constructors
   # http://eslint.org/docs/rules/new-cap
   new-cap: 0
 
-  # Disallow the omission of parentheses when invoking a constructor
+  # Disallow the omission of parentheses when invoking a constructor with no arguments
   # http://eslint.org/docs/rules/new-parens
   new-parens: 2
 
-  # allow/disallow an empty newline after var statement
+  # Require or disallow an empty newline after variable declarations
   # http://eslint.org/docs/rules/newline-after-var
   newline-after-var: 0
 
   # Disallow use of the Array constructor
   # http://eslint.org/docs/rules/no-array-constructor
   no-array-constructor: 0
+
+  # Disallow use of bitwise operators
+  # http://eslint.org/docs/rules/no-bitwise
+  no-bitwise: 0
 
   # Disallow use of the continue statement
   # http://eslint.org/docs/rules/no-continue
@@ -595,7 +627,7 @@ rules:
   # http://eslint.org/docs/rules/no-inline-comments
   no-inline-comments: 0
 
-  # disallow if as the only statement in an else block
+  # Disallow if as the only statement in an else block
   # http://eslint.org/docs/rules/no-lonely-if
   no-lonely-if: 0
 
@@ -613,11 +645,15 @@ rules:
   # http://eslint.org/docs/rules/no-nested-ternary
   no-nested-ternary: 0
 
-  # Disallow use of the Object constructor
+  # Disallow the use of the Object constructor
   # http://eslint.org/docs/rules/no-new-object
   no-new-object: 1
 
-  # Disallow certain syntax (no-restricted-syntax)
+  # Disallow use of unary operators, ++ and --
+  # http://eslint.org/docs/rules/no-plusplus
+  no-plusplus: 0
+
+  # Disallow use of certain syntax in code
   # http://eslint.org/docs/rules/no-restricted-syntax
   no-restricted-syntax: 0
 
@@ -637,7 +673,7 @@ rules:
   # http://eslint.org/docs/rules/no-underscore-dangle
   no-underscore-dangle: 0
 
-  # Disallow the use of Boolean literals in conditional expressions
+  # Disallow the use of ternary operators when a simpler alternative exists
   # http://eslint.org/docs/rules/no-unneeded-ternary
   no-unneeded-ternary: 2
 
@@ -645,14 +681,14 @@ rules:
   # http://eslint.org/docs/rules/object-curly-spacing
   object-curly-spacing: 0
 
-  # Allow or disallow one variable declaration per function
+  # Require or disallow one variable declaration per function
   # http://eslint.org/docs/rules/one-var
   one-var:
     - 2
     - uninitialized: "always"
       initialized: "never"
 
-  # Prevent assignment operator shorthand where possible
+  # Require assignment operator shorthand where possible or prohibit it entirely
   # http://eslint.org/docs/rules/operator-assignment
   operator-assignment:
     - 0
@@ -701,11 +737,7 @@ rules:
   # http://eslint.org/docs/rules/space-after-keywords
   space-after-keywords: 2
 
-  # Require a space before certain keywords
-  # http://eslint.org/docs/rules/space-before-keywords
-  space-before-keywords: 0
-
-  # require or disallow space before blocks
+  # Require or disallow space before blocks
   # http://eslint.org/docs/rules/space-before-blocks
   space-before-blocks:
    - 2
@@ -717,7 +749,11 @@ rules:
     - 0
     - "always"
 
-  # require or disallow spaces inside parentheses
+  # Require a space before certain keywords
+  # http://eslint.org/docs/rules/space-before-keywords
+  space-before-keywords: 0
+
+  # Require or disallow spaces inside parentheses
   # http://eslint.org/docs/rules/space-in-parens
   space-in-parens:
     - 2
@@ -731,118 +767,20 @@ rules:
   # http://eslint.org/docs/rules/space-return-throw-case
   space-return-throw-case: 2
 
-  # Require or disallow spaces before/after unary operators (words on by default, nonwords)
+  # Require or disallow spaces before/after unary operators
   # http://eslint.org/docs/rules/space-unary-ops
   space-unary-ops:
     - 2
     - words: true
       nonwords: false
 
-  # require or disallow a space immediately following the // or /* in a comment
+  # Require or disallow a space immediately following the // or /* in a comment
   # http://eslint.org/docs/rules/spaced-comment
   spaced-comment: 0
 
-  # require regex literals to be wrapped in parentheses
+  # Require regex literals to be wrapped in parentheses
   # http://eslint.org/docs/rules/wrap-regex
   wrap-regex: 0
-
-
-  #############################################################################
-  # ECMAScript 6 (All Off)
-  #############################################################################
-  # require parens in arrow function arguments
-  # http://eslint.org/docs/rules/arrow-parens
-  arrow-parens: 0
-
-  # require space before/after arrow function's arrow
-  # http://eslint.org/docs/rules/arrow-spacing
-  arrow-spacing: 0
-
-  # verify calls of super() in constructors
-  # http://eslint.org/docs/rules/constructor-super
-  constructor-super: 0
-
-  # enforce the spacing around the * in generator functions
-  # http://eslint.org/docs/rules/generator-star-spacing
-  generator-star-spacing: 0
-
-  # disallow modifying variables of class declarations
-  # http://eslint.org/docs/rules/no-class-assign
-  no-class-assign: 0
-
-  # disallow modifying variables that are declared using const
-  # http://eslint.org/docs/rules/no-const-assign
-  no-const-assign: 0
-
-  # disallow duplicate name in class members
-  # http://eslint.org/docs/rules/no-dupe-class-members
-  no-dupe-class-members: 0
-
-  # disallow use of this/super before calling super() in constructors
-  # http://eslint.org/docs/rules/no-this-before-super
-  no-this-before-super: 0
-
-  # require let or const instead of var
-  # http://eslint.org/docs/rules/no-var
-  no-var: 0
-
-  # require method and property shorthand syntax for object literals
-  # http://eslint.org/docs/rules/object-shorthand
-  object-shorthand: 0
-
-  # suggest using arrow functions as callbacks
-  # http://eslint.org/docs/rules/prefer-arrow-callback
-  prefer-arrow-callback: 0
-
-  # suggest using of const declaration for variables that are never modified after declared
-  # http://eslint.org/docs/rules/prefer-const
-  prefer-const: 0
-
-  # suggest using the spread operator instead of .apply().
-  # http://eslint.org/docs/rules/prefer-spread
-  prefer-spread: 0
-
-  # suggest using Reflect methods where applicable
-  # http://eslint.org/docs/rules/prefer-reflect
-  prefer-reflect: 0
-
-  # suggest using template literals instead of strings concatenation
-  # http://eslint.org/docs/rules/prefer-template
-  prefer-template: 0
-
-  # disallow generator functions that do not have yield
-  # http://eslint.org/docs/rules/require-yield
-  require-yield: 0
-
-  #############################################################################
-  # Legacy
-  #############################################################################
-  # specify the maximum depth that blocks can be nested
-  # http://eslint.org/docs/rules/max-depth
-  max-depth: 0
-
-  # specify the maximum length of a line in your program
-  # http://eslint.org/docs/rules/max-len
-  max-len:
-    - 2
-    - 100
-    - 2
-
-  # Limits the number of parameters that can be used in function declaration.
-  # http://eslint.org/docs/rules/max-params
-  max-params: 0
-
-  # Specify the maximum number of statements allowed in a function
-  # http://eslint.org/docs/rules/max-statements
-  max-statements: 0
-
-  # Disallow use of bitwise operators
-  # http://eslint.org/docs/rules/no-bitwise
-  no-bitwise: 0
-
-  # Disallow use of unary operators, ++ and --
-  # http://eslint.org/docs/rules/no-plusplus
-  no-plusplus: 0
 
 
 settings:
