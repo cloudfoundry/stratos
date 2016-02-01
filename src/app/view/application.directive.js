@@ -13,9 +13,11 @@
    * @namespace app.view.application
    * @memberof app.view
    * @name application
+   * @param {string} path - the application base path
    * @property {app.view.application.ApplicationController} controller - the application controller
    * @property {string} controllerAs - the application controller identifier
    * @property {string} templateUrl - the application template filepath
+   * @returns {object} The application directive definition object
    */
   function application(path) {
     return {

@@ -15,9 +15,7 @@
    * @name accountActions
    * @description An account-actions UI component directive
    * @param {string} path - the application base path
-   * @property {app.view.AccountActionsController} controller - the controller
-   * @property {string} controllerAs - the identifier for the controller
-   * @property {string} templateUrl - the template filepath
+   * @returns {object} The account actions directive definition object
    */
   function accountActions(path) {
     return {

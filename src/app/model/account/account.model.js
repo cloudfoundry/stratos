@@ -41,7 +41,7 @@
      * @description Log in of the application at model layer
      * @param {string} username - the username
      * @param {string} password - the password
-     * @returns {Promise} returns a promise
+     * @returns {HttpPromise} returns a promise
      * @public
      */
     login: function (username, password) {
@@ -54,7 +54,7 @@
      * @function logout
      * @memberof app.model.account.Account
      * @description Log out of the application at model layer
-     * @returns {Promise} returns a promise
+     * @returns {HttpPromise} returns a promise
      * @public
      */
     logout: function () {
@@ -67,6 +67,7 @@
      * @function onLoggedOut
      * @memberof app.model.account.Account
      * @description Logged-in handler at model layer
+     * @param {object} response - the HTTP response object
      * @private
      */
     onLoggedIn: function (response) {

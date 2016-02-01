@@ -15,9 +15,7 @@
    * @name navigation
    * @description A navigation UI component directive
    * @param {string} path - the application base path
-   * @property {app.view.NavigationController} controller - the controller
-   * @property {string} controllerAs - the identifier for the controller
-   * @property {string} templateUrl - the template filepath
+   * @returns {object} The navigation directive definition object
    */
   function navigation(path) {
     return {

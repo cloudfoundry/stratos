@@ -24,10 +24,15 @@
   ];
 
   /**
-   * A $http interceptor, which emits a global HTTP error event when
+   * @name interceptor
+   * @description A $http interceptor, which emits a global HTTP error event when
    * response.status >= 400
    *
    * See https://docs.angularjs.org/api/ng/service/$http for details
+   *
+   * @param {object} $q - the $q service for promise/deferred objects
+   * @param {object} eventService - the event bus service
+   * @returns {object} The responseError function
    */
   function interceptor($q, eventService) {
     return {

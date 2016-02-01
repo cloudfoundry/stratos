@@ -14,7 +14,8 @@
    * @memberof app.view
    * @name navbar
    * @description A navbar directive
-   * @property {string} templateUrl - the navbar template filepath
+   * @param {string} path - the application base path
+   * @returns {object} The navbar directive definition object
    */
   function navbar(path) {
     return {

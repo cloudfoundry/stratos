@@ -14,7 +14,8 @@
    * @memberof app.view
    * @name loginPage
    * @description A login page directive
-   * @property {string} templateUrl - the login page template filepath
+   * @param {string} path - the application base path
+   * @returns {object} The login page directive definition object
    */
   function loginPage(path) {
     return {

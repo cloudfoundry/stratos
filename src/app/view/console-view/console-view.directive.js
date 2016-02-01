@@ -14,7 +14,8 @@
    * @memberof app.view
    * @name consoleView
    * @description A console view directive
-   * @property {string} templateUrl - the console view template filepath
+   * @param {string} path - the application base path
+   * @returns {object} The console view directive definition object
    */
   function consoleView(path) {
     return {

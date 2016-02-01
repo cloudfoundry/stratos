@@ -9,6 +9,7 @@
    * @memberof app.api
    * @name apiManager
    * @description The manager that handles registration and retrieval of APIs
+   * @returns {object} The API manager service
    */
   function apiManagerFactory() {
     var apis = {};

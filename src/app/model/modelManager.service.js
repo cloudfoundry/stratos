@@ -12,6 +12,7 @@
    * @memberof app.model
    * @name app.model.modelManager
    * @description The manager that handles registration and retrieval of models
+   * @returns {object} The model manager service
    */
   function modelManagerFactory() {
     var models = {};
