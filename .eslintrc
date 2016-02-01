@@ -1,125 +1,87 @@
-# For a detailed list of all options please see here:
-# http://eslint.org/docs/configuring/
-
-# By default, ESLint uses Espree as its parser.
-parser: espree
-
-# Most environment options are not explicitly enabled or disabled, only
-# included here for completeness' sake. They are commented out, because the
-# global updates.py script would otherwise override them during a global
-# requirements synchronization.
-#
-# Individual projects should choose which platforms they deploy to.
-
+---
 env:
-
-  # browser global variables.
-  # browser: true
-
-  # Node.js global variables and Node.js-specific rules.
-  # node: true
-
-  # web workers global variables.
-  # worker: true
-
-  # defines require() and define() as global variables as per the amd spec.
-  # amd: true
-
-  # Adds all of the Jasmine testing global variables for version 1.3 and 2.0.
-  # jasmine: true
-
-  # phantomjs global variables.
-  # phantomjs: true
-
-  # jquery global variables.
-  # jquery: true
-
-  # prototypejs global variables.
-  # prototypejs: true
-
-  # shelljs global variables.
-  # shelljs: true
-
-  # meteor global variables.
-  # meteor: true
-
-  # OpenStack uses Jasmine, not Mocha.
-  # mocha: false
-
-  # Openstack does not support ES6 at its present level of adoption.
-  # es6: false
+  browser: true
+  node: true
+  jasmine: true
+  phantomjs: true
+  protractor: true
+  es6: false
 
 
-# Below we activate and configure the linting rules for all javascript in
-# OpenStack. These will be synchronized across all projects that make use of
-# them.
+globals:
+  angular: false
+
+
+plugins:
+  - angular
+
+
 rules:
-
   #############################################################################
   # Possible Errors
   #############################################################################
 
-  # Disallow trailing commas, as those break some browsers.
+  # Disallow or enforce trailing commas
   # http://eslint.org/docs/rules/comma-dangle
   comma-dangle:
     - 2
     - "never"
 
-  # Prevent the assignment of a variable in a conditional.
+  # Disallow assignment in conditional expressions
   # http://eslint.org/docs/rules/no-cond-assign
   no-cond-assign: 2
 
-  # Do not permit the use of console logging statements.
+  # Disallow use of console in the node environment
   # http://eslint.org/docs/rules/no-console
   no-console: 2
 
-  # Do not permit if (true) or if(false)
+  # Disallow use of constant expressions in conditions
   # http://eslint.org/docs/rules/no-constant-condition
   no-constant-condition: 2
 
-  # Do not permit ASCII 0-31 (control characters) in regular expressions.
+  # Disallow control characters in regular expressions
   # http://eslint.org/docs/rules/no-control-regex
   no-control-regex: 2
 
-  # Do not permit debugger; statements.
+  # Disallow use of debugger
   # http://eslint.org/docs/rules/no-debugger
   no-debugger: 2
 
-  # Do not permit duplicate argument names in function declaration.
+  # Disallow duplicate arguments in functions
   # http://eslint.org/docs/rules/no-dupe-args
   no-dupe-args: 2
 
-  # Do not permit duplicate keys in object declarations.
+  # Disallow duplicate keys when creating object literals
   # http://eslint.org/docs/rules/no-dupe-keys
   no-dupe-keys: 2
 
-  # Do not permit duplicate cases in switch statements.
+  # Disallow a duplicate case label
   # http://eslint.org/docs/rules/no-duplicate-case
   no-duplicate-case: 2
 
-  # Disallow empty regex character classes. (/[]/)
+  # Disallow the use of empty character classes in regular expressions
   # http://eslint.org/docs/rules/no-empty-character-class
   no-empty-character-class: 2
 
-  # Disallow empty block statements.
+  # Disallow empty statements
   # http://eslint.org/docs/rules/no-empty
   no-empty: 2
 
-  # Disallow assigning of the exception parameter in a catch block.
+  # Disallow assigning to the exception in a catch block
   # http://eslint.org/docs/rules/no-ex-assign
   no-ex-assign: 2
 
-  # Disallow the use of double negation (!!foo) if already in a boolean context
+  # Disallow double-negation boolean casts in a boolean context
   # http://eslint.org/docs/rules/no-extra-boolean-cast
   no-extra-boolean-cast: 2
 
-  # Disallow extraneous parentheses around functions.
+  # Disallow unnecessary parentheses
   # http://eslint.org/docs/rules/no-extra-parens
   no-extra-parens:
     - 2
     - "all"
 
-  # Disallow extraneous semicolons.
+  # Disallow unnecessary semicolons
   # http://eslint.org/docs/rules/no-extra-semi
   no-extra-semi: 2
 
@@ -155,7 +117,11 @@ rules:
   # http://eslint.org/docs/rules/no-sparse-arrays
   no-sparse-arrays: 2
 
-  # Disallow unreachable statements
+  # Avoid code that looks like two expressions but is actually one
+  # http://eslint.org/docs/rules/no-unexpected-multiline
+  no-unexpected-multiline: 0
+
+  # Disallow unreachable statements after a return, throw, continue, or break statement
   # http://eslint.org/docs/rules/no-unreachable
   no-unreachable: 2
 
@@ -171,9 +137,6 @@ rules:
   # http://eslint.org/docs/rules/valid-typeof
   valid-typeof: 2
 
-  # Avoid code that looks like two expressions but is actually one
-  # http://eslint.org/docs/rules/no-unexpected-multiline
-  no-unexpected-multiline: 0
 
   #############################################################################
   # Best Practices
@@ -882,28 +845,5 @@ rules:
   no-plusplus: 0
 
 
-# We only support ECMA5, disable everything else.
-ecmaFeatures:
-  arrowFunctions: false
-  binaryLiterals: false
-  blockBindings: false
-  classes: false
-  defaultParams: false
-  destructuring: false
-  forOf: false
-  generators: false
-  modules: false
-  objectLiteralComputedProperties: false
-  objectLiteralDuplicateProperties: false
-  objectLiteralShorthandMethods: false
-  objectLiteralShorthandProperties: false
-  octalLiterals: false
-  regexUFlag: false
-  regexYFlag: false
-  restParams: false
-  spread: false
-  superInFunctions: false
-  templateStrings: false
-  unicodeCodePointEscapes: false
-  globalReturn: false
-  jsx: false
+settings:
+  angular: 1
