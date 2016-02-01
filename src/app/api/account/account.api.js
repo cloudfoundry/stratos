@@ -39,7 +39,7 @@
      * @param {string} username - the username
      * @param {string} password - the password
      * @description Log in of the application at model layer
-     * @returns {HttpPromise} A resolved/rejected promise
+     * @returns {object} A resolved/rejected promise
      * @public
      */
     login: function (username, password) {
@@ -53,7 +53,7 @@
      * @function logout
      * @memberof app.api.account.AccountApi
      * @description Log out at API layer, send XHR.
-     * @returns {HttpPromise} A resolved/rejected promise
+     * @returns {object} A resolved/rejected promise
      * @public
      */
     logout: function () {

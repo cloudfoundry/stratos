@@ -32,7 +32,7 @@
    *
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {object} eventService - the event bus service
-   * @returns {object} The responseError function
+   * @returns {object} The response error function
    */
   function interceptor($q, eventService) {
     return {

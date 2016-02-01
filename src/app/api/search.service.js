@@ -34,7 +34,7 @@
      * @description Index a resource with given type
      * @param {string} type - the resource type
      * @param {object} options - the specification object
-     * @returns {HttpPromise} The resolved/rejected promise
+     * @returns {object} The resolved/rejected promise
      * @public
      * @example
      * searchService.index('application', { name: 'foo' }).then(...);
@@ -50,7 +50,7 @@
      * @description Remove a resource from the index
      * @param {string} type - the resource type
      * @param {string} id - the resource ID
-     * @returns {HttpPromise} The resolved/rejected promise
+     * @returns {object} The resolved/rejected promise
      * @public
      */
     function remove(type, id) {
@@ -64,7 +64,7 @@
      * @description Retrieve a resource from the index
      * @param {string} type - the resource type
      * @param {string} id - the resource ID
-     * @returns {HttpPromise} The resolved/rejected promise
+     * @returns {object} The resolved/rejected promise
      */
     function retrieve(type, id) {
       return $http.get(path(INDEX, type, id, '_source'));
@@ -78,7 +78,7 @@
      * @param {string} type - the resource type
      * @param {string} id - the resource ID
      * @param {object} data - the given partial update data object
-     * @returns {HttpPromise} The resolved/rejected promise
+     * @returns {object} The resolved/rejected promise
      * @public
      */
     function update(type, id, data) {
@@ -94,7 +94,7 @@
      * @param {string} type - the resource type
      * @param {object} query - the Elasticsearch query object
      * @param {object} params - specify pagination if provided
-     * @returns {HttpPromise} The resolved/rejected promise
+     * @returns {object} The resolved/rejected promise
      * @public
      * @example
      * searchService.search('application',
