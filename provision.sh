@@ -7,5 +7,5 @@ cd $TOOLS_DIR
 npm install
 PATH=$PATH:$TOOLS_DIR/node_modules/.bin
 node_modules/.bin/bower install --allow-root --force
-node_modules/.bin/gulp clean
+node_modules/.bin/gulp clean:dist
 node_modules/.bin/gulp

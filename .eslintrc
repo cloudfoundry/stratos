@@ -12,8 +12,8 @@ globals:
   angular: false
 
 
-plugins:
-  - angular
+# plugins:
+#   - angular
 
 
 rules:

@@ -16,7 +16,7 @@
   ];
 
   function register(eventService, modelManager) {
-    // var cf = new CloudFoundry(eventService, modelManager);
+    return new CloudFoundry(eventService, modelManager);
   }
 
   function CloudFoundry(eventService, modelManager) {
