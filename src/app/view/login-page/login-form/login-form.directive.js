@@ -14,7 +14,8 @@
    * @memberof app.view
    * @name loginForm
    * @description A login-form directive
-   * @property {string} templateUrl - the login form template file path
+   * @param {string} path - the application base path
+   * @returns {object} The login form directive definition object
    */
   function loginForm(path) {
     return {

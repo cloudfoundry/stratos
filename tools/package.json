@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "gate-check": "npm test && gulp lint",
     "test": "karma start karma.conf.js --single-run"
   },
   "author": "",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "eslint": "^1.10.3",
+    "eslint-plugin-angular": "^0.15.0",
     "gulp-eslint": "^1.1.1",
     "gulp-plumber": "^1.0.1",
     "gulp-rename": "^1.2.2",

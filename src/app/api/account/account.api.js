@@ -24,7 +24,8 @@
    * @namespace app.api
    * @memberof app.api.account
    * @name app.model.account.AccountApi
-   * @property {Object} $http - angular $http service
+   * @param {object} $http - the Angular $http service
+   * @property {object} $http - the Angular $http service
    * @class
    */
   function AccountApi($http) {
@@ -38,7 +39,7 @@
      * @param {string} username - the username
      * @param {string} password - the password
      * @description Log in of the application at model layer
-     * @returns {Promise} returns a promise
+     * @returns {object} A resolved/rejected promise
      * @public
      */
     login: function (username, password) {
@@ -52,13 +53,12 @@
      * @function logout
      * @memberof app.api.account.AccountApi
      * @description Log out at API layer, send XHR.
-     * @returns {Promise} returns a promise
+     * @returns {object} A resolved/rejected promise
      * @public
      */
     logout: function () {
       return this.$http.get('/api/auth/logout');
     }
   });
-
 
 })();

@@ -1,19 +1,19 @@
 'use strict';
 
-var gulp = require('gulp');
-var concat = require('gulp-concat-util');
-var gulpinject = require('gulp-inject');
-var wiredep = require('wiredep').stream;
-var runSequence = require('run-sequence');
-var sass = require('gulp-sass');
-var eslint = require('gulp-eslint');
-var del = require('del');
-var sh = require('shelljs');
-var file = require('gulp-file');
-var plumber = require('gulp-plumber');
-var rename = require('gulp-rename');
-var config = require('./gulp.config')();
+var concat = require('gulp-concat-util'),
+  del = require('del'),
+  eslint = require('gulp-eslint'),
+  file = require('gulp-file'),
+  gulp = require('gulp'),
+  gulpinject = require('gulp-inject'),
+  plumber = require('gulp-plumber'),
+  rename = require('gulp-rename'),
+  runSequence = require('run-sequence'),
+  sass = require('gulp-sass'),
+  sh = require('shelljs'),
+  wiredep = require('wiredep').stream;
 
+var config = require('./gulp.config')();
 var paths = config.paths,
   jsSourceFiles = config.jsSourceFiles,
   jsLibs = config.jsLibs,
@@ -24,29 +24,40 @@ var paths = config.paths,
   cssFiles = config.cssFiles,
   partials = config.partials;
 
-
-gulp.task('plugin', function() {
-  var CMD = 'cd ../src/plugins && ls */*.scss';
-  var pluginsScssFiles  = sh.exec(CMD, { silent: true })
-    .output
-    .trim()
-    .split(/\s+/)
-    .map(function (scss) {
-      return '@import "' + scss + '";'
-    });
-
-  return file('.plugins.scss', pluginsScssFiles.join('\n'), { src: true })
-    .pipe(gulp.dest(paths.src + 'plugins'));
+// Clear the 'dist' folder
+gulp.task('clean:dist', function (next) {
+  del(paths.dist + '**/*', { force: true }, next);
 });
 
+// Copy HTML files to 'dist'
+gulp.task('copy:html', function () {
+  return gulp
+    .src(partials, { base: paths.src })
+    .pipe(gulp.dest(paths.dist));
+});
 
-gulp.task('js', function () {
+// Copy index.html to 'dist'
+gulp.task('copy:index', function () {
+  return gulp
+    .src(paths.src + 'index.html')
+    .pipe(gulp.dest(paths.dist));
+});
+
+// Copy JavaScript source files to 'dist'
+gulp.task('copy:js', function () {
   return gulp
     .src(jsSourceFiles, { base: paths.src })
     .pipe(gulp.dest(paths.dist));
 });
 
+// Copy 'lib' folder to 'dist'
+gulp.task('copy:lib', function () {
+  return gulp
+    .src(paths.src + 'lib/**')
+    .pipe(gulp.dest(paths.dist + 'lib/'));
+});
 
+// Compile SCSS to CSS
 gulp.task('css', function () {
   return gulp
     .src(scssSourceFiles, { base: paths.src })
@@ -60,29 +71,8 @@ gulp.task('css', function () {
     .pipe(gulp.dest(paths.dist));
 });
 
-
-gulp.task('html', function () {
-  return gulp
-    .src(partials, { base: paths.src })
-    .pipe(gulp.dest(paths.dist));
-});
-
-
-gulp.task('lib', function () {
-  return gulp
-    .src(paths.src + 'lib/**')
-    .pipe(gulp.dest(paths.dist + 'lib/'));
-});
-
-
-gulp.task('index:copy', function () {
-  return gulp
-    .src(paths.src + 'index.html')
-    .pipe(gulp.dest(paths.dist));
-});
-
-
-gulp.task('index:inject', [ 'index:copy' ], function () {
+// Inject JavaScript and SCSS source file references in index.html
+gulp.task('inject:index', [ 'copy:index' ], function () {
   var sources = gulp.src(
     [ paths.dist + 'config.js' ]
     .concat(jsLibs)
@@ -98,9 +88,8 @@ gulp.task('index:inject', [ 'index:copy' ], function () {
     .pipe(gulp.dest(paths.dist));
 });
 
-
 // Automatically inject SCSS file imports from Bower packages
-gulp.task('scss:inject', function () {
+gulp.task('inject:scss', function () {
   return gulp
     .src(paths.src + 'index.tmpl.scss')
     .pipe(wiredep(config.bower))
@@ -108,15 +97,7 @@ gulp.task('scss:inject', function () {
     .pipe(gulp.dest(paths.src));
 });
 
-
-gulp.task('watch', function () {
-  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, [ 'js' ]);
-  gulp.watch(scssFiles, [ 'css' ]);
-  gulp.watch(partials, [ 'html' ]);
-  gulp.watch(paths.src + 'index.html', [ 'index:inject' ]);
-});
-
-
+// Run ESLint on 'src' folder
 gulp.task('lint', function () {
   return gulp
     .src([
@@ -128,22 +109,38 @@ gulp.task('lint', function () {
     .pipe(eslint.failAfterError());
 });
 
+// Generate .plugin.scss file and copy to 'dist'
+gulp.task('plugin', function() {
+  var CMD = 'cd ../src/plugins && ls */*.scss';
+  var pluginsScssFiles = sh.exec(CMD, { silent: true })
+    .output
+    .trim()
+    .split(/\s+/)
+    .map(function (scss) {
+      return '@import "' + scss + '";';
+    });
 
-gulp.task('clean', function (next) {
-  del(paths.dist + '**/*', { force: true }, next);
+  return file('.plugins.scss', pluginsScssFiles.join('\n'), { src: true })
+    .pipe(gulp.dest(paths.src + 'plugins'));
 });
 
+// Gulp watch JavaScript, SCSS and HTML source files
+gulp.task('watch', function () {
+  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, [ 'js' ]);
+  gulp.watch(scssFiles, [ 'css' ]);
+  gulp.watch(partials, [ 'html' ]);
+  gulp.watch(paths.src + 'index.html', [ 'index:inject' ]);
+});
 
 gulp.task('default', function (next) {
   runSequence(
     'plugin',
-    'lint',
-    'js',
-    'lib',
-    'scss:inject',
+    'copy:js',
+    'copy:lib',
+    'inject:scss',
     'css',
-    'html',
-    'index:inject',
+    'copy:html',
+    'inject:index',
     next
   );
 });

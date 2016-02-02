@@ -9,7 +9,7 @@
     '$stateProvider'
   ];
 
-  function registerRoute($stateProvider, basePath) {
+  function registerRoute($stateProvider) {
     $stateProvider.state('cf.organizations', {
       url: '/organizations',
       templateUrl: 'plugins/cloud-foundry/view/organizations/organizations.html'

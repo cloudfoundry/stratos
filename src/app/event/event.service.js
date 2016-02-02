@@ -23,7 +23,9 @@
    * @memberof app.event
    * @name eventService
    * @description The event bus service
+   * @param {object} $rootScope - the $rootScope
    * @property {object} events - the default set of events (i.e. HTTP status codes)
+   * @returns {object} the event bus
    * @example
    * // subscribe to an event
    * eventService.$on(events.HTTP_401, handler);

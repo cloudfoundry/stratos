@@ -14,39 +14,43 @@
   /**
    * @memberof app.api
    * @name app.api.searchService
-   * @description search service provider
+   * @description Search service provider
+   * @param {object} $http - the $http service
+   * @returns {object} The search service
    */
   function serviceFactory($http) {
     return {
-      'delete': remove,
-      'get': retrieve,
+      delete: remove,
+      get: retrieve,
       index: index,
       search: search,
       update: update
     };
 
     /**
-     * @function index, index a resource with given type
+     * @function index
      * @memberof app.api.searchService
-     * @param type {string} the resource type
-     * @param options {object} the specification object
-     * @returns {HttpPromise}
+     * @name index
+     * @description Index a resource with given type
+     * @param {string} type - the resource type
+     * @param {object} options - the specification object
+     * @returns {object} The resolved/rejected promise
      * @public
      * @example
-     ```
-      searchService.index('application', { name: 'foo' }).then(...);
-     ```
+     * searchService.index('application', { name: 'foo' }).then(...);
      */
     function index(type, options) {
       return $http.post(path(INDEX, type), options);
     }
 
     /**
-     * @function remove, remove a resource from the index
+     * @function remove
      * @memberof app.api.searchService
-     * @param type {string} the resource type
-     * @param id {string} the resource id
-     * @returns {HttpPromise}
+     * @name remove
+     * @description Remove a resource from the index
+     * @param {string} type - the resource type
+     * @param {string} id - the resource ID
+     * @returns {object} The resolved/rejected promise
      * @public
      */
     function remove(type, id) {
@@ -54,23 +58,27 @@
     }
 
     /**
-     * @function retrieve, retrieve a resource from the index
+     * @function retrieve
      * @memberof app.api.searchService
-     * @param type {string} the resource type
-     * @param id {string} the resource id
-     * @returns {HttpPromise}
+     * @name retrieve
+     * @description Retrieve a resource from the index
+     * @param {string} type - the resource type
+     * @param {string} id - the resource ID
+     * @returns {object} The resolved/rejected promise
      */
     function retrieve(type, id) {
       return $http.get(path(INDEX, type, id, '_source'));
     }
 
     /**
-     * @function update, update a resource in the index
+     * @function update
      * @memberof app.api.searchService
-     * @param type {string} the resource type
-     * @param id {string} the resource id
-     * @param data {Object} the given partial update data object
-     * @returns {HttpPromise}
+     * @name update
+     * @description Update a resource in the index
+     * @param {string} type - the resource type
+     * @param {string} id - the resource ID
+     * @param {object} data - the given partial update data object
+     * @returns {object} The resolved/rejected promise
      * @public
      */
     function update(type, id, data) {
@@ -78,30 +86,30 @@
     }
 
     /**
-     * @function search, search for all resources described by the query,
-     * with pagination information
+     * @function search
      * @memberof app.api.searchService
-     * @param type {string} the resource type
-     * @param query {object} the Elasticsearch query object
-     * @param params {object} specify pagination if provided.
-     * @returns {HttpPromise}
+     * @name search
+     * @description Search for all resources described by the query,
+     * with pagination information
+     * @param {string} type - the resource type
+     * @param {object} query - the Elasticsearch query object
+     * @param {object} params - specify pagination if provided
+     * @returns {object} The resolved/rejected promise
      * @public
      * @example
-     ```
-      searchService.search('application',
-        {
-          bool: {
-            must: [ { match: { name: 'App' } } ]
-          }
-        },
-        {
-          size: 5,
-          from: 5
-        }
-      ).then(function (response) {
-        console.log(response.data.hits.total, response.data.hits.hits);
-      });
-     ```
+     * searchService.search('application',
+     *   {
+     *     bool: {
+     *       must: [ { match: { name: 'App' } } ]
+     *     }
+     *   },
+     *   {
+     *     size: 5,
+     *     from: 5
+     *   }
+     * ).then(function (response) {
+     *   console.log(response.data.hits.total, response.data.hits.hits);
+     * });
      */
     function search(type, query, params) {
       return $http.post(path(INDEX, type, '_search'),
@@ -111,8 +119,10 @@
     }
 
     /**
-     * Util function, join all arguments to form a path
-     * @returns {string}
+     * @function path
+     * @name path
+     * @description Join all arguments to form a path
+     * @returns {string} The final path string
      * @private
      */
     function path() {

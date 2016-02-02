@@ -42,7 +42,7 @@
      * @param {string} href - the href / ng-router state
      * @param {string} text - the displayed text of the menu item
      * @param {string} icon - the icon of the menu item
-     * @returns {app.model.navigation.Menu}
+     * @returns {app.model.navigation.Menu} The navigation's Menu object
      */
     addMenuItem: function (name, href, text, icon) {
       this.push({
@@ -59,7 +59,7 @@
      * @function reset
      * @memberof app.model.navigation.Menu
      * @description Clear the menu list
-     * @returns {app.model.navigation.Menu}
+     * @returns {app.model.navigation.Menu} The navigation's Menu object
      */
     reset: function () {
       this.length = 0;
