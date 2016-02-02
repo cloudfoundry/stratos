@@ -21,6 +21,7 @@
     "bootstrap-sass-official": "3.3.5",
     "font-awesome": "~4.5.0",
     "helion-ui-framework": "../../helion-ui-framework",
+    "helion-ui-theme": "../../helion-ui-theme#re-scaffold",
     "lodash": "~4.0.1",
     "moment": "~2.10.6",
     "angular-moment": "~0.10.3"
