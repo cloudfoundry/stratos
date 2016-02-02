@@ -1,16 +1,12 @@
-$fa-font-path:      "lib/font-awesome/fonts";
-$font-path:         "lib/helion-ui-theme/dist/fonts/metric-font";
-$icon-font-path:    "lib/helion-ui-theme/dist/fonts/helion-icons/fonts";
-
-@import "lib/helion-ui-theme/dist/fonts/index";
-@import "lib/helion-ui-theme/dist/scss/theme/index";
+// theme
+//@import "lib/helion-ui-theme/default/variables";
+//@import "lib/helion-ui-theme/mixins";
+//@import "lib/helion-ui-theme/variables";
 
 // libs - auto-populated by wiredep from bower.json
+$fa-font-path: "lib/font-awesome/fonts";
 // bower:scss
 // endbower
-
-@import "lib/helion-ui-theme/dist/scss/mixin/index";
-@import "lib/helion-ui-theme/dist/scss/style/index";
 
 // app
 @import "app/app";
