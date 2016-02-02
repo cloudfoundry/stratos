@@ -1,13 +1,20 @@
-// theme
-//@import "lib/helion-ui-theme/default/variables";
-//@import "lib/helion-ui-theme/mixins";
-//@import "lib/helion-ui-theme/variables";
+// Font paths
+$fa-font-path:      "lib/font-awesome/fonts";
+$font-path:         "lib/helion-ui-theme/dist/fonts/metric-font";
+$icon-font-path:    "lib/helion-ui-theme/dist/fonts/helion-icons/fonts";
 
-// libs - auto-populated by wiredep from bower.json
-$fa-font-path: "lib/font-awesome/fonts";
+// Helion UI fonts and theme
+@import "lib/helion-ui-theme/dist/fonts/index";
+@import "lib/helion-ui-theme/dist/scss/theme/index";
+
+// Libs - auto-populated by wiredep from bower.json
 // bower:scss
 // endbower
 
-// app
+// Helion UI styles
+@import "lib/helion-ui-theme/dist/scss/mixin/index";
+@import "lib/helion-ui-theme/dist/scss/style/index";
+
+// App
 @import "app/app";
 @import "plugins/.plugins"; // auto-generated after running gulp
