@@ -9,7 +9,8 @@
     'gettext',
     'helion.framework',
     'ui.bootstrap',
-    'ui.router'
+    'ui.router',
+    'snapscroll'
   ];
 
   var pluginModules = _.chain(env.plugins).map('moduleName').value();

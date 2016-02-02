@@ -1,1 +1,53 @@
 @import "login-form/login-form";
+
+login-page {
+  article {
+    section {
+      background-color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:nth-child(2n) {
+        background-color: $seashell;
+      }
+
+      p {
+        margin-top: 24px;
+        margin-bottom: 24px;
+        max-width: 576px;
+      }
+    }
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .hpe-logo {
+    position: absolute;
+    width: 40%;
+    bottom: 5em;
+    left: 50%;
+    transform: translate(-50%, 0);
+  }
+
+  .introduction {
+    background-color: $limed-spruce;
+    color: white;
+  }
+
+  .login-panel {
+    background-color: white;
+    height: 100vh;
+    top: 0;
+  }
+
+  @media (min-width: 768px) {
+    .login-panel {
+      position: fixed;
+      right: 0;
+    }
+  }
+}
