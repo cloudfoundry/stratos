@@ -35,6 +35,9 @@
    * @namespace app.view.NavigationController
    * @memberof app.view
    * @name NavigationController
+   * @constructor
+   * @param {object} $state - ui-router $state service
+   * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {object} $state - ui-router $state service
    * @property {app.event.eventService} eventService - the event bus service
@@ -54,8 +57,8 @@
      * @function onAutoNav
      * @memberof app.view.navigation.NavigationController
      * @description automatic navigating event handler
-     * @param event {object} angular event object
-     * @param state {string} the state to navigate to
+     * @param {object} event - angular event object
+     * @param {string} state - the state to navigate to
      * @private
      */
     onAutoNav: function (event, state) {
