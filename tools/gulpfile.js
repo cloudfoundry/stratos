@@ -126,9 +126,9 @@ gulp.task('plugin', function() {
 
 // Gulp watch JavaScript, SCSS and HTML source files
 gulp.task('watch', function () {
-  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, [ 'js' ]);
+  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, [ 'copy:js' ]);
   gulp.watch(scssFiles, [ 'css' ]);
-  gulp.watch(partials, [ 'html' ]);
+  gulp.watch(partials, [ 'copy:html' ]);
   gulp.watch(paths.src + 'index.html', [ 'index:inject' ]);
 });
 

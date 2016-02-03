@@ -33,6 +33,7 @@
 
     onLoggedIn: function () {
       this.registerNavigation();
+      this.eventService.$emit(this.eventService.events.AUTO_NAV, 'cf.applications');
     },
 
     onLoggedOut: function () {},
