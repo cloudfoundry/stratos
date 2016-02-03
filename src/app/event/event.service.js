@@ -7,7 +7,8 @@
     HTTP_401: 'HTTP_401',
     HTTP_403: 'HTTP_403',
     HTTP_404: 'HTTP_404',
-    HTTP_500: 'HTTP_500'
+    HTTP_500: 'HTTP_500',
+    AUTO_NAV: 'AUTO_NAV'
   };
 
   angular
