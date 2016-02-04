@@ -48,13 +48,13 @@ login-page {
     flex-direction: column;
     background-color: white;
     height: 100vh;
-    top: 0;
   }
 
   @media (min-width: 768px) {
     .login-panel {
       position: fixed;
       right: 0;
+      top: 0;
     }
   }
 }
