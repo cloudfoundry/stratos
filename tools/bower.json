@@ -16,7 +16,6 @@
     "angular": "~1.4.9",
     "angular-bootstrap": "~1.1.1",
     "angular-gettext": "~2.2.0",
-    "angular-snapscroll": "~0.2.5",
     "angular-sanitize": "~1.4.9",
     "angular-ui-router": "~0.2.17",
     "bootstrap-sass-official": "^3.3.6",
