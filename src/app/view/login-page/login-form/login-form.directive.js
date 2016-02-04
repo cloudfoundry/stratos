@@ -27,6 +27,14 @@
 
   LoginFormController.$inject = [];
 
-  function LoginFormController() {}
+  function LoginFormController() {
+    this.showPassword = false;
+  }
+
+  angular.extend(LoginFormController.prototype, {
+    showHidePassword: function () {
+      this.showPassword = !this.showPassword;
+    }
+  });
 
 })();
