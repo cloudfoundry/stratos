@@ -1,25 +1,29 @@
-<form name="loginForm" role="form">
-  <label for="login-form-username"
-         class="required"
-         translate>
-    Username
-  </label>
-  <input id="login-form-username"
-         type="text" name="username"
-         ng-model="loginFormCtrl.username" required autofocus />
-  <ng-messages role="alert"></ng-messages>
+<h1 class="text-center" translate>HPE Helion Stratos</h1>
+<form class="form-stacked login-form center-block" name="loginForm" role="form">
+  <div class="form-group" ng-class="{focused: usernameFocused}">
+    <label class="control-label required" for="login-form-username" translate>
+      Username
+    </label>
+    <input class="form-control"
+      id="login-form-username"
+      type="text" name="username"
+      ng-model="loginFormCtrl.username"
+      ng-focus="usernameFocused = true" ng-blur="usernameFocused = false"
+      required autofocus/>
+  </div>
+  <div class="form-group" ng-class="{focused: passwordFocused}">
+    <label class="control-label required" for="login-form-password" translate>
+      Password
+    </label>
+    <input class="form-control"
+      id="login-form-password"
+      type="text" name="password"
+      ng-model="loginFormCtrl.password"
+      ng-focus="passwordFocused = true" ng-blur="passwordFocused = false"
+      required/>
+  </div>
 
-  <label for="login-form-password"
-         class="required"
-         translate>
-    Password
-  </label>
-  <input id="login-form-password"
-         type="text" name="password"
-         ng-model="loginFormCtrl.password" required />
-  <ng-messages role="alert"></ng-messages>
-
-  <button type="button"
+  <button type="button" class="btn btn-primary center-block"
           ng-disabled="loginForm.$invalid"
           ng-click="applicationCtrl.login('dev', 'dev')"
           translate>
