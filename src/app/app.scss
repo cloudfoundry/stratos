@@ -1,5 +1,11 @@
 @import "view/view";
 
+html {
+  height: 100%;
+  width: 100%;
+}
+
 body {
-  padding-top: $navbar-height;
+  padding-top: 0;
+  height: 100%;
 }
