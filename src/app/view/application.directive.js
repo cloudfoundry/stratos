@@ -72,7 +72,6 @@
      * @private
      */
     onLoggedIn: function () {
-      this.modelManager.retrieve('app.model.navigation').reset();
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
       this.loggedIn = true;
     },
@@ -97,7 +96,6 @@
      * @private
      */
     onLoggedOut: function () {
-      this.modelManager.retrieve('app.model.navigation').reset();
       this.eventService.$emit(this.eventService.events.LOGGED_OUT);
       this.loggedIn = false;
     }

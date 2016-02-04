@@ -12,24 +12,85 @@
     .run(registerModel);
 
   registerModel.$inject = [
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.event.eventService',
+    '$state'
   ];
 
-  function registerModel(modelManager) {
+  function registerModel(modelManager, eventService, $state) {
     /**
      * Register 'app.model.navigation' with the model manager service.
      * This model hosts the application's navigation tree.
      */
-    modelManager.register('app.model.navigation', new Menu());
+    modelManager.register('app.model.navigation', new NavigationModel(eventService, $state));
   }
+
+  /**
+   * @namespace app.model.NavigationModel
+   * @memberof app.model
+   * @name NavigationModel
+   * @constructor
+   * @param {app.event.eventService} eventService - the event bus service
+   * @param {object} $state - ui-router $state service
+   * @property {app.event.eventService} eventService - the event bus service
+   * @property {object} $state - ui-router $state service
+   * @property {app.model.navigation} menu - the navigation model
+   */
+  function NavigationModel(eventService, $state) {
+    this.eventService = eventService;
+    this.$state = $state;
+    this.menu = new Menu();
+    this.eventService.$on(this.eventService.events.LOGGED_IN, this.onLogin.bind(this));
+    this.eventService.$on(this.eventService.events.LOGGED_OUT, this.onLogout.bind(this));
+    this.eventService.$on(this.eventService.events.AUTO_NAV, this.onAutoNav.bind(this));
+  }
+
+  angular.extend(NavigationModel.prototype, {
+    /**
+     * @function onLogin
+     * @memberof app.model.NavigationModel
+     * @description login event handler
+     * @private
+     */
+    onLogin: function () {
+      this.menu.reset();
+    },
+
+    /**
+     * @function onLogout
+     * @memberof app.model.NavigationModel
+     * @description logout event handler
+     * @private
+     */
+    onLogout: function () {
+      this.menu.reset();
+    },
+
+    /**
+     * @function onAutoNav
+     * @memberof app.model.NavigationModel
+     * @description automatic navigating event handler
+     * @param {object} event - angular event object
+     * @param {string} state - the state to navigate to
+     * @private
+     */
+    onAutoNav: function (event, state) {
+      this.$state.go(state);
+      this.menu.currentState = state;
+    }
+  });
 
   /**
    * @namespace app.model.navigation.Menu
    * @memberof app.model.navigation
    * @name app.model.navigation.Menu
+   * @property {string} currentState - current ui-router state
    */
-  function Menu() {}
+  function Menu() {
+    this.currentState = null;
+  }
 
+  // Using an array as the prototype
   Menu.prototype = [];
 
   angular.extend(Menu.prototype, {
