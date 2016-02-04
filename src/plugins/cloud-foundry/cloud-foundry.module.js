@@ -39,7 +39,7 @@
     onLoggedOut: function () {},
 
     registerNavigation: function () {
-      this.modelManager.retrieve('app.model.navigation')
+      this.modelManager.retrieve('app.model.navigation').menu
         .addMenuItem('cf.hosts', 'cf.hosts', gettext('Hosts'))
         .addMenuItem('cf.organizations', 'cf.organizations', gettext('Organizations'))
         .addMenuItem('cf.applications', 'cf.applications', gettext('Applications'))

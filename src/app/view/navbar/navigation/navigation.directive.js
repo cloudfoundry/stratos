@@ -26,8 +26,6 @@
   }
 
   NavigationController.$inject = [
-    '$state',
-    'app.event.eventService',
     'app.model.modelManager'
   ];
 
@@ -36,35 +34,10 @@
    * @memberof app.view
    * @name NavigationController
    * @constructor
-   * @param {object} $state - ui-router $state service
-   * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @property {object} $state - ui-router $state service
-   * @property {app.event.eventService} eventService - the event bus service
-   * @property {app.model.navigation} menu - the navigation model
-   * @property {string} currentState - current ui-router state
+   * @property {app.model.navigationModel} navigationModel - the navigation model
    */
-  function NavigationController($state, eventService, modelManager) {
-    this.$state = $state;
-    this.eventService = eventService;
-    this.menu = modelManager.retrieve('app.model.navigation');
-    this.currentState = null;
-    this.eventService.$on(this.eventService.events.AUTO_NAV, this.onAutoNav.bind(this));
+  function NavigationController(modelManager) {
+    this.navigationModel = modelManager.retrieve('app.model.navigation');
   }
-
-  angular.extend(NavigationController.prototype, {
-    /**
-     * @function onAutoNav
-     * @memberof app.view.navigation.NavigationController
-     * @description automatic navigating event handler
-     * @param {object} event - angular event object
-     * @param {string} state - the state to navigate to
-     * @private
-     */
-    onAutoNav: function (event, state) {
-      this.$state.go(state);
-      this.currentState = state;
-    }
-  });
-
 })();
