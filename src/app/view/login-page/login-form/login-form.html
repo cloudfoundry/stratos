@@ -8,13 +8,16 @@
       id="login-form-username" name="username"
       ng-model="loginFormCtrl.username" required autofocus/>
   </div>
-  <div class="form-group" focusable-input>
+  <div class="form-group has-feedback" focusable-input>
     <label class="control-label required" for="login-form-password" translate>
       Password
     </label>
-    <input type="text" class="form-control"
+    <input type="{{loginFormCtrl.showPassword ? 'text' : 'password'}}" class="form-control"
       id="login-form-password" name="password"
       ng-model="loginFormCtrl.password" required/>
+    <span class="helion-icon helion-icon-View form-control-feedback"
+      ng-class="{'text-muted': !loginFormCtrl.showPassword}"
+      ng-click="loginFormCtrl.showHidePassword()"></span>
   </div>
 
   <button type="button" class="btn btn-primary center-block"
