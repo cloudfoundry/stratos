@@ -1,4 +1,8 @@
-<div class="col-sm-4 clearfix login-panel">
+<div class="scroll scroll-up col-sm-8 col-xs-12 text-center"
+  ng-show="loginPageCtrl.prevArrowVisible" ng-click="loginPageCtrl.goToPrevSection()">
+  <span class="helion-icon helion-icon-Up helion-icon-lg scroll-arrow"></span>
+</div>
+<div id="section_login_panel" class="col-sm-4 clearfix login-panel">
   <div class="login-form-wrapper">
     <login-form></login-form>
   </div>
@@ -7,7 +11,7 @@
   </div>
 </div>
 <article class="col-sm-8 content">
-  <section class="clearfix introduction">
+  <section id="section_introduction" class="clearfix introduction">
     <div>
       <h1 class="text-center" translate>HPE Helion Stratos</h1>
       <p class="text-center" translate>
@@ -15,7 +19,7 @@
       </p>
     </div>
   </section>
-  <section class="clearfix">
+  <section id="section_learning" class="clearfix">
     <div>
       <p class="text-center">
         <span class="helion-icon helion-icon-Book helion-icon-4x"></span>
@@ -29,7 +33,7 @@
       </p>
     </div>
   </section>
-  <section class="clearfix">
+  <section id="section_develop" class="clearfix">
     <div>
       <p class="text-center">
         <span class="helion-icon helion-icon-Deployment helion-icon-4x"></span>
@@ -43,7 +47,7 @@
       </p>
     </div>
   </section>
-  <section class="clearfix">
+  <section id="section_getting_started" class="clearfix">
     <div>
       <p class="text-center">
         <span class="helion-icon helion-icon-Grow helion-icon-4x"></span>
@@ -56,5 +60,15 @@
         <a href="#" class="btn btn-default" translate>Learn More</a>
       </p>
     </div>
+    <div class="footer">
+      <img ng-src="/lib/helion-ui-theme/dist/images/hpe_pri_grn_rev_rgb.png"/>
+      <div class="copyright" translate>
+        Stratos | &copy; 2015 Hewlett Packard Enterprise Company, L.P.
+      </div>
+    </div>
   </section>
 </article>
+<div class="scroll scroll-down col-sm-8 col-xs-12 text-center"
+  ng-show="loginPageCtrl.nextArrowVisible" ng-click="loginPageCtrl.goToNextSection()">
+  <span class="helion-icon helion-icon-Down helion-icon-lg scroll-arrow"></span>
+</div>

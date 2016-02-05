@@ -8,8 +8,9 @@ login-page {
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 1em 3em;
 
-      &:nth-child(2n) {
+      &:nth-of-type(2n) {
         background-color: $seashell;
       }
 
@@ -23,6 +24,21 @@ login-page {
 
   .content {
     padding: 0;
+  }
+
+  .footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: black;
+    opacity: 0.75;
+    color: white;
+    padding: 1em;
+
+    .copyright {
+      padding-top: 24px;
+    }
   }
 
   .hpe-logo {
@@ -48,6 +64,7 @@ login-page {
     flex-direction: column;
     background-color: white;
     height: 100vh;
+    border-left: 1px solid black;
   }
 
   @media (min-width: 768px) {
@@ -56,5 +73,29 @@ login-page {
       right: 0;
       top: 0;
     }
+  }
+
+  .scroll {
+    position: fixed;
+    z-index: 2;
+  }
+
+  .scroll-arrow {
+    color: #999999;
+    opacity: 0.75;
+    cursor: pointer;
+    font-size: 1.5em;
+
+    &:hover {
+      color: black;
+    }
+  }
+
+  .scroll-up {
+    top: 1em;
+  }
+
+  .scroll-down {
+    bottom: 1em;
   }
 }
