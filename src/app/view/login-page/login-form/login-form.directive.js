@@ -27,11 +27,23 @@
 
   LoginFormController.$inject = [];
 
+  /**
+   * @namespace app.view.loginForm.LoginFormController
+   * @memberof app.view.loginForm
+   * @name LoginFormController
+   * @constructor
+   * @property {boolean} showPassword - show or hide password in plain text
+   */
   function LoginFormController() {
     this.showPassword = false;
   }
 
   angular.extend(LoginFormController.prototype, {
+    /**
+     * @function showHidePassword
+     * @memberof app.view.loginForm.LoginFormController
+     * @description Toggle show or hide password in plain text
+     */
     showHidePassword: function () {
       this.showPassword = !this.showPassword;
     }
