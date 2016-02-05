@@ -1,3 +1,4 @@
 <navbar ng-if="applicationCtrl.loggedIn"></navbar>
 <login-page ng-if="!applicationCtrl.loggedIn"></login-page>
 <console-view ng-if="applicationCtrl.loggedIn"></console-view>
+<footer ng-if="!applicationCtrl.loggedIn"></footer>
