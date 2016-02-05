@@ -3,9 +3,9 @@
 
   angular
     .module('app.view')
-    .directive('footer', footer);
+    .directive('consoleFooter', consoleFooter);
 
-  footer.$inject = [
+  consoleFooter.$inject = [
     'app.basePath'
   ];
 
@@ -17,9 +17,9 @@
    * @param {string} path - the application base path
    * @returns {object} The footer directive definition object
    */
-  function footer(path) {
+  function consoleFooter(path) {
     return {
-      templateUrl: path + 'view/footer/footer.html'
+      templateUrl: path + 'view/console-footer/console-footer.html'
     };
   }
 
