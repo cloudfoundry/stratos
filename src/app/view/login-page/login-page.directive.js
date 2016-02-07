@@ -48,11 +48,12 @@
       });
 
       function cacheSectionPositions() {
-        var scrollY = $window.scrollY;
+        var scrollY = $window.scrollY || $window.pageYOffset;
 
         var sections = [{ id: 'section_login_panel', top: 0 }];
         angular.forEach(element.find('section'), function (elt) {
-          sections.push({ id: elt.id, top: elt.getBoundingClientRect().top + scrollY });
+          var top = Math.round(elt.getBoundingClientRect().top + scrollY);
+          sections.push({ id: elt.id, top: top });
         });
 
         ctrl.sections = sections;
@@ -62,7 +63,7 @@
       }
 
       function handleScroll() {
-        var y = $window.scrollY;
+        var y = $window.scrollY || $window.pageYOffset;
         var scrollBottom = ctrl.sections[ctrl.lastSectionIdx].top || 0;
 
         ctrl.prevArrowVisible = y > 0;
@@ -94,7 +95,7 @@
       }
     },
     goToPrevSection: function () {
-      var y = this.$window.scrollY;
+      var y = this.$window.scrollY || this.$window.pageYOffset;
       var sectionTop = this.sections[this.currentSectionIdx].top;
       var diff = y === sectionTop ? -1 : 0;
       this.currentSectionIdx += diff;
