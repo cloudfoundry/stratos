@@ -16,6 +16,7 @@
    * @name loginPage
    * @description A login page directive
    * @param {string} path - the application base path
+   * @param {object} $window - the Angular $window service
    * @returns {object} The login page directive definition object
    */
   function loginPage(path, $window) {
@@ -42,7 +43,7 @@
         }, 400));
 
       scope.$on('destroy', function () {
-        window
+        windowElt
           .off('scroll')
           .off('resize');
       });
@@ -75,6 +76,21 @@
 
   LoginPageController.$inject = ['$window', 'smoothScroll'];
 
+  /**
+   * @namespace app.view.LoginPageController
+   * @memberof app.view
+   * @name LoginPageController
+   * @constructor
+   * @param {object} $window - the Angular $window service
+   * @param {object} smoothScroll - the ngSmoothScroll service
+   * @property {object} $window - the Angular $window service
+   * @property {object} smoothScroll - the ngSmoothScroll service
+   * @property {boolean} prevArrowVisible - show/hide previous arrow
+   * @property {boolean} nextArrowVisible - show/hide next arrow
+   * @property {array} sections - the sections containing content
+   * @property {number} currentSectionIdx - the index of the current section
+   * @property {number} lastSectionIdx - the index of the last section
+   */
   function LoginPageController($window, smoothScroll) {
     this.$window = $window;
     this.smoothScroll = smoothScroll;
@@ -88,19 +104,40 @@
   }
 
   angular.extend(LoginPageController.prototype, {
+    /**
+     * @function goToNextSection
+     * @memberof app.view.LoginPageController
+     * @description Scroll to the next section
+     * @public
+     */
     goToNextSection: function () {
       if (this.currentSectionIdx < this.lastSectionIdx) {
         this.currentSectionIdx += 1;
-        this.smoothScroll(document.getElementById(this.sections[this.currentSectionIdx].id));
+        var id = this.sections[this.currentSectionIdx].id;
+        this.smoothScroll(this.$window.document.getElementById(id));
       }
     },
+    /**
+     * @function goToPrevSection
+     * @memberof app.view.LoginPageController
+     * @description Scroll back to previous section
+     * @public
+     */
     goToPrevSection: function () {
       var y = this.$window.scrollY || this.$window.pageYOffset;
       var sectionTop = this.sections[this.currentSectionIdx].top;
       var diff = y === sectionTop ? -1 : 0;
       this.currentSectionIdx += diff;
-      this.smoothScroll(document.getElementById(this.sections[this.currentSectionIdx].id));
+      var id = this.sections[this.currentSectionIdx].id;
+      this.smoothScroll(this.$window.document.getElementById(id));
     },
+    /**
+     * @function setCurrentSection
+     * @memberof app.view.LoginPageController
+     * @description Set the current visible section
+     * @param {number} y - the current scroll position
+     * @public
+     */
     setCurrentSection: function (y) {
       var ctrl = this;
 
