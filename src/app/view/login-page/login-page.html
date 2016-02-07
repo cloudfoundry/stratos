@@ -72,3 +72,9 @@
   ng-show="loginPageCtrl.nextArrowVisible" ng-click="loginPageCtrl.goToNextSection()">
   <span class="helion-icon helion-icon-Down helion-icon-lg scroll-arrow"></span>
 </div>
+<div class="section-status col-sm-8 col-xs-12">
+  <ul>
+    <li ng-repeat="section in loginPageCtrl.sections track by section.id"
+      ng-class="{'selected': loginPageCtrl.currentSectionIdx === $index}"></li>
+  </ul>
+</div>
