@@ -38,6 +38,8 @@ module.exports = function () {
 
     jsSourceFiles: [
       paths.src + '**/*.js',
+      '!' + paths.dist + '**/*.mock.js',
+      '!' + paths.dist + '**/*.spec.js',
       '!' + paths.src + 'lib/**/*.js'
     ],
 
