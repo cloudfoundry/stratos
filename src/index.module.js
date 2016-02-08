@@ -8,6 +8,7 @@
   var otherModules = [
     'gettext',
     'helion.framework',
+    'smoothScroll',
     'ui.bootstrap',
     'ui.router'
   ];

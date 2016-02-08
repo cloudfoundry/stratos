@@ -10,8 +10,7 @@
       'app.api',
       'app.event',
       'app.model',
-      'app.view',
-      'smoothScroll'
+      'app.view'
     ])
     .constant('app.basePath', 'app/');
 
