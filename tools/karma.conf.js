@@ -63,7 +63,7 @@ module.exports = function (config) {
     },
 
     proxies: {
-      '/lib/helion-ui-theme/dist/images': '/base/images'
+      '/lib/helion-ui-theme/dist/images/': '/base/lib/helion-ui-theme/dist/images/'
     },
 
     reporters: ['progress', 'coverage']
