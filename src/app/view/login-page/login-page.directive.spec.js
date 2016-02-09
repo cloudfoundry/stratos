@@ -43,7 +43,7 @@
     });
 
     describe('loginPageController', function () {
-      beforeEach(inject(function ($injector) {
+      beforeEach(function () {
         // mock data
         $controller.nextArrowVisible = true;
         $controller.sections = [
@@ -55,7 +55,7 @@
         $controller.lastSectionIdx = 2;
 
         spyOn($controller, 'smoothScroll');
-      }));
+      });
 
       it('should be defined', function () {
         expect($controller).toBeDefined();
