@@ -5,10 +5,13 @@
 
 #### Standup Stratos service using docker-compose
 ```
-docker-compose up (-d)
-Use -d to run in background
+docker-compose up
 ```
-Service should now be running on 192.168.99.100.
+#### To run in background
+```
+docker-compose up -d
+```
+Service should now be running on your docker host ID, usually 192.168.99.100.
 
 #### Stop Stratos service
 If running in foreground, first do Ctrl + C to exit and then:
