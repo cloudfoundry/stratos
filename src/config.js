@@ -9,7 +9,7 @@
   var env = {
     registerApplication: registerApplication,
 
-    HELION_UI_FRAMEWORK_BASE_PATH: 'lib/helion-ui-framework/'
+    HELION_UI_FRAMEWORK_BASE_PATH: 'lib/helion-ui-framework/dist/'
   };
 
   expose({
