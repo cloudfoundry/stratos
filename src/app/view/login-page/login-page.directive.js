@@ -37,7 +37,10 @@
           handleScroll();
           scope.$apply();
         }, 150))
-        .on('resize', _.debounce(cacheSectionPositions, 400));
+        .on('resize', _.debounce(function onResize() {
+          cacheSectionPositions();
+          scope.$apply();
+        }, 400));
 
       scope.$on('destroy', function () {
         windowElt
@@ -60,7 +63,7 @@
         });
 
         if (sections.length > 0 && sections[0].top > 0) {
-          sections.unshift({ id: 'section_login_panel', top: 0 });
+          sections.unshift({ id: 'section-login-panel', top: 0 });
         }
 
         ctrl.sections = sections;

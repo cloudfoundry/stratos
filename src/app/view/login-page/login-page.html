@@ -75,6 +75,7 @@
 <div class="section-status col-sm-8 col-xs-12">
   <ul>
     <li ng-repeat="section in loginPageCtrl.sections track by section.id"
-      ng-class="{'selected': loginPageCtrl.currentSectionIdx === $index}"></li>
+      ng-class="{'selected': loginPageCtrl.currentSectionIdx === $index}"
+      scroll-to="{{section.id}}"></li>
   </ul>
 </div>
