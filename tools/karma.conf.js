@@ -16,6 +16,8 @@ module.exports = function (config) {
     },
 
     files: [
+      'lib/angular-mocks/angular-mocks.js',
+
       'config.js',
 
       'lib/helion-ui-framework/**/*.module.js',
