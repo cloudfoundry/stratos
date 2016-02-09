@@ -133,8 +133,9 @@
      * @public
      */
     goToPrevSection: function () {
-      if (this.currentSectionIdx > 0) {
-        var y = this.$window.scrollY || this.$window.pageYOffset;
+      var y = this.$window.scrollY || this.$window.pageYOffset;
+
+      if (this.currentSectionIdx > 0 || y > 0) {
         var sectionTop = this.sections[this.currentSectionIdx].top;
         var diff = y === sectionTop ? -1 : 0;
         this.currentSectionIdx += diff;

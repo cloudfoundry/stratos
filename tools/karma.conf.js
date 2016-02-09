@@ -20,9 +20,14 @@ module.exports = function (config) {
 
       'config.js',
 
-      'lib/helion-ui-framework/**/*.module.js',
-      'lib/helion-ui-framework/**/!(*.mock|*.spec).js',
       'lib/helion-ui-framework/**/!(*.mock).html',
+      {
+        pattern: 'lib/helion-ui-theme/dist/images/*.png',
+        watched: false,
+        included: false,
+        served: true,
+        nocache: false
+      },
 
       'index.module.js',
       'app/**/*.module.js',
@@ -55,6 +60,10 @@ module.exports = function (config) {
     preprocessors: {
       'app/**/*.html': ['ng-html2js'],
       'app/**/!(*.mock|*.spec).js': ['coverage']
+    },
+
+    proxies: {
+      '/lib/helion-ui-theme/dist/images/': '/base/lib/helion-ui-theme/dist/images/'
     },
 
     reporters: ['progress', 'coverage']
