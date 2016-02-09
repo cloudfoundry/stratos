@@ -37,7 +37,10 @@
           handleScroll();
           scope.$apply();
         }, 150))
-        .on('resize', _.debounce(cacheSectionPositions, 400));
+        .on('resize', _.debounce(function onResize() {
+          cacheSectionPositions();
+          scope.$apply();
+        }, 400));
 
       scope.$on('destroy', function () {
         windowElt
@@ -53,11 +56,15 @@
          * id - {string}, the ID of the <section>
          * top - {number}, the top Y-position of the <section> in context of the page
          */
-        var sections = [{ id: 'section-login-panel', top: 0 }];
+        var sections = [];
         angular.forEach(element.find('section'), function (elt) {
           var top = Math.round(elt.getBoundingClientRect().top + scrollY);
           sections.push({ id: elt.id, top: top });
         });
+
+        if (sections.length > 0 && sections[0].top > 0) {
+          sections.unshift({ id: 'section-login-panel', top: 0 });
+        }
 
         ctrl.sections = sections;
         ctrl.lastSectionIdx = sections.length - 1;
@@ -126,12 +133,14 @@
      * @public
      */
     goToPrevSection: function () {
-      var y = this.$window.scrollY || this.$window.pageYOffset;
-      var sectionTop = this.sections[this.currentSectionIdx].top;
-      var diff = y === sectionTop ? -1 : 0;
-      this.currentSectionIdx += diff;
-      var id = this.sections[this.currentSectionIdx].id;
-      this.smoothScroll(this.$window.document.getElementById(id));
+      if (this.currentSectionIdx > 0) {
+        var y = this.$window.scrollY || this.$window.pageYOffset;
+        var sectionTop = this.sections[this.currentSectionIdx].top;
+        var diff = y === sectionTop ? -1 : 0;
+        this.currentSectionIdx += diff;
+        var id = this.sections[this.currentSectionIdx].id;
+        this.smoothScroll(this.$window.document.getElementById(id));
+      }
     },
     /**
      * @function setCurrentSection

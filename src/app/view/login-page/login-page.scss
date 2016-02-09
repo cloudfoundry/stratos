@@ -67,7 +67,7 @@ login-page {
     border-left: 1px solid black;
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: $screen-sm-min) {
     .login-panel {
       position: fixed;
       right: 0;
@@ -97,5 +97,30 @@ login-page {
 
   .scroll-down {
     bottom: 1em;
+  }
+
+  .section-status {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+
+    ul {
+      position: absolute;
+      right: 1em;
+
+      li {
+        background-color: #999999;
+        opacity: 0.3;
+        list-style: none;
+        height: 8px;
+        width: 8px;
+        margin: 5px;
+        cursor: pointer;
+
+        &.selected {
+          opacity: 1;
+        }
+      }
+    }
   }
 }
