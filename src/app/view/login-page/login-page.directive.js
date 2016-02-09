@@ -33,14 +33,11 @@
       var windowElt = angular.element($window);
 
       windowElt
-        .on('scroll', _.debounce(function () {
+        .on('scroll', _.debounce(function onScroll() {
           handleScroll();
           scope.$apply();
         }, 150))
-        .on('resize', _.debounce(function () {
-          cacheSectionPositions();
-          scope.$apply();
-        }, 400));
+        .on('resize', _.debounce(cacheSectionPositions, 400));
 
       scope.$on('destroy', function () {
         windowElt
@@ -51,7 +48,12 @@
       function cacheSectionPositions() {
         var scrollY = $window.scrollY || $window.pageYOffset;
 
-        var sections = [{ id: 'section_login_panel', top: 0 }];
+        /**
+         * Section Object:
+         * id - the ID of the <section>
+         * top - the top Y-position of the <section> in context of the page
+         */
+        var sections = [{ id: 'section-login-panel', top: 0 }];
         angular.forEach(element.find('section'), function (elt) {
           var top = Math.round(elt.getBoundingClientRect().top + scrollY);
           sections.push({ id: elt.id, top: top });
