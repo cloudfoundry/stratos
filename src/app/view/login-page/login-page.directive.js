@@ -50,8 +50,8 @@
 
         /**
          * Section Object:
-         * id - the ID of the <section>
-         * top - the top Y-position of the <section> in context of the page
+         * id - {string}, the ID of the <section>
+         * top - {number}, the top Y-position of the <section> in context of the page
          */
         var sections = [{ id: 'section-login-panel', top: 0 }];
         angular.forEach(element.find('section'), function (elt) {
