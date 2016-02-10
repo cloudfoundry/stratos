@@ -63,7 +63,7 @@
       var self = this;
       this.modelManager.retrieve('app.model.account')
         .login(username, password)
-        .then(this.onLoggedIn.bind(this), function loginFailed(err) {
+        .then(this.onLoggedIn.bind(this), function loginFailed() {
           self.failedLogin = true;
         });
     },
