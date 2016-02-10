@@ -37,12 +37,19 @@
    * @property {app.model.navigation} menu - the navigation model
    */
   function NavigationModel(eventService, $state) {
+    var that = this;
     this.eventService = eventService;
     this.$state = $state;
     this.menu = new Menu();
-    this.eventService.$on(this.eventService.events.LOGGED_IN, this.onLogin.bind(this));
-    this.eventService.$on(this.eventService.events.LOGGED_OUT, this.onLogout.bind(this));
-    this.eventService.$on(this.eventService.events.AUTO_NAV, this.onAutoNav.bind(this));
+    this.eventService.$on(this.eventService.events.LOGGED_IN, function () {
+      that.onLogin();
+    });
+    this.eventService.$on(this.eventService.events.LOGGED_OUT, function () {
+      that.onLogout();
+    });
+    this.eventService.$on(this.eventService.events.AUTO_NAV, function (event, state) {
+      that.onAutoNav(event, state);
+    });
   }
 
   angular.extend(NavigationModel.prototype, {

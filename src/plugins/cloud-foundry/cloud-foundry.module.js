@@ -20,17 +20,18 @@
   }
 
   function CloudFoundry(eventService, modelManager) {
+    var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
-    this.init();
+    this.eventService.$on(this.eventService.events.LOGGED_IN, function () {
+      that.onLoggedIn();
+    });
+    this.eventService.$on(this.eventService.events.LOGGED_OUT, function () {
+      that.onLoggedOut();
+    });
   }
 
   angular.extend(CloudFoundry.prototype, {
-    init: function () {
-      this.eventService.$on(this.eventService.events.LOGGED_IN, this.onLoggedIn.bind(this));
-      this.eventService.$on(this.eventService.events.LOGGED_OUT, this.onLoggedOut.bind(this));
-    },
-
     onLoggedIn: function () {
       this.registerNavigation();
       this.eventService.$emit(this.eventService.events.AUTO_NAV, 'cf.applications');
