@@ -103,6 +103,19 @@ describe('Login Page', function () {
       expect(element(by.css('login-page')).isPresent()).toBeFalsy();
       expect(element(by.css('console-view')).isPresent()).toBeTruthy();
     });
+
+    it('should not allow log in with incorrect credentials', function () {
+      var fields = loginPage.loginFormFields();
+      fields.get(0).sendKeys('badusername');
+      fields.get(1).sendKeys('badpassword');
+
+      expect(loginPage.loginButton().isEnabled()).toBeTruthy();
+
+      loginPage.loginButton().click();
+
+      expect(element(by.css('login-page')).isPresent()).toBeTruthy();
+      expect(element(by.css('console-view')).isPresent()).toBeFalsy();
+    });
   });
 
 });
