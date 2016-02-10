@@ -68,8 +68,8 @@
           function () {
             that.onLoggedIn();
           },
-          function loginFailed() {
-            that.failedLogin = true;
+          function () {
+            that.onLoginFailed();
           }
         );
     },
@@ -86,6 +86,18 @@
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
       this.loggedIn = true;
       this.failedLogin = false;
+    },
+
+    /**
+     * @function onLoginFailed
+     * @memberof app.view.application.ApplicationController
+     * @description Login-failure event handler
+     * @private
+     * @returns {void}
+     */
+    onLoginFailed: function () {
+      this.loggedIn = false;
+      this.failedLogin = true;
     },
 
     /**
