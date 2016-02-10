@@ -3,17 +3,20 @@
   max-width: 350px;
   padding-top: 40px;
 
-  &.failed-login {
-    padding-top: 0px;
-  }
-
-  .failed-login-message {
-    height: 40px;
-  }
-
   button {
     margin-top: 40px;
     width: 200px;
+  }
+
+  .failed-login-message {
+    background-color: $carnation;
+    color: $white;
+    margin: 40px 0px;
+    padding: 40px;
+    position: absolute;
+    bottom: -40px;
+    right: 0;
+    width: 100%;
   }
 
   .helion-icon-View.form-control-feedback {
