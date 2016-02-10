@@ -12,7 +12,9 @@ Nginx is used to serve static files while Node.js + Express is used to host the 
 This project depends on the following:
 * [Docker](https://docs.docker.com/mac)
 * [Node.js](https://nodejs.org) - to easily install Node.js modules
+* [stratos-identity-db](https://github.com/hpcloud/stratos-identity-db) - MySQL identity database
 * [stratos-node-server](https://github.com/hpcloud/stratos-node-server) - mock REST API Express server
+* [stratos-es](https://github.com/hpcloud/stratos-es) - Elasticsearch
 * [stratos-server](https://github.com/hpcloud/stratos-server) - Nginx server
 * [helion-ui-framework](https://github.com/hpcloud/helion-ui-framework) - reusable Angular-based UI components
 * [helion-ui-theme](https://github.com/hpcloud/helion-ui-theme) - Helion branding, assets, styles, theme
@@ -30,11 +32,23 @@ Note: If your builds are hanging at the 'Setting up ca-certificates-java' step, 
 docker-machine create --driver virtualbox --virtualbox-cpu-count "2" default
 ```
 
+### Build and run the Stratos Identity Database
+```
+cd ../stratos-identity-db
+docker compose up -d
+
+# Set up database
+docker exec -it stratosidentitydb_db_1 /bin/bash
+mysql -u stratos --password=stratos < /versions/0.0.1.sql
+```
+
 ### Build and run the REST API server
 ```
 cd ../stratos-node-server
 docker build -t stratos-node-server .
-docker run -it --rm --name stratos-node-server \
+docker run -it \
+           --rm --name stratos-node-server \
+           --link stratosidentitydb_db_1:db \
            -v $(pwd):/usr/src/app \
            -p 3000:3000 \
            stratos-node-server
@@ -43,10 +57,13 @@ npm install && npm start
 
 ### Run Elasticsearch
 ```
-docker run --name stratos-es -d elasticsearch elasticsearch
+cd ../stratos-es
+docker build -t stratos-es .
+docker run -d --name stratos-es stratos-es
 ```
 
 ### Build and run Nginx
+Wait for the REST API server and Elasticsearch to be up and running before running the following commands:
 ```
 cd ../stratos-server
 docker build -t stratos-server .
@@ -124,6 +141,13 @@ $ ./node_modules/.bin/protractor protractor.conf.js
 ```
 $ cd tools
 $ ./node_modules/.bin/gulp lint
+```
+
+### Running gate check script
+This runs the unit tests and linting.
+```
+$ cd tools
+$ npm run gate-check
 ```
 
 ### Generate documentation (experimental)
