@@ -5,6 +5,7 @@ var concat = require('gulp-concat-util'),
   eslint = require('gulp-eslint'),
   file = require('gulp-file'),
   gulp = require('gulp'),
+  gulpif = require('gulp-if'),
   gulpinject = require('gulp-inject'),
   plumber = require('gulp-plumber'),
   rename = require('gulp-rename'),
@@ -23,6 +24,8 @@ var paths = config.paths,
   scssFiles = config.scssFiles,
   cssFiles = config.cssFiles,
   partials = config.partials;
+
+var usePlumber = true;
 
 // Clear the 'dist' folder
 gulp.task('clean:dist', function (next) {
@@ -61,12 +64,12 @@ gulp.task('copy:lib', function () {
 gulp.task('css', function () {
   return gulp
     .src(scssSourceFiles, { base: paths.src })
-    .pipe(plumber({
+    .pipe(gulpif(usePlumber, plumber({
       errorHandler: function (err) {
         console.log(err);
         this.emit('end');
       }
-    }))
+    })))
     .pipe(sass())
     .pipe(gulp.dest(paths.dist));
 });
@@ -133,6 +136,7 @@ gulp.task('watch', function () {
 });
 
 gulp.task('default', function (next) {
+  usePlumber = false;
   runSequence(
     'plugin',
     'copy:js',
