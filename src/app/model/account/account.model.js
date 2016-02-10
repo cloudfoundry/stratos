@@ -45,9 +45,12 @@
      * @public
      */
     login: function (username, password) {
+      var that = this;
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
-        .then(this.onLoggedIn.bind(this));
+        .then(function (response) {
+          that.onLoggedIn(response);
+        });
     },
 
     /**
@@ -58,9 +61,12 @@
      * @public
      */
     logout: function () {
+      var that = this;
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.logout()
-        .then(this.onLoggedOut.bind(this));
+        .then(function () {
+          that.onLoggedOut();
+        });
     },
 
     /**
@@ -68,6 +74,7 @@
      * @memberof app.model.account.Account
      * @description Logged-in handler at model layer
      * @param {object} response - the HTTP response object
+     * @returns {void}
      * @private
      * @returns {void}
      */
@@ -80,6 +87,7 @@
      * @function onLoggedOut
      * @memberof app.model.account.Account
      * @description Logged-out handler at model layer
+     * @returns {void}
      * @private
      * @returns {void}
      */

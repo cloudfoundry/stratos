@@ -56,13 +56,17 @@
      * @description Log in to the application
      * @param {string} username - the username
      * @param {string} password - the password
+     * @returns {void}
      * @public
      * @returns {void}
      */
     login: function (username, password) {
+      var that = this;
       this.modelManager.retrieve('app.model.account')
         .login(username, password)
-        .then(this.onLoggedIn.bind(this));
+        .then(function () {
+          that.onLoggedIn();
+        });
     },
 
     /**
@@ -70,6 +74,7 @@
      * @memberof app.view.application.ApplicationController
      * @description Logged-in event handler
      * @emits LOGGED_IN
+     * @returns {void}
      * @private
      * @returns {void}
      */
@@ -82,13 +87,17 @@
      * @function logout
      * @memberof app.view.application.ApplicationController
      * @description Log out of the application
+     * @returns {void}
      * @public
      * @returns {void}
      */
     logout: function () {
+      var that = this;
       this.modelManager.retrieve('app.model.account')
         .logout()
-        .then(this.onLoggedOut.bind(this));
+        .then(function () {
+          that.onLoggedOut();
+        });
     },
 
     /**
@@ -96,6 +105,7 @@
      * @memberof app.view.application.ApplicationController
      * @description Logged-out event handler
      * @emits LOGGED_OUT
+     * @returns {void}
      * @private
      * @returns {void}
      */

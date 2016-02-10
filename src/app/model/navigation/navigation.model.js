@@ -57,6 +57,7 @@
      * @function onLogin
      * @memberof app.model.NavigationModel
      * @description login event handler
+     * @returns {void}
      * @private
      * @returns {void}
      */
@@ -68,6 +69,7 @@
      * @function onLogout
      * @memberof app.model.NavigationModel
      * @description logout event handler
+     * @returns {void}
      * @private
      * @returns {void}
      */
@@ -81,6 +83,7 @@
      * @description automatic navigating event handler
      * @param {object} event - angular event object
      * @param {string} state - the state to navigate to
+     * @returns {void}
      * @private
      * @returns {void}
      */
