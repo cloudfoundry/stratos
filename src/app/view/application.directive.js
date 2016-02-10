@@ -41,6 +41,7 @@
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {boolean} loggedIn - a flag indicating if user logged in
+   * @property {boolean} failedLogin - a flag indicating if user login failed.
    * @class
    */
   function ApplicationController(eventService, modelManager) {
