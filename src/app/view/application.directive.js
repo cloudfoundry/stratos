@@ -47,6 +47,7 @@
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.loggedIn = false;
+    this.failedLogin = false;
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -59,11 +60,11 @@
      * @public
      */
     login: function (username, password) {
+      var self = this;
       this.modelManager.retrieve('app.model.account')
         .login(username, password)
         .then(this.onLoggedIn.bind(this), function loginFailed(err) {
-          // TODO: display login failure message
-          console.log("failed login");
+          self.failedLogin = true;
         });
     },
 
@@ -77,6 +78,7 @@
     onLoggedIn: function () {
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
       this.loggedIn = true;
+      this.failedLogin = false;
     },
 
     /**
