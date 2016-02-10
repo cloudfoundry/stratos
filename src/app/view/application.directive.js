@@ -61,7 +61,10 @@
     login: function (username, password) {
       this.modelManager.retrieve('app.model.account')
         .login(username, password)
-        .then(this.onLoggedIn.bind(this));
+        .then(this.onLoggedIn.bind(this), function loginFailed(err) {
+          // TODO: display login failure message
+          console.log("failed login");
+        });
     },
 
     /**
