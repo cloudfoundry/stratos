@@ -2,7 +2,7 @@
   'use strict';
 
   describe('application directive', function () {
-    var $element, $controller;
+    var $element;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -16,7 +16,6 @@
       $compile($element)($scope);
 
       $scope.$apply();
-      $controller = $element.controller('application');
     }));
 
     it('should be defined', function () {
