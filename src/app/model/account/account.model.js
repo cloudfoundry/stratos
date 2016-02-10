@@ -45,9 +45,10 @@
      * @public
      */
     login: function (username, password) {
+      var that = this;
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
-        .then(this.onLoggedIn.bind(this));
+        .then(that.onLoggedIn);
     },
 
     /**
@@ -58,9 +59,10 @@
      * @public
      */
     logout: function () {
+      var that = this;
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.logout()
-        .then(this.onLoggedOut.bind(this));
+        .then(that.onLoggedOut);
     },
 
     /**

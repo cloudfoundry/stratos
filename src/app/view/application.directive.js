@@ -59,9 +59,12 @@
      * @public
      */
     login: function (username, password) {
+      var that = this;
       this.modelManager.retrieve('app.model.account')
         .login(username, password)
-        .then(this.onLoggedIn.bind(this));
+        .then(function () {
+          that.onLoggedIn();
+        });
     },
 
     /**
@@ -83,9 +86,12 @@
      * @public
      */
     logout: function () {
+      var that = this;
       this.modelManager.retrieve('app.model.account')
         .logout()
-        .then(this.onLoggedOut.bind(this));
+        .then(function () {
+          that.onLoggedOut();
+        });
     },
 
     /**
