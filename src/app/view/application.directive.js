@@ -60,12 +60,9 @@
      * @public
      */
     login: function (username, password) {
-      var self = this;
       this.modelManager.retrieve('app.model.account')
         .login(username, password)
-        .then(this.onLoggedIn.bind(this), function loginFailed() {
-          self.failedLogin = true;
-        });
+        .then(this.onLoggedIn.bind(this), this.onLoginFailed.bind(this));
     },
 
     /**
@@ -79,6 +76,17 @@
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
       this.loggedIn = true;
       this.failedLogin = false;
+    },
+
+    /**
+     * @function onLoginFailed
+     * @memberof app.view.application.ApplicationController
+     * @description Login-failure event handler
+     * @private
+     */
+    onLoginFailed: function () {
+      this.loggedIn = false;
+      this.failedLogin = true;
     },
 
     /**
