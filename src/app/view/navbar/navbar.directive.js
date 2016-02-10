@@ -19,7 +19,7 @@
    */
   function navbar(path) {
     return {
-      templateUrl: path + '/view/navbar/navbar.html'
+      templateUrl: path + 'view/navbar/navbar.html'
     };
   }
 

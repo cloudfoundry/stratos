@@ -21,7 +21,7 @@
     return {
       controller: NavigationController,
       controllerAs: 'navigationCtrl',
-      templateUrl: path + '/view/navbar/navigation/navigation.html'
+      templateUrl: path + 'view/navbar/navigation/navigation.html'
     };
   }
 
