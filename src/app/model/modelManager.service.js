@@ -28,6 +28,7 @@
      * @memberof app.model.modelManager
      * @param {string} name - the name of the model to register
      * @param {object} model - the model object to register
+     * @returns {void}
      */
     function register(name, model) {
       models[name] = model;

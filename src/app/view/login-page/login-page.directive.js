@@ -118,6 +118,7 @@
      * @memberof app.view.LoginPageController
      * @description Scroll to the next section
      * @public
+     * @returns {void}
      */
     goToNextSection: function () {
       if (this.currentSectionIdx < this.lastSectionIdx) {
@@ -131,6 +132,7 @@
      * @memberof app.view.LoginPageController
      * @description Scroll back to previous section
      * @public
+     * @returns {void}
      */
     goToPrevSection: function () {
       var y = this.$window.scrollY || this.$window.pageYOffset;
@@ -149,6 +151,7 @@
      * @description Set the current visible section
      * @param {number} y - the current scroll position
      * @public
+     * @returns {void}
      */
     setCurrentSection: function (y) {
       var ctrl = this;
