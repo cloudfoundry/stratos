@@ -117,6 +117,7 @@
      * @function goToNextSection
      * @memberof app.view.LoginPageController
      * @description Scroll to the next section
+     * @returns {void}
      * @public
      */
     goToNextSection: function () {
@@ -130,6 +131,7 @@
      * @function goToPrevSection
      * @memberof app.view.LoginPageController
      * @description Scroll back to previous section
+     * @returns {void}
      * @public
      */
     goToPrevSection: function () {
@@ -148,6 +150,7 @@
      * @memberof app.view.LoginPageController
      * @description Set the current visible section
      * @param {number} y - the current scroll position
+     * @returns {void}
      * @public
      */
     setCurrentSection: function (y) {

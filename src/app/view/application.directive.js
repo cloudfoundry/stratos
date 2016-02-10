@@ -56,6 +56,7 @@
      * @description Log in to the application
      * @param {string} username - the username
      * @param {string} password - the password
+     * @returns {void}
      * @public
      */
     login: function (username, password) {
@@ -72,6 +73,7 @@
      * @memberof app.view.application.ApplicationController
      * @description Logged-in event handler
      * @emits LOGGED_IN
+     * @returns {void}
      * @private
      */
     onLoggedIn: function () {
@@ -83,6 +85,7 @@
      * @function logout
      * @memberof app.view.application.ApplicationController
      * @description Log out of the application
+     * @returns {void}
      * @public
      */
     logout: function () {
@@ -99,6 +102,7 @@
      * @memberof app.view.application.ApplicationController
      * @description Logged-out event handler
      * @emits LOGGED_OUT
+     * @returns {void}
      * @private
      */
     onLoggedOut: function () {

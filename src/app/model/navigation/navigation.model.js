@@ -57,6 +57,7 @@
      * @function onLogin
      * @memberof app.model.NavigationModel
      * @description login event handler
+     * @returns {void}
      * @private
      */
     onLogin: function () {
@@ -67,6 +68,7 @@
      * @function onLogout
      * @memberof app.model.NavigationModel
      * @description logout event handler
+     * @returns {void}
      * @private
      */
     onLogout: function () {
@@ -79,6 +81,7 @@
      * @description automatic navigating event handler
      * @param {object} event - angular event object
      * @param {string} state - the state to navigate to
+     * @returns {void}
      * @private
      */
     onAutoNav: function (event, state) {
@@ -92,6 +95,7 @@
    * @memberof app.model.navigation
    * @name app.model.navigation.Menu
    * @property {string} currentState - current ui-router state
+   * @returns {void}
    */
   function Menu() {
     this.currentState = null;

@@ -74,6 +74,7 @@
      * @memberof app.model.account.Account
      * @description Logged-in handler at model layer
      * @param {object} response - the HTTP response object
+     * @returns {void}
      * @private
      */
     onLoggedIn: function (response) {
@@ -85,6 +86,7 @@
      * @function onLoggedOut
      * @memberof app.model.account.Account
      * @description Logged-out handler at model layer
+     * @returns {void}
      * @private
      */
     onLoggedOut: function () {

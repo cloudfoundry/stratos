@@ -43,6 +43,7 @@
      * @function showHidePassword
      * @memberof app.view.loginForm.LoginFormController
      * @description Toggle show or hide password in plain text
+     * @returns {void}
      */
     showHidePassword: function () {
       this.showPassword = !this.showPassword;
