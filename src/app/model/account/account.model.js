@@ -46,7 +46,8 @@
      */
     login: function (username, password) {
       var accountApi = this.apiManager.retrieve('app.api.account');
-      return accountApi.login(username, password);
+      return accountApi.login(username, password)
+         .then(this.onLoggedIn.bind(this));
     },
 
     /**
