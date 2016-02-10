@@ -47,8 +47,8 @@
     this.eventService.$on(this.eventService.events.LOGGED_OUT, function () {
       that.onLogout();
     });
-    this.eventService.$on(this.eventService.events.AUTO_NAV, function () {
-      that.onAutoNav();
+    this.eventService.$on(this.eventService.events.AUTO_NAV, function (event, state) {
+      that.onAutoNav(event, state);
     });
   }
 
