@@ -3,6 +3,14 @@
   max-width: 350px;
   padding-top: 40px;
 
+  &.failed-login {
+    padding-top: 0px;
+  }
+
+  .failed-login-message {
+    height: 40px;
+  }
+
   button {
     margin-top: 40px;
     width: 200px;

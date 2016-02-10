@@ -47,6 +47,7 @@
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.loggedIn = false;
+    this.failedLogin = false;
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -63,9 +64,14 @@
       var that = this;
       this.modelManager.retrieve('app.model.account')
         .login(username, password)
-        .then(function () {
-          that.onLoggedIn();
-        });
+        .then(
+          function () {
+            that.onLoggedIn();
+          },
+          function loginFailed() {
+            that.failedLogin = true;
+          }
+        );
     },
 
     /**
@@ -79,6 +85,7 @@
     onLoggedIn: function () {
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
       this.loggedIn = true;
+      this.failedLogin = false;
     },
 
     /**
