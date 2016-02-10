@@ -35,6 +35,7 @@
    * @name AccountActionsController
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.model.account} account - the account model
+   * @constructor
    */
   function AccountActionsController(modelManager) {
     this.account = modelManager.retrieve('app.model.account');

@@ -57,6 +57,7 @@
      * @param {string} username - the username
      * @param {string} password - the password
      * @public
+     * @returns {void}
      */
     login: function (username, password) {
       this.modelManager.retrieve('app.model.account')
@@ -70,6 +71,7 @@
      * @description Logged-in event handler
      * @emits LOGGED_IN
      * @private
+     * @returns {void}
      */
     onLoggedIn: function () {
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
@@ -81,6 +83,7 @@
      * @memberof app.view.application.ApplicationController
      * @description Log out of the application
      * @public
+     * @returns {void}
      */
     logout: function () {
       this.modelManager.retrieve('app.model.account')
@@ -94,6 +97,7 @@
      * @description Logged-out event handler
      * @emits LOGGED_OUT
      * @private
+     * @returns {void}
      */
     onLoggedOut: function () {
       this.eventService.$emit(this.eventService.events.LOGGED_OUT);
