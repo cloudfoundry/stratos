@@ -14,6 +14,7 @@ This project depends on the following:
 * [Node.js](https://nodejs.org) - to easily install Node.js modules
 * [stratos-identity-db](https://github.com/hpcloud/stratos-identity-db) - MySQL identity database
 * [stratos-node-server](https://github.com/hpcloud/stratos-node-server) - mock REST API Express server
+* [stratos-es](https://github.com/hpcloud/stratos-es) - Elasticsearch
 * [stratos-server](https://github.com/hpcloud/stratos-server) - Nginx server
 * [helion-ui-framework](https://github.com/hpcloud/helion-ui-framework) - reusable Angular-based UI components
 * [helion-ui-theme](https://github.com/hpcloud/helion-ui-theme) - Helion branding, assets, styles, theme
