@@ -23,7 +23,7 @@
     return {
       controller: ApplicationController,
       controllerAs: 'applicationCtrl',
-      templateUrl: path + '/view/application.html'
+      templateUrl: path + 'view/application.html'
     };
   }
 
