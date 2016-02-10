@@ -48,7 +48,9 @@
       var that = this;
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
-        .then(that.onLoggedIn);
+        .then(function (response) {
+          that.onLoggedIn(response);
+        });
     },
 
     /**
@@ -62,7 +64,9 @@
       var that = this;
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.logout()
-        .then(that.onLoggedOut);
+        .then(function () {
+          that.onLoggedOut();
+        });
     },
 
     /**
