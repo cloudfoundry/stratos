@@ -29,7 +29,7 @@
       expect($element).toBeDefined();
     });
 
-    describe('ApplicationController', function () {
+    describe('An ApplicationController instance', function () {
       it('should be defined', function () {
         expect(applicationCtrl).toBeDefined();
       });
