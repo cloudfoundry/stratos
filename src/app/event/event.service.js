@@ -3,6 +3,7 @@
 
   var events = {
     LOGGED_IN: 'LOGGED_IN',
+    LOGIN_FAILED: 'LOGIN_FAILED',
     LOGGED_OUT: 'LOGGED_OUT',
     HTTP_401: 'HTTP_401',
     HTTP_403: 'HTTP_403',
