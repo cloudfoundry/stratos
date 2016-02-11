@@ -83,9 +83,11 @@
      * @function onLoginFailed
      * @memberof app.view.application.ApplicationController
      * @description Login-failure event handler
+     * @emits LOGIN_FAILED
      * @private
      */
     onLoginFailed: function () {
+      this.eventService.$emit(this.eventService.events.LOGIN_FAILED);
       this.loggedIn = false;
       this.failedLogin = true;
     },

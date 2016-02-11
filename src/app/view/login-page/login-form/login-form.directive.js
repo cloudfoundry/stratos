@@ -25,17 +25,22 @@
     };
   }
 
-  LoginFormController.$inject = [];
+  LoginFormController.$inject = [
+    'app.event.eventService'
+  ];
 
   /**
    * @namespace app.view.loginForm.LoginFormController
    * @memberof app.view.loginForm
    * @name LoginFormController
    * @constructor
+   * @param {app.event.eventService} eventService - the event bus service
    * @property {boolean} showPassword - show or hide password in plain text
    */
-  function LoginFormController() {
+  function LoginFormController(eventService) {
+    this.eventService = eventService;
     this.showPassword = false;
+    this.eventService.$on(this.eventService.events.LOGIN_FAILED, this.clearPassword.bind(this));
   }
 
   angular.extend(LoginFormController.prototype, {
@@ -46,6 +51,15 @@
      */
     showHidePassword: function () {
       this.showPassword = !this.showPassword;
+    },
+
+    /**
+     * @function clearPassword
+     * @memberof app.view.loginForm.LoginFormController
+     * @description Clear the contents of the password field
+     */
+    clearPassword: function () {
+      this.password = '';
     }
   });
 
