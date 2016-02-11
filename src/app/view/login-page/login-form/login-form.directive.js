@@ -38,9 +38,12 @@
    * @property {boolean} showPassword - show or hide password in plain text
    */
   function LoginFormController(eventService) {
+    var that = this;
     this.eventService = eventService;
     this.showPassword = false;
-    this.eventService.$on(this.eventService.events.LOGIN_FAILED, this.clearPassword.bind(this));
+    this.eventService.$on(this.eventService.events.LOGIN_FAILED, function () {
+      that.clearPassword();
+    });
   }
 
   angular.extend(LoginFormController.prototype, {
@@ -58,6 +61,7 @@
      * @function clearPassword
      * @memberof app.view.loginForm.LoginFormController
      * @description Clear the contents of the password field
+     * @returns {void}
      */
     clearPassword: function () {
       this.password = '';

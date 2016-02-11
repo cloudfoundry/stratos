@@ -5,10 +5,9 @@
     var $element, $controller;
 
     beforeEach(module('templates'));
-    beforeEach(module('app.view'));
+    beforeEach(module('green-box-console'));
 
     beforeEach(module(function ($provide) {
-      $provide.value('app.basePath', 'app/');
       $provide.value('$window', {
         pageYOffset: 0,
         scrollY: 0,
@@ -19,6 +18,9 @@
           getElementById: function () {
             return {};
           }
+        },
+        navigator: {
+          userAgent: null
         }
       });
       $provide.value('smoothScroll', angular.noop);

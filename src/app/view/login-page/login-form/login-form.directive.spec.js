@@ -5,7 +5,7 @@
     var $element, $controller;
 
     beforeEach(module('templates'));
-    beforeEach(module('app.view'));
+    beforeEach(module('green-box-console'));
 
     beforeEach(module(function ($provide) {
       $provide.provider('app.basePath', function () {
