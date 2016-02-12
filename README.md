@@ -46,12 +46,19 @@ mysql -u stratos --password=stratos < /versions/0.0.1.sql
 ```
 cd ../stratos-node-server
 docker build -t stratos-node-server .
+
 docker run -it \
            --rm --name stratos-node-server \
            --link stratosidentitydb_db_1:db \
            -v $(pwd):/usr/src/app \
            -p 3000:3000 \
+           -e MYSQL_ROOT_PASSWORD=stratos \
+           -e MYSQL_DATABASE=stratos-db \
+           -e MYSQL_USER=stratos \
+           -e MYSQL_PASSWORD=stratos \
+           -e PORT=3000 \
            stratos-node-server
+
 npm install && npm start
 ```
 
