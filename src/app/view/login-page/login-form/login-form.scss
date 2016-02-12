@@ -1,11 +1,8 @@
-.login-form {
-  display: block;
-  max-width: 350px;
-  padding-top: 40px;
+login-form {
+  width: 100%;
 
-  button {
-    margin-top: 40px;
-    width: 200px;
+  @media (min-height: 600px) {
+    padding-top: 100px;
   }
 
   .failed-login-message {
@@ -22,8 +19,27 @@
     }
   }
 
-  .helion-icon-View.form-control-feedback {
-    cursor: pointer;
-    pointer-events: auto;
+  .login-error {
+    margin-top: 40px;
+  }
+
+  .login-form {
+    display: block;
+    max-width: 350px;
+    padding: 15px;
+
+    button {
+      margin-top: 40px;
+      width: 200px;
+    }
+
+    .form-group:first-of-type {
+      margin-top: 40px;
+    }
+
+    .helion-icon-View.form-control-feedback {
+      cursor: pointer;
+      pointer-events: auto;
+    }
   }
 }
