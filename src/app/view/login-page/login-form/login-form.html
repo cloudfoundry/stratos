@@ -1,6 +1,6 @@
-<h1 class="text-center" translate>HPE Helion Stratos</h1>
 <form class="form-stacked login-form center-block" ng-class="applicationCtrl.failedLogin ? 'failed-login' : ''" name="loginForm" role="form"
   ng-submit="applicationCtrl.login(loginFormCtrl.username,loginFormCtrl.password)">
+  <h1 class="text-center" translate>HPE Helion Stratos</h1>
   <div class="form-group" focusable-input ng-class="applicationCtrl.failedLogin ? 'has-error' : ''">
     <label class="control-label required" for="login-form-username" translate>
       Username
@@ -25,10 +25,7 @@
     ng-disabled="loginForm.$invalid" translate>
     Login
   </button>
-  <div ng-if="applicationCtrl.failedLogin" class="failed-login-message">
-    <span style="float: left"><i class="helion-icon helion-icon-Critical_L"></i></span>
-    <div style="margin-left: 40px">
-      The login and password combination you used are incorrect. Please try again.
-    </div>
-  </div>
 </form>
+<div ng-if="applicationCtrl.failedLogin" class="alert alert-danger login-error">
+  <p>The login and password combination you used are incorrect. Please try again.</p>
+</div>
