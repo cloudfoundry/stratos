@@ -53,6 +53,14 @@
         expect(applicationCtrl.loggedIn).toBe(false);
       });
 
+      it('should have properties `failedLogin` defined', function () {
+        expect(applicationCtrl.failedLogin).toBeDefined();
+      });
+
+      it('should have properties `failedLogin` defined as false by default', function () {
+        expect(applicationCtrl.failedLogin).toBe(false);
+      });
+
       // method definitions
 
       it('should have method `login` defined', function () {
@@ -65,6 +73,10 @@
 
       it('should have method `onLoggedIn` defined', function () {
         expect(angular.isFunction(applicationCtrl.onLoggedIn)).toBe(true);
+      });
+
+      it('should have method `onLoginFailed` defined', function () {
+        expect(angular.isFunction(applicationCtrl.onLoginFailed)).toBe(true);
       });
 
       it('should have method `onLoggedOut` defined', function () {
@@ -80,6 +92,7 @@
         applicationCtrl.login('dev', 'dev');
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(true);
+        expect(applicationCtrl.failedLogin).toBe(false);
       });
 
       it('invoke `login` method - failure', function () {
@@ -89,6 +102,7 @@
         applicationCtrl.login('dev', 'dev');
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(false);
+        expect(applicationCtrl.failedLogin).toBe(true);
       });
 
       it('invoke `logout` method - success', function () {
@@ -98,6 +112,7 @@
         applicationCtrl.logout();
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(false);
+        expect(applicationCtrl.failedLogin).toBe(false);
       });
 
       it('invoke `logout` method - failure', function () {
@@ -107,6 +122,7 @@
         applicationCtrl.logout();
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(true);
+        expect(applicationCtrl.failedLogin).toBe(false);
       });
 
     });

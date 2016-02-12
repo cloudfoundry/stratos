@@ -38,8 +38,18 @@
         expect($controller).toBeDefined();
       });
 
+      it('should have properties `eventService` defined', function () {
+        expect($controller.eventService).toBeDefined();
+      });
+
       it('should not show password in plain text by default', function () {
         expect($controller.showPassword).toBe(false);
+      });
+
+      it('`clearPassword` should called when events.LOGIN_FAILED triggered', function () {
+        spyOn($controller, 'clearPassword');
+        $controller.eventService.$emit($controller.eventService.events.LOGIN_FAILED);
+        expect($controller.clearPassword).toHaveBeenCalled();
       });
 
       it('should allow toggling of password in plain text', function () {
