@@ -44,6 +44,9 @@
     this.eventService.$on(this.eventService.events.LOGIN_FAILED, function () {
       that.clearPassword();
     });
+    this.eventService.$on(this.eventService.events.HTTP_500, function () {
+      that.clearPassword();
+    });
   }
 
   angular.extend(LoginFormController.prototype, {

@@ -41,7 +41,8 @@
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {boolean} loggedIn - a flag indicating if user logged in
-   * @property {boolean} failedLogin - a flag indicating if user login failed.
+   * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
+   * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @class
    */
   function ApplicationController(eventService, modelManager) {
@@ -49,6 +50,7 @@
     this.modelManager = modelManager;
     this.loggedIn = false;
     this.failedLogin = false;
+    this.serverErrorOnLogin = false;
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -69,8 +71,8 @@
           function () {
             that.onLoggedIn();
           },
-          function () {
-            that.onLoginFailed();
+          function (response) {
+            that.onLoginFailed(response);
           }
         );
     },
@@ -87,20 +89,31 @@
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
       this.loggedIn = true;
       this.failedLogin = false;
+      this.serverErrorOnLogin = false;
     },
 
     /**
      * @function onLoginFailed
      * @memberof app.view.application.ApplicationController
      * @description Login-failure event handler
+     * @param {object} response - the HTTP response
      * @emits LOGIN_FAILED
+     * @emits HTTP_500
      * @private
      * @returns {void}
      */
-    onLoginFailed: function () {
-      this.eventService.$emit(this.eventService.events.LOGIN_FAILED);
+    onLoginFailed: function (response) {
+      // handle 5xx errors when attempting to login
+      if (response.status >= 500) {
+        this.eventService.$emit(this.eventService.events.HTTP_500);
+        this.serverErrorOnLogin = true;
+        this.failedLogin = false;
+      } else {
+        this.eventService.$emit(this.eventService.events.LOGIN_FAILED);
+        this.serverErrorOnLogin = false;
+        this.failedLogin = true;
+      }
       this.loggedIn = false;
-      this.failedLogin = true;
     },
 
     /**

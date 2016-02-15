@@ -31,4 +31,10 @@
       The login and password combination you used are incorrect. Please try again.
     </div>
   </div>
+  <div ng-if="applicationCtrl.serverErrorOnLogin" class="failed-login-message">
+    <span style="float: left"><i class="helion-icon helion-icon-Critical_L"></i></span>
+    <div style="margin-left: 40px">
+      A server error occurred when attempting to log you in. Please try again. If this error persists, please contact the administrator.
+    </div>
+  </div>
 </form>
