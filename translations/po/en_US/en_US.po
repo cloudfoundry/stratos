@@ -1,0 +1,119 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"X-Generator: Poedit 1.8.7\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: en_US\n"
+
+#: plugins/cloud-foundry/cloud-foundry.module.js:46
+msgid "Applications"
+msgstr "Applications"
+
+#: view/login-page/login-page.html:42
+msgid ""
+"Built for Enterprise applications, Stratos has open source Cloud Foundry as "
+"a core component and adds support for things that Enterprise operations "
+"teams need most such as resiliency, ease of management, and ease of install. "
+"It also provides additional capabilities for developers such as a continuous "
+"integration and deployment service that automates build, test, and "
+"deployment actions."
+msgstr ""
+"Built for Enterprise applications, Stratos has open source Cloud Foundry as "
+"a core component and adds support for things that Enterprise operations "
+"teams need most such as resiliency, ease of management, and ease of install. "
+"It also provides additional capabilities for developers such as a continuous "
+"integration and deployment service that automates build, test, and "
+"deployment actions."
+
+#: view/login-page/login-page.html:41
+msgid "Develop"
+msgstr "Develop"
+
+#: view/login-page/login-page.html:55
+msgid "Getting Started"
+msgstr "Getting Started"
+
+#: plugins/cloud-foundry/cloud-foundry.module.js:44
+msgid "Hosts"
+msgstr "Hosts"
+
+#: view/login-page/login-form/login-form.html:1
+#: view/login-page/login-page.html:16 view/navbar/navbar.html:15
+msgid "HPE Helion Stratos"
+msgstr "HPE Helion Stratos"
+
+#: view/login-page/login-page.html:32 view/login-page/login-page.html:46
+#: view/login-page/login-page.html:60
+msgid "Learn More"
+msgstr "Learn More"
+
+#: view/login-page/login-page.html:27
+msgid "Learning"
+msgstr "Learning"
+
+#: view/login-page/login-form/login-form.html:24
+msgid "Login"
+msgstr "Login"
+
+#: plugins/cloud-foundry/cloud-foundry.module.js:45
+msgid "Organizations"
+msgstr "Organizations"
+
+#: view/login-page/login-form/login-form.html:13
+msgid "Password"
+msgstr "Password"
+
+#: view/login-page/login-page.html:28
+msgid ""
+"Read through these guides to understand fundamental concepts behind Helion "
+"Development Platform. You’ll learn everything you need to know in order to "
+"deploy your first app. You can also dig into the details of each technology "
+"stack to learn how your app goes from your development machine to your users."
+msgstr ""
+"Read through these guides to understand fundamental concepts behind Helion "
+"Development Platform. You’ll learn everything you need to know in order to "
+"deploy your first app. You can also dig into the details of each technology "
+"stack to learn how your app goes from your development machine to your users."
+
+#: plugins/cloud-foundry/cloud-foundry.module.js:47
+msgid "Services"
+msgstr "Services"
+
+#: view/login-page/login-page.html:65
+msgid "Stratos | &copy; 2015 Hewlett Packard Enterprise Company, L.P."
+msgstr "Stratos | &copy; 2015 Hewlett Packard Enterprise Company, L.P."
+
+#: view/login-page/login-page.html:17
+msgid ""
+"Stratos tag line: discovering, composing, developing and managing Cloud "
+"Native workloads which are hosted in a myriad of: public, managed and "
+"private cloud/compute providers."
+msgstr ""
+"Stratos tag line: discovering, composing, developing and managing Cloud "
+"Native workloads which are hosted in a myriad of: public, managed and "
+"private cloud/compute providers."
+
+#: view/login-page/login-page.html:56
+msgid ""
+"The Quick Start Developer Trial is the fastest way to evaluate the HP Helion "
+"Development Platform for yourself. Download the files, create and configure "
+"your sandbox environment, and deploy one or more sample applications."
+msgstr ""
+"The Quick Start Developer Trial is the fastest way to evaluate the HP Helion "
+"Development Platform for yourself. Download the files, create and configure "
+"your sandbox environment, and deploy one or more sample applications."
+
+#: view/navbar/navbar.html:10
+msgid "Toggle navigation"
+msgstr "Toggle navigation"
+
+#: view/login-page/login-form/login-form.html:5
+msgid "Username"
+msgstr "Username"

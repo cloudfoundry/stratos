@@ -5,8 +5,9 @@
  */
 module.exports = function () {
   var paths = {
+    dist: '../dist/',
     src: '../src/',
-    dist: '../dist/'
+    translations: '../translations/'
   };
 
   var config = {
@@ -58,7 +59,17 @@ module.exports = function () {
 
     paths: paths,
 
-    plugins: []
+    plugins: [],
+
+    translate: {
+      dist: paths.dist + 'translations',
+      json: paths.translations + 'json',
+      options: {
+        format: 'json'
+      },
+      po: paths.translations + 'po/**/*.po',
+      pot: paths.translations + 'stratos.pot'
+    }
   };
 
   return config;

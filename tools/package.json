@@ -23,6 +23,7 @@
   "devDependencies": {
     "eslint": "^1.10.3",
     "eslint-plugin-angular": "^0.15.0",
+    "gulp-angular-gettext": "^2.1.0",
     "gulp-eslint": "^1.1.1",
     "gulp-if": "^2.0.0",
     "gulp-plumber": "^1.0.1",
