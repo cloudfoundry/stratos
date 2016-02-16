@@ -6,7 +6,7 @@ var hostIp = sh.exec(CMD, { silent: true }).output.trim();
 
 module.exports = {
 
-  load: load,
+  loadApp: loadApp,
   setBrowserNormal: setBrowserNormal,
   setBrowserSmall: setBrowserSmall,
   setBrowserWidthSmall: setBrowserWidthSmall,
@@ -19,7 +19,7 @@ module.exports = {
 
 };
 
-function load() {
+function loadApp() {
   browser.get('http://' + hostIp);
 }
 

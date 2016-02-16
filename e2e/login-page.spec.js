@@ -4,7 +4,7 @@ var loginPage = require('./po/login-page.po');
 describe('Login Page', function () {
   beforeAll(function () {
     helpers.setBrowserNormal();
-    helpers.load();
+    helpers.loadApp();
   });
 
   describe('content', function () {
@@ -31,7 +31,7 @@ describe('Login Page', function () {
       loginPage.nextArrow().click();
 
       browser.driver.sleep(2000);
-      browser.executeScript('return window.scrollY;').then(function(pos) {
+      browser.executeScript('return window.scrollY;').then(function (pos) {
         loginPage.contentSections().get(1).getLocation().then(function (loc) {
           expect(pos).toBe(loc.y);
         });
@@ -42,7 +42,7 @@ describe('Login Page', function () {
       loginPage.prevArrow().click();
 
       browser.driver.sleep(2000);
-      browser.executeScript('return window.scrollY;').then(function(pos) {
+      browser.executeScript('return window.scrollY;').then(function (pos) {
         expect(pos).toBe(0);
       });
     });
@@ -53,7 +53,7 @@ describe('Login Page', function () {
       helpers.setBrowserWidthSmall();
       browser.driver.sleep(1000);
 
-      browser.executeScript('return window.scrollY;').then(function(pos) {
+      browser.executeScript('return window.scrollY;').then(function (pos) {
         loginPage.loginPanel().getSize().then(function (size) {
           loginPage.contentSections().get(0).getLocation().then(function (loc) {
             expect(size.height).toBe(loc.y);
@@ -66,14 +66,14 @@ describe('Login Page', function () {
       loginPage.contentIndicatorSquares().get(0).click();
       browser.driver.sleep(1000);
 
-      browser.executeScript('return window.scrollY;').then(function(pos) {
+      browser.executeScript('return window.scrollY;').then(function (pos) {
         expect(pos).toBe(0);
       });
 
       loginPage.contentIndicatorSquares().get(1).click();
       browser.driver.sleep(1000);
 
-      browser.executeScript('return window.scrollY;').then(function(pos) {
+      browser.executeScript('return window.scrollY;').then(function (pos) {
         loginPage.contentSections().get(0).getLocation().then(function (loc) {
           expect(pos).toBe(loc.y);
         });
@@ -91,7 +91,7 @@ describe('Login Page', function () {
       expect(element(by.css('console-view')).isPresent()).toBeFalsy();
     });
 
-    xit('should allow log in with correct credentials', function () {
+    it('should allow log in with correct credentials', function () {
       var fields = loginPage.loginFormFields();
       fields.get(0).sendKeys('dev');
       fields.get(1).sendKeys('dev');
@@ -105,6 +105,8 @@ describe('Login Page', function () {
     });
 
     it('should not allow log in with incorrect credentials', function () {
+      helpers.loadApp();
+
       var fields = loginPage.loginFormFields();
       fields.get(0).sendKeys('badusername');
       fields.get(1).sendKeys('badpassword');
