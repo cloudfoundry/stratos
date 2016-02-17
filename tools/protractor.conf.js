@@ -6,9 +6,14 @@ exports.config = {
 
   framework: 'jasmine2',
 
+  directConnect: true,
+
   capabilities: {
-    'browserName': 'phantomjs',
-    'phantomjs.binary.path': require('phantomjs').path,
-    'phantomjs.ghostdriver.cli.args': ['--loglevel=DEBUG']
+    'browserName': 'chrome',
+    'version': '',
+    'platform': 'ANY',
+    'chromeOptions': {
+      args: ['--no-sandbox']
+    } 
   }
 };
