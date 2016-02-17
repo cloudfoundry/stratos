@@ -129,19 +129,9 @@ $ npm test
 ```
 
 ### Running Protractor tests in container
-Start the Selenium server:
 ```
 $ cd tools
-$ ./node_modules/.bin/webdriver-manager update
-$ ./node_modules/.bin/webdriver-manager start
-```
-
-Open another terminal and run Protractor. You'll need to run 'eval' again for your Docker machine (replace 'default' with your machine name).
-```
-eval "$(docker-machine env default)"
-docker exec -it stratos-ui /bin/bash
-
-$ ./node_modules/.bin/protractor protractor.conf.js
+$ xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
 ```
 
 ### Running ESLint in container
