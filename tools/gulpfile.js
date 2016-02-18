@@ -149,7 +149,7 @@ gulp.task('translate:extract', function () {
 gulp.task('translate:compile', function () {
   return gulp.src(config.translate.po)
     .pipe(gettext.compile(config.translate.options))
-    .pipe(gulp.dest(config.translate.json));
+    .pipe(gulp.dest(config.translate.js));
 });
 
 // Gulp watch JavaScript, SCSS and HTML source files

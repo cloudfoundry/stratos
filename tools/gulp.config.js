@@ -63,10 +63,8 @@ module.exports = function () {
 
     translate: {
       dist: paths.dist + 'translations',
-      json: paths.translations + 'json',
-      options: {
-        format: 'json'
-      },
+      js: paths.translations + 'js',
+      options: {},
       po: paths.translations + 'po/**/*.po',
       pot: paths.translations + 'stratos.pot'
     }

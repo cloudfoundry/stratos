@@ -8,5 +8,5 @@ dist
 docs/src
 lib
 src/index.scss
-translations/json
+translations/js
 translations/**/*.mo
