@@ -7,20 +7,6 @@ login-form, [login-form] {
     margin-top: 100px;
   }
 
-  .failed-login-message {
-    background-color: $carnation;
-    color: $white;
-    margin: 40px 0px;
-    padding: 40px;
-    position: absolute;
-    bottom: -40px;
-    right: 0;
-    width: 100%;
-    div {
-      margin-left: 40px
-    }
-  }
-
   .login-error {
     margin-top: 20px;
   }
