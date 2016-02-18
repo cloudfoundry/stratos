@@ -61,6 +61,22 @@
         expect(applicationCtrl.failedLogin).toBe(false);
       });
 
+      it('should have properties `serverErrorOnLogin` defined', function () {
+        expect(applicationCtrl.serverErrorOnLogin).toBeDefined();
+      });
+
+      it('should have properties `serverErrorOnLogin` defined as false by default', function () {
+        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+      });
+
+      it('should have properties `serverFailedToRespond` defined', function () {
+        expect(applicationCtrl.serverFailedToRespond).toBeDefined();
+      });
+
+      it('should have properties `serverFailedToRespond` defined as false by default', function () {
+        expect(applicationCtrl.serverFailedToRespond).toBe(false);
+      });
+
       // method definitions
 
       it('should have method `login` defined', function () {
@@ -93,9 +109,11 @@
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(true);
         expect(applicationCtrl.failedLogin).toBe(false);
+        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
 
-      it('invoke `login` method - failure', function () {
+      it('invoke `login` method - failure with bad credentials', function () {
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/api/auth/login/').respond(400, {});
         $httpBackend.expectPOST('/api/auth/login/');
@@ -103,6 +121,32 @@
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(false);
         expect(applicationCtrl.failedLogin).toBe(true);
+        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        expect(applicationCtrl.serverFailedToRespond).toBe(false);
+      });
+
+      it('invoke `login` method - failure with server error', function () {
+        applicationCtrl.loggedIn = false;
+        $httpBackend.when('POST', '/api/auth/login/').respond(500, {});
+        $httpBackend.expectPOST('/api/auth/login/');
+        applicationCtrl.login('dev', 'dev');
+        $httpBackend.flush();
+        expect(applicationCtrl.loggedIn).toBe(false);
+        expect(applicationCtrl.failedLogin).toBe(false);
+        expect(applicationCtrl.serverErrorOnLogin).toBe(true);
+        expect(applicationCtrl.serverFailedToRespond).toBe(false);
+      });
+
+      it('invoke `login` method - failure because server failed to respond', function () {
+        applicationCtrl.loggedIn = false;
+        $httpBackend.when('POST', '/api/auth/login/').respond(-1);
+        $httpBackend.expectPOST('/api/auth/login/');
+        applicationCtrl.login('dev', 'dev');
+        $httpBackend.flush();
+        expect(applicationCtrl.loggedIn).toBe(false);
+        expect(applicationCtrl.failedLogin).toBe(false);
+        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        expect(applicationCtrl.serverFailedToRespond).toBe(true);
       });
 
       it('invoke `logout` method - success', function () {
@@ -113,6 +157,8 @@
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(false);
         expect(applicationCtrl.failedLogin).toBe(false);
+        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
 
       it('invoke `logout` method - failure', function () {
@@ -123,6 +169,8 @@
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(true);
         expect(applicationCtrl.failedLogin).toBe(false);
+        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
 
     });

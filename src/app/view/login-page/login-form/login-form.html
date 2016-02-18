@@ -26,9 +26,21 @@
     Login
   </button>
   <div ng-if="applicationCtrl.failedLogin" class="failed-login-message">
-    <span style="float: left"><i class="helion-icon helion-icon-Critical_L"></i></span>
-    <div style="margin-left: 40px">
+    <span class="pull-left"><i class="helion-icon helion-icon-Critical_L"></i></span>
+    <div translate>
       The login and password combination you used are incorrect. Please try again.
+    </div>
+  </div>
+  <div ng-if="applicationCtrl.serverErrorOnLogin" class="failed-login-message">
+    <span class="pull-left"><i class="helion-icon helion-icon-Critical_L"></i></span>
+    <div translate>
+      A server error occurred when attempting to log you in. Please try again. If this error persists, please contact the administrator.
+    </div>
+  </div>
+  <div ng-if="applicationCtrl.serverFailedToRespond" class="failed-login-message">
+    <span class="pull-left"><i class="helion-icon helion-icon-Critical_L"></i></span>
+    <div translate>
+      The authentication server failed to respond. Please try again. If this error persists, please contact the administrator.
     </div>
   </div>
 </form>
