@@ -42,9 +42,8 @@ login-page {
   }
 
   .hpe-logo {
-    display: block;
-    padding: 3em 1em;
-    max-width: 200px;
+    flex: 0 0 auto;
+    padding: 0 1em 1em;
   }
 
   .introduction {
@@ -52,19 +51,17 @@ login-page {
     color: white;
   }
 
-  .login-form-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-  }
-
   .login-panel {
     display: flex;
     flex-direction: column;
     background-color: white;
     height: 100vh;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: space-between;
     border-left: 1px solid black;
+    overflow-y: auto;
+    padding: 0;
   }
 
   @media (min-width: $screen-sm-min) {
@@ -103,6 +100,7 @@ login-page {
     position: fixed;
     top: 50%;
     transform: translateY(-50%);
+    z-index: 2;
 
     ul {
       position: absolute;

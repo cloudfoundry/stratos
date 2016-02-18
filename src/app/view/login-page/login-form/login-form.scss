@@ -1,29 +1,33 @@
-.login-form {
-  display: block;
-  max-width: 350px;
-  padding-top: 40px;
+login-form, [login-form] {
+  width: 100%;
+  margin-bottom: 10px;
+  z-index: 2;
 
-  button {
-    margin-top: 40px;
-    width: 200px;
+  @media (min-height: 600px) {
+    margin-top: 100px;
   }
 
-  .failed-login-message {
-    background-color: $carnation;
-    color: $white;
-    margin: 40px 0px;
-    padding: 40px;
-    position: absolute;
-    bottom: -40px;
-    right: 0;
-    width: 100%;
-    div {
-      margin-left: 40px
+  .login-error {
+    margin-top: 20px;
+  }
+
+  .login-form {
+    display: block;
+    max-width: 350px;
+    padding: 15px;
+
+    button {
+      margin-top: 40px;
+      width: 200px;
     }
-  }
 
-  .helion-icon-View.form-control-feedback {
-    cursor: pointer;
-    pointer-events: auto;
+    .form-group:first-of-type {
+      margin-top: 40px;
+    }
+
+    .helion-icon-View.form-control-feedback {
+      cursor: pointer;
+      pointer-events: auto;
+    }
   }
 }
