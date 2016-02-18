@@ -44,7 +44,10 @@
     this.eventService.$on(this.eventService.events.LOGIN_FAILED, function () {
       that.clearPassword();
     });
-    this.eventService.$on(this.eventService.events.HTTP_500, function () {
+    this.eventService.$on(this.eventService.events.HTTP_5XX_ON_LOGIN, function () {
+      that.clearPassword();
+    });
+    this.eventService.$on(this.eventService.events['HTTP_-1'], function () {
       that.clearPassword();
     });
   }

@@ -52,6 +52,18 @@
         expect($controller.clearPassword).toHaveBeenCalled();
       });
 
+      it('`clearPassword` should called when events.HTTP_5XX_ON_LOGIN triggered', function () {
+        spyOn($controller, 'clearPassword');
+        $controller.eventService.$emit($controller.eventService.events.HTTP_5XX_ON_LOGIN);
+        expect($controller.clearPassword).toHaveBeenCalled();
+      });
+
+      it('`clearPassword` should called when events[\'HTTP_-1\'] triggered', function () {
+        spyOn($controller, 'clearPassword');
+        $controller.eventService.$emit($controller.eventService.events['HTTP_-1']);
+        expect($controller.clearPassword).toHaveBeenCalled();
+      });
+
       it('should allow toggling of password in plain text', function () {
         $controller.showHidePassword();
         expect($controller.showPassword).toBe(true);

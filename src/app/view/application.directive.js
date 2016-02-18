@@ -51,6 +51,7 @@
     this.loggedIn = false;
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
+    this.serverFailedToRespond = false;
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -90,6 +91,7 @@
       this.loggedIn = true;
       this.failedLogin = false;
       this.serverErrorOnLogin = false;
+      this.serverFailedToRespond = false;
     },
 
     /**
@@ -103,13 +105,21 @@
      * @returns {void}
      */
     onLoginFailed: function (response) {
-      // handle 5xx errors when attempting to login
-      if (response.status >= 500) {
-        this.eventService.$emit(this.eventService.events.HTTP_500);
+      if (response.status === -1) {
+        // handle the case when the server never responds
+        this.serverFailedToRespond = true;
+        this.serverErrorOnLogin = false;
+        this.failedLogin = false;
+      } else if (response.status >= 500 && response.status < 600) {
+        // handle 5xx errors when attempting to login
+        this.eventService.$emit(this.eventService.events.HTTP_5XX_ON_LOGIN);
+        this.serverFailedToRespond = false;
         this.serverErrorOnLogin = true;
         this.failedLogin = false;
       } else {
+        // general authentication failed
         this.eventService.$emit(this.eventService.events.LOGIN_FAILED);
+        this.serverFailedToRespond = false;
         this.serverErrorOnLogin = false;
         this.failedLogin = true;
       }
