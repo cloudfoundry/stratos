@@ -3,7 +3,7 @@
 
   angular
     .module('cloud-foundry.api')
-    .variable('cloud-foundry.api.collectionBase', CollectionBase);
+    .constant('cloud-foundry.api.collectionBase', CollectionBase);
 
   CollectionBase.$inject = [];
 
@@ -13,6 +13,6 @@
 
   angular.extend(CollectionBase.prototype, {
     //...
-  })
+  });
 
 })();
