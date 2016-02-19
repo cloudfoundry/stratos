@@ -5,8 +5,7 @@
     .module('cloud-foundry.api')
     .constant('cloud-foundry.api.collectionBase', CollectionBase);
 
-  CollectionBase.$inject = [];
-
+  
   function CollectionBase(foo) {
     this.foo = foo;
   }
