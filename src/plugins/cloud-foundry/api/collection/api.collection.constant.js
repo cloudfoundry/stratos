@@ -5,12 +5,11 @@
     .module('cloud-foundry.api')
     .constant('cloud-foundry.api.collectionBase', CollectionBase);
 
-  var CollectionBase = function() {
-      this.foo = "bar";
-  };
+
+  function CollectionBase() {}
 
   angular.extend(CollectionBase.prototype, {
-    hello: function(name) {
+    hello: function (name) {
       console.log("Hello '" + name + "'!");
     }
   });
