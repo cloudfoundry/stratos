@@ -8,7 +8,7 @@
    * @description Cloud Foundry v2 API
    */
   angular
-    .module('cloud-foundry.api')
+    .module('cloud-foundry.api', [])
     .run(registerCFApi);
 
   registerCFApi.$inject = [
