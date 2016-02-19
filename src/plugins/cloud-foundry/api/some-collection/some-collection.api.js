@@ -5,7 +5,7 @@
     .module('cloud-foundry.api')
     .run(registerSomeCollectionApi);
 
-  registerAccountApi.$inject = [
+  registerSomeCollectionApi.$inject = [
     '$http',
     'app.api.apiManager',
     'cloud-foundry.api.collectionBase'
