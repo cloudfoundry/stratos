@@ -70,7 +70,7 @@
         .login(username, password)
         .then(
           function () {
-            that.onLoggedIn();
+            that.onLoggedIn(true);
           },
           function (response) {
             that.onLoginFailed(response);
@@ -86,8 +86,12 @@
      * @private
      * @returns {void}
      */
-    onLoggedIn: function () {
-      this.eventService.$emit(this.eventService.events.LOGGED_IN);
+    onLoggedIn: function (firstTime) {
+      if (firstTime) {
+        this.eventService.$emit(this.eventService.events.AUTO_NAV, 'service-registration');
+      } else {
+        this.eventService.$emit(this.eventService.events.LOGGED_IN);
+      }
       this.loggedIn = true;
       this.failedLogin = false;
       this.serverErrorOnLogin = false;

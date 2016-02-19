@@ -1,0 +1,53 @@
+<div ng-controller="serviceRegistrationController as serviceRegistrationCtrl">
+  <div class="container">
+    <div class="row">
+      <h2 class="page-header" translate>
+        Select Service to Register
+        <span class="helion-icon helion-icon-Help pull-right"></span>
+      </h2>
+      <p translate>
+        Before you get started with Stratos, you will have to register into
+        services to see what apps you have access to.
+      </p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th translate>Name</th>
+            <th translate>URL</th>
+            <th translate>User Account</th>
+            <th class="text-center" translate>Status</th>
+            <th class="registered-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="service in serviceRegistrationCtrl.services">
+            <td>{{service.name}}</td>
+            <td>{{service.url}}</td>
+            <td>{{service.userAccount}}</td>
+            <td class="text-center">
+              <span ng-bind-html="service.status | serviceStatus"></span>
+            </td>
+            <td class="text-right">
+              <a class="btn btn-link btn-sm" ng-if="!service.credentialsValid"
+                ng-click="serviceRegistrationCtrl.enterCredentials(service)" translate>Enter Credentials</a>
+              <a class="btn btn-link btn-sm" ng-if="service.credentialsValid"
+                ng-click="serviceRegistrationCtrl.revoke(service)" translate>Revoke</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="fixed-footer">
+    <span class="registered-notification" ng-if="serviceRegistrationCtrl.servicesRegistered > 0"
+      translate-n="serviceRegistrationCtrl.servicesRegistered"
+      translate-plural="{{serviceRegistrationCtrl.servicesRegistered}} clusters registered">
+      {{serviceRegistrationCtrl.servicesRegistered}} cluster registered
+    </span>
+    <button type="button" class="btn btn-default"
+      ng-disabled="serviceRegistrationCtrl.servicesRegistered === 0"
+      ng-click="serviceRegistrationCtrl.completeRegistration()" translate>
+      Next
+    </button>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+service-registration, [service-registration] {
+  display: block;
+  padding-top: 50px;
+  padding-bottom: 80px;
+
+  .registered-actions {
+    min-width: 200px;
+  }
+
+  .registered-notification {
+    margin-right: 20px;
+    text-transform: uppercase;
+  }
+
+  .table > tbody > tr > td {
+    vertical-align: middle;
+  }
+}
