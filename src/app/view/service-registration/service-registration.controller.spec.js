@@ -2,7 +2,7 @@
   'use strict';
 
   describe('service registration controller', function () {
-    var eventService, modelManager, ctrl;
+    var ctrl;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));

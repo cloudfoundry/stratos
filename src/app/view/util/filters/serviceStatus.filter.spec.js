@@ -4,7 +4,7 @@
   describe('serviceStatus filter', function () {
     var serviceStatusFilter;
 
-    beforeEach(module('app.view'));
+    beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       serviceStatusFilter = $injector.get('serviceStatusFilter');
     }));
