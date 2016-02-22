@@ -83,6 +83,7 @@
      * @function onLoggedIn
      * @memberof app.view.application.ApplicationController
      * @description Logged-in event handler
+     * @param {boolean} firstTimeLogin - flag for user logging in for the first time
      * @emits LOGGED_IN
      * @private
      * @returns {void}

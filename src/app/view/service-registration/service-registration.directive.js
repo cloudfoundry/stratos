@@ -1,12 +1,20 @@
 (function () {
-  'use strict'
+  'use strict';
 
   angular
     .module('app.view')
-    .directive('serviceRegistration', serviceRegistration)
+    .directive('serviceRegistration', serviceRegistration);
 
   serviceRegistration.$inject = ['app.basePath'];
 
+  /**
+   * @namespace app.view.serviceRegistration
+   * @memberof app.view
+   * @name serviceRegistration
+   * @description A service-registration directive
+   * @param {string} path - the application base path
+   * @returns {object} The service-registration directive definition object
+   */
   function serviceRegistration(path) {
     return {
       bindToController: {
@@ -33,6 +41,7 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.model.account} account - the account model
    * @property {app.event.eventService} eventService - the application event bus
+   * @property {boolean} showRegistration - flag to show or hide this component
    * @property {number} servicesRegistered - the count of valid clusters/services registered
    * @property {array} services - the clusters/services available for registration
    */
