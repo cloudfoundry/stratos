@@ -20,7 +20,7 @@ module.exports = function (config) {
 
       'config.js',
 
-      'lib/helion-ui-framework/**/!(*.mock).html',
+      'lib/helion-ui-framework/dist/**/*.html',
       {
         pattern: 'lib/helion-ui-theme/dist/images/*.png',
         watched: false,
@@ -40,6 +40,7 @@ module.exports = function (config) {
     frameworks: ['wiredep', 'jasmine'],
 
     ngHtml2JsPreprocessor: {
+      stripPrefix: 'lib/helion-ui-framework/dist/',
       moduleName: 'templates'
     },
 
@@ -58,6 +59,7 @@ module.exports = function (config) {
     ],
 
     preprocessors: {
+      'lib/helion-ui-framework/dist/**/*.html': ['ng-html2js'],
       'app/**/*.html': ['ng-html2js'],
       'app/**/!(*.mock|*.spec).js': ['coverage']
     },
