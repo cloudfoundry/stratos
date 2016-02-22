@@ -1,9 +1,23 @@
 (function () {
-  'use strict';
+  'use strict'
 
   angular
-    .module('app.view.service-registration')
-    .controller('serviceRegistrationController', ServiceRegistrationController);
+    .module('app.view')
+    .directive('serviceRegistration', serviceRegistration)
+
+  serviceRegistration.$inject = ['app.basePath'];
+
+  function serviceRegistration(path) {
+    return {
+      bindToController: {
+        showRegistration: '='
+      },
+      controller: ServiceRegistrationController,
+      controllerAs: 'serviceRegistrationCtrl',
+      scope: {},
+      templateUrl: path + 'view/service-registration/service-registration.html'
+    };
+  }
 
   ServiceRegistrationController.$inject = [
     'app.event.eventService',
@@ -25,6 +39,7 @@
   function ServiceRegistrationController(eventService, modelManager) {
     this.account = modelManager.retrieve('app.model.account');
     this.eventService = eventService;
+    this.showRegistration = false;
 
     // TODO: hardcoding services for now until backend is ready
     this.servicesRegistered = 0;
@@ -38,7 +53,7 @@
   // Mock out the enter credentials and revoke actions
   angular.extend(ServiceRegistrationController.prototype, {
     completeRegistration: function () {
-      this.eventService.$emit(this.eventService.events.LOGGED_IN);
+      this.showRegistration = false;
     },
     enterCredentials: function (service) {
       service.credentialsValid = true;

@@ -1,6 +1,12 @@
-<div class="service-registration"
-  ng-controller="serviceRegistrationController as serviceRegistrationCtrl">
-  <div class="container">
+<div class="service-registration" ng-if="serviceRegistrationCtrl.showRegistration">
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#" translate>HPE Helion Stratos</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container registration-content">
     <div class="row">
       <h2 class="page-header" translate>
         Select Service to Register
@@ -17,7 +23,7 @@
             <th translate>URL</th>
             <th translate>User Account</th>
             <th class="text-center" translate>Status</th>
-            <th class="registered-actions"></th>
+            <th class="registration-actions"></th>
           </tr>
         </thead>
         <tbody>
@@ -40,7 +46,7 @@
     </div>
   </div>
   <div class="fixed-footer">
-    <span class="registered-notification" ng-if="serviceRegistrationCtrl.servicesRegistered > 0"
+    <span class="registration-notification" ng-if="serviceRegistrationCtrl.servicesRegistered > 0"
       translate-n="serviceRegistrationCtrl.servicesRegistered"
       translate-plural="{{serviceRegistrationCtrl.servicesRegistered}} clusters registered">
       {{serviceRegistrationCtrl.servicesRegistered}} cluster registered

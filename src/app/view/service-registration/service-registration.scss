@@ -1,13 +1,21 @@
 .service-registration {
+  background-color: $body-bg;
   display: block;
-  padding-top: 50px;
-  padding-bottom: 80px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 
-  .registered-actions {
+  .registration-actions {
     min-width: 200px;
   }
 
-  .registered-notification {
+  .registration-content {
+    padding: 50px 40px 80px;
+  }
+
+  .registration-notification {
     margin-right: 20px;
     text-transform: uppercase;
   }

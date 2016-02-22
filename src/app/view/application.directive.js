@@ -52,6 +52,7 @@
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
     this.serverFailedToRespond = false;
+    this.showRegistration = false;
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -86,16 +87,13 @@
      * @private
      * @returns {void}
      */
-    onLoggedIn: function (firstTime) {
-      if (firstTime) {
-        this.eventService.$emit(this.eventService.events.AUTO_NAV, 'service-registration');
-      } else {
-        this.eventService.$emit(this.eventService.events.LOGGED_IN);
-      }
+    onLoggedIn: function (firstTimeLogin) {
+      this.eventService.$emit(this.eventService.events.LOGGED_IN);
       this.loggedIn = true;
       this.failedLogin = false;
       this.serverErrorOnLogin = false;
       this.serverFailedToRespond = false;
+      this.showRegistration = firstTimeLogin;
     },
 
     /**
@@ -157,6 +155,7 @@
     onLoggedOut: function () {
       this.eventService.$emit(this.eventService.events.LOGGED_OUT);
       this.loggedIn = false;
+      this.showRegistration = false;
     }
   });
 

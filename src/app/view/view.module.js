@@ -9,8 +9,6 @@
    * the Angular directives and controllers
    */
   angular
-    .module('app.view', [
-      'app.view.service-registration'
-    ]);
+    .module('app.view', []);
 
 })();
