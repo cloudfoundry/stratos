@@ -18,7 +18,7 @@
   function serviceRegistration(path) {
     return {
       bindToController: {
-        showRegistration: '='
+        showOverlayRegistration: '=?'
       },
       controller: ServiceRegistrationController,
       controllerAs: 'serviceRegistrationCtrl',
@@ -48,7 +48,7 @@
   function ServiceRegistrationController(eventService, modelManager) {
     this.account = modelManager.retrieve('app.model.account');
     this.eventService = eventService;
-    this.showRegistration = false;
+    this.overlay = angular.isDefined(this.showOverlayRegistration);
 
     // TODO: hardcoding services for now until backend is ready
     this.servicesRegistered = 0;
@@ -62,7 +62,7 @@
   // Mock out the enter credentials and revoke actions
   angular.extend(ServiceRegistrationController.prototype, {
     completeRegistration: function () {
-      this.showRegistration = false;
+      this.showOverlayRegistration = false;
     },
     enterCredentials: function (service) {
       service.credentialsValid = true;

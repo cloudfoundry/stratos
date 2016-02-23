@@ -1,60 +1,106 @@
 (function () {
   'use strict';
 
-  describe('service registration controller', function () {
-    var $scope, $element, $controller;
+  describe('service-registration directive', function () {
+    var $compile, $scope;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
-      var $compile = $injector.get('$compile');
+      $compile = $injector.get('$compile');
       $scope = $injector.get('$rootScope').$new();
       $scope.showRegistration = false;
-
-      var markup = '<service-registration show-registration="showRegistration"><service-registration/>';
-
-      $element = angular.element(markup);
-      $compile($element)($scope);
-
-      $scope.$apply();
-
-      $controller = $element.controller('serviceRegistration');
     }));
 
-    it('should be defined', function () {
-      expect($element).toBeDefined();
+    describe('without overlay', function () {
+      var $element, $controller;
+
+      beforeEach(function () {
+        var markup = '<service-registration><service-registration/>';
+
+        $element = angular.element(markup);
+        $compile($element)($scope);
+
+        $scope.$apply();
+
+        $controller = $element.controller('serviceRegistration');
+      });
+
+      it('should be defined', function () {
+        expect($element).toBeDefined();
+      });
+
+      it('should have `account` property defined', function () {
+        expect($controller.account).toBeDefined();
+      });
+
+      it('should have `eventService` property defined', function () {
+        expect($controller.eventService).toBeDefined();
+      });
+
+      it('should have `overlay` property initially set to true', function () {
+        expect($controller.overlay).toBe(false);
+      });
+
+      it('should have undefined `showOverlayRegistration` property', function () {
+        expect($controller.showOverlayRegistration).toBeUndefined();
+      });
     });
 
-    it('should have `account` property defined', function () {
-      expect($controller.account).toBeDefined();
-    });
+    describe('with overlay', function () {
+      var $element, $controller;
 
-    it('should have `eventService` property defined', function () {
-      expect($controller.eventService).toBeDefined();
-    });
+      beforeEach(function () {
+        var markup = '<service-registration show-overlay-registration="showRegistration">' +
+                     '<service-registration/>';
 
-    it('should have `showRegistration` property initially set to false', function () {
-      expect($controller.showRegistration).toBe(false);
-    });
+        $element = angular.element(markup);
+        $compile($element)($scope);
 
-    it('should show service-registration component when showRegistration === true', function () {
-      $scope.showRegistration = true;
-      $scope.$apply();
+        $scope.$apply();
 
-      expect($controller.showRegistration).toBe(true);
-      expect($element.find('div').length).toBeGreaterThan(0);
-    });
+        $controller = $element.controller('serviceRegistration');
+      });
 
-    it('should hide service-registration component when registration completed', function () {
-      $scope.showRegistration = true;
-      $scope.$apply();
+      it('should be defined', function () {
+        expect($element).toBeDefined();
+      });
 
-      $controller.completeRegistration();
-      $scope.$apply();
+      it('should have `account` property defined', function () {
+        expect($controller.account).toBeDefined();
+      });
 
-      expect($controller.showRegistration).toBe(false);
-      expect($element.find('div').length).toBe(0);
+      it('should have `eventService` property defined', function () {
+        expect($controller.eventService).toBeDefined();
+      });
+
+      it('should have `overlay` property initially set to true', function () {
+        expect($controller.overlay).toBe(true);
+      });
+
+      it('should have `showOverlayRegistration` property initially set to false', function () {
+        expect($controller.showOverlayRegistration).toBe(false);
+      });
+
+      it('should show service-registration component when showRegistration === true', function () {
+        $scope.showRegistration = true;
+        $scope.$apply();
+
+        expect($controller.showOverlayRegistration).toBe(true);
+        expect($element.find('div').length).toBeGreaterThan(0);
+      });
+
+      it('should hide service-registration component when registration completed', function () {
+        $scope.showRegistration = true;
+        $scope.$apply();
+
+        $controller.completeRegistration();
+        $scope.$apply();
+
+        expect($controller.showOverlayRegistration).toBe(false);
+        expect($element.find('div').length).toBe(0);
+      });
     });
   });
 

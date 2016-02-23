@@ -1,5 +1,6 @@
-<div class="service-registration" ng-if="serviceRegistrationCtrl.showRegistration">
-  <nav class="navbar navbar-inverse navbar-fixed-top">
+<div class="service-registration" ng-class="{'overlay-position': serviceRegistrationCtrl.overlay}"
+  ng-if="!serviceRegistrationCtrl.overlay || serviceRegistrationCtrl.showOverlayRegistration">
+  <nav class="navbar navbar-inverse navbar-fixed-top" ng-if="serviceRegistrationCtrl.overlay">
     <div class="container-fluid">
       <div class="navbar-header">
         <a class="navbar-brand" href="#" translate>HPE Helion Stratos</a>
@@ -45,7 +46,7 @@
       </table>
     </div>
   </div>
-  <div class="fixed-footer">
+  <div class="fixed-footer" ng-if="serviceRegistrationCtrl.overlay">
     <span class="registration-notification" ng-if="serviceRegistrationCtrl.servicesRegistered > 0"
       translate-n="serviceRegistrationCtrl.servicesRegistered"
       translate-plural="{{serviceRegistrationCtrl.servicesRegistered}} clusters registered">
@@ -54,7 +55,7 @@
     <button type="button" class="btn btn-default"
       ng-disabled="serviceRegistrationCtrl.servicesRegistered === 0"
       ng-click="serviceRegistrationCtrl.completeRegistration()" translate>
-      Next
+      Done
     </button>
   </div>
 </div>
