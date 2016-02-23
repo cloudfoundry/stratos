@@ -1,2 +1,12 @@
 @import "login-page/login-page";
 @import "console-view/console-view";
+@import "service-registration/service-registration";
+
+.overlay-position {
+  background-color: $body-bg;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+}

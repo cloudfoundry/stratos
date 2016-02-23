@@ -43,6 +43,7 @@
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
+   * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
   function ApplicationController(eventService, modelManager) {
@@ -52,6 +53,7 @@
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
     this.serverFailedToRespond = false;
+    this.showRegistration = false;
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -70,7 +72,7 @@
         .login(username, password)
         .then(
           function () {
-            that.onLoggedIn();
+            that.onLoggedIn(true);
           },
           function (response) {
             that.onLoginFailed(response);
@@ -82,16 +84,18 @@
      * @function onLoggedIn
      * @memberof app.view.application.ApplicationController
      * @description Logged-in event handler
+     * @param {boolean} firstTimeLogin - flag for user logging in for the first time
      * @emits LOGGED_IN
      * @private
      * @returns {void}
      */
-    onLoggedIn: function () {
+    onLoggedIn: function (firstTimeLogin) {
       this.eventService.$emit(this.eventService.events.LOGGED_IN);
       this.loggedIn = true;
       this.failedLogin = false;
       this.serverErrorOnLogin = false;
       this.serverFailedToRespond = false;
+      this.showRegistration = firstTimeLogin;
     },
 
     /**
@@ -153,6 +157,7 @@
     onLoggedOut: function () {
       this.eventService.$emit(this.eventService.events.LOGGED_OUT);
       this.loggedIn = false;
+      this.showRegistration = false;
     }
   });
 
