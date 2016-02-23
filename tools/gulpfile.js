@@ -4,6 +4,7 @@ var concat = require('gulp-concat-util'),
   del = require('del'),
   eslint = require('gulp-eslint'),
   file = require('gulp-file'),
+  gettext = require('gulp-angular-gettext'),
   gulp = require('gulp'),
   gulpif = require('gulp-if'),
   gulpinject = require('gulp-inject'),
@@ -60,6 +61,13 @@ gulp.task('copy:lib', function () {
     .pipe(gulp.dest(paths.dist + 'lib/'));
 });
 
+// Copy 'translations' folder to 'dist'
+gulp.task('copy:translations', function () {
+  return gulp
+    .src(config.translate.json + '**/*')
+    .pipe(gulp.dest(config.translate.dist));
+});
+
 // Compile SCSS to CSS
 gulp.task('css', function () {
   return gulp
@@ -75,9 +83,9 @@ gulp.task('css', function () {
 });
 
 // Inject JavaScript and SCSS source file references in index.html
-gulp.task('inject:index', [ 'copy:index' ], function () {
+gulp.task('inject:index', ['copy:index'], function () {
   var sources = gulp.src(
-    [ paths.dist + 'config.js' ]
+    [paths.dist + 'config.js']
     .concat(jsLibs)
     .concat(plugins)
     .concat(jsFiles)
@@ -113,7 +121,7 @@ gulp.task('lint', function () {
 });
 
 // Generate .plugin.scss file and copy to 'dist'
-gulp.task('plugin', function() {
+gulp.task('plugin', function () {
   var CMD = 'cd ../src/plugins && ls */*.scss';
   var pluginsScssFiles = sh.exec(CMD, { silent: true })
     .output
@@ -127,12 +135,29 @@ gulp.task('plugin', function() {
     .pipe(gulp.dest(paths.src + 'plugins'));
 });
 
+// Generate the POT file to be translated
+gulp.task('translate:extract', function () {
+  var sources = config.partials
+    .concat(config.jsSourceFiles);
+
+  return gulp.src(sources)
+    .pipe(gettext.extract(config.translate.pot))
+    .pipe(gulp.dest(config.paths.translations));
+});
+
+// Convert translated PO files into JSON format
+gulp.task('translate:compile', function () {
+  return gulp.src(config.translate.po)
+    .pipe(gettext.compile(config.translate.options))
+    .pipe(gulp.dest(config.translate.js));
+});
+
 // Gulp watch JavaScript, SCSS and HTML source files
 gulp.task('watch', function () {
-  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, [ 'copy:js' ]);
-  gulp.watch(scssFiles, [ 'css' ]);
-  gulp.watch(partials, [ 'copy:html' ]);
-  gulp.watch(paths.src + 'index.html', [ 'inject:index' ]);
+  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, ['copy:js']);
+  gulp.watch(scssFiles, ['css']);
+  gulp.watch(partials, ['copy:html']);
+  gulp.watch(paths.src + 'index.html', ['inject:index']);
 });
 
 gulp.task('default', function (next) {
