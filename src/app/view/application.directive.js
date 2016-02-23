@@ -43,6 +43,7 @@
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
+   * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
   function ApplicationController(eventService, modelManager) {
