@@ -29,5 +29,17 @@ login-form, [login-form] {
       cursor: pointer;
       pointer-events: auto;
     }
+
+    .login-form-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+
+      .spinner-notification {
+        margin-right: 20px;
+        text-transform: uppercase;
+      }
+    }
   }
 }

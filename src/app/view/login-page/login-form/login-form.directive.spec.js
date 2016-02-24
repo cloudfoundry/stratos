@@ -42,10 +42,6 @@
         expect($controller.eventService).toBeDefined();
       });
 
-      it('should not show password in plain text by default', function () {
-        expect($controller.showPassword).toBe(false);
-      });
-
       it('`clearPassword` should called when events.LOGIN_FAILED triggered', function () {
         spyOn($controller, 'clearPassword');
         $controller.eventService.$emit($controller.eventService.events.LOGIN_FAILED);
@@ -62,14 +58,6 @@
         spyOn($controller, 'clearPassword');
         $controller.eventService.$emit($controller.eventService.events['HTTP_-1']);
         expect($controller.clearPassword).toHaveBeenCalled();
-      });
-
-      it('should allow toggling of password in plain text', function () {
-        $controller.showHidePassword();
-        expect($controller.showPassword).toBe(true);
-
-        $controller.showHidePassword();
-        expect($controller.showPassword).toBe(false);
       });
     });
   });
