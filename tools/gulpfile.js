@@ -85,8 +85,7 @@ gulp.task('css', function () {
 // Inject JavaScript and SCSS source file references in index.html
 gulp.task('inject:index', ['copy:index'], function () {
   var sources = gulp.src(
-    [paths.dist + 'config.js']
-    .concat(jsLibs)
+    jsLibs
     .concat(plugins)
     .concat(jsFiles)
     .concat(cssFiles), { read: false });
