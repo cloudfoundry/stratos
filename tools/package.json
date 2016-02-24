@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "gate-check": "npm test && gulp lint",
-    "test": "karma start karma.conf.js --single-run"
+    "gate-check": "gulp lint && npm test",
+    "pretest": "npm run update-webdriver",
+    "test": "karma start karma.conf.js --single-run",
+    "update-webdriver": "webdriver-manager update"
   },
   "author": "",
   "license": "ISC",
