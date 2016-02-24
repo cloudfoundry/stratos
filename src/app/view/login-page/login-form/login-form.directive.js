@@ -87,6 +87,7 @@
     login: function () {
       var that = this;
 
+      // use timeout to prevent flashing of spinner with fast logins
       this.loginTimeout = this.$timeout(function () {
         that.loggingIn = true;
       }, 500);
