@@ -85,12 +85,12 @@
      * @memberof app.view.application.ApplicationController
      * @description Logged-in event handler
      * @param {boolean} firstTimeLogin - flag for user logging in for the first time
-     * @emits LOGGED_IN
+     * @emits LOGIN
      * @private
      * @returns {void}
      */
     onLoggedIn: function (firstTimeLogin) {
-      this.eventService.$emit(this.eventService.events.LOGGED_IN);
+      this.eventService.$emit(this.eventService.events.LOGIN);
       this.loggedIn = true;
       this.failedLogin = false;
       this.serverErrorOnLogin = false;
@@ -150,12 +150,12 @@
      * @function onLoggedOut
      * @memberof app.view.application.ApplicationController
      * @description Logged-out event handler
-     * @emits LOGGED_OUT
+     * @emits LOGOUT
      * @private
      * @returns {void}
      */
     onLoggedOut: function () {
-      this.eventService.$emit(this.eventService.events.LOGGED_OUT);
+      this.eventService.$emit(this.eventService.events.LOGOUT);
       this.loggedIn = false;
       this.showRegistration = false;
     }

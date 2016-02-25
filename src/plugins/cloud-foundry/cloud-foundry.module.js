@@ -23,10 +23,10 @@
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
-    this.eventService.$on(this.eventService.events.LOGGED_IN, function () {
+    this.eventService.$on(this.eventService.events.LOGIN, function () {
       that.onLoggedIn();
     });
-    this.eventService.$on(this.eventService.events.LOGGED_OUT, function () {
+    this.eventService.$on(this.eventService.events.LOGOUT, function () {
       that.onLoggedOut();
     });
   }
