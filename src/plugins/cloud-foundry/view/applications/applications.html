@@ -1,1 +1,5 @@
 <h4>Applications</h4>
+
+<div ng-repeat="app in AppsCtrl.apps.resources track by app.metadata.guid">
+  {{app.entity.name}} : {{app.metadata.guid}}
+</div>

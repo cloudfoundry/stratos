@@ -8,10 +8,11 @@
   registerCFApi.$inject = [
     '$http',
     'app.api.apiManager',
-    'cloud-foundry.api.collectionService'
+    'cloud-foundry.api.collectionService',
+    'cloud-foundry.api.appsService'
   ];
 
-  function registerCFApi($http, apiManager, CollectionService) {
+  function registerCFApi($http, apiManager, CollectionService, AppsAPI) {
 
     /*
      Generic CF resources that follow the standard pattern with no unique functionality.
@@ -34,6 +35,7 @@
     function CFApi($http) {
       this.$http = $http;
       CFApiInitializeCollections(this);
+      apiManager.register('cloud-foundry.api.apps', new AppsAPI(this, $http, CollectionService));
     }
 
     angular.extend(CFApi.prototype, {
