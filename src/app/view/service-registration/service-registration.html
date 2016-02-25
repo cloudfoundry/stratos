@@ -10,7 +10,7 @@
   <div class="container registration-content">
     <div class="row">
       <h2 class="page-header" translate>
-        Select Service to Register
+        Setup your Stratos Account
         <span class="helion-icon helion-icon-Help pull-right"></span>
       </h2>
       <p translate>
@@ -23,7 +23,7 @@
             <th translate>Name</th>
             <th translate>URL</th>
             <th translate>User Account</th>
-            <th class="text-center" translate>Status</th>
+            <th class="text-center" translate>Registered</th>
             <th class="registration-actions"></th>
           </tr>
         </thead>
@@ -33,11 +33,12 @@
             <td>{{service.url}}</td>
             <td>{{service.username}}</td>
             <td class="text-center">
-              <span ng-bind-html="service.status | serviceStatus"></span>
+              <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+                ng-show="service.registered"></span>
             </td>
             <td class="text-right">
               <a class="btn btn-link btn-sm" ng-if="!service.credentialsValid"
-                ng-click="serviceRegistrationCtrl.enterCredentials(service)" translate>Enter Credentials</a>
+                ng-click="serviceRegistrationCtrl.enterCredentials(service)" translate>Provide Credentials</a>
               <a class="btn btn-link btn-sm" ng-if="service.credentialsValid"
                 ng-click="serviceRegistrationCtrl.revoke(service)" translate>Revoke</a>
             </td>

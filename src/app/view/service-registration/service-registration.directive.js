@@ -65,6 +65,7 @@
   angular.extend(ServiceRegistrationController.prototype, {
     closeFlyout: function () {
       this.showFlyout = false;
+      this.activeService = null;
       this.servicesRegistered = countRegistered(this.services);
     },
     completeRegistration: function () {
@@ -75,8 +76,7 @@
       this.showFlyout = true;
     },
     revoke: function (service) {
-      service.credentialsValid = false;
-      service.status = undefined;
+      service.registered = false;
       service.username = '';
       service.password = '';
       this.servicesRegistered = countRegistered(this.services);
@@ -86,7 +86,7 @@
   function countRegistered(services) {
     return _.reduce(services,
       function (sum, obj) {
-        if (obj.credentialsValid) {
+        if (obj.registered) {
           sum += 1;
         }
         return sum;
