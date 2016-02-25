@@ -66,12 +66,12 @@
     },
     enterCredentials: function (service) {
       service.credentialsValid = true;
-      service.status = 'OK';
+      service.registered = true;
       this.servicesRegistered = countRegistered(this.services);
     },
     revoke: function (service) {
       service.credentialsValid = false;
-      service.status = undefined;
+      service.registered = false;
       this.servicesRegistered = countRegistered(this.services);
     }
   });
