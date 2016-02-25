@@ -11,7 +11,7 @@
 
   function CollectionServiceFactory(apiManager) {
 
-    var apiVersionPrefix = '/v2/';
+    var apiVersionPrefix = '/api/cf/v2/';
 
     function makeQueryString(options) {
       options = options || {};
