@@ -50,6 +50,8 @@ docker build -t stratos-node-server .
 docker run -it \
            --rm --name stratos-node-server \
            --link stratosidentitydb_db_1:db \
+           --link mock-auth-service:auth_service \
+           --link mock-api-service:cf_service \
            -v $(pwd):/usr/src/app \
            -p 3000:3000 \
            -e MYSQL_ROOT_PASSWORD=stratos \
