@@ -70,7 +70,7 @@
     this.serverErrorOnRegister = false;
     this.serverFailedToRespond = false;
 
-    $scope.$watch(function watchService() {
+    $scope.$watchCollection(function watchService() {
       return ctrl.service;
     }, function serviceChanged(newValue) {
       ctrl._data = angular.extend({}, newValue);
@@ -79,29 +79,29 @@
 
   angular.extend(CredentialsFormController.prototype, {
     cancel: function () {
-      this.reset();
+      delete this._data.username;
+      delete this._data.password;
+
       if (angular.isDefined(this.onCancel)) {
         this.onCancel();
       }
+
+      this.reset();
     },
     register: function () {
       this.authenticating = true;
 
       // mock authenticate credentials
-      this.service.credentialsValid = true;
-      this.service.status = 'OK';
-      angular.extend(this.service, this._data);
+      this._data.registered = true;
+      delete this._data.password;
+
+      if (angular.isDefined(this.onSubmit)) {
+        this.onSubmit({ data: this._data });
+      }
 
       this.reset();
-      if (angular.isDefined(this.onSubmit)) {
-        this.onSubmit();
-      }
     },
     reset: function () {
-      // clear username and password
-      this._data.username = '';
-      this._data.password = '';
-
       this.failedRegister = false;
       this.serverErrorOnRegister = false;
       this.serverFailedToRespond = false;

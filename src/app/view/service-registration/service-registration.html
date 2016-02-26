@@ -37,10 +37,10 @@
                 ng-show="service.registered"></span>
             </td>
             <td class="text-right">
-              <a class="btn btn-link btn-sm" ng-if="!service.credentialsValid"
+              <a class="btn btn-link btn-sm" ng-if="!service.registered"
                 ng-click="serviceRegistrationCtrl.enterCredentials(service)" translate>Provide Credentials</a>
-              <a class="btn btn-link btn-sm" ng-if="service.credentialsValid"
-                ng-click="serviceRegistrationCtrl.revoke(service)" translate>Revoke</a>
+              <a class="btn btn-link btn-sm" ng-if="service.registered"
+                ng-click="serviceRegistrationCtrl.unregister(service)" translate>Unregister</a>
             </td>
           </tr>
         </tbody>
@@ -62,7 +62,7 @@
   <flyout flyout-active="serviceRegistrationCtrl.showFlyout" flyout-close-icon="'helion-icon helion-icon-Close'">
     <credentials-form service="serviceRegistrationCtrl.activeService"
       on-cancel="serviceRegistrationCtrl.closeFlyout()"
-      on-submit="serviceRegistrationCtrl.closeFlyout()">
+      on-submit="serviceRegistrationCtrl.closeFlyout(data)">
     </credentials-form>
   </flyout>
 </div>

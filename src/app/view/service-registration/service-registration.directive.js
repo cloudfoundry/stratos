@@ -53,19 +53,23 @@
     // TODO: hardcoding services for now until backend is ready
     this.servicesRegistered = 0;
     this.services = [
-      { name: 'Helion_Cloud_foundry_01', url: 'api.15.126.233.28.xip.io' },
       { name: 'AWS', url: 'api.15.126.233.29.xip.io' },
-      { name: 'Github', url: 'api.15.126.233.30.xip.io' }
+      { name: 'Github', url: 'api.15.126.233.30.xip.io' },
+      { name: 'Helion_Cloud_foundry_01', url: 'api.15.126.233.28.xip.io' }
     ];
 
     this.showFlyout = false;
   }
 
-  // Mock out the enter credentials and revoke actions
+  // Mock out the enter credentials and unregister actions
   angular.extend(ServiceRegistrationController.prototype, {
-    closeFlyout: function () {
+    closeFlyout: function (serviceData) {
+      // update service data if new data available
+      if (angular.isDefined(serviceData)) {
+        angular.extend(this.activeService, serviceData);
+      }
+
       this.showFlyout = false;
-      this.activeService = null;
       this.servicesRegistered = countRegistered(this.services);
     },
     completeRegistration: function () {
@@ -75,10 +79,9 @@
       this.activeService = service;
       this.showFlyout = true;
     },
-    revoke: function (service) {
+    unregister: function (service) {
       service.registered = false;
-      service.username = '';
-      service.password = '';
+      delete service.username;
       this.servicesRegistered = countRegistered(this.services);
     }
   });
