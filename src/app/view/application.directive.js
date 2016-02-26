@@ -37,6 +37,7 @@
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
+   * @param {function} $timeout - angular $timeout service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.event.eventService} eventService - the event bus service
@@ -63,7 +64,13 @@
   }
 
   angular.extend(ApplicationController.prototype, {
-
+    /**
+     * @function verifySession
+     * @memberof app.view.application.ApplicationController
+     * @description verify session
+     * @public
+     * @returns {void}
+     */
     verifySession: function () {
       var that = this;
       this.modelManager.retrieve('app.model.account')
