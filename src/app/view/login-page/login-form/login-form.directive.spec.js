@@ -2,7 +2,7 @@
   'use strict';
 
   describe('login-form directive', function () {
-    var $element, $controller;
+    var $timeout, $element, $controller;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -18,6 +18,7 @@
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
       var $scope = $injector.get('$rootScope').$new();
+      $timeout = $injector.get('$timeout');
 
       var markup = '<login-form><login-form/>';
 
@@ -42,10 +43,6 @@
         expect($controller.eventService).toBeDefined();
       });
 
-      it('should not show password in plain text by default', function () {
-        expect($controller.showPassword).toBe(false);
-      });
-
       it('`clearPassword` should called when events.LOGIN_FAILED triggered', function () {
         spyOn($controller, 'clearPassword');
         $controller.eventService.$emit($controller.eventService.events.LOGIN_FAILED);
@@ -64,12 +61,19 @@
         expect($controller.clearPassword).toHaveBeenCalled();
       });
 
-      it('should allow toggling of password in plain text', function () {
-        $controller.showHidePassword();
-        expect($controller.showPassword).toBe(true);
+      it('should cancel loginTimeout and set loggingIn === false when clearPassword() is called', function () {
+        spyOn($controller.$timeout, 'cancel').and.callThrough();
 
-        $controller.showHidePassword();
-        expect($controller.showPassword).toBe(false);
+        $controller.clearPassword();
+        expect($controller.$timeout.cancel).toHaveBeenCalled();
+        expect($controller.loggingIn).toBe(false);
+      });
+
+      it('should set loggingIn === false in $timeout when login() called', function () {
+        $controller.login();
+        $timeout.flush();
+
+        expect($controller.loggingIn).toBe(true);
       });
     });
   });

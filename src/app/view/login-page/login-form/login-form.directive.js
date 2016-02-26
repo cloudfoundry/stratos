@@ -26,6 +26,7 @@
   }
 
   LoginFormController.$inject = [
+    '$timeout',
     'app.event.eventService'
   ];
 
@@ -34,13 +35,23 @@
    * @memberof app.view.loginForm
    * @name LoginFormController
    * @constructor
+   * @param {object} $timeout - the Angular $timeout service
    * @param {app.event.eventService} eventService - the event bus service
-   * @property {boolean} showPassword - show or hide password in plain text
+   * @property {object} $timeout - the Angular $timeout service
+   * @property {app.event.eventService} eventService - the event bus service
+   * @property {boolean} loggingIn - flag indicating app is still authenticating
+   * @property {object} loginTimeout - the promise returned by $timeout for loggingIn
    */
-  function LoginFormController(eventService) {
+  function LoginFormController($timeout, eventService) {
     var that = this;
+    this.$timeout = $timeout;
     this.eventService = eventService;
-    this.showPassword = false;
+    this.loggingIn = false;
+    this.loginTimeout = null;
+
+    this.eventService.$on(this.eventService.events.LOGGED_IN, function () {
+      that.loggingIn = false;
+    });
     this.eventService.$on(this.eventService.events.LOGIN_FAILED, function () {
       that.clearPassword();
     });
@@ -54,16 +65,6 @@
 
   angular.extend(LoginFormController.prototype, {
     /**
-     * @function showHidePassword
-     * @memberof app.view.loginForm.LoginFormController
-     * @description Toggle show or hide password in plain text
-     * @returns {void}
-     */
-    showHidePassword: function () {
-      this.showPassword = !this.showPassword;
-    },
-
-    /**
      * @function clearPassword
      * @memberof app.view.loginForm.LoginFormController
      * @description Clear the contents of the password field
@@ -71,6 +72,27 @@
      */
     clearPassword: function () {
       this.password = '';
+
+      this.$timeout.cancel(this.loginTimeout);
+      this.loggingIn = false;
+    },
+
+    /**
+     * @function login
+     * @memberof app.view.loginForm.LoginFormController
+     * @description Show spinner while still authenticating
+     * and continue to submit form
+     * @returns {boolean} - always true
+     */
+    login: function () {
+      var that = this;
+
+      // use timeout to prevent flashing of spinner with fast logins
+      this.loginTimeout = this.$timeout(function () {
+        that.loggingIn = true;
+      }, 500);
+
+      return true;
     }
   });
 

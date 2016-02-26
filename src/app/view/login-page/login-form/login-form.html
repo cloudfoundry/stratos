@@ -1,5 +1,5 @@
-<form class="form-stacked login-form center-block" ng-class="applicationCtrl.failedLogin ? 'failed-login' : ''" name="loginForm" role="form"
-  ng-submit="applicationCtrl.login(loginFormCtrl.username,loginFormCtrl.password)">
+<form name="loginForm" role="form" class="form-stacked login-form center-block"
+  ng-class="applicationCtrl.failedLogin ? 'failed-login' : ''">
   <h1 class="text-center" translate>HPE Helion Stratos</h1>
   <div class="form-group" focusable-input ng-class="applicationCtrl.failedLogin ? 'has-error' : ''">
     <label class="control-label required" for="login-form-username" translate>
@@ -13,18 +13,23 @@
     <label class="control-label required" for="login-form-password" translate>
       Password
     </label>
-    <input type="{{loginFormCtrl.showPassword ? 'text' : 'password'}}" class="form-control"
-      id="login-form-password" name="password"
-      ng-model="loginFormCtrl.password" required/>
-    <span class="helion-icon helion-icon-View form-control-feedback"
-      ng-class="{'text-muted': !loginFormCtrl.showPassword}"
-      ng-click="loginFormCtrl.showHidePassword()"></span>
+    <input type="text" class="form-control" id="login-form-password" name="password"
+      ng-model="loginFormCtrl.password" required
+      password-reveal password-reveal-icon="'helion-icon helion-icon-View'"/>
   </div>
 
   <button type="submit" class="btn btn-primary center-block"
-    ng-disabled="loginForm.$invalid" translate>
+    ng-disabled="loginForm.$invalid || loginFormCtrl.loggingIn"
+    ng-click="loginFormCtrl.login() && applicationCtrl.login(loginFormCtrl.username,loginFormCtrl.password)" translate>
     Login
   </button>
+
+  <div class="login-form-spinner" ng-show="loginFormCtrl.loggingIn">
+    <span class="spinner-notification" translate>
+      Authenticating Credentials
+    </span>
+    <spinner></spinner>
+  </div>
 </form>
 <div ng-if="applicationCtrl.failedLogin" class="alert alert-danger login-error">
   <p translate>The login and password combination you used are incorrect. Please try again.</p>
