@@ -53,6 +53,9 @@
 
       it('should call reset() on cancel', function () {
         credentialsFormCtrl.cancel();
+
+        expect(credentialsFormCtrl._data.username).toBeUndefined();
+        expect(credentialsFormCtrl._data.password).toBeUndefined();
         expect(credentialsFormCtrl.reset).toHaveBeenCalled();
       });
 
@@ -62,21 +65,14 @@
 
         credentialsFormCtrl.register();
 
-        expect(credentialsFormCtrl.service.name).toBe('cluster1');
-        expect(credentialsFormCtrl.service.url).toBe('cluster1_url');
-        expect(credentialsFormCtrl.service.username).toBe('cluster1_username');
-        expect(credentialsFormCtrl.service.password).toBe('cluster1_password');
         expect(credentialsFormCtrl.reset).toHaveBeenCalled();
-
-        expect($scope.service.username).toBe('cluster1_username');
-        expect($scope.service.password).toBe('cluster1_password');
+        expect(credentialsFormCtrl._data.registered).toBe(true);
+        expect(credentialsFormCtrl._data.password).toBeUndefined();
       });
 
       it('should set error flags to false and set form as pristine on reset', function () {
         credentialsFormCtrl.reset();
 
-        expect(credentialsFormCtrl._data.username).toBe('');
-        expect(credentialsFormCtrl._data.password).toBe('');
         expect(credentialsFormCtrl.failedRegister).toBe(false);
         expect(credentialsFormCtrl.serverErrorOnRegister).toBe(false);
         expect(credentialsFormCtrl.serverFailedToRespond).toBe(false);
@@ -125,7 +121,7 @@
       beforeEach(function () {
         $scope.register = angular.noop;
 
-        var markup = '<credentials-form service="service" on-submit="register()">' +
+        var markup = '<credentials-form service="service" on-submit="register(data)">' +
                      '<credentials-form/>';
 
         element = angular.element(markup);
@@ -147,8 +143,19 @@
       });
 
       it('should call onSubmit() on register', function () {
+        credentialsFormCtrl._data.username = 'cluster1_username';
+        credentialsFormCtrl._data.password = 'cluster1_password';
+
         credentialsFormCtrl.register();
-        expect(credentialsFormCtrl.onSubmit).toHaveBeenCalled();
+
+        var serviceData = {
+          name: 'cluster1',
+          url: 'cluster1_url',
+          username: 'cluster1_username',
+          registered: true
+        };
+
+        expect(credentialsFormCtrl.onSubmit).toHaveBeenCalledWith({ data: serviceData });
         expect($scope.register).toHaveBeenCalled();
       });
     });
