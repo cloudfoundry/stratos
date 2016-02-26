@@ -2,6 +2,14 @@
 @import "console-view/console-view";
 @import "service-registration/service-registration";
 
+.form-buttons {
+  margin-top: 40px;
+
+  button {
+    margin-left: 10px;
+  }
+}
+
 .overlay-position {
   background-color: $body-bg;
   position: absolute;

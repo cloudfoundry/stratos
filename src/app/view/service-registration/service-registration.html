@@ -31,7 +31,7 @@
           <tr ng-repeat="service in serviceRegistrationCtrl.services">
             <td>{{service.name}}</td>
             <td>{{service.url}}</td>
-            <td>{{service.userAccount}}</td>
+            <td>{{service.username}}</td>
             <td class="text-center">
               <span ng-bind-html="service.status | serviceStatus"></span>
             </td>
@@ -58,4 +58,10 @@
       Done
     </button>
   </div>
+  <flyout flyout-active="serviceRegistrationCtrl.showFlyout" flyout-close-icon="'helion-icon helion-icon-Close'">
+    <credentials-form service="serviceRegistrationCtrl.activeService"
+      on-cancel="serviceRegistrationCtrl.closeFlyout()"
+      on-submit="serviceRegistrationCtrl.closeFlyout()">
+    </credentials-form>
+  </flyout>
 </div>

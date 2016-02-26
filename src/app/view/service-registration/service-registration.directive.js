@@ -57,21 +57,28 @@
       { name: 'AWS', url: 'api.15.126.233.29.xip.io' },
       { name: 'Github', url: 'api.15.126.233.30.xip.io' }
     ];
+
+    this.showFlyout = false;
   }
 
   // Mock out the enter credentials and revoke actions
   angular.extend(ServiceRegistrationController.prototype, {
+    closeFlyout: function () {
+      this.showFlyout = false;
+      this.servicesRegistered = countRegistered(this.services);
+    },
     completeRegistration: function () {
       this.showOverlayRegistration = false;
     },
     enterCredentials: function (service) {
-      service.credentialsValid = true;
-      service.status = 'OK';
-      this.servicesRegistered = countRegistered(this.services);
+      this.activeService = service;
+      this.showFlyout = true;
     },
     revoke: function (service) {
       service.credentialsValid = false;
       service.status = undefined;
+      service.username = '';
+      service.password = '';
       this.servicesRegistered = countRegistered(this.services);
     }
   });
