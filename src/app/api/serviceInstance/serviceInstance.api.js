@@ -38,7 +38,7 @@
      * @memberof app.api.serviceInstance.ServiceInstanceApi
      * @description Returns a list of service instances for the user
      * @param {string} user - the Stratos user
-     * @returns {object} A resolved/rejected promise
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     list: function (user) {
@@ -56,7 +56,7 @@
      * @param {string} service - the service instance
      * @param {string} username - the service instance username to authenticate with
      * @param {string} password - the service instance password to authenticate with
-     * @returns {object} A resolved/rejected promise
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     register: function (user, service, username, password) {
@@ -74,7 +74,7 @@
      * @description Revoke user's access from service instance
      * @param {string} user - the Stratos user
      * @param {string} service - the service instance to revoke access from
-     * @returns {object} A resolved/rejected promise
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     revoke: function (user, service) {
