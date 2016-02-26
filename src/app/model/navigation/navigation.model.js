@@ -41,10 +41,10 @@
     this.eventService = eventService;
     this.$state = $state;
     this.menu = new Menu();
-    this.eventService.$on(this.eventService.events.LOGGED_IN, function () {
+    this.eventService.$on(this.eventService.events.LOGIN, function () {
       that.onLogin();
     });
-    this.eventService.$on(this.eventService.events.LOGGED_OUT, function () {
+    this.eventService.$on(this.eventService.events.LOGOUT, function () {
       that.onLogout();
     });
     this.eventService.$on(this.eventService.events.AUTO_NAV, function (event, state) {
