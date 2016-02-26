@@ -61,7 +61,9 @@
 
   function expose(vars) {
     for (var key in vars) {
-      global[key] = vars[key];
+      if (vars.hasOwnProperty(key)) {
+        global[key] = vars[key];
+      }
     }
   }
 

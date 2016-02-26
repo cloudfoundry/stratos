@@ -131,6 +131,7 @@ $ npm test
 ### Running Protractor tests in container
 ```
 $ cd tools
+$ npm run update-webdriver
 $ xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
 ```
 
