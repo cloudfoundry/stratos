@@ -2,13 +2,14 @@
   'use strict';
 
   describe('credentials-form directive', function () {
-    var $compile, $scope;
+    var $compile, $httpBackend, $scope;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
       $compile = $injector.get('$compile');
+      $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       $scope.service = { name: 'cluster1', url: 'cluster1_url' };
     }));
@@ -17,7 +18,7 @@
       var element, credentialsFormCtrl;
 
       beforeEach(function () {
-        var markup = '<credentials-form service="service"><credentials-form/>';
+        var markup = '<credentials-form service-instance="service"><credentials-form/>';
 
         element = angular.element(markup);
         $compile(element)($scope);
@@ -32,12 +33,8 @@
         expect(element).toBeDefined();
       });
 
-      it('should have `account` property defined', function () {
-        expect(credentialsFormCtrl.account).toBeDefined();
-      });
-
-      it('should have `eventService` property defined', function () {
-        expect(credentialsFormCtrl.eventService).toBeDefined();
+      it('should have `serviceInstanceModel` be defined', function () {
+        expect(credentialsFormCtrl.serviceInstanceModel).toBeDefined();
       });
 
       it('should have `_data` property initially set', function () {
@@ -54,20 +51,25 @@
       it('should call reset() on cancel', function () {
         credentialsFormCtrl.cancel();
 
-        expect(credentialsFormCtrl._data.username).toBeUndefined();
-        expect(credentialsFormCtrl._data.password).toBeUndefined();
+        expect(credentialsFormCtrl._data.service_user).toBeUndefined();
+        expect(credentialsFormCtrl._data.service_password).toBeUndefined();
         expect(credentialsFormCtrl.reset).toHaveBeenCalled();
       });
 
-      it('should call reset() on register', function () {
-        credentialsFormCtrl._data.username = 'cluster1_username';
-        credentialsFormCtrl._data.password = 'cluster1_password';
+      it('should call reset() on register successful', function () {
+        $httpBackend.when('POST', '/api/service-instances/register').respond(200, {});
+        $httpBackend.expectPOST('/api/service-instances/register');
+
+        credentialsFormCtrl._data.service_user = 'cluster1_username';
+        credentialsFormCtrl._data.service_password = 'cluster1_password';
 
         credentialsFormCtrl.register();
 
+        $httpBackend.flush();
+
         expect(credentialsFormCtrl.reset).toHaveBeenCalled();
         expect(credentialsFormCtrl._data.registered).toBe(true);
-        expect(credentialsFormCtrl._data.password).toBeUndefined();
+        expect(credentialsFormCtrl._data.service_password).toBeUndefined();
       });
 
       it('should set error flags to false and set form as pristine on reset', function () {
@@ -87,7 +89,7 @@
       beforeEach(function () {
         $scope.cancel = angular.noop;
 
-        var markup = '<credentials-form service="service" on-cancel="cancel()">' +
+        var markup = '<credentials-form service-instance="service" on-cancel="cancel()">' +
                      '<credentials-form/>';
 
         element = angular.element(markup);
@@ -121,7 +123,7 @@
       beforeEach(function () {
         $scope.register = angular.noop;
 
-        var markup = '<credentials-form service="service" on-submit="register(data)">' +
+        var markup = '<credentials-form service-instance="service" on-submit="register(data)">' +
                      '<credentials-form/>';
 
         element = angular.element(markup);
@@ -143,15 +145,20 @@
       });
 
       it('should call onSubmit() on register', function () {
-        credentialsFormCtrl._data.username = 'cluster1_username';
-        credentialsFormCtrl._data.password = 'cluster1_password';
+        $httpBackend.when('POST', '/api/service-instances/register').respond(200, {});
+        $httpBackend.expectPOST('/api/service-instances/register');
+
+        credentialsFormCtrl._data.service_user = 'cluster1_username';
+        credentialsFormCtrl._data.service_password = 'cluster1_password';
 
         credentialsFormCtrl.register();
+
+        $httpBackend.flush();
 
         var serviceData = {
           name: 'cluster1',
           url: 'cluster1_url',
-          username: 'cluster1_username',
+          service_user: 'cluster1_username',
           registered: true
         };
 

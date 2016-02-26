@@ -28,19 +28,19 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="service in serviceRegistrationCtrl.services">
-            <td>{{service.name}}</td>
-            <td>{{service.url}}</td>
-            <td>{{service.username}}</td>
+          <tr ng-repeat="serviceInstance in serviceRegistrationCtrl.serviceInstances">
+            <td>{{serviceInstance.name}}</td>
+            <td>{{serviceInstance.url}}</td>
+            <td>{{serviceInstance.service_user}}</td>
             <td class="text-center">
               <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                ng-show="service.registered"></span>
+                ng-show="serviceInstance.registered"></span>
             </td>
             <td class="text-right">
-              <a class="btn btn-link btn-sm" ng-if="!service.registered"
-                ng-click="serviceRegistrationCtrl.enterCredentials(service)" translate>Provide Credentials</a>
-              <a class="btn btn-link btn-sm" ng-if="service.registered"
-                ng-click="serviceRegistrationCtrl.unregister(service)" translate>Unregister</a>
+              <a class="btn btn-link btn-sm" ng-if="!serviceInstance.registered"
+                ng-click="serviceRegistrationCtrl.enterCredentials(serviceInstance)" translate>Provide Credentials</a>
+              <a class="btn btn-link btn-sm" ng-if="serviceInstance.registered"
+                ng-click="serviceRegistrationCtrl.unregister(serviceInstance)" translate>Unregister</a>
             </td>
           </tr>
         </tbody>
@@ -48,19 +48,19 @@
     </div>
   </div>
   <div class="fixed-footer" ng-if="serviceRegistrationCtrl.overlay">
-    <span class="registration-notification" ng-if="serviceRegistrationCtrl.servicesRegistered > 0"
-      translate-n="serviceRegistrationCtrl.servicesRegistered"
-      translate-plural="{{serviceRegistrationCtrl.servicesRegistered}} clusters registered">
-      {{serviceRegistrationCtrl.servicesRegistered}} cluster registered
+    <span class="registration-notification" ng-if="serviceRegistrationCtrl.serviceInstanceModel.numRegistered > 0"
+      translate-n="serviceRegistrationCtrl.serviceInstanceModel.numRegistered"
+      translate-plural="{{serviceRegistrationCtrl.serviceInstanceModel.numRegistered}} clusters registered">
+      {{serviceRegistrationCtrl.serviceInstanceModel.numRegistered}} cluster registered
     </span>
     <button type="button" class="btn btn-default"
-      ng-disabled="serviceRegistrationCtrl.servicesRegistered === 0"
+      ng-disabled="serviceRegistrationCtrl.serviceInstanceModel.numRegistered === 0"
       ng-click="serviceRegistrationCtrl.completeRegistration()" translate>
       Done
     </button>
   </div>
   <flyout flyout-active="serviceRegistrationCtrl.showFlyout" flyout-close-icon="'helion-icon helion-icon-Close'">
-    <credentials-form service="serviceRegistrationCtrl.activeService"
+    <credentials-form service-instance="serviceRegistrationCtrl.activeServiceInstance"
       on-cancel="serviceRegistrationCtrl.closeFlyout()"
       on-submit="serviceRegistrationCtrl.closeFlyout(data)">
     </credentials-form>

@@ -57,6 +57,7 @@
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
     this.serverFailedToRespond = false;
+    this.showGlobalSpinner = false;
     this.showRegistration = false;
     $timeout(function () {
       that.verifySession();
@@ -76,7 +77,7 @@
       this.modelManager.retrieve('app.model.account')
         .verifySession()
         .then(function () {
-          that.onLoggedIn(true);
+          that.onLoggedIn();
         });
     },
 
@@ -95,7 +96,7 @@
         .login(username, password)
         .then(
           function () {
-            that.onLoggedIn(true);
+            that.onLoggedIn();
           },
           function (response) {
             that.onLoginFailed(response);
@@ -107,18 +108,25 @@
      * @function onLoggedIn
      * @memberof app.view.application.ApplicationController
      * @description Logged-in event handler
-     * @param {boolean} firstTimeLogin - flag for user logging in for the first time
      * @emits LOGIN
      * @private
      * @returns {void}
      */
-    onLoggedIn: function (firstTimeLogin) {
+    onLoggedIn: function () {
+      var that = this;
       this.eventService.$emit(this.eventService.events.LOGIN);
       this.loggedIn = true;
       this.failedLogin = false;
       this.serverErrorOnLogin = false;
       this.serverFailedToRespond = false;
-      this.showRegistration = firstTimeLogin;
+      this.showGlobalSpinner = true;
+
+      this.modelManager.retrieve('app.model.serviceInstance')
+        .list()
+        .then(function onSuccess(data) {
+          that.showRegistration = data.numRegistered === 0;
+          that.showGlobalSpinner = false;
+        });
     },
 
     /**
