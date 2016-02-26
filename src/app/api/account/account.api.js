@@ -13,11 +13,13 @@
 
   registerAccountApi.$inject = [
     '$http',
+    '$q',
+    '$cookies',
     'app.api.apiManager'
   ];
 
-  function registerAccountApi($http, apiManager) {
-    apiManager.register('app.api.account', new AccountApi($http));
+  function registerAccountApi($http, $q, $cookies, apiManager) {
+    apiManager.register('app.api.account', new AccountApi($http, $q, $cookies));
   }
 
   /**
@@ -28,8 +30,10 @@
    * @property {object} $http - the Angular $http service
    * @class
    */
-  function AccountApi($http) {
+  function AccountApi($http, $q, $cookies) {
     this.$http = $http;
+    this.$q = $q;
+    this.$cookies = $cookies;
   }
 
   angular.extend(AccountApi.prototype, {
@@ -58,6 +62,22 @@
      */
     logout: function () {
       return this.$http.get('/api/auth/logout');
+    },
+
+    /**
+     * @function verifySession
+     * @memberof app.api.account.AccountApi
+     * @description Verify validation of the session with cookie.
+     * @returns {object} A resolved/rejected promise
+     * @public
+     */
+    verifySession: function () {
+      if (this.$cookies.get('session_id')) {
+        return this.$http.get('/api/auth/verify-session');
+      }
+      return this.$q(function(resolve, reject) {
+        reject({});
+      });
     }
   });
 

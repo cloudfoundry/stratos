@@ -41,7 +41,7 @@
      * @description Log in of the application at model layer
      * @param {string} username - the username
      * @param {string} password - the password
-     * @returns {object} returns a promise
+     * @returns {promise}
      * @public
      */
     login: function (username, password) {
@@ -57,7 +57,7 @@
      * @function logout
      * @memberof app.model.account.Account
      * @description Log out of the application at model layer
-     * @returns {object} returns a promise
+     * @returns {promise}
      * @public
      */
     logout: function () {
@@ -67,6 +67,30 @@
         .then(function () {
           that.onLoggedOut();
         });
+    },
+
+    /**
+     * @function verifySession
+     * @memberof app.model.account.Account
+     * @description verify if current session
+     * @public
+     * @returns {promise}
+     */
+    verifySession: function () {
+      var accountApi = this.apiManager.retrieve('app.api.account');
+      var p = accountApi.verifySession();
+      var that = this;
+
+      p.then(
+        function (response) {
+          that.onLoggedIn(response);
+        },
+        function () {
+          that.onLoggedOut();
+        }
+      );
+
+      return p;
     },
 
     /**

@@ -28,6 +28,7 @@
   }
 
   ApplicationController.$inject = [
+    '$timeout',
     'app.event.eventService',
     'app.model.modelManager'
   ];
@@ -36,6 +37,7 @@
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
+   * @param {function} $timeout - angular $timeout service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.event.eventService} eventService - the event bus service
@@ -46,7 +48,9 @@
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController(eventService, modelManager) {
+  function ApplicationController($timeout, eventService, modelManager) {
+    var that = this;
+
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.loggedIn = false;
@@ -54,9 +58,28 @@
     this.serverErrorOnLogin = false;
     this.serverFailedToRespond = false;
     this.showRegistration = false;
+    $timeout(function () {
+      that.verifySession();
+    }, 0);
   }
 
   angular.extend(ApplicationController.prototype, {
+    /**
+     * @function verifySession
+     * @memberof app.view.application.ApplicationController
+     * @description verify session
+     * @public
+     * @returns {void}
+     */
+    verifySession: function () {
+      var that = this;
+      this.modelManager.retrieve('app.model.account')
+        .verifySession()
+        .then(function () {
+          that.onLoggedIn(true);
+        });
+    },
+
     /**
      * @function login
      * @memberof app.view.application.ApplicationController
