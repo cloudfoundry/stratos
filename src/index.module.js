@@ -7,6 +7,7 @@
   ];
 
   var otherModules = [
+    'angularMoment',
     'gettext',
     'helion.framework',
     'smoothScroll',

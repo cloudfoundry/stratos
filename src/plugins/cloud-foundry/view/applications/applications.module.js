@@ -31,13 +31,10 @@
    */
   function ApplicationsController(apiManager) {
     this.appsAPI = apiManager.retrieve('cloud-foundry.api.apps');
-    this.apps = this.listApps();
+    this.apps = this.appsAPI.list();
   }
 
   angular.extend(ApplicationsController.prototype, {
-    listApps: function () {
-      return this.appsAPI.list();
-    }
   });
 
 })();

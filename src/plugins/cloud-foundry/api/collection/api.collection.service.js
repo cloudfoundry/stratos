@@ -11,7 +11,7 @@
 
   function CollectionServiceFactory(apiManager) {
 
-    var apiVersionPrefix = '/api/cf/v2/';
+    var apiVersionPrefix = '/api/v2/';
 
     function makeQueryString(options) {
       options = options || {};
@@ -99,7 +99,7 @@
         options.paramSerializer = makeQueryString;
         options.params = params;
 
-        var path = apiVersionPrefix + this.collection;
+        var path = this.getCollectionUrl();
 
         this.api.get(path, options); // TODO: need to deal with the Page.js collection response type
       };
