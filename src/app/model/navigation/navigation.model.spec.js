@@ -46,13 +46,13 @@
 
     it('`onLogin` should called when events.LOGGED_IN triggered', function () {
       spyOn(navigationModel, 'onLogin');
-      navigationModel.eventService.$emit(navigationModel.eventService.events.LOGGED_IN);
+      navigationModel.eventService.$emit(navigationModel.eventService.events.LOGIN);
       expect(navigationModel.onLogin).toHaveBeenCalled();
     });
 
     it('`onLogout` should called when events.LOGGED_OUT triggered', function () {
       spyOn(navigationModel, 'onLogout');
-      navigationModel.eventService.$emit(navigationModel.eventService.events.LOGGED_OUT);
+      navigationModel.eventService.$emit(navigationModel.eventService.events.LOGOUT);
       expect(navigationModel.onLogout).toHaveBeenCalled();
     });
 
