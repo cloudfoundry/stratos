@@ -11,11 +11,7 @@
 
   function CollectionServiceFactory(apiManager) {
 
-<<<<<<< HEAD
     var apiVersionPrefix = '/api/v2/';
-=======
-    var apiVersionPrefix = '/api/cf/v2/';
->>>>>>> d232134aeec0282564afeb8c3a9b460f71731f62
 
     function makeQueryString(options) {
       options = options || {};
