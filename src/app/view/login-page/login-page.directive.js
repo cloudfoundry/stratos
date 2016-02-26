@@ -58,7 +58,7 @@
          */
         var sections = [];
         angular.forEach(element.find('section'), function (elt) {
-          var top = Math.round(elt.getBoundingClientRect().top + scrollY);
+          var top = Math.floor(elt.getBoundingClientRect().top + scrollY);
           sections.push({ id: elt.id, top: top });
         });
 
@@ -73,7 +73,7 @@
       }
 
       function handleScroll() {
-        var y = $window.scrollY || $window.pageYOffset;
+        var y = Math.floor($window.scrollY || $window.pageYOffset);
         var scrollBottom = ctrl.sections[ctrl.lastSectionIdx].top || 0;
 
         ctrl.prevArrowVisible = y > 0;
@@ -135,11 +135,11 @@
      * @returns {void}
      */
     goToPrevSection: function () {
-      var y = this.$window.scrollY || this.$window.pageYOffset;
+      var y = Math.floor(this.$window.scrollY || this.$window.pageYOffset) - 5;
 
       if (this.currentSectionIdx > 0 || y > 0) {
         var sectionTop = this.sections[this.currentSectionIdx].top;
-        var diff = y === sectionTop ? -1 : 0;
+        var diff = y <= sectionTop ? -1 : 0;
         this.currentSectionIdx += diff;
         var id = this.sections[this.currentSectionIdx].id;
         this.smoothScroll(this.$window.document.getElementById(id));
@@ -156,6 +156,7 @@
     setCurrentSection: function (y) {
       var ctrl = this;
 
+      y += 5;   // add padding for zoom
       angular.forEach(this.sections, function (section, idx) {
         if (y >= section.top) {
           ctrl.currentSectionIdx = idx;
