@@ -2,16 +2,16 @@
   'use strict';
 
   var events = {
-    AUTO_NAV                    : 'AUTO_NAV',
-    LOGIN                       : 'LOGIN',
-    LOGIN_FAILED                : 'LOGIN_FAILED',
-    LOGOUT                      : 'LOGOUT',
-    HTTP_401                    : 'HTTP_401',
-    HTTP_403                    : 'HTTP_403',
-    HTTP_404                    : 'HTTP_404',
-    HTTP_500                    : 'HTTP_500',
-    HTTP_502                    : 'HTTP_502', // Bad gateway, node server is down
-    HTTP_5XX_ON_LOGIN           : 'HTTP_5XX_ON_LOGIN'
+    AUTO_NAV            : 'AUTO_NAV',
+    LOGIN               : 'LOGIN',
+    LOGIN_FAILED        : 'LOGIN_FAILED',
+    LOGOUT              : 'LOGOUT',
+    HTTP_401            : 'HTTP_401',
+    HTTP_403            : 'HTTP_403',
+    HTTP_404            : 'HTTP_404',
+    HTTP_500            : 'HTTP_500',
+    HTTP_502            : 'HTTP_502', // Bad gateway, node server is down
+    HTTP_5XX_ON_LOGIN   : 'HTTP_5XX_ON_LOGIN'
   };
 
   angular

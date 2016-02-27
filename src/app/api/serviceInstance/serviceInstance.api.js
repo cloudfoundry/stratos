@@ -42,7 +42,9 @@
      * @public
      */
     list: function (user) {
-      return this.$http.get('/api/service-instances', { params: { username: user } });
+      return this.$http.get('/api/service-instances', {
+        params: { username: user }
+      });
     },
 
     /**
