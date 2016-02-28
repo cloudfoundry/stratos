@@ -1,1 +1,25 @@
 <h4>Applications</h4>
+
+<div class="col-md-4 col-sm-1" ng-repeat="app in AppsCtrl.apps.resources track by app.metadata.guid">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">
+				{{app.entity.name}}
+				<div class="label pull-right" ng-class="(app.entity.state=='STARTED') ?  'label-success' : 'label-default'">{{app.entity.state}}</div>
+			</h3>
+		</div>
+		<div class="panel-body">
+			<strong>GUID</strong>: {{app.metadata.guid}}
+			<br/>
+			<strong>Created</strong>: <span am-time-ago="app.metadata.created_at"></span>
+			<br/>
+			<strong>Updated</strong>:  <span am-time-ago="app.metadata.updated_at"></span>
+			<br/>
+			<strong>Allocated Memory</strong>: {{app.entity.memory}} MB
+			<br/>
+			<strong>Allocated Disk Space</strong>: {{app.entity.disk_quota}} MB
+			<br/>
+			<strong>App Instances</strong>: {{app.entity.instances}}
+		</div>
+	</div>
+</div>
