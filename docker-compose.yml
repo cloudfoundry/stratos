@@ -12,7 +12,7 @@ db:
     - MYSQL_USER=stratos
     - MYSQL_PASSWORD=stratos
   volumes:
-    - ../stratos-identity-db/versions:/versions
+    - ../stratos-identity-db/versions:/docker-entrypoint-initdb.d
   volumes_from:
     - data
 

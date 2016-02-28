@@ -20,14 +20,7 @@ docker-compose up
 docker-compose up -d
 ```
 
-#### DB migration
-exec into stratosdeploy_db_1 and run
-```
-mysql -u stratos --password=stratos < /versions/0.0.1.sql
-mysql -u stratos --password=stratos < /versions/add_some_data.sql
-```
-
-Service should now be running on your docker host ID, usually 192.168.99.100.
+Wait until the UI container finishing building (the stratosdeploy_ui_1 container stop running), the Web UI should now be running on your docker host ID, usually 192.168.99.100.
 
 #### Stop
 
