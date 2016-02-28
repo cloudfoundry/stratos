@@ -43,7 +43,7 @@
      */
     list: function (user) {
       return this.$http.get('/api/service-instances', {
-        username: user
+        params: { username: user }
       });
     },
 
@@ -69,16 +69,16 @@
     },
 
     /**
-     * @function revoke
+     * @function unregister
      * @memberof app.api.serviceInstance.ServiceInstanceApi
-     * @description Revoke user's access from service instance
+     * @description Unregister user's access from service instance
      * @param {string} user - the Stratos user
-     * @param {string} service - the service instance to revoke access from
+     * @param {string} service - the service instance to unregister from
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    revoke: function (user, service) {
-      return this.$http.post('/api/service-instances/revoke', {
+    unregister: function (user, service) {
+      return this.$http.post('/api/service-instances/unregister', {
         username: user,
         name: service
       });

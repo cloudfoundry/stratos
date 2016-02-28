@@ -18,3 +18,15 @@
   right: 0;
   top: 0;
 }
+
+.application-global-spinner {
+  .global-spinner-message {
+    color: $gray-light;
+    text-transform: uppercase;
+  }
+
+  spinner {
+    height: 100px;
+    width: 100px;
+  }
+}

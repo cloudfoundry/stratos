@@ -16,7 +16,7 @@
    * accessible services/clusters
    * @param {string} path - the application base path
    * @example
-   * <credentials-form service="ctrl.serviceToRegister"
+   * <credentials-form service-instance="ctrl.serviceToRegister"
    *   on-cancel="ctrl.registerCancelled()"
    *   onSubmit="ctrl.registerSubmitted()">
    * </credentials-form>
@@ -27,7 +27,7 @@
       bindToController: {
         onCancel: '&?',
         onSubmit: '&?',
-        service: '='
+        serviceInstance: '='
       },
       controller: CredentialsFormController,
       controllerAs: 'credentialsFormCtrl',
@@ -38,7 +38,6 @@
 
   CredentialsFormController.$inject = [
     '$scope',
-    'app.event.eventService',
     'app.model.modelManager'
   ];
 
@@ -50,37 +49,34 @@
    * service/cluster registration
    * @constructor
    * @param {object} $scope - this controller's directive scope
-   * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @property {app.model.account} account - the account model
-   * @property {app.event.eventService} eventService - the application event bus
+   * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {boolean} authenticating - a flag that authentication is in process
    * @property {boolean} failedRegister - an error flag for bad credentials
    * @property {boolean} serverErrorOnRegister - an error flag for a server error
    * @property {boolean} serverFailedToRespond - an error flag for no server response
    * @property {object} _data - the view data (copy of service)
    */
-  function CredentialsFormController($scope, eventService, modelManager) {
+  function CredentialsFormController($scope, modelManager) {
     var ctrl = this;
 
-    this.account = modelManager.retrieve('app.model.account');
-    this.eventService = eventService;
+    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.authenticating = false;
     this.failedRegister = false;
     this.serverErrorOnRegister = false;
     this.serverFailedToRespond = false;
 
     $scope.$watchCollection(function watchService() {
-      return ctrl.service;
-    }, function serviceChanged(newValue) {
+      return ctrl.serviceInstance;
+    }, function serviceInstanceChanged(newValue) {
       ctrl._data = angular.extend({}, newValue);
     });
   }
 
   angular.extend(CredentialsFormController.prototype, {
     cancel: function () {
-      delete this._data.username;
-      delete this._data.password;
+      delete this._data.service_user;
+      delete this._data.service_password;
 
       if (angular.isDefined(this.onCancel)) {
         this.onCancel();
@@ -89,11 +85,40 @@
       this.reset();
     },
     register: function () {
+      var that = this;
       this.authenticating = true;
 
-      // mock authenticate credentials
+      this.serviceInstanceModel.register(this._data.name, this._data.service_user, this._data.service_password)
+        .then(function onSuccess() {
+          that.registerSuccessful();
+        }, function onError(response) {
+          that.registerFailed(response);
+        });
+    },
+    registerFailed: function (response) {
+      if (response.status === -1) {
+        // handle the case when the server never responds
+        this.serverFailedToRespond = true;
+        this.serverErrorOnRegister = false;
+        this.failedRegister = false;
+      } else if (response.status >= 500 && response.status < 600) {
+        // handle 5xx errors when attempting to authenticate
+        this.serverFailedToRespond = false;
+        this.serverErrorOnRegister = true;
+        this.failedRegister = false;
+      } else {
+        // general authentication failed
+        this.serverFailedToRespond = false;
+        this.serverErrorOnRegister = false;
+        this.failedRegister = true;
+      }
+
+      delete this._data.service_password;
+      this.authenticating = false;
+    },
+    registerSuccessful: function () {
       this._data.registered = true;
-      delete this._data.password;
+      delete this._data.service_password;
 
       if (angular.isDefined(this.onSubmit)) {
         this.onSubmit({ data: this._data });

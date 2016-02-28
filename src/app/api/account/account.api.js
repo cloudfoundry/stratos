@@ -27,7 +27,11 @@
    * @memberof app.api.account
    * @name app.model.account.AccountApi
    * @param {object} $http - the Angular $http service
+   * @param {object} $q - the Angular Promise service
+   * @param {object} $cookies - the Angular cookies service
    * @property {object} $http - the Angular $http service
+   * @property {object} $q - the Angular Promise service
+   * @property {object} $cookies - the Angular cookies service
    * @class
    */
   function AccountApi($http, $q, $cookies) {

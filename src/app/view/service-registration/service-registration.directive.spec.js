@@ -31,20 +31,24 @@
         expect(element).toBeDefined();
       });
 
-      it('should have `account` property defined', function () {
-        expect(serviceRegistrationCtrl.account).toBeDefined();
-      });
-
-      it('should have `eventService` property defined', function () {
-        expect(serviceRegistrationCtrl.eventService).toBeDefined();
-      });
-
       it('should have `overlay` property initially set to true', function () {
         expect(serviceRegistrationCtrl.overlay).toBe(false);
       });
 
       it('should have undefined `showOverlayRegistration` property', function () {
         expect(serviceRegistrationCtrl.showOverlayRegistration).toBeUndefined();
+      });
+
+      it('should have `serviceInstanceModel` property defined', function () {
+        expect(serviceRegistrationCtrl.serviceInstanceModel).toBeDefined();
+      });
+
+      it('should have `serviceInstances` property initially be []', function () {
+        expect(serviceRegistrationCtrl.serviceInstances).toEqual([]);
+      });
+
+      it('should have `showFlyout` property initially be false', function () {
+        expect(serviceRegistrationCtrl.showFlyout).toBe(false);
       });
     });
 
@@ -67,20 +71,24 @@
         expect(element).toBeDefined();
       });
 
-      it('should have `account` property defined', function () {
-        expect(serviceRegistrationCtrl.account).toBeDefined();
-      });
-
-      it('should have `eventService` property defined', function () {
-        expect(serviceRegistrationCtrl.eventService).toBeDefined();
+      it('should have `showOverlayRegistration` property initially set to false', function () {
+        expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(false);
       });
 
       it('should have `overlay` property initially set to true', function () {
         expect(serviceRegistrationCtrl.overlay).toBe(true);
       });
 
-      it('should have `showOverlayRegistration` property initially set to false', function () {
-        expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(false);
+      it('should have `serviceInstanceModel` property defined', function () {
+        expect(serviceRegistrationCtrl.serviceInstanceModel).toBeDefined();
+      });
+
+      it('should have `serviceInstances` property initially be []', function () {
+        expect(serviceRegistrationCtrl.serviceInstances).toEqual([]);
+      });
+
+      it('should have `showFlyout` property initially be false', function () {
+        expect(serviceRegistrationCtrl.showFlyout).toBe(false);
       });
 
       it('should show service-registration component when showRegistration === true', function () {

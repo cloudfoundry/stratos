@@ -29,7 +29,8 @@
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.model.account} account - the account model
    * @property {app.api.serviceInstance} serviceInstanceApi - the service instance API
-   * @property {array} serviceInstances - the service instances for the logged in user
+   * @property {array} serviceInstances - the service instances available to user
+   * @property {number} numRegistered - the number of user registered service instances
    * @class
    */
   function ServiceInstance(apiManager, modelManager) {
@@ -37,21 +38,26 @@
     this.account = modelManager.retrieve('app.model.account');
     this.serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
     this.serviceInstances = [];
+    this.numRegistered = 0;
   }
 
   angular.extend(ServiceInstance.prototype, {
     /**
      * @function list
      * @memberof app.model.serviceInstance.ServiceInstance
-     * @description Returns a list of service instances for the user
+     * @description Returns services instances and number registered
      * @returns {promise} A resolved/rejected promise
      * @public
      */
     list: function () {
       var that = this;
-      return this.serviceInstanceApi.list(this.account.user)
+      return this.serviceInstanceApi.list(that.account.username)
         .then(function (response) {
-          that.serviceInstances = response.data;
+          var items = response.data.items;
+          that.serviceInstances.length = 0;
+          that.serviceInstances.push.apply(that.serviceInstances, items);
+          that.numRegistered = _.sumBy(items, function (o) { return o.registered ? 1 : 0; }) || 0;
+          return { serviceInstances: that.serviceInstances, numRegistered: that.numRegistered };
         });
     },
 
@@ -60,26 +66,26 @@
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Authenticate the username and password with the
      * service instance
-     * @param {string} service - the service instance
+     * @param {string} serviceInstance - the service instance name
      * @param {string} username - the service instance username to authenticate with
      * @param {string} password - the service instance password to authenticate with
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    register: function (service, username, password) {
-      return this.serviceInstanceApi.register(this.account.user, service, username, password);
+    register: function (serviceInstance, username, password) {
+      return this.serviceInstanceApi.register(this.account.username, serviceInstance, username, password);
     },
 
     /**
-     * @function revoke
+     * @function unregister
      * @memberof app.model.serviceInstance.ServiceInstance
-     * @description Revoke user's access from service instance
-     * @param {string} service - the service instance to revoke access from
+     * @description Unregister user from service instance
+     * @param {string} serviceInstance - the service instance name
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    revoke: function (service) {
-      return this.serviceInstanceApi.revoke(this.account.user, service);
+    unregister: function (serviceInstance) {
+      return this.serviceInstanceApi.unregister(this.account.username, serviceInstance);
     }
   });
 

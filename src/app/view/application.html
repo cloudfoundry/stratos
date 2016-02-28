@@ -2,3 +2,6 @@
 <login-page ng-if="!applicationCtrl.loggedIn"></login-page>
 <console-view ng-if="applicationCtrl.loggedIn"></console-view>
 <service-registration show-overlay-registration="applicationCtrl.showRegistration"></service-registration>
+<global-spinner class="application-global-spinner" spinner-active="applicationCtrl.showGlobalSpinner">
+  <h2 class="global-spinner-message">Please wait...</h2>
+</global-spinner>

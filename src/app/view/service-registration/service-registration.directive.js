@@ -28,7 +28,6 @@
   }
 
   ServiceRegistrationController.$inject = [
-    'app.event.eventService',
     'app.model.modelManager'
   ];
 
@@ -37,63 +36,48 @@
    * @memberof app.view
    * @name ServiceRegistrationController
    * @constructor
-   * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @property {app.model.account} account - the account model
-   * @property {app.event.eventService} eventService - the application event bus
-   * @property {boolean} showRegistration - flag to show or hide this component
-   * @property {number} servicesRegistered - the count of valid clusters/services registered
-   * @property {array} services - the clusters/services available for registration
+   * @property {boolean} overlay - flag to show or hide this component
+   * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
+   * @property {array} serviceInstances - the service instances available to user
+   * @property {boolean} showFlyout - flag to show or hide flyout
    */
-  function ServiceRegistrationController(eventService, modelManager) {
-    this.account = modelManager.retrieve('app.model.account');
-    this.eventService = eventService;
+  function ServiceRegistrationController(modelManager) {
     this.overlay = angular.isDefined(this.showOverlayRegistration);
-
-    // TODO: hardcoding services for now until backend is ready
-    this.servicesRegistered = 0;
-    this.services = [
-      { name: 'AWS', url: 'api.15.126.233.29.xip.io' },
-      { name: 'Github', url: 'api.15.126.233.30.xip.io' },
-      { name: 'Helion_Cloud_foundry_01', url: 'api.15.126.233.28.xip.io' }
-    ];
-
+    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+    this.serviceInstances = this.serviceInstanceModel.serviceInstances;
     this.showFlyout = false;
   }
 
-  // Mock out the enter credentials and unregister actions
   angular.extend(ServiceRegistrationController.prototype, {
-    closeFlyout: function (serviceData) {
-      // update service data if new data available
-      if (angular.isDefined(serviceData)) {
-        angular.extend(this.activeService, serviceData);
+    closeFlyout: function (serviceInstance) {
+      if (angular.isDefined(serviceInstance)) {
+        // save service instance data only on successful registration
+        angular.extend(this.activeServiceInstance, serviceInstance);
+
+        if (serviceInstance.registered) {
+          this.serviceInstanceModel.numRegistered += 1;
+        }
       }
 
       this.showFlyout = false;
-      this.servicesRegistered = countRegistered(this.services);
     },
     completeRegistration: function () {
       this.showOverlayRegistration = false;
     },
-    enterCredentials: function (service) {
-      this.activeService = service;
+    enterCredentials: function (serviceInstance) {
+      this.activeServiceInstance = serviceInstance;
       this.showFlyout = true;
     },
-    unregister: function (service) {
-      service.registered = false;
-      delete service.username;
-      this.servicesRegistered = countRegistered(this.services);
+    unregister: function (serviceInstance) {
+      var that = this;
+      this.serviceInstanceModel.unregister(serviceInstance.name)
+        .then(function success() {
+          serviceInstance.registered = false;
+          delete serviceInstance.service_user;
+          that.serviceInstanceModel.numRegistered -= 1;
+        });
     }
   });
-
-  function countRegistered(services) {
-    return _.reduce(services,
-      function (sum, obj) {
-        if (obj.registered) {
-          sum += 1;
-        }
-        return sum;
-      }, 0);
-  }
 
 })();
