@@ -20,11 +20,11 @@ docker-compose up
 docker-compose up -d
 ```
 
-Wait until the UI container finishing building (the stratosdeploy_ui_1 container stop running), the Web UI should now be running on your docker host ID, usually 192.168.99.100.
+Wait until the UI container finishing building (the `stratosdeploy_ui_1` container stop running), the Web UI should now be running on your docker host ID, usually 192.168.99.100.
 
 #### Stop
 
-If running in foreground, first do Ctrl + C to exit and then:
+If running in foreground, first do `Ctrl + C` to exit and then:
 ```
 docker-compose stop
 ```
