@@ -1,30 +1,78 @@
-stratos-es:
-  image: elasticsearch
+data:
+  image: ubuntu:14.04
+  volumes:
+    - /var/lib/mysql
 
-stratos-node-server:
+
+db:
+  image: mysql:5.7
+  environment:
+    - MYSQL_ROOT_PASSWORD=stratos
+    - MYSQL_DATABASE=stratos-db
+    - MYSQL_USER=stratos
+    - MYSQL_PASSWORD=stratos
+  volumes:
+    - ../stratos-identity-db/versions:/docker-entrypoint-initdb.d
+  volumes_from:
+    - data
+
+
+cf:
+  build: ../stratos-node-server
+  dockerfile: Dockerfile.demo.mock_api
+  ports:
+    - "3002:3002"
+  environment:
+    - PORT=3002
+  volumes:
+    - ../stratos-node-server:/usr/src/app
+
+
+auth:
+  build: ../stratos-node-server
+  dockerfile: Dockerfile.demo.mock_auth
+  ports:
+    - "3001:3001"
+  environment:
+    - PORT=3001
+  volumes:
+    - ../stratos-node-server:/usr/src/app
+
+
+api:
   build: ../stratos-node-server
   dockerfile: Dockerfile.prod
   ports:
     - "3000:3000"
+  environment:
+    - PORT=3000
+    - MYSQL_ROOT_PASSWORD=stratos
+    - MYSQL_DATABASE=stratos-db
+    - MYSQL_USER=stratos
+    - MYSQL_PASSWORD=stratos
   volumes:
     - ../stratos-node-server:/usr/src/app
+  links:
+    - db:db
+    - auth:auth_service
+    - cf:cf_service
 
-stratos-server:
+
+nginx:
   build: ../stratos-server
+  dockerfile: Dockerfile.prod
   ports:
     - "80:80"
   volumes:
     - ../stratos-ui/dist:/usr/share/nginx/html:ro
   links:
-    - stratos-node-server
-    - stratos-es
+    - api:api
 
-stratos-ui:
+
+ui:
   build: ../stratos-ui
+  dockerfile: Dockerfile.prod
   volumes:
     - ../stratos-ui:/usr/src/app
     - ../helion-ui-framework:/usr/src/helion-ui-framework
     - ../helion-ui-theme:/usr/src/helion-ui-theme
-  links:
-    - stratos-server
-

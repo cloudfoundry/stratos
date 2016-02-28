@@ -1,25 +1,35 @@
 #stratos-deploy
+
 #### Requirements:
 - All requirements for stratos-ui also apply (all dependencies plus repo's cloned in proper location).
 - Docker-compose must also be installed.
 
-#### Standup Stratos service using docker-compose
+
+#### Build
+```
+docker-compose build
+```
+
+#### Run
 ```
 docker-compose up
 ```
-#### To run in background
+
+#### Or run in background
 ```
 docker-compose up -d
 ```
-Service should now be running on your docker host ID, usually 192.168.99.100.
 
-#### Stop Stratos service
+Wait until the UI container finishing building (the stratosdeploy_ui_1 container stop running), the Web UI should now be running on your docker host ID, usually 192.168.99.100.
+
+#### Stop
+
 If running in foreground, first do Ctrl + C to exit and then:
 ```
 docker-compose stop
 ```
 
-### Cleanup containers
+#### Cleanup containers
 ```
 docker-compose rm -f $(docker-compose ps -a)
 ```

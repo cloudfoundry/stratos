@@ -1,0 +1,30 @@
+stratos-es:
+  image: elasticsearch
+
+stratos-node-server:
+  build: ../stratos-node-server
+  dockerfile: Dockerfile.prod
+  ports:
+    - "3000:3000"
+  volumes:
+    - ../stratos-node-server:/usr/src/app
+
+stratos-server:
+  build: ../stratos-server
+  ports:
+    - "80:80"
+  volumes:
+    - ../stratos-ui/dist:/usr/share/nginx/html:ro
+  links:
+    - stratos-node-server
+    - stratos-es
+
+stratos-ui:
+  build: ../stratos-ui
+  volumes:
+    - ../stratos-ui:/usr/src/app
+    - ../helion-ui-framework:/usr/src/helion-ui-framework
+    - ../helion-ui-theme:/usr/src/helion-ui-theme
+  links:
+    - stratos-server
+
