@@ -26,6 +26,7 @@ cf:
     - PORT=3002
   volumes:
     - ../stratos-node-server:/usr/src/app
+    - /usr/src/app/node_modules
 
 
 auth:
@@ -37,6 +38,7 @@ auth:
     - PORT=3001
   volumes:
     - ../stratos-node-server:/usr/src/app
+    - /usr/src/app/node_modules
 
 
 api:
@@ -52,6 +54,7 @@ api:
     - MYSQL_PASSWORD=stratos
   volumes:
     - ../stratos-node-server:/usr/src/app
+    - /usr/src/app/node_modules
   links:
     - db:db
     - auth:auth_service
