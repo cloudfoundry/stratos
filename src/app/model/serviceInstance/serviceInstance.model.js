@@ -55,7 +55,7 @@
         .then(function (response) {
           var items = response.data.items;
           that.serviceInstances.length = 0;
-          that.serviceInstances.push.apply(that.serviceInstances, items);
+          that.serviceInstances.push.apply(that.serviceInstances, _.sortBy(items, 'name'));
           that.numRegistered = _.sumBy(items, function (o) { return o.registered ? 1 : 0; }) || 0;
           return { serviceInstances: that.serviceInstances, numRegistered: that.numRegistered };
         });
