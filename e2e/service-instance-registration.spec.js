@@ -1,4 +1,5 @@
 var helpers = require('./po/helpers.po');
+var navbar = require('./po/navbar.po');
 var loginPage = require('./po/login-page.po');
 var registration = require('./po/service-instance-registration.po');
 
@@ -150,6 +151,15 @@ describe('Service Instance Registration', function () {
 
     it('should show applications view when `Done` clicked', function () {
       registration.completeRegistration();
+      browser.driver.sleep(1000);
+
+      expect(registrationOverlay.isPresent()).toBeFalsy();
+      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications');
+    });
+
+    it('should go directly to applications view on logout and login', function () {
+      navbar.logout();
+      registration.login();
       browser.driver.sleep(1000);
 
       expect(registrationOverlay.isPresent()).toBeFalsy();
