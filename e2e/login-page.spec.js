@@ -1,3 +1,5 @@
+'use strict';
+
 var helpers = require('./po/helpers.po');
 var loginPage = require('./po/login-page.po');
 
@@ -91,19 +93,6 @@ describe('Login Page', function () {
       expect(element(by.css('console-view')).isPresent()).toBeFalsy();
     });
 
-    it('should allow log in with correct credentials', function () {
-      var fields = loginPage.loginFormFields();
-      fields.get(0).sendKeys('dev');
-      fields.get(1).sendKeys('dev');
-
-      expect(loginPage.loginButton().isEnabled()).toBeTruthy();
-
-      loginPage.loginButton().click();
-
-      expect(element(by.css('login-page')).isPresent()).toBeFalsy();
-      expect(element(by.css('console-view')).isPresent()).toBeTruthy();
-    });
-
     it('should not allow log in with incorrect credentials', function () {
       helpers.loadApp();
 
@@ -117,6 +106,21 @@ describe('Login Page', function () {
 
       expect(element(by.css('login-page')).isPresent()).toBeTruthy();
       expect(element(by.css('console-view')).isPresent()).toBeFalsy();
+    });
+
+    it('should allow log in with correct credentials', function () {
+      var fields = loginPage.loginFormFields();
+      var usernameField = fields.get(0);
+      usernameField.clear();
+      usernameField.sendKeys('dev');
+      fields.get(1).sendKeys('dev');
+
+      expect(loginPage.loginButton().isEnabled()).toBeTruthy();
+
+      loginPage.loginButton().click();
+
+      expect(element(by.css('login-page')).isPresent()).toBeFalsy();
+      expect(element(by.css('console-view')).isPresent()).toBeTruthy();
     });
   });
 
