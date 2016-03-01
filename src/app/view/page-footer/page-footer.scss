@@ -1,11 +1,9 @@
-page-footer {
+page-footer, [page-footer] {
   display: block;
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  margin-left: -15px;
-  margin-right: -15px;
   height: $page-footer-height;
   color: $page-footer-color-fg;
   background: $page-footer-color-bg;
@@ -13,8 +11,9 @@ page-footer {
 
   .copyright {
     position: absolute;
-    left: 15px + 40px;
+    left: 40px;
     bottom: 40px;
+    line-height: 1;
 
     .secondary {
       color: #ccc;
@@ -24,18 +23,18 @@ page-footer {
   .helion-logo {
     position: absolute;
     top: 34px;
-    left: 15px + 40px;
+    left: 40px;
   }
 
   .hpe-logo {
     position: absolute;
     top: 34px;
-    right: 15px + 40px;
+    right: 40px;
   }
 
   .links {
     position: absolute;
-    right: 15px + 40px;
+    right: 40px;
     bottom: 40px;
     margin: 0;
     line-height: 1;
@@ -48,6 +47,27 @@ page-footer {
         cursor: pointer;
         color: #ccc;
       }
+    }
+  }
+
+  &.bleeding {
+    margin-left: -15px;
+    margin-right: -15px;
+
+    .copyright {
+      left: 15px + 40px;
+    }
+
+    .helion-logo {
+      left: 15px + 40px;
+    }
+
+    .hpe-logo {
+      right: 15px + 40px;
+    }
+
+    .links {
+      right: 15px + 40px;
     }
   }
 }
