@@ -1,14 +1,18 @@
 // Font paths
-$fa-font-path           : "lib/font-awesome/fonts";
-$font-path              : "lib/helion-ui-theme/dist/fonts/metric-font";
-$icon-font-path         : "lib/helion-ui-theme/dist/fonts/helion-icons/fonts";
+$fa-font-path             : "lib/font-awesome/fonts";
+$font-path                : "lib/helion-ui-theme/dist/fonts/metric-font";
+$icon-font-path           : "lib/helion-ui-theme/dist/fonts/helion-icons/fonts";
 
-$page-header-height     : 96px !default;
-$page-footer-height     : 176px !default;
-$page-footer-color-bg   : #333 !default;
-$page-footer-color-fg   : #fff !default;
+$page-header-height       : 96px !default;
+$page-footer-height       : 176px !default;
+$page-footer-color-bg     : #333 !default;
+$page-footer-color-fg     : #fff !default;
 
-$navbar-height          : $page-header-height !default;
+$page-header-fg             : #333 !default;
+$page-header-fg-unselected  : #999 !default;
+$page-header-bg             : #fff !default;
+
+$navbar-height            : $page-header-height !default;
 
 // Helion UI fonts and theme
 @import "lib/helion-ui-theme/dist/fonts/index";
