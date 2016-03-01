@@ -1,3 +1,5 @@
+'use strict';
+
 var sh = require('../../tools/node_modules/shelljs');
 
 // Get host IP
@@ -22,6 +24,7 @@ module.exports = {
   getTableRows: getTableRows,
   getTableRowAt: getTableRowAt,
   getTableCellAt: getTableCellAt
+
 };
 
 function getHost() {

@@ -1,3 +1,5 @@
+'use strict';
+
 // Service instances registration helpers
 var helpers = require('./helpers.po');
 var loginPage = require('./login-page.po');
@@ -24,6 +26,7 @@ module.exports = {
   cancel: cancel,
   register: register,
   togglePassword: togglePassword
+
 };
 
 function login() {

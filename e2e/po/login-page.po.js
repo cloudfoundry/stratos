@@ -1,3 +1,5 @@
+'use strict';
+
 // Login page helpers
 var helpers = require('./helpers.po');
 

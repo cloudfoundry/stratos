@@ -1,3 +1,5 @@
+'use strict';
+
 var helpers = require('./po/helpers.po');
 var navbar = require('./po/navbar.po');
 var loginPage = require('./po/login-page.po');

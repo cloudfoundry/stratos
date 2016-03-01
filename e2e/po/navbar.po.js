@@ -1,3 +1,5 @@
+'use strict';
+
 // Navbar helpers
 module.exports = {
 
