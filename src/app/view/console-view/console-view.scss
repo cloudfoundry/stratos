@@ -1,4 +1,13 @@
+@import "page-footer/page-footer";
+
 console-view {
+  position: relative;
   display: block;
-  padding-top: 50px;
+  padding-top: $page-header-height;
+  min-height: 100vh;
+  overflow-x: hidden;
+
+  > * > .content {
+    padding-bottom: $page-footer-height;
+  }
 }

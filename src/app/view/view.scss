@@ -1,3 +1,8 @@
+$page-header-height: 96px;
+$page-footer-height: 176px;
+$page-footer-color-bg: #333;
+$page-footer-color-fg: #fff;
+
 @import "login-page/login-page";
 @import "console-view/console-view";
 @import "service-registration/service-registration";
