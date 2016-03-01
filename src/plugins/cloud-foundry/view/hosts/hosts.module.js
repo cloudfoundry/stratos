@@ -10,8 +10,8 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('cf.hosts', {
-      url: '/hosts',
+    $stateProvider.state('cf.workspaces', {
+      url: '/workspaces',
       templateUrl: 'plugins/cloud-foundry/view/hosts/hosts.html'
     });
   }

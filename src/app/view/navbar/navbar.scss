@@ -1,0 +1,51 @@
+navbar > nav {
+  color: $page-header-fg;
+  background: $page-header-bg;
+  padding-left: 20px;
+  padding-right: 20px;
+
+  .nav.navbar-nav > li {
+    > a {
+      font-size: 18pt;
+      color: $page-header-fg-unselected;
+      background: transparent;
+
+      &:hover,
+      &:focus,
+      &.active {
+        color: $page-header-fg;
+        background: transparent;
+        text-decoration: none;
+      }
+
+      &:active {
+        box-shadow: none;
+      }
+    }
+
+    &.active {
+      > a {
+        color: $page-header-fg;
+      }
+    }
+  }
+
+  account-actions > * > a {
+    position: relative;
+    top: 6px;
+    color: $page-header-fg;
+    &:hover,
+    &:focus {
+      text-decoration: none;
+    }
+  }
+
+  .navbar-brand {
+    font-size: 24pt;
+    font-weight: 500;
+  }
+}
+
+.icon-bar {
+  background: $page-header-fg-unselected;
+}
