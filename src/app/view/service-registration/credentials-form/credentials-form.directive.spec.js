@@ -14,6 +14,11 @@
       $scope.service = { name: 'cluster1', url: 'cluster1_url' };
     }));
 
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
+
     describe('with default functionality', function () {
       var element, credentialsFormCtrl;
 
@@ -27,6 +32,8 @@
 
         credentialsFormCtrl = element.controller('credentialsForm');
         spyOn(credentialsFormCtrl, 'reset').and.callThrough();
+        spyOn(credentialsFormCtrl, 'registerFailed').and.callThrough();
+        spyOn(credentialsFormCtrl, 'registerSuccessful').and.callThrough();
       });
 
       it('should be defined', function () {
@@ -67,9 +74,58 @@
 
         $httpBackend.flush();
 
+        expect(credentialsFormCtrl.registerSuccessful).toHaveBeenCalled();
         expect(credentialsFormCtrl.reset).toHaveBeenCalled();
         expect(credentialsFormCtrl._data.registered).toBe(true);
         expect(credentialsFormCtrl._data.service_password).toBeUndefined();
+      });
+
+      it('should called registerFailed() on register failure', function () {
+        $httpBackend.when('POST', '/api/service-instances/register').respond(403, {});
+        credentialsFormCtrl.register();
+        $httpBackend.flush();
+
+        expect(credentialsFormCtrl.registerFailed).toHaveBeenCalled();
+      });
+
+      it('should set correct errors on register failure with status === -1', function () {
+        $httpBackend.when('POST', '/api/service-instances/register').respond(-1, {});
+        credentialsFormCtrl.register();
+        $httpBackend.flush();
+
+        expect(credentialsFormCtrl.serverFailedToRespond).toBe(true);
+        expect(credentialsFormCtrl.serverErrorOnRegister).toBe(false);
+        expect(credentialsFormCtrl.failedRegister).toBe(false);
+      });
+
+      it('should set correct errors on register failure with status === 403', function () {
+        $httpBackend.when('POST', '/api/service-instances/register').respond(403, {});
+        credentialsFormCtrl.register();
+        $httpBackend.flush();
+
+        expect(credentialsFormCtrl.serverFailedToRespond).toBe(false);
+        expect(credentialsFormCtrl.serverErrorOnRegister).toBe(false);
+        expect(credentialsFormCtrl.failedRegister).toBe(true);
+      });
+
+      it('should set correct errors on register failure with status === 500', function () {
+        $httpBackend.when('POST', '/api/service-instances/register').respond(500, {});
+        credentialsFormCtrl.register();
+        $httpBackend.flush();
+
+        expect(credentialsFormCtrl.serverFailedToRespond).toBe(false);
+        expect(credentialsFormCtrl.serverErrorOnRegister).toBe(true);
+        expect(credentialsFormCtrl.failedRegister).toBe(false);
+      });
+
+      it('should set correct errors on register failure with status === 501', function () {
+        $httpBackend.when('POST', '/api/service-instances/register').respond(501, {});
+        credentialsFormCtrl.register();
+        $httpBackend.flush();
+
+        expect(credentialsFormCtrl.serverFailedToRespond).toBe(false);
+        expect(credentialsFormCtrl.serverErrorOnRegister).toBe(true);
+        expect(credentialsFormCtrl.failedRegister).toBe(false);
       });
 
       it('should set error flags to false and set form as pristine on reset', function () {
