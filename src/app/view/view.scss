@@ -32,3 +32,16 @@
     width: 100px;
   }
 }
+
+.btn-border-less {
+  display: inline-block;
+  color: $text-color;
+  text-decoration: none;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: $brand-primary;
+    text-decoration: none;;
+  }
+}
