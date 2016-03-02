@@ -7,7 +7,7 @@ page-footer, [page-footer] {
   height: $page-footer-height;
   color: $page-footer-color-fg;
   background: $page-footer-color-bg;
-  font-size: 16pt;
+  font-size: 16px;
 
   .copyright {
     position: absolute;
@@ -39,7 +39,6 @@ page-footer, [page-footer] {
     bottom: 40px;
     margin: 0;
     line-height: 1;
-    width: 40%;
 
     li {
       display: inline-block;
