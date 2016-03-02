@@ -7,7 +7,8 @@
     "gate-check": "gulp lint && npm test",
     "pretest": "npm run update-webdriver",
     "test": "karma start karma.conf.js --single-run",
-    "update-webdriver": "webdriver-manager update"
+    "update-webdriver": "webdriver-manager update",
+    "watch": "gulp watch"
   },
   "author": "",
   "license": "ISC",
