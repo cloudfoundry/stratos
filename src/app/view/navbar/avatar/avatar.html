@@ -1,0 +1,12 @@
+<a class="btn-border-less"
+   title="{{ avatarCtrl.model.username }}"
+   ng-click="avatarCtrl.showHideActions()">
+  <i class="helion-icon helion-icon-User helion-icon-2x" ></i>
+</a>
+<div ng-if="avatarCtrl.showActions"
+     class="popover hpe-popover bottom in">
+  <div class="arrow"></div>
+  <div class="popover-content">
+    <account-actions></account-actions>
+  </div>
+</div>

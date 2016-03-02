@@ -21,7 +21,7 @@
     return {
       controller: AccountActionsController,
       controllerAs: 'accountActionsCtrl',
-      templateUrl: path + 'view/navbar/account-actions/account-actions.html'
+      templateUrl: path + 'view/navbar/avatar/account-actions/account-actions.html'
     };
   }
 
@@ -38,7 +38,7 @@
    * @constructor
    */
   function AccountActionsController(modelManager) {
-    this.account = modelManager.retrieve('app.model.account');
+    this.model = modelManager.retrieve('app.model.account');
   }
 
 })();
