@@ -41,8 +41,8 @@
 
     registerNavigation: function () {
       this.modelManager.retrieve('app.model.navigation').menu
-        .addMenuItem('cf.workspaces', 'cf.workspaces', gettext('Workspaces'))
-        .addMenuItem('cf.applications', 'cf.applications', gettext('Applications'))
+        .addMenuItem('cf.workspace', 'cf.workspace', gettext('Workspace'))
+        .addMenuItem('cf.applications', 'cf.applications', gettext('Applications'));
     }
   });
 
