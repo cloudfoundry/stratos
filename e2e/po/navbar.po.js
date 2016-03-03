@@ -10,8 +10,8 @@ module.exports = {
 };
 
 function accountActionsButton() {
-  return element(by.css('account-actions'))
-    .element(by.id('login-button'));
+  return element(by.css('avatar'))
+    .element(by.css('[ng-click="avatarCtrl.showHideActions()"]'))
 }
 
 function showAccountActions() {
