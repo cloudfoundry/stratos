@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "gulp clean:dist && gulp",
     "gate-check": "gulp lint && npm test",
     "pretest": "npm run update-webdriver",
     "test": "karma start karma.conf.js --single-run",
