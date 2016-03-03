@@ -51,7 +51,7 @@
      */
     list: function () {
       var that = this;
-      return this.serviceInstanceApi.list(that.account.username)
+      return this.serviceInstanceApi.list(that.account.data.username)
         .then(function (response) {
           var items = response.data.items;
           that.serviceInstances.length = 0;
@@ -73,7 +73,7 @@
      * @public
      */
     register: function (serviceInstance, username, password) {
-      return this.serviceInstanceApi.register(this.account.username, serviceInstance, username, password);
+      return this.serviceInstanceApi.register(this.account.data.username, serviceInstance, username, password);
     },
 
     /**
@@ -85,7 +85,7 @@
      * @public
      */
     unregister: function (serviceInstance) {
-      return this.serviceInstanceApi.unregister(this.account.username, serviceInstance);
+      return this.serviceInstanceApi.unregister(this.account.data.username, serviceInstance);
     }
   });
 

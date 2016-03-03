@@ -49,7 +49,6 @@
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
         .then(function (response) {
-          that.username = username;
           that.onLoggedIn(response);
         });
     },

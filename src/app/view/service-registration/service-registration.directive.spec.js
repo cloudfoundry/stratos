@@ -12,6 +12,10 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       $scope.showRegistration = false;
+
+      var modelManager = $injector.get('app.model.modelManager');
+      var account = modelManager.retrieve('app.model.account');
+      account.data = { username: 'dev' };
     }));
 
     describe('without overlay', function () {
@@ -98,7 +102,7 @@
         model.numRegistered = 1;
 
         var mockRegistered = { name: 'cluster', url: 'cluster_url', service_user: 'user' };
-        var expectedData = { username: undefined, name: 'cluster' };
+        var expectedData = { username: 'dev', name: 'cluster' };
 
         $httpBackend.when('POST', '/api/service-instances/unregister').respond(200, {});
         $httpBackend.expectPOST('/api/service-instances/unregister', expectedData);
