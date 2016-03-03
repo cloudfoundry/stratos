@@ -11,7 +11,7 @@
       var $compile = $injector.get('$compile');
       var $scope = $injector.get('$rootScope').$new();
 
-      var markup = '<application><application/>';
+      var markup = '<application></application>';
 
       $httpBackend = $injector.get('$httpBackend');
       $element = angular.element(markup);
@@ -104,7 +104,7 @@
       it('invoke `login` method - success', function () {
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/api/auth/login/').respond(200, {});
-        $httpBackend.when('GET', '/api/service-instances?username=dev').respond(200, { items: [] });
+        $httpBackend.when('GET', '/api/service-instances').respond(200, { items: [] });
         $httpBackend.expectPOST('/api/auth/login/');
         applicationCtrl.login('dev', 'dev');
         $httpBackend.flush();
