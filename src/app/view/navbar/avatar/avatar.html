@@ -1,9 +1,9 @@
 <a class="btn-border-less"
-   title="{{ avatarCtrl.model.data.username }}"
-   ng-click="avatarCtrl.showHideActions()">
+   ng-click="avatarCtrl.showActions()"
+   title="{{ avatarCtrl.model.data.username }}">
   <i class="helion-icon helion-icon-User helion-icon-2x" ></i>
 </a>
-<div ng-if="avatarCtrl.showActions"
+<div ng-if="avatarCtrl.showingActions"
      class="popover hpe-popover bottom in">
   <div class="arrow"></div>
   <div class="popover-content">
