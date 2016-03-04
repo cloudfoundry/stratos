@@ -34,30 +34,26 @@
         expect(avatarCtrl.model).toBeDefined();
       });
 
-      it('should have properties `showActions` defined', function () {
-        expect(avatarCtrl.model).toBeDefined();
+      it('should have properties `showingActions` defined', function () {
+        expect(avatarCtrl.showingActions).toBeDefined();
       });
 
-      it('should have properties `showActions` defined as false by default', function () {
-        expect(avatarCtrl.showActions).toBe(false);
+      it('should have properties `showingActions` defined as false by default', function () {
+        expect(avatarCtrl.showingActions).toBe(false);
       });
 
       // method definitions
 
-      it('should have method `showHideActions` defined', function () {
-        expect(angular.isFunction(avatarCtrl.showHideActions)).toBe(true);
+      it('should have method `showActions` defined', function () {
+        expect(angular.isFunction(avatarCtrl.showActions)).toBe(true);
       });
 
       // method invocation
 
-      it('invoke `showHideActions`', function () {
+      it('invoke `showActions`', function () {
         avatarCtrl.showActions = false;
-        avatarCtrl.showHideActions();
+        avatarCtrl.showingActions();
         expect(avatarCtrl.showActions).toBe(true);
-
-        avatarCtrl.showActions = true;
-        avatarCtrl.showHideActions();
-        expect(avatarCtrl.showActions).toBe(false);
       });
 
     });
