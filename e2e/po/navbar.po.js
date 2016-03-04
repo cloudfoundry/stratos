@@ -11,7 +11,7 @@ module.exports = {
 
 function accountActionsButton() {
   return element(by.css('avatar'))
-    .element(by.css('[ng-click="avatarCtrl.showHideActions()"]'))
+    .element(by.css('[ng-click="avatarCtrl.showActions()"]'))
 }
 
 function showAccountActions() {
