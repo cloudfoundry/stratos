@@ -1,15 +1,13 @@
-<span class="btn">
-  <span uib-dropdown>
-    <a href id="login-button" uib-dropdown-toggle
-       role="button"
-       aria-haspopup="true"
-       aria-expanded="false">
-      <span class="fa fa-user fa-3"></span>
-    </a>
-    <ul uib-dropdown-menu aria-labelledby="login-button">
-      <li>
-        <a href="#" ng-click="applicationCtrl.logout()">Sign Out</a>
-      </li>
-    </ul>
-  </span>
+<span uib-dropdown>
+  <a href id="login-button" uib-dropdown-toggle
+     role="button"
+     aria-haspopup="true"
+     aria-expanded="false">
+    <i class="helion-icon helion-icon-User helion-icon-2x"></i>
+  </a>
+  <ul uib-dropdown-menu aria-labelledby="login-button">
+    <li>
+      <a href="#" ng-click="applicationCtrl.logout()" translate>Sign Out</a>
+    </li>
+  </ul>
 </span>

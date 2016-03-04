@@ -3,10 +3,8 @@
 
   angular
     .module('cloud-foundry.view', [
-      'cloud-foundry.view.hosts',
-      'cloud-foundry.view.organizations',
       'cloud-foundry.view.applications',
-      'cloud-foundry.view.services'
+      'cloud-foundry.view.workspace'
     ])
     .config(registerRoute);
 

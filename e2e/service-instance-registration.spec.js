@@ -156,7 +156,7 @@ describe('Service Instance Registration', function () {
       browser.driver.sleep(1000);
 
       expect(registrationOverlay.isPresent()).toBeFalsy();
-      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications');
+      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/workspace');
     });
 
     it('should go directly to applications view on logout and login', function () {
@@ -165,7 +165,7 @@ describe('Service Instance Registration', function () {
       browser.driver.sleep(1000);
 
       expect(registrationOverlay.isPresent()).toBeFalsy();
-      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications');
+      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/workspace');
     });
   });
 });
