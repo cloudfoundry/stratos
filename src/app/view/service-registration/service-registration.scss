@@ -3,12 +3,24 @@
 .service-registration {
   display: block;
 
+  .navbar {
+    color: $page-header-fg;
+    background: $page-header-bg;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    .navbar-brand {
+      font-size: 24pt;
+      font-weight: 500;
+    }
+  }
+
   .registration-actions {
     min-width: 200px;
   }
 
   .registration-content {
-    padding: 50px 40px 80px;
+    padding: $page-header-height 40px 80px;
   }
 
   .registration-notification {
