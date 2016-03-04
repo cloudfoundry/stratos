@@ -3,6 +3,12 @@
 .service-registration {
   display: block;
 
+  &.overlay-position {
+    .registration-content {
+      padding: $page-header-height 40px 80px;
+    }
+  }
+
   .navbar {
     color: $page-header-fg;
     background: $page-header-bg;
@@ -17,10 +23,6 @@
 
   .registration-actions {
     min-width: 200px;
-  }
-
-  .registration-content {
-    padding: $page-header-height 40px 80px;
   }
 
   .registration-notification {
