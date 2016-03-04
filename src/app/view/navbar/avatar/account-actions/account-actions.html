@@ -9,26 +9,19 @@
     </span>
   </div>
 
-  <table>
-    <tr>
-      <td>
-        <a class="btn-border-less" href="#/account/settings">
-          <i class="helion-icon helion-icon-Actions helion-icon-2x"></i>
-          <div translate>
-            Account Settings
-          </div>
-        </a>
-      </td>
-      <td><!-- placeholder for help --></td>
-      <td>
-        <a class="btn-border-less" href="#"
-           ng-click="applicationCtrl.logout()">
-          <i class="helion-icon helion-icon-Logout helion-icon-2x"></i>
-          <div translate>
-            Sign Out
-          </div>
-        </a>
-      </td>
-    </tr>
-  </table>
+  <div class="actions">
+    <a class="action btn-border-less" href="#/account/settings">
+      <i class="helion-icon helion-icon-Actions helion-icon-2x"></i>
+      <div translate>
+        Account Settings
+      </div>
+    </a>
+    <a class="action btn-border-less" href="#"
+       ng-click="applicationCtrl.logout()">
+      <i class="helion-icon helion-icon-Logout helion-icon-2x"></i>
+      <div translate>
+        Sign Out
+      </div>
+    </a>
+  </div>
 </div>

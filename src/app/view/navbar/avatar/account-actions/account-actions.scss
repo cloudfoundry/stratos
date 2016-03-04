@@ -3,16 +3,18 @@ account-actions, [account-actions] {
   width: 557px;
   height: 162px;
 
-  table {
-    width: 100%;
-
-    td {
-      width: 33%;
-      text-align: center;
-    }
-  }
-
   .account-info {
     height: 80px;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-around;
+
+    .action {
+      text-align: center;
+    }
   }
 }
