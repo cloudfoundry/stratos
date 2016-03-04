@@ -115,7 +115,6 @@
      */
     onLoggedOut: function () {
       this.loggedIn = false;
-      delete this.username;
       delete this.data;
     }
 
