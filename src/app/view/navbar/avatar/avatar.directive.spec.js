@@ -51,9 +51,9 @@
       // method invocation
 
       it('invoke `showActions`', function () {
-        avatarCtrl.showActions = false;
-        avatarCtrl.showingActions();
-        expect(avatarCtrl.showActions).toBe(true);
+        avatarCtrl.showingActions = false;
+        avatarCtrl.showActions();
+        expect(avatarCtrl.showingActions).toBe(true);
       });
 
     });
