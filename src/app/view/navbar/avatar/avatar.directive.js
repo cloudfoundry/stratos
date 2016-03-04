@@ -26,7 +26,10 @@
   }
 
   AvatarController.$inject = [
-    'app.model.modelManager'
+    'app.model.modelManager',
+    '$scope',
+    '$document',
+    '$timeout'
   ];
 
   /**
@@ -34,25 +37,48 @@
    * @memberof app.view
    * @name AvatarController
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @property {app.model.account} account - the account model
-   * @property {boolean} showActions - flag indicating show or hide actions popover.
+   * @param {object} $document - angular $document service
+   * @param {object} $scope - angular $scope service
+   * @param {object} $timeout - angular $timeout service
+   * @property {app.model.account} model - the account model
+   * @property {object} $document - angular $document service
+   * @property {object} $scope - angular $scope service
+   * @property {object} $timeout - angular $timeout service
+   * @property {boolean} showingActions - flag indicating show or hide actions popover.
    * @constructor
    */
-  function AvatarController(modelManager) {
+  function AvatarController(modelManager, $scope, $document, $timeout) {
     this.model = modelManager.retrieve('app.model.account');
-    this.showActions = false;
+    this.$document = $document;
+    this.$scope = $scope;
+    this.$timeout = $timeout;
+    this.showingActions = false;
   }
 
   angular.extend(AvatarController.prototype, {
     /**
-     * @function showHideActions
+     * @function showActions
      * @memberof AvatarController
-     * @description show or hide actions popover
+     * @description show actions popover
      * @returns {void}
      * @public
      */
-    showHideActions: function () {
-      this.showActions = !this.showActions;
+    showActions: function () {
+      var that = this;
+      this.showingActions = true;
+      this.$timeout(function () {
+        if (that.showingActions) {
+          that.$document.on('click', hide);
+        } else {
+          that.$document.off('click', hide);
+        }
+      }, 0);
+
+      function hide() {
+        that.showingActions = false;
+        that.$document.off('click', hide);
+        that.$scope.$apply();
+      }
     }
   });
 
