@@ -28,6 +28,8 @@
    * @constructor
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the model management service
+   * @property {app.event.eventService} eventService - the event bus service
+   * @property {app.model.modelManager} modelManager - the model management service
    */
   function SettingsController(eventService, modelManager) {
     this.eventService = eventService;
