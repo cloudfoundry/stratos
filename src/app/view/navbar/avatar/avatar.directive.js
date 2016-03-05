@@ -37,20 +37,20 @@
    * @memberof app.view
    * @name AvatarController
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {object} $document - angular $document service
    * @param {object} $scope - angular $scope service
+   * @param {object} $document - angular $document service
    * @param {object} $timeout - angular $timeout service
    * @property {app.model.account} model - the account model
-   * @property {object} $document - angular $document service
    * @property {object} $scope - angular $scope service
+   * @property {object} $document - angular $document service
    * @property {object} $timeout - angular $timeout service
    * @property {boolean} showingActions - flag indicating show or hide actions popover.
    * @constructor
    */
   function AvatarController(modelManager, $scope, $document, $timeout) {
     this.model = modelManager.retrieve('app.model.account');
-    this.$document = $document;
     this.$scope = $scope;
+    this.$document = $document;
     this.$timeout = $timeout;
     this.showingActions = false;
   }

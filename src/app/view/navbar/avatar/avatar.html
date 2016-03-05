@@ -1,8 +1,9 @@
-<a class="btn-border-less"
+<i class="btn-border-less helion-icon helion-icon-User_settings"
+   ng-if="applicationCtrl.loggedIn"
    ng-click="avatarCtrl.showActions()"
    title="{{ avatarCtrl.model.data.username }}">
-  <i class="helion-icon helion-icon-User helion-icon-2x" ></i>
-</a>
+</i>
+
 <div ng-if="avatarCtrl.showingActions"
      class="popover hpe-popover bottom in">
   <div class="arrow"></div>
