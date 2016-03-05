@@ -8,13 +8,17 @@ account-actions, [account-actions] {
   }
 
   .actions {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-around;
+    display: table;
+    width: 100%;
 
     .action {
+      display: table-cell;
+      width: 50%;
       text-align: center;
+
+      > * {
+        display: inline-block;
+      }
     }
   }
 }
