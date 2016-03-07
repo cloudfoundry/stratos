@@ -19,14 +19,9 @@
     }));
 
     describe('without overlay', function () {
-      var element, serviceRegistrationCtrl, mockServiceInstance;
+      var element, serviceRegistrationCtrl;
 
       beforeEach(function () {
-        mockServiceInstance = {
-          name: 'cluster',
-          url: 'cluster_url'
-        };
-
         var markup = '<service-registration><service-registration/>';
 
         element = angular.element(markup);
@@ -57,46 +52,21 @@
         expect(serviceRegistrationCtrl.serviceInstances).toEqual([]);
       });
 
-      it('should have `showFlyout` property initially be false', function () {
-        expect(serviceRegistrationCtrl.showFlyout).toBe(false);
-      });
+      it('should call connect on model on connect()', function () {
+        var serviceInstance = { name: 'cluster1', url: 'cluster1_url' };
+        $httpBackend.when('POST', '/api/service-instances/connect').respond(200, {});
 
-      it('should set showFlyout === false on closeFlyout()', function () {
-        serviceRegistrationCtrl.enterCredentials(mockServiceInstance);
-        serviceRegistrationCtrl.closeFlyout();
+        serviceRegistrationCtrl.connect(serviceInstance);
+        $httpBackend.flush();
 
-        expect(serviceRegistrationCtrl.showFlyout).toBe(false);
-      });
-
-      it('should set showFlyout === false and update data on closeFlyout(serviceInstance)', function () {
-        serviceRegistrationCtrl.enterCredentials(mockServiceInstance);
-        serviceRegistrationCtrl.closeFlyout({ name: 'cluster2', url: 'cluster2_url' });
-
-        var expectedData = { name: 'cluster2', url: 'cluster2_url' };
-        expect(serviceRegistrationCtrl.activeServiceInstance).toEqual(expectedData);
-        expect(serviceRegistrationCtrl.serviceInstanceModel.numRegistered).toBe(0);
-        expect(serviceRegistrationCtrl.showFlyout).toBe(false);
-      });
-
-      it('should set showFlyout === false and update data on closeFlyout(serviceInstance)', function () {
-        serviceRegistrationCtrl.enterCredentials(mockServiceInstance);
-        serviceRegistrationCtrl.closeFlyout({ name: 'cluster2', url: 'cluster2_url', registered: true });
-
-        var expectedData = { name: 'cluster2', url: 'cluster2_url', registered: true };
-        expect(serviceRegistrationCtrl.activeServiceInstance).toEqual(expectedData);
+        expect(serviceInstance.service_user).toBe('cluster1_user');
+        expect(serviceInstance.service_token).toBe('token');
+        expect(serviceInstance.expires_at).toBeDefined();
+        expect(serviceInstance.scope).toEqual(['role1', 'role2']);
         expect(serviceRegistrationCtrl.serviceInstanceModel.numRegistered).toBe(1);
-        expect(serviceRegistrationCtrl.showFlyout).toBe(false);
       });
 
-      it('should set showFlyout === true on enterCredentials()', function () {
-        serviceRegistrationCtrl.enterCredentials(mockServiceInstance);
-
-        var expectedData = { name: 'cluster', url: 'cluster_url' };
-        expect(serviceRegistrationCtrl.activeServiceInstance).toEqual(expectedData);
-        expect(serviceRegistrationCtrl.showFlyout).toBe(true);
-      });
-
-      it('should call unregister on model on unregister()', function () {
+      it('should call disconnect on model on disconnect()', function () {
         var model = serviceRegistrationCtrl.serviceInstanceModel;
         model.serviceInstances = [{ name: 'c1', url: 'c1_url', service_user: 'usr1' }];
         model.numRegistered = 1;
@@ -104,12 +74,12 @@
         var mockRegistered = { name: 'cluster', url: 'cluster_url', service_user: 'user' };
         var expectedData = { username: 'dev', name: 'cluster' };
 
-        $httpBackend.when('POST', '/api/service-instances/unregister').respond(200, {});
-        $httpBackend.expectPOST('/api/service-instances/unregister', expectedData);
-        serviceRegistrationCtrl.unregister(mockRegistered);
+        $httpBackend.when('POST', '/api/service-instances/disconnect').respond(200, {});
+        $httpBackend.expectPOST('/api/service-instances/disconnect', expectedData);
+        serviceRegistrationCtrl.disconnect(mockRegistered);
         $httpBackend.flush();
 
-        expect(mockRegistered.registered).toBe(false);
+        expect(mockRegistered.registered).toBeUndefined();
         expect(mockRegistered.service_user).toBeUndefined();
         expect(serviceRegistrationCtrl.serviceInstanceModel.numRegistered).toBe(0);
       });
@@ -150,10 +120,6 @@
         expect(serviceRegistrationCtrl.serviceInstances).toEqual([]);
       });
 
-      it('should have `showFlyout` property initially be false', function () {
-        expect(serviceRegistrationCtrl.showFlyout).toBe(false);
-      });
-
       it('should be visible when showRegistration === true', function () {
         $scope.showRegistration = true;
         $scope.$apply();
@@ -163,14 +129,36 @@
       });
 
       it('should be hidden when registration completed', function () {
+        spyOn(serviceRegistrationCtrl.serviceInstanceModel, 'register').and.callThrough();
         $scope.showRegistration = true;
         $scope.$apply();
 
         serviceRegistrationCtrl.completeRegistration();
+
+        expect(serviceRegistrationCtrl.serviceInstanceModel.register).not.toHaveBeenCalled();
+        expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(true);
+      });
+
+      it('should be hidden when registration completed', function () {
+        spyOn(serviceRegistrationCtrl.serviceInstanceModel, 'register').and.callThrough();
+        $scope.showRegistration = true;
         $scope.$apply();
 
+        serviceRegistrationCtrl.serviceInstances = [
+          { name: 'cluster1', url: 'cluster1_url', valid: true },
+          { name: 'cluster2', url: 'cluster2_url', valid: true },
+          { name: 'cluster3', url: 'cluster3_url' }
+        ];
+        serviceRegistrationCtrl.serviceInstanceModel.numRegistered = 2;
+
+        var expectedData = { username: 'dev', serviceInstances: ['cluster1', 'cluster2'] };
+        $httpBackend.when('POST', '/api/service-instances/register').respond(200, {});
+        $httpBackend.expectPOST('/api/service-instances/register', expectedData);
+        serviceRegistrationCtrl.completeRegistration();
+        $httpBackend.flush();
+
+        expect(serviceRegistrationCtrl.serviceInstanceModel.register).toHaveBeenCalled();
         expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(false);
-        expect(element.find('div').length).toBe(0);
       });
     });
   });

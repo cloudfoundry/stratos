@@ -34,7 +34,7 @@
               <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                 ng-if="serviceInstance.valid"></span>
               <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
-                ng-if="serviceInstance.expired"></span>
+                ng-if="serviceInstance.valid === false"></span>
               <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-warning"
                 ng-if="serviceInstance.error"></span>
             </td>
@@ -44,12 +44,12 @@
             <td>{{serviceInstance.expires_at | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
             <td class="text-right">
               <a class="btn btn-link btn-sm" ng-if="!serviceInstance.valid"
-                ng-click="serviceRegistrationCtrl.enterCredentials(serviceInstance)">
-                <span ng-if="serviceInstance.expired" translate>Reconnect</span>
-                <span ng-if="!serviceInstance.expired" translate>Connect</span>
+                ng-click="serviceRegistrationCtrl.connect(serviceInstance)">
+                <span ng-if="serviceInstance.valid === false" translate>Reconnect</span>
+                <span ng-if="serviceInstance.valid === undefined" translate>Connect</span>
               </a>
               <a class="btn btn-link btn-sm" ng-if="serviceInstance.valid"
-                ng-click="serviceRegistrationCtrl.unregister(serviceInstance)" translate>Disconnect</a>
+                ng-click="serviceRegistrationCtrl.disconnect(serviceInstance)" translate>Disconnect</a>
             </td>
           </tr>
         </tbody>
@@ -68,10 +68,4 @@
       Done
     </button>
   </div>
-  <flyout flyout-active="serviceRegistrationCtrl.showFlyout" flyout-close-icon="'helion-icon helion-icon-Close'">
-    <credentials-form service-instance="serviceRegistrationCtrl.activeServiceInstance"
-      on-cancel="serviceRegistrationCtrl.closeFlyout()"
-      on-submit="serviceRegistrationCtrl.closeFlyout(data)">
-    </credentials-form>
-  </flyout>
 </div>

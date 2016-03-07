@@ -38,22 +38,38 @@
      * @memberof app.api.serviceInstance.ServiceInstanceApi
      * @description Connect a service instance
      * @param {string} user - the Stratos user
-     * @param {string} service - the service instance name
+     * @param {string} serviceInstance - the service instance name
      * @param {string} username - the service instance account username
      * @param {string} token - the access token
-     * @param {number} expires_at - when the token expires
+     * @param {number} expiresAt - when the token expires
      * @param {array} scope - the token scope
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (user, service, username, token, expires_at, scope) {
+    connect: function (user, serviceInstance, username, token, expiresAt, scope) {
       return this.$http.post('/api/service-instances/connect', {
         username: user,
-        name: service,
+        name: serviceInstance,
         service_user: username,
         service_token: token,
-        expires_at: expires_at,
+        expires_at: expiresAt,
         scope: scope
+      });
+    },
+
+    /**
+     * @function disconnect
+     * @memberof app.api.serviceInstance.ServiceInstanceApi
+     * @description Disconnect user from service instance
+     * @param {string} user - the Stratos user
+     * @param {string} serviceInstance - the service instance name
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    disconnect: function (user, serviceInstance) {
+      return this.$http.post('/api/service-instances/disconnect', {
+        username: user,
+        name: serviceInstance
       });
     },
 
@@ -84,22 +100,6 @@
       return this.$http.post('/api/service-instances/register', {
         username: user,
         serviceInstances: serviceInstanceNames
-      });
-    },
-
-    /**
-     * @function unregister
-     * @memberof app.api.serviceInstance.ServiceInstanceApi
-     * @description Disconnect and unregister user from service instance
-     * @param {string} user - the Stratos user
-     * @param {string} service - the service instance name
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    unregister: function (user, service) {
-      return this.$http.post('/api/service-instances/unregister', {
-        username: user,
-        name: service
       });
     }
   });

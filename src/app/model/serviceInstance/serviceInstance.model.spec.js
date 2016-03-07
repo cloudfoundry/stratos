@@ -48,9 +48,69 @@
         .respond(200, mockData);
 
       serviceInstance.list().then(function (response) {
-        expect(response).toEqual({ serviceInstances: expectedData, numRegistered: 0 });
+        expect(response).toEqual({ serviceInstances: expectedData, numCompleted: 0, numRegistered: 0 });
         expect(serviceInstance.serviceInstances).toEqual(expectedData);
         expect(serviceInstance.numRegistered).toBe(0);
+      });
+
+      $httpBackend.flush();
+    });
+
+    it('should set valid === true for service instance if not expired', function () {
+      var data = {
+        items: [
+          { name: 'cluster1', url:' cluster1_url', expires_at: (new Date()).getTime() + 36000 },
+          { name: 'cluster2', url:' cluster2_url' }
+        ]
+      };
+
+      $httpBackend.when('GET', '/api/service-instances?username=dev')
+        .respond(200, data);
+
+      serviceInstance.list().then(function (response) {
+        expect(response.numRegistered).toBe(1);
+        expect(serviceInstance.serviceInstances[0].valid).toBe(true);
+      });
+
+      $httpBackend.flush();
+    });
+
+    it('should set valid === false for service instance if expired', function () {
+      var data = {
+        items: [
+          { name: 'cluster1', url:' cluster1_url', expires_at: (new Date()).getTime() - 1 },
+          { name: 'cluster2', url:' cluster2_url' }
+        ]
+      };
+
+      $httpBackend.when('GET', '/api/service-instances?username=dev')
+        .respond(200, data);
+
+      serviceInstance.list().then(function (response) {
+        expect(response.numRegistered).toBe(0);
+        expect(serviceInstance.serviceInstances[0].valid).toBe(false);
+      });
+
+      $httpBackend.flush();
+    });
+
+    it('should return numCompleted on list() with valid+registered service instances', function () {
+      var data = {
+        items: [
+          {
+            name: 'cluster1',
+            url:' cluster1_url',
+            expires_at: (new Date()).getTime() + 360000,
+            registered: true
+          }
+        ]
+      };
+
+      $httpBackend.when('GET', '/api/service-instances?username=dev')
+        .respond(200, data);
+
+      serviceInstance.list().then(function (response) {
+        expect(response.numCompleted).toBe(1);
       });
 
       $httpBackend.flush();
@@ -70,29 +130,47 @@
       $httpBackend.flush();
     });
 
-    it('should POST correct data on register()', function () {
+    it('should POST correct data on connect()', function () {
       var data = {
         username: 'dev',
         name: 'service',
-        service_user: 'username',
-        service_password: 'password'
+        service_user: 'service_user',
+        service_token: 'token',
+        expires_at: 1000,
+        scope: ['role1', 'role2']
       };
-      $httpBackend.expectPOST('/api/service-instances/register', data).respond(200, '');
+      $httpBackend.expectPOST('/api/service-instances/connect', data).respond(200, '');
 
-      serviceInstance.register('service', 'username', 'password');
-
+      var serviceInstanceData = {
+        name: 'service',
+        service_user: 'service_user',
+        service_token: 'token',
+        expires_at: 1000,
+        scope: ['role1', 'role2']
+      };
+      serviceInstance.connect(serviceInstanceData);
       $httpBackend.flush();
     });
 
-    it('should POST correct data on unregister()', function () {
+    it('should POST correct data on disconnect()', function () {
       var data = {
         username: 'dev',
         name: 'service'
       };
-      $httpBackend.expectPOST('/api/service-instances/unregister', data).respond(200, '');
+      $httpBackend.expectPOST('/api/service-instances/disconnect', data).respond(200, '');
 
-      serviceInstance.unregister('service');
+      serviceInstance.disconnect('service');
 
+      $httpBackend.flush();
+    });
+
+    it('should POST correct data on register()', function () {
+      var data = {
+        username: 'dev',
+        serviceInstances: ['service']
+      };
+      $httpBackend.expectPOST('/api/service-instances/register', data).respond(200, '');
+      serviceInstance.register(['service']);
       $httpBackend.flush();
     });
   });

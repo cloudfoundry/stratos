@@ -51,15 +51,15 @@
     completeRegistration: function () {
       var that = this;
 
-      var registered = _.filter(this.serviceInstances, { valid: true });
-      if (!_.isEmpty(registered)) {
+      if (this.serviceInstanceModel.numRegistered > 0) {
+        var registered = _.filter(this.serviceInstances, { valid: true });
         this.serviceInstanceModel.register(_.map(registered, 'name'))
           .then(function () {
             that.showOverlayRegistration = false;
           });
       }
     },
-    enterCredentials: function (serviceInstance) {
+    connect: function (serviceInstance) {
       var that = this;
 
       // Mock data from UAA server
@@ -72,17 +72,15 @@
       this.serviceInstanceModel.connect(serviceInstance)
         .then(function success() {
           serviceInstance.valid = true;
-          serviceInstance.expired = false;
           that.serviceInstanceModel.numRegistered += 1;
         });
     },
-    unregister: function (serviceInstance) {
+    disconnect: function (serviceInstance) {
       var that = this;
-      this.serviceInstanceModel.unregister(serviceInstance.name)
+      this.serviceInstanceModel.disconnect(serviceInstance.name)
         .then(function success() {
-          serviceInstance.valid = false;
-          serviceInstance.expired = false;
-          serviceInstance.registered = false;
+          delete serviceInstance.registered;
+          delete serviceInstance.valid;
           delete serviceInstance.service_user;
           delete serviceInstance.service_token;
           delete serviceInstance.expires_at;

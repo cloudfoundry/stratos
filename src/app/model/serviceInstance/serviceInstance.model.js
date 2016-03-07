@@ -60,6 +60,19 @@
     },
 
     /**
+     * @function disconnect
+     * @memberof app.model.serviceInstance.ServiceInstance
+     * @description Disconnect user from service instance
+     * @param {string} serviceInstanceName - the service instance name
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    disconnect: function (serviceInstanceName) {
+      return this.serviceInstanceApi.disconnect(this.account.data.username,
+                                                serviceInstanceName);
+    },
+
+    /**
      * @function list
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Returns services instances and number registered
@@ -77,10 +90,8 @@
           angular.forEach(items, function (item) {
             if (angular.isDefined(item.expires_at)) {
               if (item.expires_at > now) {
-                item.expired = false;
                 item.valid = true;
               } else {
-                item.expired = true;
                 item.valid = false;
               }
             }
@@ -88,19 +99,19 @@
 
           that.serviceInstances.length = 0;
           that.serviceInstances.push.apply(that.serviceInstances, _.sortBy(items, 'name'));
-          that.numCompleted = _.sumBy(items, function (o) { return o.valid && o.registered ? 1 : 0; }) || 0;
           that.numRegistered = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
+          var numCompleted = _.sumBy(items, function (o) { return o.valid && o.registered ? 1 : 0; }) || 0;
 
           return {
             serviceInstances: that.serviceInstances,
-            numCompleted: that.numCompleted,
+            numCompleted: numCompleted,
             numRegistered: that.numRegistered
           };
         });
     },
 
     /**
-     * @function list
+     * @function register
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Set the service instances as registered
      * @param {string} serviceInstanceNames - the service instance names
@@ -108,19 +119,7 @@
      * @public
      */
     register: function (serviceInstanceNames) {
-      return this.serviceInstanceApi.register(this.account.username, serviceInstanceNames);
-    },
-
-    /**
-     * @function unregister
-     * @memberof app.model.serviceInstance.ServiceInstance
-     * @description Unregister user from service instance
-     * @param {string} serviceInstance - the service instance name
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    unregister: function (serviceInstance) {
-      return this.serviceInstanceApi.unregister(this.account.data.username, serviceInstance);
+      return this.serviceInstanceApi.register(this.account.data.username, serviceInstanceNames);
     }
   });
 
