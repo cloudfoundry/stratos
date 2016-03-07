@@ -12,6 +12,10 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       $scope.service = { name: 'cluster1', url: 'cluster1_url' };
+
+      var modelManager = $injector.get('app.model.modelManager');
+      var account = modelManager.retrieve('app.model.account');
+      account.data = { username: 'dev' };
     }));
 
     afterEach(function () {

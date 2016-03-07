@@ -103,7 +103,7 @@
 
       it('invoke `login` method - success', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/api/auth/login/').respond(200, {});
+        $httpBackend.when('POST', '/api/auth/login/').respond(200, { username: 'dev' });
         $httpBackend.when('GET', '/api/service-instances?username=dev').respond(200, { items: [] });
         $httpBackend.expectPOST('/api/auth/login/');
         applicationCtrl.login('dev', 'dev');

@@ -10,7 +10,7 @@
 
       var modelManager = $injector.get('app.model.modelManager');
       var account = modelManager.retrieve('app.model.account');
-      account.username = 'dev';
+      account.data = { username: 'dev' };
       serviceInstance = modelManager.retrieve('app.model.serviceInstance');
 
       mockData = {
