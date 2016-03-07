@@ -43,6 +43,23 @@
 
   angular.extend(ServiceInstance.prototype, {
     /**
+     * @function connect
+     * @memberof app.api.serviceInstance.ServiceInstance
+     * @description Connect a service instance
+     * @param {object} serviceInstance - the service instance data
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    connect: function (serviceInstance) {
+      return this.serviceInstanceApi.connect(this.account.data.username,
+                                             serviceInstance.name,
+                                             serviceInstance.service_user,
+                                             serviceInstance.service_token,
+                                             serviceInstance.expires_at,
+                                             serviceInstance.scope);
+    },
+
+    /**
      * @function list
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Returns services instances and number registered
@@ -54,26 +71,44 @@
       return this.serviceInstanceApi.list(that.account.data.username)
         .then(function (response) {
           var items = response.data.items;
+
+          // check token expirations
+          var now = (new Date()).getTime();
+          angular.forEach(items, function (item) {
+            if (angular.isDefined(item.expires_at)) {
+              if (item.expires_at > now) {
+                item.expired = false;
+                item.valid = true;
+              } else {
+                item.expired = true;
+                item.valid = false;
+              }
+            }
+          });
+
           that.serviceInstances.length = 0;
           that.serviceInstances.push.apply(that.serviceInstances, _.sortBy(items, 'name'));
-          that.numRegistered = _.sumBy(items, function (o) { return o.registered ? 1 : 0; }) || 0;
-          return { serviceInstances: that.serviceInstances, numRegistered: that.numRegistered };
+          that.numCompleted = _.sumBy(items, function (o) { return o.valid && o.registered ? 1 : 0; }) || 0;
+          that.numRegistered = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
+
+          return {
+            serviceInstances: that.serviceInstances,
+            numCompleted: that.numCompleted,
+            numRegistered: that.numRegistered
+          };
         });
     },
 
     /**
      * @function list
      * @memberof app.model.serviceInstance.ServiceInstance
-     * @description Authenticate the username and password with the
-     * service instance
-     * @param {string} serviceInstance - the service instance name
-     * @param {string} username - the service instance username to authenticate with
-     * @param {string} password - the service instance password to authenticate with
+     * @description Set the service instances as registered
+     * @param {string} serviceInstanceNames - the service instance names
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    register: function (serviceInstance, username, password) {
-      return this.serviceInstanceApi.register(this.account.data.username, serviceInstance, username, password);
+    register: function (serviceInstanceNames) {
+      return this.serviceInstanceApi.register(this.account.username, serviceInstanceNames);
     },
 
     /**

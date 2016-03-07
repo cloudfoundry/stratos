@@ -20,27 +20,36 @@
       <table class="table">
         <thead>
           <tr>
+            <th class="text-center registration-status" translate></th>
             <th translate>Name</th>
             <th translate>URL</th>
             <th translate>User Account</th>
-            <th class="text-center" translate>Registered</th>
+            <th translate>Valid Until</th>
             <th class="registration-actions"></th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="serviceInstance in serviceRegistrationCtrl.serviceInstances">
+            <td class="text-center">
+              <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+                ng-if="serviceInstance.valid"></span>
+              <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+                ng-if="serviceInstance.expired"></span>
+              <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-warning"
+                ng-if="serviceInstance.error"></span>
+            </td>
             <td>{{serviceInstance.name}}</td>
             <td>{{serviceInstance.url}}</td>
             <td>{{serviceInstance.service_user}}</td>
-            <td class="text-center">
-              <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                ng-show="serviceInstance.registered"></span>
-            </td>
+            <td>{{serviceInstance.expires_at | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
             <td class="text-right">
-              <a class="btn btn-link btn-sm" ng-if="!serviceInstance.registered"
-                ng-click="serviceRegistrationCtrl.enterCredentials(serviceInstance)" translate>Provide Credentials</a>
-              <a class="btn btn-link btn-sm" ng-if="serviceInstance.registered"
-                ng-click="serviceRegistrationCtrl.unregister(serviceInstance)" translate>Unregister</a>
+              <a class="btn btn-link btn-sm" ng-if="!serviceInstance.valid"
+                ng-click="serviceRegistrationCtrl.enterCredentials(serviceInstance)">
+                <span ng-if="serviceInstance.expired" translate>Reconnect</span>
+                <span ng-if="!serviceInstance.expired" translate>Connect</span>
+              </a>
+              <a class="btn btn-link btn-sm" ng-if="serviceInstance.valid"
+                ng-click="serviceRegistrationCtrl.unregister(serviceInstance)" translate>Disconnect</a>
             </td>
           </tr>
         </tbody>

@@ -124,7 +124,7 @@
       this.modelManager.retrieve('app.model.serviceInstance')
         .list()
         .then(function onSuccess(data) {
-          that.showRegistration = data.numRegistered === 0;
+          that.showRegistration = data.numCompleted === 0;
           that.showGlobalSpinner = false;
         });
     },
