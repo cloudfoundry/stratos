@@ -7,7 +7,7 @@ For more implementation details, please see the following pages:
 * [Plugins](docs/plugins.md)
 
 ## System Requirements
-Nginx is used to serve static files while Node.js + Express is used to host the mock REST API backend (which is in development). A third container hosting Elasticsearch will provide the cache component.
+Nginx is used to serve static files while Node.js + Express is used to host the mock REST API backend (which is in development). Another container hosts the MySQL database for session and service instance management. Finally, there is a container hosting Elasticsearch that provides the cache component.
 
 This project depends on the following:
 * [Docker](https://docs.docker.com/mac)
@@ -40,12 +40,31 @@ docker compose up -d
 # Set up database
 docker exec -it stratosidentitydb_db_1 /bin/bash
 mysql -u stratos --password=stratos < /versions/0.0.1.sql
+mysql -u stratos --password=stratos < /versions/add_some_data.sql
 ```
 
 ### Build and run the REST API server
 ```
 cd ../stratos-node-server
 docker build -t stratos-node-server .
+
+# Run the mock authentication server
+docker run -it --rm\
+           --name mock-auth-service \
+           -v $(pwd):/usr/src/app \
+           -p 3001 \
+           stratos-node-server
+
+npm install && npm run start-mock-auth-server
+
+# Run the mock API server
+docker run -it --rm\
+           --name mock-api-service \
+           -v $(pwd):/usr/src/app \
+           -p 3002 \
+           stratos-node-server
+
+npm install && npm run start-mock-api-server
 
 docker run -it \
            --rm --name stratos-node-server \
