@@ -1,12 +1,19 @@
+@import "avatar/avatar";
+
 navbar > nav {
   color: $page-header-fg;
   background: $page-header-bg;
   padding-left: 20px;
   padding-right: 20px;
 
+  .navbar-brand {
+    font-size: 24px;
+    font-weight: 500;
+  }
+
   .nav.navbar-nav > li {
     > a {
-      font-size: 18pt;
+      font-size: 18px;
       color: $page-header-fg-unselected;
       background: transparent;
 
@@ -30,19 +37,26 @@ navbar > nav {
     }
   }
 
-  account-actions > * > a {
-    position: relative;
-    top: 6px;
-    color: $page-header-fg;
-    &:hover,
-    &:focus {
-      text-decoration: none;
+  icons, [icons] {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-end;
+    line-height: 22px;
+    padding-top: 40px;
+    padding-right: 4px;
+
+    > * {
+      margin-left: 30px;
+    }
+
+    .helion-icon {
+      cursor: pointer;
     }
   }
 
-  .navbar-brand {
-    font-size: 24pt;
-    font-weight: 500;
+  .helion-icon {
+    font-size: 24px;
   }
 }
 

@@ -32,6 +32,7 @@
   function Account(apiManager) {
     this.apiManager = apiManager;
     this.loggedIn = false;
+    this.data = {};
   }
 
   angular.extend(Account.prototype, {

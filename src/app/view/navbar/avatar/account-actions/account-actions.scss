@@ -1,0 +1,24 @@
+account-actions, [account-actions] {
+  display: block;
+  width: 557px;
+  height: 162px;
+
+  .account-info {
+    height: 80px;
+  }
+
+  .actions {
+    display: table;
+    width: 100%;
+
+    .action {
+      display: table-cell;
+      width: 33.3%;
+      text-align: center;
+
+      > * {
+        display: inline-block;
+      }
+    }
+  }
+}
