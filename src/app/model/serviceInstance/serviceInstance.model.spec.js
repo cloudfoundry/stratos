@@ -76,9 +76,10 @@
     });
 
     it('should set valid === false for service instance if expired', function () {
+      var now = (new Date()).getTime() / 1000;
       var data = {
         items: [
-          { name: 'cluster1', url:' cluster1_url', expires_at: (new Date()).getTime() - 1 },
+          { name: 'cluster1', url:' cluster1_url', expires_at: now - 1 },
           { name: 'cluster2', url:' cluster2_url' }
         ]
       };

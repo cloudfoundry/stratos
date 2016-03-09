@@ -30,7 +30,7 @@
         </thead>
         <tbody>
           <tr ng-repeat="serviceInstance in serviceRegistrationCtrl.serviceInstances">
-            <td class="text-center">
+            <td class="text-center registration-status">
               <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                 ng-if="serviceInstance.valid"></span>
               <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
@@ -39,9 +39,9 @@
                 ng-if="serviceInstance.error"></span>
             </td>
             <td>{{serviceInstance.name}}</td>
-            <td>{{serviceInstance.url}}</td>
+            <td>{{serviceInstance.URL}}</td>
             <td>{{serviceInstance.service_user}}</td>
-            <td>{{serviceInstance.expires_at | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
+            <td>{{serviceInstance.expires_at | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
             <td class="text-right">
               <a class="btn btn-link btn-sm" ng-if="!serviceInstance.valid"
                 ng-click="serviceRegistrationCtrl.connect(serviceInstance)">

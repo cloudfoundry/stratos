@@ -53,7 +53,7 @@
       });
 
       it('should call connect on model on connect()', function () {
-        var serviceInstance = { name: 'cluster1', url: 'cluster1_url' };
+        var serviceInstance = { name: 'cluster1', URL: 'cluster1_url' };
         $httpBackend.when('POST', '/api/service-instances/connect').respond(200, {});
 
         serviceRegistrationCtrl.connect(serviceInstance);
@@ -68,10 +68,10 @@
 
       it('should call disconnect on model on disconnect()', function () {
         var model = serviceRegistrationCtrl.serviceInstanceModel;
-        model.serviceInstances = [{ name: 'c1', url: 'c1_url', service_user: 'usr1' }];
+        model.serviceInstances = [{ name: 'c1', URL: 'c1_url', service_user: 'usr1' }];
         model.numRegistered = 1;
 
-        var mockRegistered = { name: 'cluster', url: 'cluster_url', service_user: 'user' };
+        var mockRegistered = { name: 'cluster', URL: 'cluster_url', service_user: 'user' };
         var expectedData = { username: 'dev', name: 'cluster' };
 
         $httpBackend.when('POST', '/api/service-instances/disconnect').respond(200, {});
@@ -145,9 +145,9 @@
         $scope.$apply();
 
         serviceRegistrationCtrl.serviceInstances = [
-          { name: 'cluster1', url: 'cluster1_url', valid: true },
-          { name: 'cluster2', url: 'cluster2_url', valid: true },
-          { name: 'cluster3', url: 'cluster3_url' }
+          { name: 'cluster1', URL: 'cluster1_url', valid: true },
+          { name: 'cluster2', URL: 'cluster2_url', valid: true },
+          { name: 'cluster3', URL: 'cluster3_url' }
         ];
         serviceRegistrationCtrl.serviceInstanceModel.numRegistered = 2;
 

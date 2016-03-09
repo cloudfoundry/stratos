@@ -63,10 +63,10 @@
       var that = this;
 
       // Mock data from UAA server
-      var now = (new Date()).getTime();
+      var now = (new Date()).getTime() / 1000;
       serviceInstance.service_user = serviceInstance.name + '_user';
       serviceInstance.service_token = 'token';
-      serviceInstance.expires_at = now + 36000;
+      serviceInstance.expires_at = now + 60;
       serviceInstance.scope = ['role1', 'role2'];
 
       this.serviceInstanceModel.connect(serviceInstance)

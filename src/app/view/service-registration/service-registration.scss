@@ -1,5 +1,3 @@
-@import "credentials-form/credentials-form";
-
 .service-registration {
   display: block;
 
@@ -27,6 +25,10 @@
 
   .registration-status {
     min-width: 40px;
+
+    .helion-icon {
+      vertical-align: middle;
+    }
   }
 
   .registration-notification {

@@ -86,9 +86,9 @@
           var items = response.data.items;
 
           // check token expirations
-          var now = (new Date()).getTime();
+          var now = (new Date()).getTime() / 1000;
           angular.forEach(items, function (item) {
-            if (angular.isDefined(item.expires_at)) {
+            if (!_.isNil(item.expires_at)) {
               if (item.expires_at > now) {
                 item.valid = true;
               } else {
