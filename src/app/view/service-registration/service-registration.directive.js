@@ -67,7 +67,7 @@
       serviceInstance.service_user = serviceInstance.name + '_user';
       serviceInstance.service_token = 'token';
       serviceInstance.expires_at = now + 60;
-      serviceInstance.scope = ['role1', 'role2'];
+      serviceInstance.scope = 'role1 role2';
 
       this.serviceInstanceModel.connect(serviceInstance)
         .then(function success() {

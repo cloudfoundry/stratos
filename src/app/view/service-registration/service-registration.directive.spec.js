@@ -62,7 +62,7 @@
         expect(serviceInstance.service_user).toBe('cluster1_user');
         expect(serviceInstance.service_token).toBe('token');
         expect(serviceInstance.expires_at).toBeDefined();
-        expect(serviceInstance.scope).toEqual(['role1', 'role2']);
+        expect(serviceInstance.scope).toBe('role1 role2');
         expect(serviceRegistrationCtrl.serviceInstanceModel.numRegistered).toBe(1);
       });
 
