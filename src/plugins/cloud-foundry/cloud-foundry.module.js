@@ -34,14 +34,14 @@
   angular.extend(CloudFoundry.prototype, {
     onLoggedIn: function () {
       this.registerNavigation();
-      this.eventService.$emit(this.eventService.events.AUTO_NAV, 'cf.workspace');
+      this.eventService.$emit(this.eventService.events.AUTO_NAV, 'cf.workspaces');
     },
 
     onLoggedOut: function () {},
 
     registerNavigation: function () {
       this.modelManager.retrieve('app.model.navigation').menu
-        .addMenuItem('cf.workspace', 'cf.workspace', gettext('Workspace'))
+        .addMenuItem('cf.workspaces', 'cf.workspaces', gettext('Workspaces'))
         .addMenuItem('cf.applications', 'cf.applications', gettext('Applications'));
     }
   });

@@ -4,7 +4,7 @@
   angular
     .module('cloud-foundry.view', [
       'cloud-foundry.view.applications',
-      'cloud-foundry.view.workspace'
+      'cloud-foundry.view.workspaces'
     ])
     .config(registerRoute);
 
