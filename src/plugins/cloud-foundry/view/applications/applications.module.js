@@ -14,7 +14,7 @@
       url: '/applications',
       templateUrl: 'plugins/cloud-foundry/view/applications/applications.html',
       controller: ApplicationsController,
-      controllerAs: 'AppsCtrl'
+      controllerAs: 'ApplicationsController'
     });
   }
 
@@ -29,9 +29,9 @@
    * @property {object} appsAPI - the Cloud Foundry Apps API
    * @property {array} apps - List of applications
    */
-  function ApplicationsController(apiManager) {
-    this.appsAPI = apiManager.retrieve('cloud-foundry.api.apps');
-    this.apps = this.appsAPI.list();
+  function ApplicationsController(modelManager) {
+    this.application = modelManager.retrieve('cloud-foundry.model.application');
+    this.applications = this.application.all();
   }
 
   angular.extend(ApplicationsController.prototype, {

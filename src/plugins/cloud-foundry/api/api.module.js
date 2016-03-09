@@ -9,10 +9,10 @@
     '$http',
     'app.api.apiManager',
     'cloud-foundry.api.collectionService',
-    'cloud-foundry.api.appsService'
+    'cloud-foundry.api.applicationApi'
   ];
 
-  function registerCFApi($http, apiManager, CollectionService, AppsAPI) {
+  function registerCFApi($http, apiManager, CollectionService, ApplicationAPI) {
 
     /*
      Generic CF resources that follow the standard pattern with no unique functionality.
