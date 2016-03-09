@@ -145,15 +145,13 @@
         $scope.$apply();
 
         serviceRegistrationCtrl.serviceInstances = [
-          { name: 'cluster1', URL: 'cluster1_url', valid: true },
-          { name: 'cluster2', URL: 'cluster2_url', valid: true },
+          { name: 'cluster1', URL: 'cluster1_url', username: 'dev', valid: true },
+          { name: 'cluster2', URL: 'cluster2_url', username: 'dev', valid: true },
           { name: 'cluster3', URL: 'cluster3_url' }
         ];
         serviceRegistrationCtrl.serviceInstanceModel.numRegistered = 2;
 
-        var expectedData = { username: 'dev', serviceInstances: ['cluster1', 'cluster2'] };
         $httpBackend.when('POST', '/api/service-instances/register').respond(200, {});
-        $httpBackend.expectPOST('/api/service-instances/register', expectedData);
         serviceRegistrationCtrl.completeRegistration();
         $httpBackend.flush();
 

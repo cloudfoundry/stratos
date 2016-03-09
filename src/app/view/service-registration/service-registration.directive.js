@@ -53,7 +53,7 @@
 
       if (this.serviceInstanceModel.numRegistered > 0) {
         var registered = _.filter(this.serviceInstances, { valid: true });
-        this.serviceInstanceModel.register(_.map(registered, 'name'))
+        this.serviceInstanceModel.register(registered)
           .then(function () {
             that.showOverlayRegistration = false;
           });
