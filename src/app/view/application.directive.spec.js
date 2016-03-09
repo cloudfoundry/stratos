@@ -11,7 +11,7 @@
       var $compile = $injector.get('$compile');
       var $scope = $injector.get('$rootScope').$new();
 
-      var markup = '<application><application/>';
+      var markup = '<application></application>';
 
       $httpBackend = $injector.get('$httpBackend');
       $element = angular.element(markup);

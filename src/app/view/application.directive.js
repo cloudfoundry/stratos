@@ -135,7 +135,7 @@
      * @description Login-failure event handler
      * @param {object} response - the HTTP response
      * @emits LOGIN_FAILED
-     * @emits HTTP_500
+     * @emits HTTP_5XX_ON_LOGIN
      * @private
      * @returns {void}
      */
