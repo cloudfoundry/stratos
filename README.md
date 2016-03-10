@@ -35,7 +35,7 @@ docker-machine create --driver virtualbox --virtualbox-cpu-count "2" default
 ### Build and run the Stratos Identity Database
 ```
 cd ../stratos-identity-db
-docker compose up -d
+docker-compose up -d
 
 # Set up database
 docker exec -it stratosidentitydb_db_1 /bin/bash
