@@ -3,44 +3,53 @@
   <nav class="navbar navbar-fixed-top" ng-if="serviceRegistrationCtrl.overlay">
     <div class="container-fluid">
       <div class="navbar-header">
-        <span class="navbar-brand" translate>HPE Helion Development Platform</span>
+        <span class="navbar-brand" translate>CNAP</span>
       </div>
     </div>
   </nav>
   <div class="container registration-content">
     <div class="row">
       <h2 class="page-header" translate>
-        Setup your Stratos Account
+        Setup your account
         <span class="helion-icon helion-icon-Help pull-right"></span>
       </h2>
       <p translate>
-        Before you get started with Stratos, you will have to register into
+        Before you get started with CNAP, you will have to register into
         services to see what apps you have access to.
       </p>
       <table class="table">
         <thead>
           <tr>
+            <th class="text-center registration-status" translate></th>
             <th translate>Name</th>
             <th translate>URL</th>
             <th translate>User Account</th>
-            <th class="text-center" translate>Registered</th>
+            <th translate>Valid Until</th>
             <th class="registration-actions"></th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="serviceInstance in serviceRegistrationCtrl.serviceInstances">
-            <td>{{serviceInstance.name}}</td>
-            <td>{{serviceInstance.url}}</td>
-            <td>{{serviceInstance.service_user}}</td>
-            <td class="text-center">
+            <td class="text-center registration-status">
               <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                ng-show="serviceInstance.registered"></span>
+                ng-if="serviceInstance.valid"></span>
+              <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+                ng-if="serviceInstance.valid === false"></span>
+              <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-warning"
+                ng-if="serviceInstance.error"></span>
             </td>
+            <td>{{serviceInstance.name}}</td>
+            <td>{{serviceInstance.URL}}</td>
+            <td>{{serviceInstance.service_user}}</td>
+            <td>{{serviceInstance.expires_at | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
             <td class="text-right">
-              <a class="btn btn-link btn-sm" ng-if="!serviceInstance.registered"
-                ng-click="serviceRegistrationCtrl.enterCredentials(serviceInstance)" translate>Provide Credentials</a>
-              <a class="btn btn-link btn-sm" ng-if="serviceInstance.registered"
-                ng-click="serviceRegistrationCtrl.unregister(serviceInstance)" translate>Unregister</a>
+              <a class="btn btn-link btn-sm" ng-if="!serviceInstance.valid"
+                ng-click="serviceRegistrationCtrl.connect(serviceInstance)">
+                <span ng-if="serviceInstance.valid === false" translate>Reconnect</span>
+                <span ng-if="serviceInstance.valid === undefined" translate>Connect</span>
+              </a>
+              <a class="btn btn-link btn-sm" ng-if="serviceInstance.valid"
+                ng-click="serviceRegistrationCtrl.disconnect(serviceInstance)" translate>Disconnect</a>
             </td>
           </tr>
         </tbody>
@@ -59,10 +68,4 @@
       Done
     </button>
   </div>
-  <flyout flyout-active="serviceRegistrationCtrl.showFlyout" flyout-close-icon="'helion-icon helion-icon-Close'">
-    <credentials-form service-instance="serviceRegistrationCtrl.activeServiceInstance"
-      on-cancel="serviceRegistrationCtrl.closeFlyout()"
-      on-submit="serviceRegistrationCtrl.closeFlyout(data)">
-    </credentials-form>
-  </flyout>
 </div>

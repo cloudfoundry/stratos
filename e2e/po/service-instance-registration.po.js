@@ -9,13 +9,14 @@ module.exports = {
   login: login,
   registrationOverlay: registrationOverlay,
   serviceInstancesTable: serviceInstancesTable,
-  provideCredentialsLink: provideCredentialsLink,
-  unregisterLink: unregisterLink,
+  connectLink: connectLink,
+  disconnectLink: disconnectLink,
   doneButton: doneButton,
-  provideCredentials: provideCredentials,
-  unregister: unregister,
+  connect: connect,
+  disconnect: disconnect,
   completeRegistration: completeRegistration,
   registrationNotification: registrationNotification,
+  serviceInstanceStatus: serviceInstanceStatus,
 
   credentialsFlyout: credentialsFlyout,
   credentialsForm: credentialsForm,
@@ -44,22 +45,22 @@ function serviceInstancesTable() {
   return registrationOverlay().element(by.css('table'));
 }
 
-function provideCredentialsLink(rowIndex) {
+function connectLink(rowIndex) {
   return helpers.getTableRowAt(serviceInstancesTable(), rowIndex)
-    .element(by.css('[ng-click="serviceRegistrationCtrl.enterCredentials(serviceInstance)"]'));
+    .element(by.css('[ng-click="serviceRegistrationCtrl.connect(serviceInstance)"]'));
 }
 
-function unregisterLink(rowIndex) {
+function disconnectLink(rowIndex) {
   return helpers.getTableRowAt(serviceInstancesTable(), rowIndex)
-    .element(by.css('[ng-click="serviceRegistrationCtrl.unregister(serviceInstance)"]'));
+    .element(by.css('[ng-click="serviceRegistrationCtrl.disconnect(serviceInstance)"]'));
 }
 
-function provideCredentials(rowIndex) {
-  return provideCredentialsLink(rowIndex).click();
+function connect(rowIndex) {
+  return connectLink(rowIndex).click();
 }
 
-function unregister(rowIndex) {
-  return unregisterLink(rowIndex).click();
+function disconnect(rowIndex) {
+  return disconnectLink(rowIndex).click();
 }
 
 function doneButton() {
@@ -68,6 +69,11 @@ function doneButton() {
 
 function completeRegistration() {
   return doneButton().click();
+}
+
+function serviceInstanceStatus(rowIndex, statusClass) {
+  return helpers.getTableCellAt(serviceInstancesTable(), rowIndex, 0)
+    .element(by.css('.' + statusClass));
 }
 
 function registrationNotification() {

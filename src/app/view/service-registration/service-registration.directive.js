@@ -40,41 +40,51 @@
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {array} serviceInstances - the service instances available to user
-   * @property {boolean} showFlyout - flag to show or hide flyout
    */
   function ServiceRegistrationController(modelManager) {
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstances = this.serviceInstanceModel.serviceInstances;
-    this.showFlyout = false;
   }
 
   angular.extend(ServiceRegistrationController.prototype, {
-    closeFlyout: function (serviceInstance) {
-      if (angular.isDefined(serviceInstance)) {
-        // save service instance data only on successful registration
-        angular.extend(this.activeServiceInstance, serviceInstance);
-
-        if (serviceInstance.registered) {
-          this.serviceInstanceModel.numRegistered += 1;
-        }
-      }
-
-      this.showFlyout = false;
-    },
     completeRegistration: function () {
-      this.showOverlayRegistration = false;
-    },
-    enterCredentials: function (serviceInstance) {
-      this.activeServiceInstance = serviceInstance;
-      this.showFlyout = true;
-    },
-    unregister: function (serviceInstance) {
       var that = this;
-      this.serviceInstanceModel.unregister(serviceInstance.name)
+
+      if (this.serviceInstanceModel.numRegistered > 0) {
+        var registered = _.filter(this.serviceInstances, { valid: true });
+        this.serviceInstanceModel.register(registered)
+          .then(function () {
+            that.showOverlayRegistration = false;
+          });
+      }
+    },
+    connect: function (serviceInstance) {
+      var that = this;
+
+      // Mock data from UAA server
+      var now = (new Date()).getTime() / 1000;
+      serviceInstance.service_user = serviceInstance.name + '_user';
+      serviceInstance.service_token = 'token';
+      serviceInstance.expires_at = now + 60;
+      serviceInstance.scope = 'role1 role2';
+
+      this.serviceInstanceModel.connect(serviceInstance)
         .then(function success() {
-          serviceInstance.registered = false;
+          serviceInstance.valid = true;
+          that.serviceInstanceModel.numRegistered += 1;
+        });
+    },
+    disconnect: function (serviceInstance) {
+      var that = this;
+      this.serviceInstanceModel.disconnect(serviceInstance.name)
+        .then(function success() {
+          delete serviceInstance.registered;
+          delete serviceInstance.valid;
           delete serviceInstance.service_user;
+          delete serviceInstance.service_token;
+          delete serviceInstance.expires_at;
+          delete serviceInstance.scope;
           that.serviceInstanceModel.numRegistered -= 1;
         });
     }

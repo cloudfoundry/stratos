@@ -25,6 +25,20 @@
       expect(serviceInstanceApi.$http).toBeDefined();
     });
 
+    it('should send POST request for connect', function () {
+      var data = {
+        username: 'user',
+        name: 'c1',
+        service_user: 'c1_user',
+        service_token: 'token',
+        expires_at: 1000,
+        scope: ['role1']
+      };
+      $httpBackend.expectPOST('/api/service-instances/connect', data).respond(200, '');
+      serviceInstanceApi.connect('user', 'c1', 'c1_user', 'token', 1000, ['role1']);
+      $httpBackend.flush();
+    });
+
     it('should return service instances for specified user', function () {
       var data = {
         items: ['x','y','z']
@@ -41,22 +55,20 @@
     it('should send POST request for register', function () {
       var data = {
         username: 'user',
-        name: 'service',
-        service_user: 'username',
-        service_password: 'password'
+        serviceInstances: ['service']
       };
       $httpBackend.expectPOST('/api/service-instances/register', data).respond(200, '');
-      serviceInstanceApi.register('user', 'service', 'username', 'password');
+      serviceInstanceApi.register('user', ['service']);
       $httpBackend.flush();
     });
 
-    it('should send POST request for unregister', function () {
+    it('should send POST request for disconnect', function () {
       var data = {
         username: 'user',
         name: 'service'
       };
-      $httpBackend.expectPOST('/api/service-instances/unregister', data).respond(200, '');
-      serviceInstanceApi.unregister('user', 'service');
+      $httpBackend.expectPOST('/api/service-instances/disconnect', data).respond(200, '');
+      serviceInstanceApi.disconnect('user', 'service');
       $httpBackend.flush();
     });
   });
