@@ -31,5 +31,5 @@ docker-compose stop
 
 #### Cleanup containers
 ```
-docker rm -f $(docker-compose ps -q)
+docker-compose rm -f
 ```
