@@ -38,53 +38,7 @@
 
     var apiVersionPrefix = '/api/v2/';
 
-    /**
-     * @function makeQueryString
-     * @memberof cloud-foundry.api.application
-     * @description http GET against the cf endpoint.
-     * @param {string} options - the options
-     * @returns {string} the query string
-     * @private
-     */
-    function makeQueryString(options) {
-      options = options || {};
 
-      var query = '';
-      var firstQuery = true;
-
-      if (options.queries) {
-        _.each(options.queries, function (value, key) {
-          query = query + ((firstQuery ? '' : '&') + key + '=' + value);
-          firstQuery = false;
-        });
-      }
-
-      if (options.filter && options.filter.name) {
-        query = query + ((firstQuery ? '' : '&') + 'q=' + options.filter.name + ':' + options.filter.value);
-      }
-
-      return query;
-    }
-    
-     /**
-       * @function get
-       * @memberof cloud-foundry.api.application
-       * @description http GET against the cf endpoint.
-       * @param {string} resourceIdentifier - the resource type to get
-       * @param {string} params - the http params
-       * @returns {object} A resolved/rejected promise
-       * @private
-       */
-      get: function(resourceIdentifier, params) {
-        var options = {};
-        options.paramSerializer = makeQueryString;
-        options.params = params;
-
-        var path = this.getCollectionUrl() + '/' + resourceIdentifier;
-
-        return this.$http.get(path, options);
-
-      }
 
     this.$http = $http;
     this.$q = $q;
@@ -121,7 +75,7 @@
       */
       usage: function(guid, options){
         var path = this.getCollectionUrl() + '/' + guid + '/usage';
-        this.get(path, options);
+        return this.get(path, options);
       },
 
       /**
@@ -138,7 +92,7 @@
       files: function(guid,instanceIndex, filepath, options){
         options.params = {allow_redirect: false};
         var path = this.getCollectionUrl() + '/' + guid + '/instances/' + instanceIndex + '/files/' + filepath;
-        this.get(path, options);
+        return this.get(path, options);
       },
 
       /**
@@ -152,8 +106,25 @@
         return apiVersionPrefix + this.name;
       },
 
-     
+      /**
+       * @function get
+       * @memberof cloud-foundry.api.application
+       * @description http GET against the cf endpoint.
+       * @param {string} resourceIdentifier - the resource type to get
+       * @param {string} params - the http params
+       * @returns {object} A resolved/rejected promise
+       * @private
+       */
+      get: function(resourceIdentifier, params) {
+        var options = {};
+        options.paramSerializer = makeQueryString;
+        options.params = params;
 
+        var path = this.getCollectionUrl() + '/' + resourceIdentifier;
+
+        return this.$http.get(path, options);
+
+      }
 
   });
 
@@ -308,6 +279,34 @@
         });
         /* eslint-enable quote-props */
   }
+
+   /**
+     * @function makeQueryString
+     * @memberof cloud-foundry.api.application
+     * @description http GET against the cf endpoint.
+     * @param {string} options - the options
+     * @returns {string} the query string
+     * @private
+     */
+    function makeQueryString(options) {
+      options = options || {};
+
+      var query = '';
+      var firstQuery = true;
+
+      if (options.queries) {
+        _.each(options.queries, function (value, key) {
+          query = query + ((firstQuery ? '' : '&') + key + '=' + value);
+          firstQuery = false;
+        });
+      }
+
+      if (options.filter && options.filter.name) {
+        query = query + ((firstQuery ? '' : '&') + 'q=' + options.filter.name + ':' + options.filter.value);
+      }
+
+      return query;
+    }
 
 })();
 

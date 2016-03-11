@@ -8,11 +8,7 @@
    * @description The API layer of the CF platform that handles HTTP requests
    */
   angular
-    .module('cloud-foundry.api', [], config);
+    .module('cloud-foundry.api', []);
 
-  interceptor.$inject = [
-    '$q',
-    'app.event.eventService'
-  ];
 
 })();
