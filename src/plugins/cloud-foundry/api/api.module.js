@@ -1,86 +1,47 @@
 (function () {
   'use strict';
 
+  /**
+   * @namespace cloud-foundry.api
+   * @memberof cloud-foundry
+   * @name api
+   * @description The API layer of the CF platform that handles HTTP requests
+   */
   angular
-    .module('cloud-foundry.api', [])
-    .run(registerCFApi);
+    .module('cloud-foundry.api', [], config);
 
-  registerCFApi.$inject = [
-    '$http',
-    'app.api.apiManager',
-    'cloud-foundry.api.collectionService',
-    'cloud-foundry.api.applicationApi'
+  config.$inject = [
+    '$httpProvider'
   ];
 
-  function registerCFApi($http, apiManager, CollectionService, ApplicationAPI) {
+  function config($httpProvider) {
+    $httpProvider.interceptors.push(interceptor);
+  }
 
-    /*
-     Generic CF resources that follow the standard pattern with no unique functionality.
-     For other resources that do have unique functionality or don't support the standard set of verbs then derive an
-     object off of collection and add or remove specific functions.
-     */
-    var genericCollections = [
-      'domains',
-      'private_domains',
-      'shared_domains',
-      'quota_definitions',
-      'service_bindings',
-      'service_plans',
-      'services',
-      'service_instances',
-      'user_provided_service_instances',
-      'buildpacks'
-    ];
+  interceptor.$inject = [
+    '$q',
+    'app.event.eventService'
+  ];
 
-    function CFApi($http) {
-      this.$http = $http;
-      CFApiInitializeCollections(this);
-      apiManager.register('cloud-foundry.api.apps', new AppsAPI(this, $http, CollectionService));
-    }
+  /**
+   * @name interceptor
+   * @description A $http interceptor, which emits a global HTTP error event when
+   * response.status >= 400
+   *
+   * See https://docs.angularjs.org/api/ng/service/$http for details
+   *
+   * @param {object} $q - the $q service for promise/deferred objects
+   * @param {object} eventService - the event bus service
+   * @returns {object} The response error function
+   */
+  function interceptor($q, eventService) {
+    return {
+      responseError: responseError
+    };
 
-    angular.extend(CFApi.prototype, {
-
-      getApiInfo: function (options) {
-        this.get('/v2/info', options);
-      },
-
-      get: function (path, options) {
-        this.$http.get(path, options);
-      },
-
-      delete_: function (path, options) {
-        this.$http.delete(path, options);
-      },
-
-      put: function (path, options) {
-        this.$http.put(path, options);
-      },
-
-      post: function (path, options) {
-        this.$http.post(path, options);
-      }
-
-    });
-
-    apiManager.register('cloud-foundry.api', new CFApi($http));
-
-    function CFApiInitializeCollections(api) {
-      /*eslint-disable no-loop-func */
-      for (var i = genericCollections.length - 1; i >= 0; i--) {
-        (function(j) {
-
-          var collectionName = genericCollections[j];
-
-          var collectionAPI = function ($http, CollectionService) {
-            CollectionService.call(this, collectionName);
-            this.$http = $http;
-            this.api = api;
-          };
-
-          apiManager.register('cloud-foundry.api.' + collectionName, new collectionAPI($http, CollectionService));
-        })(i);
-      }
-      /*eslint-enable no-loop-func */
+    function responseError(response) {
+      eventService.$emit('HTTP_' + response.status, response);
+      return $q.reject(response);
     }
   }
 

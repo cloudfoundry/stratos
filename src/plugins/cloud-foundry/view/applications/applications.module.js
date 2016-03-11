@@ -19,19 +19,21 @@
   }
 
   ApplicationsController.$inject = [
-    'app.api.apiManager'
+    'app.model.modelManager'
   ];
 
   /**
    * @name ApplicationsController
    * @constructor
-   * @param {app.api.apiManager.service} apiManager - the API management service
-   * @property {object} appsAPI - the Cloud Foundry Apps API
-   * @property {array} apps - List of applications
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @property {object} application - the Cloud Foundry Applications Model
    */
   function ApplicationsController(modelManager) {
+    var that = this;
     this.application = modelManager.retrieve('cloud-foundry.model.application');
-    this.applications = this.application.all();
+    this.application.all().then(function () {
+        console.log(that.application.data);
+    });
   }
 
   angular.extend(ApplicationsController.prototype, {

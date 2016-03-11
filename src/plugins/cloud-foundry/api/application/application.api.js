@@ -11,7 +11,7 @@
     .module('cloud-foundry.api')
     .run(registerApplicationApi);
 
-  registerAccountApi.$inject = [
+  registerApplicationApi.$inject = [
     '$http',
     '$q',
     '$cookies',
@@ -19,7 +19,7 @@
   ];
 
   function registerApplicationApi($http, $q, $cookies, apiManager) {
-    apiManager.register('cloud-foundry.api.application', new ApplicationApi(api, http, $q, $cookies, CollectionService));
+    apiManager.register('cloud-foundry.api.application', new ApplicationApi($http, $q, $cookies));
   }
 
   /**
@@ -38,6 +38,14 @@
 
     var apiVersionPrefix = '/api/v2/';
 
+    /**
+     * @function makeQueryString
+     * @memberof cloud-foundry.api.application
+     * @description http GET against the cf endpoint.
+     * @param {string} options - the options
+     * @returns {string} the query string
+     * @private
+     */
     function makeQueryString(options) {
       options = options || {};
 
@@ -66,6 +74,73 @@
 
   angular.extend(ApplicationApi.prototype, {
 
+     /**
+      * @function all
+      * @memberof cloud-foundry.api.application
+      * @description Retrieve all the applications from cloud foundry.
+      * @param {string} guid - the guid
+      * @param {string} options - the options
+      * @returns {object} A resolved/rejected promise
+      * @public
+      */
+      all: function(guid, options){
+        //var path = this.getCollectionUrl() + '/' + guid + '/instances';
+        //this.get(path, options)
+        //TODO this needs to return a promise, even for stub data
+        return stubData();
+      },
+
+     /**
+      * @function usage
+      * @memberof cloud-foundry.api.application
+      * @description Retrieve all the usage from cloud foundry.
+      * @param {string} guid - the guid
+      * @param {string} options - the options
+      * @returns {object} A resolved/rejected promise
+      * @public
+      */
+      usage: function(guid, options){
+        var path = this.getCollectionUrl() + '/' + guid + '/usage';
+        this.get(path, options);
+      },
+
+      /**
+       * @function files
+       * @memberof cloud-foundry.api.application
+       * @description Retrieve all the usage from cloud foundry.
+       * @param {string} guid - the guid
+       * @param {string} instanceIndex - the instanceIndex
+       * @param {string} filepath - the filepath
+       * @param {string} options - the options
+       * @returns {object} A resolved/rejected promise
+       * @public
+      */
+      files: function(guid,instanceIndex, filepath, options){
+        options.params = {allow_redirect: false};
+        var path = this.getCollectionUrl() + '/' + guid + '/instances/' + instanceIndex + '/files/' + filepath;
+        this.get(path, options);
+      },
+
+      /**
+       * @function return
+       * @memberof cloud-foundry.api.application
+       * @description Retrieve all the usage from cloud foundry.
+       * @returns {string} the base url for the endpoint
+       * @private
+       */
+      getCollectionUrl: function () {
+        return apiVersionPrefix + this.name;
+      },
+
+      /**
+       * @function get
+       * @memberof cloud-foundry.api.application
+       * @description http GET against the cf endpoint.
+       * @param {string} resourceIdentifier - the resource type to get
+       * @param {string} params - the http params
+       * @returns {object} A resolved/rejected promise
+       * @private
+       */
       get: function(resourceIdentifier, params) {
         var options = {};
         options.paramSerializer = makeQueryString;
@@ -77,26 +152,6 @@
 
       },
 
-      all: function(guid, options){
-        //var path = this.getCollectionUrl() + '/' + guid + '/instances';
-        //this.get(path, options)
-        return stubData();
-      },
-
-      usage: function(guid, options){
-        var path = this.getCollectionUrl() + '/' + guid + '/usage';
-        this.get(path, options);
-      },
-
-      files: function(guid,instanceIndex, filepath, options){
-        options.params = {allow_redirect: false};
-        var path = this.getCollectionUrl() + '/' + guid + '/instances/' + instanceIndex + '/files/' + filepath;
-        this.get(path, options);
-      },
-
-      getCollectionUrl: function () {
-        return apiVersionPrefix + this.name;
-      }
 
   });
 
@@ -104,7 +159,8 @@
 
         // stub out response for list
         /* eslint-disable quote-props */
-        return {
+        return Promise.resolve({
+        "data":{
           "total_results": 3,
           "total_pages": 1,
           "prev_url": null,
@@ -246,7 +302,8 @@
               }
             }
           ]
-        };
+        }
+        });
         /* eslint-enable quote-props */
   }
 

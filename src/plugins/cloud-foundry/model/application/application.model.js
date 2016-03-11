@@ -12,7 +12,7 @@
     .run(registerApplicationModel);
 
   registerApplicationModel.$inject = [
-    'cloud-founder.model.modelManager',
+    'app.model.modelManager',
     'app.api.apiManager'
   ];
 
@@ -21,62 +21,108 @@
   }
 
   /**
-   * @namespace cloud-founder.model.account.Account
-   * @memberof cloud-founder.model.account
-   * @name cloud-founder.model.account.Account
+   * @namespace cloud-foundry.model.account.Account
+   * @memberof cloud-foundry.model.account
+   * @name cloud-foundry.model.account.Account
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {boolean} loggedIn - a flag indicating if user logged in
    * @class
    */
   function Application(apiManager) {
     this.apiManager = apiManager;
   }
 
-  angular.extend(Account.prototype, {
-   
-    instances: function (guid, options) {
+  angular.extend(Application.prototype, {
+
+    /**
+     * @function all
+     * @memberof cloud-foundry.model.account
+     * @description List all applications at the model layer
+     * @param guid
+     * @param options
+     * @returns {promise} A promise object
+     * @public
+     **/
+    all: function (guid, options) {
       var that = this;
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
-      return applicationApi.all(guid,options)
-        .then(function () {
-          that.onAll();
+      return applicationApi.all(guid, options)
+        .then(function (response) {
+          that.onAll(response);
         });
     },
 
+    /**
+     * @function usage
+     * @memberof cloud-foundry.model.account
+     * @description List the usage at the model layer
+     * @param guid
+     * @param options
+     * @returns {promise} A promise object
+     * @public
+     **/
     usage: function (guid, options) {
       var that = this;
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
-      return applicationApi.usage(guid,options)
-        .then(function () {
-          that.onUsage();
+      return applicationApi.usage(guid, options)
+        .then(function (response) {
+          that.onUsage(response);
         });
     },
 
-    files: function (guid,instanceIndex, filepath, options) {
+    /**
+     * @function files
+     * @memberof cloud-foundry.model.account
+     * @description List the files at the model layer
+     * @param guid
+     * @param instanceIndex
+     * @param filepath
+     * @param options
+     * @returns {promise} A promise object
+     * @public
+     **/
+    files: function (guid, instanceIndex, filepath, options) {
       var that = this;
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
-      return applicationApi.files(guid,instanceIndex, filepath, options)
-        .then(function () {
-          that.onFiles();
+      return applicationApi.files(guid, instanceIndex, filepath, options)
+        .then(function (response) {
+          that.onFiles(response);
         });
     },
 
+    /**
+     * @function onAll
+     * @memberof cloud-foundry.model.account
+     * @description onAll handler at model layer
+     * @private
+     * @returns {void}
+     * */
     onAll: function (response) {
       this.data = response.data;
+      return this.data;
     },
-
+    /**
+     * @function onUsage
+     * @memberof cloud-foundry.model.account
+     * @description onUsage handler at model layer
+     * @private
+     * @returns {void}
+     * */
     onUsage: function (response) {
       this.data = response.data;
     },
-
+    /**
+     * @function onFiles
+     * @memberof cloud-foundry.model.account
+     * @description onFiles handler at model layer
+     * @property data - the return data from the api call
+     * @private
+     * @returns {void}
+     * */
     onFiles: function (response) {
       this.data = response.data;
     }
 
-
-
-   
   });
 
 })();
