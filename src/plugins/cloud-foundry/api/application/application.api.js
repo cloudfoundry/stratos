@@ -65,6 +65,26 @@
 
       return query;
     }
+    
+     /**
+       * @function get
+       * @memberof cloud-foundry.api.application
+       * @description http GET against the cf endpoint.
+       * @param {string} resourceIdentifier - the resource type to get
+       * @param {string} params - the http params
+       * @returns {object} A resolved/rejected promise
+       * @private
+       */
+      get: function(resourceIdentifier, params) {
+        var options = {};
+        options.paramSerializer = makeQueryString;
+        options.params = params;
+
+        var path = this.getCollectionUrl() + '/' + resourceIdentifier;
+
+        return this.$http.get(path, options);
+
+      }
 
     this.$http = $http;
     this.$q = $q;
@@ -132,25 +152,7 @@
         return apiVersionPrefix + this.name;
       },
 
-      /**
-       * @function get
-       * @memberof cloud-foundry.api.application
-       * @description http GET against the cf endpoint.
-       * @param {string} resourceIdentifier - the resource type to get
-       * @param {string} params - the http params
-       * @returns {object} A resolved/rejected promise
-       * @private
-       */
-      get: function(resourceIdentifier, params) {
-        var options = {};
-        options.paramSerializer = makeQueryString;
-        options.params = params;
-
-        var path = this.getCollectionUrl() + '/' + resourceIdentifier;
-
-        this.$http.get(path, options);
-
-      },
+     
 
 
   });

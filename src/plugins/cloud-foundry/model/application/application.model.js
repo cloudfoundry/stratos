@@ -30,6 +30,7 @@
    */
   function Application(apiManager) {
     this.apiManager = apiManager;
+    this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
   }
 
   angular.extend(Application.prototype, {
@@ -45,8 +46,7 @@
      **/
     all: function (guid, options) {
       var that = this;
-      var applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
-      return applicationApi.all(guid, options)
+      return this.applicationApi.all(guid, options)
         .then(function (response) {
           that.onAll(response);
         });
@@ -63,8 +63,7 @@
      **/
     usage: function (guid, options) {
       var that = this;
-      var applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
-      return applicationApi.usage(guid, options)
+      return this.applicationApi.usage(guid, options)
         .then(function (response) {
           that.onUsage(response);
         });
@@ -83,8 +82,7 @@
      **/
     files: function (guid, instanceIndex, filepath, options) {
       var that = this;
-      var applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
-      return applicationApi.files(guid, instanceIndex, filepath, options)
+      return this.applicationApi.files(guid, instanceIndex, filepath, options)
         .then(function (response) {
           that.onFiles(response);
         });
@@ -99,7 +97,6 @@
      * */
     onAll: function (response) {
       this.data = response.data;
-      return this.data;
     },
     /**
      * @function onUsage
