@@ -9,6 +9,10 @@
 ```
 docker-compose build
 ```
+If you prefer to have a development environment running where the stratos-ui repo will auto-update (via gulp watch), instead run this command:
+```
+docker-compose -f docker-compose.yml -f docker-compose.dev-ui.yml build
+```
 
 #### Run
 ```

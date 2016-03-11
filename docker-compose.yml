@@ -74,7 +74,6 @@ nginx:
 
 ui:
   build: ../stratos-ui
-  dockerfile: Dockerfile.prod
   volumes:
     - ../stratos-ui:/usr/src/app
     - ../helion-ui-framework:/usr/src/helion-ui-framework

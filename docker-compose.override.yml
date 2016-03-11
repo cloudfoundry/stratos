@@ -1,0 +1,2 @@
+ui:
+  dockerfile: Dockerfile.prod
