@@ -14,7 +14,7 @@
       url: '/applications',
       templateUrl: 'plugins/cloud-foundry/view/applications/applications.html',
       controller: ApplicationsController,
-      controllerAs: 'ApplicationsController'
+      controllerAs: 'applicationsCtrl'
     });
   }
 
@@ -32,7 +32,7 @@
     var that = this;
     this.application = modelManager.retrieve('cloud-foundry.model.application');
     this.application.all().then(function () {
-        console.log(that.application.data);
+        console.log(that.application.data.applications);
     });
   }
 

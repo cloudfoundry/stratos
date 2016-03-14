@@ -21,23 +21,26 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.account.Account
-   * @memberof cloud-foundry.model.account
-   * @name cloud-foundry.model.account.Account
+   * @namespace cloud-foundry.model.application.Application
+   * @memberof cloud-foundry.model.application
+   * @name cloud-foundry.model.application.Application
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
+   * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @class
    */
   function Application(apiManager) {
     this.apiManager = apiManager;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
+    this.data = {};
+
   }
 
   angular.extend(Application.prototype, {
 
     /**
      * @function all
-     * @memberof cloud-foundry.model.account
+     * @memberof  cloud-foundry.model.application
      * @description List all applications at the model layer
      * @param guid
      * @param options
@@ -54,7 +57,7 @@
 
     /**
      * @function usage
-     * @memberof cloud-foundry.model.account
+     * @memberof cloud-foundry.model.application
      * @description List the usage at the model layer
      * @param guid
      * @param options
@@ -71,7 +74,7 @@
 
     /**
      * @function files
-     * @memberof cloud-foundry.model.account
+     * @memberof  cloud-foundry.model.application
      * @description List the files at the model layer
      * @param guid
      * @param instanceIndex
@@ -90,34 +93,34 @@
 
     /**
      * @function onAll
-     * @memberof cloud-foundry.model.account
+     * @memberof  cloud-foundry.model.application
      * @description onAll handler at model layer
      * @private
      * @returns {void}
      * */
     onAll: function (response) {
-      this.data = response.data;
+      this.data.applications = response.data;
     },
     /**
      * @function onUsage
-     * @memberof cloud-foundry.model.account
+     * @memberof  cloud-foundry.model.application
      * @description onUsage handler at model layer
      * @private
      * @returns {void}
      * */
     onUsage: function (response) {
-      this.data = response.data;
+      this.data.usage = response.data;
     },
     /**
      * @function onFiles
-     * @memberof cloud-foundry.model.account
+     * @memberof  cloud-foundry.model.application
      * @description onFiles handler at model layer
      * @property data - the return data from the api call
      * @private
      * @returns {void}
      * */
     onFiles: function (response) {
-      this.data = response.data;
+      this.data.files = response.data;
     }
 
   });

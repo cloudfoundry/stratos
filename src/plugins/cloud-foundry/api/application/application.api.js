@@ -38,8 +38,6 @@
 
     var apiVersionPrefix = '/api/v2/';
 
-
-
     this.$http = $http;
     this.$q = $q;
     this.$cookies = $cookies;
