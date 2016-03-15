@@ -14,27 +14,30 @@
       url: '/applications',
       templateUrl: 'plugins/cloud-foundry/view/applications/applications.html',
       controller: ApplicationsController,
-      controllerAs: 'AppsCtrl'
+      controllerAs: 'applicationsCtrl'
     });
   }
 
   ApplicationsController.$inject = [
-    'app.api.apiManager'
+    'app.model.modelManager'
   ];
 
   /**
    * @name ApplicationsController
    * @constructor
-   * @param {app.api.apiManager.service} apiManager - the API management service
-   * @property {object} appsAPI - the Cloud Foundry Apps API
-   * @property {array} apps - List of applications
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @property {object} application - the Cloud Foundry Applications Model
    */
-  function ApplicationsController(apiManager) {
-    this.appsAPI = apiManager.retrieve('cloud-foundry.api.apps');
-    this.apps = this.appsAPI.list();
+  function ApplicationsController(modelManager) {
+    var that = this; // eslint-disable-line
+    this.application = modelManager.retrieve('cloud-foundry.model.application');
+    this.application.all().then(function () {
+      //console.log(that.application.data.applications);
+    });
   }
 
   angular.extend(ApplicationsController.prototype, {
+
   });
 
 })();
