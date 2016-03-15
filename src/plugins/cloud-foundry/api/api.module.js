@@ -10,5 +10,4 @@
   angular
     .module('cloud-foundry.api', []);
 
-
 })();

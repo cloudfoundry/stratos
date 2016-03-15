@@ -37,13 +37,12 @@
   }
 
   angular.extend(Application.prototype, {
-
     /**
      * @function all
      * @memberof  cloud-foundry.model.application
      * @description List all applications at the model layer
-     * @param guid
-     * @param options
+     * @param {string} guid application guid
+     * @param {object} options options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -59,8 +58,8 @@
      * @function usage
      * @memberof cloud-foundry.model.application
      * @description List the usage at the model layer
-     * @param guid
-     * @param options
+     * @param {string} guid application guid
+     * @param {object} options options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -76,10 +75,10 @@
      * @function files
      * @memberof  cloud-foundry.model.application
      * @description List the files at the model layer
-     * @param guid
-     * @param instanceIndex
-     * @param filepath
-     * @param options
+     * @param {string} guid application guid
+     * @param {string} instanceIndex the instanceIndex
+     * @param {string} filepath the filePath
+     * @param {object} options options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -95,30 +94,35 @@
      * @function onAll
      * @memberof  cloud-foundry.model.application
      * @description onAll handler at model layer
+     * @param {string} response the json return from the api call
      * @private
      * @returns {void}
-     * */
+     */
     onAll: function (response) {
       this.data.applications = response.data;
     },
+
     /**
      * @function onUsage
      * @memberof  cloud-foundry.model.application
      * @description onUsage handler at model layer
+     * @param {string} response the return from the api call
      * @private
      * @returns {void}
-     * */
+     */
     onUsage: function (response) {
       this.data.usage = response.data;
     },
+
     /**
      * @function onFiles
      * @memberof  cloud-foundry.model.application
      * @description onFiles handler at model layer
+     * @parameter {string} response the return from the api call
      * @property data - the return data from the api call
      * @private
      * @returns {void}
-     * */
+     */
     onFiles: function (response) {
       this.data.files = response.data;
     }
