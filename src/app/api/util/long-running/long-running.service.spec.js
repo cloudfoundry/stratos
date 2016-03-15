@@ -20,7 +20,7 @@
       var c = 0;
 
       longRunning(function () {
-        return $q(function (resolve, reject) {
+        return $q(function (resolve) {
           $timeout(function () {
             if (c++ < 3) {
               resolve({ data: {} });

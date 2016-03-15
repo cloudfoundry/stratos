@@ -42,7 +42,9 @@
     return longRunning;
 
     function longRunning(operation, interval) {
-      var conditionFn, deferred = $q.defer();
+      var conditionFn;
+      var deferred = $q.defer();
+
       loop();
       return {
         until: until
