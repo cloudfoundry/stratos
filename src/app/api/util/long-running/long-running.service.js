@@ -8,7 +8,6 @@
   /**
    *
    ```js
-
    // inject 'app.api.long-running.service' as longRunning here
 
    var interval = 3000;
@@ -31,16 +30,27 @@
      .then(function (response) {
        myDataModel.foo = response.data.foo;
      });
-
    ```
    */
   serviceFactory.$inject = [
     '$q', '$timeout'
   ];
 
+  /**
+   * serviceFactory factory of the service
+   * @param {object} $q - angular $q service
+   * @param {function} $timeout - angular $timeout service
+   * @returns {function} longRunning service
+   */
   function serviceFactory($q, $timeout) {
     return longRunning;
 
+    /**
+     * longRunning longRunning service
+     * @param {function} operation
+     * @param {number} interval in ms
+     * @returns {{until: until}}
+     */
     function longRunning(operation, interval) {
       var conditionFn;
       var deferred = $q.defer();
@@ -50,11 +60,19 @@
         until: until
       };
 
+      /**
+       * specify condition check function to terminate the async loop
+       * @param {function} func - the condition checking function
+       * @returns {promise}
+       */
       function until(func) {
         conditionFn = func;
         return deferred.promise;
       }
 
+      /**
+       * An async loop
+       */
       function loop() {
         $timeout(function () {
           operation().then(function (data) {
