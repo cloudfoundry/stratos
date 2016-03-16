@@ -1,11 +1,10 @@
-<h4>Applications</h4>
+<h4>APPLICATIONS</h4>
 
 <gallery-card class="col-md-4 col-sm-1" ng-repeat="(idx, app) in applicationsCtrl.model.applications track by app.metadata.guid"
   card-actions-icon="helion-icon helion-icon-lg helion-icon-More" card-actions="AppsCtrl.cardActions"
   card-data="AppsCtrl.cards[idx]" on-card-click="AppsCtrl.cardClicked(card)"
   on-notification-click="AppsCtrl.notificationClicked(card)">
-  <strong>GUID</strong>:
-    <a ng-href="#/cf/applications/{{app.metadata.guid}}">{{app.metadata.guid}}</a>
+  <strong>GUID</strong>: <span>{{app.metadata.guid}}</span>
   <br/>
   <strong>Created</strong>: <span am-time-ago="app.metadata.created_at"></span>
   <br/>
