@@ -5,50 +5,79 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.EnvironmentVariableGroupsService', EnvironmentVariableGroupsServiceFactory);
+    .run(registerApi);
 
-  function EnvironmentVariableGroupsServiceFactory() {
-    /* eslint-disable camelcase */
-    function EnvironmentVariableGroupsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.GettingContentsOfRunningEnvironmentVariableGroup = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/environment_variable_groups/running";
-        config.method = 'GET';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.EnvironmentVariableGroups', new EnvironmentVariableGroupsApi($http));
+  }
 
-      this.GettingContentsOfStagingEnvironmentVariableGroup = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/environment_variable_groups/staging";
-        config.method = 'GET';
-        $http(config);
-      };
+  function EnvironmentVariableGroupsApi($http) {
+    this.$http = $http;
+  }
 
-      this.UpdateContentsOfRunningEnvironmentVariableGroup = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/environment_variable_groups/running";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(EnvironmentVariableGroupsApi.prototype, {
 
-      this.UpdateContentsOfStagingEnvironmentVariableGroup = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/environment_variable_groups/staging";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Getting the contents of the running environment variable group
+    * returns the set of default environment variables available to running apps
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/environment_variable_groups/getting_the_contents_of_the_running_environment_variable_group.html
+    */
+    GettingContentsOfRunningEnvironmentVariableGroup: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/environment_variable_groups/running";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * Getting the contents of the staging environment variable group
+    * returns the set of default environment variables available during staging
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/environment_variable_groups/getting_the_contents_of_the_staging_environment_variable_group.html
+    */
+    GettingContentsOfStagingEnvironmentVariableGroup: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/environment_variable_groups/staging";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Updating the contents of the running environment variable group
+    * Updates the set of environment variables which will be made available to all running apps
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/environment_variable_groups/updating_the_contents_of_the_running_environment_variable_group.html
+    */
+    UpdateContentsOfRunningEnvironmentVariableGroup: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/environment_variable_groups/running";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
+    },
+
+   /*
+    * Updating the contents of the staging environment variable group
+    * Updates the set of environment variables which will be made available during staging
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/environment_variable_groups/updating_the_contents_of_the_staging_environment_variable_group.html
+    */
+    UpdateContentsOfStagingEnvironmentVariableGroup: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/environment_variable_groups/staging";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return EnvironmentVariableGroupsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

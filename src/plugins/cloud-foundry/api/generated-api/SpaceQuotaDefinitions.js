@@ -5,82 +5,123 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.SpaceQuotaDefinitionsService', SpaceQuotaDefinitionsServiceFactory);
+    .run(registerApi);
 
-  function SpaceQuotaDefinitionsServiceFactory() {
-    /* eslint-disable camelcase */
-    function SpaceQuotaDefinitionsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.AssociateSpaceWithSpaceQuotaDefinition = function (guid, space_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/space_quota_definitions/" + guid + "/spaces/" + space_guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.SpaceQuotaDefinitions', new SpaceQuotaDefinitionsApi($http));
+  }
 
-      this.CreateSpaceQuotaDefinition = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/space_quota_definitions";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function SpaceQuotaDefinitionsApi($http) {
+    this.$http = $http;
+  }
 
-      this.DeleteSpaceQuotaDefinition = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/space_quota_definitions/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(SpaceQuotaDefinitionsApi.prototype, {
 
-      this.ListAllSpaceQuotaDefinitions = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/space_quota_definitions";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Associate Space with the Space Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/associate_space_with_the_space_quota_definition.html
+    */
+    AssociateSpaceWithSpaceQuotaDefinition: function (guid, space_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/space_quota_definitions/" + guid + "/spaces/" + space_guid + "";
+      config.method = 'PUT';
+      return $http(config);
+    },
 
-      this.ListAllSpacesForSpaceQuotaDefinition = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/space_quota_definitions/" + guid + "/spaces";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Creating a Space Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/creating_a_space_quota_definition.html
+    */
+    CreateSpaceQuotaDefinition: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/space_quota_definitions";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.RemoveSpaceFromSpaceQuotaDefinition = function (guid, space_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/space_quota_definitions/" + guid + "/spaces/" + space_guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * Delete a Particular Space Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/delete_a_particular_space_quota_definition.html
+    */
+    DeleteSpaceQuotaDefinition: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/space_quota_definitions/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RetrieveSpaceQuotaDefinition = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/space_quota_definitions/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Space Quota Definitions
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/list_all_space_quota_definitions.html
+    */
+    ListAllSpaceQuotaDefinitions: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/space_quota_definitions";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.UpdateSpaceQuotaDefinition = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/space_quota_definitions/" + guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * List all Spaces for the Space Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/list_all_spaces_for_the_space_quota_definition.html
+    */
+    ListAllSpacesForSpaceQuotaDefinition: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/space_quota_definitions/" + guid + "/spaces";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * Remove Space from the Space Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/remove_space_from_the_space_quota_definition.html
+    */
+    RemoveSpaceFromSpaceQuotaDefinition: function (guid, space_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/space_quota_definitions/" + guid + "/spaces/" + space_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Space Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/retrieve_a_particular_space_quota_definition.html
+    */
+    RetrieveSpaceQuotaDefinition: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/space_quota_definitions/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Updating a Space Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/updating_a_space_quota_definition.html
+    */
+    UpdateSpaceQuotaDefinition: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/space_quota_definitions/" + guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return SpaceQuotaDefinitionsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

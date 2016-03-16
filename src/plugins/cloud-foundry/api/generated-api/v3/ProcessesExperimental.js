@@ -5,58 +5,99 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.ProcessesExperimentalService', ProcessesExperimentalServiceFactory);
+    .run(registerApi);
 
-  function ProcessesExperimentalServiceFactory() {
-    /* eslint-disable camelcase */
-    function ProcessesExperimentalService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.GetProcess = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/processes/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.ProcessesExperimental', new ProcessesExperimentalApi($http));
+  }
 
-      this.ListAllProcesses = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/processes";
-        config.method = 'GET';
-        $http(config);
-      };
+  function ProcessesExperimentalApi($http) {
+    this.$http = $http;
+  }
 
-      this.ScalingProcess = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/processes/" + guid + "/scale";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(ProcessesExperimentalApi.prototype, {
 
-      this.TerminatingProcessInstance = function (guid, index, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/processes/" + guid + "/instances/" + index + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * Get a Process
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/get_a_process.html
+    */
+    GetProcess: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/processes/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.UpdateProcess = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/processes/" + guid + "";
-        config.method = 'PATCH';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Get Detailed Stats for a Process
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/get_detailed_stats_for_a_process.html
+    */
+    GetDetailedStatsForProcess: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/processes/" + guid + "/stats";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * List all Processes
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/list_all_processes.html
+    */
+    ListAllProcesses: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/processes";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Scaling a Process
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/scaling_a_process.html
+    */
+    ScalingProcess: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/processes/" + guid + "/scale";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
+    },
+
+   /*
+    * Terminating a Process instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/terminating_a_process_instance.html
+    */
+    TerminatingProcessInstance: function (guid, index, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/processes/" + guid + "/instances/" + index + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
+
+   /*
+    * Updating a Process
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/updating_a_process.html
+    */
+    UpdateProcess: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/processes/" + guid + "";
+      config.method = 'PATCH';
+      config.data = value;
+      return $http(config);
     }
 
-    return ProcessesExperimentalService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

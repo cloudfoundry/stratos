@@ -5,24 +5,37 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.InfoService', InfoServiceFactory);
+    .run(registerApi);
 
-  function InfoServiceFactory() {
-    /* eslint-disable camelcase */
-    function InfoService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.GetInfo = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/info";
-        config.method = 'GET';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.Info', new InfoApi($http));
+  }
 
+  function InfoApi($http) {
+    this.$http = $http;
+  }
+
+  /* eslint-disable camelcase */
+  angular.extend(InfoApi.prototype, {
+
+   /*
+    * Get Info
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/info/get_info.html
+    */
+    GetInfo: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/info";
+      config.method = 'GET';
+      return $http(config);
     }
 
-    return InfoService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

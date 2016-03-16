@@ -5,82 +5,123 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.SecurityGroupsService', SecurityGroupsServiceFactory);
+    .run(registerApi);
 
-  function SecurityGroupsServiceFactory() {
-    /* eslint-disable camelcase */
-    function SecurityGroupsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.AssociateSpaceWithSecurityGroup = function (guid, space_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/security_groups/" + guid + "/spaces/" + space_guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.SecurityGroups', new SecurityGroupsApi($http));
+  }
 
-      this.CreateSecurityGroup = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/security_groups";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function SecurityGroupsApi($http) {
+    this.$http = $http;
+  }
 
-      this.DeleteSecurityGroup = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/security_groups/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(SecurityGroupsApi.prototype, {
 
-      this.ListAllSecurityGroups = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/security_groups";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Associate Space with the Security Group
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/associate_space_with_the_security_group.html
+    */
+    AssociateSpaceWithSecurityGroup: function (guid, space_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/security_groups/" + guid + "/spaces/" + space_guid + "";
+      config.method = 'PUT';
+      return $http(config);
+    },
 
-      this.ListAllSpacesForSecurityGroup = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/security_groups/" + guid + "/spaces";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Creating a Security Group
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/creating_a_security_group.html
+    */
+    CreateSecurityGroup: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/security_groups";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.RemoveSpaceFromSecurityGroup = function (guid, space_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/security_groups/" + guid + "/spaces/" + space_guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * Delete a Particular Security Group
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/delete_a_particular_security_group.html
+    */
+    DeleteSecurityGroup: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/security_groups/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RetrieveSecurityGroup = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/security_groups/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Security Groups
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/list_all_security_groups.html
+    */
+    ListAllSecurityGroups: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/security_groups";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.UpdateSecurityGroup = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/security_groups/" + guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * List all Spaces for the Security Group
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/list_all_spaces_for_the_security_group.html
+    */
+    ListAllSpacesForSecurityGroup: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/security_groups/" + guid + "/spaces";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * Remove Space from the Security Group
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/remove_space_from_the_security_group.html
+    */
+    RemoveSpaceFromSecurityGroup: function (guid, space_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/security_groups/" + guid + "/spaces/" + space_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Security Group
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/retrieve_a_particular_security_group.html
+    */
+    RetrieveSecurityGroup: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/security_groups/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Updating a Security Group
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/updating_a_security_group.html
+    */
+    UpdateSecurityGroup: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/security_groups/" + guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return SecurityGroupsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

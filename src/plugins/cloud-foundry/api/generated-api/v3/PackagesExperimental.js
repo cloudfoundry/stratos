@@ -5,66 +5,99 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.PackagesExperimentalService', PackagesExperimentalServiceFactory);
+    .run(registerApi);
 
-  function PackagesExperimentalServiceFactory() {
-    /* eslint-disable camelcase */
-    function PackagesExperimentalService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.CopyPackage = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/apps/" + guid + "/packages";
-        config.method = 'POST';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.PackagesExperimental', new PackagesExperimentalApi($http));
+  }
 
-      this.CreatePackage = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/apps/" + guid + "/packages";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function PackagesExperimentalApi($http) {
+    this.$http = $http;
+  }
 
-      this.DeletePackage = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/packages/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(PackagesExperimentalApi.prototype, {
 
-      this.GetPackage = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/packages/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Copy a Package
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/copy_a_package.html
+    */
+    CopyPackage: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/apps/" + guid + "/packages";
+      config.method = 'POST';
+      return $http(config);
+    },
 
-      this.ListAllPackages = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/packages";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Create a Package
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/create_a_package.html
+    */
+    CreatePackage: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/apps/" + guid + "/packages";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.StagePackage = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/packages/" + guid + "/droplets";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Delete a Package
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/delete_a_package.html
+    */
+    DeletePackage: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/packages/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
+   /*
+    * Get a Package
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/get_a_package.html
+    */
+    GetPackage: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/packages/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * List all Packages
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/list_all_packages.html
+    */
+    ListAllPackages: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/packages";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Stage a package
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/stage_a_package.html
+    */
+    StagePackage: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/packages/" + guid + "/droplets";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
     }
 
-    return PackagesExperimentalService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

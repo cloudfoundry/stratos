@@ -5,90 +5,135 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.UserProvidedServiceInstancesService', UserProvidedServiceInstancesServiceFactory);
+    .run(registerApi);
 
-  function UserProvidedServiceInstancesServiceFactory() {
-    /* eslint-disable camelcase */
-    function UserProvidedServiceInstancesService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.AssociateRouteWithUserProvidedServiceInstanceExperimental = function (guid, route_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instances/" + guid + "/routes/" + route_guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.UserProvidedServiceInstances', new UserProvidedServiceInstancesApi($http));
+  }
 
-      this.CreateUserProvidedServiceInstance = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instances";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function UserProvidedServiceInstancesApi($http) {
+    this.$http = $http;
+  }
 
-      this.DeleteUserProvidedServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instances/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(UserProvidedServiceInstancesApi.prototype, {
 
-      this.ListAllRoutesForUserProvidedServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instances/" + guid + "/routes";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Associate Route with the User Provided Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/associate_route_with_the_user_provided_service_instance.html
+    */
+    AssociateRouteWithUserProvidedServiceInstance: function (guid, route_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instances/" + guid + "/routes/" + route_guid + "";
+      config.method = 'PUT';
+      return $http(config);
+    },
 
-      this.ListAllServiceBindingsForUserProvidedServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instances/" + guid + "/service_bindings";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Creating a User Provided Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/creating_a_user_provided_service_instance.html
+    */
+    CreateUserProvidedServiceInstance: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instances";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.ListAllUserProvidedServiceInstances = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instances";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Delete a Particular User Provided Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/delete_a_particular_user_provided_service_instance.html
+    */
+    DeleteUserProvidedServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instances/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RemoveRouteFromUserProvidedServiceInstanceExperimental = function (guid, route_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instance/" + guid + "/routes/" + route_guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * List all Routes for the User Provided Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/list_all_routes_for_the_user_provided_service_instance.html
+    */
+    ListAllRoutesForUserProvidedServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instances/" + guid + "/routes";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.RetrieveUserProvidedServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instances/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Service Bindings for the User Provided Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/list_all_service_bindings_for_the_user_provided_service_instance.html
+    */
+    ListAllServiceBindingsForUserProvidedServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instances/" + guid + "/service_bindings";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.UpdateUserProvidedServiceInstance = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/user_provided_service_instances/" + guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * List all User Provided Service Instances
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/list_all_user_provided_service_instances.html
+    */
+    ListAllUserProvidedServiceInstances: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instances";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * Remove Route from the User Provided Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/remove_route_from_the_user_provided_service_instance.html
+    */
+    RemoveRouteFromUserProvidedServiceInstance: function (guid, route_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instance/" + guid + "/routes/" + route_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular User Provided Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/retrieve_a_particular_user_provided_service_instance.html
+    */
+    RetrieveUserProvidedServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instances/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Updating a User Provided Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/updating_a_user_provided_service_instance.html
+    */
+    UpdateUserProvidedServiceInstance: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/user_provided_service_instances/" + guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return UserProvidedServiceInstancesService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

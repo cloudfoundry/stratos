@@ -5,48 +5,73 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.DropletsExperimentalService', DropletsExperimentalServiceFactory);
+    .run(registerApi);
 
-  function DropletsExperimentalServiceFactory() {
-    /* eslint-disable camelcase */
-    function DropletsExperimentalService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.DeleteDroplet = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/droplets/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.DropletsExperimental', new DropletsExperimentalApi($http));
+  }
 
-      this.FiltersDropletsByStatesAppGuids = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/droplets";
-        config.method = 'GET';
-        $http(config);
-      };
+  function DropletsExperimentalApi($http) {
+    this.$http = $http;
+  }
 
-      this.GetDroplet = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/droplets/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(DropletsExperimentalApi.prototype, {
 
-      this.ListAllDroplets = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v3/droplets";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Delete a Droplet
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/droplets__experimental_/delete_a_droplet.html
+    */
+    DeleteDroplet: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/droplets/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
+   /*
+    * Filters Droplets by states, app_guids
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/droplets__experimental_/filters_droplets_by_states,_app_guids.html
+    */
+    FiltersDropletsByStatesAppGuids: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/droplets";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Get a Droplet
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/droplets__experimental_/get_a_droplet.html
+    */
+    GetDroplet: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/droplets/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * List all Droplets
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/droplets__experimental_/list_all_droplets.html
+    */
+    ListAllDroplets: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v3/droplets";
+      config.method = 'GET';
+      return $http(config);
     }
 
-    return DropletsExperimentalService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

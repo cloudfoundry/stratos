@@ -5,49 +5,74 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.StacksService', StacksServiceFactory);
+    .run(registerApi);
 
-  function StacksServiceFactory() {
-    /* eslint-disable camelcase */
-    function StacksService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.CreateStack = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/stacks";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.Stacks', new StacksApi($http));
+  }
 
-      this.DeleteStack = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/stacks/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function StacksApi($http) {
+    this.$http = $http;
+  }
 
-      this.ListAllStacks = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/stacks";
-        config.method = 'GET';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(StacksApi.prototype, {
 
-      this.RetrieveStack = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/stacks/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Create a Stack
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/stacks/create_a_stack.html
+    */
+    CreateStack: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/stacks";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
+   /*
+    * Delete a Particular Stack
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/stacks/delete_a_particular_stack.html
+    */
+    DeleteStack: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/stacks/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
+
+   /*
+    * List all Stacks
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/stacks/list_all_stacks.html
+    */
+    ListAllStacks: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/stacks";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Stack
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/stacks/retrieve_a_particular_stack.html
+    */
+    RetrieveStack: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/stacks/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
     }
 
-    return StacksService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

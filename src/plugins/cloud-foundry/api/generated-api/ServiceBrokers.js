@@ -5,58 +5,87 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.ServiceBrokersService', ServiceBrokersServiceFactory);
+    .run(registerApi);
 
-  function ServiceBrokersServiceFactory() {
-    /* eslint-disable camelcase */
-    function ServiceBrokersService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.CreateServiceBroker = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_brokers";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.ServiceBrokers', new ServiceBrokersApi($http));
+  }
 
-      this.DeleteServiceBroker = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_brokers/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function ServiceBrokersApi($http) {
+    this.$http = $http;
+  }
 
-      this.ListAllServiceBrokers = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_brokers";
-        config.method = 'GET';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(ServiceBrokersApi.prototype, {
 
-      this.RetrieveServiceBroker = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_brokers/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Create a Service Broker
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/create_a_service_broker.html
+    */
+    CreateServiceBroker: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_brokers";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.UpdateServiceBroker = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_brokers/" + guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Delete a Particular Service Broker
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/delete_a_particular_service_broker.html
+    */
+    DeleteServiceBroker: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_brokers/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
+   /*
+    * List all Service Brokers
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/list_all_service_brokers.html
+    */
+    ListAllServiceBrokers: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_brokers";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Service Broker
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/retrieve_a_particular_service_broker.html
+    */
+    RetrieveServiceBroker: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_brokers/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Update a Service Broker
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/update_a_service_broker.html
+    */
+    UpdateServiceBroker: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_brokers/" + guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return ServiceBrokersService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

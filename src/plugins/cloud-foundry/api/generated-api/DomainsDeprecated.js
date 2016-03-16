@@ -5,66 +5,99 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.DomainsDeprecatedService', DomainsDeprecatedServiceFactory);
+    .run(registerApi);
 
-  function DomainsDeprecatedServiceFactory() {
-    /* eslint-disable camelcase */
-    function DomainsDeprecatedService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.CreateDomainOwnedByGivenOrganizationDeprecated = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/domains";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.DomainsDeprecated', new DomainsDeprecatedApi($http));
+  }
 
-      this.CreateSharedDomainDeprecated = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/domains";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function DomainsDeprecatedApi($http) {
+    this.$http = $http;
+  }
 
-      this.DeleteDomainDeprecated = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/domains/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(DomainsDeprecatedApi.prototype, {
 
-      this.ListAllDomainsDeprecated = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/domains";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Create a Domain owned by the given Organization (deprecated)
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/domains__deprecated_/create_a_domain_owned_by_the_given_organization_(deprecated).html
+    */
+    CreateDomainOwnedByGivenOrganizationDeprecated: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/domains";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.ListAllSpacesForDomainDeprecated = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/domains/" + guid + "/spaces";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Create a Shared Domain (deprecated)
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/domains__deprecated_/create_a_shared_domain_(deprecated).html
+    */
+    CreateSharedDomainDeprecated: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/domains";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.RetrieveDomainDeprecated = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/domains/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Delete a Particular Domain (deprecated)
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/domains__deprecated_/delete_a_particular_domain_(deprecated).html
+    */
+    DeleteDomainDeprecated: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/domains/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
+   /*
+    * List all Domains (deprecated)
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/domains__deprecated_/list_all_domains_(deprecated).html
+    */
+    ListAllDomainsDeprecated: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/domains";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * List all Spaces for the Domain (deprecated)
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/domains__deprecated_/list_all_spaces_for_the_domain_(deprecated).html
+    */
+    ListAllSpacesForDomainDeprecated: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/domains/" + guid + "/spaces";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Domain (deprecated)
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/domains__deprecated_/retrieve_a_particular_domain_(deprecated).html
+    */
+    RetrieveDomainDeprecated: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/domains/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
     }
 
-    return DomainsDeprecatedService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

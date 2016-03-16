@@ -5,24 +5,42 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.BlobstoresService', BlobstoresServiceFactory);
+    .run(registerApi);
 
-  function BlobstoresServiceFactory() {
-    /* eslint-disable camelcase */
-    function BlobstoresService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.DeleteAllBlobsInBuildpackCacheBlobstore = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/blobstores/buildpack_cache";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.Blobstores', new BlobstoresApi($http));
+  }
 
+  function BlobstoresApi($http) {
+    this.$http = $http;
+  }
+
+  /* eslint-disable camelcase */
+  angular.extend(BlobstoresApi.prototype, {
+
+   /*
+    * Delete all blobs in the Buildpack cache blobstore
+    * This endpoint will delete all of the existing buildpack caches in
+    * the blobstore. The buildpack cache is used during staging by buildpacks
+    * as a way to cache certain resources, e.g. downloaded Ruby gems. An admin
+    * who wanted to decrease the size of their blobstore could use this endpoint
+    * to delete unnecessary blobs.
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/blobstores/delete_all_blobs_in_the_buildpack_cache_blobstore.html
+    */
+    DeleteAllBlobsInBuildpackCacheBlobstore: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/blobstores/buildpack_cache";
+      config.method = 'DELETE';
+      return $http(config);
     }
 
-    return BlobstoresService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();
