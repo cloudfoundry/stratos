@@ -5,65 +5,98 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.PrivateDomainsService', PrivateDomainsServiceFactory);
+    .run(registerApi);
 
-  function PrivateDomainsServiceFactory() {
-    /* eslint-disable camelcase */
-    function PrivateDomainsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.CreatePrivateDomainOwnedByGivenOrganization = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/private_domains";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.PrivateDomains', new PrivateDomainsApi($http));
+  }
 
-      this.DeletePrivateDomain = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/private_domains/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function PrivateDomainsApi($http) {
+    this.$http = $http;
+  }
 
-      this.FilterPrivateDomainsByName = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/private_domains";
-        config.method = 'GET';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(PrivateDomainsApi.prototype, {
 
-      this.ListAllPrivateDomains = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/private_domains";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Create a Private Domain owned by the given Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/private_domains/create_a_private_domain_owned_by_the_given_organization.html
+    */
+    CreatePrivateDomainOwnedByGivenOrganization: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/private_domains";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.ListAllSharedOrganizationsForPrivateDomain = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/private_domains/" + guid + "/shared_organizations";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Delete a Particular Private Domain
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/private_domains/delete_a_particular_private_domain.html
+    */
+    DeletePrivateDomain: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/private_domains/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RetrievePrivateDomain = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/private_domains/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Filtering Private Domains by name
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/private_domains/filtering_private_domains_by_name.html
+    */
+    FilterPrivateDomainsByName: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/private_domains";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * List all Private Domains
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/private_domains/list_all_private_domains.html
+    */
+    ListAllPrivateDomains: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/private_domains";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * List all Shared Organizations for the Private Domain
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/private_domains/list_all_shared_organizations_for_the_private_domain.html
+    */
+    ListAllSharedOrganizationsForPrivateDomain: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/private_domains/" + guid + "/shared_organizations";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Private Domain
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/private_domains/retrieve_a_particular_private_domain.html
+    */
+    RetrievePrivateDomain: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/private_domains/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
     }
 
-    return PrivateDomainsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

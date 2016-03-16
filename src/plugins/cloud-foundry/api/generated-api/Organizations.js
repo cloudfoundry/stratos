@@ -5,314 +5,469 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.OrganizationsService', OrganizationsServiceFactory);
+    .run(registerApi);
 
-  function OrganizationsServiceFactory() {
-    /* eslint-disable camelcase */
-    function OrganizationsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.AssociateAuditorWithOrganization = function (guid, auditor_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/auditors/" + auditor_guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.Organizations', new OrganizationsApi($http));
+  }
 
-      this.AssociateAuditorWithOrganizationByUsername = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "v2/organizations/" + guid + "/auditors";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+  function OrganizationsApi($http) {
+    this.$http = $http;
+  }
 
-      this.AssociateBillingManagerWithOrganization = function (guid, billing_manager_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/billing_managers/" + billing_manager_guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(OrganizationsApi.prototype, {
 
-      this.AssociateBillingManagerWithOrganizationByUsername = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "v2/organizations/" + guid + "/billing_managers";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Associate Auditor with the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_auditor_with_the_organization.html
+    */
+    AssociateAuditorWithOrganization: function (guid, auditor_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/auditors/" + auditor_guid + "";
+      config.method = 'PUT';
+      return $http(config);
+    },
 
-      this.AssociateManagerWithOrganization = function (guid, manager_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/managers/" + manager_guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+   /*
+    * Associate Auditor with the Organization by Username
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_auditor_with_the_organization_by_username.html
+    */
+    AssociateAuditorWithOrganizationByUsername: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "v2/organizations/" + guid + "/auditors";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.AssociateManagerWithOrganizationByUsername = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "v2/organizations/" + guid + "/managers";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Associate Billing Manager with the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_billing_manager_with_the_organization.html
+    */
+    AssociateBillingManagerWithOrganization: function (guid, billing_manager_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/billing_managers/" + billing_manager_guid + "";
+      config.method = 'PUT';
+      return $http(config);
+    },
 
-      this.AssociatePrivateDomainWithOrganization = function (guid, private_domain_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/private_domains/" + private_domain_guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+   /*
+    * Associate Billing Manager with the Organization by Username
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_billing_manager_with_the_organization_by_username.html
+    */
+    AssociateBillingManagerWithOrganizationByUsername: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "v2/organizations/" + guid + "/billing_managers";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.AssociateUserWithOrganization = function (guid, user_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/users/" + user_guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+   /*
+    * Associate Manager with the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_manager_with_the_organization.html
+    */
+    AssociateManagerWithOrganization: function (guid, manager_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/managers/" + manager_guid + "";
+      config.method = 'PUT';
+      return $http(config);
+    },
 
-      this.AssociateUserWithOrganizationByUsername = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "v2/organizations/" + guid + "/users";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Associate Manager with the Organization by Username
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_manager_with_the_organization_by_username.html
+    */
+    AssociateManagerWithOrganizationByUsername: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "v2/organizations/" + guid + "/managers";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.CreateOrganization = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Associate Private Domain with the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_private_domain_with_the_organization.html
+    */
+    AssociatePrivateDomainWithOrganization: function (guid, private_domain_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/private_domains/" + private_domain_guid + "";
+      config.method = 'PUT';
+      return $http(config);
+    },
 
-      this.DeleteOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * Associate User with the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_user_with_the_organization.html
+    */
+    AssociateUserWithOrganization: function (guid, user_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/users/" + user_guid + "";
+      config.method = 'PUT';
+      return $http(config);
+    },
 
-      this.DisassociateAuditorWithOrganizationByUsername = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "v2/organizations/" + guid + "/auditors";
-        config.method = 'DELETE';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Associate User with the Organization by Username
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/associate_user_with_the_organization_by_username.html
+    */
+    AssociateUserWithOrganizationByUsername: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "v2/organizations/" + guid + "/users";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.DisassociateBillingManagerWithOrganizationByUsername = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "v2/organizations/" + guid + "/billing_managers";
-        config.method = 'DELETE';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Creating an Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/creating_an_organization.html
+    */
+    CreateOrganization: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.DisassociateManagerWithOrganizationByUsername = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "v2/organizations/" + guid + "/managers";
-        config.method = 'DELETE';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Delete a Particular Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/delete_a_particular_organization.html
+    */
+    DeleteOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.DisassociateUserWithOrganizationByUsername = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "v2/organizations/" + guid + "/users";
-        config.method = 'DELETE';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Disassociate Auditor with the Organization by Username
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/disassociate_auditor_with_the_organization_by_username.html
+    */
+    DisassociateAuditorWithOrganizationByUsername: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "v2/organizations/" + guid + "/auditors";
+      config.method = 'DELETE';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.GetOrganizationSummary = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/summary";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Disassociate Billing Manager with the Organization by Username
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/disassociate_billing_manager_with_the_organization_by_username.html
+    */
+    DisassociateBillingManagerWithOrganizationByUsername: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "v2/organizations/" + guid + "/billing_managers";
+      config.method = 'DELETE';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.ListAllAuditorsForOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/auditors";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Disassociate Manager with the Organization by Username
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/disassociate_manager_with_the_organization_by_username.html
+    */
+    DisassociateManagerWithOrganizationByUsername: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "v2/organizations/" + guid + "/managers";
+      config.method = 'DELETE';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.ListAllBillingManagersForOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/billing_managers";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Disassociate User with the Organization by Username
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/disassociate_user_with_the_organization_by_username.html
+    */
+    DisassociateUserWithOrganizationByUsername: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "v2/organizations/" + guid + "/users";
+      config.method = 'DELETE';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.ListAllDomainsForOrganizationDeprecated = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/domains";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Get Organization summary
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/get_organization_summary.html
+    */
+    GetOrganizationSummary: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/summary";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.ListAllManagersForOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/managers";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Auditors for the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_auditors_for_the_organization.html
+    */
+    ListAllAuditorsForOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/auditors";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.ListAllOrganizations = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Billing Managers for the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_billing_managers_for_the_organization.html
+    */
+    ListAllBillingManagersForOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/billing_managers";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.ListAllPrivateDomainsForOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/private_domains";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Domains for the Organization (deprecated)
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_domains_for_the_organization_(deprecated).html
+    */
+    ListAllDomainsForOrganizationDeprecated: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/domains";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.ListAllServicesForOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/services";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Managers for the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_managers_for_the_organization.html
+    */
+    ListAllManagersForOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/managers";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.ListAllSpaceQuotaDefinitionsForOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/space_quota_definitions";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Organizations
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_organizations.html
+    */
+    ListAllOrganizations: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.ListAllSpacesForOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/spaces";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Private Domains for the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_private_domains_for_the_organization.html
+    */
+    ListAllPrivateDomainsForOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/private_domains";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.ListAllUsersForOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/users";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Services for the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_services_for_the_organization.html
+    */
+    ListAllServicesForOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/services";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.RemoveAuditorFromOrganization = function (guid, auditor_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/auditors/" + auditor_guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * List all Space Quota Definitions for the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_space_quota_definitions_for_the_organization.html
+    */
+    ListAllSpaceQuotaDefinitionsForOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/space_quota_definitions";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.RemoveBillingManagerFromOrganization = function (guid, billing_manager_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/billing_managers/" + billing_manager_guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * List all Spaces for the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_spaces_for_the_organization.html
+    */
+    ListAllSpacesForOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/spaces";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.RemoveManagerFromOrganization = function (guid, manager_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/managers/" + manager_guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * List all Users for the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/list_all_users_for_the_organization.html
+    */
+    ListAllUsersForOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/users";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.RemovePrivateDomainFromOrganization = function (guid, private_domain_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/private_domains/" + private_domain_guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * Remove Auditor from the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/remove_auditor_from_the_organization.html
+    */
+    RemoveAuditorFromOrganization: function (guid, auditor_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/auditors/" + auditor_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RemoveUserFromOrganization = function (guid, user_guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/users/" + user_guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+   /*
+    * Remove Billing Manager from the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/remove_billing_manager_from_the_organization.html
+    */
+    RemoveBillingManagerFromOrganization: function (guid, billing_manager_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/billing_managers/" + billing_manager_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RetrieveOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Remove Manager from the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/remove_manager_from_the_organization.html
+    */
+    RemoveManagerFromOrganization: function (guid, manager_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/managers/" + manager_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RetrievingOrganizationInstanceUsage = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/instance_usage";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Remove Private Domain from the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/remove_private_domain_from_the_organization.html
+    */
+    RemovePrivateDomainFromOrganization: function (guid, private_domain_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/private_domains/" + private_domain_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RetrievingOrganizationMemoryUsage = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/memory_usage";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Remove User from the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/remove_user_from_the_organization.html
+    */
+    RemoveUserFromOrganization: function (guid, user_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/users/" + user_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.RetrievingRolesOfAllUsersInOrganization = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "/user_roles";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Retrieve a Particular Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/retrieve_a_particular_organization.html
+    */
+    RetrieveOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.UpdateOrganization = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/organizations/" + guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Retrieving organization instance usage
+    * This endpoint returns a count of started app instances under an organization.
+    * Note that crashing apps are included in this count.
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/retrieving_organization_instance_usage.html
+    */
+    RetrievingOrganizationInstanceUsage: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/instance_usage";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * Retrieving organization memory usage
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/retrieving_organization_memory_usage.html
+    */
+    RetrievingOrganizationMemoryUsage: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/memory_usage";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieving the roles of all Users in the Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/retrieving_the_roles_of_all_users_in_the_organization.html
+    */
+    RetrievingRolesOfAllUsersInOrganization: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "/user_roles";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Update an Organization
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organizations/update_an_organization.html
+    */
+    UpdateOrganization: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/organizations/" + guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return OrganizationsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

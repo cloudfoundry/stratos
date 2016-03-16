@@ -5,48 +5,73 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.JobsService', JobsServiceFactory);
+    .run(registerApi);
 
-  function JobsServiceFactory() {
-    /* eslint-disable camelcase */
-    function JobsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.RetrieveJobThatIsQueued = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/jobs/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.Jobs', new JobsApi($http));
+  }
 
-      this.RetrieveJobThatWasSuccessful = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/jobs/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+  function JobsApi($http) {
+    this.$http = $http;
+  }
 
-      this.RetrieveJobWithKnownFailure = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/jobs/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(JobsApi.prototype, {
 
-      this.RetrieveJobWithUnknownFailure = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/jobs/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Retrieve Job that is queued
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/jobs/retrieve_job_that_is_queued.html
+    */
+    RetrieveJobThatIsQueued: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/jobs/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * Retrieve Job that was successful
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/jobs/retrieve_job_that_was_successful.html
+    */
+    RetrieveJobThatWasSuccessful: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/jobs/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve Job with known failure
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/jobs/retrieve_job_with_known_failure.html
+    */
+    RetrieveJobWithKnownFailure: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/jobs/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve Job with unknown failure
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/jobs/retrieve_job_with_unknown_failure.html
+    */
+    RetrieveJobWithUnknownFailure: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/jobs/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
     }
 
-    return JobsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

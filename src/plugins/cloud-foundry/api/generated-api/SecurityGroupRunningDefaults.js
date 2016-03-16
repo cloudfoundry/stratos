@@ -5,40 +5,61 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.SecurityGroupRunningDefaultsService', SecurityGroupRunningDefaultsServiceFactory);
+    .run(registerApi);
 
-  function SecurityGroupRunningDefaultsServiceFactory() {
-    /* eslint-disable camelcase */
-    function SecurityGroupRunningDefaultsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.RemovingSecurityGroupAsDefaultForRunningApps = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/running_security_groups/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.SecurityGroupRunningDefaults', new SecurityGroupRunningDefaultsApi($http));
+  }
 
-      this.ReturnSecurityGroupsUsedForRunningApps = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/running_security_groups";
-        config.method = 'GET';
-        $http(config);
-      };
+  function SecurityGroupRunningDefaultsApi($http) {
+    this.$http = $http;
+  }
 
-      this.SetSecurityGroupAsDefaultForRunningApps = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/running_security_groups/" + guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(SecurityGroupRunningDefaultsApi.prototype, {
 
+   /*
+    * Removing a Security Group as a default for running Apps
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_running_defaults/removing_a_security_group_as_a_default_for_running_apps.html
+    */
+    RemovingSecurityGroupAsDefaultForRunningApps: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/running_security_groups/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
+
+   /*
+    * Return the Security Groups used for running Apps
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_running_defaults/return_the_security_groups_used_for_running_apps.html
+    */
+    ReturnSecurityGroupsUsedForRunningApps: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/running_security_groups";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Set a Security Group as a default for running Apps
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_running_defaults/set_a_security_group_as_a_default_for_running_apps.html
+    */
+    SetSecurityGroupAsDefaultForRunningApps: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/running_security_groups/" + guid + "";
+      config.method = 'PUT';
+      return $http(config);
     }
 
-    return SecurityGroupRunningDefaultsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

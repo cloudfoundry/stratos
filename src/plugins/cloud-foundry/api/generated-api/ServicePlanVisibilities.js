@@ -5,58 +5,87 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.ServicePlanVisibilitiesService', ServicePlanVisibilitiesServiceFactory);
+    .run(registerApi);
 
-  function ServicePlanVisibilitiesServiceFactory() {
-    /* eslint-disable camelcase */
-    function ServicePlanVisibilitiesService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.CreateServicePlanVisibility = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_plan_visibilities";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.ServicePlanVisibilities', new ServicePlanVisibilitiesApi($http));
+  }
 
-      this.DeleteServicePlanVisibilities = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_plan_visibilities/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function ServicePlanVisibilitiesApi($http) {
+    this.$http = $http;
+  }
 
-      this.ListAllServicePlanVisibilities = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_plan_visibilities";
-        config.method = 'GET';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(ServicePlanVisibilitiesApi.prototype, {
 
-      this.RetrieveServicePlanVisibility = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_plan_visibilities/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Creating a Service Plan Visibility
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/creating_a_service_plan_visibility.html
+    */
+    CreateServicePlanVisibility: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_plan_visibilities";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.UpdateServicePlanVisibility = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_plan_visibilities/" + guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Delete a Particular Service Plan Visibilities
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/delete_a_particular_service_plan_visibilities.html
+    */
+    DeleteServicePlanVisibilities: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_plan_visibilities/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
+   /*
+    * List all Service Plan Visibilities
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/list_all_service_plan_visibilities.html
+    */
+    ListAllServicePlanVisibilities: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_plan_visibilities";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Service Plan Visibility
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/retrieve_a_particular_service_plan_visibility.html
+    */
+    RetrieveServicePlanVisibility: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_plan_visibilities/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Updating a Service Plan Visibility
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/updating_a_service_plan_visibility.html
+    */
+    UpdateServicePlanVisibility: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_plan_visibilities/" + guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return ServicePlanVisibilitiesService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

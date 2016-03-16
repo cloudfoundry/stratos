@@ -5,40 +5,61 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.SecurityGroupStagingDefaultsService', SecurityGroupStagingDefaultsServiceFactory);
+    .run(registerApi);
 
-  function SecurityGroupStagingDefaultsServiceFactory() {
-    /* eslint-disable camelcase */
-    function SecurityGroupStagingDefaultsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.RemovingSecurityGroupAsDefaultForStaging = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/staging_security_groups/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.SecurityGroupStagingDefaults', new SecurityGroupStagingDefaultsApi($http));
+  }
 
-      this.ReturnSecurityGroupsUsedForStaging = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/staging_security_groups";
-        config.method = 'GET';
-        $http(config);
-      };
+  function SecurityGroupStagingDefaultsApi($http) {
+    this.$http = $http;
+  }
 
-      this.SetSecurityGroupAsDefaultForStaging = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/config/staging_security_groups/" + guid + "";
-        config.method = 'PUT';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(SecurityGroupStagingDefaultsApi.prototype, {
 
+   /*
+    * Removing a Security Group as a default for staging
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_staging_defaults/removing_a_security_group_as_a_default_for_staging.html
+    */
+    RemovingSecurityGroupAsDefaultForStaging: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/staging_security_groups/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
+
+   /*
+    * Return the Security Groups used for staging
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_staging_defaults/return_the_security_groups_used_for_staging.html
+    */
+    ReturnSecurityGroupsUsedForStaging: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/staging_security_groups";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Set a Security Group as a default for staging
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_staging_defaults/set_a_security_group_as_a_default_for_staging.html
+    */
+    SetSecurityGroupAsDefaultForStaging: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/config/staging_security_groups/" + guid + "";
+      config.method = 'PUT';
+      return $http(config);
     }
 
-    return SecurityGroupStagingDefaultsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

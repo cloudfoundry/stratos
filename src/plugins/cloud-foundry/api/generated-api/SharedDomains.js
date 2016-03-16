@@ -5,57 +5,86 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.SharedDomainsService', SharedDomainsServiceFactory);
+    .run(registerApi);
 
-  function SharedDomainsServiceFactory() {
-    /* eslint-disable camelcase */
-    function SharedDomainsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.CreateSharedDomain = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/shared_domains";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.SharedDomains', new SharedDomainsApi($http));
+  }
 
-      this.DeleteSharedDomain = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/shared_domains/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function SharedDomainsApi($http) {
+    this.$http = $http;
+  }
 
-      this.FilterSharedDomainsByName = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/shared_domains";
-        config.method = 'GET';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(SharedDomainsApi.prototype, {
 
-      this.ListAllSharedDomains = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/shared_domains";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Create a Shared Domain
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/create_a_shared_domain.html
+    */
+    CreateSharedDomain: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/shared_domains";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.RetrieveSharedDomain = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/shared_domains/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Delete a Particular Shared Domain
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/delete_a_particular_shared_domain.html
+    */
+    DeleteSharedDomain: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/shared_domains/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
+   /*
+    * Filtering Shared Domains by name
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/filtering_shared_domains_by_name.html
+    */
+    FilterSharedDomainsByName: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/shared_domains";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * List all Shared Domains
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/list_all_shared_domains.html
+    */
+    ListAllSharedDomains: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/shared_domains";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Shared Domain
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/retrieve_a_particular_shared_domain.html
+    */
+    RetrieveSharedDomain: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/shared_domains/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
     }
 
-    return SharedDomainsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

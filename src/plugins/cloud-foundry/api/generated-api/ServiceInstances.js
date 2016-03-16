@@ -5,109 +5,148 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.ServiceInstancesService', ServiceInstancesServiceFactory);
+    .run(registerApi);
 
-  function ServiceInstancesServiceFactory() {
-    /* eslint-disable camelcase */
-    function ServiceInstancesService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.BindingServiceInstanceToRouteExperimental = function (service_instance_guid, route_guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances/" + service_instance_guid + "/routes/" + route_guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.ServiceInstances', new ServiceInstancesApi($http));
+  }
 
-      this.CreateServiceInstance = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function ServiceInstancesApi($http) {
+    this.$http = $http;
+  }
 
-      this.DeleteServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(ServiceInstancesApi.prototype, {
 
-      this.ListAllRoutesForServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances/" + guid + "/routes";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Binding a Service Instance to a Route
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/binding_a_service_instance_to_a_route.html
+    */
+    BindingServiceInstanceToRoute: function (service_instance_guid, route_guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances/" + service_instance_guid + "/routes/" + route_guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.ListAllServiceBindingsForServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances/" + guid + "/service_bindings";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Creating a Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/creating_a_service_instance.html
+    */
+    CreateServiceInstance: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.ListAllServiceInstances = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Delete a Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/delete_a_service_instance.html
+    */
+    DeleteServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
-      this.MigrateServiceInstancesFromOneServicePlanToAnotherServicePlanExperimental = function (service_plan_guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_plans/" + service_plan_guid + "/service_instances";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * List all Routes for the Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/list_all_routes_for_the_service_instance.html
+    */
+    ListAllRoutesForServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances/" + guid + "/routes";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.RetrieveServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Service Bindings for the Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/list_all_service_bindings_for_the_service_instance.html
+    */
+    ListAllServiceBindingsForServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances/" + guid + "/service_bindings";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.RetrievingPermissionsOnServiceInstance = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances/" + guid + "/permissions";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * List all Service Instances
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/list_all_service_instances.html
+    */
+    ListAllServiceInstances: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.UnbindingServiceInstanceFromRouteExperimental = function (service_instance_guid, route_guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances/" + service_instance_guid + "/routes/" + route_guid + "";
-        config.method = 'DELETE';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Retrieve a Particular Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/retrieve_a_particular_service_instance.html
+    */
+    RetrieveServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
 
-      this.UpdateServiceInstance = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/service_instances/" + guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Retrieving permissions on a Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/retrieving_permissions_on_a_service_instance.html
+    */
+    RetrievingPermissionsOnServiceInstance: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances/" + guid + "/permissions";
+      config.method = 'GET';
+      return $http(config);
+    },
 
+   /*
+    * Unbinding a service instance from a route
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/unbinding_a_service_instance_from_a_route.html
+    */
+    UnbindingServiceInstanceFromRoute: function (service_instance_guid, route_guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances/" + service_instance_guid + "/routes/" + route_guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
+
+   /*
+    * Update a Service Instance
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/update_a_service_instance.html
+    */
+    UpdateServiceInstance: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/service_instances/" + guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return ServiceInstancesService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();

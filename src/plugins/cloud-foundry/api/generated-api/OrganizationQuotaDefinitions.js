@@ -5,58 +5,87 @@
 
   angular
     .module('cloud-foundry.api')
-    .factory('cloud-foundry.api.OrganizationQuotaDefinitionsService', OrganizationQuotaDefinitionsServiceFactory);
+    .run(registerApi);
 
-  function OrganizationQuotaDefinitionsServiceFactory() {
-    /* eslint-disable camelcase */
-    function OrganizationQuotaDefinitionsService($http) {
+  registerApi.$inject = [
+    '$http',
+    'app.api.apiManager'
+  ];
 
-      this.CreateOrganizationQuotaDefinition = function (value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/quota_definitions";
-        config.method = 'POST';
-        config.data = value;
-        $http(config);
-      };
+  function registerApi($http, apiManager) {
+    apiManager.register('cloud-foundry.api.OrganizationQuotaDefinitions', new OrganizationQuotaDefinitionsApi($http));
+  }
 
-      this.DeleteOrganizationQuotaDefinition = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/quota_definitions/" + guid + "";
-        config.method = 'DELETE';
-        $http(config);
-      };
+  function OrganizationQuotaDefinitionsApi($http) {
+    this.$http = $http;
+  }
 
-      this.ListAllOrganizationQuotaDefinitions = function (params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/quota_definitions";
-        config.method = 'GET';
-        $http(config);
-      };
+  /* eslint-disable camelcase */
+  angular.extend(OrganizationQuotaDefinitionsApi.prototype, {
 
-      this.RetrieveOrganizationQuotaDefinition = function (guid, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/quota_definitions/" + guid + "";
-        config.method = 'GET';
-        $http(config);
-      };
+   /*
+    * Creating a Organization Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/creating_a_organization_quota_definition.html
+    */
+    CreateOrganizationQuotaDefinition: function (value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/quota_definitions";
+      config.method = 'POST';
+      config.data = value;
+      return $http(config);
+    },
 
-      this.UpdateOrganizationQuotaDefinition = function (guid, value, params) {
-        var config = {};
-        config.params = params;
-        config.url = "/v2/quota_definitions/" + guid + "";
-        config.method = 'PUT';
-        config.data = value;
-        $http(config);
-      };
+   /*
+    * Delete a Particular Organization Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/delete_a_particular_organization_quota_definition.html
+    */
+    DeleteOrganizationQuotaDefinition: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/quota_definitions/" + guid + "";
+      config.method = 'DELETE';
+      return $http(config);
+    },
 
+   /*
+    * List all Organization Quota Definitions
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/list_all_organization_quota_definitions.html
+    */
+    ListAllOrganizationQuotaDefinitions: function (params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/quota_definitions";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Retrieve a Particular Organization Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/retrieve_a_particular_organization_quota_definition.html
+    */
+    RetrieveOrganizationQuotaDefinition: function (guid, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/quota_definitions/" + guid + "";
+      config.method = 'GET';
+      return $http(config);
+    },
+
+   /*
+    * Updating a Organization Quota Definition
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/updating_a_organization_quota_definition.html
+    */
+    UpdateOrganizationQuotaDefinition: function (guid, value, params) {
+      var config = {};
+      config.params = params;
+      config.url = "/v2/quota_definitions/" + guid + "";
+      config.method = 'PUT';
+      config.data = value;
+      return $http(config);
     }
 
-    return OrganizationQuotaDefinitionsService;
-    /* eslint-enable camelcase */
-  }
+  });
+  /* eslint-enable camelcase */
 
 })();
