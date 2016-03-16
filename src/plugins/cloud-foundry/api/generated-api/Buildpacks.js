@@ -33,10 +33,10 @@
     ChangePositionOfBuildpack: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/buildpacks/" + guid + "";
+      config.url = "/api/cf/v2/buildpacks/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -46,10 +46,10 @@
     CreatesAdminBuildpack: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/buildpacks";
+      config.url = "/api/cf/v2/buildpacks";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -59,9 +59,9 @@
     DeleteBuildpack: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/buildpacks/" + guid + "";
+      config.url = "/api/cf/v2/buildpacks/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -71,10 +71,10 @@
     EnableOrDisableBuildpack: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/buildpacks/" + guid + "";
+      config.url = "/api/cf/v2/buildpacks/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -84,9 +84,9 @@
     ListAllBuildpacks: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/buildpacks";
+      config.url = "/api/cf/v2/buildpacks";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -96,10 +96,10 @@
     LockOrUnlockBuildpack: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/buildpacks/" + guid + "";
+      config.url = "/api/cf/v2/buildpacks/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -109,9 +109,9 @@
     RetrieveBuildpack: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/buildpacks/" + guid + "";
+      config.url = "/api/cf/v2/buildpacks/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

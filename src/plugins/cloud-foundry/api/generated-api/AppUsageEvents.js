@@ -33,9 +33,9 @@
     ListAllAppUsageEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/app_usage_events";
+      config.url = "/api/cf/v2/app_usage_events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -49,9 +49,9 @@
     PurgeAndReseedAppUsageEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/app_usage_events/destructively_purge_all_and_reseed_started_apps";
+      config.url = "/api/cf/v2/app_usage_events/destructively_purge_all_and_reseed_started_apps";
       config.method = 'POST';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -61,9 +61,9 @@
     RetrieveAppUsageEvent: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/app_usage_events/" + guid + "";
+      config.url = "/api/cf/v2/app_usage_events/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

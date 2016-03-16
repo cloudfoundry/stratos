@@ -30,10 +30,10 @@
     CreatePrivateDomainOwnedByGivenOrganization: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/private_domains";
+      config.url = "/api/cf/v2/private_domains";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -43,9 +43,9 @@
     DeletePrivateDomain: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/private_domains/" + guid + "";
+      config.url = "/api/cf/v2/private_domains/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     FilterPrivateDomainsByName: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/private_domains";
+      config.url = "/api/cf/v2/private_domains";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     ListAllPrivateDomains: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/private_domains";
+      config.url = "/api/cf/v2/private_domains";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -79,9 +79,9 @@
     ListAllSharedOrganizationsForPrivateDomain: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/private_domains/" + guid + "/shared_organizations";
+      config.url = "/api/cf/v2/private_domains/" + guid + "/shared_organizations";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -91,9 +91,9 @@
     RetrievePrivateDomain: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/private_domains/" + guid + "";
+      config.url = "/api/cf/v2/private_domains/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

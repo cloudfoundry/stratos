@@ -30,10 +30,10 @@
     CreateServiceBinding: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_bindings";
+      config.url = "/api/cf/v2/service_bindings";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -43,9 +43,9 @@
     DeleteServiceBinding: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_bindings/" + guid + "";
+      config.url = "/api/cf/v2/service_bindings/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     ListAllServiceBindings: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_bindings";
+      config.url = "/api/cf/v2/service_bindings";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     RetrieveServiceBinding: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_bindings/" + guid + "";
+      config.url = "/api/cf/v2/service_bindings/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

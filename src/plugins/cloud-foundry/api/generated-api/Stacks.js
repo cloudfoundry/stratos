@@ -30,10 +30,10 @@
     CreateStack: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/stacks";
+      config.url = "/api/cf/v2/stacks";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -43,9 +43,9 @@
     DeleteStack: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/stacks/" + guid + "";
+      config.url = "/api/cf/v2/stacks/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     ListAllStacks: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/stacks";
+      config.url = "/api/cf/v2/stacks";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     RetrieveStack: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/stacks/" + guid + "";
+      config.url = "/api/cf/v2/stacks/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

@@ -30,10 +30,10 @@
     CreateServiceKey: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_keys";
+      config.url = "/api/cf/v2/service_keys";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -43,9 +43,9 @@
     DeleteServiceKey: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_keys/" + guid + "";
+      config.url = "/api/cf/v2/service_keys/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     ListAllServiceKeys: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_keys";
+      config.url = "/api/cf/v2/service_keys";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     RetrieveServiceKey: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_keys/" + guid + "";
+      config.url = "/api/cf/v2/service_keys/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

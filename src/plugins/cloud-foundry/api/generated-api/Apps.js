@@ -30,9 +30,9 @@
     AssociateRouteWithApp: function (guid, route_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/routes/" + route_guid + "";
+      config.url = "/api/cf/v2/apps/" + guid + "/routes/" + route_guid + "";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -45,10 +45,10 @@
     CopyAppBitsForApp: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/copy_bits";
+      config.url = "/api/cf/v2/apps/" + guid + "/copy_bits";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -58,10 +58,10 @@
     CreateDockerAppExperimental: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps";
+      config.url = "/api/cf/v2/apps";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -71,10 +71,10 @@
     CreateApp: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps";
+      config.url = "/api/cf/v2/apps";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -84,9 +84,9 @@
     DeleteApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "";
+      config.url = "/api/cf/v2/apps/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -99,9 +99,9 @@
     DownloadsStagedDropletForApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/droplet/download";
+      config.url = "/api/cf/v2/apps/" + guid + "/droplet/download";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -111,9 +111,9 @@
     GetAppSummary: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/summary";
+      config.url = "/api/cf/v2/apps/" + guid + "/summary";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -124,9 +124,9 @@
     GetDetailedStatsForStartedApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/stats";
+      config.url = "/api/cf/v2/apps/" + guid + "/stats";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -137,9 +137,9 @@
     GetEnvForApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/env";
+      config.url = "/api/cf/v2/apps/" + guid + "/env";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -161,9 +161,9 @@
     GetInstanceInformationForStartedApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/instances";
+      config.url = "/api/cf/v2/apps/" + guid + "/instances";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -173,9 +173,9 @@
     ListAllApps: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps";
+      config.url = "/api/cf/v2/apps";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -185,9 +185,9 @@
     ListAllRoutesForApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/routes";
+      config.url = "/api/cf/v2/apps/" + guid + "/routes";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -197,9 +197,9 @@
     ListAllServiceBindingsForApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/service_bindings";
+      config.url = "/api/cf/v2/apps/" + guid + "/service_bindings";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -209,9 +209,9 @@
     RemoveRouteFromApp: function (guid, route_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/routes/" + route_guid + "";
+      config.url = "/api/cf/v2/apps/" + guid + "/routes/" + route_guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -221,9 +221,9 @@
     RemoveServiceBindingFromApp: function (guid, service_binding_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/service_bindings/" + service_binding_guid + "";
+      config.url = "/api/cf/v2/apps/" + guid + "/service_bindings/" + service_binding_guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -233,9 +233,9 @@
     RestageApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/restage";
+      config.url = "/api/cf/v2/apps/" + guid + "/restage";
       config.method = 'POST';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -245,9 +245,9 @@
     RetrieveApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "";
+      config.url = "/api/cf/v2/apps/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -257,9 +257,9 @@
     TerminateRunningAppInstanceAtGivenIndex: function (guid, index, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "/instances/" + index + "";
+      config.url = "/api/cf/v2/apps/" + guid + "/instances/" + index + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -269,10 +269,10 @@
     UpdateApp: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/apps/" + guid + "";
+      config.url = "/api/cf/v2/apps/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

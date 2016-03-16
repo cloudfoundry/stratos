@@ -30,9 +30,9 @@
     ListAllEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -42,9 +42,9 @@
     ListAppCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -54,9 +54,9 @@
     ListAppDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -66,9 +66,9 @@
     ListAppExitedEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -78,9 +78,9 @@
     ListAppSshAuthorizedEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -90,9 +90,9 @@
     ListAppSshUnauthorizedEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -102,9 +102,9 @@
     ListAppStartEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -114,9 +114,9 @@
     ListAppStopEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -126,9 +126,9 @@
     ListAppUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -138,9 +138,9 @@
     ListEventsAssociatedWithAppSinceJanuary12014: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -150,9 +150,9 @@
     ListRouteCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -162,9 +162,9 @@
     ListRouteDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -174,9 +174,9 @@
     ListRouteUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -186,9 +186,9 @@
     ListServiceBindingCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -198,9 +198,9 @@
     ListServiceBindingDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -210,9 +210,9 @@
     ListServiceBrokerCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -222,9 +222,9 @@
     ListServiceBrokerDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -234,9 +234,9 @@
     ListServiceBrokerUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -246,9 +246,9 @@
     ListServiceCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -258,9 +258,9 @@
     ListServiceDashboardClientCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -270,9 +270,9 @@
     ListServiceDashboardClientDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -282,9 +282,9 @@
     ListServiceDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -294,9 +294,9 @@
     ListServiceInstanceCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -306,9 +306,9 @@
     ListServiceInstanceDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -318,9 +318,9 @@
     ListServiceInstanceUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -330,9 +330,9 @@
     ListServiceKeyCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -342,9 +342,9 @@
     ListServiceKeyDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -354,9 +354,9 @@
     ListServicePlanCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -366,9 +366,9 @@
     ListServicePlanDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -378,9 +378,9 @@
     ListServicePlanUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -390,9 +390,9 @@
     ListServicePlanVisibilityCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -402,9 +402,9 @@
     ListServicePlanVisibilityDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -414,9 +414,9 @@
     ListServicePlanVisibilityUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -426,9 +426,9 @@
     ListServiceUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -438,9 +438,9 @@
     ListSpaceCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -450,9 +450,9 @@
     ListSpaceDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -462,9 +462,9 @@
     ListSpaceUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -474,9 +474,9 @@
     ListUserProvidedServiceInstanceCreateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -486,9 +486,9 @@
     ListUserProvidedServiceInstanceDeleteEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -498,9 +498,9 @@
     ListUserProvidedServiceInstanceUpdateEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events";
+      config.url = "/api/cf/v2/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -510,9 +510,9 @@
     RetrieveEvent: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/events/" + guid + "";
+      config.url = "/api/cf/v2/events/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

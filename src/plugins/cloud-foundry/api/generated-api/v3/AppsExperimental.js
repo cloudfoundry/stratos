@@ -30,10 +30,10 @@
     AssignDropletAsAppsCurrentDroplet: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/current_droplet";
+      config.url = "/api/cf/v3/apps/" + guid + "/current_droplet";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -46,10 +46,10 @@
     CreateDockerApp: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps";
+      config.url = "/api/cf/v3/apps";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -62,10 +62,10 @@
     CreateApp: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps";
+      config.url = "/api/cf/v3/apps";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -75,9 +75,9 @@
     DeleteApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "";
+      config.url = "/api/cf/v3/apps/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -87,9 +87,9 @@
     FiltersDropletsByStatesAppGuids: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/droplets";
+      config.url = "/api/cf/v3/apps/" + guid + "/droplets";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -99,9 +99,9 @@
     GetProcessFromApp: function (guid, type, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/processes/" + type + "";
+      config.url = "/api/cf/v3/apps/" + guid + "/processes/" + type + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -111,9 +111,9 @@
     GetApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "";
+      config.url = "/api/cf/v3/apps/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -123,9 +123,9 @@
     GetDetailedStatsForAppsProcess: function (guid, type, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/processes/" + type + "/stats";
+      config.url = "/api/cf/v3/apps/" + guid + "/processes/" + type + "/stats";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -135,9 +135,9 @@
     GetDetailedStatsForApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/stats";
+      config.url = "/api/cf/v3/apps/" + guid + "/stats";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -147,9 +147,9 @@
     GetEnvForApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/env";
+      config.url = "/api/cf/v3/apps/" + guid + "/env";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -159,9 +159,9 @@
     ListAllApps: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps";
+      config.url = "/api/cf/v3/apps";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -171,9 +171,9 @@
     ListAssociatedDroplets: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/droplets";
+      config.url = "/api/cf/v3/apps/" + guid + "/droplets";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -183,9 +183,9 @@
     ListAssociatedPackages: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/packages";
+      config.url = "/api/cf/v3/apps/" + guid + "/packages";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -195,9 +195,9 @@
     ListAssociatedProcesses: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/processes";
+      config.url = "/api/cf/v3/apps/" + guid + "/processes";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -207,10 +207,10 @@
     ScalingProcessFromItsApp: function (guid, type, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/processes/" + type + "/scale";
+      config.url = "/api/cf/v3/apps/" + guid + "/processes/" + type + "/scale";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -220,9 +220,9 @@
     StartingApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/start";
+      config.url = "/api/cf/v3/apps/" + guid + "/start";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -232,9 +232,9 @@
     StoppingApp: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/stop";
+      config.url = "/api/cf/v3/apps/" + guid + "/stop";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -244,9 +244,9 @@
     TerminatingProcessInstanceFromItsApp: function (guid, type, index, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/processes/" + type + "/instances/" + index + "";
+      config.url = "/api/cf/v3/apps/" + guid + "/processes/" + type + "/instances/" + index + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -256,10 +256,10 @@
     UpdateApp: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "";
+      config.url = "/api/cf/v3/apps/" + guid + "";
       config.method = 'PATCH';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

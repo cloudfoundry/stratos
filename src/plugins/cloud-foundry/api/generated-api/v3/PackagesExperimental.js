@@ -30,9 +30,9 @@
     CopyPackage: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/packages";
+      config.url = "/api/cf/v3/apps/" + guid + "/packages";
       config.method = 'POST';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -42,10 +42,10 @@
     CreatePackage: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/apps/" + guid + "/packages";
+      config.url = "/api/cf/v3/apps/" + guid + "/packages";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     DeletePackage: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/packages/" + guid + "";
+      config.url = "/api/cf/v3/packages/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     GetPackage: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/packages/" + guid + "";
+      config.url = "/api/cf/v3/packages/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -79,9 +79,9 @@
     ListAllPackages: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/packages";
+      config.url = "/api/cf/v3/packages";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -91,10 +91,10 @@
     StagePackage: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/packages/" + guid + "/droplets";
+      config.url = "/api/cf/v3/packages/" + guid + "/droplets";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

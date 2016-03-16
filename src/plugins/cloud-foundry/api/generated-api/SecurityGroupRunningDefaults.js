@@ -30,9 +30,9 @@
     RemovingSecurityGroupAsDefaultForRunningApps: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/running_security_groups/" + guid + "";
+      config.url = "/api/cf/v2/config/running_security_groups/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -42,9 +42,9 @@
     ReturnSecurityGroupsUsedForRunningApps: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/running_security_groups";
+      config.url = "/api/cf/v2/config/running_security_groups";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -54,9 +54,9 @@
     SetSecurityGroupAsDefaultForRunningApps: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/running_security_groups/" + guid + "";
+      config.url = "/api/cf/v2/config/running_security_groups/" + guid + "";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     }
 
   });
