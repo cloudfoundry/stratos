@@ -35,9 +35,9 @@
     DeleteAllBlobsInBuildpackCacheBlobstore: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/blobstores/buildpack_cache";
+      config.url = "/api/cf/v2/blobstores/buildpack_cache";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

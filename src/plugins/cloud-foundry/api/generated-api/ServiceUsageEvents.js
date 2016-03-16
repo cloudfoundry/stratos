@@ -33,9 +33,9 @@
     ListServiceUsageEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_usage_events";
+      config.url = "/api/cf/v2/service_usage_events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -49,9 +49,9 @@
     PurgeAndReseedServiceUsageEvents: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_usage_events/destructively_purge_all_and_reseed_existing_instances";
+      config.url = "/api/cf/v2/service_usage_events/destructively_purge_all_and_reseed_existing_instances";
       config.method = 'POST';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -61,9 +61,9 @@
     RetrieveServiceUsageEvent: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_usage_events/" + guid + "";
+      config.url = "/api/cf/v2/service_usage_events/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     }
 
   });

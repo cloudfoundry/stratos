@@ -30,9 +30,9 @@
     AssociateRouteWithUserProvidedServiceInstance: function (guid, route_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instances/" + guid + "/routes/" + route_guid + "";
+      config.url = "/api/cf/v2/user_provided_service_instances/" + guid + "/routes/" + route_guid + "";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -42,10 +42,10 @@
     CreateUserProvidedServiceInstance: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instances";
+      config.url = "/api/cf/v2/user_provided_service_instances";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     DeleteUserProvidedServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instances/" + guid + "";
+      config.url = "/api/cf/v2/user_provided_service_instances/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     ListAllRoutesForUserProvidedServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instances/" + guid + "/routes";
+      config.url = "/api/cf/v2/user_provided_service_instances/" + guid + "/routes";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -79,9 +79,9 @@
     ListAllServiceBindingsForUserProvidedServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instances/" + guid + "/service_bindings";
+      config.url = "/api/cf/v2/user_provided_service_instances/" + guid + "/service_bindings";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -91,9 +91,9 @@
     ListAllUserProvidedServiceInstances: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instances";
+      config.url = "/api/cf/v2/user_provided_service_instances";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -103,9 +103,9 @@
     RemoveRouteFromUserProvidedServiceInstance: function (guid, route_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instance/" + guid + "/routes/" + route_guid + "";
+      config.url = "/api/cf/v2/user_provided_service_instance/" + guid + "/routes/" + route_guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -115,9 +115,9 @@
     RetrieveUserProvidedServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instances/" + guid + "";
+      config.url = "/api/cf/v2/user_provided_service_instances/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -127,10 +127,10 @@
     UpdateUserProvidedServiceInstance: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/user_provided_service_instances/" + guid + "";
+      config.url = "/api/cf/v2/user_provided_service_instances/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

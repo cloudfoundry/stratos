@@ -30,9 +30,9 @@
     GetAllFeatureFlags: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags";
+      config.url = "/api/cf/v2/config/feature_flags";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -43,9 +43,9 @@
     GetAppBitsUploadFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/app_bits_upload";
+      config.url = "/api/cf/v2/config/feature_flags/app_bits_upload";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -56,9 +56,9 @@
     GetAppScalingFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/app_scaling";
+      config.url = "/api/cf/v2/config/feature_flags/app_scaling";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -70,9 +70,9 @@
     GetDiegoDockerFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/diego_docker";
+      config.url = "/api/cf/v2/config/feature_flags/diego_docker";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -83,9 +83,9 @@
     GetPrivateDomainCreationFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/private_domain_creation";
+      config.url = "/api/cf/v2/config/feature_flags/private_domain_creation";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -96,9 +96,9 @@
     GetRouteCreationFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/route_creation";
+      config.url = "/api/cf/v2/config/feature_flags/route_creation";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -109,9 +109,9 @@
     GetServiceInstanceCreationFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/service_instance_creation";
+      config.url = "/api/cf/v2/config/feature_flags/service_instance_creation";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -126,9 +126,9 @@
     GetSetUserRolesFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/set_roles_by_username";
+      config.url = "/api/cf/v2/config/feature_flags/set_roles_by_username";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -140,9 +140,9 @@
     GetSpaceScopedPrivateBrokerCreationFeatureFlagExperimental: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/space_scoped_private_broker_creation";
+      config.url = "/api/cf/v2/config/feature_flags/space_scoped_private_broker_creation";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -154,9 +154,9 @@
     GetTaskCreationFeatureFlagExperimental: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/task_creation";
+      config.url = "/api/cf/v2/config/feature_flags/task_creation";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -171,9 +171,9 @@
     GetUnsetUserRolesFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/unset_roles_by_username";
+      config.url = "/api/cf/v2/config/feature_flags/unset_roles_by_username";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -184,9 +184,9 @@
     GetUserOrgCreationFeatureFlag: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/user_org_creation";
+      config.url = "/api/cf/v2/config/feature_flags/user_org_creation";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -196,10 +196,10 @@
     SetFeatureFlag: function (name, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/config/feature_flags/" + name + "";
+      config.url = "/api/cf/v2/config/feature_flags/" + name + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

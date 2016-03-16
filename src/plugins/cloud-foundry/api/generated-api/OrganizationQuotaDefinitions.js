@@ -30,10 +30,10 @@
     CreateOrganizationQuotaDefinition: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/quota_definitions";
+      config.url = "/api/cf/v2/quota_definitions";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -43,9 +43,9 @@
     DeleteOrganizationQuotaDefinition: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/quota_definitions/" + guid + "";
+      config.url = "/api/cf/v2/quota_definitions/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     ListAllOrganizationQuotaDefinitions: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/quota_definitions";
+      config.url = "/api/cf/v2/quota_definitions";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     RetrieveOrganizationQuotaDefinition: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/quota_definitions/" + guid + "";
+      config.url = "/api/cf/v2/quota_definitions/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -79,10 +79,10 @@
     UpdateOrganizationQuotaDefinition: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/quota_definitions/" + guid + "";
+      config.url = "/api/cf/v2/quota_definitions/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

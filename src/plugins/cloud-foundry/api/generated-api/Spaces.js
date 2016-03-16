@@ -30,9 +30,9 @@
     AssociateAuditorWithSpace: function (guid, auditor_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/auditors/" + auditor_guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "/auditors/" + auditor_guid + "";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -42,10 +42,10 @@
     AssociateAuditorWithSpaceByUsername: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "v2/spaces/" + guid + "/auditors";
+      config.url = "/api/cfv2/spaces/" + guid + "/auditors";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     AssociateDeveloperWithSpace: function (guid, developer_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/developers/" + developer_guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "/developers/" + developer_guid + "";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,10 +67,10 @@
     AssociateDeveloperWithSpaceByUsername: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "v2/spaces/" + guid + "/developers";
+      config.url = "/api/cfv2/spaces/" + guid + "/developers";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -80,9 +80,9 @@
     AssociateManagerWithSpace: function (guid, manager_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/managers/" + manager_guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "/managers/" + manager_guid + "";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -92,10 +92,10 @@
     AssociateManagerWithSpaceByUsername: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "v2/spaces/" + guid + "/managers";
+      config.url = "/api/cfv2/spaces/" + guid + "/managers";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -105,9 +105,9 @@
     AssociateSecurityGroupWithSpace: function (guid, security_group_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/security_groups/" + security_group_guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "/security_groups/" + security_group_guid + "";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -117,10 +117,10 @@
     CreateSpace: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces";
+      config.url = "/api/cf/v2/spaces";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -130,9 +130,9 @@
     DeleteSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -142,10 +142,10 @@
     DisassociateAuditorWithSpaceByUsername: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "v2/spaces/" + guid + "/auditors";
+      config.url = "/api/cfv2/spaces/" + guid + "/auditors";
       config.method = 'DELETE';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -155,10 +155,10 @@
     DisassociateDeveloperWithSpaceByUsername: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "v2/spaces/" + guid + "/developers";
+      config.url = "/api/cfv2/spaces/" + guid + "/developers";
       config.method = 'DELETE';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -168,10 +168,10 @@
     DisassociateManagerWithSpaceByUsername: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "v2/spaces/" + guid + "/managers";
+      config.url = "/api/cfv2/spaces/" + guid + "/managers";
       config.method = 'DELETE';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -181,9 +181,9 @@
     GetSpaceSummary: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/summary";
+      config.url = "/api/cf/v2/spaces/" + guid + "/summary";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -193,9 +193,9 @@
     ListAllAppsForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/apps";
+      config.url = "/api/cf/v2/spaces/" + guid + "/apps";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -205,9 +205,9 @@
     ListAllAuditorsForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/auditors";
+      config.url = "/api/cf/v2/spaces/" + guid + "/auditors";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -217,9 +217,9 @@
     ListAllDevelopersForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/developers";
+      config.url = "/api/cf/v2/spaces/" + guid + "/developers";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -229,9 +229,9 @@
     ListAllDomainsForSpaceDeprecated: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/domains";
+      config.url = "/api/cf/v2/spaces/" + guid + "/domains";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -241,9 +241,9 @@
     ListAllEventsForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/events";
+      config.url = "/api/cf/v2/spaces/" + guid + "/events";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -253,9 +253,9 @@
     ListAllManagersForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/managers";
+      config.url = "/api/cf/v2/spaces/" + guid + "/managers";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -265,9 +265,9 @@
     ListAllRoutesForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/routes";
+      config.url = "/api/cf/v2/spaces/" + guid + "/routes";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -277,9 +277,9 @@
     ListAllSecurityGroupsForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/security_groups";
+      config.url = "/api/cf/v2/spaces/" + guid + "/security_groups";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -289,9 +289,9 @@
     ListAllServiceInstancesForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/service_instances";
+      config.url = "/api/cf/v2/spaces/" + guid + "/service_instances";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -301,9 +301,9 @@
     ListAllServicesForSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/services";
+      config.url = "/api/cf/v2/spaces/" + guid + "/services";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -313,9 +313,9 @@
     ListAllSpaces: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces";
+      config.url = "/api/cf/v2/spaces";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -325,9 +325,9 @@
     RemoveAuditorFromSpace: function (guid, auditor_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/auditors/" + auditor_guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "/auditors/" + auditor_guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -337,9 +337,9 @@
     RemoveDeveloperFromSpace: function (guid, developer_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/developers/" + developer_guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "/developers/" + developer_guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -349,9 +349,9 @@
     RemoveManagerFromSpace: function (guid, manager_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/managers/" + manager_guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "/managers/" + manager_guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -361,9 +361,9 @@
     RemoveSecurityGroupFromSpace: function (guid, security_group_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/security_groups/" + security_group_guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "/security_groups/" + security_group_guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -373,9 +373,9 @@
     RetrieveSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -385,9 +385,9 @@
     RetrievingRolesOfAllUsersInSpace: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "/user_roles";
+      config.url = "/api/cf/v2/spaces/" + guid + "/user_roles";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -397,10 +397,10 @@
     UpdateSpace: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/spaces/" + guid + "";
+      config.url = "/api/cf/v2/spaces/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

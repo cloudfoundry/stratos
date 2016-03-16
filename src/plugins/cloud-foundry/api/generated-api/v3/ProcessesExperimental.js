@@ -30,9 +30,9 @@
     GetProcess: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/processes/" + guid + "";
+      config.url = "/api/cf/v3/processes/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -42,9 +42,9 @@
     GetDetailedStatsForProcess: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/processes/" + guid + "/stats";
+      config.url = "/api/cf/v3/processes/" + guid + "/stats";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -54,9 +54,9 @@
     ListAllProcesses: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/processes";
+      config.url = "/api/cf/v3/processes";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -66,10 +66,10 @@
     ScalingProcess: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/processes/" + guid + "/scale";
+      config.url = "/api/cf/v3/processes/" + guid + "/scale";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -79,9 +79,9 @@
     TerminatingProcessInstance: function (guid, index, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/processes/" + guid + "/instances/" + index + "";
+      config.url = "/api/cf/v3/processes/" + guid + "/instances/" + index + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -91,10 +91,10 @@
     UpdateProcess: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v3/processes/" + guid + "";
+      config.url = "/api/cf/v3/processes/" + guid + "";
       config.method = 'PATCH';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

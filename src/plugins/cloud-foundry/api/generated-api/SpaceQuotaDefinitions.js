@@ -30,9 +30,9 @@
     AssociateSpaceWithSpaceQuotaDefinition: function (guid, space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/space_quota_definitions/" + guid + "/spaces/" + space_guid + "";
+      config.url = "/api/cf/v2/space_quota_definitions/" + guid + "/spaces/" + space_guid + "";
       config.method = 'PUT';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -42,10 +42,10 @@
     CreateSpaceQuotaDefinition: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/space_quota_definitions";
+      config.url = "/api/cf/v2/space_quota_definitions";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     DeleteSpaceQuotaDefinition: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/space_quota_definitions/" + guid + "";
+      config.url = "/api/cf/v2/space_quota_definitions/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     ListAllSpaceQuotaDefinitions: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/space_quota_definitions";
+      config.url = "/api/cf/v2/space_quota_definitions";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -79,9 +79,9 @@
     ListAllSpacesForSpaceQuotaDefinition: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/space_quota_definitions/" + guid + "/spaces";
+      config.url = "/api/cf/v2/space_quota_definitions/" + guid + "/spaces";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -91,9 +91,9 @@
     RemoveSpaceFromSpaceQuotaDefinition: function (guid, space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/space_quota_definitions/" + guid + "/spaces/" + space_guid + "";
+      config.url = "/api/cf/v2/space_quota_definitions/" + guid + "/spaces/" + space_guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -103,9 +103,9 @@
     RetrieveSpaceQuotaDefinition: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/space_quota_definitions/" + guid + "";
+      config.url = "/api/cf/v2/space_quota_definitions/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -115,10 +115,10 @@
     UpdateSpaceQuotaDefinition: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/space_quota_definitions/" + guid + "";
+      config.url = "/api/cf/v2/space_quota_definitions/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });

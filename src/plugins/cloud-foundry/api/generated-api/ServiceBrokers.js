@@ -30,10 +30,10 @@
     CreateServiceBroker: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_brokers";
+      config.url = "/api/cf/v2/service_brokers";
       config.method = 'POST';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -43,9 +43,9 @@
     DeleteServiceBroker: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_brokers/" + guid + "";
+      config.url = "/api/cf/v2/service_brokers/" + guid + "";
       config.method = 'DELETE';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -55,9 +55,9 @@
     ListAllServiceBrokers: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_brokers";
+      config.url = "/api/cf/v2/service_brokers";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -67,9 +67,9 @@
     RetrieveServiceBroker: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_brokers/" + guid + "";
+      config.url = "/api/cf/v2/service_brokers/" + guid + "";
       config.method = 'GET';
-      return $http(config);
+      return this.$http(config);
     },
 
    /*
@@ -79,10 +79,10 @@
     UpdateServiceBroker: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/v2/service_brokers/" + guid + "";
+      config.url = "/api/cf/v2/service_brokers/" + guid + "";
       config.method = 'PUT';
       config.data = value;
-      return $http(config);
+      return this.$http(config);
     }
 
   });
