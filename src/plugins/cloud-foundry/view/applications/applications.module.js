@@ -29,15 +29,11 @@
    * @property {object} application - the Cloud Foundry Applications Model
    */
   function ApplicationsController(modelManager) {
-    var that = this; // eslint-disable-line
-    this.application = modelManager.retrieve('cloud-foundry.model.application');
-    this.application.all().then(function () {
-      //console.log(that.application.data.applications);
-    });
+    this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.model.all();
   }
 
   angular.extend(ApplicationsController.prototype, {
-
   });
 
 })();
