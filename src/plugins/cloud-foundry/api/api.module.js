@@ -53,14 +53,14 @@
     }
 
     function marshalRequest(config) {
-      if (config.url.substr(0,11) === "/api/cf/v2/") {
+      if (config.url.substr(0,11) === '/api/cf/v2/') {
         config.paramSerializer = makeQueryString;
       }
       return config || $q.when(config);
     }
 
     function marshalResponse(response) {
-      if (response.config.url.substr(0,4) === "/v2/" && response.config.url.indexOf('orphan-relations=1')) {
+      if (response.config.url.substr(0,4) === '/v2/' && response.config.url.indexOf('orphan-relations=1')) {
         // insert orphan relations back into returned resources
       }
       return response;

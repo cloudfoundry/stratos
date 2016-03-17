@@ -30,7 +30,7 @@
     RetrieveJobThatIsQueued: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/jobs/" + guid + "";
+      config.url = '/api/cf/v2/jobs/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -42,7 +42,7 @@
     RetrieveJobThatWasSuccessful: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/jobs/" + guid + "";
+      config.url = '/api/cf/v2/jobs/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -54,7 +54,7 @@
     RetrieveJobWithKnownFailure: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/jobs/" + guid + "";
+      config.url = '/api/cf/v2/jobs/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -66,7 +66,7 @@
     RetrieveJobWithUnknownFailure: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/jobs/" + guid + "";
+      config.url = '/api/cf/v2/jobs/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     }

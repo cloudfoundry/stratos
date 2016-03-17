@@ -30,7 +30,7 @@
     CreateSharedDomain: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/shared_domains";
+      config.url = '/api/cf/v2/shared_domains';
       config.method = 'POST';
       config.data = value;
       return this.$http(config);
@@ -43,7 +43,7 @@
     DeleteSharedDomain: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/shared_domains/" + guid + "";
+      config.url = '/api/cf/v2/shared_domains/" + guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -55,7 +55,7 @@
     FilterSharedDomainsByName: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/shared_domains";
+      config.url = '/api/cf/v2/shared_domains';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -67,7 +67,7 @@
     ListAllSharedDomains: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/shared_domains";
+      config.url = '/api/cf/v2/shared_domains';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -79,7 +79,7 @@
     RetrieveSharedDomain: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/shared_domains/" + guid + "";
+      config.url = '/api/cf/v2/shared_domains/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     }

@@ -36,7 +36,7 @@
     ListAllMatchingResources: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/resource_match";
+      config.url = '/api/cf/v2/resource_match';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);

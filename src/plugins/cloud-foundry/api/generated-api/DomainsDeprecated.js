@@ -30,7 +30,7 @@
     CreateDomainOwnedByGivenOrganizationDeprecated: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/domains";
+      config.url = '/api/cf/v2/domains';
       config.method = 'POST';
       config.data = value;
       return this.$http(config);
@@ -43,7 +43,7 @@
     CreateSharedDomainDeprecated: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/domains";
+      config.url = '/api/cf/v2/domains';
       config.method = 'POST';
       config.data = value;
       return this.$http(config);
@@ -56,7 +56,7 @@
     DeleteDomainDeprecated: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/domains/" + guid + "";
+      config.url = '/api/cf/v2/domains/" + guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -68,7 +68,7 @@
     ListAllDomainsDeprecated: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/domains";
+      config.url = '/api/cf/v2/domains';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -80,7 +80,7 @@
     ListAllSpacesForDomainDeprecated: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/domains/" + guid + "/spaces";
+      config.url = '/api/cf/v2/domains/" + guid + "/spaces';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -92,7 +92,7 @@
     RetrieveDomainDeprecated: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/domains/" + guid + "";
+      config.url = '/api/cf/v2/domains/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     }

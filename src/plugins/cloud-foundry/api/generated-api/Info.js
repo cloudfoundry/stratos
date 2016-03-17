@@ -30,7 +30,7 @@
     GetInfo: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/info";
+      config.url = '/api/cf/v2/info';
       config.method = 'GET';
       return this.$http(config);
     }

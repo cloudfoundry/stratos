@@ -31,7 +31,7 @@
     DeleteService: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/services/" + guid + "";
+      config.url = '/api/cf/v2/services/" + guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -43,7 +43,7 @@
     ListAllServicePlansForService: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/services/" + guid + "/service_plans";
+      config.url = '/api/cf/v2/services/" + guid + "/service_plans';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -55,7 +55,7 @@
     ListAllServices: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/services";
+      config.url = '/api/cf/v2/services';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -67,7 +67,7 @@
     RetrieveService: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/services/" + guid + "";
+      config.url = '/api/cf/v2/services/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     }

@@ -30,7 +30,7 @@
     RemovingSecurityGroupAsDefaultForStaging: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/config/staging_security_groups/" + guid + "";
+      config.url = '/api/cf/v2/config/staging_security_groups/" + guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -42,7 +42,7 @@
     ReturnSecurityGroupsUsedForStaging: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/config/staging_security_groups";
+      config.url = '/api/cf/v2/config/staging_security_groups';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -54,7 +54,7 @@
     SetSecurityGroupAsDefaultForStaging: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/config/staging_security_groups/" + guid + "";
+      config.url = '/api/cf/v2/config/staging_security_groups/" + guid + "';
       config.method = 'PUT';
       return this.$http(config);
     }

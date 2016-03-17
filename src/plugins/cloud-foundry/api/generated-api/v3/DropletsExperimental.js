@@ -30,7 +30,7 @@
     DeleteDroplet: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v3/droplets/" + guid + "";
+      config.url = '/api/cf/v3/droplets/" + guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -42,7 +42,7 @@
     FiltersDropletsByStatesAppGuids: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v3/droplets";
+      config.url = '/api/cf/v3/droplets';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -54,7 +54,7 @@
     GetDroplet: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v3/droplets/" + guid + "";
+      config.url = '/api/cf/v3/droplets/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -66,7 +66,7 @@
     ListAllDroplets: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v3/droplets";
+      config.url = '/api/cf/v3/droplets';
       config.method = 'GET';
       return this.$http(config);
     }

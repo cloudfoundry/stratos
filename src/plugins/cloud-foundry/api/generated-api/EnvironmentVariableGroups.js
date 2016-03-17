@@ -31,7 +31,7 @@
     GettingContentsOfRunningEnvironmentVariableGroup: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/config/environment_variable_groups/running";
+      config.url = '/api/cf/v2/config/environment_variable_groups/running';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -44,7 +44,7 @@
     GettingContentsOfStagingEnvironmentVariableGroup: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/config/environment_variable_groups/staging";
+      config.url = '/api/cf/v2/config/environment_variable_groups/staging';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -57,7 +57,7 @@
     UpdateContentsOfRunningEnvironmentVariableGroup: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/config/environment_variable_groups/running";
+      config.url = '/api/cf/v2/config/environment_variable_groups/running';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);
@@ -71,7 +71,7 @@
     UpdateContentsOfStagingEnvironmentVariableGroup: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/config/environment_variable_groups/staging";
+      config.url = '/api/cf/v2/config/environment_variable_groups/staging';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);

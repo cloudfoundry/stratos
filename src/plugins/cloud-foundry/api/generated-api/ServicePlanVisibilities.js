@@ -30,7 +30,7 @@
     CreateServicePlanVisibility: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_plan_visibilities";
+      config.url = '/api/cf/v2/service_plan_visibilities';
       config.method = 'POST';
       config.data = value;
       return this.$http(config);
@@ -43,7 +43,7 @@
     DeleteServicePlanVisibilities: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_plan_visibilities/" + guid + "";
+      config.url = '/api/cf/v2/service_plan_visibilities/" + guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -55,7 +55,7 @@
     ListAllServicePlanVisibilities: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_plan_visibilities";
+      config.url = '/api/cf/v2/service_plan_visibilities';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -67,7 +67,7 @@
     RetrieveServicePlanVisibility: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_plan_visibilities/" + guid + "";
+      config.url = '/api/cf/v2/service_plan_visibilities/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -79,7 +79,7 @@
     UpdateServicePlanVisibility: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_plan_visibilities/" + guid + "";
+      config.url = '/api/cf/v2/service_plan_visibilities/" + guid + "';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);

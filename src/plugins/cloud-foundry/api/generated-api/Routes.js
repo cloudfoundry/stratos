@@ -30,7 +30,7 @@
     AssociateAppWithRoute: function (guid, app_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes/" + guid + "/apps/" + app_guid + "";
+      config.url = '/api/cf/v2/routes/" + guid + "/apps/" + app_guid + "';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -43,7 +43,7 @@
     CheckRouteExists: function (domain_guid, host, path, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes/reserved/domain/" + domain_guid + "/host/" + host + "?path=" + path + "";
+      config.url = '/api/cf/v2/routes/reserved/domain/" + domain_guid + "/host/" + host + "?path=" + path + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -55,7 +55,7 @@
     CreateRoute: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes";
+      config.url = '/api/cf/v2/routes';
       config.method = 'POST';
       config.data = value;
       return this.$http(config);
@@ -68,7 +68,7 @@
     DeleteRoute: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes/" + guid + "?recursive=true";
+      config.url = '/api/cf/v2/routes/" + guid + "?recursive=true';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -80,7 +80,7 @@
     ListAllAppsForRoute: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes/" + guid + "/apps";
+      config.url = '/api/cf/v2/routes/" + guid + "/apps';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -92,7 +92,7 @@
     ListAllRoutes: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes";
+      config.url = '/api/cf/v2/routes';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -104,7 +104,7 @@
     RemoveAppFromRoute: function (guid, app_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes/" + guid + "/apps/" + app_guid + "";
+      config.url = '/api/cf/v2/routes/" + guid + "/apps/" + app_guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -116,7 +116,7 @@
     RetrieveRoute: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes/" + guid + "";
+      config.url = '/api/cf/v2/routes/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -128,7 +128,7 @@
     UpdateRoute: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/routes/" + guid + "";
+      config.url = '/api/cf/v2/routes/" + guid + "';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);

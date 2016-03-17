@@ -30,7 +30,7 @@
     AssociateSpaceWithSecurityGroup: function (guid, space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/security_groups/" + guid + "/spaces/" + space_guid + "";
+      config.url = '/api/cf/v2/security_groups/" + guid + "/spaces/" + space_guid + "';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -42,7 +42,7 @@
     CreateSecurityGroup: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/security_groups";
+      config.url = '/api/cf/v2/security_groups';
       config.method = 'POST';
       config.data = value;
       return this.$http(config);
@@ -55,7 +55,7 @@
     DeleteSecurityGroup: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/security_groups/" + guid + "";
+      config.url = '/api/cf/v2/security_groups/" + guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -67,7 +67,7 @@
     ListAllSecurityGroups: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/security_groups";
+      config.url = '/api/cf/v2/security_groups';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -79,7 +79,7 @@
     ListAllSpacesForSecurityGroup: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/security_groups/" + guid + "/spaces";
+      config.url = '/api/cf/v2/security_groups/" + guid + "/spaces';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -91,7 +91,7 @@
     RemoveSpaceFromSecurityGroup: function (guid, space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/security_groups/" + guid + "/spaces/" + space_guid + "";
+      config.url = '/api/cf/v2/security_groups/" + guid + "/spaces/" + space_guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -103,7 +103,7 @@
     RetrieveSecurityGroup: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/security_groups/" + guid + "";
+      config.url = '/api/cf/v2/security_groups/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -115,7 +115,7 @@
     UpdateSecurityGroup: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/security_groups/" + guid + "";
+      config.url = '/api/cf/v2/security_groups/" + guid + "';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);

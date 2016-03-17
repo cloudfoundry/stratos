@@ -30,7 +30,7 @@
     BindingServiceInstanceToRoute: function (service_instance_guid, route_guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances/" + service_instance_guid + "/routes/" + route_guid + "";
+      config.url = '/api/cf/v2/service_instances/" + service_instance_guid + "/routes/" + route_guid + "';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);
@@ -43,7 +43,7 @@
     CreateServiceInstance: function (value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances";
+      config.url = '/api/cf/v2/service_instances';
       config.method = 'POST';
       config.data = value;
       return this.$http(config);
@@ -56,7 +56,7 @@
     DeleteServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances/" + guid + "";
+      config.url = '/api/cf/v2/service_instances/" + guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -68,7 +68,7 @@
     ListAllRoutesForServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances/" + guid + "/routes";
+      config.url = '/api/cf/v2/service_instances/" + guid + "/routes';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -80,7 +80,7 @@
     ListAllServiceBindingsForServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances/" + guid + "/service_bindings";
+      config.url = '/api/cf/v2/service_instances/" + guid + "/service_bindings';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -92,7 +92,7 @@
     ListAllServiceInstances: function (params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances";
+      config.url = '/api/cf/v2/service_instances';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -104,7 +104,7 @@
     RetrieveServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances/" + guid + "";
+      config.url = '/api/cf/v2/service_instances/" + guid + "';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -116,7 +116,7 @@
     RetrievingPermissionsOnServiceInstance: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances/" + guid + "/permissions";
+      config.url = '/api/cf/v2/service_instances/" + guid + "/permissions';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -128,7 +128,7 @@
     UnbindingServiceInstanceFromRoute: function (service_instance_guid, route_guid, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances/" + service_instance_guid + "/routes/" + route_guid + "";
+      config.url = '/api/cf/v2/service_instances/" + service_instance_guid + "/routes/" + route_guid + "';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -140,7 +140,7 @@
     UpdateServiceInstance: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = "/api/cf/v2/service_instances/" + guid + "";
+      config.url = '/api/cf/v2/service_instances/" + guid + "';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);
