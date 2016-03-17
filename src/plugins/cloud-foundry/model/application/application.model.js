@@ -91,6 +91,20 @@
     },
 
     /**
+     * @function summary
+     * @memberof cloud-foundry.model.application
+     * @description get summary of an application at the model layer
+     * @param {string} guid - the application id
+     * @returns {promise}
+     * @public
+     */
+    summary: function (guid) {
+      return this.apiManager.retrieve('cloud-foundry.api.application')
+        .summary(guid)
+        .then(this.onSummary.bind(this));
+    },
+
+    /**
      * @function onAll
      * @memberof  cloud-foundry.model.application
      * @description onAll handler at model layer
@@ -125,6 +139,18 @@
      */
     onFiles: function (response) {
       this.data.files = response.data;
+    },
+
+    /**
+     * @function onSummary
+     * @memberof  cloud-foundry.model.application
+     * @description onSummary handler at model layer
+     * @param {object} response - the json return from the api call
+     * @private
+     * @returns {void}
+     */
+    onSummary: function (response) {
+      this.summary = response.data;
     }
 
   });
