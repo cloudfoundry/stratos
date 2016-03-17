@@ -10,6 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
+    //cf.applications:guid.show...
     $stateProvider.state('cf.applications', {
       url: '/applications',
       templateUrl: 'plugins/cloud-foundry/view/applications/applications.html',
@@ -31,9 +32,10 @@
   function ApplicationsController(modelManager) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.model.all();
-  }
+    };
 
   angular.extend(ApplicationsController.prototype, {
+
   });
 
 })();
