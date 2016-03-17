@@ -30,7 +30,7 @@
     DeleteServicePlans: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plans/" + guid + "';
+      config.url = '/api/cf/v2/service_plans/' + guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -42,7 +42,7 @@
     ListAllServiceInstancesForServicePlan: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plans/" + guid + "/service_instances';
+      config.url = '/api/cf/v2/service_plans/' + guid + '/service_instances';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -66,7 +66,7 @@
     RetrieveServicePlan: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plans/" + guid + "';
+      config.url = '/api/cf/v2/service_plans/' + guid + '';
       config.method = 'GET';
       return this.$http(config);
     },

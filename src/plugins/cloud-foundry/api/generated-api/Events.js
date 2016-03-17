@@ -510,7 +510,7 @@
     RetrieveEvent: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events/" + guid + "';
+      config.url = '/api/cf/v2/events/' + guid + '';
       config.method = 'GET';
       return this.$http(config);
     }

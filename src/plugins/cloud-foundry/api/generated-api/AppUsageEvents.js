@@ -61,7 +61,7 @@
     RetrieveAppUsageEvent: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/app_usage_events/" + guid + "';
+      config.url = '/api/cf/v2/app_usage_events/' + guid + '';
       config.method = 'GET';
       return this.$http(config);
     }

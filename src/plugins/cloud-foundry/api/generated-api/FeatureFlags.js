@@ -196,7 +196,7 @@
     SetFeatureFlag: function (name, value, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/config/feature_flags/" + name + "';
+      config.url = '/api/cf/v2/config/feature_flags/' + name + '';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);

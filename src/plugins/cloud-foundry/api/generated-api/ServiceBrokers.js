@@ -43,7 +43,7 @@
     DeleteServiceBroker: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_brokers/" + guid + "';
+      config.url = '/api/cf/v2/service_brokers/' + guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -67,7 +67,7 @@
     RetrieveServiceBroker: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_brokers/" + guid + "';
+      config.url = '/api/cf/v2/service_brokers/' + guid + '';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -79,7 +79,7 @@
     UpdateServiceBroker: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_brokers/" + guid + "';
+      config.url = '/api/cf/v2/service_brokers/' + guid + '';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);

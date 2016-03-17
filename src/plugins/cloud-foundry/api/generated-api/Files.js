@@ -30,7 +30,7 @@
     RetrieveFile: function (app_guid, instance_index, file_path, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/" + app_guid + "/instances/" + instance_index + "/files/" + file_path + "';
+      config.url = '/api/cf/v2/apps/' + app_guid + '/instances/' + instance_index + '/files/' + file_path + '';
       config.method = 'GET';
       return this.$http(config);
     }

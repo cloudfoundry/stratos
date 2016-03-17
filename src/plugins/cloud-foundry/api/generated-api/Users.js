@@ -30,7 +30,7 @@
     AssociateAuditedOrganizationWithUser: function (guid, audited_organization_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/audited_organizations/" + audited_organization_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -42,7 +42,7 @@
     AssociateAuditedSpaceWithUser: function (guid, audited_space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/audited_spaces/" + audited_space_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -54,7 +54,7 @@
     AssociateBillingManagedOrganizationWithUser: function (guid, billing_managed_organization_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/billing_managed_organizations/" + billing_managed_organization_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -66,7 +66,7 @@
     AssociateManagedOrganizationWithUser: function (guid, managed_organization_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/managed_organizations/" + managed_organization_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -78,7 +78,7 @@
     AssociateManagedSpaceWithUser: function (guid, managed_space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/managed_spaces/" + managed_space_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -90,7 +90,7 @@
     AssociateOrganizationWithUser: function (guid, organization_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/organizations/" + organization_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/organizations/' + organization_guid + '';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -102,7 +102,7 @@
     AssociateSpaceWithUser: function (guid, space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/spaces/" + space_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/spaces/' + space_guid + '';
       config.method = 'PUT';
       return this.$http(config);
     },
@@ -127,7 +127,7 @@
     DeleteUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -139,7 +139,7 @@
     GetUserSummary: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/summary';
+      config.url = '/api/cf/v2/users/' + guid + '/summary';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -151,7 +151,7 @@
     ListAllAuditedOrganizationsForUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/audited_organizations';
+      config.url = '/api/cf/v2/users/' + guid + '/audited_organizations';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -163,7 +163,7 @@
     ListAllAuditedSpacesForUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/audited_spaces';
+      config.url = '/api/cf/v2/users/' + guid + '/audited_spaces';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -175,7 +175,7 @@
     ListAllBillingManagedOrganizationsForUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/billing_managed_organizations';
+      config.url = '/api/cf/v2/users/' + guid + '/billing_managed_organizations';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -187,7 +187,7 @@
     ListAllManagedOrganizationsForUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/managed_organizations';
+      config.url = '/api/cf/v2/users/' + guid + '/managed_organizations';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -199,7 +199,7 @@
     ListAllManagedSpacesForUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/managed_spaces';
+      config.url = '/api/cf/v2/users/' + guid + '/managed_spaces';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -211,7 +211,7 @@
     ListAllOrganizationsForUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/organizations';
+      config.url = '/api/cf/v2/users/' + guid + '/organizations';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -223,7 +223,7 @@
     ListAllSpacesForUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/spaces';
+      config.url = '/api/cf/v2/users/' + guid + '/spaces';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -247,7 +247,7 @@
     RemoveAuditedOrganizationFromUser: function (guid, audited_organization_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/audited_organizations/" + audited_organization_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -259,7 +259,7 @@
     RemoveAuditedSpaceFromUser: function (guid, audited_space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/audited_spaces/" + audited_space_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -271,7 +271,7 @@
     RemoveBillingManagedOrganizationFromUser: function (guid, billing_managed_organization_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/billing_managed_organizations/" + billing_managed_organization_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -283,7 +283,7 @@
     RemoveManagedOrganizationFromUser: function (guid, managed_organization_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/managed_organizations/" + managed_organization_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -295,7 +295,7 @@
     RemoveManagedSpaceFromUser: function (guid, managed_space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/managed_spaces/" + managed_space_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -307,7 +307,7 @@
     RemoveOrganizationFromUser: function (guid, organization_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/organizations/" + organization_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/organizations/' + organization_guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -319,7 +319,7 @@
     RemoveSpaceFromUser: function (guid, space_guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "/spaces/" + space_guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '/spaces/' + space_guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -331,7 +331,7 @@
     RetrieveUser: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '';
       config.method = 'GET';
       return this.$http(config);
     },
@@ -343,7 +343,7 @@
     UpdateUser: function (guid, value, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/" + guid + "';
+      config.url = '/api/cf/v2/users/' + guid + '';
       config.method = 'PUT';
       config.data = value;
       return this.$http(config);

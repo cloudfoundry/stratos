@@ -43,7 +43,7 @@
     DeleteServiceKey: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_keys/" + guid + "';
+      config.url = '/api/cf/v2/service_keys/' + guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -67,7 +67,7 @@
     RetrieveServiceKey: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_keys/" + guid + "';
+      config.url = '/api/cf/v2/service_keys/' + guid + '';
       config.method = 'GET';
       return this.$http(config);
     }

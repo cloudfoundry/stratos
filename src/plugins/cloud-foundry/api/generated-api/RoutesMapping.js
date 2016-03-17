@@ -30,7 +30,7 @@
     DeleteRouteMapping: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/route_mappings/" + guid + "';
+      config.url = '/api/cf/v2/route_mappings/' + guid + '';
       config.method = 'DELETE';
       return this.$http(config);
     },
@@ -67,7 +67,7 @@
     RetrieveRouteMapping: function (guid, params) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/route_mappings/" + guid + "';
+      config.url = '/api/cf/v2/route_mappings/' + guid + '';
       config.method = 'GET';
       return this.$http(config);
     }
