@@ -25,7 +25,7 @@
 
    /*
     * Associate Space with the Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/associate_space_with_the_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_groups/associate_space_with_the_security_group.html
     */
     AssociateSpaceWithSecurityGroup: function (guid, space_guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * Creating a Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/creating_a_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_groups/creating_a_security_group.html
     */
     CreateSecurityGroup: function (value, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * Delete a Particular Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/delete_a_particular_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_groups/delete_a_particular_security_group.html
     */
     DeleteSecurityGroup: function (guid, params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * List all Security Groups
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/list_all_security_groups.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_groups/list_all_security_groups.html
     */
     ListAllSecurityGroups: function (params) {
       var config = {};
@@ -74,7 +74,7 @@
 
    /*
     * List all Spaces for the Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/list_all_spaces_for_the_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_groups/list_all_spaces_for_the_security_group.html
     */
     ListAllSpacesForSecurityGroup: function (guid, params) {
       var config = {};
@@ -86,7 +86,7 @@
 
    /*
     * Remove Space from the Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/remove_space_from_the_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_groups/remove_space_from_the_security_group.html
     */
     RemoveSpaceFromSecurityGroup: function (guid, space_guid, params) {
       var config = {};
@@ -98,7 +98,7 @@
 
    /*
     * Retrieve a Particular Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/retrieve_a_particular_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_groups/retrieve_a_particular_security_group.html
     */
     RetrieveSecurityGroup: function (guid, params) {
       var config = {};
@@ -110,7 +110,7 @@
 
    /*
     * Updating a Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/updating_a_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_groups/updating_a_security_group.html
     */
     UpdateSecurityGroup: function (guid, value, params) {
       var config = {};

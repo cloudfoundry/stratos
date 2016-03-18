@@ -25,7 +25,7 @@
 
    /*
     * Create a Service Key
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_keys/create_a_service_key.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_keys/create_a_service_key.html
     */
     CreateServiceKey: function (value, params) {
       var config = {};
@@ -38,7 +38,7 @@
 
    /*
     * Delete a Particular Service Key
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_keys/delete_a_particular_service_key.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_keys/delete_a_particular_service_key.html
     */
     DeleteServiceKey: function (guid, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * List all Service Keys
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_keys/list_all_service_keys.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_keys/list_all_service_keys.html
     */
     ListAllServiceKeys: function (params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * Retrieve a Particular Service Key
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_keys/retrieve_a_particular_service_key.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_keys/retrieve_a_particular_service_key.html
     */
     RetrieveServiceKey: function (guid, params) {
       var config = {};

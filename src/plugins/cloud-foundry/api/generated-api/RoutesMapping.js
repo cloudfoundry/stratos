@@ -25,7 +25,7 @@
 
    /*
     * Delete a Particular Route Mapping
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes_mapping/delete_a_particular_route_mapping.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes_mapping/delete_a_particular_route_mapping.html
     */
     DeleteRouteMapping: function (guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * List all Route Mappings
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes_mapping/list_all_route_mappings.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes_mapping/list_all_route_mappings.html
     */
     ListAllRouteMappings: function (params) {
       var config = {};
@@ -49,7 +49,7 @@
 
    /*
     * Mapping an App and a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes_mapping/mapping_an_app_and_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes_mapping/mapping_an_app_and_a_route.html
     */
     MappingAppAndRoute: function (value, params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * Retrieve a Particular Route Mapping
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes_mapping/retrieve_a_particular_route_mapping.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes_mapping/retrieve_a_particular_route_mapping.html
     */
     RetrieveRouteMapping: function (guid, params) {
       var config = {};

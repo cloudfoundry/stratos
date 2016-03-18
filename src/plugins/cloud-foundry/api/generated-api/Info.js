@@ -25,7 +25,7 @@
 
    /*
     * Get Info
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/info/get_info.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/info/get_info.html
     */
     GetInfo: function (params) {
       var config = {};

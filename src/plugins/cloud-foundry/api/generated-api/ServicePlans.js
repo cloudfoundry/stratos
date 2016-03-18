@@ -25,7 +25,7 @@
 
    /*
     * Delete a Particular Service Plans
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/delete_a_particular_service_plans.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plans/delete_a_particular_service_plans.html
     */
     DeleteServicePlans: function (guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * List all Service Instances for the Service Plan
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/list_all_service_instances_for_the_service_plan.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plans/list_all_service_instances_for_the_service_plan.html
     */
     ListAllServiceInstancesForServicePlan: function (guid, params) {
       var config = {};
@@ -49,7 +49,7 @@
 
    /*
     * List all Service Plans
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/list_all_service_plans.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plans/list_all_service_plans.html
     */
     ListAllServicePlans: function (params) {
       var config = {};
@@ -61,7 +61,7 @@
 
    /*
     * Retrieve a Particular Service Plan
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/retrieve_a_particular_service_plan.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plans/retrieve_a_particular_service_plan.html
     */
     RetrieveServicePlan: function (guid, params) {
       var config = {};
@@ -73,7 +73,7 @@
 
    /*
     * Updating a Service Plan
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/updating_a_service_plan.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plans/updating_a_service_plan.html
     */
     UpdateServicePlan: function (value, params) {
       var config = {};

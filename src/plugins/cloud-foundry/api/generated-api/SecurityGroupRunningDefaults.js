@@ -25,7 +25,7 @@
 
    /*
     * Removing a Security Group as a default for running Apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_running_defaults/removing_a_security_group_as_a_default_for_running_apps.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_group_running_defaults/removing_a_security_group_as_a_default_for_running_apps.html
     */
     RemovingSecurityGroupAsDefaultForRunningApps: function (guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * Return the Security Groups used for running Apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_running_defaults/return_the_security_groups_used_for_running_apps.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_group_running_defaults/return_the_security_groups_used_for_running_apps.html
     */
     ReturnSecurityGroupsUsedForRunningApps: function (params) {
       var config = {};
@@ -49,7 +49,7 @@
 
    /*
     * Set a Security Group as a default for running Apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_group_running_defaults/set_a_security_group_as_a_default_for_running_apps.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_group_running_defaults/set_a_security_group_as_a_default_for_running_apps.html
     */
     SetSecurityGroupAsDefaultForRunningApps: function (guid, params) {
       var config = {};

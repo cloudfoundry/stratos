@@ -28,7 +28,7 @@
     * Buildpacks are maintained in an ordered list.  If the target position is already occupied,
     * the entries will be shifted down the list to make room.  If the target position is beyond
     * the end of the current list, the buildpack will be positioned at the end of the list.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/buildpacks/change_the_position_of_a_buildpack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/buildpacks/change_the_position_of_a_buildpack.html
     */
     ChangePositionOfBuildpack: function (guid, value, params) {
       var config = {};
@@ -41,7 +41,7 @@
 
    /*
     * Creates an admin Buildpack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/buildpacks/creates_an_admin_buildpack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/buildpacks/creates_an_admin_buildpack.html
     */
     CreatesAdminBuildpack: function (value, params) {
       var config = {};
@@ -54,7 +54,7 @@
 
    /*
     * Delete a Particular Buildpack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/buildpacks/delete_a_particular_buildpack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/buildpacks/delete_a_particular_buildpack.html
     */
     DeleteBuildpack: function (guid, params) {
       var config = {};
@@ -66,7 +66,7 @@
 
    /*
     * Enable or disable a Buildpack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/buildpacks/enable_or_disable_a_buildpack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/buildpacks/enable_or_disable_a_buildpack.html
     */
     EnableOrDisableBuildpack: function (guid, value, params) {
       var config = {};
@@ -79,7 +79,7 @@
 
    /*
     * List all Buildpacks
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/buildpacks/list_all_buildpacks.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/buildpacks/list_all_buildpacks.html
     */
     ListAllBuildpacks: function (params) {
       var config = {};
@@ -91,7 +91,7 @@
 
    /*
     * Lock or unlock a Buildpack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/buildpacks/lock_or_unlock_a_buildpack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/buildpacks/lock_or_unlock_a_buildpack.html
     */
     LockOrUnlockBuildpack: function (guid, value, params) {
       var config = {};
@@ -104,7 +104,7 @@
 
    /*
     * Retrieve a Particular Buildpack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/buildpacks/retrieve_a_particular_buildpack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/buildpacks/retrieve_a_particular_buildpack.html
     */
     RetrieveBuildpack: function (guid, params) {
       var config = {};

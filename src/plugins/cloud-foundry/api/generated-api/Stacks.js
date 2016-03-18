@@ -25,7 +25,7 @@
 
    /*
     * Create a Stack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/stacks/create_a_stack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/stacks/create_a_stack.html
     */
     CreateStack: function (value, params) {
       var config = {};
@@ -38,7 +38,7 @@
 
    /*
     * Delete a Particular Stack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/stacks/delete_a_particular_stack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/stacks/delete_a_particular_stack.html
     */
     DeleteStack: function (guid, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * List all Stacks
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/stacks/list_all_stacks.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/stacks/list_all_stacks.html
     */
     ListAllStacks: function (params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * Retrieve a Particular Stack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/stacks/retrieve_a_particular_stack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/stacks/retrieve_a_particular_stack.html
     */
     RetrieveStack: function (guid, params) {
       var config = {};

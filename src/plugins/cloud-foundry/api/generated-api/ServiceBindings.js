@@ -25,7 +25,7 @@
 
    /*
     * Create a Service Binding
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_bindings/create_a_service_binding.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_bindings/create_a_service_binding.html
     */
     CreateServiceBinding: function (value, params) {
       var config = {};
@@ -38,7 +38,7 @@
 
    /*
     * Delete a Particular Service Binding
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_bindings/delete_a_particular_service_binding.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_bindings/delete_a_particular_service_binding.html
     */
     DeleteServiceBinding: function (guid, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * List all Service Bindings
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_bindings/list_all_service_bindings.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_bindings/list_all_service_bindings.html
     */
     ListAllServiceBindings: function (params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * Retrieve a Particular Service Binding
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_bindings/retrieve_a_particular_service_binding.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_bindings/retrieve_a_particular_service_binding.html
     */
     RetrieveServiceBinding: function (guid, params) {
       var config = {};

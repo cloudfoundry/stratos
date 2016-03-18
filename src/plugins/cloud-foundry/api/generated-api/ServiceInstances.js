@@ -25,7 +25,7 @@
 
    /*
     * Binding a Service Instance to a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/binding_a_service_instance_to_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/binding_a_service_instance_to_a_route.html
     */
     BindingServiceInstanceToRoute: function (service_instance_guid, route_guid, value, params) {
       var config = {};
@@ -38,7 +38,7 @@
 
    /*
     * Creating a Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/creating_a_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/creating_a_service_instance.html
     */
     CreateServiceInstance: function (value, params) {
       var config = {};
@@ -51,7 +51,7 @@
 
    /*
     * Delete a Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/delete_a_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/delete_a_service_instance.html
     */
     DeleteServiceInstance: function (guid, params) {
       var config = {};
@@ -63,7 +63,7 @@
 
    /*
     * List all Routes for the Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/list_all_routes_for_the_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/list_all_routes_for_the_service_instance.html
     */
     ListAllRoutesForServiceInstance: function (guid, params) {
       var config = {};
@@ -75,7 +75,7 @@
 
    /*
     * List all Service Bindings for the Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/list_all_service_bindings_for_the_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/list_all_service_bindings_for_the_service_instance.html
     */
     ListAllServiceBindingsForServiceInstance: function (guid, params) {
       var config = {};
@@ -87,7 +87,7 @@
 
    /*
     * List all Service Instances
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/list_all_service_instances.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/list_all_service_instances.html
     */
     ListAllServiceInstances: function (params) {
       var config = {};
@@ -99,7 +99,7 @@
 
    /*
     * Retrieve a Particular Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/retrieve_a_particular_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/retrieve_a_particular_service_instance.html
     */
     RetrieveServiceInstance: function (guid, params) {
       var config = {};
@@ -111,7 +111,7 @@
 
    /*
     * Retrieving permissions on a Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/retrieving_permissions_on_a_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/retrieving_permissions_on_a_service_instance.html
     */
     RetrievingPermissionsOnServiceInstance: function (guid, params) {
       var config = {};
@@ -123,7 +123,7 @@
 
    /*
     * Unbinding a service instance from a route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/unbinding_a_service_instance_from_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/unbinding_a_service_instance_from_a_route.html
     */
     UnbindingServiceInstanceFromRoute: function (service_instance_guid, route_guid, params) {
       var config = {};
@@ -135,7 +135,7 @@
 
    /*
     * Update a Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_instances/update_a_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_instances/update_a_service_instance.html
     */
     UpdateServiceInstance: function (guid, value, params) {
       var config = {};

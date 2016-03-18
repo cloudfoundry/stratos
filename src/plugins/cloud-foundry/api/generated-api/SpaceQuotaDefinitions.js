@@ -25,7 +25,7 @@
 
    /*
     * Associate Space with the Space Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/associate_space_with_the_space_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/space_quota_definitions/associate_space_with_the_space_quota_definition.html
     */
     AssociateSpaceWithSpaceQuotaDefinition: function (guid, space_guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * Creating a Space Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/creating_a_space_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/space_quota_definitions/creating_a_space_quota_definition.html
     */
     CreateSpaceQuotaDefinition: function (value, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * Delete a Particular Space Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/delete_a_particular_space_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/space_quota_definitions/delete_a_particular_space_quota_definition.html
     */
     DeleteSpaceQuotaDefinition: function (guid, params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * List all Space Quota Definitions
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/list_all_space_quota_definitions.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/space_quota_definitions/list_all_space_quota_definitions.html
     */
     ListAllSpaceQuotaDefinitions: function (params) {
       var config = {};
@@ -74,7 +74,7 @@
 
    /*
     * List all Spaces for the Space Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/list_all_spaces_for_the_space_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/space_quota_definitions/list_all_spaces_for_the_space_quota_definition.html
     */
     ListAllSpacesForSpaceQuotaDefinition: function (guid, params) {
       var config = {};
@@ -86,7 +86,7 @@
 
    /*
     * Remove Space from the Space Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/remove_space_from_the_space_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/space_quota_definitions/remove_space_from_the_space_quota_definition.html
     */
     RemoveSpaceFromSpaceQuotaDefinition: function (guid, space_guid, params) {
       var config = {};
@@ -98,7 +98,7 @@
 
    /*
     * Retrieve a Particular Space Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/retrieve_a_particular_space_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/space_quota_definitions/retrieve_a_particular_space_quota_definition.html
     */
     RetrieveSpaceQuotaDefinition: function (guid, params) {
       var config = {};
@@ -110,7 +110,7 @@
 
    /*
     * Updating a Space Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/space_quota_definitions/updating_a_space_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/space_quota_definitions/updating_a_space_quota_definition.html
     */
     UpdateSpaceQuotaDefinition: function (guid, value, params) {
       var config = {};

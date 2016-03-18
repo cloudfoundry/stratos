@@ -25,7 +25,7 @@
 
    /*
     * Associate App with the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/associate_app_with_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/associate_app_with_the_route.html
     */
     AssociateAppWithRoute: function (guid, app_guid, params) {
       var config = {};
@@ -38,7 +38,7 @@
    /*
     * Check a Route exists
     * This endpoint returns a status code of 204 if the route exists, and 404 if it does not.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/check_a_route_exists.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/check_a_route_exists.html
     */
     CheckRouteExists: function (domain_guid, host, path, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * Creating a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/creating_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/creating_a_route.html
     */
     CreateRoute: function (value, params) {
       var config = {};
@@ -63,7 +63,7 @@
 
    /*
     * Delete a Particular Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/delete_a_particular_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/delete_a_particular_route.html
     */
     DeleteRoute: function (guid, params) {
       var config = {};
@@ -75,7 +75,7 @@
 
    /*
     * List all Apps for the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/list_all_apps_for_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/list_all_apps_for_the_route.html
     */
     ListAllAppsForRoute: function (guid, params) {
       var config = {};
@@ -87,7 +87,7 @@
 
    /*
     * List all Routes
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/list_all_routes.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/list_all_routes.html
     */
     ListAllRoutes: function (params) {
       var config = {};
@@ -99,7 +99,7 @@
 
    /*
     * Remove App from the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/remove_app_from_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/remove_app_from_the_route.html
     */
     RemoveAppFromRoute: function (guid, app_guid, params) {
       var config = {};
@@ -111,7 +111,7 @@
 
    /*
     * Retrieve a Particular Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/retrieve_a_particular_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/retrieve_a_particular_route.html
     */
     RetrieveRoute: function (guid, params) {
       var config = {};
@@ -123,7 +123,7 @@
 
    /*
     * Update a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/update_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/update_a_route.html
     */
     UpdateRoute: function (guid, value, params) {
       var config = {};

@@ -25,7 +25,7 @@
 
    /*
     * Create a Shared Domain
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/create_a_shared_domain.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/shared_domains/create_a_shared_domain.html
     */
     CreateSharedDomain: function (value, params) {
       var config = {};
@@ -38,7 +38,7 @@
 
    /*
     * Delete a Particular Shared Domain
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/delete_a_particular_shared_domain.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/shared_domains/delete_a_particular_shared_domain.html
     */
     DeleteSharedDomain: function (guid, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * Filtering Shared Domains by name
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/filtering_shared_domains_by_name.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/shared_domains/filtering_shared_domains_by_name.html
     */
     FilterSharedDomainsByName: function (params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * List all Shared Domains
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/list_all_shared_domains.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/shared_domains/list_all_shared_domains.html
     */
     ListAllSharedDomains: function (params) {
       var config = {};
@@ -74,7 +74,7 @@
 
    /*
     * Retrieve a Particular Shared Domain
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/retrieve_a_particular_shared_domain.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/shared_domains/retrieve_a_particular_shared_domain.html
     */
     RetrieveSharedDomain: function (guid, params) {
       var config = {};

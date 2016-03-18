@@ -25,7 +25,7 @@
 
    /*
     * Get a Process
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/get_a_process.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/processes__experimental_/get_a_process.html
     */
     GetProcess: function (guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * Get Detailed Stats for a Process
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/get_detailed_stats_for_a_process.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/processes__experimental_/get_detailed_stats_for_a_process.html
     */
     GetDetailedStatsForProcess: function (guid, params) {
       var config = {};
@@ -49,7 +49,7 @@
 
    /*
     * List all Processes
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/list_all_processes.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/processes__experimental_/list_all_processes.html
     */
     ListAllProcesses: function (params) {
       var config = {};
@@ -61,7 +61,7 @@
 
    /*
     * Scaling a Process
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/scaling_a_process.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/processes__experimental_/scaling_a_process.html
     */
     ScalingProcess: function (guid, value, params) {
       var config = {};
@@ -74,7 +74,7 @@
 
    /*
     * Terminating a Process instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/terminating_a_process_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/processes__experimental_/terminating_a_process_instance.html
     */
     TerminatingProcessInstance: function (guid, index, params) {
       var config = {};
@@ -86,7 +86,7 @@
 
    /*
     * Updating a Process
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/processes__experimental_/updating_a_process.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/processes__experimental_/updating_a_process.html
     */
     UpdateProcess: function (guid, value, params) {
       var config = {};

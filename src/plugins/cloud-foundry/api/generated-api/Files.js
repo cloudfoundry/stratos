@@ -25,7 +25,7 @@
 
    /*
     * Retrieve File
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/files/retrieve_file.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/files/retrieve_file.html
     */
     RetrieveFile: function (app_guid, instance_index, file_path, params) {
       var config = {};

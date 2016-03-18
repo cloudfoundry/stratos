@@ -25,7 +25,7 @@
 
    /*
     * Copy a Package
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/copy_a_package.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/packages__experimental_/copy_a_package.html
     */
     CopyPackage: function (guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * Create a Package
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/create_a_package.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/packages__experimental_/create_a_package.html
     */
     CreatePackage: function (guid, value, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * Delete a Package
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/delete_a_package.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/packages__experimental_/delete_a_package.html
     */
     DeletePackage: function (guid, params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * Get a Package
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/get_a_package.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/packages__experimental_/get_a_package.html
     */
     GetPackage: function (guid, params) {
       var config = {};
@@ -74,7 +74,7 @@
 
    /*
     * List all Packages
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/list_all_packages.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/packages__experimental_/list_all_packages.html
     */
     ListAllPackages: function (params) {
       var config = {};
@@ -86,7 +86,7 @@
 
    /*
     * Stage a package
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/packages__experimental_/stage_a_package.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/packages__experimental_/stage_a_package.html
     */
     StagePackage: function (guid, value, params) {
       var config = {};

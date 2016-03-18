@@ -25,7 +25,7 @@
 
    /*
     * Associate Route with the User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/associate_route_with_the_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/associate_route_with_the_user_provided_service_instance.html
     */
     AssociateRouteWithUserProvidedServiceInstance: function (guid, route_guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * Creating a User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/creating_a_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/creating_a_user_provided_service_instance.html
     */
     CreateUserProvidedServiceInstance: function (value, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * Delete a Particular User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/delete_a_particular_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/delete_a_particular_user_provided_service_instance.html
     */
     DeleteUserProvidedServiceInstance: function (guid, params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * List all Routes for the User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/list_all_routes_for_the_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/list_all_routes_for_the_user_provided_service_instance.html
     */
     ListAllRoutesForUserProvidedServiceInstance: function (guid, params) {
       var config = {};
@@ -74,7 +74,7 @@
 
    /*
     * List all Service Bindings for the User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/list_all_service_bindings_for_the_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/list_all_service_bindings_for_the_user_provided_service_instance.html
     */
     ListAllServiceBindingsForUserProvidedServiceInstance: function (guid, params) {
       var config = {};
@@ -86,7 +86,7 @@
 
    /*
     * List all User Provided Service Instances
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/list_all_user_provided_service_instances.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/list_all_user_provided_service_instances.html
     */
     ListAllUserProvidedServiceInstances: function (params) {
       var config = {};
@@ -98,7 +98,7 @@
 
    /*
     * Remove Route from the User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/remove_route_from_the_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/remove_route_from_the_user_provided_service_instance.html
     */
     RemoveRouteFromUserProvidedServiceInstance: function (guid, route_guid, params) {
       var config = {};
@@ -110,7 +110,7 @@
 
    /*
     * Retrieve a Particular User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/retrieve_a_particular_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/retrieve_a_particular_user_provided_service_instance.html
     */
     RetrieveUserProvidedServiceInstance: function (guid, params) {
       var config = {};
@@ -122,7 +122,7 @@
 
    /*
     * Updating a User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/user_provided_service_instances/updating_a_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/updating_a_user_provided_service_instance.html
     */
     UpdateUserProvidedServiceInstance: function (guid, value, params) {
       var config = {};

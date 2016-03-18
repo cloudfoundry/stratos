@@ -25,7 +25,7 @@
 
    /*
     * Delete a Droplet
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/droplets__experimental_/delete_a_droplet.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/droplets__experimental_/delete_a_droplet.html
     */
     DeleteDroplet: function (guid, params) {
       var config = {};
@@ -37,7 +37,7 @@
 
    /*
     * Filters Droplets by states, app_guids
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/droplets__experimental_/filters_droplets_by_states,_app_guids.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/droplets__experimental_/filters_droplets_by_states,_app_guids.html
     */
     FiltersDropletsByStatesAppGuids: function (params) {
       var config = {};
@@ -49,7 +49,7 @@
 
    /*
     * Get a Droplet
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/droplets__experimental_/get_a_droplet.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/droplets__experimental_/get_a_droplet.html
     */
     GetDroplet: function (guid, params) {
       var config = {};
@@ -61,7 +61,7 @@
 
    /*
     * List all Droplets
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/droplets__experimental_/list_all_droplets.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/droplets__experimental_/list_all_droplets.html
     */
     ListAllDroplets: function (params) {
       var config = {};

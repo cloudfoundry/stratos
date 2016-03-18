@@ -25,7 +25,7 @@
 
    /*
     * Creating a Service Plan Visibility
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/creating_a_service_plan_visibility.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/creating_a_service_plan_visibility.html
     */
     CreateServicePlanVisibility: function (value, params) {
       var config = {};
@@ -38,7 +38,7 @@
 
    /*
     * Delete a Particular Service Plan Visibilities
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/delete_a_particular_service_plan_visibilities.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/delete_a_particular_service_plan_visibilities.html
     */
     DeleteServicePlanVisibilities: function (guid, params) {
       var config = {};
@@ -50,7 +50,7 @@
 
    /*
     * List all Service Plan Visibilities
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/list_all_service_plan_visibilities.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/list_all_service_plan_visibilities.html
     */
     ListAllServicePlanVisibilities: function (params) {
       var config = {};
@@ -62,7 +62,7 @@
 
    /*
     * Retrieve a Particular Service Plan Visibility
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/retrieve_a_particular_service_plan_visibility.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/retrieve_a_particular_service_plan_visibility.html
     */
     RetrieveServicePlanVisibility: function (guid, params) {
       var config = {};
@@ -74,7 +74,7 @@
 
    /*
     * Updating a Service Plan Visibility
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plan_visibilities/updating_a_service_plan_visibility.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/updating_a_service_plan_visibility.html
     */
     UpdateServicePlanVisibility: function (guid, value, params) {
       var config = {};
