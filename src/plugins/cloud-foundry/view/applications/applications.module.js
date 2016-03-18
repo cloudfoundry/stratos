@@ -16,6 +16,13 @@
       controller: ApplicationsController,
       controllerAs: 'applicationsCtrl'
     });
+
+    $stateProvider.state('cf.applications.show', {
+      url: '/applications/:applicationId',
+      templateUrl: 'plugins/cloud-foundry/view/applications/show.html',
+      controller: ApplicationsController,
+      controllerAs: 'applicationsCtrl'
+    });
   }
 
   ApplicationsController.$inject = [
@@ -34,6 +41,7 @@
   }
 
   angular.extend(ApplicationsController.prototype, {
+
   });
 
 })();

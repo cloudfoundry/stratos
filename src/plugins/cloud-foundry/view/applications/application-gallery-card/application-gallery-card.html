@@ -1,0 +1,13 @@
+<gallery-card  card-data="applicationGalleryCardCtrl.cardData" on-card-click="applicationGalleryCardCtrl.cardClicked()">
+  <strong>GUID</strong>: {{applicationGalleryCardCtrl.app.metadata.guid}}
+  <br/>
+  <strong>Created</strong>: <span am-time-ago="applicationGalleryCardCtrl.app.metadata.created_at"></span>
+  <br/>
+  <strong>Updated</strong>:  <span am-time-ago="applicationGalleryCardCtrl.app.metadata.updated_at"></span>
+  <br/>
+  <strong>Allocated Memory</strong>: {{applicationGalleryCardCtrl.app.entity.memory}} MB
+  <br/>
+  <strong>Allocated Disk Space</strong>: {{applicationGalleryCardCtrl.app.entity.disk_quota}} MB
+  <br/>
+  <strong>App Instances</strong>: {{applicationGalleryCardCtrl.app.entity.instances}}
+</gallery-card>
