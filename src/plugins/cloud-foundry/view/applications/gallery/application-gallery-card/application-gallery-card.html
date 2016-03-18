@@ -1,4 +1,5 @@
-<gallery-card  card-data="applicationGalleryCardCtrl.cardData">
+<gallery-card card-data="applicationGalleryCardCtrl.cardData"
+  on-card-click="applicationGalleryCardCtrl.goToApp()">
   <strong>GUID</strong>: {{applicationGalleryCardCtrl.app.metadata.guid}}
   <br/>
   <strong>Created</strong>: <span am-time-ago="applicationGalleryCardCtrl.app.metadata.created_at"></span>
