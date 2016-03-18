@@ -31,7 +31,7 @@
    */
   function Application(apiManager) {
     this.apiManager = apiManager;
-    this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.application');
+    this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.data = {};
 
   }
@@ -48,7 +48,7 @@
      **/
     all: function (guid, options) {
       var that = this;
-      return this.applicationApi.all(guid, options)
+      return this.applicationApi.ListAllApps(guid, options)
         .then(function (response) {
           that.onAll(response);
         });
@@ -65,7 +65,7 @@
      **/
     usage: function (guid, options) {
       var that = this;
-      return this.applicationApi.usage(guid, options)
+      return this.applicationApi.GetDetailedStatsForStartedApp(guid, options)
         .then(function (response) {
           that.onUsage(response);
         });
