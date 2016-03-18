@@ -11,7 +11,7 @@
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.services', {
-      url: '/services/:guid',
+      url: '/:guid/services',
       templateUrl: 'plugins/cloud-foundry/view/applications/services/services.html',
       controller: ApplicationsServicesController,
       controllerAs: 'applicationsServicesCtrl'
