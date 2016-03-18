@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications')
+    .module('cloud-foundry.view.applications.gallery')
     .directive('applicationGalleryCard', applicationGalleryCard);
 
   applicationGalleryCard.$inject = [];
@@ -15,25 +15,20 @@
       controller: ApplicationGalleryCardController,
       controllerAs: 'applicationGalleryCardCtrl',
       scope: {},
-      templateUrl: 'plugins/cloud-foundry/view/applications/application-gallery-card/application-gallery-card.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/gallery/application-gallery-card/application-gallery-card.html'
     };
   }
 
-  ApplicationGalleryCardController.$inject = ['$state'];
+  ApplicationGalleryCardController.$inject = [];
 
-  function ApplicationGalleryCardController($state) {
+  function ApplicationGalleryCardController() {
 
-    this.$state = $state;
     this.cardData = {
       title: this.app.entity.name,
       status: {
         description: this.app.entity.state === 'STARTED' ? '' : this.app.entity.state,
         classes: this.app.entity.state === 'STARTED' ? '' : 'warning'
       }
-    };
-
-    this.cardClicked = function() {
-      this.$state.go('cf.applications.show', {applicationId: this.app.metadata.guid});
     };
   }
 

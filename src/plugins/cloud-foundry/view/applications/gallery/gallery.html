@@ -1,0 +1,6 @@
+<h1>Application Gallery <a ui-sref="cf.applications.list">List Viw</a></h1>
+
+<div class="col-md-4 col-sm-1" ng-repeat="app in applicationsGalleryCtrl.model.data.applications.resources track by app.metadata.guid">
+  <a application-gallery-card app="app"
+     ui-sref="cf.applications.summary({guid: app.metadata.guid})"></a>
+</div>

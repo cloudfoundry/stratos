@@ -2,7 +2,11 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications', [])
+    .module('cloud-foundry.view.applications', [
+      'cloud-foundry.view.applications.gallery',
+      'cloud-foundry.view.applications.list',
+      'cloud-foundry.view.applications.summary'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -12,36 +16,8 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications', {
       url: '/applications',
-      templateUrl: 'plugins/cloud-foundry/view/applications/applications.html',
-      controller: ApplicationsController,
-      controllerAs: 'applicationsCtrl'
-    });
-
-    $stateProvider.state('cf.applications.show', {
-      url: '/applications/:applicationId',
-      templateUrl: 'plugins/cloud-foundry/view/applications/show.html',
-      controller: ApplicationsController,
-      controllerAs: 'applicationsCtrl'
+      templateUrl: 'plugins/cloud-foundry/view/applications/applications.html'
     });
   }
-
-  ApplicationsController.$inject = [
-    'app.model.modelManager'
-  ];
-
-  /**
-   * @name ApplicationsController
-   * @constructor
-   * @param {app.model.modelManager} modelManager - the Model management service
-   * @property {object} application - the Cloud Foundry Applications Model
-   */
-  function ApplicationsController(modelManager) {
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.model.all();
-  }
-
-  angular.extend(ApplicationsController.prototype, {
-
-  });
 
 })();
