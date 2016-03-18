@@ -5,10 +5,10 @@
     .module('cloud-foundry.view.applications')
     .directive('applicationGalleryCard', applicationGalleryCard);
 
-  applicationGalleryCard.$inject = ['app.basePath'];
+  applicationGalleryCard.$inject = [];
 
 
-  function applicationGalleryCard(path) {
+  function applicationGalleryCard() {
     return {
       bindToController: {
         app: '=',
@@ -20,17 +20,22 @@
     };
   }
 
-  ApplicationGalleryCardController.$inject = [];
+  ApplicationGalleryCardController.$inject = ['$state'];
 
 
-  function ApplicationGalleryCardController() {
+  function ApplicationGalleryCardController($state) {
 
+    this.$state = $state;
     this.cardData = {
       title: this.app.entity.name,
       status: {
         description:  (this.app.entity.state=='STARTED') ?  '' : this.app.entity.state,
         classes:  (this.app.entity.state=='STARTED') ?  '' : 'warning'
       }
+    };
+
+    this.cardClicked = function(){
+      this.$state.go('cf.applications.show', {applicationId: this.app.metadata.guid});
     };
   }
 
