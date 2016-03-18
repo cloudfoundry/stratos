@@ -7,11 +7,10 @@
 
   applicationGalleryCard.$inject = [];
 
-
   function applicationGalleryCard() {
     return {
       bindToController: {
-        app: '=',
+        app: '='
       },
       controller: ApplicationGalleryCardController,
       controllerAs: 'applicationGalleryCardCtrl',
@@ -22,19 +21,18 @@
 
   ApplicationGalleryCardController.$inject = ['$state'];
 
-
   function ApplicationGalleryCardController($state) {
 
     this.$state = $state;
     this.cardData = {
       title: this.app.entity.name,
       status: {
-        description:  (this.app.entity.state=='STARTED') ?  '' : this.app.entity.state,
-        classes:  (this.app.entity.state=='STARTED') ?  '' : 'warning'
+        description: this.app.entity.state === 'STARTED' ? '' : this.app.entity.state,
+        classes: this.app.entity.state === 'STARTED' ? '' : 'warning'
       }
     };
 
-    this.cardClicked = function(){
+    this.cardClicked = function() {
       this.$state.go('cf.applications.show', {applicationId: this.app.metadata.guid});
     };
   }

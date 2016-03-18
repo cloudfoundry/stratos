@@ -18,11 +18,11 @@
     });
 
     $stateProvider.state('cf.applications.show', {
-        url: '/applications/:applicationId',
-        templateUrl: 'plugins/cloud-foundry/view/applications/show.html',
-        controller: ApplicationsController,
-        controllerAs: 'applicationsCtrl'
-    })
+      url: '/applications/:applicationId',
+      templateUrl: 'plugins/cloud-foundry/view/applications/show.html',
+      controller: ApplicationsController,
+      controllerAs: 'applicationsCtrl'
+    });
   }
 
   ApplicationsController.$inject = [
@@ -38,7 +38,7 @@
   function ApplicationsController(modelManager) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.model.all();
-    };
+  }
 
   angular.extend(ApplicationsController.prototype, {
 
