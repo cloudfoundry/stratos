@@ -19,10 +19,10 @@
     };
   }
 
-  ApplicationGalleryCardController.$inject = [];
+  ApplicationGalleryCardController.$inject = ['$state'];
 
-  function ApplicationGalleryCardController() {
-
+  function ApplicationGalleryCardController($state) {
+    this.$state = $state;
     this.cardData = {
       title: this.app.entity.name,
       status: {
@@ -31,5 +31,11 @@
       }
     };
   }
+
+  angular.extend(ApplicationGalleryCardController.prototype, {
+    goToApp: function () {
+      this.$state.go('cf.applications.summary', { guid: this.app.metadata.guid });
+    }
+  });
 
 })();
