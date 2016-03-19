@@ -2,7 +2,7 @@
   'use strict';
 
   var events = {
-    AUTO_NAV            : 'AUTO_NAV',
+    REDIRECT            : 'REDIRECT',
     LOGIN               : 'LOGIN',
     LOGIN_FAILED        : 'LOGIN_FAILED',
     LOGOUT              : 'LOGOUT',
