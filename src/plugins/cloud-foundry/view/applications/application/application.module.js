@@ -31,7 +31,7 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
-   * @property {object} application - the Cloud Foundry Applications Model
+   * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
   function ApplicationController(modelManager, $stateParams) {
