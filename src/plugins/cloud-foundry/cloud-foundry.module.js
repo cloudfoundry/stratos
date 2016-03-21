@@ -34,7 +34,7 @@
   angular.extend(CloudFoundry.prototype, {
     onLoggedIn: function () {
       this.registerNavigation();
-      this.eventService.$emit(this.eventService.events.AUTO_NAV, 'cf.workspaces');
+      this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.workspaces');
     },
 
     onLoggedOut: function () {},

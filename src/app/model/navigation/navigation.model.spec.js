@@ -56,15 +56,15 @@
       expect(navigationModel.onLogout).toHaveBeenCalled();
     });
 
-    it('`onAutoNav` should called when events.AUTO_NAV triggered', function () {
+    it('`onAutoNav` should called when events.REDIRECT triggered', function () {
       spyOn(navigationModel, 'onAutoNav');
-      navigationModel.eventService.$emit(navigationModel.eventService.events.AUTO_NAV, 'cf.applications');
+      navigationModel.eventService.$emit(navigationModel.eventService.events.REDIRECT, 'cf.applications');
       expect(navigationModel.onAutoNav).toHaveBeenCalledWith(jasmine.any(Object), 'cf.applications');
     });
 
-    it('`$state.go` should called and menu should be set when events.AUTO_NAV triggered', function () {
+    it('`$state.go` should called and menu should be set when events.REDIRECT triggered', function () {
       spyOn(navigationModel.$state, 'go');
-      navigationModel.eventService.$emit(navigationModel.eventService.events.AUTO_NAV, 'cf.applications');
+      navigationModel.eventService.$emit(navigationModel.eventService.events.REDIRECT, 'cf.applications');
       expect(navigationModel.$state.go).toHaveBeenCalledWith('cf.applications');
       expect(navigationModel.menu.currentState).toBe('cf.applications');
     });
