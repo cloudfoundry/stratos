@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.services', [])
+    .module('cloud-foundry.view.applications.application.services', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -10,33 +10,33 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('cf.applications.services', {
-      url: '/:guid/services',
-      templateUrl: 'plugins/cloud-foundry/view/applications/services/services.html',
-      controller: ApplicationsServicesController,
-      controllerAs: 'applicationsServicesCtrl'
+    $stateProvider.state('cf.applications.application.services', {
+      url: '/services',
+      templateUrl: 'plugins/cloud-foundry/view/applications/application/services/services.html',
+      controller: ApplicationServicesController,
+      controllerAs: 'applicationServicesCtrl'
     });
   }
 
-  ApplicationsServicesController.$inject = [
+  ApplicationServicesController.$inject = [
     'app.model.modelManager',
     '$stateParams'
   ];
 
   /**
-   * @name ApplicationsServicesController
+   * @name ApplicationServicesController
    * @constructor
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {object} model - the Cloud Foundry applications model
    * @property {string} id - the application GUID
    */
-  function ApplicationsServicesController(modelManager, $stateParams) {
+  function ApplicationServicesController(modelManager, $stateParams) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
   }
 
-  angular.extend(ApplicationsServicesController.prototype, {
+  angular.extend(ApplicationServicesController.prototype, {
   });
 
 })();

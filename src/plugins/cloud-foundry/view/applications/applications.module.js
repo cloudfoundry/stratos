@@ -3,10 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications', [
-      'cloud-foundry.view.applications.gallery',
-      'cloud-foundry.view.applications.list',
-      'cloud-foundry.view.applications.summary',
-      'cloud-foundry.view.applications.services'
+      'cloud-foundry.view.applications.application',
+      'cloud-foundry.view.applications.list'
     ])
     .config(registerRoute);
 

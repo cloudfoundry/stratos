@@ -2,7 +2,10 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.list', [])
+    .module('cloud-foundry.view.applications.list', [
+      'cloud-foundry.view.applications.list.gallery-view',
+      'cloud-foundry.view.applications.list.table-view'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [

@@ -1,5 +1,1 @@
-<h1>Application List (<a ui-sref="cf.applications.gallery">Gallery View</a>)</h1>
-
-<div ng-repeat="app in applicationsListCtrl.model.data.applications.resources track by app.metadata.guid">
-  <a ui-sref="cf.applications.summary({guid: app.metadata.guid})">{{ app.metadata.guid }}</a>
-</div>
+<div ui-view></div>
