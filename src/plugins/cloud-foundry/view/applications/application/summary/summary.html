@@ -1,1 +1,50 @@
-<h1>Application Summary for {{ applicationSummaryCtrl.id }}</h1>
+<div class="panel panel-default">
+  <h5>Summary</h5>
+  <ul>
+    <li>
+        memory: {{ appCtrl.model.application.summary.memory }}
+    </li>
+
+    <li>
+        running_instances: {{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}
+    </li>
+
+    <li>
+        disk_quota: {{ appCtrl.model.application.summary.disk_quota }}
+    </li>
+
+    <li>
+        buildpack: {{ appCtrl.model.application.summary.buildpack }}
+    </li>
+
+  </ul>
+</div>
+
+<div class="panel panel-default">
+  <h5>Services</h5>
+  <ul>
+    <li ng-repeat="service in appCtrl.model.application.summary.services">
+        {{ service }}
+    </li>
+  </ul>
+</div>
+
+
+<div class="panel panel-default">
+  <h5>Routes</h5>
+  <ul>
+    <li ng-repeat="route in appCtrl.model.application.summary.routes">
+        {{ route }}
+    </li>
+  </ul>
+</div>
+
+
+<div class="panel panel-default">
+  <h5>Instances</h5>
+  <ul>
+    <li ng-repeat="instance in appCtrl.model.application.summary.instances">
+        {{ instance }}
+    </li>
+  </ul>
+</div>

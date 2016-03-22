@@ -27,13 +27,14 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
+   * @property {object} application - the currently focused application.
    * @class
    */
   function Application(apiManager) {
     this.apiManager = apiManager;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.data = {};
-
+    this.application = {};
   }
 
   angular.extend(Application.prototype, {
@@ -91,16 +92,16 @@
     },
 
     /**
-     * @function summary
+     * @function getAppSummary
      * @memberof cloud-foundry.model.application
      * @description get summary of an application at the model layer
      * @param {string} guid - the application id
      * @returns {promise}
      * @public
      */
-    summary: function (guid) {
-      return this.apiManager.retrieve('cloud-foundry.api.application')
-        .summary(guid)
+    getAppSummary: function (guid) {
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetAppSummary(guid)
         .then(this.onSummary.bind(this));
     },
 
@@ -150,7 +151,7 @@
      * @returns {void}
      */
     onSummary: function (response) {
-      this.summary = response.data;
+      this.application.summary = response.data;
     }
 
   });
