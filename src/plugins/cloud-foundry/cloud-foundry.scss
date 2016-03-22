@@ -9,6 +9,11 @@ application-gallery-card .attribute-value {
   color: #666666;
 }
 
+.action-bar {
+  height: $hpe-unit-space * 3;
+  line-height: $hpe-unit-space * 3;
+}
+
 application-gallery-card .attribute-value:first-letter {
   text-transform: uppercase;
 }

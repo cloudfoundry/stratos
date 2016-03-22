@@ -1,6 +1,20 @@
-<ul>
-  <li><a ui-sref="cf.applications.application.summary({guid: applicationCtrl.id})">Summary</a></li>
-  <li><a ui-sref="cf.applications.application.services({guid: applicationCtrl.id})">Services</a></li>
+<div class="action-bar app-actions-bar panel panel-default col-md-12">
+  {{ appCtrl.model.application.summary.state }}
+  {{ appCtrl.model.application.summary.name }}
+
+  <div class="pull-right">
+    <span class="btn-group">
+      <button class="btn btn-default btn-info" translate>Restart</button>
+      <button class="btn btn-default btn-info" translate>Stop</button>
+    </span>
+    <button class="btn btn-default" translate>Launch App</button>
+  </div>
+</div>
+
+<ul class="nav nav-pills nav-stacked col-md-3">
+  <li><a ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>Summary</a></li>
+  <li><a ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>Services</a></li>
 </ul>
 
-<div ui-view></div>
+<div ui-view class="col-md-9">
+</div>

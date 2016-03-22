@@ -29,7 +29,7 @@
    * @name ApplicationsListController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @property {object} application - the Cloud Foundry Applications Model
+   * @property {object} model - the Cloud Foundry Applications Model
    */
   function ApplicationsListController(modelManager) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
