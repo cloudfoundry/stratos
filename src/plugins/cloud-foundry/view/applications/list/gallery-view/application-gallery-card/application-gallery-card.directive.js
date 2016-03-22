@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.gallery')
+    .module('cloud-foundry.view.applications.list')
     .directive('applicationGalleryCard', applicationGalleryCard);
 
   applicationGalleryCard.$inject = [];
@@ -15,7 +15,7 @@
       controller: ApplicationGalleryCardController,
       controllerAs: 'applicationGalleryCardCtrl',
       scope: {},
-      templateUrl: 'plugins/cloud-foundry/view/applications/gallery/application-gallery-card/application-gallery-card.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/list/gallery-view/application-gallery-card/application-gallery-card.html'
     };
   }
 
@@ -53,7 +53,7 @@
 
   angular.extend(ApplicationGalleryCardController.prototype, {
     goToApp: function () {
-      this.$state.go('cf.applications.summary', { guid: this.app.metadata.guid });
+      this.$state.go('cf.applications.application.summary', { guid: this.app.metadata.guid });
     }
   });
 
