@@ -17,7 +17,7 @@
       url: '/:guid',
       templateUrl: 'plugins/cloud-foundry/view/applications/application/application.html',
       controller: ApplicationController,
-      controllerAs: 'applicationCtrl'
+      controllerAs: 'appCtrl'
     });
   }
 
@@ -37,9 +37,22 @@
   function ApplicationController(modelManager, $stateParams) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
+    this.init(this.id);
+    this.tabs = [
+      { label: gettext('Summary'), state: 'cf.applications.application.summary({guid: appCtrl.id})' },
+      { label: gettext('Services'), state: 'cf.applications.application.services({guid: appCtrl.id})' }
+    ]
   }
 
   angular.extend(ApplicationController.prototype, {
+
+    init: function () {
+      var that = this;
+      this.model.getAppSummary(this.id)
+        .then(function () {
+          console.log(that.model.application.summary);
+        });
+    }
   });
 
 })();
