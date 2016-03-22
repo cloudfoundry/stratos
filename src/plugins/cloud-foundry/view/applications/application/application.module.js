@@ -33,15 +33,16 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
+   * @property {number} tabIndex - index of active tab
    */
   function ApplicationController(modelManager, $stateParams) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
     this.init();
+    this.tabIndex = 0;
   }
 
   angular.extend(ApplicationController.prototype, {
-
     init: function () {
       this.model.getAppSummary(this.id);
     }
