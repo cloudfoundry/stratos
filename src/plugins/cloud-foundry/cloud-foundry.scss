@@ -1,7 +1,73 @@
+@import "view/applications/applications";
 
+// TODO may need to move these rule out to helio-ui-theme
 .action-bar {
   height: $hpe-unit-space * 3;
   line-height: $hpe-unit-space * 3;
   vertical-align: middle;
   margin-top: $hpe-unit-space;
+  padding-left: $hpe-unit-space;
+  padding-right: $hpe-unit-space;
+
+  .action-target-name {
+    display: inline-block;
+    font-size: $hpe-unit-space - 3px;
+    margin-left: $hpe-unit-space * .75;
+  }
+
+  .action-target-state {
+    color: $brand-primary;
+    display: inline-block;
+    font-size: $hpe-unit-space + 3px;
+  }
+
+  .btn {
+    margin-left: $hpe-unit-space / 3;
+  }
+}
+
+table.table  {
+  > thead > tr > th,
+  > tbody > tr:not([table-inline-message]) > td,
+  > tfoot > tr > td {
+
+    .icon-link {
+      color: $text-color;
+      text-decoration: none;
+
+      &:hover,
+      &:active {
+        color: $link-color;
+        text-decoration: none;
+      }
+    }
+
+    .helion-icon {
+      line-height: 0;
+      font-size: $hpe-unit-space;
+      vertical-align: middle;
+    }
+  }
+}
+
+.action-header {
+
+  &.panel-heading {
+    line-height: 1;
+    padding-top: $hpe-unit-space * 1.1;
+    padding-bottom: $hpe-unit-space * .5;
+  }
+
+  .btn {
+    line-height: 1;
+    text-transform: capitalize;
+
+    * {
+      line-height: 0;
+    }
+
+    .helion-icon {
+      margin-right: $hpe-unit-space / 3
+    }
+  }
 }

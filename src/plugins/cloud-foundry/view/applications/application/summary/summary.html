@@ -1,50 +1,129 @@
-<div class="panel panel-default">
-  <h5>Summary</h5>
-  <ul>
-    <li>
-        memory: {{ appCtrl.model.application.summary.memory }}
-    </li>
+<div class="panel panel-default summary">
+  <div class="panel-heading action-header">
+    <span translate>Summary</span>
+    <a class="btn btn-link">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Edit</span>
+    </a>
+  </div>
 
-    <li>
-        running_instances: {{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}
-    </li>
+  <div class="row data-body">
+    <div class="col-md-6">
+      <dl class="dl-horizontal">
+        <dt>MEMORY UTILIZATION</dt>
+        <dd class="pull-right">0 / {{ appCtrl.model.application.summary.memory }}</dd>
 
-    <li>
-        disk_quota: {{ appCtrl.model.application.summary.disk_quota }}
-    </li>
+        <dt>INSTANCES</dt>
+        <dd class="pull-right">{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}</dd>
 
-    <li>
-        buildpack: {{ appCtrl.model.application.summary.buildpack }}
-    </li>
+        <dt>DISK QUOTA</dt>
+        <dd class="pull-right">0 / {{ appCtrl.model.application.summary.disk_quota }}</dd>
 
-  </ul>
+        <dt>STATE</dt>
+        <dd class="pull-right"></dd>
+
+        <dt>MODIFIED</dt>
+        <dd class="pull-right"></dd>
+      </dl>
+    </div>
+    <div class="col-md-6">
+      <dl class="dl-horizontal">
+        <dt>BUILDPACK</dt>
+        <dd class="pull-right">{{ appCtrl.model.application.summary.buildpack }}</dd>
+
+        <dt>CF TARGET</dt>
+        <dd class="pull-right"></dd>
+
+        <dt>CF LOGIN</dt>
+        <dd class="pull-right"></dd>
+      </dl>
+    </div>
+  </div>
 </div>
 
-<div class="panel panel-default">
-  <h5>Services</h5>
-  <ul>
-    <li ng-repeat="service in appCtrl.model.application.summary.services">
-        {{ service }}
-    </li>
-  </ul>
+<div>
+  <div class="action-header">
+    <span translate>Service Instances</span>
+    <a class="btn btn-link">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Add service</span>
+    </a>
+  </div>
+  <div class="panel panel-default">
+    <table class="table">
+      <thead>
+        <tr>
+          <th translate>Name</th>
+          <th translate>Service</th>
+          <th translate>Plan</th>
+          <th translate>ENV.VARIABLES</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="service in appCtrl.model.application.summary.services">
+          <td>{{ service.name }}</td>
+          <td>{{ service.service_plan.service.label }}</td>
+          <td>{{ service.service_plan.name }}</td>
+          <td>
+            <a class="icon-link" href="http://yahoo.com" target="_blank"><i class="helion-icon helion-icon-Share"></i></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-
-<div class="panel panel-default">
-  <h5>Routes</h5>
-  <ul>
-    <li ng-repeat="route in appCtrl.model.application.summary.routes">
-        {{ route }}
-    </li>
-  </ul>
+<div>
+  <div class="action-header">
+    <span translate>Routes</span>
+    <a class="btn btn-link">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Add routes</span>
+    </a>
+  </div>
+  <div class="panel panel-default">
+    <table class="table">
+      <thead>
+        <tr>
+          <th translate>Route</th>
+          <th translate>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="route in appCtrl.model.application.summary.routes">
+          <td>{{ route.host + '.' + route.domain.name  + '/' + route.path }}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-
-<div class="panel panel-default">
-  <h5>Instances</h5>
-  <ul>
-    <li ng-repeat="instance in appCtrl.model.application.summary.instances">
-        {{ instance }}
-    </li>
-  </ul>
+<div>
+  <div class="action-header">
+    <span translate>Instances</span>
+    <a class="btn btn-link">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Add instances</span>
+    </a>
+  </div>
+  <div class="panel panel-default">
+    <table class="table">
+      <thead>
+        <tr>
+          <th translate>Index</th>
+          <th translate>Status</th>
+          <th></th>
+        </tr>
+      </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="instance in appCtrl.model.application.summary.running_instances">
+          <td>{{ $index }}</td>
+          <td>{{ instance.name }}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
