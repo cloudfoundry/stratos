@@ -1,4 +1,5 @@
-# The production docker-compose file.
+# The development docker-compose file.
+# Use this to have things like "gulp watch" running in the UI.
 data:
   extends:
     file: common.yml
@@ -49,4 +50,4 @@ ui:
   extends:
     file: common.yml
     service: ui
-  dockerfile: Dockerfile.prod
+  dockerfile: Dockerfile

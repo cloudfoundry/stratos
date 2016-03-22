@@ -1,0 +1,81 @@
+data:
+  image: ubuntu:14.04
+  volumes:
+    - /var/lib/mysql
+
+
+db:
+  image: mysql:5.7
+  env_file:
+    ./db.env
+  volumes:
+    - ../stratos-identity-db/versions:/docker-entrypoint-initdb.d
+  # NOTE: volumes_from field must be included individually if extending this file.
+  #volumes_from:
+  #  - data
+
+
+# Mock Cloud Foundry service
+cf:
+  build: ../stratos-node-server
+  dockerfile: Dockerfile.demo.mock_api
+  ports:
+    - "3002:3002"
+  environment:
+    - PORT=3002
+  volumes:
+    - ../stratos-node-server:/usr/src/app
+    - /usr/src/app/node_modules
+
+
+# Mock Auth service
+auth:
+  build: ../stratos-node-server
+  dockerfile: Dockerfile.demo.mock_auth
+  ports:
+    - "3001:3001"
+  environment:
+    - PORT=3001
+  volumes:
+    - ../stratos-node-server:/usr/src/app
+    - /usr/src/app/node_modules
+
+
+api:
+  build: ../stratos-node-server
+  dockerfile: Dockerfile.prod
+  ports:
+    - "3000:3000"
+  env_file:
+    ./db.env
+  environment:
+    - PORT=3000
+  volumes:
+    - ../stratos-node-server:/usr/src/app
+    - /usr/src/app/node_modules
+  # NOTE: links field must be included individually if extending this file.
+  #links:
+  #  - db:db
+  #  - auth:auth_service
+  #  - cf:cf_service
+
+
+nginx:
+  build: ../stratos-server
+  dockerfile: Dockerfile.prod
+  ports:
+    - "80:80"
+  volumes:
+    - ../stratos-ui/dist:/usr/share/nginx/html:ro
+  # NOTE: links field must be included individually if extending this file.
+  #links:
+  #  - api:api
+
+
+ui:
+  build: ../stratos-ui
+  dockerfile: Dockerfile.prod
+  volumes:
+    - ../stratos-ui:/usr/src/app
+    - ../helion-ui-framework:/usr/src/helion-ui-framework
+    - ../helion-ui-theme:/usr/src/helion-ui-theme

@@ -1,5 +1,8 @@
+# TODO: This file is currently not in use.  It should be reworked to take
+# advantage of common.yml
 stratos-es:
   image: elasticsearch
+
 
 stratos-node-server:
   build: ../stratos-node-server
@@ -8,6 +11,7 @@ stratos-node-server:
     - "3000:3000"
   volumes:
     - ../stratos-node-server:/usr/src/app
+
 
 stratos-server:
   build: ../stratos-server
@@ -18,6 +22,7 @@ stratos-server:
   links:
     - stratos-node-server
     - stratos-es
+
 
 stratos-ui:
   build: ../stratos-ui
