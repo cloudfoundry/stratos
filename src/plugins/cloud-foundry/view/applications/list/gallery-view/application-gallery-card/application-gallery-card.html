@@ -1,26 +1,15 @@
 <gallery-card card-data="applicationGalleryCardCtrl.cardData"
   on-card-click="applicationGalleryCardCtrl.goToApp()">
-  <table style="width: 100%;" class="ng-scope">
-    <tbody>
-      <tr>
-        <td class="attribute-name">Memory Utilization</td>
-        <td class="text-right attribute-value">{{applicationGalleryCardCtrl.app.entity.memory}} MB</td></tr>
-      <tr>
-      <tr>
-        <td class="attribute-name">Instances</td>
-        <td class="text-right attribute-value">{{applicationGalleryCardCtrl.app.entity.instances}}</td></tr>
-      <tr>
-        <td class="attribute-name">Disk Quota</td>
-        <td class="text-right attribute-value">{{applicationGalleryCardCtrl.app.entity.disk_quota}}</td>
-      </tr>
-      <tr>
-        <td class="attribute-name">State</td>
-        <td class="text-right attribute-value">{{applicationGalleryCardCtrl.app.entity.state}}</td>
-      </tr>
-      <tr>
-        <td class="attribute-name">Modified</td>
-        <td class="text-right attribute-value">{{applicationGalleryCardCtrl.app.metadata.updated_at | date : 'M/d/yy h:mm:ss a'}}</td>
-      </tr>
-    </tbody>
-  </table>
+  <dl class="dl-horizontal">
+    <dt class="attribute-name">Memory Utilization</dt>
+    <dd class="attribute-value">{{applicationGalleryCardCtrl.app.entity.memory}} MB</dd>
+    <dt class="attribute-name">Instances</dt>
+    <dd class="attribute-value">{{applicationGalleryCardCtrl.app.entity.instances}}</dd>
+    <dt class="attribute-name">Disk Quota</dt>
+    <dd class="attribute-value">{{applicationGalleryCardCtrl.app.entity.disk_quota}}</dd>
+    <dt class="attribute-name">State</dt>
+    <dd class="attribute-value">{{applicationGalleryCardCtrl.app.entity.state}}</dd>
+    <dt class="attribute-name">Modified</dt>
+    <dd class="attribute-value">{{applicationGalleryCardCtrl.app.metadata.updated_at | date : 'M/d/yy h:mm:ss a'}}</dd>
+  </dl>
 </gallery-card>
