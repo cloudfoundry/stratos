@@ -18,12 +18,12 @@
 </div>
 
 <ul class="nav nav-pills nav-stacked col-md-3">
-  <li ng-class="{'active': appCtrl.tabIndex===0}" ng-click="appCtrl.tabIndex=0">
+  <li ui-sref-active="active">
     <a ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>
       Summary
     </a>
   </li>
-  <li ng-class="{'active': appCtrl.tabIndex===1}" ng-click="appCtrl.tabIndex=1">
+  <li ui-sref-active="active">
     <a ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>
       Services
     </a>
