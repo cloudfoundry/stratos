@@ -38,7 +38,7 @@
     * @function all
     * @memberof cloud-foundry.api.service
     * @description Retrieve all the services from cloud foundry.
-    * @returns {promise}
+    * @returns {promise} a promise object
     * @public
     */
     all: function () {
@@ -50,7 +50,7 @@
     * @memberof cloud-foundry.api.service
     * @description Retrieve summary of service with given app id
     * @param {string} guid - the service id
-    * @returns {promise}
+    * @returns {promise} a promise object
     * @public
     */
     summary: function (guid) {

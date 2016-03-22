@@ -95,7 +95,7 @@
      * @memberof cloud-foundry.model.application
      * @description get summary of an application at the model layer
      * @param {string} guid - the application id
-     * @returns {promise}
+     * @returns {promise} a promise object
      * @public
      */
     summary: function (guid) {

@@ -21,14 +21,14 @@
 
   ApplicationGalleryCardController.$inject = [
     '$state',
-    '$scope',
+    '$scope'
   ];
 
   function ApplicationGalleryCardController($state, $scope) {
     var that = this;
     this.$state = $state;
     this.cardData = {
-      title: this.app.entity.name,
+      title: this.app.entity.name
     };
 
     var validStates = ['STARTED', 'RUNNING', 'STOPPING'];
@@ -36,17 +36,17 @@
       function () {
         return that.app.entity.state;
       }, function (newState) {
-        if (validStates.indexOf(newState) < 0) {
-          var icon = newState === 'ERROR' ? 'helion-icon-Critical_L' : 'helion-icon-Warning_L'
-          that.cardData.status = {
-            classes: newState === 'ERROR' ? 'danger' : 'warning',
-            description: newState,
-            icon: 'helion-icon helion-icon-lg ' + icon
-          };
-        } else {
-          delete that.cardData.status;
-        }
+      if (validStates.indexOf(newState) < 0) {
+        var icon = newState === 'ERROR' ? 'helion-icon-Critical_L' : 'helion-icon-Warning_L';
+        that.cardData.status = {
+          classes: newState === 'ERROR' ? 'danger' : 'warning',
+          description: newState,
+          icon: 'helion-icon helion-icon-lg ' + icon
+        };
+      } else {
+        delete that.cardData.status;
       }
+    }
     );
 
   }
