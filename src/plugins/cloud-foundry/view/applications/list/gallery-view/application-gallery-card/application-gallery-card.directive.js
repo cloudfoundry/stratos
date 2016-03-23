@@ -30,25 +30,6 @@
     this.cardData = {
       title: this.app.entity.name
     };
-
-    var validStates = ['STARTED', 'RUNNING', 'STOPPING'];
-    $scope.$watch(
-      function () {
-        return that.app.entity.state;
-      }, function (newState) {
-      if (validStates.indexOf(newState) < 0) {
-        var icon = newState === 'ERROR' ? 'helion-icon-Critical_L' : 'helion-icon-Warning_L';
-        that.cardData.status = {
-          classes: newState === 'ERROR' ? 'danger' : 'warning',
-          description: newState,
-          icon: 'helion-icon helion-icon-lg ' + icon
-        };
-      } else {
-        delete that.cardData.status;
-      }
-    }
-    );
-
   }
 
   angular.extend(ApplicationGalleryCardController.prototype, {
