@@ -4,17 +4,30 @@
 
   <div class="pull-right">
     <span class="btn-group">
-      <button class="btn btn-default btn-info" translate>Restart</button>
-      <button class="btn btn-default btn-info" translate>Stop</button>
+      <button class="btn btn-default btn-info" translate>
+        Restart
+      </button>
+      <button class="btn btn-default btn-info" translate>
+        Stop
+      </button>
     </span>
-    <button class="btn btn-default" translate>Launch App</button>
+    <button class="btn btn-default" translate>
+      Launch App
+    </button>
   </div>
 </div>
 
 <ul class="nav nav-pills nav-stacked col-md-3">
-  <li><a ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>Summary</a></li>
-  <li><a ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>Services</a></li>
+  <li ui-sref-active="active">
+    <a ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>
+      Summary
+    </a>
+  </li>
+  <li ui-sref-active="active">
+    <a ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>
+      Services
+    </a>
+  </li>
 </ul>
 
-<div ui-view class="col-md-9">
-</div>
+<div ui-view class="col-md-9"></div>
