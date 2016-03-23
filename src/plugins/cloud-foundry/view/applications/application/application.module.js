@@ -39,7 +39,6 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
     this.init();
-    this.tabIndex = 0;
   }
 
   angular.extend(ApplicationController.prototype, {
