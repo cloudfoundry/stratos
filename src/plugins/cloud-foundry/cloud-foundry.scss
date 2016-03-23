@@ -1,22 +1,4 @@
 // cloud-foundry.scss
-application-gallery-card .attribute-name {
-  text-transform: uppercase;
-  color: #666666;
-}
-
-application-gallery-card .attribute-value {
-  text-transform: lowercase;
-  color: #666666;
-}
-
-application-gallery-card .attribute-value:first-letter {
-  text-transform: uppercase;
-}
-
-application-gallery-card .panel-heading{
-   color: #666666;
-}
-
 .action-bar {
     height: $hpe-unit-space * 3;
     line-height: $hpe-unit-space * 3;
