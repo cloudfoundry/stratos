@@ -20,12 +20,10 @@
   }
 
   ApplicationGalleryCardController.$inject = [
-    '$state',
-    '$scope'
+    '$state'
   ];
 
-  function ApplicationGalleryCardController($state, $scope) {
-    var that = this;
+  function ApplicationGalleryCardController($state) {
     this.$state = $state;
     this.cardData = {
       title: this.app.entity.name
