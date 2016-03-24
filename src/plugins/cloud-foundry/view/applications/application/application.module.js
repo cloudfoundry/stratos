@@ -44,18 +44,6 @@
   angular.extend(ApplicationController.prototype, {
     init: function () {
       this.model.getAppSummary(this.id);
-    },
-
-    launch: function () {
-      this.model.launch(this.id);
-    },
-
-    restart: function () {
-      this.model.restart(this.id);
-    },
-
-    stop: function () {
-      this.model.stop(this.id);
     }
   });
 
