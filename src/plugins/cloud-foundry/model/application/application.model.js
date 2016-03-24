@@ -116,7 +116,7 @@
     startApp: function (guid) {
       this.onAppStateChange();
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {'state': 'STARTED'}, {})
+        .UpdateApp(guid, {state: 'STARTED'}, {})
         .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
     },
 
@@ -131,7 +131,7 @@
     stopApp: function (guid) {
       this.onAppStateChange();
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {'state': 'STOPPED'}, {})
+        .UpdateApp(guid, {state: 'STOPPED'}, {})
         .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
     },
 
