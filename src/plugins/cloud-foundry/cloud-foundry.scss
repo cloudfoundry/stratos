@@ -1,24 +1,73 @@
 @import "view/applications/applications";
 
-// TODO may need to move these rule out to helio-ui-theme
+@mixin hpe-state($color, $icon, $bg-color) {
+  background-color: $bg-color;
+
+  &:first-of-type {
+    &:before {
+      @extend .helion-icon;
+      background-color: $color;
+      color: $bg-color;
+      content: $icon;
+    }
+  }
+}
+
+// TODO: move these rule out to helio-ui-theme in following PR
 .action-bar {
   height: $hpe-unit-space * 3;
   line-height: $hpe-unit-space * 3;
   vertical-align: middle;
   margin-top: $hpe-unit-space;
-  padding-left: $hpe-unit-space;
+  padding-left: 0;
   padding-right: $hpe-unit-space;
+
+  .action-target-state {
+    display: inline-block;
+    font-size: $hpe-unit-space;
+    width: $hpe-unit-space * 3;
+    height: $hpe-unit-space * 3;
+    line-height: 0;
+    padding: $hpe-unit-space;
+
+    &:before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: $hpe-unit-space * 3;
+      height: $hpe-unit-space * 3;
+      padding: $hpe-unit-space;
+    }
+
+    &.app-state-STARTED_PENDING {
+      @include hpe-state($white, $helion-icon-Tab, $gray);
+    }
+
+    &.app-state-STOPPED_PENDING {
+      @include hpe-state($white, $helion-icon-Halt-stop, $gray);
+    }
+
+    &.app-state-_STARTED {
+      @include hpe-state($white, $helion-icon-Checkmark, $hpe-primary);
+    }
+
+    &.app-state-_STOPPED {
+      @include hpe-state($white, $helion-icon-Halt-stop, $state-danger-bg);
+    }
+
+    &.app-state-_FAILED {
+      @include hpe-state($state-danger-bg, $helion-icon-Critical_L, $white);
+    }
+
+    &.app-state-WARNING {
+      @include hpe-state($state-warning-bg, $helion-icon-Alert, $white);
+    }
+  }
 
   .action-target-name {
     display: inline-block;
     font-size: $hpe-unit-space - 3px;
     margin-left: $hpe-unit-space * .75;
-  }
-
-  .action-target-state {
-    color: $brand-primary;
-    display: inline-block;
-    font-size: $hpe-unit-space + 3px;
   }
 
   .btn {

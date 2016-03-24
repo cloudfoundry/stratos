@@ -28,13 +28,19 @@
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} application - the currently focused application.
+   * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @class
    */
   function Application(apiManager) {
     this.apiManager = apiManager;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.data = {};
-    this.application = {};
+    this.application = {
+      summary: {
+        state: 'LOADING'
+      }
+    };
+    this.appStateSwitchTo = '';
   }
 
   angular.extend(Application.prototype, {
@@ -114,7 +120,8 @@
      * @public
      */
     startApp: function (guid) {
-      this.onAppStateChange();
+      this.appStateSwitchTo = 'STARTED';
+      this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STARTED'}, {})
         .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
@@ -129,7 +136,8 @@
      * @public
      */
     stopApp: function (guid) {
-      this.onAppStateChange();
+      this.appStateSwitchTo = 'STOPPED';
+      this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STOPPED'}, {})
         .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
@@ -200,17 +208,6 @@
     },
 
     /**
-     * @function onAppStateChange
-     * @memberof  cloud-foundry.model.application
-     * @description onAppStateChange handler at model layer
-     * @private
-     * @returns {void}
-     */
-    onAppStateChange: function () {
-      this.application.summary.state = 'PENDING';
-    },
-
-    /**
      * @function onAppStateChangeSuccess
      * @memberof  cloud-foundry.model.application
      * @description onAppStateChangeSuccess handler at model layer
@@ -220,6 +217,7 @@
      */
     onAppStateChangeSuccess: function (response) {
       this.application.summary.state = response.data.entity.state;
+      this.appStateSwitchTo = '';
     },
 
     /**
@@ -231,6 +229,7 @@
      */
     onAppStateChangeFailure: function () {
       this.application.summary.state = 'FAILED';
+      this.appStateSwitchTo = '';
     }
   });
 
