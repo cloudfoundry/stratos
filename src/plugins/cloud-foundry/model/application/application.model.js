@@ -140,7 +140,7 @@
      * @memberof cloud-foundry.model.application
      * @description restart an application
      * @param {string} guid - the application id
-     * @returns {promise}
+     * @returns {void}
      * @public
      */
     restartApp: function (guid) {
