@@ -1,1 +1,8 @@
-<h1>Application Services for {{ applicationServicesCtrl.id }}</h1>
+<h1 ui-view="title">Application Services for {{ applicationServicesCtrl.appModel.application.summary.name }}</h1>
+
+<ul ng-repeat="service in applicationServicesCtrl.model.data.resources track by service.metadata.guid">
+  <li><strong>{{service.entity.label}} (v{{service.entity.version}}):</strong> {{service.entity.description}}</li>
+  
+</ul>
+
+
