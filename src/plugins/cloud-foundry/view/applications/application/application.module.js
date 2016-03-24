@@ -36,6 +36,42 @@
    * @property {number} tabIndex - index of active tab
    */
   function ApplicationController(modelManager, $stateParams) {
+
+    // state mapping key === this.model.appStateSwitchTo + '_' + this.model.summary.state
+
+    // TODO: 1) need to find the right icon name. 2) use spinner for loading
+    this.stateMap = {
+      'LOADING': {
+        className: 'app-loading',
+        icon: 'helion-icon helion-icon-Refresh'
+      },
+
+      'STARTED_PENDING': {
+        className: 'app-starting',
+        icon: 'helion-icon helion-icon-Tab_Carrot'
+      },
+
+      'STOPPED_PENDING': {
+        className: 'app-stopping',
+        icon: 'helion-icon helion-icon-Halt_Stop'
+      },
+
+      'STARTED': {
+        className: 'app-started',
+        icon: 'helion-icon helion-icon-Checkmark'
+      },
+
+      'STOPPED': {
+        className: 'app-stopped',
+        icon: 'helion-icon helion-icon-Halt_Stop'
+      },
+
+      'FAILED': {
+        className: 'app-error',
+        icon: 'helion-icon helion-icon-Critical'
+      }
+    };
+
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
     this.init();

@@ -6,19 +6,39 @@
   line-height: $hpe-unit-space * 3;
   vertical-align: middle;
   margin-top: $hpe-unit-space;
-  padding-left: $hpe-unit-space;
+  padding-left: 0;
   padding-right: $hpe-unit-space;
+
+  .action-target-state {
+    display: inline-block;
+    font-size: $hpe-unit-space;
+    width: $hpe-unit-space * 3;
+    line-height: 0;
+    padding: $hpe-unit-space;
+
+    &.app-started {
+      color: $brand-primary;
+    }
+
+    &.app-stopped {
+      color: $brand-primary;
+    }
+
+    &.app-error {
+      color: $brand-primary;
+    }
+
+    &.app-loading,
+    &.app-starting,
+    &.app-stopping {
+      color: $gray-light;
+    }
+  }
 
   .action-target-name {
     display: inline-block;
     font-size: $hpe-unit-space - 3px;
     margin-left: $hpe-unit-space * .75;
-  }
-
-  .action-target-state {
-    color: $brand-primary;
-    display: inline-block;
-    font-size: $hpe-unit-space + 3px;
   }
 
   .btn {

@@ -1,8 +1,8 @@
 <div class="action-bar app-actions-bar panel panel-default col-md-12">
-  <span class="action-target-state">
-    <i class="helion-icon helion-icon-Checkmark"></i>
+  <span class="action-target-state pull-left" ng-class="appCtrl.stateMap['STARTED'].className">
+    <i ng-class="appCtrl.stateMap['STARTED'].icon"></i>
   </span>
-  <span class="action-target-name">
+  <span class="action-target-name pull-left">
     {{ appCtrl.model.application.summary.name }}
   </span>
 
