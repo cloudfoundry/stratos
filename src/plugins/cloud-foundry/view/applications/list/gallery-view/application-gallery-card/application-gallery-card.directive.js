@@ -19,16 +19,14 @@
     };
   }
 
-  ApplicationGalleryCardController.$inject = ['$state'];
+  ApplicationGalleryCardController.$inject = [
+    '$state'
+  ];
 
   function ApplicationGalleryCardController($state) {
     this.$state = $state;
     this.cardData = {
-      title: this.app.entity.name,
-      status: {
-        description: this.app.entity.state === 'STARTED' ? '' : this.app.entity.state,
-        classes: this.app.entity.state === 'STARTED' ? '' : 'warning'
-      }
+      title: this.app.entity.name
     };
   }
 
