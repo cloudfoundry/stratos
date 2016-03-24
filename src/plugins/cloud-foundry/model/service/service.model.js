@@ -31,9 +31,8 @@
    */
   function Service(apiManager) {
     this.apiManager = apiManager;
-    this.serviceApi = this.apiManager.retrieve('cloud-foundry.api.service');
+    this.serviceApi = this.apiManager.retrieve('cloud-foundry.api.Services');
     this.data = {};
-
   }
 
   angular.extend(Service.prototype, {
@@ -48,7 +47,7 @@
      **/
     all: function (guid, options) {
       var that = this;
-      return this.serviceApi.all(guid, options)
+      return this.serviceApi.ListAllServices(options)
         .then(function (response) {
           that.onAll(response);
         });
@@ -99,7 +98,7 @@
      * @returns {void}
      */
     onAll: function (response) {
-      this.data.services = response.data;
+      this.data = response.data;
     },
 
     /**

@@ -18,6 +18,7 @@
     });
   }
 
+
   ApplicationServicesController.$inject = [
     'app.model.modelManager',
     '$stateParams'
@@ -32,8 +33,10 @@
    * @property {string} id - the application GUID
    */
   function ApplicationServicesController(modelManager, $stateParams) {
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.model = modelManager.retrieve('cloud-foundry.model.service');
     this.id = $stateParams.guid;
+    this.model.all()
+    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
   }
 
   angular.extend(ApplicationServicesController.prototype, {
