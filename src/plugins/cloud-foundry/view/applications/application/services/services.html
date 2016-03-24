@@ -1,8 +1,36 @@
-<h1 ui-view="title">Application Services for {{ applicationServicesCtrl.appModel.application.summary.name }}</h1>
-
-<ul ng-repeat="service in applicationServicesCtrl.model.data.resources track by service.metadata.guid">
-  <li><strong>{{service.entity.label}} (v{{service.entity.version}}):</strong> {{service.entity.description}}</li>
-  
-</ul>
-
-
+<div class="panel panel-default"
+  ng-repeat="service in applicationServicesCtrl.model.data.resources track by service.metadata.guid">
+  <div class="panel-body service-panel">
+    <div class="col-md-6 service-text">
+      <i class="helion-icon helion-icon-4x helion-icon-Service_business service-icon"></i>
+      <div>
+        <h4 class="font-semi-bold">{{ ::service.entity.label }}</h4>
+        <p>
+          {{ ::service.entity.description }}. Lorem ipsum dolor sit amet, consectetur
+          adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
+          aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+          nisi ut aliquip ex ea commodo consequat.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-6 service-metadata">
+      <dl>
+        <dt>Version</dt>
+        <dd>{{ ::service.entity.version }}</dd>
+        <dt>Category</dt>
+        <dd>Data and Analytics / Graph</dd>
+        <dt class="service-attached">1 Attached</dt>
+      </dl>
+      <div class="service-actions">
+        <actions-menu actions="applicationServicesCtrl.serviceActions"
+          action-target="service" menu-icon="helion-icon helion-icon-More"
+          menu-position="actions-menu-right">
+        </actions-menu>
+        <button class="btn btn-sm btn-link">
+          Add Service
+          <i class="helion-icon helion-icon-Plus"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

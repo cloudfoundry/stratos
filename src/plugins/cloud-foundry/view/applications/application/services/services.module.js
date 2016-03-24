@@ -18,7 +18,6 @@
     });
   }
 
-
   ApplicationServicesController.$inject = [
     'app.model.modelManager',
     '$stateParams'
@@ -34,9 +33,27 @@
    */
   function ApplicationServicesController(modelManager, $stateParams) {
     this.model = modelManager.retrieve('cloud-foundry.model.service');
-    this.id = $stateParams.guid;
-    this.model.all()
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
+    this.id = $stateParams.guid;
+    this.model.all();
+    this.serviceActions = [
+      {
+        name: 'Detach',
+        execute: function (target) {
+          /* eslint-disable */
+          alert('Detach ' + target.entity.label);
+          /* eslint-enable */
+        }
+      },
+      {
+        name: 'Manage Services',
+        execute: function (target) {
+          /* eslint-disable */
+          alert('Manage services for ' + target.entity.label);
+          /* eslint-enable */
+        }
+      }
+    ];
   }
 
   angular.extend(ApplicationServicesController.prototype, {
