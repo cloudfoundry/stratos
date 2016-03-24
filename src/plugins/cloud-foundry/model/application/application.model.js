@@ -203,7 +203,6 @@
      * @function onAppStateChange
      * @memberof  cloud-foundry.model.application
      * @description onAppStateChange handler at model layer
-     * @param {object} response - the json return from the api call
      * @private
      * @returns {void}
      */
@@ -227,7 +226,6 @@
      * @function onAppStateChangeFailure
      * @memberof  cloud-foundry.model.application
      * @description onAppStateChangeFailure handler at model layer
-     * @param {object} response - the json return from the api call
      * @private
      * @returns {void}
      */
