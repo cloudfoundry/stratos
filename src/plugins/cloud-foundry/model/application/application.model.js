@@ -106,6 +106,51 @@
     },
 
     /**
+     * @function startApp
+     * @memberof cloud-foundry.model.application
+     * @description start an application
+     * @param {string} guid - the application id
+     * @returns {promise}
+     * @public
+     */
+    startApp: function (guid) {
+      this.onAppStateChange();
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .UpdateApp(guid, {state: 'STARTED'}, {})
+        .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
+    },
+
+    /**
+     * @function stopApp
+     * @memberof cloud-foundry.model.application
+     * @description stop an application
+     * @param {string} guid - the application id
+     * @returns {promise}
+     * @public
+     */
+    stopApp: function (guid) {
+      this.onAppStateChange();
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .UpdateApp(guid, {state: 'STOPPED'}, {})
+        .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
+    },
+
+    /**
+     * @function restartApp
+     * @memberof cloud-foundry.model.application
+     * @description restart an application
+     * @param {string} guid - the application id
+     * @returns {void}
+     * @public
+     */
+    restartApp: function (guid) {
+      var that = this;
+      this.stopApp(guid).then(function () {
+        that.startApp(guid);
+      });
+    },
+
+    /**
      * @function onAll
      * @memberof  cloud-foundry.model.application
      * @description onAll handler at model layer
@@ -152,8 +197,41 @@
      */
     onSummary: function (response) {
       this.application.summary = response.data;
-    }
+    },
 
+    /**
+     * @function onAppStateChange
+     * @memberof  cloud-foundry.model.application
+     * @description onAppStateChange handler at model layer
+     * @private
+     * @returns {void}
+     */
+    onAppStateChange: function () {
+      this.application.summary.state = 'PENDING';
+    },
+
+    /**
+     * @function onAppStateChangeSuccess
+     * @memberof  cloud-foundry.model.application
+     * @description onAppStateChangeSuccess handler at model layer
+     * @param {object} response - the json return from the api call
+     * @private
+     * @returns {void}
+     */
+    onAppStateChangeSuccess: function (response) {
+      this.application.summary.state = response.data.entity.state;
+    },
+
+    /**
+     * @function onAppStateChangeFailure
+     * @memberof  cloud-foundry.model.application
+     * @description onAppStateChangeFailure handler at model layer
+     * @private
+     * @returns {void}
+     */
+    onAppStateChangeFailure: function () {
+      this.application.summary.state = 'FAILED';
+    }
   });
 
 })();
