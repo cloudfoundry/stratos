@@ -32,8 +32,6 @@
 
     it('should have initial properties defined', function () {
       expect(serviceInstance.apiManager).toBeDefined();
-      expect(serviceInstance.account).toBeDefined();
-      expect(serviceInstance.serviceInstanceApi).toBeDefined();
       expect(serviceInstance.serviceInstances).toEqual([]);
       expect(serviceInstance.numRegistered).toBe(0);
     });
@@ -44,7 +42,7 @@
         { name: 'cluster2', url:' cluster2_url' }
       ];
 
-      $httpBackend.when('GET', '/api/service-instances?username=dev')
+      $httpBackend.when('GET', '/api/user-service-instances')
         .respond(200, mockData);
 
       serviceInstance.list().then(function (response) {
@@ -64,7 +62,7 @@
         ]
       };
 
-      $httpBackend.when('GET', '/api/service-instances?username=dev')
+      $httpBackend.when('GET', '/api/user-service-instances')
         .respond(200, data);
 
       serviceInstance.list().then(function (response) {
@@ -84,7 +82,7 @@
         ]
       };
 
-      $httpBackend.when('GET', '/api/service-instances?username=dev')
+      $httpBackend.when('GET', '/api/user-service-instances')
         .respond(200, data);
 
       serviceInstance.list().then(function (response) {
@@ -107,7 +105,7 @@
         ]
       };
 
-      $httpBackend.when('GET', '/api/service-instances?username=dev')
+      $httpBackend.when('GET', '/api/user-service-instances')
         .respond(200, data);
 
       serviceInstance.list().then(function (response) {
@@ -118,7 +116,7 @@
     });
 
     it('should not set `serviceInstances` on list() and error', function () {
-      $httpBackend.when('GET', '/api/service-instances?username=dev')
+      $httpBackend.when('GET', '/api/user-service-instances')
         .respond(403, {});
 
       serviceInstance.list().then(function () {}, function (error) {
@@ -132,46 +130,23 @@
     });
 
     it('should POST correct data on connect()', function () {
-      var data = {
-        username: 'dev',
-        name: 'service',
-        service_user: 'service_user',
-        service_token: 'token',
-        expires_at: 1000,
-        scope: ['role1', 'role2']
-      };
-      $httpBackend.expectPOST('/api/service-instances/connect', data).respond(200, '');
-
-      var serviceInstanceData = {
-        name: 'service',
-        service_user: 'service_user',
-        service_token: 'token',
-        expires_at: 1000,
-        scope: ['role1', 'role2']
-      };
-      serviceInstance.connect(serviceInstanceData);
+      $httpBackend.expectPOST('/api/user-service-instances/connect', { url: 'url' }).respond(200, '');
+      serviceInstance.connect('url');
       $httpBackend.flush();
     });
 
     it('should POST correct data on disconnect()', function () {
-      var data = {
-        username: 'dev',
-        name: 'service'
-      };
-      $httpBackend.expectPOST('/api/service-instances/disconnect', data).respond(200, '');
-
-      serviceInstance.disconnect('service');
-
+      $httpBackend.expectPOST('/api/user-service-instances/disconnect', { url: 'url' }).respond(200, '');
+      serviceInstance.disconnect('url');
       $httpBackend.flush();
     });
 
     it('should POST correct data on register()', function () {
       var data = {
-        username: 'dev',
-        serviceInstances: ['service']
+        serviceInstances: ['url1', 'url2']
       };
-      $httpBackend.expectPOST('/api/service-instances/register', data).respond(200, '');
-      serviceInstance.register(['service']);
+      $httpBackend.expectPOST('/api/user-service-instances/register', data).respond(200, '');
+      serviceInstance.register(['url1', 'url2']);
       $httpBackend.flush();
     });
   });

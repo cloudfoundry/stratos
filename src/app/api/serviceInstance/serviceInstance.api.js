@@ -37,69 +37,48 @@
      * @function connect
      * @memberof app.api.serviceInstance.ServiceInstanceApi
      * @description Connect a service instance
-     * @param {string} user - the Stratos user
-     * @param {string} serviceInstance - the service instance name
-     * @param {string} username - the service instance account username
-     * @param {string} token - the access token
-     * @param {number} expiresAt - when the token expires
-     * @param {array} scope - the token scope
+     * @param {string} url - the service instance endpoint
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (user, serviceInstance, username, token, expiresAt, scope) {
-      return this.$http.post('/api/service-instances/connect', {
-        username: user,
-        name: serviceInstance,
-        service_user: username,
-        service_token: token,
-        expires_at: expiresAt,
-        scope: scope
-      });
+    connect: function (url) {
+      return this.$http.post('/api/user-service-instances/connect', { url: url });
     },
 
     /**
      * @function disconnect
      * @memberof app.api.serviceInstance.ServiceInstanceApi
      * @description Disconnect user from service instance
-     * @param {string} user - the Stratos user
-     * @param {string} serviceInstance - the service instance name
+     * @param {string} url - the service instance endpoint
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    disconnect: function (user, serviceInstance) {
-      return this.$http.post('/api/service-instances/disconnect', {
-        username: user,
-        name: serviceInstance
-      });
+    disconnect: function (url) {
+      return this.$http.post('/api/user-service-instances/disconnect', { url: url });
     },
 
     /**
      * @function list
      * @memberof app.api.serviceInstance.ServiceInstanceApi
      * @description Returns a list of service instances for the user
-     * @param {string} user - the Stratos user
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    list: function (user) {
-      return this.$http.get('/api/service-instances', {
-        params: { username: user }
-      });
+    list: function () {
+      return this.$http.get('/api/user-service-instances');
     },
 
     /**
      * @function register
      * @memberof app.api.serviceInstance.ServiceInstanceApi
      * @description Set the service instances as registered
-     * @param {string} user - the Stratos user
-     * @param {array} serviceInstanceNames - the service instance names
+     * @param {array} urls - the service instance endpoints
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    register: function (user, serviceInstanceNames) {
-      return this.$http.post('/api/service-instances/register', {
-        username: user,
-        serviceInstances: serviceInstanceNames
+    register: function (urls) {
+      return this.$http.post('/api/user-service-instances/register', {
+        serviceInstances: urls
       });
     }
   });

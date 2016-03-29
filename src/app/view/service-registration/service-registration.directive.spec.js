@@ -53,34 +53,40 @@
       });
 
       it('should call connect on model on connect()', function () {
-        var serviceInstance = { name: 'cluster1', URL: 'cluster1_url' };
-        $httpBackend.when('POST', '/api/service-instances/connect').respond(200, {});
+        var serviceInstance = { name: 'cluster1', url: 'cluster1_url' };
+        var mockResponse = {
+          name: 'cluster1',
+          url: 'cluster1_url',
+          account: 'dev',
+          expires_at: 3600
+        };
+        $httpBackend.when('POST', '/api/user-service-instances/connect').respond(200, mockResponse);
 
         serviceRegistrationCtrl.connect(serviceInstance);
         $httpBackend.flush();
 
-        expect(serviceInstance.service_user).toBe('cluster1_user');
-        expect(serviceInstance.service_token).toBe('token');
-        expect(serviceInstance.expires_at).toBeDefined();
-        expect(serviceInstance.scope).toBe('role1 role2');
+        expect(serviceInstance.account).toBe('dev');
+        expect(serviceInstance.expires_at).toBe(3600);
         expect(serviceRegistrationCtrl.serviceInstanceModel.numRegistered).toBe(1);
       });
 
       it('should call disconnect on model on disconnect()', function () {
         var model = serviceRegistrationCtrl.serviceInstanceModel;
-        model.serviceInstances = [{ name: 'c1', URL: 'c1_url', service_user: 'usr1' }];
+        model.serviceInstances = [{ name: 'c1', url: 'c1_url', account: 'usr1' }];
         model.numRegistered = 1;
 
-        var mockRegistered = { name: 'cluster', URL: 'cluster_url', service_user: 'user' };
-        var expectedData = { username: 'dev', name: 'cluster' };
+        var mockRegistered = { name: 'cluster', url: 'cluster_url', account: 'usr1' };
+        var expectedData = { url: 'cluster_url' };
 
-        $httpBackend.when('POST', '/api/service-instances/disconnect').respond(200, {});
-        $httpBackend.expectPOST('/api/service-instances/disconnect', expectedData);
+        $httpBackend.when('POST', '/api/user-service-instances/disconnect').respond(200, {});
+        $httpBackend.expectPOST('/api/user-service-instances/disconnect', expectedData);
         serviceRegistrationCtrl.disconnect(mockRegistered);
         $httpBackend.flush();
 
+        expect(mockRegistered.account).toBeUndefined();
+        expect(mockRegistered.expires_at).toBeUndefined();
         expect(mockRegistered.registered).toBeUndefined();
-        expect(mockRegistered.service_user).toBeUndefined();
+        expect(mockRegistered.valid).toBeUndefined();
         expect(serviceRegistrationCtrl.serviceInstanceModel.numRegistered).toBe(0);
       });
     });
@@ -151,7 +157,7 @@
         ];
         serviceRegistrationCtrl.serviceInstanceModel.numRegistered = 2;
 
-        $httpBackend.when('POST', '/api/service-instances/register').respond(200, {});
+        $httpBackend.when('POST', '/api/user-service-instances/register').respond(200, {});
         serviceRegistrationCtrl.completeRegistration();
         $httpBackend.flush();
 
