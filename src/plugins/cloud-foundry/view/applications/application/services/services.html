@@ -15,11 +15,11 @@
     </div>
     <div class="col-md-6 service-metadata">
       <dl>
-        <dt>Version</dt>
+        <dt translate>Version</dt>
         <dd>{{ ::service.entity.version }}</dd>
-        <dt>Category</dt>
+        <dt translate>Category</dt>
         <dd>{{ ::service.entity.extra.categories }}</dd>
-        <dt class="service-attached">1 Attached</dt>
+        <dt class="service-attached">2 <span translate>Attached</span></dt>
       </dl>
       <div class="service-actions">
         <actions-menu actions="applicationServicesCtrl.serviceActions"
@@ -27,7 +27,7 @@
           menu-position="actions-menu-right">
         </actions-menu>
         <button class="btn btn-sm btn-link">
-          Add Service
+          <span translate>Add Service</span>
           <i class="helion-icon helion-icon-Plus"></i>
         </button>
       </div>
