@@ -42,7 +42,7 @@
         { name: 'cluster2', url:' cluster2_url' }
       ];
 
-      $httpBackend.when('GET', '/api/user-service-instances')
+      $httpBackend.when('GET', '/api/service-instances/user')
         .respond(200, mockData);
 
       serviceInstance.list().then(function (response) {
@@ -62,7 +62,7 @@
         ]
       };
 
-      $httpBackend.when('GET', '/api/user-service-instances')
+      $httpBackend.when('GET', '/api/service-instances/user')
         .respond(200, data);
 
       serviceInstance.list().then(function (response) {
@@ -82,7 +82,7 @@
         ]
       };
 
-      $httpBackend.when('GET', '/api/user-service-instances')
+      $httpBackend.when('GET', '/api/service-instances/user')
         .respond(200, data);
 
       serviceInstance.list().then(function (response) {
@@ -105,7 +105,7 @@
         ]
       };
 
-      $httpBackend.when('GET', '/api/user-service-instances')
+      $httpBackend.when('GET', '/api/service-instances/user')
         .respond(200, data);
 
       serviceInstance.list().then(function (response) {
@@ -116,7 +116,7 @@
     });
 
     it('should not set `serviceInstances` on list() and error', function () {
-      $httpBackend.when('GET', '/api/user-service-instances')
+      $httpBackend.when('GET', '/api/service-instances/user')
         .respond(403, {});
 
       serviceInstance.list().then(function () {}, function (error) {
@@ -130,13 +130,13 @@
     });
 
     it('should POST correct data on connect()', function () {
-      $httpBackend.expectPOST('/api/user-service-instances/connect', { url: 'url' }).respond(200, '');
+      $httpBackend.expectPOST('/api/service-instances/user/connect', { url: 'url' }).respond(200, '');
       serviceInstance.connect('url');
       $httpBackend.flush();
     });
 
     it('should POST correct data on disconnect()', function () {
-      $httpBackend.expectPOST('/api/user-service-instances/disconnect', { url: 'url' }).respond(200, '');
+      $httpBackend.expectPOST('/api/service-instances/user/disconnect', { url: 'url' }).respond(200, '');
       serviceInstance.disconnect('url');
       $httpBackend.flush();
     });
@@ -145,7 +145,7 @@
       var data = {
         serviceInstances: ['url1', 'url2']
       };
-      $httpBackend.expectPOST('/api/user-service-instances/register', data).respond(200, '');
+      $httpBackend.expectPOST('/api/service-instances/user/register', data).respond(200, '');
       serviceInstance.register(['url1', 'url2']);
       $httpBackend.flush();
     });

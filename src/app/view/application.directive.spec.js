@@ -104,7 +104,7 @@
       it('invoke `login` method - success', function () {
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/api/auth/login/').respond(200, { username: 'dev' });
-        $httpBackend.when('GET', '/api/user-service-instances').respond(200, { items: [] });
+        $httpBackend.when('GET', '/api/service-instances/user').respond(200, { items: [] });
         $httpBackend.expectPOST('/api/auth/login/');
         applicationCtrl.login('dev', 'dev');
         $httpBackend.flush();
@@ -117,7 +117,7 @@
       it('invoke `login` method - failure with bad credentials', function () {
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/api/auth/login/').respond(400, {});
-        $httpBackend.when('GET', '/api/user-service-instances').respond(200, { items: [] });
+        $httpBackend.when('GET', '/api/service-instances/user').respond(200, { items: [] });
         $httpBackend.expectPOST('/api/auth/login/');
         applicationCtrl.login('dev', 'dev');
         $httpBackend.flush();

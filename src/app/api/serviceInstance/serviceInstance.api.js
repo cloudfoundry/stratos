@@ -42,7 +42,7 @@
      * @public
      */
     connect: function (url) {
-      return this.$http.post('/api/user-service-instances/connect', { url: url });
+      return this.$http.post('/api/service-instances/user/connect', { url: url });
     },
 
     /**
@@ -54,7 +54,7 @@
      * @public
      */
     disconnect: function (url) {
-      return this.$http.post('/api/user-service-instances/disconnect', { url: url });
+      return this.$http.post('/api/service-instances/user/disconnect', { url: url });
     },
 
     /**
@@ -65,7 +65,7 @@
      * @public
      */
     list: function () {
-      return this.$http.get('/api/user-service-instances');
+      return this.$http.get('/api/service-instances/user');
     },
 
     /**
@@ -77,7 +77,7 @@
      * @public
      */
     register: function (urls) {
-      return this.$http.post('/api/user-service-instances/register', {
+      return this.$http.post('/api/service-instances/user/register', {
         serviceInstances: urls
       });
     }

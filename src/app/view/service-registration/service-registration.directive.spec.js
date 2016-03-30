@@ -60,7 +60,7 @@
           account: 'dev',
           expires_at: 3600
         };
-        $httpBackend.when('POST', '/api/user-service-instances/connect').respond(200, mockResponse);
+        $httpBackend.when('POST', '/api/service-instances/user/connect').respond(200, mockResponse);
 
         serviceRegistrationCtrl.connect(serviceInstance);
         $httpBackend.flush();
@@ -78,8 +78,8 @@
         var mockRegistered = { name: 'cluster', url: 'cluster_url', account: 'usr1' };
         var expectedData = { url: 'cluster_url' };
 
-        $httpBackend.when('POST', '/api/user-service-instances/disconnect').respond(200, {});
-        $httpBackend.expectPOST('/api/user-service-instances/disconnect', expectedData);
+        $httpBackend.when('POST', '/api/service-instances/user/disconnect').respond(200, {});
+        $httpBackend.expectPOST('/api/service-instances/user/disconnect', expectedData);
         serviceRegistrationCtrl.disconnect(mockRegistered);
         $httpBackend.flush();
 
@@ -157,7 +157,7 @@
         ];
         serviceRegistrationCtrl.serviceInstanceModel.numRegistered = 2;
 
-        $httpBackend.when('POST', '/api/user-service-instances/register').respond(200, {});
+        $httpBackend.when('POST', '/api/service-instances/user/register').respond(200, {});
         serviceRegistrationCtrl.completeRegistration();
         $httpBackend.flush();
 
