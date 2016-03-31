@@ -3,15 +3,14 @@ var loginPage = require('./login-page.po');
 
 // Navbar helpers
 module.exports = {
-
-  showAppDetails: showAppDetails
-
+  login : login,
+  showApplicationsGallery : showApplicationsGallery,
+  showAppDetails : showAppDetails
 };
 
 function applicationGalleryCard() {
   return element.all(by.css('application-gallery-card')).get(0)
     .element(by.css('gallery-card'));
-
 }
 
 function applicationsGalleryButton() {
@@ -27,13 +26,6 @@ function showApplicationDetail(){
   applicationGalleryCard().click();
 }
 
-
-
-function showAppDetails() {
-  login();
-  showApplicationsGallery();
-  showApplicationDetail();
-}
 
 function login(){
   var fields = loginPage.loginFormFields();
