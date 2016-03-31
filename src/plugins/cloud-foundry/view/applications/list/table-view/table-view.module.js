@@ -12,7 +12,11 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.list.table-view', {
       url: '/table-view',
-      templateUrl: 'plugins/cloud-foundry/view/applications/list/table-view/table-view.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/list/table-view/table-view.html',
+      ncyBreadcrumb: {
+        label: 'Table-View',
+        parent: 'cf.applications.list.gallery-view'
+      }
     });
   }
 

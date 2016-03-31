@@ -12,7 +12,10 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.list.gallery-view', {
       url: '/gallery-view',
-      templateUrl: 'plugins/cloud-foundry/view/applications/list/gallery-view/gallery-view.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/list/gallery-view/gallery-view.html',
+      ncyBreadcrumb: {
+        label: 'Cloud Foundry'
+      }
     });
   }
 

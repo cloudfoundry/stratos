@@ -15,7 +15,11 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications', {
       url: '/applications',
-      templateUrl: 'plugins/cloud-foundry/view/applications/applications.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/applications.html',
+      ncyBreadcrumb: {
+        skip: true
+      }
+      
     });
   }
 

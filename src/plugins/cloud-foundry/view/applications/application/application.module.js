@@ -17,7 +17,12 @@
       url: '/:guid',
       templateUrl: 'plugins/cloud-foundry/view/applications/application/application.html',
       controller: ApplicationController,
-      controllerAs: 'appCtrl'
+      controllerAs: 'appCtrl',
+      ncyBreadcrumb: {
+        // label: 'Application',
+        // parent: 'cf.applications.list.gallery-view'
+        skip: true
+      }
     });
   }
 

@@ -17,7 +17,10 @@
       url: '/list',
       templateUrl: 'plugins/cloud-foundry/view/applications/list/list.html',
       controller: ApplicationsListController,
-      controllerAs: 'applicationsListCtrl'
+      controllerAs: 'applicationsListCtrl',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 
