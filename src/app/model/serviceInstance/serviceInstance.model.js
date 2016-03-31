@@ -76,7 +76,11 @@
         .then(function (response) {
           var items = response.data.items || [];
           that.serviceInstances.length = 0;
-          that.serviceInstances.push.apply(that.serviceInstances, _.sortBy(items, 'name'));
+          [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
+
+          return {
+            numAvailable: that.serviceInstances.length
+          };
         });
     }
   });
