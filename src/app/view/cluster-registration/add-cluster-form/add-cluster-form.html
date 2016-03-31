@@ -1,0 +1,20 @@
+<div class="add-cluster-form">
+  <h2 translate>Register Cluster</h2>
+  <p translate>Enter the cluster API endpoint and name</p>
+  <form name="addClusterFormCtrl.addClusterForm" ng-submit="addClusterFormCtrl.addCluster()">
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>Cluster Address</label>
+      <input type="text" class="form-control" ng-model="addClusterFormCtrl.url" required/>
+    </div>
+    <div class="form-group" focusable-input>
+      <label class="" translate>Cluster Name</label>
+      <input type="text" class="form-control" ng-model="addClusterFormCtrl.name" required/>
+    </div>
+    <div class="form-actions pull-right">
+      <button type="button" class="btn btn-info"
+        ng-click="addClusterFormCtrl.cancel()" translate>Cancel</button>
+      <button type="submit" class="btn btn-default"
+        ng-disabled="addClusterFormCtrl.addClusterForm.$invalid" translate>Register</button>
+    </div>
+  </form>
+</div>
