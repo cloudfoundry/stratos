@@ -81,11 +81,7 @@
           var now = (new Date()).getTime() / 1000;
           angular.forEach(items, function (item) {
             if (!_.isNil(item.expires_at)) {
-              if (item.expires_at > now) {
-                item.valid = true;
-              } else {
-                item.valid = false;
-              }
+              item.valid = item.expires_at > now;
             }
           });
 
