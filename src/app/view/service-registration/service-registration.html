@@ -40,8 +40,8 @@
                 ng-if="serviceInstance.error"></span>
             </td>
             <td>{{serviceInstance.name}}</td>
-            <td>{{serviceInstance.URL}}</td>
-            <td>{{serviceInstance.service_user}}</td>
+            <td>{{serviceInstance.url}}</td>
+            <td>{{serviceInstance.account}}</td>
             <td>{{serviceInstance.expires_at | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
             <td class="text-right">
               <a class="btn btn-link btn-sm" ng-if="!serviceInstance.valid"

@@ -49,43 +49,57 @@
   }
 
   angular.extend(ServiceRegistrationController.prototype, {
+    /**
+     * @function completeRegistration
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Set service instances as registered
+     * @returns {void}
+     */
     completeRegistration: function () {
       var that = this;
-
       if (this.serviceInstanceModel.numRegistered > 0) {
-        var registered = _.filter(this.serviceInstances, { valid: true });
-        this.serviceInstanceModel.register(registered)
+        var registeredUrls = _.chain(this.serviceInstances)
+                              .filter({ valid: true })
+                              .map('url');
+        this.serviceInstanceModel.register(registeredUrls)
           .then(function () {
             that.showOverlayRegistration = false;
           });
       }
     },
+
+    /**
+     * @function connect
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Connect service instance for user
+     * @param {object} serviceInstance - the service instance to connect
+     * @returns {void}
+     */
     connect: function (serviceInstance) {
       var that = this;
-
-      // Mock data from UAA server
-      var now = (new Date()).getTime() / 1000;
-      serviceInstance.service_user = serviceInstance.name + '_user';
-      serviceInstance.service_token = 'token';
-      serviceInstance.expires_at = now + 60;
-      serviceInstance.scope = 'role1 role2';
-
-      this.serviceInstanceModel.connect(serviceInstance)
-        .then(function success() {
+      this.serviceInstanceModel.connect(serviceInstance.url)
+        .then(function success(response) {
+          angular.extend(serviceInstance, response.data);
           serviceInstance.valid = true;
           that.serviceInstanceModel.numRegistered += 1;
         });
     },
+
+    /**
+     * @function disconnect
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Disconnect service instance for user
+     * @param {object} serviceInstance - the service instance to disconnect
+     * @returns {void}
+     */
     disconnect: function (serviceInstance) {
       var that = this;
-      this.serviceInstanceModel.disconnect(serviceInstance.name)
+      this.serviceInstanceModel.disconnect(serviceInstance.url)
         .then(function success() {
+          delete serviceInstance.account;
+          delete serviceInstance.expires_at;
           delete serviceInstance.registered;
           delete serviceInstance.valid;
-          delete serviceInstance.service_user;
-          delete serviceInstance.service_token;
-          delete serviceInstance.expires_at;
-          delete serviceInstance.scope;
           that.serviceInstanceModel.numRegistered -= 1;
         });
     }

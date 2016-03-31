@@ -17,7 +17,7 @@
   ];
 
   function registerServiceInstanceModel(apiManager, modelManager) {
-    modelManager.register('app.model.serviceInstance', new ServiceInstance(apiManager, modelManager));
+    modelManager.register('app.model.serviceInstance', new ServiceInstance(apiManager));
   }
 
   /**
@@ -25,18 +25,13 @@
    * @memberof app.model.serviceInstance
    * @name app.model.serviceInstance.ServiceInstance
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {app.model.account} account - the account model
-   * @property {app.api.serviceInstance} serviceInstanceApi - the service instance API
    * @property {array} serviceInstances - the service instances available to user
    * @property {number} numRegistered - the number of user registered service instances
    * @class
    */
-  function ServiceInstance(apiManager, modelManager) {
+  function ServiceInstance(apiManager) {
     this.apiManager = apiManager;
-    this.account = modelManager.retrieve('app.model.account');
-    this.serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
     this.serviceInstances = [];
     this.numRegistered = 0;
   }
@@ -46,30 +41,26 @@
      * @function connect
      * @memberof app.api.serviceInstance.ServiceInstance
      * @description Connect a service instance
-     * @param {object} serviceInstance - the service instance data
+     * @param {object} serviceInstanceUrl - the service instance endpoint
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (serviceInstance) {
-      return this.serviceInstanceApi.connect(this.account.data.username,
-                                             serviceInstance.name,
-                                             serviceInstance.service_user,
-                                             serviceInstance.service_token,
-                                             serviceInstance.expires_at,
-                                             serviceInstance.scope);
+    connect: function (serviceInstanceUrl) {
+      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
+      return serviceInstanceApi.connect(serviceInstanceUrl);
     },
 
     /**
      * @function disconnect
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Disconnect user from service instance
-     * @param {string} serviceInstanceName - the service instance name
+     * @param {string} serviceInstanceUrl - the service instance endpoint
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    disconnect: function (serviceInstanceName) {
-      return this.serviceInstanceApi.disconnect(this.account.data.username,
-                                                serviceInstanceName);
+    disconnect: function (serviceInstanceUrl) {
+      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
+      return serviceInstanceApi.disconnect(serviceInstanceUrl);
     },
 
     /**
@@ -81,7 +72,8 @@
      */
     list: function () {
       var that = this;
-      return this.serviceInstanceApi.list(that.account.data.username)
+      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
+      return serviceInstanceApi.list()
         .then(function (response) {
           var items = response.data.items;
 
@@ -114,12 +106,13 @@
      * @function register
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Set the service instances as registered
-     * @param {string} serviceInstanceNames - the service instance names
+     * @param {string} serviceInstanceUrls - the service instance endpoints
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    register: function (serviceInstanceNames) {
-      return this.serviceInstanceApi.register(this.account.data.username, serviceInstanceNames);
+    register: function (serviceInstanceUrls) {
+      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
+      return serviceInstanceApi.register(serviceInstanceUrls);
     }
   });
 
