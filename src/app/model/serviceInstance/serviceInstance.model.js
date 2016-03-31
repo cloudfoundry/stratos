@@ -76,7 +76,7 @@
         .then(function (response) {
           var items = response.data.items || [];
           that.serviceInstances.length = 0;
-          [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
+          that.serviceInstances.push.apply(that.serviceInstances, _.sortBy(items, 'name'));
         });
     }
   });
