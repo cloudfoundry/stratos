@@ -7,11 +7,22 @@ describe('Application Gallery Page', function () {
   beforeAll(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
+    galleryPage.login();
   });
 
   describe('content', function () {
-    it('should go to application detail if card clicked', function () {
-      galleryPage.showAppDetails();
-    });
+   describe('applications tab', function(){
+     it("should show the applications gallery", function(){
+      galleryPage.showApplicationsGallery();  
+      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() +'/#/cf/applications/list/gallery-view');
+     });
+     describe("and you click a card", function(){
+        it('should go to application detail', function () {
+          galleryPage.showApplicationDetails();
+          expect(browser.getCurrentUrl()).toMatch(/summary$/);
+        });
+     })
+   });
+   
   });
 });
