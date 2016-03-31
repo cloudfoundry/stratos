@@ -5,7 +5,7 @@ var loginPage = require('./login-page.po');
 module.exports = {
   login : login,
   showApplicationsGallery : showApplicationsGallery,
-  showAppDetails : showAppDetails
+  showApplicationDetails : showApplicationDetails
 };
 
 function applicationGalleryCard() {
@@ -22,7 +22,7 @@ function showApplicationsGallery() {
   applicationsGalleryButton().click();
 }
 
-function showApplicationDetail(){
+function showApplicationDetails(){
   applicationGalleryCard().click();
 }
 
