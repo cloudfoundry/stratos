@@ -2,9 +2,9 @@
   'use strict';
 
   /**
-   * @namespace app.api
-   * @memberOf app.api
-   * @name app.api.serviceInstance
+   * @namespace app.api.serviceInstance
+   * @memberof app.api
+   * @name serviceInstance
    * @description Service instance API
    */
   angular
@@ -21,9 +21,9 @@
   }
 
   /**
-   * @namespace app.api
+   * @namespace app.api.serviceInstance.ServiceInstanceApi
    * @memberof app.api.serviceInstance
-   * @name app.api.serviceInstance.ServiceInstanceApi
+   * @name ServiceInstanceApi
    * @param {object} $http - the Angular $http service
    * @property {object} $http - the Angular $http service
    * @class
@@ -34,52 +34,39 @@
 
   angular.extend(ServiceInstanceApi.prototype, {
     /**
-     * @function connect
+     * @function create
      * @memberof app.api.serviceInstance.ServiceInstanceApi
-     * @description Connect a service instance
+     * @description Create a service instance
      * @param {string} url - the service instance endpoint
+     * @param {string} name - the service instance friendly name
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (url) {
-      return this.$http.post('/api/service-instances/user/connect', { url: url });
+    create: function (url, name) {
+      return this.$http.post('/api/service-instances', { url: url, name: name });
     },
 
     /**
-     * @function disconnect
+     * @function remove
      * @memberof app.api.serviceInstance.ServiceInstanceApi
-     * @description Disconnect user from service instance
-     * @param {string} url - the service instance endpoint
+     * @description Remove service instance
+     * @param {number} id - the ID of the service instance to remove
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    disconnect: function (url) {
-      return this.$http.post('/api/service-instances/user/disconnect', { url: url });
+    remove: function (id) {
+      return this.$http.delete('/api/service-instances/' + id);
     },
 
     /**
      * @function list
      * @memberof app.api.serviceInstance.ServiceInstanceApi
-     * @description Returns a list of service instances for the user
+     * @description Returns a list of service instances (master list)
      * @returns {promise} A resolved/rejected promise
      * @public
      */
     list: function () {
-      return this.$http.get('/api/service-instances/user');
-    },
-
-    /**
-     * @function register
-     * @memberof app.api.serviceInstance.ServiceInstanceApi
-     * @description Set the service instances as registered
-     * @param {array} urls - the service instance endpoints
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    register: function (urls) {
-      return this.$http.post('/api/service-instances/user/register', {
-        serviceInstances: urls
-      });
+      return this.$http.get('/api/service-instances');
     }
   });
 
