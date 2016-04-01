@@ -37,7 +37,7 @@
   angular.extend(ServiceInstance.prototype, {
     /**
      * @function create
-     * @memberof app.api.serviceInstance.ServiceInstance
+     * @memberof app.model.serviceInstance.ServiceInstance
      * @description Create a service instance
      * @param {string} url - the service instance API endpoint
      * @param {string} name - the service instance friendly name

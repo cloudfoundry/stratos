@@ -2,6 +2,7 @@
 <login-page ng-if="!applicationCtrl.loggedIn"></login-page>
 <console-view ng-if="applicationCtrl.loggedIn"></console-view>
 <service-registration id="registration-overlay"
+  ng-if="applicationCtrl.showRegistration"
   show-overlay-registration="applicationCtrl.showRegistration">
 </service-registration>
 <global-spinner class="application-global-spinner" spinner-active="applicationCtrl.showGlobalSpinner">

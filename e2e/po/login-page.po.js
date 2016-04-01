@@ -11,6 +11,7 @@ module.exports = {
   nextArrow: nextArrow,
   prevArrow: prevArrow,
 
+  login: login,
   loginButton: loginButton,
   loginFormFields: loginFormFields,
   loginPanel: loginPanel
@@ -47,4 +48,11 @@ function contentIndicator() {
 
 function contentIndicatorSquares() {
   return contentIndicator().all(by.css('li'));
+}
+
+function login() {
+  var fields = loginFormFields();
+  fields.get(0).sendKeys('dev');
+  fields.get(1).sendKeys('dev');
+  loginButton().click();
 }

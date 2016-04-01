@@ -136,10 +136,23 @@
             that.showGlobalSpinner = false;
           });
       } else {
-        this.modelManager.retrieve('app.model.serviceInstance.user')
-          .list()
-          .then(function onSuccess(data) {
-            that.showRegistration = data.numCompleted === 0;
+        /**
+         * If no user data was found or the user is unregistered
+         * show the "first-time" service instance registration
+         */
+        var userModel = this.modelManager.retrieve('app.model.user');
+        userModel.getLoggedInUser()
+          .then(function onSuccess(user) {
+            if (_.isEmpty(user)) {
+              userModel.create()
+                .then(function () {
+                  that.showRegistration = true;
+                });
+            } else if (!user.registered) {
+              that.showRegistration = true;
+            }
+          })
+          .finally(function () {
             that.showGlobalSpinner = false;
           });
       }

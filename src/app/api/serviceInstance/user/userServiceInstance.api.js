@@ -49,12 +49,12 @@
      * @function disconnect
      * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
      * @description Disconnect user from service instance
-     * @param {string} url - the service instance endpoint
+     * @param {number} id - the service instance ID
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    disconnect: function (url) {
-      return this.$http.post('/api/service-instances/user/disconnect', { url: url });
+    disconnect: function (id) {
+      return this.$http.delete('/api/service-instances/user/' + id);
     },
 
     /**

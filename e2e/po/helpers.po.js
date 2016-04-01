@@ -26,9 +26,7 @@ module.exports = {
   getTableRowAt: getTableRowAt,
   getTableCellAt: getTableCellAt,
 
-  removeInstance: removeInstance,
-  resetDatabase: resetDatabase,
-  createSession: createSession
+  resetDatabase: resetDatabase
 
 };
 
@@ -98,7 +96,6 @@ function getTableCellAt(table, rowIndex, colIndex) {
 /**
  * Clean up database
  */
-
 function createSession(req) {
   return new Promise(function (resolve, reject) {
     var loginUrl = 'http://' + hostIp + ':3000/api/auth/login';
@@ -117,14 +114,14 @@ function createSession(req) {
   });
 }
 
-function removeInstance(req, jar) {
-  var removeUrl = 'http://' + hostIp + ':3000/api/service-instances/user/remove';
-  req.post({
+function unregisterUser(req, jar) {
+  var removeUrl = 'http://' + hostIp + '/api/users/1';
+  req.put({
     cookie: jar.getCookieString(hostIp),
     headers: {'content-type': 'application/json'},
     url: removeUrl,
-    body: JSON.stringify({url: 'api.15.126.233.29.xip.io'})
-  })
+    body: JSON.stringify({registered: false})
+  });
 }
 
 function resetDatabase() {
@@ -134,10 +131,9 @@ function resetDatabase() {
   });
 
   createSession(req).then(function () {
-      removeInstance(req, cookieJar);
-    }, function (err) {
-      console.log('Unable to reset the DB');
-      console.log('Error:' + err);
-    }
-  );
+    unregisterUser(req, cookieJar);
+  }, function (err) {
+    console.log('Unable to reset the DB');
+    console.log('Error:' + err);
+  });
 }

@@ -12,7 +12,7 @@ describe('Service Instance Registration', function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
 
-    registration.login();
+    loginPage.login();
     registrationOverlay = registration.registrationOverlay();
     serviceInstancesTable = registration.serviceInstancesTable();
   });
@@ -80,6 +80,11 @@ describe('Service Instance Registration', function () {
       browser.driver.sleep(1000);
     });
 
+    afterAll(function () {
+      registration.disconnectAndLogout();
+      helpers.resetDatabase();
+    });
+
     it('should show applications view when `Done` clicked', function () {
       registration.completeRegistration();
       browser.driver.sleep(1000);
@@ -90,7 +95,7 @@ describe('Service Instance Registration', function () {
 
     it('should go directly to applications view on logout and login', function () {
       navbar.logout();
-      registration.login();
+      loginPage.login();
       browser.driver.sleep(1000);
 
       expect(registrationOverlay.isPresent()).toBeFalsy();

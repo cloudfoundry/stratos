@@ -7,6 +7,9 @@ describe('Login Page', function () {
   beforeAll(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
+  });
+
+  afterAll(function () {
     helpers.resetDatabase();
   });
 

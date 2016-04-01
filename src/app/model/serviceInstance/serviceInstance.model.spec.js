@@ -49,6 +49,17 @@
       $httpBackend.flush();
     });
 
+    it('should clear `serviceInstances` on list() and no items returned', function () {
+      $httpBackend.when('GET', '/api/service-instances')
+        .respond(200, {});
+
+      serviceInstance.list().then(function () {
+        expect(serviceInstance.serviceInstances).toEqual([]);
+      });
+
+      $httpBackend.flush();
+    });
+
     it('should not set `serviceInstances` on list() and error', function () {
       $httpBackend.when('GET', '/api/service-instances')
         .respond(403, {});
