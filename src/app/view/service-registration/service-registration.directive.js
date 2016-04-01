@@ -43,7 +43,7 @@
    */
   function ServiceRegistrationController(modelManager) {
     this.overlay = angular.isDefined(this.showOverlayRegistration);
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.serviceInstances = this.serviceInstanceModel.serviceInstances;
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
   }

@@ -121,7 +121,7 @@
       this.serverFailedToRespond = false;
       this.showGlobalSpinner = true;
 
-      this.modelManager.retrieve('app.model.serviceInstance')
+      this.modelManager.retrieve('app.model.serviceInstance.user')
         .list()
         .then(function onSuccess(data) {
           that.showRegistration = data.numCompleted === 0;

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('service instance API', function () {
+  describe('user service instance API', function () {
     var $httpBackend, serviceInstanceApi;
 
     beforeEach(module('green-box-console'));
@@ -25,17 +25,22 @@
       expect(serviceInstanceApi.$http).toBeDefined();
     });
 
-    it('should send POST request for connect', function () {
-      $httpBackend.expectPOST('/api/service-instances/user/connect', { url: 'url' }).respond(200, '');
-      serviceInstanceApi.connect('url');
+    it('should send POST request for create()', function () {
+      var mockRespondData = { id: 1, url: 'url', name: 'name' };
+      $httpBackend.expectPOST('/api/service-instances', { url: 'url', name: 'name' })
+        .respond(200, mockRespondData);
+      serviceInstanceApi.create('url', 'name')
+        .then(function (response) {
+          expect(response.data).toEqual({ id: 1, url: 'url', name: 'name' });
+        });
       $httpBackend.flush();
     });
 
-    it('should return service instances for specified user', function () {
+    it('should return all service instances (master list)', function () {
       var data = {
         items: ['x','y','z']
       };
-      $httpBackend.when('GET', '/api/service-instances/user').respond(200, data);
+      $httpBackend.when('GET', '/api/service-instances').respond(200, data);
 
       serviceInstanceApi.list().then(function (response) {
         expect(response.data).toEqual({items: ['x','y','z']});
@@ -44,18 +49,9 @@
       $httpBackend.flush();
     });
 
-    it('should send POST request for register', function () {
-      var data = {
-        serviceInstances: ['url1', 'url2']
-      };
-      $httpBackend.expectPOST('/api/service-instances/user/register', data).respond(200, '');
-      serviceInstanceApi.register(['url1', 'url2']);
-      $httpBackend.flush();
-    });
-
-    it('should send POST request for disconnect', function () {
-      $httpBackend.expectPOST('/api/service-instances/user/disconnect', { url: 'url' }).respond(200, '');
-      serviceInstanceApi.disconnect('url');
+    it('should send DELETE request remove()', function () {
+      $httpBackend.expectDELETE('/api/service-instances/1').respond(200, '');
+      serviceInstanceApi.remove(1);
       $httpBackend.flush();
     });
   });
