@@ -8,6 +8,7 @@ describe('Application Gallery Page', function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
     galleryPage.login();
+    browser.driver.sleep(1000);
   });
 
   describe('content', function () {
