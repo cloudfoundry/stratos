@@ -22,12 +22,11 @@ function showApplicationsGallery() {
   applicationsGalleryButton().click();
 }
 
-function showApplicationDetails(){
+function showApplicationDetails() {
   applicationGalleryCard().click();
 }
 
-
-function login(){
+function login() {
   var fields = loginPage.loginFormFields();
   var usernameField = fields.get(0);
   usernameField.clear();
