@@ -1,6 +1,7 @@
 'use strict';
 
 var sh = require('../../tools/node_modules/shelljs');
+var request = require('../../tools/node_modules/request');
 
 // Get host IP
 var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
@@ -23,7 +24,11 @@ module.exports = {
 
   getTableRows: getTableRows,
   getTableRowAt: getTableRowAt,
-  getTableCellAt: getTableCellAt
+  getTableCellAt: getTableCellAt,
+
+  removeInstance: removeInstance,
+  resetDatabase: resetDatabase,
+  createSession: createSession
 
 };
 
@@ -88,4 +93,51 @@ function getTableRowAt(table, rowIndex) {
 
 function getTableCellAt(table, rowIndex, colIndex) {
   return getTableRows(table).get(rowIndex).all(by.css('td')).get(colIndex);
+}
+
+/**
+ * Clean up database
+ */
+
+function createSession(req) {
+  return new Promise(function (resolve, reject) {
+    var loginUrl = 'http://' + hostIp + ':3000/api/auth/login';
+
+    req.post({
+      headers: {'content-type': 'application/json'},
+      url: loginUrl,
+      body: JSON.stringify({username: 'dev', password: 'dev'})
+    }, function (error, response) {
+      if (!error && response.statusCode === 200) {
+        resolve();
+      } else {
+        reject(error);
+      }
+    });
+  });
+}
+
+function removeInstance(req, jar) {
+  var removeUrl = 'http://' + hostIp + ':3000/api/service-instances/user/remove';
+  req.post({
+    cookie: jar.getCookieString(hostIp),
+    headers: {'content-type': 'application/json'},
+    url: removeUrl,
+    body: JSON.stringify({url: 'api.15.126.233.29.xip.io'})
+  })
+}
+
+function resetDatabase() {
+  var cookieJar = request.jar();
+  var req = request.defaults({
+    jar: cookieJar
+  });
+
+  createSession(req).then(function () {
+      removeInstance(req, cookieJar);
+    }, function (err) {
+      console.log('Unable to reset the DB');
+      console.log('Error:' + err);
+    }
+  );
 }
