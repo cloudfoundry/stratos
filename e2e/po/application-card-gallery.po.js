@@ -1,36 +1,30 @@
 'use strict';
-var loginPage = require('./login-page.po');
 
-// Navbar helpers
+var navbar = require('./navbar.po');
+
 module.exports = {
-  login : login,
-  showApplicationsGallery : showApplicationsGallery,
-  showApplicationDetails : showApplicationDetails
+
+  applicationGalleryCards: applicationGalleryCards,
+  applicationGalleryCard: applicationGalleryCard,
+
+  showApplications: showApplications,
+  showApplicationDetails: showApplicationDetails
+
 };
 
-function applicationGalleryCard() {
-  return element.all(by.css('application-gallery-card')).get(0)
+function applicationGalleryCard(idx) {
+  return applicationGalleryCards().get(idx)
     .element(by.css('gallery-card'));
 }
 
-function applicationsGalleryButton() {
-  return element(by.css('navigation'))
-    .element(by.css('[href="#cf/applications/list/gallery-view"]'));
+function applicationGalleryCards() {
+  return element.all(by.css('application-gallery-card'));
 }
 
-function showApplicationsGallery() {
-  applicationsGalleryButton().click();
+function showApplications() {
+  navbar.goToView('Applications');
 }
 
-function showApplicationDetails() {
-  applicationGalleryCard().click();
-}
-
-function login() {
-  var fields = loginPage.loginFormFields();
-  var usernameField = fields.get(0);
-  usernameField.clear();
-  usernameField.sendKeys('dev');
-  fields.get(1).sendKeys('dev');
-  loginPage.loginButton().click();
+function showApplicationDetails(idx) {
+  applicationGalleryCard(idx).click();
 }

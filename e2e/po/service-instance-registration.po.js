@@ -3,10 +3,10 @@
 // Service instances registration helpers
 var helpers = require('./helpers.po');
 var loginPage = require('./login-page.po');
+var navbar = require('./navbar.po');
 
 module.exports = {
 
-  login: login,
   registrationOverlay: registrationOverlay,
   serviceInstancesTable: serviceInstancesTable,
   connectLink: connectLink,
@@ -18,31 +18,17 @@ module.exports = {
   registrationNotification: registrationNotification,
   serviceInstanceStatus: serviceInstanceStatus,
 
-  credentialsFlyout: credentialsFlyout,
-  credentialsForm: credentialsForm,
-  credentialsFormFields: credentialsFormFields,
-  cancelButton: cancelButton,
-  registerButton: registerButton,
-  passwordEye: passwordEye,
-  cancel: cancel,
-  register: register,
-  togglePassword: togglePassword
+  loginAndConnect: loginAndConnect,
+  disconnectAndLogout: disconnectAndLogout
 
 };
-
-function login() {
-  var fields = loginPage.loginFormFields();
-  fields.get(0).sendKeys('dev');
-  fields.get(1).sendKeys('dev');
-  loginPage.loginButton().click();
-}
 
 function registrationOverlay() {
   return element(by.id('registration-overlay')).element(by.css('.service-registration'));
 }
 
 function serviceInstancesTable() {
-  return registrationOverlay().element(by.css('table'));
+  return element(by.css('service-registration')).element(by.css('table'));
 }
 
 function connectLink(rowIndex) {
@@ -80,38 +66,15 @@ function registrationNotification() {
   return registrationOverlay().element(by.css('.fixed-footer .registration-notification'));
 }
 
-function credentialsFlyout() {
-  return registrationOverlay().element(by.css('.flyout-content'));
+function loginAndConnect() {
+  loginPage.login();
+  connect(0);
+  doneButton().click();
 }
 
-function credentialsForm() {
-  return helpers.getForm('credentialsFormCtrl.credentialsForm');
-}
-
-function credentialsFormFields() {
-  return helpers.getFormFields('credentialsFormCtrl.credentialsForm');
-}
-
-function cancelButton() {
-  return credentialsForm().element(by.css('[ng-click="credentialsFormCtrl.cancel()"]'));
-}
-
-function registerButton() {
-  return credentialsForm().element(by.css('button[type="submit"]'));
-}
-
-function cancel() {
-  return cancelButton().click();
-}
-
-function register() {
-  return registerButton().click();
-}
-
-function passwordEye() {
-  return credentialsForm().element(by.css('.password-reveal'));
-}
-
-function togglePassword() {
-  return passwordEye().click();
+function disconnectAndLogout() {
+  navbar.showAccountSettings();
+  browser.driver.sleep(1000);
+  disconnect(0);
+  navbar.logout();
 }

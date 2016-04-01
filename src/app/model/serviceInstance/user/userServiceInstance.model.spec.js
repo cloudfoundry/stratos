@@ -31,7 +31,7 @@
     it('should have initial properties defined', function () {
       expect(userServiceInstance.apiManager).toBeDefined();
       expect(userServiceInstance.serviceInstances).toEqual([]);
-      expect(userServiceInstance.numRegistered).toBe(0);
+      expect(userServiceInstance.numValid).toBe(0);
     });
 
     it('should set `serviceInstances` on list()', function () {
@@ -44,9 +44,9 @@
         .respond(200, mockData);
 
       userServiceInstance.list().then(function (response) {
-        expect(response).toEqual({ serviceInstances: expectedData, numCompleted: 0, numRegistered: 0 });
+        expect(response).toEqual(expectedData);
         expect(userServiceInstance.serviceInstances).toEqual(expectedData);
-        expect(userServiceInstance.numRegistered).toBe(0);
+        expect(userServiceInstance.numValid).toBe(0);
       });
 
       $httpBackend.flush();
@@ -63,8 +63,8 @@
       $httpBackend.when('GET', '/api/service-instances/user')
         .respond(200, data);
 
-      userServiceInstance.list().then(function (response) {
-        expect(response.numRegistered).toBe(1);
+      userServiceInstance.list().then(function () {
+        expect(userServiceInstance.numValid).toBe(1);
         expect(userServiceInstance.serviceInstances[0].valid).toBe(true);
       });
 
@@ -83,31 +83,9 @@
       $httpBackend.when('GET', '/api/service-instances/user')
         .respond(200, data);
 
-      userServiceInstance.list().then(function (response) {
-        expect(response.numRegistered).toBe(0);
+      userServiceInstance.list().then(function () {
+        expect(userServiceInstance.numValid).toBe(0);
         expect(userServiceInstance.serviceInstances[0].valid).toBe(false);
-      });
-
-      $httpBackend.flush();
-    });
-
-    it('should return numCompleted on list() with valid+registered service instances', function () {
-      var data = {
-        items: [
-          {
-            name: 'cluster1',
-            url:' cluster1_url',
-            expires_at: (new Date()).getTime() + 360000,
-            registered: true
-          }
-        ]
-      };
-
-      $httpBackend.when('GET', '/api/service-instances/user')
-        .respond(200, data);
-
-      userServiceInstance.list().then(function (response) {
-        expect(response.numCompleted).toBe(1);
       });
 
       $httpBackend.flush();
@@ -121,7 +99,7 @@
         expect(error.status).toBe(403);
         expect(error.data).toEqual({});
         expect(userServiceInstance.serviceInstances).toEqual([]);
-        expect(userServiceInstance.numRegistered).toBe(0);
+        expect(userServiceInstance.numValid).toBe(0);
       });
 
       $httpBackend.flush();
@@ -134,8 +112,8 @@
     });
 
     it('should POST correct data on disconnect()', function () {
-      $httpBackend.expectPOST('/api/service-instances/user/disconnect', { url: 'url' }).respond(200, '');
-      userServiceInstance.disconnect('url');
+      $httpBackend.expectDELETE('/api/service-instances/user/1').respond(200, '');
+      userServiceInstance.disconnect(1);
       $httpBackend.flush();
     });
 

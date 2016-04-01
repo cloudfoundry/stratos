@@ -1,5 +1,4 @@
-<div class="service-registration" ng-class="{'overlay-position': serviceRegistrationCtrl.overlay}"
-  ng-if="!serviceRegistrationCtrl.overlay || serviceRegistrationCtrl.showOverlayRegistration">
+<div class="service-registration" ng-class="{'overlay-position': serviceRegistrationCtrl.overlay}">
   <nav class="navbar navbar-fixed-top" ng-if="serviceRegistrationCtrl.overlay">
     <div class="container-fluid">
       <div class="navbar-header">
@@ -18,13 +17,13 @@
     </div>
   </div>
   <div class="fixed-footer" ng-if="serviceRegistrationCtrl.overlay">
-    <span class="registration-notification" ng-if="serviceRegistrationCtrl.serviceInstanceModel.numRegistered > 0"
-      translate-n="serviceRegistrationCtrl.serviceInstanceModel.numRegistered"
-      translate-plural="{{serviceRegistrationCtrl.serviceInstanceModel.numRegistered}} clusters registered">
-      {{serviceRegistrationCtrl.serviceInstanceModel.numRegistered}} cluster registered
+    <span class="registration-notification" ng-if="serviceRegistrationCtrl.serviceInstanceModel.numValid > 0"
+      translate-n="serviceRegistrationCtrl.serviceInstanceModel.numValid"
+      translate-plural="{{serviceRegistrationCtrl.serviceInstanceModel.numValid}} clusters registered">
+      {{serviceRegistrationCtrl.serviceInstanceModel.numValid}} cluster registered
     </span>
     <button type="button" class="btn btn-default"
-      ng-disabled="serviceRegistrationCtrl.serviceInstanceModel.numRegistered === 0"
+      ng-disabled="serviceRegistrationCtrl.serviceInstanceModel.numValid === 0"
       ng-click="serviceRegistrationCtrl.completeRegistration()" translate>
       Done
     </button>

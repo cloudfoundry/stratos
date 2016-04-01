@@ -49,7 +49,7 @@
       $httpBackend.flush();
     });
 
-    it('should send DELETE request remove()', function () {
+    it('should send DELETE request for remove()', function () {
       $httpBackend.expectDELETE('/api/service-instances/1').respond(200, '');
       serviceInstanceApi.remove(1);
       $httpBackend.flush();
