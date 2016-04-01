@@ -106,9 +106,9 @@ function createSession(req) {
     req.post({
       headers: {'content-type': 'application/json'},
       url: loginUrl,
-      body: JSON.stringify({username: "dev", password: "dev"})
+      body: JSON.stringify({username: 'dev', password: 'dev'})
     }, function (error, response) {
-      if (!error && response.statusCode == 200) {
+      if (!error && response.statusCode === 200) {
         resolve();
       } else {
         reject(error);
@@ -123,7 +123,7 @@ function removeInstance(req, jar) {
     cookie: jar.getCookieString(hostIp),
     headers: {'content-type': 'application/json'},
     url: removeUrl,
-    body: JSON.stringify({url: "api.15.126.233.29.xip.io"})
+    body: JSON.stringify({url: 'api.15.126.233.29.xip.io'})
   })
 }
 
