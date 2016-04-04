@@ -14,7 +14,11 @@
       url: '/services',
       templateUrl: 'plugins/cloud-foundry/view/applications/application/services/services.html',
       controller: ApplicationServicesController,
-      controllerAs: 'applicationServicesCtrl'
+      controllerAs: 'applicationServicesCtrl',
+      ncyBreadcrumb: {
+        label: 'Services',
+        parent: 'cf.applications.list.gallery-view'
+      }
     });
   }
 

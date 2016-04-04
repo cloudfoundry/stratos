@@ -9,3 +9,9 @@ console-view {
     padding-bottom: $page-footer-height;
   }
 }
+
+.breadcrumb {
+  margin-left: -$container-fluid-padding;
+  padding-left: $navbar-padding-horizontal + $container-fluid-padding;
+  width: calc(100% + (#{$container-fluid-padding} * 2));
+}

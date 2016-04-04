@@ -26,7 +26,8 @@
     "moment": "~2.10.6",
     "angular-moment": "~0.10.3",
     "ngSmoothScroll": "~2.0.0",
-    "angular-cookies": "1.4"
+    "angular-cookies": "1.4",
+    "angular-breadcrumb": "~0.4.1"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"

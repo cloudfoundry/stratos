@@ -1,0 +1,23 @@
+//== Page header and footer
+//
+//##
+$page-header-height:          96px !default;
+$page-footer-height:          176px !default;
+$page-footer-color-bg:        #333 !default;
+$page-footer-color-fg:        #fff !default;
+
+$page-header-fg:              #333 !default;
+$page-header-fg-unselected:   #999 !default;
+$page-header-bg:              #fff !default;
+
+//== Navbar
+//
+//##
+
+// Basics of a navbar
+$navbar-height:               $page-header-height !default;
+
+
+// This is how .container-fluid (via the container-fixed mixin) determines it's padding.
+$grid-gutter-width:           30px !default;  // This is bootstrap's default.
+$container-fluid-padding:     $grid-gutter-width / 2 !default;

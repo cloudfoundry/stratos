@@ -14,7 +14,11 @@
       url: '/summary',
       templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/summary.html',
       controller: ApplicationSummaryController,
-      controllerAs: 'applicationSummaryCtrl'
+      controllerAs: 'applicationSummaryCtrl',
+      ncyBreadcrumb: {
+        label: 'Application',
+        parent: 'cf.applications.list.gallery-view'
+      }
     });
   }
 
