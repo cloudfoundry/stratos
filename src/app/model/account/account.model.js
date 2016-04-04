@@ -95,6 +95,19 @@
     },
 
     /**
+     * @function isAdmin
+     * @memberof app.model.account.Account
+     * @description Return true if this user is an ITOps admin
+     * @public
+     * @returns {boolean} True if this user is an ITOps admin
+     */
+    isAdmin: function () {
+      var ADMIN_SCOPE = 'hdp3.admin';
+      return angular.isDefined(this.data.scope) &&
+        this.data.scope === ADMIN_SCOPE;
+    },
+
+    /**
      * @function onLoggedOut
      * @memberof app.model.account.Account
      * @description Logged-in handler at model layer
