@@ -128,8 +128,7 @@
        * developer if unregistered.
        */
       var account = this.modelManager.retrieve('app.model.account');
-      var role = account.data.scope;
-      if (role === 'hdp3.admin') {
+      if (account.isAdmin()) {
         this.modelManager.retrieve('app.model.serviceInstance')
           .list()
           .then(function onSuccess(data) {
