@@ -60,8 +60,7 @@
     addCluster: function () {
       var that = this;
       this.serviceInstanceModel.create(this.url, this.name)
-        .then(function (response) {
-          that.serviceInstanceModel.serviceInstances.push(response.data);
+        .then(function () {
           that.clearForm();
           that.onSubmit();
         });
