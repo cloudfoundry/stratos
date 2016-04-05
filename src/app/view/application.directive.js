@@ -50,7 +50,6 @@
    */
   function ApplicationController($timeout, eventService, modelManager) {
     var that = this;
-
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.loggedIn = false;
@@ -59,6 +58,8 @@
     this.serverFailedToRespond = false;
     this.showGlobalSpinner = false;
     this.showRegistration = false;
+    this.showClusterRegistration = false;
+
     $timeout(function () {
       that.verifySession();
     }, 0);
@@ -121,12 +122,27 @@
       this.serverFailedToRespond = false;
       this.showGlobalSpinner = true;
 
-      this.modelManager.retrieve('app.model.serviceInstance.user')
-        .list()
-        .then(function onSuccess(data) {
-          that.showRegistration = data.numCompleted === 0;
-          that.showGlobalSpinner = false;
-        });
+      /**
+       * Show cluster registration if user is ITOps (hdp3.admin).
+       * Otherwise, show service instance registration as a
+       * developer if unregistered.
+       */
+      var account = this.modelManager.retrieve('app.model.account');
+      if (account.isAdmin()) {
+        this.modelManager.retrieve('app.model.serviceInstance')
+          .list()
+          .then(function onSuccess(data) {
+            that.showClusterRegistration = data.numAvailable === 0;
+            that.showGlobalSpinner = false;
+          });
+      } else {
+        this.modelManager.retrieve('app.model.serviceInstance.user')
+          .list()
+          .then(function onSuccess(data) {
+            that.showRegistration = data.numCompleted === 0;
+            that.showGlobalSpinner = false;
+          });
+      }
     },
 
     /**
