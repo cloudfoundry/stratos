@@ -67,8 +67,10 @@
       $httpBackend.expectPOST('/api/service-instances', { url: 'url', name: 'name' })
         .respond(200, mockRespondData);
       serviceInstance.create('url', 'name')
-        .then(function (response) {
-          expect(response.data).toEqual({ id: 1, url: 'url', name: 'name' });
+        .then(function () {
+          var serviceInstances = serviceInstance.serviceInstances;
+          expect(serviceInstances.length).toBe(1);
+          expect(serviceInstances[0]).toEqual({ id: 1, url: 'url', name: 'name' });
         });
       $httpBackend.flush();
     });

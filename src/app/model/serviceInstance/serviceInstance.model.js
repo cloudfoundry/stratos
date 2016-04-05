@@ -45,8 +45,12 @@
      * @public
      */
     create: function (url, name) {
+      var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
-      return serviceInstanceApi.create(url, name);
+      return serviceInstanceApi.create(url, name)
+        .then(function (response) {
+          that.serviceInstances.push(response.data);
+        });
     },
 
     /**

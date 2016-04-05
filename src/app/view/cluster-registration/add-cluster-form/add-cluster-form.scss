@@ -1,0 +1,12 @@
+add-cluster-form {
+  display: flex;
+  justify-content: center;
+
+  form {
+    margin-top: $hpe-unit-space;
+  }
+
+  .form-actions {
+    margin-top: $hpe-unit-space;
+  }
+}
