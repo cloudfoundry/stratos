@@ -2,7 +2,7 @@
   <div class="panel-body service-panel col-md-6">
     <div class="service-summary">
       <div class="row">
-        <h2> Add Service to {{ ::applicationServiceDetailCtrl.app.application.summary.name}} </h2>
+        <h2> Add Service to {{ ::applicationServiceCtrl.app.application.summary.name}} </h2>
       </div>
       <p>
         <div class="row">
@@ -10,17 +10,17 @@
             <i class="helion-icon helion-icon-4x helion-icon-Service_business service-icon"></i>
           </div>
           <div class="col-md-3">
-            <h4 class="font-semi-bold">{{ ::applicationServiceDetailCtrl.service.entity.extra.categories }}</h4>
+            <h4 class="font-semi-bold">{{ ::applicationServiceCtrl.service.entity.extra.categories }}</h4>
           </div>
         </div>
         <div class="row">
-            {{ ::applicationServiceDetailCtrl.service.entity.label }}
+            {{ ::applicationServiceCtrl.service.entity.label }}
             <p>
-              ({{ ::applicationServiceDetailCtrl.service.entity.version }})
+              ({{ ::applicationServiceCtrl.service.entity.version }})
             </p>
         </div>
         <div class="row">
-            {{ ::applicationServiceDetailCtrl.service.entity.description }}.    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+            {{ ::applicationServiceCtrl.service.entity.description }}.    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
         </div>
       </p>
     </div>
@@ -34,7 +34,7 @@
 </div>
 <div class="col-md-12 service-detail-actions">
   <div class="pull-right">
-    <button class="btn btn-default btn-info" translate="" ng-click="applicationServiceDetailCtrl.cancel()"><span>Cancel</span></button>
-    <button class="btn btn-default" translate="" ng-click="applicationServiceDetailCtrl.add()"><span>Add</span></button>
+    <button class="btn btn-default btn-info" translate="" ng-click="applicationServiceCtrl.cancel()"><span>Cancel</span></button>
+    <button class="btn btn-default" translate="" ng-click="applicationServiceCtrl.add()"><span>Add</span></button>
   </div>
 </div>
