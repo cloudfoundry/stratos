@@ -26,6 +26,7 @@
       spyOn(addClusterFormCtrl, 'onCancel').and.callThrough();
       spyOn(addClusterFormCtrl, 'onSubmit').and.callThrough();
       spyOn(addClusterFormCtrl, 'clearForm').and.callThrough();
+      spyOn(addClusterFormCtrl, 'onAddClusterError').and.callThrough();
     }));
 
     it('should be defined', function () {
@@ -46,6 +47,10 @@
     it('should have `onCancel` and `onSubmit` initially bound', function () {
       expect(addClusterFormCtrl.onCancel).toBeDefined();
       expect(addClusterFormCtrl.onSubmit).toBeDefined();
+    });
+
+    it('should have `addClusterError` initially set to false', function () {
+      expect(addClusterFormCtrl.addClusterError).toBe(false);
     });
 
     it('should add cluster to serviceInstanceModel on addCluster()', function () {
@@ -75,6 +80,7 @@
       expect(addClusterFormCtrl.serviceInstanceModel.serviceInstances.length).toBe(0);
       expect(addClusterFormCtrl.clearForm).not.toHaveBeenCalled();
       expect(addClusterFormCtrl.onSubmit).not.toHaveBeenCalled();
+      expect(addClusterFormCtrl.onAddClusterError).toHaveBeenCalled();
     });
 
     it('should clear form and call onCancel() on cancel()', function () {
@@ -89,6 +95,12 @@
 
       expect(addClusterFormCtrl.url).toBe(null);
       expect(addClusterFormCtrl.name).toBe(null);
+      expect(addClusterFormCtrl.addClusterError).toBe(false);
+    });
+
+    it('should set addClusterError onAddClusterError()', function () {
+      addClusterFormCtrl.onAddClusterError();
+      expect(addClusterFormCtrl.addClusterError).toBe(true);
     });
   });
 
