@@ -56,8 +56,8 @@
       }
     ];
     this.showServiceDetail = function(service) {
-        this.currentService = service;
-        this.flyoutActive = true;
+      this.currentService = service;
+      this.flyoutActive = true;
     };
 
   }
