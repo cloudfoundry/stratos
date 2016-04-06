@@ -29,7 +29,12 @@
   }
 
   angular.extend(ApplicationServiceDetailController.prototype, {
-    close: function() {
+    cancel: function() {
+      this.flyoutActive = false;
+    },
+    add: function() {
+      //TBD Logic to do the add
+
       this.flyoutActive = false;
     }
   });
