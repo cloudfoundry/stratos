@@ -31,7 +31,7 @@
   angular.extend(ApplicationServiceDetailController.prototype, {
     cancel: function(parent) {
       parent.flyoutActive = false;
-    },
+    }, 
     add: function(parent) {
       //TBD Logic to do the add
 
