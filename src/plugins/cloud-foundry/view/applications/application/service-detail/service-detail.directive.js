@@ -29,9 +29,6 @@
   }
 
   angular.extend(ApplicationServiceDetailController.prototype, {
-    showServiceDetail: function () {
-      alert(this.service);
-    }
   });
 
 })();
