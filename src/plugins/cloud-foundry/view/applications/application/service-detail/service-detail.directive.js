@@ -29,6 +29,9 @@
   }
 
   angular.extend(ApplicationServiceDetailController.prototype, {
+    close: function() {
+      this.flyoutActive = false;
+    }
   });
 
 })();
