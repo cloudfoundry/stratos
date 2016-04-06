@@ -27,6 +27,7 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
+   * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @class
@@ -116,7 +117,7 @@
      * @memberof cloud-foundry.model.application
      * @description start an application
      * @param {string} guid - the application id
-     * @returns {promise}
+     * @returns {promise} a promise object
      * @public
      */
     startApp: function (guid) {
@@ -132,7 +133,7 @@
      * @memberof cloud-foundry.model.application
      * @description stop an application
      * @param {string} guid - the application id
-     * @returns {promise}
+     * @returns {promise} a promise object
      * @public
      */
     stopApp: function (guid) {
@@ -186,8 +187,7 @@
      * @function onFiles
      * @memberof  cloud-foundry.model.application
      * @description onFiles handler at model layer
-     * @parameter {string} response the return from the api call
-     * @property data - the return data from the api call
+     * @param {string} response the return from the api call
      * @private
      * @returns {void}
      */
