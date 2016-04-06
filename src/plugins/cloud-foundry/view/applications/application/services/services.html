@@ -1,3 +1,4 @@
+
 <div class="panel panel-default"
   ng-repeat="service in applicationServicesCtrl.model.data.resources track by service.metadata.guid">
   <div class="panel-body service-panel">
@@ -26,7 +27,7 @@
           action-target="service" menu-icon="helion-icon helion-icon-More"
           menu-position="actions-menu-right">
         </actions-menu>
-        <button class="btn btn-sm btn-link">
+        <button class="btn btn-sm btn-link" ng-click="applicationServicesCtrl.showServiceDetail(service)">
           <span translate>Add Service</span>
           <i class="helion-icon helion-icon-Plus"></i>
         </button>
@@ -34,3 +35,6 @@
     </div>
   </div>
 </div>
+<flyout flyout-active="applicationServicesCtrl.flyoutActive" flyout-close-icon="'helion-icon helion-icon-Close'">
+  <application-service service="applicationServicesCtrl.currentService" app="applicationServicesCtrl.appModel" parent="applicationServicesCtrl"></application-service>
+</flyout>

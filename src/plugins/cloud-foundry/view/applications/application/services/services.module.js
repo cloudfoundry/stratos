@@ -36,6 +36,7 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
     this.model.all();
+
     this.serviceActions = [
       {
         name: 'Detach',
@@ -57,6 +58,10 @@
   }
 
   angular.extend(ApplicationServicesController.prototype, {
+    showServiceDetail: function(service) {
+      this.currentService = service;
+      this.flyoutActive = true;
+    }
   });
 
 })();
