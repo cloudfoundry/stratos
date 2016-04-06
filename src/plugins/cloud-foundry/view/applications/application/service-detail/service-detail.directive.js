@@ -11,7 +11,8 @@
     return {
       bindToController: {
         service: '=',
-        app: '='
+        app: '=',
+        parent: '='
       },
       controller: ApplicationServiceDetailController,
       controllerAs: 'applicationServiceDetailCtrl',
@@ -29,13 +30,13 @@
   }
 
   angular.extend(ApplicationServiceDetailController.prototype, {
-    cancel: function(parent) {
-      parent.flyoutActive = false;
-    }, 
+    cancel: function() {
+      this.parent.flyoutActive = false;
+    },
     add: function(parent) {
       //TBD Logic to do the add
-
-      parent.flyoutActive = false;
+      
+      this.parent.flyoutActive = false;
     }
   });
 

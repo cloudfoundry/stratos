@@ -61,7 +61,7 @@
     showServiceDetail: function(service) {
       this.currentService = service;
       this.flyoutActive = true;
-    };
+    }
   });
 
 })();
