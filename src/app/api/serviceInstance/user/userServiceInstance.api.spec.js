@@ -54,8 +54,8 @@
     });
 
     it('should send POST request for disconnect', function () {
-      $httpBackend.expectPOST('/api/service-instances/user/disconnect', { url: 'url' }).respond(200, '');
-      userServiceInstanceApi.disconnect('url');
+      $httpBackend.expectDELETE('/api/service-instances/user/1').respond(200, '');
+      userServiceInstanceApi.disconnect(1);
       $httpBackend.flush();
     });
   });

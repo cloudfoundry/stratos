@@ -27,13 +27,13 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {array} serviceInstances - the service instances available to user
-   * @property {number} numRegistered - the number of user registered service instances
+   * @property {number} numValid - the number of valid user service instances
    * @class
    */
   function UserServiceInstance(apiManager) {
     this.apiManager = apiManager;
     this.serviceInstances = [];
-    this.numRegistered = 0;
+    this.numValid = 0;
   }
 
   angular.extend(UserServiceInstance.prototype, {
@@ -54,13 +54,13 @@
      * @function disconnect
      * @memberof app.model.serviceInstance.user.UserServiceInstance
      * @description Disconnect user from service instance
-     * @param {string} url - the service instance endpoint
+     * @param {number} id - the service instance ID
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    disconnect: function (url) {
+    disconnect: function (id) {
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      return serviceInstanceApi.disconnect(url);
+      return serviceInstanceApi.disconnect(id);
     },
 
     /**
@@ -81,24 +81,15 @@
           var now = (new Date()).getTime() / 1000;
           angular.forEach(items, function (item) {
             if (!_.isNil(item.expires_at)) {
-              if (item.expires_at > now) {
-                item.valid = true;
-              } else {
-                item.valid = false;
-              }
+              item.valid = item.expires_at > now;
             }
           });
 
           that.serviceInstances.length = 0;
           [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
-          that.numRegistered = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
-          var numCompleted = _.sumBy(items, function (o) { return o.registered ? 1 : 0; }) || 0;
+          that.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
 
-          return {
-            serviceInstances: that.serviceInstances,
-            numCompleted: numCompleted,
-            numRegistered: that.numRegistered
-          };
+          return that.serviceInstances;
         });
     },
 

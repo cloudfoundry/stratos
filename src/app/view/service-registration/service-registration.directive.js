@@ -39,13 +39,17 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
+   * @property {app.model.user} userModel - the user model
    * @property {array} serviceInstances - the service instances available to user
+   * @property {string} warningMsg - the warning message to show if expired
    */
   function ServiceRegistrationController(modelManager) {
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.userModel = modelManager.retrieve('app.model.user');
     this.serviceInstances = this.serviceInstanceModel.serviceInstances;
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
+    this.serviceInstanceModel.list();
   }
 
   angular.extend(ServiceRegistrationController.prototype, {
@@ -57,11 +61,8 @@
      */
     completeRegistration: function () {
       var that = this;
-      if (this.serviceInstanceModel.numRegistered > 0) {
-        var registeredUrls = _.chain(this.serviceInstances)
-                              .filter({ valid: true })
-                              .map('url');
-        this.serviceInstanceModel.register(registeredUrls)
+      if (this.serviceInstanceModel.numValid > 0) {
+        this.userModel.updateRegistered(true)
           .then(function () {
             that.showOverlayRegistration = false;
           });
@@ -81,7 +82,7 @@
         .then(function success(response) {
           angular.extend(serviceInstance, response.data);
           serviceInstance.valid = true;
-          that.serviceInstanceModel.numRegistered += 1;
+          that.serviceInstanceModel.numValid += 1;
         });
     },
 
@@ -94,13 +95,12 @@
      */
     disconnect: function (serviceInstance) {
       var that = this;
-      this.serviceInstanceModel.disconnect(serviceInstance.url)
+      this.serviceInstanceModel.disconnect(serviceInstance.id)
         .then(function success() {
           delete serviceInstance.account;
           delete serviceInstance.expires_at;
-          delete serviceInstance.registered;
           delete serviceInstance.valid;
-          that.serviceInstanceModel.numRegistered -= 1;
+          that.serviceInstanceModel.numValid -= 1;
         });
     }
   });

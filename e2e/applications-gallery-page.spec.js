@@ -4,29 +4,28 @@ var helpers = require('./po/helpers.po');
 var galleryPage = require('./po/application-card-gallery.po');
 var registration = require('./po/service-instance-registration.po');
 
-describe('Application Gallery Page', function () {
+describe('Applications - Gallery View', function () {
   beforeAll(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
-    helpers.resetDatabase();
-    galleryPage.login();
-    registration.connect(0);
-    browser.driver.sleep(1000);
-    registration.doneButton().click();
+    registration.loginAndConnect();
   });
 
-  describe('content', function () {
-    describe('applications tab', function() {
-      it("should show the applications gallery", function() {
-        galleryPage.showApplicationsGallery();
-        expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() +'/#/cf/applications/list/gallery-view');
-      });
-      describe("and you click a card", function() {
-        it('should go to application detail', function () {
-          galleryPage.showApplicationDetails();
-          expect(browser.getCurrentUrl()).toMatch(/summary$/);
-        });
-      })
+  afterAll(function () {
+    registration.disconnectAndLogout();
+    helpers.resetDatabase();
+  });
+
+  it('should show applications as cards', function() {
+    galleryPage.showApplications();
+    expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() +'/#/cf/applications/list/gallery-view');
+    expect(galleryPage.applicationGalleryCards().isDisplayed()).toBeTruthy();
+  });
+
+  describe('on card click', function () {
+    it('should show application details', function () {
+      galleryPage.showApplicationDetails(0);
+      expect(browser.getCurrentUrl()).toMatch(/summary$/);
     });
   });
 });

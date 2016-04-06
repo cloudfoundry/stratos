@@ -13,9 +13,13 @@
       $scope = $injector.get('$rootScope').$new();
       $scope.showRegistration = false;
 
-      var modelManager = $injector.get('app.model.modelManager');
-      var account = modelManager.retrieve('app.model.account');
-      account.data = { username: 'dev' };
+      var items = [{
+        id: 1,
+        name: 'c1',
+        url: 'c1_url'
+      }];
+
+      $httpBackend.when('GET', '/api/service-instances/user').respond(200, { items: items });
     }));
 
     describe('without overlay', function () {
@@ -30,6 +34,7 @@
         $scope.$apply();
 
         serviceRegistrationCtrl = element.controller('serviceRegistration');
+        serviceRegistrationCtrl.userModel.data = { id: 1 };
       });
 
       it('should be defined', function () {
@@ -53,10 +58,13 @@
       });
 
       it('should call connect on model on connect()', function () {
-        var serviceInstance = { name: 'cluster1', url: 'cluster1_url' };
+        $httpBackend.flush();
+
+        var serviceInstance = { name: 'c1', url: 'c1_url' };
         var mockResponse = {
-          name: 'cluster1',
-          url: 'cluster1_url',
+          id: 1,
+          url: 'c1_url',
+          username: 'dev',
           account: 'dev',
           expires_at: 3600
         };
@@ -67,27 +75,35 @@
 
         expect(serviceInstance.account).toBe('dev');
         expect(serviceInstance.expires_at).toBe(3600);
-        expect(serviceRegistrationCtrl.serviceInstanceModel.numRegistered).toBe(1);
+        expect(serviceInstance.valid).toBe(true);
+        expect(serviceRegistrationCtrl.serviceInstanceModel.numValid).toBe(1);
       });
 
       it('should call disconnect on model on disconnect()', function () {
-        var model = serviceRegistrationCtrl.serviceInstanceModel;
-        model.serviceInstances = [{ name: 'c1', url: 'c1_url', account: 'usr1' }];
-        model.numRegistered = 1;
-
-        var mockRegistered = { name: 'cluster', url: 'cluster_url', account: 'usr1' };
-        var expectedData = { url: 'cluster_url' };
-
-        $httpBackend.when('POST', '/api/service-instances/user/disconnect').respond(200, {});
-        $httpBackend.expectPOST('/api/service-instances/user/disconnect', expectedData);
-        serviceRegistrationCtrl.disconnect(mockRegistered);
         $httpBackend.flush();
 
-        expect(mockRegistered.account).toBeUndefined();
-        expect(mockRegistered.expires_at).toBeUndefined();
-        expect(mockRegistered.registered).toBeUndefined();
-        expect(mockRegistered.valid).toBeUndefined();
-        expect(serviceRegistrationCtrl.serviceInstanceModel.numRegistered).toBe(0);
+        var serviceInstance = { name: 'c1', url: 'c1_url' };
+        var mockResponse = {
+          id: 1,
+          url: 'c1_url',
+          username: 'dev',
+          account: 'dev',
+          expires_at: 3600
+        };
+
+        $httpBackend.when('POST', '/api/service-instances/user/connect').respond(200, mockResponse);
+        serviceRegistrationCtrl.connect(serviceInstance);
+        $httpBackend.flush();
+
+        $httpBackend.when('DELETE', '/api/service-instances/user/1').respond(200, {});
+        $httpBackend.expectDELETE('/api/service-instances/user/1');
+        serviceRegistrationCtrl.disconnect(serviceInstance);
+        $httpBackend.flush();
+
+        expect(serviceInstance.account).toBeUndefined();
+        expect(serviceInstance.expires_at).toBeUndefined();
+        expect(serviceInstance.valid).toBeUndefined();
+        expect(serviceRegistrationCtrl.serviceInstanceModel.numValid).toBe(0);
       });
     });
 
@@ -104,6 +120,7 @@
         $scope.$apply();
 
         serviceRegistrationCtrl = element.controller('serviceRegistration');
+        serviceRegistrationCtrl.userModel.data = { id: 1 };
       });
 
       it('should be defined', function () {
@@ -134,34 +151,35 @@
         expect(element.find('div').length).toBeGreaterThan(0);
       });
 
-      it('should be hidden when registration completed', function () {
-        spyOn(serviceRegistrationCtrl.serviceInstanceModel, 'register').and.callThrough();
+      it('should not be hidden on completeRegistration() and numValid === 0', function () {
+        spyOn(serviceRegistrationCtrl.userModel, 'updateRegistered').and.callThrough();
         $scope.showRegistration = true;
         $scope.$apply();
 
         serviceRegistrationCtrl.completeRegistration();
 
-        expect(serviceRegistrationCtrl.serviceInstanceModel.register).not.toHaveBeenCalled();
+        expect(serviceRegistrationCtrl.userModel.updateRegistered).not.toHaveBeenCalled();
         expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(true);
       });
 
-      it('should be hidden when registration completed', function () {
-        spyOn(serviceRegistrationCtrl.serviceInstanceModel, 'register').and.callThrough();
+      it('should be hidden on completeRegistration() and numValid > 0', function () {
+        spyOn(serviceRegistrationCtrl.userModel, 'updateRegistered').and.callThrough();
         $scope.showRegistration = true;
         $scope.$apply();
 
         serviceRegistrationCtrl.serviceInstances = [
-          { name: 'cluster1', URL: 'cluster1_url', username: 'dev', valid: true },
-          { name: 'cluster2', URL: 'cluster2_url', username: 'dev', valid: true },
-          { name: 'cluster3', URL: 'cluster3_url' }
+          { name: 'c1', url: 'c1_url', username: 'dev', expires_at: 3600, valid: true },
+          { name: 'c2', url: 'c2_url', username: 'dev', expires_at: 3600, valid: true },
+          { name: 'c3', url: 'c3_url' }
         ];
-        serviceRegistrationCtrl.serviceInstanceModel.numRegistered = 2;
+        serviceRegistrationCtrl.serviceInstanceModel.numValid = 2;
 
-        $httpBackend.when('POST', '/api/service-instances/user/register').respond(200, {});
+        $httpBackend.when('PUT', '/api/users/1').respond(200, { registered: true });
+        $httpBackend.expectPUT('/api/users/1', { registered: true });
         serviceRegistrationCtrl.completeRegistration();
         $httpBackend.flush();
 
-        expect(serviceRegistrationCtrl.serviceInstanceModel.register).toHaveBeenCalled();
+        expect(serviceRegistrationCtrl.userModel.updateRegistered).toHaveBeenCalledWith(true);
         expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(false);
       });
     });
