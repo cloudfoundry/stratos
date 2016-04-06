@@ -2,11 +2,29 @@ add-cluster-form {
   display: flex;
   justify-content: center;
 
+  .add-cluster-form {
+    max-width: 350px;
+  }
+
   form {
+    margin-top: $hpe-unit-space;
+
+    .form-group {
+      width: 100%;
+    }
+  }
+
+  .alert-danger {
     margin-top: $hpe-unit-space;
   }
 
   .form-actions {
+    display: flex;
+    justify-content: flex-end;
     margin-top: $hpe-unit-space;
+
+    button:not(:first-child) {
+      margin-left: $hpe-unit-space / 4;
+    }
   }
 }

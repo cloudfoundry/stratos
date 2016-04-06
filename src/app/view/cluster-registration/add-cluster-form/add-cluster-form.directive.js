@@ -43,11 +43,13 @@
    * @property {app.model.serviceInstance} - the service instance model
    * @property {string} url - the cluster endpoint
    * @property {string} name - the cluster friendly name
+   * @property {boolean} addClusterError - flag error adding cluster
    */
   function AddClusterFormController(modelManager) {
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.url = null;
     this.name = null;
+    this.addClusterError = false;
   }
 
   angular.extend(AddClusterFormController.prototype, {
@@ -63,6 +65,8 @@
         .then(function () {
           that.clearForm();
           that.onSubmit();
+        }, function () {
+          that.onAddClusterError();
         });
     },
 
@@ -80,12 +84,23 @@
     /**
      * @function clearForm
      * @memberof app.view.AddClusterFormController
-     * @description Clear the form
+     * @description Clear the form and all errors
      * @returns {void}
      */
     clearForm: function () {
       this.url = null;
       this.name = null;
+      this.addClusterError = false;
+    },
+
+    /**
+     * @function onAddClusterError
+     * @memberof app.view.AddClusterFormController
+     * @description Display error when adding cluster
+     * @returns {void}
+     */
+    onAddClusterError: function () {
+      this.addClusterError = true;
     }
   });
 
