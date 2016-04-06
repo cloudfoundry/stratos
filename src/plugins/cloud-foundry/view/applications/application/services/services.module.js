@@ -55,14 +55,13 @@
         }
       }
     ];
-    this.showServiceDetail = function(service) {
-      this.currentService = service;
-      this.flyoutActive = true;
-    };
-
   }
 
   angular.extend(ApplicationServicesController.prototype, {
+    showServiceDetail: function(service) {
+      this.currentService = service;
+      this.flyoutActive = true;
+    };
   });
 
 })();
