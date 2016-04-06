@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application')
+    .module('cloud-foundry.view.applications.application.services')
     .directive('applicationService', applicationService);
 
   applicationService.$inject = [];
@@ -17,7 +17,7 @@
       controller: ApplicationServiceController,
       controllerAs: 'applicationServiceCtrl',
       scope: {},
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/service/service.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/application/services/service/service.html'
     };
   }
 
