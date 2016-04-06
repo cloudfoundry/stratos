@@ -34,7 +34,12 @@ module.exports = function (config) {
       'app/**/!(*.mock|*.spec).js',
       'app/**/*.mock.js',
       'app/**/*.spec.js',
-      'app/**/*.html'
+      'app/**/*.html',
+      'plugins/**/*.module.js',
+      'plugins/**/!(*.mock|*.spec).js',
+      'plugins/**/*.mock.js',
+      'plugins/**/*.spec.js',
+      'plugins/**/*.html'
     ],
 
     frameworks: ['wiredep', 'jasmine'],
