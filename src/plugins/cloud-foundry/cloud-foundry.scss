@@ -13,7 +13,6 @@
   }
 }
 
-// TODO: move these rule out to helio-ui-theme in following PR
 .action-bar {
   height: $hpe-unit-space * 3;
   line-height: $hpe-unit-space * 3;
@@ -78,30 +77,6 @@
 
   .btn {
     margin-left: $hpe-unit-space / 3;
-  }
-}
-
-table.table  {
-  > thead > tr > th,
-  > tbody > tr:not([table-inline-message]) > td,
-  > tfoot > tr > td {
-
-    .icon-link {
-      color: $text-color;
-      text-decoration: none;
-
-      &:hover,
-      &:active {
-        color: $link-color;
-        text-decoration: none;
-      }
-    }
-
-    .helion-icon {
-      line-height: 0;
-      font-size: $hpe-unit-space;
-      vertical-align: middle;
-    }
   }
 }
 
