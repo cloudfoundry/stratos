@@ -15,5 +15,10 @@ exports.config = {
     'chromeOptions': {
       args: ['--no-sandbox']
     } 
+  },
+   jasmineNodeOpts: {
+    showColors: true,
+    isVerbose: true,
+    includeStackTrace: true
   }
 };
