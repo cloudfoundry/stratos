@@ -102,6 +102,16 @@
           delete serviceInstance.valid;
           that.serviceInstanceModel.numValid -= 1;
         });
+    },
+
+    /**
+     * @function isEmpty
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Check to see if this controller has any serviceInstances
+     * @returns {boolean}
+     */
+    isEmpty: function () {
+      return this.serviceInstances.length === 0;
     }
   });
 

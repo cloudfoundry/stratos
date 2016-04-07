@@ -1,0 +1,44 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th class="text-center registration-status" translate></th>
+    <th translate>Name</th>
+    <th translate>URL</th>
+    <th translate>User Account</th>
+    <th translate>Valid Until</th>
+    <th class="registration-actions">
+      <button class="btn btn-default"
+              translate
+              ng-click="FIXMEregister_somethingFIXME">
+        <span>Add Cluster</span>
+      </button>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="serviceInstance in serviceRegistrationCtrl.serviceInstances"
+        show-table-inline-message="{{ serviceInstance.valid === false ? serviceRegistrationCtrl.warningMsg : ''}}">
+      <td class="text-center registration-status">
+        <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+              ng-if="serviceInstance.valid"></span>
+        <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+              ng-if="serviceInstance.valid === false"></span>
+        <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-warning"
+              ng-if="serviceInstance.error"></span>
+      </td>
+      <td>{{serviceInstance.name}}</td>
+      <td>{{serviceInstance.url}}</td>
+      <td>{{serviceInstance.account}}</td>
+      <td>{{serviceInstance.expires_at | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
+      <td class="text-right">
+        <a class="btn btn-link btn-sm" ng-if="!serviceInstance.valid"
+           ng-click="serviceRegistrationCtrl.connect(serviceInstance)">
+          <span ng-if="serviceInstance.valid === false" translate>Reconnect</span>
+          <span ng-if="serviceInstance.valid === undefined" translate>Connect</span>
+        </a>
+        <a class="btn btn-link btn-sm" ng-if="serviceInstance.valid"
+           ng-click="serviceRegistrationCtrl.disconnect(serviceInstance)" translate>Disconnect</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
