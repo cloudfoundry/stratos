@@ -18,7 +18,7 @@
       password-reveal password-reveal-icon="'helion-icon helion-icon-View'"/>
   </div>
 
-  <button type="submit" class="btn btn-primary center-block"
+  <button type="submit" class="btn btn-commit center-block"
     ng-disabled="loginForm.$invalid || loginFormCtrl.loggingIn"
     ng-click="loginFormCtrl.login() && applicationCtrl.login(loginFormCtrl.username,loginFormCtrl.password)" translate>
     Login
