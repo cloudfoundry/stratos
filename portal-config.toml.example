@@ -1,0 +1,13 @@
+http_client_timeout   = 10
+skip_tls_verification = false
+tls_address           = ":8080"
+tls_cert_file         = "certs/pproxy.crt"
+tls_cert_key          = "certs/pproxy.key"
+uaa_client            = "portal_proxy"
+uaa_client_secret     = "portalproxysecret"
+uaa_endpoint          = "https://api.cnapdomain.com/oauth/token"
+cookie_store_secret   = "cookiesecret"
+dev                   = true
+
+[dev_config]
+skip_tls_verification = true
