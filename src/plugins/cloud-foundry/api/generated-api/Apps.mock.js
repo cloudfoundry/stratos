@@ -1,11 +1,12 @@
 (function (mock) {
   'use strict';
 
+  /* eslint-disable quote-props */
   mock.cloudFoundryAPI = mock.cloudFoundryAPI || {};
 
   mock.cloudFoundryAPI.Apps = {
 
-    GetAppSummary: function (guid, params) {
+    GetAppSummary: function (guid) {
       return {
         url: '/api/cf/v2/apps/' + guid + '/summary',
 
@@ -17,55 +18,55 @@
               "guid": guid,
               "name": "name-2342",
               "routes": [
-              {
-                "guid": "84a911b3-16f7-4f47-afa4-581c86018600",
-                "host": "host-20",
-                "path": "",
-                "domain": {
-                  "guid": "bc102838-ebd6-448e-8ea1-63f9b490dc7c",
-                  "name": "domain-48.example.com"
-                }
-              }
-            ],
-              "running_instances": 0,
-              "services": [
-              {
-                "guid": "28aa8270-ab0e-480d-b9b6-ba4ec4f15015",
-                "name": "name-2344",
-                "bound_app_count": 1,
-                "last_operation": null,
-                "dashboard_url": null,
-                "service_plan": {
-                  "guid": "d22b3754-d093-42a2-a294-5fda6c6db44c",
-                  "name": "name-2345",
-                  "service": {
-                    "guid": "67229bc6-8fc9-4fe1-b8bc-8790cdae5334",
-                    "label": "label-53",
-                    "provider": null,
-                    "version": null
+                {
+                  "guid": "84a911b3-16f7-4f47-afa4-581c86018600",
+                  "host": "host-20",
+                  "path": "",
+                  "domain": {
+                    "guid": "bc102838-ebd6-448e-8ea1-63f9b490dc7c",
+                    "name": "domain-48.example.com"
                   }
                 }
-              }
-            ],
-            "available_domains": [
-              {
-                "guid": "bc102838-ebd6-448e-8ea1-63f9b490dc7c",
-                "name": "domain-48.example.com",
-                "owning_organization_guid": "adee2ddb-8fa9-44cb-80f8-9c7f1589534c"
-              },
-              {
-                "guid": "e39933ad-2265-4d24-bf94-c962b2d60438",
-                "name": "customer-app-domain1.com",
-                "router_group_guid": null,
-                "router_group_types": null
-              },
-              {
-                "guid": "d664430b-1406-4d22-bc74-293581d36f0b",
-                "name": "customer-app-domain2.com",
-                "router_group_guid": null,
-                "router_group_types": null
-              }
-            ],
+              ],
+              "running_instances": 0,
+              "services": [
+                {
+                  "guid": "28aa8270-ab0e-480d-b9b6-ba4ec4f15015",
+                  "name": "name-2344",
+                  "bound_app_count": 1,
+                  "last_operation": null,
+                  "dashboard_url": null,
+                  "service_plan": {
+                    "guid": "d22b3754-d093-42a2-a294-5fda6c6db44c",
+                    "name": "name-2345",
+                    "service": {
+                      "guid": "67229bc6-8fc9-4fe1-b8bc-8790cdae5334",
+                      "label": "label-53",
+                      "provider": null,
+                      "version": null
+                    }
+                  }
+                }
+              ],
+              "available_domains": [
+                {
+                  "guid": "bc102838-ebd6-448e-8ea1-63f9b490dc7c",
+                  "name": "domain-48.example.com",
+                  "owning_organization_guid": "adee2ddb-8fa9-44cb-80f8-9c7f1589534c"
+                },
+                {
+                  "guid": "e39933ad-2265-4d24-bf94-c962b2d60438",
+                  "name": "customer-app-domain1.com",
+                  "router_group_guid": null,
+                  "router_group_types": null
+                },
+                {
+                  "guid": "d664430b-1406-4d22-bc74-293581d36f0b",
+                  "name": "customer-app-domain2.com",
+                  "router_group_guid": null,
+                  "router_group_types": null
+                }
+              ],
               "production": false,
               "space_guid": "c79071fc-3e74-4d3e-912f-782b3433ccc3",
               "stack_guid": "19fb9562-b371-44e5-b008-09d3e34c2041",
@@ -92,8 +93,8 @@
               "detected_start_command": "",
               "enable_ssh": true,
               "docker_credentials_json": {
-              "redacted_message": "[PRIVATE DATA HIDDEN]"
-            },
+                "redacted_message": "[PRIVATE DATA HIDDEN]"
+              },
               "ports": null
             }
           },
@@ -105,7 +106,7 @@
       };
     },
 
-    UpdateApp: function (guid, value, params) {
+    UpdateApp: function (guid, value) {
       return {
         url: '/api/cf/v2/apps/' + guid + '',
 
@@ -169,5 +170,5 @@
     }
   };
 
-
+  /* eslint-enable quote-props */
 })(this.mock = this.mock || {});

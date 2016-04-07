@@ -2,8 +2,7 @@
   'use strict';
 
   describe('cloud-foundry application model', function () {
-    var $httpBackend;
-    var applicationModel;
+    var $httpBackend, applicationModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
