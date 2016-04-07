@@ -1,13 +1,73 @@
 @import "view/applications/applications";
 
-// TODO may need to move these rule out to helio-ui-theme
+@mixin hpe-state($color, $icon, $bg-color) {
+  background-color: $bg-color;
+
+  &:first-of-type {
+    &:before {
+      @extend .helion-icon;
+      background-color: $color;
+      color: $bg-color;
+      content: $icon;
+    }
+  }
+}
+
 .action-bar {
   height: $hpe-unit-space * 3;
   line-height: $hpe-unit-space * 3;
   vertical-align: middle;
   margin-top: $hpe-unit-space;
-  padding-left: $hpe-unit-space;
+  padding-left: 0;
   padding-right: $hpe-unit-space;
+
+  .popover {
+    margin-left: 111px;
+  }
+
+  .action-target-state {
+    display: inline-block;
+    font-size: $hpe-unit-space;
+    width: $hpe-unit-space * 3;
+    height: $hpe-unit-space * 2.25;
+    line-height: 0;
+    padding: $hpe-unit-space;
+
+    &:before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: $hpe-unit-space * 3;
+      height: $hpe-unit-space * 3;
+      padding: $hpe-unit-space;
+    }
+
+    &.app-state-STARTED-PENDING {
+      @include hpe-state($white, $helion-icon-Tab, $gray);
+    }
+
+    &.app-state-STOPPED-PENDING {
+      @include hpe-state($white, $helion-icon-Halt-stop, $gray);
+    }
+
+    &.app-state--STARTED {
+      @include hpe-state($white, $helion-icon-Checkmark, $hpe-primary);
+    }
+
+    &.app-state--STOPPED {
+      @include hpe-state($white, $helion-icon-Halt-stop, $state-danger-bg);
+    }
+
+    &.app-state--ERROR {
+      @include hpe-state($state-danger-bg, $helion-icon-Critical_L, $white);
+    }
+
+    &.app-state-STALE-STARTED,
+    &.app-state-STALE-STOPPED,
+    &.app-state-STALE-ERROR {
+      @include hpe-state($state-warning-bg, $helion-icon-Alert, $white);
+    }
+  }
 
   .action-target-name {
     display: inline-block;
@@ -15,38 +75,8 @@
     margin-left: $hpe-unit-space * .75;
   }
 
-  .action-target-state {
-    color: $brand-primary;
-    display: inline-block;
-    font-size: $hpe-unit-space + 3px;
-  }
-
   .btn {
     margin-left: $hpe-unit-space / 3;
-  }
-}
-
-table.table  {
-  > thead > tr > th,
-  > tbody > tr:not([table-inline-message]) > td,
-  > tfoot > tr > td {
-
-    .icon-link {
-      color: $text-color;
-      text-decoration: none;
-
-      &:hover,
-      &:active {
-        color: $link-color;
-        text-decoration: none;
-      }
-    }
-
-    .helion-icon {
-      line-height: 0;
-      font-size: $hpe-unit-space;
-      vertical-align: middle;
-    }
   }
 }
 
@@ -71,3 +101,4 @@ table.table  {
     }
   }
 }
+

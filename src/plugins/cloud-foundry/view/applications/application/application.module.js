@@ -34,11 +34,13 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
+   * @property {string} warningMsg - warning message for application
    */
   function ApplicationController(modelManager, $stateParams) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
     this.init();
+    this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
   }
 
   angular.extend(ApplicationController.prototype, {

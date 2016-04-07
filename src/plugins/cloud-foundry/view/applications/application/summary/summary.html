@@ -20,10 +20,14 @@
         <dd class="pull-right">0 / {{ appCtrl.model.application.summary.disk_quota }} <span translate>MB</span></dd>
 
         <dt translate>STATE</dt>
-        <dd class="pull-right"></dd>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.summary.state }}
+        </dd>
 
         <dt translate>MODIFIED</dt>
-        <dd class="pull-right"></dd>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.summary.package_updated_at | date : 'M/d/yy h:mm:ss a' }}
+        </dd>
       </dl>
     </div>
     <div class="col-md-6">

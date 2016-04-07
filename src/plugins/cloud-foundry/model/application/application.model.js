@@ -27,14 +27,21 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
+   * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
+   * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @class
    */
   function Application(apiManager) {
     this.apiManager = apiManager;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.data = {};
-    this.application = {};
+    this.application = {
+      summary: {
+        state: 'LOADING'
+      }
+    };
+    this.appStateSwitchTo = '';
   }
 
   angular.extend(Application.prototype, {
@@ -110,11 +117,12 @@
      * @memberof cloud-foundry.model.application
      * @description start an application
      * @param {string} guid - the application id
-     * @returns {promise}
+     * @returns {promise} a promise object
      * @public
      */
     startApp: function (guid) {
-      this.onAppStateChange();
+      this.appStateSwitchTo = 'STARTED';
+      this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STARTED'}, {})
         .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
@@ -125,11 +133,12 @@
      * @memberof cloud-foundry.model.application
      * @description stop an application
      * @param {string} guid - the application id
-     * @returns {promise}
+     * @returns {promise} a promise object
      * @public
      */
     stopApp: function (guid) {
-      this.onAppStateChange();
+      this.appStateSwitchTo = 'STOPPED';
+      this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STOPPED'}, {})
         .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
@@ -178,8 +187,7 @@
      * @function onFiles
      * @memberof  cloud-foundry.model.application
      * @description onFiles handler at model layer
-     * @parameter {string} response the return from the api call
-     * @property data - the return data from the api call
+     * @param {string} response the return from the api call
      * @private
      * @returns {void}
      */
@@ -200,17 +208,6 @@
     },
 
     /**
-     * @function onAppStateChange
-     * @memberof  cloud-foundry.model.application
-     * @description onAppStateChange handler at model layer
-     * @private
-     * @returns {void}
-     */
-    onAppStateChange: function () {
-      this.application.summary.state = 'PENDING';
-    },
-
-    /**
      * @function onAppStateChangeSuccess
      * @memberof  cloud-foundry.model.application
      * @description onAppStateChangeSuccess handler at model layer
@@ -220,6 +217,7 @@
      */
     onAppStateChangeSuccess: function (response) {
       this.application.summary.state = response.data.entity.state;
+      this.appStateSwitchTo = '';
     },
 
     /**
@@ -230,7 +228,8 @@
      * @returns {void}
      */
     onAppStateChangeFailure: function () {
-      this.application.summary.state = 'FAILED';
+      this.application.summary.state = 'ERROR';
+      this.appStateSwitchTo = '';
     }
   });
 
