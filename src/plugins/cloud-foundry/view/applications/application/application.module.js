@@ -40,7 +40,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
     this.init();
-    this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to t he runtime.');
+    this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
   }
 
   angular.extend(ApplicationController.prototype, {
