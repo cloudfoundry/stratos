@@ -1,14 +1,14 @@
 (function () {
   "use strict";
-  
+
   angular
     .module('app.view')
     .directive('serviceRegistrationList', serviceRegistrationList);
-  
+
   serviceRegistrationList.$inject = [
     'app.basePath'
   ];
-  
+
   /**
    * @namespace app.view.serviceRegistrationList
    * @memberof app.view
@@ -22,5 +22,5 @@
       templateUrl: path + 'view/service-registration/service-registration-list/service-registration-list.html'
     };
   }
-  
+
 })();

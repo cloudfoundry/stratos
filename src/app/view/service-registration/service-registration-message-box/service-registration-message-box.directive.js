@@ -1,14 +1,14 @@
 (function () {
   "use strict";
-  
+
   angular
     .module('app.view')
     .directive('serviceRegistrationMessageBox', serviceRegistrationMessageBox);
-  
+
   serviceRegistrationMessageBox.$inject = [
     'app.basePath'
   ];
-  
+
   /**
    * @namespace app.view.serviceRegistrationMessageBox
    * @memberof app.view
@@ -22,5 +22,5 @@
       templateUrl: path + 'view/service-registration/service-registration-message-box/service-registration-message-box.html'
     };
   }
-  
+
 })();

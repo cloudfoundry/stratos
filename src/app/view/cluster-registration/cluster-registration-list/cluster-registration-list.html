@@ -1,0 +1,37 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th class="text-center registration-status" translate></th>
+    <th translate>Cluster</th>
+    <th translate>Address</th>
+    <th class="registration-actions">
+      <button class="btn btn-default"
+              translate
+              ng-click="FIXMEregister_somethingFIXME">
+        <span>Add Cluster</span>
+      </button>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="clusterInstance in clusterRegistrationCtrl.clusterInstances"
+        show-table-inline-message="{{ clusterInstance.valid === false ? clusterRegistrationCtrl.warningMsg : ''}}">
+      <td class="text-center registration-status">
+        <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+              ng-if="clusterInstance.valid"></span>
+        <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+              ng-if="clusterInstance.valid === false"></span>
+        <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-warning"
+              ng-if="clusterInstance.error"></span>
+      </td>
+      <td>{{clusterInstance.name}}</td>
+      <td>{{clusterInstance.url}}</td>
+      <td class="text-right">
+        <a class="btn btn-link btn-sm"
+           ng-click="clusterRegistrationCtrl.remove(clusterInstance)">
+          <span translate>remove</span>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>

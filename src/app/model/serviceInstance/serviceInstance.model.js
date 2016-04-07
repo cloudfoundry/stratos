@@ -79,6 +79,7 @@
       return serviceInstanceApi.list()
         .then(function (response) {
           var items = response.data.items || [];
+          // items = [];
           that.serviceInstances.length = 0;
           [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
 

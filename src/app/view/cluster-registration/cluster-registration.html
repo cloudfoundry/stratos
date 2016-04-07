@@ -1,0 +1,32 @@
+<div class="cluster-registration" ng-class="{'overlay-position': clusterRegistrationCtrl.overlay}">
+<!--<div class="cluster-registration" ng-class="{'overlay-position': true}">-->
+  <nav class="navbar navbar-fixed-top" ng-if="clusterRegistrationCtrl.overlay">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <span class="navbar-brand" translate>CNAP</span>
+      </div>
+    </div>
+  </nav>
+  <div class="container registration-content">
+    <div class="row">
+      <h2 class="page-header" translate>
+        Setup your environment
+        <span class="helion-icon helion-icon-Help pull-right"></span>
+      </h2>
+      <cluster-registration-message-box ng-if="clusterRegistrationCtrl.isEmpty()"></cluster-registration-message-box>
+      <cluster-registration-list ng-if="!clusterRegistrationCtrl.isEmpty()"></cluster-registration-list>
+    </div>
+  </div>
+  <div class="fixed-footer" ng-if="clusterRegistrationCtrl.overlay">
+    <span class="registration-notification" ng-if="clusterRegistrationCtrl.clusterInstanceModel.numValid > 0"
+      translate-n="clusterRegistrationCtrl.clusterInstanceModel.numValid"
+      translate-plural="{{clusterRegistrationCtrl.clusterInstanceModel.numValid}} clusters registered">
+      {{clusterRegistrationCtrl.clusterInstanceModel.numValid}} cluster registered
+    </span>
+    <button type="button" class="btn btn-default"
+      ng-disabled="clusterRegistrationCtrl.clusterInstanceModel.numValid === 0"
+      ng-click="clusterRegistrationCtrl.completeRegistration()" translate>
+      Done
+    </button>
+  </div>
+</div>

@@ -132,7 +132,8 @@
         this.modelManager.retrieve('app.model.serviceInstance')
           .list()
           .then(function onSuccess(data) {
-            that.showClusterRegistration = data.numAvailable === 0;
+            // that.showClusterRegistration = data.numAvailable === 0;
+            that.showClusterRegistration = true;
             that.showGlobalSpinner = false;
           });
       } else {
