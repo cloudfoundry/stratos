@@ -8,7 +8,8 @@ module.exports = {
   applicationGalleryCard: applicationGalleryCard,
 
   showApplications: showApplications,
-  showApplicationDetails: showApplicationDetails
+  showApplicationDetails: showApplicationDetails,
+  showServices: showServices(),
 
 };
 
@@ -28,3 +29,53 @@ function showApplications() {
 function showApplicationDetails(idx) {
   applicationGalleryCard(idx).click();
 }
+
+function showServices() {
+  servicesAction().click();
+}
+
+function applicationsActionsBar(){
+ return element.all(by.css('ul.nav.nav-pills.nav-stacked li a'));
+}
+
+function servicesAction(){
+  return applicationAction(1);
+}
+
+function applicationAction(idx) {
+     return applicationsActionsBar().get(idx);
+}
+
+function serviceDetailsActions(){
+  return element.all(by.css('div.service-detail-actions button'));
+}
+
+function serviceDetailsAction(idx) {
+     return serviceDetailsActions().get(idx);
+}
+
+function showServiceDetails() {
+  serviceDetailsAddAction().click();
+}
+
+function serviceDetailsAddAction(){
+  return serviceDetailsAction(1);
+}
+
+function serviceDetailsCancelAction(){
+  return serviceDetailsAction(0);
+}
+
+function applicationServiceFlyout(){
+ return element(by.css('div.flyout application-service'));
+}
+
+function serviceAddConfirm(){
+  serviceDetailsAddAction().click();
+}
+
+function serviceAddCancel(){
+  serviceDetailsCancelAction().click();
+}
+
+
