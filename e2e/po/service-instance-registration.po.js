@@ -68,6 +68,7 @@ function registrationNotification() {
 
 function loginAndConnect() {
   loginPage.login();
+  browser.driver.sleep(1000);
   connect(0);
   doneButton().click();
 }
