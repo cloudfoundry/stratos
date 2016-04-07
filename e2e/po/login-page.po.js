@@ -12,6 +12,7 @@ module.exports = {
   prevArrow: prevArrow,
 
   login: login,
+  loginAsAdmin: loginAsAdmin,
   loginButton: loginButton,
   loginFormFields: loginFormFields,
   loginPanel: loginPanel
@@ -55,4 +56,13 @@ function login() {
   fields.get(0).sendKeys('dev');
   fields.get(1).sendKeys('dev');
   loginButton().click();
+  browser.driver.sleep(1000);
+}
+
+function loginAsAdmin() {
+  var fields = loginFormFields();
+  fields.get(0).sendKeys('admin');
+  fields.get(1).sendKeys('admin');
+  loginButton().click();
+  browser.driver.sleep(1000);
 }

@@ -6,27 +6,24 @@ var loginPage = require('./po/login-page.po');
 var registration = require('./po/service-instance-registration.po');
 
 describe('Service Instance Registration', function () {
-  var registrationOverlay, serviceInstancesTable;
-
   beforeAll(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
-
     loginPage.login();
-    registrationOverlay = registration.registrationOverlay();
-    serviceInstancesTable = registration.serviceInstancesTable();
   });
 
   describe('service instances table', function () {
     it('should be displayed', function () {
-      expect(registrationOverlay.isDisplayed()).toBeTruthy();
+      expect(registration.registrationOverlay().isDisplayed()).toBeTruthy();
     });
 
     it('should show at least one service instance', function () {
+      var serviceInstancesTable = registration.serviceInstancesTable();
       expect(helpers.getTableRows(serviceInstancesTable).count()).toBeGreaterThan(0);
     });
 
     it('should show `Connect` link for each service instance', function () {
+      var serviceInstancesTable = registration.serviceInstancesTable();
       var serviceInstanceRows = helpers.getTableRows(serviceInstancesTable);
       for (var i = 0; i < serviceInstanceRows.count(); i++) {
         expect(registration.connectLink(i).isDisplayed()).toBeTruthy();
@@ -45,6 +42,7 @@ describe('Service Instance Registration', function () {
     });
 
     it('should update service instance data', function () {
+      var serviceInstancesTable = registration.serviceInstancesTable();
       expect(helpers.getTableCellAt(serviceInstancesTable, 0, 3).getText()).not.toBe('');
       expect(helpers.getTableCellAt(serviceInstancesTable, 0, 4).getText()).not.toBe('');
       expect(helpers.getTableCellAt(serviceInstancesTable, 0, 5).getText()).toBe('DISCONNECT');
@@ -62,6 +60,7 @@ describe('Service Instance Registration', function () {
 
   describe('service instance `Disconnect`', function () {
     it('should update row in table when disconnected', function () {
+      var serviceInstancesTable = registration.serviceInstancesTable();
       registration.disconnect(0);
 
       expect(helpers.getTableCellAt(serviceInstancesTable, 0, 3).getText()).toBe('');
@@ -89,16 +88,15 @@ describe('Service Instance Registration', function () {
       registration.completeRegistration();
       browser.driver.sleep(1000);
 
-      expect(registrationOverlay.isPresent()).toBeFalsy();
+      expect(registration.registrationOverlay().isPresent()).toBeFalsy();
       expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/workspaces');
     });
 
     it('should go directly to applications view on logout and login', function () {
       navbar.logout();
       loginPage.login();
-      browser.driver.sleep(1000);
 
-      expect(registrationOverlay.isPresent()).toBeFalsy();
+      expect(registration.registrationOverlay().isPresent()).toBeFalsy();
       expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/workspaces');
     });
   });

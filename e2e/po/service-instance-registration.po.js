@@ -68,7 +68,9 @@ function registrationNotification() {
 
 function loginAndConnect() {
   loginPage.login();
-  browser.driver.sleep(1000);
+  browser.wait(function () {
+    return element(by.css('service-registration')).isDisplayed();
+  }, 10000);
   connect(0);
   doneButton().click();
 }

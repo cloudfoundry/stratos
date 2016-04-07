@@ -178,9 +178,6 @@
         expect(applicationCtrl.serverErrorOnLogin).toBe(false);
         expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
-
     });
-
   });
-
 })();
