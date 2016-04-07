@@ -107,9 +107,12 @@
      * @public
      */
     getAppSummary: function (guid) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetAppSummary(guid)
-        .then(this.onSummary.bind(this));
+        .then(function (response) {
+          that.onSummary(response);
+        });
     },
 
     /**
@@ -121,11 +124,19 @@
      * @public
      */
     startApp: function (guid) {
+      var that = this;
       this.appStateSwitchTo = 'STARTED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STARTED'}, {})
-        .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
+        .then(
+          function (response) {
+            that.onAppStateChangeSuccess(response);
+          },
+          function () {
+            that.onAppStateChangeFailurebind();
+          }
+        );
     },
 
     /**
@@ -137,11 +148,19 @@
      * @public
      */
     stopApp: function (guid) {
+      var that = this;
       this.appStateSwitchTo = 'STOPPED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STOPPED'}, {})
-        .then(this.onAppStateChangeSuccess.bind(this), this.onAppStateChangeFailure.bind(this));
+        .then(
+          function (response) {
+            that.onAppStateChangeSuccess(response);
+          },
+          function () {
+            that.onAppStateChangeFailurebind();
+          }
+        );
     },
 
     /**
