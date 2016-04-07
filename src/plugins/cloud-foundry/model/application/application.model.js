@@ -29,7 +29,7 @@
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
-   * @property {string} appState - the state of currently focused application is switching to.
+   * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @class
    */
   function Application(apiManager) {
@@ -41,7 +41,7 @@
         state: 'LOADING'
       }
     };
-    this.appState = '';
+    this.appStateSwitchTo = '';
   }
 
   angular.extend(Application.prototype, {
@@ -121,7 +121,7 @@
      * @public
      */
     startApp: function (guid) {
-      this.appState = 'STARTED';
+      this.appStateSwitchTo = 'STARTED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STARTED'}, {})
@@ -137,7 +137,7 @@
      * @public
      */
     stopApp: function (guid) {
-      this.appState = 'STOPPED';
+      this.appStateSwitchTo = 'STOPPED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STOPPED'}, {})
@@ -217,7 +217,7 @@
      */
     onAppStateChangeSuccess: function (response) {
       this.application.summary.state = response.data.entity.state;
-      this.appState = '';
+      this.appStateSwitchTo = '';
     },
 
     /**
@@ -229,7 +229,7 @@
      */
     onAppStateChangeFailure: function () {
       this.application.summary.state = 'ERROR';
-      this.appState = '';
+      this.appStateSwitchTo = '';
     }
   });
 

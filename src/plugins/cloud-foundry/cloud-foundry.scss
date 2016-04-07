@@ -43,11 +43,11 @@
       padding: $hpe-unit-space;
     }
 
-    &.app-state-PENDING-STARTED {
+    &.app-state-STARTED-PENDING {
       @include hpe-state($white, $helion-icon-Tab, $gray);
     }
 
-    &.app-state-PENDING-STOPPED {
+    &.app-state-STOPPED-PENDING {
       @include hpe-state($white, $helion-icon-Halt-stop, $gray);
     }
 
@@ -59,13 +59,13 @@
       @include hpe-state($white, $helion-icon-Halt-stop, $state-danger-bg);
     }
 
-    &.app-state-ERROR {
+    &.app-state--ERROR {
       @include hpe-state($state-danger-bg, $helion-icon-Critical_L, $white);
     }
 
-    &.app-state-WARNING-STARTED,
-    &.app-state-WARNING-STOPPED,
-    &.app-state-WARNING-ERROR {
+    &.app-state-STALE-STARTED,
+    &.app-state-STALE-STOPPED,
+    &.app-state-STALE-ERROR {
       @include hpe-state($state-warning-bg, $helion-icon-Alert, $white);
     }
   }

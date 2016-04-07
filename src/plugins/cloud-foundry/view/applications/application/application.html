@@ -1,7 +1,7 @@
 <div class="action-bar app-actions-bar panel panel-default col-md-12">
   <span class="action-target-state pull-left"
-    ng-class="'app-state-' + appCtrl.model.appState + '-' + appCtrl.model.application.summary.state"
-    uib-popover="{{ appCtrl.model.appState === 'WARNING' ? appCtrl.worningMsg : '' }} "
+    ng-class="'app-state-' + appCtrl.model.appStateSwitchTo + '-' + appCtrl.model.application.summary.state"
+    uib-popover="{{ appCtrl.model.appStateSwitchTo==='STALE' ? appCtrl.warningMsg : '' }} "
     ng-attr-popover-trigger="mouseenter" popover-placement="bottom">
   </span>
   <span class="action-target-name pull-left">
@@ -12,20 +12,20 @@
     <span class="btn-group">
       <button class="btn btn-default btn-secondary"
         translate
-        ng-disabled="appCtrl.model.appState==='PENDING'"
+        ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
         ng-click="appCtrl.model.restartApp(appCtrl.id)">
         Restart
       </button>
       <button class="btn btn-default btn-secondary"
         translate
-        ng-disabled="appCtrl.model.appState==='PENDING' || appCtrl.model.application.summary.state==='STOPPED'"
+        ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STOPPED'"
         ng-click="appCtrl.model.stopApp(appCtrl.id)">
         Stop
       </button>
     </span>
     <button class="btn btn-default"
       translate
-      ng-disabled="appCtrl.model.appState==='PENDING' || appCtrl.model.application.summary.state==='STARTED'"
+      ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STARTED'"
       ng-click="appCtrl.model.startApp(appCtrl.id)">
       Launch App
     </button>
