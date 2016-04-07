@@ -22,11 +22,15 @@
   padding-left: 0;
   padding-right: $hpe-unit-space;
 
+  .popover {
+    margin-left: 111px;
+  }
+
   .action-target-state {
     display: inline-block;
     font-size: $hpe-unit-space;
     width: $hpe-unit-space * 3;
-    height: $hpe-unit-space * 3;
+    height: $hpe-unit-space * 2.25;
     line-height: 0;
     padding: $hpe-unit-space;
 
@@ -39,27 +43,29 @@
       padding: $hpe-unit-space;
     }
 
-    &.app-state-STARTED_PENDING {
+    &.app-state-PENDING-STARTED {
       @include hpe-state($white, $helion-icon-Tab, $gray);
     }
 
-    &.app-state-STOPPED_PENDING {
+    &.app-state-PENDING-STOPPED {
       @include hpe-state($white, $helion-icon-Halt-stop, $gray);
     }
 
-    &.app-state-_STARTED {
+    &.app-state--STARTED {
       @include hpe-state($white, $helion-icon-Checkmark, $hpe-primary);
     }
 
-    &.app-state-_STOPPED {
+    &.app-state--STOPPED {
       @include hpe-state($white, $helion-icon-Halt-stop, $state-danger-bg);
     }
 
-    &.app-state-_FAILED {
+    &.app-state-ERROR {
       @include hpe-state($state-danger-bg, $helion-icon-Critical_L, $white);
     }
 
-    &.app-state-WARNING {
+    &.app-state-WARNING-STARTED,
+    &.app-state-WARNING-STOPPED,
+    &.app-state-WARNING-ERROR {
       @include hpe-state($state-warning-bg, $helion-icon-Alert, $white);
     }
   }
@@ -120,3 +126,4 @@ table.table  {
     }
   }
 }
+
