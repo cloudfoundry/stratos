@@ -12,5 +12,4 @@
       templateUrl: 'plugins/cloud-foundry/view/applications/application/services/service/service.html'
     };
   }
-
 })();
