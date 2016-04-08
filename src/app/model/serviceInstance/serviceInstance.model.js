@@ -57,19 +57,17 @@
      * @function disconnect
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Remove service instance
-     * @param {number} id - the ID of the service instance to remove
+     * @param {app.model.serviceInstance} serviceInstance - the service instance to remove
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    remove: function (id) {
+    remove: function (serviceInstance) {
       var that = this;
-      
+
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
-      return serviceInstanceApi.remove(id)
+      return serviceInstanceApi.remove(serviceInstance.id)
         .then(function () {
-          _.remove(that.serviceInstances, function(serviceInstance) {
-            return serviceInstance.id === id;
-          });
+          _.pull(that.serviceInstances, serviceInstance);
         });
     },
 

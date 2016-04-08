@@ -66,10 +66,6 @@
   }
 
   angular.extend(ApplicationController.prototype, {
-    hideClusterRegistration: function () {
-      this.showClusterRegistration = false;
-    },
-
     /**
      * @function verifySession
      * @memberof app.view.application.ApplicationController
