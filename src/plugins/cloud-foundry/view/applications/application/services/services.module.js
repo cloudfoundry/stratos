@@ -60,6 +60,13 @@
     showServiceDetail: function(service) {
       this.currentService = service;
       this.flyoutActive = true;
+    },
+    addService: function(){
+      //TBD Addservice stuff
+      this.flyoutActive = false;
+    },
+    cancelAddService: function() {
+      this.flyoutActive = false;
     }
   });
 

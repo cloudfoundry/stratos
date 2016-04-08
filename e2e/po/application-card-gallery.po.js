@@ -9,7 +9,11 @@ module.exports = {
 
   showApplications: showApplications,
   showApplicationDetails: showApplicationDetails,
-  showServices: showServices(),
+  showServices: showServices,
+  applicationServiceFlyout: applicationServiceFlyout,
+  showServiceDetails: showServiceDetails,
+  serviceAddConfirm: serviceAddConfirm,
+  servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
 
 };
 
@@ -46,36 +50,42 @@ function applicationAction(idx) {
      return applicationsActionsBar().get(idx);
 }
 
-function serviceDetailsActions(){
+function servicePanelsAddServiceButtons() {
+  return element.all(by.css('div.service-panel div.service-actions button'));
+}
+
+function servicePanelsAddServiceButton(idx){
+  return servicePanelsAddServiceButtons().get(idx);
+}
+
+function serviceDetailsActions() {
   return element.all(by.css('div.service-detail-actions button'));
 }
 
 function serviceDetailsAction(idx) {
-     return serviceDetailsActions().get(idx);
+  return serviceDetailsActions().get(idx);
 }
 
 function showServiceDetails() {
-  serviceDetailsAddAction().click();
+  servicePanelsAddServiceButton(0).click();
 }
 
-function serviceDetailsAddAction(){
+function serviceDetailsAddAction() {
   return serviceDetailsAction(1);
 }
 
-function serviceDetailsCancelAction(){
+function serviceDetailsCancelAction() {
   return serviceDetailsAction(0);
 }
 
-function applicationServiceFlyout(){
+function applicationServiceFlyout() {
  return element(by.css('div.flyout application-service'));
 }
 
-function serviceAddConfirm(){
+function serviceAddConfirm() {
   serviceDetailsAddAction().click();
 }
 
-function serviceAddCancel(){
+function serviceAddCancel() {
   serviceDetailsCancelAction().click();
 }
-
-

@@ -2,7 +2,7 @@
 
 exports.config = {
 
-  specs: ['../e2e/**/*.spec.js'],
+  specs: ['../e2e/**/applications-service*.spec.js'],
 
   framework: 'jasmine2',
 
