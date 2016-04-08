@@ -87,8 +87,8 @@
 
     it('should DELETE correct service instance on remove()', function () {
       $httpBackend.expectDELETE('/api/service-instances/1').respond(200, '');
-      var serviceInstance = { id: 1, name: 'cluster1', url:' cluster1_url' };
-      serviceInstance.remove(serviceInstance);
+      var mockInstance = { id: 1, name: 'cluster1', url:' cluster1_url' };
+      serviceInstance.remove(mockInstance);
       $httpBackend.flush();
     });
   });
