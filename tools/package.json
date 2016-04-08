@@ -10,7 +10,8 @@
     "pretest": "npm run update-webdriver",
     "test": "karma start karma.conf.js --single-run",
     "update-webdriver": "webdriver-manager update",
-    "watch": "gulp watch"
+    "watch": "gulp watch",
+    "watch:test": "karma start karma.conf.js"
   },
   "author": "",
   "license": "ISC",

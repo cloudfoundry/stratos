@@ -19,9 +19,9 @@ module.exports = function (config) {
       'lib/angular-mocks/angular-mocks.js',
 
       'config.js',
+      'plugins/cloud-foundry/plugin.config.js',
 
-      'lib/helion-ui-framework/dist/**/*.html',
-      {
+      'lib/helion-ui-framework/dist/**/*.html', {
         pattern: 'lib/helion-ui-theme/dist/images/*.png',
         watched: false,
         included: false,
@@ -66,7 +66,9 @@ module.exports = function (config) {
     preprocessors: {
       'lib/helion-ui-framework/dist/**/*.html': ['ng-html2js'],
       'app/**/*.html': ['ng-html2js'],
-      'app/**/!(*.mock|*.spec).js': ['coverage']
+      'app/**/!(*.mock|*.spec).js': ['coverage'],
+      'plugins/**/*.html': ['ng-html2js'],
+      'plugins/**/!(*.mock|*.spec).js': ['coverage']
     },
 
     proxies: {
