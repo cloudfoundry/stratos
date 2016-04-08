@@ -77,5 +77,3 @@ function serviceAddConfirm(){
 function serviceAddCancel(){
   serviceDetailsCancelAction().click();
 }
-
-
