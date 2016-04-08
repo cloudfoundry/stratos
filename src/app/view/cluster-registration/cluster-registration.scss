@@ -1,0 +1,23 @@
+@import "add-cluster-form/add-cluster-form";
+
+.cluster-registration {
+  display: block;
+
+  &.overlay-position {
+    .registration-content {
+      padding: $page-header-height 40px 80px;
+    }
+  }
+
+  .navbar {
+    color: $page-header-fg;
+    background: $page-header-bg;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    .navbar-brand {
+      font-size: 24pt;
+      font-weight: $hpe-font-weight-semibold;
+    }
+  }
+}
