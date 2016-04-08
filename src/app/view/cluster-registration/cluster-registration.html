@@ -17,12 +17,7 @@
     </div>
   </div>
   <div class="fixed-footer" ng-if="clusterRegistrationCtrl.overlay">
-    <span class="registration-notification" ng-if="clusterRegistrationCtrl.clusterInstanceModel.numValid > 0"
-      translate-n="clusterRegistrationCtrl.clusterInstanceModel.numValid"
-      translate-plural="{{clusterRegistrationCtrl.clusterInstanceModel.numValid}} clusters registered">
-      {{clusterRegistrationCtrl.clusterInstanceModel.numValid}} cluster registered
-    </span>
-    <button type="button" class="btn btn-default"
+    <button type="button" class="btn btn-primary"
             ng-disabled="clusterRegistrationCtrl.clusterInstances.length === 0"
             ng-click="applicationCtrl.showClusterRegistration = false" translate>
       Done
