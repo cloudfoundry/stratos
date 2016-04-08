@@ -12,6 +12,15 @@ import (
 	"github.com/labstack/echo"
 )
 
+type UAAResponse struct {
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	Scope        string `json:"scope"`
+	JTI          string `json:"jti"`
+}
+
 func (p *portalProxy) login(c echo.Context) error {
 	return nil
 }
@@ -26,8 +35,6 @@ func getUAAToken(username, password, authEndpoint, client, clientSecret string) 
 	body.Set("username", username)
 	body.Set("password", password)
 	body.Set("response_type", "token")
-	//body.Set("client", client)
-	//body.Set("client_secret", clientSecret)
 
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
@@ -35,6 +42,7 @@ func getUAAToken(username, password, authEndpoint, client, clientSecret string) 
 	}
 
 	req.SetBasicAuth(client, clientSecret)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := httpClient.Do(req)
 	if err != nil {
@@ -55,13 +63,4 @@ func getUAAToken(username, password, authEndpoint, client, clientSecret string) 
 	}
 
 	return &response, nil
-}
-
-type UAAResponse struct {
-	AccessToken  string `json:"access_token"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	Scope        string `json:"scope"`
-	JTI          string `json:"jti"`
 }
