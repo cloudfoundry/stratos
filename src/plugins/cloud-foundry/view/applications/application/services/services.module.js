@@ -61,7 +61,7 @@
       this.currentService = service;
       this.flyoutActive = true;
     },
-    addService: function(){
+    addService: function() {
       //TBD Addservice stuff
       this.flyoutActive = false;
     },
