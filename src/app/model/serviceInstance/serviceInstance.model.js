@@ -62,8 +62,15 @@
      * @public
      */
     remove: function (id) {
+      var that = this;
+      
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
-      return serviceInstanceApi.remove(id);
+      return serviceInstanceApi.remove(id)
+        .then(function () {
+          _.remove(that.serviceInstances, function(serviceInstance) {
+            return serviceInstance.id === id;
+          });
+        });
     },
 
     /**
@@ -79,7 +86,6 @@
       return serviceInstanceApi.list()
         .then(function (response) {
           var items = response.data.items || [];
-          // items = [];
           that.serviceInstances.length = 0;
           [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
 

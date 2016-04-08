@@ -1,6 +1,12 @@
 <div class="add-cluster-form">
   <h2 translate>Register Cluster</h2>
   <p translate>Enter the cluster API endpoint and name</p>
+
+  <p translate>Because this is a dev environment, the valid samples you're likely looking for are:
+    "api.15.126.233.29.xip.io"  >  "HPE Cloud Foundry_01"
+    "api.12.163.29.3.xip.io"    >  "HPE Cloud Foundry_02"
+    "api.15.13.32.22.xip.io"    >  "HPE Cloud Foundry_03"</p>
+
   <form name="addClusterFormCtrl.addClusterForm" ng-submit="addClusterFormCtrl.addCluster()">
     <div class="form-group" focusable-input>
       <label class="control-label" translate>Cluster Address</label>

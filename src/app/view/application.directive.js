@@ -66,6 +66,10 @@
   }
 
   angular.extend(ApplicationController.prototype, {
+    hideClusterRegistration: function () {
+      this.showClusterRegistration = false;
+    },
+
     /**
      * @function verifySession
      * @memberof app.view.application.ApplicationController
@@ -132,8 +136,7 @@
         this.modelManager.retrieve('app.model.serviceInstance')
           .list()
           .then(function onSuccess(data) {
-            // that.showClusterRegistration = data.numAvailable === 0;
-            that.showClusterRegistration = true;
+            that.showClusterRegistration = data.numAvailable === 0;
             that.showGlobalSpinner = false;
           });
       } else {
