@@ -134,7 +134,7 @@
             that.onAppStateChangeSuccess(response);
           },
           function () {
-            that.onAppStateChangeFailurebind();
+            that.onAppStateChangeFailure();
           }
         );
     },
@@ -158,7 +158,7 @@
             that.onAppStateChangeSuccess(response);
           },
           function () {
-            that.onAppStateChangeFailurebind();
+            that.onAppStateChangeFailure();
           }
         );
     },
