@@ -77,5 +77,8 @@ function serviceAddConfirm(){
 function serviceAddCancel(){
   serviceDetailsCancelAction().click();
 }
+<<<<<<< HEAD
+=======
 
 
+>>>>>>> 33ff709366d2db8265a4fce68e9e837b3733a099
