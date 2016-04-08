@@ -14,6 +14,6 @@ exports.config = {
     'platform': 'ANY',
     'chromeOptions': {
       args: ['--no-sandbox']
-    } 
+    }
   }
 };

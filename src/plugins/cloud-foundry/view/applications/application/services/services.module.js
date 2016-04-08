@@ -57,6 +57,35 @@
   }
 
   angular.extend(ApplicationServicesController.prototype, {
+    /**
+    * @name showServiceDetail
+    * @param {object} service - the service to be displaye in the panel
+    * @param {object} currentService - save the service clicked on
+    * @property {object} flyoutActive - flyout panel boolean flag for visibility
+    */
+    showServiceDetail: function(service) {
+      this.currentService = service;
+      this.flyoutActive = true;
+    },
+
+    /**
+    * @name addService
+    * @description add this.currentService to this.appModel
+    * @property {object} flyoutActive - flyout panel boolean flag for visibility
+    */
+    addService: function() {
+      //TBD Addservice stuff
+      this.flyoutActive = false;
+    },
+
+    /**
+    * @name cancelAddService
+    * @description closes the flyout Panel without adding this.currentService to this.appModel
+    * @property {object} flyoutActive - flyout panel boolean flag for visibility
+    */
+    cancelAddService: function() {
+      this.flyoutActive = false;
+    }
   });
 
 })();
