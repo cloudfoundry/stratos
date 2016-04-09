@@ -4,7 +4,7 @@ var helpers = require('./po/helpers.po');
 var galleryPage = require('./po/application-card-gallery.po');
 var registration = require('./po/service-instance-registration.po');
 
-describe('Applications - Gallery View', function () {
+xdescribe('Applications - Gallery View', function () {
   beforeAll(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
