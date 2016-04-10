@@ -5,13 +5,13 @@ var galleryPage = require('./po/application-card-gallery.po');
 var registration = require('./po/service-instance-registration.po');
 
 describe('Applications - Gallery View', function () {
-  beforeAll(function () {
+  beforeEach(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
     registration.loginAndConnect();
   });
 
-  afterAll(function () {
+  afterEach(function () {
     registration.disconnectAndLogout();
     helpers.resetDatabase();
   });
@@ -24,6 +24,7 @@ describe('Applications - Gallery View', function () {
 
   describe('on card click', function () {
     it('should show application details', function () {
+      galleryPage.showApplications();
       galleryPage.showApplicationDetails(0);
       expect(browser.getCurrentUrl()).toMatch(/summary$/);
     });

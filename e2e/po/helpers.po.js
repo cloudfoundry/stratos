@@ -26,6 +26,8 @@ module.exports = {
   getTableRowAt: getTableRowAt,
   getTableCellAt: getTableCellAt,
 
+  createSession: createSession,
+  getRequest: getRequest,
   resetDatabase: resetDatabase
 
 };
@@ -91,6 +93,19 @@ function getTableRowAt(table, rowIndex) {
 
 function getTableCellAt(table, rowIndex, colIndex) {
   return getTableRows(table).get(rowIndex).all(by.css('td')).get(colIndex);
+}
+
+function getRequest() {
+  var cookieJar = request.jar();
+  var req = request.defaults({
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    jar: cookieJar
+  });
+
+  return req;
 }
 
 /**

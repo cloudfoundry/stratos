@@ -6,14 +6,14 @@ var registration = require('./po/service-instance-registration.po');
 
 xdescribe('Applications - Gallery View', function () {
   beforeAll(function () {
-    helpers.setBrowserNormal();
-    helpers.loadApp();
-    registration.loginAndConnect();
+    // helpers.setBrowserNormal();
+    // helpers.loadApp();
+    // registration.loginAndConnect();
   });
 
   afterAll(function () {
-    registration.disconnectAndLogout();
-    helpers.resetDatabase();
+    // registration.disconnectAndLogout();
+    // helpers.resetDatabase();
   });
 
   describe("while viewing the application gallery", function(){
