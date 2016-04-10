@@ -1,5 +1,40 @@
 .service-detail-actions {
   padding-top: 20px;
-  margin: 20px 0 40px;
+  padding-right: 0px;
+  padding-left: 0px;
+  margin-left:0px;
+  margin-right:0px;
   border-top: 1px solid #eee;
+}
+
+.service-detail-header {
+  margin-top:-40px;
+}
+
+.service-detail {
+  padding-left:120px;
+  padding-right:120px;
+  margin-top: -60px;
+}
+
+.flyout-header {
+  margin-left: -120px !important;
+  margin-top: 120px !important;
+}
+
+.add-button {
+  margin-left: 10px;
+}
+
+.app-title, .app-label, .app-category {
+   text-transform:capitalize;
+}
+
+div.service-badge .service-icon {
+  padding-top:0px;
+}
+
+div.service-category h4 {
+  padding-top:0px;
+  margin-top: 0px;
 }
