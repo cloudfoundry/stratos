@@ -178,6 +178,77 @@
         expect(applicationCtrl.serverErrorOnLogin).toBe(false);
         expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
+
+      describe('onLoggedIn as admin', function () {
+        beforeEach(function () {
+          $httpBackend.when('POST', '/api/auth/login/')
+            .respond(200, { username: 'admin', scope: 'hdp3.admin' });
+        });
+
+        it('should show cluster registration if cluster count === 0', function () {
+          $httpBackend.when('GET', '/api/service-instances')
+            .respond(200, { items: [] });
+
+          applicationCtrl.login('admin', 'admin');
+          $httpBackend.flush();
+
+          expect(applicationCtrl.showClusterRegistration).toBe(true);
+          expect(applicationCtrl.showGlobalSpinner).toBe(false);
+        });
+
+        it('should not show cluster registration if cluster count > 0', function () {
+          $httpBackend.when('GET', '/api/service-instances')
+            .respond(200, { items: [{ id: 1, url: 'url', name: 'name' }] });
+
+          applicationCtrl.login('admin', 'admin');
+          $httpBackend.flush();
+
+          expect(applicationCtrl.showClusterRegistration).toBe(false);
+          expect(applicationCtrl.showGlobalSpinner).toBe(false);
+        });
+      });
+
+      describe('onLoggedIn as dev', function () {
+        beforeEach(function () {
+          $httpBackend.when('POST', '/api/auth/login/')
+            .respond(200, { username: 'dev', scope: 'hdp3.dev' });
+        });
+
+        it('should show service instance registration if first time', function () {
+          $httpBackend.when('GET', '/api/users/loggedIn').respond(200, {});
+          $httpBackend.when('POST', '/api/users').respond(200, { id: 1, username: 'dev' });
+          $httpBackend.when('GET', '/api/service-instances/user').respond(200, { items: [] });
+
+          applicationCtrl.login('dev', 'dev');
+          $httpBackend.flush();
+
+          expect(applicationCtrl.showRegistration).toBe(true);
+          expect(applicationCtrl.showGlobalSpinner).toBe(false);
+        });
+
+        it('should show service instance registration if unregistered', function () {
+          var mockUser = { id: 1, username: 'dev', registered: false };
+          $httpBackend.when('GET', '/api/users/loggedIn').respond(200, mockUser);
+          $httpBackend.when('GET', '/api/service-instances/user').respond(200, { items: [] });
+
+          applicationCtrl.login('dev', 'dev');
+          $httpBackend.flush();
+
+          expect(applicationCtrl.showRegistration).toBe(true);
+          expect(applicationCtrl.showGlobalSpinner).toBe(false);
+        });
+
+        it('should not show service instance registration if registered', function () {
+          var mockUser = { id: 1, username: 'dev', registered: true };
+          $httpBackend.when('GET', '/api/users/loggedIn').respond(200, mockUser);
+
+          applicationCtrl.login('dev', 'dev');
+          $httpBackend.flush();
+
+          expect(applicationCtrl.showRegistration).toBe(false);
+          expect(applicationCtrl.showGlobalSpinner).toBe(false);
+        });
+      });
     });
   });
 })();
