@@ -11,6 +11,7 @@ module.exports = {
   nextArrow: nextArrow,
   prevArrow: prevArrow,
 
+  enterLogin: enterLogin,
   login: login,
   loginAsAdmin: loginAsAdmin,
   loginButton: loginButton,
@@ -51,18 +52,20 @@ function contentIndicatorSquares() {
   return contentIndicator().all(by.css('li'));
 }
 
-function login() {
+function enterLogin(username, password) {
   var fields = loginFormFields();
-  fields.get(0).sendKeys('dev');
-  fields.get(1).sendKeys('dev');
+  fields.get(0).clear();
+  fields.get(1).clear();
+  fields.get(0).sendKeys(username);
+  fields.get(1).sendKeys(password);
+}
+
+function login(username, password) {
+  enterLogin(username, password);
   loginButton().click();
   browser.driver.sleep(1000);
 }
 
 function loginAsAdmin() {
-  var fields = loginFormFields();
-  fields.get(0).sendKeys('admin');
-  fields.get(1).sendKeys('admin');
-  loginButton().click();
-  browser.driver.sleep(1000);
+  login('admin', 'admin');
 }

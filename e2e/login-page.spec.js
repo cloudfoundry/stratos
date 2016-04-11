@@ -99,10 +99,7 @@ describe('Login Page', function () {
 
     it('should not allow log in with incorrect credentials', function () {
       helpers.loadApp();
-
-      var fields = loginPage.loginFormFields();
-      fields.get(0).sendKeys('badusername');
-      fields.get(1).sendKeys('badpassword');
+      loginPage.enterLogin('badusername', 'badpassword');
 
       expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
@@ -113,11 +110,7 @@ describe('Login Page', function () {
     });
 
     it('should allow log in with correct credentials', function () {
-      var fields = loginPage.loginFormFields();
-      var usernameField = fields.get(0);
-      usernameField.clear();
-      usernameField.sendKeys('dev');
-      fields.get(1).sendKeys('dev');
+      loginPage.enterLogin('dev', 'dev');
 
       expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
