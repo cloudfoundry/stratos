@@ -13,7 +13,9 @@ module.exports = {
   applicationServiceFlyout: applicationServiceFlyout,
   showServiceDetails: showServiceDetails,
   serviceAddConfirm: serviceAddConfirm,
-  servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
+  servicePanelsAddServiceButtons: servicePanelsAddServiceButtons,
+  serviceAddCancel: serviceAddCancel,
+  serviceDetailsActions: serviceDetailsActions
 
 };
 

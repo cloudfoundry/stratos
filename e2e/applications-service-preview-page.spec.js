@@ -53,13 +53,25 @@ describe('Applications - Gallery View', function () {
          beforeEach(function() {
            galleryPage.showServiceDetails();
            browser.driver.sleep(1000);
-           browser.takeScreenshot().then(function (png) {
-              writeScreenShot(png, 'exception.png');
-           });
+            browser.takeScreenshot().then(function (png) {
+              writeScreenShot(png, 'add_service.png');
+            });
          });
+
          it("shows the service preview panel", function() {
            expect(galleryPage.applicationServiceFlyout().isDisplayed()).toBe(true);
          });
+
+         it("shows an add and cancel button", function() {
+           expect(galleryPage.serviceDetailsActions().count()).toEqual(2);
+         })
+
+         xdescribe("and you click on cancel", function () {
+           it("hides the service preview panel", function() {
+            galleryPage.serviceAddCancel();
+            expect(galleryPage.applicationServiceFlyout().isDisplayed()).toBe(false);
+         });
+         })
        });
        })
     });
