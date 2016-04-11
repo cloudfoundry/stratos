@@ -16,8 +16,8 @@ module.exports = {
   servicePanelsAddServiceButtons: servicePanelsAddServiceButtons,
   serviceAddCancel: serviceAddCancel,
   serviceDetailsActions: serviceDetailsActions,
-  closeFlyout: closeFlyout
-
+  closeFlyout: closeFlyout,
+  serviceAddConfirm: serviceAddConfirm
 };
 
 function applicationGalleryCard(idx) {
