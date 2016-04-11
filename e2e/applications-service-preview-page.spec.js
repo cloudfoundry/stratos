@@ -4,28 +4,28 @@ var helpers = require('./po/helpers.po');
 var galleryPage = require('./po/application-card-gallery.po');
 var registration = require('./po/service-instance-registration.po');
 
-describe('Applications - Gallery View', function () {
-  beforeAll(function () {
+xdescribe('Applications - Gallery View', function () {
+  beforeEach(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
     registration.loginAndConnect();
   });
 
-  afterAll(function () {
+  afterEach(function () {
     registration.disconnectAndLogout();
     helpers.resetDatabase();
   });
 
-  xdescribe("while viewing the application gallery", function(){
-    beforeAll(function () {
+  describe("while viewing the application gallery", function(){
+    beforeEach(function () {
       galleryPage.showApplications();
     });
     describe('and you click a card', function () {
-     beforeAll(function () {
+     beforeEach(function () {
         galleryPage.showApplicationDetails(0);
      });
      describe('and you click on the services tab',function(){
-       beforeAll(function () {
+       beforeEach(function () {
          galleryPage.showServices();
          browser.driver.sleep(1000);
        });
@@ -36,7 +36,7 @@ describe('Applications - Gallery View', function () {
          expect(galleryPage.servicePanelsAddServiceButtons().count()).toBeGreaterThan(0);
        });
        describe("and you click on 'add service'",function() {
-         beforeAll(function() {
+         beforeEach(function() {
            galleryPage.showServiceDetails();
            browser.driver.sleep(1000);
          });
