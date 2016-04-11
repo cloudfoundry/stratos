@@ -4,19 +4,25 @@ var helpers = require('./po/helpers.po');
 var galleryPage = require('./po/application-card-gallery.po');
 var registration = require('./po/service-instance-registration.po');
 
-xdescribe('Applications - Gallery View', function () {
+describe('Applications - Gallery View', function () {
   beforeAll(function () {
-    // helpers.setBrowserNormal();
-    // helpers.loadApp();
-    // registration.loginAndConnect();
+    helpers.setBrowserNormal();
+    helpers.loadApp();
+    registration.loginAndConnect();
   });
 
   afterAll(function () {
-    // registration.disconnectAndLogout();
-    // helpers.resetDatabase();
+    registration.disconnectAndLogout();
+    helpers.resetDatabase();
   });
 
-  describe("while viewing the application gallery", function(){
+  it('should show applications as cards', function() {
+    galleryPage.showApplications();
+    expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() +'/#/cf/applications/list/gallery-view');
+  });
+
+
+  xdescribe("while viewing the application gallery", function(){
     beforeAll(function () {
       galleryPage.showApplications();
     });
