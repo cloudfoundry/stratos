@@ -9,10 +9,6 @@ describe('Login Page', function () {
     helpers.loadApp();
   });
 
-  afterAll(function () {
-    helpers.resetDatabase();
-  });
-
   describe('content', function () {
     it('should have at least one section', function () {
       loginPage.contentSections().then(function (sections) {

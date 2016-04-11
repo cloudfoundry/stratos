@@ -26,9 +26,7 @@ module.exports = {
   getTableRowAt: getTableRowAt,
   getTableCellAt: getTableCellAt,
 
-  createSession: createSession,
-  getRequest: getRequest,
-  resetDatabase: resetDatabase
+  closeFlyout: closeFlyout
 
 };
 
@@ -95,64 +93,11 @@ function getTableCellAt(table, rowIndex, colIndex) {
   return getTableRows(table).get(rowIndex).all(by.css('td')).get(colIndex);
 }
 
-function getRequest() {
-  var cookieJar = request.jar();
-  var req = request.defaults({
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    jar: cookieJar
-  });
-
-  return req;
-}
-
 /**
- * Clean up database
+ * Flyout helpers
  */
-function createSession(req, username, password) {
-  return new Promise(function (resolve, reject) {
-    var loginUrl = 'http://' + hostIp + ':3000/api/auth/login';
-    var body = {
-      username: username || 'dev',
-      password: password || 'dev'
-    };
-
-    req.post({
-      headers: {'content-type': 'application/json'},
-      url: loginUrl,
-      body: JSON.stringify(body)
-    }, function (error, response) {
-      if (!error && response.statusCode === 200) {
-        resolve();
-      } else {
-        reject(error);
-      }
-    });
-  });
-}
-
-function unregisterUser(req, jar) {
-  var removeUrl = 'http://' + hostIp + '/api/users/1';
-  req.put({
-    cookie: jar.getCookieString(hostIp),
-    headers: {'content-type': 'application/json'},
-    url: removeUrl,
-    body: JSON.stringify({registered: false})
-  });
-}
-
-function resetDatabase() {
-  var cookieJar = request.jar();
-  var req = request.defaults({
-    jar: cookieJar
-  });
-
-  createSession(req).then(function () {
-    unregisterUser(req, cookieJar);
-  }, function (err) {
-    console.log('Unable to reset the DB');
-    console.log('Error:' + err);
-  });
+function closeFlyout() {
+  element(by.css('flyout'))
+    .element(by.css('.flyout-header button.close')).click();
+  browser.driver.sleep(2000);
 }

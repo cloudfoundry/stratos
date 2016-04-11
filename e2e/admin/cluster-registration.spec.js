@@ -1,14 +1,14 @@
 'use strict';
 
-var helpers = require('./po/helpers.po');
-var loginPage = require('./po/login-page.po');
-var navbar = require('./po/navbar.po');
-var clusterRegistration = require('./po/cluster-registration.po');
-var registration = require('./po/service-instance-registration.po');
+var helpers = require('../po/helpers.po');
+var resetTo = require('../po/resets.po');
+var loginPage = require('../po/login-page.po');
+var clusterRegistration = require('../po/cluster-registration.po');
+var registration = require('../po/service-instance-registration.po');
 
 describe('Cluster Registration (ITOps)', function () {
   beforeAll(function () {
-    clusterRegistration.clearClusters();
+    resetTo.zeroClusterAdminWorkflow();
     helpers.setBrowserNormal();
     helpers.loadApp();
   });
