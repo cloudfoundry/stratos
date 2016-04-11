@@ -15,5 +15,9 @@ exports.config = {
     'chromeOptions': {
       args: ['--no-sandbox']
     }
+  },
+
+  suites: {
+    'appgallery': ['../e2e/**/applications*.spec.js']
   }
 };

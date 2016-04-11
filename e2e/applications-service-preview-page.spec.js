@@ -57,7 +57,7 @@ describe('Applications - Gallery View', function () {
               writeScreenShot(png, 'exception.png');
            });
          });
-         xit("shows the service preview panel", function() {
+         it("shows the service preview panel", function() {
            expect(galleryPage.applicationServiceFlyout().isDisplayed()).toBe(true);
          });
        });
