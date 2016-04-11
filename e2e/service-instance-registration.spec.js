@@ -9,7 +9,7 @@ describe('Service Instance Registration', function () {
   beforeAll(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
-    loginPage.login();
+    loginPage.login('dev', 'dev');
   });
 
   describe('service instances table', function () {
@@ -38,7 +38,6 @@ describe('Service Instance Registration', function () {
   describe('service instance `Connect` clicked', function () {
     beforeAll(function () {
       registration.connect(0);
-      browser.driver.sleep(1000);
     });
 
     it('should update service instance data', function () {
@@ -76,7 +75,6 @@ describe('Service Instance Registration', function () {
   describe('service instance `Disconnect`', function () {
     beforeAll(function () {
       registration.connect(0);
-      browser.driver.sleep(1000);
     });
 
     afterAll(function () {
@@ -86,7 +84,6 @@ describe('Service Instance Registration', function () {
 
     it('should show applications view when `Done` clicked', function () {
       registration.completeRegistration();
-      browser.driver.sleep(1000);
 
       expect(registration.registrationOverlay().isPresent()).toBeFalsy();
       expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/workspaces');
@@ -94,7 +91,7 @@ describe('Service Instance Registration', function () {
 
     it('should go directly to applications view on logout and login', function () {
       navbar.logout();
-      loginPage.login();
+      loginPage.login('dev', 'dev');
 
       expect(registration.registrationOverlay().isPresent()).toBeFalsy();
       expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/workspaces');

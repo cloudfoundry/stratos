@@ -46,15 +46,15 @@ function loadApp() {
 }
 
 function setBrowserNormal() {
-  browser.driver.manage().window().setSize(1024, 768);
+  browser.manage().window().setSize(1024, 768);
 }
 
 function setBrowserSmall() {
-  browser.driver.manage().window().setSize(640, 480);
+  browser.manage().window().setSize(640, 480);
 }
 
 function setBrowserWidthSmall() {
-  browser.driver.manage().window().setSize(640, 768);
+  browser.manage().window().setSize(640, 768);
 }
 
 /**
@@ -111,14 +111,18 @@ function getRequest() {
 /**
  * Clean up database
  */
-function createSession(req) {
+function createSession(req, username, password) {
   return new Promise(function (resolve, reject) {
     var loginUrl = 'http://' + hostIp + ':3000/api/auth/login';
+    var body = {
+      username: username || 'dev',
+      password: password || 'dev'
+    };
 
     req.post({
       headers: {'content-type': 'application/json'},
       url: loginUrl,
-      body: JSON.stringify({username: 'dev', password: 'dev'})
+      body: JSON.stringify(body)
     }, function (error, response) {
       if (!error && response.statusCode === 200) {
         resolve();

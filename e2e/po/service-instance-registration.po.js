@@ -67,7 +67,7 @@ function registrationNotification() {
 }
 
 function loginAndConnect() {
-  loginPage.login();
+  loginPage.login('dev', 'dev');
   browser.wait(function () {
     return element(by.css('service-registration')).isDisplayed();
   }, 10000);
