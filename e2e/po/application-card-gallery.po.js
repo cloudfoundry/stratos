@@ -15,7 +15,8 @@ module.exports = {
   serviceAddConfirm: serviceAddConfirm,
   servicePanelsAddServiceButtons: servicePanelsAddServiceButtons,
   serviceAddCancel: serviceAddCancel,
-  serviceDetailsActions: serviceDetailsActions
+  serviceDetailsActions: serviceDetailsActions,
+  closeFlyout: closeFlyout
 
 };
 
@@ -90,4 +91,12 @@ function serviceAddConfirm() {
 
 function serviceAddCancel() {
   serviceDetailsCancelAction().click();
+}
+
+function flyoutCloseButton(){
+   return element(by.css('div.flyout div.flyout-header button'));
+}
+
+function closeFlyout() {
+  flyoutCloseButton().click();
 }
