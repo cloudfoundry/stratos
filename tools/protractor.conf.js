@@ -18,7 +18,7 @@ exports.config = {
   },
 
   suites: {
-    'appgallery': ['../e2e/**/applications*.spec.js']
+    'applications': ['../e2e/**/applications*.spec.js']
   }
 
 };
