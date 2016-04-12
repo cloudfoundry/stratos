@@ -21,6 +21,11 @@ describe('Cluster Registration (ITOps)', function () {
   });
 
   describe('- add cluster form', function () {
+    it('should display a message box', function () {
+      expect(clusterRegistration.clusterMessageBox().isDisplayed()).toBeTruthy();
+      expect(clusterRegistration.clusterTable().isPresent()).toBeFalsy();
+    });
+
     it('should appear when "Add Cluster" clicked from message box', function () {
       clusterRegistration.addClusterFromMessageBox();
       expect(clusterRegistration.addClusterForm().isDisplayed()).toBeTruthy();
@@ -38,10 +43,27 @@ describe('Cluster Registration (ITOps)', function () {
 
     it('should add cluster to table and close flyout', function () {
       clusterRegistration.registerCluster();
+      expect(clusterRegistration.clusterMessageBox().isPresent()).toBeFalsy();
+      expect(clusterRegistration.clusterTable().isDisplayed()).toBeTruthy();
       expect(clusterRegistration.clusterTableRows().count()).toBe(1);
     });
 
+    it('should show a remove button', function () {
+      expect(clusterRegistration.removeClusterButton(0).isDisplayed()).toBeTruthy();
+    });
+
+    it('should show the message box after last cluster is removed', function () {
+      clusterRegistration.removeClusterFromTable(0);
+      expect(clusterRegistration.clusterMessageBox().isDisplayed()).toBeTruthy();
+      expect(clusterRegistration.clusterTable().isPresent()).toBeFalsy();
+    });
+
     it('should appear when "Add Cluster" button clicked from table', function () {
+      // Add in the cluster we previously removed.
+      clusterRegistration.addClusterFromMessageBox();
+      clusterRegistration.fillAddClusterForm('api.123.45.67.89.xip.io', 'foo');
+      clusterRegistration.registerCluster();
+
       clusterRegistration.addClusterFromTable();
       expect(clusterRegistration.addClusterForm().isDisplayed()).toBeTruthy();
     });

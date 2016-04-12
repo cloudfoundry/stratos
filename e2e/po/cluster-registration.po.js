@@ -8,10 +8,13 @@ var addClusterFormName = 'addClusterFormCtrl.addClusterForm';
 module.exports = {
 
   registrationOverlay: registrationOverlay,
+  clusterMessageBox: clusterMessageBox,
   clusterTable: clusterTable,
   clusterTableRows: clusterTableRows,
   addClusterFromMessageBox: addClusterFromMessageBox,
   addClusterFromTable: addClusterFromTable,
+  removeClusterButton: removeClusterButton,
+  removeClusterFromTable: removeClusterFromTable,
 
   addClusterForm: addClusterForm,
   addClusterFormFields: addClusterFormFields,
@@ -29,6 +32,10 @@ function registrationOverlay() {
   return element(by.id('cluster-registration-overlay'));
 }
 
+function clusterMessageBox() {
+  return registrationOverlay().element(by.css('.message-box'));
+}
+
 function clusterTable() {
   return registrationOverlay().element(by.css('cluster-registration-list'))
     .element(by.css('table'));
@@ -39,14 +46,21 @@ function clusterTableRows() {
 }
 
 function addClusterFromMessageBox() {
-  registrationOverlay().element(by.css('.message-box'))
-    .element(by.buttonText('Add Cluster')).click();
+  clusterMessageBox().element(by.buttonText('Add Cluster')).click();
   browser.driver.sleep(1000);
 }
 
 function addClusterFromTable() {
   clusterTable().element(by.buttonText('Add Cluster')).click();
   browser.driver.sleep(1000);
+}
+
+function removeClusterButton(index) {
+  return clusterTableRows().get(index).element(by.buttonText('remove'));
+}
+
+function removeClusterFromTable(index) {
+  removeClusterButton(index).click();
 }
 
 /**
@@ -129,7 +143,7 @@ function clearClusters() {
 
   return new Promise(function (resolve, reject) {
     helpers.createSession(req, 'admin', 'admin').then(function () {
-      var data  = '';
+      var data = '';
       req.get('http://' + hostIp + '/api/service-instances')
         .on('data', function (responseData) {
           data += responseData;
