@@ -8,18 +8,12 @@ import (
 	"github.com/labstack/echo/engine/standard"
 )
 
-func sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		req := c.Request().(*standard.Request).Request
-		session, _ := cookieStore.Get(req, "portal-session")
 
-		// transfering this session value to echo.Context to keep our API surface
-		// low inside our handlers. This allows us to rip out gorilla handlers later
-		if intf, ok := session.Values["user_id"]; ok {
-			if userID, ok := intf.(string); ok {
-				c.Set("user_id", userID)
-				return h(c)
-			}
+		if userID, ok := p.getSessionValue(c, "user_id"); ok {
+			c.Set("user_id", userID)
+			return h(c)
 		}
 
 		return c.NoContent(http.StatusUnauthorized)

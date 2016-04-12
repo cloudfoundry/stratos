@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/engine/standard"
 )
 
 type UAAResponse struct {
@@ -36,18 +37,36 @@ func (p *portalProxy) login(c echo.Context) error {
 		return echo.NewHTTPError(500, `{"error": "UAA call failed!"}`)
 	}
 
-	tokenInfo, err := getUserTokenInfo(strings.TrimPrefix(uaaRes.AccessToken, "bearer "))
+	accessToken := strings.TrimPrefix(uaaRes.AccessToken, "bearer ")
+	tokenInfo, err := getUserTokenInfo(accessToken)
 	if err != nil {
 		log.Printf("Bad UAA token: %v", err)
 		return echo.NewHTTPError(500, `{"error": "Bad UAA token"}`)
 	}
 
-	fmt.Println(tokenInfo)
+	sessionValues := make(map[string]interface{})
+	sessionValues["user_id"] = tokenInfo.UserGUID
+	sessionValues["exp"] = tokenInfo.TokenExpiry
+
+	if err = p.setSessionValues(c, sessionValues); err != nil {
+		return err
+	}
+
+	p.saveUAAToken("foo", tokenInfo, accessToken, uaaRes.RefreshToken)
 
 	return nil
 }
 
 func (p *portalProxy) logout(c echo.Context) error {
+
+	res := c.Response().(*standard.Response).ResponseWriter
+	cookie := &http.Cookie{
+		Name:   portalSessionName,
+		Value:  "",
+		MaxAge: -1,
+	}
+	http.SetCookie(res, cookie)
+
 	return nil
 }
 
@@ -85,4 +104,22 @@ func getUAAToken(username, password, authEndpoint, client, clientSecret string) 
 	}
 
 	return &response, nil
+}
+
+func mkTokenRecordKey(cnsiID string, userGUID string) string {
+	return fmt.Sprintf("%s:%s", cnsiID, userGUID)
+}
+
+func (p *portalProxy) saveUAAToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) error {
+	key := mkTokenRecordKey(cnsiID, u.UserGUID)
+	var tokenRecord tokenRecord
+	tokenRecord.CNSIID = cnsiID
+	tokenRecord.UserGUID = u.UserGUID
+	tokenRecord.TokenExpiry = u.TokenExpiry
+	tokenRecord.AuthToken = authTok
+	tokenRecord.RefreshToken = refreshTok
+
+	p.TokenMap[key] = tokenRecord
+
+	return nil
 }

@@ -16,8 +16,7 @@ import (
 )
 
 var (
-	cookieStore *sessions.CookieStore
-	httpClient  = http.Client{}
+	httpClient = http.Client{}
 )
 
 func main() {
@@ -34,6 +33,7 @@ func main() {
 		return
 	}
 	portalProxy.Config = portalConfig
+	portalProxy.TokenMap = make(map[string]tokenRecord)
 
 	tr := &http.Transport{}
 	if portalConfig.Dev {
@@ -62,8 +62,10 @@ func start(p *portalProxy) {
 	e.Run(standard.NewFromTLS(p.Config.TLSAddress, p.Config.TLSCertFile, p.Config.TLSCertKey))
 }
 
+// sync.RWMutex
+
 func initCookieStore(p *portalProxy) {
-	cookieStore = sessions.NewCookieStore([]byte(p.Config.CookieStoreSecret))
+	p.CookieStore = sessions.NewCookieStore([]byte(p.Config.CookieStoreSecret))
 }
 
 func registerRoutes(e *echo.Echo, p *portalProxy) {
@@ -71,7 +73,7 @@ func registerRoutes(e *echo.Echo, p *portalProxy) {
 	e.Post("/v1/auth/logout", p.logout)
 
 	group := e.Group("/v1/proxy")
-	group.Use(sessionMiddleware)
+	group.Use(p.sessionMiddleware)
 	group.Get("/hcf", hcf)
 	group.Get("/hce", hce)
 }
