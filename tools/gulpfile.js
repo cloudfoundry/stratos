@@ -163,6 +163,7 @@ gulp.task('default', function (next) {
   usePlumber = false;
   runSequence(
     'plugin',
+    'translate:compile',
     'copy:js',
     'copy:lib',
     'inject:scss',

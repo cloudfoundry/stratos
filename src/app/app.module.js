@@ -12,6 +12,15 @@
       'app.model',
       'app.view'
     ])
-    .constant('app.basePath', 'app/');
+    .constant('app.basePath', 'app/')
+    .run(setTranslationLanguage);
+
+  setTranslationLanguage.$inject = [
+    'gettextCatalog'
+  ];
+
+  function setTranslationLanguage(gettextCatalog) {
+    gettextCatalog.setCurrentLanguage('en');
+  }
 
 })();
