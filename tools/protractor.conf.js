@@ -15,5 +15,10 @@ exports.config = {
     'chromeOptions': {
       args: ['--no-sandbox']
     }
+  },
+
+  suites: {
+    'applications': ['../e2e/**/applications*.spec.js']
   }
+
 };
