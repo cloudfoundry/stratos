@@ -1,76 +1,289 @@
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
-"Language-Team: \n"
-"MIME-Version: 1.0\n"
-"X-Generator: Poedit 1.8.7\n"
 "Last-Translator: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language-Team: \n"
 "Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: plugins/cloud-foundry/cloud-foundry.module.js:46
+#: view/service-registration/service-registration.html:59
+msgid ""
+"{{serviceRegistrationCtrl.serviceInstanceModel.numValid}} cluster registered"
+msgid_plural ""
+"{{serviceRegistrationCtrl.serviceInstanceModel.numValid}} clusters registered"
+msgstr[0] ""
+"{{serviceRegistrationCtrl.serviceInstanceModel.numValid}} cluster registered"
+msgstr[1] ""
+"{{serviceRegistrationCtrl.serviceInstanceModel.numValid}} clusters registered"
+
+#: view/page-footer/page-footer.html:6
+msgid "| &copy; 2016 Hewlett Packard Enterprise Company, L.P."
+msgstr "| &copy; 2016 Hewlett Packard Enterprise Company, L.P."
+
+#: view/login-page/login-form/login-form.html:38
+msgid ""
+"A server error occurred when attempting to log you in. Please try again. If "
+"this error persists, please contact the administrator."
+msgstr ""
+"A server error occurred when attempting to log you in. Please try again. If "
+"this error persists, please contact the administrator."
+
+#: view/navbar/avatar/account-actions/account-actions.html:16
+msgid "Account Settings"
+msgstr "Account Settings"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:93
+msgid "Actions"
+msgstr "Actions"
+
+#: cloud-foundry/view/applications/application/services/service/service.html:39
+msgid "Add"
+msgstr "Add"
+
+#: view/cluster-registration/cluster-registration-list/cluster-registration-list.html:8
+#: view/cluster-registration/cluster-registration-message-box/cluster-registration-message-box.html:5
+msgid "Add Cluster"
+msgstr "Add Cluster"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:111
+msgid "Add instances"
+msgstr "Add instances"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:85
+msgid "Add routes"
+msgstr "Add routes"
+
+#: cloud-foundry/view/applications/application/services/services.html:30
+msgid "Add Service"
+msgstr "Add Service"
+
+#: cloud-foundry/view/applications/application/services/service/service.html:5
+msgid ""
+"Add Service to {{ ::applicationServicesCtrl.appModel.application.summary."
+"name}}"
+msgstr ""
+"Add Service to {{ ::applicationServicesCtrl.appModel.application.summary."
+"name}}"
+
+#: view/cluster-registration/cluster-registration-list/cluster-registration-list.html:6
+msgid "Address"
+msgstr "Address"
+
+#: plugins/cloud-foundry/cloud-foundry.module.js:45
 msgid "Applications"
 msgstr "Applications"
 
-#: view/login-page/login-page.html:42
+#: cloud-foundry/view/applications/application/services/services.html:22
+msgid "Attached"
+msgstr "Attached"
+
+#: view/login-page/login-form/login-form.html:28
+msgid "Authenticating Credentials"
+msgstr "Authenticating Credentials"
+
+#: app/view/service-registration/service-registration.directive.js:51
+msgid "Authentication failed, please try reconnect."
+msgstr "Authentication failed, please try reconnect."
+
+#: view/cluster-registration/cluster-registration-message-box/cluster-registration-message-box.html:2
 msgid ""
-"Built for Enterprise applications, Stratos has open source Cloud Foundry as "
-"a core component and adds support for things that Enterprise operations "
-"teams need most such as resiliency, ease of management, and ease of install. "
-"It also provides additional capabilities for developers such as a continuous "
+"Before you get started with CNAP, you will have to register clusters to see "
+"what apps you have access to."
+msgstr ""
+"Before you get started with CNAP, you will have to register clusters to see "
+"what apps you have access to."
+
+#: view/service-registration/service-registration.html:15
+msgid ""
+"Before you get started with CNAP, you will have to register into services to "
+"see what apps you have access to."
+msgstr ""
+"Before you get started with CNAP, you will have to register into services to "
+"see what apps you have access to."
+
+#: cloud-foundry/view/applications/application/summary/summary.html:35
+msgid "BUILDPACK"
+msgstr "BUILDPACK"
+
+#: view/login-page/login-page.html:38
+msgid ""
+"Built for Enterprise applications, CNAP has open source Cloud Foundry as a "
+"core component and adds support for things that Enterprise operations teams "
+"need most such as resiliency, ease of management, and ease of install. It "
+"also provides additional capabilities for developers such as a continuous "
 "integration and deployment service that automates build, test, and "
 "deployment actions."
 msgstr ""
-"Built for Enterprise applications, Stratos has open source Cloud Foundry as "
-"a core component and adds support for things that Enterprise operations "
-"teams need most such as resiliency, ease of management, and ease of install. "
-"It also provides additional capabilities for developers such as a continuous "
+"Built for Enterprise applications, CNAP has open source Cloud Foundry as a "
+"core component and adds support for things that Enterprise operations teams "
+"need most such as resiliency, ease of management, and ease of install. It "
+"also provides additional capabilities for developers such as a continuous "
 "integration and deployment service that automates build, test, and "
 "deployment actions."
 
-#: view/login-page/login-page.html:41
+#: cloud-foundry/view/applications/application/services/service/service.html:37
+#: view/cluster-registration/add-cluster-form/add-cluster-form.html:17
+msgid "Cancel"
+msgstr "Cancel"
+
+#: cloud-foundry/view/applications/application/services/services.html:20
+msgid "Category"
+msgstr "Category"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:41
+msgid "CF LOGIN"
+msgstr "CF LOGIN"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:38
+msgid "CF TARGET"
+msgstr "CF TARGET"
+
+#: view/cluster-registration/cluster-registration-list/cluster-registration-list.html:5
+msgid "Cluster"
+msgstr "Cluster"
+
+#: view/cluster-registration/add-cluster-form/add-cluster-form.html:7
+msgid "Cluster Address"
+msgstr "Cluster Address"
+
+#: view/cluster-registration/add-cluster-form/add-cluster-form.html:13
+msgid "Cluster Name"
+msgstr "Cluster Name"
+
+#: view/cluster-registration/cluster-registration.html:5
+#: view/login-page/login-form/login-form.html:3
+#: view/login-page/login-page.html:12 view/navbar/navbar.html:15
+#: view/page-footer/page-footer.html:5
+#: view/service-registration/service-registration.html:5
+msgid "CNAP"
+msgstr "CNAP"
+
+#: view/login-page/login-page.html:13
+msgid ""
+"CNAP tag line: discovering, composing, developing and managing Cloud Native "
+"workloads which are hosted in a myriad of: public, managed and private cloud/"
+"compute providers."
+msgstr ""
+"CNAP tag line: discovering, composing, developing and managing Cloud Native "
+"workloads which are hosted in a myriad of: public, managed and private cloud/"
+"compute providers."
+
+#: view/service-registration/service-registration.html:48
+msgid "Connect"
+msgstr "Connect"
+
+#: plugins/cloud-foundry/view/applications/application/services/services.module.js:41
+msgid "Detach"
+msgstr "Detach"
+
+#: view/login-page/login-page.html:37
 msgid "Develop"
 msgstr "Develop"
 
-#: view/login-page/login-page.html:55
+#: view/service-registration/service-registration.html:50
+msgid "Disconnect"
+msgstr "Disconnect"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:19
+msgid "DISK QUOTA"
+msgstr "DISK QUOTA"
+
+#: view/cluster-registration/cluster-registration.html:20
+#: view/service-registration/service-registration.html:65
+msgid "Done"
+msgstr "Done"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:6
+msgid "Edit"
+msgstr "Edit"
+
+#: view/cluster-registration/add-cluster-form/add-cluster-form.html:3
+msgid "Enter the cluster API endpoint and name"
+msgstr "Enter the cluster API endpoint and name"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:63
+msgid "ENV.VARIABLES"
+msgstr "ENV.VARIABLES"
+
+#: view/login-page/login-page.html:51
 msgid "Getting Started"
 msgstr "Getting Started"
 
-#: plugins/cloud-foundry/cloud-foundry.module.js:44
-msgid "Hosts"
-msgstr "Hosts"
+#: view/navbar/avatar/account-actions/account-actions.html:25
+msgid "Help"
+msgstr "Help"
 
-#: view/login-page/login-form/login-form.html:1
-#: view/login-page/login-page.html:16 view/navbar/navbar.html:15
-msgid "HPE Helion Stratos"
-msgstr "HPE Helion Stratos"
+#: cloud-foundry/view/applications/application/summary/summary.html:118
+msgid "Index"
+msgstr "Index"
 
-#: view/login-page/login-page.html:32 view/login-page/login-page.html:46
-#: view/login-page/login-page.html:60
+#: cloud-foundry/view/applications/application/summary/summary.html:108
+msgid "Instances"
+msgstr "Instances"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:16
+msgid "INSTANCES"
+msgstr "INSTANCES"
+
+#: cloud-foundry/view/applications/application/application.html:26
+msgid "Launch App"
+msgstr "Launch App"
+
+#: view/login-page/login-page.html:28 view/login-page/login-page.html:42
+#: view/login-page/login-page.html:56
 msgid "Learn More"
 msgstr "Learn More"
 
-#: view/login-page/login-page.html:27
+#: view/login-page/login-page.html:23
 msgid "Learning"
 msgstr "Learning"
 
-#: view/login-page/login-form/login-form.html:24
+#: view/login-page/login-form/login-form.html:21
 msgid "Login"
 msgstr "Login"
 
-#: plugins/cloud-foundry/cloud-foundry.module.js:45
-msgid "Organizations"
-msgstr "Organizations"
+#: cloud-foundry/view/applications/application/summary/summary.html:53
+#: plugins/cloud-foundry/view/applications/application/services/services.module.js:49
+msgid "Manage Services"
+msgstr "Manage Services"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:14
+#: cloud-foundry/view/applications/application/summary/summary.html:20
+msgid "MB"
+msgstr "MB"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:13
+msgid "MEMORY UTILIZATION"
+msgstr "MEMORY UTILIZATION"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:27
+msgid "MODIFIED"
+msgstr "MODIFIED"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:60
+#: view/service-registration/service-registration.html:22
+msgid "Name"
+msgstr "Name"
 
 #: view/login-page/login-form/login-form.html:13
 msgid "Password"
 msgstr "Password"
 
-#: view/login-page/login-page.html:28
+#: cloud-foundry/view/applications/application/summary/summary.html:62
+msgid "Plan"
+msgstr "Plan"
+
+#: view/page-footer/page-footer.html:11
+msgid "Privacy"
+msgstr "Privacy"
+
+#: view/login-page/login-page.html:24
 msgid ""
 "Read through these guides to understand fundamental concepts behind Helion "
 "Development Platform. You’ll learn everything you need to know in order to "
@@ -82,25 +295,110 @@ msgstr ""
 "deploy your first app. You can also dig into the details of each technology "
 "stack to learn how your app goes from your development machine to your users."
 
-#: plugins/cloud-foundry/cloud-foundry.module.js:47
+#: view/service-registration/service-registration.html:47
+msgid "Reconnect"
+msgstr "Reconnect"
+
+#: view/cluster-registration/add-cluster-form/add-cluster-form.html:19
+msgid "Register"
+msgstr "Register"
+
+#: view/cluster-registration/add-cluster-form/add-cluster-form.html:2
+msgid "Register Cluster"
+msgstr "Register Cluster"
+
+#: view/cluster-registration/cluster-registration-list/cluster-registration-list.html:30
+msgid "remove"
+msgstr "remove"
+
+#: view/page-footer/page-footer.html:12
+msgid "Report Bug"
+msgstr "Report Bug"
+
+#: cloud-foundry/view/applications/application/application.html:13
+msgid "Restart"
+msgstr "Restart"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:92
+msgid "Route"
+msgstr "Route"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:82
+msgid "Routes"
+msgstr "Routes"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:61
+msgid "Service"
+msgstr "Service"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:50
+msgid "Service Instances"
+msgstr "Service Instances"
+
+#: cloud-foundry/view/applications/application/application.html:42
 msgid "Services"
 msgstr "Services"
 
-#: view/login-page/login-page.html:65
-msgid "Stratos | &copy; 2015 Hewlett Packard Enterprise Company, L.P."
-msgstr "Stratos | &copy; 2015 Hewlett Packard Enterprise Company, L.P."
+#: view/service-registration/service-registration.html:12
+msgid "Setup your account"
+msgstr "Setup your account"
 
-#: view/login-page/login-page.html:17
+#: view/cluster-registration/cluster-registration.html:12
+msgid "Setup your environment"
+msgstr "Setup your environment"
+
+#: view/navbar/avatar/account-actions/account-actions.html:35
+msgid "Sign Out"
+msgstr "Sign Out"
+
+#: view/navbar/avatar/account-actions/account-actions.html:4
+msgid "Signed in as:"
+msgstr "Signed in as:"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:22
+msgid "STATE"
+msgstr "STATE"
+
+#: cloud-foundry/view/applications/application/summary/summary.html:119
+msgid "Status"
+msgstr "Status"
+
+#: cloud-foundry/view/applications/application/application.html:19
+msgid "Stop"
+msgstr "Stop"
+
+#: cloud-foundry/view/applications/application/application.html:37
+#: cloud-foundry/view/applications/application/summary/summary.html:3
+msgid "Summary"
+msgstr "Summary"
+
+#: view/page-footer/page-footer.html:10
+msgid "Terms of use"
+msgstr "Terms of use"
+
+#: plugins/cloud-foundry/view/applications/application/application.module.js:43
 msgid ""
-"Stratos tag line: discovering, composing, developing and managing Cloud "
-"Native workloads which are hosted in a myriad of: public, managed and "
-"private cloud/compute providers."
+"The application needs to be restarted for highlighted variables to be added "
+"to the runtime."
 msgstr ""
-"Stratos tag line: discovering, composing, developing and managing Cloud "
-"Native workloads which are hosted in a myriad of: public, managed and "
-"private cloud/compute providers."
+"The application needs to be restarted for highlighted variables to be added "
+"to the runtime."
 
-#: view/login-page/login-page.html:56
+#: view/login-page/login-form/login-form.html:41
+msgid ""
+"The authentication server failed to respond. Please try again. If this error "
+"persists, please contact the administrator."
+msgstr ""
+"The authentication server failed to respond. Please try again. If this error "
+"persists, please contact the administrator."
+
+#: view/login-page/login-form/login-form.html:35
+msgid ""
+"The login and password combination you used are incorrect. Please try again."
+msgstr ""
+"The login and password combination you used are incorrect. Please try again."
+
+#: view/login-page/login-page.html:52
 msgid ""
 "The Quick Start Developer Trial is the fastest way to evaluate the HP Helion "
 "Development Platform for yourself. Download the files, create and configure "
@@ -109,11 +407,39 @@ msgstr ""
 "The Quick Start Developer Trial is the fastest way to evaluate the HP Helion "
 "Development Platform for yourself. Download the files, create and configure "
 "your sandbox environment, and deploy one or more sample applications."
+
+#: view/cluster-registration/add-cluster-form/add-cluster-form.html:24
+msgid ""
+"There was a problem adding this cluster. Please try again. If this error "
+"persists, please contact the administrator."
+msgstr ""
+"There was a problem adding this cluster. Please try again. If this error "
+"persists, please contact the administrator."
 
 #: view/navbar/navbar.html:10
 msgid "Toggle navigation"
 msgstr "Toggle navigation"
 
+#: view/service-registration/service-registration.html:23
+msgid "URL"
+msgstr "URL"
+
+#: view/service-registration/service-registration.html:24
+msgid "User Account"
+msgstr "User Account"
+
 #: view/login-page/login-form/login-form.html:5
 msgid "Username"
 msgstr "Username"
+
+#: view/service-registration/service-registration.html:25
+msgid "Valid Until"
+msgstr "Valid Until"
+
+#: cloud-foundry/view/applications/application/services/services.html:18
+msgid "Version"
+msgstr "Version"
+
+#: plugins/cloud-foundry/cloud-foundry.module.js:44
+msgid "Workspaces"
+msgstr "Workspaces"

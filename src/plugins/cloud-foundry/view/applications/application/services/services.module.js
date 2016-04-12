@@ -38,7 +38,7 @@
     this.model.all();
     this.serviceActions = [
       {
-        name: 'Detach',
+        name: gettext('Detach'),
         execute: function (target) {
           /* eslint-disable */
           alert('Detach ' + target.entity.label);
@@ -46,7 +46,7 @@
         }
       },
       {
-        name: 'Manage Services',
+        name: gettext('Manage Services'),
         execute: function (target) {
           /* eslint-disable */
           alert('Manage services for ' + target.entity.label);

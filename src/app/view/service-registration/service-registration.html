@@ -8,13 +8,12 @@
   </nav>
   <div class="container registration-content">
     <div class="row">
-      <h2 class="page-header" translate>
-        Setup your account
+      <h2 class="page-header">
+        <span translate>Setup your account</span>
         <span class="helion-icon helion-icon-Help pull-right"></span>
       </h2>
       <p translate>
-        Before you get started with CNAP, you will have to register into
-        services to see what apps you have access to.
+        Before you get started with CNAP, you will have to register into services to see what apps you have access to.
       </p>
       <table class="table">
         <thead>
@@ -58,6 +57,7 @@
   </div>
   <div class="fixed-footer" ng-if="serviceRegistrationCtrl.overlay">
     <span class="registration-notification" ng-if="serviceRegistrationCtrl.serviceInstanceModel.numValid > 0"
+      translate
       translate-n="serviceRegistrationCtrl.serviceInstanceModel.numValid"
       translate-plural="{{serviceRegistrationCtrl.serviceInstanceModel.numValid}} clusters registered">
       {{serviceRegistrationCtrl.serviceInstanceModel.numValid}} cluster registered
