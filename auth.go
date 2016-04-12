@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -22,6 +23,27 @@ type UAAResponse struct {
 }
 
 func (p *portalProxy) login(c echo.Context) error {
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	if len(username) == 0 || len(password) == 0 {
+		return echo.NewHTTPError(400, `{"error": "Needs username and password"}`)
+	}
+
+	uaaRes, err := getUAAToken(username, password, p.Config.UAAEndpoint, p.Config.UAAClient, p.Config.UAAClientSecret)
+	if err != nil {
+		log.Printf("UAA call failed : %v", err)
+		return echo.NewHTTPError(500, `{"error": "UAA call failed!"}`)
+	}
+
+	tokenInfo, err := getUserTokenInfo(strings.TrimPrefix(uaaRes.AccessToken, "bearer "))
+	if err != nil {
+		log.Printf("Bad UAA token: %v", err)
+		return echo.NewHTTPError(500, `{"error": "Bad UAA token"}`)
+	}
+
+	fmt.Println(tokenInfo)
+
 	return nil
 }
 
@@ -42,7 +64,7 @@ func getUAAToken(username, password, authEndpoint, client, clientSecret string) 
 	}
 
 	req.SetBasicAuth(client, clientSecret)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	res, err := httpClient.Do(req)
 	if err != nil {

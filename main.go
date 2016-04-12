@@ -3,7 +3,9 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -19,6 +21,8 @@ var (
 )
 
 func main() {
+	log.SetOutput(os.Stdout)
+
 	var (
 		portalConfig portalConfig
 		portalProxy  portalProxy
@@ -63,8 +67,8 @@ func initCookieStore(p *portalProxy) {
 }
 
 func registerRoutes(e *echo.Echo, p *portalProxy) {
-	e.Get("/v1/auth/login", p.login)
-	e.Get("/v1/auth/logout", p.logout)
+	e.Post("/v1/auth/login", p.login)
+	e.Post("/v1/auth/logout", p.logout)
 
 	group := e.Group("/v1/proxy")
 	group.Use(sessionMiddleware)
