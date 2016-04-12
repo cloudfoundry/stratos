@@ -13,8 +13,11 @@ module.exports = {
   applicationServiceFlyout: applicationServiceFlyout,
   showServiceDetails: showServiceDetails,
   serviceAddConfirm: serviceAddConfirm,
-  servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
-
+  servicePanelsAddServiceButtons: servicePanelsAddServiceButtons,
+  serviceAddCancel: serviceAddCancel,
+  serviceDetailsActions: serviceDetailsActions,
+  closeFlyout: closeFlyout,
+  serviceAddConfirm: serviceAddConfirm
 };
 
 function applicationGalleryCard(idx) {
@@ -88,4 +91,12 @@ function serviceAddConfirm() {
 
 function serviceAddCancel() {
   serviceDetailsCancelAction().click();
+}
+
+function flyoutCloseButton(){
+   return element(by.css('div.flyout div.flyout-header button'));
+}
+
+function closeFlyout() {
+  flyoutCloseButton().click();
 }
