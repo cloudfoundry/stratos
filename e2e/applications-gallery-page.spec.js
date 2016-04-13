@@ -6,14 +6,14 @@ var registration = require('./po/service-instance-registration.po');
 
 xdescribe('Applications - Gallery View', function () {
   beforeEach(function () {
-     // helpers.setBrowserNormal();
-     // helpers.loadApp();
-     // registration.loginAndConnect();
+    // helpers.setBrowserNormal();
+    // helpers.loadApp();
+    // registration.loginAndConnect();
   });
 
   afterEach(function () {
-     // registration.disconnectAndLogout();
-     // helpers.resetDatabase();
+    // registration.disconnectAndLogout();
+    // helpers.resetDatabase();
   });
 
   it('should show applications as cards', function() {
