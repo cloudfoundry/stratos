@@ -1,12 +1,20 @@
 package main
 
-import "github.com/gorilla/sessions"
+import (
+	"sync"
+
+	"github.com/gorilla/sessions"
+)
 
 type portalProxy struct {
 	Config      portalConfig
 	CookieStore *sessions.CookieStore
+
+	TokenMapMut sync.Mutex
 	TokenMap    map[string]tokenRecord
-	CNSIs       map[string]cnsiRecord
+
+	CNSIMut sync.Mutex
+	CNSIs   map[string]cnsiRecord
 }
 
 type tokenRecord struct {

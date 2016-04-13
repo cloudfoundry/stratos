@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"sync"
 
 	"github.com/labstack/echo"
 )
@@ -35,10 +34,9 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
 	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
 
-	var cnsiMapMutex = &sync.Mutex{}
-	cnsiMapMutex.Lock()
+	p.CNSIMut.Lock()
 	p.CNSIs[cnsiName] = newCNSI
-	cnsiMapMutex.Unlock()
+	p.CNSIMut.Unlock()
 
 	return nil
 }
