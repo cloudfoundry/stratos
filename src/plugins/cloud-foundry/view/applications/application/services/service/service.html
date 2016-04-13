@@ -6,24 +6,23 @@
     <div class="panel-body service-panel col-md-6">
       <div class="service-summary">
         <p>
-
-        <div class="row">
-          <div class="col-md-2 service-badge">
-            <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
+          <div class="row">
+            <div class="col-md-2 service-badge">
+              <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
+            </div>
+            <div class="col-md-2 service-category">
+              <h4 class="font-semi-bold app-category">{{ applicationServicesCtrl.currentService.entity.extra.categories }}</h4>
+            </div>
           </div>
-          <div class="col-md-2 service-category">
-            <h4 class="font-semi-bold app-category">{{ applicationServicesCtrl.currentService.entity.extra.categories }}</h4>
+          <div class="row app-label">
+            {{ applicationServicesCtrl.currentService.entity.label }}
+            <p>
+              ({{ applicationServicesCtrl.currentService.entity.version }})
+            </p>
           </div>
-        </div>
-        <div class="row app-label">
-          {{ applicationServicesCtrl.currentService.entity.label }}
-          <p>
-            ({{ applicationServicesCtrl.currentService.entity.version }})
-          </p>
-        </div>
-        <div class="row">
-          {{ applicationServicesCtrl.currentService.entity.description }}.
-        </div>
+          <div class="row">
+            {{ applicationServicesCtrl.currentService.entity.description }}.
+          </div>
         </p>
       </div>
     </div>
