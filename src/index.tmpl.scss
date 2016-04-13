@@ -18,6 +18,10 @@ $navbar-height              : $page-header-height !default;
 @import "lib/helion-ui-theme/dist/fonts/index";
 @import "lib/helion-ui-theme/dist/scss/theme/index";
 
+$radio-button-font-family:        'helion-icons' !default;
+$radio-button-unchecked-icon:     '\e9f9' !default;
+$radio-button-checked-icon:       '\ea74' !default;
+
 // Libs - auto-populated by wiredep from bower.json
 // bower:scss
 // endbower
