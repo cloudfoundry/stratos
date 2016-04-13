@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/sessions"
+	"github.com/satori/go.uuid"
 )
 
 type portalProxy struct {
@@ -26,6 +27,7 @@ type tokenRecord struct {
 }
 
 type cnsiRecord struct {
+	GUID                  uuid.UUID
 	APIEndpoint           string
 	AuthorizationEndpoint string
 	TokenEndpoint         string

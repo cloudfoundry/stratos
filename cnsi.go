@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/labstack/echo"
+	"github.com/satori/go.uuid"
 )
 
 type v2Info struct {
@@ -30,6 +31,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	// save data to temporary map
 	var newCNSI cnsiRecord
+	newCNSI.GUID = uuid.NewV4()
 	newCNSI.CNSIType = cnsiHCF
 	newCNSI.APIEndpoint = apiEndpoint
 	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
