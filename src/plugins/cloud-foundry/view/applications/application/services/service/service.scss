@@ -1,41 +1,41 @@
 .service-detail-actions {
-  padding-top: 20px;
-  padding-right: 0px;
-  padding-left: 0px;
-  margin-left:0px;
-  margin-right:0px;
-  border-top: 1px solid #eee;
+  padding-top: $hpe-unit-space;
+  padding-right: 0;
+  padding-left: 0;
+  margin-left: 0;
+  margin-right: 0;
+  border-top: 1px solid $silver;
 }
 
 .service-detail-header {
-  margin-top:-40px;
+  margin-top: $hpe-unit-space * -2;
 }
 
 .service-detail {
-  padding-left:120px;
-  padding-right:120px;
-  margin-top: -60px;
+  padding-left: $hpe-unit-space * 5;
+  padding-right: $hpe-unit-space * 5;
+  margin-top: $hpe-unit-space * -2.5;
 }
 
 .flyout-header {
-  margin-left: -120px !important;
-  margin-top: 120px !important;
+  margin-left: $hpe-unit-space * -5;
+  margin-top: $hpe-unit-space * 5;
 }
 
 .add-button {
-  margin-left: 10px;
+  margin-left: $hpe-unit-space / 2;
 }
 
 .app-title, .app-label, .app-category {
-   text-transform:capitalize;
+  text-transform:capitalize;
 }
 
-div.service-badge .service-icon {
-  padding-top:0px;
+.service-badge .service-icon {
+  padding-top:0;
 }
 
-div.service-category h4 {
-  padding-top:0px;
-  margin-top: 0px;
-  margin-left:15px;
+.service-category h4 {
+  padding-top: 0;
+  margin-top: 0;
+  margin-left: $hpe-unit-space / 2;
 }
