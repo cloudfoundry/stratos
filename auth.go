@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -121,7 +122,10 @@ func (p *portalProxy) saveUAAToken(cnsiID string, u userTokenInfo, authTok strin
 	tokenRecord.AuthToken = authTok
 	tokenRecord.RefreshToken = refreshTok
 
+	var tokenMapMutex = &sync.Mutex{}
+	tokenMapMutex.Lock()
 	p.TokenMap[key] = tokenRecord
+	tokenMapMutex.Unlock()
 
 	return nil
 }

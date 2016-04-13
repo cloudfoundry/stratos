@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sync"
 
 	"github.com/labstack/echo"
 )
@@ -22,11 +23,34 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 		return echo.NewHTTPError(400, `{"error": "Needs CNSI Name and API Endpoint"}`)
 	}
 
+	v2InfoResponse, err := getHCFv2Info(apiEndpoint)
+	if err != nil {
+		return err
+	}
+
+	// save data to temporary map
+	var newCNSI cnsiRecord
+	newCNSI.CNSIType = cnsiHCF
+	newCNSI.APIEndpoint = apiEndpoint
+	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
+	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
+
+	var cnsiMapMutex = &sync.Mutex{}
+	cnsiMapMutex.Lock()
+	p.CNSIs[cnsiName] = newCNSI
+	cnsiMapMutex.Unlock()
+
+	return nil
+}
+
+func getHCFv2Info(apiEndpoint string) (v2Info, error) {
+	var v2InfoReponse v2Info
+
 	// make a call to apiEndpoint/v2/info to get the auth and token endpoints
 	uri, err := url.Parse(apiEndpoint)
 	if err != nil {
 		log.Printf("Invalid endpoint url %v", apiEndpoint)
-		return echo.NewHTTPError(http.StatusBadRequest, `{"error": "Invalid endpoint url"}`)
+		return v2InfoReponse, echo.NewHTTPError(http.StatusBadRequest, `{"error": "Invalid endpoint url"}`)
 	}
 
 	uri.Path = "v2/info"
@@ -34,25 +58,14 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	if err != nil {
 		log.Printf("Unable to reach %v", apiEndpoint)
 		logHTTPError(res, err)
-		return echo.NewHTTPError(500, `{"error": "Unable to reach endpoint"}`)
+		return v2InfoReponse, echo.NewHTTPError(500, `{"error": "Unable to reach endpoint"}`)
 	}
 
-	var v2InfoReponse v2Info
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&v2InfoReponse); err != nil {
 		log.Printf("Unable to decode response from v2/info")
-		return echo.NewHTTPError(http.StatusInternalServerError, `{"error": "Invalid response from endpoint"}`)
+		return v2InfoReponse, echo.NewHTTPError(http.StatusInternalServerError, `{"error": "Invalid response from endpoint"}`)
 	}
 
-	// TODO:10 LOCK DEM MAPS
-	// save data to temporary map
-	var newCNSI cnsiRecord
-	newCNSI.CNSIType = cnsiHCF
-	newCNSI.APIEndpoint = apiEndpoint
-	newCNSI.TokenEndpoint = v2InfoReponse.TokenEndpoint
-	newCNSI.AuthorizationEndpoint = v2InfoReponse.AuthorizationEndpoint
-
-	p.CNSIs[cnsiName] = newCNSI
-
-	return nil
+	return v2InfoReponse, nil
 }
