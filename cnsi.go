@@ -24,7 +24,8 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	v2InfoResponse, err := getHCFv2Info(apiEndpoint)
 	if err != nil {
-		return err
+		log.Printf("Failed to get api endpoint v2/info: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, `{"error": "Failed to get endpoint v2/info"}`)
 	}
 
 	// save data to temporary map
@@ -47,22 +48,18 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	// make a call to apiEndpoint/v2/info to get the auth and token endpoints
 	uri, err := url.Parse(apiEndpoint)
 	if err != nil {
-		log.Printf("Invalid endpoint url %v", apiEndpoint)
-		return v2InfoReponse, echo.NewHTTPError(http.StatusBadRequest, `{"error": "Invalid endpoint url"}`)
+		return v2InfoReponse, err
 	}
 
 	uri.Path = "v2/info"
 	res, err := httpClient.Get(uri.String())
 	if err != nil {
-		log.Printf("Unable to reach %v", apiEndpoint)
-		logHTTPError(res, err)
-		return v2InfoReponse, echo.NewHTTPError(500, `{"error": "Unable to reach endpoint"}`)
+		return v2InfoReponse, err
 	}
 
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&v2InfoReponse); err != nil {
-		log.Printf("Unable to decode response from v2/info")
-		return v2InfoReponse, echo.NewHTTPError(http.StatusInternalServerError, `{"error": "Invalid response from endpoint"}`)
+		return v2InfoReponse, err
 	}
 
 	return v2InfoReponse, nil
