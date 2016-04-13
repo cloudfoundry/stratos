@@ -33,7 +33,10 @@ func main() {
 		return
 	}
 	portalProxy.Config = portalConfig
+
+	// initialize temporary data maps
 	portalProxy.TokenMap = make(map[string]tokenRecord)
+	portalProxy.CNSIs = make(map[string]cnsiRecord)
 
 	tr := &http.Transport{}
 	if portalConfig.Dev {
@@ -72,8 +75,10 @@ func registerRoutes(e *echo.Echo, p *portalProxy) {
 	e.Post("/v1/auth/login", p.login)
 	e.Post("/v1/auth/logout", p.logout)
 
-	group := e.Group("/v1/proxy")
-	group.Use(p.sessionMiddleware)
+	sessionGroup := e.Group("/v1")
+	sessionGroup.Use(p.sessionMiddleware)
+	sessionGroup.Post("/register/hcf", p.registerHCFCluster)
+	group := e.Group("/proxy")
 	group.Get("/hcf", hcf)
 	group.Get("/hce", hce)
 }

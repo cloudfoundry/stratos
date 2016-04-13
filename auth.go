@@ -87,6 +87,8 @@ func getUAAToken(username, password, authEndpoint, client, clientSecret string) 
 
 	res, err := httpClient.Do(req)
 	if err != nil {
+		log.Printf("Unable to reach %v", authEndpoint)
+		logHTTPError(res, err)
 		return nil, err
 	}
 
