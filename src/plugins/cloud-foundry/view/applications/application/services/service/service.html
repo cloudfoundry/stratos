@@ -39,12 +39,44 @@
       </p>
     </div>
   </div>
+  <div class="select-instance-panel col-md-6">
+    <uib-tabset class="select-instance-tabs" active="active">
+      <uib-tab index="0" heading="Choose Existing Instance">
+        <ul class="existing-instance-list">
+          <li class="existing-instance">
+            <input type="radio" ng-model="" ng-value="DatConn_03"/>DatConn_03</br>
+            <div>
+              <span>Plan</span><span>Free</span>
+            </div>
+            <div>
+              <span>Apps Attached</span><span>DoggyAdoption</br>Geekquiz</span>
+            </div>
+          </li>
+          <li class="existing-instance">
+            <input type="radio" ng-model="" ng-value="QuickConnect"/>QuickConnect</br>
+            <div>
+              <span>Plan</span><span>Dev</span>
+            </div>
+            <div>
+              <span>Apps Attached</span><span>Trailmap</br>Buddy System</br>Gate Crasher</span>
+            </div>
+          </li>
+        </ul>
+      </uib-tab>
+      <uib-tab index="1" heading="Create New Instance" disable="true">
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+        </p>
+      </uib-tab>
+    </uib-tabset>
+  </div>
+</div>
   <div class="col-md-12 service-detail-actions">
     <div class="pull-right">
-      <button class="btn btn-default btn-info" translate ng-click="applicationServicesCtrl.cancelAddService();">
+      <button class="btn btn-default btn-info" translate ng-click="applicationServicesCtrl.cancelAddService()">
        Cancel</button>
-      <button class="btn btn-primary add-button" translate ng-click="applicationServicesCtrl.addService()">Add
-      </button>
+      <button class="btn btn-primary add-button" translate ng-click="applicationServicesCtrl.addService()">
+        Add</button>
     </div
   </div>
 </div>
