@@ -3,3 +3,27 @@
   margin: 20px 0 40px;
   border-top: 1px solid #eee;
 }
+
+.select-instance-panel {
+  padding-top: 100px;
+
+  .instance {
+    padding-left: 25px;
+  }
+}
+
+.panel .panel-default {
+  border: solid red 1px;
+
+  .panel-body {
+    border: solid red 1px;
+
+    .service-summary {
+      border: solid red 1px;
+    }
+  }
+
+  .select-instance-panel {
+    border: solid red 1px;
+  }
+}
