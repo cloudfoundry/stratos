@@ -1,19 +1,16 @@
 'use strict';
 
-var helpers = require('./po/helpers.po');
-var galleryPage = require('./po/application-card-gallery.po');
-var registration = require('./po/service-instance-registration.po');
+var helpers = require('../po/helpers.po');
+var resetTo = require('../po/resets.po');
+var loginPage = require('../po/login-page.po');
+var galleryPage = require('../po/applications.po');
 
-xdescribe('Applications - Gallery View', function () {
-  beforeEach(function () {
-    // helpers.setBrowserNormal();
-    // helpers.loadApp();
-    // registration.loginAndConnect();
-  });
-
-  afterEach(function () {
-    // registration.disconnectAndLogout();
-    // helpers.resetDatabase();
+describe('Applications - Gallery View', function () {
+  beforeAll(function () {
+    resetTo.devWorkflow(false);
+    helpers.setBrowserNormal();
+    helpers.loadApp();
+    loginPage.login('dev', 'dev');
   });
 
   it('should show applications as cards', function() {
@@ -24,7 +21,6 @@ xdescribe('Applications - Gallery View', function () {
 
   describe('on card click', function () {
     it('should show application details', function () {
-      galleryPage.showApplications();
       galleryPage.showApplicationDetails(0);
       expect(browser.getCurrentUrl()).toMatch(/summary$/);
     });

@@ -35,26 +35,22 @@ function showApplicationDetails(idx) {
 }
 
 function showServices() {
-  servicesAction().click();
+  applicationAction(1).click();
 }
 
-function applicationsActionsBar(){
- return element.all(by.css('ul.nav.nav-pills.nav-stacked li a'));
-}
-
-function servicesAction(){
-  return applicationAction(1);
+function applicationActionsBar() {
+  return element.all(by.css('ul.nav.nav-pills.nav-stacked li a'));
 }
 
 function applicationAction(idx) {
-     return applicationsActionsBar().get(idx);
+  return applicationActionsBar().get(idx);
 }
 
 function servicePanelsAddServiceButtons() {
   return element.all(by.css('div.service-panel div.service-actions button'));
 }
 
-function servicePanelsAddServiceButton(idx){
+function servicePanelsAddServiceButton(idx) {
   return servicePanelsAddServiceButtons().get(idx);
 }
 
@@ -68,6 +64,7 @@ function serviceDetailsAction(idx) {
 
 function showServiceDetails() {
   servicePanelsAddServiceButton(0).click();
+  browser.driver.sleep(1000);
 }
 
 function serviceDetailsAddAction() {
@@ -79,7 +76,7 @@ function serviceDetailsCancelAction() {
 }
 
 function applicationServiceFlyout() {
- return element(by.css('div.flyout application-service'));
+  return element(by.css('div.flyout application-service'));
 }
 
 function serviceAddConfirm() {
