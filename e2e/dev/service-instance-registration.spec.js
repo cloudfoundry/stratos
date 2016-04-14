@@ -83,7 +83,7 @@ describe('Service Instance Registration', function () {
       registration.completeRegistration();
 
       expect(registration.registrationOverlay().isPresent()).toBeFalsy();
-      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/workspaces');
+      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications/list/gallery-view');
     });
 
     it('should go directly to applications view on logout and login', function () {
@@ -91,7 +91,7 @@ describe('Service Instance Registration', function () {
       loginPage.login('dev', 'dev');
 
       expect(registration.registrationOverlay().isPresent()).toBeFalsy();
-      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/workspaces');
+      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications/list/gallery-view');
     });
   });
 });

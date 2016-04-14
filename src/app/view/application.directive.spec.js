@@ -18,6 +18,7 @@
       $compile($element)($scope);
       $scope.$apply();
       applicationCtrl = $element.controller('application');
+      $httpBackend.when('GET', '/api/cf/v2/apps').respond(200, { items: [] });
     }));
 
     afterEach(function() {
