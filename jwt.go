@@ -12,7 +12,7 @@ type userTokenInfo struct {
 	TokenExpiry int    `json:"exp"`
 }
 
-func getUserTokenInfo(tok string) (u userTokenInfo, err error) {
+func getUserTokenInfo(tok string) (u *userTokenInfo, err error) {
 	splits := strings.Split(tok, ".")
 
 	if len(splits) < 3 {

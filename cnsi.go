@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -20,25 +19,32 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	apiEndpoint := c.FormValue("api_endpoint")
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
-		return echo.NewHTTPError(400, `{"error": "Needs CNSI Name and API Endpoint"}`)
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Needs CNSI Name and API Endpoint",
+			"CNSI Name or Endpoint were not provided when trying to register an HCF Cluster")
 	}
 
 	v2InfoResponse, err := getHCFv2Info(apiEndpoint)
 	if err != nil {
-		log.Printf("Failed to get api endpoint v2/info: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, `{"error": "Failed to get endpoint v2/info"}`)
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to get endpoint v2/info",
+			"Failed to get api endpoint v2/info: %v",
+			err)
 	}
 
 	// save data to temporary map
 	var newCNSI cnsiRecord
-	newCNSI.GUID = uuid.NewV4()
+	guid := uuid.NewV4().String()
+	newCNSI.Name = cnsiName
 	newCNSI.CNSIType = cnsiHCF
 	newCNSI.APIEndpoint = apiEndpoint
 	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
 	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
 
 	p.CNSIMut.Lock()
-	p.CNSIs[cnsiName] = newCNSI
+	p.CNSIs[guid] = newCNSI
 	p.CNSIMut.Unlock()
 
 	return nil

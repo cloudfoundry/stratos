@@ -2,12 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.com/labstack/echo"
@@ -23,38 +21,82 @@ type UAAResponse struct {
 	JTI          string `json:"jti"`
 }
 
-func (p *portalProxy) login(c echo.Context) error {
+func (p *portalProxy) loginToUAA(c echo.Context) error {
+
+	uaaRes, u, err := p.login(c, p.Config.UAAEndpoint)
+	if err != nil {
+		err = newHTTPShadowError(
+			http.StatusUnauthorized,
+			"Access Denied",
+			"Access Denied: %v", err)
+		return err
+	}
+
+	p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+
+	return nil
+}
+
+func (p *portalProxy) loginToCNSI(c echo.Context) error {
+	cnsiGUID := c.FormValue("cnsi_guid")
+
+	if len(cnsiGUID) == 0 {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Missing target endpoint",
+			"Need CNSI GUID passed as form param")
+	}
+
+	endpoint := p.CNSIs[cnsiGUID].AuthorizationEndpoint
+	if endpoint == "" {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Requested endpoint not registered",
+			"No CNSI registered with GUID %s", cnsiGUID)
+	}
+
+	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
+	uaaRes, u, err := p.login(c, tokenEndpoint)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusUnauthorized,
+			"Login failed",
+			"Login failed: %v", err)
+	}
+
+	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
+
+	return nil
+}
+
+func (p *portalProxy) login(c echo.Context, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
 	if len(username) == 0 || len(password) == 0 {
-		return echo.NewHTTPError(400, `{"error": "Needs username and password"}`)
+		return uaaRes, u, errors.New("Needs username and password")
 	}
 
-	uaaRes, err := getUAAToken(username, password, p.Config.UAAEndpoint, p.Config.UAAClient, p.Config.UAAClientSecret)
+	uaaRes, err = getUAAToken(username, password, endpoint, p.Config.UAAClient, p.Config.UAAClientSecret)
 	if err != nil {
-		log.Printf("UAA call failed : %v", err)
-		return echo.NewHTTPError(500, `{"error": "UAA call failed!"}`)
+		return uaaRes, u, err
 	}
 
 	accessToken := strings.TrimPrefix(uaaRes.AccessToken, "bearer ")
-	tokenInfo, err := getUserTokenInfo(accessToken)
+	u, err = getUserTokenInfo(accessToken)
 	if err != nil {
-		log.Printf("Bad UAA token: %v", err)
-		return echo.NewHTTPError(500, `{"error": "Bad UAA token"}`)
+		return uaaRes, u, err
 	}
 
 	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = tokenInfo.UserGUID
-	sessionValues["exp"] = tokenInfo.TokenExpiry
+	sessionValues["user_id"] = u.UserGUID
+	sessionValues["exp"] = u.TokenExpiry
 
 	if err = p.setSessionValues(c, sessionValues); err != nil {
-		return err
+		return uaaRes, u, err
 	}
 
-	p.saveUAAToken("foo", tokenInfo, accessToken, uaaRes.RefreshToken)
-
-	return nil
+	return uaaRes, u, nil
 }
 
 func (p *portalProxy) logout(c echo.Context) error {
@@ -79,30 +121,23 @@ func getUAAToken(username, password, authEndpoint, client, clientSecret string) 
 
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to create request for UAA: %v", err)
 	}
 
 	req.SetBasicAuth(client, clientSecret)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	res, err := httpClient.Do(req)
-	if err != nil {
-		log.Printf("Unable to reach %v", authEndpoint)
-		logHTTPError(res, err)
-		return nil, err
+	if err != nil || res.StatusCode != http.StatusOK {
+		return nil, logHTTPError(res, err)
 	}
 
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		io.Copy(os.Stdout, res.Body)
-		return nil, fmt.Errorf("UAA returned non-200: %d", res.StatusCode)
-	}
-
 	var response UAAResponse
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&response); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getUAAToken Decode: %s", err)
 	}
 
 	return &response, nil
@@ -112,18 +147,30 @@ func mkTokenRecordKey(cnsiID string, userGUID string) string {
 	return fmt.Sprintf("%s:%s", cnsiID, userGUID)
 }
 
-func (p *portalProxy) saveUAAToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) error {
-	key := mkTokenRecordKey(cnsiID, u.UserGUID)
+func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
+	key := u.UserGUID
 	var tokenRecord tokenRecord
-	tokenRecord.CNSIID = cnsiID
-	tokenRecord.UserGUID = u.UserGUID
 	tokenRecord.TokenExpiry = u.TokenExpiry
 	tokenRecord.AuthToken = authTok
 	tokenRecord.RefreshToken = refreshTok
 
-	p.TokenMapMut.Lock()
-	p.TokenMap[key] = tokenRecord
-	p.TokenMapMut.Unlock()
+	p.UAATokenMapMut.Lock()
+	p.UAATokenMap[key] = tokenRecord
+	p.UAATokenMapMut.Unlock()
+
+	return nil
+}
+
+func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) error {
+	key := mkTokenRecordKey(cnsiID, u.UserGUID)
+	var tokenRecord tokenRecord
+	tokenRecord.TokenExpiry = u.TokenExpiry
+	tokenRecord.AuthToken = authTok
+	tokenRecord.RefreshToken = refreshTok
+
+	p.CNSITokenMapMut.Lock()
+	p.CNSITokenMap[key] = tokenRecord
+	p.CNSITokenMapMut.Unlock()
 
 	return nil
 }

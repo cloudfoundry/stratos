@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/context"
@@ -25,6 +26,18 @@ func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		err := h(c)
 		req := c.Request().(*standard.Request).Request
 		context.Clear(req)
+
+		return err
+	}
+}
+
+func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		err := h(c)
+		if shadowError, ok := err.(errHTTPShadow); ok {
+			log.Println(shadowError.LogMessage)
+			return shadowError.HTTPError
+		}
 
 		return err
 	}

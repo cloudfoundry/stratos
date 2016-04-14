@@ -35,7 +35,8 @@ func main() {
 	portalProxy.Config = portalConfig
 
 	// initialize temporary data maps
-	portalProxy.TokenMap = make(map[string]tokenRecord)
+	portalProxy.UAATokenMap = make(map[string]tokenRecord)
+	portalProxy.CNSITokenMap = make(map[string]tokenRecord)
 	portalProxy.CNSIs = make(map[string]cnsiRecord)
 
 	tr := &http.Transport{}
@@ -58,11 +59,14 @@ func start(p *portalProxy) {
 	e.Use(sessionCleanupMiddleware)
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(errorLoggingMiddleware)
 
 	initCookieStore(p)
 	registerRoutes(e, p)
 
-	e.Run(standard.NewFromTLS(p.Config.TLSAddress, p.Config.TLSCertFile, p.Config.TLSCertKey))
+	engine := standard.NewFromTLS(p.Config.TLSAddress, p.Config.TLSCertFile, p.Config.TLSCertKey)
+	//engine.Server.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler))
+	e.Run(engine)
 }
 
 // sync.RWMutex
@@ -72,11 +76,12 @@ func initCookieStore(p *portalProxy) {
 }
 
 func registerRoutes(e *echo.Echo, p *portalProxy) {
-	e.Post("/v1/auth/login", p.login)
+	e.Post("/v1/auth/login/uaa", p.loginToUAA)
 	e.Post("/v1/auth/logout", p.logout)
 
 	sessionGroup := e.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
+	sessionGroup.Post("/auth/login/cnsi", p.loginToCNSI)
 	sessionGroup.Post("/register/hcf", p.registerHCFCluster)
 	group := e.Group("/proxy")
 	group.Get("/hcf", hcf)
