@@ -14,6 +14,10 @@ $page-header-bg             : #fff !default;
 
 $navbar-height              : $page-header-height !default;
 
+$radio-button-font-family   : "helion-icons" !default;
+$radio-button-unchecked-icon: "\e9f9" !default; // helion-icon-Radial_button
+$radio-button-checked-icon  : "\ea74" !default; // helion-icon-Radial_Black
+
 // Helion UI fonts and theme
 @import "lib/helion-ui-theme/dist/fonts/index";
 @import "lib/helion-ui-theme/dist/scss/theme/index";
