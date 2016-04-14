@@ -16,10 +16,7 @@ module.exports = {
   disconnect: disconnect,
   completeRegistration: completeRegistration,
   registrationNotification: registrationNotification,
-  serviceInstanceStatus: serviceInstanceStatus,
-
-  loginAndConnect: loginAndConnect,
-  disconnectAndLogout: disconnectAndLogout
+  serviceInstanceStatus: serviceInstanceStatus
 
 };
 
@@ -64,20 +61,4 @@ function serviceInstanceStatus(rowIndex, statusClass) {
 
 function registrationNotification() {
   return registrationOverlay().element(by.css('.fixed-footer .registration-notification'));
-}
-
-function loginAndConnect() {
-  loginPage.login('dev', 'dev');
-  browser.wait(function () {
-    return element(by.css('service-registration')).isDisplayed();
-  }, 10000);
-  connect(0);
-  doneButton().click();
-}
-
-function disconnectAndLogout() {
-  navbar.showAccountSettings();
-  browser.driver.sleep(1000);
-  disconnect(0);
-  navbar.logout();
 }

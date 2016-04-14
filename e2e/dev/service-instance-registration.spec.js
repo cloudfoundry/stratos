@@ -1,12 +1,14 @@
 'use strict';
 
-var helpers = require('./po/helpers.po');
-var navbar = require('./po/navbar.po');
-var loginPage = require('./po/login-page.po');
-var registration = require('./po/service-instance-registration.po');
+var helpers = require('../po/helpers.po');
+var resetTo = require('../po/resets.po');
+var navbar = require('../po/navbar.po');
+var loginPage = require('../po/login-page.po');
+var registration = require('../po/service-instance-registration.po');
 
 describe('Service Instance Registration', function () {
   beforeAll(function () {
+    resetTo.devWorkflow(true);
     helpers.setBrowserNormal();
     helpers.loadApp();
     loginPage.login('dev', 'dev');
@@ -72,14 +74,9 @@ describe('Service Instance Registration', function () {
     });
   });
 
-  describe('service instance `Disconnect`', function () {
+  describe('service instance - complete registration', function () {
     beforeAll(function () {
       registration.connect(0);
-    });
-
-    afterAll(function () {
-      registration.disconnectAndLogout();
-      helpers.resetDatabase();
     });
 
     it('should show applications view when `Done` clicked', function () {
