@@ -1,1 +1,43 @@
-<h1>Select Repository</h1>
+<h4 translate>Select Repository</h4>
+<p translate>
+  This list represents the repos you own or have admin rights to. Select the repository you would like to associate to this project.
+</p>
+<table class="table" st-table="wizardCtrl.options.displayedRepos"
+  st-safe-src="wizardCtrl.options.repos">
+  <thead>
+    <tr>
+      <th colspan="3" class="filter-header">
+        <form class="form-horizontal">
+          <div class="form-group col-md-3">
+            <label class="control-label" translate>Repositories</label>
+            <input type="text" class="form-control text-right"
+              ng-value="wizardCtrl.options.repos.length" readonly/>
+          </div>
+          <div class="form-group addon-form-group col-md-9">
+            <div class="input-group">
+              <span class="input-group-addon">
+                <i class="helion-icon helion-icon-lg helion-icon-Filter"></i>
+              </span>
+              <input type="search" class="form-control" st-search="full_name"/>
+            </div>
+          </div>
+        </form>
+      </th>
+    </tr>
+    <tr>
+      <th class="select-col"></th>
+      <th translate>Repository Name</th>
+      <th class="text-left" translate>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="row-vertical-middle" ng-repeat="repo in wizardCtrl.options.displayedRepos">
+      <td>
+        <radio-input ng-model="wizardCtrl.options.userInput.repo" input-value="repo">
+        </radio-input>
+      </td>
+      <td>{{ ::repo.full_name }}</td>
+      <td class="text-left">{{ ::repo.description }}</td>
+    </tr>
+  </tbody>
+</table>

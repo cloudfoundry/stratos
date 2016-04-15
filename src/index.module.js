@@ -12,7 +12,8 @@
     'helion.framework',
     'smoothScroll',
     'ui.bootstrap',
-    'ui.router'
+    'ui.router',
+    'smart-table'
   ];
 
   var pluginModules = _.chain(env.plugins).map('moduleName').value();
