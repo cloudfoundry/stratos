@@ -17,6 +17,10 @@
   margin-top: $hpe-unit-space * -2.5;
 }
 
+.service-detail .panel {
+  box-shadow: none;
+}
+
 .flyout-header {
   margin-left: $hpe-unit-space * -5;
   margin-top: $hpe-unit-space * 5;
@@ -38,7 +42,6 @@
   padding-top: 0;
   margin-top: 0;
   margin-left: $hpe-unit-space;
-
 }
 
 .select-instance-panel {
@@ -49,18 +52,109 @@
   }
 }
 
-.panel .panel-default {
-  border: solid red 1px;
+.service-panel-confirm {
 
-  .panel-body {
-    border: solid red 1px;
+  padding-left: 0;
 
-    .service-summary {
-      border: solid red 1px;
+  .message {
+    height: $hpe-unit-space * 3;
+    line-height: $hpe-unit-space * 3;
+    margin-left: 0;
+    padding-left: 0;
+
+  }
+
+  .message .message-icon {
+      margin-left: 0;
+      padding-left: 0;
+      padding-right: 0;
+      margin-right: 0;
+
+       i {
+        color: green;
+        font-size: 200%;
+        padding-top: 0;
+        margin-right: 0;
+        padding-right: 0;
+      }
+  }
+
+  .message  .message-text {
+    margin-left: $hpe-unit-space * -9;
+    padding-top: $hpe-unit-space / 6;
+  }
+
+  .message .category-name {
+    text-transform: capitalize;
+  }
+
+  h4 {
+   margin-top: 0;
+  }
+
+  .caution-message {
+    width: 50%;
+    margin: 0 auto;
+    padding: 20px;
+
+
+    i {
+      padding-left: $hpe-unit-space / 4;
+      margin-left: $hpe-unit-space / 4;
+      margin-right: $hpe-unit-space / 4;
+      padding-right:$hpe-unit-space / 4;
+      background: #f0e68c;
+    }
+
+    .caution-text {
+       background: #f0e;
+       margin-left: 20px;
+
     }
   }
 
+}
+
+
+
+.panel {
   .select-instance-panel {
-    border: solid red 1px;
+    padding-top: $hpe-unit-space * 4;
+
+    .existing-instance-list {
+      list-style-type: none;
+      padding-left: $hpe-unit-space;
+
+      .existing-instance {
+        border: 1px solid black;
+        margin-top: $hpe-unit-space / 6;
+        padding-top: $hpe-unit-space / 2;
+        padding-left: $hpe-unit-space / 2;
+
+        label {
+          input {
+            margin-right: $hpe-unit-space;
+          }
+        }
+
+        .service-details {
+          width: 100%;
+
+          tbody {
+            tr {
+              .lbl {
+                padding-left: $hpe-unit-space * 2;
+                vertical-align: text-top;
+                width: 40%;
+              }
+              .val {;
+                width: 60%
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
+

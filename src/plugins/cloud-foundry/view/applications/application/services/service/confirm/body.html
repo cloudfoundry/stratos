@@ -1,0 +1,25 @@
+<div class="panel-body service-panel-confirm">
+    <div class="row message ">
+      <div class="col-md-2 message-icon" >
+        <i class="helion-icon helion-icon-Active_L service-icon"></i>
+      </div>
+      <div class="col-md-10 message-text">
+        <h4 class="font-semi-bold" translate>Service <span class="category-name">{{ applicationServicesCtrl.currentService.entity.extra.categories
+              }}</span> has been successfully added.</h4>
+      </div>
+    </div>
+    <div class="row caution-message">>
+        <div class="col-md-4>
+          <i class="helion-icon helion-icon-Service_business service-icon"></i>
+        </div>
+        <div class="col-md-8 caution-text">
+          <p translate>
+            Please take a moment to add the following to your application manifest to describe your app's dependency
+            on this service.  Adding something to a manifest doesn't persist the binding.
+          </p>
+        </div>
+    </div>
+    <div class="row">
+      manifest snippet TBD
+    </div>
+</div>
