@@ -109,7 +109,8 @@
 
     it('removeApp', function() {
       var guid = "84a911b3-16f7-4f47-afa4-581c86018600";
-      var DeleteApp = mock.cloudFoundryAPI.Apps.DeleteApp(guid);
+      var params = {};
+      var DeleteApp = mock.cloudFoundryAPI.Apps.DeleteApp(guid, params);
       $httpBackend.when('DELETE', DeleteApp.url).respond(204, DeleteApp.response['204'].body);
       $httpBackend.expectDELETE(DeleteApp.url);
       applicationModel.remove(guid);
@@ -118,12 +119,14 @@
 
     it('getAppStats', function () {
       var guid = "84a911b3-16f7-4f47-afa4-581c86018600";
-      var GetAppStats = mock.cloudFoundryAPI.Apps.GetAppStats(guid);
-      $httpBackend.when('GET', GetAppStats.url).respond(200, GetAppStats.response['200'].body);
-      $httpBackend.expectGET(GetAppStats.url);
-      applicationModel.getAppStats(guid);
+      var params = {};
+      var GetDetailedStatsForStartedApp = mock.cloudFoundryAPI.Apps.GetDetailedStatsForStartedApp(guid);
+      $httpBackend.when('GET', GetDetailedStatsForStartedApp.url)
+                        .respond(200, GetDetailedStatsForStartedApp.response['200'].body);
+      $httpBackend.expectGET(GetDetailedStatsForStartedApp.url);
+      applicationModel.getAppStats(guid, params);
       $httpBackend.flush();
-      expect(GetAppStats.response['200'].body['0'].state).toBe('RUNNING');
+      expect(GetDetailedStatsForStartedApp.response['200'].body['0'].state).toBe('RUNNING');
       expect(applicationModel.application.stats['0'].stats.usage.disk).toBe(66392064);
     });
   });

@@ -252,9 +252,9 @@
       };
     },
 
-    GetAppStats: function(guid) {
+    GetDetailedStatsForStartedApp: function(guid) {
       return {
-        url: '/api/cf/v2/apps/' + guid + '',
+        url: '/api/cf/v2/apps/' + guid + '/stats',
 
         response: {
 
