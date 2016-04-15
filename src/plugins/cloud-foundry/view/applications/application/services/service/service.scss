@@ -26,7 +26,6 @@
   margin-left: $hpe-unit-space / 2;
 }
 
-
 .app-title, .app-label, .app-category {
   text-transform: capitalize;
 }
@@ -43,10 +42,10 @@
 }
 
 .select-instance-panel {
-  padding-top: 100px;
+  padding-top: $hpe-unit-space * 4;
 
   .instance {
-    padding-left: 25px;
+    padding-left:  $hpe-unit-space;
   }
 }
 
