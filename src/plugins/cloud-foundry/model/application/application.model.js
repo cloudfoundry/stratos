@@ -222,9 +222,9 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    remove: function (guid) {
+    remove: function (guid, params) {
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-      return applicationApi.DeleteApp(guid)
+      return applicationApi.DeleteApp(guid, params)
         .then(function () {});
     },
 
@@ -236,10 +236,10 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    getAppStats: function (guid) {
+    getAppStats: function (guid, params) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetAppStats(guid)
+        .GetDetailedStatsForStartedApp(guid, params)
         .then(function (response) {
           that.application.stats = response.data;
         });
