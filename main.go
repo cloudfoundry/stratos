@@ -22,35 +22,42 @@ var (
 func main() {
 	log.SetOutput(os.Stdout)
 
-	var (
-		portalConfig portalConfig
-		portalProxy  portalProxy
-	)
+	var portalConfig portalConfig
 
 	// Load portal configuration
 	if _, err := toml.DecodeFile("portal-config.toml", &portalConfig); err != nil {
 		fmt.Println(err)
 		return
 	}
-	portalProxy.Config = portalConfig
+	portalProxy := newPortalProxy(portalConfig)
 
-	// initialize temporary data maps
-	portalProxy.UAATokenMap = make(map[string]tokenRecord)
-	portalProxy.CNSITokenMap = make(map[string]tokenRecord)
-	portalProxy.CNSIs = make(map[string]cnsiRecord)
-
-	tr := &http.Transport{}
 	if portalConfig.Dev {
-		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: portalConfig.DevConfig.SkipTLSVerification}
+		initializeHTTPClient(portalConfig.DevConfig.SkipTLSVerification, portalConfig.HTTPClientTimeout)
 	} else {
-		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: portalConfig.SkipTLSVerification}
+		initializeHTTPClient(portalConfig.SkipTLSVerification, portalConfig.HTTPClientTimeout)
 	}
 
+	start(portalProxy)
+}
+
+func newPortalProxy(pc portalConfig) *portalProxy {
+	pp := &portalProxy{
+		UAATokenMap:  make(map[string]tokenRecord),
+		CNSITokenMap: make(map[string]tokenRecord),
+		CNSIs:        make(map[string]cnsiRecord),
+		Config:       pc,
+	}
+
+	return pp
+}
+
+func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Duration) {
+	tr := &http.Transport{}
+	if skipCertVerification {
+		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
 	httpClient.Transport = tr
-	httpClient.Timeout = time.Second * portalConfig.HTTPClientTimeout
-
-	start(&portalProxy)
-
+	httpClient.Timeout = time.Second * timeoutInSeconds
 }
 
 func start(p *portalProxy) {
@@ -61,8 +68,8 @@ func start(p *portalProxy) {
 	e.Use(middleware.Recover())
 	e.Use(errorLoggingMiddleware)
 
-	initCookieStore(p)
-	registerRoutes(e, p)
+	p.initCookieStore()
+	p.registerRoutes(e)
 
 	engine := standard.NewFromTLS(p.Config.TLSAddress, p.Config.TLSCertFile, p.Config.TLSCertKey)
 	//engine.Server.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler))
@@ -71,11 +78,11 @@ func start(p *portalProxy) {
 
 // sync.RWMutex
 
-func initCookieStore(p *portalProxy) {
+func (p *portalProxy) initCookieStore() {
 	p.CookieStore = sessions.NewCookieStore([]byte(p.Config.CookieStoreSecret))
 }
 
-func registerRoutes(e *echo.Echo, p *portalProxy) {
+func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	e.Post("/v1/auth/login/uaa", p.loginToUAA)
 	e.Post("/v1/auth/logout", p.logout)
 

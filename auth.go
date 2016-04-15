@@ -32,6 +32,14 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
+	sessionValues := make(map[string]interface{})
+	sessionValues["user_id"] = u.UserGUID
+	sessionValues["exp"] = u.TokenExpiry
+
+	if err = p.setSessionValues(c, sessionValues); err != nil {
+		return err
+	}
+
 	p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 
 	return nil
@@ -85,14 +93,6 @@ func (p *portalProxy) login(c echo.Context, endpoint string) (uaaRes *UAARespons
 	accessToken := strings.TrimPrefix(uaaRes.AccessToken, "bearer ")
 	u, err = getUserTokenInfo(accessToken)
 	if err != nil {
-		return uaaRes, u, err
-	}
-
-	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = u.UserGUID
-	sessionValues["exp"] = u.TokenExpiry
-
-	if err = p.setSessionValues(c, sessionValues); err != nil {
 		return uaaRes, u, err
 	}
 
