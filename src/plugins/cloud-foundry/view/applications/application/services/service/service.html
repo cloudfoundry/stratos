@@ -30,22 +30,34 @@
       <uib-tab index="0" heading="Choose Existing Instance">
         <ul class="existing-instance-list">
           <li class="existing-instance">
-            <input type="radio" ng-model="" ng-value="DatConn_03"/>DatConn_03</br>
-            <div>
-              <span>Plan</span><span>Free</span>
-            </div>
-            <div>
-              <span>Apps Attached</span><span>DoggyAdoption</br>Geekquiz</span>
-            </div>
+            <label>
+              <input type="radio" name="select-service-group" ng-value="DatConn_03"/>DatConn_03</br>
+            </label>
+            <table class="service-details">
+              <tr>
+                <td class="lbl">Plan</td>
+                <td class="val">Free</td>
+              </tr>
+              <tr>
+                <td class="lbl">Apps Attached</td>
+                <td class="val">DoggyAdoption</br>Geekquiz</td>
+              </tr>
+            </table>
           </li>
           <li class="existing-instance">
-            <input type="radio" ng-model="" ng-value="QuickConnect"/>QuickConnect</br>
-            <div>
-              <span>Plan</span><span>Dev</span>
-            </div>
-            <div>
-              <span>Apps Attached</span><span>Trailmap</br>Buddy System</br>Gate Crasher</span>
-            </div>
+            <label>
+              <input type="radio" name="select-service-group" ng-value="QuickConnect"/>QuickConnect</br>
+            </label>
+            <table class="service-details">
+              <tr>
+                <td class="lbl">Plan</td>
+                <td class="val">Dev</td>
+              </tr>
+              <tr>
+                <td class="lbl">Apps Attached</td>
+                <td class="val">Trailmap</br>Buddy System</br>Gate Crasher</td>
+              </tr>
+            </table>
           </li>
         </ul>
       </uib-tab>
