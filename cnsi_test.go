@@ -122,3 +122,51 @@ func TestRegisterHCFClusterWithBadV2Request(t *testing.T) {
 	}
 
 }
+
+func TestGetCNSIRecord(t *testing.T) {
+	t.Parallel()
+
+	pp := setupPortalProxy()
+	pp.CNSIs[mockCNSIGuid] = cnsiRecord{
+		APIEndpoint:           mockAPIEndpoint,
+		AuthorizationEndpoint: mockAuthEndpoint,
+	}
+
+	_, ok := pp.getCNSIRecord(mockCNSIGuid)
+	if !ok {
+		t.Error("Failed to retrieve registered CNSI")
+	}
+}
+
+func TestGetCNSIRecordMissing(t *testing.T) {
+	t.Parallel()
+
+	pp := setupPortalProxy()
+	pp.CNSIs[mockCNSIGuid] = cnsiRecord{
+		APIEndpoint:           mockAPIEndpoint,
+		AuthorizationEndpoint: mockAuthEndpoint,
+	}
+
+	_, ok := pp.getCNSIRecord("not-a-registered-cnsi-guid")
+	if ok {
+		t.Error("Returned a record when passed a non-registered GUID")
+	}
+}
+
+func TestListRegisteredCNSIs(t *testing.T) {
+	t.Skip("GET requests broken in mock server right now")
+	t.Parallel()
+
+	req := setupMockReq("GET", nil)
+
+	_, _, ctx, pp := setupHTTPTest(req)
+	pp.CNSIs[mockCNSIGuid] = cnsiRecord{
+		APIEndpoint:           mockAPIEndpoint,
+		AuthorizationEndpoint: mockAuthEndpoint,
+	}
+
+	err := pp.listRegisteredCNSIs(ctx)
+	if err != nil {
+		t.Errorf("Unable to retriece list of registered CNSIs from /cnsis: %v", err)
+	}
+}

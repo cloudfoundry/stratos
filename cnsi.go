@@ -50,6 +50,26 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	return nil
 }
 
+func (p *portalProxy) getCNSIRecord(guid string) (*cnsiRecord, bool) {
+	rec, ok := p.CNSIs[guid]
+	return &rec, ok
+}
+
+func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
+	jsonString, err := json.Marshal(p.CNSIs)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to retrieve list of CNSIs",
+			"Failed to retrieve list of CNSIs: %v", err,
+		)
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+	return nil
+}
+
 func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	var v2InfoReponse v2Info
 
@@ -61,7 +81,7 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 
 	uri.Path = "v2/info"
 	res, err := httpClient.Get(uri.String())
-	if err != nil {
+	if err != nil || res.StatusCode != 200 {
 		return v2InfoReponse, err
 	}
 

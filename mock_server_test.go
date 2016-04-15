@@ -31,6 +31,14 @@ func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, e
 }
 
 func setupMockReq(method string, formValues map[string]string) *http.Request {
+	if formValues == nil {
+		req, err := http.NewRequest(method, "http://127.0.0.1", nil)
+		if err != nil {
+			panic(err)
+		}
+		return req
+	}
+
 	form := url.Values{}
 
 	for key, value := range formValues {
