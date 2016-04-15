@@ -149,11 +149,11 @@ func mkTokenRecordKey(cnsiID string, userGUID string) string {
 
 func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
 	key := u.UserGUID
-	var tokenRecord tokenRecord
-	tokenRecord.TokenExpiry = u.TokenExpiry
-	tokenRecord.AuthToken = authTok
-	tokenRecord.RefreshToken = refreshTok
-
+	tokenRecord := tokenRecord{
+		TokenExpiry:  u.TokenExpiry,
+		AuthToken:    authTok,
+		RefreshToken: refreshTok,
+	}
 	p.UAATokenMapMut.Lock()
 	p.UAATokenMap[key] = tokenRecord
 	p.UAATokenMapMut.Unlock()
@@ -163,10 +163,11 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 
 func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) error {
 	key := mkTokenRecordKey(cnsiID, u.UserGUID)
-	var tokenRecord tokenRecord
-	tokenRecord.TokenExpiry = u.TokenExpiry
-	tokenRecord.AuthToken = authTok
-	tokenRecord.RefreshToken = refreshTok
+	tokenRecord := tokenRecord{
+		TokenExpiry:  u.TokenExpiry,
+		AuthToken:    authTok,
+		RefreshToken: refreshTok,
+	}
 
 	p.CNSITokenMapMut.Lock()
 	p.CNSITokenMap[key] = tokenRecord
