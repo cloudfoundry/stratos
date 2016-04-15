@@ -29,15 +29,14 @@
    * @memberof cloud-foundry.view.applications
    * @name AddAppWorkflowController
    * @constructor
-   * @property {object} workflow - workflow definition
-   * @property {object} subflows - mapping of sub-workflow definitions
-   * @property {object} options - object to path in to wizard directive
+   * @property {data} data - a data bag
    */
   function AddAppWorkflowController() {
     var that = this;
     var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
+    this.data = {};
 
-    this.workflow = {
+    this.data.workflow = {
       allowJump: false,
       allowBack: false,
       title: gettext('Add Application'),
@@ -60,13 +59,13 @@
           templateUrl: path + 'delivery.html',
           nextBtnText: gettext('Next'),
           onNext: function () {
-            that.appendSubflow(that.subflows[that.options.subflow]);
+            that.appendSubflow(that.data.subflows[that.options.subflow]);
           }
         }
       ]
     };
 
-    this.subflows = {
+    this.data.subflows = {
       pipeline: [
         {
           ready: true,
@@ -112,7 +111,7 @@
     };
 
     this.options = {
-      workflow: that.workflow
+      workflow: that.data.workflow
     };
   }
 
@@ -126,7 +125,7 @@
      * @returns {void}
      */
     appendSubflow: function (subflow) {
-      [].push.apply(this.workflow.steps, subflow);
+      [].push.apply(this.data.workflow.steps, subflow);
     }
   });
 
