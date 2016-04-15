@@ -81,9 +81,8 @@
     * Delete a Particular App
     * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/apps/delete_a_particular_app.html
     */
-    DeleteApp: function (guid, params) {
+    DeleteApp: function (guid) {
       var config = {};
-      config.params = params;
       config.url = '/api/cf/v2/apps/' + guid + '';
       config.method = 'DELETE';
       return this.$http(config);
@@ -272,6 +271,17 @@
       config.url = '/api/cf/v2/apps/' + guid + '';
       config.method = 'PUT';
       config.data = value;
+      return this.$http(config);
+    },
+
+    /*
+     * Get the stats for STARTED App
+     * https://apidocs.cloudfoundry.org/231/apps/get_detailed_stats_for_a_started_app.html
+     */
+    GetAppStats: function(guid) {
+      var config = {};
+      config.url = '/api/cf/v2/apps/' + guid + '';
+      config.method = 'GET';
       return this.$http(config);
     }
 
