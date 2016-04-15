@@ -1,3 +1,53 @@
+
+.panel {
+  .select-instance-panel {
+    padding-top: 100px;
+
+    // .select-instance-tabs {
+      // border: 0;
+      // margin: 0;
+    // }
+
+    ul.existing-instance-list {
+      list-style-type: none;
+      // border: 0px;
+      // margin: 0px;
+      padding-left: 25px;
+
+      li.existing-instance {
+        border: 1px solid black;
+        margin-top: 5px;
+        padding-top: 10px;
+        padding-left: 10px;
+
+        label {
+          input {
+            margin-right: 25px;
+          }
+        }
+
+        table.service-details {
+          width: 100%;
+
+          tbody {
+            tr {
+              td.lbl {
+                padding-left: 40px;
+                vertical-align: text-top;
+                width: 40%;
+              }
+
+              td.val {
+                width: 60%;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 .service-detail-actions {
   padding-top: $hpe-unit-space;
   padding-right: 0;
