@@ -49,7 +49,10 @@
       name: null,
       domain: null,
       source: 'github',
-      repo: null
+      repo: null,
+      branch: null,
+      dockerRegistry: null,
+      buildContainer: null
     };
 
     this.data.workflow = {
@@ -104,7 +107,17 @@
           ready: true,
           title: gettext('Select Repository'),
           templateUrl: path + 'pipeline-subflow/select-repository.html',
-          nextBtnText: gettext('Next')
+          nextBtnText: gettext('Next'),
+          onNext: function () {
+            if (that.userInput.repo) {
+              return that.githubModel.branches(that.userInput.repo.full_name)
+                .then(function () {
+                  var branches = _.map(that.githubModel.data.branches,
+                                       function (o) { return { label: o.name, value: o }; });
+                  [].push.apply(that.options.branches, branches);
+                });
+            }
+          }
         },
         {
           ready: true,
@@ -188,7 +201,15 @@
           value: 'git'
         }
       ],
-      repos: []
+      repos: [],
+      branches: [],
+      dockerRegistries: [],
+      buildContainers: [
+        { label: 'Java', value: 'java' },
+        { label: 'Node.js', value: 'nodejs' },
+        { label: 'PHP', value: 'php' },
+        { label: 'Python', value: 'python' }
+      ]
     };
   }
 

@@ -1,1 +1,34 @@
-<h1>Pipeline Details</h1>
+<h4 translate>Pipeline Details</h4>
+<form>
+  <div class="form-group">
+    <label class="control-label" translate>Repository Selected</label>
+    <input class="form-control" type="text"
+      ng-value="wizardCtrl.options.userInput.repo.name" readonly>
+  </div>
+  <div class="form-group">
+    <label class="control-label" translate>Repository Full Name</label>
+    <input class="form-control" type="text"
+      ng-value="wizardCtrl.options.userInput.repo.full_name" readonly>
+  </div>
+  <div class="form-group">
+    <label class="control-label" translate>Branch</label>
+    <select-input input-model="wizardCtrl.options.userInput.branch"
+      input-options="wizardCtrl.options.branches"
+      placeholder="Select branch" tabindex="0"
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
+  </div>
+  <div class="form-group">
+    <label class="control-label" translate>Docker Registry</label>
+    <select-input input-model="wizardCtrl.options.userInput.dockerRegistry"
+      input-options="wizardCtrl.options.dockerRegistries"
+      placeholder="Select registry" tabindex="0"
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
+  </div>
+  <div class="form-group">
+    <label class="control-label" translate>Build Container</label>
+    <select-input input-model="wizardCtrl.options.userInput.buildContainer"
+      input-options="wizardCtrl.options.buildContainers"
+      placeholder="Select build container" tabindex="0"
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
+  </div>
+</form>
