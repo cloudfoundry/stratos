@@ -142,6 +142,10 @@ docker logs stratos-ui
 ```
 docker exec -it stratos-ui /bin/bash
 ```
+or, from the stratos-deploy project
+```
+docker-compose run --rm ui bash
+```
 
 ### Running Karma tests in container
 ```
