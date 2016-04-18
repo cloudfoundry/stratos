@@ -76,7 +76,7 @@
     */
     addService: function() {
       //TBD Addservice stuff
-      this.flyoutActive = false;
+      // this.flyoutActive = false;
     },
 
     /**

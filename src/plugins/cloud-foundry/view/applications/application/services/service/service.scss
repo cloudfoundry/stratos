@@ -3,207 +3,82 @@
   .select-instance-panel {
     padding-top: 100px;
 
-    // .select-instance-tabs {
-      // border: 0;
-      // margin: 0;
-    // }
+    .select-instance-tabs {
+      padding: 0;
+    }
+  }
+}
 
-    ul.existing-instance-list {
-      list-style-type: none;
-      // border: 0px;
-      // margin: 0px;
-      padding-left: 25px;
+.service-panel {
+  .service-summary {
+    .service-badge {
+      border: 1px solid red;
+      padding: 0;
 
-      li.existing-instance {
-        border: 1px solid black;
-        margin-top: 5px;
-        padding-top: 10px;
-        padding-left: 10px;
-
-        label {
-          input {
-            margin-right: 25px;
-          }
-        }
-
-        table.service-details {
-          width: 100%;
-
-          tbody {
-            tr {
-              td.lbl {
-                padding-left: 40px;
-                vertical-align: text-top;
-                width: 40%;
-              }
-
-              td.val {
-                width: 60%;
-              }
-            }
-          }
-        }
+      i {
+        margin: 0;
+        padding: 0;
       }
     }
   }
 }
 
-.service-detail-actions {
-  padding-top: $hpe-unit-space;
-  padding-right: 0;
-  padding-left: 0;
-  margin-left: 0;
-  margin-right: 0;
-  border-top: 1px solid $silver;
-}
-
-.service-detail-header {
-  margin-top: $hpe-unit-space * -2;
-}
-
 .service-detail {
-  padding-left: $hpe-unit-space * 5;
-  padding-right: $hpe-unit-space * 5;
-  margin-top: $hpe-unit-space * -2.5;
-}
-
-.service-detail .panel {
-  box-shadow: none;
-}
-
-.flyout-header {
-  margin-left: $hpe-unit-space * -5;
-  margin-top: $hpe-unit-space * 5;
-}
-
-.add-button {
-  margin-left: $hpe-unit-space / 2;
-}
-
-.app-title, .app-label, .app-category {
-  text-transform: capitalize;
-}
-
-.service-badge .service-icon {
-  padding-top: 0;
-}
-
-.service-category h4 {
-  padding-top: 0;
-  margin-top: 0;
-  margin-left: $hpe-unit-space;
-}
-
-.select-instance-panel {
-  padding-top: $hpe-unit-space * 4;
-
-  .instance {
-    padding-left:  $hpe-unit-space;
+  .page-title {
+    h2 {
+      padding-left: 25px;
+    }
   }
 }
 
 .service-panel-confirm {
-
-  padding-left: 0;
+  padding: 0;
 
   .message {
-    height: $hpe-unit-space * 3;
-    line-height: $hpe-unit-space * 3;
-    margin-left: 0;
-    padding-left: 0;
+    margin: 0;
+    padding: 0;
 
-  }
+    .message-icon {
+      height: 20px;
+      margin: 0;
+      padding: 0;
+      width: 25px;
 
-  .message .message-icon {
-      margin-left: 0;
-      padding-left: 0;
-      padding-right: 0;
-      margin-right: 0;
-
-       i {
+      i {
         color: green;
-        font-size: 200%;
-        padding-top: 0;
-        margin-right: 0;
-        padding-right: 0;
+        height: 10px;
+        padding: 0;
+        padding-left: 10px;
+        padding-top: 10px;
       }
+    }
+    .message-text {
+      margin-left: 5px;
+    }
   }
-
-  .message  .message-text {
-    margin-left: $hpe-unit-space * -7;
-    padding-top: $hpe-unit-space / 6;
-  }
-
-  .message .category-name {
-    text-transform: capitalize;
-  }
-
-  h4 {
-   margin-top: 0;
-  }
-
   .caution-message {
-    width: 50%;
-    margin: 0 auto;
-    padding: 20px;
+    margin: 0;
+    padding-left: 150px;
+    padding-top: 100px;
 
-    i {
-      padding-left: $hpe-unit-space / 6;
-      margin-left: $hpe-unit-space / 6;
-      margin-right: $hpe-unit-space / 6;
-      padding-right:$hpe-unit-space / 6;
-      margin-top: 0;
-      padding-top: 0;
-      color: $sunglow;
-    }
+    .message-icon {
+      margin: 0;
+      padding: 0;
+      width: 25px;
 
-    .caution-text {
-       margin-left: 0;
-    }
-  }
-
-}
-
-
-
-.panel {
-  .select-instance-panel {
-    padding-top: $hpe-unit-space * 4;
-
-    .existing-instance-list {
-      list-style-type: none;
-      padding-left: $hpe-unit-space;
-
-      .existing-instance {
-        border: 1px solid black;
-        margin-top: $hpe-unit-space / 6;
-        padding-top: $hpe-unit-space / 2;
-        padding-left: $hpe-unit-space / 2;
-
-        label {
-          input {
-            margin-right: $hpe-unit-space;
-          }
-        }
-
-        .service-details {
-          width: 100%;
-
-          tbody {
-            tr {
-              .lbl {
-                padding-left: $hpe-unit-space * 2;
-                vertical-align: text-top;
-                width: 40%;
-              }
-              .val {;
-                width: 60%
-              }
-            }
-          }
-        }
+      i {
+        color: $sunglow;
+        height: 10px;
+        padding: 10px;
       }
     }
+    .caution-text {
+      padding-left: 25px;
+      padding-top: 5px;
+    }
+  }
+  .manifest {
+    margin: 0;
+    padding-left: 160px;
   }
 }
-

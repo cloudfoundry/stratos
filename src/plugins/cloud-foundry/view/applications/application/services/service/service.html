@@ -1,48 +1,36 @@
 <div class="service-detail">
-  <div class="service-detail-header">
-    <div class="row">
-      <h2 translate> Add Service to <span
-          class="app-title">{{ applicationServicesCtrl.appModel.application.summary.name}}</span></h2>
-    </div>
-    <div class="panel panel-default" ng-switch on="daStep">
-      <div ng-switch-when="preview">
-        <div ng-include=""
-             src="'plugins/cloud-foundry/view/applications/application/services/service/preview/body.html'"></div>
-      </div>
-      <div ng-switch-when="instance">
-        <div ng-include=""
-             src="'plugins/cloud-foundry/view/applications/application/services/service/instance/body.html'"></div>
-      </div>
-      <div ng-switch-when="confirm">
-        <div ng-include=""
-             src="'plugins/cloud-foundry/view/applications/application/services/service/confirm/body.html'"></div>
-      </div>
-    </div>
+  <div class="page-title col-md-12 row">
+    <h2 translate> Add Service to <span
+        class="app-title">{{ applicationServicesCtrl.appModel.application.summary.name}}</span></h2>
+  </div>
 
-    <div class="col-md-12 service-detail-actions" ng-switch on="daStep">
-      <div ng-switch-when="preview">
-        <div ng-include=""
-             src="'plugins/cloud-foundry/view/applications/application/services/service/preview/actions.html'"></div>
-      </div>
-      <div ng-switch-when="instance">
-        <div ng-include=""
-             src="'plugins/cloud-foundry/view/applications/application/services/service/instance/actions.html'"></div>
-      </div>
-      <div ng-switch-when="confirm">
-        <div ng-include=""
-             src="'plugins/cloud-foundry/view/applications/application/services/service/confirm/actions.html'"></div>
-      </div>
+  <div class="col-md-12 panel panel-default" ng-switch on="addServiceStep">
+    <div ng-switch-when="confirm">
+      <div ng-include=""
+           src="'plugins/cloud-foundry/view/applications/application/services/service/confirm/body.html'"></div>
+    </div>
+    <div ng-switch-default>
+      <div ng-include=""
+           src="'plugins/cloud-foundry/view/applications/application/services/service/create-instance/body.html'"></div>
+    </div>
+  </div>
+
+  <div class="col-md-12 service-detail-actions" ng-switch on="addServiceStep">
+    <div ng-switch-when="confirm">
+      <div ng-include=""
+           src="'plugins/cloud-foundry/view/applications/application/services/service/confirm/actions.html'"></div>
+    </div>
+    <div ng-switch-default>
+      <div ng-include=""
+           src="'plugins/cloud-foundry/view/applications/application/services/service/create-instance/actions.html'"></div>
     </div>
   </div>
 </div>
 
-  <p>
-    <label>Type the state you want to show </label><br/>
-    <select ng-model="daStep">
-      <option value="preview">Preview
-      <option value="instance">Instance
-      <option value="confirm">Confirm
-    </select>
-  </p>
-
-
+<p>
+  <label>Type the state you want to show </label><br/>
+  <select ng-model="addServiceStep">
+    <option value="create-instance">Create Instance
+    <option value="confirm">Confirm
+  </select>
+</p>
