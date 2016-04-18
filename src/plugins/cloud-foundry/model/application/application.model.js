@@ -39,7 +39,8 @@
     this.application = {
       summary: {
         state: 'LOADING'
-      }
+      },
+      stats: {}
     };
     this.appStateSwitchTo = '';
   }
@@ -176,6 +177,58 @@
       this.stopApp(guid).then(function () {
         that.startApp(guid);
       });
+    },
+
+    /**
+     * @function create
+     * @memberof cloud-foundry.model.application
+     * @description Create an application
+     * @param {object} newAppSpec - values for the new Application
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    create: function (newAppSpec) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .CreateApp(newAppSpec)
+        .then(function (response) {
+          that.getAppSummary(response.data.metadata.guid);
+        });
+    },
+
+    /**
+     * @function update
+     * @memberof cloud-foundry.model.application
+     * @description Update an application
+     * @param {string} guid - Application identifier
+     * @param {object} newAppSpec - values to update Application
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    update: function (guid, newAppSpec) {
+      var that = this;
+      var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
+      return applicationApi.UpdateApp(guid, newAppSpec)
+        .then(function (response) {
+          that.getAppSummary(response.data.metadata.guid);
+        });
+    },
+
+    /**
+     * @function getAppStats
+     * @memberof cloud-foundry.model.application
+     * @description Returns the stats for the STARTED app
+     * @param {string} guid - the app guid
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    getAppStats: function (guid, params) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetDetailedStatsForStartedApp(guid, params)
+        .then(function (response) {
+          that.application.stats = response.data;
+        });
     },
 
     /**
