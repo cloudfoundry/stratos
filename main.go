@@ -71,7 +71,7 @@ func start(p *portalProxy) {
 	p.initCookieStore()
 	p.registerRoutes(e)
 
-	engine := standard.NewFromTLS(p.Config.TLSAddress, p.Config.TLSCertFile, p.Config.TLSCertKey)
+	engine := standard.WithTLS(p.Config.TLSAddress, p.Config.TLSCertFile, p.Config.TLSCertKey)
 	//engine.Server.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler))
 	e.Run(engine)
 }

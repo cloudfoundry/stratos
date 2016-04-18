@@ -25,7 +25,7 @@ const mockUserGuid = "asd-gjfg-bob"
 
 func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, echo.Context) {
 	e := echo.New()
-	ctx := echo.NewContext(&standard.Request{Request: req}, &standard.Response{ResponseWriter: res}, e)
+	ctx := e.NewContext(standard.NewRequest(req, nil), standard.NewResponse(res, nil))
 
 	return e, ctx
 }
