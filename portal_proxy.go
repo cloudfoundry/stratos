@@ -17,20 +17,20 @@ type portalProxy struct {
 	Config      portalConfig
 	CookieStore *sessions.CookieStore
 
-	UAATokenMapMut sync.Mutex
+	UAATokenMapMut sync.RWMutex
 	UAATokenMap    map[string]tokenRecord
 
-	CNSITokenMapMut sync.Mutex
+	CNSITokenMapMut sync.RWMutex
 	CNSITokenMap    map[string]tokenRecord
 
-	CNSIMut sync.Mutex
+	CNSIMut sync.RWMutex
 	CNSIs   map[string]cnsiRecord
 }
 
 type tokenRecord struct {
 	AuthToken    string
 	RefreshToken string
-	TokenExpiry  int
+	TokenExpiry  int64
 }
 
 type cnsiRecord struct {

@@ -9,7 +9,7 @@ import (
 
 type userTokenInfo struct {
 	UserGUID    string `json:"user_id"`
-	TokenExpiry int    `json:"exp"`
+	TokenExpiry int64  `json:"exp"`
 }
 
 func getUserTokenInfo(tok string) (u *userTokenInfo, err error) {
