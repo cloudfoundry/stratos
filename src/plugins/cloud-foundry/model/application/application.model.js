@@ -132,9 +132,11 @@
         .then(
           function (response) {
             that.onAppStateChangeSuccess(response);
+            return response;
           },
-          function () {
+          function (error) {
             that.onAppStateChangeFailure();
+            return error;
           }
         );
     },
@@ -156,9 +158,11 @@
         .then(
           function (response) {
             that.onAppStateChangeSuccess(response);
+            return response;
           },
-          function () {
+          function (error) {
             that.onAppStateChangeFailure();
+            return error;
           }
         );
     },

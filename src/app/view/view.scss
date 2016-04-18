@@ -101,6 +101,7 @@
         left: $hpe-unit-space * 5;
         margin: 0;
         padding: 0;
+        z-index: 1;
       }
 
       .wizard-step {
@@ -110,6 +111,12 @@
         bottom: 0;
         margin: 0;
         padding: 0 $hpe-unit-space * 5 0 $hpe-unit-space * 6;
+        overflow-y: auto;
+
+        .step-title {
+          margin-top: 0;
+          font-size: $hpe-unit-space;
+        }
       }
     }
 
@@ -133,4 +140,3 @@
     }
   }
 }
-

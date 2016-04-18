@@ -22,19 +22,31 @@
     };
   }
 
-  AddAppWorkflowController.$inject = [];
+  AddAppWorkflowController.$inject = [
+    'app.model.modelManager',
+  ];
 
   /**
    * @namespace cloud-foundry.view.applications.AddAppWorkflowController
    * @memberof cloud-foundry.view.applications
    * @name AddAppWorkflowController
    * @constructor
-   * @property {data} data - a data bag
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @property {object} model - the Cloud Foundry applications model
+   * @property {object} data - a data bag
+   * @property {object} userInput - user's input about new application
    */
-  function AddAppWorkflowController() {
+  function AddAppWorkflowController(modelManager) {
     var that = this;
     var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
+
+    this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.data = {};
+
+    this.userInput = {
+      name: null,
+      domain: null
+    };
 
     this.data.workflow = {
       allowJump: false,
@@ -47,7 +59,13 @@
         {
           title: gettext('Name'),
           templateUrl: path + 'name.html',
-          nextBtnText: gettext('Next')
+          form: 'application-name-form',
+          nextBtnText: gettext('Create and continue'),
+          onNext: function () {
+            that.createApp(that.userInput.name, that.userInput.domain).then(function (response) {
+              console.log(response);
+            });
+          }
         },
         {
           title: gettext('Services'),
@@ -95,7 +113,7 @@
           ready: true,
           title: gettext('Deploy'),
           templateUrl: path + 'pipeline-subflow/deploy.html',
-          nextBtnText: gettext('Finished code change'),
+          nextBtnText: gettext('Finished with code change'),
           isLastStep: true
         }
       ],
@@ -104,14 +122,21 @@
           ready: true,
           title: gettext('Deploy'),
           templateUrl: path + 'cli-subflow/deploy.html',
-          nextBtnText: gettext('Finished code change'),
+          nextBtnText: gettext('Finished with code change'),
           isLastStep: true
         }
       ]
     };
 
     this.options = {
-      workflow: that.data.workflow
+      workflow: that.data.workflow,
+      userInput: this.userInput,
+      domains: [
+        { label: 'domain A', value: 'domain-a'},
+        { label: 'domain B', value: 'domain-b'},
+        { label: 'domain C', value: 'domain-c'},
+        { label: 'domain D', value: 'domain-d'}
+      ]
     };
   }
 
@@ -126,7 +151,24 @@
      */
     appendSubflow: function (subflow) {
       [].push.apply(this.data.workflow.steps, subflow);
+    },
+
+    /**
+     * @function createApp
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description append a sub workflow to the main workflow
+     * @param {string} name - a unique application name
+     * @param {string} domain - the selected domain name
+     * @returns {Promise} a promise object
+     */
+    createApp: function (name, domain) {
+      console.log(name, domain);
+      return this.model.stopApp({
+        name: name,
+        domain: domain
+      });
     }
+
   });
 
 })();

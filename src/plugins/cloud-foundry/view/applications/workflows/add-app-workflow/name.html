@@ -1,1 +1,34 @@
-<h1>Application Name</h1>
+<h4 class="step-title" translate>Application Name</h4>
+<p translate>
+  Create a unique name for your application. The name you create will be
+  reserved even if you exit.
+</p>
+
+<form class="ng-pristine ng-valid">
+  <div class="form-group">
+    <label class="control-label"
+      for="add-app-workflow-application-name" required translate>
+      Application name
+    </label>
+    <input ng-model="wizardCtrl.options.userInput.name" type="text" class="form-control"
+      id="add-app-workflow-application-name" required autofocus>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label" translate>Domain</label>
+    <select-input
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+      input-model="wizardCtrl.options.userInput.domain"
+      input-options="wizardCtrl.options.domains"
+      placeholder="Select Domain"
+      tabindex="0">
+    </select-input>
+  </div>
+</form>
+
+<br><br>
+<!--<tt>{{ wizardCtrl.options.domains }}</tt><br><br>-->
+<!--<tt>{{ wizardCtrl.steps[wizardCtrl.currentIndex].form }}</tt><br><br>-->
+<!--<tt>{{ wizardCtrl }}</tt><br><br>-->
+
+
