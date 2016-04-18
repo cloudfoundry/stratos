@@ -54,12 +54,16 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 }
 
 func (p *portalProxy) getCNSIRecord(guid string) (*cnsiRecord, bool) {
+	p.CNSIMut.RLock()
 	rec, ok := p.CNSIs[guid]
+	p.CNSIMut.RUnlock()
 	return &rec, ok
 }
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
+	p.CNSIMut.RLock()
 	jsonString, err := json.Marshal(p.CNSIs)
+	p.CNSIMut.RUnlock()
 	if err != nil {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
