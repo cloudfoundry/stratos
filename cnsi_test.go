@@ -154,7 +154,6 @@ func TestGetCNSIRecordMissing(t *testing.T) {
 }
 
 func TestListRegisteredCNSIs(t *testing.T) {
-	t.Skip("GET requests broken in mock server right now")
 	t.Parallel()
 
 	req := setupMockReq("GET", nil)
