@@ -107,16 +107,6 @@
       expect(UpdateApp.response['201'].body.metadata.guid).toBe(guid);
     });
 
-    it('removeApp', function() {
-      var guid = "84a911b3-16f7-4f47-afa4-581c86018600";
-      var params = {};
-      var DeleteApp = mock.cloudFoundryAPI.Apps.DeleteApp(guid, params);
-      $httpBackend.when('DELETE', DeleteApp.url).respond(204, DeleteApp.response['204'].body);
-      $httpBackend.expectDELETE(DeleteApp.url);
-      applicationModel.remove(guid);
-      $httpBackend.flush();
-    });
-
     it('getAppStats', function () {
       var guid = "84a911b3-16f7-4f47-afa4-581c86018600";
       var params = {};

@@ -215,20 +215,6 @@
     },
 
     /**
-     * @function delete
-     * @memberof cloud-foundry.model.application
-     * @description Remove application
-     * @param {object} application - the service instance to remove
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    remove: function (guid, params) {
-      var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-      return applicationApi.DeleteApp(guid, params)
-        .then(function () {});
-    },
-
-    /**
      * @function getAppStats
      * @memberof cloud-foundry.model.application
      * @description Returns the stats for the STARTED app
