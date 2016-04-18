@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -81,8 +84,16 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 
 	uri.Path = "v2/info"
 	res, err := httpClient.Get(uri.String())
-	if err != nil || res.StatusCode != 200 {
+	if err != nil {
 		return v2InfoReponse, err
+	}
+
+	if res.StatusCode != 200 {
+		buf := &bytes.Buffer{}
+		io.Copy(buf, res.Body)
+		defer res.Body.Close()
+
+		return v2InfoReponse, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
 	}
 
 	dec := json.NewDecoder(res.Body)
