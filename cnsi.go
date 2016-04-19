@@ -100,8 +100,10 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	return v2InfoReponse, nil
 }
 
-func (p *portalProxy) getCNSIRecord(guid string) (*cnsiRecord, bool) {
-	rec, ok := p.getCNSIRecord(guid)
+func (p *portalProxy) getCNSIRecord(guid string) (cnsiRecord, bool) {
+	p.CNSIMut.RLock()
+	rec, ok := p.CNSIs[guid]
+	p.CNSIMut.RUnlock()
 
 	return rec, ok
 }
