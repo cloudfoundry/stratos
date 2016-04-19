@@ -123,7 +123,8 @@ func (p *portalProxy) getCNSITokenRecord(cnsiGuid, userGuid string) (tokenRecord
 	return t, ok
 }
 
-func (p *portalProxy) setCNSITokenRecord(key string, t tokenRecord) {
+func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokenRecord) {
+	key := mkTokenRecordKey(cnsiGUID, userGUID)
 	p.CNSITokenMapMut.Lock()
 	p.CNSITokenMap[key] = t
 	p.CNSITokenMapMut.Unlock()

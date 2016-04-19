@@ -172,16 +172,15 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 	return nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) error {
-	key := mkTokenRecordKey(cnsiID, u.UserGUID)
+func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (tokenRecord, error) {
 	tokenRecord := tokenRecord{
 		TokenExpiry:  u.TokenExpiry,
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 	}
-	p.setCNSITokenRecord(key, tokenRecord)
+	p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
 
-	return nil
+	return tokenRecord, nil
 }
 
 func (p *portalProxy) getUAATokenRecord(key string) tokenRecord {
