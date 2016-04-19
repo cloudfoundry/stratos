@@ -12,13 +12,17 @@
 .service-panel {
   .service-summary {
     .service-badge {
-      border: 1px solid red;
+      // border: 1px solid red;
       padding: 0;
 
       i {
         margin: 0;
         padding: 0;
       }
+    }
+    .service-category {
+      padding: 0;
+      margin-left: 25px;
     }
   }
 }
@@ -80,5 +84,6 @@
   .manifest {
     margin: 0;
     padding-left: 160px;
+    padding-top: 25px;
   }
 }
