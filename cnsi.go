@@ -45,19 +45,11 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	newCNSI.APIEndpoint = apiEndpoint
 	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
 	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
+	p.setCNSIRecord(guid, newCNSI)
 
-	p.CNSIMut.Lock()
-	p.CNSIs[guid] = newCNSI
-	p.CNSIMut.Unlock()
+	c.String(http.StatusCreated, guid)
 
 	return nil
-}
-
-func (p *portalProxy) getCNSIRecord(guid string) (*cnsiRecord, bool) {
-	p.CNSIMut.RLock()
-	rec, ok := p.CNSIs[guid]
-	p.CNSIMut.RUnlock()
-	return &rec, ok
 }
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
@@ -106,4 +98,31 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	}
 
 	return v2InfoReponse, nil
+}
+
+func (p *portalProxy) getCNSIRecord(guid string) (*cnsiRecord, bool) {
+	rec, ok := p.getCNSIRecord(guid)
+
+	return rec, ok
+}
+
+func (p *portalProxy) setCNSIRecord(guid string, c cnsiRecord) {
+	p.CNSIMut.RLock()
+	p.CNSIs[guid] = c
+	p.CNSIMut.RUnlock()
+}
+
+func (p *portalProxy) getCNSITokenRecord(cnsiGuid, userGuid string) (tokenRecord, bool) {
+	key := mkTokenRecordKey(cnsiGuid, userGuid)
+	p.CNSITokenMapMut.RLock()
+	t, ok := p.CNSITokenMap[key]
+	p.CNSITokenMapMut.RUnlock()
+
+	return t, ok
+}
+
+func (p *portalProxy) setCNSITokenRecord(key string, t tokenRecord) {
+	p.CNSITokenMapMut.Lock()
+	p.CNSITokenMap[key] = t
+	p.CNSITokenMapMut.Unlock()
 }

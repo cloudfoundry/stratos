@@ -85,13 +85,12 @@ func (p *portalProxy) login(c echo.Context, endpoint string) (uaaRes *UAARespons
 		return uaaRes, u, errors.New("Needs username and password")
 	}
 
-	uaaRes, err = getUAAToken(username, password, endpoint, p.Config.UAAClient, p.Config.UAAClientSecret)
+	uaaRes, err = p.getUAATokenWithCreds(username, password, endpoint)
 	if err != nil {
 		return uaaRes, u, err
 	}
 
-	accessToken := strings.TrimPrefix(uaaRes.AccessToken, "bearer ")
-	u, err = getUserTokenInfo(accessToken)
+	u, err = getUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
 		return uaaRes, u, err
 	}
@@ -112,19 +111,33 @@ func (p *portalProxy) logout(c echo.Context) error {
 	return nil
 }
 
-func getUAAToken(username, password, authEndpoint, client, clientSecret string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithCreds(username, password, authEndpoint string) (*UAAResponse, error) {
 	body := url.Values{}
 	body.Set("grant_type", "password")
 	body.Set("username", username)
 	body.Set("password", password)
 	body.Set("response_type", "token")
 
+	return p.getUAAToken(body, authEndpoint)
+}
+
+func (p *portalProxy) getUAATokenWithRefreshToken(refreshToken, authEndpoint string) (*UAAResponse, error) {
+	body := url.Values{}
+	body.Set("grant_type", "password")
+	body.Set("refresh_token", refreshToken)
+	body.Set("response_type", "token")
+
+	return p.getUAAToken(body, authEndpoint)
+}
+
+func (p *portalProxy) getUAAToken(body url.Values, authEndpoint string) (*UAAResponse, error) {
+
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create request for UAA: %v", err)
 	}
 
-	req.SetBasicAuth(client, clientSecret)
+	req.SetBasicAuth(p.Config.UAAClient, p.Config.UAAClientSecret)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	res, err := httpClient.Do(req)
@@ -154,9 +167,7 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 	}
-	p.UAATokenMapMut.Lock()
-	p.UAATokenMap[key] = tokenRecord
-	p.UAATokenMapMut.Unlock()
+	p.setUAATokenRecord(key, tokenRecord)
 
 	return nil
 }
@@ -168,10 +179,21 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 	}
-
-	p.CNSITokenMapMut.Lock()
-	p.CNSITokenMap[key] = tokenRecord
-	p.CNSITokenMapMut.Unlock()
+	p.setCNSITokenRecord(key, tokenRecord)
 
 	return nil
+}
+
+func (p *portalProxy) getUAATokenRecord(key string) tokenRecord {
+	p.UAATokenMapMut.RLock()
+	t := p.UAATokenMap[key]
+	p.UAATokenMapMut.RUnlock()
+
+	return t
+}
+
+func (p *portalProxy) setUAATokenRecord(key string, t tokenRecord) {
+	p.UAATokenMapMut.Lock()
+	p.UAATokenMap[key] = t
+	p.UAATokenMapMut.Unlock()
 }

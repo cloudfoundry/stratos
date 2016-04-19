@@ -13,7 +13,8 @@ type userTokenInfo struct {
 }
 
 func getUserTokenInfo(tok string) (u *userTokenInfo, err error) {
-	splits := strings.Split(tok, ".")
+	accessToken := strings.TrimPrefix(tok, "bearer ")
+	splits := strings.Split(accessToken, ".")
 
 	if len(splits) < 3 {
 		return u, errors.New("Token was poorly formed.")
