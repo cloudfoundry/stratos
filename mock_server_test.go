@@ -108,7 +108,7 @@ func setupMockServer(t *testing.T, modifiers ...mockServerFunc) *httptest.Server
 
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if mServer.Route != r.URL.Path {
-			t.Errorf("Wanted path '%s, got path '%s'", mServer.Route, r.URL.Path)
+			t.Errorf("Wanted path '%s', got path '%s'", mServer.Route, r.URL.Path)
 		}
 		if mServer.Method != r.Method {
 			t.Errorf("Wanted method '%s', got method '%s'", mServer.Method, r.Method)
