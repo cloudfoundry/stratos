@@ -23,7 +23,7 @@
   }
 
   AddAppWorkflowController.$inject = [
-    'app.model.modelManager',
+    'app.model.modelManager'
   ];
 
   /**
@@ -62,9 +62,6 @@
           form: 'application-name-form',
           nextBtnText: gettext('Create and continue'),
           onNext: function () {
-            that.createApp(that.userInput.name, that.userInput.domain).then(function (response) {
-              console.log(response);
-            });
           }
         },
         {
@@ -131,11 +128,16 @@
     this.options = {
       workflow: that.data.workflow,
       userInput: this.userInput,
+
+      // mock data
       domains: [
-        { label: 'domain A', value: 'domain-a'},
-        { label: 'domain B', value: 'domain-b'},
-        { label: 'domain C', value: 'domain-c'},
-        { label: 'domain D', value: 'domain-d'}
+        { label: 'domain-28.example.com', value: 'domain-28.example.com'},
+        { label: 'customer-app-domain1.com', value: 'customer-app-domain1.com'},
+        { label: 'customer-app-domain2.com', value: 'customer-app-domain2.com'},
+        { label: 'domain-38.example.com', value: 'domain-38.example.com'},
+        { label: 'domain-39.example.com', value: 'domain-39.example.com'},
+        { label: 'domain-40.example.com', value: 'domain-40.example.com'},
+        { label: 'domain-41.example.com', value: 'domain-41.example.com'}
       ]
     };
   }
@@ -156,17 +158,12 @@
     /**
      * @function createApp
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
-     * @description append a sub workflow to the main workflow
+     * @description create an application
      * @param {string} name - a unique application name
      * @param {string} domain - the selected domain name
      * @returns {Promise} a promise object
      */
     createApp: function (name, domain) {
-      console.log(name, domain);
-      return this.model.stopApp({
-        name: name,
-        domain: domain
-      });
     }
 
   });
