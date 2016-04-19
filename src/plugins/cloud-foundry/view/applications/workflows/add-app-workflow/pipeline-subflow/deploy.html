@@ -1,1 +1,35 @@
-<h1>Deploy App</h1>
+<h4 translate>Deploy App</h4>
+<p translate>You are almost done!</p>
+<p translate>To deploy your app make a code change in your repository, this will automatically trigger the delivery pipeline:</p>
+<p translate>Add a manifest.yml to your source code or update your existing one by copying & pasting the code below:</p>
+<div class="row">
+  <div class="col-md-6">
+    <span translate>We have:</span>
+    <ul>
+      <li translate>reserved a name/route for your app</li>
+      <li translate>provisioned and bound services</li>
+      <li translate>created a temporary app in the gallery</li>
+      <li translate>created a delivery pipeline</li>
+    </ul>
+  </div>
+  <div class="col-md-6">
+    <div class="hpe-copy hpe-copy-dark">
+      <pre class="hpe-pre-dark">
+applications:
+  services:
+    meteor-cloudant:
+      host: meteor-cloudant-rocks
+      name: meteor-cloudant-rocks
+      descriptions: this application demonstrates how to use Cloudant with Meteor
+      memory: 512M
+      buildpack: http://github.com/cloudfoundry-community/cf-meteor-buildpack.git
+      env:
+        MONGO_URL: nope
+  declared-services:
+    meteor-cloudant:
+      label: CloudantNOSQLDB
+      plan: Shared</pre>
+    </div>
+  </div>
+</div>
+<p translate>If you have updated your manifest already, any other code change will trigger a deployment.</p>
