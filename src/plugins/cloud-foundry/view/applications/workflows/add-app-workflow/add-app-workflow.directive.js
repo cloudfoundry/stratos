@@ -163,7 +163,7 @@
      * @param {string} domain - the selected domain name
      * @returns {Promise} a promise object
      */
-    createApp: function (name, domain) {
+    createApp: function () {
     }
 
   });
