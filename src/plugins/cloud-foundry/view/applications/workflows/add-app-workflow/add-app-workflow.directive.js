@@ -22,19 +22,31 @@
     };
   }
 
-  AddAppWorkflowController.$inject = [];
+  AddAppWorkflowController.$inject = [
+    'app.model.modelManager'
+  ];
 
   /**
    * @namespace cloud-foundry.view.applications.AddAppWorkflowController
    * @memberof cloud-foundry.view.applications
    * @name AddAppWorkflowController
    * @constructor
-   * @property {data} data - a data bag
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @property {object} model - the Cloud Foundry applications model
+   * @property {object} data - a data bag
+   * @property {object} userInput - user's input about new application
    */
-  function AddAppWorkflowController() {
+  function AddAppWorkflowController(modelManager) {
     var that = this;
     var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
+
+    this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.data = {};
+
+    this.userInput = {
+      name: null,
+      domain: null
+    };
 
     this.data.workflow = {
       allowJump: false,
@@ -47,7 +59,10 @@
         {
           title: gettext('Name'),
           templateUrl: path + 'name.html',
-          nextBtnText: gettext('Next')
+          form: 'application-name-form',
+          nextBtnText: gettext('Create and continue'),
+          onNext: function () {
+          }
         },
         {
           title: gettext('Services'),
@@ -95,7 +110,7 @@
           ready: true,
           title: gettext('Deploy'),
           templateUrl: path + 'pipeline-subflow/deploy.html',
-          nextBtnText: gettext('Finished code change'),
+          nextBtnText: gettext('Finished with code change'),
           isLastStep: true
         }
       ],
@@ -104,14 +119,26 @@
           ready: true,
           title: gettext('Deploy'),
           templateUrl: path + 'cli-subflow/deploy.html',
-          nextBtnText: gettext('Finished code change'),
+          nextBtnText: gettext('Finished with code change'),
           isLastStep: true
         }
       ]
     };
 
     this.options = {
-      workflow: that.data.workflow
+      workflow: that.data.workflow,
+      userInput: this.userInput,
+
+      // mock data
+      domains: [
+        { label: 'domain-28.example.com', value: 'domain-28.example.com'},
+        { label: 'customer-app-domain1.com', value: 'customer-app-domain1.com'},
+        { label: 'customer-app-domain2.com', value: 'customer-app-domain2.com'},
+        { label: 'domain-38.example.com', value: 'domain-38.example.com'},
+        { label: 'domain-39.example.com', value: 'domain-39.example.com'},
+        { label: 'domain-40.example.com', value: 'domain-40.example.com'},
+        { label: 'domain-41.example.com', value: 'domain-41.example.com'}
+      ]
     };
   }
 
@@ -126,7 +153,19 @@
      */
     appendSubflow: function (subflow) {
       [].push.apply(this.data.workflow.steps, subflow);
+    },
+
+    /**
+     * @function createApp
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description create an application
+     * @param {string} name - a unique application name
+     * @param {string} domain - the selected domain name
+     * @returns {Promise} a promise object
+     */
+    createApp: function () {
     }
+
   });
 
 })();
