@@ -1,10 +1,39 @@
-<h1>Delivery</h1>
+<h4 class="step-title" translate>Select a delivery method.</h4>
 
-<input type="radio"
-  ng-model="wizardCtrl.options.subflow"
-  value="pipeline" > pipeline <br>
-<input type="radio"
-  ng-model="wizardCtrl.options.subflow"
-  value="cli" > CLI <br>
+<div class="flex-container-row-wrap ">
+  <div class="fantasy-single-select flex-container-col">
+    <div class="fantasy-single-select-icon flex-center">
+      <i class="helion-icon helion-icon-Deployment"></i>
+    </div>
+    <div class="fantasy-single-select-form-group flex-container-row">
+      <radio-input
+        ng-model="wizardCtrl.options.subflow"
+        input-value="'pipeline'">
+      </radio-input>
+      <div class="fantasy-single-select-rich-formatted-label">
+        <div class="fantasy-single-select-rich-formatted-label-title" translate>Delivery pipeline</div>
+        <div class="fantasy-single-select-rich-formatted-label-description" translate>
+          Create a delivery pipeline that will automate build, test and deploy cycles for every commit.
+        </div>
+      </div>
+    </div>
+  </div>
 
-<tt>subflow = {{ wizardCtrl.options.subflow }} </tt><br/>
+  <div class="fantasy-single-select flex-container-col">
+    <div class="fantasy-single-select-icon flex-center">
+      <i class="helion-icon helion-icon-Command_line"></i>
+    </div>
+    <div class="fantasy-single-select-form-group flex-container-row">
+      <radio-input
+        ng-model="wizardCtrl.options.subflow"
+        input-value="'cli'">
+      </radio-input>
+      <div class="fantasy-single-select-rich-formatted-label">
+        <div class="fantasy-single-select-rich-formatted-label-title" translate>CLI</div>
+        <div class="fantasy-single-select-rich-formatted-label-description" translate>
+          Deploy your app using the HCF CLI by following a few simple steps.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
