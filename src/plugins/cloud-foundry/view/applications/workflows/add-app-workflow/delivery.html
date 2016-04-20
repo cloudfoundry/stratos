@@ -1,10 +1,35 @@
-<h1>Delivery</h1>
+<h4 class="step-title" translate>Select a delivery method</h4>
 
-<input type="radio"
-  ng-model="wizardCtrl.options.subflow"
-  value="pipeline" > pipeline <br>
-<input type="radio"
-  ng-model="wizardCtrl.options.subflow"
-  value="cli" > CLI <br>
+<ul class="media-list hpe-add-option-list">
+  <li class="media">
+    <div class="hpe-media-select-col">
+      <radio-input
+        ng-model="wizardCtrl.options.subflow"
+        input-value="'pipeline'">
+      </radio-input>
+    </div>
+    <div class="media-left media-middle">
+      <i class="helion-icon helion-icon-Deployment helion-icon-2dot5x"></i>
+    </div>
+    <div class="media-body">
+      <h4 class="media-heading" translate>Delivery pipeline</h4>
+      <p translate>Create a delivery pipeline that will automate build, test and deploy cycles for every commit.</p>
+    </div>
+  </li>
 
-<tt>subflow = {{ wizardCtrl.options.subflow }} </tt><br/>
+  <li class="media">
+    <div class="hpe-media-select-col">
+      <radio-input
+        ng-model="wizardCtrl.options.subflow"
+        input-value="'cli'">
+      </radio-input>
+    </div>
+    <div class="media-left media-middle">
+      <i class="helion-icon helion-icon-Command_line helion-icon-2dot5x"></i>
+    </div>
+    <div class="media-body">
+      <h4 class="media-heading" translate>CLI</h4>
+      <p translate>Deploy your app using the HCF CLI by following a few simple steps.</p>
+    </div>
+  </li>
+</ul>

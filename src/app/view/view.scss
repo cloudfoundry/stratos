@@ -5,6 +5,7 @@
 @import "cluster-registration/cluster-registration";
 @import "service-registration/service-registration";
 
+
 .form-buttons {
   margin-top: 40px;
 
@@ -47,8 +48,27 @@
   }
 }
 
-// Flyout
-// TODO: move to helio-ui-theme
+// TODO: move bellow to helio-ui-theme
+
+.flex-container-row-wrap {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.flex-container-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-container-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  @include flex-align(center, center);
+}
 
 .flyout-content {
 
@@ -115,7 +135,7 @@
 
         .step-title {
           margin-top: 0;
-          font-size: $hpe-unit-space * 3 / 4;
+          font-size: $hpe-unit-space * 7 / 8;
         }
       }
     }
@@ -135,8 +155,12 @@
       background: $white;
 
       .btn {
-        margin-left: $hpe-unit-space;
+        margin-left: $hpe-unit-space / 2;
       }
     }
   }
+}
+
+.helion-icon-2dot5x {
+  font-size: $hpe-unit-space * 2.5;
 }

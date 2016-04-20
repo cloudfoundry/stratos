@@ -153,6 +153,7 @@
     this.options = {
       workflow: that.data.workflow,
       userInput: this.userInput,
+      subflow: 'pipeline',
 
       // mock data
       domains: [
