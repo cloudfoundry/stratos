@@ -16,6 +16,7 @@ module.exports = function (config) {
     },
 
     files: [
+      'lib/jquery/dist/jquery.js',
       'lib/angular-mocks/angular-mocks.js',
 
       'config.js',
