@@ -46,6 +46,7 @@
   angular.extend(ApplicationController.prototype, {
     init: function () {
       this.model.getAppSummary(this.id);
+      this.model.getAppStats(this.id);
     }
   });
 

@@ -231,7 +231,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetDetailedStatsForStartedApp(guid, params)
         .then(function (response) {
-          that.application.stats = response.data;
+          that.application.stats = response.data["0"].stats;
         });
     },
 
