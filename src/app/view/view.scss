@@ -161,35 +161,6 @@
   }
 }
 
-.fantasy-single-select {
-  display: inline-flex;
-  width: $hpe-unit-space * 12;
-  margin: 0 $hpe-unit-space * 3 / 4 $hpe-unit-space * 3 / 4 0;
-
-  &:last-child {
-    margin-right: 0;
-  }
-
-  .fantasy-single-select-icon {
-    height: $hpe-unit-space * 8;
-    border: 2px solid $gray-light;
-    margin: 0 0 $hpe-unit-space / 2 0;
-
-    i {
-      font-size: $hpe-unit-space * 3.5;
-      color: $hpe-primary-fg;
-    }
-  }
-
-  radio-input {
-    margin-right: $hpe-unit-space / 4;
-  }
-
-  .fantasy-single-select-rich-formatted-label {
-    padding-top: $hpe-unit-space / 24;
-  }
-
-  .fantasy-single-select-rich-formatted-label-title {
-    font-size: $hpe-unit-space * 7 / 8;
-  }
+.helion-icon-2dot5x {
+  font-size: $hpe-unit-space * 2.5;
 }

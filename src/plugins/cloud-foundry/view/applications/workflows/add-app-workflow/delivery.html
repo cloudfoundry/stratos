@@ -1,39 +1,35 @@
-<h4 class="step-title" translate>Select a delivery method.</h4>
+<h4 class="step-title" translate>Select a delivery method</h4>
 
-<div class="flex-container-row-wrap ">
-  <div class="fantasy-single-select flex-container-col">
-    <div class="fantasy-single-select-icon flex-center">
-      <i class="helion-icon helion-icon-Deployment"></i>
-    </div>
-    <div class="fantasy-single-select-form-group flex-container-row">
+<ul class="media-list hpe-add-option-list">
+  <li class="media">
+    <div class="hpe-media-select-col">
       <radio-input
         ng-model="wizardCtrl.options.subflow"
         input-value="'pipeline'">
       </radio-input>
-      <div class="fantasy-single-select-rich-formatted-label">
-        <div class="fantasy-single-select-rich-formatted-label-title" translate>Delivery pipeline</div>
-        <div class="fantasy-single-select-rich-formatted-label-description" translate>
-          Create a delivery pipeline that will automate build, test and deploy cycles for every commit.
-        </div>
-      </div>
     </div>
-  </div>
+    <div class="media-left media-middle">
+      <i class="helion-icon helion-icon-Deployment helion-icon-2dot5x"></i>
+    </div>
+    <div class="media-body">
+      <h4 class="media-heading">Delivery pipeline</h4>
+      <p>Create a delivery pipeline that will automate build, test and deploy cycles for every commit.</p>
+    </div>
+  </li>
 
-  <div class="fantasy-single-select flex-container-col">
-    <div class="fantasy-single-select-icon flex-center">
-      <i class="helion-icon helion-icon-Command_line"></i>
-    </div>
-    <div class="fantasy-single-select-form-group flex-container-row">
+  <li class="media">
+    <div class="hpe-media-select-col">
       <radio-input
         ng-model="wizardCtrl.options.subflow"
         input-value="'cli'">
       </radio-input>
-      <div class="fantasy-single-select-rich-formatted-label">
-        <div class="fantasy-single-select-rich-formatted-label-title" translate>CLI</div>
-        <div class="fantasy-single-select-rich-formatted-label-description" translate>
-          Deploy your app using the HCF CLI by following a few simple steps.
-        </div>
-      </div>
     </div>
-  </div>
-</div>
+    <div class="media-left media-middle">
+      <i class="helion-icon helion-icon-Command_line helion-icon-2dot5x"></i>
+    </div>
+    <div class="media-body">
+      <h4 class="media-heading">CLI</h4>
+      <p>Deploy your app using the HCF CLI by following a few simple steps.</p>
+    </div>
+  </li>
+</ul>
