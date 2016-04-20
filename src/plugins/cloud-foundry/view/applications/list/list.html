@@ -3,7 +3,7 @@
   <div class="pull-right">
     <button class="btn btn-primary"
       translate
-      ng-click="applicationsCtrl.startCreateApp()">
+      ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')">
       add application
     </button>
   </div>

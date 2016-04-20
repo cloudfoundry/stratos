@@ -22,17 +22,21 @@
   }
 
   ApplicationsListController.$inject = [
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.event.eventService'
   ];
 
   /**
    * @name ApplicationsListController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.event.eventService} eventService - the event bus service
    * @property {object} model - the Cloud Foundry Applications Model
+   * @property {app.event.eventService} eventService - the event bus service
    */
-  function ApplicationsListController(modelManager) {
+  function ApplicationsListController(modelManager, eventService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.eventService = eventService;
     this.model.all();
   }
 

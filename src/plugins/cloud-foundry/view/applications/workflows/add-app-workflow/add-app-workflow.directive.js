@@ -23,7 +23,8 @@
   }
 
   AddAppWorkflowController.$inject = [
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.event.eventService'
   ];
 
   /**
@@ -36,10 +37,11 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function AddAppWorkflowController(modelManager) {
+  function AddAppWorkflowController(modelManager, eventService) {
     var that = this;
     var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
-
+    this.addingApplication = false;
+    this.eventService = eventService;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.data = {};
 
@@ -140,6 +142,18 @@
         { label: 'domain-41.example.com', value: 'domain-41.example.com'}
       ]
     };
+
+    this.addApplicationActions = {
+      stop: function () {
+        that.stopWorkflow();
+      },
+
+      finish: function () {
+        that.finishWorkflow();
+      }
+    };
+
+    this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', this.startWorkflow.bind(this));
   }
 
   angular.extend(AddAppWorkflowController.prototype, {
@@ -164,6 +178,18 @@
      * @returns {Promise} a promise object
      */
     createApp: function () {
+    },
+
+    startWorkflow: function () {
+      this.addingApplication = true;
+    },
+
+    stopWorkflow: function () {
+      this.addingApplication = false;
+    },
+
+    finishWorkflow: function () {
+      this.addingApplication = false;
     }
 
   });
