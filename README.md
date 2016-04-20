@@ -40,6 +40,8 @@ time=2016-04-20T18:32:14-04:00, remote_ip=::1, method=GET, uri=/hce, status=404,
 If you'd like to visualize all of the dependencies of the project:
 ```
 brew install graphviz
+go get github.com/kisielk/godepgraph
+
 ~/gop/bin/godepgraph portal-proxy | dot -Tpng -o portal-proxy.png
 ls -la
 open portal-proxy.png
