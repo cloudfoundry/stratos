@@ -44,6 +44,7 @@
     this.addingApplication = false;
     this.eventService = eventService;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
       that.startWorkflow();
@@ -57,6 +58,7 @@
 
       var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
       this.data = {};
+      this.serviceModel.all();
 
       this.userInput = {
         name: null,
