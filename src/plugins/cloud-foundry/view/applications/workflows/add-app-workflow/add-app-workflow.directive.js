@@ -33,6 +33,7 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry applications model
+   * @property {object} githubModel - the Github model
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
@@ -41,12 +42,14 @@
     var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     this.data = {};
 
     this.userInput = {
       name: null,
       domain: null,
-      source: 'github'
+      source: 'github',
+      repo: null
     };
 
     this.data.workflow = {
@@ -87,7 +90,15 @@
           ready: true,
           title: gettext('Select Source'),
           templateUrl: path + 'pipeline-subflow/select-source.html',
-          nextBtnText: gettext('Next')
+          nextBtnText: gettext('Next'),
+          onNext: function () {
+            return that.githubModel.repos()
+              .then(function () {
+                var repos = _.filter(that.githubModel.data.repos,
+                                     function (o) { return o.permissions.admin; });
+                [].push.apply(that.options.repos, repos);
+              });
+          }
         },
         {
           ready: true,
@@ -176,7 +187,8 @@
           description: gettext('Connect to a repository hosted locally. You will need to provide the name of the repo and the clone URL.'),
           value: 'git'
         }
-      ]
+      ],
+      repos: []
     };
   }
 
