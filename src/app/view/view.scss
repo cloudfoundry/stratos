@@ -81,7 +81,7 @@
     width: auto;
   }
 
-  .wizard-head {
+  .modal-header, .wizard-head {
     position: absolute;
     top: 0;
     left: 0;
@@ -89,6 +89,7 @@
     height: $hpe-unit-space * 4;
     margin: 0;
     padding: $hpe-unit-space * 1.5 $hpe-unit-space * 5;
+    border: none;
 
     h4 {
       font-size: $hpe-unit-space;
@@ -96,7 +97,7 @@
     }
   }
 
-  .wizard-body {
+  .modal-body, .wizard-body {
     position: absolute;
     top: $hpe-unit-space * 4;
     left: 0;
@@ -104,6 +105,10 @@
     bottom: $hpe-unit-space * 4.5;
     margin: 0;
     padding: 0;
+
+    &.scrollable {
+      padding: 0 $hpe-unit-space * 5;
+    }
 
     .wizard-nav {
       position: absolute;
@@ -130,7 +135,7 @@
     }
   }
 
-  .wizard-foot {
+  .modal-footer, .wizard-foot {
     position: absolute;
     display: flex;
     flex-direction: row;
@@ -141,6 +146,7 @@
     margin: 0;
     height: $hpe-unit-space * 4.5;
     border-top: 1px solid $gray-light;
+    padding: 0;
     padding-top: $hpe-unit-space * 3 / 4;
     background: $white;
 

@@ -1,8 +1,12 @@
 <div class="service-detail">
-  <div class="service-detail-header">
-    <h2 translate> Add Service to <span class="app-title">{{ applicationServicesCtrl.appModel.application.summary.name}}</span> </h2>
+  <div class="modal-header">
+    <h4>
+      <span translate>Add Service to</span>
+      <span class="app-title">{{ ::applicationServicesCtrl.appModel.application.summary.name }}</span>
+    </h4>
   </div>
-  <div class="panel panel-default">
+
+  <div class="modal-body scrollable">
     <div class="panel-body service-panel col-md-6">
       <div class="service-summary">
         <div class="row">
@@ -39,12 +43,14 @@
       </p>
     </div>
   </div>
-  <div class="col-md-12 service-detail-actions">
-    <div class="pull-right">
-      <button class="btn btn-default btn-info" translate ng-click="applicationServicesCtrl.cancelAddService();">
-       Cancel</button>
-      <button class="btn btn-primary add-button" translate ng-click="applicationServicesCtrl.addService()">Add
-      </button>
-    </div
+
+  <div class="modal-footer">
+    <button class="btn btn-default" translate ng-click="applicationServicesCtrl.cancelAddService();">
+     Cancel
+    </button>
+    <button class="btn btn-primary" translate ng-click="applicationServicesCtrl.addService()">
+      Add
+    </button>
   </div>
+
 </div>
