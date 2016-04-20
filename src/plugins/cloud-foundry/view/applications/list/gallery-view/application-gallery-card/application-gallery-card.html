@@ -1,15 +1,15 @@
 <gallery-card card-data="applicationGalleryCardCtrl.cardData"
   on-card-click="applicationGalleryCardCtrl.goToApp()">
   <dl class="dl-horizontal">
-    <dt>Memory Utilization</dt>
+    <dt translate>Memory Utilization</dt>
     <dd>{{applicationGalleryCardCtrl.app.entity.memory}} MB</dd>
-    <dt>Instances</dt>
+    <dt translate>Instances</dt>
     <dd>{{applicationGalleryCardCtrl.app.entity.instances}}</dd>
-    <dt>Disk Quota</dt>
+    <dt translate>Disk Quota</dt>
     <dd>{{applicationGalleryCardCtrl.app.entity.disk_quota}}</dd>
-    <dt>State</dt>
-    <dd>{{applicationGalleryCardCtrl.app.entity.state}}</dd>
-    <dt>Modified</dt>
+    <dt translate>Modified</dt>
     <dd>{{applicationGalleryCardCtrl.app.metadata.updated_at | date : 'M/d/yy h:mm:ss a'}}</dd>
+    <dt translate>State</dt>
+    <dd>{{applicationGalleryCardCtrl.app.entity.state}}</dd>
   </dl>
 </gallery-card>
