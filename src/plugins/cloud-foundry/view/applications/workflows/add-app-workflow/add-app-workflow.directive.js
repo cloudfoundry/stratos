@@ -104,7 +104,7 @@
           ready: true,
           title: gettext('Notifications'),
           templateUrl: path + 'pipeline-subflow/notifications.html',
-          nextBtnText: gettext('Next')
+          nextBtnText: gettext('Skip')
         },
         {
           ready: true,
@@ -138,6 +138,23 @@
         { label: 'domain-39.example.com', value: 'domain-39.example.com'},
         { label: 'domain-40.example.com', value: 'domain-40.example.com'},
         { label: 'domain-41.example.com', value: 'domain-41.example.com'}
+      ],
+      notificationTargets: [
+        {
+          title: 'HipChat',
+          description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
+          img: 'hipchat_logo.png'
+        },
+        {
+          title: 'Http',
+          description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
+          img: 'httppost_logo.png'
+        },
+        {
+          title: 'Flow Dock',
+          description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
+          img: 'flowdock_logo.png'
+        }
       ]
     };
   }
