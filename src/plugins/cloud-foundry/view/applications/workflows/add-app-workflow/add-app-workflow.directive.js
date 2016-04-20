@@ -43,7 +43,10 @@
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
+    this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
     this.data = {};
+
+    this.serviceModel.all();
 
     this.userInput = {
       name: null,
@@ -154,6 +157,7 @@
       workflow: that.data.workflow,
       userInput: this.userInput,
       subflow: 'pipeline',
+      serviceModel: this.serviceModel,
 
       // mock data
       domains: [
