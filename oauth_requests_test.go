@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+// TODO: check that Authorization header starts with "bearer "
+
 func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 	t.Parallel()
 	testDoOauthFlowRequest(t, false, time.Now().AddDate(0, 0, 1).Unix())

@@ -128,7 +128,7 @@ func TestGetCNSIRecord(t *testing.T) {
 
 	pp := setupPortalProxy()
 	pp.CNSIs[mockCNSIGuid] = cnsiRecord{
-		APIEndpoint:           mockAPIEndpoint,
+		APIEndpoint:           urlMust(mockAPIEndpoint),
 		AuthorizationEndpoint: mockAuthEndpoint,
 	}
 
@@ -143,7 +143,7 @@ func TestGetCNSIRecordMissing(t *testing.T) {
 
 	pp := setupPortalProxy()
 	pp.CNSIs[mockCNSIGuid] = cnsiRecord{
-		APIEndpoint:           mockAPIEndpoint,
+		APIEndpoint:           urlMust(mockAPIEndpoint),
 		AuthorizationEndpoint: mockAuthEndpoint,
 	}
 
@@ -160,7 +160,7 @@ func TestListRegisteredCNSIs(t *testing.T) {
 
 	_, _, ctx, pp := setupHTTPTest(req)
 	pp.CNSIs[mockCNSIGuid] = cnsiRecord{
-		APIEndpoint:           mockAPIEndpoint,
+		APIEndpoint:           urlMust(mockAPIEndpoint),
 		AuthorizationEndpoint: mockAuthEndpoint,
 	}
 

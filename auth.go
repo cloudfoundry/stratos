@@ -21,6 +21,12 @@ type UAAResponse struct {
 	JTI          string `json:"jti"`
 }
 
+type tokenRecord struct {
+	AuthToken    string
+	RefreshToken string
+	TokenExpiry  int64
+}
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 
 	uaaRes, u, err := p.login(c, p.Config.UAAEndpoint)

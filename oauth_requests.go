@@ -6,13 +6,6 @@ import (
 	"time"
 )
 
-type CNSIRequest struct {
-	GUID     string
-	UserGUID string
-	Response []byte
-	Error    error
-}
-
 func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokenRecord, c cnsiRecord, err error) {
 	// look up token
 	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)

@@ -26,17 +26,3 @@ type portalProxy struct {
 	CNSIMut sync.RWMutex
 	CNSIs   map[string]cnsiRecord
 }
-
-type tokenRecord struct {
-	AuthToken    string
-	RefreshToken string
-	TokenExpiry  int64
-}
-
-type cnsiRecord struct {
-	Name                  string
-	APIEndpoint           string
-	AuthorizationEndpoint string
-	TokenEndpoint         string
-	CNSIType              cnsiType
-}

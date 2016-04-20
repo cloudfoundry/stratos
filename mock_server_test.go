@@ -120,6 +120,14 @@ func setupMockServer(t *testing.T, modifiers ...mockServerFunc) *httptest.Server
 	return server
 }
 
+func urlMust(i string) *url.URL {
+	b, err := url.Parse(i)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
 const mockUaaToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsInVzZXJfaWQiOiJhc2QtZ2pmZy1ib2IiLCJleHAiOjEyMzQ1Njd9.gO9WDYNEfMsnbz7-sICTNygzkqvWgMP2nm9BStJvvCw`
 
 var mockUAAResponse = UAAResponse{

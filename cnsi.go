@@ -17,6 +17,14 @@ type v2Info struct {
 	TokenEndpoint         string `json:"token_endpoint"`
 }
 
+type cnsiRecord struct {
+	Name                  string
+	APIEndpoint           *url.URL
+	AuthorizationEndpoint string
+	TokenEndpoint         string
+	CNSIType              cnsiType
+}
+
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	cnsiName := c.FormValue("cnsi_name")
 	apiEndpoint := c.FormValue("api_endpoint")
@@ -38,13 +46,21 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	}
 
 	// save data to temporary map
-	var newCNSI cnsiRecord
+	apiEndpointURL, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to get API Endpoint",
+			"Failed to get API Endpoint: %v", err)
+	}
 	guid := uuid.NewV4().String()
-	newCNSI.Name = cnsiName
-	newCNSI.CNSIType = cnsiHCF
-	newCNSI.APIEndpoint = apiEndpoint
-	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
-	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
+	newCNSI := cnsiRecord{
+		Name:                  cnsiName,
+		CNSIType:              cnsiHCF,
+		APIEndpoint:           apiEndpointURL,
+		TokenEndpoint:         v2InfoResponse.TokenEndpoint,
+		AuthorizationEndpoint: v2InfoResponse.AuthorizationEndpoint,
+	}
 	p.setCNSIRecord(guid, newCNSI)
 
 	c.String(http.StatusCreated, guid)
