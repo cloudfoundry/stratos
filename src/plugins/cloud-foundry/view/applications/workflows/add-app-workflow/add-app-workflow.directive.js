@@ -46,7 +46,7 @@
     this.userInput = {
       name: null,
       domain: null,
-      source: null
+      source: 'github'
     };
 
     this.data.workflow = {
@@ -165,16 +165,16 @@
           value: 'github'
         },
         {
-          img: 'git.png',
-          label: 'Git',
-          description: gettext('Connect to a repository hosted locally. You will need to provide the name of the repo and the clone URL.'),
-          value: 'git'
-        },
-        {
           img: 'GitHub-Mark-120px-plus.png',
           label: 'Github Enterprise',
           description: gettext('Connect to a repository hosted on an on-premise Github Enterprise instance that you own or have admin rights to.'),
           value: 'github-enterprise'
+        },
+        {
+          img: 'git.png',
+          label: 'Git',
+          description: gettext('Connect to a repository hosted locally. You will need to provide the name of the repo and the clone URL.'),
+          value: 'git'
         }
       ]
     };
