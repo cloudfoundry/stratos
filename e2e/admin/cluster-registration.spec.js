@@ -9,6 +9,7 @@ var registration = require('../po/service-instance-registration.po');
 describe('Cluster Registration (ITOps)', function () {
   beforeAll(function () {
     resetTo.zeroClusterAdminWorkflow();
+    browser.driver.sleep(2000);
     helpers.setBrowserNormal();
     helpers.loadApp();
   });
