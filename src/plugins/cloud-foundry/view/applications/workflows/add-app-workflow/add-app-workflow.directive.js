@@ -225,7 +225,9 @@
       }
     };
 
-    this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', this.startWorkflow.bind(this));
+    this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
+      that.startWorkflow();
+    });
   }
 
   angular.extend(AddAppWorkflowController.prototype, {
