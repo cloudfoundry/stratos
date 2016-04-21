@@ -85,7 +85,7 @@ describe('Cluster Registration (ITOps)', function () {
     it('should hide form and not add cluster when "Cancel" clicked', function () {
       clusterRegistration.fillAddClusterForm('api.123.45.67.89.xip.io', 'bar');
       clusterRegistration.cancel();
-      expect(clusterRegistration.addClusterForm().isDisplayed()).toBeFalsy();
+      expect(clusterRegistration.addClusterForm().isPresent()).toBeFalsy();
       expect(clusterRegistration.clusterTableRows().count()).toBe(1);
     });
   });
