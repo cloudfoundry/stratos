@@ -36,6 +36,7 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
     this.model.all();
+    this.step = "instance";
     this.serviceActions = [
       {
         name: gettext('Detach'),
@@ -75,7 +76,7 @@
     */
     addService: function() {
       //TBD Addservice stuff
-      this.flyoutActive = false;
+      // this.flyoutActive = false;
     },
 
     /**

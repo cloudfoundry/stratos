@@ -1,43 +1,89 @@
-.service-detail-actions {
-  padding-top: $hpe-unit-space;
-  padding-right: 0;
-  padding-left: 0;
-  margin-left: 0;
-  margin-right: 0;
-  border-top: 1px solid $silver;
+
+.panel {
+  .select-instance-panel {
+    padding-top: 100px;
+
+    .select-instance-tabs {
+      padding: 0;
+    }
+  }
 }
 
-.service-detail-header {
-  margin-top: $hpe-unit-space * -2;
+.service-panel {
+  .service-summary {
+    .service-badge {
+      // border: 1px solid red;
+      padding: 0;
+
+      i {
+        margin: 0;
+        padding: 0;
+      }
+    }
+    .service-category {
+      padding: 0;
+      margin-left: 25px;
+    }
+  }
 }
 
 .service-detail {
-  padding-left: $hpe-unit-space * 5;
-  padding-right: $hpe-unit-space * 5;
-  margin-top: $hpe-unit-space * -2.5;
+  .page-title {
+    h2 {
+      padding-left: 25px;
+    }
+  }
 }
 
-.flyout-header {
-  margin-left: $hpe-unit-space * -5;
-  margin-top: $hpe-unit-space * 5;
-}
+.service-panel-confirm {
+  padding: 0;
 
-.add-button {
-  margin-left: $hpe-unit-space / 2;
-}
+  .message {
+    margin: 0;
+    padding: 0;
 
+    .message-icon {
+      height: 20px;
+      margin: 0;
+      padding: 0;
+      width: 25px;
 
-.app-title, .app-label, .app-category {
-  text-transform: capitalize;
-}
+      i {
+        color: green;
+        height: 10px;
+        padding: 0;
+        padding-left: 10px;
+        padding-top: 10px;
+      }
+    }
+    .message-text {
+      margin-left: 5px;
+    }
+  }
+  .caution-message {
+    margin: 0;
+    padding-left: 150px;
+    padding-top: 100px;
 
-.service-badge .service-icon {
-  padding-top: 0;
-}
+    .message-icon {
+      margin: 0;
+      padding: 0;
+      width: 25px;
 
-.service-category h4 {
-  padding-top: 0;
-  margin-top: 0;
-  margin-left: $hpe-unit-space;
-
+      i {
+        color: $sunglow;
+        height: 10px;
+        padding: 10px;
+      }
+    }
+    .caution-text {
+      padding-left: 25px;
+      padding-top: 5px;
+    }
+  }
+  .manifest {
+    margin: 0;
+    padding-left: 160px;
+    padding-top: 25px;
+  }
 }
