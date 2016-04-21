@@ -12,19 +12,19 @@
       <dl class="dl-horizontal">
 
         <dd>
-          <percent-gauge title="Memory Utilization"
+          <percent-gauge title="{{ 'Memory Utilization' | translate }}"
                          value="{{ appCtrl.model.application.stats.usage.mem / appCtrl.model.application.stats.mem_quota }}"
                          value-text="{{ [appCtrl.model.application.stats.usage.mem, appCtrl.model.application.stats.mem_quota] | usageBytes:0 }}" />
         </dd>
 
         <dd>
-          <percent-gauge title="Instances"
+          <percent-gauge title="{{ 'Instances' | translate }}"
                          value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
                          value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}" />
         </dd>
 
         <dd>
-          <percent-gauge title="Disk Quota"
+          <percent-gauge title="{{ 'Disk Quota' | translate }}"
                          value="{{ appCtrl.model.application.stats.usage.disk / appCtrl.model.application.stats.disk_quota }}"
                          value-text="{{ [appCtrl.model.application.stats.usage.disk, appCtrl.model.application.stats.disk_quota] | usageBytes }}" />
         </dd>
