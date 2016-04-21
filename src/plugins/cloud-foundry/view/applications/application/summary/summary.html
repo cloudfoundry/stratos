@@ -24,7 +24,7 @@
         </dd>
 
         <dd>
-          <percent-gauge title="{{ 'Disk Quota' | translate }}"
+          <percent-gauge title="{{ 'Disk Utilization' | translate }}"
                          value="{{ appCtrl.model.application.stats.usage.disk / appCtrl.model.application.stats.disk_quota }}"
                          value-text="{{ [appCtrl.model.application.stats.usage.disk, appCtrl.model.application.stats.disk_quota] | usageBytes }}" />
         </dd>
@@ -46,7 +46,7 @@
         <dt translate>BUILDPACK</dt>
         <dd class="pull-right">{{ appCtrl.model.application.summary.buildpack }}</dd>
 
-        <dt translate>CF TARGET</dt>
+        <dt translate>CLUSTER</dt>
         <dd class="pull-right"></dd>
 
         <dt translate>CF LOGIN</dt>
