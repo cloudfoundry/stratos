@@ -4,6 +4,10 @@ add-cluster-form {
 
   .add-cluster-form {
     max-width: 350px;
+
+    h2 {
+      margin-top: $hpe-unit-space * 2.5;
+    }
   }
 
   form {
