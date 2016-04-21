@@ -1,51 +1,53 @@
-table.table {
-  tbody, tr:nth-child(2) {
-    border: 1px solid $table-border-color;
-  }
+add-app-workflow {
+  table.table {
+    tbody, tr:nth-child(2) {
+      border: 1px solid $table-border-color;
+    }
 
-  // TODO: From here onwards, code will be moved to helion-ui-theme
-  > thead > tr > th.text-left,
-  > tbody > tr:not([table-inline-message]) > td.text-left {
-    &:last-child:not(.text-center) {
-      text-align: left;
+    // TODO: From here onwards, code will be moved to helion-ui-theme
+    > thead > tr > th.text-left,
+    > tbody > tr:not([table-inline-message]) > td.text-left {
+      &:last-child:not(.text-center) {
+        text-align: left;
 
-      &.filter-header {
-        padding: $hpe-unit-space 0;
+        &.filter-header {
+          padding: $hpe-unit-space 0;
+        }
       }
     }
-  }
 
-  .filter-header {
-    .form-group {
-      margin: 0;
-
-      &:first-child {
-        @include flex-align(center, flex-start);
-        flex-direction: column;
-        border: 1px solid $input-border;
-        padding: 0 $padding-large-horizontal;
+    .filter-header {
+      .form-group {
         margin: 0;
 
-        label {
-          color: $hpe-input-label-fg;
-          font-weight: normal;
-          font-size: $font-size-small;
-          margin-bottom: $hpe-unit-space / 4;
-          padding-top: 0;
-        }
+        &:first-child {
+          @include flex-align(center, flex-start);
+          flex-direction: column;
+          border: 1px solid $input-border;
+          padding: 0 $padding-large-horizontal;
+          margin: 0;
 
-        input[type="text"] {
-          border: none;
-          background-color: transparent;
-          padding: 0;
-          height: $line-height-computed;
-          line-height: $line-height-computed; // Required for bug in Chrome
+          label {
+            color: $hpe-input-label-fg;
+            font-weight: normal;
+            font-size: $font-size-small;
+            margin-bottom: $hpe-unit-space / 4;
+            padding-top: 0;
+          }
+
+          input[type="text"] {
+            border: none;
+            background-color: transparent;
+            padding: 0;
+            height: $line-height-computed;
+            line-height: $line-height-computed; // Required for bug in Chrome
+          }
         }
       }
     }
-  }
 
-  .row-vertical-middle > td {
-    vertical-align: middle;
+    .row-vertical-middle > td {
+      vertical-align: middle;
+    }
   }
 }
