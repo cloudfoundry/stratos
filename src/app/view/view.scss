@@ -72,91 +72,86 @@
 
 .flyout-content {
 
-  .flyout-header {
+  & > button.close {
     position: absolute;
     top: $hpe-unit-space * 2.5;
     right: $hpe-unit-space * 4;
     margin: 0;
     padding: 0;
     width: auto;
-    z-index: 1;
   }
 
-  .flyout-body {
+  .modal-header, .wizard-head {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    height: $hpe-unit-space * 4;
+    margin: 0;
+    padding: $hpe-unit-space * 1.5 $hpe-unit-space * 5;
+    border: none;
+
+    h4 {
+      font-size: $hpe-unit-space;
+      font-weight: 600;
+    }
+  }
+
+  .modal-body, .wizard-body {
+    position: absolute;
+    top: $hpe-unit-space * 4;
+    left: 0;
+    right: 0;
+    bottom: $hpe-unit-space * 4.5;
     margin: 0;
     padding: 0;
 
-    .wizard-head {
+    &.scrollable {
+      padding: 0 $hpe-unit-space * 5;
+    }
+
+    .wizard-nav {
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
-      height: $hpe-unit-space * 4;
-      margin: 0;
-      padding: $hpe-unit-space * 1.5 $hpe-unit-space * 5;
-
-      h4 {
-        font-size: $hpe-unit-space;
-        font-weight: 600;
-      }
-    }
-
-    .wizard-body {
-      position: absolute;
-      top: $hpe-unit-space * 4;
-      left: 0;
-      right: 0;
-      bottom: $hpe-unit-space * 4.5;
+      left: $hpe-unit-space * 5;
       margin: 0;
       padding: 0;
-
-      .wizard-nav {
-        position: absolute;
-        top: 0;
-        left: $hpe-unit-space * 5;
-        margin: 0;
-        padding: 0;
-        z-index: 1;
-      }
-
-      .wizard-step {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        margin: 0;
-        padding: 0 $hpe-unit-space * 5 0 $hpe-unit-space * 6;
-        overflow-y: auto;
-
-        .step-title {
-          margin-top: 0;
-          font-size: $hpe-unit-space * 7 / 8;
-        }
-      }
+      z-index: 1;
     }
 
-    .wizard-foot {
+    .wizard-step {
       position: absolute;
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-end;
-      left: $hpe-unit-space * 5;
-      right: $hpe-unit-space * 5;
+      top: 0;
+      right: 0;
       bottom: 0;
       margin: 0;
-      height: $hpe-unit-space * 4.5;
-      border-top: 1px solid $gray-light;
-      padding-top: $hpe-unit-space * 3 / 4;
-      background: $white;
+      padding: 0 $hpe-unit-space * 5 0 $hpe-unit-space * 6;
+      overflow-y: auto;
 
-      .btn {
-        margin-left: $hpe-unit-space / 2;
+      .step-title {
+        margin-top: 0;
+        font-size: $hpe-unit-space * 7 / 8;
       }
+    }
+  }
+
+  .modal-footer, .wizard-foot {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    left: $hpe-unit-space * 5;
+    right: $hpe-unit-space * 5;
+    bottom: 0;
+    margin: 0;
+    height: $hpe-unit-space * 4.5;
+    border-top: 1px solid $gray-light;
+    padding: 0;
+    padding-top: $hpe-unit-space * 3 / 4;
+    background: $white;
+
+    .btn {
+      margin-left: $hpe-unit-space / 2;
     }
   }
 }
