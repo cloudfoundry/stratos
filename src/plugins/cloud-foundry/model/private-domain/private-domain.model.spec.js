@@ -33,7 +33,7 @@
       var FilterPrivateDomainsByName = mock.cloudFoundryAPI.PrivateDomains.FilterPrivateDomainsByName();
       $httpBackend.when('GET', FilterPrivateDomainsByName.url).respond(200, FilterPrivateDomainsByName.response['200'].body);
       $httpBackend.expectGET(FilterPrivateDomainsByName.url);
-      privateDomainModel.filterByName();
+      privateDomainModel.filterByName(null);
       $httpBackend.flush();
       expect(privateDomainModel.data.filtered.total_results).toBe(FilterPrivateDomainsByName.response['200'].body.total_results);
       expect(privateDomainModel.data.filtered.prev_url).toBe(FilterPrivateDomainsByName.response['200'].body.prev_url);
@@ -42,22 +42,23 @@
     });
 
     it('allSharedOrganizationsForPrivateDomain', function() {
-      var ListAllSharedOrganizationsForPrivateDomain = mock.cloudFoundryAPI.PrivateDomains.ListAllSharedOrganizationsForPrivateDomain();
+      var ListAllSharedOrganizationsForPrivateDomain = mock.cloudFoundryAPI.PrivateDomains.ListAllSharedOrganizationsForPrivateDomain('36d72b3b-1bf5-44a0-9aa8-7401a78e484d');
       $httpBackend.when('GET', ListAllSharedOrganizationsForPrivateDomain.url).respond(200, ListAllSharedOrganizationsForPrivateDomain.response['200'].body);
       $httpBackend.expectGET(ListAllSharedOrganizationsForPrivateDomain.url);
-      privateDomainModel.allSharedOrganizationsForPrivateDomain();
+      privateDomainModel.allSharedOrganizationsForPrivateDomain('36d72b3b-1bf5-44a0-9aa8-7401a78e484d', null);
       $httpBackend.flush();
       expect(privateDomainModel.data.allSharedOrg.total_results).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body.total_results);
       expect(privateDomainModel.data.allSharedOrg.prev_url).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body.prev_url);
       expect(privateDomainModel.data.allSharedOrg.next_url).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body.next_url);
-      expect(privateDomainModel.data.allSharedOrg.resources[0].metadata.guid).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body.resources[0].metadata.guid);
+      expect(privateDomainModel.data.allSharedOrg['36d72b3b-1bf5-44a0-9aa8-7401a78e484d'].resources[0].metadata.guid)
+        .toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body['36d72b3b-1bf5-44a0-9aa8-7401a78e484d'].resources[0].metadata.guid);
     });
 
     it('retrievePrivateDomain', function() {
-      var RetrievePrivateDomain = mock.cloudFoundryAPI.PrivateDomains.RetrievePrivateDomain();
+      var RetrievePrivateDomain = mock.cloudFoundryAPI.PrivateDomains.RetrievePrivateDomain("6ea5aeab-cced-43ad-b1bd-44057d2c648f");
       $httpBackend.when('GET', RetrievePrivateDomain.url).respond(200, RetrievePrivateDomain.response['200'].body);
       $httpBackend.expectGET(RetrievePrivateDomain.url);
-      privateDomainModel.retrievePrivateDomain();
+      privateDomainModel.retrievePrivateDomain("6ea5aeab-cced-43ad-b1bd-44057d2c648f", null);
       $httpBackend.flush();
       expect(privateDomainModel.data.one.total_results).toBe(RetrievePrivateDomain.response['200'].body.total_results);
       expect(privateDomainModel.data.one.prev_url).toBe(RetrievePrivateDomain.response['200'].body.prev_url);

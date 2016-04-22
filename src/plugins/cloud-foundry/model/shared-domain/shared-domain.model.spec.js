@@ -30,17 +30,17 @@
       var FilterSharedDomainsByName = mock.cloudFoundryAPI.SharedDomains.FilterSharedDomainsByName();
       $httpBackend.when('GET', FilterSharedDomainsByName.url).respond(200, FilterSharedDomainsByName.response['200'].body);
       $httpBackend.expectGET(FilterSharedDomainsByName.url);
-      sharedDomainModel.filterByName();
+      sharedDomainModel.filterByName(null);
       $httpBackend.flush();
       expect(sharedDomainModel.data.filtered.total_results).toBe(FilterSharedDomainsByName.response['200'].body.total_results);
       expect(sharedDomainModel.data.filtered.total_pages).toBe(FilterSharedDomainsByName.response['200'].body.total_pages);
     });
 
     it('retrieveSharedDomain', function() {
-      var RetrieveSharedDomain = mock.cloudFoundryAPI.SharedDomains.RetrieveSharedDomain();
+      var RetrieveSharedDomain = mock.cloudFoundryAPI.SharedDomains.RetrieveSharedDomain("e05c91d8-e0d1-439a-911f-2216e62dafa6");
       $httpBackend.when('GET', RetrieveSharedDomain.url).respond(200, RetrieveSharedDomain.response['200'].body);
       $httpBackend.expectGET(RetrieveSharedDomain.url);
-      sharedDomainModel.retrieveSharedDomain();
+      sharedDomainModel.retrieveSharedDomain("e05c91d8-e0d1-439a-911f-2216e62dafa6", null);
       $httpBackend.flush();
       expect(sharedDomainModel.data.one.total_results).toBe(RetrieveSharedDomain.response['200'].body.total_results);
       expect(sharedDomainModel.data.one.total_pages).toBe(RetrieveSharedDomain.response['200'].body.total_pages);

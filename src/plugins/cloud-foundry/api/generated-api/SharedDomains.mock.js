@@ -56,84 +56,31 @@
           200: {
 
             body: {
-              "total_results": 6,
+              "total_results": 2,
               "total_pages": 1,
               "prev_url": null,
               "next_url": null,
               "resources": [
                 {
                   "metadata": {
-                    "guid": "3e087ac4-4972-46f3-8102-f10976db1cd7",
-                    "url": "/v2/shared_domains/3e087ac4-4972-46f3-8102-f10976db1cd7",
-                    "created_at": "2016-02-19T02:04:06Z",
-                    "updated_at": null
+                    "guid": "e05c91d8-e0d1-439a-911f-2216e62dafa6",
+                    "url": "/v2/shared_domains/e05c91d8-e0d1-439a-911f-2216e62dafa6",
+                    "created_at": "2016-04-12T22:02:34Z",
+                    "updated_at": "2016-04-18T19:55:58Z"
                   },
                   "entity": {
-                    "name": "customer-app-domain1.com",
-                    "router_group_guid": null
+                    "name": "stackato-8hhk.local"
                   }
                 },
                 {
                   "metadata": {
-                    "guid": "74625421-e3e1-4c44-85b0-91db7984a80f",
-                    "url": "/v2/shared_domains/74625421-e3e1-4c44-85b0-91db7984a80f",
-                    "created_at": "2016-02-19T02:04:06Z",
+                    "guid": "98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
+                    "url": "/v2/shared_domains/98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
+                    "created_at": "2016-04-20T20:33:26Z",
                     "updated_at": null
                   },
                   "entity": {
-                    "name": "customer-app-domain2.com",
-                    "router_group_guid": null
-                  }
-                },
-                {
-                  "metadata": {
-                    "guid": "8131a72d-ca3d-4e63-8f47-efab777da98d",
-                    "url": "/v2/shared_domains/8131a72d-ca3d-4e63-8f47-efab777da98d",
-                    "created_at": "2016-02-19T02:04:07Z",
-                    "updated_at": null
-                  },
-                  "entity": {
-                    "name": "domain-63.example.com",
-                    "router_group_guid": null
-                  }
-                },
-                {
-                  "metadata": {
-                    "guid": "06439e4e-bb19-49f7-9965-f3fbb7900aae",
-                    "url": "/v2/shared_domains/06439e4e-bb19-49f7-9965-f3fbb7900aae",
-                    "created_at": "2016-02-19T02:04:07Z",
-                    "updated_at": null
-                  },
-                  "entity": {
-                    "name": "domain-64.example.com",
-                    "router_group_guid": null
-                  }
-                },
-                {
-                  "metadata": {
-                    "guid": "9bfe303f-026b-405c-861a-f6bda8d5bcc7",
-                    "url": "/v2/shared_domains/9bfe303f-026b-405c-861a-f6bda8d5bcc7",
-                    "created_at": "2016-02-19T02:04:07Z",
-                    "updated_at": null
-                  },
-                  "entity": {
-                    "name": "domain-65.example.com",
-                    "router_group_guid": null
-                  }
-                },
-                {
-                  "metadata": {
-                    "guid": "ce972938-aab7-41f6-b6b2-2b94d92fe3e6",
-                    "url": "/v2/shared_domains/ce972938-aab7-41f6-b6b2-2b94d92fe3e6",
-                    "created_at": "2016-02-19T02:04:07Z",
-                    "updated_at": null
-                  },
-                  "entity": {
-                    "name": "domain-66.example.com",
-                    "router_group_guid": "my-random-guid",
-                    "router_group_types": [
-                      "tcp"
-                    ]
+                    "name": "example.org"
                   }
                 }
               ]
@@ -149,25 +96,40 @@
     },
 
     RetrieveSharedDomain: function (guid) {
+      /* eslint-disable */
+      var mock_shared_domains_data = {
+        "e05c91d8-e0d1-439a-911f-2216e62dafa6": {
+          "entity": {
+            "name": "stackato-8hhk.local"
+          },
+          "metadata": {
+            "updated_at": "2016-04-18T19:55:58Z",
+            "created_at": "2016-04-12T22:02:34Z",
+            "url": "/v2/shared_domains/e05c91d8-e0d1-439a-911f-2216e62dafa6",
+            "guid": "e05c91d8-e0d1-439a-911f-2216e62dafa6"
+          }
+        },
+        "98dcbe2a-f14f-4dc8-bb33-ccec7ca736df": {
+          "entity": {
+            "name": "example.org"
+          },
+          "metadata": {
+            "updated_at": null,
+            "created_at": "2016-04-20T20:33:26Z",
+            "url": "/v2/shared_domains/98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
+            "guid": "98dcbe2a-f14f-4dc8-bb33-ccec7ca736df"
+          }
+        }
+      };
+      /* eslint-enable */
+
       return {
         url: '/api/cf/v2/shared_domains/' + guid + '',
 
         response: {
 
           200: {
-
-            body: {
-              "metadata": {
-                "guid": guid,
-                "url": "/v2/shared_domains/3e087ac4-4972-46f3-8102-f10976db1cd7",
-                "created_at": "2016-02-19T02:04:06Z",
-                "updated_at": null
-              },
-              "entity": {
-                "name": "customer-app-domain1.com",
-                "router_group_guid": null
-              }
-            }
+            body: mock_shared_domains_data[guid] || {}
           },
 
           500: {
