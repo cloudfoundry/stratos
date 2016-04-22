@@ -44,12 +44,12 @@ function clusterTableRows() {
 
 function addClusterFromMessageBox() {
   clusterMessageBox().element(by.buttonText('Add Cluster')).click();
-  browser.driver.sleep(1000);
+  browser.driver.sleep(2000);
 }
 
 function addClusterFromTable() {
   clusterTable().element(by.buttonText('Add Cluster')).click();
-  browser.driver.sleep(1000);
+  browser.driver.sleep(2000);
 }
 
 function removeClusterButton(index) {
@@ -80,7 +80,7 @@ function registerButton() {
 function cancel() {
   helpers.getForm(addClusterFormName)
     .element(by.buttonText('Cancel')).click();
-  browser.driver.sleep(1000);
+  browser.driver.sleep(2000);
 }
 
 function fillAddClusterForm(address, name) {
