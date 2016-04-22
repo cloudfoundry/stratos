@@ -35,7 +35,7 @@ function showApplicationDetails(idx) {
 }
 
 function showServices() {
-  applicationAction(1).click();
+  applicationAction(2).click();
 }
 
 function applicationActionsBar() {
