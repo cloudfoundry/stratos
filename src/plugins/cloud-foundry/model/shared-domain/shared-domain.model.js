@@ -32,7 +32,11 @@
   function SharedDomain(apiManager) {
     this.apiManager = apiManager;
     this.sharedDomainApi = this.apiManager.retrieve('cloud-foundry.api.SharedDomains');
-    this.data = {};
+    this.data = {
+      all: {},
+      filtered: {},
+      one: {}
+    };
   }
 
   angular.extend(SharedDomain.prototype, {

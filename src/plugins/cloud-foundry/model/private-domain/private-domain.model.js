@@ -32,7 +32,11 @@
   function PrivateDomain(apiManager) {
     this.apiManager = apiManager;
     this.privateDomainApi = this.apiManager.retrieve('cloud-foundry.api.PrivateDomains');
-    this.data = {};
+    this.data = {
+      all: {},
+      filtered: {},
+      one: {}
+    };
   }
 
   angular.extend(PrivateDomain.prototype, {

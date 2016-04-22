@@ -23,7 +23,10 @@
       $httpBackend.expectGET(ListAllPrivateDomains.url);
       privateDomainModel.all();
       $httpBackend.flush();
-      expect(privateDomainModel.data.all).toBe(ListAllPrivateDomains.response['200'].body);
+      expect(privateDomainModel.data.all.total_results).toBe(ListAllPrivateDomains.response['200'].body.total_results);
+      expect(privateDomainModel.data.all.prev_url).toBe(ListAllPrivateDomains.response['200'].body.prev_url);
+      expect(privateDomainModel.data.all.next_url).toBe(ListAllPrivateDomains.response['200'].body.next_url);
+      expect(privateDomainModel.data.all.resources[0].metadata.guid).toBe(ListAllPrivateDomains.response['200'].body.resources[0].metadata.guid);
     });
 
     it('filterByName', function() {
@@ -32,7 +35,10 @@
       $httpBackend.expectGET(FilterPrivateDomainsByName.url);
       privateDomainModel.filterByName();
       $httpBackend.flush();
-      expect(privateDomainModel.data.filtered).toBe(FilterPrivateDomainsByName.response['200'].body);
+      expect(privateDomainModel.data.filtered.total_results).toBe(FilterPrivateDomainsByName.response['200'].body.total_results);
+      expect(privateDomainModel.data.filtered.prev_url).toBe(FilterPrivateDomainsByName.response['200'].body.prev_url);
+      expect(privateDomainModel.data.filtered.next_url).toBe(FilterPrivateDomainsByName.response['200'].body.next_url);
+      expect(privateDomainModel.data.filtered.resources[0].metadata.guid).toBe(FilterPrivateDomainsByName.response['200'].body.resources[0].metadata.guid);
     });
 
     it('allSharedOrganizationsForPrivateDomain', function() {
@@ -41,7 +47,10 @@
       $httpBackend.expectGET(ListAllSharedOrganizationsForPrivateDomain.url);
       privateDomainModel.allSharedOrganizationsForPrivateDomain();
       $httpBackend.flush();
-      expect(privateDomainModel.data.allSharedOrg).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body);
+      expect(privateDomainModel.data.allSharedOrg.total_results).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body.total_results);
+      expect(privateDomainModel.data.allSharedOrg.prev_url).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body.prev_url);
+      expect(privateDomainModel.data.allSharedOrg.next_url).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body.next_url);
+      expect(privateDomainModel.data.allSharedOrg.resources[0].metadata.guid).toBe(ListAllSharedOrganizationsForPrivateDomain.response['200'].body.resources[0].metadata.guid);
     });
 
     it('retrievePrivateDomain', function() {
@@ -50,8 +59,12 @@
       $httpBackend.expectGET(RetrievePrivateDomain.url);
       privateDomainModel.retrievePrivateDomain();
       $httpBackend.flush();
-      expect(privateDomainModel.data.one).toBe(RetrievePrivateDomain.response['200'].body);
+      expect(privateDomainModel.data.one.total_results).toBe(RetrievePrivateDomain.response['200'].body.total_results);
+      expect(privateDomainModel.data.one.prev_url).toBe(RetrievePrivateDomain.response['200'].body.prev_url);
+      expect(privateDomainModel.data.one.next_url).toBe(RetrievePrivateDomain.response['200'].body.next_url);
+      expect(privateDomainModel.data.one.metadata.guid).toBe(RetrievePrivateDomain.response['200'].body.metadata.guid);
     });
 
   });
-});
+
+})();
