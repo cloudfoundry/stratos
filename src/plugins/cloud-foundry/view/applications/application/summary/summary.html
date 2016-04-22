@@ -10,14 +10,24 @@
   <div class="row data-body">
     <div class="col-md-6">
       <dl class="dl-horizontal">
-        <dt translate>MEMORY UTILIZATION</dt>
-        <dd class="pull-right">0 / {{ appCtrl.model.application.summary.memory }} <span translate>MB</span></dd>
 
-        <dt translate>INSTANCES</dt>
-        <dd class="pull-right">{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}</dd>
+        <dd>
+          <percent-gauge title="{{ 'Memory Utilization' | translate }}"
+                         value="{{ appCtrl.model.application.stats.usage.mem / appCtrl.model.application.stats.mem_quota }}"
+                         value-text="{{ [appCtrl.model.application.stats.usage.mem, appCtrl.model.application.stats.mem_quota] | usageBytes:0 }}" />
+        </dd>
 
-        <dt translate>DISK QUOTA</dt>
-        <dd class="pull-right">0 / {{ appCtrl.model.application.summary.disk_quota }} <span translate>MB</span></dd>
+        <dd>
+          <percent-gauge title="{{ 'Instances' | translate }}"
+                         value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
+                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}" />
+        </dd>
+
+        <dd>
+          <percent-gauge title="{{ 'Disk Quota' | translate }}"
+                         value="{{ appCtrl.model.application.stats.usage.disk / appCtrl.model.application.stats.disk_quota }}"
+                         value-text="{{ [appCtrl.model.application.stats.usage.disk, appCtrl.model.application.stats.disk_quota] | usageBytes }}" />
+        </dd>
 
         <dt translate>STATE</dt>
         <dd class="pull-right">
@@ -28,6 +38,7 @@
         <dd class="pull-right">
           {{ appCtrl.model.application.summary.package_updated_at | date : 'M/d/yy h:mm:ss a' }}
         </dd>
+
       </dl>
     </div>
     <div class="col-md-6">

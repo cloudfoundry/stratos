@@ -117,7 +117,7 @@
       applicationModel.getAppStats(guid, params);
       $httpBackend.flush();
       expect(GetDetailedStatsForStartedApp.response['200'].body['0'].state).toBe('RUNNING');
-      expect(applicationModel.application.stats['0'].stats.usage.disk).toBe(66392064);
+      expect(applicationModel.application.stats.usage.disk).toBe(66392064);
     });
   });
 
