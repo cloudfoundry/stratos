@@ -8,10 +8,12 @@ var registration = require('../po/service-instance-registration.po');
 
 describe('Service Instance Registration', function () {
   beforeAll(function () {
-    resetTo.devWorkflow(true);
-    helpers.setBrowserNormal();
-    helpers.loadApp();
-    loginPage.login('dev', 'dev');
+    browser.driver.wait(resetTo.devWorkflow(true))
+      .then(function () {
+        helpers.setBrowserNormal();
+        helpers.loadApp();
+        loginPage.login('dev', 'dev');
+      });
   });
 
   describe('service instances table', function () {

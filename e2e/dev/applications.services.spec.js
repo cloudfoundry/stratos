@@ -7,13 +7,15 @@ var galleryPage = require('../po/applications.po');
 
 describe('Application - Services', function () {
   beforeAll(function () {
-    resetTo.devWorkflow(false);
-    helpers.setBrowserNormal();
-    helpers.loadApp();
-    loginPage.login('dev', 'dev');
-    galleryPage.showApplications();
-    galleryPage.showApplicationDetails(0);
-    galleryPage.showServices();
+    browser.driver.wait(resetTo.devWorkflow(false))
+      .then(function () {
+        helpers.setBrowserNormal();
+        helpers.loadApp();
+        loginPage.login('dev', 'dev');
+        galleryPage.showApplications();
+        galleryPage.showApplicationDetails(0);
+        galleryPage.showServices();
+      });
   });
 
   it('should show application services URL', function () {
