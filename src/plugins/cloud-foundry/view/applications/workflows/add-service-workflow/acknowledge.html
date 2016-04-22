@@ -1,0 +1,48 @@
+<div class="panel-body service-panel-confirm">
+  <div class="row message">
+    <div class="col-md-2 message-icon">
+      <i class="helion-icon helion-icon-lg helion-icon-Active_L service-icon"></i>
+    </div>
+    <div class="col-md-10 message-text">
+      <h4 class="font-semi-bold" translate>Service <span class="category-name">
+        {{ applicationServicesCtrl.currentService.entity.extra.categories}}
+        </span> has been successfully added.</h4>
+    </div>
+  </div>
+  <div class="row caution-message">
+    <div class="col-md-2 message-icon">
+      <i class="helion-icon helion-icon-2x helion-icon-Alert_pressed service-icon"></i>
+    </div>
+    <div class="col-md-9 caution-text">
+      <p translate>
+        Please take a moment to add the following to your application manifest to describe your app's dependency
+        on this service.  Adding something to a manifest doesn't persist the binding.
+      </p>
+    </div>
+  </div>
+  <div class="row manifest">
+
+    <div class="col-md-8">
+      <div class="action-header">
+        Manifest Snippet
+        <button class="btn btn-link">
+          <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
+          Copy
+        </button>
+      </div>
+      <div class="panel panel-default">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td class="text-left">
+                Instance 234 </br>
+                Type: MongoDB
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

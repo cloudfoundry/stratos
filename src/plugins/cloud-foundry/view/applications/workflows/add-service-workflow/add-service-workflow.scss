@@ -1,0 +1,104 @@
+.service-badge {
+  border: 1px solid red;
+}
+
+.wizard-step {
+
+  .select-instance-panel {
+    border: 1px solid red;
+    
+    padding-top: 100px;
+
+    .select-instance-tabs {
+      padding: 0;
+    }
+  }
+
+  .service-panel {
+    border: 1px solid red;
+    
+    .service-summary {
+      .row {
+        .service-badge {
+          border: 1px solid red;
+          
+          padding: 0;
+
+          i {
+            margin: 0;
+            padding: 0;
+          }
+        }
+        .service-category {
+          padding: 0;
+          margin-left: 25px;
+        }      
+      }
+    }
+  }
+
+  .service-detail {
+    border: 1px solid red;
+    
+    .page-title {
+      h2 {
+        padding-left: 25px;
+      }
+    }
+  }
+
+  .service-panel-confirm {
+    border: 1px solid red;
+    
+    padding: 0;
+
+    .message {
+      margin: 0;
+      padding: 0;
+
+      .message-icon {
+        height: 20px;
+        margin: 0;
+        padding: 0;
+        width: 25px;
+
+        i {
+          color: green;
+          height: 10px;
+          padding: 0;
+          padding-left: 10px;
+          padding-top: 10px;
+        }
+      }
+      .message-text {
+        margin-left: 5px;
+      }
+    }
+    .caution-message {
+      margin: 0;
+      padding-left: 150px;
+      padding-top: 100px;
+
+      .message-icon {
+        margin: 0;
+        padding: 0;
+        width: 25px;
+
+        i {
+          color: $sunglow;
+          height: 10px;
+          padding: 10px;
+        }
+      }
+      .caution-text {
+        padding-left: 25px;
+        padding-top: 5px;
+      }
+    }
+    .manifest {
+      margin: 0;
+      padding-left: 160px;
+      padding-top: 25px;
+    }
+  }
+}
