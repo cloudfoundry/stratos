@@ -89,15 +89,13 @@ function nClustersAdminWorkflow() {
  */
 function newRequest() {
   var cookieJar = request.jar();
-  var req = request.defaults({
+  return request.defaults({
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
     jar: cookieJar
   });
-
-  return req;
 }
 
 /**
@@ -250,7 +248,7 @@ function resetUserServiceInstances(req) {
  */
 function removeUserServiceInstances(req) {
   return new Promise(function (resolve, reject) {
-    var data  = '';
+    var data = '';
     req.get('http://' + hostIp + '/api/service-instances/user')
       .on('data', function (responseData) {
         data += responseData;
@@ -297,14 +295,14 @@ function setUser(req, registered) {
         if (Object.keys(user).length === 0) {
           sendRequest(req, 'POST', 'users', body)
             .then(function () {
-              resolve()
+              resolve();
             }, function (err) {
               reject();
             });
         } else if (user.registered !== registered) {
           sendRequest(req, 'PUT', 'users/' + user.id, body)
             .then(function () {
-              resolve()
+              resolve();
             }, function () {
               reject();
             });
