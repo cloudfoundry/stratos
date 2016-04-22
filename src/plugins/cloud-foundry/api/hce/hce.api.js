@@ -21,7 +21,6 @@
   }
 
   /**
-   * @namespace cloud-foundry.api.hce.HceApi
    * @memberof cloud-foundry.api.hce
    * @name HceApi
    * @param {object} $http - the Angular $http service

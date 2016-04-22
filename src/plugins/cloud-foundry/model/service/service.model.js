@@ -21,9 +21,8 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.service.Service
    * @memberof cloud-foundry.model.service
-   * @name cloud-foundry.model.service.Service
+   * @name Service
    * @param {app.api.apiManager} apiManager - the service API manager
    * @property {app.api.apiManager} apiManager - the service API manager
    * @property {app.api.serviceApi} serviceApi - the service API proxy
@@ -40,8 +39,8 @@
      * @function all
      * @memberof  cloud-foundry.model.service
      * @description List all services at the model layer
-     * @param {string} guid service guid
-     * @param {object} options options for url building
+     * @param {string} guid - service guid
+     * @param {object} options - options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -57,8 +56,8 @@
      * @function usage
      * @memberof cloud-foundry.model.service
      * @description List the usage at the model layer
-     * @param {string} guid service guid
-     * @param {object} options options for url building
+     * @param {string} guid - service guid
+     * @param {object} options - options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -74,10 +73,10 @@
      * @function files
      * @memberof  cloud-foundry.model.service
      * @description List the files at the model layer
-     * @param {string} guid service guid
-     * @param {string} instanceIndex the instanceIndex
-     * @param {string} filepath the filePath
-     * @param {object} options options for url building
+     * @param {string} guid - service guid
+     * @param {string} instanceIndex - the instanceIndex
+     * @param {string} filepath - the filePath
+     * @param {object} options - options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -93,9 +92,8 @@
      * @function onAll
      * @memberof  cloud-foundry.model.service
      * @description onAll handler at model layer
-     * @param {string} response the json return from the api call
+     * @param {string} response - the json return from the api call
      * @private
-     * @returns {void}
      */
     onAll: function (response) {
       this.data = response.data;
@@ -105,9 +103,8 @@
      * @function onUsage
      * @memberof  cloud-foundry.model.service
      * @description onUsage handler at model layer
-     * @param {string} response the return from the api call
+     * @param {string} response - the return from the api call
      * @private
-     * @returns {void}
      */
     onUsage: function (response) {
       this.data.usage = response.data;
@@ -117,10 +114,8 @@
      * @function onFiles
      * @memberof  cloud-foundry.model.service
      * @description onFiles handler at model layer
-     * @parameter {string} response the return from the api call
-     * @property data - the return data from the api call
+     * @param {string} response - the return from the api call
      * @private
-     * @returns {void}
      */
     onFiles: function (response) {
       this.data.files = response.data;

@@ -57,7 +57,6 @@
      * @function completeRegistration
      * @memberOf app.view.ServiceRegistrationController
      * @description Set service instances as registered
-     * @returns {void}
      */
     completeRegistration: function () {
       var that = this;
@@ -74,7 +73,6 @@
      * @memberOf app.view.ServiceRegistrationController
      * @description Connect service instance for user
      * @param {object} serviceInstance - the service instance to connect
-     * @returns {void}
      */
     connect: function (serviceInstance) {
       var that = this;
@@ -91,7 +89,6 @@
      * @memberOf app.view.ServiceRegistrationController
      * @description Disconnect service instance for user
      * @param {object} serviceInstance - the service instance to disconnect
-     * @returns {void}
      */
     disconnect: function (serviceInstance) {
       var that = this;

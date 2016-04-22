@@ -113,7 +113,6 @@
      * @description Logged-in handler at model layer
      * @param {object} response - the HTTP response object
      * @private
-     * @returns {void}
      */
     onLoggedIn: function (response) {
       this.loggedIn = true;
@@ -125,7 +124,6 @@
      * @memberof app.model.account.Account
      * @description Logged-out handler at model layer
      * @private
-     * @returns {void}
      */
     onLoggedOut: function () {
       this.loggedIn = false;

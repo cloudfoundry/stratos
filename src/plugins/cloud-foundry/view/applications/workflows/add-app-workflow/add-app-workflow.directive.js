@@ -8,7 +8,6 @@
   addAppWorkflow.$inject = [];
 
   /**
-   * @namespace cloud-foundry.view.applications.addAppWorkflow
    * @memberof cloud-foundry.view.applications
    * @name addAppWorkflow
    * @description An add-app-workflow directive
@@ -28,11 +27,11 @@
   ];
 
   /**
-   * @namespace cloud-foundry.view.applications.AddAppWorkflowController
    * @memberof cloud-foundry.view.applications
    * @name AddAppWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.event.eventService} eventService - the Event management service
    * @property {object} model - the Cloud Foundry applications model
    * @property {object} githubModel - the Github model
    * @property {object} data - a data bag
@@ -242,7 +241,6 @@
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description append a sub workflow to the main workflow
      * @param {object} subflow - the sub workflow to append
-     * @returns {void}
      */
     appendSubflow: function (subflow) {
       [].push.apply(this.data.workflow.steps, subflow);
@@ -252,9 +250,6 @@
      * @function createApp
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description create an application
-     * @param {string} name - a unique application name
-     * @param {string} domain - the selected domain name
-     * @returns {Promise} a promise object
      */
     createApp: function () {
     },

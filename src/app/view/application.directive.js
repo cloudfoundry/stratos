@@ -71,7 +71,6 @@
      * @memberof app.view.application.ApplicationController
      * @description verify session
      * @public
-     * @returns {void}
      */
     verifySession: function () {
       var that = this;
@@ -89,7 +88,6 @@
      * @param {string} username - the username
      * @param {string} password - the password
      * @public
-     * @returns {void}
      */
     login: function (username, password) {
       var that = this;
@@ -111,7 +109,6 @@
      * @description Logged-in event handler
      * @emits LOGIN
      * @private
-     * @returns {void}
      */
     onLoggedIn: function () {
       var that = this;
@@ -166,7 +163,6 @@
      * @emits LOGIN_FAILED
      * @emits HTTP_5XX_ON_LOGIN
      * @private
-     * @returns {void}
      */
     onLoginFailed: function (response) {
       if (response.status === -1) {
@@ -195,7 +191,6 @@
      * @memberof app.view.application.ApplicationController
      * @description Log out of the application
      * @public
-     * @returns {void}
      */
     logout: function () {
       var that = this;
@@ -212,7 +207,6 @@
      * @description Logged-out event handler
      * @emits LOGOUT
      * @private
-     * @returns {void}
      */
     onLoggedOut: function () {
       this.eventService.$emit(this.eventService.events.LOGOUT);

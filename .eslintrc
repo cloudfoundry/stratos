@@ -131,7 +131,9 @@ rules:
 
   # Ensure JSDoc comments are valid
   # http://eslint.org/docs/rules/valid-jsdoc
-  valid-jsdoc: 1
+  # NOTE: the "requireReturn" parameter is very poorly labeled
+  #       It really means "require return only when a return is present"
+  valid-jsdoc: [1, {"prefer": {"return": "returns"}, "requireReturn": false, "requireReturnDescription": false}]
 
   # Ensure that the results of typeof are compared against a valid string
   # http://eslint.org/docs/rules/valid-typeof

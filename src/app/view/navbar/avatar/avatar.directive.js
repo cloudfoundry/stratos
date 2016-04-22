@@ -60,7 +60,6 @@
      * @function showActions
      * @memberof AvatarController
      * @description show actions popover
-     * @returns {void}
      * @public
      */
     showActions: function () {

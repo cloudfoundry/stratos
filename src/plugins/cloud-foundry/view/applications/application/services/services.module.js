@@ -59,8 +59,7 @@
   angular.extend(ApplicationServicesController.prototype, {
     /**
     * @name showServiceDetail
-    * @param {object} service - the service to be displaye in the panel
-    * @param {object} currentService - save the service clicked on
+    * @param {object} service - the service to be displayed in the panel
     * @property {object} flyoutActive - flyout panel boolean flag for visibility
     */
     showServiceDetail: function(service) {
