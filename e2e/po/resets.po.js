@@ -188,7 +188,7 @@ function resetClusters(req) {
  */
 function removeClusters(req) {
   return new Promise(function (resolve, reject) {
-    var data  = '';
+    var data = '';
     req.get('http://' + hostIp + '/api/service-instances')
       .on('data', function (responseData) {
         data += responseData;
