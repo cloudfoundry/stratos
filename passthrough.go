@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine"
 	"github.com/labstack/echo/engine/standard"
@@ -197,7 +196,6 @@ func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest
 	if len(cnsiRequest.Body) > 0 {
 		body = bytes.NewReader(cnsiRequest.Body)
 	}
-	spew.Dump(cnsiRequest.URL.String())
 	req, err = http.NewRequest(cnsiRequest.Method, cnsiRequest.URL.String(), body)
 	if err != nil {
 		cnsiRequest.Error = err

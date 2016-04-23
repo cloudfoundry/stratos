@@ -58,12 +58,13 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 
 func (p *portalProxy) refreshToken(cnsiGUID string, userGUID string, tokenEndpoint string) (t tokenRecord, err error) {
 
+	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 	userToken, ok := p.getCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)
 	}
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(userToken.RefreshToken, tokenEndpoint)
+	uaaRes, err := p.getUAATokenWithRefreshToken(userToken.RefreshToken, tokenEndpointWithPath)
 	if err != nil {
 		return t, fmt.Errorf("Token refresh request failed: %v", err)
 	}

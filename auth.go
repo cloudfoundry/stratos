@@ -129,7 +129,7 @@ func (p *portalProxy) getUAATokenWithCreds(username, password, authEndpoint stri
 
 func (p *portalProxy) getUAATokenWithRefreshToken(refreshToken, authEndpoint string) (*UAAResponse, error) {
 	body := url.Values{}
-	body.Set("grant_type", "password")
+	body.Set("grant_type", "refresh_token")
 	body.Set("refresh_token", refreshToken)
 	body.Set("response_type", "token")
 
