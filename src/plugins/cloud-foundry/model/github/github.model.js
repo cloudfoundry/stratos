@@ -21,7 +21,6 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.github.GithubModel
    * @memberof cloud-foundry.model.github
    * @name GithubModel
    * @param {app.api.apiManager} apiManager - the application API manager
@@ -103,7 +102,6 @@
      * @description onRepos handler
      * @param {string} response - the JSON response from API call
      * @private
-     * @returns {void}
      */
     onRepos: function (response) {
       this.data.repos.length = 0;
@@ -116,7 +114,6 @@
      * @description onBranches handler
      * @param {string} response - the JSON response from API call
      * @private
-     * @returns {void}
      */
     onBranches: function (response) {
       this.data.branches.length = 0;
@@ -129,7 +126,6 @@
      * @description onCommits handler
      * @param {string} response - the JSON response from API call
      * @private
-     * @returns {void}
      */
     onCommits: function (response) {
       this.data.commits.length = 0;
@@ -141,7 +137,6 @@
      * @memberof cloud-foundry.model.github.GithubModel
      * @description onReposError handler
      * @private
-     * @returns {void}
      */
     onReposError: function () {
       this.data.repos.length = 0;
@@ -152,7 +147,6 @@
      * @memberof cloud-foundry.model.github.GithubModel
      * @description onBranchesError handler
      * @private
-     * @returns {void}
      */
     onBranchesError: function () {
       this.data.branches.length = 0;
@@ -163,7 +157,6 @@
      * @memberof cloud-foundry.model.github.GithubModel
      * @description onCommitsError handler
      * @private
-     * @returns {void}
      */
     onCommitsError: function () {
       this.data.commits.length = 0;

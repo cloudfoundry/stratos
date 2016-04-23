@@ -54,7 +54,6 @@
      * @function showClusterAddForm
      * @memberOf app.view.ClusterRegistrationController
      * @description Show the cluster add form flyout
-     * @returns {void}
      */
     showClusterAddForm: function () {
       this.clusterAddFlyoutActive = true;
@@ -64,7 +63,6 @@
      * @function hideClusterAddForm
      * @memberOf app.view.ClusterRegistrationController
      * @description Hide the cluster add form flyout
-     * @returns {void}
      */
     hideClusterAddForm: function () {
       this.clusterAddFlyoutActive = false;

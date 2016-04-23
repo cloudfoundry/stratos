@@ -21,7 +21,6 @@
   }
 
   /**
-   * @namespace cloud-foundry.api.github.GithubApi
    * @memberof cloud-foundry.api.github
    * @name GithubApi
    * @param {object} $http - the Angular $http service

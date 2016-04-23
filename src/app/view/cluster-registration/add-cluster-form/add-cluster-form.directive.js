@@ -39,8 +39,8 @@
    * @memberof app.view
    * @name AddClusterFormController
    * @constructor
-   * @param {app.model.modelManager} - the application model manager
-   * @property {app.model.serviceInstance} - the service instance model
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {string} url - the cluster endpoint
    * @property {string} name - the cluster friendly name
    * @property {boolean} addClusterError - flag error adding cluster
@@ -57,7 +57,6 @@
      * @function addCluster
      * @memberof app.view.AddClusterFormController
      * @description Add a cluster and dismiss this form after clearing it
-     * @returns {void}
      */
     addCluster: function () {
       var that = this;
@@ -74,7 +73,6 @@
      * @function cancel
      * @memberof app.view.AddClusterFormController
      * @description Cancel adding cluster. Clear the form and dismiss this form.
-     * @returns {void}
      */
     cancel: function () {
       this.clearForm();
@@ -85,7 +83,6 @@
      * @function clearForm
      * @memberof app.view.AddClusterFormController
      * @description Clear the form and all errors
-     * @returns {void}
      */
     clearForm: function () {
       this.url = null;
@@ -97,7 +94,6 @@
      * @function onAddClusterError
      * @memberof app.view.AddClusterFormController
      * @description Display error when adding cluster
-     * @returns {void}
      */
     onAddClusterError: function () {
       this.addClusterError = true;

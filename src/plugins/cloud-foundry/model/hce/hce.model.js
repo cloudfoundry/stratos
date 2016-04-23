@@ -21,7 +21,6 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.hce.HceModel
    * @memberof cloud-foundry.model.hce
    * @name HceModel
    * @param {app.api.apiManager} apiManager - the application API manager
@@ -77,7 +76,6 @@
      * @description onBuildContainers handler
      * @param {string} response - the JSON response from API call
      * @private
-     * @returns {void}
      */
     onBuildContainers: function (response) {
       this.data.buildContainers.length = 0;
@@ -90,7 +88,6 @@
      * @description onNotificationTargetTypes handler
      * @param {string} response - the JSON response from API call
      * @private
-     * @returns {void}
      */
     onNotificationTargetTypes: function (response) {
       this.data.notificationTargetTypes.length = 0;

@@ -68,7 +68,6 @@
      * @function clearPassword
      * @memberof app.view.loginForm.LoginFormController
      * @description Clear the contents of the password field
-     * @returns {void}
      */
     clearPassword: function () {
       this.password = '';

@@ -38,7 +38,6 @@
    * @param {string} basePath - the base path to the root folder where the
    * plugin application resides or is installed. The basePath is relative to
    * the 'src' folder.
-   * @returns {void}
    */
   function registerApplication(id, angularModuleName, basePath) {
     env.plugins = env.plugins || {};

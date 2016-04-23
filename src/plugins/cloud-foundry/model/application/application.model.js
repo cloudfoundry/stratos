@@ -21,9 +21,8 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.application.Application
    * @memberof cloud-foundry.model.application
-   * @name cloud-foundry.model.application.Application
+   * @name Application
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
@@ -50,8 +49,8 @@
      * @function all
      * @memberof  cloud-foundry.model.application
      * @description List all applications at the model layer
-     * @param {string} guid application guid
-     * @param {object} options options for url building
+     * @param {string} guid - application guid
+     * @param {object} options - options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -67,8 +66,8 @@
      * @function usage
      * @memberof cloud-foundry.model.application
      * @description List the usage at the model layer
-     * @param {string} guid application guid
-     * @param {object} options options for url building
+     * @param {string} guid - application guid
+     * @param {object} options - options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -84,10 +83,10 @@
      * @function files
      * @memberof  cloud-foundry.model.application
      * @description List the files at the model layer
-     * @param {string} guid application guid
-     * @param {string} instanceIndex the instanceIndex
-     * @param {string} filepath the filePath
-     * @param {object} options options for url building
+     * @param {string} guid - application guid
+     * @param {string} instanceIndex - the instanceIndex
+     * @param {string} filepath - the filePath
+     * @param {object} options - options for url building
      * @returns {promise} A promise object
      * @public
      **/
@@ -173,7 +172,6 @@
      * @memberof cloud-foundry.model.application
      * @description restart an application
      * @param {string} guid - the application id
-     * @returns {void}
      * @public
      */
     restartApp: function (guid) {
@@ -223,6 +221,7 @@
      * @memberof cloud-foundry.model.application
      * @description Returns the stats for the STARTED app
      * @param {string} guid - the app guid
+     * @param {object} params - options for getting the stats of an app
      * @returns {promise} A resolved/rejected promise
      * @public
      */
@@ -239,9 +238,8 @@
      * @function onAll
      * @memberof  cloud-foundry.model.application
      * @description onAll handler at model layer
-     * @param {string} response the json return from the api call
+     * @param {string} response - the json return from the api call
      * @private
-     * @returns {void}
      */
     onAll: function (response) {
       this.data.applications = response.data;
@@ -251,9 +249,8 @@
      * @function onUsage
      * @memberof  cloud-foundry.model.application
      * @description onUsage handler at model layer
-     * @param {string} response the return from the api call
+     * @param {string} response - the return from the api call
      * @private
-     * @returns {void}
      */
     onUsage: function (response) {
       this.data.usage = response.data;
@@ -263,9 +260,8 @@
      * @function onFiles
      * @memberof  cloud-foundry.model.application
      * @description onFiles handler at model layer
-     * @param {string} response the return from the api call
+     * @param {string} response - the return from the api call
      * @private
-     * @returns {void}
      */
     onFiles: function (response) {
       this.data.files = response.data;
@@ -277,7 +273,6 @@
      * @description onSummary handler at model layer
      * @param {object} response - the json return from the api call
      * @private
-     * @returns {void}
      */
     onSummary: function (response) {
       this.application.summary = response.data;
@@ -289,7 +284,6 @@
      * @description onAppStateChangeSuccess handler at model layer
      * @param {object} response - the json return from the api call
      * @private
-     * @returns {void}
      */
     onAppStateChangeSuccess: function (response) {
       this.application.summary.state = response.data.entity.state;
@@ -301,7 +295,6 @@
      * @memberof  cloud-foundry.model.application
      * @description onAppStateChangeFailure handler at model layer
      * @private
-     * @returns {void}
      */
     onAppStateChangeFailure: function () {
       this.application.summary.state = 'ERROR';
