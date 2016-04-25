@@ -234,6 +234,8 @@
           that.finishWorkflow();
         }
       };
+
+      this.userInput.domain = this.options.domains[0].value;
     },
 
     /**
