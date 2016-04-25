@@ -16,7 +16,7 @@
    */
   function addServiceWorkflow() {
     return {
-      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html', 
+      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html',
       controller: AddServiceWorkflowController,
       controllerAs: 'addServiceWorkflowCtrl'
     };
@@ -111,7 +111,6 @@
 
     addService: function () {
       // this.serviceModel.metadata.guid
-      alert('Service Added.');
     },
 
     startWorkflow: function (service) {
