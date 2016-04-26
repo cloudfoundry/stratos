@@ -116,6 +116,7 @@
     startWorkflow: function (service) {
       this.reset();
       this.addingService = true;
+      this.options.workflow.title = "Add Service to " + this.appModel.application.summary.name;
       this.options.workflow.hideStepNavStack = true;
       this.options.service = service;
     },

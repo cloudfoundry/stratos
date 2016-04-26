@@ -5,7 +5,7 @@
     </div>
     <div class="col-md-10 message-text">
       <h4 class="font-semi-bold" translate>Service <span class="category-name">
-        {{ applicationServicesCtrl.currentService.entity.extra.categories}}
+        {{ wizardCtrl.options.service.entity.extra.categories }}
         </span> has been successfully added.</h4>
     </div>
   </div>
@@ -23,15 +23,19 @@
   <div class="row manifest">
 
     <div class="col-md-8">
-      <div class="action-header">
-        Manifest Snippet
-        <button class="btn btn-link">
-          <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
-          Copy
-        </button>
-      </div>
       <div class="panel panel-default">
-        <table class="table">
+        <table style="width: 100%;">
+          <thead>
+            <tr>
+              <td align='right'>
+                <span>Manifest Snippet</span>
+                <button class="btn btn-link">
+                  <i class="helion-icon helion-icon-Right_Arrow"></i>
+                  Copy
+                </button>
+              </td>
+            </tr>
+          </thead>
           <tbody>
             <tr>
               <td class="text-left">
