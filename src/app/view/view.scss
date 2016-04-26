@@ -50,6 +50,12 @@
 
 // TODO: move bellow to helio-ui-theme
 
+flyout.without-close-button {
+  button.close {
+    display: none;
+  }
+}
+
 .flex-container-row-wrap {
   display: flex;
   flex-direction: row;
