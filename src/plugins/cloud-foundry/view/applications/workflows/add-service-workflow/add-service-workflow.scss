@@ -1,10 +1,14 @@
+@media (min-width: 768px) {
+  add-service-workflow .col-sm-9 {
+    width: auto;
+  }
+}
+
 add-service-workflow {
   .flyout-content .wizard-body .wizard-step {
-    padding: 0px;
+    padding-left: $hpe-unit-space * 5;
 
     .select-instance-panel {
-      border: 1px solid red;
-
       padding-top: 100px;
 
       .select-instance-tabs {
@@ -13,8 +17,6 @@ add-service-workflow {
     }
 
     .select-instance-panel {
-      border: 1px solid red;
-
       padding-top: 100px;
 
       .select-instance-tabs {
@@ -23,13 +25,9 @@ add-service-workflow {
     }
 
     .service-panel {
-      border: 1px solid red;
-
       .service-summary {
         .row {
           .service-badge {
-            border: 1px solid red;
-
             padding: 0;
 
             i {
@@ -46,8 +44,6 @@ add-service-workflow {
     }
 
     .service-detail {
-      border: 1px solid red;
-
       .page-title {
         h2 {
           padding-left: 25px;
@@ -56,8 +52,6 @@ add-service-workflow {
     }
 
     .service-panel-confirm {
-      border: 1px solid red;
-
       padding: 0;
 
       .message {
