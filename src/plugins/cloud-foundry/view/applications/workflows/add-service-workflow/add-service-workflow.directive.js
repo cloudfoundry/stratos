@@ -72,7 +72,7 @@
           {
             title: gettext('Instance'),
             templateUrl: path + 'instance.html',
-            nextBtnText: gettext('Next'),
+            nextBtnText: gettext('Add'),
             onNext: function () {
             }
           },

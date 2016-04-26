@@ -29,7 +29,7 @@
 <div class="instance-details col-md-6">
   <div class="select-instance-panel">
     <uib-tabset class="select-instance-tabs" active="active">
-      <uib-tab index="0" heading="Choose Instance" disable="true">
+      <uib-tab index="0" heading="Choose Existing Instance" disable="true">
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
           incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
@@ -39,13 +39,13 @@
           deserunt mollit anim id est laborum.
         </p>
       </uib-tab>
-      <uib-tab index="1" heading="Create Instance" active="true">
+      <uib-tab index="1" heading="Create New Instance" active="true">
 
         <form>
           <div class="form-group" focusable-input>
             <label class="control-label"
               for="add-service-workflow-name" required translate>
-              Instance Name
+              Name
             </label>
             <input ng-model="wizardCtrl.options.userInput.Name" type="text" class="form-control"
               id="add-service-workflow-name" required autofocus>

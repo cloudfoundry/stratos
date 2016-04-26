@@ -12,19 +12,20 @@ add-service-workflow {
       padding-top: 100px;
 
       .select-instance-tabs {
-        padding: 0;
-      }
-    }
-
-    .select-instance-panel {
-      padding-top: 100px;
-
-      .select-instance-tabs {
-        padding: 0;
+        .nav-tabs .uib-tab {
+          margin: 0;
+          padding-left: 7.5px;
+          padding-right: 7.5px;
+          a {
+            font-size: 15px;
+          }
+        }
       }
     }
 
     .service-panel {
+      padding-top: 0;
+
       .service-summary {
         .row {
           .service-badge {
@@ -39,6 +40,9 @@ add-service-workflow {
             padding: 0;
             margin-left: 25px;
           }
+        }
+        .app-label {
+          padding-top: 25px;
         }
       }
     }
@@ -101,6 +105,15 @@ add-service-workflow {
         margin: 0;
         padding-left: 160px;
         padding-top: 25px;
+
+        table {
+           width: 100%;
+
+           button {
+             font-size: 16px;
+             padding-left: 130px;
+           }
+        }
       }
     }
   }
