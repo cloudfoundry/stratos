@@ -9,7 +9,7 @@ add-service-workflow {
     padding-left: $hpe-unit-space * 4.5;
 
     .select-instance-panel {
-      padding-top: 100px;
+      padding-top: 0px;
 
       .select-instance-tabs {
         .nav-tabs .uib-tab {
@@ -18,6 +18,17 @@ add-service-workflow {
           padding-right: 7.5px;
           a {
             font-size: 15px;
+          }
+        }
+        .tab-content {
+          .tab-pane {
+            form {
+              padding-top: 10px;
+
+              .form-group {
+                margin: 0;
+              }
+            }
           }
         }
       }
@@ -59,6 +70,7 @@ add-service-workflow {
       padding: 0;
 
       .message {
+        line-height: 0.75;
         margin: 0;
         padding: 0;
 
@@ -69,7 +81,7 @@ add-service-workflow {
           width: 25px;
 
           i {
-            color: green;
+            color: $brand-primary;
             height: 10px;
             padding: 0;
             padding-left: 10px;
@@ -104,15 +116,25 @@ add-service-workflow {
       .manifest {
         margin: 0;
         padding-left: 160px;
-        padding-top: 25px;
+        padding-top: 15px;
 
         table {
-           width: 100%;
+          width: 100%;
 
-           button {
-             font-size: 16px;
-             padding-left: 130px;
-           }
+          th {
+            padding: 10px;
+            text-align: left;
+
+            button {
+              float: right;
+              font-size: 14px;
+              padding: 0;
+            }
+          }
+
+          td {
+            text-align: left;
+          }
         }
       }
     }
