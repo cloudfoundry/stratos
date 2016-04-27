@@ -202,6 +202,8 @@ function removeClusters(req) {
             Promise.all(promises).then(function () {
               resolve();
             });
+          } else {
+            resolve();
           }
         } else {
           resolve();
@@ -264,6 +266,8 @@ function removeUserServiceInstances(req) {
             Promise.all(promises).then(function () {
               resolve();
             });
+          } else {
+            resolve();
           }
         } else {
           resolve();

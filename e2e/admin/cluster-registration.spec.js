@@ -8,9 +8,11 @@ var registration = require('../po/service-instance-registration.po');
 
 describe('Cluster Registration (ITOps)', function () {
   beforeAll(function () {
-    resetTo.zeroClusterAdminWorkflow();
-    helpers.setBrowserNormal();
-    helpers.loadApp();
+    browser.driver.wait(resetTo.zeroClusterAdminWorkflow())
+      .then(function () {
+        helpers.setBrowserNormal();
+        helpers.loadApp();
+      });
   });
 
   it('should be displayed with cluster count === 0', function () {

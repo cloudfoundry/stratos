@@ -7,10 +7,12 @@ var galleryPage = require('../po/applications.po');
 
 describe('Applications - Gallery View', function () {
   beforeAll(function () {
-    resetTo.devWorkflow(false);
-    helpers.setBrowserNormal();
-    helpers.loadApp();
-    loginPage.login('dev', 'dev');
+    browser.driver.wait(resetTo.devWorkflow(false))
+      .then(function () {
+        helpers.setBrowserNormal();
+        helpers.loadApp();
+        loginPage.login('dev', 'dev');
+      });
   });
 
   it('should show applications as cards', function() {
