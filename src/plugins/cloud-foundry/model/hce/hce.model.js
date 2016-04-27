@@ -31,8 +31,7 @@
   function HceModel(apiManager) {
     this.apiManager = apiManager;
     this.data = {
-      buildContainers: [],
-      notificationTargetTypes: []
+      buildContainers: []
     };
   }
 
@@ -47,26 +46,10 @@
      **/
     buildContainers: function () {
       var that = this;
-      var hceApi = this.apiManager.retrieve('cloud-foundry.api.hce');
-      return hceApi.buildContainers()
+      return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
+        .getBuildContainers()
         .then(function (response) {
           that.onBuildContainers(response);
-        });
-    },
-
-    /**
-     * @function notificationTargetTypes
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Get the set of notification target types
-     * @returns {promise} A promise object
-     * @public
-     **/
-    notificationTargetTypes: function () {
-      var that = this;
-      var hceApi = this.apiManager.retrieve('cloud-foundry.api.hce');
-      return hceApi.notificationTargetTypes()
-        .then(function (response) {
-          that.onNotificationTargetTypes(response);
         });
     },
 
@@ -80,18 +63,6 @@
     onBuildContainers: function (response) {
       this.data.buildContainers.length = 0;
       [].push.apply(this.data.buildContainers, response.data || []);
-    },
-
-    /**
-     * @function onNotificationTargetTypes
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description onNotificationTargetTypes handler
-     * @param {string} response - the JSON response from API call
-     * @private
-     */
-    onNotificationTargetTypes: function (response) {
-      this.data.notificationTargetTypes.length = 0;
-      [].push.apply(this.data.notificationTargetTypes, response.data || []);
     }
 
   });
