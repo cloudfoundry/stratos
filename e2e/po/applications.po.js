@@ -76,7 +76,7 @@ function serviceDetailsCancelAction() {
 }
 
 function applicationServiceFlyout() {
-  return element(by.css('div.flyout application-service'));
+  return element(by.css('add-service-workflow'));
 }
 
 function serviceAddConfirm() {

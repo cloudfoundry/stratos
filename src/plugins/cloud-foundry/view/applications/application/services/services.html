@@ -26,8 +26,9 @@
           action-target="service" menu-icon="helion-icon helion-icon-More"
           menu-position="actions-menu-right">
         </actions-menu>
-        <button class="btn btn-sm btn-link" ng-click="applicationServicesCtrl.showServiceDetail(service)">
-          <span translate>Add Service</span>
+        <button class="btn btn-sm btn-link" translate
+          ng-click="applicationServicesCtrl.eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', service)">
+          Add Service
           <i class="helion-icon helion-icon-Plus"></i>
         </button>
       </div>
@@ -35,6 +36,4 @@
   </div>
 </div>
 
-<flyout flyout-active="applicationServicesCtrl.flyoutActive" flyout-close-icon="'helion-icon helion-icon-Close'">
-  <application-service></application-service>
-</flyout>
+<add-service-workflow></add-service-workflow>

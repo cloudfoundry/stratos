@@ -1,0 +1,50 @@
+<div class="service-confirm">
+
+  <div class="success-message">
+    <div class="message-icon">
+      <i class="helion-icon helion-icon-lg helion-icon-Active_L service-icon"></i>
+    </div>
+    <div class="message-text">
+      <h4 class="font-semi-bold" translate>Service <span class="category-name" translate>
+        {{ wizardCtrl.options.service.entity.extra.categories }}
+        </span> has been successfully added.</h4>
+    </div>
+  </div>
+
+  <div class="caution-message col-md-8">
+    <div class="message-icon">
+      <i class="helion-icon helion-icon-2x helion-icon-Alert_pressed service-icon"></i>
+    </div>
+    <div class="message-text">
+      <p translate>
+        Please take a moment to add the following to your application manifest to describe your app's dependency
+        on this service. Adding something to a manifest doesn't persist the binding.
+      </p>
+    </div>
+  </div>
+
+  <div class="manifest col-md-8">
+    <table class="table table-bordered table-actionable">
+      <thead>
+        <tr>
+          <th translate>Manifest Snippet</th>
+          <th>
+            <button class="btn btn-link">
+              <i class="helion-icon helion-icon-Right_Arrow"></i>
+              <span translate>Copy</span>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td translate>
+            Instance 234
+            Type: MongoDB
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

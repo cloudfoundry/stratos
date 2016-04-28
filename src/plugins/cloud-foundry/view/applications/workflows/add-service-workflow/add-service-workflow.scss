@@ -1,0 +1,121 @@
+@media (min-width: 768px) {
+  add-service-workflow .col-sm-9 {
+    width: auto;
+  }
+}
+
+add-service-workflow {
+  .flyout-content .wizard-body .wizard-step {
+    padding-left: $hpe-unit-space * 4.5;
+
+    .select-instance-tabs {
+      .nav-tabs .uib-tab {
+        margin: 0;
+        padding-left: $hpe-unit-space / 3;
+        padding-right: $hpe-unit-space / 3;
+        padding-top: 0;
+      }
+      .nav-tabs > li.active > a,
+      .nav-tabs > li.active > a:hover,
+      .nav-tabs > li.active > a:focus {
+        background-color: white;
+      }
+      .tab-content {
+        .tab-pane {
+          form:not(.form-horizontal) .form-group {
+            width: 100%;
+          }
+          form {
+            padding-top: $hpe-unit-space / 2;
+          }
+        }
+      }
+    }
+
+    .service-summary {
+      display: flex;
+      flex-flow: column;
+
+      .service-badge-category {
+        display: flex;
+        flex-flow: row;
+
+        .service-badge {
+          padding: 0;
+
+          i {
+            margin: 0;
+            padding: 0;
+          }
+          .service-category {
+            padding: 0;
+          }
+        }
+      }
+      .service-label {
+        padding-top: $hpe-unit-space;
+      }
+    }
+
+    .service-confirm {
+      padding: 0;
+
+      .success-message {
+        display: flex;
+        flex-flow: row;
+        align-items: center;
+        margin: 0;
+        padding-left: $hpe-unit-space * 0.6;
+
+        .message-icon {
+          height: $hpe-unit-space;
+          margin: 0;
+          padding: 0;
+
+          i {
+            color: $brand-primary;
+            height: $hpe-unit-space / 2;
+            padding: 0;
+          }
+        }
+        .message-text {
+          margin-left: $hpe-unit-space / 5;
+        }
+      }
+
+      .caution-message {
+        display: flex;
+        flex-flow: row;
+        align-items: flex-start;
+        margin: 0;
+        padding-left: $hpe-unit-space * 6;
+        padding-top: $hpe-unit-space * 4;
+
+        .message-icon {
+          i {
+            color: $sunglow;
+            padding: 0;
+          }
+        }
+        .message-text {
+          padding-left: $hpe-unit-space;
+          p {
+            span {
+              width: $hpe-unit-space * 3;
+            }
+          }
+        }
+      }
+
+      .manifest {
+        margin: 0;
+        padding-left: $hpe-unit-space * 5.5;
+        padding-top: $hpe-unit-space / 2;
+
+        th {
+          padding: $hpe-unit-space / 2.5;
+        }
+      }
+    }
+  }
+}

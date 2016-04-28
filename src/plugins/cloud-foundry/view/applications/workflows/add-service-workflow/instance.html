@@ -1,0 +1,62 @@
+<div class="service-summary col-md-6">
+  <div class="service-badge-category">
+    <div class="col-md-1 service-badge">
+      <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
+    </div>
+    <div class="col-md-3 service-category">
+      <h4 class="font-semi-bold app-category">
+        {{ wizardCtrl.options.service.entity.extra.categories }}
+      </h4>
+    </div>
+  </div>
+  <div class="service-label">
+    {{ wizardCtrl.options.service.entity.label }}
+    <p>
+      ({{ wizardCtrl.options.service.entity.version }})
+    </p>
+  </div>
+  <div class="service-description">
+    {{ wizardCtrl.options.service.entity.description }}. Lorem ipsum dolor sit amet, consectetur
+    adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+    reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+    cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+  </div>
+</div>
+
+<div class="col-md-6">
+  <uib-tabset class="select-instance-tabs" active="active">
+    <uib-tab index="0" heading="{{ 'Choose Existing Instance' | translate }}" disable="true">
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+        irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+        deserunt mollit anim id est laborum.
+      </p>
+    </uib-tab>
+    <uib-tab index="1" heading="{{ 'Create New Instance' | translate }}" active="true">
+      <form>
+        <div class="form-group" focusable-input>
+          <label class="control-label"
+            for="add-service-workflow-name" required translate>
+            Name
+          </label>
+          <input ng-model="wizardCtrl.options.userInput.Name" type="text" class="form-control"
+            id="add-service-workflow-name" required autofocus>
+        </div>
+        <div class="form-group">
+          <label class="control-label" translate>Plan</label>
+          <select-input
+            arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+            input-model="wizardCtrl.options.userInput.plan"
+            input-options="wizardCtrl.options.plans"
+            placeholder="{{'Select Plan' | translate}}"
+            tabindex="0">
+          </select-input>
+        </div>
+      </form>
+    </uib-tab>
+  </uib-tabset>
+</div>
