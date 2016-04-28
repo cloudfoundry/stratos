@@ -8,133 +8,107 @@ add-service-workflow {
   .flyout-content .wizard-body .wizard-step {
     padding-left: $hpe-unit-space * 4.5;
 
-    .select-instance-panel {
-      padding-top: 0px;
-
-      .select-instance-tabs {
-        .nav-tabs .uib-tab {
-          margin: 0;
-          padding-left: 7.5px;
-          padding-right: 7.5px;
-          a {
-            font-size: 15px;
+    .select-instance-tabs {
+      .nav-tabs .uib-tab {
+        margin: 0;
+        padding-left: $hpe-unit-space / 3;
+        padding-right: $hpe-unit-space / 3;
+        padding-top: 0;
+      }
+      .tab-content {
+        .tab-pane {
+          form:not(.form-horizontal) .form-group {
+            width: 100%;
           }
-        }
-        .tab-content {
-          .tab-pane {
-            form {
-              padding-top: 10px;
-
-              .form-group {
-                margin: 0;
-              }
-            }
+          form {
+            padding-top: $hpe-unit-space / 2;
           }
         }
       }
     }
 
-    .service-panel {
-      padding-top: 0;
+    .service-summary {
+      display: flex;
+      flex-flow: column;
 
-      .service-summary {
-        .row {
-          .service-badge {
+      .service-badge-category {
+        display: flex;
+        flex-flow: row;
+
+        .service-badge {
+          padding: 0;
+
+          i {
+            margin: 0;
             padding: 0;
-
-            i {
-              margin: 0;
-              padding: 0;
-            }
           }
           .service-category {
             padding: 0;
-            margin-left: 25px;
           }
         }
-        .app-label {
-          padding-top: 25px;
-        }
+      }
+      .service-label {
+        padding-top: $hpe-unit-space;
       }
     }
 
-    .service-detail {
-      .page-title {
-        h2 {
-          padding-left: 25px;
-        }
-      }
-    }
-
-    .service-panel-confirm {
+    .service-confirm {
       padding: 0;
 
-      .message {
-        line-height: 0.75;
+      .success-message {
+        display: flex;
+        flex-flow: row;
+        align-items: center;
         margin: 0;
-        padding: 0;
+        padding-left: $hpe-unit-space * 0.6;
 
         .message-icon {
-          height: 20px;
+          height: $hpe-unit-space;
           margin: 0;
           padding: 0;
-          width: 25px;
 
           i {
             color: $brand-primary;
-            height: 10px;
+            height: $hpe-unit-space / 2;
             padding: 0;
-            padding-left: 10px;
-            padding-top: 10px;
           }
         }
         .message-text {
-          margin-left: 5px;
+          margin-left: $hpe-unit-space / 5;
         }
       }
+
       .caution-message {
+        display: flex;
+        flex-flow: row;
+        align-items: flex-start;
         margin: 0;
-        padding-left: 150px;
-        padding-top: 100px;
+        padding-left: $hpe-unit-space * 6;
+        padding-top: $hpe-unit-space * 4;
 
         .message-icon {
-          margin: 0;
-          padding: 0;
-          width: 25px;
-
           i {
             color: $sunglow;
-            height: 10px;
-            padding: 10px;
+            padding: 0;
           }
         }
-        .caution-text {
-          padding-left: 25px;
-          padding-top: 5px;
-        }
-      }
-      .manifest {
-        margin: 0;
-        padding-left: 160px;
-        padding-top: 15px;
-
-        table {
-          width: 100%;
-
-          th {
-            padding: 10px;
-            text-align: left;
-
-            button {
-              float: right;
-              font-size: 14px;
-              padding: 0;
+        .message-text {
+          padding-left: $hpe-unit-space;
+          p {
+            span {
+              width: $hpe-unit-space * 3;
             }
           }
+        }
+      }
 
-          td {
-            text-align: left;
-          }
+      .manifest {
+        margin: 0;
+        padding-left: $hpe-unit-space * 5.5;
+        padding-top: $hpe-unit-space / 2;
+
+        th {
+          padding: $hpe-unit-space / 2.5;
         }
       }
     }
