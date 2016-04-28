@@ -15,6 +15,11 @@ add-service-workflow {
         padding-right: $hpe-unit-space / 3;
         padding-top: 0;
       }
+      .nav-tabs > li.active > a,
+      .nav-tabs > li.active > a:hover,
+      .nav-tabs > li.active > a:focus {
+        background-color: white;
+      }
       .tab-content {
         .tab-pane {
           form:not(.form-horizontal) .form-group {
