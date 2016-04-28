@@ -11,6 +11,7 @@ type portalConfig struct {
 	UAAClient           string        `toml:"uaa_client"`
 	UAAClientSecret     string        `toml:"uaa_client_secret"`
 	UAAEndpoint         string        `toml:"uaa_endpoint"`
+	AllowedOrigins      []string      `toml:"allowed_origins"`
 	CookieStoreSecret   string        `toml:"cookie_store_secret"`
 	Dev                 bool          `toml:"dev"`
 	DevConfig           devConfig     `toml:"dev_config"`
