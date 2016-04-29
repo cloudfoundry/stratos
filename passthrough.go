@@ -137,7 +137,7 @@ func (p *portalProxy) validateCNSIList(cnsiList []string) error {
 	return nil
 }
 
-func (p *portalProxy) hcf(c echo.Context) error {
+func (p *portalProxy) proxy(c echo.Context) error {
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -181,10 +181,6 @@ func (p *portalProxy) hcf(c echo.Context) error {
 		log.Printf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
 	}
 	return err
-}
-
-func (p *portalProxy) hce(c echo.Context) error {
-	return nil
 }
 
 func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest, kill <-chan struct{}) {

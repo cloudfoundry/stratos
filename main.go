@@ -76,8 +76,6 @@ func start(p *portalProxy) {
 	e.Run(engine)
 }
 
-// sync.RWMutex
-
 func (p *portalProxy) initCookieStore() {
 	p.CookieStore = sessions.NewCookieStore([]byte(p.Config.CookieStoreSecret))
 }
@@ -92,6 +90,5 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.Post("/register/hcf", p.registerHCFCluster)
 	sessionGroup.Get("/cnsis", p.listRegisteredCNSIs)
 	group := sessionGroup.Group("/proxy")
-	group.Get("/hcf/*", p.hcf)
-	group.Get("/hce/*", p.hce)
+	group.Get("/*", p.proxy)
 }
