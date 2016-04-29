@@ -4,7 +4,11 @@
   angular
     .module('cloud-foundry.view.applications.application', [
       'cloud-foundry.view.applications.application.summary',
-      'cloud-foundry.view.applications.application.services'
+      'cloud-foundry.view.applications.application.log-stream',
+      'cloud-foundry.view.applications.application.services',
+      'cloud-foundry.view.applications.application.delivery-logs',
+      'cloud-foundry.view.applications.application.delivery-pipeline',
+      'cloud-foundry.view.applications.application.variables'
     ])
     .config(registerRoute);
 

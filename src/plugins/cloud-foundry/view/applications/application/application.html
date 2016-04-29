@@ -39,7 +39,7 @@
     </a>
   </li>
   <li>
-    <a ng-click="alert('Log Stream not implemented yet.');" translate>
+    <a ui-sref="cf.applications.application.log-stream({guid: appCtrl.id})" translate>
       Log Stream
     </a>
   </li>
@@ -49,17 +49,17 @@
     </a>
   </li>
   <li>
-    <a ng-click="alert('Delivery Logs not implemented yet.');" translate>
+    <a ui-sref="cf.applications.application.delivery-logs({guid: appCtrl.id})" translate>
       Delivery Logs
     </a>
   </li>
   <li>
-    <a ng-click="alert('Pipeline not implemented yet.');" translate>
-      Pipeline
+    <a ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id})" translate>
+      Delivery Pipeline
     </a>
   </li>
   <li>
-    <a ng-click="alert('Variables not implemented yet.');" translate>
+    <a ui-sref="cf.applications.application.variables({guid: appCtrl.id})" translate>
       Variables
     </a>
   </li>
