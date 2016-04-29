@@ -6,6 +6,7 @@ tls_cert_key          = "certs/pproxy.key"
 uaa_client            = "portal_proxy"
 uaa_client_secret     = "portalproxysecret"
 uaa_endpoint          = "https://api.cnapdomain.com/oauth/token"
+allowed_origins       = [ "https://localhost" ]
 cookie_store_secret   = "cookiesecret"
 dev                   = true
 
