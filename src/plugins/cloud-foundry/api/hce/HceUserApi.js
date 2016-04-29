@@ -48,7 +48,7 @@
       var config = {
         method: 'POST',
         url: path,
-        params: params,
+        params: params || {},
         data: data,
         headers: this.defaultHeaders
       };
@@ -70,7 +70,7 @@
       var config = {
         method: 'DELETE',
         url: path,
-        params: params,
+        params: params || {},
         headers: this.defaultHeaders
       };
 
@@ -91,7 +91,7 @@
       var config = {
         method: 'GET',
         url: path,
-        params: params,
+        params: params || {},
         headers: this.defaultHeaders
       };
 
@@ -112,7 +112,7 @@
       var config = {
         method: 'GET',
         url: path,
-        params: params,
+        params: params || {},
         headers: this.defaultHeaders
       };
 
@@ -134,7 +134,7 @@
       var config = {
         method: 'PUT',
         url: path,
-        params: params,
+        params: params || {},
         data: data,
         headers: this.defaultHeaders
       };
