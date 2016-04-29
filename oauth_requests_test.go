@@ -66,7 +66,7 @@ func testDoOauthFlowRequest(t *testing.T, failFirst bool, tokenExpiration int64)
 		Name:                  "mockHCF",
 		CNSIType:              cnsiHCF,
 		AuthorizationEndpoint: mockUAA.URL,
-		TokenEndpoint:         mockUAA.URL + "/oauth/token",
+		TokenEndpoint:         mockUAA.URL,
 	}
 	pp.CNSIs[mockCNSIGuid] = mockCNSI
 
