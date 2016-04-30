@@ -6,11 +6,6 @@
       ng-value="wizardCtrl.options.userInput.repo.name" readonly>
   </div>
   <div class="form-group">
-    <label class="control-label" translate>Repository Full Name</label>
-    <input class="form-control" type="text"
-      ng-value="wizardCtrl.options.userInput.repo.full_name" readonly>
-  </div>
-  <div class="form-group">
     <label class="control-label" translate>Branch</label>
     <select-input input-model="wizardCtrl.options.userInput.branch"
       input-options="wizardCtrl.options.branches"
@@ -18,17 +13,17 @@
       arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
   </div>
   <div class="form-group">
-    <label class="control-label" translate>Docker Registry</label>
-    <select-input input-model="wizardCtrl.options.userInput.dockerRegistry"
-      input-options="wizardCtrl.options.dockerRegistries"
-      placeholder="{{'Select Docker Registry' | translate}}" tabindex="0"
-      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
-  </div>
-  <div class="form-group">
     <label class="control-label" translate>Build Container</label>
     <select-input input-model="wizardCtrl.options.userInput.buildContainer"
       input-options="wizardCtrl.options.buildContainers"
       placeholder="{{'Select Build Container' | translate}}" tabindex="0"
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
+  </div>
+  <div class="form-group">
+    <label class="control-label" translate>Container Registry</label>
+    <select-input input-model="wizardCtrl.options.userInput.imageRegistry"
+      input-options="wizardCtrl.options.imageRegistries"
+      placeholder="{{'Select Container Registry' | translate}}" tabindex="0"
       arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
   </div>
 </form>
