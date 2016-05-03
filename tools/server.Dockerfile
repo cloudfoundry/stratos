@@ -12,7 +12,6 @@ COPY portal-config.toml portal-config.toml
 
 RUN chmod +x portal-proxy
 
-# TODO woodnt: Figure out the right ports here.
-ENV HOST=0.0.0.0 PORT=8112
+EXPOSE 443
 
 ENTRYPOINT ["/srv/portal-proxy"]
