@@ -13,7 +13,7 @@ docker build --tag portal-proxy-server \
 
 docker run -it \
            --rm \
-           --publish 443:8080 \
+           --publish 8080:443 \
            --name portal-proxy-server \
            portal-proxy-server $*
 
