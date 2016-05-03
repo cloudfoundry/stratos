@@ -1,11 +1,17 @@
 console-view {
   position: relative;
-  display: block;
+  display: flex;
   padding-top: $page-header-height;
   min-height: 100vh;
   overflow-x: hidden;
 
-  > * > .content {
-    padding-bottom: $page-footer-height;
+  & > * {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    & > .content {
+      flex: 1;
+    }
   }
 }

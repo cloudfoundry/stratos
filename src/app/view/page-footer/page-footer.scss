@@ -1,9 +1,7 @@
 page-footer, [page-footer] {
   display: block;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  flex: 0;
+  position: relative;
   height: $page-footer-height;
   color: $page-footer-color-fg;
   background: $page-footer-color-bg;
