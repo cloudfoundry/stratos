@@ -1,13 +1,5 @@
-@media (min-width: 768px) {
-  add-service-workflow .col-sm-9 {
-    width: auto;
-  }
-}
-
 add-service-workflow {
   .flyout-content .wizard-body .wizard-step {
-    padding-left: $hpe-unit-space * 4.5;
-
     .select-instance-tabs {
       .nav-tabs .uib-tab {
         margin: 0;
