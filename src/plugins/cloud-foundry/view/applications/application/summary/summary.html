@@ -44,7 +44,9 @@
     <div class="col-md-6">
       <dl class="dl-horizontal">
         <dt translate>BUILDPACK</dt>
-        <dd class="pull-right">{{ appCtrl.model.application.summary.buildpack }}</dd>
+        <dd class="nowrap align-right">
+          <a target="buildpack" href="{{ appCtrl.model.application.summary.buildpack }}">{{ appCtrl.model.application.summary.buildpack }}</a>
+        </dd>
 
         <dt translate>CLUSTER</dt>
         <dd class="pull-right"></dd>
