@@ -5,8 +5,10 @@
 
 set -x
 
+pushd $(git rev-parse --show-toplevel)
+
 docker build --tag portal-proxy-server \
-             --file tools/server.Dockerfile \
+             --file server.Dockerfile \
              .
 
 docker run -it \
@@ -15,3 +17,4 @@ docker run -it \
            --name portal-proxy-server \
            portal-proxy-server $*
 
+popd

@@ -1,6 +1,5 @@
 FROM golang:1.6
 
-# FIXME: Somehow make this relative to THIS FILE instead of relative to where we're calling it from.
 # TODO: if we start to use glide (http://glide.sh/) we should only copy over the glide.yml file.
 COPY . /go/src/portal-proxy
 

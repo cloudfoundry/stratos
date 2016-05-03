@@ -5,8 +5,10 @@
 
 set -x
 
+pushd $(git rev-parse --show-toplevel)
+
 docker build --tag portal-proxy-builder \
-             --file tools/build.Dockerfile \
+             --file build.Dockerfile \
              .
 
 docker run -it \
@@ -14,3 +16,5 @@ docker run -it \
            --name portal-proxy-builder \
            --volume $(pwd):/go/src/portal-proxy \
            portal-proxy-builder $*
+
+popd
