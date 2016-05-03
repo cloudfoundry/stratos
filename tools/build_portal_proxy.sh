@@ -12,5 +12,5 @@ docker build --tag portal-proxy-builder \
 docker run -it \
            --rm \
            --name portal-proxy-builder \
-           --volume /Users/mwood/Code/stratos/portal-proxy:/go/src/portal-proxy \
+           --volume $(pwd):/go/src/portal-proxy \
            portal-proxy-builder $*
