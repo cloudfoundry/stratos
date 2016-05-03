@@ -155,6 +155,7 @@
             templateUrl: path + 'pipeline-subflow/pipeline-details.html',
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
+              that.createPipeline();
             }
           },
           {
@@ -281,6 +282,39 @@
      * @description create an application
      */
     createApp: function () {
+    },
+
+    createPipeline: function () {
+      var that = this;
+      var url = this.userInput.serviceInstance.url;
+      var target = _.find(this.hceModel.data.deploymentTargets, { url: url });
+      if (!target) {
+        var name = this.userInput.serviceInstance.name;
+        this.hceModel.createDeploymentTarget(name, url, 'username', 'password', 'org', 'space')
+          .then(function (response) {
+            that.createProject(response);
+          });
+      } else {
+        this.createProject(target);
+      }
+    },
+
+    createProject: function (target) {
+      var buildContainer = this.userInput.buildContainer;
+      var repository = this.userInput.repo;
+      var repo = {
+        vcs: this.hceModel.data.user.vcs,
+        full_name: repository.full_name,
+        owner: repository.owner.login,
+        name: repository.name,
+        githubRepoId: repository.id,
+        branch: this.userInput.branch.name,
+        cloneUrl: repository.clone_url,
+        sshUrl: repository.ssh_url,
+        httpUrl: repository.html_url
+      };
+
+      this.hceModel.createProject(this.userInput.name, target.deployment_target_id, 'python', buildContainer.build_container_id, repo, repo.branch);
     },
 
     startWorkflow: function () {

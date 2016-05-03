@@ -6,7 +6,7 @@
 
   mock.hceApi.HceProjectApi = {
 
-    createProject: function (name, vcsToken, targetId, type, buildContainerId, repo, branch) {
+    createProject: function (name, targetId, type, buildContainerId, repo, branch) {
       return {
         url: '/api/ce/v2/projects',
         response: {
@@ -17,9 +17,9 @@
               type: type,
               user_id: 2,
               build_container_id: buildContainerId,
-              token: vcsToken,
+              token: 'GithubToken',
               branchRefName: branch,
-              deployment_target_id: 200,
+              deployment_target_id: targetId,
               repo: repo
             }
           },

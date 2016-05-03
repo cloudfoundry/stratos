@@ -13,32 +13,90 @@
 
   registerHceModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'app.event.eventService',
+    '$q'
   ];
 
-  function registerHceModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager));
+  function registerHceModel(modelManager, apiManager, eventService, $q) {
+    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager, eventService, $q));
   }
 
   /**
    * @memberof cloud-foundry.model.hce
    * @name HceModel
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {app.event.eventService} eventService - the event bus service
    * @property {app.api.apiManager} apiManager - the application API manager
+   * @property {app.event.eventService} eventService - the event bus service
    * @property {object} data - the Helion Code Engine data
    * @class
    */
-  function HceModel(apiManager) {
+  function HceModel(apiManager, eventService, $q) {
+    var that = this;
+    this.$q = $q;
     this.apiManager = apiManager;
+    this.eventService = eventService;
     this.data = {
       buildContainers: [],
       deploymentTargets: [],
       imageRegistries: [],
+      projects: {},
       user: {}
     };
+
+    this.eventService.$on(this.eventService.events.LOGOUT, function () {
+      that.clear();
+    });
   }
 
   angular.extend(HceModel.prototype, {
+
+    /**
+     * @function init
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Initialize the model data. This is
+     * hardcoded for now until Github auth and HCE API
+     * is finished.
+     * @returns {void}
+     * @public
+     */
+    init: function () {
+      var deferred = this.$q.defer();
+
+      // TODO: hardcoded values until HCE API is finished
+      var that = this;
+      this.getUser(5).then(function () {
+        var promises = [];
+        promises.push(that.getDeploymentTargets());
+        promises.push(that.getProjects());
+        that.$q.all(promises).then(function () {
+          deferred.resolve();
+        });
+      }, function () {
+        that.createUser('123456', 'owner', 'github-access-token')
+          .then(function () {
+            deferred.resolve();
+          });
+      });
+
+      return deferred.promise;
+    },
+
+    /**
+     * @function clear
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Clear the model data
+     * @returns {void}
+     * @public
+     */
+    clear: function () {
+      this.data.buildContainers.length = 0;
+      this.data.deploymentTargets.length = 0;
+      this.data.imageRegistries.length = 0;
+      this.data.projects = {};
+      this.data.user = {};
+    },
 
     /**
      * @function getBuildContainers
@@ -46,7 +104,7 @@
      * @description Get registered build container instances
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     getBuildContainers: function () {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
@@ -62,7 +120,7 @@
      * @description Get registered deployment targets
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     getDeploymentTargets: function () {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
@@ -78,7 +136,7 @@
      * @description Get registered image registries
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     getImageRegistries: function () {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
@@ -89,13 +147,54 @@
     },
 
     /**
+     * @function getNotificationTargets
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get notification targets for project
+     * @param {number} projectId - the project ID to retrieve targets for
+     * @returns {promise} A promise object
+     * @public
+     */
+    getNotificationTargets: function (projectId) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
+        .getNotificationTargets({ project_id: projectId });
+    },
+
+    /**
+     * @function getProject
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get project by name
+     * @param {string} name - the project name
+     * @returns {promise} A promise object
+     * @public
+     */
+    getProject: function (name) {
+      return this.data.projects[name];
+    },
+
+    /**
+     * @function getProjects
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get projects of user
+     * @returns {promise} A promise object
+     * @public
+     */
+    getProjects: function () {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .getProjects({ user_id: that.data.user.id })
+        .then(function (response) {
+          that.onGetProjects(response);
+        });
+    },
+
+    /**
      * @function getUser
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get user by ID
      * @param {number} userId - the user's ID
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     getUser: function (userId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
@@ -144,8 +243,6 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a new project
      * @param {string} name - the project name
-     * @param {string} vcs - the VCS type
-     * @param {string} vcsToken - the VCS token
      * @param {number} targetId - the deployment target ID
      * @param {string} type - the platform type of the project (e.g. java, nodejs)
      * @param {number} buildContainerId - the build container ID
@@ -154,30 +251,24 @@
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (name, vcs, vcsToken, targetId, type, buildContainerId, repo, branch) {
+    createProject: function (name, targetId, type, buildContainerId, repo, branch) {
+      var that = this;
       var newProject = {
         name: name,
         type: type,
         user_id: this.data.user.id,
         build_container_id: buildContainerId,
-        token: vcsToken,
+        token: this.data.user.secret,
         branchRefName: branch,
-        repo: {
-          vcs: vcs || 'github',
-          full_name: repo.full_name,
-          owner: repo.owner.login,
-          name: repo.name,
-          githubRepoId: repo.id,
-          branch: branch,
-          cloneUrl: repo.clone_url,
-          sshUrl: repo.ssh_url,
-          httpUrl: repo.html_url
-        },
+        repo: repo,
         deployment_target_id: targetId
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .createProject(newProject);
+        .createProject(newProject)
+        .then(function (response) {
+          return that.onCreateProject(response);
+        });
     },
 
     /**
@@ -244,6 +335,17 @@
     },
 
     /**
+     * @function onGetProjects
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Cache user projects
+     * @param {string} response - the JSON response from API call
+     * @private
+     */
+    onGetProjects: function (response) {
+      this.data.projects = _.keyBy(response.data, 'name') || {};
+    },
+
+    /**
      * @function onGetUser
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user
@@ -251,9 +353,7 @@
      * @private
      */
     onGetUser: function (response) {
-      var user = response.data;
-      delete user.secret;
-      this.data.user = user;
+      this.data.user = response.data || {};
     },
 
     /**
@@ -274,6 +374,22 @@
     },
 
     /**
+     * @function onCreateProject
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Cache new project
+     * @param {string} response - the JSON response from API call
+     * @returns {object} The new project data
+     * @private
+     */
+    onCreateProject: function (response) {
+      var project = response.data;
+      delete project.token;
+      this.data.projects[project.name] = project;
+
+      return project;
+    },
+
+    /**
      * @function onCreateUser
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user
@@ -283,12 +399,10 @@
      */
     onCreateUser: function (response) {
       var newUser = response.data;
-      delete newUser.secret;
-      this.data.user = newUser;
+      this.data.user = newUser || {};
 
       return newUser;
     }
-
   });
 
 })();
