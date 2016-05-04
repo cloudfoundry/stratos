@@ -1,6 +1,6 @@
 http_client_timeout   = 10
 skip_tls_verification = false
-tls_address           = ":8080"
+tls_address           = ":443"
 tls_cert_file         = "certs/pproxy.crt"
 tls_cert_key          = "certs/pproxy.key"
 uaa_client            = "portal_proxy"
