@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	tokens "portal-proxy/repository/tokens"
 )
 
-func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokenRecord, c cnsiRecord, err error) {
+func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsiRecord, err error) {
 	// look up token
 	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
 	if !ok {

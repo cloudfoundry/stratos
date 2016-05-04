@@ -1,0 +1,6 @@
+export MYSQL_USERNAME=stratos
+export MYSQL_PASSWORDFILE=database_password
+export MYSQL_PROTOCOL="tcp"
+export MYSQL_ADDRESS="localhost"
+export MYSQL_PORT="3306"
+export MYSQL_DATABASE="stratos-db"

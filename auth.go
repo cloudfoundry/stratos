@@ -10,6 +10,8 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+
+	tokens "portal-proxy/repository/tokens"
 )
 
 type UAAResponse struct {
@@ -19,12 +21,6 @@ type UAAResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 	Scope        string `json:"scope"`
 	JTI          string `json:"jti"`
-}
-
-type tokenRecord struct {
-	AuthToken    string
-	RefreshToken string
-	TokenExpiry  int64
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -121,6 +117,8 @@ func (p *portalProxy) logout(c echo.Context) error {
 	}
 	http.SetCookie(res, cookie)
 
+	// TODO: CJ - Save to database
+
 	return nil
 }
 
@@ -169,43 +167,57 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 	return &response, nil
 }
 
-func mkTokenRecordKey(cnsiID string, userGUID string) string {
-	return fmt.Sprintf("%s:%s", cnsiID, userGUID)
-}
-
 func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
 	key := u.UserGUID
-	tokenRecord := tokenRecord{
+	tokenRecord := tokens.TokenRecord{
 		TokenExpiry:  u.TokenExpiry,
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 	}
+
 	p.setUAATokenRecord(key, tokenRecord)
 
 	return nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (tokenRecord, error) {
-	tokenRecord := tokenRecord{
+func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (tokens.TokenRecord, error) {
+	tokenRecord := tokens.TokenRecord{
 		TokenExpiry:  u.TokenExpiry,
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 	}
+
 	p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
 
 	return tokenRecord, nil
 }
 
-func (p *portalProxy) getUAATokenRecord(key string) tokenRecord {
-	p.UAATokenMapMut.RLock()
-	t := p.UAATokenMap[key]
-	p.UAATokenMapMut.RUnlock()
+func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
 
-	return t
+	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
+	if err != nil {
+		fmt.Errorf("getUAATokenRecord->NewMysqlTokenRepository() %s", err)
+		return tokens.TokenRecord{}
+	}
+	tr, er := tokenRepo.FindUaaToken(key)
+	if er != nil {
+		fmt.Errorf("getUAATokenRecord->FindUaaToken() %s", err)
+		return tokens.TokenRecord{}
+	}
+
+	fmt.Println("--- Get UAA token")
+	return tr
 }
 
-func (p *portalProxy) setUAATokenRecord(key string, t tokenRecord) {
-	p.UAATokenMapMut.Lock()
-	p.UAATokenMap[key] = t
-	p.UAATokenMapMut.Unlock()
+func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) {
+
+	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
+	if err != nil {
+		fmt.Errorf("setUAATokenRecord->NewMysqlTokenRepository() %s", err)
+	}
+	er := tokenRepo.SaveUaaToken(key, t)
+	if er != nil {
+		fmt.Errorf("setUAATokenRecord->SaveUaaToken() %s", err)
+	}
+	fmt.Println("--- Saved UAA token")
 }

@@ -10,6 +10,8 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
+
+	tokens "portal-proxy/repository/tokens"
 )
 
 type v2Info struct {
@@ -61,6 +63,9 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 		TokenEndpoint:         v2InfoResponse.TokenEndpoint,
 		AuthorizationEndpoint: v2InfoResponse.AuthorizationEndpoint,
 	}
+
+	// TODO: CJ - Save to database
+
 	p.setCNSIRecord(guid, newCNSI)
 
 	c.String(http.StatusCreated, guid)
@@ -121,6 +126,8 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsiRecord, bool) {
 	rec, ok := p.CNSIs[guid]
 	p.CNSIMut.RUnlock()
 
+	// TODO: CJ - Save to database
+
 	return rec, ok
 }
 
@@ -128,20 +135,37 @@ func (p *portalProxy) setCNSIRecord(guid string, c cnsiRecord) {
 	p.CNSIMut.RLock()
 	p.CNSIs[guid] = c
 	p.CNSIMut.RUnlock()
+
+	// TODO: CJ - Save to database
+
 }
 
-func (p *portalProxy) getCNSITokenRecord(cnsiGuid, userGuid string) (tokenRecord, bool) {
-	key := mkTokenRecordKey(cnsiGuid, userGuid)
-	p.CNSITokenMapMut.RLock()
-	t, ok := p.CNSITokenMap[key]
-	p.CNSITokenMapMut.RUnlock()
+func (p *portalProxy) getCNSITokenRecord(cnsiGuid string, userGuid string) (tokens.TokenRecord, bool) {
 
-	return t, ok
+	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
+	if err != nil {
+		fmt.Errorf("getCNSITokenRecord->NewMysqlTokenRepository() %s", err)
+		return tokens.TokenRecord{}, false
+	}
+	tr, er := tokenRepo.FindCnsiToken(userGuid, cnsiGuid)
+	if er != nil {
+		fmt.Errorf("getCNSITokenRecord->FindCnsiToken() %s", err)
+		return tokens.TokenRecord{}, false
+	}
+
+	fmt.Println("--- Get CNSI token")
+	return tr, true
 }
 
-func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokenRecord) {
-	key := mkTokenRecordKey(cnsiGUID, userGUID)
-	p.CNSITokenMapMut.Lock()
-	p.CNSITokenMap[key] = t
-	p.CNSITokenMapMut.Unlock()
+func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) {
+
+	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
+	if err != nil {
+		fmt.Errorf("setCNSITokenRecord->NewMysqlTokenRepository() %s", err)
+	}
+	er := tokenRepo.SaveCnsiToken(userGUID, cnsiGUID, t)
+	if er != nil {
+		fmt.Errorf("setCNSITokenRecord->SaveUaaToken() %s", err)
+	}
+	fmt.Println("--- Saved CNSI token")
 }

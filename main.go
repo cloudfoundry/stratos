@@ -14,6 +14,9 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
+
+	mysql "portal-proxy/mysql"
+	// tokens "portal-proxy/repository/tokens"
 )
 
 var (
@@ -57,8 +60,8 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 
 func newPortalProxy(pc portalConfig) *portalProxy {
 	pp := &portalProxy{
-		UAATokenMap:  make(map[string]tokenRecord),
-		CNSITokenMap: make(map[string]tokenRecord),
+		// UAATokenMap:  make(map[string]tokenRecord),
+		// CNSITokenMap: make(map[string]tokens.TokenRecord),
 		CNSIs:        make(map[string]cnsiRecord),
 		Config:       pc,
 	}
@@ -88,6 +91,7 @@ func start(p *portalProxy) error {
 	}))
 	e.Use(errorLoggingMiddleware)
 
+	p.initMysqlStore()
 	p.initCookieStore()
 	p.registerRoutes(e)
 
@@ -102,11 +106,28 @@ func start(p *portalProxy) error {
 	return nil
 }
 
+func (p *portalProxy) initMysqlStore() {
+	var dbconfig mysql.MysqlConnectionParameters
+	var err error
+	dbconfig, err = mysql.NewMySQLConnectionParametersFromEnvironment()
+	if err != nil {
+		panic("Unable to load database configuration.")
+	} else {
+		p.DatabaseConfig = dbconfig
+	}
+}
+
 func (p *portalProxy) initCookieStore() {
 	p.CookieStore = sessions.NewCookieStore([]byte(p.Config.CookieStoreSecret))
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
+
+	// TODO: remove prior to shipping
+	if p.Config.Dev {
+		e.Static("/*", "demo")
+	}
+
 	e.Post("/v1/auth/login/uaa", p.loginToUAA)
 	e.Post("/v1/auth/logout", p.logout)
 

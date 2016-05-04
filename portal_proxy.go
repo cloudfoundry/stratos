@@ -4,6 +4,9 @@ import (
 	"sync"
 
 	"github.com/gorilla/sessions"
+
+	mysql "portal-proxy/mysql"
+	// tokens "portal-proxy/repository/tokens"
 )
 
 type cnsiType string
@@ -13,15 +16,24 @@ const (
 	cnsiHCE cnsiType = "hce"
 )
 
+type tokenType string
+
+const (
+	tokenUAA tokenType = "uaa"
+	tokenCNSI	tokenType = "cnsi"
+)
+
 type portalProxy struct {
-	Config      portalConfig
-	CookieStore *sessions.CookieStore
+	Config      		portalConfig
+	DatabaseConfig	mysql.MysqlConnectionParameters
 
-	UAATokenMapMut sync.RWMutex
-	UAATokenMap    map[string]tokenRecord
+	CookieStore 		*sessions.CookieStore
 
-	CNSITokenMapMut sync.RWMutex
-	CNSITokenMap    map[string]tokenRecord
+	// UAATokenMapMut sync.RWMutex
+	// UAATokenMap    map[string]tokenRecord
+
+	// CNSITokenMapMut sync.RWMutex
+	// CNSITokenMap    map[string]tokens.TokenRecord
 
 	CNSIMut sync.RWMutex
 	CNSIs   map[string]cnsiRecord
