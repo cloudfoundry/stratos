@@ -100,13 +100,8 @@ add-service-workflow {
       }
 
       .manifest {
-        margin: 0;
         padding-left: $hpe-unit-space * 5.5;
         padding-top: $hpe-unit-space / 2;
-
-        th {
-          padding: $hpe-unit-space / 2.5;
-        }
       }
     }
   }
