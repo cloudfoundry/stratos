@@ -58,9 +58,10 @@ add-service-workflow {
 
         .alert {
           padding-bottom: 0;
+          padding-left: $hpe-unit-space / 2;
 
           p {
-            padding-left: 100px;
+            padding-left: $hpe-unit-space * 2;
           }
         }
       }
