@@ -70,8 +70,12 @@ add-service-workflow {
         padding-left: $hpe-unit-space * 5.5;
         padding-top: $hpe-unit-space / 2;
 
-        .btn .helion-icon-Right_Arrow {
-          margin-right: 5px;
+        .btn {
+          min-width: $hpe-unit-space * 3;
+
+          .helion-icon-Right_Arrow {
+            text-align: left;
+          }
         }
       }
     }
