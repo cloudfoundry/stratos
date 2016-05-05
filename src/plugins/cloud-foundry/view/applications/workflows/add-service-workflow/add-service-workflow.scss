@@ -77,6 +77,10 @@ add-service-workflow {
             text-align: left;
           }
         }
+
+        .panel-heading, .panel-body {
+          padding: $hpe-unit-space / 2;
+        }
       }
     }
 
