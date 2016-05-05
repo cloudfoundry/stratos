@@ -50,51 +50,17 @@ add-service-workflow {
     }
 
     .service-confirm {
-      padding: 0;
-
-      .success-message {
-        display: flex;
-        flex-flow: row;
-        align-items: center;
-        margin: 0;
-        padding-left: $hpe-unit-space * 0.6;
-
-        .message-icon {
-          height: $hpe-unit-space;
-          margin: 0;
-          padding: 0;
-
-          i {
-            color: $brand-primary;
-            height: $hpe-unit-space / 2;
-            padding: 0;
-          }
-        }
-        .message-text {
-          margin-left: $hpe-unit-space / 5;
-        }
-      }
 
       .caution-message {
-        display: flex;
-        flex-flow: row;
-        align-items: flex-start;
         margin: 0;
         padding-left: $hpe-unit-space * 6;
         padding-top: $hpe-unit-space * 4;
 
-        .message-icon {
-          i {
-            color: $sunglow;
-            padding: 0;
-          }
-        }
-        .message-text {
-          padding-left: $hpe-unit-space;
+        .alert {
+          padding-bottom: 0;
+
           p {
-            span {
-              width: $hpe-unit-space * 3;
-            }
+            padding-left: 100px;
           }
         }
       }
@@ -102,7 +68,12 @@ add-service-workflow {
       .manifest {
         padding-left: $hpe-unit-space * 5.5;
         padding-top: $hpe-unit-space / 2;
+
+        .btn .helion-icon-Right_Arrow {
+          margin-right: 5px;
+        }
       }
     }
+
   }
 }

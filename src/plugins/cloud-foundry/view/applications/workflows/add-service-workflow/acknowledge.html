@@ -1,21 +1,15 @@
 <div class="service-confirm">
 
-  <div class="success-message">
-    <div class="message-icon">
-      <i class="helion-icon helion-icon-lg helion-icon-Active_L service-icon"></i>
-    </div>
-    <div class="message-text">
-      <h4 class="font-semi-bold" translate>Service <span class="category-name" translate>
+  <div class="success-message col-md-8">
+    <div class=" alert alert-success alert-no-bg ">
+      <p translate>Service <span class="category-name" translate>
         {{ wizardCtrl.options.service.entity.extra.categories }}
-        </span> has been successfully added.</h4>
+        </span> has been successfully added.</p>
     </div>
   </div>
 
   <div class="caution-message col-md-8">
-    <div class="message-icon">
-      <i class="helion-icon helion-icon-2x helion-icon-Alert_pressed service-icon"></i>
-    </div>
-    <div class="message-text">
+    <div class="alert alert-warning alert-no-bg">
       <p translate>
         Please take a moment to add the following to your application manifest to describe your app's dependency
         on this service. Adding something to a manifest doesn't persist the binding.
@@ -28,13 +22,13 @@
       <div class="panel-heading action-header">
         <span translate>Manifest Snippet</span>
         <button class="btn btn-link">
-          <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
+          <i class="helion-icon helion-icon-Right_Arrow"></i>
           <span translate>Copy</span>
         </button>
       </div>
       <div class="panel-body">
-        <div translate>Instance 234</div>
-        <div translate>Type: MongoDB</div>
+        <div>Instance 234</div>
+        <div>Type: MongoDB</div>
       </div>
     </div>
   </div>
