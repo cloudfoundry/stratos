@@ -1,7 +1,7 @@
 package tokens
 
 import (
-	// "fmt"
+	"fmt"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 
@@ -10,15 +10,15 @@ import (
 )
 
 const (
-	getUaaToken 	= `SELECT user_guid, auth_token, refresh_token, token_expiry
+	findUaaToken 	= `SELECT auth_token, refresh_token, token_expiry
 								 	 FROM tokens
 								 	 WHERE token_type = 'uaa' AND user_guid = ?`
  	saveUaaToken 	= `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
 									 VALUES (?, 'uaa', ?, ?, ?)`
-  getCnsiToken 	= `SELECT user_guid, cnsi_guid, auth_token, refresh_token, token_expiry
+  findCnsiToken = `SELECT auth_token, refresh_token, token_expiry
 									 FROM tokens
-									 WHERE token_type = 'cnsi' AND user_guid = ? AND cnsi_guid=?`
-	saveCnsiToken = `INSERT INTO tokens (user_guid, cnsi_guid, token_type, auth_token, refresh_token, token_expiry)
+									 WHERE cnsi_guid=? AND user_guid = ? AND token_type = 'cnsi'`
+	saveCnsiToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
 									 VALUES (?, ?, 'cnsi', ?, ?, ?)`
 )
 
@@ -43,7 +43,7 @@ func (p *MysqlTokenRepository) SaveUaaToken(user_guid string, tr TokenRecord) er
 
   stmt, es := p.db.Prepare(saveUaaToken)
   if es != nil {
-      panic(es.Error())
+      return &repository.DatabaseError{InnerError: es}
   }
 
   _, err := stmt.Exec(user_guid, tr.AuthToken, tr.RefreshToken, tr.TokenExpiry)
@@ -59,7 +59,7 @@ func (p *MysqlTokenRepository) FindUaaToken(user_guid string) (TokenRecord, erro
 
   tr := new(TokenRecord)
 
-	err := p.db.QueryRow(getUaaToken, user_guid).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
+	err := p.db.QueryRow(findUaaToken, user_guid).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
 	if err != nil {
 		return TokenRecord{}, &repository.DatabaseError{InnerError: err}
 	}
@@ -68,14 +68,14 @@ func (p *MysqlTokenRepository) FindUaaToken(user_guid string) (TokenRecord, erro
 }
 
 
-func (p *MysqlTokenRepository) SaveCnsiToken(user_guid string, cnsi_guid string, tr TokenRecord) error {
+func (p *MysqlTokenRepository) SaveCnsiToken(cnsi_guid string, user_guid string, tr TokenRecord) error {
 
   stmt, es := p.db.Prepare(saveCnsiToken)
   if es != nil {
-      panic(es.Error())
+		return &repository.DatabaseError{InnerError: es}
   }
 
-  _, err := stmt.Exec(user_guid, cnsi_guid, tr.AuthToken, tr.RefreshToken, tr.TokenExpiry)
+  _, err := stmt.Exec(cnsi_guid, user_guid, tr.AuthToken, tr.RefreshToken, tr.TokenExpiry)
 
 	if err != nil {
 		return &repository.DatabaseError{InnerError: err}
@@ -85,11 +85,11 @@ func (p *MysqlTokenRepository) SaveCnsiToken(user_guid string, cnsi_guid string,
 }
 
 
-func (p *MysqlTokenRepository) FindCnsiToken(user_guid string, cnsi_guid string) (TokenRecord, error) {
+func (p *MysqlTokenRepository) FindCnsiToken(cnsi_guid string, user_guid string) (TokenRecord, error) {
 
   tr := new(TokenRecord)
 
-	err := p.db.QueryRow(getCnsiToken, user_guid, cnsi_guid).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
+	err := p.db.QueryRow(findCnsiToken, cnsi_guid, user_guid).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
 	if err != nil {
 		return TokenRecord{}, &repository.DatabaseError{InnerError: err}
 	}

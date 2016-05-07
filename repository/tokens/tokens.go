@@ -17,6 +17,6 @@ type Repository interface {
   FindUaaToken(user_guid string) (TokenRecord, error)
   SaveUaaToken(user_guid string, tokenRecord TokenRecord) error
 
-  FindCnsiToken(user_guid string, cnsi_guid string) (TokenRecord, error)
-  SaveCnsiToken(user_guid string, cnsi_guid string, tokenRecord TokenRecord) error
+  FindCnsiToken(cnsi_guid string, user_guid string) (TokenRecord, error)
+  SaveCnsiToken(cnsi_guid string, user_guid string, tokenRecord TokenRecord) error
 }

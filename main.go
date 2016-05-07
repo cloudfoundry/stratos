@@ -16,7 +16,6 @@ import (
 	"github.com/labstack/echo/middleware"
 
 	mysql "portal-proxy/mysql"
-	// tokens "portal-proxy/repository/tokens"
 )
 
 var (
@@ -62,7 +61,7 @@ func newPortalProxy(pc portalConfig) *portalProxy {
 	pp := &portalProxy{
 		// UAATokenMap:  make(map[string]tokenRecord),
 		// CNSITokenMap: make(map[string]tokens.TokenRecord),
-		CNSIs:        make(map[string]cnsiRecord),
+		// CNSIs:        make(map[string]cnsiRecord),
 		Config:       pc,
 	}
 

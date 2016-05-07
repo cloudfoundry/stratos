@@ -57,7 +57,13 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 			"Need CNSI GUID passed as form param")
 	}
 
-	endpoint := p.CNSIs[cnsiGUID].AuthorizationEndpoint
+	endpoint := ""
+	cnsi_record, ok := p.getCNSIRecord(cnsiGUID)
+
+	if ok {
+		endpoint = cnsi_record.AuthorizationEndpoint
+	}
+
 	if endpoint == "" {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
@@ -115,9 +121,9 @@ func (p *portalProxy) logout(c echo.Context) error {
 		Value:  "",
 		MaxAge: -1,
 	}
-	http.SetCookie(res, cookie)
 
-	// TODO: CJ - Save to database
+	// TODO: CJ - Explicitly clear out session
+	http.SetCookie(res, cookie)
 
 	return nil
 }
@@ -205,7 +211,6 @@ func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
 		return tokens.TokenRecord{}
 	}
 
-	fmt.Println("--- Get UAA token")
 	return tr
 }
 
@@ -219,5 +224,4 @@ func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) {
 	if er != nil {
 		fmt.Errorf("setUAATokenRecord->SaveUaaToken() %s", err)
 	}
-	fmt.Println("--- Saved UAA token")
 }

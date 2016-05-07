@@ -5,11 +5,13 @@ import (
 	"net/http"
 	"time"
 
+	cnsis "portal-proxy/repository/cnsis"
 	tokens "portal-proxy/repository/tokens"
 )
 
-func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsiRecord, err error) {
+func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsis.CnsiRecord, err error) {
 	// look up token
+
 	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
 	if !ok {
 		return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.GUID, r.UserGUID)

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"sync"
+	// "sync"
 
 	"github.com/gorilla/sessions"
 
@@ -9,19 +9,19 @@ import (
 	// tokens "portal-proxy/repository/tokens"
 )
 
-type cnsiType string
+// type cnsiType string
+//
+// const (
+// 	cnsiHCF cnsiType = "hcf"
+// 	cnsiHCE cnsiType = "hce"
+// )
 
-const (
-	cnsiHCF cnsiType = "hcf"
-	cnsiHCE cnsiType = "hce"
-)
-
-type tokenType string
-
-const (
-	tokenUAA tokenType = "uaa"
-	tokenCNSI	tokenType = "cnsi"
-)
+// type tokenType string
+//
+// const (
+// 	tokenUAA tokenType = "uaa"
+// 	tokenCNSI	tokenType = "cnsi"
+// )
 
 type portalProxy struct {
 	Config      		portalConfig
@@ -35,6 +35,6 @@ type portalProxy struct {
 	// CNSITokenMapMut sync.RWMutex
 	// CNSITokenMap    map[string]tokens.TokenRecord
 
-	CNSIMut sync.RWMutex
-	CNSIs   map[string]cnsiRecord
+	// CNSIMut sync.RWMutex
+	// CNSIs   map[string]cnsiRecord
 }
