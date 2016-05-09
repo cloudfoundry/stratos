@@ -1,0 +1,11 @@
+$gallery-card-side-margins: 30px;
+$gallery-card-max-width: 400px;
+$gallery-card-layout-steps: 4;
+
+@for $i from 1 through $gallery-card-layout-steps {
+  @media (min-width: $gallery-card-side-margins + $i * $gallery-card-max-width) {
+    .app-gallery-card.col-md-4.col-sm-1 {
+      width: percentage(1/$i);
+    }
+  }
+}
