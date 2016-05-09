@@ -45,7 +45,7 @@
      * @public
      **/
     isWebLink: function(buildpack) {
-      var url = (angular.isDefined(buildpack) && buildpack !== null) ? buildpack : '';
+      var url = angular.isDefined(buildpack) && buildpack !== null ? buildpack : '';
       url = url.trim().toLowerCase();
       return url.indexOf('http://') === 0 || url.indexOf('https://') === 0;
     }
