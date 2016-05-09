@@ -13,6 +13,11 @@ var concat = require('gulp-concat-util'),
   runSequence = require('run-sequence'),
   sass = require('gulp-sass'),
   sh = require('shelljs'),
+  browserSync = require('browser-sync').create(),
+  browserSyncProxy = require('proxy-middleware'),
+  gutil = require('gulp-util'),
+  node_url = require('url'),
+
   wiredep = require('wiredep').stream;
 
 var config = require('./gulp.config')();
@@ -153,10 +158,43 @@ gulp.task('translate:compile', function () {
 
 // Gulp watch JavaScript, SCSS and HTML source files
 gulp.task('watch', function () {
-  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, ['copy:js']);
-  gulp.watch(scssFiles, ['css']);
-  gulp.watch(partials, ['copy:html']);
-  gulp.watch(paths.src + 'index.html', ['inject:index']);
+  var callback = browserSync.active ? browserSync.reload : function() {};
+  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, ['copy:js', callback]);
+  gulp.watch(scssFiles, ['css', callback]);
+  gulp.watch(partials, ['copy:html', callback]);
+  gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
+});
+
+gulp.task('browsersync', function(callback) {
+  var proxyOptions = {};
+  try {
+    // Need a JSON file named 'dev_config.json'
+    var devOptions = require('./dev_config.json');
+    // Need key 'api' with the URL to the API server
+    proxyOptions = node_url.parse(devOptions.api);
+    proxyOptions.route = '/api';
+    gutil.log('Proxying API requests to:', gutil.colors.magenta(devOptions.api));
+  } catch(e) {
+    throw new gutil.PluginError('browsersync', 'dev_options.json file is required with API endpoint configuration');
+  }
+
+  browserSync.init({
+      server: {
+          baseDir: "../dist",
+          middleware: [browserSyncProxy(proxyOptions)]
+      },
+      ghostMode: false,
+      open: false,
+      port: 3000
+
+  }, function() {
+    callback();
+  });
+});
+
+// Static server
+gulp.task('dev', ['default'], function() {
+    runSequence('browsersync', 'watch');
 });
 
 gulp.task('default', function (next) {

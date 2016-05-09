@@ -27,6 +27,7 @@
     "wiredep": "^3.0.0"
   },
   "devDependencies": {
+    "browser-sync": "^2.8.2",
     "eslint": "^1.10.3",
     "eslint-plugin-angular": "^0.15.0",
     "gulp-angular-gettext": "^2.1.0",
@@ -34,6 +35,7 @@
     "gulp-if": "^2.0.0",
     "gulp-plumber": "^1.0.1",
     "gulp-rename": "^1.2.2",
+    "gulp-util": "^3.0.7",
     "jasmine-core": "^2.4.1",
     "jsdoc": "^3.4.0",
     "karma": "^0.13.19",
@@ -46,6 +48,7 @@
     "phantomjs": "^1.9.19",
     "prompt": "^0.2.14",
     "protractor": "^3.0.0",
+    "proxy-middleware": "^0.15.0",
     "request": "2.69.0",
     "shelljs": "^0.5.3"
   }

@@ -8,5 +8,6 @@ dist
 docs/src
 lib
 src/index.scss
+tools/dev_config.json
 translations/js
 translations/**/*.mo
