@@ -36,15 +36,18 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {object} model - the Cloud Foundry Applications Model
+   * @property {object} hceModel - the HCE model
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
    */
   function ApplicationController(modelManager, $stateParams) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.id = $stateParams.guid;
-    this.init();
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
+
+    this.init();
   }
 
   angular.extend(ApplicationController.prototype, {

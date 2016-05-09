@@ -80,7 +80,7 @@
       expect(hceModel.data.user.userId).toBe('githubuser');
       expect(hceModel.data.user.login).toBe('user');
       expect(hceModel.data.user.vcs).toBe('github');
-      expect(hceModel.data.user.secret).toBeUndefined();
+      expect(hceModel.data.user.secret).toBe('GithubToken');
     });
 
     it('createDeploymentTarget', function () {
@@ -132,11 +132,19 @@
         httpUrl: 'https://github.com/test_owner/test_repo'
       };
       var createProject = mock.hceApi.HceProjectApi
-                            .createProject('name', 'github', 'GithubToken', 1, 'java', 2, repo, 'master');
+                            .createProject('name', 1, 'java', 2, repo, 'master');
 
       $httpBackend.when('POST', createProject.url).respond(201, createProject.response['201'].body);
       $httpBackend.expectPOST(createProject.url);
-      hceModel.createProject('name', 'github', 'GithubToken', 1, 'java', 2, repo, 'master');
+      hceModel.createProject('name', 1, 'java', 2, repo, 'master')
+        .then(function (project) {
+          expect(project.name).toBe('name');
+          expect(project.deployment_target_id).toBe(1);
+          expect(project.type).toBe('java');
+          expect(project.build_container_id).toBe(2);
+          expect(project.branchRefName).toBe('master');
+          expect(project.repo).toBeDefined();
+        });
       $httpBackend.flush();
     });
 
@@ -149,7 +157,7 @@
       $httpBackend.flush();
 
       expect(hceModel.data.user).not.toEqual({});
-      expect(hceModel.data.user.secret).toBeUndefined();
+      expect(hceModel.data.user.secret).toBe('GithubToken');
     });
   });
 

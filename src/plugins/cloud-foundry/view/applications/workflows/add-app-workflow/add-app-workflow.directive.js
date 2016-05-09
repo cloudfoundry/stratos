@@ -33,6 +33,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @property {object} model - the Cloud Foundry applications model
+   * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} githubModel - the Github model
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
@@ -43,7 +44,9 @@
     this.addingApplication = false;
     this.eventService = eventService;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
+    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
       that.startWorkflow();
     });
@@ -59,12 +62,13 @@
 
       this.userInput = {
         name: null,
+        serviceInstance: null,
         domain: null,
         source: 'github',
         repo: null,
         branch: null,
-        dockerRegistry: null,
-        buildContainer: null
+        buildContainer: null,
+        imageRegistry: null
       };
 
       this.data.workflow = {
@@ -121,6 +125,20 @@
             templateUrl: path + 'pipeline-subflow/select-repository.html',
             nextBtnText: gettext('Next'),
             onNext: function () {
+              that.hceModel.getBuildContainers()
+                .then(function () {
+                  var buildContainers = _.map(that.hceModel.data.buildContainers,
+                                              function (o) { return { label: o.build_container_label, value: o }; });
+                  [].push.apply(that.options.buildContainers, buildContainers);
+                });
+
+              that.hceModel.getImageRegistries()
+                .then(function () {
+                  var imageRegistries = _.map(that.hceModel.data.imageRegistries,
+                                              function (o) { return { label: o.registry_label, value: o }; });
+                  [].push.apply(that.options.imageRegistries, imageRegistries);
+                });
+
               if (that.userInput.repo) {
                 return that.githubModel.branches(that.userInput.repo.full_name)
                   .then(function () {
@@ -135,7 +153,10 @@
             ready: true,
             title: gettext('Pipeline Details'),
             templateUrl: path + 'pipeline-subflow/pipeline-details.html',
-            nextBtnText: gettext('Create pipeline')
+            nextBtnText: gettext('Create pipeline'),
+            onNext: function () {
+              that.createPipeline();
+            }
           },
           {
             ready: true,
@@ -162,12 +183,24 @@
         ]
       };
 
+      this.serviceInstanceModel.list()
+        .then(function (serviceInstances) {
+          var validServiceInstances = _.chain(serviceInstances)
+                                       .filter('valid')
+                                       .map(function (o) {
+                                         return { label: o.url, value: o };
+                                       })
+                                       .value();
+          [].push.apply(that.options.serviceInstances, validServiceInstances);
+        });
+
       this.options = {
         workflow: that.data.workflow,
         userInput: this.userInput,
         subflow: 'pipeline',
 
         // mock data
+        serviceInstances: [],
         domains: [
           { label: 'domain-28.example.com', value: 'domain-28.example.com'},
           { label: 'customer-app-domain1.com', value: 'customer-app-domain1.com'},
@@ -216,13 +249,8 @@
         ],
         repos: [],
         branches: [],
-        dockerRegistries: [],
-        buildContainers: [
-          { label: 'Java', value: 'java' },
-          { label: 'Node.js', value: 'nodejs' },
-          { label: 'PHP', value: 'php' },
-          { label: 'Python', value: 'python' }
-        ]
+        buildContainers: [],
+        imageRegistries: []
       };
 
       this.addApplicationActions = {
@@ -254,6 +282,39 @@
      * @description create an application
      */
     createApp: function () {
+    },
+
+    createPipeline: function () {
+      var that = this;
+      var url = this.userInput.serviceInstance.url;
+      var target = _.find(this.hceModel.data.deploymentTargets, { url: url });
+      if (!target) {
+        var name = this.userInput.serviceInstance.name;
+        this.hceModel.createDeploymentTarget(name, url, 'username', 'password', 'org', 'space')
+          .then(function (response) {
+            that.createProject(response);
+          });
+      } else {
+        this.createProject(target);
+      }
+    },
+
+    createProject: function (target) {
+      var buildContainer = this.userInput.buildContainer;
+      var repository = this.userInput.repo;
+      var repo = {
+        vcs: this.hceModel.data.user.vcs,
+        full_name: repository.full_name,
+        owner: repository.owner.login,
+        name: repository.name,
+        githubRepoId: repository.id,
+        branch: this.userInput.branch.name,
+        cloneUrl: repository.clone_url,
+        sshUrl: repository.ssh_url,
+        httpUrl: repository.html_url
+      };
+
+      this.hceModel.createProject(this.userInput.name, target.deployment_target_id, 'python', buildContainer.build_container_id, repo, repo.branch);
     },
 
     startWorkflow: function () {
