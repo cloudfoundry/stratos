@@ -37,6 +37,18 @@
   }
 
   angular.extend(ApplicationSummaryController.prototype, {
+    /**
+     * @function isWebLink
+     * @description Determine if supplies buildpack url is a web link
+     * @param {string} buildpack - buildpack url guid
+     * @returns {boolean} Indicating if supplies buildpack is a web link
+     * @public
+     **/
+    isWebLink: function(buildpack) {
+      var url = angular.isDefined(buildpack) && buildpack !== null ? buildpack : '';
+      url = url.trim().toLowerCase();
+      return url.indexOf('http://') === 0 || url.indexOf('https://') === 0;
+    }
   });
 
 })();

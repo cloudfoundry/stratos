@@ -5,4 +5,15 @@
     margin-bottom: $hpe-unit-space * .5;
     margin-left: auto;
   }
+
+  dd.nowrap {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.align-right {
+      clear: right;
+      text-align: right;
+    }
+  }
 }
