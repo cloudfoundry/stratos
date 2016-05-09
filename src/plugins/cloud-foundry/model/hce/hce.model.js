@@ -13,32 +13,55 @@
 
   registerHceModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'app.event.eventService'
   ];
 
-  function registerHceModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager));
+  function registerHceModel(modelManager, apiManager, eventService) {
+    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager, eventService));
   }
 
   /**
    * @memberof cloud-foundry.model.hce
    * @name HceModel
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {app.event.eventService} eventService - the application event service
    * @property {app.api.apiManager} apiManager - the application API manager
+   * @property {app.event.eventService} eventService - the application event service
    * @property {object} data - the Helion Code Engine data
    * @class
    */
-  function HceModel(apiManager) {
+  function HceModel(apiManager, eventService) {
+    var that = this;
     this.apiManager = apiManager;
+    this.eventService = eventService;
     this.data = {
       buildContainers: [],
       deploymentTargets: [],
       imageRegistries: [],
+      projects: {},
       user: {}
     };
+
+    this.eventService.$on(this.eventService.events.LOGOUT, function () {
+      that.data = {};
+    });
   }
 
   angular.extend(HceModel.prototype, {
+
+    /**
+     * @function getBuildContainer
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get build container by ID
+     * @param {number} id - the build container ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getBuildContainer: function (id) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
+        .getBuildContainer(id);
+    },
 
     /**
      * @function getBuildContainers
@@ -46,7 +69,7 @@
      * @description Get registered build container instances
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     getBuildContainers: function () {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
@@ -57,12 +80,25 @@
     },
 
     /**
+     * @function getDeploymentTarget
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get deployment target by ID
+     * @param {number} id - the deployment target ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getDeploymentTarget: function (id) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
+        .getDeploymentTarget(id);
+    },
+
+    /**
      * @function getDeploymentTargets
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get registered deployment targets
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     getDeploymentTargets: function () {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
@@ -78,7 +114,7 @@
      * @description Get registered image registries
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     getImageRegistries: function () {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
@@ -89,17 +125,75 @@
     },
 
     /**
+     * @function getNotificationTargets
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get notification targets for project
+     * @param {number} projectId - the project ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getNotificationTargets: function (projectId) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
+        .getNotificationTargets({ project_id: projectId });
+    },
+
+    /**
+     * @function getProject
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get project by name
+     * @param {string} name - the project name
+     * @returns {promise} A promise object
+     * @public
+     */
+    getProject: function (name) {
+      return this.data.projects[name];
+    },
+
+    /**
+     * @function getProjects
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get projects of user
+     * @returns {promise} A promise object
+     * @public
+     */
+    getProjects: function () {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .getProjects({ user_id: that.data.user.id })
+        .then(function (response) {
+          that.onGetProjects(response);
+        });
+    },
+
+    /**
      * @function getUser
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get user by ID
      * @param {number} userId - the user's ID
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     getUser: function (userId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
         .getUser(userId)
+        .then(function (response) {
+          that.onGetUser(response);
+        });
+    },
+
+    /**
+     * @function getUserByGithubId
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get user by Github user ID
+     * @param {string} githubUserId - the Github user ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getUserByGithubId: function (githubUserId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
+        .getUserByGithubId(githubUserId)
         .then(function (response) {
           that.onGetUser(response);
         });
@@ -208,6 +302,19 @@
     },
 
     /**
+     * @function removeNotificationTarget
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Remove notification target
+     * @param {number} targetId - the notification target ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    removeNotificationTarget: function (targetId) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
+        .removeNotificationTarget(targetId);
+    },
+
+    /**
      * @function onGetBuildContainers
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache build container
@@ -241,6 +348,17 @@
     onGetImageRegistries: function (response) {
       this.data.imageRegistries.length = 0;
       [].push.apply(this.data.imageRegistries, response.data || []);
+    },
+
+    /**
+     * @function onGetProjects
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Cache user projects
+     * @param {string} response - the JSON response from API call
+     * @private
+     */
+    onGetProjects: function (response) {
+      this.data.projects = _.keyBy(response.data, 'name') || {};
     },
 
     /**
