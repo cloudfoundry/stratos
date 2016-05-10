@@ -65,7 +65,12 @@
     </a>
   </div>
   <div class="panel panel-default">
-    <table class="table table-actionable">
+    <div class="panel-body"
+      ng-if="!appCtrl.model.application.summary.services.length" translate>
+      You have no service instances.
+    </div>
+    <table class="table table-actionable"
+      ng-if="appCtrl.model.application.summary.services.length">
       <thead>
         <tr>
           <th translate>Name</th>
@@ -97,7 +102,12 @@
     </a>
   </div>
   <div class="panel panel-default">
-    <table class="table table-actionable">
+    <div class="panel-body"
+      ng-if="!appCtrl.model.application.summary.routes.length" translate>
+      You have no routes.
+    </div>
+    <table class="table table-actionable"
+      ng-if="appCtrl.model.application.summary.routes.length" >
       <thead>
         <tr>
           <th translate>Route</th>
@@ -123,7 +133,12 @@
     </a>
   </div>
   <div class="panel panel-default">
-    <table class="table">
+    <div class="panel-body"
+      ng-if="!appCtrl.model.application.summary.running_instances.length" translate>
+      You have no instances.
+    </div>
+    <table class="table"
+      ng-if="appCtrl.model.application.summary.running_instances.length" >
       <thead>
         <tr>
           <th translate>Index</th>

@@ -41,39 +41,39 @@
   </div>
 </div>
 
-<ul class="nav nav-pills nav-stacked col-md-3">
-  <li ui-sref-active="active">
-    <a ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>
+<ul class="nav nav-tabs">
+  <li class="nav-item" ui-sref-active="active">
+    <a class="nav-link" ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>
       Summary
     </a>
   </li>
-  <li ui-sref-active="active">
-    <a ui-sref="cf.applications.application.log-stream({guid: appCtrl.id})" translate>
+  <li class="nav-item" ui-sref-active="active">
+    <a class="nav-link" ui-sref="cf.applications.application.log-stream({guid: appCtrl.id})" translate>
       Log Stream
     </a>
   </li>
-  <li ui-sref-active="active">
-    <a ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>
+  <li class="nav-item" ui-sref-active="active">
+    <a class="nav-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>
       Services
     </a>
   </li>
-  <li ui-sref-active="active">
-    <a ui-sref="cf.applications.application.delivery-logs({guid: appCtrl.id})" translate>
+  <li class="nav-item" ui-sref-active="active">
+    <a class="nav-link" ui-sref="cf.applications.application.delivery-logs({guid: appCtrl.id})" translate>
       Delivery Logs
     </a>
   </li>
-  <li ui-sref-active="active">
-    <a ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id})" translate>
+  <li class="nav-item" ui-sref-active="active">
+    <a class="nav-link" ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id})" translate>
       Delivery Pipeline
     </a>
   </li>
-  <li ui-sref-active="active">
-    <a ui-sref="cf.applications.application.variables({guid: appCtrl.id})" translate>
+  <li class="nav-item" ui-sref-active="active">
+    <a class="nav-link" ui-sref="cf.applications.application.variables({guid: appCtrl.id})" translate>
       Variables
     </a>
   </li>
 </ul>
 
-<div class="col-md-9 application-details">
+<div class="application-details col-sm-12">
   <div ui-view class="row"></div>
 </div>

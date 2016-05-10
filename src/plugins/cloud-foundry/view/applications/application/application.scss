@@ -1,2 +1,7 @@
 @import "services/services";
 @import "summary/summary";
+
+.application-details {
+  padding-top: $hpe-unit-space;
+  padding-bottom: $hpe-unit-space;
+}
