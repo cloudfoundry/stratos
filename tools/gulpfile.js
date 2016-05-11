@@ -158,14 +158,14 @@ gulp.task('translate:compile', function () {
 
 // Gulp watch JavaScript, SCSS and HTML source files
 gulp.task('watch', function () {
-  var callback = browserSync.active ? browserSync.reload : function() {};
-  gulp.watch(jsSourceFiles, { interval: 1000, usePoll: true }, ['copy:js', callback]);
+  var callback = browserSync.active ? browserSync.reload : function () {};
+  gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true}, ['copy:js', callback]);
   gulp.watch(scssFiles, ['css', callback]);
   gulp.watch(partials, ['copy:html', callback]);
   gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
 });
 
-gulp.task('browsersync', function(callback) {
+gulp.task('browsersync', function (callback) {
   var proxyOptions = {};
   try {
     // Need a JSON file named 'dev_config.json'
@@ -174,27 +174,27 @@ gulp.task('browsersync', function(callback) {
     proxyOptions = node_url.parse(devOptions.api);
     proxyOptions.route = '/api';
     gutil.log('Proxying API requests to:', gutil.colors.magenta(devOptions.api));
-  } catch(e) {
+  } catch (e) {
     throw new gutil.PluginError('browsersync', 'dev_options.json file is required with API endpoint configuration');
   }
 
   browserSync.init({
-      server: {
-          baseDir: "../dist",
-          middleware: [browserSyncProxy(proxyOptions)]
-      },
-      ghostMode: false,
-      open: false,
-      port: 3000
+    server: {
+      baseDir: "../dist",
+      middleware: [browserSyncProxy(proxyOptions)]
+    },
+    ghostMode: false,
+    open: false,
+    port: 3100
 
-  }, function() {
+  }, function () {
     callback();
   });
 });
 
 // Static server
-gulp.task('dev', ['default'], function() {
-    runSequence('browsersync', 'watch');
+gulp.task('dev', ['default'], function () {
+  runSequence('browsersync', 'watch');
 });
 
 gulp.task('default', function (next) {
