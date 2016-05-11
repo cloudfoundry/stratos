@@ -39,7 +39,7 @@ function showServices() {
 }
 
 function applicationActionsBar() {
-  return element.all(by.css('ul.nav.nav-pills.nav-stacked li a'));
+  return element.all(by.css('ul.nav.nav-tabs li a'));
 }
 
 function applicationAction(idx) {
