@@ -1,79 +1,99 @@
-<div class="action-bar app-actions-bar panel panel-default col-md-12">
-  <span class="action-target-state pull-left"
-    ng-class="'app-state-' + appCtrl.model.appStateSwitchTo + '-' + appCtrl.model.application.summary.state"
-    uib-popover="{{ appCtrl.model.appStateSwitchTo==='STALE' ? appCtrl.warningMsg : '' }} "
-    ng-attr-popover-trigger="mouseenter" popover-placement="bottom">
-  </span>
-  <span class="action-target-name pull-left">
+<div class="col-md-9 col-sm-12">
+  <div class="application-header font-semi-bold text-uppercase">
     {{ appCtrl.model.application.summary.name }}
-  </span>
-
-  <div class="pull-right">
-    <span class="btn-group">
-      <!--Either the start or restart button should be present at any given time.-->
-      <button class="btn btn-default"
-        translate
-        ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
-        ng-if="appCtrl.model.application.summary.state==='STOPPED'"
-        ng-click="appCtrl.model.startApp(appCtrl.id)">
-        Start
-      </button>
-      <button class="btn btn-default"
-        translate
-        ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
-        ng-if="appCtrl.model.application.summary.state!=='STOPPED'"
-        ng-click="appCtrl.model.restartApp(appCtrl.id)">
-        Restart
-      </button>
-      <button class="btn btn-default"
-        translate
-        ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STOPPED'"
-        ng-click="appCtrl.model.stopApp(appCtrl.id)">
-        Stop
-      </button>
+    <span class="action-target-state"
+      ng-class="'app-state-' + appCtrl.model.appStateSwitchTo + '-' + appCtrl.model.application.summary.state"
+      uib-popover="{{ appCtrl.model.appStateSwitchTo==='STALE' ? appCtrl.warningMsg : '' }}"
+      ng-attr-popover-trigger="mouseenter" popover-placement="bottom">
     </span>
-    <button class="btn btn-primary"
-      translate
-      ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STARTED'"
-      ng-click="appCtrl.model.startApp(appCtrl.id)">
-      Launch App
-    </button>
+    <actions-menu class="application-nav-menu visible-sm visible-xs" actions="appCtrl.appActions"
+      menu-icon="helion-icon helion-icon-2x helion-icon-More"
+      menu-position="actions-menu-right">
+    </actions-menu>
+  </div>
+
+  <ul class="application-nav nav nav-tabs col-sm-12">
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>
+        Summary
+      </a>
+    </li>
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="cf.applications.application.log-stream({guid: appCtrl.id})" translate>
+        Log Stream
+      </a>
+    </li>
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>
+        Services
+      </a>
+    </li>
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="cf.applications.application.delivery-logs({guid: appCtrl.id})" translate>
+        Delivery Logs
+      </a>
+    </li>
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id})" translate>
+        Delivery Pipeline
+      </a>
+    </li>
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="cf.applications.application.variables({guid: appCtrl.id})" translate>
+        Variables
+      </a>
+    </li>
+  </ul>
+
+  <div class="application-details col-sm-12">
+    <div ui-view class="row"></div>
   </div>
 </div>
 
-<ul class="nav nav-tabs">
-  <li class="nav-item" ui-sref-active="active">
-    <a class="nav-link" ui-sref="cf.applications.application.summary({guid: appCtrl.id})" translate>
-      Summary
-    </a>
+<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
+  <li>
+    <button class="btn btn-link btn-border-less"
+      translate
+      ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STARTED'"
+      ng-click="appCtrl.model.startApp(appCtrl.id)">
+      <i class="helion-icon helion-icon-lg helion-icon-Launch"></i>
+      Launch App
+    </button>
   </li>
-  <li class="nav-item" ui-sref-active="active">
-    <a class="nav-link" ui-sref="cf.applications.application.log-stream({guid: appCtrl.id})" translate>
-      Log Stream
-    </a>
+  <li>
+    <button class="btn btn-link btn-border-less"
+      translate
+      ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STOPPED'"
+      ng-click="appCtrl.model.stopApp(appCtrl.id)">
+      <i class="helion-icon helion-icon-lg helion-icon-Halt-stop"></i>
+      Stop
+    </button>
   </li>
-  <li class="nav-item" ui-sref-active="active">
-    <a class="nav-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})" translate>
-      Services
-    </a>
+  <li>
+    <button class="btn btn-link btn-border-less"
+      translate
+      ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
+      ng-if="appCtrl.model.application.summary.state!=='STOPPED'"
+      ng-click="appCtrl.model.restartApp(appCtrl.id)">
+      <i class="helion-icon helion-icon-lg helion-icon-Refresh"></i>
+      Restart
+    </button>
   </li>
-  <li class="nav-item" ui-sref-active="active">
-    <a class="nav-link" ui-sref="cf.applications.application.delivery-logs({guid: appCtrl.id})" translate>
-      Delivery Logs
-    </a>
+  <li>
+    <button class="btn btn-link btn-border-less"
+      translate>
+      <i class="helion-icon helion-icon-lg helion-icon-Trash"></i>
+      Delete
+    </button>
   </li>
-  <li class="nav-item" ui-sref-active="active">
-    <a class="nav-link" ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id})" translate>
-      Delivery Pipeline
-    </a>
-  </li>
-  <li class="nav-item" ui-sref-active="active">
-    <a class="nav-link" ui-sref="cf.applications.application.variables({guid: appCtrl.id})" translate>
-      Variables
-    </a>
+  <li>
+    <button class="btn btn-link btn-border-less"
+      translate
+      ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
+      ng-if="appCtrl.model.application.summary.state==='STOPPED'"
+      ng-click="appCtrl.model.startApp(appCtrl.id)">
+      <i class="helion-icon helion-icon-lg helion-icon-Play"></i>
+      Start
+    </button>
   </li>
 </ul>
-
-<div class="application-details col-sm-12">
-  <div ui-view class="row"></div>
-</div>

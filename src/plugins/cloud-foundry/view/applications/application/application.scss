@@ -1,7 +1,58 @@
 @import "services/services";
 @import "summary/summary";
 
+.application-action-col {
+  padding-top: $hpe-unit-space * 2;
+
+  .btn {
+    font-size: $font-size-large;
+    height: auto;
+    padding: $hpe-unit-space/2 $hpe-unit-space;
+
+    &:focus,
+    &:active {
+      outline: none;
+    }
+
+    > * {
+      vertical-align: middle;
+    }
+
+    .helion-icon {
+      padding-right: $hpe-unit-space;
+    }
+  }
+}
+
+.application-header {
+  @include flex-vertical-centered();
+  font-size: $hpe-unit-space;
+  padding-top: $hpe-unit-space * 2;
+  padding-bottom: $hpe-unit-space * 2;
+
+  .action-target-state {
+    margin-left: $hpe-unit-space;
+  }
+
+  .popover {
+    margin-left: 111px;
+    margin-top: 20px;
+  }
+}
+
 .application-details {
   padding-top: $hpe-unit-space;
   padding-bottom: $hpe-unit-space;
+}
+
+.application-nav.nav.nav-tabs > li {
+  padding-top: 0;
+
+  &:first-of-type {
+    margin-left: 0;
+  }
+}
+
+.application-nav-menu {
+  margin-left: auto;
 }
