@@ -9,9 +9,14 @@
     height: auto;
     padding: $hpe-unit-space/2 $hpe-unit-space;
 
+    &:active,
     &:focus,
-    &:active {
+    &:hover {
       outline: none;
+
+      &[disabled] {
+        color: $text-color;
+      }
     }
 
     > * {
