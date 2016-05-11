@@ -179,3 +179,10 @@ Locally, run the following command to generate documentation in the `docs/src` f
 cd tools
 ./node_modules/.bin/jsdoc ../src/app ../src/*.js -r -d ../docs/src
 ```
+
+#### Build and register image for UCP
+**Docker Quickstart Terminal**
+```
+docker build -t 192.168.99.100:5000/cnap_nginx -f Dockerfile.ucp .
+docker push 192.168.99.100:5000/cnap_nginx
+```
