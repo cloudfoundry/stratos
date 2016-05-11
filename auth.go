@@ -11,9 +11,10 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
-	tokens "portal-proxy/repository/tokens"
+	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
+// UAAResponse - <TBD>
 type UAAResponse struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`
@@ -58,10 +59,10 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	}
 
 	endpoint := ""
-	cnsi_record, ok := p.getCNSIRecord(cnsiGUID)
+	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
 
 	if ok {
-		endpoint = cnsi_record.AuthorizationEndpoint
+		endpoint = cnsiRecord.AuthorizationEndpoint
 	}
 
 	if endpoint == "" {
@@ -122,7 +123,7 @@ func (p *portalProxy) logout(c echo.Context) error {
 		MaxAge: -1,
 	}
 
-	// TODO: CJ - Explicitly clear out session
+	// TODO(wchrisjohnson): Explicitly clear out session
 	http.SetCookie(res, cookie)
 
 	return nil
@@ -202,12 +203,13 @@ func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
 
 	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Errorf("getUAATokenRecord->NewMysqlTokenRepository() %s", err)
+		fmt.Printf("Database error getting repo for UAA token: %v", err)
 		return tokens.TokenRecord{}
 	}
-	tr, er := tokenRepo.FindUaaToken(key)
-	if er != nil {
-		fmt.Errorf("getUAATokenRecord->FindUaaToken() %s", err)
+
+	tr, err := tokenRepo.FindUAAToken(key)
+	if err != nil {
+		fmt.Printf("Database error finding UAA token: %v", err)
 		return tokens.TokenRecord{}
 	}
 
@@ -218,10 +220,11 @@ func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) {
 
 	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Errorf("setUAATokenRecord->NewMysqlTokenRepository() %s", err)
+		fmt.Printf("Database error getting repo for UAA token: %v", err)
 	}
-	er := tokenRepo.SaveUaaToken(key, t)
-	if er != nil {
-		fmt.Errorf("setUAATokenRecord->SaveUaaToken() %s", err)
+
+	err = tokenRepo.SaveUAAToken(key, t)
+	if err != nil {
+		fmt.Printf("Database error saving UAA token: %v", err)
 	}
 }

@@ -1,36 +1,33 @@
 package tokens
 
 import (
-	"fmt"
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"fmt"
 
- 	"portal-proxy/mysql"
- 	"portal-proxy/repository"
+	"github.com/hpcloud/portal-proxy/datastore"
 )
 
 const (
-	findUaaToken 	= `SELECT auth_token, refresh_token, token_expiry
-								 	 FROM tokens
-								 	 WHERE token_type = 'uaa' AND user_guid = ?`
- 	saveUaaToken 	= `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
-									 VALUES (?, 'uaa', ?, ?, ?)`
-  findCnsiToken = `SELECT auth_token, refresh_token, token_expiry
+	findUAAToken = `SELECT auth_token, refresh_token, token_expiry
+								 	FROM tokens
+								 	WHERE token_type = 'uaa' AND user_guid = ?`
+	saveUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
+									VALUES (?, 'uaa', ?, ?, ?)`
+	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
 									 FROM tokens
 									 WHERE cnsi_guid=? AND user_guid = ? AND token_type = 'cnsi'`
-	saveCnsiToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
+	saveCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
 									 VALUES (?, ?, 'cnsi', ?, ?, ?)`
 )
 
 // MysqlTokenRepository is a MySQL-backed token repository
 type MysqlTokenRepository struct {
-	Repository
-
 	db *sql.DB
 }
 
-func NewMysqlTokenRepository(configParams mysql.MysqlConnectionParameters) (Repository, error) {
-	db, err := mysql.GetConnection(configParams)
+// NewMysqlTokenRepository - get a reference to the token data source
+func NewMysqlTokenRepository(configParams datastore.MysqlConnectionParameters) (Repository, error) {
+	db, err := datastore.GetConnection(configParams)
 	if err != nil {
 		return nil, err
 	}
@@ -38,60 +35,60 @@ func NewMysqlTokenRepository(configParams mysql.MysqlConnectionParameters) (Repo
 	return &MysqlTokenRepository{db: db}, nil
 }
 
+// SaveUAAToken - Save the UAA token to the datastore
+func (p *MysqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) error {
 
-func (p *MysqlTokenRepository) SaveUaaToken(user_guid string, tr TokenRecord) error {
-
-  stmt, es := p.db.Prepare(saveUaaToken)
-  if es != nil {
-      return &repository.DatabaseError{InnerError: es}
-  }
-
-  _, err := stmt.Exec(user_guid, tr.AuthToken, tr.RefreshToken, tr.TokenExpiry)
+	stmt, err := p.db.Prepare(saveUAAToken)
 	if err != nil {
-		return &repository.DatabaseError{InnerError: err}
+		return fmt.Errorf("Unable to Prepare/Save UAA token: %v", err)
+	}
+
+	_, err = stmt.Exec(userGUID, tr.AuthToken, tr.RefreshToken, tr.TokenExpiry)
+	if err != nil {
+		return fmt.Errorf("Unable to Save UAA token: %v", err)
 	}
 
 	return nil
 }
 
+// FindUAAToken - return the UAA token from the datastore
+func (p *MysqlTokenRepository) FindUAAToken(userGUID string) (TokenRecord, error) {
 
-func (p *MysqlTokenRepository) FindUaaToken(user_guid string) (TokenRecord, error) {
+	tr := new(TokenRecord)
 
-  tr := new(TokenRecord)
-
-	err := p.db.QueryRow(findUaaToken, user_guid).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
+	err := p.db.QueryRow(findUAAToken, userGUID).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
 	if err != nil {
-		return TokenRecord{}, &repository.DatabaseError{InnerError: err}
+		return TokenRecord{}, fmt.Errorf("Unable to Find UAA token: %v", err)
 	}
 
 	return *tr, nil
 }
 
+// SaveCNSIToken - Save the CNSI (UAA) token to the datastore
+func (p *MysqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr TokenRecord) error {
 
-func (p *MysqlTokenRepository) SaveCnsiToken(cnsi_guid string, user_guid string, tr TokenRecord) error {
+	stmt, err := p.db.Prepare(saveCNSIToken)
+	if err != nil {
+		return fmt.Errorf("Unable to Prepare/Save CNSI token: %v", err)
+	}
 
-  stmt, es := p.db.Prepare(saveCnsiToken)
-  if es != nil {
-		return &repository.DatabaseError{InnerError: es}
-  }
-
-  _, err := stmt.Exec(cnsi_guid, user_guid, tr.AuthToken, tr.RefreshToken, tr.TokenExpiry)
+	_, err = stmt.Exec(cnsiGUID, userGUID, tr.AuthToken, tr.RefreshToken, tr.TokenExpiry)
 
 	if err != nil {
-		return &repository.DatabaseError{InnerError: err}
+		return fmt.Errorf("Unable to Save CNSI token: %v", err)
 	}
 
 	return nil
 }
 
+// FindCNSIToken - retrieve a CNSI (UAA) token from the datastore
+func (p *MysqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string) (TokenRecord, error) {
 
-func (p *MysqlTokenRepository) FindCnsiToken(cnsi_guid string, user_guid string) (TokenRecord, error) {
+	tr := new(TokenRecord)
 
-  tr := new(TokenRecord)
-
-	err := p.db.QueryRow(findCnsiToken, cnsi_guid, user_guid).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
+	err := p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
 	if err != nil {
-		return TokenRecord{}, &repository.DatabaseError{InnerError: err}
+		return TokenRecord{}, fmt.Errorf("Unable to Find CNSI token: %v", err)
 	}
 
 	return *tr, nil

@@ -1,131 +1,124 @@
 package cnsis
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/url"
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 
- 	"portal-proxy/mysql"
-  "portal-proxy/repository"
+	"github.com/hpcloud/portal-proxy/datastore"
 )
 
 const (
-	listCnsis	= `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
+	listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
 							 FROM cnsis`
-  findCnsi	= `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
+	findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
   						 FROM cnsis
                WHERE guid=?`
-	saveCnsi  = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint)
+	saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint)
 							 VALUES (?, ?, ?, ?, ?, ?)`
 )
 
-// MysqlCnsiRepository is a MySQL-backed cnsi repository
-type MysqlCnsiRepository struct {
-	Repository
-
+// MysqlCNSIRepository is a MySQL-backed CNSI repository
+type MysqlCNSIRepository struct {
 	db *sql.DB
 }
 
-
-func NewMysqlCnsiRepository(configParams mysql.MysqlConnectionParameters) (Repository, error) {
-	db, err := mysql.GetConnection(configParams)
+// NewMysqlCNSIRepository - Returns a reference to a CNSI data source
+func NewMysqlCNSIRepository(configParams datastore.MysqlConnectionParameters) (Repository, error) {
+	db, err := datastore.GetConnection(configParams)
 	if err != nil {
-		return nil, &repository.DatabaseError{InnerError: err}
+		return nil, fmt.Errorf("Unable to get database reference: %v", err)
 	}
 
-	return &MysqlCnsiRepository{db: db}, nil
+	return &MysqlCNSIRepository{db: db}, nil
 }
 
+// List - Returns a list of CNSI Records
+func (p *MysqlCNSIRepository) List() ([]*CNSIRecord, error) {
 
-func (p *MysqlCnsiRepository) List() ([]*CnsiRecord, error) {
-
-	rows, err := p.db.Query(listCnsis)
+	rows, err := p.db.Query(listCNSIs)
 	if err != nil {
-		panic(err.Error())
-		return []*CnsiRecord{}, &repository.DatabaseError{InnerError: err}
+		return []*CNSIRecord{}, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
 	defer rows.Close()
 
-  cnsi_list := make([]*CnsiRecord, 0)
-  for rows.Next() {
-      cnsi := new(CnsiRecord)
-      err := rows.Scan(&cnsi.Guid, &cnsi.Name, &cnsi.CNSIType, &cnsi.APIEndpoint, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint)
-      if err != nil {
-          return nil, &repository.DatabaseError{InnerError: err}
-      }
-      cnsi_list = append(cnsi_list, cnsi)
-  }
-  if err = rows.Err(); err != nil {
-			panic(err.Error())
-      return nil, &repository.DatabaseError{InnerError: err}
-  }
+	var cnsiList []*CNSIRecord
+	cnsiList = make([]*CNSIRecord, 0)
+	for rows.Next() {
+		cnsi := new(CNSIRecord)
+		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &cnsi.CNSIType, &cnsi.APIEndpoint, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
+		}
+		cnsiList = append(cnsiList, cnsi)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Unable to List CNSI records: %v", err)
+	}
 
-	return cnsi_list, nil
+	return cnsiList, nil
 }
 
+// Find - Returns a single CNSI Record
+func (p *MysqlCNSIRepository) Find(guid string) (CNSIRecord, error) {
 
-func (p *MysqlCnsiRepository) Find(guid string) (CnsiRecord, error) {
+	cnsi := new(CNSIRecord)
 
-	fmt.Println("----- ENTERING Find")
-
-  cnsi := new(CnsiRecord)
-
-	stmt, err := p.db.Prepare(findCnsi)
+	stmt, err := p.db.Prepare(findCNSI)
 	if err != nil {
-	    panic(err.Error())
+		return CNSIRecord{}, fmt.Errorf("Unable to Prepare/Find CNSI record: %v", err)
 	}
 
 	var (
-		p_cnsi_type string 		// CnsiType
-		p_url string 					// *url.URL
+		pCNSIType string
+		pURL      string
 	)
-	err = stmt.QueryRow(guid).Scan(&cnsi.Guid,
-																 &cnsi.Name,
-																 &p_cnsi_type,
-																 &p_url,
-																 &cnsi.AuthorizationEndpoint,
-																 &cnsi.TokenEndpoint)
+	err = stmt.QueryRow(guid).Scan(&cnsi.GUID,
+		&cnsi.Name,
+		&pCNSIType,
+		&pURL,
+		&cnsi.AuthorizationEndpoint,
+		&cnsi.TokenEndpoint)
 	if err != nil {
-		panic(err.Error())
-		return CnsiRecord{}, &repository.DatabaseError{InnerError: err}
+		return CNSIRecord{}, fmt.Errorf("Unable to Find CNSI record: %v", err)
 	}
 
-	// TODO: CJ - discover a way to do this automagically
+	// TODO(wchrisjohnson): discover a way to do this automagically
 	// These two fields need to be converted manually
-	cnsi.CNSIType = getCnsiType(p_cnsi_type)
-	cnsi.APIEndpoint, err = url.Parse(p_url)
+	cnsi.CNSIType, err = getCNSIType(pCNSIType)
+	cnsi.APIEndpoint, err = url.Parse(pURL)
 
 	return *cnsi, nil
 }
 
+func getCNSIType(cnsi string) (CNSIType, error) {
+	var newType CNSIType
 
-// TODO: CJ - discover a better way to convert to the custom type
-func getCnsiType(str string) CnsiType {
-	var x CnsiType
-	switch {
-	case str == "hcf":
-    return CnsiHCF
-	case str == "hce":
-		return CnsiHCE
-	default:
-		return x
-  }
+	switch cnsi {
+	case
+		"hcf",
+		"hce":
+		return CNSIType(cnsi), nil
+	}
+	return newType, errors.New("Invalid string passed to getCNSIType.")
 }
 
+// Save - Persist a CNSI Record to a datastore
+func (p *MysqlCNSIRepository) Save(guid string, cnsi CNSIRecord) error {
 
-func (p *MysqlCnsiRepository) Save(guid string, cnsi CnsiRecord) error {
-
-  stmt, es := p.db.Prepare(saveCnsi)
-  if es != nil {
-		return &repository.DatabaseError{InnerError: es}
-  }
-
-  _, err := stmt.Exec(guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-											fmt.Sprintf("%s", cnsi.APIEndpoint),
-											cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint)
+	stmt, err := p.db.Prepare(saveCNSI)
 	if err != nil {
-		return &repository.DatabaseError{InnerError: err}
+		return fmt.Errorf("Unable to Prepare/Save CNSI record: %v", err)
+	}
+
+	_, err = stmt.Exec(guid,
+		cnsi.Name,
+		fmt.Sprintf("%s", cnsi.CNSIType),
+		fmt.Sprintf("%s", cnsi.APIEndpoint),
+		cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint)
+	if err != nil {
+		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}
 
 	return nil

@@ -4,7 +4,7 @@ import "testing"
 
 func TestGetUserTokenInfo(t *testing.T) {
 	t.Parallel()
-	_, err := getUserTokenInfo(mockUaaToken)
+	_, err := getUserTokenInfo(mockUAAToken)
 	if err != nil {
 		t.Errorf("Unable to get user token info: %v", err)
 	}

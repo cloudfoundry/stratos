@@ -10,12 +10,11 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/hpcloud/portal-proxy/datastore"
 	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
-
-	mysql "portal-proxy/mysql"
 )
 
 var (
@@ -59,10 +58,7 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 
 func newPortalProxy(pc portalConfig) *portalProxy {
 	pp := &portalProxy{
-		// UAATokenMap:  make(map[string]tokenRecord),
-		// CNSITokenMap: make(map[string]tokens.TokenRecord),
-		// CNSIs:        make(map[string]cnsiRecord),
-		Config:       pc,
+		Config: pc,
 	}
 
 	return pp
@@ -106,14 +102,13 @@ func start(p *portalProxy) error {
 }
 
 func (p *portalProxy) initMysqlStore() {
-	var dbconfig mysql.MysqlConnectionParameters
+	var dbconfig datastore.MysqlConnectionParameters
 	var err error
-	dbconfig, err = mysql.NewMySQLConnectionParametersFromEnvironment()
+	dbconfig, err = datastore.NewMySQLConnectionParametersFromEnvironment()
 	if err != nil {
 		panic("Unable to load database configuration.")
-	} else {
-		p.DatabaseConfig = dbconfig
 	}
+	p.DatabaseConfig = dbconfig
 }
 
 func (p *portalProxy) initCookieStore() {
@@ -122,7 +117,7 @@ func (p *portalProxy) initCookieStore() {
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
-	// TODO: remove prior to shipping
+	// TODO(wchrisjohnson): remove prior to shipping
 	if p.Config.Dev {
 		e.Static("/*", "demo")
 	}

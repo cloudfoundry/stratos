@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/echo/engine/standard"
 )
 
+// CNSIRequest - <TBD>
 type CNSIRequest struct {
 	GUID     string
 	UserGUID string

@@ -4,25 +4,29 @@ import (
 	"net/url"
 )
 
-type CnsiType string
+// CNSIType - <TBD>
+type CNSIType string
 
+// CNSIHCF - <TBD>
+// CNSIHCE - <TBD>
 const (
-	CnsiHCF CnsiType = "hcf"
-	CnsiHCE CnsiType = "hce"
+	CNSIHCF CNSIType = "hcf"
+	CNSIHCE CNSIType = "hce"
 )
 
-type CnsiRecord struct {
-	Guid 									string
+// CNSIRecord - <TBD>
+type CNSIRecord struct {
+	GUID                  string
 	Name                  string
 	APIEndpoint           *url.URL
 	AuthorizationEndpoint string
 	TokenEndpoint         string
-	CNSIType              CnsiType
+	CNSIType              CNSIType
 }
 
 // Repository is an application of the repository pattern for storing CNSI Records
 type Repository interface {
-  List() ([]*CnsiRecord, error)
-  Find(guid string) (CnsiRecord, error)
-  Save(guid string, cnsi_record CnsiRecord) error
+	List() ([]*CNSIRecord, error)
+	Find(guid string) (CNSIRecord, error)
+	Save(guid string, cnsiRecord CNSIRecord) error
 }

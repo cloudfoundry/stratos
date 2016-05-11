@@ -20,8 +20,8 @@ type mockServer struct {
 
 type mockServerFunc func(*mockServer)
 
-const mockCNSIGuid = "some-guid-1234"
-const mockUserGuid = "asd-gjfg-bob"
+const mockCNSIGUID = "some-guid-1234"
+const mockUserGUID = "asd-gjfg-bob"
 
 func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, echo.Context) {
 	e := echo.New()
@@ -128,11 +128,11 @@ func urlMust(i string) *url.URL {
 	return b
 }
 
-const mockUaaToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsInVzZXJfaWQiOiJhc2QtZ2pmZy1ib2IiLCJleHAiOjEyMzQ1Njd9.gO9WDYNEfMsnbz7-sICTNygzkqvWgMP2nm9BStJvvCw`
+const mockUAAToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsInVzZXJfaWQiOiJhc2QtZ2pmZy1ib2IiLCJleHAiOjEyMzQ1Njd9.gO9WDYNEfMsnbz7-sICTNygzkqvWgMP2nm9BStJvvCw`
 
 var mockUAAResponse = UAAResponse{
-	AccessToken:  mockUaaToken,
-	RefreshToken: mockUaaToken,
+	AccessToken:  mockUAAToken,
+	RefreshToken: mockUAAToken,
 }
 
 const (

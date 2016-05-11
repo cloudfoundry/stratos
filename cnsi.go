@@ -11,15 +11,14 @@ import (
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
 
-	tokens "portal-proxy/repository/tokens"
-	cnsis "portal-proxy/repository/cnsis"
+	"github.com/hpcloud/portal-proxy/repository/cnsis"
+	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
 type v2Info struct {
 	AuthorizationEndpoint string `json:"authorization_endpoint"`
 	TokenEndpoint         string `json:"token_endpoint"`
 }
-
 
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
@@ -51,9 +50,9 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 			"Failed to get API Endpoint: %v", err)
 	}
 	guid := uuid.NewV4().String()
-	newCNSI := cnsis.CnsiRecord{
+	newCNSI := cnsis.CNSIRecord{
 		Name:                  cnsiName,
-		CNSIType:              cnsis.CnsiHCF,
+		CNSIType:              cnsis.CNSIHCF,
 		APIEndpoint:           apiEndpointURL,
 		TokenEndpoint:         v2InfoResponse.TokenEndpoint,
 		AuthorizationEndpoint: v2InfoResponse.AuthorizationEndpoint,
@@ -68,31 +67,30 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 
-	cnsiRepo, err := cnsis.NewMysqlCnsiRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewMysqlCNSIRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Errorf("listRegisteredCNSIs->NewMysqlCsniRepository() %s", err)
-		return err
+		return fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
 
 	var jsonString []byte
-	var e error
 
-	cnsi_list, er := cnsiRepo.List()
-	if er != nil {
+	var cnsiList []*cnsis.CNSIRecord
+	cnsiList, err = cnsiRepo.List()
+	if err != nil {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to retrieve list of CNSIs",
-			"Failed to retrieve list of CNSIs: %v", er,
+			"Failed to retrieve list of CNSIs: %v", err,
 		)
-	} else {
-		jsonString, e = json.Marshal(cnsi_list)
-		if e != nil {
-			return newHTTPShadowError(
-				http.StatusBadRequest,
-				"Failed to retrieve list of CNSIs",
-				"Failed to retrieve list of CNSIs: %v", e,
-			)
-		}
+	}
+
+	jsonString, err = json.Marshal(cnsiList)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to retrieve list of CNSIs",
+			"Failed to retrieve list of CNSIs: %v", err,
+		)
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -131,67 +129,58 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	return v2InfoReponse, nil
 }
 
-func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CnsiRecord, bool) {
+func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
-	cnsiRepo, err := cnsis.NewMysqlCnsiRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewMysqlCNSIRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Errorf("getCNSIRecord->NewMysqlTokenRepository %s", err)
-		return cnsis.CnsiRecord{}, false
+		return cnsis.CNSIRecord{}, false
 	}
 
-	rec, er := cnsiRepo.Find(guid)
-	if er != nil {
-		fmt.Errorf("getCNSIRecord->Find %s", er)
-		return cnsis.CnsiRecord{}, false
-	} else {
-		fmt.Sprintf("--- Found CNSI Record %s", guid)
+	rec, err := cnsiRepo.Find(guid)
+	if err != nil {
+		return cnsis.CNSIRecord{}, false
 	}
 
 	return rec, true
 }
 
-func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CnsiRecord) {
+func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) {
 
-	cnsiRepo, err := cnsis.NewMysqlCnsiRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewMysqlCNSIRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Errorf("setCNSIRecord->NewMysqlTokenRepository %s", err)
+		fmt.Printf("setCNSIRecord: %v", err)
 	}
-	er := cnsiRepo.Save(guid, c)
-	if er != nil {
-		fmt.Errorf("setCNSIRecord->Save %s", er)
-	} else {
-		fmt.Sprintf("--- Saved CNSI Record %s", guid)
+
+	err = cnsiRepo.Save(guid, c)
+	if err != nil {
+		fmt.Printf("setCNSIRecord: %v", err)
 	}
 }
 
-func (p *portalProxy) getCNSITokenRecord(cnsiGuid string, userGuid string) (tokens.TokenRecord, bool) {
+func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (tokens.TokenRecord, bool) {
 
 	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Errorf("getCNSITokenRecord->NewMysqlTokenRepository %s", err)
 		return tokens.TokenRecord{}, false
 	}
-	tr, er := tokenRepo.FindCnsiToken(cnsiGuid, userGuid)
-	if er != nil {
-		fmt.Errorf("getCNSITokenRecord->FindCnsiToken %s", er)
+
+	tr, err := tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
+	if err != nil {
 		return tokens.TokenRecord{}, false
-	} else {
-		fmt.Sprintf("--- Got CNSI token record for cnsi %s and user %s", cnsiGuid, userGuid)
 	}
 
 	return tr, true
 }
 
-func (p *portalProxy) setCNSITokenRecord(cnsiGuid string, userGuid string, t tokens.TokenRecord) {
+func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) {
 
 	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Errorf("setCNSITokenRecord->NewMysqlTokenRepository %s", err)
+		fmt.Printf("setCNSITokenRecord: %v", err)
 	}
-	er := tokenRepo.SaveCnsiToken(cnsiGuid, userGuid, t)
-	if er != nil {
-		fmt.Errorf("setCNSITokenRecord->SaveUaaToken %s", er)
-	} else {
-		fmt.Sprintf("--- Saved CNSI token record for cnsi %s and user %s", cnsiGuid, userGuid)
+
+	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t)
+	if err != nil {
+		fmt.Printf("setCNSITokenRecord: %v", err)
 	}
 }

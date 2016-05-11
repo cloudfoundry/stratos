@@ -1,4 +1,4 @@
-package mysql
+package datastore
 
 import (
 	"fmt"
@@ -8,30 +8,30 @@ import (
 	"strings"
 
 	"database/sql"
-  _ "github.com/go-sql-driver/mysql"
 )
 
+// MysqlConnectionParameters -
 type MysqlConnectionParameters struct {
-  Username            string
-	Password            string
-  Protocol            string
-  Address             string
-	Port								int
-  Database						string
+	Username string
+	Password string
+	Protocol string
+	Address  string
+	Port     int
+	Database string
 }
 
 const (
-	// The environment variable with the MySQL username
+	// MYSQLUsername - The environment variable with the MySQL username
 	MYSQLUsername = "MYSQL_USERNAME"
-	// The environment variable with the MySQL password
+	// MYSQLPasswordFile - The environment variable with the MySQL password
 	MYSQLPasswordFile = "MYSQL_PASSWORDFILE"
-	// The environment variable with the MySQL protocol
+	// MYSQLProtocol - The environment variable with the MySQL protocol
 	MYSQLProtocol = "MYSQL_PROTOCOL"
-	// The environment variable with the MySQL IP address or URL
+	// MYSQLAddress - The environment variable with the MySQL IP address or URL
 	MYSQLAddress = "MYSQL_ADDRESS"
-	// The environment variable with the MySQL port (3306)
+	// MYSQLPort - The environment variable with the MySQL port (3306)
 	MYSQLPort = "MYSQL_PORT"
-	// The environment variable with the MySQL database name
+	// MYSQLDatabase - The environment variable with the MySQL database name
 	MYSQLDatabase = "MYSQL_DATABASE"
 )
 
@@ -56,7 +56,8 @@ func (b *BadEnvVarError) Error() string {
 	return fmt.Sprintf("Environment variable %s value cannot be used, reason: %s", b.EnvVar, b.Reason)
 }
 
-// NewMysqlConnectionParametersFromEnvironment discovers MySQL connection parameters from environment variables
+// NewMySQLConnectionParametersFromEnvironment -
+// 		discovers MySQL connection parameters from environment variables
 func NewMySQLConnectionParametersFromEnvironment() (MysqlConnectionParameters, error) {
 	exists := func(filename string) bool {
 		_, err := os.Lstat(filename)
@@ -67,16 +68,7 @@ func NewMySQLConnectionParametersFromEnvironment() (MysqlConnectionParameters, e
 		return true
 	}
 
-	readFile := func(filename string) (string, error) {
-		b, err := ioutil.ReadFile(filename)
-		if err != nil {
-			return "", err
-		}
-
-		return strings.TrimSpace(string(b)), nil
-	}
-
-	result := MysqlConnectionParameters{}
+	var result MysqlConnectionParameters
 	var err error
 
 	username := strings.TrimSpace(os.Getenv(MYSQLUsername))
@@ -86,48 +78,29 @@ func NewMySQLConnectionParametersFromEnvironment() (MysqlConnectionParameters, e
 	port := strings.TrimSpace(os.Getenv(MYSQLPort))
 	database := strings.TrimSpace(os.Getenv(MYSQLDatabase))
 
-	if username == "" {
-		return MysqlConnectionParameters{}, &MissingEnvVarError{EnvVar: MYSQLUsername}
-	}
+	// validateConnectionVariables(username, passwordFile, protocol, address, port, database)
 
-	if passwordFile == "" {
-		return MysqlConnectionParameters{}, &MissingEnvVarError{EnvVar: MYSQLPasswordFile}
-	}
 	if !exists(passwordFile) {
-		return MysqlConnectionParameters{}, &BadEnvVarError{EnvVar: MYSQLPasswordFile, Reason: "File does not exist or is not accessible"}
-	}
-
-	if protocol == "" {
-		return MysqlConnectionParameters{}, &MissingEnvVarError{EnvVar: MYSQLProtocol}
-	}
-
-	if address == "" {
-		return MysqlConnectionParameters{}, &MissingEnvVarError{EnvVar: MYSQLAddress}
-	}
-
-	if port == "" {
-		return MysqlConnectionParameters{}, &MissingEnvVarError{EnvVar: MYSQLPort}
-	}
-
-	if database == "" {
-		return MysqlConnectionParameters{}, &MissingEnvVarError{EnvVar: MYSQLDatabase}
+		return result, &BadEnvVarError{EnvVar: MYSQLPasswordFile, Reason: "File does not exist or is not accessible"}
 	}
 
 	result.Username = username
-	result.Password, err = readFile(passwordFile)
+
+	pwd, err := ioutil.ReadFile(passwordFile)
 	if err != nil {
-		return MysqlConnectionParameters{}, &BadEnvVarError{EnvVar: MYSQLPasswordFile, Reason: "File is not readable"}
+		return result, &BadEnvVarError{EnvVar: MYSQLPasswordFile, Reason: "File is not readable"}
 	}
+	result.Password = strings.TrimSpace(string(pwd))
 
 	result.Protocol = protocol
 	result.Address = address
 
 	result.Port, err = strconv.Atoi(port)
 	if err != nil {
-		return MysqlConnectionParameters{}, &BadEnvVarError{EnvVar: MYSQLPort, Reason: "Not a valid integer"}
+		return result, &BadEnvVarError{EnvVar: MYSQLPort, Reason: "Not a valid integer"}
 	}
 	if result.Port > 65535 || result.Port < 1 {
-		return MysqlConnectionParameters{}, &BadEnvVarError{EnvVar: MYSQLPort, Reason: "Must be between 1 and 65535"}
+		return result, &BadEnvVarError{EnvVar: MYSQLPort, Reason: "Must be between 1 and 65535"}
 	}
 
 	result.Database = database
@@ -135,6 +108,17 @@ func NewMySQLConnectionParametersFromEnvironment() (MysqlConnectionParameters, e
 	return result, nil
 }
 
+// func validateConnectionVariables(username, passwordFile, protcol, address, port, database string) (err error) {
+// 	defer func() { recover() }
+// 	BeginValidation().Validate(
+// 		IsNotNil(username, "Missing env variable MYSQL_USERNAME"),
+// 		IsNotNil(passwordFile, "Missing env variable MYSQL_PASSWORDFILE"),
+// 		IsNotNil(protocol, "Missing env variable MYSQL_PROTOCOL"),
+// 		IsNotNil(address, "Missing env variable MYSQL_ADDRESS"),
+// 		IsNotNil(port, "Missing env variable MYSQL_PORT"),
+// 		IsNotNil(database, "Missing env variable MYSQL_DATABASE"),
+// 	).CheckSetErrorAndPanic(&err) // Return error will get set, and the function will return.
+// }
 
 // GetConnection returns a database connection to MySQL
 func GetConnection(connParams MysqlConnectionParameters) (*sql.DB, error) {

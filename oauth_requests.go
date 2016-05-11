@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	cnsis "portal-proxy/repository/cnsis"
-	tokens "portal-proxy/repository/tokens"
+	"github.com/hpcloud/portal-proxy/repository/cnsis"
+	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
-func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsis.CnsiRecord, err error) {
+func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsis.CNSIRecord, err error) {
 	// look up token
 
 	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
