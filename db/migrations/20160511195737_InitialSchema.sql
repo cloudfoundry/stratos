@@ -1,0 +1,93 @@
+
+-- +goose Up
+-- SQL in section 'Up' is executed when this migration is applied
+
+CREATE TABLE IF NOT EXISTS session (
+  session_id      VARCHAR(36) NOT NULL UNIQUE,
+  access_token    TEXT        NOT NULL,
+  expires_at      INTEGER     NOT NULL,
+  scope           VARCHAR(64) NOT NULL,
+  username        VARCHAR(40) NOT NULL,
+  PRIMARY KEY (session_id)
+);
+
+-- Track registered users
+CREATE TABLE IF NOT EXISTS users (
+  id              BIGSERIAL     NOT NULL UNIQUE,
+  username        VARCHAR(40)   NOT NULL UNIQUE,
+  registered      BOOLEAN,
+  PRIMARY KEY (username)
+);
+
+-- Master list of service instances
+CREATE TABLE IF NOT EXISTS service_instances (
+  id              BIGSERIAL     NOT NULL UNIQUE,
+  url             VARCHAR(900)  NOT NULL UNIQUE,
+  name            VARCHAR(40)   NOT NULL,
+  PRIMARY KEY (url)
+);
+
+CREATE TABLE IF NOT EXISTS user_service_instances (
+  id                    BIGSERIAL       NOT NULL UNIQUE,
+  url                   VARCHAR(900)    NOT NULL,
+  username              VARCHAR(40)     NOT NULL,
+  account               VARCHAR(40),
+  access_token          TEXT,
+  refresh_token         TEXT,
+  expires_at            INTEGER,
+  scope                 VARCHAR(1000),
+  registered            BOOLEAN,
+  CONSTRAINT url_username PRIMARY KEY (url, username)
+);
+
+-- For storage of UAA and CNSI tokens
+CREATE TABLE IF NOT EXISTS tokens (
+  id            BIGSERIAL   NOT NULL UNIQUE,
+  user_guid     VARCHAR(36) NOT NULL,
+  cnsi_guid     VARCHAR(36),
+  token_type    VARCHAR(10) NOT NULL,
+  auth_token    TEXT        NOT NULL,
+  refresh_token TEXT        NOT NULL,
+  token_expiry  BIGINT      NOT NULL,
+  last_updated  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'), 
+  PRIMARY KEY (id)
+);
+
+CREATE INDEX tokens_user_guid ON tokens (user_guid);
+CREATE INDEX tokens_cnsi_guid ON tokens (cnsi_guid);
+CREATE INDEX tokens_token_type ON tokens (token_type);
+
+-- For storage of CNSI records
+CREATE TABLE IF NOT EXISTS cnsis (
+  guid            VARCHAR(36)   NOT NULL UNIQUE,
+  name            VARCHAR(255)  NOT NULL,
+  cnsi_type       VARCHAR(3)    NOT NULL,
+  api_endpoint    VARCHAR(255)  NOT NULL,
+  auth_endpoint   VARCHAR(255)  NOT NULL,
+  token_endpoint  VARCHAR(255)  NOT NULL,
+  last_updated    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+  PRIMARY KEY (guid)
+);
+
+CREATE INDEX cnsis_name ON cnsis (name);
+CREATE INDEX cnsis_cnsi_type ON cnsis (cnsi_type);
+
+-- +goose Down
+-- SQL section 'Down' is executed when this migration is rolled back
+
+DROP  TABLE IF EXISTS session;
+
+DROP  TABLE IF EXISTS users;
+
+DROP  TABLE IF EXISTS service_instances;
+
+DROP  TABLE IF EXISTS user_service_instances;
+
+DROP  INDEX IF EXISTS tokens_token_type;
+DROP  INDEX IF EXISTS tokens_cnsi_guid;
+DROP  INDEX IF EXISTS tokens_user_guid;
+DROP  TABLE IF EXISTS tokens;
+
+DROP  INDEX IF EXISTS cnsis_cnsi_type;
+DROP  INDEX IF EXISTS cnsis_name;
+DROP  TABLE IF EXISTS cnsis;

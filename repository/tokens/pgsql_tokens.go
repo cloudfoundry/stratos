@@ -10,33 +10,33 @@ import (
 const (
 	findUAAToken = `SELECT auth_token, refresh_token, token_expiry
 								 	FROM tokens
-								 	WHERE token_type = 'uaa' AND user_guid = ?`
+								 	WHERE token_type = 'uaa' AND user_guid = $1`
 	saveUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
-									VALUES (?, 'uaa', ?, ?, ?)`
+									VALUES ($1, 'uaa', $2, $3, $4)`
 	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
 									 FROM tokens
-									 WHERE cnsi_guid=? AND user_guid = ? AND token_type = 'cnsi'`
+									 WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 	saveCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
-									 VALUES (?, ?, 'cnsi', ?, ?, ?)`
+									 VALUES ($1, $2, 'cnsi', $3, $4, $5)`
 )
 
-// MysqlTokenRepository is a MySQL-backed token repository
-type MysqlTokenRepository struct {
+// PgsqlTokenRepository is a PostgreSQL-backed token repository
+type PgsqlTokenRepository struct {
 	db *sql.DB
 }
 
-// NewMysqlTokenRepository - get a reference to the token data source
-func NewMysqlTokenRepository(configParams datastore.MysqlConnectionParameters) (Repository, error) {
+// NewPgsqlTokenRepository - get a reference to the token data source
+func NewPgsqlTokenRepository(configParams datastore.PostgresConnectionParameters) (Repository, error) {
 	db, err := datastore.GetConnection(configParams)
 	if err != nil {
 		return nil, err
 	}
 
-	return &MysqlTokenRepository{db: db}, nil
+	return &PgsqlTokenRepository{db: db}, nil
 }
 
 // SaveUAAToken - Save the UAA token to the datastore
-func (p *MysqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) error {
+func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) error {
 
 	stmt, err := p.db.Prepare(saveUAAToken)
 	if err != nil {
@@ -52,7 +52,7 @@ func (p *MysqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) err
 }
 
 // FindUAAToken - return the UAA token from the datastore
-func (p *MysqlTokenRepository) FindUAAToken(userGUID string) (TokenRecord, error) {
+func (p *PgsqlTokenRepository) FindUAAToken(userGUID string) (TokenRecord, error) {
 
 	tr := new(TokenRecord)
 
@@ -65,7 +65,7 @@ func (p *MysqlTokenRepository) FindUAAToken(userGUID string) (TokenRecord, error
 }
 
 // SaveCNSIToken - Save the CNSI (UAA) token to the datastore
-func (p *MysqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr TokenRecord) error {
+func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr TokenRecord) error {
 
 	stmt, err := p.db.Prepare(saveCNSIToken)
 	if err != nil {
@@ -82,7 +82,7 @@ func (p *MysqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 }
 
 // FindCNSIToken - retrieve a CNSI (UAA) token from the datastore
-func (p *MysqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string) (TokenRecord, error) {
+func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string) (TokenRecord, error) {
 
 	tr := new(TokenRecord)
 

@@ -8,7 +8,7 @@ import (
 
 type portalProxy struct {
 	Config         portalConfig
-	DatabaseConfig datastore.MysqlConnectionParameters
+	DatabaseConfig datastore.PostgresConnectionParameters
 
 	CookieStore *sessions.CookieStore
 }

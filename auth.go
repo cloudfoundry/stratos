@@ -201,7 +201,7 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 
 func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
 
-	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
 		fmt.Printf("Database error getting repo for UAA token: %v", err)
 		return tokens.TokenRecord{}
@@ -218,7 +218,7 @@ func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
 
 func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) {
 
-	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
 		fmt.Printf("Database error getting repo for UAA token: %v", err)
 	}

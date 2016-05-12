@@ -14,37 +14,38 @@ const (
 							 FROM cnsis`
 	findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
   						 FROM cnsis
-               WHERE guid=?`
+               WHERE guid=$1`
 	saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint)
-							 VALUES (?, ?, ?, ?, ?, ?)`
+							 VALUES ($1, $2, $3, $4, $5, $6)`
 )
 
-// MysqlCNSIRepository is a MySQL-backed CNSI repository
-type MysqlCNSIRepository struct {
+// PostgresCNSIRepository is a PostgreSQL-backed CNSI repository
+type PostgresCNSIRepository struct {
 	db *sql.DB
 }
 
-// NewMysqlCNSIRepository - Returns a reference to a CNSI data source
-func NewMysqlCNSIRepository(configParams datastore.MysqlConnectionParameters) (Repository, error) {
+// NewPostgresCNSIRepository will create a new instance of the PostgresInstanceRepository
+func NewPostgresCNSIRepository(configParams datastore.PostgresConnectionParameters) (Repository, error) {
 	db, err := datastore.GetConnection(configParams)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to get database reference: %v", err)
+		return nil, err
 	}
 
-	return &MysqlCNSIRepository{db: db}, nil
+	return &PostgresCNSIRepository{db: db}, nil
 }
 
 // List - Returns a list of CNSI Records
-func (p *MysqlCNSIRepository) List() ([]*CNSIRecord, error) {
+func (p *PostgresCNSIRepository) List() ([]*CNSIRecord, error) {
 
 	rows, err := p.db.Query(listCNSIs)
 	if err != nil {
-		return []*CNSIRecord{}, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
+		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
 	defer rows.Close()
 
 	var cnsiList []*CNSIRecord
 	cnsiList = make([]*CNSIRecord, 0)
+
 	for rows.Next() {
 		cnsi := new(CNSIRecord)
 		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &cnsi.CNSIType, &cnsi.APIEndpoint, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint)
@@ -61,7 +62,7 @@ func (p *MysqlCNSIRepository) List() ([]*CNSIRecord, error) {
 }
 
 // Find - Returns a single CNSI Record
-func (p *MysqlCNSIRepository) Find(guid string) (CNSIRecord, error) {
+func (p *PostgresCNSIRepository) Find(guid string) (CNSIRecord, error) {
 
 	cnsi := new(CNSIRecord)
 
@@ -87,7 +88,14 @@ func (p *MysqlCNSIRepository) Find(guid string) (CNSIRecord, error) {
 	// TODO(wchrisjohnson): discover a way to do this automagically
 	// These two fields need to be converted manually
 	cnsi.CNSIType, err = getCNSIType(pCNSIType)
+	if err != nil {
+		return CNSIRecord{}, fmt.Errorf("Unable to get CNSI type: %v", err)
+	}
+
 	cnsi.APIEndpoint, err = url.Parse(pURL)
+	if err != nil {
+		return CNSIRecord{}, fmt.Errorf("Unable to parse API Endpoint: %v", err)
+	}
 
 	return *cnsi, nil
 }
@@ -105,7 +113,7 @@ func getCNSIType(cnsi string) (CNSIType, error) {
 }
 
 // Save - Persist a CNSI Record to a datastore
-func (p *MysqlCNSIRepository) Save(guid string, cnsi CNSIRecord) error {
+func (p *PostgresCNSIRepository) Save(guid string, cnsi CNSIRecord) error {
 
 	stmt, err := p.db.Prepare(saveCNSI)
 	if err != nil {

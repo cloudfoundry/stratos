@@ -86,7 +86,7 @@ func start(p *portalProxy) error {
 	}))
 	e.Use(errorLoggingMiddleware)
 
-	p.initMysqlStore()
+	p.initPgsqlStore()
 	p.initCookieStore()
 	p.registerRoutes(e)
 
@@ -101,12 +101,12 @@ func start(p *portalProxy) error {
 	return nil
 }
 
-func (p *portalProxy) initMysqlStore() {
-	var dbconfig datastore.MysqlConnectionParameters
+func (p *portalProxy) initPgsqlStore() {
+	var dbconfig datastore.PostgresConnectionParameters
 	var err error
-	dbconfig, err = datastore.NewMySQLConnectionParametersFromEnvironment()
+	dbconfig, err = datastore.NewPostgresConnectionParametersFromEnvironment("")
 	if err != nil {
-		panic("Unable to load database configuration.")
+		panic(fmt.Errorf("Unable to load database configuration. %v", err))
 	}
 	p.DatabaseConfig = dbconfig
 }

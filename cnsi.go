@@ -67,7 +67,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 
-	cnsiRepo, err := cnsis.NewMysqlCNSIRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConfig)
 	if err != nil {
 		return fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
@@ -131,7 +131,7 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 
 func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
-	cnsiRepo, err := cnsis.NewMysqlCNSIRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConfig)
 	if err != nil {
 		return cnsis.CNSIRecord{}, false
 	}
@@ -146,7 +146,7 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
 func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) {
 
-	cnsiRepo, err := cnsis.NewMysqlCNSIRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConfig)
 	if err != nil {
 		fmt.Printf("setCNSIRecord: %v", err)
 	}
@@ -159,7 +159,7 @@ func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) {
 
 func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (tokens.TokenRecord, bool) {
 
-	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
 		return tokens.TokenRecord{}, false
 	}
@@ -174,7 +174,7 @@ func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (toke
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) {
 
-	tokenRepo, err := tokens.NewMysqlTokenRepository(p.DatabaseConfig)
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
 		fmt.Printf("setCNSITokenRecord: %v", err)
 	}

@@ -1,0 +1,8 @@
+export PGSQL_USER='stratos'
+export PGSQL_PASSWORD='stratos'
+export PGSQL_PASSWORD_FILE=password_file
+export PGSQL_DATABASE='stratos-db'
+export PGSQL_HOST=localhost
+export PGSQL_PORT=5432
+export PGSQL_CONNECT_TIMEOOUT=5
+export PGSQL_SSL_MODE=disable

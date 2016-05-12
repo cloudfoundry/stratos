@@ -64,22 +64,17 @@ skip_tls_verification = true
 tls_address           = ":8080"
 ```
 
-- Source ENV variables for mysql
-
-Touch a new files called `database_password` in the root of your project. Enter the password for the stratos-db into that file. The default for this file is `stratos`.
-
-Then run the `portal-proxy.rc` file to create environment variables that will be used to establilsh a connection to the mysql database.
-
-```
-. ./portal-proxy.rc
-```
-
-_NOTE: The latest mysql database schema is located in the `stratos-identity-db` project, in case you want to create a local mysql instance to dev/test the proxy against._
-
 - Run
 
-To run the portal-proxy:
+To run the portal-proxy with expected environment variables set:
 ```
+# basic w/no env vars
+go build && ./portal-proxy
+
+# non-SSL
+go build && ./portal-proxy
+
+# SSL enabled
 go build && ./portal-proxy
 ```
 
