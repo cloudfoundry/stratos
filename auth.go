@@ -29,7 +29,7 @@ type tokenRecord struct {
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 
-	uaaRes, u, err := p.login(c, p.Config.UAAEndpoint)
+	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.Config.UAAEndpoint)
 	if err != nil {
 		err = newHTTPShadowError(
 			http.StatusUnauthorized,
@@ -70,7 +70,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	}
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
-	uaaRes, u, err := p.login(c, tokenEndpoint)
+	uaaRes, u, err := p.login(c, p.Config.HCFClient, p.Config.HCFClientSecret, tokenEndpoint)
 	if err != nil {
 		return newHTTPShadowError(
 			http.StatusUnauthorized,
@@ -83,7 +83,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) login(c echo.Context, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
+func (p *portalProxy) login(c echo.Context, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
@@ -91,7 +91,7 @@ func (p *portalProxy) login(c echo.Context, endpoint string) (uaaRes *UAARespons
 		return uaaRes, u, errors.New("Needs username and password")
 	}
 
-	uaaRes, err = p.getUAATokenWithCreds(username, password, endpoint)
+	uaaRes, err = p.getUAATokenWithCreds(username, password, client, clientSecret, endpoint)
 	if err != nil {
 		return uaaRes, u, err
 	}
@@ -117,33 +117,33 @@ func (p *portalProxy) logout(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) getUAATokenWithCreds(username, password, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithCreds(username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	body := url.Values{}
 	body.Set("grant_type", "password")
 	body.Set("username", username)
 	body.Set("password", password)
 	body.Set("response_type", "token")
 
-	return p.getUAAToken(body, authEndpoint)
+	return p.getUAAToken(body, client, clientSecret, authEndpoint)
 }
 
-func (p *portalProxy) getUAATokenWithRefreshToken(refreshToken, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithRefreshToken(refreshToken, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	body := url.Values{}
 	body.Set("grant_type", "refresh_token")
 	body.Set("refresh_token", refreshToken)
 	body.Set("response_type", "token")
 
-	return p.getUAAToken(body, authEndpoint)
+	return p.getUAAToken(body, client, clientSecret, authEndpoint)
 }
 
-func (p *portalProxy) getUAAToken(body url.Values, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create request for UAA: %v", err)
 	}
 
-	req.SetBasicAuth(p.Config.UAAClient, p.Config.UAAClientSecret)
+	req.SetBasicAuth(client, clientSecret)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	res, err := httpClient.Do(req)

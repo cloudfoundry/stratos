@@ -10,7 +10,7 @@ func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokenRecord, c cns
 	// look up token
 	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
 	if !ok {
-		return t, c, fmt.Errorf("Could not find token for user:cnsi %s:%s", r.GUID, r.UserGUID)
+		return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.GUID, r.UserGUID)
 	}
 
 	c, ok = p.getCNSIRecord(r.GUID)
@@ -31,7 +31,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 	expTime := time.Unix(tokenRec.TokenExpiry, 0)
 	for {
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.refreshToken(cnsiRequest.GUID, cnsiRequest.UserGUID, cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.refreshToken(cnsiRequest.GUID, cnsiRequest.UserGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsi.TokenEndpoint)
 			if err != nil {
 				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
 			}
@@ -56,7 +56,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 	panic("Authentication code hit impossible case")
 }
 
-func (p *portalProxy) refreshToken(cnsiGUID string, userGUID string, tokenEndpoint string) (t tokenRecord, err error) {
+func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokenRecord, err error) {
 
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 	userToken, ok := p.getCNSITokenRecord(cnsiGUID, userGUID)
@@ -64,7 +64,7 @@ func (p *portalProxy) refreshToken(cnsiGUID string, userGUID string, tokenEndpoi
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)
 	}
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(userToken.RefreshToken, tokenEndpointWithPath)
+	uaaRes, err := p.getUAATokenWithRefreshToken(userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath)
 	if err != nil {
 		return t, fmt.Errorf("Token refresh request failed: %v", err)
 	}
