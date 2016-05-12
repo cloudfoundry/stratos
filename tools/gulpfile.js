@@ -175,7 +175,7 @@ gulp.task('browsersync', function (callback) {
     proxyOptions.route = '/api';
     gutil.log('Proxying API requests to:', gutil.colors.magenta(devOptions.api));
   } catch (e) {
-    throw new gutil.PluginError('browsersync', 'dev_options.json file is required with API endpoint configuration');
+    throw new gutil.PluginError('browsersync', 'dev_config.json file is required with API endpoint configuration');
   }
 
   browserSync.init({
