@@ -78,6 +78,13 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 			"Login failed: %v", err)
 	}
 
+	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
+	userID, ok := p.getSessionStringValue(c, "user_id")
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
+	}
+	u.UserGUID = userID
+
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 
 	return nil
