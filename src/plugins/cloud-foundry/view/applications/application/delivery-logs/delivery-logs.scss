@@ -1,0 +1,51 @@
+.application-details {
+  .delivery-logs-summary {
+    .data-body {
+      margin-left: $hpe-unit-space;
+    }
+    .summary-col {
+      padding: 0;
+      div {
+        padding-top: $hpe-unit-space / 2;
+        &:last-of-type {
+          padding-bottom: $hpe-unit-space / 2;
+        }
+      }
+    }
+  }
+  .delivery-logs-search {
+    padding: $hpe-unit-space/2 $hpe-unit-space;
+    .search-field {
+      width: 100%;
+      div {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        input {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  .delivery-logs-builds {
+    .circle {
+      border-radius: 50%;
+      width: $hpe-unit-space / 2;
+      height: $hpe-unit-space / 2;
+      display: inline-block;
+      position: relative;
+      top: 1px;
+      &.success {
+        background: $status-okay;
+        border: 1px solid $status-okay;
+      }
+      &.deploying {
+        border: 2px solid $salmon;
+      }
+      &.failure {
+        background: $status-critical;
+        border: 1px solid $status-critical;
+      }
+    }
+  }
+}

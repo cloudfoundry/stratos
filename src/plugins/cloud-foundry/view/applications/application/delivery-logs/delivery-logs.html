@@ -1,1 +1,95 @@
-<h3 translate>Delivery Logs</h3>
+<div class="panel panel-default delivery-logs-summary">
+  <div class="panel-heading action-header">
+    <span translate>Summary</span>
+  </div>
+  <div class="row data-body">
+    <!-- TODO are these fixed and predefined or specific to application? -->
+    <div class="col-md-3 summary-col">
+      <div translate>LAST BUILD</div>
+      <div translate>LAST TEST</div>
+      <div translate>LAST DEPLOYMENT</div>
+    </div>
+    <div class="col-md-9 summary-col">
+      <div><a class="" href=""  ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastBuilt)">
+        {{ appDelLogsCtrl.hceModel.delivery.lastBuilt.link }}</a>
+        <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastBuilt.time"></span>
+      </div>
+      <div><a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastTest)">
+        {{ appDelLogsCtrl.hceModel.delivery.lastTest.link }}</a>
+        <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastTest.time"></span>
+      </div>
+      <div><a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastDeployment)">
+        {{ appDelLogsCtrl.hceModel.delivery.lastDeployment.link }}</a>
+        <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastDeployment.time"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default delivery-logs-search">
+  <form>
+    <div class="form-group search-field" focusable-input >
+      <label class="control-label" for="build-search" required translate>
+        Search Builds
+      </label>
+      <div>
+        <!-- TODO: This fails to search dates in table (filter works on raw time value, not displayed version. Need to
+        format data correctly before pushing to model)-->
+        <input ng-model="appDelLogsCtrl.searchValue" type="text" class="form-control" id="build-search">
+        <i class="helion-icon helion-icon-Search"></i>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="delivery-logs-builds">
+  <div class="action-header">
+    <span translate>Builds</span>
+    <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Trigger Build</span>
+    </a>
+  </div>
+  <div class="panel panel-default">
+    <table class="table table-actionable">
+      <thead>
+      <tr>
+        <th translate>MESSAGE</th>
+        <th translate>RESULT</th>
+        <th translate>TIME</th>
+        <th translate>COMMIT AUTHOR</th>
+        <th translate>REASON</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="build in appDelLogsCtrl.hceModel.delivery.builds | filter:appDelLogsCtrl.searchValue">
+        <td><a class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">{{ build.message }}</a></td>
+        <td ng-switch="build.result" class="row">
+          <div ng-switch-when="success" class="">
+            <span class="circle success"></span>
+            <span translate>Success</span>
+            <!-- TODO: Will this bring in a flyout with build specific details + log? -->
+            <a class="" href="" ng-click="appDelLogsCtrl.viewBuildResult(build)">view</a>
+          </div>
+          <div ng-switch-when="deploying">
+            <span class="circle deploying"></span>
+            <span translate>Deploying</span>
+          </div>
+          <div ng-switch-when="failure">
+            <span class="circle failure"></span>
+            <span translate>Failed</span>
+            <!-- TODO: Will this bring in a flyout with build specific details + log? -->
+            <a class="" href="" ng-click="appDelLogsCtrl.viewBuildResult(build)">view</a>
+          </div>
+          <div ng-switch-default>
+            <span translate>Unknown</span>
+          </div>
+        </td>
+        <td>{{ build.time | amDateFormat:'MM/D/YYYY - hh:mm:ss a' }}</td>
+        <td>{{ build.commitAuthor }}</td>
+        <td>{{ build.reason }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
