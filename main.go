@@ -28,13 +28,16 @@ func main() {
 	// Load portal configuration
 	if err := ucpconfig.Load(&portalConfig); err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 	portalProxy := newPortalProxy(portalConfig)
 
 	initializeHTTPClient(portalConfig.SkipTLSVerification, time.Duration(portalConfig.HTTPClientTimeout))
 
-	start(portalProxy)
+	if err := start(portalProxy); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func createTempCertFiles(pc portalConfig) (string, string, error) {
@@ -72,7 +75,7 @@ func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Durat
 	httpClient.Timeout = time.Second * timeoutInSeconds
 }
 
-func start(p *portalProxy) {
+func start(p *portalProxy) error {
 	e := echo.New()
 	// Root level middleware
 	e.Use(sessionCleanupMiddleware)
@@ -90,11 +93,13 @@ func start(p *portalProxy) {
 
 	certFile, certKeyFile, err := createTempCertFiles(p.Config)
 	if err != nil {
-		// TODO: do we just kill the app here? probably, right?
+		return err
 	}
 
 	engine := standard.WithTLS(p.Config.TLSAddress, certFile, certKeyFile)
 	e.Run(engine)
+
+	return nil
 }
 
 func (p *portalProxy) initCookieStore() {
