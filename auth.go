@@ -60,17 +60,14 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	endpoint := ""
 	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
-
-	if ok {
-		endpoint = cnsiRecord.AuthorizationEndpoint
-	}
-
-	if endpoint == "" {
+	if !ok {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
 			"Requested endpoint not registered",
 			"No CNSI registered with GUID %s", cnsiGUID)
 	}
+
+	endpoint = cnsiRecord.AuthorizationEndpoint
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 	uaaRes, u, err := p.login(c, p.Config.HCFClient, p.Config.HCFClientSecret, tokenEndpoint)
