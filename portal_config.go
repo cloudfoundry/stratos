@@ -1,22 +1,16 @@
 package main
 
-import "time"
-
 type portalConfig struct {
-	HTTPClientTimeout   time.Duration `toml:"http_client_timeout"`
-	SkipTLSVerification bool          `toml:"skip_tls_verification"`
-	TLSAddress          string        `toml:"tls_address"`
-	TLSCertFile         string        `toml:"tls_cert_file"`
-	TLSCertKey          string        `toml:"tls_cert_key"`
-	UAAClient           string        `toml:"uaa_client"`
-	UAAClientSecret     string        `toml:"uaa_client_secret"`
-	UAAEndpoint         string        `toml:"uaa_endpoint"`
-	AllowedOrigins      []string      `toml:"allowed_origins"`
-	CookieStoreSecret   string        `toml:"cookie_store_secret"`
-	Dev                 bool          `toml:"dev"`
-	DevConfig           devConfig     `toml:"dev_config"`
-}
-
-type devConfig struct {
-	SkipTLSVerification bool `toml:"skip_tls_verification"`
+	HTTPClientTimeout   int64    `ucp:"HTTP_CLIENT_TIMEOUT"`
+	SkipTLSVerification bool     `ucp:"SKIP_TLS_VERIFICATION"`
+	TLSAddress          string   `ucp:"TLS_ADDRESS"`
+	TLSCert             string   `ucp:"CERT"`
+	TLSCertKey          string   `ucp:"CERT_KEY"`
+	ConsoleClient       string   `ucp:"CONSOLE_CLIENT"`
+	ConsoleClientSecret string   `ucp:"CONSOLE_CLIENT_SECRET"`
+	HCFClient           string   `ucp:"HCF_CLIENT"`
+	HCFClientSecret     string   `ucp:"HCF_CLIENT_SECRET"`
+	UAAEndpoint         string   `ucp:"UAA_ENDPOINT"`
+	AllowedOrigins      []string `ucp:"ALLOWED_ORIGINS"`
+	CookieStoreSecret   string   `ucp:"COOKIE_STORE_SECRET"`
 }

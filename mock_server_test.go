@@ -56,10 +56,10 @@ func setupMockReq(method string, formValues map[string]string) *http.Request {
 
 func setupPortalProxy() *portalProxy {
 	pc := portalConfig{
-		UAAClient:         "portal_proxy",
-		UAAClientSecret:   "ohsosecret!",
-		UAAEndpoint:       "https://login.52.38.188.107.nip.io/oauth/token",
-		CookieStoreSecret: "hiddenraisinsohno!",
+		ConsoleClient:       "console",
+		ConsoleClientSecret: "",
+		UAAEndpoint:         "https://login.52.38.188.107.nip.io/oauth/token",
+		CookieStoreSecret:   "hiddenraisinsohno!",
 	}
 
 	pp := newPortalProxy(pc)

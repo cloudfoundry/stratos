@@ -22,6 +22,15 @@ func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, 
 	return nil, false
 }
 
+func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string, bool) {
+	intf, ok := p.getSessionValue(c, key)
+	if !ok {
+		return "", false
+	}
+
+	return intf.(string), true
+}
+
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter

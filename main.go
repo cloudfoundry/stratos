@@ -3,13 +3,14 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/BurntSushi/toml"
 	"github.com/gorilla/sessions"
+	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -25,19 +26,33 @@ func main() {
 	var portalConfig portalConfig
 
 	// Load portal configuration
-	if _, err := toml.DecodeFile("portal-config.toml", &portalConfig); err != nil {
+	if err := ucpconfig.Load(&portalConfig); err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 	portalProxy := newPortalProxy(portalConfig)
 
-	if portalConfig.Dev {
-		initializeHTTPClient(portalConfig.DevConfig.SkipTLSVerification, portalConfig.HTTPClientTimeout)
-	} else {
-		initializeHTTPClient(portalConfig.SkipTLSVerification, portalConfig.HTTPClientTimeout)
+	initializeHTTPClient(portalConfig.SkipTLSVerification, time.Duration(portalConfig.HTTPClientTimeout))
+
+	if err := start(portalProxy); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func createTempCertFiles(pc portalConfig) (string, string, error) {
+	certFilename := "pproxy.crt"
+	certKeyFilename := "pproxy.key"
+	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
+	if err != nil {
+		return "", "", err
 	}
 
-	start(portalProxy)
+	err = ioutil.WriteFile(certKeyFilename, []byte(pc.TLSCertKey), 0600)
+	if err != nil {
+		return "", "", err
+	}
+	return certFilename, certKeyFilename, nil
 }
 
 func newPortalProxy(pc portalConfig) *portalProxy {
@@ -60,7 +75,7 @@ func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Durat
 	httpClient.Timeout = time.Second * timeoutInSeconds
 }
 
-func start(p *portalProxy) {
+func start(p *portalProxy) error {
 	e := echo.New()
 	// Root level middleware
 	e.Use(sessionCleanupMiddleware)
@@ -76,9 +91,15 @@ func start(p *portalProxy) {
 	p.initCookieStore()
 	p.registerRoutes(e)
 
-	engine := standard.WithTLS(p.Config.TLSAddress, p.Config.TLSCertFile, p.Config.TLSCertKey)
-	//engine.Server.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler))
+	certFile, certKeyFile, err := createTempCertFiles(p.Config)
+	if err != nil {
+		return err
+	}
+
+	engine := standard.WithTLS(p.Config.TLSAddress, certFile, certKeyFile)
 	e.Run(engine)
+
+	return nil
 }
 
 func (p *portalProxy) initCookieStore() {
