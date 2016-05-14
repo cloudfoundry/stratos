@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/hpcloud/portal-proxy/datastore"
+	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -37,9 +37,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	portalProxy := newPortalProxy(portalConfig)
+	portalProxy := newPortalProxy(portalConfig, databaseConfig)
 
-	initializeHTTPClient(portalConfig.SkipTLSVerification, time.Duration(portalConfig.HTTPClientTimeout))
+	initializeHTTPClient(portalConfig.SkipTLSVerification,
+		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
 
 	if err := start(portalProxy); err != nil {
 		fmt.Println(err)
@@ -47,24 +48,44 @@ func main() {
 	}
 }
 
+func loadPortalConfig(pc portalConfig) (portalConfig, error) {
+	if err := ucpconfig.Load(&pc); err != nil {
+		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
+	}
+	return pc, nil
+}
+
+func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
+	if err := ucpconfig.Load(&dc); err != nil {
+		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
+	}
+
+	dc, err := datastore.NewPostgresConnectionParametersFromConfig(dc)
+	if err != nil {
+		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
+	}
+	return dc, nil
+}
+
 func createTempCertFiles(pc portalConfig) (string, string, error) {
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
-	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
-	if err != nil {
-		return "", "", err
-	}
+	// err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
+	// if err != nil {
+	// 	return "", "", err
+	// }
 
-	err = ioutil.WriteFile(certKeyFilename, []byte(pc.TLSCertKey), 0600)
-	if err != nil {
-		return "", "", err
-	}
+	// err = ioutil.WriteFile(certKeyFilename, []byte(pc.TLSCertKey), 0600)
+	// if err != nil {
+	// 	return "", "", err
+	// }
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc portalConfig) *portalProxy {
+func newPortalProxy(pc portalConfig, dc datastore.DatabaseConfig) *portalProxy {
 	pp := &portalProxy{
-		Config: pc,
+		Config:         pc,
+		DatabaseConfig: dc,
 	}
 
 	return pp
@@ -92,7 +113,6 @@ func start(p *portalProxy) error {
 	}))
 	e.Use(errorLoggingMiddleware)
 
-	p.initPgsqlStore()
 	p.initCookieStore()
 	p.registerRoutes(e)
 
@@ -105,16 +125,6 @@ func start(p *portalProxy) error {
 	e.Run(engine)
 
 	return nil
-}
-
-func (p *portalProxy) initPgsqlStore() {
-	var dbconfig datastore.PostgresConnectionParameters
-	var err error
-	dbconfig, err = datastore.NewPostgresConnectionParametersFromEnvironment("")
-	if err != nil {
-		panic(fmt.Errorf("Unable to load database configuration. %v", err))
-	}
-	p.DatabaseConfig = dbconfig
 }
 
 func (p *portalProxy) initCookieStore() {

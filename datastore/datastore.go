@@ -2,7 +2,6 @@ package datastore
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -11,25 +10,22 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// SSLValidationMode is the PostgreSQL driver SSL validation modes
-type SSLValidationMode string
-
 // DatabaseConfig represents the connection configuration parameters
 type DatabaseConfig struct {
-	Username             string `ucp:"PGSQL_USER"`
-	Password             string // password read from env
-	Database             string `ucp:"PGSQL_DATABASE"`
-	Host                 string `ucp:"PGSQL_HOST"`
-	Port                 int    `ucp:"PGSQL_PORT"`
-	SSLMode              string `ucp:"PGSQL_SSL_MODE"`
-	ConnectionTimeoutSec int    `ucp:"PGSQL_CONNECTION_TIMEOUT"`
-	CertificateFile      string `ucp:"PGSQL_CERTIFICATE_FILE"`
-	SSLCertificate       string // certificate read from file
-	KeyFile              string `ucp:"PGSQL_KEY_FILE"`
-	SSLKey               string // key read from file
-	RootCertificateFile  string `ucp:"PGSQL_ROOT_CERTIFICATE_FILE"`
-	SSLRootCertificate   string // root certificate read from file
+	Username                string `ucp:"PGSQL_USER"`
+	Password                string `ucp:"PGSQL_PASSWORD"`
+	Database                string `ucp:"PGSQL_DATABASE"`
+	Host                    string `ucp:"PGSQL_HOST"`
+	Port                    int    `ucp:"PGSQL_PORT"`
+	SSLMode                 string `ucp:"PGSQL_SSL_MODE"`
+	ConnectionTimeoutInSecs int    `ucp:"PGSQL_CONNECTION_TIMEOUT_IN_SECS"`
+	SSLCertificate          string `ucp:"PGSQL_CERT"`
+	SSLKey                  string `ucp:"PGSQL_CERT_KEY"`
+	SSLRootCertificate      string `ucp:"PGSQL_ROOT_CERT"`
 }
+
+// SSLValidationMode is the PostgreSQL driver SSL validation modes
+type SSLValidationMode string
 
 const (
 	// SSLDisabled means no checking of SSL
@@ -56,8 +52,8 @@ func NewPostgresConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 	validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
 
 	// set default for connection timeout if necessary
-	if dc.ConnectionTimeoutSec == 0 {
-		dc.ConnectionTimeoutSec = DefaultConnectionTimeout
+	if dc.ConnectionTimeoutInSecs == 0 {
+		dc.ConnectionTimeoutInSecs = DefaultConnectionTimeout
 	}
 
 	// SSL has been disabled - bail out
@@ -65,47 +61,47 @@ func NewPostgresConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		return dc, nil
 	}
 
-	// initiate SSL configuration
-	dc, err := initSSLConfigs(dc)
-	if err != nil {
-		return dc, errors.New("Unable to configure database connection for SSL.")
-	}
+	// // initiate SSL configuration
+	// dc, err := initSSLConfigs(dc)
+	// if err != nil {
+	// 	return dc, errors.New("Unable to configure database connection for SSL.")
+	// }
 
 	return dc, nil
 }
 
-func initSSLConfigs(dc DatabaseConfig) (DatabaseConfig, error) {
-	if dc.SSLMode == string(SSLRequired) ||
-		dc.SSLMode == string(SSLVerifyCA) ||
-		dc.SSLMode == string(SSLVerifyFull) {
-
-		// ensure cert file exists
-		if dc.CertificateFile != "" {
-			ok, err := fileExists(dc.CertificateFile)
-			if !ok {
-				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_CERTIFICATE_FILE missing or inaccessible. '%v'", dc.CertificateFile, err)
-			}
-		}
-
-		// ensure ssl key file exists
-		if dc.SSLKey != "" {
-			ok, err := fileExists(dc.KeyFile)
-			if !ok {
-				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_KEY_FILE missing or inaccessible. '%v'", dc.KeyFile, err)
-			}
-		}
-
-		// ensure root cert file exists
-		if dc.SSLRootCertificate != "" {
-			ok, err := fileExists(dc.RootCertificateFile)
-			if !ok {
-				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_ROOT_CERTIFICATE_FILE missing or inaccessible. '%v'", dc.RootCertificateFile, err)
-			}
-		}
-	}
-
-	return dc, fmt.Errorf("Invalid SSL mode: '%s'", dc.SSLMode)
-}
+// func initSSLConfigs(dc DatabaseConfig) (DatabaseConfig, error) {
+// 	if dc.SSLMode == string(SSLRequired) ||
+// 		dc.SSLMode == string(SSLVerifyCA) ||
+// 		dc.SSLMode == string(SSLVerifyFull) {
+//
+// 		// ensure cert file exists
+// 		if dc.CertificateFile != "" {
+// 			ok, err := fileExists(dc.CertificateFile)
+// 			if !ok {
+// 				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_CERTIFICATE_FILE missing or inaccessible. '%v'", dc.CertificateFile, err)
+// 			}
+// 		}
+//
+// 		// ensure ssl key file exists
+// 		if dc.SSLKey != "" {
+// 			ok, err := fileExists(dc.KeyFile)
+// 			if !ok {
+// 				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_KEY_FILE missing or inaccessible. '%v'", dc.KeyFile, err)
+// 			}
+// 		}
+//
+// 		// ensure root cert file exists
+// 		if dc.SSLRootCertificate != "" {
+// 			ok, err := fileExists(dc.RootCertificateFile)
+// 			if !ok {
+// 				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_ROOT_CERTIFICATE_FILE missing or inaccessible. '%v'", dc.RootCertificateFile, err)
+// 			}
+// 		}
+// 	}
+//
+// 	return dc, fmt.Errorf("Invalid SSL mode: '%s'", dc.SSLMode)
+// }
 
 func fileExists(filename string) (bool, error) {
 	err := fmt.Errorf("File '%s' does not exist or is not accessible.", filename)
@@ -147,7 +143,7 @@ func buildConnectionString(dc DatabaseConfig) string {
 		escapeStr(dc.Database),
 		dc.Host,
 		dc.Port,
-		dc.ConnectionTimeoutSec)
+		dc.ConnectionTimeoutInSecs)
 
 	if dc.SSLMode != "" {
 		connStr = connStr + fmt.Sprintf(" sslmode=%s", dc.SSLMode)

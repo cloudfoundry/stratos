@@ -25,8 +25,8 @@ type PostgresCNSIRepository struct {
 }
 
 // NewPostgresCNSIRepository will create a new instance of the PostgresInstanceRepository
-func NewPostgresCNSIRepository(configParams datastore.PostgresConnectionParameters) (Repository, error) {
-	db, err := datastore.GetConnection(configParams)
+func NewPostgresCNSIRepository(dc datastore.DatabaseConfig) (Repository, error) {
+	db, err := datastore.GetConnection(dc)
 	if err != nil {
 		return nil, err
 	}

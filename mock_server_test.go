@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hpcloud/portal-proxy/datastore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 )
@@ -62,7 +63,9 @@ func setupPortalProxy() *portalProxy {
 		CookieStoreSecret:   "hiddenraisinsohno!",
 	}
 
-	pp := newPortalProxy(pc)
+	dc := datastore.DatabaseConfig{}
+
+	pp := newPortalProxy(pc, dc)
 	pp.initCookieStore()
 
 	return pp

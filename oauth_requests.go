@@ -60,7 +60,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 	panic("Authentication code hit impossible case")
 }
 
-func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokenRecord, err error) {
+func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokens.TokenRecord, err error) {
 
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 	userToken, ok := p.getCNSITokenRecord(cnsiGUID, userGUID)

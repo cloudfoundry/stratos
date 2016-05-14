@@ -26,8 +26,8 @@ type PgsqlTokenRepository struct {
 }
 
 // NewPgsqlTokenRepository - get a reference to the token data source
-func NewPgsqlTokenRepository(configParams datastore.PostgresConnectionParameters) (Repository, error) {
-	db, err := datastore.GetConnection(configParams)
+func NewPgsqlTokenRepository(dc datastore.DatabaseConfig) (Repository, error) {
+	db, err := datastore.GetConnection(dc)
 	if err != nil {
 		return nil, err
 	}
