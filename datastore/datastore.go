@@ -1,32 +1,34 @@
 package datastore
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 
-	"database/sql"
-
+	"github.com/kat-co/vala"
 	_ "github.com/lib/pq"
 )
 
 // SSLValidationMode is the PostgreSQL driver SSL validation modes
 type SSLValidationMode string
 
-// PostgresConnectionParameters represents the connection configuration parameters
-type PostgresConnectionParameters struct {
-	Username             string
-	Password             string
-	Database             string
-	Host                 string
-	Port                 int
-	SSLMode              SSLValidationMode
-	ConnectionTimeoutSec int
-	SSLCertificate       string
-	SSLKey               string
-	SSLRootCertificate   string
+// DatabaseConfig represents the connection configuration parameters
+type DatabaseConfig struct {
+	Username             string `ucp:"PGSQL_USER"`
+	Password             string // password read from env
+	Database             string `ucp:"PGSQL_DATABASE"`
+	Host                 string `ucp:"PGSQL_HOST"`
+	Port                 int    `ucp:"PGSQL_PORT"`
+	SSLMode              string `ucp:"PGSQL_SSL_MODE"`
+	ConnectionTimeoutSec int    `ucp:"PGSQL_CONNECTION_TIMEOUT"`
+	CertificateFile      string `ucp:"PGSQL_CERTIFICATE_FILE"`
+	SSLCertificate       string // certificate read from file
+	KeyFile              string `ucp:"PGSQL_KEY_FILE"`
+	SSLKey               string // key read from file
+	RootCertificateFile  string `ucp:"PGSQL_ROOT_CERTIFICATE_FILE"`
+	SSLRootCertificate   string // root certificate read from file
 }
 
 const (
@@ -41,201 +43,126 @@ const (
 )
 
 const (
-	// PGSQLUser is the environment variable with the PostgreSQL username
-	PGSQLUser = "PGSQL_USER"
-	// PGSQLPasswordFile is the environment variable with the filename of PostgreSQL password
-	PGSQLPasswordFile = "PGSQL_PASSWORD_FILE"
-	// PGSQLDatabase is the environment variable with the PostgreSQL database name
-	PGSQLDatabase = "PGSQL_DATABASE"
-	// PGSQLHost is the environment variable with the PostgreSQL hostname
-	PGSQLHost = "PGSQL_HOST"
-	// PGSQLPort is the environment variable with the PostgreSQL port number
-	PGSQLPort = "PGSQL_PORT"
-	// PGSQLSSLMode is the environment variable with the PostgreSQL SSL mode to enforce
-	PGSQLSSLMode = "PGSQL_SSL_MODE"
-	// PGSQLCertificateFile is the environment variable with the PostgreSQL public certificate file
-	PGSQLCertificateFile = "PGSQL_CERTIFICATE_FILE"
-	// PGSQLKeyFile is the environment variable with the PostgreSQL private key file
-	PGSQLKeyFile = "PGSQL_KEY_FILE"
-	// PGSQLRootCertificateFile is the environment variable with the PostgreSQL public root CA certificate file
-	PGSQLRootCertificateFile = "PGSQL_ROOT_CERTIFICATE_FILE"
-	// PGSQLConnectionTimeout max time in seconds to wait
-	PGSQLConnectionTimeout = "PGSQL_CONNECTION_TIMEOUT"
-
 	// UniqueConstraintViolation is the error code for a unique constraint violation
-	UniqueConstraintViolation = "23505"
+	UniqueConstraintViolation = 23505
 
 	// DefaultConnectionTimeout is the default to timeout on connections
-	DefaultConnectionTimeout = "10"
+	DefaultConnectionTimeout = 10
 )
 
-// MissingEnvVarError represents a missing environment variable
-type MissingEnvVarError struct {
-	EnvVar string
+// NewPostgresConnectionParametersFromConfig setup database connection parameters based on contents of config struct
+func NewPostgresConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfig, error) {
+
+	validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
+
+	// set default for connection timeout if necessary
+	if dc.ConnectionTimeoutSec == 0 {
+		dc.ConnectionTimeoutSec = DefaultConnectionTimeout
+	}
+
+	// SSL has been disabled - bail out
+	if dc.SSLMode == string(SSLDisabled) {
+		return dc, nil
+	}
+
+	// initiate SSL configuration
+	dc, err := initSSLConfigs(dc)
+	if err != nil {
+		return dc, errors.New("Unable to configure database connection for SSL.")
+	}
+
+	return dc, nil
 }
 
-// Error returns a string explaining the missing variable
-func (m *MissingEnvVarError) Error() string {
-	return fmt.Sprintf("Environment variable %s required but not provided", m.EnvVar)
-}
+func initSSLConfigs(dc DatabaseConfig) (DatabaseConfig, error) {
+	if dc.SSLMode == string(SSLRequired) ||
+		dc.SSLMode == string(SSLVerifyCA) ||
+		dc.SSLMode == string(SSLVerifyFull) {
 
-// BadEnvVarError represents a bad environment variable
-type BadEnvVarError struct {
-	EnvVar string
-	Reason string
-}
-
-// Error returns a string explaining the bad variable
-func (b *BadEnvVarError) Error() string {
-	return fmt.Sprintf("Environment variable %s value cannot be used, reason: %s", b.EnvVar, b.Reason)
-}
-
-// NewPostgresConnectionParametersFromEnvironment discovers PostgreSQL connection parameters from environment variables
-func NewPostgresConnectionParametersFromEnvironment(prefix string) (PostgresConnectionParameters, error) {
-	exists := func(filename string) bool {
-		_, err := os.Lstat(filename)
-		if err != nil {
-			return false
+		// ensure cert file exists
+		if dc.CertificateFile != "" {
+			ok, err := fileExists(dc.CertificateFile)
+			if !ok {
+				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_CERTIFICATE_FILE missing or inaccessible. '%v'", dc.CertificateFile, err)
+			}
 		}
 
-		return true
-	}
-
-	readFile := func(filename string) (string, error) {
-		b, err := ioutil.ReadFile(filename)
-		if err != nil {
-			return "", err
+		// ensure ssl key file exists
+		if dc.SSLKey != "" {
+			ok, err := fileExists(dc.KeyFile)
+			if !ok {
+				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_KEY_FILE missing or inaccessible. '%v'", dc.KeyFile, err)
+			}
 		}
 
-		return strings.TrimSpace(string(b)), nil
-	}
-
-	result := PostgresConnectionParameters{}
-	var err error
-
-	username := strings.TrimSpace(os.Getenv(prefix + PGSQLUser))
-	passwordFile := strings.TrimSpace(os.Getenv(prefix + PGSQLPasswordFile))
-	database := strings.TrimSpace(os.Getenv(prefix + PGSQLDatabase))
-	host := strings.TrimSpace(os.Getenv(prefix + PGSQLHost))
-	port := strings.TrimSpace(os.Getenv(prefix + PGSQLPort))
-	sslMode := strings.TrimSpace(os.Getenv(prefix + PGSQLSSLMode))
-	sslCert := strings.TrimSpace(os.Getenv(prefix + PGSQLCertificateFile))
-	sslKey := strings.TrimSpace(os.Getenv(prefix + PGSQLKeyFile))
-	sslRootCert := strings.TrimSpace(os.Getenv(prefix + PGSQLRootCertificateFile))
-	connectionTimeout := strings.TrimSpace(os.Getenv(prefix + PGSQLConnectionTimeout))
-
-	if username == "" {
-		return PostgresConnectionParameters{}, &MissingEnvVarError{EnvVar: prefix + PGSQLUser}
-	}
-
-	if passwordFile == "" {
-		return PostgresConnectionParameters{}, &MissingEnvVarError{EnvVar: prefix + PGSQLPasswordFile}
-	}
-
-	if !exists(passwordFile) {
-		return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLPasswordFile, Reason: "File does not exist or is not accessible"}
-	}
-
-	if database == "" {
-		return PostgresConnectionParameters{}, &MissingEnvVarError{EnvVar: prefix + PGSQLDatabase}
-	}
-
-	if host == "" {
-		return PostgresConnectionParameters{}, &MissingEnvVarError{EnvVar: prefix + PGSQLHost}
-	}
-
-	if port == "" {
-		return PostgresConnectionParameters{}, &MissingEnvVarError{EnvVar: prefix + PGSQLPort}
-	}
-
-	if connectionTimeout == "" {
-		connectionTimeout = DefaultConnectionTimeout
-	}
-
-	result.Username = username
-	result.Database = database
-	result.Password, err = readFile(passwordFile)
-	if err != nil {
-		return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLPasswordFile, Reason: "File is not readable"}
-	}
-
-	result.Host = host
-	result.Port, err = strconv.Atoi(port)
-	if err != nil {
-		return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLPort, Reason: "Not a valid integer"}
-	}
-
-	if result.Port > 65535 || result.Port < 1 {
-		return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLPort, Reason: "Must be between 1 and 65535"}
-	}
-
-	result.ConnectionTimeoutSec, err = strconv.Atoi(connectionTimeout)
-	if err != nil {
-		return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLConnectionTimeout, Reason: "Not a valid integer"}
-	}
-
-	if result.ConnectionTimeoutSec < 0 {
-		return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLConnectionTimeout, Reason: "Must be >= 0"}
-	}
-
-	if sslMode == string(SSLDisabled) || sslMode == string(SSLRequired) || sslMode == string(SSLVerifyCA) || sslMode == string(SSLVerifyFull) {
-		result.SSLMode = SSLValidationMode(sslMode)
-		if sslMode != string(SSLDisabled) {
-			if sslCert != "" && !exists(sslCert) {
-				return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLCertificateFile, Reason: "File does not exist or is not accessible"}
+		// ensure root cert file exists
+		if dc.SSLRootCertificate != "" {
+			ok, err := fileExists(dc.RootCertificateFile)
+			if !ok {
+				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_ROOT_CERTIFICATE_FILE missing or inaccessible. '%v'", dc.RootCertificateFile, err)
 			}
-
-			if sslKey != "" && !exists(sslKey) {
-				return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLKeyFile, Reason: "File does not exist or is not accessible"}
-			}
-
-			if sslRootCert != "" && !exists(sslRootCert) {
-				return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLRootCertificateFile, Reason: "File does not exist or is not accessible"}
-			}
-
-			result.SSLCertificate = sslCert
-			result.SSLKey = sslKey
-			result.SSLRootCertificate = sslRootCert
 		}
-	} else if sslMode != "" {
-		return PostgresConnectionParameters{}, &BadEnvVarError{EnvVar: prefix + PGSQLSSLMode, Reason: "Invalid SSL mode"}
 	}
 
-	return result, nil
+	return dc, fmt.Errorf("Invalid SSL mode: '%s'", dc.SSLMode)
+}
+
+func fileExists(filename string) (bool, error) {
+	err := fmt.Errorf("File '%s' does not exist or is not accessible.", filename)
+	_, e := os.Lstat(filename)
+	passes := (e == nil)
+	return passes, err
+}
+
+func validateRequiredDatabaseParams(username, password, database, host string,
+	port int) (err error) {
+	err = vala.BeginValidation().Validate(
+		vala.IsNotNil(username, "username"),
+		vala.IsNotNil(password, "password"),
+		vala.IsNotNil(database, "database"),
+		vala.IsNotNil(host, "host"),
+		vala.GreaterThan(port, 0, "port"),
+		vala.Not(vala.GreaterThan(port, 65535, "port")),
+	).Check()
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetConnection returns a database connection to PostgreSQL
-func GetConnection(connParams PostgresConnectionParameters) (*sql.DB, error) {
-	return sql.Open("postgres", buildConnectionString(connParams))
+func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
+	return sql.Open("postgres", buildConnectionString(dc))
 }
 
-func buildConnectionString(connParams PostgresConnectionParameters) string {
+func buildConnectionString(dc DatabaseConfig) string {
 	escapeStr := func(in string) string {
 		return strings.Replace(in, `'`, `\'`, -1)
 	}
 
 	connStr := fmt.Sprintf("user='%s' password='%s' dbname='%s' host=%s port=%d connect_timeout=%d",
-		escapeStr(connParams.Username),
-		escapeStr(connParams.Password),
-		escapeStr(connParams.Database),
-		connParams.Host,
-		connParams.Port,
-		connParams.ConnectionTimeoutSec)
+		escapeStr(dc.Username),
+		escapeStr(dc.Password),
+		escapeStr(dc.Database),
+		dc.Host,
+		dc.Port,
+		dc.ConnectionTimeoutSec)
 
-	if connParams.SSLMode != "" {
-		connStr = connStr + fmt.Sprintf(" sslmode=%s", connParams.SSLMode)
+	if dc.SSLMode != "" {
+		connStr = connStr + fmt.Sprintf(" sslmode=%s", dc.SSLMode)
 	}
 
-	if connParams.SSLCertificate != "" {
-		connStr = connStr + fmt.Sprintf(" sslcert='%s'", escapeStr(connParams.SSLCertificate))
+	if dc.SSLCertificate != "" {
+		connStr = connStr + fmt.Sprintf(" sslcert='%s'", escapeStr(dc.SSLCertificate))
 	}
 
-	if connParams.SSLKey != "" {
-		connStr = connStr + fmt.Sprintf(" sslkey='%s'", escapeStr(connParams.SSLKey))
+	if dc.SSLKey != "" {
+		connStr = connStr + fmt.Sprintf(" sslkey='%s'", escapeStr(dc.SSLKey))
 	}
 
-	if connParams.SSLRootCertificate != "" {
-		connStr = connStr + fmt.Sprintf(" sslrootcert='%s'", escapeStr(connParams.SSLRootCertificate))
+	if dc.SSLRootCertificate != "" {
+		connStr = connStr + fmt.Sprintf(" sslrootcert='%s'", escapeStr(dc.SSLRootCertificate))
 	}
 
 	return connStr

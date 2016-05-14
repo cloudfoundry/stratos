@@ -56,14 +56,6 @@ cd ~/gop/src
 git clone git@github.com:hpcloud/portal-proxy.git
 ```
 
-- Create a config file
-
-There is an example config file in the project named `portal-config.toml.example`. Create a file in the project, name it `portal-config.toml`, and add (at minimum) the following to it:
-```
-skip_tls_verification = true
-tls_address           = ":8080"
-```
-
 - Run
 
 To run the portal-proxy with expected environment variables set:

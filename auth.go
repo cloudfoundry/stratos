@@ -191,7 +191,10 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 		RefreshToken: refreshTok,
 	}
 
-	p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
+	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
+	if err != nil {
+		return tokens.TokenRecord{}, err
+	}
 
 	return tokenRecord, nil
 }

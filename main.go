@@ -11,7 +11,6 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/hpcloud/portal-proxy/datastore"
-	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
@@ -25,12 +24,19 @@ func main() {
 	log.SetOutput(os.Stdout)
 
 	var portalConfig portalConfig
-
-	// Load portal configuration
-	if err := ucpconfig.Load(&portalConfig); err != nil {
+	portalConfig, err := loadPortalConfig(portalConfig)
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	var databaseConfig datastore.DatabaseConfig
+	databaseConfig, err = loadDatabaseConfig(databaseConfig)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	portalProxy := newPortalProxy(portalConfig)
 
 	initializeHTTPClient(portalConfig.SkipTLSVerification, time.Duration(portalConfig.HTTPClientTimeout))
@@ -118,9 +124,7 @@ func (p *portalProxy) initCookieStore() {
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
 	// TODO(wchrisjohnson): remove prior to shipping
-	if p.Config.Dev {
-		e.Static("/*", "demo")
-	}
+	e.Static("/*", "demo")
 
 	e.Post("/v1/auth/login/uaa", p.loginToUAA)
 	e.Post("/v1/auth/logout", p.logout)

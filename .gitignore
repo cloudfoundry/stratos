@@ -1,4 +1,2 @@
-certs/*
 demo/*
-portal-config.toml
 portal-proxy

@@ -1,6 +1,18 @@
+# General
+export HTTP_CLIENT_TIMEOUT=10
+export SKIP_TLS_VERIFICATION=true
+export TLS_ADDRESS=":8080"
+export TLS_CERT_FILE=certs/local.example.com.crt
+export TLS_CERT_KEY=certs/local.example.com.key
+export UAA_CLIENT=portal-proxy
+export UAA_CLIENT_SECRET=ohsosecret!
+export UAA_ENDPOINT="https://login.hcf.helion.lol/oauth/token"
+export ALLOWED_ORIGINS="https://localhost, https://127.0.0.1"
+export COOKIE_STORE_SECRET=cookiesecret
+
+# PostgreSQL
 export PGSQL_USER='stratos'
 export PGSQL_PASSWORD='stratos'
-export PGSQL_PASSWORD_FILE=password_file
 export PGSQL_DATABASE='stratos-db'
 export PGSQL_HOST=localhost
 export PGSQL_PORT=5432

@@ -58,7 +58,10 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 		AuthorizationEndpoint: v2InfoResponse.AuthorizationEndpoint,
 	}
 
-	p.setCNSIRecord(guid, newCNSI)
+	err = p.setCNSIRecord(guid, newCNSI)
+	if err != nil {
+		return err
+	}
 
 	c.String(http.StatusCreated, guid)
 
@@ -144,17 +147,23 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 	return rec, true
 }
 
-func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) {
+func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Printf("setCNSIRecord: %v", err)
+		errMsg := fmt.Errorf("Unable to establish a database reference: '%v'", err)
+		fmt.Println(errMsg)
+		return errMsg
 	}
 
 	err = cnsiRepo.Save(guid, c)
 	if err != nil {
-		fmt.Printf("setCNSIRecord: %v", err)
+		errMsg := fmt.Errorf("Unable to save a CNSI record: '%v'", err)
+		fmt.Println(errMsg)
+		return errMsg
 	}
+
+	return nil
 }
 
 func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (tokens.TokenRecord, bool) {
@@ -172,15 +181,21 @@ func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (toke
 	return tr, true
 }
 
-func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) {
+func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) error {
 
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
 	if err != nil {
-		fmt.Printf("setCNSITokenRecord: %v", err)
+		errMsg := fmt.Errorf("Unable to establish a database reference: '%v'", err)
+		fmt.Println(errMsg)
+		return errMsg
 	}
 
 	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t)
 	if err != nil {
-		fmt.Printf("setCNSITokenRecord: %v", err)
+		errMsg := fmt.Errorf("Unable to save a CNSI Token: '%v'", err)
+		fmt.Println(errMsg)
+		return errMsg
 	}
+
+	return nil
 }
