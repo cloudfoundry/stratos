@@ -217,6 +217,19 @@
     },
 
     /**
+     * @function deleteApp
+     * @memberof cloud-foundry.model.application
+     * @description Detete an application
+     * @param {string} guid - Application identifier
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    deleteApp: function (guid) {
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .DeleteApp(guid);
+    },
+
+    /**
      * @function getAppStats
      * @memberof cloud-foundry.model.application
      * @description Returns the stats for the STARTED app

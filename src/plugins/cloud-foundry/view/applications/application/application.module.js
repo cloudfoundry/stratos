@@ -27,6 +27,7 @@
 
   ApplicationController.$inject = [
     'app.model.modelManager',
+    'app.event.eventService',
     '$stateParams',
     '$scope',
     'helion.framework.widgets.dialog.confirm'
@@ -36,18 +37,21 @@
    * @name ApplicationController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.event.eventService} eventService - the event bus service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
    * @param {object} confirmDialog - the confirm dialog service
    * @property {object} model - the Cloud Foundry Applications Model
+   * @property {app.event.eventService} eventService - the event bus service
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
    */
-  function ApplicationController(modelManager, $stateParams, $scope, confirmDialog) {
+  function ApplicationController(modelManager, eventService, $stateParams, $scope, confirmDialog) {
     var that = this;
 
+    this.eventService = eventService;
     this.confirmDialog = confirmDialog;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
@@ -119,10 +123,13 @@
           no: gettext('Cancel')
         },
         callback: function () {
-          that.model.deleteApp(that.id);
+          that.model.deleteApp(that.id).then(function () {
+            that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+          });
         }
       });
     }
   });
+
 
 })();
