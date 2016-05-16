@@ -79,7 +79,6 @@
     height: $hpe-unit-space * 16;
 
     .modal-header {
-      height: $hpe-unit-space * 2 + $font-size-large;
       padding: $hpe-unit-space;
 
       > h3 {
@@ -119,12 +118,9 @@
 
     .modal-footer {
       display: flex;
-      flex-direction: row;
-      height: $hpe-unit-space * 2 + $button-height;
       justify-content: space-between;
       align-items: center;
-      padding-left: $hpe-unit-space;
-      padding-right: $hpe-unit-space;
+      padding: $hpe-unit-space;
 
       &:before,
       &:after {
