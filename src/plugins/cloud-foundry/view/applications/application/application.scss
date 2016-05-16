@@ -79,17 +79,17 @@
     height: $hpe-unit-space * 16;
 
     .modal-header {
-      height: $hpe-unit-space * 3;
+      height: $hpe-unit-space * 2 + $font-size-large;
       padding: $hpe-unit-space;
 
       > h3 {
-        height: $hpe-unit-space;
-        line-height: $hpe-unit-space;
+        height: $font-size-large;
+        line-height: $font-size-large;
         margin: 0;
         padding: 0;
-        color: $gray-darker;
         font-size: $font-size-large;
         font-weight: normal;
+        color: $gray-darker;
       }
     }
 
