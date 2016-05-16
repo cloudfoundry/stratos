@@ -105,7 +105,7 @@
       padding: 0 $hpe-unit-space * 4;
 
       & > p {
-        margin: 0;
+        margin-bottom: $hpe-unit-space;
 
         &:before {
           @extend .helion-icon;
