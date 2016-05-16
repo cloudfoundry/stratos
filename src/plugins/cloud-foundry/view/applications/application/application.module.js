@@ -110,8 +110,6 @@
     },
 
     deleteApp: function () {
-      // TODO: wire up with real logic.
-
       var that = this;
       this.confirmDialog({
         title: gettext('Detete Application'),
