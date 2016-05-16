@@ -14,7 +14,7 @@
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf', {
-      url: 'cf',
+      url: '/cf',
       templateUrl: 'plugins/cloud-foundry/view/view.html'
     });
   }
