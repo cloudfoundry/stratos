@@ -61,3 +61,75 @@
 .application-nav-menu {
   margin-left: auto;
 }
+
+// confirmation dialog
+
+.confirm-dialog > .modal-dialog {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+
+  & > .modal-content {
+    display: flex;
+    flex-direction: column;
+    width: $hpe-unit-space * 16;
+    height: $hpe-unit-space * 16;
+
+    .modal-header {
+      height: $hpe-unit-space * 3;
+      padding: $hpe-unit-space;
+
+      > h3 {
+        height: $hpe-unit-space;
+        line-height: $hpe-unit-space;
+        margin: 0;
+        padding: 0;
+        color: $gray-darker;
+        font-size: $font-size-large;
+        font-weight: normal;
+      }
+    }
+
+    .modal-body {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: $gray-darker;
+      font-size: $font-size-large;
+      text-align: center;
+      padding: 0 $hpe-unit-space * 4;
+
+      & > p {
+        margin: 0;
+
+        &:before {
+          @extend .helion-icon;
+          content: $helion-icon-Alert_pressed;
+          display: block;
+          margin-bottom: $hpe-unit-space;
+          font-size: $hpe-unit-space * 2;
+          color: $state-warning-bg;
+        }
+      }
+    }
+
+    .modal-footer {
+      display: flex;
+      flex-direction: row;
+      height: $hpe-unit-space * 2 + $button-height;
+      justify-content: space-between;
+      align-items: center;
+      padding-left: $hpe-unit-space;
+      padding-right: $hpe-unit-space;
+
+      &:before,
+      &:after {
+        display: none;
+      }
+    }
+  }
+}
