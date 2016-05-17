@@ -48,6 +48,7 @@
     });
 
     it('getDeploymentTargets', function () {
+      hceModel.data.user = { id: 1 };
       var getDeploymentTargets = mock.hceApi.HceDeploymentApi.getDeploymentTargets();
 
       $httpBackend.when('GET', getDeploymentTargets.url).respond(200, getDeploymentTargets.response['200'].body);

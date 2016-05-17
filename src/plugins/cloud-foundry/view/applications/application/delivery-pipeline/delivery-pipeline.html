@@ -1,1 +1,161 @@
-<h3 translate>Delivery Pipeline</h3>
+<div ng-if="!applicationDeliveryPipelineCtrl.project"
+  class="message-box message-box-no-bg">
+  <p>
+    <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
+    <h3 translate>You have not setup a delivery pipeline</h3>
+  </p>
+  <button class="btn btn-primary" translate>setup delivery pipeline</button>
+</div>
+<div ng-if="applicationDeliveryPipelineCtrl.project">
+  <div class="card panel panel-default">
+    <div class="panel-heading action-header">
+      <span translate>Summary</span>
+      <button class="btn btn-link">
+        <i class="helion-icon helion-icon-Right_Arrow"></i>
+        <span translate>Delete Pipeline</span>
+      </button>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <dl class="dl-horizontal col-md-6">
+          <dt translate>source</dt>
+          <dd>
+            {{ applicationDeliveryPipelineCtrl.project.repo.vcs }}
+          </dd>
+          <dt translate>repo</dt>
+          <dd>
+            {{ applicationDeliveryPipelineCtrl.project.repo.name }}
+          </dd>
+          <dt translate>branch</dt>
+          <dd>
+            {{ applicationDeliveryPipelineCtrl.project.repo.branch }}
+          </dd>
+          <dt translate>build container</dt>
+          <dd>
+            {{ applicationDeliveryPipelineCtrl.project.buildContainer.build_container_label }}
+          </dd>
+        </dl>
+        <dl class="dl-horizontal col-md-6">
+          <dt translate>hce endpoint</dt>
+          <dd>
+            {{ applicationDeliveryPipelineCtrl.project.deploymentTarget.url }}
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification-targets">
+    <div class="action-header">
+      <span translate>Notification Targets</span>
+      <button class="btn btn-link">
+        <i class="helion-icon helion-icon-Right_Arrow"></i>
+        <span translate>Add Target</span>
+      </button>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <span ng-if="!applicationDeliveryPipelineCtrl.notificationTargets.length"
+          translate>You have no notification targets.</span>
+      </div>
+      <table ng-if="applicationDeliveryPipelineCtrl.notificationTargets.length"
+        class="table table-actionable">
+        <thead>
+          <tr>
+            <th translate>Name</th>
+            <th translate>Type</th>
+            <th translate>Location</th>
+            <th translate>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="target in applicationDeliveryPipelineCtrl.notificationTargets">
+            <td>{{ target.name }}</td>
+            <td>{{ target.type }}</td>
+            <td>{{ target.location }}</td>
+            <td>
+              <actions-menu actions="applicationDeliveryPipelineCtrl.notificationTargetActions"
+                action-target="target" menu-icon="helion-icon helion-icon-More"></actions-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="post-deploy-actions">
+    <div class="action-header">
+      <span translate>Post Deploy Actions</span>
+      <button class="btn btn-link">
+        <i class="helion-icon helion-icon-Right_Arrow"></i>
+        <span translate>Add Action</span>
+      </button>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <span ng-if="!applicationDeliveryPipelineCtrl.postDeployActions.length"
+          translate>You have no post deploy actions.</span>
+      </div>
+      <table ng-if="applicationDeliveryPipelineCtrl.postDeployActions.length"
+        class="table table-actionable">
+        <thead>
+          <tr>
+            <th translate>Name</th>
+            <th translate>Type</th>
+            <th translate>Created</th>
+            <th translate>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="postDeployAction in applicationDeliveryPipelineCtrl.postDeployActions">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+              <actions-menu actions="applicationDeliveryPipelineCtrl.postDeployActionActions"
+                action-target="postDeployAction" menu-icon="helion-icon helion-icon-More"></actions-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="container-registries">
+    <div class="action-header">
+      <span translate>Container Registries</span>
+      <button class="btn btn-link">
+        <i class="helion-icon helion-icon-Right_Arrow"></i>
+        <span translate>Add Container Registry</span>
+      </button>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <span ng-if="!applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries.length"
+          translate>You have no container registries.</span>
+      </div>
+      <table ng-if="applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries.length"
+        class="table table-actionable">
+        <thead>
+          <tr>
+            <th translate>Registry Name</th>
+            <th translate>Designated</th>
+            <th translate>URL</th>
+            <th translate>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="registry in applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries">
+            <td>{{ registry.registry_label }}</td>
+            <td></td>
+            <td>{{ registry.registry_url }}</td>
+            <td>
+              <actions-menu actions="applicationDeliveryPipelineCtrl.containerRegistryActions"
+                action-target="registry" menu-icon="helion-icon helion-icon-More"></actions-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
