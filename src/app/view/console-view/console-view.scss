@@ -1,17 +1,20 @@
 console-view {
   position: relative;
   display: flex;
+  flex-direction: column;
   padding-top: $page-header-height;
   min-height: 100vh;
+  height: 100vh;
   overflow-x: hidden;
 
   & > * {
     display: flex;
     flex-direction: column;
     flex: 1;
+    width: 100vw;
 
     & > .content {
-      flex: 1;
+      flex: 1 0 auto;
     }
   }
 }
