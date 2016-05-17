@@ -69,3 +69,10 @@
     </button>
   </div>
 </div>
+<flyout flyout-active="serviceRegistrationCtrl.credentialsFormOpen"
+  flyout-close-icon="'helion-icon helion-icon-Close'">
+  <credentials-form cnsi="serviceRegistrationCtrl.activeServiceInstance"
+    on-cancel="serviceRegistrationCtrl.onConnectCancel()"
+    on-submit="serviceRegistrationCtrl.onConnectSuccess(serviceInstance)">
+  </credentials-form>
+</flyout>

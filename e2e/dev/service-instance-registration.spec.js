@@ -44,7 +44,34 @@ describe('Service Instance Registration', function () {
       registration.connect(0);
     });
 
-    it('should update service instance data', function () {
+    it('should open the credentials form', function () {
+      expect(registration.credentialsForm().isDisplayed()).toBeTruthy();
+    });
+
+    it('should show the cluster name and URL as readonly in the credentials form', function () {
+      var serviceInstancesTable = registration.serviceInstancesTable();
+      var name = helpers.getTableCellAt(serviceInstancesTable, 0, 1).getText();
+      var url = helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText();
+
+      var fields = registration.credentialsFormFields();
+      expect(fields.get(0).getAttribute('value')).toBe(name);
+      expect(fields.get(1).getAttribute('value')).toBe(url);
+      expect(fields.get(2).getAttribute('value')).toBe('');
+      expect(fields.get(3).getAttribute('value')).toBe('');
+    });
+
+    it('should disable register button if username and password are blank', function () {
+      expect(registration.registerButton().isEnabled()).toBeFalsy();
+    });
+
+    it('should enable register button if username and password are not blank', function () {
+      registration.fillCredentialsForm('username', 'password');
+      expect(registration.registerButton().isEnabled()).toBeTruthy();
+    });
+
+    it('should update service instance data on register', function () {
+      registration.registerServiceInstance();
+
       var serviceInstancesTable = registration.serviceInstancesTable();
       expect(helpers.getTableCellAt(serviceInstancesTable, 0, 3).getText()).not.toBe('');
       expect(helpers.getTableCellAt(serviceInstancesTable, 0, 4).getText()).not.toBe('');
@@ -82,6 +109,8 @@ describe('Service Instance Registration', function () {
     });
 
     it('should show applications view when `Done` clicked', function () {
+      registration.fillCredentialsForm('username', 'password');
+      registration.registerServiceInstance();
       registration.completeRegistration();
 
       expect(registration.registrationOverlay().isPresent()).toBeFalsy();

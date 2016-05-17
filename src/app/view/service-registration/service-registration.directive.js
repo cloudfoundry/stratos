@@ -48,6 +48,7 @@
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userModel = modelManager.retrieve('app.model.user');
     this.serviceInstances = this.serviceInstanceModel.serviceInstances;
+    this.credentialsFormOpen = false;
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
     this.serviceInstanceModel.list();
   }
@@ -75,13 +76,8 @@
      * @param {object} serviceInstance - the service instance to connect
      */
     connect: function (serviceInstance) {
-      var that = this;
-      this.serviceInstanceModel.connect(serviceInstance.url)
-        .then(function success(response) {
-          angular.extend(serviceInstance, response.data);
-          serviceInstance.valid = true;
-          that.serviceInstanceModel.numValid += 1;
-        });
+      this.activeServiceInstance = serviceInstance;
+      this.credentialsFormOpen = true;
     },
 
     /**
@@ -99,6 +95,20 @@
           delete serviceInstance.valid;
           that.serviceInstanceModel.numValid -= 1;
         });
+    },
+
+    onConnectCancel: function () {
+      this.credentialsFormOpen = false;
+    },
+
+    onConnectSuccess: function (serviceInstance) {
+      angular.extend(this.activeServiceInstance, serviceInstance);
+      this.activeServiceInstance.valid = true;
+
+      this.serviceInstanceModel.numValid += 1;
+      this.credentialsFormOpen = false;
+
+      this.activeServiceInstance = null;
     }
   });
 

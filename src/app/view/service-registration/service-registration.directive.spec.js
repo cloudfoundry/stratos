@@ -57,26 +57,12 @@
         expect(serviceRegistrationCtrl.serviceInstances).toEqual([]);
       });
 
-      it('should call connect on model on connect()', function () {
-        $httpBackend.flush();
-
+      it('should open credentials flyout on connect()', function () {
         var serviceInstance = { name: 'c1', url: 'c1_url' };
-        var mockResponse = {
-          id: 1,
-          url: 'c1_url',
-          username: 'dev',
-          account: 'dev',
-          expires_at: 3600
-        };
-        $httpBackend.when('POST', '/api/service-instances/user/connect').respond(200, mockResponse);
-
         serviceRegistrationCtrl.connect(serviceInstance);
-        $httpBackend.flush();
 
-        expect(serviceInstance.account).toBe('dev');
-        expect(serviceInstance.expires_at).toBe(3600);
-        expect(serviceInstance.valid).toBe(true);
-        expect(serviceRegistrationCtrl.serviceInstanceModel.numValid).toBe(1);
+        expect(serviceRegistrationCtrl.activeServiceInstance).toBeDefined();
+        expect(serviceRegistrationCtrl.credentialsFormOpen).toBe(true);
       });
 
       it('should call disconnect on model on disconnect()', function () {
@@ -91,9 +77,8 @@
           expires_at: 3600
         };
 
-        $httpBackend.when('POST', '/api/service-instances/user/connect').respond(200, mockResponse);
         serviceRegistrationCtrl.connect(serviceInstance);
-        $httpBackend.flush();
+        serviceRegistrationCtrl.onConnectSuccess(mockResponse);
 
         $httpBackend.when('DELETE', '/api/service-instances/user/1').respond(200, {});
         $httpBackend.expectDELETE('/api/service-instances/user/1');
@@ -104,6 +89,12 @@
         expect(serviceInstance.expires_at).toBeUndefined();
         expect(serviceInstance.valid).toBeUndefined();
         expect(serviceRegistrationCtrl.serviceInstanceModel.numValid).toBe(0);
+      });
+
+      it('should hide credentials form flyout `onConnectCancel`', function () {
+        serviceRegistrationCtrl.credentialsFormOpen = true;
+        serviceRegistrationCtrl.onConnectCancel();
+        expect(serviceRegistrationCtrl.credentialsFormOpen).toBe(false);
       });
     });
 
