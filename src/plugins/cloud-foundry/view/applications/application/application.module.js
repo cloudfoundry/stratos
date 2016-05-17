@@ -112,10 +112,10 @@
     deleteApp: function () {
       var that = this;
       this.confirmDialog({
-        title: gettext('Detete Application'),
+        title: gettext('Delete Application'),
         description: gettext('Are you sure you want to delete ') + this.model.application.summary.name + '?',
         buttonText: {
-          yes: gettext('Detete'),
+          yes: gettext('Delete'),
           no: gettext('Cancel')
         },
         callback: function () {

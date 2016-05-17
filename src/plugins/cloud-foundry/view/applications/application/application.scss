@@ -65,16 +65,15 @@
 // confirmation dialog
 
 .confirm-dialog > .modal-dialog {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  @include flex-align(center, center);
+
   height: 100%;
   width: 100%;
   margin: 0;
 
   & > .modal-content {
-    display: flex;
-    flex-direction: column;
+    @include flex-align(flex-start, stretch, column);
+
     width: $hpe-unit-space * 16;
     height: $hpe-unit-space * 16;
     box-shadow: none;
@@ -96,9 +95,8 @@
 
     .modal-body {
       flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      @include flex-align(center, center);
+
       color: $gray-darker;
       font-size: $font-size-large;
       text-align: center;
@@ -119,11 +117,9 @@
     }
 
     .modal-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: $hpe-unit-space;
+      @include flex-align(space-between, center);
 
+      padding: $hpe-unit-space;
       &:before,
       &:after {
         display: none;
