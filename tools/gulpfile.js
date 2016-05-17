@@ -17,7 +17,6 @@ var concat = require('gulp-concat-util'),
   browserSyncProxy = require('proxy-middleware'),
   gutil = require('gulp-util'),
   node_url = require('url'),
-
   wiredep = require('wiredep').stream;
 
 var config = require('./gulp.config')();
@@ -35,7 +34,11 @@ var usePlumber = true;
 
 // Clear the 'dist' folder
 gulp.task('clean:dist', function (next) {
-  del(paths.dist + '**/*', { force: true }, next);
+  del([
+    paths.dist + '**/*',
+    '!' + paths.dist + 'lib',
+    '!' + paths.dist + 'lib/**/*'
+    ], { force: true }, next);
 });
 
 // Copy HTML files to 'dist'
@@ -57,13 +60,6 @@ gulp.task('copy:js', function () {
   return gulp
     .src(jsSourceFiles, { base: paths.src })
     .pipe(gulp.dest(paths.dist));
-});
-
-// Copy 'lib' folder to 'dist'
-gulp.task('copy:lib', function () {
-  return gulp
-    .src(paths.src + 'lib/**')
-    .pipe(gulp.dest(paths.dist + 'lib/'));
 });
 
 // Copy 'translations' folder to 'dist'
@@ -203,7 +199,6 @@ gulp.task('default', function (next) {
     'plugin',
     'translate:compile',
     'copy:js',
-    'copy:lib',
     'inject:scss',
     'css',
     'copy:html',
