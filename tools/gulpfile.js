@@ -62,7 +62,7 @@ gulp.task('copy:js', function () {
 // Copy 'lib' folder to 'dist'
 gulp.task('copy:lib', function () {
   return gulp
-    .src('lib/**', {base: paths.src})
+    .src(paths.src + 'lib/**')
     .pipe(gulp.dest(paths.dist + 'lib/'));
 });
 
@@ -144,7 +144,7 @@ gulp.task('translate:extract', function () {
   var sources = config.partials
     .concat(config.jsSourceFiles);
 
-  return gulp.src(sources, {base: paths.src})
+  return gulp.src(sources)
     .pipe(gettext.extract(config.translate.pot))
     .pipe(gulp.dest(config.paths.translations));
 });
@@ -159,9 +159,9 @@ gulp.task('translate:compile', function () {
 // Gulp watch JavaScript, SCSS and HTML source files
 gulp.task('watch', function () {
   var callback = browserSync.active ? browserSync.reload : function () {};
-  gulp.watch(jsSourceFiles, {base: paths.src, interval: 1000, usePoll: true}, ['copy:js', callback]);
-  gulp.watch(scssFiles, {base: paths.src}, ['css', callback]);
-  gulp.watch(partials, {base: paths.src}, ['copy:html', callback]);
+  gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true}, ['copy:js', callback]);
+  gulp.watch(scssFiles, ['css', callback]);
+  gulp.watch(partials, ['copy:html', callback]);
   gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
 });
 

@@ -38,28 +38,23 @@ module.exports = function () {
     ],
 
     jsSourceFiles: [
-      'app/**/*.js',
-      'plugin/**/*.js',
-      '*.js',
-      '!app/**/*.mock.js',
-      '!app/**/*.spec.js',
-      '!plugin/**/*.mock.js',
-      '!plugin/**/*.spec.js'
+      paths.src + '**/*.js',
+      '!' + paths.dist + '**/*.mock.js',
+      '!' + paths.dist + '**/*.spec.js',
+      '!' + paths.src + 'lib/**/*.js'
     ],
 
     scssFiles: [
-      'app/**/*.scss',
-      'plugins/**/*.scss',
-      '*.scss'
+      paths.src + '**/*.scss'
     ],
 
     scssSourceFiles: [
-      'index.scss'
+      paths.src + 'index.scss'
     ],
 
     partials: [
-      'app/**/*.html',
-      'plugins/**/*.html'
+      paths.src + 'app/**/*.html',
+      paths.src + 'plugins/**/*.html'
     ],
 
     paths: paths,
