@@ -17,7 +17,7 @@ var concat = require('gulp-concat-util'),
   browserSyncProxy = require('proxy-middleware'),
   gutil = require('gulp-util'),
   node_url = require('url'),
-
+  vfs = require('vinyl-fs'),
   wiredep = require('wiredep').stream;
 
 var config = require('./gulp.config')();
@@ -60,10 +60,13 @@ gulp.task('copy:js', function () {
 });
 
 // Copy 'lib' folder to 'dist'
+// gulp.src does not support symlinks, so use vinyl-fs
 gulp.task('copy:lib', function () {
-  return gulp
-    .src(paths.src + 'lib/**')
-    .pipe(gulp.dest(paths.dist + 'lib/'));
+  return vfs
+    .src([
+      paths.src + 'lib/',
+      paths.src + 'lib/**/*'
+    ]).pipe(vfs.dest(paths.dist + 'lib/'));
 });
 
 // Copy 'translations' folder to 'dist'
