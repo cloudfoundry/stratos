@@ -50,6 +50,7 @@
     "protractor": "^3.0.0",
     "proxy-middleware": "^0.15.0",
     "request": "2.69.0",
-    "shelljs": "^0.5.3"
+    "shelljs": "^0.5.3",
+    "vinyl-fs": "2.4.3"
   }
 }
