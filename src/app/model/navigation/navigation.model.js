@@ -14,15 +14,16 @@
   registerModel.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
-    '$state'
+    '$state',
+    '$rootScope'
   ];
 
-  function registerModel(modelManager, eventService, $state) {
+  function registerModel(modelManager, eventService, $state, $rootScope) {
     /**
      * Register 'app.model.navigation' with the model manager service.
      * This model hosts the application's navigation tree.
      */
-    modelManager.register('app.model.navigation', new NavigationModel(eventService, $state));
+    modelManager.register('app.model.navigation', new NavigationModel(eventService, $state, $rootScope));
   }
 
   /**
@@ -32,11 +33,12 @@
    * @constructor
    * @param {app.event.eventService} eventService - the event bus service
    * @param {object} $state - ui-router $state service
+   * @param {object} $rootScope - Angular rootScope object
    * @property {app.event.eventService} eventService - the event bus service
    * @property {object} $state - ui-router $state service
    * @property {app.model.navigation} menu - the navigation model
    */
-  function NavigationModel(eventService, $state) {
+  function NavigationModel(eventService, $state, $rootScope) {
     var that = this;
     this.eventService = eventService;
     this.$state = $state;
@@ -50,6 +52,13 @@
     this.eventService.$on(this.eventService.events.REDIRECT, function (event, state) {
       that.onAutoNav(event, state);
     });
+
+    // Install state change handler to set currentState on our menu
+    // The rootScope never gets destroyed so we can safely ignore the eslint error
+    $rootScope.$on('$stateChangeSuccess', function(event, toState) { // eslint-disable-line angular/on-watch
+      that.menu.currentState = toState.data.activeMenuState;
+    });
+
   }
 
   angular.extend(NavigationModel.prototype, {
@@ -83,7 +92,6 @@
      */
     onAutoNav: function (event, state) {
       this.$state.go(state);
-      this.menu.currentState = state;
     }
   });
 
@@ -107,17 +115,22 @@
      * @description Appends a new menu item into the menu list. Each menu item
      * is a sub-menu which is also of type Menu and is empty initially.
      * @param {string} name - the name/ID of the menu item
-     * @param {string} href - the href / ng-router state
+     * @param {string} href - the href / ng-router state we go to when clicking the entry.
+     *                        e.g. cf.applications.list.gallery-view
      * @param {string} text - the displayed text of the menu item
      * @param {string} icon - the icon of the menu item
+     * @param {string=} baseState - optional href / ng-router top-level base state e.g. cf.applications or cf.workspaces
+     *                              (defaults to name)
      * @returns {app.model.navigation.Menu} The navigation's Menu object
      */
-    addMenuItem: function (name, href, text, icon) {
+    addMenuItem: function (name, href, text, icon, baseState) {
       this.push({
         name: name,
         href: href,
         text: text,
         icon: icon,
+        // baseState is used to work out which menu entry is active based on any child state
+        baseState: baseState || name, // defaults to name
         items: new Menu()   // sub-menu
       });
       return this;
