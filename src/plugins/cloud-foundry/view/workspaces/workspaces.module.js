@@ -12,7 +12,10 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.workspaces', {
       url: '/workspaces',
-      templateUrl: 'plugins/cloud-foundry/view/workspaces/workspaces.html'
+      templateUrl: 'plugins/cloud-foundry/view/workspaces/workspaces.html',
+      data: {
+        activeMenuState: 'cf.workspaces'
+      }
     });
   }
 
