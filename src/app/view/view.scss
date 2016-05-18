@@ -41,3 +41,11 @@
   right: 0;
   bottom: 0;
 }
+
+.captain {
+  font-weight: 600;
+  text-transform: uppercase;
+  color: $text-color;
+  font-size: $font-size-large;
+  margin-bottom: $hpe-unit-space / 2;
+}

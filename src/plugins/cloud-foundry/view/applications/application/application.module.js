@@ -114,6 +114,11 @@
     },
 
     deleteApp: function () {
+      this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW');
+      //this.simpleDeleteAppDialog();
+    },
+
+    simpleDeleteAppDialog: function () {
       var that = this;
       this.confirmDialog({
         title: gettext('Delete Application'),
