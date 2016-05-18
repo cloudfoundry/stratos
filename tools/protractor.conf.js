@@ -15,5 +15,10 @@ exports.config = {
     'chromeOptions': {
       args: ['--no-sandbox']
     }
+  },
+
+  params: {
+    hostIp: '',
+    port: ''
   }
 };

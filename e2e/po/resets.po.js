@@ -2,7 +2,7 @@
 
 var request = require('../../tools/node_modules/request');
 var helpers = require('./helpers.po');
-var hostIp = helpers.getHost();
+var host = helpers.getHost();
 
 module.exports = {
 
@@ -111,7 +111,7 @@ function sendRequest(req, method, url, body) {
   return new Promise(function (resolve, reject) {
     req({
       method: method,
-      url: 'http://' + hostIp + '/api/' + url,
+      url: 'http://' + host + '/api/' + url,
       body: JSON.stringify(body)
     }).on('response', function (response) {
       if (response.statusCode === 200) {
@@ -140,7 +140,7 @@ function createSession(req, username, password) {
       })
     };
 
-    req.post('http://' + hostIp + ':3000/api/auth/login', options)
+    req.post('http://' + host + '/api/auth/login', options)
       .on('response', function (response) {
         if (response.statusCode === 200) {
           resolve();
@@ -187,7 +187,7 @@ function resetClusters(req) {
 function removeClusters(req) {
   return new Promise(function (resolve, reject) {
     var data  = '';
-    req.get('http://' + hostIp + '/api/service-instances')
+    req.get('http://' + host + '/api/service-instances')
       .on('data', function (responseData) {
         data += responseData;
       })
@@ -251,7 +251,7 @@ function resetUserServiceInstances(req) {
 function removeUserServiceInstances(req) {
   return new Promise(function (resolve, reject) {
     var data = '';
-    req.get('http://' + hostIp + '/api/service-instances/user')
+    req.get('http://' + host + '/api/service-instances/user')
       .on('data', function (responseData) {
         data += responseData;
       })
@@ -289,7 +289,7 @@ function removeUserServiceInstances(req) {
 function setUser(req, registered) {
   return new Promise(function (resolve, reject) {
     var data = '';
-    req.get('http://' + hostIp + '/api/users/loggedIn')
+    req.get('http://' + host + '/api/users/loggedIn')
       .on('data', function (responseData) {
         data += responseData;
       })

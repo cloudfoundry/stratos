@@ -2,7 +2,6 @@
 
 // Cluster registration helpers
 var helpers = require('./helpers.po');
-var hostIp = helpers.getHost();
 var addClusterFormName = 'addClusterFormCtrl.addClusterForm';
 
 module.exports = {

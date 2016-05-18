@@ -1,9 +1,8 @@
-<div class="panel panel-default delivery-logs-summary">
+<div id="delivery-logs-summary" class="panel panel-default delivery-logs-summary">
   <div class="panel-heading action-header">
     <span translate>Summary</span>
   </div>
   <div class="row data-body">
-    <!-- TODO are these fixed and predefined or specific to application? -->
     <div class="col-md-3 summary-col">
       <div translate>LAST BUILD</div>
       <div translate>LAST TEST</div>
@@ -26,15 +25,13 @@
   </div>
 </div>
 
-<div class="panel panel-default delivery-logs-search">
+<div id="delivery-logs-search" class="panel panel-default delivery-logs-search">
   <form>
     <div class="form-group search-field" focusable-input >
       <label class="control-label" for="build-search" required translate>
         Search Builds
       </label>
       <div>
-        <!-- TODO: This fails to search dates in table (filter works on raw time value, not displayed version. Need to
-        format data correctly before pushing to model)-->
         <input ng-model="appDelLogsCtrl.searchValue" type="text" class="form-control" id="build-search">
         <i class="helion-icon helion-icon-Search"></i>
       </div>
@@ -42,7 +39,7 @@
   </form>
 </div>
 
-<div class="delivery-logs-builds">
+<div id="delivery-logs-builds" class="delivery-logs-builds">
   <div class="action-header">
     <span translate>Builds</span>
     <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()">
@@ -65,10 +62,10 @@
       <tr ng-repeat="build in appDelLogsCtrl.hceModel.delivery.builds | filter:appDelLogsCtrl.searchValue">
         <td><a class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">{{ build.message }}</a></td>
         <td ng-switch="build.result" class="row">
+          <!-- TODO: Translate message in model before adding to scope (this will fix search) -->
           <div ng-switch-when="success" class="">
             <span class="circle success"></span>
             <span translate>Success</span>
-            <!-- TODO: Will this bring in a flyout with build specific details + log? -->
             <a class="" href="" ng-click="appDelLogsCtrl.viewBuildResult(build)">view</a>
           </div>
           <div ng-switch-when="deploying">
@@ -78,14 +75,13 @@
           <div ng-switch-when="failure">
             <span class="circle failure"></span>
             <span translate>Failed</span>
-            <!-- TODO: Will this bring in a flyout with build specific details + log? -->
             <a class="" href="" ng-click="appDelLogsCtrl.viewBuildResult(build)">view</a>
           </div>
           <div ng-switch-default>
             <span translate>Unknown</span>
           </div>
         </td>
-        <td>{{ build.time | amDateFormat:'MM/D/YYYY - hh:mm:ss a' }}</td>
+        <td>{{ build.time }}</td>
         <td>{{ build.commitAuthor }}</td>
         <td>{{ build.reason }}</td>
       </tr>

@@ -17,7 +17,7 @@ describe('Applications - Gallery View', function () {
 
   it('should show applications as cards', function() {
     galleryPage.showApplications();
-    expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() +'/#/cf/applications/list/gallery-view');
+    expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications/list/gallery-view');
     expect(galleryPage.applicationGalleryCards().isDisplayed()).toBeTruthy();
   });
 
