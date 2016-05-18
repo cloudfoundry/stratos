@@ -70,7 +70,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
@@ -134,7 +134,7 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 
 func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return cnsis.CNSIRecord{}, false
 	}
@@ -149,7 +149,7 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
 func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 
-	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConfig)
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		errMsg := fmt.Errorf("Unable to establish a database reference: '%v'", err)
 		fmt.Println(errMsg)
@@ -168,7 +168,7 @@ func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 
 func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (tokens.TokenRecord, bool) {
 
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return tokens.TokenRecord{}, false
 	}
@@ -183,7 +183,7 @@ func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (toke
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) error {
 
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		errMsg := fmt.Errorf("Unable to establish a database reference: '%v'", err)
 		fmt.Println(errMsg)
@@ -192,7 +192,7 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tok
 
 	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t)
 	if err != nil {
-		errMsg := fmt.Errorf("Unable to save a CNSI Token: '%v'", err)
+		errMsg := fmt.Errorf("Unable to save a CNSI Token: %v", err)
 		fmt.Println(errMsg)
 		return errMsg
 	}

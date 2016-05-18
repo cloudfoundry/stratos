@@ -49,6 +49,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 }
 
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
+
 	cnsiGUID := c.FormValue("cnsi_guid")
 
 	if len(cnsiGUID) == 0 {
@@ -60,6 +61,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	endpoint := ""
 	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
+
 	if !ok {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
@@ -70,6 +72,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	endpoint = cnsiRecord.AuthorizationEndpoint
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
+
 	uaaRes, u, err := p.login(c, p.Config.HCFClient, p.Config.HCFClientSecret, tokenEndpoint)
 	if err != nil {
 		return newHTTPShadowError(
@@ -174,9 +177,9 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
 	key := u.UserGUID
 	tokenRecord := tokens.TokenRecord{
-		TokenExpiry:  u.TokenExpiry,
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
+		TokenExpiry:  u.TokenExpiry,
 	}
 
 	p.setUAATokenRecord(key, tokenRecord)
@@ -199,26 +202,27 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 	return tokenRecord, nil
 }
 
-func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
-
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
-	if err != nil {
-		fmt.Printf("Database error getting repo for UAA token: %v", err)
-		return tokens.TokenRecord{}
-	}
-
-	tr, err := tokenRepo.FindUAAToken(key)
-	if err != nil {
-		fmt.Printf("Database error finding UAA token: %v", err)
-		return tokens.TokenRecord{}
-	}
-
-	return tr
-}
+// As of 5/18/2016 - not used
+// func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
+//
+// 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+// 	if err != nil {
+// 		fmt.Printf("Database error getting repo for UAA token: %v", err)
+// 		return tokens.TokenRecord{}
+// 	}
+//
+// 	tr, err := tokenRepo.FindUAAToken(key)
+// 	if err != nil {
+// 		fmt.Printf("Database error finding UAA token: %v", err)
+// 		return tokens.TokenRecord{}
+// 	}
+//
+// 	return tr
+// }
 
 func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) {
 
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConfig)
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		fmt.Printf("Database error getting repo for UAA token: %v", err)
 	}

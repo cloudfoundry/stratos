@@ -97,55 +97,21 @@ coverage: 71.9% of statements
 ok  	portal-proxy	0.046s
 ```
 
-To parse the above output file and display the results:
+To display the above results in the browser:
+```
+go tool cover -html=coverage.out
+```
+
+To display the above results directly:
 ```
 src/portal-proxy - [master●] » go tool cover -func=coverage.out
+...
 github.com/hpcloud/portal-proxy/auth.go:24:		loginToUAA			90.9%
 github.com/hpcloud/portal-proxy/auth.go:48:		loginToCNSI			100.0%
 github.com/hpcloud/portal-proxy/auth.go:80:		login				90.9%
 github.com/hpcloud/portal-proxy/auth.go:101:		logout				100.0%
-github.com/hpcloud/portal-proxy/auth.go:114:		getUAATokenWithCreds		100.0%
-github.com/hpcloud/portal-proxy/auth.go:124:		getUAATokenWithRefreshToken	100.0%
-github.com/hpcloud/portal-proxy/auth.go:133:		getUAAToken			85.7%
-github.com/hpcloud/portal-proxy/auth.go:159:		mkTokenRecordKey		100.0%
-github.com/hpcloud/portal-proxy/auth.go:163:		saveUAAToken			100.0%
-github.com/hpcloud/portal-proxy/auth.go:175:		saveCNSIToken			100.0%
-github.com/hpcloud/portal-proxy/auth.go:186:		getUAATokenRecord		0.0%
-github.com/hpcloud/portal-proxy/auth.go:194:		setUAATokenRecord		100.0%
-github.com/hpcloud/portal-proxy/cnsi.go:20:		registerHCFCluster		100.0%
-github.com/hpcloud/portal-proxy/cnsi.go:55:		listRegisteredCNSIs		87.5%
-github.com/hpcloud/portal-proxy/cnsi.go:72:		getHCFv2Info			88.2%
-github.com/hpcloud/portal-proxy/cnsi.go:103:		getCNSIRecord			100.0%
-github.com/hpcloud/portal-proxy/cnsi.go:111:		setCNSIRecord			100.0%
-github.com/hpcloud/portal-proxy/cnsi.go:117:		getCNSITokenRecord		100.0%
-github.com/hpcloud/portal-proxy/cnsi.go:126:		setCNSITokenRecord		100.0%
-github.com/hpcloud/portal-proxy/errors.go:22:		Error				0.0%
-github.com/hpcloud/portal-proxy/errors.go:26:		newHTTPShadowError		100.0%
-github.com/hpcloud/portal-proxy/errors.go:33:		Error				75.0%
-github.com/hpcloud/portal-proxy/errors.go:41:		logHTTPError			100.0%
-github.com/hpcloud/portal-proxy/jwt.go:15:			getUserTokenInfo		90.0%
-github.com/hpcloud/portal-proxy/main.go:22:		main				0.0%
-github.com/hpcloud/portal-proxy/main.go:43:		newPortalProxy			100.0%
-github.com/hpcloud/portal-proxy/main.go:54:		initializeHTTPClient		100.0%
-github.com/hpcloud/portal-proxy/main.go:63:		start				0.0%
-github.com/hpcloud/portal-proxy/main.go:81:		initCookieStore			100.0%
-github.com/hpcloud/portal-proxy/main.go:85:		registerRoutes			0.0%
-github.com/hpcloud/portal-proxy/middleware.go:12:		sessionMiddleware		0.0%
-github.com/hpcloud/portal-proxy/middleware.go:24:		sessionCleanupMiddleware	0.0%
-github.com/hpcloud/portal-proxy/middleware.go:34:		errorLoggingMiddleware		0.0%
-github.com/hpcloud/portal-proxy/oauth_requests.go:16:	getCNSIRequestRecords		85.7%
-github.com/hpcloud/portal-proxy/oauth_requests.go:31:	doOauthFlowRequest		81.0%
-github.com/hpcloud/portal-proxy/oauth_requests.go:66:	refreshToken			69.2%
-github.com/hpcloud/portal-proxy/passthrough.go:5:		hcf				0.0%
-github.com/hpcloud/portal-proxy/passthrough.go:9:		hce				0.0%
-github.com/hpcloud/portal-proxy/session.go:12:		getSessionValue			0.0%
-github.com/hpcloud/portal-proxy/session.go:25:		setSessionValues		100.0%
+...
 total:					(statements)			71.9%
-```
-
-To parse the above output file and allow you to drill into the results:
-```
-go tool cover -html=coverage.out
 ```
 
 Source: https://blog.golang.org/cover

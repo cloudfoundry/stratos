@@ -18,10 +18,10 @@ const (
 type CNSIRecord struct {
 	GUID                  string
 	Name                  string
+	CNSIType              CNSIType
 	APIEndpoint           *url.URL
 	AuthorizationEndpoint string
 	TokenEndpoint         string
-	CNSIType              CNSIType
 }
 
 // Repository is an application of the repository pattern for storing CNSI Records

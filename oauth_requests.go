@@ -9,22 +9,6 @@ import (
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
-func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsis.CNSIRecord, err error) {
-	// look up token
-
-	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
-	if !ok {
-		return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.GUID, r.UserGUID)
-	}
-
-	c, ok = p.getCNSIRecord(r.GUID)
-	if !ok {
-		return t, c, fmt.Errorf("Info could not be found for CNSI with GUID %s", r.GUID)
-	}
-
-	return t, c, nil
-}
-
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Request) (*http.Response, error) {
 	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
 	if err != nil {
@@ -57,7 +41,23 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 		got401 = true
 	}
 
-	panic("Authentication code hit impossible case")
+	// panic("Authentication code hit impossible case")
+}
+
+func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsis.CNSIRecord, err error) {
+	// look up token
+
+	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
+	if !ok {
+		return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.GUID, r.UserGUID)
+	}
+
+	c, ok = p.getCNSIRecord(r.GUID)
+	if !ok {
+		return t, c, fmt.Errorf("Info could not be found for CNSI with GUID %s", r.GUID)
+	}
+
+	return t, c, nil
 }
 
 func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokens.TokenRecord, err error) {

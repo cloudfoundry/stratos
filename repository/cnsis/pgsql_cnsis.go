@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-
-	"github.com/hpcloud/portal-proxy/datastore"
 )
 
 const (
@@ -25,13 +23,8 @@ type PostgresCNSIRepository struct {
 }
 
 // NewPostgresCNSIRepository will create a new instance of the PostgresInstanceRepository
-func NewPostgresCNSIRepository(dc datastore.DatabaseConfig) (Repository, error) {
-	db, err := datastore.GetConnection(dc)
-	if err != nil {
-		return nil, err
-	}
-
-	return &PostgresCNSIRepository{db: db}, nil
+func NewPostgresCNSIRepository(dcp *sql.DB) (Repository, error) {
+	return &PostgresCNSIRepository{db: dcp}, nil
 }
 
 // List - Returns a list of CNSI Records
@@ -64,40 +57,47 @@ func (p *PostgresCNSIRepository) List() ([]*CNSIRecord, error) {
 // Find - Returns a single CNSI Record
 func (p *PostgresCNSIRepository) Find(guid string) (CNSIRecord, error) {
 
-	cnsi := new(CNSIRecord)
-
-	stmt, err := p.db.Prepare(findCNSI)
-	if err != nil {
-		return CNSIRecord{}, fmt.Errorf("Unable to Prepare/Find CNSI record: %v", err)
-	}
-
 	var (
 		pCNSIType string
 		pURL      string
 	)
-	err = stmt.QueryRow(guid).Scan(&cnsi.GUID,
-		&cnsi.Name,
-		&pCNSIType,
-		&pURL,
-		&cnsi.AuthorizationEndpoint,
-		&cnsi.TokenEndpoint)
-	if err != nil {
-		return CNSIRecord{}, fmt.Errorf("Unable to Find CNSI record: %v", err)
+
+	cnsi := new(CNSIRecord)
+
+	err := p.db.QueryRow(findCNSI, guid).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
+		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint)
+
+	switch {
+	case err == sql.ErrNoRows:
+		return CNSIRecord{}, errors.New("No match for that GUID")
+	case err != nil:
+		return CNSIRecord{}, fmt.Errorf("Error trying to Find CNSI record: %v", err)
+	default:
+		// do nothing
 	}
 
 	// TODO(wchrisjohnson): discover a way to do this automagically
 	// These two fields need to be converted manually
-	cnsi.CNSIType, err = getCNSIType(pCNSIType)
-	if err != nil {
+	if cnsi.CNSIType, err = getCNSIType(pCNSIType); err != nil {
 		return CNSIRecord{}, fmt.Errorf("Unable to get CNSI type: %v", err)
 	}
 
-	cnsi.APIEndpoint, err = url.Parse(pURL)
-	if err != nil {
+	if cnsi.APIEndpoint, err = url.Parse(pURL); err != nil {
 		return CNSIRecord{}, fmt.Errorf("Unable to parse API Endpoint: %v", err)
 	}
 
 	return *cnsi, nil
+}
+
+// Save - Persist a CNSI Record to a datastore
+func (p *PostgresCNSIRepository) Save(guid string, cnsi CNSIRecord) error {
+
+	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
+		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint); err != nil {
+		return fmt.Errorf("Unable to Save CNSI record: %v", err)
+	}
+
+	return nil
 }
 
 func getCNSIType(cnsi string) (CNSIType, error) {
@@ -110,24 +110,4 @@ func getCNSIType(cnsi string) (CNSIType, error) {
 		return CNSIType(cnsi), nil
 	}
 	return newType, errors.New("Invalid string passed to getCNSIType.")
-}
-
-// Save - Persist a CNSI Record to a datastore
-func (p *PostgresCNSIRepository) Save(guid string, cnsi CNSIRecord) error {
-
-	stmt, err := p.db.Prepare(saveCNSI)
-	if err != nil {
-		return fmt.Errorf("Unable to Prepare/Save CNSI record: %v", err)
-	}
-
-	_, err = stmt.Exec(guid,
-		cnsi.Name,
-		fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint),
-		cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint)
-	if err != nil {
-		return fmt.Errorf("Unable to Save CNSI record: %v", err)
-	}
-
-	return nil
 }

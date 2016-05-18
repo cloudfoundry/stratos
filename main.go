@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -37,7 +38,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	portalProxy := newPortalProxy(portalConfig, databaseConfig)
+	var databaseConnectionPool *sql.DB
+	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer databaseConnectionPool.Close()
+
+	portalProxy := newPortalProxy(portalConfig, databaseConfig, databaseConnectionPool)
+
+	// 2 - store databae connection in the portalProxy struct
 
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
@@ -60,7 +71,7 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	dc, err := datastore.NewPostgresConnectionParametersFromConfig(dc)
+	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
@@ -82,10 +93,11 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc portalConfig, dc datastore.DatabaseConfig) *portalProxy {
+func newPortalProxy(pc portalConfig, dc datastore.DatabaseConfig, dcp *sql.DB) *portalProxy {
 	pp := &portalProxy{
-		Config:         pc,
-		DatabaseConfig: dc,
+		Config:                 pc,
+		DatabaseConfig:         dc,
+		DatabaseConnectionPool: dcp,
 	}
 
 	return pp

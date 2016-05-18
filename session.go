@@ -40,7 +40,5 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 		session.Values[k] = v
 	}
 
-	// TODO: CJ - Save to database
-
 	return p.CookieStore.Save(req, res, session)
 }

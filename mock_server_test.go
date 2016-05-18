@@ -65,7 +65,7 @@ func setupPortalProxy() *portalProxy {
 
 	dc := datastore.DatabaseConfig{}
 
-	pp := newPortalProxy(pc, dc)
+	pp := newPortalProxy(pc, dc, nil)
 	pp.initCookieStore()
 
 	return pp

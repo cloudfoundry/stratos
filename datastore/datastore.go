@@ -3,7 +3,6 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/kat-co/vala"
@@ -46,68 +45,25 @@ const (
 	DefaultConnectionTimeout = 10
 )
 
-// NewPostgresConnectionParametersFromConfig setup database connection parameters based on contents of config struct
-func NewPostgresConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfig, error) {
+// NewDatabaseConnectionParametersFromConfig setup database connection parameters based on contents of config struct
+func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfig, error) {
 
-	validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
+	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
+	if err != nil {
+		return dc, err
+	}
 
 	// set default for connection timeout if necessary
-	if dc.ConnectionTimeoutInSecs == 0 {
+	if dc.ConnectionTimeoutInSecs <= 0 {
 		dc.ConnectionTimeoutInSecs = DefaultConnectionTimeout
 	}
 
-	// SSL has been disabled - bail out
-	if dc.SSLMode == string(SSLDisabled) {
+	if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
+		dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 		return dc, nil
 	}
 
-	// // initiate SSL configuration
-	// dc, err := initSSLConfigs(dc)
-	// if err != nil {
-	// 	return dc, errors.New("Unable to configure database connection for SSL.")
-	// }
-
-	return dc, nil
-}
-
-// func initSSLConfigs(dc DatabaseConfig) (DatabaseConfig, error) {
-// 	if dc.SSLMode == string(SSLRequired) ||
-// 		dc.SSLMode == string(SSLVerifyCA) ||
-// 		dc.SSLMode == string(SSLVerifyFull) {
-//
-// 		// ensure cert file exists
-// 		if dc.CertificateFile != "" {
-// 			ok, err := fileExists(dc.CertificateFile)
-// 			if !ok {
-// 				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_CERTIFICATE_FILE missing or inaccessible. '%v'", dc.CertificateFile, err)
-// 			}
-// 		}
-//
-// 		// ensure ssl key file exists
-// 		if dc.SSLKey != "" {
-// 			ok, err := fileExists(dc.KeyFile)
-// 			if !ok {
-// 				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_KEY_FILE missing or inaccessible. '%v'", dc.KeyFile, err)
-// 			}
-// 		}
-//
-// 		// ensure root cert file exists
-// 		if dc.SSLRootCertificate != "" {
-// 			ok, err := fileExists(dc.RootCertificateFile)
-// 			if !ok {
-// 				return dc, fmt.Errorf("Filename '%s' referenced in PGSQL_ROOT_CERTIFICATE_FILE missing or inaccessible. '%v'", dc.RootCertificateFile, err)
-// 			}
-// 		}
-// 	}
-//
-// 	return dc, fmt.Errorf("Invalid SSL mode: '%s'", dc.SSLMode)
-// }
-
-func fileExists(filename string) (bool, error) {
-	err := fmt.Errorf("File '%s' does not exist or is not accessible.", filename)
-	_, e := os.Lstat(filename)
-	passes := (e == nil)
-	return passes, err
+	return dc, fmt.Errorf("Invalid SSL mode: %v", dc.SSLMode)
 }
 
 func validateRequiredDatabaseParams(username, password, database, host string,
