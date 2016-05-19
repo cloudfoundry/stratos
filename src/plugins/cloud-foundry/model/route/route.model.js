@@ -3,7 +3,6 @@
 
   /**
    * @namespace cloud-foundry.model
-   * @memberOf cloud-foundry.model
    * @description Route model
    */
   angular
@@ -20,11 +19,12 @@
   }
 
   /**
-   * @memberof cloud-foundry.model.route
+   * @memberof cloud-foundry.model
+   * @namespace cloud-foundry.model.route
    * @name Route
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
-   * @property {object} data - the data bag
+   * @property {object} route - the currently selected route state
    * @class
    */
   function Route(apiManager) {
