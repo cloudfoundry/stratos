@@ -1,3 +1,5 @@
+$service-attached-size: 24px;
+
 .service-panel {
   display: flex;
   align-items: stretch;
@@ -9,19 +11,21 @@
 
 .service-icon {
   display: block;
-  padding: $hpe-unit-space * 1.5;
-  padding-left: 0;
+  padding: $hpe-unit-space * 2;
+  padding-left: $hpe-unit-space * 0.5;
+  color: $hpe-primary;
 }
 
 .service-metadata {
   display: flex;
-  padding-left: $hpe-unit-space;
+  padding-left: $hpe-unit-space * 2;
 
   dt {
     text-transform: uppercase;
+    font-weight: normal;
 
     &:not(:first-of-type) {
-      margin-top: $hpe-unit-space / 2;
+      margin-top: $hpe-unit-space / 1.25;
     }
   }
 
@@ -30,6 +34,9 @@
     flex-direction: column;
     margin-left: auto;
     text-align: right;
+    align-items: inherit;
+    padding: 0;
+    font-weight: normal;
 
     .btn-link {
       margin-top: auto;
@@ -39,6 +46,7 @@
       &:focus,
       &:active {
         text-decoration: none;
+        outline: 0;
       }
 
       .helion-icon {
@@ -47,9 +55,15 @@
     }
   }
 
+  .service-attached {
+    position: absolute;
+    margin-left: -$hpe-unit-space * 1.25;
+    margin-top: -(($service-attached-size - $font-size-base)/2);
+  }
+
   .service-attached:before {
     font-family: 'helion-icons';
+    font-size: $service-attached-size;
     content: '\e916';
-    margin-right: 5px;
   }
 }
