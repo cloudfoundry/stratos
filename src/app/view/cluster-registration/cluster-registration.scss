@@ -2,6 +2,7 @@
 
 .cluster-registration {
   display: block;
+  overflow-y: auto;
 
   &.overlay-position {
     .registration-content {

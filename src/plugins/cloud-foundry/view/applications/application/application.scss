@@ -53,12 +53,74 @@
 
 .application-nav.nav.nav-tabs > li {
   padding-top: 0;
-
-  &:first-of-type {
-    margin-left: 0;
-  }
 }
 
 .application-nav-menu {
   margin-left: auto;
+}
+
+// confirmation dialog
+
+.confirm-dialog > .modal-dialog {
+  @include flex-align(center, center);
+
+  height: 100%;
+  width: 100%;
+  margin: 0;
+
+  & > .modal-content {
+    @include flex-align(flex-start, stretch, column);
+
+    width: $hpe-unit-space * 16;
+    height: $hpe-unit-space * 16;
+    box-shadow: none;
+    border: none;
+
+    .modal-header {
+      padding: $hpe-unit-space;
+
+      > h3 {
+        height: $font-size-large;
+        line-height: $font-size-large;
+        margin: 0;
+        padding: 0;
+        font-size: $font-size-large;
+        font-weight: normal;
+        color: $gray-darker;
+      }
+    }
+
+    .modal-body {
+      flex: 1;
+      @include flex-align(center, center);
+
+      color: $gray-darker;
+      font-size: $font-size-large;
+      text-align: center;
+      padding: 0 $hpe-unit-space * 4;
+
+      & > p {
+        margin-bottom: $hpe-unit-space;
+
+        &:before {
+          @extend .helion-icon;
+          content: $helion-icon-Alert_pressed;
+          display: block;
+          margin-bottom: $hpe-unit-space;
+          font-size: $hpe-unit-space * 2;
+          color: $state-warning-bg;
+        }
+      }
+    }
+
+    .modal-footer {
+      @include flex-align(space-between, center);
+
+      padding: $hpe-unit-space;
+      &:before,
+      &:after {
+        display: none;
+      }
+    }
+  }
 }

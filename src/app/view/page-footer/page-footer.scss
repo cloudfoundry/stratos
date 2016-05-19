@@ -1,6 +1,6 @@
 page-footer, [page-footer] {
   display: block;
-  flex: 0;
+  flex-shrink: 0;
   position: relative;
   height: $page-footer-height;
   color: $page-footer-color-fg;

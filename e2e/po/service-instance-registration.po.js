@@ -4,6 +4,7 @@
 var helpers = require('./helpers.po');
 var loginPage = require('./login-page.po');
 var navbar = require('./navbar.po');
+var credentialsFormName = 'credentialsFormCtrl.credentialsForm';
 
 module.exports = {
 
@@ -16,8 +17,14 @@ module.exports = {
   disconnect: disconnect,
   completeRegistration: completeRegistration,
   registrationNotification: registrationNotification,
-  serviceInstanceStatus: serviceInstanceStatus
+  serviceInstanceStatus: serviceInstanceStatus,
 
+  credentialsForm: credentialsForm,
+  credentialsFormFields: credentialsFormFields,
+  registerButton: registerButton,
+  cancel: cancel,
+  fillCredentialsForm: fillCredentialsForm,
+  registerServiceInstance: registerServiceInstance
 };
 
 function registrationOverlay() {
@@ -39,11 +46,12 @@ function disconnectLink(rowIndex) {
 }
 
 function connect(rowIndex) {
-  return connectLink(rowIndex).click();
+  connectLink(rowIndex).click();
+  browser.driver.sleep(2000);
 }
 
 function disconnect(rowIndex) {
-  return disconnectLink(rowIndex).click();
+  disconnectLink(rowIndex).click();
 }
 
 function doneButton() {
@@ -51,7 +59,7 @@ function doneButton() {
 }
 
 function completeRegistration() {
-  return doneButton().click();
+  doneButton().click();
 }
 
 function serviceInstanceStatus(rowIndex, statusClass) {
@@ -61,4 +69,40 @@ function serviceInstanceStatus(rowIndex, statusClass) {
 
 function registrationNotification() {
   return registrationOverlay().element(by.css('.fixed-footer .registration-notification'));
+}
+
+/**
+ * Credentials Form page objects
+ */
+function credentialsForm() {
+  return element(by.id('registration-overlay')).element(by.css('flyout'))
+    .element(by.css('form[name="' + credentialsFormName + '"]'));
+}
+
+function credentialsFormFields() {
+  return helpers.getFormFields(credentialsFormName);
+}
+
+function registerButton() {
+  return helpers.getForm(credentialsFormName)
+    .element(by.buttonText('Register'));
+}
+
+function cancel() {
+  helpers.getForm(credentialsFormName)
+    .element(by.buttonText('Cancel')).click();
+  browser.driver.sleep(2000);
+}
+
+function fillCredentialsForm(username, password) {
+  var fields = credentialsFormFields();
+  fields.get(2).clear();
+  fields.get(3).clear();
+  fields.get(2).sendKeys(username || '');
+  fields.get(3).sendKeys(password || '');
+}
+
+function registerServiceInstance() {
+  registerButton().click();
+  browser.driver.sleep(2000);
 }

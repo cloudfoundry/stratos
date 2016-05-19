@@ -32,7 +32,7 @@
 
     getDeploymentTargets: function () {
       return {
-        url: '/api/ce/v2/deployments/targets',
+        url: '/api/ce/v2/deployments/targets?user_id=1',
         response: {
           200: {
             body: [
@@ -49,7 +49,7 @@
               },
               {
                 id: 1,
-                user_id: 2,
+                user_id: 1,
                 name: 'Deployment Target Name 2',
                 url: 'http://www.example2.com/',
                 userName: 'username2',

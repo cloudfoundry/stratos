@@ -53,47 +53,43 @@
 <ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
   <li>
     <button class="btn btn-link btn-border-less"
-      translate
       ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STARTED'"
       ng-click="appCtrl.model.startApp(appCtrl.id)">
       <i class="helion-icon helion-icon-lg helion-icon-Launch"></i>
-      Launch App
+      <span translate>Launch App</span>
     </button>
   </li>
   <li>
     <button class="btn btn-link btn-border-less"
-      translate
       ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STOPPED'"
       ng-click="appCtrl.model.stopApp(appCtrl.id)">
       <i class="helion-icon helion-icon-lg helion-icon-Halt-stop"></i>
-      Stop
+      <span translate>Stop</span>
     </button>
   </li>
   <li>
     <button class="btn btn-link btn-border-less"
-      translate
       ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
       ng-if="appCtrl.model.application.summary.state!=='STOPPED'"
       ng-click="appCtrl.model.restartApp(appCtrl.id)">
       <i class="helion-icon helion-icon-lg helion-icon-Refresh"></i>
-      Restart
+      <span translate>Restart</span>
     </button>
   </li>
   <li>
     <button class="btn btn-link btn-border-less"
-      translate>
+      ng-click="appCtrl.deleteApp()">
       <i class="helion-icon helion-icon-lg helion-icon-Trash"></i>
-      Delete
+      <span translate>Delete</span>
     </button>
   </li>
   <li>
     <button class="btn btn-link btn-border-less"
-      translate
       ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
       ng-if="appCtrl.model.application.summary.state==='STOPPED'"
       ng-click="appCtrl.model.startApp(appCtrl.id)">
       <i class="helion-icon helion-icon-lg helion-icon-Play"></i>
-      Start
+      <span translate>Start</span>
     </button>
   </li>
 </ul>
