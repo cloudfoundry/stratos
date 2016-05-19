@@ -32,6 +32,14 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 			"CNSI Name or Endpoint were not provided when trying to register an HCF Cluster")
 	}
 
+	apiEndpointURL, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to get API Endpoint",
+			"Failed to get API Endpoint: %v", err)
+	}
+
 	v2InfoResponse, err := getHCFv2Info(apiEndpoint)
 	if err != nil {
 		return newHTTPShadowError(
@@ -41,15 +49,9 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 			err)
 	}
 
-	// save data to temporary map
-	apiEndpointURL, err := url.Parse(apiEndpoint)
-	if err != nil {
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to get API Endpoint",
-			"Failed to get API Endpoint: %v", err)
-	}
 	guid := uuid.NewV4().String()
+
+	// save data to temporary map
 	newCNSI := cnsis.CNSIRecord{
 		Name:                  cnsiName,
 		CNSIType:              cnsis.CNSIHCF,
