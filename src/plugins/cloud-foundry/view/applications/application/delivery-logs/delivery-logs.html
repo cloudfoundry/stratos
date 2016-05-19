@@ -61,20 +61,19 @@
       <tbody>
       <tr ng-repeat="build in appDelLogsCtrl.hceModel.delivery.builds | filter:appDelLogsCtrl.searchValue">
         <td><a class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">{{ build.message }}</a></td>
-        <td ng-switch="build.result" class="row">
-          <!-- TODO: Translate message in model before adding to scope (this will fix search) -->
-          <div ng-switch-when="success" class="">
+        <td ng-switch="build.result.value" class="row result-col">
+          <div ng-switch-when="Success">
             <span class="circle success"></span>
-            <span translate>Success</span>
+            <span translate>{{build.result.label}}</span>
             <a class="" href="" ng-click="appDelLogsCtrl.viewBuildResult(build)">view</a>
           </div>
-          <div ng-switch-when="deploying">
+          <div ng-switch-when="Deploying">
             <span class="circle deploying"></span>
-            <span translate>Deploying</span>
+            <span translate>{{build.result.label}}</span>
           </div>
-          <div ng-switch-when="failure">
+          <div ng-switch-when="Failure">
             <span class="circle failure"></span>
-            <span translate>Failed</span>
+            <span translate>{{build.result.label}}</span>
             <a class="" href="" ng-click="appDelLogsCtrl.viewBuildResult(build)">view</a>
           </div>
           <div ng-switch-default>

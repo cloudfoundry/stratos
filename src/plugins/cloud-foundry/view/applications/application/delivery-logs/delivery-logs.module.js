@@ -67,28 +67,28 @@
         builds: [
           {
             message: 'Update lastupdated.txt',
-            result: 'failure',
+            result: transformResult('Failure'),
             time: momentise(moment().valueOf()),
             commitAuthor: 'DBalwin',
             reason: 'Manual'
           },
           {
             message: 'Update lastupdated.txt',
-            result: 'deploying',
+            result: transformResult('Deploying'),
             time: momentise(moment().subtract(46064, 'seconds').valueOf()),
             commitAuthor: 'TWogan',
             reason: 'Manual'
           },
           {
             message: 'Update lastupdated.txt',
-            result: 'success',
+            result: transformResult('Success'),
             time: momentise(moment().subtract(40004, 'seconds').valueOf()),
             commitAuthor: 'GNuman',
             reason: 'Manual'
           },
           {
             message: 'Update lastupdated.txt',
-            result: 'asadsa',
+            result: transformResult('unknownstatus'),
             time: momentise(moment().subtract(335643, 'seconds').valueOf()),
             commitAuthor: 'BAtman',
             reason: 'Because why not'
@@ -101,6 +101,14 @@
       // Convert date to string BEFORE we send to scope, this will allow any filters that use the data to work
       // Ensure we use i18n date/time format
       return moment(epoch).format('L - LTS');
+    }
+
+    function transformResult(result) {
+      // Localise result BEFORE we send to scope, this will allow any filters that use the data to work.
+      return {
+        value: result,
+        label: gettext(result)
+      };
     }
 
     $scope.$on("$destroy", function() {
