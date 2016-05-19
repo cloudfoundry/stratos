@@ -60,13 +60,15 @@ gulp.task('copy:js', function () {
 });
 
 // Copy 'lib' folder to 'dist'
-// gulp.src does not support symlinks, so use vinyl-fs
+// Bote: gulp.src does not support symlinks, so use vinyl-fs.
+// Even with vinyl-fs, when copying symlink dirs, it only copies 1 level deep of folder
+// so, we copy explicitly our helion-* repos' dist folder - these are the repositories that you
+// might be using 'bower link' with
 gulp.task('copy:lib', function () {
-  return vfs
-    .src([
-      paths.src + 'lib/',
-      paths.src + 'lib/**/*'
-    ]).pipe(vfs.dest(paths.dist + 'lib/'));
+  return vfs.src([
+    paths.src + 'lib/**/*',
+    paths.src + 'lib/helion-*/dist/**/*'
+  ]).pipe(vfs.dest(paths.dist + 'lib'));
 });
 
 // Copy 'translations' folder to 'dist'
