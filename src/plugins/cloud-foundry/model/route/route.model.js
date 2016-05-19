@@ -49,7 +49,7 @@
    /**
     * @function listAllAppsForRoute
     * @memberof cloud-foundry.model.route
-    * @description Lists all apps for the route
+    * @description Lists all apps for the route and store the response in the model
     * @param {string} guid - Route identifier
     * @param {object} params - optional parameters
     * @returns {promise} A resolved/rejected promise
@@ -62,6 +62,24 @@
         .then(function (response) {
           that.route.id = guid;
           that.route.apps = response.data;
+        });
+    },
+
+   /**
+    * @function listAllAppsForRouteWihoutStore
+    * @memberof cloud-foundry.model.route
+    * @description get all apps for the route
+    * @param {string} guid - Route identifier
+    * @param {object} params - optional parameters
+    * @returns {promise} A resolved/rejected promise
+    * @public
+    */
+    listAllAppsForRouteWihoutStore: function (guid, params) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Routes')
+        .ListAllAppsForRoute(guid, params)
+        .then(function (response) {
+          return response.data.resources;
         });
     }
   });
