@@ -66,7 +66,7 @@
     },
 
    /**
-    * @function listAllAppsForRouteWihoutStore
+    * @function listAllAppsForRouteWithoutStore
     * @memberof cloud-foundry.model.route
     * @description get all apps for the route
     * @param {string} guid - Route identifier
@@ -74,7 +74,7 @@
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllAppsForRouteWihoutStore: function (guid, params) {
+    listAllAppsForRouteWithoutStore: function (guid, params) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
         .ListAllAppsForRoute(guid, params)

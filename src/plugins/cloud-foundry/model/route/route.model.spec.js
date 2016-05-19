@@ -35,6 +35,21 @@
       expect(routeModel.route.id).toBe('123');
       expect(routeModel.route.apps).toEqual(ListAllAppsForRoute.response['200'].body);
     });
+
+    it('listAllAppsForRouteWithoutStore', function () {
+      var ListAllAppsForRoute = mock.cloudFoundryAPI.Routes.ListAllAppsForRoute('123');
+      $httpBackend.whenGET(ListAllAppsForRoute.url).respond(200, ListAllAppsForRoute.response['200'].body);
+      $httpBackend.expectGET(ListAllAppsForRoute.url);
+
+      var result;
+      expect(result).not.toBeDefined();
+      routeModel.listAllAppsForRouteWithoutStore('123').then(function (resources) {
+        result = resources;
+      });
+      $httpBackend.flush();
+      expect(result).toBeDefined();
+      expect(result.length).toBe(1);
+    });
   });
 
 })();
