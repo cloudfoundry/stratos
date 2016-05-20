@@ -75,7 +75,6 @@
     * @public
     */
     listAllAppsForRouteWithoutStore: function (guid, params) {
-      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
         .ListAllAppsForRoute(guid, params)
         .then(function (response) {
