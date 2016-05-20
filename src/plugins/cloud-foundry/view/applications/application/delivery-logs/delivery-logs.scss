@@ -1,3 +1,6 @@
+@import "details/build-log";
+@import "details/commit";
+
 .application-details {
   .delivery-logs-summary {
     .data-body {
@@ -27,25 +30,24 @@
       }
     }
   }
-  .delivery-logs-builds {
-    .circle {
-      border-radius: 50%;
-      width: $hpe-unit-space / 2;
-      height: $hpe-unit-space / 2;
-      display: inline-block;
-      position: relative;
-      top: 1px;
-      &.success {
-        background: $status-okay;
-        border: 1px solid $status-okay;
-      }
-      &.deploying {
-        border: 2px solid $salmon;
-      }
-      &.failure {
-        background: $status-critical;
-        border: 1px solid $status-critical;
-      }
-    }
+}
+
+.circle {
+  border-radius: 50%;
+  width: $hpe-unit-space / 2;
+  height: $hpe-unit-space / 2;
+  display: inline-block;
+  position: relative;
+  top: 1px;
+  &.success {
+    background: $status-okay;
+    border: 1px solid $status-okay;
+  }
+  &.deploying {
+    border: 2px solid $salmon;
+  }
+  &.failure {
+    background: $status-critical;
+    border: 1px solid $status-critical;
   }
 }

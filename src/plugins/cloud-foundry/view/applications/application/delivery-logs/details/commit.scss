@@ -1,0 +1,44 @@
+.delivery-commit-detail {
+  margin-right: 120px;
+
+  &.panel {
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  .summary-col {
+    div {
+      padding-top: $hpe-unit-space / 2;
+      &:last-of-type {
+        padding-bottom: $hpe-unit-space / 2;
+      }
+    }
+  }
+
+  .nav-tabs {
+    border-width: 2px;
+  }
+}
+
+.delivery-commit-builds {
+  margin-right: 120px;
+
+  table.table.table-outlined {
+    border-width: 1px;
+  }
+
+  .build-result {
+    text-transform: uppercase;
+    font-weight: $hpe-font-weight-semibold;
+  }
+
+  .build-view {
+    a {
+      font-size: inherit;
+      text-decoration: none;
+    }
+  }
+}
+
+
+

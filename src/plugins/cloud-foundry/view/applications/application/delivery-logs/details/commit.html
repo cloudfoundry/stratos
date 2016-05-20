@@ -1,0 +1,60 @@
+<div class="delivery-commit-detail panel">
+  <div class="row">
+    <div class="col-sm-3 summary-col">
+      <div translate>COMMIT ID</div>
+      <div translate>CREATED</div>
+      <div translate>COMMIT AUTHOR</div>
+    </div>
+    <div class="col-sm-6 summary-col text-right">
+      <div>{{ detailViewCtrl.context.commit.id }}</div>
+      <div>{{ detailViewCtrl.context.commit.created }}</div>
+      <div>{{ detailViewCtrl.context.commit.author }}</div>
+    </div>
+  </div>
+  <br>
+  <div class="nav-tabs"></div>
+</div>
+<div class="delivery-commit-builds">
+  <table class="table table-outlined">
+    <tbody>
+    <tr ng-repeat="build in detailViewCtrl.context.builds">
+      <td ng-switch="build.result.value" class="row result-col build-result">
+        <div ng-switch-when="Success">
+          <span class="circle success"></span>
+          <span translate>{{ build.result.label }}</span>
+        </div>
+        <div ng-switch-when="Deploying">
+          <span class="circle deploying"></span>
+          <span translate>{{ build.result.label }}</span>
+        </div>
+        <div ng-switch-when="Failure">
+          <span class="circle failure"></span>
+          <span translate>{{ build.result.label }}</span>
+        </div>
+        <div ng-switch-default>
+          <span translate>Unknown</span>
+        </div>
+      </td>
+      <td class="row result-col">
+        <span translate>Started: </span>
+        {{ build.time.label }}
+      </td>
+      <td></td>
+      <td class="row result-col">
+        <span translate>Duration: </span>
+        <span am-time-ago="build.time.value"></span>
+      </td>
+      <td ng-switch="build.result.value == 'Success' || build.result.value == 'Failure'" class="build-view">
+        <div ng-switch-when="true">
+          <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewBuild(build)">
+            <i class="helion-icon helion-icon-Right_Arrow"></i>
+            <span translate>View</span>
+          </a>
+        </div>
+        <div ng-switch-default>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
