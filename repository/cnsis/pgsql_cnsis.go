@@ -9,12 +9,14 @@ import (
 
 const (
 	listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
-							 FROM cnsis`
+               FROM cnsis`
+
 	findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
-  						 FROM cnsis
-               WHERE guid=$1`
+              FROM cnsis
+              WHERE guid=$1`
+
 	saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint)
-							 VALUES ($1, $2, $3, $4, $5, $6)`
+              VALUES ($1, $2, $3, $4, $5, $6)`
 )
 
 // PostgresCNSIRepository is a PostgreSQL-backed CNSI repository

@@ -449,75 +449,75 @@ func TestSetUAATokenRecord(t *testing.T) {
 	}
 }
 
-//
-// func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
-// 	t.Parallel()
-//
-// 	req := setupMockReq("POST", map[string]string{
-// 		"username":  "admin",
-// 		"password":  "changeme",
-// 		"cnsi_guid": mockCNSIGuid,
-// 	})
-//
-// 	_, _, ctx, pp := setupHTTPTest(req)
-//
-// 	mockUAA := setupMockServer(t,
-// 		msRoute("/oauth/token"),
-// 		msMethod("POST"),
-// 		msStatus(http.StatusOK),
-// 		msBody(jsonMust(mockUAAResponse)))
-//
-// 	defer mockUAA.Close()
-//
-// 	var mockCNSI = cnsiRecord{
-// 		Name:     "mockHCF",
-// 		CNSIType: cnsiHCF,
-// 	}
-// 	pp.CNSIs[mockCNSIGuid] = mockCNSI
-//
-// 	if err := pp.loginToCNSI(ctx); err == nil {
-// 		t.Error("Login against CNSI should fail if API endpoint not specified")
-// 	}
-//
-// 	testTokenKey := mkTokenRecordKey("", mockUserGuid)
-// 	if _, ok := pp.CNSITokenMap[testTokenKey]; ok {
-// 		t.Error("Token should not be saved in CNSI map if API endpoint not specified")
-// 	}
-// }
+func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
+	t.Skip("Skipping for now - need to verify whether still needed.")
+	t.Parallel()
 
-// func TestLoginToCNSIWithBadCreds(t *testing.T) {
-// 	t.Parallel()
-//
-// 	req := setupMockReq("POST", map[string]string{
-// 		"username":  "admin",
-// 		"password":  "busted",
-// 		"cnsi_guid": mockCNSIGuid,
-// 	})
-//
-// 	_, _, ctx, pp := setupHTTPTest(req)
-//
-// 	mockUAA := setupMockServer(t,
-// 		msRoute("/oauth/token"),
-// 		msMethod("POST"),
-// 		msStatus(http.StatusOK),
-// 		msBody(jsonMust(mockUAAResponse)))
-//
-// 	defer mockUAA.Close()
-//
-// 	var mockCNSI = cnsiRecord{
-// 		Name:                  "mockHCF",
-// 		CNSIType:              cnsiHCF,
-// 		AuthorizationEndpoint: mockUAA.URL,
-// 	}
-// 	pp.CNSIs[mockCNSIGuid] = mockCNSI
-//
-// 	if err := pp.loginToCNSI(ctx); err != nil {
-// 		t.Error(err)
-// 	}
-//
-// 	testTokenKey := mkTokenRecordKey(mockCNSIGuid, mockUserGuid)
-// 	if _, ok := pp.CNSITokenMap[testTokenKey]; !ok {
-// 		t.Errorf("Token was not saved in CNSI map")
-// 	}
-// }
-//
+	req := setupMockReq("POST", "", map[string]string{
+		"username":  "admin",
+		"password":  "changeme",
+		"cnsi_guid": mockCNSIGUID,
+	})
+
+	_, _, ctx, pp := setupHTTPTest(req)
+
+	mockUAA := setupMockServer(t,
+		msRoute("/oauth/token"),
+		msMethod("POST"),
+		msStatus(http.StatusOK),
+		msBody(jsonMust(mockUAAResponse)))
+
+	defer mockUAA.Close()
+
+	// var mockCNSI = CNSIRecord{
+	// 	Name:     "mockHCF",
+	// 	CNSIType: cnsiHCF,
+	// }
+	// pp.CNSIs[mockCNSIGuid] = mockCNSI
+
+	if err := pp.loginToCNSI(ctx); err == nil {
+		t.Error("Login against CNSI should fail if API endpoint not specified")
+	}
+
+	// testTokenKey := mkTokenRecordKey("", mockUserGuid)
+	// if _, ok := pp.CNSITokenMap[testTokenKey]; ok {
+	// 	t.Error("Token should not be saved in CNSI map if API endpoint not specified")
+	// }
+}
+
+func TestLoginToCNSIWithBadCreds(t *testing.T) {
+	t.Skip("Skipping for now - need to verify whether still needed.")
+	t.Parallel()
+
+	req := setupMockReq("POST", "", map[string]string{
+		"username":  "admin",
+		"password":  "busted",
+		"cnsi_guid": mockCNSIGUID,
+	})
+
+	_, _, ctx, pp := setupHTTPTest(req)
+
+	mockUAA := setupMockServer(t,
+		msRoute("/oauth/token"),
+		msMethod("POST"),
+		msStatus(http.StatusOK),
+		msBody(jsonMust(mockUAAResponse)))
+
+	defer mockUAA.Close()
+
+	// var mockCNSI = cnsiRecord{
+	// 	Name:                  "mockHCF",
+	// 	CNSIType:              cnsiHCF,
+	// 	AuthorizationEndpoint: mockUAA.URL,
+	// }
+	// pp.CNSIs[mockCNSIGuid] = mockCNSI
+
+	if err := pp.loginToCNSI(ctx); err != nil {
+		t.Error(err)
+	}
+
+	// testTokenKey := mkTokenRecordKey(mockCNSIGuid, mockUserGuid)
+	// if _, ok := pp.CNSITokenMap[testTokenKey]; !ok {
+	// 	t.Errorf("Token was not saved in CNSI map")
+	// }
+}

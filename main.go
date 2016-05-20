@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -79,15 +80,15 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 func createTempCertFiles(pc portalConfig) (string, string, error) {
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
-	// err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
-	// if err != nil {
-	// 	return "", "", err
-	// }
+	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
+	if err != nil {
+		return "", "", err
+	}
 
-	// err = ioutil.WriteFile(certKeyFilename, []byte(pc.TLSCertKey), 0600)
-	// if err != nil {
-	// 	return "", "", err
-	// }
+	err = ioutil.WriteFile(certKeyFilename, []byte(pc.TLSCertKey), 0600)
+	if err != nil {
+		return "", "", err
+	}
 	return certFilename, certKeyFilename, nil
 }
 

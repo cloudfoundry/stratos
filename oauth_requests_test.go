@@ -288,7 +288,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 	}
 }
 
-func TestDoOauthFlowRequestWithFailedRefresh(t *testing.T) {
+func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 	t.Parallel()
 
 	var failFirst = false
@@ -407,37 +407,44 @@ func TestDoOauthFlowRequestWithFailedRefresh(t *testing.T) {
 	mockHCF.Close()
 }
 
-// func TestDoOauthFlowRequestWithValidTokenFailFirst(t *testing.T) {
-// 	t.Parallel()
-// 	testDoOauthFlowRequest(t, true, time.Now().AddDate(0, 0, 1).Unix())
-// }
+func TestDoOauthFlowRequestWithValidTokenFailFirst(t *testing.T) {
+	t.Skip("Skipping for now.")
+	t.Parallel()
 
-// func TestDoOauthFlowRequestWithExpiredTokenFailFirst(t *testing.T) {
-// 	t.Parallel()
-// 	testDoOauthFlowRequest(t, true, time.Now().AddDate(0, 0, -1).Unix())
-// }
+	// This method no longer exists due to use of sql-mock.
+	// testDoOauthFlowRequest(t, true, time.Now().AddDate(0, 0, 1).Unix())
+}
 
-// func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
-// 	t.Parallel()
-//
-// 	req, _ := http.NewRequest("GET", "/v2/info", nil)
-// 	pp := setupPortalProxy()
-//
-// 	var mockTokenRecord = tokens.TokenRecord{
-// 		AuthToken:   mockUAAToken,
-// 		TokenExpiry: 0,
-// 	}
-// 	pp.setCNSITokenRecord("not-the-right-guid", mockUserGUID, mockTokenRecord)
-//
-// 	_, err := pp.doOauthFlowRequest(CNSIRequest{
-// 		GUID:     mockCNSIGUID,
-// 		UserGUID: mockUserGUID,
-// 	}, req)
-//
-// 	if err == nil {
-// 		t.Error("Request should not succeed if there is no matching CNSI tokenRecord")
-// 	}
-// }
+func TestDoOauthFlowRequestWithExpiredTokenFailFirst(t *testing.T) {
+	t.Skip("Skipping for now.")
+	t.Parallel()
+
+	// This method no longer exists due to use of sql-mock.
+	// testDoOauthFlowRequest(t, true, time.Now().AddDate(0, 0, -1).Unix())
+}
+
+func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
+	t.Skip("Skipping for now - need to verify whether still needed.")
+	t.Parallel()
+
+	req, _ := http.NewRequest("GET", "/v2/info", nil)
+	pp := setupPortalProxy()
+
+	var mockTokenRecord = tokens.TokenRecord{
+		AuthToken:   mockUAAToken,
+		TokenExpiry: 0,
+	}
+	pp.setCNSITokenRecord("not-the-right-guid", mockUserGUID, mockTokenRecord)
+
+	_, err := pp.doOauthFlowRequest(CNSIRequest{
+		GUID:     mockCNSIGUID,
+		UserGUID: mockUserGUID,
+	}, req)
+
+	if err == nil {
+		t.Error("Request should not succeed if there is no matching CNSI tokenRecord")
+	}
+}
 
 func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 	t.Parallel()
