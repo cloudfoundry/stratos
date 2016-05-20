@@ -46,9 +46,7 @@ func main() {
 	}
 	defer databaseConnectionPool.Close()
 
-	portalProxy := newPortalProxy(portalConfig, databaseConfig, databaseConnectionPool)
-
-	// 2 - store databae connection in the portalProxy struct
+	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool)
 
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
@@ -93,10 +91,9 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc portalConfig, dc datastore.DatabaseConfig, dcp *sql.DB) *portalProxy {
+func newPortalProxy(pc portalConfig, dcp *sql.DB) *portalProxy {
 	pp := &portalProxy{
 		Config:                 pc,
-		DatabaseConfig:         dc,
 		DatabaseConnectionPool: dcp,
 	}
 

@@ -153,6 +153,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	}
 
 	req, body, err := getRequestParts(c)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hpcloud/portal-proxy/datastore"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 )
@@ -24,6 +23,8 @@ type mockServerFunc func(*mockServer)
 const mockCNSIGUID = "some-guid-1234"
 const mockUserGUID = "asd-gjfg-bob"
 
+const mockURLString = "http://localhost:9999/some/fake/url/"
+
 func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, echo.Context) {
 	e := echo.New()
 	ctx := e.NewContext(standard.NewRequest(req, nil), standard.NewResponse(res, nil))
@@ -31,9 +32,13 @@ func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, e
 	return e, ctx
 }
 
-func setupMockReq(method string, formValues map[string]string) *http.Request {
+func setupMockReq(method string, urlString string, formValues map[string]string) *http.Request {
+	if urlString == "" {
+		urlString = mockURLString
+	}
+
 	if formValues == nil {
-		req, err := http.NewRequest(method, "http://127.0.0.1", nil)
+		req, err := http.NewRequest(method, urlString, nil)
 		if err != nil {
 			panic(err)
 		}
@@ -45,7 +50,7 @@ func setupMockReq(method string, formValues map[string]string) *http.Request {
 	for key, value := range formValues {
 		form.Set(key, value)
 	}
-	req, err := http.NewRequest(method, "http://127.0.0.1", strings.NewReader(form.Encode()))
+	req, err := http.NewRequest(method, urlString, strings.NewReader(form.Encode()))
 	if err != nil {
 		panic(err)
 	}
@@ -63,9 +68,7 @@ func setupPortalProxy() *portalProxy {
 		CookieStoreSecret:   "hiddenraisinsohno!",
 	}
 
-	dc := datastore.DatabaseConfig{}
-
-	pp := newPortalProxy(pc, dc, nil)
+	pp := newPortalProxy(pc, nil)
 	pp.initCookieStore()
 
 	return pp

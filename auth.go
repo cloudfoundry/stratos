@@ -43,7 +43,10 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -182,7 +185,10 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 		TokenExpiry:  u.TokenExpiry,
 	}
 
-	p.setUAATokenRecord(key, tokenRecord)
+	err := p.setUAATokenRecord(key, tokenRecord)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -220,15 +226,17 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 // 	return tr
 // }
 
-func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) {
+func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error {
 
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		fmt.Printf("Database error getting repo for UAA token: %v", err)
+		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
 	}
 
 	err = tokenRepo.SaveUAAToken(key, t)
 	if err != nil {
-		fmt.Printf("Database error saving UAA token: %v", err)
+		return fmt.Errorf("Database error saving UAA token: %v", err)
 	}
+
+	return nil
 }

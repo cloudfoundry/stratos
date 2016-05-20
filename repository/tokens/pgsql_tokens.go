@@ -32,6 +32,18 @@ func NewPgsqlTokenRepository(dcp *sql.DB) (Repository, error) {
 // SaveUAAToken - Save the UAA token to the datastore
 func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) error {
 
+	if userGUID == "" {
+		return fmt.Errorf("Unable to save UAA Token without a valid User GUID.")
+	}
+
+	if tr.AuthToken == "" {
+		return fmt.Errorf("Unable to save UAA Token without a valid Auth Token.")
+	}
+
+	if tr.RefreshToken == "" {
+		return fmt.Errorf("Unable to save UAA Token without a valid Refresh Token.")
+	}
+
 	if _, err := p.db.Exec(saveUAAToken, userGUID, "uaa", tr.AuthToken, tr.RefreshToken,
 		tr.TokenExpiry); err != nil {
 		return fmt.Errorf("Unable to Save UAA token: %v", err)
@@ -45,6 +57,10 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string) (TokenRecord, error
 
 	tr := new(TokenRecord)
 
+	if userGUID == "" {
+		return TokenRecord{}, fmt.Errorf("Unable to find UAA Token without a valid User GUID.")
+	}
+
 	err := p.db.QueryRow(findUAAToken, userGUID).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
 	if err != nil {
 		return TokenRecord{}, fmt.Errorf("Unable to Find UAA token: %v", err)
@@ -55,6 +71,22 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string) (TokenRecord, error
 
 // SaveCNSIToken - Save the CNSI (UAA) token to the datastore
 func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr TokenRecord) error {
+
+	if cnsiGUID == "" {
+		return fmt.Errorf("Unable to save CNSI Token without a valid CNSI GUID.")
+	}
+
+	if userGUID == "" {
+		return fmt.Errorf("Unable to save CNSI Token without a valid User GUID.")
+	}
+
+	if tr.AuthToken == "" {
+		return fmt.Errorf("Unable to save CNSI Token without a valid Auth Token.")
+	}
+
+	if tr.RefreshToken == "" {
+		return fmt.Errorf("Unable to save CNSI Token without a valid Refresh Token.")
+	}
 
 	if _, err := p.db.Exec(saveCNSIToken, cnsiGUID, userGUID, "cnsi", tr.AuthToken,
 		tr.RefreshToken, tr.TokenExpiry); err != nil {
@@ -68,6 +100,14 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string) (TokenRecord, error) {
 
 	tr := new(TokenRecord)
+
+	if cnsiGUID == "" {
+		return TokenRecord{}, fmt.Errorf("Unable to find CNSI Token without a valid CNSI GUID.")
+	}
+
+	if userGUID == "" {
+		return TokenRecord{}, fmt.Errorf("Unable to find CNSI Token without a valid User GUID.")
+	}
 
 	err := p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
 	if err != nil {

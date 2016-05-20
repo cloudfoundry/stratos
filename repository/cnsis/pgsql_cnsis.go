@@ -47,6 +47,7 @@ func (p *PostgresCNSIRepository) List() ([]*CNSIRecord, error) {
 		}
 		cnsiList = append(cnsiList, cnsi)
 	}
+
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("Unable to List CNSI records: %v", err)
 	}

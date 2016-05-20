@@ -89,13 +89,9 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 		)
 	}
 
-	jsonString, err = json.Marshal(cnsiList)
+	jsonString, err = marshalCNSIlist(cnsiList)
 	if err != nil {
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to retrieve list of CNSIs",
-			"Failed to retrieve list of CNSIs: %v", err,
-		)
+		return err
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -103,10 +99,21 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 	return nil
 }
 
+func marshalCNSIlist(cnsiList []*cnsis.CNSIRecord) ([]byte, error) {
+	jsonString, err := json.Marshal(cnsiList)
+	if err != nil {
+		return nil, newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to retrieve list of CNSIs",
+			"Failed to retrieve list of CNSIs: %v", err,
+		)
+	}
+	return jsonString, nil
+}
+
 func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	var v2InfoReponse v2Info
 
-	// make a call to apiEndpoint/v2/info to get the auth and token endpoints
 	uri, err := url.Parse(apiEndpoint)
 	if err != nil {
 		return v2InfoReponse, err
@@ -153,16 +160,12 @@ func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		errMsg := fmt.Errorf("Unable to establish a database reference: '%v'", err)
-		fmt.Println(errMsg)
-		return errMsg
+		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
 	}
 
 	err = cnsiRepo.Save(guid, c)
 	if err != nil {
-		errMsg := fmt.Errorf("Unable to save a CNSI record: '%v'", err)
-		fmt.Println(errMsg)
-		return errMsg
+		return fmt.Errorf("Unable to save a CNSI record: '%v'", err)
 	}
 
 	return nil
@@ -187,16 +190,12 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tok
 
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		errMsg := fmt.Errorf("Unable to establish a database reference: '%v'", err)
-		fmt.Println(errMsg)
-		return errMsg
+		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
 	}
 
 	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t)
 	if err != nil {
-		errMsg := fmt.Errorf("Unable to save a CNSI Token: %v", err)
-		fmt.Println(errMsg)
-		return errMsg
+		return fmt.Errorf("Unable to save a CNSI Token: %v", err)
 	}
 
 	return nil
