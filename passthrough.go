@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/echo/engine/standard"
 )
 
+// CNSIRequest - <TBD>
 type CNSIRequest struct {
 	GUID     string
 	UserGUID string
@@ -152,6 +153,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	}
 
 	req, body, err := getRequestParts(c)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

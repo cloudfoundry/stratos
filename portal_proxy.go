@@ -1,28 +1,17 @@
 package main
 
 import (
-	"sync"
+	"database/sql"
 
 	"github.com/gorilla/sessions"
-)
 
-type cnsiType string
-
-const (
-	cnsiHCF cnsiType = "hcf"
-	cnsiHCE cnsiType = "hce"
+	"github.com/hpcloud/portal-proxy/datastore"
 )
 
 type portalProxy struct {
-	Config      portalConfig
+	Config                 portalConfig
+	DatabaseConfig         datastore.DatabaseConfig
+	DatabaseConnectionPool *sql.DB
+
 	CookieStore *sessions.CookieStore
-
-	UAATokenMapMut sync.RWMutex
-	UAATokenMap    map[string]tokenRecord
-
-	CNSITokenMapMut sync.RWMutex
-	CNSITokenMap    map[string]tokenRecord
-
-	CNSIMut sync.RWMutex
-	CNSIs   map[string]cnsiRecord
 }

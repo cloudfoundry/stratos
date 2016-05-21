@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/hpcloud/portal-proxy/datastore"
 	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -24,20 +26,55 @@ func main() {
 	log.SetOutput(os.Stdout)
 
 	var portalConfig portalConfig
-
-	// Load portal configuration
-	if err := ucpconfig.Load(&portalConfig); err != nil {
+	portalConfig, err := loadPortalConfig(portalConfig)
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	portalProxy := newPortalProxy(portalConfig)
 
-	initializeHTTPClient(portalConfig.SkipTLSVerification, time.Duration(portalConfig.HTTPClientTimeout))
+	var databaseConfig datastore.DatabaseConfig
+	databaseConfig, err = loadDatabaseConfig(databaseConfig)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	var databaseConnectionPool *sql.DB
+	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer databaseConnectionPool.Close()
+
+	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool)
+
+	initializeHTTPClient(portalConfig.SkipTLSVerification,
+		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
 
 	if err := start(portalProxy); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func loadPortalConfig(pc portalConfig) (portalConfig, error) {
+	if err := ucpconfig.Load(&pc); err != nil {
+		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
+	}
+	return pc, nil
+}
+
+func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
+	if err := ucpconfig.Load(&dc); err != nil {
+		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
+	}
+
+	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
+	if err != nil {
+		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
+	}
+	return dc, nil
 }
 
 func createTempCertFiles(pc portalConfig) (string, string, error) {
@@ -55,12 +92,10 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc portalConfig) *portalProxy {
+func newPortalProxy(pc portalConfig, dcp *sql.DB) *portalProxy {
 	pp := &portalProxy{
-		UAATokenMap:  make(map[string]tokenRecord),
-		CNSITokenMap: make(map[string]tokenRecord),
-		CNSIs:        make(map[string]cnsiRecord),
-		Config:       pc,
+		Config:                 pc,
+		DatabaseConnectionPool: dcp,
 	}
 
 	return pp
@@ -107,6 +142,10 @@ func (p *portalProxy) initCookieStore() {
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
+
+	// TODO(wchrisjohnson): remove prior to shipping
+	e.Static("/*", "demo")
+
 	e.Post("/v1/auth/login/uaa", p.loginToUAA)
 	e.Post("/v1/auth/logout", p.logout)
 

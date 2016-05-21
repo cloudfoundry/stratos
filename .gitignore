@@ -1,4 +1,3 @@
-certs/*.crt
-certs/*.key
-portal-config.toml
+demo/*
+*.rc
 portal-proxy

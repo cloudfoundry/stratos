@@ -10,8 +10,11 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+
+	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
+// UAAResponse - <TBD>
 type UAAResponse struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`
@@ -19,12 +22,6 @@ type UAAResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 	Scope        string `json:"scope"`
 	JTI          string `json:"jti"`
-}
-
-type tokenRecord struct {
-	AuthToken    string
-	RefreshToken string
-	TokenExpiry  int64
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -46,12 +43,16 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
+
 	cnsiGUID := c.FormValue("cnsi_guid")
 
 	if len(cnsiGUID) == 0 {
@@ -61,15 +62,20 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 			"Need CNSI GUID passed as form param")
 	}
 
-	endpoint := p.CNSIs[cnsiGUID].AuthorizationEndpoint
-	if endpoint == "" {
+	endpoint := ""
+	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
+
+	if !ok {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
 			"Requested endpoint not registered",
 			"No CNSI registered with GUID %s", cnsiGUID)
 	}
 
+	endpoint = cnsiRecord.AuthorizationEndpoint
+
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
+
 	uaaRes, u, err := p.login(c, p.Config.HCFClient, p.Config.HCFClientSecret, tokenEndpoint)
 	if err != nil {
 		return newHTTPShadowError(
@@ -119,6 +125,8 @@ func (p *portalProxy) logout(c echo.Context) error {
 		Value:  "",
 		MaxAge: -1,
 	}
+
+	// TODO(wchrisjohnson): Explicitly clear out session
 	http.SetCookie(res, cookie)
 
 	return nil
@@ -169,43 +177,66 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 	return &response, nil
 }
 
-func mkTokenRecordKey(cnsiID string, userGUID string) string {
-	return fmt.Sprintf("%s:%s", cnsiID, userGUID)
-}
-
 func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
 	key := u.UserGUID
-	tokenRecord := tokenRecord{
-		TokenExpiry:  u.TokenExpiry,
+	tokenRecord := tokens.TokenRecord{
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
+		TokenExpiry:  u.TokenExpiry,
 	}
-	p.setUAATokenRecord(key, tokenRecord)
+
+	err := p.setUAATokenRecord(key, tokenRecord)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (tokenRecord, error) {
-	tokenRecord := tokenRecord{
+func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (tokens.TokenRecord, error) {
+	tokenRecord := tokens.TokenRecord{
 		TokenExpiry:  u.TokenExpiry,
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 	}
-	p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
+
+	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
+	if err != nil {
+		return tokens.TokenRecord{}, err
+	}
 
 	return tokenRecord, nil
 }
 
-func (p *portalProxy) getUAATokenRecord(key string) tokenRecord {
-	p.UAATokenMapMut.RLock()
-	t := p.UAATokenMap[key]
-	p.UAATokenMapMut.RUnlock()
+// As of 5/18/2016 - not used
+// func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
+//
+// 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+// 	if err != nil {
+// 		fmt.Printf("Database error getting repo for UAA token: %v", err)
+// 		return tokens.TokenRecord{}
+// 	}
+//
+// 	tr, err := tokenRepo.FindUAAToken(key)
+// 	if err != nil {
+// 		fmt.Printf("Database error finding UAA token: %v", err)
+// 		return tokens.TokenRecord{}
+// 	}
+//
+// 	return tr
+// }
 
-	return t
-}
+func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error {
 
-func (p *portalProxy) setUAATokenRecord(key string, t tokenRecord) {
-	p.UAATokenMapMut.Lock()
-	p.UAATokenMap[key] = t
-	p.UAATokenMapMut.Unlock()
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
+	}
+
+	err = tokenRepo.SaveUAAToken(key, t)
+	if err != nil {
+		return fmt.Errorf("Database error saving UAA token: %v", err)
+	}
+
+	return nil
 }

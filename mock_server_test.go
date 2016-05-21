@@ -20,8 +20,10 @@ type mockServer struct {
 
 type mockServerFunc func(*mockServer)
 
-const mockCNSIGuid = "some-guid-1234"
-const mockUserGuid = "asd-gjfg-bob"
+const mockCNSIGUID = "some-guid-1234"
+const mockUserGUID = "asd-gjfg-bob"
+
+const mockURLString = "http://localhost:9999/some/fake/url/"
 
 func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, echo.Context) {
 	e := echo.New()
@@ -30,9 +32,13 @@ func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, e
 	return e, ctx
 }
 
-func setupMockReq(method string, formValues map[string]string) *http.Request {
+func setupMockReq(method string, urlString string, formValues map[string]string) *http.Request {
+	if urlString == "" {
+		urlString = mockURLString
+	}
+
 	if formValues == nil {
-		req, err := http.NewRequest(method, "http://127.0.0.1", nil)
+		req, err := http.NewRequest(method, urlString, nil)
 		if err != nil {
 			panic(err)
 		}
@@ -44,7 +50,7 @@ func setupMockReq(method string, formValues map[string]string) *http.Request {
 	for key, value := range formValues {
 		form.Set(key, value)
 	}
-	req, err := http.NewRequest(method, "http://127.0.0.1", strings.NewReader(form.Encode()))
+	req, err := http.NewRequest(method, urlString, strings.NewReader(form.Encode()))
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +68,7 @@ func setupPortalProxy() *portalProxy {
 		CookieStoreSecret:   "hiddenraisinsohno!",
 	}
 
-	pp := newPortalProxy(pc)
+	pp := newPortalProxy(pc, nil)
 	pp.initCookieStore()
 
 	return pp
@@ -128,11 +134,11 @@ func urlMust(i string) *url.URL {
 	return b
 }
 
-const mockUaaToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsInVzZXJfaWQiOiJhc2QtZ2pmZy1ib2IiLCJleHAiOjEyMzQ1Njd9.gO9WDYNEfMsnbz7-sICTNygzkqvWgMP2nm9BStJvvCw`
+const mockUAAToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsInVzZXJfaWQiOiJhc2QtZ2pmZy1ib2IiLCJleHAiOjEyMzQ1Njd9.gO9WDYNEfMsnbz7-sICTNygzkqvWgMP2nm9BStJvvCw`
 
 var mockUAAResponse = UAAResponse{
-	AccessToken:  mockUaaToken,
-	RefreshToken: mockUaaToken,
+	AccessToken:  mockUAAToken,
+	RefreshToken: mockUAAToken,
 }
 
 const (

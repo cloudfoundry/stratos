@@ -10,6 +10,9 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
+
+	"github.com/hpcloud/portal-proxy/repository/cnsis"
+	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
 type v2Info struct {
@@ -17,15 +20,8 @@ type v2Info struct {
 	TokenEndpoint         string `json:"token_endpoint"`
 }
 
-type cnsiRecord struct {
-	Name                  string
-	APIEndpoint           *url.URL
-	AuthorizationEndpoint string
-	TokenEndpoint         string
-	CNSIType              cnsiType
-}
-
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
+
 	cnsiName := c.FormValue("cnsi_name")
 	apiEndpoint := c.FormValue("api_endpoint")
 
@@ -34,6 +30,14 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 			http.StatusBadRequest,
 			"Needs CNSI Name and API Endpoint",
 			"CNSI Name or Endpoint were not provided when trying to register an HCF Cluster")
+	}
+
+	apiEndpointURL, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to get API Endpoint",
+			"Failed to get API Endpoint: %v", err)
 	}
 
 	v2InfoResponse, err := getHCFv2Info(apiEndpoint)
@@ -45,23 +49,21 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 			err)
 	}
 
-	// save data to temporary map
-	apiEndpointURL, err := url.Parse(apiEndpoint)
-	if err != nil {
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to get API Endpoint",
-			"Failed to get API Endpoint: %v", err)
-	}
 	guid := uuid.NewV4().String()
-	newCNSI := cnsiRecord{
+
+	// save data to temporary map
+	newCNSI := cnsis.CNSIRecord{
 		Name:                  cnsiName,
-		CNSIType:              cnsiHCF,
+		CNSIType:              cnsis.CNSIHCF,
 		APIEndpoint:           apiEndpointURL,
 		TokenEndpoint:         v2InfoResponse.TokenEndpoint,
 		AuthorizationEndpoint: v2InfoResponse.AuthorizationEndpoint,
 	}
-	p.setCNSIRecord(guid, newCNSI)
+
+	err = p.setCNSIRecord(guid, newCNSI)
+	if err != nil {
+		return err
+	}
 
 	c.String(http.StatusCreated, guid)
 
@@ -69,9 +71,16 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 }
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
-	p.CNSIMut.RLock()
-	jsonString, err := json.Marshal(p.CNSIs)
-	p.CNSIMut.RUnlock()
+
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return fmt.Errorf("listRegisteredCNSIs: %s", err)
+	}
+
+	var jsonString []byte
+
+	var cnsiList []*cnsis.CNSIRecord
+	cnsiList, err = cnsiRepo.List()
 	if err != nil {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
@@ -80,15 +89,31 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 		)
 	}
 
+	jsonString, err = marshalCNSIlist(cnsiList)
+	if err != nil {
+		return err
+	}
+
 	c.Response().Header().Set("Content-Type", "application/json")
 	c.Response().Write(jsonString)
 	return nil
 }
 
+func marshalCNSIlist(cnsiList []*cnsis.CNSIRecord) ([]byte, error) {
+	jsonString, err := json.Marshal(cnsiList)
+	if err != nil {
+		return nil, newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to retrieve list of CNSIs",
+			"Failed to retrieve list of CNSIs: %v", err,
+		)
+	}
+	return jsonString, nil
+}
+
 func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	var v2InfoReponse v2Info
 
-	// make a call to apiEndpoint/v2/info to get the auth and token endpoints
 	uri, err := url.Parse(apiEndpoint)
 	if err != nil {
 		return v2InfoReponse, err
@@ -116,32 +141,62 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	return v2InfoReponse, nil
 }
 
-func (p *portalProxy) getCNSIRecord(guid string) (cnsiRecord, bool) {
-	p.CNSIMut.RLock()
-	rec, ok := p.CNSIs[guid]
-	p.CNSIMut.RUnlock()
+func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
-	return rec, ok
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return cnsis.CNSIRecord{}, false
+	}
+
+	rec, err := cnsiRepo.Find(guid)
+	if err != nil {
+		return cnsis.CNSIRecord{}, false
+	}
+
+	return rec, true
 }
 
-func (p *portalProxy) setCNSIRecord(guid string, c cnsiRecord) {
-	p.CNSIMut.RLock()
-	p.CNSIs[guid] = c
-	p.CNSIMut.RUnlock()
+func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
+
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
+	}
+
+	err = cnsiRepo.Save(guid, c)
+	if err != nil {
+		return fmt.Errorf("Unable to save a CNSI record: '%v'", err)
+	}
+
+	return nil
 }
 
-func (p *portalProxy) getCNSITokenRecord(cnsiGuid, userGuid string) (tokenRecord, bool) {
-	key := mkTokenRecordKey(cnsiGuid, userGuid)
-	p.CNSITokenMapMut.RLock()
-	t, ok := p.CNSITokenMap[key]
-	p.CNSITokenMapMut.RUnlock()
+func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (tokens.TokenRecord, bool) {
 
-	return t, ok
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return tokens.TokenRecord{}, false
+	}
+
+	tr, err := tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
+	if err != nil {
+		return tokens.TokenRecord{}, false
+	}
+
+	return tr, true
 }
 
-func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokenRecord) {
-	key := mkTokenRecordKey(cnsiGUID, userGUID)
-	p.CNSITokenMapMut.Lock()
-	p.CNSITokenMap[key] = t
-	p.CNSITokenMapMut.Unlock()
+func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) error {
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
+	}
+
+	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t)
+	if err != nil {
+		return fmt.Errorf("Unable to save a CNSI Token: %v", err)
+	}
+
+	return nil
 }
