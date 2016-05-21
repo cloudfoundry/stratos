@@ -40,8 +40,6 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 		}
 		got401 = true
 	}
-
-	// panic("Authentication code hit impossible case")
 }
 
 func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsis.CNSIRecord, err error) {
