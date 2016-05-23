@@ -105,13 +105,16 @@
      */
     deleteApp: function () {
       var that = this;
-      return this.$q.all([
-        this.removeAppFromRoutes().then(function () {
-          return that.tryDeleteEachRoute();
-        }),
-        this.deleteServiceBindings(),
-        this.appModel.deleteApp(this.appModel.application.summary.guid)
-      ]);
+
+      var task1= this.removeAppFromRoutes();
+      var task2= this.deleteServiceBindings();
+      var task3= this.appModel.deleteApp(this.appModel.application.summary.guid);
+
+      task1.then(function () {
+        that.tryDeleteEachRoute();
+      });
+
+      return this.$q.all([task1, task2, task3]);
     },
 
     /**
@@ -119,7 +122,6 @@
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description remove app from all the routes
      */
-
     removeAppFromRoutes: function () {
       var that = this;
       var tasks = [];
@@ -128,7 +130,7 @@
 
       Object.keys(checkedRouteValue).forEach(function (guid) {
         if (checkedRouteValue[guid]) {
-          tasks.push(that.removeAppFromRoutes(guid, appGuid));
+          tasks.push(that.routeModel.removeAppFromRoute(guid, appGuid));
         }
       });
 
