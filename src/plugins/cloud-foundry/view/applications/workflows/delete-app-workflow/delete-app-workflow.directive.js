@@ -104,12 +104,35 @@
      * @description delete an application
      */
     deleteApp: function () {
+      var that = this;
       return this.$q.all([
-        // Enable these two once the endpoints are available
-        //this.tryDeleteEachRoute(),
-        //this.deleteServiceBindings(),
+        this.removeAppFromRoutes().then(function () {
+          return that.tryDeleteEachRoute();
+        }),
+        this.deleteServiceBindings(),
         this.appModel.deleteApp(this.appModel.application.summary.guid)
       ]);
+    },
+
+    /**
+     * @function removeAppFromRoutes
+     * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
+     * @description remove app from all the routes
+     */
+
+    removeAppFromRoutes: function () {
+      var that = this;
+      var tasks = [];
+      var checkedRouteValue = this.userInput.checkedRouteValue;
+      var appGuid = this.appModel.application.summary.guid;
+
+      Object.keys(checkedRouteValue).forEach(function (guid) {
+        if (checkedRouteValue[guid]) {
+          tasks.push(that.removeAppFromRoutes(guid, appGuid));
+        }
+      });
+
+      return this.$q.all(tasks);
     },
 
     /**
@@ -122,9 +145,9 @@
       var tasks = [];
       var checkedServiceValue = this.userInput.checkedServiceValue;
 
-      Object.keys(checkedServiceValue).forEach(function (bindingId) {
-        if (checkedServiceValue[bindingId]) {
-          tasks.push(that.serviceBindingModel.deleteServiceBinding(bindingId, { async: true }));
+      Object.keys(checkedServiceValue).forEach(function (guid) {
+        if (checkedServiceValue[guid]) {
+          tasks.push(that.serviceBindingModel.deleteServiceBinding(guid, { async: true }));
         }
       });
 
@@ -141,7 +164,7 @@
       return this.$q(function (resolve, reject) {
         that.routeModel.listAllAppsForRouteWithoutStore(routeId)
           .then(function (apps) {
-            if (apps.length === 1) {
+            if (apps.length === 0) {
               that.routeModel.deleteRoute(routeId).then(resolve, reject);
             } else {
               reject();

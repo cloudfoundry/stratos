@@ -34,10 +34,24 @@
 
   angular.extend(Route.prototype, {
    /**
+    * @function removeAppFromRoute
+    * @memberof cloud-foundry.model.route
+    * @description remove app from the route
+    * @param {string} guid - route identifier
+    * @param {string} appGuid - app identifier
+    * @returns {promise} A resolved/rejected promise
+    * @public
+    */
+    removeAppFromRoute: function (guid, appGuid) {
+      return this.apiManager.retrieve('cloud-foundry.api.Routes')
+        .RemoveAppFromRoute(guid, appGuid);
+    },
+
+   /**
     * @function deleteApp
     * @memberof cloud-foundry.model.route
-    * @description Deletes a particular route
-    * @param {string} guid - Route identifier
+    * @description deletes a particular route
+    * @param {string} guid - route identifier
     * @returns {promise} A resolved/rejected promise
     * @public
     */
@@ -49,8 +63,8 @@
    /**
     * @function listAllAppsForRoute
     * @memberof cloud-foundry.model.route
-    * @description Lists all apps for the route and store the response in the model
-    * @param {string} guid - Route identifier
+    * @description lists all apps for the route and store the response in the model
+    * @param {string} guid - route identifier
     * @param {object} params - optional parameters
     * @returns {promise} A resolved/rejected promise
     * @public
@@ -69,7 +83,7 @@
     * @function listAllAppsForRouteWithoutStore
     * @memberof cloud-foundry.model.route
     * @description get all apps for the route
-    * @param {string} guid - Route identifier
+    * @param {string} guid - route identifier
     * @param {object} params - optional parameters
     * @returns {promise} A resolved/rejected promise
     * @public
