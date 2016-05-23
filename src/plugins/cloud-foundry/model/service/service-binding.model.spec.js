@@ -17,7 +17,7 @@
       $httpBackend.verifyNoOutstandingRequest();
     });
 
-    fit('deleteServiceBinding', function () {
+    it('deleteServiceBinding', function () {
       var DeleteServiceBinding = mock.cloudFoundryAPI.ServiceBindings.DeleteServiceBinding('123');
       $httpBackend.whenDELETE(DeleteServiceBinding.url).respond(204, DeleteServiceBinding.response['204'].body);
       $httpBackend.expectDELETE(DeleteServiceBinding.url);
@@ -26,7 +26,7 @@
       expect(DeleteServiceBinding.response['204'].body).toBeDefined();
     });
 
-    fit('listAllServiceBindings', function () {
+    it('listAllServiceBindings', function () {
       var ListAllServiceBindings = mock.cloudFoundryAPI.ServiceBindings.ListAllServiceBindings();
       $httpBackend.whenGET(ListAllServiceBindings.url).respond(200, ListAllServiceBindings.response['200'].body);
       $httpBackend.expectGET(ListAllServiceBindings.url);
