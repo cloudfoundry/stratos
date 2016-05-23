@@ -116,6 +116,17 @@
     },
 
     /**
+     * @function launchApp
+     * @memberof cloud-foundry.model.application
+     * @description Launch an application
+     * @param {string} guid - the application id
+     * @returns {void}
+     * @public
+     */
+    launchApp: function (guid) {    // eslint-disable-line no-unused-vars
+    },
+
+    /**
      * @function startApp
      * @memberof cloud-foundry.model.application
      * @description start an application
