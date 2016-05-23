@@ -102,13 +102,13 @@
      * @function deleteApp
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description delete an application
+     * @returns {promise} A resolved/rejected promise
      */
     deleteApp: function () {
       var that = this;
-
-      var task1= this.removeAppFromRoutes();
-      var task2= this.deleteServiceBindings();
-      var task3= this.appModel.deleteApp(this.appModel.application.summary.guid);
+      var task1 = this.removeAppFromRoutes();
+      var task2 = this.deleteServiceBindings();
+      var task3 = this.appModel.deleteApp(this.appModel.application.summary.guid);
 
       task1.then(function () {
         that.tryDeleteEachRoute();
@@ -121,6 +121,7 @@
      * @function removeAppFromRoutes
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description remove app from all the routes
+     * @returns {promise} A resolved/rejected promise
      */
     removeAppFromRoutes: function () {
       var that = this;
@@ -141,6 +142,7 @@
      * @function deleteServiceBindings
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description delete all service binding for the app
+     * @returns {promise} A resolved/rejected promise
      */
     deleteServiceBindings: function () {
       var that = this;
@@ -160,6 +162,8 @@
      * @function deleteRouteIfPossible
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description delete an route if possible
+     * @param {string} routeId - the identifier of the route
+     * @returns {promise} A resolved/rejected promise
      */
     deleteRouteIfPossible: function (routeId) {
       var that = this;
@@ -179,6 +183,7 @@
      * @function tryDeleteEachRoute
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description try delete each route associated with the application
+     * @returns {promise} A resolved/rejected promise
      */
     tryDeleteEachRoute: function () {
       var that = this;

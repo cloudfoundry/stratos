@@ -20,7 +20,6 @@
 
   /**
    * @memberof cloud-foundry.model
-   * @namespace cloud-foundry.model.route
    * @name Route
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager

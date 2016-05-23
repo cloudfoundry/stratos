@@ -22,7 +22,6 @@
 
   /**
    * @memberof cloud-foundry.model.serviceBinding
-   * @namespace cloud-foundry.model.serviceBinding
    * @name ServiceBinding
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
