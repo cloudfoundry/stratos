@@ -1,16 +1,12 @@
 <div class="delivery-commit-detail panel">
-  <div class="row">
-    <div class="col-sm-3 summary-col">
-      <div translate>COMMIT ID</div>
-      <div translate>CREATED</div>
-      <div translate>COMMIT AUTHOR</div>
-    </div>
-    <div class="col-sm-6 summary-col text-right">
-      <div>{{ detailViewCtrl.context.commit.id }}</div>
-      <div>{{ detailViewCtrl.context.commit.created }}</div>
-      <div>{{ detailViewCtrl.context.commit.author }}</div>
-    </div>
-  </div>
+  <dl class="dl-horizontal col-sm-9">
+    <dt translate>COMMIT ID</dt>
+    <dd class="text-right">{{ detailViewCtrl.context.commit.id }}</dd>
+    <dt translate>CREATED</dt>
+    <dd class="text-right">{{ detailViewCtrl.context.commit.created }}</dd>
+    <dt translate>COMMIT AUTHOR</dt>
+    <dd class="text-right">{{ detailViewCtrl.context.commit.author }}</dd>
+  </dl>
   <br>
   <div class="nav-tabs"></div>
 </div>

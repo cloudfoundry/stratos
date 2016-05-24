@@ -6,16 +6,17 @@
     background-color: transparent;
   }
 
-  .summary-col {
-    div {
+  & > dl {
+    padding-bottom: $hpe-unit-space;
+    padding-left: 0px;
+
+    dt, dd {
       padding-top: $hpe-unit-space / 2;
-      &:last-of-type {
-        padding-bottom: $hpe-unit-space / 2;
-      }
     }
   }
 
   .nav-tabs {
+    clear: both;
     border-width: 2px;
   }
 }
