@@ -2,27 +2,27 @@
   <div class="panel-heading action-header">
     <span translate>Summary</span>
   </div>
-  <div class="row data-body">
-    <div class="col-md-3 summary-col">
-      <div translate>LAST BUILD</div>
-      <div translate>LAST TEST</div>
-      <div translate>LAST DEPLOYMENT</div>
-    </div>
-    <div class="col-md-9 summary-col">
-      <div><a class="" href=""  ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastBuilt)">
-        {{ appDelLogsCtrl.hceModel.delivery.lastBuilt.link }}</a>
-        <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastBuilt.time"></span>
-      </div>
-      <div><a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastTest)">
-        {{ appDelLogsCtrl.hceModel.delivery.lastTest.link }}</a>
-        <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastTest.time"></span>
-      </div>
-      <div><a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastDeployment)">
-        {{ appDelLogsCtrl.hceModel.delivery.lastDeployment.link }}</a>
-        <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastDeployment.time"></span>
-      </div>
-    </div>
-  </div>
+
+  <dl class="dl-horizontal">
+    <dt translate>LAST BUILD</dt>
+    <dd>
+      <a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastBuilt)">
+      {{ appDelLogsCtrl.hceModel.delivery.lastBuilt.link }}</a>
+      <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastBuilt.time"></span>
+    </dd>
+    <dt translate>LAST TEST</dt>
+    <dd>
+      <a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastTest)">
+      {{ appDelLogsCtrl.hceModel.delivery.lastTest.link }}</a>
+      <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastTest.time"></span>
+    </dd>
+    <dt translate>LAST DEPLOYMENT</dt>
+    <dd>
+      <a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastDeployment)">
+      {{ appDelLogsCtrl.hceModel.delivery.lastDeployment.link }}</a>
+      <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastDeployment.time"></span>
+    </dd>
+  </dl>
 </div>
 
 <div id="delivery-logs-search" class="panel panel-default delivery-logs-search">
@@ -65,7 +65,7 @@
           <div ng-switch-when="Success">
             <span class="circle success"></span>
             <span translate>{{ build.result.label }}</span>
-            <a class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
+            <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
           </div>
           <div ng-switch-when="Deploying">
             <span class="circle deploying"></span>
@@ -74,7 +74,7 @@
           <div ng-switch-when="Failure">
             <span class="circle failure"></span>
             <span translate>{{ build.result.label }}</span>
-            <a class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
+            <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
           </div>
           <div ng-switch-default>
             <span translate>Unknown</span>
