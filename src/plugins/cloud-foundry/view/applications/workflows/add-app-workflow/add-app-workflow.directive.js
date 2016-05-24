@@ -287,7 +287,7 @@
     getPrivateDomains: function () {
       var that = this;
       return this.privateDomainModel.listAllPrivateDomains().then(function (privateDomains) {
-        [].push.apply(that.options.domains, _.map(privateDomains, that.domainMapping);
+        [].push.apply(that.options.domains, _.map(privateDomains, that.domainMapping));
       });
     },
 
@@ -300,7 +300,7 @@
     getSharedDomains: function () {
       var that = this;
       return this.sharedDomainModel.listAllSharedDomains().then(function (sharedDomains) {
-        [].push.apply(that.options.domains, _.map(sharedDomains, that.domainMapping);
+        [].push.apply(that.options.domains, _.map(sharedDomains, that.domainMapping));
       });
     },
 
