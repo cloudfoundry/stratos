@@ -41,7 +41,7 @@
    */
   function ApplicationDeliveryLogsController($scope, $stateParams, $interval, moment, modelManager, detailView) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.hceModel = {};
+    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
     var that = this;
 
@@ -51,138 +51,158 @@
 
     function updateData() {
       /* eslint-disable */
-      // TODO: Need to update once https://github.com/hpcloud/stratos-ui/pull/242 | TEAMFOUR-304 is merged.
-      // TODO: Bring in data via new HceModel get<x> functions that poke HCE backend
-      // TODO: Update data structure to match pipeline/executions/events/etc
+      // TODO: Fetch the actual user.
       /* eslint-enable */
-      that.hceModel.commits = {
-        afw342: {
-          author: 'GLineker',
-          created: momentise(moment().subtract(46, 'seconds').valueOf()),
-          message: 'Update lastupdated.txt',
-          id: 'afw342'
-        },
-        gdf543: {
-          author: 'BBonden',
-          created: momentise(moment().subtract(460, 'seconds').valueOf()),
-          message: 'Update lastupdated.txt',
-          id: 'gdf543'
-        },
-        sdf234: {
-          author: 'DBalwin',
-          created: momentise(moment().subtract(4606, 'seconds').valueOf()),
-          message: 'Update lastupdated.txt',
-          id: 'sdf234'
-        },
-        skt753: {
-          author: 'TWogan',
-          created: momentise(moment().subtract(50064, 'seconds').valueOf()),
-          message: 'Change to log in',
-          id: 'skt753'
-        },
-        nbv035: {
-          author: 'GNuman',
-          created: momentise(moment().subtract(80064, 'seconds').valueOf()),
-          message: 'Fixed broken broker',
-          id: 'nbv035'
-        },
-        hyg983: {
-          author: 'BAtman',
-          created: momentise(moment().subtract(90064, 'seconds').valueOf()),
-          message: 'Break the build',
-          id: 'hyg983'
-        }
-      };
-      // Populate commit, localise date and transform result BEFORE we send to scope, this will allow any filters that
-      // use the data to work
-      that.hceModel.builds = [
+      that.hceModel.getUserByGithubId('18697775')
+        .then(function() {
+          return that.hceModel.getProjects();
+        })
+        .then(function() {
+          that.model.application.summary.name = 'test';// Temp override
+          return that.hceModel.getProject(that.model.application.summary.name);
+        })
+        .then(function(project) {
+          if (angular.isUndefined(project)) {
+            throw 'Could not find project with name \'' + that.model.application.summary.name + '\'';
+          } else {
+            return that.hceModel.getPipelineExecutions(project.id);
+          }
+        })
+        .then(function() {
+          // The ux will translate & localise date/time. In order for the search filter to work this conversion needs
+          // to happen before being pushed to scope. So two options, either append these values to to existing
+          // hceModel.data object or clone and update as needed for this specific directive
+          that.parsedHceModel = JSON.parse(JSON.stringify(that.hceModel.data));
+
+          addMockData();
+          console.log('that.hceModel.data.pipelineExecutions: ', that.hceModel.data.pipelineExecutions);
+
+          for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
+            var build = that.parsedHceModel.pipelineExecutions[i];
+            // Localise the reason creation date string
+            build.reason.createdDataString = momentise(build.reason.createdDate);
+            // Update the result with translated text
+            build.result = transformResult(build.result);
+          }
+
+        })
+        .catch(function(error) {
+          console.error('Failed to fetch delivery logs data: ', error);
+        });
+
+    }
+
+    function addMockData() {
+      var mocked = [
         {
-          buildId: 'build0',
-          commit: fetchCommit('sdf234'),
-          time: {
-            label: momentise(moment().valueOf()),
-            value: moment().valueOf()
+          concoursePipelineId: "362eeb20-219f-11e6-8838-71fe4dbc2489",
+          id: 1,
+          message: "Update lastupdated.txt",
+          name: "Commit number 2",
+          reason: {
+            author: "DBaldwin",
+            avatarUrl: "https://avatars.githubusercontent.com/u/18697775?v=3",
+            commitSha: "123d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            commitUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            compareUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            createdDate: moment().subtract(46, 'seconds').valueOf(),
+            pullRequestId: null,
+            type: "manual"
           },
-          reason: 'Manual',
-          result: transformResult('Failure')
-        },
-        {
-          buildId: 'build1',
-          commit: fetchCommit('sdf234'),
-          time: {
-            label: momentise(moment().subtract(4694, 'seconds').valueOf()),
-            value: moment().subtract(4694, 'seconds').valueOf()
-          },
-          reason: 'Manual',
-          result: transformResult('Success')
+          result: "Failure"
         },
         {
-          buildId: 'build2',
-          commit: fetchCommit('skt753'),
-          time: {
-            label: momentise(moment().subtract(46064, 'seconds').valueOf()),
-            value: moment().subtract(46064, 'seconds').valueOf()
+          concoursePipelineId: "362eeb20-219f-11e6-8838-71fe4dbc2489",
+          id: 2,
+          message: "Update lastupdated.txt",
+          name: "Commit number 2",
+          reason: {
+            author: "DBaldwin",
+            avatarUrl: "https://avatars.githubusercontent.com/u/18697775?v=3",
+            commitSha: "123d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            commitUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            compareUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            createdDate: moment().subtract(460, 'seconds').valueOf(),
+            pullRequestId: null,
+            type: "manual"
           },
-          reason: 'Manual',
-          result: transformResult('Deploying')
+          result: "Success"
         },
         {
-          buildId: 'build3',
-          commit: fetchCommit('nbv035'),
-          time: {
-            label:  momentise(moment().subtract(40004, 'seconds').valueOf()),
-            value: moment().subtract(40004, 'seconds').valueOf()
+          concoursePipelineId: "362eeb20-219f-11e6-8838-71fe4dbc2489",
+          id: 3,
+          message: "Fixed the log in so logs go in",
+          name: "Change to log in",
+          reason: {
+            author: "JAubrey",
+            avatarUrl: "https://avatars.githubusercontent.com/u/18697775?v=3",
+            commitSha: "423d97aasdasfffcc66978e3c85af856262fe",
+            commitUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            compareUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            createdDate: moment().subtract(4606, 'seconds').valueOf(),
+            pullRequestId: null,
+            type: "manual"
           },
-          reason: 'Because why not',
-          result: transformResult('Success')
+          result: "Deploying"
         },
         {
-          buildId: 'build4',
-          commit: fetchCommit('hyg983'),
-          time: {
-            label: momentise(moment().subtract(335643, 'seconds').valueOf()),
-            value: moment().subtract(335643, 'seconds').valueOf()
+          concoursePipelineId: "362eeb20-219f-11e6-8838-71fe4dbc2489",
+          id: 4,
+          message: "Fixed broken broker",
+          name: "Fixed broken broker",
+          reason: {
+            author: "GNuman",
+            avatarUrl: "https://avatars.githubusercontent.com/u/18697775?v=3",
+            commitSha: "523d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            commitUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            compareUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            createdDate: moment().subtract(50064, 'seconds').valueOf(),
+            pullRequestId: null,
+            type: "manual"
           },
-          reason: 'Manual',
-          result: transformResult('unknownstatus')
+          result: "Success"
         },
         {
-          buildId: 'build5',
-          commit: fetchCommit('hyg983'),
-          time: {
-            label: momentise(moment().subtract(33543, 'seconds').valueOf()),
-            value: moment().subtract(33543, 'seconds').valueOf()
+          concoursePipelineId: "362eeb20-219f-11e6-8838-71fe4dbc2489",
+          id: 5,
+          message: "Break the build",
+          name: "Break the build",
+          reason: {
+            author: "BAtman",
+            avatarUrl: "https://avatars.githubusercontent.com/u/18697775?v=3",
+            commitSha: "623d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            commitUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            compareUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            createdDate: moment().subtract(55064, 'seconds').valueOf(),
+            pullRequestId: null,
+            type: "because why not"
           },
-          reason: 'Manual',
-          result: transformResult('Failure')
+          result: "unknown"
+        },
+        {
+          concoursePipelineId: "362eeb20-219f-11e6-8838-71fe4dbc2489",
+          id: 6,
+          message: "Break the build",
+          name: "Break the build",
+          reason: {
+            author: "BAtman",
+            avatarUrl: "https://avatars.githubusercontent.com/u/18697775?v=3",
+            commitSha: "623d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            commitUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            compareUrl: "https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe",
+            createdDate: moment().subtract(60064, 'seconds').valueOf(),
+            pullRequestId: null,
+            type: "manual"
+          },
+          result: "Failure"
         }
       ];
-
-      that.hceModel.delivery = {
-        lastBuilt: {
-          link: 'afw342',
-          time: new Date().getTime()
-        },
-        lastTest: {
-          link: 'gdf543',
-          time: new Date().getTime() - 1000000
-        },
-        lastDeployment: {
-          link: 'nbv035',
-          time: new Date().getTime() - 16400000
-        },
-        builds: that.hceModel.builds
-      };
-
+      that.parsedHceModel.pipelineExecutions = that.parsedHceModel.pipelineExecutions.concat(mocked);
     }
 
-    function fetchCommit(commitId) {
-      return that.hceModel.commits[commitId];
-    }
-
-    function momentise(epoch) {
+    function momentise(init) {
       // Ensure we use i18n date/time format
-      return moment(epoch).format('L - LTS');
+      return moment(init).format('L - LTS');
     }
 
     function transformResult(result) {
@@ -199,7 +219,6 @@
     });
 
     this.id = $stateParams.guid;
-    this.moment = moment;
     this.detailView = detailView;
   }
 
@@ -222,11 +241,14 @@
 
       this.detailView({
         templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/commit.html',
-        title: build.commit.message
+        title: build.message
       }, {
+        build: build,
         commit: build.commit,
-        builds: _.filter(that.hceModel.builds, function(o) { return o.commit.id === build.commit.id; }),
-        viewBuild: function () {
+        builds: _.filter(that.parsedHceModel.pipelineExecutions, function(o) {
+          return o.reason.commitSha === build.reason.commitSha;
+        }),
+        viewBuild: function (build) {
           that.viewBuild(build);
         }
       });

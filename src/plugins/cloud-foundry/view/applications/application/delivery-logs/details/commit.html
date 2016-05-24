@@ -1,11 +1,11 @@
 <div class="delivery-commit-detail panel">
   <dl class="dl-horizontal col-sm-9">
     <dt translate>COMMIT ID</dt>
-    <dd class="text-right">{{ detailViewCtrl.context.commit.id }}</dd>
+    <dd class="text-right">{{ detailViewCtrl.context.build.reason.commitSha }}</dd>
     <dt translate>CREATED</dt>
-    <dd class="text-right">{{ detailViewCtrl.context.commit.created }}</dd>
+    <dd class="text-right">TODO: Fetch details from github (this is not the build/reason created?)</dd>
     <dt translate>COMMIT AUTHOR</dt>
-    <dd class="text-right">{{ detailViewCtrl.context.commit.author }}</dd>
+    <dd class="text-right">{{ detailViewCtrl.context.build.reason.author }}</dd>
   </dl>
   <br>
   <div class="nav-tabs"></div>
@@ -16,16 +16,13 @@
     <tr ng-repeat="build in detailViewCtrl.context.builds">
       <td ng-switch="build.result.value" class="row result-col build-result">
         <div ng-switch-when="Success">
-          <span class="circle success"></span>
-          <span translate>{{ build.result.label }}</span>
+          <span class="small-state success" translate>{{ build.result.label }}</span>
         </div>
         <div ng-switch-when="Deploying">
-          <span class="circle deploying"></span>
-          <span translate>{{ build.result.label }}</span>
+          <span class="small-state deploying" translate>{{ build.result.label }}</span>
         </div>
         <div ng-switch-when="Failure">
-          <span class="circle failure"></span>
-          <span translate>{{ build.result.label }}</span>
+          <span class="small-state failure" translate>{{ build.result.label }}</span>
         </div>
         <div ng-switch-default>
           <span translate>Unknown</span>
@@ -33,12 +30,12 @@
       </td>
       <td class="row result-col">
         <span translate>Started: </span>
-        {{ build.time.label }}
+        {{ build.reason.createdDataString }}
       </td>
       <td></td>
       <td class="row result-col">
         <span translate>Duration: </span>
-        <span am-time-ago="build.time.value"></span>
+        TODO
       </td>
       <td ng-switch="build.result.value == 'Success' || build.result.value == 'Failure'" class="build-view">
         <div ng-switch-when="true">

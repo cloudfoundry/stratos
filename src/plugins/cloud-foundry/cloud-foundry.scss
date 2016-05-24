@@ -10,6 +10,35 @@
   }
 }
 
+@mixin shape($size, $bg-color, $border-color, $rotate, $border-radius) {
+  &:before {
+    content: '';
+    display: inline-block;
+    width: $size;
+    height: $size;
+    border: 1px solid $border-color;
+    background: $bg-color;
+    vertical-align: middle;
+    border-radius: $border-radius;
+    transform: rotate($rotate);
+  }
+}
+@mixin shape-circle($size, $bg-color, $border-color) {
+  @include shape($size, $bg-color, $border-color, 0, $size);
+  &:before {
+    // Ensure the shape will line up with other shapes
+    margin-right: 9px;
+  }
+}
+@mixin shape-diamond($size, $bg-color, $border-color) {
+  @include shape($size, $bg-color, $border-color, -45deg, 0);
+  &:before {
+    // Ensure the shape will line up with other shapes
+    margin-right: 10px;
+    margin-left: 1px;
+  }
+}
+
 .action-bar {
   height: $hpe-unit-space * 3;
   line-height: $hpe-unit-space * 3;
@@ -64,6 +93,20 @@
   &.app-state-STALE-STOPPED,
   &.app-state-STALE-ERROR {
     @include hpe-state($state-warning-bg, $helion-icon-Alert, transparent);
+  }
+}
+
+.small-state {
+  &.success {
+    @include shape-circle(16px, $status-okay, $status-okay);
+  }
+
+  &.deploying {
+    @include shape-circle(16px, white, $salmon);
+  }
+
+  &.failure {
+    @include shape-diamond(14px, $status-critical, $status-critical);
   }
 }
 

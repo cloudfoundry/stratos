@@ -59,30 +59,31 @@
       </tr>
       </thead>
       <tbody>
-      <tr ng-repeat="build in appDelLogsCtrl.hceModel.delivery.builds | filter:appDelLogsCtrl.searchValue">
-        <td><a class="" href="" ng-click="appDelLogsCtrl.viewCommit(build)">{{ build.commit.message }}</a></td>
+      <tr ng-repeat="build in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
+        <td><a class="" href="" ng-click="appDelLogsCtrl.viewCommit(build)">{{ build.message }}</a></td>
         <td ng-switch="build.result.value" class="row result-col">
           <div ng-switch-when="Success">
-            <span class="circle success"></span>
-            <span translate>{{ build.result.label }}</span>
+            <span class="small-state success" translate>{{ build.result.label }}</span>
             <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
           </div>
           <div ng-switch-when="Deploying">
-            <span class="circle deploying"></span>
-            <span translate>{{ build.result.label }}</span>
+            <span class="small-state deploying" translate>{{ build.result.label }}</span>
           </div>
           <div ng-switch-when="Failure">
-            <span class="circle failure"></span>
-            <span translate>{{ build.result.label }}</span>
+            <span class="small-state failure" translate>{{ build.result.label }}</span>
+            <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
+          </div>
+          <div ng-switch-when="in-progress">
+            <span class="small-state deploying" translate>{{ build.result.label }}</span>
             <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
           </div>
           <div ng-switch-default>
             <span translate>Unknown</span>
           </div>
         </td>
-        <td>{{ build.time.label }}</td>
-        <td>{{ build.commit.author }}</td>
-        <td>{{ build.reason }}</td>
+        <td>{{ build.reason.createdDataString }}</td>
+        <td>{{ build.reason.author }}</td>
+        <td>{{ build.reason.type }}</td>
       </tr>
       </tbody>
     </table>

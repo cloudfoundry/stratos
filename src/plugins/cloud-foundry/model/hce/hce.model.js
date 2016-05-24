@@ -40,7 +40,8 @@
       deploymentTargets: [],
       imageRegistries: [],
       projects: {},
-      user: {}
+      user: {},
+      pipelineExecutions: []
     };
 
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
@@ -196,6 +197,23 @@
         .getUserByGithubId(githubUserId)
         .then(function (response) {
           that.onGetUser(response);
+        });
+    },
+
+    /**
+     * @function getPipelineExecutions
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get executions by project ID
+     * @param {string} projectId - the HCE project ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getPipelineExecutions: function (projectId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
+        .getPipelineExecutions({ project_id: projectId})
+        .then(function (response) {
+          that.onGetPipelineExecutions(response);
         });
     },
 
@@ -405,8 +423,20 @@
       this.data.user = newUser;
 
       return newUser;
-    }
+    },
 
+    /**
+     * @function onGetPipelineExecutions
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Cache pipeline executions
+     * @param {string} response - the JSON response from API call
+     * @returns {object} The executions associated with the project
+     * @private
+     */
+    onGetPipelineExecutions: function (response) {
+      this.data.pipelineExecutions.length = 0;
+      [].push.apply(this.data.pipelineExecutions, response.data || []);
+    }
   });
 
 })();
