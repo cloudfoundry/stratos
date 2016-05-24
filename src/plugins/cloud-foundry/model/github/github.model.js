@@ -45,11 +45,11 @@
      * @description Get repos user owns or has admin rights to
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     repos: function () {
       var that = this;
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
-      return githubApi.repos()
+      return githubApi.repos({ per_page: 100 })
         .then(function (response) {
           that.onRepos(response);
         }, function () {
@@ -64,7 +64,7 @@
      * @param {string} repo - the repo to get branches for
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     branches: function (repo) {
       var that = this;
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
@@ -84,7 +84,7 @@
      * @param {string} branch - the branch to get commits for
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     commits: function (repo, branch) {
       var that = this;
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
@@ -105,7 +105,7 @@
      */
     onRepos: function (response) {
       this.data.repos.length = 0;
-      [].push.apply(this.data.repos, response.data.repos || []);
+      [].push.apply(this.data.repos, response.data || []);
     },
 
     /**
@@ -117,7 +117,7 @@
      */
     onBranches: function (response) {
       this.data.branches.length = 0;
-      [].push.apply(this.data.branches, response.data.branches || []);
+      [].push.apply(this.data.branches, response.data || []);
     },
 
     /**
@@ -129,7 +129,7 @@
      */
     onCommits: function (response) {
       this.data.commits.length = 0;
-      [].push.apply(this.data.commits, response.data.commits || []);
+      [].push.apply(this.data.commits, response.data || []);
     },
 
     /**
