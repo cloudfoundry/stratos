@@ -17,6 +17,15 @@
       $httpBackend.verifyNoOutstandingRequest();
     });
 
+    it('removeAppFromRoute', function () {
+      var RemoveAppFromRoute = mock.cloudFoundryAPI.Routes.RemoveAppFromRoute('123', '456');
+      $httpBackend.whenDELETE(RemoveAppFromRoute.url).respond(204, RemoveAppFromRoute.response['204'].body);
+      $httpBackend.expectDELETE(RemoveAppFromRoute.url);
+      routeModel.removeAppFromRoute('123', '456');
+      $httpBackend.flush();
+      expect(RemoveAppFromRoute.response['204'].body).toBeDefined();
+    });
+
     it('deleteRoute', function () {
       var DeleteRoute = mock.cloudFoundryAPI.Routes.DeleteRoute('123');
       $httpBackend.whenDELETE(DeleteRoute.url).respond(204, DeleteRoute.response['204'].body);
