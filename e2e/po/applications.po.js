@@ -10,6 +10,7 @@ module.exports = {
   showApplications: showApplications,
   showApplicationDetails: showApplicationDetails,
   showServices: showServices,
+  showDeliveryLogs: showDeliveryLogs,
   applicationServiceFlyout: applicationServiceFlyout,
   showServiceDetails: showServiceDetails,
   serviceAddConfirm: serviceAddConfirm,
@@ -36,6 +37,10 @@ function showApplicationDetails(idx) {
 
 function showServices() {
   applicationAction(2).click();
+}
+
+function showDeliveryLogs() {
+  applicationAction(3).click();
 }
 
 function applicationActionsBar() {

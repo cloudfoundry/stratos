@@ -5,7 +5,9 @@ var request = require('../../tools/node_modules/request');
 
 // Get host IP
 var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
-var hostIp = sh.exec(CMD, { silent: true }).output.trim();
+var hostIp = browser.params.hostIp || sh.exec(CMD, { silent: true }).output.trim();
+var hostPort = browser.params.port || '';
+var host = hostIp + (hostPort ? ':' + hostPort : '');
 
 module.exports = {
 
@@ -31,7 +33,7 @@ module.exports = {
 };
 
 function getHost() {
-  return hostIp;
+  return host;
 }
 
 function newBrowser() {
@@ -40,7 +42,7 @@ function newBrowser() {
 
 function loadApp() {
   browser.manage().deleteAllCookies();
-  browser.get('http://' + hostIp);
+  browser.get('http://' + host);
 }
 
 function setBrowserNormal() {
