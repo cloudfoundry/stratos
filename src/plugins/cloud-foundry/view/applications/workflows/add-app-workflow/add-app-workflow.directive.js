@@ -23,7 +23,8 @@
 
   AddAppWorkflowController.$inject = [
     'app.model.modelManager',
-    'app.event.eventService'
+    'app.event.eventService',
+    '$q'
   ];
 
   /**
@@ -32,21 +33,28 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
+   * @param {object} $q - angular $q service
+   * @property {object} $q - angular $q service
    * @property {object} model - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} githubModel - the Github model
+   * @property {object} privateDomainModel - the private domain model
+   * @property {object} sharedDomainModel - the shared domain model
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function AddAppWorkflowController(modelManager, eventService) {
+  function AddAppWorkflowController(modelManager, eventService, $q) {
     var that = this;
 
+    this.$q = $q;
     this.addingApplication = false;
     this.eventService = eventService;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
+    this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
       that.startWorkflow();
     });
@@ -197,18 +205,8 @@
         workflow: that.data.workflow,
         userInput: this.userInput,
         subflow: 'pipeline',
-
-        // mock data
         serviceInstances: [],
-        domains: [
-          { label: 'domain-28.example.com', value: 'domain-28.example.com'},
-          { label: 'customer-app-domain1.com', value: 'customer-app-domain1.com'},
-          { label: 'customer-app-domain2.com', value: 'customer-app-domain2.com'},
-          { label: 'domain-38.example.com', value: 'domain-38.example.com'},
-          { label: 'domain-39.example.com', value: 'domain-39.example.com'},
-          { label: 'domain-40.example.com', value: 'domain-40.example.com'},
-          { label: 'domain-41.example.com', value: 'domain-41.example.com'}
-        ],
+        domains: [],
         notificationTargets: [
           {
             title: 'HipChat',
@@ -262,7 +260,60 @@
         }
       };
 
-      this.userInput.domain = this.options.domains[0].value;
+      this.getDomains().then(function () {
+        that.userInput.domain = that.options.domains[0].value;
+      });
+    },
+
+    /**
+     * @function getDomains
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description get domains, including private domains and shared domains
+     * @returns {promise} A resolved/rejected promise
+     */
+    getDomains: function () {
+      return this.$q.all([
+        this.getPrivateDomains(),
+        this.getSharedDomains()
+      ]);
+    },
+
+    /**
+     * @function getPrivateDomains
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description get private domains
+     * @returns {promise} A resolved/rejected promise
+     */
+    getPrivateDomains: function () {
+      var that = this;
+      return this.privateDomainModel.listAllPrivateDomains().then(function (privateDomains) {
+        [].push.apply(that.options.domains, _.map(privateDomains, that.domainMapping);
+      });
+    },
+
+    /**
+     * @function getSharedDomains
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description get shared domains
+     * @returns {promise} A resolved/rejected promise
+     */
+    getSharedDomains: function () {
+      var that = this;
+      return this.sharedDomainModel.listAllSharedDomains().then(function (sharedDomains) {
+        [].push.apply(that.options.domains, _.map(sharedDomains, that.domainMapping);
+      });
+    },
+
+    /**
+     * @function domainMapping
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description domain mapping function
+     */
+    domainMapping: function (d) {
+      return {
+        label: d.entity.name,
+        value: d.entity.name
+      };
     },
 
     /**
