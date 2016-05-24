@@ -1,15 +1,11 @@
 .application-details {
   .delivery-logs-summary {
-    .data-body {
-      margin-left: $hpe-unit-space;
-    }
-    .summary-col {
-      padding: 0;
-      div {
+    & > dl {
+      padding-left: $hpe-unit-space;
+      padding-bottom: $hpe-unit-space;
+
+      dt, dd {
         padding-top: $hpe-unit-space / 2;
-        &:last-of-type {
-          padding-bottom: $hpe-unit-space / 2;
-        }
       }
     }
   }
