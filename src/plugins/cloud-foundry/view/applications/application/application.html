@@ -51,46 +51,12 @@
 </div>
 
 <ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
-  <li>
+  <li ng-repeat="appAction in appCtrl.appActions">
     <button class="btn btn-link btn-border-less"
-      ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STARTED'"
-      ng-click="appCtrl.model.startApp(appCtrl.id)">
-      <i class="helion-icon helion-icon-lg helion-icon-Launch"></i>
-      <span translate>Launch App</span>
-    </button>
-  </li>
-  <li>
-    <button class="btn btn-link btn-border-less"
-      ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STOPPED'"
-      ng-click="appCtrl.model.stopApp(appCtrl.id)">
-      <i class="helion-icon helion-icon-lg helion-icon-Halt-stop"></i>
-      <span translate>Stop</span>
-    </button>
-  </li>
-  <li>
-    <button class="btn btn-link btn-border-less"
-      ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
-      ng-if="appCtrl.model.application.summary.state!=='STOPPED'"
-      ng-click="appCtrl.model.restartApp(appCtrl.id)">
-      <i class="helion-icon helion-icon-lg helion-icon-Refresh"></i>
-      <span translate>Restart</span>
-    </button>
-  </li>
-  <li>
-    <button class="btn btn-link btn-border-less"
-      ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STARTED'"
-      ng-click="appCtrl.deleteApp()">
-      <i class="helion-icon helion-icon-lg helion-icon-Trash"></i>
-      <span translate>Delete</span>
-    </button>
-  </li>
-  <li>
-    <button class="btn btn-link btn-border-less"
-      ng-disabled="appCtrl.model.application.summary.state==='PENDING'"
-      ng-if="appCtrl.model.application.summary.state==='STOPPED'"
-      ng-click="appCtrl.model.startApp(appCtrl.id)">
-      <i class="helion-icon helion-icon-lg helion-icon-Play"></i>
-      <span translate>Start</span>
+      ng-disabled="appAction.disabled"
+      ng-hide="appAction.hidden"
+      ng-click="appAction.execute()">
+      <i ng-class="appAction.icon"></i> {{ appAction.name }}
     </button>
   </li>
 </ul>
