@@ -78,6 +78,7 @@
   </li>
   <li>
     <button class="btn btn-link btn-border-less"
+      ng-disabled="appCtrl.model.application.summary.state==='PENDING' || appCtrl.model.application.summary.state==='STARTED'"
       ng-click="appCtrl.deleteApp()">
       <i class="helion-icon helion-icon-lg helion-icon-Trash"></i>
       <span translate>Delete</span>

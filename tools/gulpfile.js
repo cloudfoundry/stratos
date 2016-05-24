@@ -17,7 +17,7 @@ var concat = require('gulp-concat-util'),
   browserSyncProxy = require('proxy-middleware'),
   gutil = require('gulp-util'),
   node_url = require('url'),
-
+  vfs = require('vinyl-fs'),
   wiredep = require('wiredep').stream;
 
 var config = require('./gulp.config')();
@@ -60,10 +60,15 @@ gulp.task('copy:js', function () {
 });
 
 // Copy 'lib' folder to 'dist'
+// Bote: gulp.src does not support symlinks, so use vinyl-fs.
+// Even with vinyl-fs, when copying symlink dirs, it only copies 1 level deep of folder
+// so, we copy explicitly our helion-* repos' dist folder - these are the repositories that you
+// might be using 'bower link' with
 gulp.task('copy:lib', function () {
-  return gulp
-    .src(paths.src + 'lib/**')
-    .pipe(gulp.dest(paths.dist + 'lib/'));
+  return vfs.src([
+    paths.src + 'lib/**/*',
+    paths.src + 'lib/helion-*/dist/**/*'
+  ]).pipe(vfs.dest(paths.dist + 'lib'));
 });
 
 // Copy 'translations' folder to 'dist'

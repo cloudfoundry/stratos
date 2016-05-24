@@ -60,6 +60,7 @@
       this.data.workflow = {
         allowJump: false,
         allowBack: false,
+        allowCancelAtLastStep: true,
         title: gettext('Delete App, Pipeline, and Selected Items'),
         hideStepNavStack: true,
         steps: [

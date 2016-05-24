@@ -89,7 +89,9 @@
         {
           name: gettext('Delete'),
           execute: function () {
-          }
+            that.deleteApp();
+          },
+          disabled: newState === 'PENDING' || newState === 'STARTED'
         }
       ];
 
@@ -114,7 +116,11 @@
     },
 
     deleteApp: function () {
-      this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW');
+      if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
+        this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW');
+      } else {
+        this.simpleDeleteAppDialog();
+      }
     },
 
     simpleDeleteAppDialog: function () {
