@@ -2,10 +2,14 @@
   <div class="application-header font-semi-bold text-uppercase">
     {{ appCtrl.model.application.summary.name }}
     <span class="action-target-state"
+      ng-if="appCtrl.model.application.summary.state !== 'PENDING'"
       ng-class="'app-state-' + appCtrl.model.appStateSwitchTo + '-' + appCtrl.model.application.summary.state"
       uib-popover="{{ appCtrl.model.appStateSwitchTo==='STALE' ? appCtrl.warningMsg : '' }}"
       ng-attr-popover-trigger="mouseenter" popover-placement="bottom">
     </span>
+    <bounce-spinner classes="bounce-spinner-sm"
+      ng-if="appCtrl.model.application.summary.state === 'PENDING'">
+    </bounce-spinner>
     <actions-menu class="application-nav-menu visible-sm visible-xs" actions="appCtrl.appActions"
       menu-icon="helion-icon helion-icon-2x helion-icon-More"
       menu-position="actions-menu-right">
