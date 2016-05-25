@@ -1,7 +1,7 @@
 <div class="delivery-build-summary">
   <div class="row col-md-5">
     <span translate>Started: </span>
-    {{ detailViewCtrl.context.build.reason.createdDateString }}
+    {{ detailViewCtrl.context.event.startDate | amDateFormat:'L - LTS'}}
   </div>
   <div class="row col-md-4">
     <span translate>Duration: </span>

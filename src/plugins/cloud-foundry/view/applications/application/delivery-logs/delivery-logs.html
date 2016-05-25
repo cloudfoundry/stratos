@@ -6,21 +6,21 @@
   <dl class="dl-horizontal">
     <dt translate>LAST BUILD</dt>
     <dd>
-      <a class="" href="" ng-click="appDelLogsCtrl.viewCommit(appDelLogsCtrl.last.build)">
+      <a class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.build)">
       {{ appDelLogsCtrl.last.build.reason.commitSha }}</a>
-      <span am-time-ago="appDelLogsCtrl.last.build.date"></span>
+      <span am-time-ago="appDelLogsCtrl.last.build.reason.createdDate"></span>
     </dd>
     <dt translate>LAST TEST</dt>
     <dd>
-      <a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastTest)">
-      {{ appDelLogsCtrl.hceModel.delivery.lastTest.link }}</a>
-      <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastTest.time"></span>
+      <a class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.test)">
+        {{ appDelLogsCtrl.last.test.reason.commitSha }}</a>
+      <span am-time-ago="appDelLogsCtrl.last.test.reason.createdDate"></span>
     </dd>
     <dt translate>LAST DEPLOYMENT</dt>
     <dd>
-      <a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastDeployment)">
-      {{ appDelLogsCtrl.hceModel.delivery.lastDeployment.link }}</a>
-      <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastDeployment.time"></span>
+      <a class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.deploy)">
+        {{ appDelLogsCtrl.last.deploy.reason.commitSha }}</a>
+      <span am-time-ago="appDelLogsCtrl.last.deploy.reason.createdDate"></span>
     </dd>
   </dl>
 </div>
@@ -59,35 +59,34 @@
       </tr>
       </thead>
       <tbody>
-      <tr ng-repeat="build in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
-        <td><a class="" href="" ng-click="appDelLogsCtrl.viewCommit(build)">{{ build.message }}</a></td>
-        <td ng-switch="build.result.value" class="row result-col" id="result-col">
+      <tr ng-repeat="execution in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
+        <td><a class="" href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
+        <td ng-switch="execution.result.value" class="row result-col" id="result-col">
           <div ng-switch-when="Success">
             <span class="helion-icon helion-icon-Active_S text-primary"></span>
-            <span translate>{{ build.result.label }}</span>
-            <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
+            <span translate>{{ execution.result.label }}</span>
+            <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
           </div>
           <div ng-switch-when="Deploying">
             <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
-            <span translate>{{ build.result.label }}</span>
+            <span translate>{{ execution.result.label }}</span>
           </div>
           <div ng-switch-when="Failure">
             <span class="helion-icon helion-icon-Critical_S text-danger"></span>
-            <span translate>{{ build.result.label }}</span>
-            <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
+            <span translate>{{ execution.result.label }}</span>
+            <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
           </div>
           <div ng-switch-when="in-progress">
             <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
-            <span translate>{{ build.result.label }}</span>
-            <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
+            <span translate>{{ execution.result.label }}</span>
           </div>
           <div ng-switch-default>
             <span translate>Unknown</span>
           </div>
         </td>
-        <td>{{ build.reason.createdDateString }}</td>
-        <td>{{ build.reason.author }}</td>
-        <td>{{ build.reason.type }}</td>
+        <td>{{ execution.reason.createdDateString }}</td>
+        <td>{{ execution.reason.author }}</td>
+        <td>{{ execution.reason.type }}</td>
       </tr>
       </tbody>
     </table>

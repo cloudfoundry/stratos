@@ -1,11 +1,11 @@
 <div class="delivery-commit-detail panel">
   <dl class="dl-horizontal col-sm-9">
     <dt translate>COMMIT ID</dt>
-    <dd class="text-right">{{ detailViewCtrl.context.build.reason.commitSha }}</dd>
+    <dd class="text-right">{{ detailViewCtrl.context.execution.reason.commitSha }}</dd>
     <dt translate>CREATED</dt>
-    <dd class="text-right">{{ detailViewCtrl.context.build.reason.createdDateString }}</dd>
+    <dd class="text-right">{{ detailViewCtrl.context.execution.reason.createdDate | amDateFormat:'L - LTS' }}</dd>
     <dt translate>COMMIT AUTHOR</dt>
-    <dd class="text-right">{{ detailViewCtrl.context.build.reason.author }}</dd>
+    <dd class="text-right">{{ detailViewCtrl.context.execution.reason.author }}</dd>
   </dl>
   <br>
   <div class="nav-tabs"></div>
@@ -13,23 +13,23 @@
 <div class="delivery-commit-builds">
   <table class="table table-outlined">
     <tbody>
-    <tr ng-repeat="build in detailViewCtrl.context.builds">
-      <td ng-switch="build.result.value" class="row result-col build-result" id="result-col">
+    <tr ng-repeat="event in detailViewCtrl.context.events">
+      <td ng-switch="event.state" class="row result-col build-result" id="result-col">
         <div ng-switch-when="Success">
           <span class="helion-icon helion-icon-Active_S text-primary"></span>
-          <span translate>{{ build.result.label }}</span>
+          <span translate>{{ event.type }}</span>
         </div>
         <div ng-switch-when="Deploying">
           <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
-          <span translate>{{ build.result.label }}</span>
+          <span translate>{{ event.type }}</span>
         </div>
         <div ng-switch-when="Failure">
           <span class="helion-icon helion-icon-Critical_S text-danger"></span>
-          <span translate>{{ build.result.label }}</span>
+          <span translate>{{ event.type }}</span>
         </div>
         <div ng-switch-when="in-progress">
           <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
-          <span translate>{{ build.result.label }}</span>
+          <span translate>{{ event.type }}</span>
         </div>
         <div ng-switch-default>
           <span translate>Unknown</span>
@@ -37,16 +37,16 @@
       </td>
       <td class="row result-col">
         <span translate>Started: </span>
-        {{ build.reason.createdDateString }}
+        {{ event.startDate | amDateFormat:'L - LTS'}}
       </td>
       <td></td>
       <td class="row result-col">
         <span translate>Duration: </span>
         TODO
       </td>
-      <td ng-switch="build.result.value == 'Success' || build.result.value == 'Failure'" class="build-view">
+      <td ng-switch="event.state == 'Success' || event.state == 'Failure'" class="build-view">
         <div ng-switch-when="true">
-          <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewBuild(build)">
+          <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewEvent(event)">
             <i class="helion-icon helion-icon-Right_Arrow"></i>
             <span translate>View</span>
           </a>

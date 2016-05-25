@@ -218,6 +218,23 @@
     },
 
     /**
+     * @function getPipelineExecutions
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get events by execution ID
+     * @param {string} executionId - the HCE execution ID that owns the events
+     * @returns {promise} A promise object
+     * @public
+     */
+    getPipelineEvents: function (executionId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
+        .getPipelineEvents({ execution_id: executionId})
+        .then(function (response) {
+          that.onGetPipelineEvents(response);
+        });
+    },
+
+    /**
      * @function createDeploymentTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a new deployment target
@@ -430,13 +447,25 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache pipeline executions
      * @param {string} response - the JSON response from API call
-     * @returns {object} The executions associated with the project
      * @private
      */
     onGetPipelineExecutions: function (response) {
       this.data.pipelineExecutions.length = 0;
       [].push.apply(this.data.pipelineExecutions, response.data || []);
-    }
+    },
+
+    /**
+     * @function onGetPipelineEvents
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Extract data from response
+     * @param {string} response - the JSON response from API call
+     * @returns {object} The collection of pipeline events
+     * @private
+     */
+    onGetPipelineEvents: function (response) {
+      return response.data;
+    },
+
   });
 
 })();
