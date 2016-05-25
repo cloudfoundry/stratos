@@ -173,9 +173,9 @@
           },
           {
             ready: true,
-            title: gettext('Deploy'),
+            title: gettext('Deploy App'),
             templateUrl: path + 'pipeline-subflow/deploy.html',
-            nextBtnText: gettext('Finished with code change'),
+            nextBtnText: gettext('Finished code change'),
             isLastStep: true
           }
         ],
