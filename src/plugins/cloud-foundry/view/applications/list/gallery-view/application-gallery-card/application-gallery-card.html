@@ -1,15 +1,23 @@
 <gallery-card card-data="applicationGalleryCardCtrl.cardData"
   on-card-click="applicationGalleryCardCtrl.goToApp()">
   <dl class="dl-horizontal">
-    <dt translate>Memory Utilization</dt>
-    <dd>{{applicationGalleryCardCtrl.app.entity.memory}} MB</dd>
+    <dt translate>App State</dt>
+    <dd class="text-capitalize">
+      {{applicationGalleryCardCtrl.app.entity.state | lowercase}}
+      <span class="app-status">
+        <span ng-if="applicationGalleryCardCtrl.app.entity.state !== 'PENDING'"
+          class="helion-icon {{ applicationGalleryCardCtrl.app.entity.state | appStateIcon }}">
+        </span>
+        <bounce-spinner classes="bounce-spinner-sm"
+          ng-if="applicationGalleryCardCtrl.app.entity.state === 'PENDING'">
+        </bounce-spinner>
+      </span>
+    </dd>
     <dt translate>Instances</dt>
     <dd>{{applicationGalleryCardCtrl.app.entity.instances}}</dd>
     <dt translate>Disk Quota</dt>
     <dd>{{applicationGalleryCardCtrl.app.entity.disk_quota}}</dd>
-    <dt translate>Modified</dt>
-    <dd>{{applicationGalleryCardCtrl.app.metadata.updated_at | date : 'M/d/yy h:mm:ss a'}}</dd>
-    <dt translate>State</dt>
-    <dd>{{applicationGalleryCardCtrl.app.entity.state}}</dd>
+    <dt translate>Memory Utilization</dt>
+    <dd>{{applicationGalleryCardCtrl.app.entity.memory}} MB</dd>
   </dl>
 </gallery-card>
