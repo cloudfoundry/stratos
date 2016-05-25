@@ -57,53 +57,60 @@
     this.id = $stateParams.guid;
     this.init();
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
-    this.appActions = [];
+    this.isPending = this.model.application.summary.state === 'PENDING';
+    this.appActions = [
+      {
+        name: gettext('Launch App'),
+        execute: function () {
+          that.model.launchApp(that.id);
+        },
+        disabled: this.isPending,
+        icon: 'helion-icon helion-icon-lg helion-icon-Launch'
+      },
+      {
+        name: gettext('Stop'),
+        execute: function () {
+          that.model.stopApp(that.id);
+        },
+        disabled: this.isPending,
+        icon: 'helion-icon helion-icon-lg helion-icon-Halt-stop'
+      },
+      {
+        name: gettext('Restart'),
+        execute: function () {
+          that.model.restartApp(that.id);
+        },
+        disabled: this.isPending,
+        icon: 'helion-icon helion-icon-lg helion-icon-Refresh'
+      },
+      {
+        name: gettext('Delete'),
+        execute: function () {
+          that.deleteApp();
+        },
+        disabled: this.isPending,
+        icon: 'helion-icon helion-icon-lg helion-icon-Trash'
+      },
+      {
+        name: gettext('Start'),
+        execute: function () {
+          that.model.startApp(that.id);
+        },
+        disabled: this.isPending,
+        icon: 'helion-icon helion-icon-lg helion-icon-Play'
+      },
+      {
+        name: gettext('CLI Instructions'),
+        execute: function () {
+        },
+        icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
+      }
+    ];
 
     $scope.$watch(function () {
       return that.model.application.summary.state;
     }, function (newState) {
-      that.appActions.length = 0;
-
-      var newActions = [
-        {
-          name: gettext('Launch App'),
-          execute: function () {
-            that.model.startApp(that.id);
-          },
-          disabled: newState === 'PENDING' || newState === 'STARTED'
-        },
-        {
-          name: gettext('Stop'),
-          execute: function () {
-            that.model.stopApp(that.id);
-          },
-          disabled: newState === 'PENDING' || newState === 'STOPPED'
-        },
-        {
-          name: gettext('Restart'),
-          execute: function () {
-            that.model.restartApp(that.id);
-          },
-          disabled: newState === 'PENDING'
-        },
-        {
-          name: gettext('Delete'),
-          execute: function () {
-          }
-        }
-      ];
-
-      if (newState === 'STOPPED') {
-        newActions.push({
-          name: gettext('Start'),
-          execute: function () {
-            that.model.startApp(that.id);
-          },
-          disabled: newState === 'PENDING' || newState !== 'STOPPED'
-        });
-      }
-
-      [].push.apply(that.appActions, newActions);
+      that.onAppStateChange(newState);
     });
   }
 
@@ -114,7 +121,11 @@
     },
 
     deleteApp: function () {
-      this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW');
+      if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
+        this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW');
+      } else {
+        this.simpleDeleteAppDialog();
+      }
     },
 
     simpleDeleteAppDialog: function () {
@@ -132,6 +143,19 @@
           });
         }
       });
+    },
+
+    onAppStateChange: function (newState) {
+      var that = this;
+
+      this.isPending = newState === 'PENDING';
+      angular.forEach(this.appActions, function (appAction) {
+        appAction.disabled = that.isPending;
+      });
+
+      this.appActions[1].hidden = newState === 'STOPPED';
+      this.appActions[3].hidden = newState === 'STARTED';
+      this.appActions[4].hidden = newState === 'STARTED';
     }
   });
 
