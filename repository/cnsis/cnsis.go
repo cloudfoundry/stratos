@@ -24,9 +24,18 @@ type CNSIRecord struct {
 	TokenEndpoint         string
 }
 
+// RegisteredCluster - <TBD>
+type RegisteredCluster struct {
+	Name        string
+	URL         string
+	Account     string
+	TokenExpiry int64
+}
+
 // Repository is an application of the repository pattern for storing CNSI Records
 type Repository interface {
 	List() ([]*CNSIRecord, error)
+	ListByUser(userGUID string) ([]*RegisteredCluster, error)
 	Find(guid string) (CNSIRecord, error)
 	Save(guid string, cnsiRecord CNSIRecord) error
 }
