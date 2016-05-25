@@ -98,6 +98,10 @@ export CERT=<cert file contents>
 export CERT_KEY=<key file contents>
 ```
 
+- Set up developer certs
+
+The proxy requires certs to run. When running in production or in the dev harness, the cert will come from environment variables, but since docker-compose can't handle multi-line variables in it's env_files, the proxy will first look for pproxy.cert and pproxy.key files in a dev-certs directory.  You can set the CERT and CERT_KEY variables in your .rc file to be random short strings. They won't be used, but must be present for the proxy to run.
+
 - Run
 
 To run the portal-proxy with expected environment variables set:

@@ -80,6 +80,18 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 func createTempCertFiles(pc portalConfig) (string, string, error) {
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
+
+	// If there's a developer cert/key, use that instead of using what's in the
+	// config. This is to bypass an issue with docker-compose not being able to
+	// handle multi-line variables in an env_file
+	devCertsDir := "dev-certs/"
+	_, err_devcert := os.Stat(devCertsDir + certFilename)
+	_, err_devkey := os.Stat(devCertsDir + certKeyFilename)
+	if err_devcert == nil && err_devkey == nil {
+		fmt.Println("Yeah, got some certs, yo")
+		return devCertsDir + certFilename, devCertsDir + certKeyFilename, nil
+	}
+
 	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
 	if err != nil {
 		return "", "", err
