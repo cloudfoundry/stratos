@@ -28,10 +28,6 @@
   function HcePipelineApi($http) {
     this.$http = $http;
     this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
   }
 
   angular.extend(HcePipelineApi.prototype, {
@@ -42,15 +38,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    deletePipelineExecution: function (executionId, params) {
+    deletePipelineExecution: function (guid, executionId, params) {
       var path = this.baseUrl + '/pipelines/executions/{execution_id}'
         .replace('{' + 'execution_id' + '}', executionId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -63,15 +62,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getPipelineEvent: function (eventId, params) {
+    getPipelineEvent: function (guid, eventId, params) {
       var path = this.baseUrl + '/pipelines/events/{event_id}'
         .replace('{' + 'event_id' + '}', eventId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -83,14 +85,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getPipelineEvents: function (params) {
+    getPipelineEvents: function (guid, params) {
       var path = this.baseUrl + '/pipelines/events';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -103,15 +108,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getPipelineExecution: function (executionId, params) {
+    getPipelineExecution: function (guid, executionId, params) {
       var path = this.baseUrl + '/pipelines/executions/{execution_id}'
         .replace('{' + 'execution_id' + '}', executionId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -123,14 +131,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getPipelineExecutions: function (params) {
+    getPipelineExecutions: function (guid, params) {
       var path = this.baseUrl + '/pipelines/executions';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -143,15 +154,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    pipelineEventOccurred: function (data, params) {
+    pipelineEventOccurred: function (guid, data, params) {
       var path = this.baseUrl + '/pipelines/events';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -164,15 +178,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    triggerPipelineExecution: function (data, params) {
+    triggerPipelineExecution: function (guid, data, params) {
       var path = this.baseUrl + '/pipelines/triggers';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);

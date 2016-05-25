@@ -73,7 +73,7 @@
 
       $httpBackend.when('GET', getUser.url).respond(200, getUser.response['200'].body);
       $httpBackend.expectGET(getUser.url);
-      hceModel.getUser(1);
+      hceModel.getUser('cnsi_guid', 1);
       $httpBackend.flush();
 
       expect(hceModel.data.user).not.toEqual({});
@@ -137,7 +137,7 @@
 
       $httpBackend.when('POST', createProject.url).respond(201, createProject.response['201'].body);
       $httpBackend.expectPOST(createProject.url);
-      hceModel.createProject('name', 'github', 'GithubToken', 1, 'java', 2, repo, 'master');
+      hceModel.createProject('cnsi_guid', 'name', 'github', 'GithubToken', 1, 'java', 2, repo, 'master');
       $httpBackend.flush();
     });
 

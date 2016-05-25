@@ -93,7 +93,7 @@
     connect: function () {
       var that = this;
       this.authenticating = true;
-      this.serviceInstanceModel.connect(this.cnsi.url)
+      this.serviceInstanceModel.connect(this.cnsi.url, this._data.username, this._data.password)
         .then(function success(response) {
           that.reset();
           if (angular.isDefined(that.onSubmit)) {

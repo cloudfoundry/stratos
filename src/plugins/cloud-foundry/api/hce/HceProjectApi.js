@@ -28,10 +28,6 @@
   function HceProjectApi($http) {
     this.$http = $http;
     this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
   }
 
   angular.extend(HceProjectApi.prototype, {
@@ -43,16 +39,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    addMember: function (projectId, data, params) {
+    addMember: function (guid, projectId, data, params) {
       var path = this.baseUrl + '/projects/{project_id}/members'
         .replace('{' + 'project_id' + '}', projectId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -65,15 +64,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    addPipelineTask: function (data, params) {
+    addPipelineTask: function (guid, data, params) {
       var path = this.baseUrl + '/pipelines/tasks';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -86,15 +88,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    createProject: function (data, params) {
+    createProject: function (guid, data, params) {
       var path = this.baseUrl + '/projects';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -107,15 +112,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    deleteProject: function (projectId, params) {
+    deleteProject: function (guid, projectId, params) {
       var path = this.baseUrl + '/projects/{project_id}'
         .replace('{' + 'project_id' + '}', projectId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -128,15 +136,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getPipelineTask: function (taskId, params) {
+    getPipelineTask: function (guid, taskId, params) {
       var path = this.baseUrl + '/pipelines/tasks/{task_id}'
         .replace('{' + 'task_id' + '}', taskId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -148,14 +159,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getPipelineTasks: function (params) {
+    getPipelineTasks: function (guid, params) {
       var path = this.baseUrl + '/pipelines/tasks';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -168,15 +182,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getProject: function (projectId, params) {
+    getProject: function (guid, projectId, params) {
       var path = this.baseUrl + '/projects/{project_id}'
         .replace('{' + 'project_id' + '}', projectId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -189,15 +206,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getProjectMembers: function (projectId, params) {
+    getProjectMembers: function (guid, projectId, params) {
       var path = this.baseUrl + '/projects/{project_id}/members'
         .replace('{' + 'project_id' + '}', projectId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -209,14 +229,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getProjects: function (params) {
+    getProjects: function (guid, params) {
       var path = this.baseUrl + '/projects';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -230,16 +253,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    removeMember: function (projectId, data, params) {
+    removeMember: function (guid, projectId, data, params) {
       var path = this.baseUrl + '/projects/{project_id}/members'
         .replace('{' + 'project_id' + '}', projectId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -252,15 +278,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    removePipelineTask: function (taskId, params) {
+    removePipelineTask: function (guid, taskId, params) {
       var path = this.baseUrl + '/pipelines/tasks/{task_id}'
         .replace('{' + 'task_id' + '}', taskId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -274,16 +303,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    updateProject: function (projectId, data, params) {
+    updateProject: function (guid, projectId, data, params) {
       var path = this.baseUrl + '/projects/{project_id}'
         .replace('{' + 'project_id' + '}', projectId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);

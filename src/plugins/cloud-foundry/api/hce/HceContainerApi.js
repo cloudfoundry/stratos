@@ -28,10 +28,6 @@
   function HceContainerApi($http) {
     this.$http = $http;
     this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
   }
 
   angular.extend(HceContainerApi.prototype, {
@@ -42,15 +38,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    addBuildContainer: function (data, params) {
+    addBuildContainer: function (guid, data, params) {
       var path = this.baseUrl + '/containers/build_containers';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -63,15 +62,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    addImage: function (data, params) {
+    addImage: function (guid, data, params) {
       var path = this.baseUrl + '/containers/images';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -84,15 +86,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    addImageRegistry: function (data, params) {
+    addImageRegistry: function (guid, data, params) {
       var path = this.baseUrl + '/containers/images/registries';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -105,15 +110,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getBuildContainer: function (containerId, params) {
+    getBuildContainer: function (guid, containerId, params) {
       var path = this.baseUrl + '/containers/build_containers/{container_id}'
         .replace('{' + 'container_id' + '}', containerId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -125,14 +133,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getBuildContainers: function (params) {
+    getBuildContainers: function (guid, params) {
       var path = this.baseUrl + '/containers/build_containers';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -145,15 +156,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getImage: function (imageId, params) {
+    getImage: function (guid, imageId, params) {
       var path = this.baseUrl + '/containers/images/{image_id}'
         .replace('{' + 'image_id' + '}', imageId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -165,14 +179,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getImageRegistries: function (params) {
+    getImageRegistries: function (guid, params) {
       var path = this.baseUrl + '/containers/images/registries';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -185,34 +202,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getImageRegistry: function (registryId, params) {
+    getImageRegistry: function (guid, registryId, params) {
       var path = this.baseUrl + '/containers/images/registries/{registry_id}'
         .replace('{' + 'registry_id' + '}', registryId);
-
-      var config = {
-        method: 'GET',
-        url: path,
-        params: params || {},
-        headers: this.defaultHeaders
+      var headers = {
+        'x-cnap-cnsi-list': guid
       };
 
-      return this.$http(config);
-    },
-
-    /**
-     * @name getImageTypes
-     * @description Enumeration of Container image types, e.g. &#x60;DOCKER&#x60;, &#x60;ROCKET&#x60;, etc.\n
-     * @param {object} params - the query parameters
-     * @returns {promise} A resolved/rejected promise
-     */
-    getImageTypes: function (params) {
-      var path = this.baseUrl + '/containers/images/types';
-
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -224,14 +225,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getImages: function (params) {
+    getImages: function (guid, params) {
       var path = this.baseUrl + '/containers/images';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -244,15 +248,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    removeBuildContainer: function (containerId, params) {
+    removeBuildContainer: function (guid, containerId, params) {
       var path = this.baseUrl + '/containers/build_containers/{container_id}'
         .replace('{' + 'container_id' + '}', containerId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -265,15 +272,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    removeImage: function (imageId, params) {
+    removeImage: function (guid, imageId, params) {
       var path = this.baseUrl + '/containers/images/{image_id}'
         .replace('{' + 'image_id' + '}', imageId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -286,15 +296,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    removeImageRegistry: function (registryId, params) {
+    removeImageRegistry: function (guid, registryId, params) {
       var path = this.baseUrl + '/containers/images/registries/{registry_id}'
         .replace('{' + 'registry_id' + '}', registryId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -308,16 +321,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    updateBuildContainer: function (containerId, data, params) {
+    updateBuildContainer: function (guid, containerId, data, params) {
       var path = this.baseUrl + '/containers/build_containers/{container_id}'
         .replace('{' + 'container_id' + '}', containerId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -331,16 +347,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    updateImage: function (imageId, data, params) {
+    updateImage: function (guid, imageId, data, params) {
       var path = this.baseUrl + '/containers/images/{image_id}'
         .replace('{' + 'image_id' + '}', imageId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -354,16 +373,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    updateImageRegistry: function (registryId, data, params) {
+    updateImageRegistry: function (guid, registryId, data, params) {
       var path = this.baseUrl + '/containers/images/registries/{registry_id}'
         .replace('{' + 'registry_id' + '}', registryId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);

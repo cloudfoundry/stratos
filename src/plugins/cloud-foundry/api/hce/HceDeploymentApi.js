@@ -28,10 +28,6 @@
   function HceDeploymentApi($http) {
     this.$http = $http;
     this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
   }
 
   angular.extend(HceDeploymentApi.prototype, {
@@ -42,15 +38,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    addDeploymentTarget: function (data, params) {
+    addDeploymentTarget: function (guid, data, params) {
       var path = this.baseUrl + '/deployments/targets';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -63,15 +62,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    deploymentOccurred: function (data, params) {
+    deploymentOccurred: function (guid, data, params) {
       var path = this.baseUrl + '/deployments';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -84,15 +86,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getDeployment: function (deploymentId, params) {
+    getDeployment: function (guid, deploymentId, params) {
       var path = this.baseUrl + '/deployments/{deployment_id}'
         .replace('{' + 'deployment_id' + '}', deploymentId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -105,15 +110,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getDeploymentTarget: function (targetId, params) {
+    getDeploymentTarget: function (guid, targetId, params) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -125,14 +133,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getDeploymentTargets: function (params) {
+    getDeploymentTargets: function (guid, params) {
       var path = this.baseUrl + '/deployments/targets';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -144,14 +155,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getDeployments: function (params) {
+    getDeployments: function (guid, params) {
       var path = this.baseUrl + '/deployments';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -164,15 +178,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    removeDeployment: function (deploymentId, params) {
+    removeDeployment: function (guid, deploymentId, params) {
       var path = this.baseUrl + '/deployments/{deployment_id}'
         .replace('{' + 'deployment_id' + '}', deploymentId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -185,15 +202,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    removeDeploymentTarget: function (targetId, params) {
+    removeDeploymentTarget: function (guid, targetId, params) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -207,16 +227,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    updateTarget: function (targetId, data, params) {
+    updateTarget: function (guid, targetId, data, params) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);

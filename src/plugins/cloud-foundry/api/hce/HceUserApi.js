@@ -28,10 +28,6 @@
   function HceUserApi($http) {
     this.$http = $http;
     this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
   }
 
   angular.extend(HceUserApi.prototype, {
@@ -42,15 +38,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    createUser: function (data, params) {
+    createUser: function (guid, data, params) {
       var path = this.baseUrl + '/users';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -63,15 +62,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    deleteUser: function (userId, params) {
+    deleteUser: function (guid, userId, params) {
       var path = this.baseUrl + '/users/{user_id}'
         .replace('{' + 'user_id' + '}', userId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -84,15 +86,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getUser: function (userId, params) {
+    getUser: function (guid, userId, params) {
       var path = this.baseUrl + '/users/{user_id}'
         .replace('{' + 'user_id' + '}', userId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -105,15 +110,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getUserByGithubId: function (githubId, params) {
+    getUserByGithubId: function (guid, githubId, params) {
       var path = this.baseUrl + '/users/github/{github_id}'
         .replace('{' + 'github_id' + '}', githubId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -127,16 +135,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    updateUser: function (userId, data, params) {
+    updateUser: function (guid, userId, data, params) {
       var path = this.baseUrl + '/users/{user_id}'
         .replace('{' + 'user_id' + '}', userId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
