@@ -44,31 +44,36 @@
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
     var that = this;
+    var updateModelPromise;
 
-    updateData();
-
-    var updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
+    /* eslint-disable */
+    // TODO: Fetch the actual user.
+    // TODO: Check if project id already exists in hce model?
+    /* eslint-enable */
+    that.hceModel.getUserByGithubId('18697775')
+      .then(function() {
+        return that.hceModel.getProjects();
+      })
+      .then(function() {
+        that.model.application.summary.name = 'test';// Temp override
+        return that.hceModel.getProject(that.model.application.summary.name);
+      })
+      .then(function(project) {
+        if (angular.isUndefined(project)) {
+          throw 'Could not find project with name \'' + that.model.application.summary.name + '\'';
+        } else {
+          updateData();
+          updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
+        }
+      })
+      .catch(function(error) {
+        console.error('Failed to fetch delivery logs data: ', error);
+      });
 
     function updateData() {
-      /* eslint-disable */
-      // TODO: Fetch the actual user.
-      /* eslint-enable */
-      that.hceModel.getUserByGithubId('18697775')
-        .then(function() {
-          return that.hceModel.getProjects();
-        })
-        .then(function() {
-          that.model.application.summary.name = 'test';// Temp override
-          return that.hceModel.getProject(that.model.application.summary.name);
-        })
-        .then(function(project) {
-          if (angular.isUndefined(project)) {
-            throw 'Could not find project with name \'' + that.model.application.summary.name + '\'';
-          } else {
-            return that.hceModel.getPipelineExecutions(project.id);
-          }
-        })
-        .then(function() {
+      var project = that.hceModel.getProject(that.model.application.summary.name)
+      return that.hceModel.getPipelineExecutions(project.id)
+        .then(function () {
           // The ux will translate & localise date/time. In order for the search filter to work this conversion needs
           // to happen before being pushed to scope. So two options, either append these values to to existing
           // hceModel.data object or clone and update as needed for this specific directive
@@ -84,12 +89,10 @@
             // Update the result with translated text
             build.result = transformResult(build.result);
           }
-
         })
-        .catch(function(error) {
-          console.error('Failed to fetch delivery logs data: ', error);
+        .catch(function (error) {
+          console.error('Failed to fetch pipeline executions: ', error);
         });
-
     }
 
     function addMockData() {
