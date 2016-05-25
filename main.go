@@ -88,7 +88,6 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 	_, err_devcert := os.Stat(devCertsDir + certFilename)
 	_, err_devkey := os.Stat(devCertsDir + certKeyFilename)
 	if err_devcert == nil && err_devkey == nil {
-		fmt.Println("Yeah, got some certs, yo")
 		return devCertsDir + certFilename, devCertsDir + certKeyFilename, nil
 	}
 
