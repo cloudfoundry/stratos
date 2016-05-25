@@ -62,9 +62,9 @@
     // TODO (kdomico): Hi! I've used the same github user approach. Update here as well or let me know if I need to do it
     // TODO (rcox): Improvements - Check if project id already exists in hce model?
     /* eslint-enable */
-    that.hceModel.getUserByGithubId('18697775')
+    that.hceModel.getUserByGithubId('123', '123456')
       .then(function() {
-        return that.hceModel.getProjects();
+        return that.hceModel.getProjects('123');
       })
       .then(function() {
         return that.hceModel.getProject(that.model.application.summary.name);
@@ -83,7 +83,7 @@
 
     function updateData() {
       var project = that.hceModel.getProject(that.model.application.summary.name);
-      return that.hceModel.getPipelineExecutions(project.id)
+      return that.hceModel.getPipelineExecutions('123', project.id)
         .then(function () {
           // Fetch pipeline executions and their events
 
@@ -170,7 +170,7 @@
     }
 
     function fetchEvents(eventsPerExecution, executionId) {
-      return that.hceModel.getPipelineEvents(executionId)
+      return that.hceModel.getPipelineEvents('123', executionId)
         .then(function(events) {
           // if (eventsPerExecution[executionId]) {
           //   // used with mock, to be removed

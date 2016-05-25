@@ -45,7 +45,7 @@
     };
 
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
-      that.data = {};
+      that.onLogout();
     });
   }
 
@@ -55,26 +55,28 @@
      * @function getBuildContainer
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get build container by ID
+     * @param {string} guid - the HCE instance GUID
      * @param {number} id - the build container ID
      * @returns {promise} A promise object
      * @public
      */
-    getBuildContainer: function (id) {
+    getBuildContainer: function (guid, id) {
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getBuildContainer(id);
+        .getBuildContainer(guid, id);
     },
 
     /**
      * @function getBuildContainers
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get registered build container instances
+     * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
      * @public
      */
-    getBuildContainers: function () {
+    getBuildContainers: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getBuildContainers()
+        .getBuildContainers(guid)
         .then(function (response) {
           that.onGetBuildContainers(response);
         });
@@ -84,26 +86,28 @@
      * @function getDeploymentTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get deployment target by ID
+     * @param {string} guid - the HCE instance GUID
      * @param {number} id - the deployment target ID
      * @returns {promise} A promise object
      * @public
      */
-    getDeploymentTarget: function (id) {
+    getDeploymentTarget: function (guid, id) {
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .getDeploymentTarget(id);
+        .getDeploymentTarget(guid, id);
     },
 
     /**
      * @function getDeploymentTargets
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get registered deployment targets
+     * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
      * @public
      */
-    getDeploymentTargets: function () {
+    getDeploymentTargets: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .getDeploymentTargets({ user_id: this.data.user.id })
+        .getDeploymentTargets(guid, { user_id: this.data.user.id })
         .then(function (response) {
           that.onGetDeploymentTargets(response);
         });
@@ -113,13 +117,14 @@
      * @function getImageRegistries
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get registered image registries
+     * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
      * @public
      */
-    getImageRegistries: function () {
+    getImageRegistries: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getImageRegistries()
+        .getImageRegistries(guid)
         .then(function (response) {
           that.onGetImageRegistries(response);
         });
@@ -129,13 +134,14 @@
      * @function getNotificationTargets
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get notification targets for project
+     * @param {string} guid - the HCE instance GUID
      * @param {number} projectId - the project ID
      * @returns {promise} A promise object
      * @public
      */
-    getNotificationTargets: function (projectId) {
+    getNotificationTargets: function (guid, projectId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
-        .getNotificationTargets({ project_id: projectId });
+        .getNotificationTargets(guid, { project_id: projectId });
     },
 
     /**
@@ -154,15 +160,16 @@
      * @function getProjects
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get projects of user
+     * @param {string} guid - the HCE instance GUID
      * @returns {promise} A promise object
      * @public
      */
-    getProjects: function () {
+    getProjects: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .getProjects({ user_id: that.data.user.id })
+        .getProjects(guid, { user_id: that.data.user.id })
         .then(function (response) {
-          that.onGetProjects(response);
+          return that.onGetProjects(response);
         });
     },
 
@@ -170,14 +177,15 @@
      * @function getUser
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get user by ID
+     * @param {string} guid - the HCE instance GUID
      * @param {number} userId - the user's ID
      * @returns {promise} A promise object
      * @public
      */
-    getUser: function (userId) {
+    getUser: function (guid, userId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUser(userId)
+        .getUser(guid, userId)
         .then(function (response) {
           that.onGetUser(response);
         });
@@ -187,14 +195,15 @@
      * @function getUserByGithubId
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get user by Github user ID
+     * @param {string} guid - the HCE instance GUID
      * @param {string} githubUserId - the Github user ID
      * @returns {promise} A promise object
      * @public
      */
-    getUserByGithubId: function (githubUserId) {
+    getUserByGithubId: function (guid, githubUserId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUserByGithubId(githubUserId)
+        .getUserByGithubId(guid, githubUserId)
         .then(function (response) {
           that.onGetUser(response);
         });
@@ -204,14 +213,15 @@
      * @function getPipelineExecutions
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get executions by project ID
+     * @param {string} guid - the HCE instance GUID
      * @param {string} projectId - the HCE project ID
      * @returns {promise} A promise object
      * @public
      */
-    getPipelineExecutions: function (projectId) {
+    getPipelineExecutions: function (guid, projectId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .getPipelineExecutions({ project_id: projectId})
+        .getPipelineExecutions(guid, { project_id: projectId})
         .then(function (response) {
           that.onGetPipelineExecutions(response);
         });
@@ -221,14 +231,15 @@
      * @function getPipelineExecutions
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get events by execution ID
+     * @param {string} guid - the HCE instance GUID
      * @param {string} executionId - the HCE execution ID that owns the events
      * @returns {promise} A promise object
      * @public
      */
-    getPipelineEvents: function (executionId) {
+    getPipelineEvents: function (guid, executionId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .getPipelineEvents({ execution_id: executionId})
+        .getPipelineEvents(guid, { execution_id: executionId})
         .then(function (response) {
           return that.onGetPipelineEvents(response);
         });
@@ -238,6 +249,7 @@
      * @function createDeploymentTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a new deployment target
+     * @param {string} guid - the HCE instance GUID
      * @param {string} name - the user-provided label for this target
      * @param {string} url - the URL endpoint that the target is accessible at
      * @param {string} username - the username to authenticate the target with
@@ -248,7 +260,7 @@
      * @returns {promise} A promise object
      * @public
      */
-    createDeploymentTarget: function (name, url, username, password, org, space, targetType) {
+    createDeploymentTarget: function (guid, name, url, username, password, org, space, targetType) {
       var that = this;
       var newTarget = {
         user_id: this.data.user.id,
@@ -262,7 +274,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .addDeploymentTarget(newTarget)
+        .addDeploymentTarget(guid, newTarget)
         .then(function (response) {
           return that.onCreateDeploymentTarget(response);
         });
@@ -272,6 +284,7 @@
      * @function createProject
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a new project
+     * @param {string} guid - the HCE instance GUID
      * @param {string} name - the project name
      * @param {string} vcs - the VCS type
      * @param {string} vcsToken - the VCS token
@@ -283,7 +296,7 @@
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (name, vcs, vcsToken, targetId, type, buildContainerId, repo, branch) {
+    createProject: function (guid, name, vcs, vcsToken, targetId, type, buildContainerId, repo, branch) {
       var newProject = {
         name: name,
         type: type,
@@ -306,13 +319,14 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .createProject(newProject);
+        .createProject(guid, newProject);
     },
 
     /**
      * @function createUser
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a new HCE user
+     * @param {string} guid - the HCE instance GUID
      * @param {string} userId - the user ID
      * @param {string} login - the user login name
      * @param {string} token - the login token
@@ -320,7 +334,7 @@
      * @returns {promise} A promise object
      * @public
      */
-    createUser: function (userId, login, token, vcs) {
+    createUser: function (guid, userId, login, token, vcs) {
       var that = this;
       var newUser = {
         userId: userId,
@@ -330,7 +344,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .createUser(newUser)
+        .createUser(guid, newUser)
         .then(function (response) {
           return that.onCreateUser(response);
         });
@@ -340,14 +354,15 @@
      * @function downloadArtifact
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Download the artifact associated with the artifact ID.
+     * @param {string} guid - the HCE instance GUID
      * @param {string} artifactId - the HCE artifact ID
      * @returns {promise} A promise object.
      * @public
      */
-    downloadArtifact: function (artifactId) {
+    downloadArtifact: function (guid, artifactId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceArtifactApi')
-        .downloadArtifact(artifactId)
+        .downloadArtifact(guid, artifactId)
         .then(function (response) {
           return that.onDownloadArtifact(response);
         });
@@ -357,13 +372,35 @@
      * @function removeNotificationTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Remove notification target
+     * @param {string} guid - the HCE instance GUID
      * @param {number} targetId - the notification target ID
      * @returns {promise} A promise object
      * @public
      */
-    removeNotificationTarget: function (targetId) {
+    removeNotificationTarget: function (guid, targetId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
-        .removeNotificationTarget(targetId);
+        .removeNotificationTarget(guid, targetId);
+    },
+
+    /**
+     * @function triggerPipelineExecution
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Trigger pipeline execution for project and commit ref
+     * @param {string} guid - the HCE instance GUID
+     * @param {number} projectId - the project ID
+     * @param {string} commitRef - the commit ref
+     * @returns {promise} A promise object
+     * @public
+     */
+    triggerPipelineExecution: function (guid, projectId, commitRef) {
+      var data = {
+        user_id: this.data.user.id,
+        project_id: projectId,
+        commit_ref: commitRef
+      };
+
+      return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
+        .triggerPipelineExecution(guid, data);
     },
 
     /**
@@ -407,10 +444,12 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user projects
      * @param {string} response - the JSON response from API call
+     * @returns {array} An array of the user's projects
      * @private
      */
     onGetProjects: function (response) {
       this.data.projects = _.keyBy(response.data, 'name') || {};
+      return response.data;
     },
 
     /**
@@ -493,6 +532,24 @@
      */
     onDownloadArtifact: function (response) {
       return response.data;
+    },
+
+    /**
+     * @function onLogout
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Clear the data on logout
+     * @returns {void}
+     * @private
+     */
+    onLogout: function () {
+      this.data = {
+        buildContainers: [],
+        deploymentTargets: [],
+        imageRegistries: [],
+        projects: {},
+        user: {},
+        pipelineExecutions: []
+      };
     }
 
   });
