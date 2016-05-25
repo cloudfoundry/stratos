@@ -26,4 +26,14 @@
       }
     }
   }
+  .delivery-logs-builds {
+    .temp-deploying {
+      color:$salmon
+    }
+  }
+}
+
+// Very specific selector makes this 24, override this for the two places it's used in this context
+#result-col > div > span.helion-icon {
+  font-size: 14px;
 }

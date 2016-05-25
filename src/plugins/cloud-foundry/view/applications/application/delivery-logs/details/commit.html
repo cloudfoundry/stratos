@@ -3,7 +3,7 @@
     <dt translate>COMMIT ID</dt>
     <dd class="text-right">{{ detailViewCtrl.context.build.reason.commitSha }}</dd>
     <dt translate>CREATED</dt>
-    <dd class="text-right">TODO: Fetch details from github (this is not the build/reason created?)</dd>
+    <dd class="text-right">{{ detailViewCtrl.context.build.reason.createdDateString }}</dd>
     <dt translate>COMMIT AUTHOR</dt>
     <dd class="text-right">{{ detailViewCtrl.context.build.reason.author }}</dd>
   </dl>
@@ -14,15 +14,22 @@
   <table class="table table-outlined">
     <tbody>
     <tr ng-repeat="build in detailViewCtrl.context.builds">
-      <td ng-switch="build.result.value" class="row result-col build-result">
+      <td ng-switch="build.result.value" class="row result-col build-result" id="result-col">
         <div ng-switch-when="Success">
-          <span class="small-state success" translate>{{ build.result.label }}</span>
+          <span class="helion-icon helion-icon-Active_S text-primary"></span>
+          <span translate>{{ build.result.label }}</span>
         </div>
         <div ng-switch-when="Deploying">
-          <span class="small-state deploying" translate>{{ build.result.label }}</span>
+          <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+          <span translate>{{ build.result.label }}</span>
         </div>
         <div ng-switch-when="Failure">
-          <span class="small-state failure" translate>{{ build.result.label }}</span>
+          <span class="helion-icon helion-icon-Critical_S text-danger"></span>
+          <span translate>{{ build.result.label }}</span>
+        </div>
+        <div ng-switch-when="in-progress">
+          <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+          <span translate>{{ build.result.label }}</span>
         </div>
         <div ng-switch-default>
           <span translate>Unknown</span>
@@ -30,7 +37,7 @@
       </td>
       <td class="row result-col">
         <span translate>Started: </span>
-        {{ build.reason.createdDataString }}
+        {{ build.reason.createdDateString }}
       </td>
       <td></td>
       <td class="row result-col">

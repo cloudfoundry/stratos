@@ -42,6 +42,11 @@
   function ApplicationDeliveryLogsController($scope, $stateParams, $interval, moment, modelManager, detailView) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.last = {
+      build: null,
+      test: null,
+      deploy: null
+    };
 
     var that = this;
     var updateModelPromise;
@@ -63,7 +68,7 @@
           throw 'Could not find project with name \'' + that.model.application.summary.name + '\'';
         } else {
           updateData();
-          updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
+          //updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
         }
       })
       .catch(function(error) {
@@ -71,7 +76,7 @@
       });
 
     function updateData() {
-      var project = that.hceModel.getProject(that.model.application.summary.name)
+      var project = that.hceModel.getProject(that.model.application.summary.name);
       return that.hceModel.getPipelineExecutions(project.id)
         .then(function () {
           // The ux will translate & localise date/time. In order for the search filter to work this conversion needs
@@ -80,19 +85,49 @@
           that.parsedHceModel = JSON.parse(JSON.stringify(that.hceModel.data));
 
           addMockData();
-          console.log('that.hceModel.data.pipelineExecutions: ', that.hceModel.data.pipelineExecutions);
+          console.log('that.hceModel.data.pipelineExecutions: ', that.parsedHceModel);
+
+          that.last.build = null;
+          var lastBuildTime = null;
 
           for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
             var build = that.parsedHceModel.pipelineExecutions[i];
-            // Localise the reason creation date string
-            build.reason.createdDataString = momentise(build.reason.createdDate);
-            // Update the result with translated text
-            build.result = transformResult(build.result);
+
+            updateBuildForFiltering(that.parsedHceModel.pipelineExecutions, build, i);
+
+            // Localise the reason creation date string (use i18n date/time format)
+            var thisBuildTime = moment(build.reason.createdDate);
+            // Is this build the last successful one?
+            if (build.result.value === 'Success' && (that.last.build == null || lastBuildTime.diff(thisBuildTime) < 0)) {
+              that.last.build = build;
+              that.last.build.date = thisBuildTime;
+              lastBuildTime = thisBuildTime;
+            }
           }
         })
         .catch(function (error) {
           console.error('Failed to fetch pipeline executions: ', error);
         });
+    }
+
+    function updateBuildForFiltering(builds, build, pos) {
+      // Localise the reason creation date string (use i18n date/time format)
+      build.reason.createdDateString = moment(build.reason.createdDate).format('L - LTS');
+
+      // Update the result with translated text
+      build.result = {
+        value: build.result,
+        label: gettext(build.result)
+      };
+
+      // Strip out properties that aren't displayed (filtering by values which aren't shown is a bit jarring)
+      var propertiesToKeep = ['id', 'message', 'result', 'reason.createdDateString', 'reason.author', 'reason.type'];
+      var cleanBuild = {};
+      for (var j = 0; j < propertiesToKeep.length; j++) {
+        var toKeep = propertiesToKeep[j];
+        _.set(cleanBuild, toKeep, _.get(build, toKeep));
+      }
+      builds[pos] = cleanBuild;
     }
 
     function addMockData() {
@@ -203,18 +238,6 @@
       that.parsedHceModel.pipelineExecutions = that.parsedHceModel.pipelineExecutions.concat(mocked);
     }
 
-    function momentise(init) {
-      // Ensure we use i18n date/time format
-      return moment(init).format('L - LTS');
-    }
-
-    function transformResult(result) {
-      return {
-        value: result,
-        label: gettext(result)
-      };
-    }
-
     $scope.$on("$destroy", function() {
       if (updateModelPromise) {
         $interval.cancel(updateModelPromise);
@@ -241,15 +264,17 @@
 
     viewCommit: function (build) {
       var that = this;
+      var rawBuild = _.find(that.hceModel.data.pipelineExecutions, function (o) {
+        return o.id === build.id;
+      });
 
       this.detailView({
         templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/commit.html',
-        title: build.message
+        title: rawBuild.message
       }, {
-        build: build,
-        commit: build.commit,
-        builds: _.filter(that.parsedHceModel.pipelineExecutions, function(o) {
-          return o.reason.commitSha === build.reason.commitSha;
+        build: rawBuild,
+        builds: _.filter(that.hceModel.data.pipelineExecutions, function(o) {
+          return o.reason.commitSha === rawBuild.reason.commitSha;
         }),
         viewBuild: function (build) {
           that.viewBuild(build);

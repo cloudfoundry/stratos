@@ -6,9 +6,9 @@
   <dl class="dl-horizontal">
     <dt translate>LAST BUILD</dt>
     <dd>
-      <a class="" href="" ng-click="appDelLogsCtrl.viewSummaryItem(appDelLogsCtrl.hceModel.delivery.lastBuilt)">
-      {{ appDelLogsCtrl.hceModel.delivery.lastBuilt.link }}</a>
-      <span am-time-ago="appDelLogsCtrl.hceModel.delivery.lastBuilt.time"></span>
+      <a class="" href="" ng-click="appDelLogsCtrl.viewCommit(appDelLogsCtrl.last.build)">
+      {{ appDelLogsCtrl.last.build.reason.commitSha }}</a>
+      <span am-time-ago="appDelLogsCtrl.last.build.date"></span>
     </dd>
     <dt translate>LAST TEST</dt>
     <dd>
@@ -61,27 +61,31 @@
       <tbody>
       <tr ng-repeat="build in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
         <td><a class="" href="" ng-click="appDelLogsCtrl.viewCommit(build)">{{ build.message }}</a></td>
-        <td ng-switch="build.result.value" class="row result-col">
+        <td ng-switch="build.result.value" class="row result-col" id="result-col">
           <div ng-switch-when="Success">
-            <span class="small-state success" translate>{{ build.result.label }}</span>
+            <span class="helion-icon helion-icon-Active_S text-primary"></span>
+            <span translate>{{ build.result.label }}</span>
             <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
           </div>
           <div ng-switch-when="Deploying">
-            <span class="small-state deploying" translate>{{ build.result.label }}</span>
+            <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+            <span translate>{{ build.result.label }}</span>
           </div>
           <div ng-switch-when="Failure">
-            <span class="small-state failure" translate>{{ build.result.label }}</span>
+            <span class="helion-icon helion-icon-Critical_S text-danger"></span>
+            <span translate>{{ build.result.label }}</span>
             <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
           </div>
           <div ng-switch-when="in-progress">
-            <span class="small-state deploying" translate>{{ build.result.label }}</span>
+            <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+            <span translate>{{ build.result.label }}</span>
             <a translate class="" href="" ng-click="appDelLogsCtrl.viewBuild(build)">view</a>
           </div>
           <div ng-switch-default>
             <span translate>Unknown</span>
           </div>
         </td>
-        <td>{{ build.reason.createdDataString }}</td>
+        <td>{{ build.reason.createdDateString }}</td>
         <td>{{ build.reason.author }}</td>
         <td>{{ build.reason.type }}</td>
       </tr>
