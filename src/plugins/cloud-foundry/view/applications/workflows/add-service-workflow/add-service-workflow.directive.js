@@ -8,7 +8,6 @@
   addServiceWorkflow.$inject = [];
 
   /**
-   * @namespace cloud-foundry.view.applications.addServiceWorkflow
    * @memberof cloud-foundry.view.applications
    * @name addServiceWorkflow
    * @description An add-service-workflow directive
@@ -28,12 +27,11 @@
   ];
 
   /**
-   * @namespace cloud-foundry.view.applications.addServiceWorkflowController
    * @memberof cloud-foundry.view.applications
    * @name addServiceWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @property {data} data - a data bag
+   * @param {app.model.eventService} eventService - the eventService service
    */
   function AddServiceWorkflowController(modelManager, eventService) {
     var that = this;

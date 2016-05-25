@@ -6,6 +6,23 @@
 
   mock.cloudFoundryAPI.Routes = {
 
+    RemoveAppFromRoute: function (guid, appGuid) {
+      return {
+        url: '/api/cf/v2/routes/' + guid + '/apps/' + appGuid,
+
+        response: {
+
+          204: {
+            body: {}
+          },
+
+          500: {
+            body: {}
+          }
+        }
+      };
+    },
+
     DeleteRoute: function (guid) {
       return {
         url: '/api/cf/v2/routes/' + guid + '?recursive=true',

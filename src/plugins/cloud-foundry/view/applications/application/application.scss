@@ -36,7 +36,7 @@
   padding-top: $hpe-unit-space * 2;
   padding-bottom: $hpe-unit-space * 2;
 
-  .action-target-state {
+  .action-target-state, .bounce-spinner {
     margin-left: $hpe-unit-space;
   }
 
@@ -57,6 +57,19 @@
 
 .application-nav-menu {
   margin-left: auto;
+
+  .actions-menu.open > .actions-menu-icon {
+    color: $brand-primary;
+  }
+
+  .actions-menu-list {
+    top: 75%;
+    min-width: $hpe-unit-space * 10;
+  }
+
+  .actions-menu-item > i {
+    padding-right: $hpe-unit-space / 2;
+  }
 }
 
 // confirmation dialog
