@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gorilla/sessions"
+	"github.com/antonlindstrom/pgstore"
 	"github.com/hpcloud/portal-proxy/datastore"
 	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
@@ -43,6 +43,7 @@ func main() {
 	}
 	log.Println("Encryption key set.")
 
+<<<<<<< 4ac66f5a156f28990cc5de581f5fa96fa7a8ebc5
 	var databaseConfig datastore.DatabaseConfig
 	databaseConfig, err = loadDatabaseConfig(databaseConfig)
 	if err != nil {
@@ -50,13 +51,19 @@ func main() {
 		os.Exit(1)
 	}
 	log.Println("Proxy database configuration loaded.")
+=======
+	//
+	initializeHTTPClient(portalConfig.SkipTLSVerification,
+		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
+>>>>>>> Initial commit
 
-	var databaseConnectionPool *sql.DB
-	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
+	// load the database config from env vars; create db connection pool
+	dbConnPool, err := initConnPool()
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
+<<<<<<< 4ac66f5a156f28990cc5de581f5fa96fa7a8ebc5
 	defer databaseConnectionPool.Close()
 	log.Println("Proxy database connection pool created.")
 
@@ -66,6 +73,14 @@ func main() {
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
 	log.Println("HTTP client initialized.")
+=======
+	defer dbConnPool.Close()
+
+	// initialize the postgres backed session store
+	sessStore := initSessionStore(dbConnPool, portalConfig)
+
+	portalProxy := newPortalProxy(portalConfig, dbConnPool, sessStore)
+>>>>>>> Initial commit
 
 	log.Printf("%v", portalConfig)
 	if err := start(portalProxy); err != nil {
@@ -92,6 +107,24 @@ func setEncryptionKey(pc portalConfig) ([]byte, error) {
 	return key, nil
 }
 
+func initConnPool() (*sql.DB, error) {
+	// load up postgresql database configuration
+	var databaseConfig datastore.DatabaseConfig
+	databaseConfig, err := loadDatabaseConfig(databaseConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// initialize the database connection pool
+	var databaseConnectionPool *sql.DB
+	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return databaseConnectionPool, nil
+}
+
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {
 	if err := ucpconfig.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
@@ -109,6 +142,15 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 	return dc, nil
+}
+
+func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {
+	store := pgstore.NewPGStoreFromPool(db, []byte(pc.CookieStoreSecret))
+
+	// Run a background goroutine to clean up expired sessions from the database.
+	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
+
+	return store
 }
 
 func createTempCertFiles(pc portalConfig) (string, string, error) {
@@ -137,10 +179,11 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
-func newPortalProxy(pc portalConfig, dcp *sql.DB) *portalProxy {
+func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalProxy {
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
+		SessionStore:           ss,
 	}
 
 	return pp
@@ -157,6 +200,7 @@ func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Durat
 
 func start(p *portalProxy) error {
 	e := echo.New()
+
 	// Root level middleware
 	e.Use(sessionCleanupMiddleware)
 	e.Use(middleware.Logger())
@@ -168,7 +212,6 @@ func start(p *portalProxy) error {
 	}))
 	e.Use(errorLoggingMiddleware)
 
-	p.initCookieStore()
 	p.registerRoutes(e)
 
 	certFile, certKeyFile, err := createTempCertFiles(p.Config)
@@ -180,10 +223,6 @@ func start(p *portalProxy) error {
 	e.Run(engine)
 
 	return nil
-}
-
-func (p *portalProxy) initCookieStore() {
-	p.CookieStore = sessions.NewCookieStore([]byte(p.Config.CookieStoreSecret))
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {

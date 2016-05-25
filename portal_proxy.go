@@ -3,15 +3,11 @@ package main
 import (
 	"database/sql"
 
-	"github.com/gorilla/sessions"
-
-	"github.com/hpcloud/portal-proxy/datastore"
+	"github.com/antonlindstrom/pgstore"
 )
 
 type portalProxy struct {
 	Config                 portalConfig
-	DatabaseConfig         datastore.DatabaseConfig
 	DatabaseConnectionPool *sql.DB
-
-	CookieStore *sessions.CookieStore
+	SessionStore           *pgstore.PGStore
 }

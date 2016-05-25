@@ -73,8 +73,7 @@ func setupPortalProxy() *portalProxy {
 		EncryptionKeyInBytes: key,
 	}
 
-	pp := newPortalProxy(pc, nil)
-	pp.initCookieStore()
+	pp := newPortalProxy(pc, nil, nil)
 
 	return pp
 }

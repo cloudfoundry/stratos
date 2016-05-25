@@ -77,11 +77,11 @@ export PGSQL_USER='stratos'
 export PGSQL_PASSWORD='stratos'
 export PGSQL_DATABASE='stratos-db'
 export PGSQL_HOST='localhost'
-export PGSQL_PORT='5432'
-export PGSQL_CONNECT_TIMEOOUT='5'
+export PGSQL_PORT=5432
+export PGSQL_CONNECT_TIMEOUT=5
 export PGSQL_SSL_MODE='disable'
 
-export HTTP_CLIENT_TIMEOUT_IN_SECS='10'
+export HTTP_CLIENT_TIMEOUT_IN_SECS=10
 export SKIP_TLS_VERIFICATION='true'
 export TLS_ADDRESS=':8080'
 export CONSOLE_CLIENT='portal-proxy'
