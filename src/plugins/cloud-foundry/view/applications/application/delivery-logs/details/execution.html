@@ -13,7 +13,7 @@
   <div class="delivery-log-execution-events">
     <div ng-if="!detailViewCtrl.context.events || detailViewCtrl.context.events.length === 0"
     translate class="message-box message-box-no-bg">
-      No data available
+      No build data available
     </div>
     <table class="table table-outlined">
       <tbody>
@@ -44,7 +44,7 @@
         <td></td>
         <td class="row result-col">
           <span translate>Duration: </span>
-          {{ event.endDateString }}
+          {{ event.durationString }}
         </td>
         <td ng-switch="event.state == 'succeeded' || event.state == 'deploying'" class="event-view">
           <div ng-switch-when="true">

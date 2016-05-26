@@ -83,17 +83,18 @@
         <tr
           ng-repeat="execution in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
           <td><a class="" href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
-          <td ng-switch="execution.result.value" class="row result-col" id="result-col">
-            <div ng-switch-when="Success">
+          <td ng-if="!execution.result" class="row result-col">
+          <td ng-if="execution.result" ng-switch="execution.result.state" class="row result-col" id="result-col">
+            <div ng-switch-when="succeeded">
               <span class="helion-icon helion-icon-Active_S text-primary"></span>
               <span translate>{{ execution.result.label }}</span>
               <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
             </div>
-            <div ng-switch-when="Deploying">
+            <div ng-switch-when="running">
               <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
               <span translate>{{ execution.result.label }}</span>
             </div>
-            <div ng-switch-when="Failure">
+            <div ng-switch-when="failed">
               <span class="helion-icon helion-icon-Critical_S text-danger"></span>
               <span translate>{{ execution.result.label }}</span>
               <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
@@ -102,6 +103,7 @@
               <span class="helion-icon helion-icon-Active_S"></span>
               <span translate>{{ execution.result.label }}</span>
             </div>
+
           </td>
           <td>{{ execution.reason.createdDateString }}</td>
           <td>{{ execution.reason.author }}</td>
