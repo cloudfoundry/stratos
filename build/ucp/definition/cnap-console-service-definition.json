@@ -1,0 +1,630 @@
+{
+  "name": "cnap-console",
+  "version": "1.0.0",
+  "vendor": "HPE",
+  "volumes": [
+    {
+      "name": "data",
+      "size_gb": 10,
+      "filesystem": "ext4",
+      "shared": false
+    },
+    {
+      "name": "stolon-data",
+      "size_gb": 10,
+      "filesystem": "ext4",
+      "shared": false
+    }
+  ],
+  "components": [
+    {
+      "name": "db",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "db",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-db:latest",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "cnap-console-db",
+          "protocol": "TCP",
+          "source_port": 3306,
+          "target_port": 3306,
+          "public": true
+        }
+      ],
+      "volume_mounts": [
+        {
+          "volume_name": "data",
+          "mountpoint": "/var/lib/mysql"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "MYSQL_ROOT_PASSWORD"
+        },
+        {
+          "name": "MYSQL_DATABASE"
+        },
+        {
+          "name": "MYSQL_USER"
+        },
+        {
+          "name": "MYSQL_PASSWORD"
+        }
+      ]
+    },
+    {
+      "name": "cf-service",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "cf-service",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-mock-api:latest",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "mock-api",
+          "protocol": "TCP",
+          "source_port": 3002,
+          "target_port": 3002,
+          "public": true
+        }
+      ]
+    },
+    {
+      "name": "auth-service",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "auth-service",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-mock-auth:latest",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "mock-auth",
+          "protocol": "TCP",
+          "source_port": 3001,
+          "target_port": 3001,
+          "public": true
+        }
+      ]
+    },
+    {
+      "name": "stratos-node-server",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "stratos-node-server",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-api:latest",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "api",
+          "protocol": "TCP",
+          "source_port": 3000,
+          "target_port": 3000,
+          "public": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "PORT"
+        },
+        {
+          "name": "MYSQL_ROOT_PASSWORD"
+        },
+        {
+          "name": "MYSQL_DATABASE"
+        },
+        {
+          "name": "MYSQL_USER"
+        },
+        {
+          "name": "MYSQL_PASSWORD"
+        }
+      ]
+    },
+    {
+      "name": "cnap-console-nginx",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "cnap-console-nginx",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-server:latest",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "api",
+          "protocol": "TCP",
+          "source_port": 80,
+          "target_port": 80,
+          "public": true
+        },
+        {
+          "name": "api-443",
+          "protocol": "TCP",
+          "source_port": 443,
+          "target_port": 443,
+          "public": true
+        }
+      ]
+    },
+    {
+      "name": "cnap-console-proxy",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "cnap-console-proxy",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-proxy:latest",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "proxy",
+          "protocol": "TCP",
+          "source_port": 80,
+          "target_port": 80,
+          "public": true
+        },
+        {
+          "name": "proxy-443",
+          "protocol": "TCP",
+          "source_port": 443,
+          "target_port": 443,
+          "public": true
+        }
+      ]
+    },
+    {
+      "name": "stolon-sentinel",
+      "version": "0.1.0",
+      "vendor": "HPE",
+      "external_name": "stolon-sentinel",
+      "image": "docker-registry.helion.space:443/stolon",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "parameters": [
+        {
+          "name": "SENTINEL"
+        },
+        {
+          "name": "STSENTINEL_CLUSTER_NAME"
+        },
+        {
+          "name": "STSENTINEL_STORE_BACKEND"
+        },
+        {
+          "name": "STSENTINEL_STORE_ENDPOINTS"
+        },
+        {
+          "name": "STSENTINEL_KEEPER_KUBE_LABEL_SELECTOR"
+        },
+        {
+          "name": "STSENTINEL_DEBUG"
+        },
+        {
+          "name": "STSENTINEL_KUBERNETES_NAMESPACE"
+        }
+      ],
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "sentinel",
+          "protocol": "TCP",
+          "source_port": 6431,
+          "target_port": 6431,
+          "public": false
+        }
+      ]
+    },
+    {
+      "name": "stolon-keeper",
+      "version": "0.1.0",
+      "vendor": "HPE",
+      "external_name": "stolon-keeper",
+      "image": "docker-registry.helion.space:443/stolon",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "parameters": [
+        {
+          "name": "KEEPER"
+        },
+        {
+          "name": "STKEEPER_CLUSTER_NAME"
+        },
+        {
+          "name": "STKEEPER_STORE_BACKEND"
+        },
+        {
+          "name": "STKEEPER_STORE_ENDPOINTS"
+        },
+        {
+          "name": "STKEEPER_DEBUG"
+        },
+        {
+          "name": "STKEEPER_INITIAL_PG_SU_USERNAME"
+        },
+        {
+          "name": "STKEEPER_INITIAL_PG_SU_PASSWORD_FILE"
+        },
+        {
+          "name": "stolon"
+        }
+      ],
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "pgsql-1",
+          "protocol": "TCP",
+          "source_port": 5431,
+          "target_port": 5431,
+          "public": false
+        },
+        {
+          "name": "pgsql-2",
+          "protocol": "TCP",
+          "source_port": 5432,
+          "target_port": 5432,
+          "public": false
+        }
+      ],
+      "volume_mounts": [
+        {
+          "volume_name": "stolon-data",
+          "mountpoint": "/stolon-data"
+        }
+      ]
+    },
+    {
+      "name": "stolon-proxy",
+      "version": "0.1.0",
+      "vendor": "HPE",
+      "external_name": "stolon-proxy",
+      "image": "docker-registry.helion.space:443/stolon",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "parameters": [
+        {
+          "name": "PROXY"
+        },
+        {
+          "name": "STPROXY_CLUSTER_NAME"
+        },
+        {
+          "name": "STPROXY_STORE_BACKEND"
+        },
+        {
+          "name": "STPROXY_STORE_ENDPOINTS"
+        },
+        {
+          "name": "STPROXY_DEBUG"
+        }
+      ],
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "pgsql-2",
+          "protocol": "TCP",
+          "source_port": 5432,
+          "target_port": 5432,
+          "public": false
+        }
+      ]
+    }
+  ],
+  "parameters": [
+    {
+      "name": "MYSQL_ROOT_PASSWORD",
+      "description": "Root password for MySQL",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "MYSQL_DATABASE",
+      "description": "Database name for MySQL",
+      "default": "stratos-db",
+      "example": "stratos-db",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "MYSQL_USER",
+      "description": "Username for MySQL",
+      "default": "stratos",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "MYSQL_PASSWORD",
+      "description": "Password for MySQL",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PORT",
+      "description": "Port number to expose the API on",
+      "default": "3000",
+      "example": "3000",
+      "data_type": "string",
+      "required": false,
+      "secret": false
+    },
+    {
+      "name": "DB_USER",
+      "description": "PostgreSQL user",
+      "default": "stolon",
+      "example": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_HOST",
+      "description": "PostgreSQL host address",
+      "default": "stolon-proxy-int",
+      "example": "stolon-proxy-int",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_PORT",
+      "description": "PostgreSQL port",
+      "default": "5432",
+      "example": "5432",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STSENTINEL_CLUSTER_NAME",
+      "description": "Stolon Sentinel Cluster Name",
+      "default": "kube-stolon",
+      "example": "kube-stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STSENTINEL_STORE_BACKEND",
+      "description": "Stolon Sentinel Store Backend",
+      "default": "etcd",
+      "example": "etcd",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STSENTINEL_STORE_ENDPOINTS",
+      "description": "Stolon Sentinel Store Endpoints",
+      "default": "192.168.200.2:2379",
+      "example": "192.168.200.2:2379",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STSENTINEL_KEEPER_KUBE_LABEL_SELECTOR",
+      "description": "Kubernetes Stolon Sentinel Label Selector",
+      "default": "component=stolon-keeper",
+      "example": "component=stolon-keeper",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STSENTINEL_DEBUG",
+      "description": "Turn on debug mode for Stolon Sentinel",
+      "default": "true",
+      "example": "true",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STSENTINEL_KUBERNETES_NAMESPACE",
+      "description": "Kubernetes namespace for Stolon Sentinel",
+      "default": "ucp",
+      "example": "ucp",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "SENTINEL",
+      "description": "Stolon Sentinel",
+      "default": "true",
+      "example": "true",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "KEEPER",
+      "description": "Stolon Keeper",
+      "default": "true",
+      "example": "true",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STKEEPER_CLUSTER_NAME",
+      "description": "Stolon Keeper Cluster Name",
+      "default": "kube-stolon",
+      "example": "kube-stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STKEEPER_STORE_BACKEND",
+      "description": "Stolon Keeper Store Backend",
+      "default": "etcd",
+      "example": "etcd",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STKEEPER_STORE_ENDPOINTS",
+      "description": "Stolon Keeper Store Endpoints",
+      "default": "192.168.200.2:2379",
+      "example": "192.168.200.2:2379",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STKEEPER_DEBUG",
+      "description": "Turn on debug mode for Stolon Keeper",
+      "default": "true",
+      "example": "true",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STKEEPER_INITIAL_PG_SU_USERNAME",
+      "description": "Initial PostgreSQL username to use for the Stolon Keeper",
+      "default": "stolon",
+      "example": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STKEEPER_INITIAL_PG_SU_PASSWORD_FILE",
+      "description": "PostgreSQL password file to use for the Stolon Keeper",
+      "default": "/etc/secrets/stolon",
+      "example": "/etc/secrets/stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PROXY",
+      "description": "Stolon Proxy",
+      "default": "true",
+      "example": "true",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STPROXY_CLUSTER_NAME",
+      "description": "Stolon Proxy Cluster Name",
+      "default": "kube-stolon",
+      "example": "kube-stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STPROXY_STORE_BACKEND",
+      "description": "Stolon Proxy Store Backend",
+      "default": "etcd",
+      "example": "etcd",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STPROXY_STORE_ENDPOINTS",
+      "description": "Stolon Proxy Store Endpoints",
+      "default": "192.168.200.2:2379",
+      "example": "192.168.200.2:2379",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STPROXY_DEBUG",
+      "description": "Turn on debug mode for Stolon Proxy",
+      "default": "true",
+      "example": "true",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_ADDR",
+      "description": "Database address",
+      "default": "stolon-proxy-int",
+      "example": "",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_HOST",
+      "description": "Database host address",
+      "default": "stolon-proxy-int",
+      "example": "",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_PORT",
+      "description": "Database port",
+      "default": "5432",
+      "example": "5432",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "stolon",
+      "description": "PostgreSQL password for stolon",
+      "secret": true
+    }
+  ]
+}

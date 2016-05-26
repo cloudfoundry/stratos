@@ -47,12 +47,13 @@ buildAndPublishImage cnap-console-mock-auth Dockerfile.mock_auth.UCP ${__DIRNAME
 buildAndPublishImage cnap-console-api Dockerfile.UCP ${__DIRNAME}/../../stratos-node-server
 
 # Build Portal Proxy
+#
 PORTAL_PROXY_PATH=${__DIRNAME}/../../portal-proxy
 pushd ${PORTAL_PROXY_PATH}
 ./tools/build_portal_proxy.sh
 popd
 
-buildAndPublishImage cnap-console-proxy server.Dockerfile ${__DIRNAME}/../../portal-proxy
+buildAndPublishImage cnap-console-proxy server.Dockerfile ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
 pushd ../stratos-ui/tools
