@@ -93,6 +93,7 @@
             form: 'application-name-form',
             nextBtnText: gettext('Create and continue'),
             onNext: function () {
+              that.createApp();
             }
           },
           {
@@ -330,8 +331,12 @@
      * @function createApp
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description create an application
+     * @returns {promise} A resolved/rejected promise
      */
     createApp: function () {
+      return this.model.createApp({
+        name: this.userInput.name
+      });
     },
 
     startWorkflow: function () {

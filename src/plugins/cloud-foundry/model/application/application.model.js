@@ -182,14 +182,14 @@
     },
 
     /**
-     * @function create
+     * @function createApp
      * @memberof cloud-foundry.model.application
      * @description Create an application
      * @param {object} newAppSpec - values for the new Application
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    create: function (newAppSpec) {
+    createApp: function (newAppSpec) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .CreateApp(newAppSpec)
