@@ -35,7 +35,7 @@
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} $q - angular $q service
    * @property {object} $q - angular $q service
-   * @property {object} model - the Cloud Foundry applications model
+   * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} githubModel - the Github model
    * @property {object} privateDomainModel - the private domain model
@@ -49,7 +49,7 @@
     this.$q = $q;
     this.addingApplication = false;
     this.eventService = eventService;
-    this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
@@ -334,7 +334,7 @@
      * @returns {promise} A resolved/rejected promise
      */
     createApp: function () {
-      return this.model.createApp({
+      return this.appModel.createApp({
         name: this.userInput.name
       });
     },
