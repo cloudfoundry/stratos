@@ -81,6 +81,8 @@
       var project = that.hceModel.getProject(that.model.application.summary.name);
       return that.hceModel.getPipelineExecutions(project.id)
         .then(function () {
+          // Fetch pipeline executions and their events
+
 
           // Need to optimise for projects with a large amount of executions/builds
           // - only process visible executions
@@ -95,39 +97,9 @@
           that.parsedHceModel = JSON.parse(JSON.stringify(that.hceModel.data));
 
           var fetchEventsPromises = [];
-          var lastBuildTime, lastTestTime, lastDeployTime;
 
           for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
             var execution = that.parsedHceModel.pipelineExecutions[i];
-
-            // Something weird about this part. Not sure if the execution result will be enough to determine the
-            // state of each section. Alternatively may need to fetch all events and check through them. Another way
-            // might be, if the order of the executions is fixed, search through until each one is found
-            var thisExecutionTime = moment(execution.reason.createdDate);
-            if (execution.result === 'Success') {
-              if (angular.isUndefined(lastDeployTime) || lastDeployTime.diff(thisExecutionTime) < 0) {
-                lastBuildTime = thisExecutionTime;
-                lastTestTime = thisExecutionTime;
-                lastDeployTime = thisExecutionTime;
-                that.last.build = execution;
-                that.last.test = execution;
-                that.last.deploy = execution;
-              }
-            } else if (!lastDeployTime && execution.result === 'Deploying') {
-              // If Deploying, must have passed testing
-              if (angular.isUndefined(lastTestTime) || lastTestTime.diff(thisExecutionTime) < 0) {
-                lastBuildTime = thisExecutionTime;
-                lastTestTime = thisExecutionTime;
-                that.last.build = execution;
-                that.last.test = execution;
-              }
-            } else if (!lastTestTime && execution.result === 'Testing') {
-              // If Testing, must have passed building
-              if (angular.isUndefined(lastBuildTime) || lastBuildTime.diff(thisExecutionTime) < 0) {
-                lastBuildTime = thisExecutionTime;
-                that.last.build = execution;
-              }
-            }
 
             updateExecutionForFiltering(that.parsedHceModel.pipelineExecutions, execution, i);
 
@@ -135,6 +107,54 @@
 
           }
           return $q.all(fetchEventsPromises);
+        })
+        .then(function() {
+          that.last = {
+            build: null,
+            test: null,
+            deploy: null
+          };
+
+          var lastBuildTime, lastTestTime, lastDeployTime;
+          _.forEach(that.eventsPerExecution, function(events, executionId) {
+            if (!events || events.length === 0) {
+              return;
+            }
+
+            for (var i = 0; i < events.length; i++) {
+              var event = events[i];
+              event.endDateString = event.endDate ? moment.duration(event.endDate, 'ms').humanize() : event.endDate;
+
+              if (event.state !== "succeeded") {
+                continue;
+              }
+
+              var thisEventTime = moment(event.endDate);
+              switch(event.type) {
+                case 'Building':
+                  if (angular.isUndefined(lastBuildTime) || lastBuildTime.diff(thisEventTime) < 0) {
+                    lastBuildTime = thisEventTime;
+                    that.last.build = event;
+                  }
+                  break;
+                case 'Testing':
+                  if (angular.isUndefined(lastTestTime) || lastTestTime.diff(thisEventTime) < 0) {
+                    lastTestTime = thisEventTime;
+                    that.last.test = event;
+                  }
+                  break;
+                case 'Deploying':
+                  if (angular.isUndefined(lastDeployTime) || lastDeployTime.diff(thisEventTime) < 0) {
+                    lastDeployTime = thisEventTime;
+                    that.last.deploy = event;
+                  }
+                  break;
+              }
+            }
+          });
+          // that.last.build = _.find(that.hceModel.data.pipelineExecutions, { id: that.last.build});
+          // that.last.test = _.find(that.hceModel.data.pipelineExecutions, { id: that.last.test});
+          // that.last.deploy = _.find(that.hceModel.data.pipelineExecutions, { id: that.last.deploy});
         })
         .catch(function (error) {
           console.error('Failed to fetch/process pipeline executions or events: ', error);
@@ -280,40 +300,40 @@
       that.hceModel.data.pipelineExecutions = that.hceModel.data.pipelineExecutions.concat(mocked);
 
       that.eventsPerExecution['91'] = [
-        createEvent(90, "build", "Failure", 46, 40, 91)
+        createEvent(90, "Building", "failed", 46, 40, 91)
       ];
       that.eventsPerExecution['92'] = [
-        createEvent(91, "build", "Success", 500, 510, 92),
-        createEvent(92, "test", "Success", 600, 650, 92),
-        createEvent(93, "deploy", "Success", 650, 40, 92)
+        createEvent(91, "Building", "succeeded", 500, 510, 92),
+        createEvent(92, "Testing", "succeeded", 600, 650, 92),
+        createEvent(93, "Deploying", "failed", 650, 40, 92)
       ];
       that.eventsPerExecution['93'] = [
-        createEvent(94, "build", "Success", 4606, 4600, 93),
-        createEvent(95, "test", "Success", 4600, 4560, 93),
-        createEvent(96, "deploy", "Deploying", 4560, 4510, 93)
+        createEvent(94, "Building", "succeeded", 4606, 4600, 93),
+        createEvent(95, "Testing", "succeeded", 4600, 4560, 93),
+        createEvent(96, "Deploying", "running", 4560, 4510, 93)
       ];
       that.eventsPerExecution['94'] = [
-        createEvent(97, "build", "Success", 50064, 50060, 94),
-        createEvent(98, "test", "Success", 50055, 50050, 94),
-        createEvent(99, "deploy", "Success", 50050, 50045, 94)
+        createEvent(97, "Building", "succeeded", 50064, 50060, 94),
+        createEvent(98, "Testing", "succeeded", 50055, 50050, 94),
+        createEvent(99, "Deploying", "succeeded", 50050, 50045, 94)
       ];
       that.eventsPerExecution['95'] = [
       ];
       that.eventsPerExecution['96'] = [
-        createEvent(91, "build", "Success", 60064, 60060, 96),
-        createEvent(92, "test", "Failure", 60060, 60000, 96)
+        createEvent(91, "Building", "succeeded", 60064, 60060, 96),
+        createEvent(92, "Testing", "failed", 60060, 60000, 96)
       ];
 
       function createEvent(id, type, state, startOffset, endOffset, execId) {
         return {
           "id": id,
-          "name": "string",
+          "name": type,
           "type": type,
           "state": state,
           "startDate": moment().subtract(startOffset, 'seconds'),
           "endDate": moment().subtract(endOffset, 'seconds'),
-          "execution_id": execId,
-          "artifact_id": id
+          "artifactId": id,
+          "duration": (endOffset - startOffset) * 1000
         }
       }
     }

@@ -18,25 +18,25 @@
       <dt translate>LAST BUILD</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.build" class="" href=""
-           ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.build)">
-          {{ appDelLogsCtrl.last.build.reason.commitSha }}</a>
-        <span ng-if="appDelLogsCtrl.last.build" am-time-ago="appDelLogsCtrl.last.build.reason.createdDate"></span>
+           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.build)">
+          {{ appDelLogsCtrl.last.build.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.build" am-time-ago="appDelLogsCtrl.last.build.endDate"></span>
         <span ng-if="!appDelLogsCtrl.last.build" translate>None</span>
       </dd>
       <dt translate>LAST TEST</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.test" class="" href=""
-           ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.test)">
-          {{ appDelLogsCtrl.last.test.reason.commitSha }}</a>
-        <span ng-if="appDelLogsCtrl.last.test" am-time-ago="appDelLogsCtrl.last.test.reason.createdDate"></span>
+           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.test)">
+          {{ appDelLogsCtrl.last.test.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.test" am-time-ago="appDelLogsCtrl.last.test.endDate"></span>
         <span ng-if="!appDelLogsCtrl.last.test" translate>None</span>
       </dd>
       <dt translate>LAST DEPLOYMENT</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.deploy" class="" href=""
-           ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.deploy)">
-          {{ appDelLogsCtrl.last.deploy.reason.commitSha }}</a>
-        <span ng-if="appDelLogsCtrl.last.deploy" am-time-ago="appDelLogsCtrl.last.deploy.reason.createdDate"></span>
+           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.deploy)">
+          {{ appDelLogsCtrl.last.deploy.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.deploy" am-time-ago="appDelLogsCtrl.last.deploy.endDate"></span>
         <span ng-if="!appDelLogsCtrl.last.deploy" translate>None</span>
       </dd>
     </dl>

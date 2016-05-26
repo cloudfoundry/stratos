@@ -33,7 +33,7 @@
 
     var hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
-    hceModel.downloadArtifact(event.artifact_id)
+    hceModel.downloadArtifact(event.artifactId)
       .then(function(artifact) {
         if (artifact) {
           vm.log = artifact;
@@ -42,7 +42,7 @@
         }
       })
       .catch(function(error) {
-        console.error('Failed to download artifact with id: ' + event.artifact_id, error);
+        console.error('Failed to download artifact with id: ' + event.artifactId, error);
       })
       .finally(function() {
         if (!vm.log) {

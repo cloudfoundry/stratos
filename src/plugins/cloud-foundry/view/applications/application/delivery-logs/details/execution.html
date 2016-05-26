@@ -19,25 +19,23 @@
       <tbody>
       <tr ng-repeat="event in detailViewCtrl.context.events">
         <td ng-switch="event.state" class="row result-col event-result" id="result-col">
-          <div ng-switch-when="Success">
+          <div ng-switch-when="succeeded">
             <span class="helion-icon helion-icon-Active_S text-primary"></span>
             <span translate>{{ event.type }}</span>
           </div>
-          <div ng-switch-when="Deploying">
+          <div ng-switch-when="running">
             <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
             <span translate>{{ event.type }}</span>
           </div>
-          <div ng-switch-when="Failure">
+          <div ng-switch-when="failed">
             <span class="helion-icon helion-icon-Critical_S text-danger"></span>
             <span translate>{{ event.type }}</span>
           </div>
-          <div ng-switch-when="in-progress">
-            <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+          <div ng-switch-default>
+            <span class="helion-icon helion-icon-Active_S"></span>
             <span translate>{{ event.type }}</span>
           </div>
-          <div ng-switch-default>
-            <span translate>Unknown</span>
-          </div>
+
         </td>
         <td class="row result-col">
           <span translate>Started: </span>
@@ -46,9 +44,9 @@
         <td></td>
         <td class="row result-col">
           <span translate>Duration: </span>
-          TODO
+          {{ event.endDateString }}
         </td>
-        <td ng-switch="event.state == 'Success' || event.state == 'Failure'" class="event-view">
+        <td ng-switch="event.state == 'succeeded' || event.state == 'deploying'" class="event-view">
           <div ng-switch-when="true">
             <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewEvent(event)">
               <i class="helion-icon helion-icon-Right_Arrow"></i>
