@@ -46,7 +46,7 @@
           <span translate>Duration: </span>
           {{ event.durationString }}
         </td>
-        <td ng-switch="event.state == 'succeeded' || event.state == 'deploying'" class="event-view">
+        <td ng-switch="event.state == 'succeeded' || event.state == 'failed'" class="event-view">
           <div ng-switch-when="true">
             <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewEvent(event)">
               <i class="helion-icon helion-icon-Right_Arrow"></i>
