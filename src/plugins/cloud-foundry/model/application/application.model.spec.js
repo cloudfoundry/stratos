@@ -84,7 +84,7 @@
       $httpBackend.whenPOST(CreateApp.url).respond(201, CreateApp.response['201'].body);
       $httpBackend.expectPOST(CreateApp.url);
       $httpBackend.expectGET(GetAppSummary.url);
-      applicationModel.create(newAppSpec);
+      applicationModel.createApp(newAppSpec);
       applicationModel.getAppSummary(guid);
       $httpBackend.flush();
       expect(CreateApp.response['201'].body.entity.name).toBe(newAppSpec.name);
