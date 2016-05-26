@@ -313,7 +313,7 @@
           "startDate": moment().subtract(startOffset, 'seconds'),
           "endDate": moment().subtract(endOffset, 'seconds'),
           "execution_id": execId,
-          "artifact_id": 0
+          "artifact_id": id
         }
       }
     }
@@ -333,12 +333,6 @@
     triggerBuild: function() {
       /* eslint-disable */
       alert('TODO: trigger build');
-      /* eslint-enable */
-    },
-
-    viewSummaryItem: function(item) {
-      /* eslint-disable */
-      alert('TODO: Show.. ' + item.link);
       /* eslint-enable */
     },
 
@@ -371,15 +365,15 @@
         }
       });
 
-      if (!latestEvent) {
-        return;
+      if (latestEvent) {
+        this.viewEvent(latestEvent);
       }
-      this.viewEvent(latestEvent);
     },
 
     viewEvent: function(event) {
       this.detailView({
         templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/event.html',
+        controller: 'eventDetailViewController',
         title: gettext('Build Log')
       }, {
         event: event

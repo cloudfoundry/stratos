@@ -337,6 +337,23 @@
     },
 
     /**
+     * @function downloadArtifact
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Download the artifact associated with the artifact ID.
+     * @param {string} artifactId - the HCE artifact ID
+     * @returns {promise} A promise object.
+     * @public
+     */
+    downloadArtifact: function (artifactId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceArtifactApi')
+        .downloadArtifact(artifactId)
+        .then(function (response) {
+          that.onDownloadArtifact(response);
+        });
+    },
+
+    /**
      * @function removeNotificationTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Remove notification target
@@ -465,6 +482,18 @@
     onGetPipelineEvents: function (response) {
       return response.data;
     },
+
+    /**
+     * @function onDownloadArtifact
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Extract data from response
+     * @param {string} response - the JSON response from API call
+     * @returns {object} TODO (rcox): Not sure what type this is atm, but for the moment it's JSON
+     * @private
+     */
+    onDownloadArtifact: function (response) {
+      return response.data;
+    }
 
   });
 

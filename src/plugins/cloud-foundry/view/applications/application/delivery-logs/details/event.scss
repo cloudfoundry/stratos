@@ -1,4 +1,8 @@
-.delivery-build-log-view.temp-log-size{
+.delivery-log-event {
+  margin-right: $hpe-unit-space * 5;
+  color: $gray-darker;
+}
+.delivery-log-event-log-view.temp-log-size{
   background-color: rgba(0,0,0,0.75);
   margin-right: 140px;
   height: 400px;
