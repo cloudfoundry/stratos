@@ -230,7 +230,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
         .getPipelineEvents({ execution_id: executionId})
         .then(function (response) {
-          that.onGetPipelineEvents(response);
+          return that.onGetPipelineEvents(response);
         });
     },
 
@@ -349,7 +349,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceArtifactApi')
         .downloadArtifact(artifactId)
         .then(function (response) {
-          that.onDownloadArtifact(response);
+          return that.onDownloadArtifact(response);
         });
     },
 

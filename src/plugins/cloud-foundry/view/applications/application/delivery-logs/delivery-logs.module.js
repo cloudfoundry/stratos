@@ -45,6 +45,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.hasProject = null;
+    this.fetchError = false;
     this.last = {
       build: null,
       test: null,
@@ -75,6 +76,7 @@
       })
       .catch(function(error) {
         console.error('Failed to fetch project or process delivery logs data: ', error);
+        that.fetchError = error;
       });
 
     function updateData() {

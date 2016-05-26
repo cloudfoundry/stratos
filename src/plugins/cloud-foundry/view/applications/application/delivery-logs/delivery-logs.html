@@ -1,5 +1,9 @@
-<div ng-if="appDelLogsCtrl.hasProject === null" class="message-box message-box-no-bg">
+<div ng-if="!appDelLogsCtrl.fetchError && appDelLogsCtrl.hasProject === null" class="message-box message-box-no-bg">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="appDelLogsCtrl.fetchError" class="message-box message-box-no-bg">
+  <div translate>An error occurred retrieving delivery logs</div>
+  <span>{{appDelLogsCtrl.fetchError.data.message}}</span>
 </div>
 <div ng-if="appDelLogsCtrl.hasProject === false" class="message-box message-box-no-bg">
   <p>

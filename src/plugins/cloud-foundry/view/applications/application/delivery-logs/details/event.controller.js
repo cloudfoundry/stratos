@@ -53,7 +53,7 @@
     // The design shows this as a human readible but vague 'a few seconds' ago. Moment humanize matches this.
     // Need to loop back and understand the requirement (only show this for a few seconds/show something more accurate
     // for longer durations/etc)
-    vm.duration = moment.duration(event.startDate.diff(event.endDate)).humanize();
+    vm.duration = moment.duration(moment(event.startDate).diff(event.endDate)).humanize();
   }
 
 })();
