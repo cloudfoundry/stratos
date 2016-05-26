@@ -5,6 +5,7 @@ RUN mkdir -p /srv
 WORKDIR /srv
 
 COPY portal-proxy portal-proxy
+COPY ./dev-certs /srv/dev-certs
 
 RUN chmod +x portal-proxy
 
