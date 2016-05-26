@@ -33,6 +33,20 @@
 
   angular.extend(Route.prototype, {
    /**
+    * @function associateAppWithRoute
+    * @memberof cloud-foundry.model.route
+    * @description associate app with the route
+    * @param {string} guid - route identifier
+    * @param {string} appGuid - app identifier
+    * @returns {promise} A resolved/rejected promise
+    * @public
+    */
+    associateAppWithRoute: function (guid, appGuid) {
+      return this.apiManager.retrieve('cloud-foundry.api.Routes')
+        .AssociateAppWithRoute(guid, appGuid);
+    },
+
+   /**
     * @function removeAppFromRoute
     * @memberof cloud-foundry.model.route
     * @description remove app from the route

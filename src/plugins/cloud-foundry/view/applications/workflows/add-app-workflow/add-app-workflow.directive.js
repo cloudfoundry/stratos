@@ -51,6 +51,7 @@
     this.eventService = eventService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
@@ -309,11 +310,13 @@
      * @function domainMapping
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description domain mapping function
+     * @param {object} domain - a domain object
+     * @returns {object} select-option object for domain
      */
-    domainMapping: function (d) {
+    domainMapping: function (domain) {
       return {
-        label: d.entity.name,
-        value: d.entity.name
+        label: domain.entity.name,
+        value: domain
       };
     },
 
@@ -334,8 +337,15 @@
      * @returns {promise} A resolved/rejected promise
      */
     createApp: function () {
-      return this.appModel.createApp({
-        name: this.userInput.name
+      var that = this;
+      return this.$q(function (resolve, reject) {
+        that.appModel.createApp({
+          name: that.userInput.name
+        }).then(function (app) {
+          that.routeModel
+            .associateAppWithRoute(that.userInput.domain.metadata.guid, app.metadata.guid)
+            .then(resolve, reject);
+        });
       });
     },
 
@@ -351,7 +361,6 @@
     finishWorkflow: function () {
       this.addingApplication = false;
     }
-
   });
 
 })();

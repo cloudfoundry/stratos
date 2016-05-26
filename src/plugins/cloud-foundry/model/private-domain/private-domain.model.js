@@ -20,9 +20,8 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.private-domain.PrivateDomain
-   * @memberOf cloud-foundry.model.private-domain
-   * @name cloud-foundry.model.domain.PrivateDomain
+   * @memberOf cloud-foundry.model
+   * @name PrivateDomain
    * @param {app.api.apiManager} apiManager - the private-domain API manager
    * @property {app.api.apiManager} apiManager - the private-domain API manager
    * @class
