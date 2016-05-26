@@ -1,101 +1,117 @@
-<div id="delivery-logs-summary" class="panel panel-default delivery-logs-summary">
-  <div class="panel-heading action-header">
-    <span translate>Summary</span>
-  </div>
-
-  <dl class="dl-horizontal">
-    <dt translate>LAST BUILD</dt>
-    <dd>
-      <a ng-if="appDelLogsCtrl.last.build" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.build)">
-      {{ appDelLogsCtrl.last.build.reason.commitSha }}</a>
-      <span ng-if="appDelLogsCtrl.last.build" am-time-ago="appDelLogsCtrl.last.build.reason.createdDate"></span>
-      <span ng-if="!appDelLogsCtrl.last.build" translate>None</span>
-    </dd>
-    <dt translate>LAST TEST</dt>
-    <dd>
-      <a ng-if="appDelLogsCtrl.last.test" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.test)">
-        {{ appDelLogsCtrl.last.test.reason.commitSha }}</a>
-      <span ng-if="appDelLogsCtrl.last.test" am-time-ago="appDelLogsCtrl.last.test.reason.createdDate"></span>
-      <span ng-if="!appDelLogsCtrl.last.test" translate>None</span>
-    </dd>
-    <dt translate>LAST DEPLOYMENT</dt>
-    <dd>
-      <a ng-if="appDelLogsCtrl.last.deploy" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.deploy)">
-        {{ appDelLogsCtrl.last.deploy.reason.commitSha }}</a>
-      <span ng-if="appDelLogsCtrl.last.deploy" am-time-ago="appDelLogsCtrl.last.deploy.reason.createdDate"></span>
-      <span ng-if="!appDelLogsCtrl.last.deploy" translate>None</span>
-    </dd>
-  </dl>
+<div ng-if="appDelLogsCtrl.hasProject === null" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </global-spinner>
 </div>
-
-<div id="delivery-logs-search" class="panel panel-default delivery-logs-search">
-  <form>
-    <div class="form-group search-field" focusable-input >
-      <label class="control-label" for="build-search" required translate>
-        Search Builds
-      </label>
-      <div>
-        <input ng-model="appDelLogsCtrl.searchValue" type="text" class="form-control" id="build-search">
-        <i class="helion-icon helion-icon-Search"></i>
-      </div>
+<div ng-if="appDelLogsCtrl.hasProject === false" class="message-box message-box-no-bg">
+  <p>
+  <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
+  <h3 translate>You have not set up a delivery pipeline</h3>
+  </p>
+  <button class="btn btn-primary" translate>set up delivery pipeline</button>
+</div>
+<div ng-if="appDelLogsCtrl.hasProject === true">
+  <div id="delivery-logs-summary" class="panel panel-default delivery-logs-summary">
+    <div class="panel-heading action-header">
+      <span translate>Summary</span>
     </div>
-  </form>
+
+    <dl class="dl-horizontal">
+      <dt translate>LAST BUILD</dt>
+      <dd>
+        <a ng-if="appDelLogsCtrl.last.build" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.build)">
+        {{ appDelLogsCtrl.last.build.reason.commitSha }}</a>
+        <span ng-if="appDelLogsCtrl.last.build" am-time-ago="appDelLogsCtrl.last.build.reason.createdDate"></span>
+        <span ng-if="!appDelLogsCtrl.last.build" translate>None</span>
+      </dd>
+      <dt translate>LAST TEST</dt>
+      <dd>
+        <a ng-if="appDelLogsCtrl.last.test" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.test)">
+          {{ appDelLogsCtrl.last.test.reason.commitSha }}</a>
+        <span ng-if="appDelLogsCtrl.last.test" am-time-ago="appDelLogsCtrl.last.test.reason.createdDate"></span>
+        <span ng-if="!appDelLogsCtrl.last.test" translate>None</span>
+      </dd>
+      <dt translate>LAST DEPLOYMENT</dt>
+      <dd>
+        <a ng-if="appDelLogsCtrl.last.deploy" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.deploy)">
+          {{ appDelLogsCtrl.last.deploy.reason.commitSha }}</a>
+        <span ng-if="appDelLogsCtrl.last.deploy" am-time-ago="appDelLogsCtrl.last.deploy.reason.createdDate"></span>
+        <span ng-if="!appDelLogsCtrl.last.deploy" translate>None</span>
+      </dd>
+    </dl>
+  </div>
+
+  <div id="delivery-logs-search" class="panel panel-default delivery-logs-search">
+    <form>
+      <div class="form-group search-field" focusable-input >
+        <label class="control-label" for="build-search" required translate>
+          Search Builds
+        </label>
+        <div>
+          <input ng-model="appDelLogsCtrl.searchValue" type="text" class="form-control" id="build-search">
+          <i class="helion-icon helion-icon-Search"></i>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div id="delivery-logs-builds" class="delivery-logs-builds">
+    <div class="action-header">
+      <span translate>Builds</span>
+      <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()">
+        <i class="helion-icon helion-icon-Right_Arrow"></i>
+        <span translate>Trigger Build</span>
+      </a>
+    </div>
+    <div class="panel panel-default">
+      <table class="table table-actionable">
+        <thead>
+        <tr>
+          <th translate>MESSAGE</th>
+          <th translate>RESULT</th>
+          <th translate>TIME</th>
+          <th translate>COMMIT AUTHOR</th>
+          <th translate>REASON</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="execution in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
+          <td><a class="" href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
+          <td ng-switch="execution.result.value" class="row result-col" id="result-col">
+            <div ng-switch-when="Enqueued Build">
+              <span class="helion-icon helion-icon-Active_S"></span>
+              <span translate>{{ execution.result.label }}</span>
+            </div>
+			<div ng-switch-when="Success">
+              <span class="helion-icon helion-icon-Active_S text-primary"></span>
+              <span translate>{{ execution.result.label }}</span>
+              <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
+            </div>
+            <div ng-switch-when="Deploying">
+              <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+              <span translate>{{ execution.result.label }}</span>
+            </div>
+            <div ng-switch-when="Failure">
+              <span class="helion-icon helion-icon-Critical_S text-danger"></span>
+              <span translate>{{ execution.result.label }}</span>
+              <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
+            </div>
+            <div ng-switch-when="in-progress">
+              <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+              <span translate>{{ execution.result.label }}</span>
+            </div>
+            <div ng-switch-default>
+              <span translate>Unknown</span>
+            </div>
+          </td>
+          <td>{{ execution.reason.createdDateString }}</td>
+          <td>{{ execution.reason.author }}</td>
+          <td>{{ execution.reason.type }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
-<div id="delivery-logs-builds" class="delivery-logs-builds">
-  <div class="action-header">
-    <span translate>Builds</span>
-    <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()">
-      <i class="helion-icon helion-icon-Right_Arrow"></i>
-      <span translate>Trigger Build</span>
-    </a>
-  </div>
-  <div class="panel panel-default">
-    <table class="table table-actionable">
-      <thead>
-      <tr>
-        <th translate>MESSAGE</th>
-        <th translate>RESULT</th>
-        <th translate>TIME</th>
-        <th translate>COMMIT AUTHOR</th>
-        <th translate>REASON</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr ng-repeat="execution in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
-        <td><a class="" href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
-        <td ng-switch="execution.result.value" class="row result-col" id="result-col">
-          <div ng-switch-when="Enqueued Build">
-            <span class="helion-icon helion-icon-Active_S"></span>
-            <span translate>{{ execution.result.label }}</span>
-          </div>
-          <div ng-switch-when="Success">
-            <span class="helion-icon helion-icon-Active_S text-primary"></span>
-            <span translate>{{ execution.result.label }}</span>
-            <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
-          </div>
-          <div ng-switch-when="Deploying">
-            <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
-            <span translate>{{ execution.result.label }}</span>
-          </div>
-          <div ng-switch-when="Failure">
-            <span class="helion-icon helion-icon-Critical_S text-danger"></span>
-            <span translate>{{ execution.result.label }}</span>
-            <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
-          </div>
-          <div ng-switch-when="in-progress">
-            <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
-            <span translate>{{ execution.result.label }}</span>
-          </div>
-          <div ng-switch-default>
-            <span translate>Unknown</span>
-          </div>
-        </td>
-        <td>{{ execution.reason.createdDateString }}</td>
-        <td>{{ execution.reason.author }}</td>
-        <td>{{ execution.reason.type }}</td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+
+

@@ -44,6 +44,7 @@
   function ApplicationDeliveryLogsController($scope, $stateParams, $interval, $q, moment, modelManager, detailView) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hasProject = null;
     this.last = {
       build: null,
       test: null,
@@ -54,8 +55,8 @@
     var updateModelPromise;
 
     /* eslint-disable */
-    // TODO: Fetch the actual user.
-    // TODO: Check if project id already exists in hce model?
+    // TODO (kdomico): Hi! I've used the same github user approach. Update here as well or let me know if I need to do it
+    // TODO (rcox): Improvements - Check if project id already exists in hce model?
     /* eslint-enable */
     that.hceModel.getUserByGithubId('18697775')
       .then(function() {
@@ -66,15 +67,14 @@
         return that.hceModel.getProject(that.model.application.summary.name);
       })
       .then(function(project) {
-        if (angular.isUndefined(project)) {
-          throw 'Could not find project with name \'' + that.model.application.summary.name + '\'';
-        } else {
+        that.hasProject = !(angular.isUndefined(project) || project === null);
+        if (that.hasProject) {
           updateData();
-          //updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
+          updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
         }
       })
       .catch(function(error) {
-        console.error('Failed to fetch delivery logs data: ', error);
+        console.error('Failed to fetch project or process delivery logs data: ', error);
       });
 
     function updateData() {
@@ -100,7 +100,9 @@
           for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
             var execution = that.parsedHceModel.pipelineExecutions[i];
 
-            // Something weird about this part
+            // Something weird about this part. Not sure if the execution result will be enough to determine the
+            // state of each section. Alternatively may need to fetch all events and check through them. Another way
+            // might be, if the order of the executions is fixed, search through until each one is found
             var thisExecutionTime = moment(execution.reason.createdDate);
             if (execution.result === 'Success') {
               if (angular.isUndefined(lastDeployTime) || lastDeployTime.diff(thisExecutionTime) < 0) {
