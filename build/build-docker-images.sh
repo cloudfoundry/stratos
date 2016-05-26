@@ -2,8 +2,13 @@
 set -e
 
 DOCKER_REGISTRY=docker-registry.helion.space:443
+#DOCKER_REGISTRY=localhost:5000
 TAG=latest
 GROUP_NAME=helioncf
+BUILD_ARGS=""
+__DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+
 #BUILD_ARGS="--build-arg http_proxy=http://proxy.sdc.hp.com:8080"
 #BUILD_ARGS="$BUILD_ARGS --build-arg https_proxy=http://proxy.sdc.hp.com:8080"
 
@@ -36,11 +41,18 @@ function buildAndPublishImage {
 }
 
 # Build and publish all of the images for Stratos Console UI
-buildAndPublishImage cnap-console-db Dockerfile.UCP  ../stratos-identity-db
-buildAndPublishImage cnap-console-mock-api Dockerfile.mock_api.UCP ../stratos-node-server
-buildAndPublishImage cnap-console-mock-auth Dockerfile.mock_auth.UCP ../stratos-node-server
-buildAndPublishImage cnap-console-api Dockerfile.UCP ../stratos-node-server
-buildAndPublishImage cnap-console-proxy server.Dockerfile ../portal-proxy
+buildAndPublishImage cnap-console-db Dockerfile.UCP  ${__DIRNAME}/../../stratos-identity-db
+buildAndPublishImage cnap-console-mock-api Dockerfile.mock_api.UCP ${__DIRNAME}/../../stratos-node-server
+buildAndPublishImage cnap-console-mock-auth Dockerfile.mock_auth.UCP ${__DIRNAME}/../../stratos-node-server
+buildAndPublishImage cnap-console-api Dockerfile.UCP ${__DIRNAME}/../../stratos-node-server
+
+# Build Portal Proxy
+PORTAL_PROXY_PATH=${__DIRNAME}/../../portal-proxy
+pushd ${PORTAL_PROXY_PATH}
+./tools/build_portal_proxy.sh
+popd
+
+buildAndPublishImage cnap-console-proxy server.Dockerfile ${__DIRNAME}/../../portal-proxy
 
 # Prepare the nginx server
 pushd ../stratos-ui/tools
