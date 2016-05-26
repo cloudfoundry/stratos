@@ -11,6 +11,7 @@
   <div class="nav-tabs"></div>
 </div>
 <div class="delivery-commit-builds">
+  <span ng-if="!detailViewCtrl.context.events || detailViewCtrl.context.events.length === 0" translate>No data available</span>
   <table class="table table-outlined">
     <tbody>
     <tr ng-repeat="event in detailViewCtrl.context.events">

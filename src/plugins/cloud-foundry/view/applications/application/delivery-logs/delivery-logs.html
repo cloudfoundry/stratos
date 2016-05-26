@@ -6,21 +6,24 @@
   <dl class="dl-horizontal">
     <dt translate>LAST BUILD</dt>
     <dd>
-      <a class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.build)">
+      <a ng-if="appDelLogsCtrl.last.build" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.build)">
       {{ appDelLogsCtrl.last.build.reason.commitSha }}</a>
-      <span am-time-ago="appDelLogsCtrl.last.build.reason.createdDate"></span>
+      <span ng-if="appDelLogsCtrl.last.build" am-time-ago="appDelLogsCtrl.last.build.reason.createdDate"></span>
+      <span ng-if="!appDelLogsCtrl.last.build" translate>None</span>
     </dd>
     <dt translate>LAST TEST</dt>
     <dd>
-      <a class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.test)">
+      <a ng-if="appDelLogsCtrl.last.test" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.test)">
         {{ appDelLogsCtrl.last.test.reason.commitSha }}</a>
-      <span am-time-ago="appDelLogsCtrl.last.test.reason.createdDate"></span>
+      <span ng-if="appDelLogsCtrl.last.test" am-time-ago="appDelLogsCtrl.last.test.reason.createdDate"></span>
+      <span ng-if="!appDelLogsCtrl.last.test" translate>None</span>
     </dd>
     <dt translate>LAST DEPLOYMENT</dt>
     <dd>
-      <a class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.deploy)">
+      <a ng-if="appDelLogsCtrl.last.deploy" class="" href="" ng-click="appDelLogsCtrl.viewExecution(appDelLogsCtrl.last.deploy)">
         {{ appDelLogsCtrl.last.deploy.reason.commitSha }}</a>
-      <span am-time-ago="appDelLogsCtrl.last.deploy.reason.createdDate"></span>
+      <span ng-if="appDelLogsCtrl.last.deploy" am-time-ago="appDelLogsCtrl.last.deploy.reason.createdDate"></span>
+      <span ng-if="!appDelLogsCtrl.last.deploy" translate>None</span>
     </dd>
   </dl>
 </div>
@@ -62,6 +65,10 @@
       <tr ng-repeat="execution in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
         <td><a class="" href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
         <td ng-switch="execution.result.value" class="row result-col" id="result-col">
+          <div ng-switch-when="Enqueued Build">
+            <span class="helion-icon helion-icon-Active_S"></span>
+            <span translate>{{ execution.result.label }}</span>
+          </div>
           <div ng-switch-when="Success">
             <span class="helion-icon helion-icon-Active_S text-primary"></span>
             <span translate>{{ execution.result.label }}</span>
