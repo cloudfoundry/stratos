@@ -1,0 +1,45 @@
+.delivery-commit-detail {
+  margin-right: $hpe-unit-space * 5;
+
+  &.panel {
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  & > dl {
+    padding-bottom: $hpe-unit-space;
+    padding-left: 0;
+
+    dt, dd {
+      padding-top: $hpe-unit-space / 2;
+    }
+  }
+
+  .nav-tabs {
+    clear: both;
+    border-width: 2px;
+  }
+}
+
+.delivery-commit-builds {
+  margin-right: $hpe-unit-space * 5;
+
+  table.table.table-outlined {
+    border-width: 1px;
+  }
+
+  .build-result {
+    text-transform: uppercase;
+    font-weight: $hpe-font-weight-semibold;
+  }
+
+  .build-view {
+    a {
+      font-size: inherit;
+      text-decoration: none;
+    }
+  }
+}
+
+
+
