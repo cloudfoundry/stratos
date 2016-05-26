@@ -12,6 +12,7 @@ __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #BUILD_ARGS="--build-arg http_proxy=http://proxy.sdc.hp.com:8080"
 #BUILD_ARGS="$BUILD_ARGS --build-arg https_proxy=http://proxy.sdc.hp.com:8080"
 
+
 function buildAndPublishImage {
   # $1 is name
   # $2 is docker file name
@@ -47,22 +48,25 @@ buildAndPublishImage cnap-console-mock-auth Dockerfile.mock_auth.UCP ${__DIRNAME
 buildAndPublishImage cnap-console-api Dockerfile.UCP ${__DIRNAME}/../../stratos-node-server
 
 # Build Portal Proxy
-#
-PORTAL_PROXY_PATH=${__DIRNAME}/../../portal-proxy
+PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
 pushd ${PORTAL_PROXY_PATH}
 ./tools/build_portal_proxy.sh
 popd
 
+# Build and publish the container image for the portal proxy
 buildAndPublishImage cnap-console-proxy server.Dockerfile ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
-pushd ../stratos-ui/tools
-npm install
-bower install
-npm run build
+docker run --rm \
+  -v ${__DIRNAME}/../../stratos-ui:/usr/src/app \
+  -v ${__DIRNAME}/../../helion-ui-framework:/usr/src/helion-ui-framework \
+  -v ${__DIRNAME}/../../helion-ui-theme:/usr/src/helion-ui-theme \
+  -w /usr/src/app \
+  node:4.2.3 \
+  /bin/bash ./provision.sh
 
-cd ..
-cp -R ./dist ../stratos-server/dist
-popd
+# Copy the artifacts from the above to the stratos-server
+cp -R ${__DIRNAME}/../../stratos-ui/dist ${__DIRNAME}/../../stratos-server/dist
 
-buildAndPublishImage cnap-console-server Dockerfile.prod ../stratos-server
+# Build and push an image based on stratos-server
+buildAndPublishImage cnap-console-server Dockerfile.UCP ${__DIRNAME}/../../stratos-server
