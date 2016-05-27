@@ -52,6 +52,7 @@
       test: null,
       deploy: null
     };
+    this.executionSearchTerms = ['message', 'result.label', 'reason.createdDateString', 'reason.author', 'reason.type'];
 
     var that = this;
     var updateModelPromise;
@@ -220,15 +221,6 @@
       } else {
         execution.result = undefined;
       }
-
-      // Strip out properties that aren't displayed (filtering by values which aren't shown is a bit jarring)
-      var propertiesToKeep = ['id', 'message', 'result', 'reason.createdDateString', 'reason.author', 'reason.type'];
-      var cleanExeuction = {};
-      for (var j = 0; j < propertiesToKeep.length; j++) {
-        var toKeep = propertiesToKeep[j];
-        _.set(cleanExeuction, toKeep, _.get(execution, toKeep));
-      }
-      executions[pos] = cleanExeuction;
     }
 
     function addMockData() {

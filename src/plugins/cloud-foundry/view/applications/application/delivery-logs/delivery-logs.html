@@ -80,7 +80,7 @@
         </thead>
         <tbody>
         <tr
-          ng-repeat="execution in appDelLogsCtrl.parsedHceModel.pipelineExecutions | filter:appDelLogsCtrl.searchValue">
+          ng-repeat="execution in appDelLogsCtrl.parsedHceModel.pipelineExecutions | byProperties:appDelLogsCtrl.searchValue:appDelLogsCtrl.executionSearchTerms">
           <td><a class="" href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
           <td ng-if="!execution.result" class="row result-col">
           <td ng-if="execution.result" ng-switch="execution.result.state" class="row result-col" id="result-col">
