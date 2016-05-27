@@ -7,14 +7,14 @@
    */
   angular
     .module('cloud-foundry.model')
-    .run(registerRouteModel);
+    .run(registerOrgModel);
 
-  registerRouteModel.$inject = [
+  registerOrgModel.$inject = [
     'app.model.modelManager',
     'app.api.apiManager'
   ];
 
-  function registerRouteModel(modelManager, apiManager) {
+  function registerOrgModel(modelManager, apiManager) {
     modelManager.register('cloud-foundry.model.organization', new Organization(apiManager));
   }
 

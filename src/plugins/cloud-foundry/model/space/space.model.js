@@ -7,14 +7,14 @@
    */
   angular
     .module('cloud-foundry.model')
-    .run(registerRouteModel);
+    .run(registerSpaceModel);
 
-  registerRouteModel.$inject = [
+  registerSpaceModel.$inject = [
     'app.model.modelManager',
     'app.api.apiManager'
   ];
 
-  function registerRouteModel(modelManager, apiManager) {
+  function registerSpaceModel(modelManager, apiManager) {
     modelManager.register('cloud-foundry.model.space', new Space(apiManager));
   }
 
@@ -41,6 +41,9 @@
     listAllSpaces: function (params) {
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllSpaces(params)
+        .then(function (response) {
+          return response.data.resources;
+        });
     }
   });
 
