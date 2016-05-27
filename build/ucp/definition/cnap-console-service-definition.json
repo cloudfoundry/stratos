@@ -230,137 +230,21 @@
       ]
     },
     {
-      "name": "stolon-sentinel",
-      "version": "0.1.0",
+      "name": "portal-db",
+      "version": "1.0.0",
       "vendor": "HPE",
-      "external_name": "stolon-sentinel",
-      "image": "docker-registry.helion.space:443/stolon",
-      "min_RAM_mb": 512,
+      "external_name": "portal-db",
+      "image": "docker.io/postgres:9.5",
+      "min_RAM_mb": 256,
       "min_disk_gb": 1,
+      "min_VCPU": 1,
       "platform": "linux-x86_64",
       "workload_type": "container",
-      "parameters": [
-        {
-          "name": "SENTINEL"
-        },
-        {
-          "name": "STSENTINEL_CLUSTER_NAME"
-        },
-        {
-          "name": "STSENTINEL_STORE_BACKEND"
-        },
-        {
-          "name": "STSENTINEL_STORE_ENDPOINTS"
-        },
-        {
-          "name": "STSENTINEL_KEEPER_KUBE_LABEL_SELECTOR"
-        },
-        {
-          "name": "STSENTINEL_DEBUG"
-        },
-        {
-          "name": "STSENTINEL_KUBERNETES_NAMESPACE"
-        }
-      ],
-      "min_instances": 1,
-      "max_instances": 1,
-      "service_ports": [
-        {
-          "name": "sentinel",
-          "protocol": "TCP",
-          "source_port": 6431,
-          "target_port": 6431,
-          "public": false
-        }
-      ]
-    },
-    {
-      "name": "stolon-keeper",
-      "version": "0.1.0",
-      "vendor": "HPE",
-      "external_name": "stolon-keeper",
-      "image": "docker-registry.helion.space:443/stolon",
-      "min_RAM_mb": 512,
-      "min_disk_gb": 1,
-      "platform": "linux-x86_64",
-      "workload_type": "container",
-      "parameters": [
-        {
-          "name": "KEEPER"
-        },
-        {
-          "name": "STKEEPER_CLUSTER_NAME"
-        },
-        {
-          "name": "STKEEPER_STORE_BACKEND"
-        },
-        {
-          "name": "STKEEPER_STORE_ENDPOINTS"
-        },
-        {
-          "name": "STKEEPER_DEBUG"
-        },
-        {
-          "name": "STKEEPER_INITIAL_PG_SU_USERNAME"
-        },
-        {
-          "name": "STKEEPER_INITIAL_PG_SU_PASSWORD_FILE"
-        },
-        {
-          "name": "stolon"
-        }
-      ],
-      "min_instances": 1,
-      "max_instances": 1,
-      "service_ports": [
-        {
-          "name": "pgsql-1",
-          "protocol": "TCP",
-          "source_port": 5431,
-          "target_port": 5431,
-          "public": false
-        },
-        {
-          "name": "pgsql-2",
-          "protocol": "TCP",
-          "source_port": 5432,
-          "target_port": 5432,
-          "public": false
-        }
-      ],
-      "volume_mounts": [
-        {
-          "volume_name": "stolon-data",
-          "mountpoint": "/stolon-data"
-        }
-      ]
-    },
-    {
-      "name": "stolon-proxy",
-      "version": "0.1.0",
-      "vendor": "HPE",
-      "external_name": "stolon-proxy",
-      "image": "docker-registry.helion.space:443/stolon",
-      "min_RAM_mb": 512,
-      "min_disk_gb": 1,
-      "platform": "linux-x86_64",
-      "workload_type": "container",
-      "parameters": [
-        {
-          "name": "PROXY"
-        },
-        {
-          "name": "STPROXY_CLUSTER_NAME"
-        },
-        {
-          "name": "STPROXY_STORE_BACKEND"
-        },
-        {
-          "name": "STPROXY_STORE_ENDPOINTS"
-        },
-        {
-          "name": "STPROXY_DEBUG"
-        }
+      "capabilities": [],
+      "affinity": [],
+      "labels": [
+        "label1",
+        "label2"
       ],
       "min_instances": 1,
       "max_instances": 1,
@@ -370,7 +254,22 @@
           "protocol": "TCP",
           "source_port": 5432,
           "target_port": 5432,
-          "public": false
+          "public": true
+        }
+      ],
+      "volume_mounts": [],
+      "parameters": [
+        {
+          "name": "POSTGRES_DB"
+        },
+        {
+          "name": "POSTGRES_PASSWORD"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "PGDATA"
         }
       ]
     }
@@ -389,7 +288,7 @@
       "workload_type": "container",
       "parameters": [
         {
-          "name": "stolon"
+          "name": "DB_PASSWORD"
         },
         {
           "name": "DB_USER"
@@ -407,6 +306,42 @@
     }
   ],
   "parameters": [
+    {
+      "name": "POSTGRES_DB",
+      "description": "placeholder",
+      "default": "stratos-db",
+      "example": "stratos-db",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "POSTGRES_PASSWORD",
+      "description": "placeholder",
+      "default": "stratos",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "POSTGRES_USER",
+      "description": "placeholder",
+      "default": "stratos",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PGDATA",
+      "description": "placeholder",
+      "default": "/database",
+      "example": "/database",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
     {
       "name": "MYSQL_ROOT_PASSWORD",
       "description": "Root password for MySQL",
@@ -451,10 +386,27 @@
       "secret": false
     },
     {
+      "name": "DB_ADDR",
+      "description": "Database address",
+      "default": "portal-db",
+      "example": "",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
       "name": "DB_USER",
       "description": "PostgreSQL user",
-      "default": "stolon",
-      "example": "stolon",
+      "default": "stratos",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_PASSWORD",
+      "value": "stratos",
+      "description": "PostgreSQL password for stolon",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -462,8 +414,8 @@
     {
       "name": "DB_HOST",
       "description": "PostgreSQL host address",
-      "default": "stolon-proxy-int",
-      "example": "stolon-proxy-int",
+      "default": "portal-db",
+      "example": "portal-db",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -647,38 +599,6 @@
       "data_type": "string",
       "required": true,
       "secret": false
-    },
-    {
-      "name": "DB_ADDR",
-      "description": "Database address",
-      "default": "stolon-proxy-int",
-      "example": "",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "DB_HOST",
-      "description": "Database host address",
-      "default": "stolon-proxy-int",
-      "example": "",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "DB_PORT",
-      "description": "Database port",
-      "default": "5432",
-      "example": "5432",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "stolon",
-      "description": "PostgreSQL password for stolon",
-      "secret": true
     }
   ]
 }

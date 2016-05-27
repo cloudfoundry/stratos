@@ -29,18 +29,6 @@
       "value": "3000"
     },
     {
-      "name": "SOTLON_USER",
-      "value": "stolon"
-    },
-    {
-      "name": "STOLON_HOST",
-      "value": "stolon-proxy-int"
-    },
-    {
-      "name": "STOLON_PORT",
-      "value": "5432"
-    },
-    {
       "name": "STSENTINEL_CLUSTER_NAME",
       "value": "kube-stolon"
     },
@@ -117,12 +105,20 @@
       "value": "true"
     },
     {
+      "name": "DB_HOST",
+      "value": "portal-db"
+    },
+    {
       "name": "DB_ADDR",
-      "value": "stolon-proxy-int"
+      "value": "portal-db"
     },
     {
       "name": "DB_PORT",
       "value": "5432"
+    },
+    {
+      "name": "DB_USER",
+      "value": "stratos"
     },
     {
       "name": "DB_PASSWORD",
