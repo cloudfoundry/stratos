@@ -27,7 +27,7 @@
     */
   function HceSecurityApi($http) {
     this.$http = $http;
-    this.baseUrl = '/api/ce/v2';
+    this.baseUrl = '/pp/v1/proxy/v2';
   }
 
   angular.extend(HceSecurityApi.prototype, {
