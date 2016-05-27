@@ -195,6 +195,7 @@
         .CreateApp(newAppSpec)
         .then(function (response) {
           that.getAppSummary(response.data.metadata.guid);
+          return response.data;
         });
     },
 

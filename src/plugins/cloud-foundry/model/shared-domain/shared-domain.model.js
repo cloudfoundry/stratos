@@ -20,9 +20,8 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.shared-domain.SharedDomain
-   * @memberOf cloud-foundry.model.shared-domain
-   * @name cloud-foundry.model.shared-domain.SharedDomain
+   * @memberOf cloud-foundry.model
+   * @name SharedDomain
    * @param {app.api.apiManager} apiManager - the shared-domain API manager
    * @property {app.api.apiManager} apiManager - the shared-domain API manager
    * @class
