@@ -24,6 +24,7 @@
   AddAppWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
+    '$scope',
     '$q'
   ];
 
@@ -33,19 +34,23 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
+   * @param {object} $scope - angular $scope
    * @param {object} $q - angular $q service
+   * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} githubModel - the Github model
    * @property {object} privateDomainModel - the private domain model
    * @property {object} sharedDomainModel - the shared domain model
+   * @property {object} organizationModel - the organization model
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function AddAppWorkflowController(modelManager, eventService, $q) {
+  function AddAppWorkflowController(modelManager, eventService, $scope, $q) {
     var that = this;
 
+    this.$scope = $scope;
     this.$q = $q;
     this.addingApplication = false;
     this.eventService = eventService;
@@ -56,8 +61,27 @@
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
       that.startWorkflow();
+    });
+
+    this.userInput = {};
+
+    $scope.$watch(function () {
+      return that.userInput.serviceInstance;
+    }, function (newValue) {
+      if (newValue) {
+        that.getOrganizations();
+      }
+    });
+
+    $scope.$watch(function () {
+      return that.userInput.organization;
+    }, function (organization) {
+      if (organization) {
+        that.getSpacesForOrganization(organization.metadata.guid);
+      }
     });
   }
 
@@ -72,6 +96,9 @@
       this.userInput = {
         name: null,
         serviceInstance: null,
+        organization: null,
+        space: null,
+        host: null,
         domain: null,
         source: 'github',
         repo: null,
@@ -208,6 +235,8 @@
         userInput: this.userInput,
         subflow: 'pipeline',
         serviceInstances: [],
+        organizations: [],
+        spaces: [],
         domains: [],
         notificationTargets: [
           {
@@ -268,12 +297,45 @@
     },
 
     /**
+     * @function getOrganizations
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description get organizations
+     * @returns {promise} A resolved/rejected promise
+     */
+    getOrganizations: function () {
+      var that = this;
+      return this.organizationModel.listAllOrganizations()
+        .then(function (organizations) {
+          that.options.organizations.length = 0;
+          [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));
+          that.userInput.organization = that.options.organizations[0].value;
+        });
+    },
+
+    /**
+     * @function getSpacesForOrganization
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description get spaces for organization
+     * @returns {promise} A resolved/rejected promise
+     */
+    getSpacesForOrganization: function (guid) {
+      var that = this;
+      return this.organizationModel.listAllSpacesForOrganization(guid)
+        .then(function (spaces) {
+          that.options.spaces.length = 0;
+          [].push.apply(that.options.spaces, _.map(spaces, that.selectOptionMapping));
+          that.userInput.space = that.options.spaces[0].value;
+        });
+    },
+
+    /**
      * @function getDomains
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description get domains, including private domains and shared domains
      * @returns {promise} A resolved/rejected promise
      */
     getDomains: function () {
+      this.options.domains.length = 0;
       return this.$q.all([
         this.getPrivateDomains(),
         this.getSharedDomains()
@@ -289,7 +351,7 @@
     getPrivateDomains: function () {
       var that = this;
       return this.privateDomainModel.listAllPrivateDomains().then(function (privateDomains) {
-        [].push.apply(that.options.domains, _.map(privateDomains, that.domainMapping));
+        [].push.apply(that.options.domains, _.map(privateDomains, that.selectOptionMapping));
       });
     },
 
@@ -302,21 +364,21 @@
     getSharedDomains: function () {
       var that = this;
       return this.sharedDomainModel.listAllSharedDomains().then(function (sharedDomains) {
-        [].push.apply(that.options.domains, _.map(sharedDomains, that.domainMapping));
+        [].push.apply(that.options.domains, _.map(sharedDomains, that.selectOptionMapping));
       });
     },
 
     /**
-     * @function domainMapping
+     * @function selectOptionMapping
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description domain mapping function
-     * @param {object} domain - a domain object
-     * @returns {object} select-option object for domain
+     * @param {object} o - an object to map
+     * @returns {object} select-option object
      */
-    domainMapping: function (domain) {
+    selectOptionMapping: function (o) {
       return {
-        label: domain.entity.name,
-        value: domain
+        label: o.entity.name,
+        value: o
       };
     },
 
