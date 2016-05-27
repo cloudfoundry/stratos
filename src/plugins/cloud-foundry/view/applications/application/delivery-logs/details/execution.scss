@@ -29,6 +29,9 @@
 
     table.table.table-outlined {
       border-width: 1px;
+      tbody > tr > td {
+        vertical-align: middle;
+      }
     }
 
     .event-result {
