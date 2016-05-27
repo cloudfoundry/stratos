@@ -70,14 +70,14 @@ api:
 
 
 proxy:
-  build: ~/gop/src/github.com/hpcloud/portal-proxy
+  build: $GOPATH/src/github.com/hpcloud/portal-proxy
   dockerfile: build.Dockerfile
   ports:
     - "3003:3003"
   env_file:
     ./proxy.env
   volumes:
-    - ~/gop/src/github.com/hpcloud/portal-proxy:/srv
+    - $GOPATH/src/github.com/hpcloud/portal-proxy:/srv
 
 
 nginx:
