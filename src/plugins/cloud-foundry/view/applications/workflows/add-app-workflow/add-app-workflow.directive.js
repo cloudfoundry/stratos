@@ -335,6 +335,7 @@
      * @returns {promise} A resolved/rejected promise
      */
     getDomains: function () {
+      this.options.domains.length = 0;
       return this.$q.all([
         this.getPrivateDomains(),
         this.getSharedDomains()
