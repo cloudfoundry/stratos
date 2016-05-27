@@ -5,7 +5,7 @@ ENV DB_HOST="stolon-proxy-int" DB="postgres" DB_PORT="5432" DB_USER="stolon" DB_
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
 
-ADD run.sh /
-ADD migrations/20160511195737_InitialSchema.sql /
+ADD db/run.sh /
+ADD db/migrations/20160511195737_InitialSchema.sql /
 
 CMD ["/run.sh"]
