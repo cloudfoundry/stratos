@@ -71,13 +71,13 @@ api:
 
 proxy:
   build: ~/gop/src/github.com/hpcloud/portal-proxy
-  dockerfile: server.Dockerfile
+  dockerfile: build.Dockerfile
   ports:
     - "3003:3003"
   env_file:
     ./proxy.env
   volumes:
-    - ../portal-proxy:/srv
+    - ~/gop/src/github.com/hpcloud/portal-proxy:/srv
 
 
 nginx:
