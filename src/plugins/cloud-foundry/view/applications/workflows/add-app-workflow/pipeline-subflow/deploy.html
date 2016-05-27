@@ -13,7 +13,8 @@
 applications:
 <span class="text-primary" translate># We have reserved a name/route for your app</span>
 - name: {{ wizardCtrl.options.userInput.name }}
-  domain: {{ wizardCtrl.options.userInput.domain }}<span ng-if="wizardCtrl.options.userInput.services">
+  host: {{ wizardCtrl.options.userInput.host }}
+  domain: {{ wizardCtrl.options.userInput.domain.entity.name }}<span ng-if="wizardCtrl.options.userInput.services">
   <span class="text-primary" translate># We have provisioned and bound services</span>
   services:<span ng-repeat="service in wizardCtrl.options.userInput.services">
   - {{ service.label }}</span>
