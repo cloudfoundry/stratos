@@ -37,6 +37,7 @@ api:
     - auth:auth_service
     - cf:cf_service
 
+
 postgres:
   extends:
     file: common.yml
@@ -49,6 +50,7 @@ proxy:
     service: proxy
   links:
     - postgres:postgres
+
 
 nginx:
   extends:
