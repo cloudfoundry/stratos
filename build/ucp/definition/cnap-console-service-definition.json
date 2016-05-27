@@ -358,10 +358,12 @@
       "name": "configuration",
       "version": "0.1.0",
       "vendor": "HPE",
+      "external_name": "configuration",
       "image": "docker-registry.helion.space:443/helioncf/cnap-console-database-configuration:latest",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
       "platform": "linux-x86_64",
+      "workload_type": "container",
       "parameters": [
         {
           "name": "stolon"
