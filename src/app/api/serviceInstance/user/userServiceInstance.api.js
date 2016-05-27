@@ -41,8 +41,9 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (url) {
-      return this.$http.post('/api/service-instances/user/connect', { url: url });
+    connect: function (url, username, password) {
+      var data = { url: url, username: username, password: password };
+      return this.$http.post('/api/service-instances/user/connect', data);
     },
 
     /**

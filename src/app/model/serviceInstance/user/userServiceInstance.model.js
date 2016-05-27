@@ -45,9 +45,9 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (url) {
+    connect: function (url, username, password) {
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      return serviceInstanceApi.connect(url);
+      return serviceInstanceApi.connect(url, username, password);
     },
 
     /**

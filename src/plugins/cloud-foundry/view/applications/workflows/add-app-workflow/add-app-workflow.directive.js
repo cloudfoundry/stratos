@@ -104,7 +104,8 @@
         repo: null,
         branch: null,
         buildContainer: null,
-        imageRegistry: null
+        imageRegistry: null,
+        projectId: null
       };
 
       this.data.workflow = {
@@ -148,6 +149,14 @@
             templateUrl: path + 'pipeline-subflow/select-source.html',
             nextBtnText: gettext('Next'),
             onNext: function () {
+              // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+              that.hceModel.getUserByGithubId('123', '123456')
+                .then(angular.noop, function (response) {
+                  if (response.status === 404) {
+                    that.hceModel.createUser('123', '123456', 'login', 'token');
+                  }
+                });
+
               return that.githubModel.repos()
                 .then(function () {
                   var repos = _.filter(that.githubModel.data.repos,
@@ -162,19 +171,7 @@
             templateUrl: path + 'pipeline-subflow/select-repository.html',
             nextBtnText: gettext('Next'),
             onNext: function () {
-              that.hceModel.getBuildContainers()
-                .then(function () {
-                  var buildContainers = _.map(that.hceModel.data.buildContainers,
-                                              function (o) { return { label: o.build_container_label, value: o }; });
-                  [].push.apply(that.options.buildContainers, buildContainers);
-                });
-
-              that.hceModel.getImageRegistries()
-                .then(function () {
-                  var imageRegistries = _.map(that.hceModel.data.imageRegistries,
-                                              function (o) { return { label: o.registry_label, value: o }; });
-                  [].push.apply(that.options.imageRegistries, imageRegistries);
-                });
+              that.getPipelineDetailsData();
 
               if (that.userInput.repo) {
                 return that.githubModel.branches(that.userInput.repo.full_name)
@@ -192,6 +189,20 @@
             templateUrl: path + 'pipeline-subflow/pipeline-details.html',
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
+              that.hceModel.getDeploymentTargets('123').then(function () {
+                var target = _.find(that.hceModel.data.deploymentTargets,
+                                    { name: that.userInput.serviceInstance.name });
+                if (target) {
+                  that.createPipeline(target.deployment_target_id);
+                } else {
+                  that.createDeploymentTarget().then(function (newTarget) {
+                    that.createPipeline(newTarget.deployment_target_id)
+                      .then(function (response) {
+                        that.userInput.projectId = response.data.id;
+                      });
+                  });
+                }
+              });
             }
           },
           {
@@ -382,6 +393,24 @@
       };
     },
 
+    getPipelineDetailsData: function () {
+      var that = this;
+
+      this.hceModel.getBuildContainers('123')
+        .then(function () {
+          var buildContainers = _.map(that.hceModel.data.buildContainers,
+                                      function (o) { return { label: o.build_container_label, value: o }; });
+          [].push.apply(that.options.buildContainers, buildContainers);
+        });
+
+      this.hceModel.getImageRegistries('123')
+        .then(function () {
+          var imageRegistries = _.map(that.hceModel.data.imageRegistries,
+                                      function (o) { return { label: o.registry_label, value: o }; });
+          [].push.apply(that.options.imageRegistries, imageRegistries);
+        });
+    },
+
     /**
      * @function appendSubflow
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
@@ -411,6 +440,33 @@
       });
     },
 
+    createDeploymentTarget: function () {
+      return this.hceModel.createDeploymentTarget('123',
+                                                  this.userInput.serviceInstance.name,
+                                                  this.userInput.serviceInstance.url,
+                                                  this.userInput.serviceInstance.account,
+                                                  this.userInput.serviceInstance.account_password,
+                                                  this.userInput.organization || 'cnapui',
+                                                  this.userInput.space || 'cnapuispace');
+    },
+
+    createPipeline: function (targetId) {
+      var projectType = this.userInput.buildContainer.build_container_label.split(' ')[0];
+      return this.hceModel.createProject('123',
+                                         this.userInput.name,
+                                         this.userInput.source,
+                                         this.githubModel.getToken(),
+                                         targetId,
+                                         projectType.toLowerCase(),
+                                         this.userInput.buildContainer.build_container_id,
+                                         this.userInput.repo,
+                                         this.userInput.branch.name);
+    },
+
+    triggerPipeline: function () {
+      return this.hceModel.triggerPipelineExecution('123', this.userInput.projectId, 'HEAD');
+    },
+
     startWorkflow: function () {
       this.addingApplication = true;
       this.reset();
@@ -421,6 +477,7 @@
     },
 
     finishWorkflow: function () {
+      this.triggerPipeline();
       this.addingApplication = false;
     }
   });

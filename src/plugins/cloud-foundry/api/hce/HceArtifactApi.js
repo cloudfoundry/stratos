@@ -27,11 +27,7 @@
     */
   function HceArtifactApi($http) {
     this.$http = $http;
-    this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
+    this.baseUrl = '/pp/v1/proxy/v2';
   }
 
   angular.extend(HceArtifactApi.prototype, {
@@ -42,15 +38,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    deleteArtifact: function (artifactId, params) {
+    deleteArtifact: function (guid, artifactId, params) {
       var path = this.baseUrl + '/artifacts/{artifact_id}'
         .replace('{' + 'artifact_id' + '}', artifactId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -63,15 +62,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    downloadArtifact: function (artifactId, params) {
+    downloadArtifact: function (guid, artifactId, params) {
       var path = this.baseUrl + '/artifacts/{artifact_id}/download'
         .replace('{' + 'artifact_id' + '}', artifactId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -84,15 +86,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getArtifact: function (artifactId, params) {
+    getArtifact: function (guid, artifactId, params) {
       var path = this.baseUrl + '/artifacts/{artifact_id}'
         .replace('{' + 'artifact_id' + '}', artifactId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -104,14 +109,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getArtifacts: function (params) {
+    getArtifacts: function (guid, params) {
       var path = this.baseUrl + '/artifacts';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -124,9 +132,11 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    uploadArtifact: function (data, params) {
+    uploadArtifact: function (guid, data, params) {
       var path = this.baseUrl + '/artifacts';
-      var headers = angular.extend({}, this.defaultHeaders);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
       headers['Content-Type'] = 'application/x-gzip';
 
       var config = {

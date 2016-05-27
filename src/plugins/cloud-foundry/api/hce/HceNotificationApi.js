@@ -27,11 +27,7 @@
     */
   function HceNotificationApi($http) {
     this.$http = $http;
-    this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
+    this.baseUrl = '/pp/v1/proxy/v2';
   }
 
   angular.extend(HceNotificationApi.prototype, {
@@ -42,15 +38,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    addNotificationTarget: function (data, params) {
+    addNotificationTarget: function (guid, data, params) {
       var path = this.baseUrl + '/notifications/targets';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -63,15 +62,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getNotificationTarget: function (notificationTargetId, params) {
+    getNotificationTarget: function (guid, notificationTargetId, params) {
       var path = this.baseUrl + '/notifications/targets/{notification_target_id}'
         .replace('{' + 'notification_target_id' + '}', notificationTargetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -83,14 +85,39 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    getNotificationTargets: function (params) {
+    getNotificationTargets: function (guid, params) {
       var path = this.baseUrl + '/notifications/targets';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
+      };
+
+      return this.$http(config);
+    },
+
+    /**
+     * @name listNotificationTargetTypes
+     * @description Enumeration of Notification target types, e.g. &#x60;HIPCHAT&#x60;, &#x60;SLACK&#x60;, etc.\n
+     * @param {object} params - the query parameters
+     * @returns {promise} A resolved/rejected promise
+     */
+    listNotificationTargetTypes: function (guid, params) {
+      var path = this.baseUrl + '/notifications/targets/types';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
+
+      var config = {
+        method: 'GET',
+        url: path,
+        params: params || {},
+        headers: headers
       };
 
       return this.$http(config);
@@ -103,15 +130,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    removeNotificationTarget: function (notificationTargetId, params) {
+    removeNotificationTarget: function (guid, notificationTargetId, params) {
       var path = this.baseUrl + '/notifications/targets/{notification_target_id}'
         .replace('{' + 'notification_target_id' + '}', notificationTargetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -125,16 +155,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    updateNotificationTarget: function (notificationTargetId, data, params) {
+    updateNotificationTarget: function (guid, notificationTargetId, data, params) {
       var path = this.baseUrl + '/notifications/targets/{notification_target_id}'
         .replace('{' + 'notification_target_id' + '}', notificationTargetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);

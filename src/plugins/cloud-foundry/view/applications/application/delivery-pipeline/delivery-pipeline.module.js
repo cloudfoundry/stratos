@@ -46,7 +46,7 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          this.hceModel.removeNotificationTarget(target.id)
+          this.hceModel.removeNotificationTarget('123', target.id)
             .then(function () {
               _.remove(that.notificationTargets, { id: target.id });
             });
@@ -70,17 +70,18 @@
     ];
     /* eslint-enable */
 
-    this.hceModel.getUserByGithubId('123456')
+    // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+    this.hceModel.getUserByGithubId('123', '123456')
       .then(function () {
-        that.hceModel.getProjects()
+        that.hceModel.getProjects('123')
           .then(function () {
             that.getProject();
           });
-        that.hceModel.getImageRegistries();
+        that.hceModel.getImageRegistries('123');
       }, function (response) {
         if (response.status === 404) {
-          that.hceModel.createUser('123456', 'login', 'token');
-          that.hceModel.getImageRegistries();
+          that.hceModel.createUser('123', '123456', 'login', 'token');
+          that.hceModel.getImageRegistries('123');
         }
       });
   }
@@ -90,17 +91,17 @@
       var that = this;
       this.project = this.hceModel.getProject(this.model.application.summary.name);
       if (angular.isDefined(this.project)) {
-        this.hceModel.getDeploymentTarget(this.project.deployment_target_id)
+        this.hceModel.getDeploymentTarget('123', this.project.deployment_target_id)
           .then(function (response) {
             that.project.deploymentTarget = response.data;
           });
 
-        this.hceModel.getBuildContainer(this.project.build_container_id)
+        this.hceModel.getBuildContainer('123', this.project.build_container_id)
           .then(function (response) {
             that.project.buildContainer = response.data;
           });
 
-        this.hceModel.getNotificationTargets(this.project.id)
+        this.hceModel.getNotificationTargets('123', this.project.id)
           .then(function (response) {
             that.notificationTargets.length = 0;
             [].push.apply(that.notificationTargets, response.data);

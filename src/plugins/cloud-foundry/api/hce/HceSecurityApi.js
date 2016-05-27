@@ -27,11 +27,7 @@
     */
   function HceSecurityApi($http) {
     this.$http = $http;
-    this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
+    this.baseUrl = '/pp/v1/proxy/v2';
   }
 
   angular.extend(HceSecurityApi.prototype, {
@@ -42,15 +38,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    forgetCredential: function (credentialId, params) {
+    forgetCredential: function (guid, credentialId, params) {
       var path = this.baseUrl + '/auth/credentials/{credential_id}'
         .replace('{' + 'credential_id' + '}', credentialId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -62,14 +61,17 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    listCredentials: function (params) {
+    listCredentials: function (guid, params) {
       var path = this.baseUrl + '/auth/credentials';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -82,15 +84,18 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    storeCredential: function (data, params) {
+    storeCredential: function (guid, data, params) {
       var path = this.baseUrl + '/auth/credentials';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
@@ -104,16 +109,19 @@
      * @param {object} params - the query parameters
      * @returns {promise} A resolved/rejected promise
      */
-    updateCredential: function (credentialId, data, params) {
+    updateCredential: function (guid, credentialId, data, params) {
       var path = this.baseUrl + '/auth/credentials/{credential_id}'
         .replace('{' + 'credential_id' + '}', credentialId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
 
       return this.$http(config);
