@@ -204,6 +204,29 @@
           "target_port": 443,
           "public": true
         }
+      ],
+      "parameters": [
+        {
+          "name": "PGSQL_USER"
+        },
+        {
+          "name": "PGSQL_PASSWORD"
+        },
+        {
+          "name": "PGSQL_DATABASE"
+        },
+        {
+          "name": "PGSQL_HOST"
+        },
+        {
+          "name": "PGSQL_PORT"
+        },
+        {
+          "name": "PGSQL_CONNECT_TIMEOUT"
+        },
+        {
+          "name": "PGSQL_SSL_MODE"
+        }
       ]
     },
     {

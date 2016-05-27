@@ -127,6 +127,34 @@
     {
       "name": "DB_PASSWORD",
       "value": "stolon"
+    },
+    {
+      "name": "PGSQL_USER",
+      "value": "stratos"
+    },
+    {
+      "name": "PGSQL_PASSWORD",
+      "value": "stratos"
+    },
+    {
+      "name": "PGSQL_DATABASE",
+      "value": "stratos-db"
+    },
+    {
+      "name": "PGSQL_HOST",
+      "value": "stolon-proxy-int"
+    },
+    {
+      "name": "PGSQL_PORT",
+      "value": "5432"
+    },
+    {
+      "name": "PGSQL_CONNECT_TIMEOUT",
+      "value": "10"
+    },
+    {
+      "name": "PGSQL_SSL_MODE",
+      "value": "disable"
     }
   ]
 }
