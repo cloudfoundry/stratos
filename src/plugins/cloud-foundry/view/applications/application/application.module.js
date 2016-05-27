@@ -174,7 +174,7 @@
     },
 
     onAppRoutesChange: function (newRoutes) {
-      this.appActions[0].hidden = newRoutes.length === 0;
+      this.appActions[0].hidden = !newRoutes || newRoutes.length === 0;
     }
   });
 

@@ -7,6 +7,7 @@
 
   EventDetailViewController.$inject = [
     '$timeout',
+    '$log',
     'context',
     'content',
     'moment',
@@ -16,7 +17,8 @@
   /**
    * @name EventDetailViewController
    * @constructor
-   * @param {object $timeout - Angular timeout service
+   * @param {object} $timeout - Angular timeout service
+   * @param {object} $log - the angular $log service
    * @param {object} context -
    * @param {object} content -
    * @param {object} moment - the moment timezone component
@@ -25,7 +27,7 @@
    * @property {object} content -
    * @property {string} duration - The duration of the event
    */
-  function EventDetailViewController($timeout, context, content, moment, modelManager) {
+  function EventDetailViewController($timeout, $log, context, content, moment, modelManager) {
     var vm = this;
     vm.context = context;
     vm.content = content;
@@ -46,7 +48,7 @@
           }
         })
         .catch(function(error) {
-          console.error('Failed to download artifact with id: ' + event.artifactId, error);
+          $log.error('Failed to download artifact with id: ' + event.artifactId, error);
         })
         .finally(function() {
           if (!vm.log) {

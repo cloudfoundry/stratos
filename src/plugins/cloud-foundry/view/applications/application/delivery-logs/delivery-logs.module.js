@@ -23,6 +23,7 @@
     '$stateParams',
     '$interval',
     '$q',
+    '$log',
     'moment',
     'app.model.modelManager',
     'helion.framework.widgets.detailView'
@@ -35,17 +36,17 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $interval - the angular $interval service
    * @param {object} $q - the angular $q service
+   * @param {object} $log - the angular $log service
    * @param {object} moment - the moment timezone component
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {helion.framework.widgets.detailView} detailView - the helion framework detailView widget
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryLogsController($scope, $stateParams, $interval, $q, moment, modelManager, detailView) {
+  function ApplicationDeliveryLogsController($scope, $stateParams, $interval, $q, $log, moment, modelManager, detailView) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.hasProject = null;
-    this.fetchError = false;
     this.last = {
       build: null,
       test: null,
@@ -60,125 +61,140 @@
     // TODO (rcox): Improvements - Check if project id already exists in hce model?
     /* eslint-enable */
     that.hceModel.getUserByGithubId('18697775')
-      .then(function() {
+      .then(function () {
         return that.hceModel.getProjects();
       })
-      .then(function() {
-        //that.model.application.summary.name = 'test';// Temp override
+      .then(function () {
+        that.model.application.summary.name = 'test';// Temp override
         return that.hceModel.getProject(that.model.application.summary.name);
       })
-      .then(function(project) {
+      .then(function (project) {
         that.hasProject = !(angular.isUndefined(project) || project === null);
         if (that.hasProject) {
           updateData();
           updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
         }
       })
-      .catch(function(error) {
-        console.error('Failed to fetch project or process delivery logs data: ', error);
-        that.fetchError = error;
+      .catch(function (error) {
+        $log.error('Failed to fetch project or process delivery logs data: ', error);
+        that.hasProject = 'error';
       });
 
+    /* eslint-disable */
+    // TODO (rcox): Need to optimise for projects with large amount of executions/builds
+    // - only process visible executions
+    // - Don't fetch events for all executions
+    // - See TEAMFOUR-375
+    /* eslint-enable */
     function updateData() {
       var project = that.hceModel.getProject(that.model.application.summary.name);
+      // Fetch pipeline executions
       return that.hceModel.getPipelineExecutions(project.id)
         .then(function () {
-          // Fetch pipeline executions and their events
-
-          /* eslint-disable */
-          // TODO (rcox): Need to optimise for projects with large amount of executions/builds
-          // - only process visible executions
-          // - Don't fetch events for all executions
-          // - See TEAMFOUR-375
-          /* eslint-enable */
+          // ParseFetch pipeline execution's events
 
           that.eventsPerExecution = {};
-          // The ux will need to show the translated & localise date/time in the table. In order for the search filter
-          // for the table to work this conversion needs to happen before being pushed to scope. So two options,
-          // either append these values to to existing hceModel.data object or clone and update as needed for this
-          // specific directive
-          // addMockData();
-          that.parsedHceModel = JSON.parse(JSON.stringify(that.hceModel.data));
 
           var fetchEventsPromises = [];
-          for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
-            fetchEventsPromises.push(fetchEvents(that.eventsPerExecution, that.parsedHceModel.pipelineExecutions[i].id));
+          for (var i = 0; i < that.hceModel.data.pipelineExecutions.length; i++) {
+            fetchEventsPromises.push(fetchEvents(that.eventsPerExecution, that.hceModel.data.pipelineExecutions[i].id));
           }
           return $q.all(fetchEventsPromises);
         })
         .then(function() {
+          addMockData();
+        })
+        .then(function () {
           // Discover the last successful build/test/deploy events
           that.last = {
-            build: null,
-            test: null,
-            deploy: null
+            build: {
+              mEndData: moment(0)
+            },
+            test: {
+              mEndData: moment(0)
+            },
+            deploy: {
+              mEndData: moment(0)
+            }
           };
 
-          var lastBuildTime, lastTestTime, lastDeployTime;
-          _.forEach(that.eventsPerExecution, function(events) {
+          _.forEach(that.eventsPerExecution, function parseEvents(events) {
             if (!events || events.length === 0) {
               return;
             }
 
             for (var i = 0; i < events.length; i++) {
-              var event = events[i];
-              event.durationString = event.duration ? moment.duration(event.duration, 'ms').humanize() : event.duration;
-
-              // Only consider successful events
-              if (event.state !== "succeeded") {
-                continue;
-              }
-
-              var thisEventTime = moment(event.endDate);
-              switch (event.type) {
-                case 'Building':
-                  if (angular.isUndefined(lastBuildTime) || lastBuildTime.diff(thisEventTime) < 0) {
-                    lastBuildTime = thisEventTime;
-                    that.last.build = event;
-                  }
-                  break;
-                case 'Testing':
-                  if (angular.isUndefined(lastTestTime) || lastTestTime.diff(thisEventTime) < 0) {
-                    lastTestTime = thisEventTime;
-                    that.last.test = event;
-                  }
-                  break;
-                case 'Deploying':
-                  if (angular.isUndefined(lastDeployTime) || lastDeployTime.diff(thisEventTime) < 0) {
-                    lastDeployTime = thisEventTime;
-                    that.last.deploy = event;
-                  }
-                  break;
-              }
+              parseEvent(events[i], that.last);
             }
           });
           // that.last.build = _.find(that.hceModel.data.pipelineExecutions, { id: that.last.build});
           // that.last.test = _.find(that.hceModel.data.pipelineExecutions, { id: that.last.test});
           // that.last.deploy = _.find(that.hceModel.data.pipelineExecutions, { id: that.last.deploy});
         })
-        .then(function() {
+        .then(function () {
+          // The ux will need to show the translated & localise date/time in the table. In order for the search filter
+          // for the table to work this conversion needs to happen before being pushed to scope. So two options,
+          // either append these values to to existing hceModel.data object or clone and update as needed for this
+          // specific directive
+          /* eslint-disable */
+          that.parsedHceModel = JSON.parse(JSON.stringify(that.hceModel.data));
+          /* eslint-enable */
+
           for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
             var execution = that.parsedHceModel.pipelineExecutions[i];
-            updateExecutionForFiltering(that.parsedHceModel.pipelineExecutions, execution, i);
+            parseExecution(that.parsedHceModel.pipelineExecutions, execution, i);
           }
         })
         .catch(function (error) {
-          console.error('Failed to fetch/process pipeline executions or events: ', error);
+          $log.error('Failed to fetch/process pipeline executions or events: ', error);
         });
     }
 
     function fetchEvents(eventsPerExecution, executionId) {
       return that.hceModel.getPipelineEvents(executionId)
         .then(function(events) {
-          // if (eventsPerExecution[executionId]) {
-          //   // used with mock, to be removed
-          //   return;
-          // }
+          if (eventsPerExecution[executionId]) {
+            // used with mock, to be removed
+            return;
+          }
           eventsPerExecution[executionId] = events;
         });
     }
 
-    function updateExecutionForFiltering(executions, execution, pos) {
+    function parseEvent(event, lastEvents) {
+      if (event.duration) {
+        event.durationString = moment.duration(event.duration, 'ms').humanize();
+      }
+
+      // Only consider successful events for now on
+      if (event.state !== "succeeded") {
+        return;
+      }
+
+      var thisEventTime = moment(event.endDate);
+      switch (event.type) {
+        case 'Building':
+          if (lastEvents.build.mEndData.diff(thisEventTime) < 0) {
+            lastEvents.build.mEndData = thisEventTime;
+            that.last.build.event = event;
+          }
+          break;
+        case 'Testing':
+          if (lastEvents.test.mEndData.diff(thisEventTime) < 0) {
+            lastEvents.test.mEndData = thisEventTime;
+            that.last.test.event = event;
+          }
+          break;
+        case 'Deploying':
+          if (lastEvents.deploy.mEndData.diff(thisEventTime) < 0) {
+            lastEvents.deploy.mEndData = thisEventTime;
+            that.last.deploy.event = event;
+          }
+          break;
+      }
+    }
+
+    function parseExecution(executions, execution, pos) {
       // The ux will filter the executions by the values within the object on scope. Need to ensure that only visible
       // entries are in the scope. Additionally any translated text or localise date/time must be done up front.
 
@@ -228,7 +244,7 @@
             commitSha: '123d97f1fc9189c9a9fcc66978e3c85af856262fe',
             commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
             compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(46, 'seconds').valueOf(),
+            createdDate: moment().subtract(46, 'seconds').format(),
             pullRequestId: null,
             type: 'manual'
           },
@@ -245,7 +261,7 @@
             commitSha: '123d97f1fc9189c9a9fcc66978e3c85af856262fe',
             commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
             compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(460, 'seconds').valueOf(),
+            createdDate: moment().subtract(460, 'seconds').format(),
             pullRequestId: null,
             type: 'manual'
           },
@@ -340,14 +356,13 @@
         createEvent(98, 'Testing', 'succeeded', 50055, 50050, 94),
         createEvent(99, 'Deploying', 'succeeded', 50050, 50045, 94)
       ];
-      that.eventsPerExecution['95'] = [
-      ];
+      that.eventsPerExecution['95'] = [];
       that.eventsPerExecution['96'] = [
         createEvent(91, 'Building', 'succeeded', 60064, 60060, 96),
         createEvent(92, 'Testing', 'failed', 60060, 60000, 96)
       ];
 
-      function createEvent(id, type, state, startOffset, endOffset, execId) {
+      function createEvent(id, type, state, startOffset, endOffset) {
         return {
           id: id,
           name: type,
@@ -361,7 +376,7 @@
       }
     }
 
-    $scope.$on("$destroy", function() {
+    $scope.$on("$destroy", function () {
       if (updateModelPromise) {
         $interval.cancel(updateModelPromise);
       }
@@ -373,7 +388,7 @@
 
   angular.extend(ApplicationDeliveryLogsController.prototype, {
 
-    triggerBuild: function() {
+    triggerBuild: function () {
       /* eslint-disable */
       alert('TODO: trigger build');
       /* eslint-enable */
@@ -399,9 +414,8 @@
 
     viewEventForExecution: function (execution) {
       var events = this.eventsPerExecution[execution.id];
-      var latestEvent;
-      var lastEventTime;
-      _.forEach(events, function(event) {
+      var latestEvent, lastEventTime;
+      _.forEach(events, function (event) {
         if (!lastEventTime || lastEventTime.diff(event.endDate) < 0) {
           lastEventTime = moment(event.endDate);
           latestEvent = event;
@@ -413,7 +427,7 @@
       }
     },
 
-    viewEvent: function(event) {
+    viewEvent: function (event) {
       this.detailView({
         templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/event.html',
         controller: 'eventDetailViewController',
