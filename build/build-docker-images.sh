@@ -56,6 +56,9 @@ popd
 # Build and publish the container image for the portal proxy
 buildAndPublishImage cnap-console-proxy server.Dockerfile ${PORTAL_PROXY_PATH}
 
+# Build the postgres configuration container
+buildAndPublishImage cnap-console-database-configuration database.Dockerfile.UCP ${PORTAL_PROXY_PATH}
+
 # Prepare the nginx server
 docker run --rm \
   -v ${__DIRNAME}/../../stratos-ui:/usr/src/app \

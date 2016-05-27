@@ -352,6 +352,35 @@
       ]
     }
   ],
+  "preflight": [],
+  "postflight": [
+    {
+      "name": "configuration",
+      "version": "0.1.0",
+      "vendor": "HPE",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-database-configuration:latest",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "platform": "linux-x86_64",
+      "parameters": [
+        {
+          "name": "stolon"
+        },
+        {
+          "name": "DB_USER"
+        },
+        {
+          "name": "DB_HOST"
+        },
+        {
+          "name": "DB_PORT"
+        }
+      ],
+      "min_instances": 1,
+      "max_instances": 1,
+      "retry_count": 100
+    }
+  ],
   "parameters": [
     {
       "name": "MYSQL_ROOT_PASSWORD",
