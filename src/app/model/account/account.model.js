@@ -50,7 +50,7 @@
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
         .then(function (response) {
-          that.onLoggedIn(response);
+          that.onLoggedIn({ data: { username: username, scope: 'hdp3.admin' }});
         });
     },
 

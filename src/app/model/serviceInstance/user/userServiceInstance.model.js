@@ -32,7 +32,7 @@
    */
   function UserServiceInstance(apiManager) {
     this.apiManager = apiManager;
-    this.serviceInstances = [];
+    this.serviceInstances = {};
     this.numValid = 0;
   }
 
@@ -45,9 +45,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (url) {
+    connect: function (guid, name, username, password) {
+      var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      return serviceInstanceApi.connect(url);
+      return serviceInstanceApi.connect(guid, username, password)
+        .then(function (response) {
+          that.onConnect(guid, name, response);
+          return response;
+        });
     },
 
     /**
@@ -75,18 +80,17 @@
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
       return serviceInstanceApi.list()
         .then(function (response) {
-          var items = response.data.items;
+          var items = response.data;
 
           // check token expirations
           var now = (new Date()).getTime() / 1000;
           angular.forEach(items, function (item) {
-            if (!_.isNil(item.expires_at)) {
-              item.valid = item.expires_at > now;
+            if (!_.isNil(item.TokenExpiry)) {
+              item.valid = item.TokenExpiry > now;
             }
           });
 
-          that.serviceInstances.length = 0;
-          [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
+          that.serviceInstances = _.keyBy(items, 'Name');
           that.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
 
           return that.serviceInstances;
@@ -104,6 +108,16 @@
     register: function (urls) {
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
       return serviceInstanceApi.register(urls);
+    },
+
+    onConnect: function (guid, name, response) {
+      var newCnsi = response.data;
+      var data = { GUID: guid, Name: name, TokenExpiry: newCnsi.token_expiry, Account: newCnsi.username, APIEndpoint: newCnsi.api_endpoint };
+      if (angular.isUndefined(this.serviceInstances[name])) {
+        this.serviceInstances[name] = data;
+      } else {
+        angular.extend(this.serviceInstances[name], data);
+      }
     }
   });
 
