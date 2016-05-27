@@ -1,0 +1,22 @@
+<div class="delivery-log-event">
+  <div class="delivery-log-event-summary">
+    <div class="row col-md-5">
+      <span translate>Started: </span>
+      {{ detailViewCtrl.context.event.startDate | amDateFormat:'L - LTS'}}
+    </div>
+    <div class="row col-md-4">
+      <span translate>Duration: </span>
+      <span> {{ detailViewCtrl.duration }}</span>
+    </div>
+  </div>
+  <br><br>
+  <div ng-if="detailViewCtrl.log === null" class="message-box message-box-no-bg">
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+  <div ng-if="detailViewCtrl.log === false" class="message-box message-box-no-bg">
+    <span translate>No log available</span>
+  </div>
+  <div ng-if="detailViewCtrl.log" class="delivery-log-event-log-view temp-log-size">
+    <pre>{{ detailViewCtrl.log }}</pre>
+  </div>
+</div>

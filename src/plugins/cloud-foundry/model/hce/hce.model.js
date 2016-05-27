@@ -40,7 +40,8 @@
       deploymentTargets: [],
       imageRegistries: [],
       projects: {},
-      user: {}
+      user: {},
+      pipelineExecutions: []
     };
 
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
@@ -200,6 +201,40 @@
     },
 
     /**
+     * @function getPipelineExecutions
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get executions by project ID
+     * @param {string} projectId - the HCE project ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getPipelineExecutions: function (projectId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
+        .getPipelineExecutions({ project_id: projectId})
+        .then(function (response) {
+          that.onGetPipelineExecutions(response);
+        });
+    },
+
+    /**
+     * @function getPipelineExecutions
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get events by execution ID
+     * @param {string} executionId - the HCE execution ID that owns the events
+     * @returns {promise} A promise object
+     * @public
+     */
+    getPipelineEvents: function (executionId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
+        .getPipelineEvents({ execution_id: executionId})
+        .then(function (response) {
+          return that.onGetPipelineEvents(response);
+        });
+    },
+
+    /**
      * @function createDeploymentTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a new deployment target
@@ -298,6 +333,23 @@
         .createUser(newUser)
         .then(function (response) {
           return that.onCreateUser(response);
+        });
+    },
+
+    /**
+     * @function downloadArtifact
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Download the artifact associated with the artifact ID.
+     * @param {string} artifactId - the HCE artifact ID
+     * @returns {promise} A promise object.
+     * @public
+     */
+    downloadArtifact: function (artifactId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceArtifactApi')
+        .downloadArtifact(artifactId)
+        .then(function (response) {
+          return that.onDownloadArtifact(response);
         });
     },
 
@@ -405,6 +457,42 @@
       this.data.user = newUser;
 
       return newUser;
+    },
+
+    /**
+     * @function onGetPipelineExecutions
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Cache pipeline executions
+     * @param {string} response - the JSON response from API call
+     * @private
+     */
+    onGetPipelineExecutions: function (response) {
+      this.data.pipelineExecutions.length = 0;
+      [].push.apply(this.data.pipelineExecutions, response.data || []);
+    },
+
+    /**
+     * @function onGetPipelineEvents
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Extract data from response
+     * @param {string} response - the JSON response from API call
+     * @returns {object} The collection of pipeline events
+     * @private
+     */
+    onGetPipelineEvents: function (response) {
+      return response.data;
+    },
+
+    /**
+     * @function onDownloadArtifact
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Extract data from response
+     * @param {string} response - the JSON response from API call
+     * @returns {object} TODO (rcox): Not sure what type this is atm, but for the moment it's JSON
+     * @private
+     */
+    onDownloadArtifact: function (response) {
+      return response.data;
     }
 
   });
