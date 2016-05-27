@@ -80,6 +80,56 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	return nil
 }
 
+func (p *portalProxy) registerHCECluster(c echo.Context) error {
+
+	cnsiName := c.FormValue("cnsi_name")
+	apiEndpoint := c.FormValue("api_endpoint")
+
+	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Needs CNSI Name and API Endpoint",
+			"CNSI Name or Endpoint were not provided when trying to register an HCE Cluster")
+	}
+
+	apiEndpointURL, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to get API Endpoint",
+			"Failed to get API Endpoint: %v", err)
+	}
+
+	infoResponse, err := getHCEInfo(apiEndpoint)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to get endpoint 'info'",
+			"Failed to get api endpoint 'info': %v",
+			err)
+	}
+
+	guid := uuid.NewV4().String()
+
+	// save data to temporary map
+	newCNSI := cnsis.CNSIRecord{
+		Name:                  cnsiName,
+		CNSIType:              cnsis.CNSIHCE,
+		APIEndpoint:           apiEndpointURL,
+		TokenEndpoint:         infoResponse.TokenEndpoint,
+		AuthorizationEndpoint: infoResponse.AuthorizationEndpoint,
+	}
+
+	err = p.setCNSIRecord(guid, newCNSI)
+	if err != nil {
+		return err
+	}
+
+	c.String(http.StatusCreated, guid)
+
+	return nil
+}
+
 func (p *portalProxy) listCNSIs(c echo.Context) error {
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
@@ -200,6 +250,36 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	}
 
 	return v2InfoReponse, nil
+}
+
+func getHCEInfo(apiEndpoint string) (v2Info, error) {
+	var infoReponse v2Info
+
+	uri, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return infoReponse, err
+	}
+
+	uri.Path = "info"
+	res, err := httpClient.Get(uri.String())
+	if err != nil {
+		return infoReponse, err
+	}
+
+	if res.StatusCode != 200 {
+		buf := &bytes.Buffer{}
+		io.Copy(buf, res.Body)
+		defer res.Body.Close()
+
+		return infoReponse, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
+	}
+
+	dec := json.NewDecoder(res.Body)
+	if err = dec.Decode(&infoReponse); err != nil {
+		return infoReponse, err
+	}
+
+	return infoReponse, nil
 }
 
 func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
