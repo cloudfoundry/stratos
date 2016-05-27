@@ -14,6 +14,7 @@ db:
   #volumes_from:
   #  - data
 
+
 postgres:
   image: postgres:latest
   env_file:
@@ -21,7 +22,7 @@ postgres:
   ports:
     - "5432:5432"
   volumes:
-    - ../portal-proxy/db/migrations:/docker-entrypoint-initdb.d
+    - $GOPATH/src/github.com/hpcloud/portal-proxy/db/migrations:/docker-entrypoint-initdb.d
 
 
 # Mock Cloud Foundry service
@@ -71,7 +72,7 @@ api:
 
 proxy:
   build: $GOPATH/src/github.com/hpcloud/portal-proxy
-  dockerfile: build.Dockerfile
+  dockerfile: server.Dockerfile
   ports:
     - "3003:3003"
   env_file:
