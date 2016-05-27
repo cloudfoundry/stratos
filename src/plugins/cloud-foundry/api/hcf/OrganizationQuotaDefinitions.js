@@ -25,63 +25,83 @@
 
    /*
     * Creating a Organization Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/organization_quota_definitions/creating_a_organization_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/creating_a_organization_quota_definition.html
     */
-    CreateOrganizationQuotaDefinition: function (value, params) {
+    CreateOrganizationQuotaDefinition: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/quota_definitions';
       config.method = 'POST';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Delete a Particular Organization Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/organization_quota_definitions/delete_a_particular_organization_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/delete_a_particular_organization_quota_definition.html
     */
-    DeleteOrganizationQuotaDefinition: function (guid, params) {
+    DeleteOrganizationQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/quota_definitions/' + guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Organization Quota Definitions
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/organization_quota_definitions/list_all_organization_quota_definitions.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/list_all_organization_quota_definitions.html
     */
-    ListAllOrganizationQuotaDefinitions: function (params) {
+    ListAllOrganizationQuotaDefinitions: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/quota_definitions';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Retrieve a Particular Organization Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/organization_quota_definitions/retrieve_a_particular_organization_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/retrieve_a_particular_organization_quota_definition.html
     */
-    RetrieveOrganizationQuotaDefinition: function (guid, params) {
+    RetrieveOrganizationQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/quota_definitions/' + guid + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Updating a Organization Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/organization_quota_definitions/updating_a_organization_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/updating_a_organization_quota_definition.html
     */
-    UpdateOrganizationQuotaDefinition: function (guid, value, params) {
+    UpdateOrganizationQuotaDefinition: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/quota_definitions/' + guid + '';
       config.method = 'PUT';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

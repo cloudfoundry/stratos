@@ -25,112 +25,181 @@
 
    /*
     * Associate App with the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/associate_app_with_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/associate_app_with_the_route.html
     */
-    AssociateAppWithRoute: function (guid, app_guid, params) {
+    AssociateAppWithRoute: function (guid, app_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/routes/' + guid + '/apps/' + app_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
+      return this.$http(config);
+    },
+
+   /*
+    * Check a HTTP Route exists
+    * This endpoint returns a status code of 204 if the route exists, and 404 if it does not.
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/check_a_http_route_exists.html
+    */
+    CheckHttpRouteExists: function (domain_guid, host, path, params, httpConfigOptions) {
+      var config = {};
+      config.params = params;
+      config.url = '/api/cf/v2/routes/reserved/domain/' + domain_guid + '/host/' + host + '?path=' + path + '';
+      config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Check a Route exists
     * This endpoint returns a status code of 204 if the route exists, and 404 if it does not.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/check_a_route_exists.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/check_a_route_exists.html
     */
-    CheckRouteExists: function (domain_guid, host, path, params) {
+    CheckRouteExists: function (domain_guid, host, path, port, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/reserved/domain/' + domain_guid + '/host/' + host + '?path=' + path + '';
+      config.url = '/api/cf/v2/routes/reserved/domain/' + domain_guid + '?host=' + host + '&path=' + path + '&port=' + port + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Creating a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/creating_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/creating_a_route.html
     */
-    CreateRoute: function (value, params) {
+    CreateRoute: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/routes';
       config.method = 'POST';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Delete a Particular Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/delete_a_particular_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/delete_a_particular_route.html
     */
-    DeleteRoute: function (guid, params) {
+    DeleteRoute: function (guid, recursive, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/routes/' + guid + '?recursive=true';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Apps for the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/list_all_apps_for_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/list_all_apps_for_the_route.html
     */
-    ListAllAppsForRoute: function (guid, params) {
+    ListAllAppsForRoute: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/routes/' + guid + '/apps';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
+      return this.$http(config);
+    },
+
+   /*
+    * List all Route Mappings for the Route
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/list_all_route_mappings_for_the_route.html
+    */
+    ListAllRouteMappingsForRoute: function (guid, params, httpConfigOptions) {
+      var config = {};
+      config.params = params;
+      config.url = '/api/cf/v2/routes/' + guid + '/route_mappings';
+      config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Routes
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/list_all_routes.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/list_all_routes.html
     */
-    ListAllRoutes: function (params) {
+    ListAllRoutes: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/routes';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove App from the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/remove_app_from_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/remove_app_from_the_route.html
     */
-    RemoveAppFromRoute: function (guid, app_guid, params) {
+    RemoveAppFromRoute: function (guid, app_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/routes/' + guid + '/apps/' + app_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Retrieve a Particular Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/retrieve_a_particular_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/retrieve_a_particular_route.html
     */
-    RetrieveRoute: function (guid, params) {
+    RetrieveRoute: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/routes/' + guid + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Update a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes/update_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/update_a_route.html
     */
-    UpdateRoute: function (guid, value, params) {
+    UpdateRoute: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/routes/' + guid + '';
       config.method = 'PUT';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

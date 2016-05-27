@@ -31,14 +31,18 @@
     * pushing an app which has only been partially changed.
     * Cloud Foundry operators may set minimum / maximum file sizes to match against.
     * If the file size provided is outside this range, it will not be matched against.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/resource_match/list_all_matching_resources.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/resource_match/list_all_matching_resources.html
     */
-    ListAllMatchingResources: function (value, params) {
+    ListAllMatchingResources: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
       config.url = '/api/cf/v2/resource_match';
       config.method = 'PUT';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 
