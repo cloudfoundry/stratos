@@ -1,9 +1,9 @@
 FROM golang:1.6
 
 # TODO: if we start to use glide (http://glide.sh/) we should only copy over the glide.yml file.
-COPY . /go/src/portal-proxy
+COPY . /go/src/github.com/hpcloud/portal-proxy
 
-WORKDIR /go/src/portal-proxy
+WORKDIR /go/src/github.com/hpcloud/portal-proxy
 
 RUN mkdir /root/.ssh
 #

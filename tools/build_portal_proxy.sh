@@ -14,7 +14,7 @@ docker build --tag portal-proxy-builder \
 docker run -it \
            --rm \
            --name portal-proxy-builder \
-           --volume $(pwd):/go/src/portal-proxy \
+           --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
            portal-proxy-builder $*
 
 popd
