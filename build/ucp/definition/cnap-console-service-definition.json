@@ -107,10 +107,10 @@
       ]
     },
     {
-      "name": "stratos-node-server",
+      "name": "api",
       "version": "1.0.0",
       "vendor": "HPE",
-      "external_name": "stratos-node-server",
+      "external_name": "api",
       "image": "docker-registry.helion.space:443/helioncf/cnap-console-api:latest",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
@@ -250,7 +250,7 @@
       "max_instances": 1,
       "service_ports": [
         {
-          "name": "pgsql-2",
+          "name": "stolon-proxy-int",
           "protocol": "TCP",
           "source_port": 5432,
           "target_port": 5432,
@@ -318,8 +318,8 @@
     {
       "name": "POSTGRES_PASSWORD",
       "description": "placeholder",
-      "default": "stratos",
-      "example": "stratos",
+      "default": "stolon",
+      "example": "stolon",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -327,8 +327,8 @@
     {
       "name": "POSTGRES_USER",
       "description": "placeholder",
-      "default": "stratos",
-      "example": "stratos",
+      "default": "stolon",
+      "example": "stolon",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -388,7 +388,7 @@
     {
       "name": "DB_ADDR",
       "description": "Database address",
-      "default": "portal-db",
+      "default": "stolon-proxy-int",
       "example": "",
       "data_type": "string",
       "required": true,
@@ -414,8 +414,7 @@
     {
       "name": "DB_HOST",
       "description": "PostgreSQL host address",
-      "default": "portal-db",
-      "example": "portal-db",
+      "default": "stolon-proxy-int",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -425,177 +424,6 @@
       "description": "PostgreSQL port",
       "default": "5432",
       "example": "5432",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STSENTINEL_CLUSTER_NAME",
-      "description": "Stolon Sentinel Cluster Name",
-      "default": "kube-stolon",
-      "example": "kube-stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STSENTINEL_STORE_BACKEND",
-      "description": "Stolon Sentinel Store Backend",
-      "default": "etcd",
-      "example": "etcd",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STSENTINEL_STORE_ENDPOINTS",
-      "description": "Stolon Sentinel Store Endpoints",
-      "default": "192.168.200.2:2379",
-      "example": "192.168.200.2:2379",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STSENTINEL_KEEPER_KUBE_LABEL_SELECTOR",
-      "description": "Kubernetes Stolon Sentinel Label Selector",
-      "default": "component=stolon-keeper",
-      "example": "component=stolon-keeper",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STSENTINEL_DEBUG",
-      "description": "Turn on debug mode for Stolon Sentinel",
-      "default": "true",
-      "example": "true",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STSENTINEL_KUBERNETES_NAMESPACE",
-      "description": "Kubernetes namespace for Stolon Sentinel",
-      "default": "ucp",
-      "example": "ucp",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "SENTINEL",
-      "description": "Stolon Sentinel",
-      "default": "true",
-      "example": "true",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "KEEPER",
-      "description": "Stolon Keeper",
-      "default": "true",
-      "example": "true",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STKEEPER_CLUSTER_NAME",
-      "description": "Stolon Keeper Cluster Name",
-      "default": "kube-stolon",
-      "example": "kube-stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STKEEPER_STORE_BACKEND",
-      "description": "Stolon Keeper Store Backend",
-      "default": "etcd",
-      "example": "etcd",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STKEEPER_STORE_ENDPOINTS",
-      "description": "Stolon Keeper Store Endpoints",
-      "default": "192.168.200.2:2379",
-      "example": "192.168.200.2:2379",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STKEEPER_DEBUG",
-      "description": "Turn on debug mode for Stolon Keeper",
-      "default": "true",
-      "example": "true",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STKEEPER_INITIAL_PG_SU_USERNAME",
-      "description": "Initial PostgreSQL username to use for the Stolon Keeper",
-      "default": "stolon",
-      "example": "stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STKEEPER_INITIAL_PG_SU_PASSWORD_FILE",
-      "description": "PostgreSQL password file to use for the Stolon Keeper",
-      "default": "/etc/secrets/stolon",
-      "example": "/etc/secrets/stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "PROXY",
-      "description": "Stolon Proxy",
-      "default": "true",
-      "example": "true",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STPROXY_CLUSTER_NAME",
-      "description": "Stolon Proxy Cluster Name",
-      "default": "kube-stolon",
-      "example": "kube-stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STPROXY_STORE_BACKEND",
-      "description": "Stolon Proxy Store Backend",
-      "default": "etcd",
-      "example": "etcd",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STPROXY_STORE_ENDPOINTS",
-      "description": "Stolon Proxy Store Endpoints",
-      "default": "192.168.200.2:2379",
-      "example": "192.168.200.2:2379",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STPROXY_DEBUG",
-      "description": "Turn on debug mode for Stolon Proxy",
-      "default": "true",
-      "example": "true",
       "data_type": "string",
       "required": true,
       "secret": false

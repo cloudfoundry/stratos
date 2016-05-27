@@ -29,88 +29,12 @@
       "value": "3000"
     },
     {
-      "name": "STSENTINEL_CLUSTER_NAME",
-      "value": "kube-stolon"
-    },
-    {
-      "name": "STSENTINEL_STORE_BACKEND",
-      "value": "etcd"
-    },
-    {
-      "name": "STSENTINEL_STORE_ENDPOINTS",
-      "value": "192.168.200.2:2379"
-    },
-    {
-      "name": "STSENTINEL_KEEPER_KUBE_LABEL_SELECTOR",
-      "value": "component=stolon-keeper"
-    },
-    {
-      "name": "STSENTINEL_DEBUG",
-      "value": "true"
-    },
-    {
-      "name": "STSENTINEL_KUBERNETES_NAMESPACE",
-      "value": "ucp"
-    },
-    {
-      "name": "SENTINEL",
-      "value": "true"
-    },
-    {
-      "name": "KEEPER",
-      "value": "true"
-    },
-    {
-      "name": "STKEEPER_CLUSTER_NAME",
-      "value": "kube-stolon"
-    },
-    {
-      "name": "STKEEPER_STORE_BACKEND",
-      "value": "etcd"
-    },
-    {
-      "name": "STKEEPER_STORE_ENDPOINTS",
-      "value": "192.168.200.2:2379"
-    },
-    {
-      "name": "STKEEPER_DEBUG",
-      "value": "true"
-    },
-    {
-      "name": "STKEEPER_INITIAL_PG_SU_USERNAME",
-      "value": "stolon"
-    },
-    {
-      "name": "STKEEPER_INITIAL_PG_SU_PASSWORD_FILE",
-      "value": "/etc/secrets/stolon"
-    },
-    {
-      "name": "PROXY",
-      "value": "true"
-    },
-    {
-      "name": "STPROXY_CLUSTER_NAME",
-      "value": "kube-stolon"
-    },
-    {
-      "name": "STPROXY_STORE_BACKEND",
-      "value": "etcd"
-    },
-    {
-      "name": "STPROXY_STORE_ENDPOINTS",
-      "value": "192.168.200.2:2379"
-    },
-    {
-      "name": "STPROXY_DEBUG",
-      "value": "true"
-    },
-    {
       "name": "DB_HOST",
-      "value": "portal-db"
+      "value": "stolon-proxy-int"
     },
     {
       "name": "DB_ADDR",
-      "value": "portal-db"
+      "value": "stolon-proxy-int"
     },
     {
       "name": "DB_PORT",
@@ -122,15 +46,15 @@
     },
     {
       "name": "DB_PASSWORD",
-      "value": "stolon"
+      "value": "stratos"
     },
     {
       "name": "PGSQL_USER",
-      "value": "stratos"
+      "value": "stolon"
     },
     {
       "name": "PGSQL_PASSWORD",
-      "value": "stratos"
+      "value": "stolon"
     },
     {
       "name": "PGSQL_DATABASE",
