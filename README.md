@@ -28,13 +28,13 @@ In order to facilitate a smoother, faster development process, the build script 
 ```
 tools/build_portal_proxy.sh bash
 ... <lots of output here> ...
-root@427ed6a1c84b:/go/src/portal-proxy#
+root@427ed6a1c84b:/go/src/github.com/hpcloud/portal-proxy#
 
 # Run the following if you need to re-get dependencies
-root@427ed6a1c84b:/go/src/portal-proxy# tools/on_container_get_deps.sh
+root@427ed6a1c84b:/go/src/github.com/hpcloud/portal-proxy# tools/on_container_get_deps.sh
 
 # Or, to just run the build script:
-root@427ed6a1c84b:/go/src/portal-proxy# tools/on_container_build.sh
+root@427ed6a1c84b:/go/src/github.com/hpcloud/portal-proxy# tools/on_container_build.sh
 ```
 
 ### Plans for the future
