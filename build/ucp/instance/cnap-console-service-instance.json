@@ -30,11 +30,11 @@
     },
     {
       "name": "DB_HOST",
-      "value": "stolon-proxy-int"
+      "value": "cnap-postgresql"
     },
     {
       "name": "DB_ADDR",
-      "value": "stolon-proxy-int"
+      "value": "cnap-postgresql"
     },
     {
       "name": "DB_PORT",
@@ -62,7 +62,7 @@
     },
     {
       "name": "PGSQL_HOST",
-      "value": "stolon-proxy-int"
+      "value": "cnap-postgresql"
     },
     {
       "name": "PGSQL_PORT",
@@ -75,6 +75,30 @@
     {
       "name": "PGSQL_SSL_MODE",
       "value": "disable"
+    },
+    {
+      "name": "POSTGRES_USER",
+      "value": "stolon"
+    },
+    {
+      "name": "POSTGRES_PASSWORD",
+      "value": "stolon"
+    },
+    {
+      "name": "POSTGRES_DATABASE",
+      "value": "stratos-db"
+    },
+    {
+      "name": "POSTGRES_DB",
+      "value": "stratos-db"
+    },
+    {
+      "name": "POSTGRES_HOST",
+      "value": "cnap-postgresql"
+    },
+    {
+      "name": "POSTGRES_PORT",
+      "value": "5432"
     }
   ]
 }
