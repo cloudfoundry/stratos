@@ -226,6 +226,42 @@
         },
         {
           "name": "PGSQL_SSL_MODE"
+        },
+        {
+          "name": "CERT"
+        },
+        {
+          "name": "CERT_KEY"
+        },
+        {
+          "name": "HTTP_CLIENT_TIMEOUT_IN_SECS"
+        },
+        {
+          "name": "SKIP_TLS_VERIFICATION"
+        },
+        {
+          "name": "TLS_ADDRESS"
+        },
+        {
+          "name": "CONSOLE_CLIENT"
+        },
+        {
+          "name": "CONSOLE_CLIENT_SECRET"
+        },
+        {
+          "name": "HCF_CLIENT"
+        },
+        {
+          "name": "HCF_CLIENT_SECRET"
+        },
+        {
+          "name": "UAA_ENDPOINT"
+        },
+        {
+          "name": "ALLOWED_ORIGINS"
+        },
+        {
+          "name": "COOKIE_STORE_SECRET"
         }
       ]
     },
@@ -275,5 +311,246 @@
     }
   ],
   "preflight": [],
-  "postflight": []
+  "postflight": [],
+  "parameters": [
+    {
+        "name": "MYSQL_ROOT_PASSWORD",
+        "description": "The root password for MySQL",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "MYSQL_DATABASE",
+        "description": "MySQL database name",
+        "default": "db",
+        "example": "db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "MYSQL_USER",
+        "description": "MySQL user name",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "MYSQL_PASSWORD",
+        "description": "MySQL password",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PORT",
+        "description": "MySQL port number",
+        "default": "3306",
+        "example": "3306",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_USER",
+        "description": "Postgres usernme",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_PASSWORD",
+        "description": "Postgres password",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_DATABASE",
+        "description": "Postgres catabase name",
+        "default": "portal-db",
+        "example": "portal-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_HOST",
+        "description": "Postgres hostname",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_PORT",
+        "description": "Postgres port",
+        "default": "5432",
+        "example": "5432",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_CONNECT_TIMEOUT",
+        "description": "Postgres password",
+        "default": "10",
+        "example": "10",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_SSL_MODE",
+        "description": "Postgres SSL mode",
+        "default": "disable",
+        "example": "disable",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "POSTGRES_DB",
+        "description": "Postgres database name",
+        "default": "stratos-db",
+        "example": "stratos-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "POSTGRES_PASSWORD",
+        "description": "Postgres password",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "POSTGRES_USER",
+        "description": "Postgres username",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "CERT",
+        "description": "Certificate",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "CERT_KEY",
+        "description": "Certificate Key",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
+        "description": "HTTP client timeoout",
+        "default": "10",
+        "example": "10",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "SKIP_TLS_VERIFICATION",
+        "description": "To skip TLS or now?",
+        "default": "true",
+        "example": "true",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "TLS_ADDRESS",
+        "description": "TLS Address",
+        "default": ":8080",
+        "example": ":8080",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "CONSOLE_CLIENT",
+        "description": "Console client",
+        "default": "portal-proxy",
+        "example": "portal-proxy",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "CONSOLE_CLIENT_SECRET",
+        "description": "Console client secret",
+        "default": "ohsosecret!",
+        "example": "ohsosecret!",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HCF_CLIENT",
+        "description": "HCF client",
+        "default": "portal-proxy",
+        "example": "portal-proxy",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HCF_CLIENT_SECRET",
+        "description": "HCF client secret",
+        "default": "ohsosecret!",
+        "example": "ohsosecret!",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "UAA_ENDPOINT",
+        "description": "UAA endpoint",
+        "default": "https://login.hcf.helion.lol/oauth/token",
+        "example": "https://login.hcf.helion.lol/oauth/token",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "ALLOWED_ORIGINS",
+        "description": "Allowed origins - TBD",
+        "default": "https://localhost,https://127.0.0.1",
+        "example": "https://localhost,https://127.0.0.1",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "COOKIE_STORE_SECRET",
+        "description": "Cookie store secret",
+        "default": "cookiesecret",
+        "example": "cookiesecret",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    }
+  ]
 }
