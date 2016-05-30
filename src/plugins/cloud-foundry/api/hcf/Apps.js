@@ -25,12 +25,12 @@
 
    /*
     * Associate Route with the App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/associate_route_with_the_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/associate_route_with_the_app.html
     */
     AssociateRouteWithApp: function (guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/routes/' + route_guid + '';
+      config.url = '/pp/v2/apps/' + guid + '/routes/' + route_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -44,12 +44,12 @@
     * This endpoint will copy the package bits in the blobstore from the source app to the destination app.
     * It will always return a job which you can query for success or failure.
     * This operation will require the app to restart in order for the changes to take effect.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/copy_the_app_bits_for_an_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/copy_the_app_bits_for_an_app.html
     */
     CopyAppBitsForApp: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/copy_bits';
+      config.url = '/pp/v2/apps/' + guid + '/copy_bits';
       config.method = 'POST';
       config.data = value;
 
@@ -61,12 +61,12 @@
 
    /*
     * Creating a Docker App (experimental)
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/creating_a_docker_app_(experimental).html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/creating_a_docker_app_(experimental).html
     */
     CreateDockerAppExperimental: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps';
+      config.url = '/pp/v2/apps';
       config.method = 'POST';
       config.data = value;
 
@@ -78,12 +78,12 @@
 
    /*
     * Creating an App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/creating_an_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/creating_an_app.html
     */
     CreateApp: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps';
+      config.url = '/pp/v2/apps';
       config.method = 'POST';
       config.data = value;
 
@@ -95,12 +95,12 @@
 
    /*
     * Delete a Particular App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/delete_a_particular_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/delete_a_particular_app.html
     */
     DeleteApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '';
+      config.url = '/pp/v2/apps/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -114,12 +114,12 @@
     * When using a remote blobstore, such as AWS, the response is a redirect to the actual location of the bits.
     * If the client is automatically following redirects, then the OAuth token that was used to communicate with Cloud Controller will be replayed on the new redirect request.
     * Some blobstores may reject the request in that case. Clients may need to follow the redirect without including the OAuth token.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/downloads_the_staged_droplet_for_an_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/downloads_the_staged_droplet_for_an_app.html
     */
     DownloadsStagedDropletForApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/droplet/download';
+      config.url = '/pp/v2/apps/' + guid + '/droplet/download';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -130,12 +130,12 @@
 
    /*
     * Get App summary
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/get_app_summary.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/get_app_summary.html
     */
     GetAppSummary: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/summary';
+      config.url = '/pp/v2/apps/' + guid + '/summary';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -147,12 +147,12 @@
    /*
     * Get detailed stats for a STARTED App
     * Get status for each instance of an App using the app guid.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/get_detailed_stats_for_a_started_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/get_detailed_stats_for_a_started_app.html
     */
     GetDetailedStatsForStartedApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/stats';
+      config.url = '/pp/v2/apps/' + guid + '/stats';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -164,12 +164,12 @@
    /*
     * Get the env for an App
     * Get the environment variables for an App using the app guid. Restricted to SpaceDeveloper role.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/get_the_env_for_an_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/get_the_env_for_an_app.html
     */
     GetEnvForApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/env';
+      config.url = '/pp/v2/apps/' + guid + '/env';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -192,12 +192,12 @@
     * "console_port": null
     * }
     * }.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/get_the_instance_information_for_a_started_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/get_the_instance_information_for_a_started_app.html
     */
     GetInstanceInformationForStartedApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/instances';
+      config.url = '/pp/v2/apps/' + guid + '/instances';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -208,12 +208,12 @@
 
    /*
     * List all Apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/list_all_apps.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/list_all_apps.html
     */
     ListAllApps: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps';
+      config.url = '/pp/v2/apps';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -224,12 +224,12 @@
 
    /*
     * List all Routes for the App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/list_all_routes_for_the_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/list_all_routes_for_the_app.html
     */
     ListAllRoutesForApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/routes';
+      config.url = '/pp/v2/apps/' + guid + '/routes';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -240,12 +240,12 @@
 
    /*
     * List all Service Bindings for the App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/list_all_service_bindings_for_the_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/list_all_service_bindings_for_the_app.html
     */
     ListAllServiceBindingsForApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/service_bindings';
+      config.url = '/pp/v2/apps/' + guid + '/service_bindings';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -256,12 +256,12 @@
 
    /*
     * Remove Route from the App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/remove_route_from_the_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/remove_route_from_the_app.html
     */
     RemoveRouteFromApp: function (guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/routes/' + route_guid + '';
+      config.url = '/pp/v2/apps/' + guid + '/routes/' + route_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -272,12 +272,12 @@
 
    /*
     * Remove Service Binding from the App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/remove_service_binding_from_the_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/remove_service_binding_from_the_app.html
     */
     RemoveServiceBindingFromApp: function (guid, service_binding_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/service_bindings/' + service_binding_guid + '';
+      config.url = '/pp/v2/apps/' + guid + '/service_bindings/' + service_binding_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -288,12 +288,12 @@
 
    /*
     * Restage an App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/restage_an_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/restage_an_app.html
     */
     RestageApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/restage';
+      config.url = '/pp/v2/apps/' + guid + '/restage';
       config.method = 'POST';
 
       for (var option in httpConfigOptions) {
@@ -304,12 +304,12 @@
 
    /*
     * Retrieve a Particular App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/retrieve_a_particular_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/retrieve_a_particular_app.html
     */
     RetrieveApp: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '';
+      config.url = '/pp/v2/apps/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -320,12 +320,12 @@
 
    /*
     * Terminate the running App Instance at the given index
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/terminate_the_running_app_instance_at_the_given_index.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/terminate_the_running_app_instance_at_the_given_index.html
     */
     TerminateRunningAppInstanceAtGivenIndex: function (guid, index, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '/instances/' + index + '';
+      config.url = '/pp/v2/apps/' + guid + '/instances/' + index + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -336,12 +336,12 @@
 
    /*
     * Updating an App
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/apps/updating_an_app.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/apps/updating_an_app.html
     */
     UpdateApp: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + guid + '';
+      config.url = '/pp/v2/apps/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

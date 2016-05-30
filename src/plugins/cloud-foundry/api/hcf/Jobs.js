@@ -25,12 +25,12 @@
 
    /*
     * Retrieve Job that is queued
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/jobs/retrieve_job_that_is_queued.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/jobs/retrieve_job_that_is_queued.html
     */
     RetrieveJobThatIsQueued: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/jobs/' + guid + '';
+      config.url = '/pp/v2/jobs/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -41,12 +41,12 @@
 
    /*
     * Retrieve Job that was successful
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/jobs/retrieve_job_that_was_successful.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/jobs/retrieve_job_that_was_successful.html
     */
     RetrieveJobThatWasSuccessful: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/jobs/' + guid + '';
+      config.url = '/pp/v2/jobs/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -57,12 +57,12 @@
 
    /*
     * Retrieve Job with known failure
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/jobs/retrieve_job_with_known_failure.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/jobs/retrieve_job_with_known_failure.html
     */
     RetrieveJobWithKnownFailure: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/jobs/' + guid + '';
+      config.url = '/pp/v2/jobs/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -73,12 +73,12 @@
 
    /*
     * Retrieve Job with unknown failure
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/jobs/retrieve_job_with_unknown_failure.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/jobs/retrieve_job_with_unknown_failure.html
     */
     RetrieveJobWithUnknownFailure: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/jobs/' + guid + '';
+      config.url = '/pp/v2/jobs/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

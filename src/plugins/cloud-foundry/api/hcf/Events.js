@@ -25,12 +25,12 @@
 
    /*
     * List all Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_all_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_all_events.html
     */
     ListAllEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -41,12 +41,12 @@
 
    /*
     * List App Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_app_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_create_events.html
     */
     ListAppCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -57,12 +57,12 @@
 
    /*
     * List App Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_app_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_delete_events.html
     */
     ListAppDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -73,12 +73,12 @@
 
    /*
     * List App Exited Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_app_exited_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_exited_events.html
     */
     ListAppExitedEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -89,12 +89,12 @@
 
    /*
     * List App SSH Authorized Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_app_ssh_authorized_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_ssh_authorized_events.html
     */
     ListAppSshAuthorizedEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -105,12 +105,12 @@
 
    /*
     * List App SSH Unauthorized Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_app_ssh_unauthorized_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_ssh_unauthorized_events.html
     */
     ListAppSshUnauthorizedEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -121,12 +121,12 @@
 
    /*
     * List App Start Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_app_start_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_start_events.html
     */
     ListAppStartEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -137,12 +137,12 @@
 
    /*
     * List App Stop Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_app_stop_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_stop_events.html
     */
     ListAppStopEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -153,12 +153,12 @@
 
    /*
     * List App Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_app_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_app_update_events.html
     */
     ListAppUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -169,12 +169,12 @@
 
    /*
     * List events associated with an App since January 1, 2014
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_events_associated_with_an_app_since_january_1,_2014.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_events_associated_with_an_app_since_january_1,_2014.html
     */
     ListEventsAssociatedWithAppSinceJanuary12014: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -185,12 +185,12 @@
 
    /*
     * List Route Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_route_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_route_create_events.html
     */
     ListRouteCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -201,12 +201,12 @@
 
    /*
     * List Route Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_route_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_route_delete_events.html
     */
     ListRouteDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -217,12 +217,12 @@
 
    /*
     * List Route Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_route_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_route_update_events.html
     */
     ListRouteUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -233,12 +233,12 @@
 
    /*
     * List Service Binding Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_binding_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_binding_create_events.html
     */
     ListServiceBindingCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -249,12 +249,12 @@
 
    /*
     * List Service Binding Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_binding_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_binding_delete_events.html
     */
     ListServiceBindingDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -265,12 +265,12 @@
 
    /*
     * List Service Broker Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_broker_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_broker_create_events.html
     */
     ListServiceBrokerCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -281,12 +281,12 @@
 
    /*
     * List Service Broker Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_broker_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_broker_delete_events.html
     */
     ListServiceBrokerDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -297,12 +297,12 @@
 
    /*
     * List Service Broker Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_broker_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_broker_update_events.html
     */
     ListServiceBrokerUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -313,12 +313,12 @@
 
    /*
     * List Service Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_create_events.html
     */
     ListServiceCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -329,12 +329,12 @@
 
    /*
     * List Service Dashboard Client Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_dashboard_client_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_dashboard_client_create_events.html
     */
     ListServiceDashboardClientCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -345,12 +345,12 @@
 
    /*
     * List Service Dashboard Client Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_dashboard_client_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_dashboard_client_delete_events.html
     */
     ListServiceDashboardClientDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -361,12 +361,12 @@
 
    /*
     * List Service Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_delete_events.html
     */
     ListServiceDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -377,12 +377,12 @@
 
    /*
     * List Service Instance Bind Route Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_instance_bind_route_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_bind_route_events.html
     */
     ListServiceInstanceBindRouteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -393,12 +393,12 @@
 
    /*
     * List Service Instance Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_instance_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_create_events.html
     */
     ListServiceInstanceCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -409,12 +409,12 @@
 
    /*
     * List Service Instance Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_instance_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_delete_events.html
     */
     ListServiceInstanceDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -425,12 +425,12 @@
 
    /*
     * List Service Instance Unbind Route Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_instance_unbind_route_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_unbind_route_events.html
     */
     ListServiceInstanceUnbindRouteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -441,12 +441,12 @@
 
    /*
     * List Service Instance Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_instance_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_instance_update_events.html
     */
     ListServiceInstanceUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -457,12 +457,12 @@
 
    /*
     * List Service Key Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_key_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_key_create_events.html
     */
     ListServiceKeyCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -473,12 +473,12 @@
 
    /*
     * List Service Key Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_key_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_key_delete_events.html
     */
     ListServiceKeyDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -489,12 +489,12 @@
 
    /*
     * List Service Plan Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_plan_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_create_events.html
     */
     ListServicePlanCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -505,12 +505,12 @@
 
    /*
     * List Service Plan Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_plan_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_delete_events.html
     */
     ListServicePlanDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -521,12 +521,12 @@
 
    /*
     * List Service Plan Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_plan_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_update_events.html
     */
     ListServicePlanUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -537,12 +537,12 @@
 
    /*
     * List Service Plan Visibility Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_plan_visibility_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_visibility_create_events.html
     */
     ListServicePlanVisibilityCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -553,12 +553,12 @@
 
    /*
     * List Service Plan Visibility Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_plan_visibility_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_visibility_delete_events.html
     */
     ListServicePlanVisibilityDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -569,12 +569,12 @@
 
    /*
     * List Service Plan Visibility Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_plan_visibility_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_plan_visibility_update_events.html
     */
     ListServicePlanVisibilityUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -585,12 +585,12 @@
 
    /*
     * List Service Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_service_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_service_update_events.html
     */
     ListServiceUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -601,12 +601,12 @@
 
    /*
     * List Space Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_space_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_space_create_events.html
     */
     ListSpaceCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -617,12 +617,12 @@
 
    /*
     * List Space Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_space_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_space_delete_events.html
     */
     ListSpaceDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -633,12 +633,12 @@
 
    /*
     * List Space Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_space_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_space_update_events.html
     */
     ListSpaceUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -649,12 +649,12 @@
 
    /*
     * List User Provided Service Instance Create Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_user_provided_service_instance_create_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_user_provided_service_instance_create_events.html
     */
     ListUserProvidedServiceInstanceCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -665,12 +665,12 @@
 
    /*
     * List User Provided Service Instance Delete Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_user_provided_service_instance_delete_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_user_provided_service_instance_delete_events.html
     */
     ListUserProvidedServiceInstanceDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -681,12 +681,12 @@
 
    /*
     * List User Provided Service Instance Update Events
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/list_user_provided_service_instance_update_events.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/list_user_provided_service_instance_update_events.html
     */
     ListUserProvidedServiceInstanceUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events';
+      config.url = '/pp/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -697,12 +697,12 @@
 
    /*
     * Retrieve a Particular Event
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/events/retrieve_a_particular_event.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/events/retrieve_a_particular_event.html
     */
     RetrieveEvent: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/events/' + guid + '';
+      config.url = '/pp/v2/events/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

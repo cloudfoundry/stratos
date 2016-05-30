@@ -25,12 +25,12 @@
 
    /*
     * Create a Service Broker
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/create_a_service_broker.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/create_a_service_broker.html
     */
     CreateServiceBroker: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_brokers';
+      config.url = '/pp/v2/service_brokers';
       config.method = 'POST';
       config.data = value;
 
@@ -42,12 +42,12 @@
 
    /*
     * Delete a Particular Service Broker
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/delete_a_particular_service_broker.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/delete_a_particular_service_broker.html
     */
     DeleteServiceBroker: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_brokers/' + guid + '';
+      config.url = '/pp/v2/service_brokers/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -58,12 +58,12 @@
 
    /*
     * List all Service Brokers
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/list_all_service_brokers.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/list_all_service_brokers.html
     */
     ListAllServiceBrokers: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_brokers';
+      config.url = '/pp/v2/service_brokers';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -74,12 +74,12 @@
 
    /*
     * Retrieve a Particular Service Broker
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/retrieve_a_particular_service_broker.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/retrieve_a_particular_service_broker.html
     */
     RetrieveServiceBroker: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_brokers/' + guid + '';
+      config.url = '/pp/v2/service_brokers/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -90,12 +90,12 @@
 
    /*
     * Update a Service Broker
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_brokers/update_a_service_broker.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_brokers/update_a_service_broker.html
     */
     UpdateServiceBroker: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_brokers/' + guid + '';
+      config.url = '/pp/v2/service_brokers/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

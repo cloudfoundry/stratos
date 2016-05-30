@@ -25,12 +25,12 @@
 
    /*
     * Associate App with the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/associate_app_with_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/associate_app_with_the_route.html
     */
     AssociateAppWithRoute: function (guid, app_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/' + guid + '/apps/' + app_guid + '';
+      config.url = '/pp/v2/routes/' + guid + '/apps/' + app_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -42,12 +42,12 @@
    /*
     * Check a HTTP Route exists
     * This endpoint returns a status code of 204 if the route exists, and 404 if it does not.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/check_a_http_route_exists.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/check_a_http_route_exists.html
     */
     CheckHttpRouteExists: function (domain_guid, host, path, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/reserved/domain/' + domain_guid + '/host/' + host + '?path=' + path + '';
+      config.url = '/pp/v2/routes/reserved/domain/' + domain_guid + '/host/' + host + '?path=' + path + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -59,12 +59,12 @@
    /*
     * Check a Route exists
     * This endpoint returns a status code of 204 if the route exists, and 404 if it does not.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/check_a_route_exists.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/check_a_route_exists.html
     */
     CheckRouteExists: function (domain_guid, host, path, port, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/reserved/domain/' + domain_guid + '?host=' + host + '&path=' + path + '&port=' + port + '';
+      config.url = '/pp/v2/routes/reserved/domain/' + domain_guid + '?host=' + host + '&path=' + path + '&port=' + port + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -75,12 +75,12 @@
 
    /*
     * Creating a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/creating_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/creating_a_route.html
     */
     CreateRoute: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes';
+      config.url = '/pp/v2/routes';
       config.method = 'POST';
       config.data = value;
 
@@ -92,12 +92,12 @@
 
    /*
     * Delete a Particular Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/delete_a_particular_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/delete_a_particular_route.html
     */
     DeleteRoute: function (guid, recursive, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/' + guid + '?recursive=true';
+      config.url = '/pp/v2/routes/' + guid + '?recursive=true';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -108,12 +108,12 @@
 
    /*
     * List all Apps for the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/list_all_apps_for_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/list_all_apps_for_the_route.html
     */
     ListAllAppsForRoute: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/' + guid + '/apps';
+      config.url = '/pp/v2/routes/' + guid + '/apps';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -124,12 +124,12 @@
 
    /*
     * List all Route Mappings for the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/list_all_route_mappings_for_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/list_all_route_mappings_for_the_route.html
     */
     ListAllRouteMappingsForRoute: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/' + guid + '/route_mappings';
+      config.url = '/pp/v2/routes/' + guid + '/route_mappings';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -140,12 +140,12 @@
 
    /*
     * List all Routes
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/list_all_routes.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/list_all_routes.html
     */
     ListAllRoutes: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes';
+      config.url = '/pp/v2/routes';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -156,12 +156,12 @@
 
    /*
     * Remove App from the Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/remove_app_from_the_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/remove_app_from_the_route.html
     */
     RemoveAppFromRoute: function (guid, app_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/' + guid + '/apps/' + app_guid + '';
+      config.url = '/pp/v2/routes/' + guid + '/apps/' + app_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -172,12 +172,12 @@
 
    /*
     * Retrieve a Particular Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/retrieve_a_particular_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/retrieve_a_particular_route.html
     */
     RetrieveRoute: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/' + guid + '';
+      config.url = '/pp/v2/routes/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -188,12 +188,12 @@
 
    /*
     * Update a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/routes/update_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes/update_a_route.html
     */
     UpdateRoute: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/routes/' + guid + '';
+      config.url = '/pp/v2/routes/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

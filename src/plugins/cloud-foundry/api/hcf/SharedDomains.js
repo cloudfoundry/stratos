@@ -25,12 +25,12 @@
 
    /*
     * Create a Shared Domain
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/create_a_shared_domain.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/create_a_shared_domain.html
     */
     CreateSharedDomain: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/shared_domains';
+      config.url = '/pp/v2/shared_domains';
       config.method = 'POST';
       config.data = value;
 
@@ -42,12 +42,12 @@
 
    /*
     * Delete a Particular Shared Domain
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/delete_a_particular_shared_domain.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/delete_a_particular_shared_domain.html
     */
     DeleteSharedDomain: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/shared_domains/' + guid + '';
+      config.url = '/pp/v2/shared_domains/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -58,12 +58,12 @@
 
    /*
     * Filtering Shared Domains by name
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/filtering_shared_domains_by_name.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/filtering_shared_domains_by_name.html
     */
     FilterSharedDomainsByName: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/shared_domains';
+      config.url = '/pp/v2/shared_domains';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -74,12 +74,12 @@
 
    /*
     * List all Shared Domains
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/list_all_shared_domains.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/list_all_shared_domains.html
     */
     ListAllSharedDomains: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/shared_domains';
+      config.url = '/pp/v2/shared_domains';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -90,12 +90,12 @@
 
    /*
     * Retrieve a Particular Shared Domain
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/shared_domains/retrieve_a_particular_shared_domain.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/shared_domains/retrieve_a_particular_shared_domain.html
     */
     RetrieveSharedDomain: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/shared_domains/' + guid + '';
+      config.url = '/pp/v2/shared_domains/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

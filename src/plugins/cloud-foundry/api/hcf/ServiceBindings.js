@@ -25,12 +25,12 @@
 
    /*
     * Create a Service Binding
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_bindings/create_a_service_binding.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_bindings/create_a_service_binding.html
     */
     CreateServiceBinding: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_bindings';
+      config.url = '/pp/v2/service_bindings';
       config.method = 'POST';
       config.data = value;
 
@@ -42,12 +42,12 @@
 
    /*
     * Delete a Particular Service Binding
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_bindings/delete_a_particular_service_binding.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_bindings/delete_a_particular_service_binding.html
     */
     DeleteServiceBinding: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_bindings/' + guid + '';
+      config.url = '/pp/v2/service_bindings/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -58,12 +58,12 @@
 
    /*
     * List all Service Bindings
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_bindings/list_all_service_bindings.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_bindings/list_all_service_bindings.html
     */
     ListAllServiceBindings: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_bindings';
+      config.url = '/pp/v2/service_bindings';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -74,12 +74,12 @@
 
    /*
     * Retrieve a Particular Service Binding
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_bindings/retrieve_a_particular_service_binding.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_bindings/retrieve_a_particular_service_binding.html
     */
     RetrieveServiceBinding: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_bindings/' + guid + '';
+      config.url = '/pp/v2/service_bindings/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

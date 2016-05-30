@@ -25,12 +25,12 @@
 
    /*
     * Associate Space with the Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/associate_space_with_the_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/associate_space_with_the_security_group.html
     */
     AssociateSpaceWithSecurityGroup: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/security_groups/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v2/security_groups/' + guid + '/spaces/' + space_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -41,12 +41,12 @@
 
    /*
     * Creating a Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/creating_a_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/creating_a_security_group.html
     */
     CreateSecurityGroup: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/security_groups';
+      config.url = '/pp/v2/security_groups';
       config.method = 'POST';
       config.data = value;
 
@@ -58,12 +58,12 @@
 
    /*
     * Delete a Particular Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/delete_a_particular_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/delete_a_particular_security_group.html
     */
     DeleteSecurityGroup: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/security_groups/' + guid + '';
+      config.url = '/pp/v2/security_groups/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -74,12 +74,12 @@
 
    /*
     * List all Security Groups
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/list_all_security_groups.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/list_all_security_groups.html
     */
     ListAllSecurityGroups: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/security_groups';
+      config.url = '/pp/v2/security_groups';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -90,12 +90,12 @@
 
    /*
     * List all Spaces for the Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/list_all_spaces_for_the_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/list_all_spaces_for_the_security_group.html
     */
     ListAllSpacesForSecurityGroup: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/security_groups/' + guid + '/spaces';
+      config.url = '/pp/v2/security_groups/' + guid + '/spaces';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -106,12 +106,12 @@
 
    /*
     * Remove Space from the Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/remove_space_from_the_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/remove_space_from_the_security_group.html
     */
     RemoveSpaceFromSecurityGroup: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/security_groups/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v2/security_groups/' + guid + '/spaces/' + space_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -122,12 +122,12 @@
 
    /*
     * Retrieve a Particular Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/retrieve_a_particular_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/retrieve_a_particular_security_group.html
     */
     RetrieveSecurityGroup: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/security_groups/' + guid + '';
+      config.url = '/pp/v2/security_groups/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -138,12 +138,12 @@
 
    /*
     * Updating a Security Group
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/security_groups/updating_a_security_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_groups/updating_a_security_group.html
     */
     UpdateSecurityGroup: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/security_groups/' + guid + '';
+      config.url = '/pp/v2/security_groups/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

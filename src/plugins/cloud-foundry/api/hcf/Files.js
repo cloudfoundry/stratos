@@ -27,12 +27,12 @@
     * Retrieve File
     * The endpoint does not function with Diego apps.
     * Please use CF CLI command `cf ssh` for Diego apps.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/files/retrieve_file.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/files/retrieve_file.html
     */
     RetrieveFile: function (app_guid, instance_index, file_path, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/apps/' + app_guid + '/instances/' + instance_index + '/files/' + file_path + '';
+      config.url = '/pp/v2/apps/' + app_guid + '/instances/' + instance_index + '/files/' + file_path + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

@@ -30,12 +30,12 @@
     * as a way to cache certain resources, e.g. downloaded Ruby gems. An admin
     * who wanted to decrease the size of their blobstore could use this endpoint
     * to delete unnecessary blobs.
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/blobstores/delete_all_blobs_in_the_buildpack_cache_blobstore.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/blobstores/delete_all_blobs_in_the_buildpack_cache_blobstore.html
     */
     DeleteAllBlobsInBuildpackCacheBlobstore: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/blobstores/buildpack_cache';
+      config.url = '/pp/v2/blobstores/buildpack_cache';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {

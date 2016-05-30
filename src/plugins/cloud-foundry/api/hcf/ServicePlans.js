@@ -25,12 +25,12 @@
 
    /*
     * Delete a Particular Service Plans
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/delete_a_particular_service_plans.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plans/delete_a_particular_service_plans.html
     */
     DeleteServicePlans: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plans/' + guid + '';
+      config.url = '/pp/v2/service_plans/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -41,12 +41,12 @@
 
    /*
     * List all Service Instances for the Service Plan
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/list_all_service_instances_for_the_service_plan.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plans/list_all_service_instances_for_the_service_plan.html
     */
     ListAllServiceInstancesForServicePlan: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plans/' + guid + '/service_instances';
+      config.url = '/pp/v2/service_plans/' + guid + '/service_instances';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -57,12 +57,12 @@
 
    /*
     * List all Service Plans
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/list_all_service_plans.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plans/list_all_service_plans.html
     */
     ListAllServicePlans: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plans';
+      config.url = '/pp/v2/service_plans';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -73,12 +73,12 @@
 
    /*
     * Retrieve a Particular Service Plan
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/retrieve_a_particular_service_plan.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plans/retrieve_a_particular_service_plan.html
     */
     RetrieveServicePlan: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plans/' + guid + '';
+      config.url = '/pp/v2/service_plans/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -89,12 +89,12 @@
 
    /*
     * Updating a Service Plan
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/service_plans/updating_a_service_plan.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plans/updating_a_service_plan.html
     */
     UpdateServicePlan: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plans';
+      config.url = '/pp/v2/service_plans';
       config.method = 'PUT';
       config.data = value;
 

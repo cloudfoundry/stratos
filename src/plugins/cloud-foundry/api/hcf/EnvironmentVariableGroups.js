@@ -26,12 +26,12 @@
    /*
     * Getting the contents of the running environment variable group
     * returns the set of default environment variables available to running apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/environment_variable_groups/getting_the_contents_of_the_running_environment_variable_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/environment_variable_groups/getting_the_contents_of_the_running_environment_variable_group.html
     */
     GettingContentsOfRunningEnvironmentVariableGroup: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/config/environment_variable_groups/running';
+      config.url = '/pp/v2/config/environment_variable_groups/running';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -43,12 +43,12 @@
    /*
     * Getting the contents of the staging environment variable group
     * returns the set of default environment variables available during staging
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/environment_variable_groups/getting_the_contents_of_the_staging_environment_variable_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/environment_variable_groups/getting_the_contents_of_the_staging_environment_variable_group.html
     */
     GettingContentsOfStagingEnvironmentVariableGroup: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/config/environment_variable_groups/staging';
+      config.url = '/pp/v2/config/environment_variable_groups/staging';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -60,12 +60,12 @@
    /*
     * Updating the contents of the running environment variable group
     * Updates the set of environment variables which will be made available to all running apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/environment_variable_groups/updating_the_contents_of_the_running_environment_variable_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/environment_variable_groups/updating_the_contents_of_the_running_environment_variable_group.html
     */
     UpdateContentsOfRunningEnvironmentVariableGroup: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/config/environment_variable_groups/running';
+      config.url = '/pp/v2/config/environment_variable_groups/running';
       config.method = 'PUT';
       config.data = value;
 
@@ -78,12 +78,12 @@
    /*
     * Updating the contents of the staging environment variable group
     * Updates the set of environment variables which will be made available during staging
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/environment_variable_groups/updating_the_contents_of_the_staging_environment_variable_group.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/environment_variable_groups/updating_the_contents_of_the_staging_environment_variable_group.html
     */
     UpdateContentsOfStagingEnvironmentVariableGroup: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/config/environment_variable_groups/staging';
+      config.url = '/pp/v2/config/environment_variable_groups/staging';
       config.method = 'PUT';
       config.data = value;
 

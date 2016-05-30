@@ -25,12 +25,12 @@
 
    /*
     * Creating a Organization Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/creating_a_organization_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/creating_a_organization_quota_definition.html
     */
     CreateOrganizationQuotaDefinition: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/quota_definitions';
+      config.url = '/pp/v2/quota_definitions';
       config.method = 'POST';
       config.data = value;
 
@@ -42,12 +42,12 @@
 
    /*
     * Delete a Particular Organization Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/delete_a_particular_organization_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/delete_a_particular_organization_quota_definition.html
     */
     DeleteOrganizationQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/quota_definitions/' + guid + '';
+      config.url = '/pp/v2/quota_definitions/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -58,12 +58,12 @@
 
    /*
     * List all Organization Quota Definitions
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/list_all_organization_quota_definitions.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/list_all_organization_quota_definitions.html
     */
     ListAllOrganizationQuotaDefinitions: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/quota_definitions';
+      config.url = '/pp/v2/quota_definitions';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -74,12 +74,12 @@
 
    /*
     * Retrieve a Particular Organization Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/retrieve_a_particular_organization_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/retrieve_a_particular_organization_quota_definition.html
     */
     RetrieveOrganizationQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/quota_definitions/' + guid + '';
+      config.url = '/pp/v2/quota_definitions/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -90,12 +90,12 @@
 
    /*
     * Updating a Organization Quota Definition
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/195/organization_quota_definitions/updating_a_organization_quota_definition.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/organization_quota_definitions/updating_a_organization_quota_definition.html
     */
     UpdateOrganizationQuotaDefinition: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/quota_definitions/' + guid + '';
+      config.url = '/pp/v2/quota_definitions/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 
