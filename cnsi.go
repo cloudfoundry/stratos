@@ -70,7 +70,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
+func (p *portalProxy) listCNSIs(c echo.Context) error {
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -99,10 +99,17 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) listRegisteredClusters(c echo.Context) error {
+func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 
-	// User ID from path `cnsis/:user_id`
-	userGUID := c.Param("user_guid")
+	userGUIDIntf, ok := p.getSessionValue(c, "user_id")
+	if !ok {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"User session could not be found",
+			"User session could not be found",
+		)
+	}
+	userGUID := userGUIDIntf.(string)
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {

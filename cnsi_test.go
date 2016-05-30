@@ -176,7 +176,7 @@ func TestRegisterHCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	}
 }
 
-func TestListRegisteredCNSIs(t *testing.T) {
+func TestListCNSIs(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)
@@ -198,7 +198,7 @@ func TestListRegisteredCNSIs(t *testing.T) {
 	mock.ExpectQuery(sql).
 		WillReturnRows(expectedCNSIList)
 
-	err := pp.listRegisteredCNSIs(ctx)
+	err := pp.listCNSIs(ctx)
 	if err != nil {
 		t.Errorf("Unable to retriece list of registered CNSIs from /cnsis: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestListRegisteredCNSIs(t *testing.T) {
 	}
 }
 
-func TestListRegisteredCNSIsWhenListFails(t *testing.T) {
+func TestListCNSIsWhenListFails(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)
@@ -228,7 +228,7 @@ func TestListRegisteredCNSIsWhenListFails(t *testing.T) {
 	mock.ExpectQuery(sql).
 		WillReturnError(errors.New("Unknown Database Error"))
 
-	err := pp.listRegisteredCNSIs(ctx)
+	err := pp.listCNSIs(ctx)
 
 	if err == nil {
 		t.Errorf("Should receive an error when unable to get a list of registered CNSIs from /cnsis: %v", err)
