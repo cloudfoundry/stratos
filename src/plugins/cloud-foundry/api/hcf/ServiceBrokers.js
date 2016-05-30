@@ -30,7 +30,7 @@
     CreateServiceBroker: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_brokers';
+      config.url = '/pp/v1/proxy/v2/service_brokers';
       config.method = 'POST';
       config.data = value;
 
@@ -47,7 +47,7 @@
     DeleteServiceBroker: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_brokers/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_brokers/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -63,7 +63,7 @@
     ListAllServiceBrokers: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_brokers';
+      config.url = '/pp/v1/proxy/v2/service_brokers';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     RetrieveServiceBroker: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_brokers/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_brokers/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     UpdateServiceBroker: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_brokers/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_brokers/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

@@ -30,7 +30,7 @@
     AssociateSpaceWithSecurityGroup: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/security_groups/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v1/proxy/v2/security_groups/' + guid + '/spaces/' + space_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     CreateSecurityGroup: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/security_groups';
+      config.url = '/pp/v1/proxy/v2/security_groups';
       config.method = 'POST';
       config.data = value;
 
@@ -63,7 +63,7 @@
     DeleteSecurityGroup: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/security_groups/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/security_groups/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     ListAllSecurityGroups: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/security_groups';
+      config.url = '/pp/v1/proxy/v2/security_groups';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     ListAllSpacesForSecurityGroup: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/security_groups/' + guid + '/spaces';
+      config.url = '/pp/v1/proxy/v2/security_groups/' + guid + '/spaces';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -111,7 +111,7 @@
     RemoveSpaceFromSecurityGroup: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/security_groups/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v1/proxy/v2/security_groups/' + guid + '/spaces/' + space_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -127,7 +127,7 @@
     RetrieveSecurityGroup: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/security_groups/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/security_groups/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -143,7 +143,7 @@
     UpdateSecurityGroup: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/security_groups/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/security_groups/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

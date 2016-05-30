@@ -30,7 +30,7 @@
     CreatePrivateDomainOwnedByGivenOrganization: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/private_domains';
+      config.url = '/pp/v1/proxy/v2/private_domains';
       config.method = 'POST';
       config.data = value;
 
@@ -47,7 +47,7 @@
     DeletePrivateDomain: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/private_domains/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/private_domains/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -63,7 +63,7 @@
     FilterPrivateDomainsByName: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/private_domains';
+      config.url = '/pp/v1/proxy/v2/private_domains';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     ListAllPrivateDomains: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/private_domains';
+      config.url = '/pp/v1/proxy/v2/private_domains';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     ListAllSharedOrganizationsForPrivateDomain: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/private_domains/' + guid + '/shared_organizations';
+      config.url = '/pp/v1/proxy/v2/private_domains/' + guid + '/shared_organizations';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -111,7 +111,7 @@
     RetrievePrivateDomain: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/private_domains/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/private_domains/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

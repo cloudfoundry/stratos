@@ -30,7 +30,7 @@
     GetInfo: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/info';
+      config.url = '/pp/v1/proxy/v2/info';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

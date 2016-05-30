@@ -30,7 +30,7 @@
     CreateDomainOwnedByGivenOrganizationDeprecated: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/domains';
+      config.url = '/pp/v1/proxy/v2/domains';
       config.method = 'POST';
       config.data = value;
 
@@ -47,7 +47,7 @@
     CreateSharedDomainDeprecated: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/domains';
+      config.url = '/pp/v1/proxy/v2/domains';
       config.method = 'POST';
       config.data = value;
 
@@ -64,7 +64,7 @@
     DeleteDomainDeprecated: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/domains/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/domains/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -80,7 +80,7 @@
     ListAllDomainsDeprecated: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/domains';
+      config.url = '/pp/v1/proxy/v2/domains';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -96,7 +96,7 @@
     ListAllSpacesForDomainDeprecated: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/domains/' + guid + '/spaces';
+      config.url = '/pp/v1/proxy/v2/domains/' + guid + '/spaces';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -112,7 +112,7 @@
     RetrieveDomainDeprecated: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/domains/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/domains/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

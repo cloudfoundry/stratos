@@ -30,7 +30,7 @@
     CreateServicePlanVisibility: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_plan_visibilities';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities';
       config.method = 'POST';
       config.data = value;
 
@@ -47,7 +47,7 @@
     DeleteServicePlanVisibilities: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_plan_visibilities/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -63,7 +63,7 @@
     ListAllServicePlanVisibilities: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_plan_visibilities';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     RetrieveServicePlanVisibility: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_plan_visibilities/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     UpdateServicePlanVisibility: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_plan_visibilities/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

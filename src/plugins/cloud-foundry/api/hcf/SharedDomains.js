@@ -30,7 +30,7 @@
     CreateSharedDomain: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/shared_domains';
+      config.url = '/pp/v1/proxy/v2/shared_domains';
       config.method = 'POST';
       config.data = value;
 
@@ -47,7 +47,7 @@
     DeleteSharedDomain: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/shared_domains/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/shared_domains/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -63,7 +63,7 @@
     FilterSharedDomainsByName: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/shared_domains';
+      config.url = '/pp/v1/proxy/v2/shared_domains';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     ListAllSharedDomains: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/shared_domains';
+      config.url = '/pp/v1/proxy/v2/shared_domains';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     RetrieveSharedDomain: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/shared_domains/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/shared_domains/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

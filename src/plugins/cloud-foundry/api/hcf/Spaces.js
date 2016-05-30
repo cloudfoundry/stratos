@@ -30,7 +30,7 @@
     AssociateAuditorWithSpace: function (guid, auditor_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/auditors/' + auditor_guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/auditors/' + auditor_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     AssociateAuditorWithSpaceByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/ppv2/spaces/' + guid + '/auditors';
+      config.url = '/pp/v1/proxyv2/spaces/' + guid + '/auditors';
       config.method = 'PUT';
       config.data = value;
 
@@ -63,7 +63,7 @@
     AssociateDeveloperWithSpace: function (guid, developer_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/developers/' + developer_guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/developers/' + developer_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     AssociateDeveloperWithSpaceByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/ppv2/spaces/' + guid + '/developers';
+      config.url = '/pp/v1/proxyv2/spaces/' + guid + '/developers';
       config.method = 'PUT';
       config.data = value;
 
@@ -96,7 +96,7 @@
     AssociateManagerWithSpace: function (guid, manager_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/managers/' + manager_guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/managers/' + manager_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -112,7 +112,7 @@
     AssociateManagerWithSpaceByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/ppv2/spaces/' + guid + '/managers';
+      config.url = '/pp/v1/proxyv2/spaces/' + guid + '/managers';
       config.method = 'PUT';
       config.data = value;
 
@@ -129,7 +129,7 @@
     AssociateSecurityGroupWithSpace: function (guid, security_group_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/security_groups/' + security_group_guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/security_groups/' + security_group_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -145,7 +145,7 @@
     CreateSpace: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces';
+      config.url = '/pp/v1/proxy/v2/spaces';
       config.method = 'POST';
       config.data = value;
 
@@ -162,7 +162,7 @@
     DeleteSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -178,7 +178,7 @@
     GetSpaceSummary: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/summary';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/summary';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -194,7 +194,7 @@
     ListAllAppsForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/apps';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/apps';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -210,7 +210,7 @@
     ListAllAuditorsForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/auditors';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/auditors';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -226,7 +226,7 @@
     ListAllDevelopersForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/developers';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/developers';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -242,7 +242,7 @@
     ListAllDomainsForSpaceDeprecated: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/domains';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/domains';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -258,7 +258,7 @@
     ListAllEventsForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/events';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -274,7 +274,7 @@
     ListAllManagersForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/managers';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/managers';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -290,7 +290,7 @@
     ListAllRoutesForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/routes';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/routes';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -306,7 +306,7 @@
     ListAllSecurityGroupsForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/security_groups';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/security_groups';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -322,7 +322,7 @@
     ListAllServiceInstancesForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/service_instances';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/service_instances';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -338,7 +338,7 @@
     ListAllServicesForSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/services';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/services';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -354,7 +354,7 @@
     ListAllSpaces: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces';
+      config.url = '/pp/v1/proxy/v2/spaces';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -370,7 +370,7 @@
     RemoveAuditorFromSpace: function (guid, auditor_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/auditors/' + auditor_guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/auditors/' + auditor_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -386,7 +386,7 @@
     RemoveAuditorWithSpaceByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/ppv2/spaces/' + guid + '/auditors';
+      config.url = '/pp/v1/proxyv2/spaces/' + guid + '/auditors';
       config.method = 'DELETE';
       config.data = value;
 
@@ -403,7 +403,7 @@
     RemoveDeveloperFromSpace: function (guid, developer_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/developers/' + developer_guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/developers/' + developer_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -419,7 +419,7 @@
     RemoveDeveloperWithSpaceByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/ppv2/spaces/' + guid + '/developers';
+      config.url = '/pp/v1/proxyv2/spaces/' + guid + '/developers';
       config.method = 'DELETE';
       config.data = value;
 
@@ -436,7 +436,7 @@
     RemoveManagerFromSpace: function (guid, manager_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/managers/' + manager_guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/managers/' + manager_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -452,7 +452,7 @@
     RemoveManagerWithSpaceByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/ppv2/spaces/' + guid + '/managers';
+      config.url = '/pp/v1/proxyv2/spaces/' + guid + '/managers';
       config.method = 'DELETE';
       config.data = value;
 
@@ -469,7 +469,7 @@
     RemoveSecurityGroupFromSpace: function (guid, security_group_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/security_groups/' + security_group_guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/security_groups/' + security_group_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -485,7 +485,7 @@
     RetrieveSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -501,7 +501,7 @@
     RetrievingRolesOfAllUsersInSpace: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '/user_roles';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '/user_roles';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -517,7 +517,7 @@
     UpdateSpace: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/spaces/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/spaces/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

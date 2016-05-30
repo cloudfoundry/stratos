@@ -30,7 +30,7 @@
     RetrieveJobThatIsQueued: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/jobs/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/jobs/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     RetrieveJobThatWasSuccessful: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/jobs/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/jobs/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -62,7 +62,7 @@
     RetrieveJobWithKnownFailure: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/jobs/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/jobs/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -78,7 +78,7 @@
     RetrieveJobWithUnknownFailure: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/jobs/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/jobs/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

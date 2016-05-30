@@ -30,7 +30,7 @@
     RemovingSecurityGroupAsDefaultForStaging: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/staging_security_groups/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/config/staging_security_groups/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     ReturnSecurityGroupsUsedForStaging: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/staging_security_groups';
+      config.url = '/pp/v1/proxy/v2/config/staging_security_groups';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -62,7 +62,7 @@
     SetSecurityGroupAsDefaultForStaging: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/staging_security_groups/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/config/staging_security_groups/' + guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {

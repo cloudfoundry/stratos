@@ -30,7 +30,7 @@
     GetAllFeatureFlags: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -47,7 +47,7 @@
     GetAppBitsUploadFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/app_bits_upload';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/app_bits_upload';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -64,7 +64,7 @@
     GetAppScalingFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/app_scaling';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/app_scaling';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -82,7 +82,7 @@
     GetDiegoDockerFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/diego_docker';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/diego_docker';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -99,7 +99,7 @@
     GetPrivateDomainCreationFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/private_domain_creation';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/private_domain_creation';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -116,7 +116,7 @@
     GetRouteCreationFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/route_creation';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/route_creation';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -133,7 +133,7 @@
     GetServiceInstanceCreationFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/service_instance_creation';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/service_instance_creation';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -154,7 +154,7 @@
     GetSetUserRolesFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/set_roles_by_username';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/set_roles_by_username';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -172,7 +172,7 @@
     GetSpaceDeveloperEnvironmentVariableVisibilityFeatureFlagExperimental: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/space_developer_env_var_visibility';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/space_developer_env_var_visibility';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -190,7 +190,7 @@
     GetSpaceScopedPrivateBrokerCreationFeatureFlagExperimental: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/space_scoped_private_broker_creation';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/space_scoped_private_broker_creation';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -207,7 +207,7 @@
     GetTaskCreationFeatureFlagExperimental: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/task_creation';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/task_creation';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -228,7 +228,7 @@
     GetUnsetUserRolesFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/unset_roles_by_username';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/unset_roles_by_username';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -245,7 +245,7 @@
     GetUserOrgCreationFeatureFlag: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/user_org_creation';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/user_org_creation';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -261,7 +261,7 @@
     SetFeatureFlag: function (name, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/feature_flags/' + name + '';
+      config.url = '/pp/v1/proxy/v2/config/feature_flags/' + name + '';
       config.method = 'PUT';
       config.data = value;
 

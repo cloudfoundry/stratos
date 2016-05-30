@@ -31,7 +31,7 @@
     DeleteService: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/services/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/services/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -47,7 +47,7 @@
     ListAllServicePlansForService: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/services/' + guid + '/service_plans';
+      config.url = '/pp/v1/proxy/v2/services/' + guid + '/service_plans';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -63,7 +63,7 @@
     ListAllServices: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/services';
+      config.url = '/pp/v1/proxy/v2/services';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     RetrieveService: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/services/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/services/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

@@ -32,7 +32,7 @@
     RetrieveFile: function (app_guid, instance_index, file_path, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/apps/' + app_guid + '/instances/' + instance_index + '/files/' + file_path + '';
+      config.url = '/pp/v1/proxy/v2/apps/' + app_guid + '/instances/' + instance_index + '/files/' + file_path + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

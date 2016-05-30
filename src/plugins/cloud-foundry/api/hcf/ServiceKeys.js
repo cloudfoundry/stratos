@@ -30,7 +30,7 @@
     CreateServiceKey: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_keys';
+      config.url = '/pp/v1/proxy/v2/service_keys';
       config.method = 'POST';
       config.data = value;
 
@@ -47,7 +47,7 @@
     DeleteServiceKey: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_keys/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_keys/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -63,7 +63,7 @@
     ListAllServiceKeys: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_keys';
+      config.url = '/pp/v1/proxy/v2/service_keys';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     RetrieveServiceKey: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_keys/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_keys/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

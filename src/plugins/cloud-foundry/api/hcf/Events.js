@@ -30,7 +30,7 @@
     ListAllEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     ListAppCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -62,7 +62,7 @@
     ListAppDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -78,7 +78,7 @@
     ListAppExitedEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -94,7 +94,7 @@
     ListAppSshAuthorizedEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -110,7 +110,7 @@
     ListAppSshUnauthorizedEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -126,7 +126,7 @@
     ListAppStartEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -142,7 +142,7 @@
     ListAppStopEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -158,7 +158,7 @@
     ListAppUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -174,7 +174,7 @@
     ListEventsAssociatedWithAppSinceJanuary12014: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -190,7 +190,7 @@
     ListRouteCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -206,7 +206,7 @@
     ListRouteDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -222,7 +222,7 @@
     ListRouteUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -238,7 +238,7 @@
     ListServiceBindingCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -254,7 +254,7 @@
     ListServiceBindingDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -270,7 +270,7 @@
     ListServiceBrokerCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -286,7 +286,7 @@
     ListServiceBrokerDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -302,7 +302,7 @@
     ListServiceBrokerUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -318,7 +318,7 @@
     ListServiceCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -334,7 +334,7 @@
     ListServiceDashboardClientCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -350,7 +350,7 @@
     ListServiceDashboardClientDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -366,7 +366,7 @@
     ListServiceDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -382,7 +382,7 @@
     ListServiceInstanceBindRouteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -398,7 +398,7 @@
     ListServiceInstanceCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -414,7 +414,7 @@
     ListServiceInstanceDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -430,7 +430,7 @@
     ListServiceInstanceUnbindRouteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -446,7 +446,7 @@
     ListServiceInstanceUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -462,7 +462,7 @@
     ListServiceKeyCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -478,7 +478,7 @@
     ListServiceKeyDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -494,7 +494,7 @@
     ListServicePlanCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -510,7 +510,7 @@
     ListServicePlanDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -526,7 +526,7 @@
     ListServicePlanUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -542,7 +542,7 @@
     ListServicePlanVisibilityCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -558,7 +558,7 @@
     ListServicePlanVisibilityDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -574,7 +574,7 @@
     ListServicePlanVisibilityUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -590,7 +590,7 @@
     ListServiceUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -606,7 +606,7 @@
     ListSpaceCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -622,7 +622,7 @@
     ListSpaceDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -638,7 +638,7 @@
     ListSpaceUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -654,7 +654,7 @@
     ListUserProvidedServiceInstanceCreateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -670,7 +670,7 @@
     ListUserProvidedServiceInstanceDeleteEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -686,7 +686,7 @@
     ListUserProvidedServiceInstanceUpdateEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events';
+      config.url = '/pp/v1/proxy/v2/events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -702,7 +702,7 @@
     RetrieveEvent: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/events/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/events/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

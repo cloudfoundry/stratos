@@ -30,7 +30,7 @@
     AssociateSpaceWithSpaceQuotaDefinition: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/space_quota_definitions/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v1/proxy/v2/space_quota_definitions/' + guid + '/spaces/' + space_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     CreateSpaceQuotaDefinition: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/space_quota_definitions';
+      config.url = '/pp/v1/proxy/v2/space_quota_definitions';
       config.method = 'POST';
       config.data = value;
 
@@ -63,7 +63,7 @@
     DeleteSpaceQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/space_quota_definitions/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/space_quota_definitions/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     ListAllSpaceQuotaDefinitions: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/space_quota_definitions';
+      config.url = '/pp/v1/proxy/v2/space_quota_definitions';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     ListAllSpacesForSpaceQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/space_quota_definitions/' + guid + '/spaces';
+      config.url = '/pp/v1/proxy/v2/space_quota_definitions/' + guid + '/spaces';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -111,7 +111,7 @@
     RemoveSpaceFromSpaceQuotaDefinition: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/space_quota_definitions/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v1/proxy/v2/space_quota_definitions/' + guid + '/spaces/' + space_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -127,7 +127,7 @@
     RetrieveSpaceQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/space_quota_definitions/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/space_quota_definitions/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -143,7 +143,7 @@
     UpdateSpaceQuotaDefinition: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/space_quota_definitions/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/space_quota_definitions/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

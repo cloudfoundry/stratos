@@ -33,7 +33,7 @@
     ListServiceUsageEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_usage_events';
+      config.url = '/pp/v1/proxy/v2/service_usage_events';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -53,7 +53,7 @@
     PurgeAndReseedServiceUsageEvents: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_usage_events/destructively_purge_all_and_reseed_existing_instances';
+      config.url = '/pp/v1/proxy/v2/service_usage_events/destructively_purge_all_and_reseed_existing_instances';
       config.method = 'POST';
 
       for (var option in httpConfigOptions) {
@@ -69,7 +69,7 @@
     RetrieveServiceUsageEvent: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_usage_events/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_usage_events/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

@@ -30,7 +30,7 @@
     CreateStack: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/stacks';
+      config.url = '/pp/v1/proxy/v2/stacks';
       config.method = 'POST';
       config.data = value;
 
@@ -47,7 +47,7 @@
     DeleteStack: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/stacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/stacks/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -63,7 +63,7 @@
     ListAllStacks: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/stacks';
+      config.url = '/pp/v1/proxy/v2/stacks';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     RetrieveStack: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/stacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/stacks/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

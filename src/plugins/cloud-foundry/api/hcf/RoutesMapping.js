@@ -30,7 +30,7 @@
     DeleteRouteMapping: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/route_mappings/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/route_mappings/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     ListAllRouteMappings: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/route_mappings';
+      config.url = '/pp/v1/proxy/v2/route_mappings';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -62,7 +62,7 @@
     MappingAppAndRoute: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/route_mappings';
+      config.url = '/pp/v1/proxy/v2/route_mappings';
       config.method = 'POST';
       config.data = value;
 
@@ -79,7 +79,7 @@
     RetrieveRouteMapping: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/route_mappings/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/route_mappings/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     UpdateRouteMapping: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/route_mappings/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/route_mappings/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

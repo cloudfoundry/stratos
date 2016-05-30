@@ -30,7 +30,7 @@
     BindingServiceInstanceToRoute: function (service_instance_guid, route_guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + service_instance_guid + '/routes/' + route_guid + '';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + service_instance_guid + '/routes/' + route_guid + '';
       config.method = 'PUT';
       config.data = value;
 
@@ -47,7 +47,7 @@
     CreateServiceInstance: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances';
+      config.url = '/pp/v1/proxy/v2/service_instances';
       config.method = 'POST';
       config.data = value;
 
@@ -64,7 +64,7 @@
     DeleteServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -80,7 +80,7 @@
     ListAllRoutesForServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + guid + '/routes';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + guid + '/routes';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -96,7 +96,7 @@
     ListAllServiceBindingsForServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + guid + '/service_bindings';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + guid + '/service_bindings';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -112,7 +112,7 @@
     ListAllServiceInstances: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances';
+      config.url = '/pp/v1/proxy/v2/service_instances';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -128,7 +128,7 @@
     ListAllServiceKeysForServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + guid + '/service_keys';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + guid + '/service_keys';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -144,7 +144,7 @@
     RetrieveServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -160,7 +160,7 @@
     RetrievingPermissionsOnServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + guid + '/permissions';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + guid + '/permissions';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -176,7 +176,7 @@
     UnbindingServiceInstanceFromRoute: function (service_instance_guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + service_instance_guid + '/routes/' + route_guid + '';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + service_instance_guid + '/routes/' + route_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -192,7 +192,7 @@
     UpdateServiceInstance: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_instances/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

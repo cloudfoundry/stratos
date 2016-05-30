@@ -31,7 +31,7 @@
     GettingContentsOfRunningEnvironmentVariableGroup: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/environment_variable_groups/running';
+      config.url = '/pp/v1/proxy/v2/config/environment_variable_groups/running';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -48,7 +48,7 @@
     GettingContentsOfStagingEnvironmentVariableGroup: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/environment_variable_groups/staging';
+      config.url = '/pp/v1/proxy/v2/config/environment_variable_groups/staging';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -65,7 +65,7 @@
     UpdateContentsOfRunningEnvironmentVariableGroup: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/environment_variable_groups/running';
+      config.url = '/pp/v1/proxy/v2/config/environment_variable_groups/running';
       config.method = 'PUT';
       config.data = value;
 
@@ -83,7 +83,7 @@
     UpdateContentsOfStagingEnvironmentVariableGroup: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/config/environment_variable_groups/staging';
+      config.url = '/pp/v1/proxy/v2/config/environment_variable_groups/staging';
       config.method = 'PUT';
       config.data = value;
 

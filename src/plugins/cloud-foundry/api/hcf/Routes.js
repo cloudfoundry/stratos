@@ -30,7 +30,7 @@
     AssociateAppWithRoute: function (guid, app_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/' + guid + '/apps/' + app_guid + '';
+      config.url = '/pp/v1/proxy/v2/routes/' + guid + '/apps/' + app_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -47,7 +47,7 @@
     CheckHttpRouteExists: function (domain_guid, host, path, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/reserved/domain/' + domain_guid + '/host/' + host + '?path=' + path + '';
+      config.url = '/pp/v1/proxy/v2/routes/reserved/domain/' + domain_guid + '/host/' + host + '?path=' + path + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -64,7 +64,7 @@
     CheckRouteExists: function (domain_guid, host, path, port, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/reserved/domain/' + domain_guid + '?host=' + host + '&path=' + path + '&port=' + port + '';
+      config.url = '/pp/v1/proxy/v2/routes/reserved/domain/' + domain_guid + '?host=' + host + '&path=' + path + '&port=' + port + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -80,7 +80,7 @@
     CreateRoute: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes';
+      config.url = '/pp/v1/proxy/v2/routes';
       config.method = 'POST';
       config.data = value;
 
@@ -97,7 +97,7 @@
     DeleteRoute: function (guid, recursive, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/' + guid + '?recursive=true';
+      config.url = '/pp/v1/proxy/v2/routes/' + guid + '?recursive=true';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -113,7 +113,7 @@
     ListAllAppsForRoute: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/' + guid + '/apps';
+      config.url = '/pp/v1/proxy/v2/routes/' + guid + '/apps';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -129,7 +129,7 @@
     ListAllRouteMappingsForRoute: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/' + guid + '/route_mappings';
+      config.url = '/pp/v1/proxy/v2/routes/' + guid + '/route_mappings';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -145,7 +145,7 @@
     ListAllRoutes: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes';
+      config.url = '/pp/v1/proxy/v2/routes';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -161,7 +161,7 @@
     RemoveAppFromRoute: function (guid, app_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/' + guid + '/apps/' + app_guid + '';
+      config.url = '/pp/v1/proxy/v2/routes/' + guid + '/apps/' + app_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -177,7 +177,7 @@
     RetrieveRoute: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/routes/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -193,7 +193,7 @@
     UpdateRoute: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/routes/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/routes/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

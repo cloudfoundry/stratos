@@ -30,7 +30,7 @@
     AssociateRouteWithUserProvidedServiceInstance: function (guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instances/' + guid + '/routes/' + route_guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '/routes/' + route_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     CreateUserProvidedServiceInstance: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instances';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances';
       config.method = 'POST';
       config.data = value;
 
@@ -63,7 +63,7 @@
     DeleteUserProvidedServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     ListAllRoutesForUserProvidedServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instances/' + guid + '/routes';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '/routes';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     ListAllServiceBindingsForUserProvidedServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instances/' + guid + '/service_bindings';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '/service_bindings';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -111,7 +111,7 @@
     ListAllUserProvidedServiceInstances: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instances';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -127,7 +127,7 @@
     RemoveRouteFromUserProvidedServiceInstance: function (guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instance/' + guid + '/routes/' + route_guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instance/' + guid + '/routes/' + route_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -143,7 +143,7 @@
     RetrieveUserProvidedServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -159,7 +159,7 @@
     UpdateUserProvidedServiceInstance: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/user_provided_service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

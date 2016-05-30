@@ -30,7 +30,7 @@
     CreateOrganizationQuotaDefinition: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/quota_definitions';
+      config.url = '/pp/v1/proxy/v2/quota_definitions';
       config.method = 'POST';
       config.data = value;
 
@@ -47,7 +47,7 @@
     DeleteOrganizationQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/quota_definitions/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/quota_definitions/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -63,7 +63,7 @@
     ListAllOrganizationQuotaDefinitions: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/quota_definitions';
+      config.url = '/pp/v1/proxy/v2/quota_definitions';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -79,7 +79,7 @@
     RetrieveOrganizationQuotaDefinition: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/quota_definitions/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/quota_definitions/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -95,7 +95,7 @@
     UpdateOrganizationQuotaDefinition: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/quota_definitions/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/quota_definitions/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 

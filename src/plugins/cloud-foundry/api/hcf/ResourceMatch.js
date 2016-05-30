@@ -36,7 +36,7 @@
     ListAllMatchingResources: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/resource_match';
+      config.url = '/pp/v1/proxy/v2/resource_match';
       config.method = 'PUT';
       config.data = value;
 

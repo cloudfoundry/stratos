@@ -33,7 +33,7 @@
     ChangePositionOfBuildpack: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/buildpacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/buildpacks/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 
@@ -50,7 +50,7 @@
     CreatesAdminBuildpack: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/buildpacks';
+      config.url = '/pp/v1/proxy/v2/buildpacks';
       config.method = 'POST';
       config.data = value;
 
@@ -67,7 +67,7 @@
     DeleteBuildpack: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/buildpacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/buildpacks/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -83,7 +83,7 @@
     EnableOrDisableBuildpack: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/buildpacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/buildpacks/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 
@@ -100,7 +100,7 @@
     ListAllBuildpacks: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/buildpacks';
+      config.url = '/pp/v1/proxy/v2/buildpacks';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -116,7 +116,7 @@
     LockOrUnlockBuildpack: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/buildpacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/buildpacks/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 
@@ -133,7 +133,7 @@
     RetrieveBuildpack: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/buildpacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/buildpacks/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {

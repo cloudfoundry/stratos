@@ -30,7 +30,7 @@
     AssociateAuditedOrganizationWithUser: function (guid, audited_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -46,7 +46,7 @@
     AssociateAuditedSpaceWithUser: function (guid, audited_space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -62,7 +62,7 @@
     AssociateBillingManagedOrganizationWithUser: function (guid, billing_managed_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -78,7 +78,7 @@
     AssociateManagedOrganizationWithUser: function (guid, managed_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -94,7 +94,7 @@
     AssociateManagedSpaceWithUser: function (guid, managed_space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -110,7 +110,7 @@
     AssociateOrganizationWithUser: function (guid, organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/organizations/' + organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/organizations/' + organization_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -126,7 +126,7 @@
     AssociateSpaceWithUser: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/spaces/' + space_guid + '';
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
@@ -142,7 +142,7 @@
     CreateUser: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users';
+      config.url = '/pp/v1/proxy/v2/users';
       config.method = 'POST';
       config.data = value;
 
@@ -159,7 +159,7 @@
     DeleteUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -175,7 +175,7 @@
     GetUserSummary: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/summary';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/summary';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -191,7 +191,7 @@
     ListAllAuditedOrganizationsForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/audited_organizations';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_organizations';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -207,7 +207,7 @@
     ListAllAuditedSpacesForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/audited_spaces';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_spaces';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -223,7 +223,7 @@
     ListAllBillingManagedOrganizationsForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/billing_managed_organizations';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/billing_managed_organizations';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -239,7 +239,7 @@
     ListAllManagedOrganizationsForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/managed_organizations';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_organizations';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -255,7 +255,7 @@
     ListAllManagedSpacesForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/managed_spaces';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_spaces';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -271,7 +271,7 @@
     ListAllOrganizationsForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/organizations';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/organizations';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -287,7 +287,7 @@
     ListAllSpacesForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/spaces';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/spaces';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -303,7 +303,7 @@
     ListAllUsers: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users';
+      config.url = '/pp/v1/proxy/v2/users';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -319,7 +319,7 @@
     RemoveAuditedOrganizationFromUser: function (guid, audited_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -335,7 +335,7 @@
     RemoveAuditedSpaceFromUser: function (guid, audited_space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -351,7 +351,7 @@
     RemoveBillingManagedOrganizationFromUser: function (guid, billing_managed_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -367,7 +367,7 @@
     RemoveManagedOrganizationFromUser: function (guid, managed_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -383,7 +383,7 @@
     RemoveManagedSpaceFromUser: function (guid, managed_space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -399,7 +399,7 @@
     RemoveOrganizationFromUser: function (guid, organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/organizations/' + organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/organizations/' + organization_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -415,7 +415,7 @@
     RemoveSpaceFromUser: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/spaces/' + space_guid + '';
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
@@ -431,7 +431,7 @@
     RetrieveUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '';
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
@@ -447,7 +447,7 @@
     UpdateUser: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v2/users/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '';
       config.method = 'PUT';
       config.data = value;
 
