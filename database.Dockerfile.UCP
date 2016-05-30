@@ -5,7 +5,7 @@ ENV DB_HOST="portal-db" DB="postgres" DB_PORT="5432" DB_USER="stolen" DB_PW_FILE
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
 
-ADD db/run.sh /
-ADD db/migrations/20160511195737_InitialSchema.sql /
+COPY /db/run.sh /var/db/
+COPY /db/migrations/20160511195737_InitialSchema.sql /var/db/
 
-CMD ["/run.sh"]
+CMD ["/var/db/run.sh"]

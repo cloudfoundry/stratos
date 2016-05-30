@@ -3,12 +3,12 @@ set -e
 
 execStatement() {
     stmt=$1
-    PGPASSFILE=/tmp/pgpass psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d postgres -w -tc "$stmt"
+    PGPASSWORD='stolon' psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d postgres -w -tc "$stmt"
 }
 
 execStatementsFromFile() {
     file=$1
-    PGPASSFILE=/tmp/pgpass psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d postgres -w -f "$file"
+    PGPASSWORD='stratos' psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $STRATOS_DB -w -f "$file"
 }
 
 echo "$DB_HOST:$DB_PORT:$DB:$DB_USER:$(cat $DB_PW_FILE)" > /tmp/pgpass
