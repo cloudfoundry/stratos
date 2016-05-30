@@ -164,8 +164,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.Use(p.sessionMiddleware)
 	sessionGroup.Post("/auth/login/cnsi", p.loginToCNSI)
 	sessionGroup.Post("/register/hcf", p.registerHCFCluster)
-	sessionGroup.Get("/cnsis/:user_guid", p.listRegisteredClusters)
-	sessionGroup.Get("/cnsis", p.listRegisteredCNSIs)
+	sessionGroup.Get("/cnsis", p.listCNSIs)
+	sessionGroup.Get("/cnsis/registered", p.listRegisteredCNSIs)
 	group := sessionGroup.Group("/proxy")
 	group.Get("/*", p.proxy)
 }
