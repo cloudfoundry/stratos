@@ -11,6 +11,10 @@ const (
 	listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
                FROM cnsis`
 
+	listCNSIsByUser = `SELECT c.name, c.api_endpoint, t.user_guid, t.token_expiry
+                     FROM cnsis c, tokens t
+                     WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2`
+
 	findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
               FROM cnsis
               WHERE guid=$1`
@@ -70,6 +74,34 @@ func (p *PostgresCNSIRepository) List() ([]*CNSIRecord, error) {
 	}
 
 	return cnsiList, nil
+}
+
+// ListByUser - Returns a list of CNSIs registered by a user
+func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredCluster, error) {
+
+	rows, err := p.db.Query(listCNSIsByUser, "cnsi", userGUID)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
+	}
+	defer rows.Close()
+
+	var clusterList []*RegisteredCluster
+	clusterList = make([]*RegisteredCluster, 0)
+
+	for rows.Next() {
+		cluster := new(RegisteredCluster)
+		err := rows.Scan(&cluster.Name, &cluster.URL, &cluster.Account, &cluster.TokenExpiry)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to scan cluster records: %v", err)
+		}
+		clusterList = append(clusterList, cluster)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Unable to List cluster records: %v", err)
+	}
+
+	return clusterList, nil
 }
 
 // Find - Returns a single CNSI Record

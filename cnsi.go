@@ -78,8 +78,8 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 	}
 
 	var jsonString []byte
-
 	var cnsiList []*cnsis.CNSIRecord
+
 	cnsiList, err = cnsiRepo.List()
 	if err != nil {
 		return newHTTPShadowError(
@@ -99,6 +99,38 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 	return nil
 }
 
+func (p *portalProxy) listRegisteredClusters(c echo.Context) error {
+
+	// User ID from path `cnsis/:user_id`
+	userGUID := c.Param("user_guid")
+
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return fmt.Errorf("listRegisteredCNSIs: %s", err)
+	}
+
+	var jsonString []byte
+	var clusterList []*cnsis.RegisteredCluster
+
+	clusterList, err = cnsiRepo.ListByUser(userGUID)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to retrieve list of clusters",
+			"Failed to retrieve list of clusters: %v", err,
+		)
+	}
+
+	jsonString, err = marshalClusterList(clusterList)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+	return nil
+}
+
 func marshalCNSIlist(cnsiList []*cnsis.CNSIRecord) ([]byte, error) {
 	jsonString, err := json.Marshal(cnsiList)
 	if err != nil {
@@ -106,6 +138,18 @@ func marshalCNSIlist(cnsiList []*cnsis.CNSIRecord) ([]byte, error) {
 			http.StatusBadRequest,
 			"Failed to retrieve list of CNSIs",
 			"Failed to retrieve list of CNSIs: %v", err,
+		)
+	}
+	return jsonString, nil
+}
+
+func marshalClusterList(clusterList []*cnsis.RegisteredCluster) ([]byte, error) {
+	jsonString, err := json.Marshal(clusterList)
+	if err != nil {
+		return nil, newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to retrieve list of clusters",
+			"Failed to retrieve list of clusters: %v", err,
 		)
 	}
 	return jsonString, nil
