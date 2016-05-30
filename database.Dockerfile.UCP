@@ -1,7 +1,7 @@
 FROM ubuntu:14.04
 
-ENV DB_HOST="stolon-proxy-int" DB="postgres" DB_PORT="5432" DB_USER="stolon" DB_PW_FILE="/etc/secrets/stolon" \
-  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="20160511195737_InitialSchema.sql"
+ENV DB_HOST="portal-db" DB="postgres" DB_PORT="5432" DB_USER="stolen" DB_PW_FILE="/etc/secrets/stolon" \
+  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="./20160511195737_InitialSchema.sql"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
 
