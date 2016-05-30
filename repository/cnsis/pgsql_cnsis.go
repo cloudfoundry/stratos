@@ -42,11 +42,26 @@ func (p *PostgresCNSIRepository) List() ([]*CNSIRecord, error) {
 	cnsiList = make([]*CNSIRecord, 0)
 
 	for rows.Next() {
+		var (
+			pCNSIType string
+			pURL      string
+		)
+
 		cnsi := new(CNSIRecord)
-		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &cnsi.CNSIType, &cnsi.APIEndpoint, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint)
+
+		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
 		}
+
+		if cnsi.CNSIType, err = getCNSIType(pCNSIType); err != nil {
+			return nil, fmt.Errorf("Unable to get CNSI type: %v", err)
+		}
+
+		if cnsi.APIEndpoint, err = url.Parse(pURL); err != nil {
+			return nil, fmt.Errorf("Unable to parse API Endpoint: %v", err)
+		}
+
 		cnsiList = append(cnsiList, cnsi)
 	}
 
