@@ -316,6 +316,7 @@
      * @function getSpacesForOrganization
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description get spaces for organization
+     * @param {string} guid - the organization GUID
      * @returns {promise} A resolved/rejected promise
      */
     getSpacesForOrganization: function (guid) {

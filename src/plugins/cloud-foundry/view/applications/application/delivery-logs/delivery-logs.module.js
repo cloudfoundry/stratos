@@ -23,6 +23,7 @@
     '$stateParams',
     '$interval',
     '$q',
+    '$log',
     'moment',
     'app.model.modelManager',
     'helion.framework.widgets.detailView'
@@ -35,13 +36,15 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $interval - the angular $interval service
    * @param {object} $q - the angular $q service
+   * @param {object} $log - the Angular $log service
    * @param {object} moment - the moment timezone component
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {helion.framework.widgets.detailView} detailView - the helion framework detailView widget
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryLogsController($scope, $stateParams, $interval, $q, moment, modelManager, detailView) {
+  function ApplicationDeliveryLogsController($scope, $stateParams, $interval, $q, $log, moment, modelManager, detailView) {
+    this.$log = $log;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.hasProject = null;
@@ -64,7 +67,6 @@
         return that.hceModel.getProjects();
       })
       .then(function() {
-        //that.model.application.summary.name = 'test';// Temp override
         return that.hceModel.getProject(that.model.application.summary.name);
       })
       .then(function(project) {
@@ -75,7 +77,7 @@
         }
       })
       .catch(function(error) {
-        console.error('Failed to fetch project or process delivery logs data: ', error);
+        that.$log.error('Failed to fetch project or process delivery logs data: ', error);
         that.fetchError = error;
       });
 
@@ -98,7 +100,7 @@
           // either append these values to to existing hceModel.data object or clone and update as needed for this
           // specific directive
           // addMockData();
-          that.parsedHceModel = JSON.parse(JSON.stringify(that.hceModel.data));
+          that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
 
           var fetchEventsPromises = [];
           for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
@@ -163,7 +165,7 @@
           }
         })
         .catch(function (error) {
-          console.error('Failed to fetch/process pipeline executions or events: ', error);
+          that.$log.error('Failed to fetch/process pipeline executions or events: ', error);
         });
     }
 
@@ -215,6 +217,7 @@
       executions[pos] = cleanExeuction;
     }
 
+    /* eslint-disable */
     function addMockData() {
       var mocked = [
         {
@@ -360,6 +363,7 @@
         };
       }
     }
+    /* eslint-enable */
 
     $scope.$on("$destroy", function() {
       if (updateModelPromise) {
@@ -399,8 +403,7 @@
 
     viewEventForExecution: function (execution) {
       var events = this.eventsPerExecution[execution.id];
-      var latestEvent;
-      var lastEventTime;
+      var latestEvent, lastEventTime;
       _.forEach(events, function(event) {
         if (!lastEventTime || lastEventTime.diff(event.endDate) < 0) {
           lastEventTime = moment(event.endDate);
