@@ -349,135 +349,11 @@
         },
         {
           "name": "SQL"
-        },
+        }
       ],
       "min_instances": 1,
       "max_instances": 1,
       "retry_count": 100
-    }
-    ],
-    "parameters": [
-    {
-      "name": "POSTGRES_DB",
-      "description": "placeholder",
-      "default": "stratos-db",
-      "example": "stratos-db",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "POSTGRES_PASSWORD",
-      "description": "placeholder",
-      "default": "stolon",
-      "example": "stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "POSTGRES_USER",
-      "description": "placeholder",
-      "default": "stolon",
-      "example": "stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "PGDATA",
-      "description": "placeholder",
-      "default": "/database",
-      "example": "/database",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "MYSQL_ROOT_PASSWORD",
-      "description": "Root password for MySQL",
-      "example": "stratos",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "MYSQL_DATABASE",
-      "description": "Database name for MySQL",
-      "default": "stratos-db",
-      "example": "stratos-db",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "MYSQL_USER",
-      "description": "Username for MySQL",
-      "default": "stratos",
-      "example": "stratos",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "MYSQL_PASSWORD",
-      "description": "Password for MySQL",
-      "example": "stratos",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "PORT",
-      "description": "Port number to expose the API on",
-      "default": "3000",
-      "example": "3000",
-      "data_type": "string",
-      "required": false,
-      "secret": false
-    },
-    {
-      "name": "DB_ADDR",
-      "description": "Database address",
-      "default": "stolon-proxy-int",
-      "example": "",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "DB_USER",
-      "description": "PostgreSQL user",
-      "default": "stratos",
-      "example": "stratos",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "DB_PASSWORD",
-      "value": "stratos",
-      "description": "PostgreSQL password for stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "DB_HOST",
-      "description": "PostgreSQL host address",
-      "default": "stolon-proxy-int",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "DB_PORT",
-      "description": "PostgreSQL port",
-      "default": "5432",
-      "example": "5432",
-      "data_type": "string",
-      "required": true,
-      "secret": false
     }
   ],
   "parameters": [
@@ -528,7 +404,7 @@
     },
     {
         "name": "PGSQL_USER",
-        "description": "Postgres usernme",
+        "description": "Postgres username",
         "default": "stolon",
         "example": "stolon",
         "data_type": "string",
@@ -546,7 +422,7 @@
     },
     {
         "name": "PGSQL_DATABASE",
-        "description": "Postgres catabase name",
+        "description": "Postgres database name",
         "default": "portal-db",
         "example": "portal-db",
         "data_type": "string",
@@ -556,8 +432,8 @@
     {
         "name": "PGSQL_HOST",
         "description": "Postgres hostname",
-        "default": "stolon",
-        "example": "stolon",
+        "default": "portal-db",
+        "example": "postal-db",
         "data_type": "string",
         "required": true,
         "secret": false
@@ -615,6 +491,50 @@
         "data_type": "string",
         "required": true,
         "secret": false
+    },
+    {
+        "name": "PGDATA",
+        "description": "placeholder",
+        "default": "/database",
+        "example": "/database",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "DB_USER",
+        "description": "PostgreSQL user",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "DB_HOST",
+        "description": "PostgreSQL host address",
+        "default": "portal-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "DB_PORT",
+        "description": "PostgreSQL port",
+        "default": "5432",
+        "example": "5432",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+       "name": "DB",
+       "description": "PostgreSQL default db ??",
+       "default": "postgres",
+       "example": "postgres",
+       "data_type": "string",
+       "required": true,
+       "secret": false
     },
     {
         "name": "CERT",
@@ -716,6 +636,51 @@
         "description": "Cookie store secret",
         "default": "cookiesecret",
         "example": "cookiesecret",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "DB_PW_FILE",
+        "description": "Database password file",
+        "default": "/etc/secrets/stolon",
+        "example": "/etc/secrets/stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "STRATOS_DB",
+        "description": "Stratos database",
+        "default": "stratos-db",
+        "example": "stratos-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "STRATOS_USER",
+        "description": "Stratos user",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "STRATOS_PWD",
+        "description": "Stratos password",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "SQL",
+        "description": "Initial Stratos database schema",
+        "default": "./20160511195737_InitialSchema.sql",
+        "example": "./20160511195737_InitialSchema.sql",
         "data_type": "string",
         "required": true,
         "secret": false

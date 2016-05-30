@@ -69,6 +69,10 @@
       "value": "stratos-db"
     },
     {
+      "name": "PGDATA",
+      "value": "/database"
+    },
+    {
       "name": "CERT",
       "value": "-----BEGIN CERTIFICATE-----\nMIIExzCCA6+gAwIBAgIJAM7Lg3RUci9qMA0GCSqGSIb3DQEBBQUAMIGdMQswCQYD\nVQQGEwJVUzEXMBUGA1UECBMOU291dGggQ2Fyb2xpbmExEzARBgNVBAcTCkdyZWVu\ndmlsbGUxDDAKBgNVBAoTA0hQRTEOMAwGA1UECxMFQ2xvdWQxGjAYBgNVBAMTEWxv\nY2FsLmV4YW1wbGUuY29tMSYwJAYJKoZIhvcNAQkBFhd3Y2hyaXNqb2huc29uQGdt\nYWlsLmNvbTAeFw0xNjA1MDIyMTU4NDBaFw0xNzA1MDIyMTU4NDBaMIGdMQswCQYD\nVQQGEwJVUzEXMBUGA1UECBMOU291dGggQ2Fyb2xpbmExEzARBgNVBAcTCkdyZWVu\ndmlsbGUxDDAKBgNVBAoTA0hQRTEOMAwGA1UECxMFQ2xvdWQxGjAYBgNVBAMTEWxv\nY2FsLmV4YW1wbGUuY29tMSYwJAYJKoZIhvcNAQkBFhd3Y2hyaXNqb2huc29uQGdt\nYWlsLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKyF0MdJx6no\nDrZprHuy9+SG16to+CmXLIeRl6EBCCa0fYtV0RJNRY4bfPvXeaw5qYSAlQXPWNTY\n/JhViEJQbapnOyx2FZ/vabg/0f2vNfvpiNkYZVDq88cpesj7KlFNYLBS62ai1lTZ\nzJ+JtKS5nsqPmEFUwjvxUFOiWuacuhknDop4QcP/bWMrFUgo45nLVzhC/IL2UbCq\n+juGX7LoFByGq1GKZLZFFOZos9sreaZvd6XsmOHlRGWLCcaVYB1Mx1vdk6HefkYi\najWwUdMd/miazXlN7+HnceaYEbCYnxVZYn1m7rYjlStaroej7bX6Y/qo4lIQMnHA\nEqkjreCkKlECAwEAAaOCAQYwggECMB0GA1UdDgQWBBSv7zHXDfXoH1vWsx/bWuyO\nygCFmTCB0gYDVR0jBIHKMIHHgBSv7zHXDfXoH1vWsx/bWuyOygCFmaGBo6SBoDCB\nnTELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDlNvdXRoIENhcm9saW5hMRMwEQYDVQQH\nEwpHcmVlbnZpbGxlMQwwCgYDVQQKEwNIUEUxDjAMBgNVBAsTBUNsb3VkMRowGAYD\nVQQDExFsb2NhbC5leGFtcGxlLmNvbTEmMCQGCSqGSIb3DQEJARYXd2Nocmlzam9o\nbnNvbkBnbWFpbC5jb22CCQDOy4N0VHIvajAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\nDQEBBQUAA4IBAQAYH60Nv6akwEGrjLGj0/yGCflyFXs0AY5PM8Fx3BQxVp8UD3B/\nXubhvuIbwDn7PFByvKktdqD2N33sGZfsCCKAdphTMecWixsYpX9geNNSoN/yKeaF\n10PWTtZE13HpcIb3V8Hl/sFsXHZSyX0Khz1ykbuSgu8zQAORG7cwnxvKogwsV8ZY\nq4PzD0m3meAWY+iu1tGlHI0sufAlMVT60Mbwh40yB5157NUj8eu7IYNO2a1X4Ca2\nJ9+DuvNYmgvXEqcX3uCquBh7BrOiVp7A0ZE40TjrztNBc6+hXBiFMRIT1LmQW3EM\nBbvJ2JJ8yACev/2iNTYjlU/XtcxXQHUHw+fc\n-----END CERTIFICATE-----"
     },
@@ -115,6 +119,42 @@
     {
       "name": "COOKIE_STORE_SECRET",
       "value": "cookiesecret"
+    },
+    {
+      "name": "DB_HOST",
+      "value": "portal-db"
+    },
+    {
+      "name": "DB",
+      "value": "postgres"
+    },
+    {
+      "name": "DB_PORT",
+      "value": "5432"
+    },
+    {
+      "name": "DB_USER",
+      "value": "stolon"
+    },
+    {
+      "name": "DB_PW_FILE",
+      "value": "/etc/secrets/stolon"
+    },
+    {
+      "name": "STRATOS_DB",
+      "value": "stratos-db"
+    },
+    {
+      "name": "STRATOS_USER",
+      "value": "stratos"
+    },
+    {
+      "name": "STRATOS_PWD",
+      "value": "stratos"
+    },
+    {
+      "name": "SQL",
+      "value": "./20160511195737_InitialSchema.sql"
     }
   ]
 }
