@@ -65,7 +65,17 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 		return err
 	}
 
-	c.String(http.StatusCreated, guid)
+	// set the guid on the object so it's returned in the response
+	newCNSI.GUID = guid
+	jsonString, err := json.Marshal(newCNSI)
+	if err != nil {
+		return err
+	}
+
+	//c.String(http.StatusCreated, guid)
+	c.Response().WriteHeader(http.StatusCreated)
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
 
 	return nil
 }

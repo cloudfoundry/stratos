@@ -24,6 +24,12 @@ type UAAResponse struct {
 	JTI          string `json:"jti"`
 }
 
+type LoginRes struct {
+	UserName    string   `json:"username"`
+	TokenExpiry int64    `json:"token_expiry"`
+	APIEndpoint *url.URL `json:"api_endpoint"`
+}
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 
 	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.Config.UAAEndpoint)
@@ -47,6 +53,19 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	resp := &LoginRes{
+		UserName:    c.FormValue("username"),
+		TokenExpiry: u.TokenExpiry,
+		APIEndpoint: nil,
+	}
+	jsonString, err := json.Marshal(resp)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
 
 	return nil
 }
@@ -92,6 +111,19 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	u.UserGUID = userID
 
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
+
+	resp := &LoginRes{
+		UserName:    c.FormValue("username"),
+		TokenExpiry: u.TokenExpiry,
+		APIEndpoint: cnsiRecord.APIEndpoint,
+	}
+	jsonString, err := json.Marshal(resp)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
 
 	return nil
 }
