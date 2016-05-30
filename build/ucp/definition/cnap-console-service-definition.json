@@ -311,7 +311,175 @@
     }
   ],
   "preflight": [],
-  "postflight": [],
+  "postflight": [
+    {
+      "name": "configuration",
+      "version": "0.1.0",
+      "vendor": "HPE",
+      "external_name": "configuration",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-database-configuration:latest",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "parameters": [
+        {
+          "name": "DB_HOST"
+        },
+        {
+          "name": "DB"
+        },
+        {
+          "name": "DB_PORT"
+        },
+        {
+          "name": "DB_USER"
+        },
+        {
+          "name": "DB_PW_FILE"
+        },
+        {
+          "name": "STRATOS_DB"
+        },
+        {
+          "name": "STRATOS_USER"
+        },
+        {
+          "name": "STRATOS_PWD"
+        },
+        {
+          "name": "SQL"
+        },
+      ],
+      "min_instances": 1,
+      "max_instances": 1,
+      "retry_count": 100
+    }
+    ],
+    "parameters": [
+    {
+      "name": "POSTGRES_DB",
+      "description": "placeholder",
+      "default": "stratos-db",
+      "example": "stratos-db",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "POSTGRES_PASSWORD",
+      "description": "placeholder",
+      "default": "stolon",
+      "example": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "POSTGRES_USER",
+      "description": "placeholder",
+      "default": "stolon",
+      "example": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PGDATA",
+      "description": "placeholder",
+      "default": "/database",
+      "example": "/database",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "MYSQL_ROOT_PASSWORD",
+      "description": "Root password for MySQL",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "MYSQL_DATABASE",
+      "description": "Database name for MySQL",
+      "default": "stratos-db",
+      "example": "stratos-db",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "MYSQL_USER",
+      "description": "Username for MySQL",
+      "default": "stratos",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "MYSQL_PASSWORD",
+      "description": "Password for MySQL",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PORT",
+      "description": "Port number to expose the API on",
+      "default": "3000",
+      "example": "3000",
+      "data_type": "string",
+      "required": false,
+      "secret": false
+    },
+    {
+      "name": "DB_ADDR",
+      "description": "Database address",
+      "default": "stolon-proxy-int",
+      "example": "",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_USER",
+      "description": "PostgreSQL user",
+      "default": "stratos",
+      "example": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_PASSWORD",
+      "value": "stratos",
+      "description": "PostgreSQL password for stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_HOST",
+      "description": "PostgreSQL host address",
+      "default": "stolon-proxy-int",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_PORT",
+      "description": "PostgreSQL port",
+      "default": "5432",
+      "example": "5432",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    }
+  ],
   "parameters": [
     {
         "name": "MYSQL_ROOT_PASSWORD",
