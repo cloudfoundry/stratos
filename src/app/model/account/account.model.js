@@ -12,25 +12,29 @@
     .run(registerAccountModel);
 
   registerAccountModel.$inject = [
+    '$cookies',
     'app.model.modelManager',
     'app.api.apiManager'
   ];
 
-  function registerAccountModel(modelManager, apiManager) {
-    modelManager.register('app.model.account', new Account(apiManager));
+  function registerAccountModel($cookies, modelManager, apiManager) {
+    modelManager.register('app.model.account', new Account($cookies, apiManager));
   }
 
   /**
    * @namespace app.model.account.Account
    * @memberof app.model.account
    * @name app.model.account.Account
+   * @param {object} $cookies - the Angular $cookies service
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @property {object} $cookies - the Angular $cookies service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {object} data - the account data object
    * @class
    */
-  function Account(apiManager) {
+  function Account($cookies, apiManager) {
+    this.$cookies = $cookies;
     this.apiManager = apiManager;
     this.loggedIn = false;
     this.data = {};
@@ -135,6 +139,7 @@
      * @private
      */
     onLoggedOut: function () {
+      this.$cookies.remove('portal-session');
       this.loggedIn = false;
       delete this.data;
     }
