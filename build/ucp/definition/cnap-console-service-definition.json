@@ -342,6 +342,12 @@
         },
         {
           "name": "SQL"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "POSTGRES_PASSWORD"
         }
       ],
       "min_instances": 1,
