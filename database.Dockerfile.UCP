@@ -1,11 +1,12 @@
 FROM ubuntu:14.04
 
-ENV DB_HOST="portal-db" DB="postgres" DB_PORT="5432" DB_USER="stolen" DB_PW_FILE="/etc/secrets/stolon" \
-  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="./20160511195737_InitialSchema.sql"
+ENV DB_HOST="portal-db" DB="postgres" DB_PORT="5432" DB_USER="postgres" \
+  POSTGRES_USER="postgres" POSTGRES_PASSWORD="postgres" \
+  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="InitialSchema.sql"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
 
-COPY /db/run.sh /var/db/
-COPY /db/migrations/20160511195737_InitialSchema.sql /var/db/
+COPY /db/run.sh /
+COPY /db/InitialSchema.sql /
 
-CMD ["/var/db/run.sh"]
+CMD ["/run.sh"]
