@@ -2,21 +2,20 @@
   'use strict';
 
   describe('user service instance model', function () {
-    var $httpBackend, userServiceInstance, mockData;
+    var $httpBackend, $httpParamSerializer, userServiceInstance, mockData;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
+      $httpParamSerializer = $injector.get('$httpParamSerializer');
 
       var modelManager = $injector.get('app.model.modelManager');
       userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
-      mockData = {
-        items: [
-          { name: 'cluster1', url:' cluster1_url' },
-          { name: 'cluster2', url:' cluster2_url' }
-        ]
-      };
+      mockData = [
+        { guid: 'c1', name: 'cluster1', url:' cluster1_url' },
+        { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
+      ];
     }));
 
     afterEach(function () {
@@ -30,17 +29,17 @@
 
     it('should have initial properties defined', function () {
       expect(userServiceInstance.apiManager).toBeDefined();
-      expect(userServiceInstance.serviceInstances).toEqual([]);
+      expect(userServiceInstance.serviceInstances).toEqual({});
       expect(userServiceInstance.numValid).toBe(0);
     });
 
     it('should set `serviceInstances` on list()', function () {
-      var expectedData = [
-        { name: 'cluster1', url:' cluster1_url' },
-        { name: 'cluster2', url:' cluster2_url' }
-      ];
+      var expectedData = {
+        c1: { guid: 'c1', name: 'cluster1', url:' cluster1_url' },
+        c2: { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
+      };
 
-      $httpBackend.when('GET', '/api/service-instances/user')
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered')
         .respond(200, mockData);
 
       userServiceInstance.list().then(function (response) {
@@ -53,19 +52,17 @@
     });
 
     it('should set valid === true for service instance if not expired', function () {
-      var data = {
-        items: [
-          { name: 'cluster1', url:' cluster1_url', expires_at: (new Date()).getTime() + 36000 },
-          { name: 'cluster2', url:' cluster2_url' }
-        ]
-      };
+      var data = [
+        { guid: 'c1', name: 'cluster1', url:' cluster1_url', token_expiry: (new Date()).getTime() + 36000 },
+        { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
+      ];
 
-      $httpBackend.when('GET', '/api/service-instances/user')
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered')
         .respond(200, data);
 
       userServiceInstance.list().then(function () {
         expect(userServiceInstance.numValid).toBe(1);
-        expect(userServiceInstance.serviceInstances[0].valid).toBe(true);
+        expect(userServiceInstance.serviceInstances.c1.valid).toBe(true);
       });
 
       $httpBackend.flush();
@@ -73,32 +70,30 @@
 
     it('should set valid === false for service instance if expired', function () {
       var now = (new Date()).getTime() / 1000;
-      var data = {
-        items: [
-          { name: 'cluster1', url:' cluster1_url', expires_at: now - 1 },
-          { name: 'cluster2', url:' cluster2_url' }
-        ]
-      };
+      var data = [
+        { guid: 'c1', name: 'cluster1', url:' cluster1_url', token_expiry: now - 1 },
+        { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
+      ];
 
-      $httpBackend.when('GET', '/api/service-instances/user')
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered')
         .respond(200, data);
 
       userServiceInstance.list().then(function () {
         expect(userServiceInstance.numValid).toBe(0);
-        expect(userServiceInstance.serviceInstances[0].valid).toBe(false);
+        expect(userServiceInstance.serviceInstances.c1.valid).toBe(false);
       });
 
       $httpBackend.flush();
     });
 
     it('should not set `serviceInstances` on list() and error', function () {
-      $httpBackend.when('GET', '/api/service-instances/user')
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered')
         .respond(403, {});
 
       userServiceInstance.list().then(function () {}, function (error) {
         expect(error.status).toBe(403);
         expect(error.data).toEqual({});
-        expect(userServiceInstance.serviceInstances).toEqual([]);
+        expect(userServiceInstance.serviceInstances).toEqual({});
         expect(userServiceInstance.numValid).toBe(0);
       });
 
@@ -106,8 +101,9 @@
     });
 
     it('should POST correct data on connect()', function () {
-      $httpBackend.expectPOST('/api/service-instances/user/connect', { url: 'url' }).respond(200, '');
-      userServiceInstance.connect('url');
+      var postData = $httpParamSerializer({ cnsi_guid: 'c1', username: 'username', password: 'password' });
+      $httpBackend.expectPOST('/pp/v1/auth/login/cnsi', postData).respond(200, '');
+      userServiceInstance.connect('c1', 'name', 'username', 'password');
       $httpBackend.flush();
     });
 

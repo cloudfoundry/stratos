@@ -1,12 +1,13 @@
 (function () {
   'use strict';
 
-  fdescribe('user service instance API', function () {
-    var $httpBackend, serviceInstanceApi;
+  describe('user service instance API', function () {
+    var $httpBackend, $httpParamSerializer, serviceInstanceApi;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
+      $httpParamSerializer = $injector.get('$httpParamSerializer');
 
       var apiManager = $injector.get('app.api.apiManager');
       serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
@@ -27,7 +28,8 @@
 
     it('should send POST request for create()', function () {
       var mockRespondData = { id: 1, url: 'url', name: 'name' };
-      $httpBackend.expectPOST('/pp/v1/register/hcf', { url: 'url', name: 'name' })
+      var postData = $httpParamSerializer({ api_endpoint: 'url', cnsi_name: 'name' });
+      $httpBackend.expectPOST('/pp/v1/register/hcf', postData)
         .respond(200, mockRespondData);
       serviceInstanceApi.create('url', 'name')
         .then(function (response) {
@@ -37,13 +39,11 @@
     });
 
     it('should return all service instances (master list)', function () {
-      var data = {
-        items: ['x','y','z']
-      };
-      $httpBackend.when('GET', '/api/service-instances').respond(200, data);
+      var data = ['x','y','z'];
+      $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, data);
 
       serviceInstanceApi.list().then(function (response) {
-        expect(response.data).toEqual({items: ['x','y','z']});
+        expect(response.data).toEqual(['x','y','z']);
       });
 
       $httpBackend.flush();

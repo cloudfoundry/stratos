@@ -8,7 +8,7 @@
 
     AssociateAppWithRoute: function (guid, appGuid) {
       return {
-        url: '/api/cf/v2/routes/' + guid + '/apps/' + appGuid,
+        url: '/pp/v1/proxy/v2/routes/' + guid + '/apps/' + appGuid,
 
         response: {
           201: {
@@ -42,7 +42,7 @@
 
     RemoveAppFromRoute: function (guid, appGuid) {
       return {
-        url: '/api/cf/v2/routes/' + guid + '/apps/' + appGuid,
+        url: '/pp/v1/proxy/v2/routes/' + guid + '/apps/' + appGuid,
 
         response: {
 
@@ -59,7 +59,7 @@
 
     DeleteRoute: function (guid) {
       return {
-        url: '/api/cf/v2/routes/' + guid + '?recursive=true',
+        url: '/pp/v1/proxy/v2/routes/' + guid + '?recursive=true',
 
         response: {
 
@@ -76,7 +76,7 @@
 
     ListAllAppsForRoute: function (guid) {
       return {
-        url: '/api/cf/v2/routes/' + guid + '/apps',
+        url: '/pp/v1/proxy/v2/routes/' + guid + '/apps',
 
         response: {
 
