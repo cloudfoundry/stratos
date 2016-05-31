@@ -151,3 +151,8 @@ var mockV2InfoResponse = v2Info{
 	AuthorizationEndpoint: mockAuthEndpoint,
 	TokenEndpoint:         mockTokenEndpoint,
 }
+
+var mockInfoResponse = v2Info{
+	AuthorizationEndpoint: mockAuthEndpoint,
+	TokenEndpoint:         mockTokenEndpoint,
+}
