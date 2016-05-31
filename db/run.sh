@@ -19,7 +19,7 @@ if [ -z "$stratosExists" ] ; then
     execStatement "CREATE DATABASE $STRATOS_DB;"
     execStatement "CREATE USER $STRATOS_USER WITH ENCRYPTED PASSWORD '$STRATOS_PWD';"
     execStatement "GRANT ALL PRIVILEGES ON DATABASE $STRATOS_DB TO $STRATOS_USER;"
-    # execStatementsFromFile "$SQL"
+    execStatementsFromFile "$SQL"
 else
     echo "$STRATOS_DB already exists"
 fi
