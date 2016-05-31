@@ -94,23 +94,15 @@
     },
     {
       "name": "CONSOLE_CLIENT",
-      "value": "portal-proxy"
-    },
-    {
-      "name": "CONSOLE_CLIENT_SECRET",
-      "value": "ohsosecret!"
+      "value": "console"
     },
     {
       "name": "HCF_CLIENT",
-      "value": "portal-proxy"
-    },
-    {
-      "name": "HCF_CLIENT_SECRET",
-      "value": "ohsosecret!"
+      "value": "cf"
     },
     {
       "name": "UAA_ENDPOINT",
-      "value": "https://login.hcf.helion.lol/oauth/token"
+      "value": "http://ident-api.ucp.svc.cluster.ucp:8080/oauth/token"
     },
     {
       "name": "ALLOWED_ORIGINS",
