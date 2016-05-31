@@ -35,7 +35,7 @@
     this.token = null;
 
     // TODO (kdomico): Temporarily retrieve token from env variable in Node server
-    eventService.$on(eventService.events.REDIRECT, function () {
+    eventService.$on(eventService.events.LOGIN, function () {
       that.$http.get('/api/gh/token')
         .then(function (response) {
           that.token = response.data.token;

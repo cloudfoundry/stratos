@@ -39,6 +39,10 @@
 
   angular.extend(GithubModel.prototype, {
 
+    getToken: function () {
+      return this.apiManager.retrieve('cloud-foundry.api.github').token;
+    },
+
     /**
      * @function repos
      * @memberof cloud-foundry.model.github.GithubModel
