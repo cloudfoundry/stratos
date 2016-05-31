@@ -84,8 +84,8 @@
      */
     verifySession: function () {
       if (this.$cookies.get('portal-session')) {
-        return this.$q(function(resolve, reject) {
-          resolve({ data: { username: 'admin', scope: 'hdp3.admin' } });
+        return this.$q(function(resolve) {
+          resolve({ data: { account: 'admin', scope: 'cloud_controller.admin' } });
         });
       }
       return this.$q(function(resolve, reject) {

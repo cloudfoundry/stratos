@@ -37,6 +37,7 @@
    * @memberof app.view
    * @name ServiceRegistrationController
    * @constructor
+   * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
@@ -46,7 +47,6 @@
    */
   function ServiceRegistrationController($scope, modelManager) {
     var that = this;
-    this.$scope = $scope;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -59,11 +59,11 @@
       return that.cnsiModel.serviceInstances;
     }, function (newCnsis) {
       _.forEach(newCnsis, function (cnsi) {
-        var name = cnsi.Name;
-        if (angular.isUndefined(that.serviceInstances[name])) {
-          that.serviceInstances[name] = cnsi;
+        var guid = cnsi.guid;
+        if (angular.isUndefined(that.serviceInstances[guid])) {
+          that.serviceInstances[guid] = cnsi;
         } else {
-          angular.extend(that.serviceInstances[name], cnsi);
+          angular.extend(that.serviceInstances[guid], cnsi);
         }
       });
     });
@@ -122,9 +122,7 @@
       this.credentialsFormOpen = false;
     },
 
-    onConnectSuccess: function (serviceInstance) {
-      angular.extend(this.activeServiceInstance, serviceInstance);
-      this.activeServiceInstance.valid = true;
+    onConnectSuccess: function () {
       this.userCnsiModel.numValid += 1;
       this.credentialsFormOpen = false;
       this.activeServiceInstance = null;

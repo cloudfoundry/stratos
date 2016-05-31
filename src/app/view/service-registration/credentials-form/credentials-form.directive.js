@@ -48,7 +48,6 @@
    * @description Controller for credentialsForm directive that handles
    * service/cluster registration
    * @constructor
-   * @param {object} $scope - this controller's directive scope
    * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.event.eventService} eventService - the application event bus
@@ -92,14 +91,17 @@
     connect: function () {
       var that = this;
       this.authenticating = true;
-      this.serviceInstanceModel.connect(this.cnsi.GUID, this.cnsi.Name, this._data.username, this._data.password)
+      this.serviceInstanceModel.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password)
         .then(function success(response) {
           that.reset();
           if (angular.isDefined(that.onSubmit)) {
             that.onSubmit({ serviceInstance: response.data });
           }
         }, function (err) {
-          console.log(err);
+          if (err.status === 400) {
+            that.failedRegister = true;
+            that.authenticating = false;
+          }
         });
     },
 
