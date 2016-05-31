@@ -89,11 +89,20 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredClust
 	clusterList = make([]*RegisteredCluster, 0)
 
 	for rows.Next() {
+		var (
+			pURL string
+		)
+
 		cluster := new(RegisteredCluster)
-		err := rows.Scan(&cluster.GUID, &cluster.Name, &cluster.APIEndpoint, &cluster.Account, &cluster.TokenExpiry)
+		err := rows.Scan(&cluster.GUID, &cluster.Name, &pURL, &cluster.Account, &cluster.TokenExpiry)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan cluster records: %v", err)
 		}
+
+		if cluster.APIEndpoint, err = url.Parse(pURL); err != nil {
+			return nil, fmt.Errorf("Unable to parse API Endpoint: %v", err)
+		}
+
 		clusterList = append(clusterList, cluster)
 	}
 
