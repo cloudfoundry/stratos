@@ -17,7 +17,7 @@
   ];
 
   function registerApplicationModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.application', new Application(apiManager));
+    modelManager.register('cloud-foundry.model.application', new Application(apiManager, modelManager));
   }
 
   /**
@@ -31,9 +31,12 @@
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @class
    */
-  function Application(apiManager) {
+  function Application(apiManager, modelManager) {
     this.apiManager = apiManager;
+    this.modelManager = modelManager;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
+    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.cnsiList = [] // TODO: this should be a list of the CNSI GUIDs
     this.data = {};
     this.application = {
       summary: {
@@ -56,7 +59,13 @@
      **/
     all: function (guid, options) {
       var that = this;
-      return this.applicationApi.ListAllApps(guid, options)
+      var cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
+                   .values()
+                   .map('guid')
+                   .value();
+      // TODO: use the list of CNSIs at this.cnsiList here instead of hard-coding a GUID
+      // they need to be comma separated values, no spaces
+      return this.applicationApi.ListAllApps(options, {headers: { 'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
           that.onAll(response);
         });

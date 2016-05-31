@@ -103,9 +103,12 @@
      * @returns {boolean} True if this user is an ITOps admin
      */
     isAdmin: function () {
-      var ADMIN_SCOPE = 'cloud_controller.admin';
+      var ADMIN_SCOPES = [
+        'cloud_controller.admin',
+        'ucp.admin'
+      ];
       return angular.isDefined(this.data.scope) &&
-        _.indexOf(this.data.scope, ADMIN_SCOPE) >= 0;
+        _.intersection(this.data.scope, ADMIN_SCOPES).length > 0;
     },
 
     /**
@@ -117,10 +120,11 @@
      */
     onLoggedIn: function (response) {
       this.loggedIn = true;
+
       var loginRes = response.data;
       this.data = {
         username: loginRes.account,
-        scope: loginRes.scope.split(' ')
+        scope: loginRes.scope ? loginRes.scope.split(' ') : []
       };
     },
 
