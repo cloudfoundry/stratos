@@ -25,327 +25,435 @@
 
    /*
     * Associate Audited Organization with the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/associate_audited_organization_with_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_audited_organization_with_the_user.html
     */
-    AssociateAuditedOrganizationWithUser: function (guid, audited_organization_guid, params) {
+    AssociateAuditedOrganizationWithUser: function (guid, audited_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Associate Audited Space with the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/associate_audited_space_with_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_audited_space_with_the_user.html
     */
-    AssociateAuditedSpaceWithUser: function (guid, audited_space_guid, params) {
+    AssociateAuditedSpaceWithUser: function (guid, audited_space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Associate Billing Managed Organization with the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/associate_billing_managed_organization_with_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_billing_managed_organization_with_the_user.html
     */
-    AssociateBillingManagedOrganizationWithUser: function (guid, billing_managed_organization_guid, params) {
+    AssociateBillingManagedOrganizationWithUser: function (guid, billing_managed_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Associate Managed Organization with the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/associate_managed_organization_with_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_managed_organization_with_the_user.html
     */
-    AssociateManagedOrganizationWithUser: function (guid, managed_organization_guid, params) {
+    AssociateManagedOrganizationWithUser: function (guid, managed_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Associate Managed Space with the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/associate_managed_space_with_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_managed_space_with_the_user.html
     */
-    AssociateManagedSpaceWithUser: function (guid, managed_space_guid, params) {
+    AssociateManagedSpaceWithUser: function (guid, managed_space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Associate Organization with the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/associate_organization_with_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_organization_with_the_user.html
     */
-    AssociateOrganizationWithUser: function (guid, organization_guid, params) {
+    AssociateOrganizationWithUser: function (guid, organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/organizations/' + organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/organizations/' + organization_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Associate Space with the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/associate_space_with_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/associate_space_with_the_user.html
     */
-    AssociateSpaceWithUser: function (guid, space_guid, params) {
+    AssociateSpaceWithUser: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/spaces/' + space_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Creating a User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/creating_a_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/creating_a_user.html
     */
-    CreateUser: function (value, params) {
+    CreateUser: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users';
+      config.url = '/pp/v1/proxy/v2/users';
       config.method = 'POST';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Delete a Particular User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/delete_a_particular_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/delete_a_particular_user.html
     */
-    DeleteUser: function (guid, params) {
+    DeleteUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Get User summary
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/get_user_summary.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/get_user_summary.html
     */
-    GetUserSummary: function (guid, params) {
+    GetUserSummary: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/summary';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/summary';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Audited Organizations for the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/list_all_audited_organizations_for_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_audited_organizations_for_the_user.html
     */
-    ListAllAuditedOrganizationsForUser: function (guid, params) {
+    ListAllAuditedOrganizationsForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/audited_organizations';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_organizations';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Audited Spaces for the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/list_all_audited_spaces_for_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_audited_spaces_for_the_user.html
     */
-    ListAllAuditedSpacesForUser: function (guid, params) {
+    ListAllAuditedSpacesForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/audited_spaces';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_spaces';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Billing Managed Organizations for the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/list_all_billing_managed_organizations_for_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_billing_managed_organizations_for_the_user.html
     */
-    ListAllBillingManagedOrganizationsForUser: function (guid, params) {
+    ListAllBillingManagedOrganizationsForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/billing_managed_organizations';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/billing_managed_organizations';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Managed Organizations for the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/list_all_managed_organizations_for_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_managed_organizations_for_the_user.html
     */
-    ListAllManagedOrganizationsForUser: function (guid, params) {
+    ListAllManagedOrganizationsForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/managed_organizations';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_organizations';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Managed Spaces for the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/list_all_managed_spaces_for_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_managed_spaces_for_the_user.html
     */
-    ListAllManagedSpacesForUser: function (guid, params) {
+    ListAllManagedSpacesForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/managed_spaces';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_spaces';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Organizations for the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/list_all_organizations_for_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_organizations_for_the_user.html
     */
-    ListAllOrganizationsForUser: function (guid, params) {
+    ListAllOrganizationsForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/organizations';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/organizations';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Spaces for the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/list_all_spaces_for_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_spaces_for_the_user.html
     */
-    ListAllSpacesForUser: function (guid, params) {
+    ListAllSpacesForUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/spaces';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/spaces';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Users
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/list_all_users.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/list_all_users.html
     */
-    ListAllUsers: function (params) {
+    ListAllUsers: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users';
+      config.url = '/pp/v1/proxy/v2/users';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove Audited Organization from the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/remove_audited_organization_from_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_audited_organization_from_the_user.html
     */
-    RemoveAuditedOrganizationFromUser: function (guid, audited_organization_guid, params) {
+    RemoveAuditedOrganizationFromUser: function (guid, audited_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_organizations/' + audited_organization_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove Audited Space from the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/remove_audited_space_from_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_audited_space_from_the_user.html
     */
-    RemoveAuditedSpaceFromUser: function (guid, audited_space_guid, params) {
+    RemoveAuditedSpaceFromUser: function (guid, audited_space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/audited_spaces/' + audited_space_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove Billing Managed Organization from the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/remove_billing_managed_organization_from_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_billing_managed_organization_from_the_user.html
     */
-    RemoveBillingManagedOrganizationFromUser: function (guid, billing_managed_organization_guid, params) {
+    RemoveBillingManagedOrganizationFromUser: function (guid, billing_managed_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/billing_managed_organizations/' + billing_managed_organization_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove Managed Organization from the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/remove_managed_organization_from_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_managed_organization_from_the_user.html
     */
-    RemoveManagedOrganizationFromUser: function (guid, managed_organization_guid, params) {
+    RemoveManagedOrganizationFromUser: function (guid, managed_organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_organizations/' + managed_organization_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove Managed Space from the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/remove_managed_space_from_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_managed_space_from_the_user.html
     */
-    RemoveManagedSpaceFromUser: function (guid, managed_space_guid, params) {
+    RemoveManagedSpaceFromUser: function (guid, managed_space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/managed_spaces/' + managed_space_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove Organization from the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/remove_organization_from_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_organization_from_the_user.html
     */
-    RemoveOrganizationFromUser: function (guid, organization_guid, params) {
+    RemoveOrganizationFromUser: function (guid, organization_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/organizations/' + organization_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/organizations/' + organization_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove Space from the User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/remove_space_from_the_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/remove_space_from_the_user.html
     */
-    RemoveSpaceFromUser: function (guid, space_guid, params) {
+    RemoveSpaceFromUser: function (guid, space_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '/spaces/' + space_guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '/spaces/' + space_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Retrieve a Particular User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/retrieve_a_particular_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/retrieve_a_particular_user.html
     */
-    RetrieveUser: function (guid, params) {
+    RetrieveUser: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Updating a User
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/users/updating_a_user.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/users/updating_a_user.html
     */
-    UpdateUser: function (guid, value, params) {
+    UpdateUser: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/users/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/users/' + guid + '';
       config.method = 'PUT';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

@@ -25,111 +25,147 @@
 
    /*
     * Associate Route with the User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/associate_route_with_the_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/associate_route_with_the_user_provided_service_instance.html
     */
-    AssociateRouteWithUserProvidedServiceInstance: function (guid, route_guid, params) {
+    AssociateRouteWithUserProvidedServiceInstance: function (guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instances/' + guid + '/routes/' + route_guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '/routes/' + route_guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Creating a User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/creating_a_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/creating_a_user_provided_service_instance.html
     */
-    CreateUserProvidedServiceInstance: function (value, params) {
+    CreateUserProvidedServiceInstance: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instances';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances';
       config.method = 'POST';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Delete a Particular User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/delete_a_particular_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/delete_a_particular_user_provided_service_instance.html
     */
-    DeleteUserProvidedServiceInstance: function (guid, params) {
+    DeleteUserProvidedServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Routes for the User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/list_all_routes_for_the_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/list_all_routes_for_the_user_provided_service_instance.html
     */
-    ListAllRoutesForUserProvidedServiceInstance: function (guid, params) {
+    ListAllRoutesForUserProvidedServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instances/' + guid + '/routes';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '/routes';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Service Bindings for the User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/list_all_service_bindings_for_the_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/list_all_service_bindings_for_the_user_provided_service_instance.html
     */
-    ListAllServiceBindingsForUserProvidedServiceInstance: function (guid, params) {
+    ListAllServiceBindingsForUserProvidedServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instances/' + guid + '/service_bindings';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '/service_bindings';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all User Provided Service Instances
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/list_all_user_provided_service_instances.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/list_all_user_provided_service_instances.html
     */
-    ListAllUserProvidedServiceInstances: function (params) {
+    ListAllUserProvidedServiceInstances: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instances';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Remove Route from the User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/remove_route_from_the_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/remove_route_from_the_user_provided_service_instance.html
     */
-    RemoveRouteFromUserProvidedServiceInstance: function (guid, route_guid, params) {
+    RemoveRouteFromUserProvidedServiceInstance: function (guid, route_guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instance/' + guid + '/routes/' + route_guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instance/' + guid + '/routes/' + route_guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Retrieve a Particular User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/retrieve_a_particular_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/retrieve_a_particular_user_provided_service_instance.html
     */
-    RetrieveUserProvidedServiceInstance: function (guid, params) {
+    RetrieveUserProvidedServiceInstance: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Updating a User Provided Service Instance
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/user_provided_service_instances/updating_a_user_provided_service_instance.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/user_provided_service_instances/updating_a_user_provided_service_instance.html
     */
-    UpdateUserProvidedServiceInstance: function (guid, value, params) {
+    UpdateUserProvidedServiceInstance: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/user_provided_service_instances/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/user_provided_service_instances/' + guid + '';
       config.method = 'PUT';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 
