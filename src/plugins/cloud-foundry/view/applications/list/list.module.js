@@ -38,9 +38,9 @@
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
-    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
 
-    this.cnsiModel.list().then(function () {
+    this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.userCnsiModel.list().then(function () {
       that.model.all();
     });
   }
