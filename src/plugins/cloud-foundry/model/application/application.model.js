@@ -59,9 +59,12 @@
      **/
     all: function (guid, options) {
       var that = this;
+      var cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
+                   .filter({ cnsi_type: 'hcf' })
+                   .map('guid');
       // TODO: use the list of CNSIs at this.cnsiList here instead of hard-coding a GUID
       // they need to be comma separated values, no spaces
-      return this.applicationApi.ListAllApps(options, {headers: { 'x-cnap-cnsi-list': "c37d2ce4-ec71-449b-a091-f2da1bb4e1b1"}})
+      return this.applicationApi.ListAllApps(options, {headers: { 'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
           that.onAll(response);
         });

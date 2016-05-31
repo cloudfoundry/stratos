@@ -35,9 +35,14 @@
    * @property {app.event.eventService} eventService - the event bus service
    */
   function ApplicationsListController(modelManager, eventService) {
+    var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
-    this.model.all();
+    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
+
+    this.cnsiModel.list().then(function () {
+      that.model.all();
+    });
   }
 
   angular.extend(ApplicationsListController.prototype, {
