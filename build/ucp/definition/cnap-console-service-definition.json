@@ -289,9 +289,6 @@
       "volume_mounts": [],
       "parameters": [
         {
-          "name": "POSTGRES_DB"
-        },
-        {
           "name": "POSTGRES_PASSWORD"
         },
         {
