@@ -100,24 +100,25 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 			"Failed to get API Endpoint: %v", err)
 	}
 
-	infoResponse, err := getHCEInfo(apiEndpoint)
-	if err != nil {
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to get endpoint 'info'",
-			"Failed to get api endpoint 'info': %v",
-			err)
-	}
+	// HCE doesn't provide this yet
+	//	infoResponse, err := getHCEInfo(apiEndpoint)
+	//	if err != nil {
+	//		return newHTTPShadowError(
+	//			http.StatusBadRequest,
+	//			"Failed to get endpoint 'info'",
+	//			"Failed to get api endpoint 'info': %v",
+	//			err)
+	//	}
 
 	guid := uuid.NewV4().String()
 
 	// save data to temporary map
 	newCNSI := cnsis.CNSIRecord{
-		Name:                  cnsiName,
-		CNSIType:              cnsis.CNSIHCE,
-		APIEndpoint:           apiEndpointURL,
-		TokenEndpoint:         infoResponse.TokenEndpoint,
-		AuthorizationEndpoint: infoResponse.AuthorizationEndpoint,
+		Name:        cnsiName,
+		CNSIType:    cnsis.CNSIHCE,
+		APIEndpoint: apiEndpointURL,
+		//		TokenEndpoint:         infoResponse.TokenEndpoint,
+		//		AuthorizationEndpoint: infoResponse.AuthorizationEndpoint,
 	}
 
 	err = p.setCNSIRecord(guid, newCNSI)
