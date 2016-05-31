@@ -41,6 +41,10 @@ function buildAndPublishImage {
   popd
 }
 
+# Cleanup prior to generating the UI container
+rm -rf ${__DIRNAME}/../../stratos-ui/dist
+rm -rf ${__DIRNAME}/../../stratos-server/dist
+
 # Build and publish all of the images for Stratos Console UI
 buildAndPublishImage cnap-console-db Dockerfile.UCP  ${__DIRNAME}/../../stratos-identity-db
 buildAndPublishImage cnap-console-mock-api Dockerfile.mock_api.UCP ${__DIRNAME}/../../stratos-node-server
