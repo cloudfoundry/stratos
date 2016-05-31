@@ -114,7 +114,7 @@
     },
     {
       "name": "ALLOWED_ORIGINS",
-      "value": "https://localhost,https://127.0.0.1"
+      "value": "http://192.168.200.3,https://192.168.200.3,http://172.17.27.1,https://172.17.27.1,http://10.254.248.45,https://10.254.248.45"
     },
     {
       "name": "COOKIE_STORE_SECRET",
@@ -154,7 +154,7 @@
     },
     {
       "name": "SQL",
-      "value": "./20160511195737_InitialSchema.sql"
+      "value": "./InitialSchema.sql"
     }
   ]
 }

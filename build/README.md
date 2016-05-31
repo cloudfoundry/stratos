@@ -14,7 +14,7 @@ $ curl -Ss http://192.168.200.2:8080/api/v1/namespaces/ucp/services/ipmgr | jq '
 $ curl -X DELETE http://192.168.200.3:<port>/v1/instances/cnapconsole
 ```
 
-3. To get logs for a container when Kubernetes UI doesn't show it
+3. To see more details information than what the Kubernetes Dashboard provides
 
 ```
 # SSH to the node VM
@@ -25,4 +25,7 @@ node$ sudo docker ps -a
 
 # Get the log of a specific container
 node$ docker logs 4499d41872a2
+
+# Inspect a container to view ENV vars, etc.
+node$ sudo docker inspect d48da0be6e66
 ```

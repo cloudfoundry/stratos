@@ -177,10 +177,10 @@
       ]
     },
     {
-      "name": "cnap-console-proxy",
+      "name": "pp",
       "version": "1.0.0",
       "vendor": "HPE",
-      "external_name": "cnap-console-proxy",
+      "external_name": "pp",
       "image": "docker-registry.helion.space:443/helioncf/cnap-console-proxy:latest",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
@@ -193,15 +193,8 @@
         {
           "name": "proxy",
           "protocol": "TCP",
-          "source_port": 80,
-          "target_port": 80,
-          "public": true
-        },
-        {
-          "name": "proxy-443",
-          "protocol": "TCP",
-          "source_port": 443,
-          "target_port": 443,
+          "source_port": 3003,
+          "target_port": 3003,
           "public": true
         }
       ],
@@ -679,8 +672,8 @@
     {
         "name": "SQL",
         "description": "Initial Stratos database schema",
-        "default": "./20160511195737_InitialSchema.sql",
-        "example": "./20160511195737_InitialSchema.sql",
+        "default": "./InitialSchema.sql",
+        "example": "./InitialSchema.sql",
         "data_type": "string",
         "required": true,
         "secret": false
