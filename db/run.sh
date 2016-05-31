@@ -3,13 +3,16 @@ set -e
 
 execStatement() {
     stmt=$1
-    psql -U postgres -h $DB_HOST -p $DB_PORT -d $DB -w -tc "$stmt"
+    PGPASSFILE=/tmp/pgpass -U postgres -h $DB_HOST -p $DB_PORT -d $DB -w -tc "$stmt"
 }
 
 execStatementsFromFile() {
     file=$1
-    PGPASSWORD='stratos' psql -U $STRATOS_USER -h $DB_HOST -p $DB_PORT -d $STRATOS_DB -w -f "$file"
+    PGPASSFILE=/tmp/pgpass psql -U $STRATOS_USER -h $DB_HOST -p $DB_PORT -d $STRATOS_DB -w -f "$file"
 }
+
+echo "$DB_HOST:$DB_PORT:$DB:$DB_USER:$POSTGRES_PASSWORD" > /tmp/pgpass
+chmod 0600 /tmp/pgpass
 
 stratosExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$STRATOS_DB';")
 if [ -z "$stratosExists" ] ; then
