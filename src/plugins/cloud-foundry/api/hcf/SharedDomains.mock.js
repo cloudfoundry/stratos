@@ -8,7 +8,7 @@
 
     FilterSharedDomainsByName: function () {
       return {
-        url: '/api/cf/v2/shared_domains',
+        url: '/pp/v1/proxy/v2/shared_domains',
 
         response: {
 
@@ -49,7 +49,7 @@
 
     ListAllSharedDomains: function () {
       return {
-        url: '/api/cf/v2/shared_domains',
+        url: '/pp/v1/proxy/v2/shared_domains',
 
         response: {
 
@@ -124,7 +124,7 @@
       /* eslint-enable */
 
       return {
-        url: '/api/cf/v2/shared_domains/' + guid + '',
+        url: '/pp/v1/proxy/v2/shared_domains/' + guid + '',
 
         response: {
 

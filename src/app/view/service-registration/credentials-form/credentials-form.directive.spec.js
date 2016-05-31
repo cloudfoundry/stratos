@@ -55,7 +55,7 @@
           account: 'cluster1_password',
           expires_at: 3600
         };
-        $httpBackend.when('POST', '/api/service-instances/user/connect').respond(200, mockResponse);
+        $httpBackend.when('POST', '/pp/v1/auth/login/cnsi').respond(200, mockResponse);
 
         credentialsFormCtrl.connect();
         $httpBackend.flush();
@@ -146,7 +146,7 @@
           account: 'dev',
           expires_at: 3600
         };
-        $httpBackend.when('POST', '/api/service-instances/user/connect').respond(200, mockResponse);
+        $httpBackend.when('POST', '/pp/v1/auth/login/cnsi').respond(200, mockResponse);
 
         credentialsFormCtrl.connect();
         $httpBackend.flush();

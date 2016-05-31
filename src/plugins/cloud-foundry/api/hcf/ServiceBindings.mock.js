@@ -8,7 +8,7 @@
 
     DeleteServiceBinding: function (guid) {
       return {
-        url: '/api/cf/v2/service_bindings/' + guid,
+        url: '/pp/v1/proxy/v2/service_bindings/' + guid,
 
         response: {
 
@@ -25,7 +25,7 @@
 
     ListAllServiceBindings: function () {
       return {
-        url: '/api/cf/v2/service_bindings',
+        url: '/pp/v1/proxy/v2/service_bindings',
 
         response: {
 

@@ -59,7 +59,7 @@
         url: 'url',
         name: 'name'
       };
-      $httpBackend.when('POST', '/api/service-instances').respond(200, mockResponse);
+      $httpBackend.when('POST', '/pp/v1/register/hcf').respond(200, mockResponse);
 
       addClusterFormCtrl.url = 'url';
       addClusterFormCtrl.name = 'name';
@@ -72,7 +72,7 @@
     });
 
     it('should not add cluster on error on addCluster()', function () {
-      $httpBackend.when('POST', '/api/service-instances').respond(500, {});
+      $httpBackend.when('POST', '/pp/v1/register/hcf').respond(500, {});
 
       addClusterFormCtrl.addCluster();
       $httpBackend.flush();
