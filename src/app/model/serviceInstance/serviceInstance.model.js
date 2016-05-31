@@ -83,9 +83,9 @@
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
       return serviceInstanceApi.list()
         .then(function (response) {
-          var items = response.data.items || [];
+          var items = response.data || [];
           that.serviceInstances.length = 0;
-          [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
+          [].push.apply(that.serviceInstances, _.sortBy(items, 'Name'));
 
           return {
             numAvailable: that.serviceInstances.length

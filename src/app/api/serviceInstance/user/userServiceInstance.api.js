@@ -13,11 +13,13 @@
 
   registerUserServiceInstanceApi.$inject = [
     '$http',
+    '$httpParamSerializer',
     'app.api.apiManager'
   ];
 
-  function registerUserServiceInstanceApi($http, apiManager) {
-    apiManager.register('app.api.serviceInstance.user', new UserServiceInstanceApi($http));
+  function registerUserServiceInstanceApi($http, $httpParamSerializer, apiManager) {
+    apiManager.register('app.api.serviceInstance.user',
+      new UserServiceInstanceApi($http, $httpParamSerializer));
   }
 
   /**
@@ -25,11 +27,14 @@
    * @memberof app.api.serviceInstance.user
    * @name UserServiceInstanceApi
    * @param {object} $http - the Angular $http service
+   * @param {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @property {object} $http - the Angular $http service
+   * @property {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @class
    */
-  function UserServiceInstanceApi($http) {
+  function UserServiceInstanceApi($http, $httpParamSerializer) {
     this.$http = $http;
+    this.$httpParamSerializer = $httpParamSerializer;
   }
 
   angular.extend(UserServiceInstanceApi.prototype, {
@@ -41,8 +46,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (url) {
-      return this.$http.post('/api/service-instances/user/connect', { url: url });
+    connect: function (guid, username, password) {
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var data = this.$httpParamSerializer({ cnsi_guid: guid, username: username, password: password });
+      return this.$http.post('/pp/v1/auth/login/cnsi', data, config);
     },
 
     /**
@@ -65,7 +76,7 @@
      * @public
      */
     list: function () {
-      return this.$http.get('/api/service-instances/user');
+      return this.$http.get('/pp/v1/cnsis/registered');
     },
 
     /**

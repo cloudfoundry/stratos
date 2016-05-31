@@ -13,13 +13,14 @@
 
   registerAccountApi.$inject = [
     '$http',
+    '$httpParamSerializer',
     '$q',
     '$cookies',
     'app.api.apiManager'
   ];
 
-  function registerAccountApi($http, $q, $cookies, apiManager) {
-    apiManager.register('app.api.account', new AccountApi($http, $q, $cookies));
+  function registerAccountApi($http, $httpParamSerializer, $q, $cookies, apiManager) {
+    apiManager.register('app.api.account', new AccountApi($http, $httpParamSerializer, $q, $cookies));
   }
 
   /**
@@ -27,15 +28,18 @@
    * @memberof app.api.account
    * @name app.model.account.AccountApi
    * @param {object} $http - the Angular $http service
+   * @param {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @param {object} $q - the Angular Promise service
    * @param {object} $cookies - the Angular cookies service
    * @property {object} $http - the Angular $http service
+   * @property {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @property {object} $q - the Angular Promise service
    * @property {object} $cookies - the Angular cookies service
    * @class
    */
-  function AccountApi($http, $q, $cookies) {
+  function AccountApi($http, $httpParamSerializer, $q, $cookies) {
     this.$http = $http;
+    this.$httpParamSerializer = $httpParamSerializer;
     this.$q = $q;
     this.$cookies = $cookies;
   }
@@ -51,10 +55,13 @@
      * @public
      */
     login: function (username, password) {
-      return this.$http.post('/api/auth/login/', {
-        username: username,
-        password: password
-      });
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var data = this.$httpParamSerializer({ username: username, password: password });
+      return this.$http.post('/pp/v1/auth/login/uaa', data, config);
     },
 
     /**
@@ -65,7 +72,7 @@
      * @public
      */
     logout: function () {
-      return this.$http.get('/api/auth/logout');
+      return this.$http.post('/pp/v1/auth/logout');
     },
 
     /**
@@ -76,8 +83,10 @@
      * @public
      */
     verifySession: function () {
-      if (this.$cookies.get('session_id')) {
-        return this.$http.get('/api/auth/verify-session');
+      if (this.$cookies.get('portal-session')) {
+        return this.$q(function(resolve, reject) {
+          resolve({ data: { username: 'admin', scope: 'hdp3.admin' } });
+        });
       }
       return this.$q(function(resolve, reject) {
         reject({});
