@@ -16,20 +16,21 @@ const (
 
 // CNSIRecord - <TBD>
 type CNSIRecord struct {
-	GUID                  string
-	Name                  string
-	CNSIType              CNSIType
-	APIEndpoint           *url.URL
-	AuthorizationEndpoint string
-	TokenEndpoint         string
+	GUID                  string   `json:"guid"`
+	Name                  string   `json:"name"`
+	CNSIType              CNSIType `json:"cnsi_type"`
+	APIEndpoint           *url.URL `json:"api_endpoint"`
+	AuthorizationEndpoint string   `json:"authorization_endpoint"`
+	TokenEndpoint         string   `json:"token_endpoint"`
 }
 
 // RegisteredCluster - <TBD>
 type RegisteredCluster struct {
-	Name        string
-	URL         string
-	Account     string
-	TokenExpiry int64
+	GUID        string   `json:"guid"`
+	Name        string   `json:"name"`
+	APIEndpoint *url.URL `json:"api_endpoint"`
+	Account     string   `json:"account"`
+	TokenExpiry int64    `json:"token_expiry"`
 }
 
 // Repository is an application of the repository pattern for storing CNSI Records

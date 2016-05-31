@@ -24,10 +24,12 @@ type UAAResponse struct {
 	JTI          string `json:"jti"`
 }
 
+// LoginRes - <TBD>
 type LoginRes struct {
-	UserName    string   `json:"username"`
+	Account     string   `json:"account"`
 	TokenExpiry int64    `json:"token_expiry"`
 	APIEndpoint *url.URL `json:"api_endpoint"`
+	Scope       string   `json:"scope"`
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -55,9 +57,10 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	}
 
 	resp := &LoginRes{
-		UserName:    c.FormValue("username"),
+		Account:     c.FormValue("username"),
 		TokenExpiry: u.TokenExpiry,
 		APIEndpoint: nil,
+		Scope:       uaaRes.Scope,
 	}
 	jsonString, err := json.Marshal(resp)
 	if err != nil {
@@ -113,9 +116,10 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 
 	resp := &LoginRes{
-		UserName:    c.FormValue("username"),
+		Account:     u.UserGUID,
 		TokenExpiry: u.TokenExpiry,
 		APIEndpoint: cnsiRecord.APIEndpoint,
+		Scope:       uaaRes.Scope,
 	}
 	jsonString, err := json.Marshal(resp)
 	if err != nil {

@@ -11,7 +11,7 @@ const (
 	listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
                FROM cnsis`
 
-	listCNSIsByUser = `SELECT c.name, c.api_endpoint, t.user_guid, t.token_expiry
+	listCNSIsByUser = `SELECT c.guid, c.name, c.api_endpoint, t.user_guid, t.token_expiry
                      FROM cnsis c, tokens t
                      WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2`
 
@@ -90,7 +90,7 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredClust
 
 	for rows.Next() {
 		cluster := new(RegisteredCluster)
-		err := rows.Scan(&cluster.Name, &cluster.URL, &cluster.Account, &cluster.TokenExpiry)
+		err := rows.Scan(&cluster.GUID, &cluster.Name, &cluster.APIEndpoint, &cluster.Account, &cluster.TokenExpiry)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan cluster records: %v", err)
 		}
