@@ -570,8 +570,8 @@
     {
         "name": "TLS_ADDRESS",
         "description": "TLS Address",
-        "default": ":8080",
-        "example": ":8080",
+        "default": ":3003",
+        "example": ":3003",
         "data_type": "string",
         "required": true,
         "secret": false

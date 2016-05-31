@@ -90,7 +90,7 @@
     },
     {
       "name": "TLS_ADDRESS",
-      "value": ":8080"
+      "value": ":3003"
     },
     {
       "name": "CONSOLE_CLIENT",
