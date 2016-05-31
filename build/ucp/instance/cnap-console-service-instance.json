@@ -42,7 +42,7 @@
     },
     {
       "name": "PGSQL_HOST",
-      "value": "cnap-postgresql"
+      "value": "portal-db"
     },
     {
       "name": "PGSQL_PORT",
