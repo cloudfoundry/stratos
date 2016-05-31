@@ -10,7 +10,8 @@
   function applicationGalleryCard() {
     return {
       bindToController: {
-        app: '='
+        app: '=',
+        cnsiGuid: '='
       },
       controller: ApplicationGalleryCardController,
       controllerAs: 'applicationGalleryCardCtrl',
