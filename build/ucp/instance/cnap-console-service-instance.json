@@ -129,7 +129,7 @@
       "value": "postgres"
     },
     {
-      "name": "DB_PORT",
+      "name": "CFGDB_PORT",
       "value": "5432"
     },
     {

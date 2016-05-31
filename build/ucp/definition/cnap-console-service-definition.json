@@ -323,7 +323,7 @@
           "name": "DB"
         },
         {
-          "name": "DB_PORT"
+          "name": "CFGDB_PORT"
         },
         {
           "name": "DB_USER"
@@ -518,7 +518,7 @@
         "secret": false
     },
     {
-        "name": "DB_PORT",
+        "name": "CFGDB_PORT",
         "description": "PostgreSQL port",
         "default": "5432",
         "example": "5432",
