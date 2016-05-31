@@ -576,8 +576,8 @@
     {
         "name": "CONSOLE_CLIENT",
         "description": "Console client",
-        "default": "portal-proxy",
-        "example": "portal-proxy",
+        "default": "console",
+        "example": "console",
         "data_type": "string",
         "required": true,
         "secret": false
@@ -585,8 +585,8 @@
     {
         "name": "CONSOLE_CLIENT_SECRET",
         "description": "Console client secret",
-        "default": "ohsosecret!",
-        "example": "ohsosecret!",
+        "default": "",
+        "example": "",
         "data_type": "string",
         "required": true,
         "secret": false
@@ -594,8 +594,8 @@
     {
         "name": "HCF_CLIENT",
         "description": "HCF client",
-        "default": "portal-proxy",
-        "example": "portal-proxy",
+        "default": "cf",
+        "example": "cf",
         "data_type": "string",
         "required": true,
         "secret": false
@@ -603,8 +603,8 @@
     {
         "name": "HCF_CLIENT_SECRET",
         "description": "HCF client secret",
-        "default": "ohsosecret!",
-        "example": "ohsosecret!",
+        "default": "",
+        "example": "",
         "data_type": "string",
         "required": true,
         "secret": false
