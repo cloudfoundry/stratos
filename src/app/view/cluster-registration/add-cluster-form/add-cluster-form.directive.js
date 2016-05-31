@@ -40,6 +40,7 @@
    * @memberof app.view
    * @name AddClusterFormController
    * @constructor
+   * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {string} url - the cluster endpoint
@@ -59,7 +60,7 @@
     }, function (newCnsis) {
       that.existingApiEndpoints = _.map(newCnsis,
                                         function (c) {
-                                          var endpoint = c.APIEndpoint;
+                                          var endpoint = c.api_endpoint;
                                           return endpoint.Scheme + '://' + endpoint.Host;
                                         });
     });

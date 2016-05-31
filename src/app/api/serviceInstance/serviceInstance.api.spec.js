@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('user service instance API', function () {
+  fdescribe('user service instance API', function () {
     var $httpBackend, serviceInstanceApi;
 
     beforeEach(module('green-box-console'));
@@ -27,7 +27,7 @@
 
     it('should send POST request for create()', function () {
       var mockRespondData = { id: 1, url: 'url', name: 'name' };
-      $httpBackend.expectPOST('/api/service-instances', { url: 'url', name: 'name' })
+      $httpBackend.expectPOST('/pp/v1/register/hcf', { url: 'url', name: 'name' })
         .respond(200, mockRespondData);
       serviceInstanceApi.create('url', 'name')
         .then(function (response) {

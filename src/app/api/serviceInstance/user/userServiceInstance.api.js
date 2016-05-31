@@ -42,7 +42,9 @@
      * @function connect
      * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
      * @description Connect a service instance
-     * @param {string} url - the service instance endpoint
+     * @param {string} guid - the CNSI guid
+     * @param {string} username - the login username
+     * @param {string} password - the login password
      * @returns {promise} A resolved/rejected promise
      * @public
      */
@@ -52,7 +54,13 @@
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
-      var data = this.$httpParamSerializer({ cnsi_guid: guid, username: username, password: password });
+      var loginData = {
+        cnsi_guid: guid,
+        username: username,
+        password: password
+      };
+      var data = this.$httpParamSerializer(loginData);
+
       return this.$http.post('/pp/v1/auth/login/cnsi', data, config);
     },
 
@@ -71,7 +79,7 @@
     /**
      * @function list
      * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
-     * @description Returns a list of service instances for the user
+     * @description Returns a list of registered CNSIs for the user
      * @returns {promise} A resolved/rejected promise
      * @public
      */

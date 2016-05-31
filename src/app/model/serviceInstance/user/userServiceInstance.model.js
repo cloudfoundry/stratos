@@ -26,7 +26,7 @@
    * @name app.model.serviceInstance.user.UserServiceInstance
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {array} serviceInstances - the service instances available to user
+   * @property {object} serviceInstances - the service instances available to user
    * @property {number} numValid - the number of valid user service instances
    * @class
    */
@@ -41,7 +41,10 @@
      * @function connect
      * @memberof app.api.serviceInstance.user.UserServiceInstance
      * @description Connect a service instance
-     * @param {string} url - the service instance endpoint
+     * @param {string} guid - the CNSI GUID
+     * @param {string} name - the CNSI name
+     * @param {string} username - the login username
+     * @param {string} password - the login password
      * @returns {promise} A resolved/rejected promise
      * @public
      */
@@ -85,12 +88,12 @@
           // check token expirations
           var now = (new Date()).getTime() / 1000;
           angular.forEach(items, function (item) {
-            if (!_.isNil(item.TokenExpiry)) {
-              item.valid = item.TokenExpiry > now;
+            if (!_.isNil(item.token_expiry)) {
+              item.valid = item.token_expiry > now;
             }
           });
 
-          that.serviceInstances = _.keyBy(items, 'Name');
+          that.serviceInstances = _.keyBy(items, 'guid');
           that.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
 
           return that.serviceInstances;
@@ -110,13 +113,26 @@
       return serviceInstanceApi.register(urls);
     },
 
+    /**
+     * @function onConnect
+     * @memberof app.model.serviceInstance.user.UserServiceInstance
+     * @description onConnect handler
+     * @param {string} guid - the CNSI GUID
+     * @param {string} name - the CNSI name
+     * @param {object} response - the HTTP response
+     * @returns {void}
+     * @private
+     */
     onConnect: function (guid, name, response) {
       var newCnsi = response.data;
-      var data = { GUID: guid, Name: name, TokenExpiry: newCnsi.token_expiry, Account: newCnsi.username, APIEndpoint: newCnsi.api_endpoint };
-      if (angular.isUndefined(this.serviceInstances[name])) {
-        this.serviceInstances[name] = data;
+      newCnsi.guid = guid;
+      newCnsi.name = name;
+      newCnsi.valid = true;
+
+      if (angular.isUndefined(this.serviceInstances[guid])) {
+        this.serviceInstances[guid] = newCnsi;
       } else {
-        angular.extend(this.serviceInstances[name], data);
+        angular.extend(this.serviceInstances[guid], newCnsi);
       }
     }
   });

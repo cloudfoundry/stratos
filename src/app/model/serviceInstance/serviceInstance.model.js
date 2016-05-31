@@ -85,7 +85,7 @@
         .then(function (response) {
           var items = response.data || [];
           that.serviceInstances.length = 0;
-          [].push.apply(that.serviceInstances, _.sortBy(items, 'Name'));
+          [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
 
           return {
             numAvailable: that.serviceInstances.length

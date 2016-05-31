@@ -27,6 +27,7 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {boolean} loggedIn - a flag indicating if user logged in
+   * @property {object} data - the account data object
    * @class
    */
   function Account(apiManager) {
@@ -50,7 +51,7 @@
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
         .then(function (response) {
-          that.onLoggedIn({ data: { username: username, scope: 'hdp3.admin' }});
+          that.onLoggedIn(response);
         });
     },
 
@@ -102,9 +103,9 @@
      * @returns {boolean} True if this user is an ITOps admin
      */
     isAdmin: function () {
-      var ADMIN_SCOPE = 'hdp3.admin';
+      var ADMIN_SCOPE = 'cloud_controller.admin';
       return angular.isDefined(this.data.scope) &&
-        this.data.scope === ADMIN_SCOPE;
+        _.indexOf(this.data.scope, ADMIN_SCOPE) >= 0;
     },
 
     /**
@@ -116,7 +117,11 @@
      */
     onLoggedIn: function (response) {
       this.loggedIn = true;
-      this.data = response.data;
+      var loginRes = response.data;
+      this.data = {
+        username: loginRes.account,
+        scope: loginRes.scope.split(' ')
+      };
     },
 
     /**
