@@ -1,11 +1,12 @@
 FROM ubuntu:14.04
 
-ENV DB_HOST="stolon-proxy-int" DB="postgres" DB_PORT="5432" DB_USER="stolon" DB_PW_FILE="/etc/secrets/stolon" \
-  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="20160511195737_InitialSchema.sql"
+ENV DB_HOST="portal-db" DB="postgres" DB_USER="stolon" \
+  POSTGRES_USER="stolon" POSTGRES_PASSWORD="stolon" CFGDB_PORT=5432 \
+  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="InitialSchema.sql"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
 
-ADD db/run.sh /
-ADD db/migrations/20160511195737_InitialSchema.sql /
+COPY /db/run.sh /
+COPY /db/InitialSchema.sql /
 
 CMD ["/run.sh"]
