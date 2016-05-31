@@ -12,6 +12,7 @@ execStatementsFromFile() {
 }
 
 echo "$DB_HOST:$CFGDB_PORT:$DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > /tmp/pgpass
+echo "$DB_HOST:$CFGDB_PORT:$STRATOS_DB:$STRATOS_USER:$STRATOS_PWD" >> /tmp/pgpass
 chmod 0600 /tmp/pgpass
 
 stratosExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$STRATOS_DB';")
