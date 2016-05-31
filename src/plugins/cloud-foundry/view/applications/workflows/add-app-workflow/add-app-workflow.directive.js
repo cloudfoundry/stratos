@@ -73,6 +73,9 @@
     }, function (newValue) {
       if (newValue) {
         that.getOrganizations();
+        that.getDomains().then(function () {
+          that.userInput.domain = that.options.domains[0].value;
+        });
       }
     });
 
@@ -219,17 +222,6 @@
         ]
       };
 
-      this.serviceInstanceModel.list()
-        .then(function (serviceInstances) {
-          var validServiceInstances = _.chain(serviceInstances)
-                                       .filter('valid')
-                                       .map(function (o) {
-                                         return { label: o.url, value: o };
-                                       })
-                                       .value();
-          [].push.apply(that.options.serviceInstances, validServiceInstances);
-        });
-
       this.options = {
         workflow: that.data.workflow,
         userInput: this.userInput,
@@ -290,10 +282,6 @@
           that.finishWorkflow();
         }
       };
-
-      this.getDomains().then(function () {
-        that.userInput.domain = that.options.domains[0].value;
-      });
     },
 
     /**
@@ -304,7 +292,8 @@
      */
     getOrganizations: function () {
       var that = this;
-      return this.organizationModel.listAllOrganizations()
+      var cnsiGuid = that.userInput.serviceInstance.guid;
+      return this.organizationModel.listAllOrganizations(cnsiGuid)
         .then(function (organizations) {
           that.options.organizations.length = 0;
           [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));
@@ -321,7 +310,8 @@
      */
     getSpacesForOrganization: function (guid) {
       var that = this;
-      return this.organizationModel.listAllSpacesForOrganization(guid)
+      var cnsiGuid = that.userInput.serviceInstance.guid;
+      return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
         .then(function (spaces) {
           that.options.spaces.length = 0;
           [].push.apply(that.options.spaces, _.map(spaces, that.selectOptionMapping));
@@ -351,7 +341,8 @@
      */
     getPrivateDomains: function () {
       var that = this;
-      return this.privateDomainModel.listAllPrivateDomains().then(function (privateDomains) {
+      var cnsiGuid = that.userInput.serviceInstance.guid;
+      return this.privateDomainModel.listAllPrivateDomains(cnsiGuid).then(function (privateDomains) {
         [].push.apply(that.options.domains, _.map(privateDomains, that.selectOptionMapping));
       });
     },
@@ -364,7 +355,8 @@
      */
     getSharedDomains: function () {
       var that = this;
-      return this.sharedDomainModel.listAllSharedDomains().then(function (sharedDomains) {
+      var cnsiGuid = that.userInput.serviceInstance.guid;
+      return this.sharedDomainModel.listAllSharedDomains(cnsiGuid).then(function (sharedDomains) {
         [].push.apply(that.options.domains, _.map(sharedDomains, that.selectOptionMapping));
       });
     },
@@ -413,8 +405,19 @@
     },
 
     startWorkflow: function () {
+      var that = this;
       this.addingApplication = true;
       this.reset();
+      this.serviceInstanceModel.list()
+        .then(function (serviceInstances) {
+          var validServiceInstances = _.chain(_.values(serviceInstances))
+                                       .filter('valid')
+                                       .map(function (o) {
+                                         return { label: o.api_endpoint.Host, value: o };
+                                       })
+                                       .value();
+          [].push.apply(that.options.serviceInstances, validServiceInstances);
+        });
     },
 
     stopWorkflow: function () {

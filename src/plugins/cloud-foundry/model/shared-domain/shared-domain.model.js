@@ -39,11 +39,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSharedDomains: function (params) {
+    listAllSharedDomains: function (cnsiGuid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.SharedDomains')
-        .ListAllSharedDomains(params)
+        .ListAllSharedDomains(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });
