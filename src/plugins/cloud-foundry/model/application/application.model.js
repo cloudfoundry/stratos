@@ -146,7 +146,14 @@
         .UpdateApp(guid, {state: 'STARTED'}, {}, config)
         .then(
           function (response) {
-            that.onAppStateChangeSuccess(response.data[cnsiGuid]);
+            var data = response.data[cnsiGuid];
+            if (angular.isDefined(data.entity)) {
+              that.onAppStateChangeSuccess(data);
+            } else if (data.error_code === 'CF-AppPackageInvalid') {
+              that.onAppStateChangeInvalid();
+            } else {
+              that.onAppStateChangeFailure();
+            }
             return response;
           },
           function (error) {
@@ -175,7 +182,12 @@
         .UpdateApp(guid, {state: 'STOPPED'}, {}, config)
         .then(
           function (response) {
-            that.onAppStateChangeSuccess(response.data[cnsiGuid]);
+            var data = response.data[cnsiGuid];
+            if (angular.isDefined(data.entity)) {
+              that.onAppStateChangeSuccess(data);
+            } else {
+              that.onAppStateChangeFailure();
+            }
             return response;
           },
           function (error) {
@@ -274,7 +286,8 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetDetailedStatsForStartedApp(guid, params, config)
         .then(function (response) {
-          that.application.stats = response.data[cnsiGuid]['0'].stats;
+          var data = response.data[cnsiGuid];
+          that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
         });
     },
 
@@ -342,6 +355,11 @@
      */
     onAppStateChangeFailure: function () {
       this.application.summary.state = 'ERROR';
+      this.appStateSwitchTo = '';
+    },
+
+    onAppStateChangeInvalid: function () {
+      this.application.summary.state = 'STOPPED';
       this.appStateSwitchTo = '';
     }
   });
