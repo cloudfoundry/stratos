@@ -11,14 +11,18 @@ const (
                   WHERE token_type = 'uaa' AND user_guid = $1`
 
 	saveUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
-                  VALUES ($1, $2, $3, $4, $5)`
+                  VALUES ($1, $2, $3, $4, $5)
+                  ON CONFLICT ON CONSTRAINT tokens_user_guid_token_type_key
+                  DO UPDATE SET auth_token = EXCLUDED.auth_token, refresh_token = EXCLUDED.refresh_token, token_expiry = EXCLUDED.token_expiry`
 
 	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
                    FROM tokens
                    WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	saveCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
-                   VALUES ($1, $2, $3, $4, $5, $6)`
+                   VALUES ($1, $2, $3, $4, $5, $6)
+                   ON CONFLICT ON CONSTRAINT tokens_user_guid_cnsi_guid_token_type_key
+                   DO UPDATE SET auth_token = EXCLUDED.auth_token, refresh_token = EXCLUDED.refresh_token, token_expiry = EXCLUDED.token_expiry`
 )
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
