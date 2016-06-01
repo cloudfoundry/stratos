@@ -249,7 +249,7 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    deleteApp: function (cnsiGuid) {
+    deleteApp: function (cnsiGuid, guid) {
       var config = {
         headers: { 'x-cnap-cnsi-list': cnsiGuid }
       };
