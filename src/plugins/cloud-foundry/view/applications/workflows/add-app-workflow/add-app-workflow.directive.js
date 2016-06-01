@@ -55,6 +55,7 @@
     this.addingApplication = false;
     this.eventService = eventService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
+    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
@@ -86,6 +87,14 @@
         that.getSpacesForOrganization(organization.metadata.guid);
       }
     });
+
+    $scope.$watch(function () {
+      return that.options && that.options.subflow;
+    }, function (subflow) {
+      if (subflow === 'pipeline') {
+        that.getHceInstances();
+      }
+    });
   }
 
   angular.extend(AddAppWorkflowController.prototype, {
@@ -103,6 +112,7 @@
         space: null,
         host: null,
         domain: null,
+        hceCnsi: null,
         source: 'github',
         repo: null,
         branch: null,
@@ -230,6 +240,7 @@
         organizations: [],
         spaces: [],
         domains: [],
+        hceCnsis: [],
         notificationTargets: [
           {
             title: 'HipChat',
@@ -373,6 +384,18 @@
         label: o.entity.name,
         value: o
       };
+    },
+
+    getHceInstances: function () {
+      var that = this;
+      this.cnsiModel.list().then(function () {
+        that.options.hceCnsis.length = 0;
+        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
+        if (hceCnsis.length > 0) {
+          var hceOptions = _.map(hceCnsis, function (o) { return { label: o.api_endpoint.Host, value: o }; });
+          [].push.apply(that.options.hceCnsis, hceOptions);
+        }
+      });
     },
 
     /**
