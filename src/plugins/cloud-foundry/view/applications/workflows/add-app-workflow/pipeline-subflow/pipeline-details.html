@@ -26,4 +26,14 @@
       placeholder="{{'Select Container Registry' | translate}}" tabindex="0"
       arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
   </div>
+  <div class="form-group" focusable-input>
+    <label class="control-label" translate>Cluster Username</label>
+    <input type="text" class="form-control"
+      ng-model="wizardCtrl.options.userInput.clusterUsername" required/>
+  </div>
+  <div class="form-group" focusable-input>
+    <label class="control-label" translate>Cluster Password</label>
+    <input type="password" class="form-control"
+      ng-model="wizardCtrl.options.userInput.clusterPassword" required/>
+  </div>
 </form>
