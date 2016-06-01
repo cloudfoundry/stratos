@@ -38,7 +38,8 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
     this.id = $stateParams.guid;
-    this.model.all();
+    this.cnsiGuid = $stateParams.cnsiGuid;
+    this.model.all(this.cnsiGuid, {});
     this.serviceActions = [
       {
         name: gettext('Detach'),
