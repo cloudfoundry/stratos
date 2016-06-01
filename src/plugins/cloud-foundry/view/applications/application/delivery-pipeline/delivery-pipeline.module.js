@@ -83,7 +83,7 @@
               .then(function () {
                 that.getProject();
               });
-            that.hceModel.getImageRegistries();
+            that.hceModel.getImageRegistries(that.hceCnsi.guid);
           }, function (response) {
             if (response.status === 404) {
               that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
@@ -102,18 +102,18 @@
         if (angular.isDefined(this.project)) {
           this.hceModel.getDeploymentTarget(this.hceCnsi.guid, this.project.deployment_target_id)
             .then(function (response) {
-              that.project.deploymentTarget = response.data;
+              that.project.deploymentTarget = response.data[that.hceCnsi.guid];
             });
 
           this.hceModel.getBuildContainer(this.hceCnsi.guid, this.project.build_container_id)
             .then(function (response) {
-              that.project.buildContainer = response.data;
+              that.project.buildContainer = response.data[that.hceCnsi.guid];
             });
 
           this.hceModel.getNotificationTargets(this.hceCnsi.guid, this.project.id)
             .then(function (response) {
               that.notificationTargets.length = 0;
-              [].push.apply(that.notificationTargets, response.data);
+              [].push.apply(that.notificationTargets, response.data[that.hceCnsi.guid]);
             });
         }
       }

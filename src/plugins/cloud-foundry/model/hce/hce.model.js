@@ -78,7 +78,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
         .getBuildContainers(guid)
         .then(function (response) {
-          that.onGetBuildContainers(response);
+          that.onGetBuildContainers(response, guid);
         });
     },
 
@@ -109,7 +109,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
         .getDeploymentTargets(guid, { user_id: this.data.user.id })
         .then(function (response) {
-          that.onGetDeploymentTargets(response);
+          that.onGetDeploymentTargets(response, guid);
         });
     },
 
@@ -126,7 +126,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
         .getImageRegistries(guid)
         .then(function (response) {
-          that.onGetImageRegistries(response);
+          that.onGetImageRegistries(response, guid);
         });
     },
 
@@ -169,7 +169,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
         .getProjects(guid, { user_id: that.data.user.id })
         .then(function (response) {
-          return that.onGetProjects(response);
+          return that.onGetProjects(response, guid);
         });
     },
 
@@ -187,7 +187,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
         .getUser(guid, userId)
         .then(function (response) {
-          that.onGetUser(response);
+          that.onGetUser(response, guid);
         });
     },
 
@@ -205,7 +205,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
         .getUserByGithubId(guid, githubUserId)
         .then(function (response) {
-          that.onGetUser(response);
+          that.onGetUser(response, guid);
         });
     },
 
@@ -223,7 +223,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
         .getPipelineExecutions(guid, { project_id: projectId})
         .then(function (response) {
-          that.onGetPipelineExecutions(response);
+          that.onGetPipelineExecutions(response, guid);
         });
     },
 
@@ -241,7 +241,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
         .getPipelineEvents(guid, { execution_id: executionId})
         .then(function (response) {
-          return that.onGetPipelineEvents(response);
+          return that.onGetPipelineEvents(response, guid);
         });
     },
 
@@ -276,7 +276,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
         .addDeploymentTarget(guid, newTarget)
         .then(function (response) {
-          return that.onCreateDeploymentTarget(response);
+          return that.onCreateDeploymentTarget(response, guid);
         });
     },
 
@@ -346,7 +346,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
         .createUser(guid, newUser)
         .then(function (response) {
-          return that.onCreateUser(response);
+          return that.onCreateUser(response, guid);
         });
     },
 
@@ -364,7 +364,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceArtifactApi')
         .downloadArtifact(guid, artifactId)
         .then(function (response) {
-          return that.onDownloadArtifact(response);
+          return that.onDownloadArtifact(response, guid);
         });
     },
 
@@ -408,11 +408,12 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache build container
      * @param {string} response - the JSON response from API call
+     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetBuildContainers: function (response) {
+    onGetBuildContainers: function (response, guid) {
       this.data.buildContainers.length = 0;
-      [].push.apply(this.data.buildContainers, response.data || []);
+      [].push.apply(this.data.buildContainers, response.data[guid] || []);
     },
 
     /**
@@ -420,11 +421,12 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache deployment targets
      * @param {string} response - the JSON response from API call
+     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetDeploymentTargets: function (response) {
+    onGetDeploymentTargets: function (response, guid) {
       this.data.deploymentTargets.length = 0;
-      [].push.apply(this.data.deploymentTargets, response.data || []);
+      [].push.apply(this.data.deploymentTargets, response.data[guid] || []);
     },
 
     /**
@@ -432,11 +434,12 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache image registries
      * @param {string} response - the JSON response from API call
+     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetImageRegistries: function (response) {
+    onGetImageRegistries: function (response, guid) {
       this.data.imageRegistries.length = 0;
-      [].push.apply(this.data.imageRegistries, response.data || []);
+      [].push.apply(this.data.imageRegistries, response.data[guid] || []);
     },
 
     /**
@@ -444,12 +447,14 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user projects
      * @param {string} response - the JSON response from API call
+     * @param {string} guid - the HCE instance GUID
      * @returns {array} An array of the user's projects
      * @private
      */
-    onGetProjects: function (response) {
-      this.data.projects = _.keyBy(response.data, 'name') || {};
-      return response.data;
+    onGetProjects: function (response, guid) {
+      var projects = response.data[guid];
+      this.data.projects = _.keyBy(projects, 'name') || {};
+      return projects;
     },
 
     /**
@@ -457,12 +462,16 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user
      * @param {string} response - the JSON response from API call
+     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetUser: function (response) {
-      var user = response.data;
-      delete user.secret;
-      this.data.user = user;
+    onGetUser: function (response, guid) {
+      // We are expecting the response to come back from the service with the requested guid
+      var user = response.data[guid];
+      if (user) {
+        delete user.secret;
+        this.data.user = user;
+      }
     },
 
     /**
@@ -487,13 +496,16 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user
      * @param {string} response - the JSON response from API call
+     * @param {string} guid - the HCE instance GUID
      * @returns {object} The new user data
      * @private
      */
-    onCreateUser: function (response) {
-      var newUser = response.data;
-      delete newUser.secret;
-      this.data.user = newUser;
+    onCreateUser: function (response, guid) {
+      var newUser = response.data[guid];
+      if (newUser) {
+        delete newUser.secret;
+        this.data.user = newUser;
+      }
 
       return newUser;
     },
@@ -503,11 +515,12 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache pipeline executions
      * @param {string} response - the JSON response from API call
+     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetPipelineExecutions: function (response) {
+    onGetPipelineExecutions: function (response, guid) {
       this.data.pipelineExecutions.length = 0;
-      [].push.apply(this.data.pipelineExecutions, response.data || []);
+      [].push.apply(this.data.pipelineExecutions, response.data[guid] || []);
     },
 
     /**
@@ -515,11 +528,12 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Extract data from response
      * @param {string} response - the JSON response from API call
+     * @param {string} guid - the HCE instance GUID
      * @returns {object} The collection of pipeline events
      * @private
      */
-    onGetPipelineEvents: function (response) {
-      return response.data;
+    onGetPipelineEvents: function (response, guid) {
+      return response.data[guid];
     },
 
     /**
@@ -527,11 +541,12 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Extract data from response
      * @param {string} response - the JSON response from API call
-     * @returns {object} TODO (rcox): Not sure what type this is atm, but for the moment it's JSON
+     * @param {string} guid - the HCE instance GUID
+     * @returns {object} Artifact content
      * @private
      */
-    onDownloadArtifact: function (response) {
-      return response.data;
+    onDownloadArtifact: function (response, guid) {
+      return response.data[guid];
     },
 
     /**
