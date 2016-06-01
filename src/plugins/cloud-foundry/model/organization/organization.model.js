@@ -38,11 +38,14 @@
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllOrganizations: function (params) {
+    listAllOrganizations: function (cnsiGuid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllOrganizations(params)
+        .ListAllOrganizations(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     },
 
@@ -55,11 +58,14 @@
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllSpacesForOrganization: function (guid, params) {
+    listAllSpacesForOrganization: function (cnsiGuid, orgGuid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllSpacesForOrganization(guid, params)
+        .ListAllSpacesForOrganization(orgGuid, params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });

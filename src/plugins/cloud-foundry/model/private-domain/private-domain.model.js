@@ -39,11 +39,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllPrivateDomains: function (params) {
+    listAllPrivateDomains: function (cnsiGuid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.PrivateDomains')
-        .ListAllPrivateDomains(params)
+        .ListAllPrivateDomains(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });
