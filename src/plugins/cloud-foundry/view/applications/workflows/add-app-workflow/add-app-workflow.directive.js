@@ -141,18 +141,7 @@
           {
             title: gettext('Services'),
             templateUrl: path + 'services.html',
-            nextBtnText: gettext('Next'),
-            onNext: function () {
-              that.cnsiModel.list().then(function () {
-                var hceCnsis = _.chain(that.cnsiModel.serviceInstances)
-                                .filter({ 'cnsi_type': 'hce' })
-                                .map(function (o) {
-                                  return { label: o.api_endpoint.Host, value: o };
-                                })
-                                .value();
-                [].push.apply(that.options.hceCnsis, hceCnsis);
-              });
-            }
+            nextBtnText: gettext('Next')
           },
           {
             title: gettext('Delivery'),
