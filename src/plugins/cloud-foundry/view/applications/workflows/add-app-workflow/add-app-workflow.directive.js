@@ -416,13 +416,32 @@
      */
     createApp: function () {
       var that = this;
+      var cnsiGuid = this.userInput.serviceInstance.guid;
       return this.$q(function (resolve, reject) {
-        that.appModel.createApp({
-          name: that.userInput.name
+        that.appModel.createApp(cnsiGuid, {
+          name: that.userInput.name,
+          space_guid: that.userInput.space.metadata.guid
         }).then(function (app) {
-          that.routeModel
-            .associateAppWithRoute(that.userInput.domain.metadata.guid, app.metadata.guid)
-            .then(resolve, reject);
+          var routeSpec = {
+            host: that.userInput.host,
+            domain_guid: that.userInput.domain.metadata.guid,
+            space_guid: that.userInput.space.metadata.guid
+          };
+
+          // Set optional fields for creating route
+          if (that.userInput.port) {
+            routeSpec.port = that.userInput.port;
+          }
+          if (that.userInput.path) {
+            routeSpec.path = that.userInput.path;
+          }
+
+          that.routeModel.createRoute(cnsiGuid, routeSpec)
+            .then(function (route) {
+              that.routeModel
+                .associateAppWithRoute(cnsiGuid, route.metadata.guid, app[cnsiGuid].metadata.guid)
+                .then(resolve, reject);
+            });
         });
       });
     },

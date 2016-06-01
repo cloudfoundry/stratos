@@ -38,11 +38,14 @@
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllSpaces: function (params) {
+    listAllSpaces: function (cnsiGuid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllSpaces(params)
+        .ListAllSpaces(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });
