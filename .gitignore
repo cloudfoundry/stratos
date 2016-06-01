@@ -1,3 +1,5 @@
+id_rsa*
+known_hosts
 *.rc
 demo/*
 portal-proxy
