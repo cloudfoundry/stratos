@@ -168,5 +168,5 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.Get("/cnsis", p.listCNSIs)
 	sessionGroup.Get("/cnsis/registered", p.listRegisteredCNSIs)
 	group := sessionGroup.Group("/proxy")
-	group.Get("/*", p.proxy)
+	group.Any("/*", p.proxy)
 }
