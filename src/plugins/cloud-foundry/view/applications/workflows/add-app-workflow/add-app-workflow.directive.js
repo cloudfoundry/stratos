@@ -463,8 +463,9 @@
      */
     createApp: function () {
       var that = this;
+      var cnsiGuid = this.userInput.serviceInstance.guid;
       return this.$q(function (resolve, reject) {
-        that.appModel.createApp({
+        that.appModel.createApp(cnsiGuid, {
           name: that.userInput.name
         }).then(function (app) {
           that.routeModel

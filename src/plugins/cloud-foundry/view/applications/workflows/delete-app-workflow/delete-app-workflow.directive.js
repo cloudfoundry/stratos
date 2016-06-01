@@ -52,9 +52,10 @@
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.deletingApplication = false;
+    this.cnsiGuid = null;
 
-    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function () {
-      that.startWorkflow();
+    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (cnsiGuid) {
+      that.startWorkflow(cnsiGuid);
     });
   }
 
@@ -204,7 +205,8 @@
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description start workflow
      */
-    startWorkflow: function () {
+    startWorkflow: function (cnsiGuid) {
+      this.cnsiGuid = cnsiGuid;
       this.deletingApplication = true;
       this.reset();
     },
