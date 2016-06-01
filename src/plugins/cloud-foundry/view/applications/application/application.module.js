@@ -18,7 +18,7 @@
 
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application', {
-      url: '/:guid',
+      url: '/:cnsiGuid/app/:guid',
       templateUrl: 'plugins/cloud-foundry/view/applications/application/application.html',
       controller: ApplicationController,
       controllerAs: 'appCtrl'
@@ -58,6 +58,7 @@
     this.eventService = eventService;
     this.confirmDialog = confirmDialog;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
     this.init();
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
@@ -79,7 +80,7 @@
       {
         name: gettext('Stop'),
         execute: function () {
-          that.model.stopApp(that.id);
+          that.model.stopApp(that.cnsiGuid, that.id);
         },
         disabled: this.isPending,
         icon: 'helion-icon helion-icon-lg helion-icon-Halt-stop'
@@ -87,7 +88,7 @@
       {
         name: gettext('Restart'),
         execute: function () {
-          that.model.restartApp(that.id);
+          that.model.restartApp(that.cnsiGuid, that.id);
         },
         disabled: this.isPending,
         icon: 'helion-icon helion-icon-lg helion-icon-Refresh'
@@ -103,7 +104,7 @@
       {
         name: gettext('Start'),
         execute: function () {
-          that.model.startApp(that.id);
+          that.model.startApp(that.cnsiGuid, that.id);
         },
         disabled: this.isPending,
         icon: 'helion-icon helion-icon-lg helion-icon-Play'
@@ -131,13 +132,13 @@
 
   angular.extend(ApplicationController.prototype, {
     init: function () {
-      this.model.getAppSummary(this.id);
-      this.model.getAppStats(this.id);
+      this.model.getAppSummary(this.cnsiGuid, this.id);
+      this.model.getAppStats(this.cnsiGuid, this.id);
     },
 
     deleteApp: function () {
       if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
-        this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW');
+        this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW', this.cnsiGuid);
       } else {
         this.simpleDeleteAppDialog();
       }
@@ -153,7 +154,7 @@
           no: gettext('Cancel')
         },
         callback: function () {
-          that.model.deleteApp(that.id).then(function () {
+          that.model.deleteApp(that.cnsiGuid, that.id).then(function () {
             that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
           });
         }
