@@ -42,9 +42,12 @@
      * @returns {promise} A promise object
      * @public
      **/
-    deleteServiceBinding: function (guid, params) {
+    deleteServiceBinding: function (cnsiGuid, guid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .DeleteServiceBinding(guid, params);
+        .DeleteServiceBinding(guid, params, httpConfig);
     },
 
     /**
@@ -55,9 +58,12 @@
      * @returns {promise} A promise object
      * @public
      **/
-    listAllServiceBindings: function (params) {
+    listAllServiceBindings: function (cnsiGuid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .ListAllServiceBindings(params)
+        .ListAllServiceBindings(params, httpConfig)
         .then(function (response) {
           return response.data.resources;
         });

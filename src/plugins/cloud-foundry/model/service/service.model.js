@@ -44,11 +44,14 @@
      * @returns {promise} A promise object
      * @public
      **/
-    all: function (guid, options) {
+    all: function (cnsiGuid, options) {
       var that = this;
-      return this.serviceApi.ListAllServices(options)
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.serviceApi.ListAllServices(options, httpConfig)
         .then(function (response) {
-          that.onAll(response);
+          that.onAll(response.data[cnsiGuid]);
         });
     },
 
@@ -96,7 +99,7 @@
      * @private
      */
     onAll: function (response) {
-      this.data = response.data;
+      this.data = response;
     },
 
     /**
