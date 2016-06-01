@@ -140,6 +140,8 @@ func (p *portalProxy) validateCNSIList(cnsiList []string) error {
 
 func (p *portalProxy) proxy(c echo.Context) error {
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
+	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
+
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -158,6 +160,13 @@ func (p *portalProxy) proxy(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	if shouldPassthrough {
+		if len(cnsiList) > 1 {
+			err := errors.New("Requested passthrough to multiple CNSIs. Only single CNSI passthroughs are supported.")
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
+
 	// send the request to each CNSI
 	done := make(chan CNSIRequest)
 	kill := make(chan struct{})
@@ -174,6 +183,19 @@ func (p *portalProxy) proxy(c echo.Context) error {
 			responses[res.GUID] = res
 		case <-timeout:
 		}
+	}
+
+	if shouldPassthrough {
+		cnsiGUID := cnsiList[0]
+		res, ok := responses[cnsiGUID]
+		if !ok {
+			return echo.NewHTTPError(http.StatusRequestTimeout, "Request timed out")
+		}
+
+		// we don't care if this fails
+		_, _ = c.Response().Write(res.Response)
+
+		return nil
 	}
 
 	jsonResponse := buildJSONResponse(cnsiList, responses)
