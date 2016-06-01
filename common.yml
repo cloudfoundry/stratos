@@ -22,7 +22,7 @@ postgres:
   ports:
     - "5432:5432"
   volumes:
-    - $GOPATH/src/github.com/hpcloud/portal-proxy/db/migrations:/docker-entrypoint-initdb.d
+    - $GOPATH/src/github.com/hpcloud/portal-proxy/db/initial:/docker-entrypoint-initdb.d
 
 
 # Mock Cloud Foundry service
