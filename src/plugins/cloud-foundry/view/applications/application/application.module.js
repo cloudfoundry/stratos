@@ -172,6 +172,10 @@
       this.appActions[1].hidden = newState === 'STOPPED';
       this.appActions[3].hidden = newState === 'STARTED';
       this.appActions[4].hidden = newState === 'STARTED';
+
+      if (newState === 'STARTED' || newState === 'STOPPED') {
+        this.init();
+      }
     },
 
     onAppRoutesChange: function (newRoutes) {

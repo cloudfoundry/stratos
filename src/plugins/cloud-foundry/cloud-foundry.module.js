@@ -55,7 +55,6 @@
 
     registerNavigation: function () {
       this.modelManager.retrieve('app.model.navigation').menu
-        .addMenuItem('cf.workspaces', 'cf.workspaces', gettext('Workspaces'))
         .addMenuItem('cf.applications', 'cf.applications.list.gallery-view', gettext('Applications'));
     }
   });
