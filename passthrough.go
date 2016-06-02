@@ -28,6 +28,7 @@ type CNSIRequest struct {
 	Header      http.Header
 	URL         *url.URL
 	StatusCode  int
+	PassThrough bool
 
 	Response []byte
 	Error    error
@@ -106,7 +107,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]CNSIRequest) map[
 	return jsonResponse
 }
 
-func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req engine.Request, uri *url.URL, body []byte, header http.Header) CNSIRequest {
+func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req engine.Request, uri *url.URL, body []byte, header http.Header, passThrough bool) CNSIRequest {
 	cnsiRequest := CNSIRequest{
 		GUID:     cnsiGUID,
 		UserGUID: userGUID,
@@ -114,6 +115,8 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req eng
 		Method: req.Method(),
 		Body:   body,
 		Header: header,
+
+		PassThrough: passThrough,
 	}
 
 	cnsiRec, ok := p.getCNSIRecord(cnsiGUID)
@@ -170,13 +173,16 @@ func (p *portalProxy) proxy(c echo.Context) error {
 			err := errors.New("Requested passthrough to multiple CNSIs. Only single CNSI passthroughs are supported.")
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
+
+		// TODO: Pass headers through in all cases, not just single pass through
+		//req.Header = header
 	}
 
 	// send the request to each CNSI
 	done := make(chan CNSIRequest)
 	kill := make(chan struct{})
 	for _, cnsi := range cnsiList {
-		cnsiRequest := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header)
+		cnsiRequest := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
 		go p.doRequest(cnsiRequest, done, kill)
 	}
 
@@ -228,6 +234,10 @@ func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest
 	if err != nil {
 		cnsiRequest.Error = err
 		goto End
+	}
+
+	if cnsiRequest.PassThrough {
+		req.Header = cnsiRequest.Header
 	}
 
 	res, err = p.doOauthFlowRequest(cnsiRequest, req)
