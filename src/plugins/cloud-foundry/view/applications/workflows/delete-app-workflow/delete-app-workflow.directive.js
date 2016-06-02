@@ -109,8 +109,8 @@
     deleteApp: function () {
       var that = this;
 
-      var tryDeleteEachRoute = $q.defer();
-      var deleteApp = $q.defer();
+      var tryDeleteEachRoute = this.$q.defer();
+      var deleteApp = this.$q.defer();
 
       this.removeAppFromRoutes().then(function () {
         that.tryDeleteEachRoute().then(function () {
