@@ -122,7 +122,8 @@ gulp.task('lint', function () {
   return gulp
     .src([
       paths.src + '**/*.js',
-      '!' + paths.src + 'lib/**/*.js'
+      '!' + paths.src + 'lib/**/*.js',
+      '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*.js'
     ])
     .pipe(eslint())
     .pipe(eslint.format())
