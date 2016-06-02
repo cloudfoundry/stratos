@@ -290,7 +290,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .addDeploymentTarget(guid, newTarget, {}, this.hceProxyConfig)
+        .addDeploymentTarget(guid, newTarget, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
           return that.onCreateDeploymentTarget(response, guid);
         });
@@ -335,7 +335,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .createProject(guid, newProject, {}, this.hceProxyConfig);
+        .createProject(guid, newProject, {}, this.hceProxyPassthroughConfig);
     },
 
     /**
@@ -416,7 +416,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .triggerPipelineExecution(guid, data, {}, this.hceProxyConfig);
+        .triggerPipelineExecution(guid, data, {}, this.hceProxyPassthroughConfig);
     },
 
     /**

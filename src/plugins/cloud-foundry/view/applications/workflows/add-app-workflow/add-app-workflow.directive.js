@@ -494,9 +494,11 @@
     },
 
     createDeploymentTarget: function () {
+      var endpoint = this.userInput.serviceInstance.api_endpoint;
+      var url = endpoint.Scheme + '://' + endpoint.Host;
       return this.hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
                                                   this.userInput.serviceInstance.name,
-                                                  this.userInput.serviceInstance.api_endpoint.Host,
+                                                  url,
                                                   this.userInput.clusterUsername,
                                                   this.userInput.clusterPassword,
                                                   this.userInput.organization.entity.name,
