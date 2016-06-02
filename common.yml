@@ -83,7 +83,7 @@ proxy:
 
 nginx:
   build: ../stratos-server
-  dockerfile: Dockerfile.prod
+  dockerfile: Dockerfile.dev
   ports:
     - "80:80"
   volumes:
