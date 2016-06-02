@@ -143,6 +143,9 @@
         },
         {
           "name": "MYSQL_PASSWORD"
+        },
+        {
+          "name": "GITHUB_ACCESS_TOKEN"
         }
       ]
     },
@@ -677,6 +680,15 @@
         "description": "Initial Stratos database schema",
         "default": "./InitialSchema.sql",
         "example": "./InitialSchema.sql",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_ACCESS_TOKEN",
+        "description": "GitHub access token used for HCE",
+        "default": "",
+        "example": "",
         "data_type": "string",
         "required": true,
         "secret": false

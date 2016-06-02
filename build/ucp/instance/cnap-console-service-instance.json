@@ -147,6 +147,10 @@
     {
       "name": "SQL",
       "value": "./InitialSchema.sql"
+    },
+    {
+      "name": "GITHUB_ACCESS_TOKEN",
+      "value": "__REPLACE_WITH_TOKEN__"
     }
   ]
 }
