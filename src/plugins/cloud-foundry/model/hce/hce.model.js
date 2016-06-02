@@ -48,9 +48,19 @@
       that.onLogout();
     });
 
+    // Proxy config to skip auth - used for HCE
     this.hceProxyConfig = {
       headers: {
         'x-cnap-skip-token-auth': 'true'
+      }
+    };
+
+    // Proxy config to skip auth - used for HCE
+    // and to pass through response directly (when we are only talking to a single CNSI)
+    this.hceProxyPassthroughConfig = {
+      headers: {
+        'x-cnap-skip-token-auth': 'true',
+        'x-cnap-passthrough': 'true'
       }
     };
   }
@@ -191,9 +201,9 @@
     getUser: function (guid, userId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUser(guid, userId, {}, this.hceProxyConfig)
+        .getUser(guid, userId, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          that.onGetUser(response, guid);
+          that.onGetUser(response);
         });
     },
 
@@ -209,9 +219,9 @@
     getUserByGithubId: function (guid, githubUserId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUserByGithubId(guid, githubUserId, {}, this.hceProxyConfig)
+        .getUserByGithubId(guid, githubUserId, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          that.onGetUser(response, guid);
+          that.onGetUser(response);
         });
     },
 
@@ -350,9 +360,9 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .createUser(guid, newUser, {}, this.hceProxyConfig)
+        .createUser(guid, newUser, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          return that.onCreateUser(response, guid);
+          return that.onCreateUser(response);
         });
     },
 
@@ -368,9 +378,9 @@
     downloadArtifact: function (guid, artifactId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceArtifactApi')
-        .downloadArtifact(guid, artifactId, {}, this.hceProxyConfig)
+        .downloadArtifact(guid, artifactId, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          return that.onDownloadArtifact(response, guid);
+          return that.onDownloadArtifact(response);
         });
     },
 
@@ -468,12 +478,10 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetUser: function (response, guid) {
-      // We are expecting the response to come back from the service with the requested guid
-      var user = response.data[guid];
+    onGetUser: function (response) {
+      var user = response.data;
       if (user) {
         delete user.secret;
         this.data.user = user;
@@ -502,12 +510,11 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @returns {object} The new user data
      * @private
      */
-    onCreateUser: function (response, guid) {
-      var newUser = response.data[guid];
+    onCreateUser: function (response) {
+      var newUser = response.data;
       if (newUser) {
         delete newUser.secret;
         this.data.user = newUser;
@@ -547,12 +554,11 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Extract data from response
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @returns {object} Artifact content
      * @private
      */
-    onDownloadArtifact: function (response, guid) {
-      return response.data[guid];
+    onDownloadArtifact: function (response) {
+      return response.data;
     },
 
     /**
