@@ -36,9 +36,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addNotificationTarget: function (guid, data, params) {
+    addNotificationTarget: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/notifications/targets';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -52,6 +53,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -61,9 +70,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} notificationTargetId - NotificationTarget id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getNotificationTarget: function (guid, notificationTargetId, params) {
+    getNotificationTarget: function (guid, notificationTargetId, params, httpConfigOptions) {
       var path = this.baseUrl + '/notifications/targets/{notification_target_id}'
         .replace('{' + 'notification_target_id' + '}', notificationTargetId);
       var headers = {
@@ -77,6 +87,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -85,9 +103,10 @@
      * @description List notifiction targets, optionally filtering.
      * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getNotificationTargets: function (guid, params) {
+    getNotificationTargets: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/notifications/targets';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -100,6 +119,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -108,9 +135,10 @@
      * @description Enumeration of Notification target types, e.g. &#x60;HIPCHAT&#x60;, &#x60;SLACK&#x60;, etc.\n
      * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    listNotificationTargetTypes: function (guid, params) {
+    listNotificationTargetTypes: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/notifications/targets/types';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -123,6 +151,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -132,9 +168,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} notificationTargetId - NotificationTarget id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeNotificationTarget: function (guid, notificationTargetId, params) {
+    removeNotificationTarget: function (guid, notificationTargetId, params, httpConfigOptions) {
       var path = this.baseUrl + '/notifications/targets/{notification_target_id}'
         .replace('{' + 'notification_target_id' + '}', notificationTargetId);
       var headers = {
@@ -148,6 +185,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -158,9 +203,10 @@
      * @param {!number} notificationTargetId - NotificationTarget id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateNotificationTarget: function (guid, notificationTargetId, data, params) {
+    updateNotificationTarget: function (guid, notificationTargetId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/notifications/targets/{notification_target_id}'
         .replace('{' + 'notification_target_id' + '}', notificationTargetId);
       var headers = {
@@ -174,6 +220,14 @@
         data: data,
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     }

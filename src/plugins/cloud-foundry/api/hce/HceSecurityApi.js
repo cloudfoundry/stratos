@@ -36,9 +36,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} credentialId - The credential id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    forgetCredential: function (guid, credentialId, params) {
+    forgetCredential: function (guid, credentialId, params, httpConfigOptions) {
       var path = this.baseUrl + '/auth/credentials/{credential_id}'
         .replace('{' + 'credential_id' + '}', credentialId);
       var headers = {
@@ -52,6 +53,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -60,9 +69,10 @@
      * @description List credentials for the specified user.
      * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    listCredentials: function (guid, params) {
+    listCredentials: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/auth/credentials';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -75,6 +85,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -84,9 +102,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    storeCredential: function (guid, data, params) {
+    storeCredential: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/auth/credentials';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -100,6 +119,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -110,9 +137,10 @@
      * @param {!number} credentialId - The id of the &#x60;Credential&#x60; instance.\n
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateCredential: function (guid, credentialId, data, params) {
+    updateCredential: function (guid, credentialId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/auth/credentials/{credential_id}'
         .replace('{' + 'credential_id' + '}', credentialId);
       var headers = {
@@ -126,6 +154,14 @@
         data: data,
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     }

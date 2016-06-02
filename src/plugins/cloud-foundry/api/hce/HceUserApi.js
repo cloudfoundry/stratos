@@ -36,9 +36,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    createUser: function (guid, data, params) {
+    createUser: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/users';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -52,6 +53,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -61,9 +70,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} userId - User id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    deleteUser: function (guid, userId, params) {
+    deleteUser: function (guid, userId, params, httpConfigOptions) {
       var path = this.baseUrl + '/users/{user_id}'
         .replace('{' + 'user_id' + '}', userId);
       var headers = {
@@ -77,6 +87,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -86,9 +104,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} userId - User id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getUser: function (guid, userId, params) {
+    getUser: function (guid, userId, params, httpConfigOptions) {
       var path = this.baseUrl + '/users/{user_id}'
         .replace('{' + 'user_id' + '}', userId);
       var headers = {
@@ -102,6 +121,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -111,9 +138,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} githubId - Users github account id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getUserByGithubId: function (guid, githubId, params) {
+    getUserByGithubId: function (guid, githubId, params, httpConfigOptions) {
       var path = this.baseUrl + '/users/github/{github_id}'
         .replace('{' + 'github_id' + '}', githubId);
       var headers = {
@@ -127,6 +155,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -137,9 +173,10 @@
      * @param {!number} userId - User id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateUser: function (guid, userId, data, params) {
+    updateUser: function (guid, userId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/users/{user_id}'
         .replace('{' + 'user_id' + '}', userId);
       var headers = {
@@ -153,6 +190,14 @@
         data: data,
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     }

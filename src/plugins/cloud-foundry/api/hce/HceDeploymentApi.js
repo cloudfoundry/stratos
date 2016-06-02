@@ -36,9 +36,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addDeploymentTarget: function (guid, data, params) {
+    addDeploymentTarget: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -51,6 +52,14 @@
         data: data,
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -61,9 +70,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    deploymentOccurred: function (guid, data, params) {
+    deploymentOccurred: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -77,6 +87,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -86,9 +104,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} deploymentId - Deployment id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getDeployment: function (guid, deploymentId, params) {
+    getDeployment: function (guid, deploymentId, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/{deployment_id}'
         .replace('{' + 'deployment_id' + '}', deploymentId);
       var headers = {
@@ -102,6 +121,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -111,9 +138,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} targetId - DeploymentTarget id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getDeploymentTarget: function (guid, targetId, params) {
+    getDeploymentTarget: function (guid, targetId, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
       var headers = {
@@ -127,6 +155,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -135,9 +171,10 @@
      * @description List the registered deployment targets, optionally filtering.
      * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getDeploymentTargets: function (guid, params) {
+    getDeploymentTargets: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -150,6 +187,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -158,9 +203,10 @@
      * @description List deployments, optionally filtering by Project id or Build id.
      * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getDeployments: function (guid, params) {
+    getDeployments: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -173,6 +219,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -182,9 +236,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} deploymentId - Deployment id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeDeployment: function (guid, deploymentId, params) {
+    removeDeployment: function (guid, deploymentId, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/{deployment_id}'
         .replace('{' + 'deployment_id' + '}', deploymentId);
       var headers = {
@@ -198,6 +253,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -207,9 +270,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} targetId - DeploymentTarget id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeDeploymentTarget: function (guid, targetId, params) {
+    removeDeploymentTarget: function (guid, targetId, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
       var headers = {
@@ -222,6 +286,14 @@
         params: params || {},
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -233,9 +305,10 @@
      * @param {!number} targetId - DeploymentTarget id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateTarget: function (guid, targetId, data, params) {
+    updateTarget: function (guid, targetId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
       var headers = {
@@ -249,6 +322,14 @@
         data: data,
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     }

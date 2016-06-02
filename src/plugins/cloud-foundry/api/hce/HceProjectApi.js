@@ -37,9 +37,10 @@
      * @param {!number} projectId - The project id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addMember: function (guid, projectId, data, params) {
+    addMember: function (guid, projectId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects/{project_id}/members'
         .replace('{' + 'project_id' + '}', projectId);
       var headers = {
@@ -54,6 +55,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -63,9 +72,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addPipelineTask: function (guid, data, params) {
+    addPipelineTask: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/pipelines/tasks';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -79,6 +89,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -88,9 +106,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    createProject: function (guid, data, params) {
+    createProject: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -104,6 +123,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -113,9 +140,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} projectId - The id of the &#x60;Project&#x60; instance to delete.\n
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    deleteProject: function (guid, projectId, params) {
+    deleteProject: function (guid, projectId, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects/{project_id}'
         .replace('{' + 'project_id' + '}', projectId);
       var headers = {
@@ -129,6 +157,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -138,9 +174,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} taskId - PipelineTask id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getPipelineTask: function (guid, taskId, params) {
+    getPipelineTask: function (guid, taskId, params, httpConfigOptions) {
       var path = this.baseUrl + '/pipelines/tasks/{task_id}'
         .replace('{' + 'task_id' + '}', taskId);
       var headers = {
@@ -154,6 +191,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -162,9 +207,10 @@
      * @description List the pipeline tasks, optionally filtering by project.
      * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getPipelineTasks: function (guid, params) {
+    getPipelineTasks: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/pipelines/tasks';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -177,6 +223,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -186,9 +240,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} projectId - HCE id of the &#x60;Project&#x60; to get.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getProject: function (guid, projectId, params) {
+    getProject: function (guid, projectId, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects/{project_id}'
         .replace('{' + 'project_id' + '}', projectId);
       var headers = {
@@ -202,6 +257,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -211,9 +274,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} projectId - The instance id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getProjectMembers: function (guid, projectId, params) {
+    getProjectMembers: function (guid, projectId, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects/{project_id}/members'
         .replace('{' + 'project_id' + '}', projectId);
       var headers = {
@@ -227,6 +291,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -235,9 +307,10 @@
      * @description List projects, optionally filtering.
      * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getProjects: function (guid, params) {
+    getProjects: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects';
       var headers = {
         'x-cnap-cnsi-list': guid
@@ -249,6 +322,14 @@
         params: params || {},
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -260,9 +341,10 @@
      * @param {!number} projectId - The project id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeMember: function (guid, projectId, data, params) {
+    removeMember: function (guid, projectId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects/{project_id}/members'
         .replace('{' + 'project_id' + '}', projectId);
       var headers = {
@@ -277,6 +359,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -286,9 +376,10 @@
      * @param {string} guid - the HCE instance GUID
      * @param {!number} taskId - The PipelineTask id to remove.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removePipelineTask: function (guid, taskId, params) {
+    removePipelineTask: function (guid, taskId, params, httpConfigOptions) {
       var path = this.baseUrl + '/pipelines/tasks/{task_id}'
         .replace('{' + 'task_id' + '}', taskId);
       var headers = {
@@ -302,6 +393,14 @@
         headers: headers
       };
 
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
       return this.$http(config);
     },
 
@@ -312,9 +411,10 @@
      * @param {!number} projectId - The id of the &#x60;Project&#x60; instance.\n
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateProject: function (guid, projectId, data, params) {
+    updateProject: function (guid, projectId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects/{project_id}'
         .replace('{' + 'project_id' + '}', projectId);
       var headers = {
@@ -328,6 +428,14 @@
         data: data,
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     }

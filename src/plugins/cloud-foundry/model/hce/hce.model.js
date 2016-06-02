@@ -47,6 +47,12 @@
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
       that.onLogout();
     });
+
+    this.hceProxyConfig = {
+      headers: {
+        'x-cnap-skip-token-auth': 'true'
+      }
+    };
   }
 
   angular.extend(HceModel.prototype, {
@@ -62,7 +68,7 @@
      */
     getBuildContainer: function (guid, id) {
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getBuildContainer(guid, id);
+        .getBuildContainer(guid, id, {}, this.hceProxyConfig);
     },
 
     /**
@@ -76,7 +82,7 @@
     getBuildContainers: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getBuildContainers(guid)
+        .getBuildContainers(guid, {}, this.hceProxyConfig)
         .then(function (response) {
           that.onGetBuildContainers(response, guid);
         });
@@ -93,7 +99,7 @@
      */
     getDeploymentTarget: function (guid, id) {
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .getDeploymentTarget(guid, id);
+        .getDeploymentTarget(guid, id, {}, this.hceProxyConfig);
     },
 
     /**
@@ -107,7 +113,7 @@
     getDeploymentTargets: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .getDeploymentTargets(guid, { user_id: this.data.user.id })
+        .getDeploymentTargets(guid, { user_id: this.data.user.id }, this.hceProxyConfig)
         .then(function (response) {
           that.onGetDeploymentTargets(response, guid);
         });
@@ -124,7 +130,7 @@
     getImageRegistries: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getImageRegistries(guid)
+        .getImageRegistries(guid, {}, this.hceProxyConfig)
         .then(function (response) {
           that.onGetImageRegistries(response, guid);
         });
@@ -141,7 +147,7 @@
      */
     getNotificationTargets: function (guid, projectId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
-        .getNotificationTargets(guid, { project_id: projectId });
+        .getNotificationTargets(guid, { project_id: projectId }, this.hceProxyConfig);
     },
 
     /**
@@ -167,7 +173,7 @@
     getProjects: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .getProjects(guid, { user_id: that.data.user.id })
+        .getProjects(guid, { user_id: this.data.user.id }, this.hceProxyConfig)
         .then(function (response) {
           return that.onGetProjects(response, guid);
         });
@@ -185,7 +191,7 @@
     getUser: function (guid, userId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUser(guid, userId)
+        .getUser(guid, userId, {}, this.hceProxyConfig)
         .then(function (response) {
           that.onGetUser(response, guid);
         });
@@ -203,7 +209,7 @@
     getUserByGithubId: function (guid, githubUserId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUserByGithubId(guid, githubUserId)
+        .getUserByGithubId(guid, githubUserId, {}, this.hceProxyConfig)
         .then(function (response) {
           that.onGetUser(response, guid);
         });
@@ -221,7 +227,7 @@
     getPipelineExecutions: function (guid, projectId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .getPipelineExecutions(guid, { project_id: projectId})
+        .getPipelineExecutions(guid, { project_id: projectId }, this.hceProxyConfig)
         .then(function (response) {
           that.onGetPipelineExecutions(response, guid);
         });
@@ -239,7 +245,7 @@
     getPipelineEvents: function (guid, executionId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .getPipelineEvents(guid, { execution_id: executionId})
+        .getPipelineEvents(guid, { execution_id: executionId }, this.hceProxyConfig)
         .then(function (response) {
           return that.onGetPipelineEvents(response, guid);
         });
@@ -274,7 +280,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .addDeploymentTarget(guid, newTarget)
+        .addDeploymentTarget(guid, newTarget, {}, this.hceProxyConfig)
         .then(function (response) {
           return that.onCreateDeploymentTarget(response, guid);
         });
@@ -319,7 +325,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .createProject(guid, newProject);
+        .createProject(guid, newProject, {}, this.hceProxyConfig);
     },
 
     /**
@@ -344,7 +350,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .createUser(guid, newUser)
+        .createUser(guid, newUser, {}, this.hceProxyConfig)
         .then(function (response) {
           return that.onCreateUser(response, guid);
         });
@@ -362,7 +368,7 @@
     downloadArtifact: function (guid, artifactId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceArtifactApi')
-        .downloadArtifact(guid, artifactId)
+        .downloadArtifact(guid, artifactId, {}, this.hceProxyConfig)
         .then(function (response) {
           return that.onDownloadArtifact(response, guid);
         });
@@ -379,7 +385,7 @@
      */
     removeNotificationTarget: function (guid, targetId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
-        .removeNotificationTarget(guid, targetId);
+        .removeNotificationTarget(guid, targetId, {}, this.hceProxyConfig);
     },
 
     /**
@@ -400,7 +406,7 @@
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .triggerPipelineExecution(guid, data);
+        .triggerPipelineExecution(guid, data, {}, this.hceProxyConfig);
     },
 
     /**
