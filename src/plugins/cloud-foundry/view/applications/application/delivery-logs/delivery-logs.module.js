@@ -431,7 +431,7 @@
         controller: 'eventDetailViewController',
         title: event.type
       }, {
-        guid: that.hceCnsi.guid,
+        guid: this.hceCnsi.guid,
         event: event
       });
     }
