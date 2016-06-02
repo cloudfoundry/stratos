@@ -81,7 +81,7 @@
      */
     showHCEEndpointAddForm: function () {
       var that = this;
-      var data = { name: '', url: 'url' };
+      var data = { name: '', url: '' };
       this.detailView(
         {
           templateUrl: 'app/view/hce-registration/hce-registration.html',
@@ -91,7 +91,9 @@
           data: data
         }
       ).result.then(function () {
-        return that.serviceInstanceApi.createHCE(data.url, data.name);
+        return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
+          that.clusterInstanceModel.list();
+        });
       });
     }
   });

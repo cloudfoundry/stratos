@@ -1,17 +1,18 @@
 <div class="hce-registration">
   <div class="modal-body">
+    <form name="hceRegistrationForm">
     <div class="form-group" focusable-input
          ng-class="{'has-error': addClusterFormCtrl.addClusterForm.url.$invalid && addClusterFormCtrl.addClusterForm.url.$dirty}">
       <label class="control-label" translate>Code Engine Endpoint</label>
       <input type="text" name="url" class="form-control" ng-model="detailViewCtrl.context.data.url"
              required />
     </div>
-    <br/>
     <div class="form-group" focusable-input>
       <label class="control-label" translate>Code Engine Name</label>
       <input type="text" class="form-control" ng-model="detailViewCtrl.context.data.name" required/>
     </div>
   </div>
+  </form>
 
   <div class="modal-footer">
     <button class="btn btn-default"
@@ -20,7 +21,7 @@
     </button>
     <button class="btn btn-primary"
             ng-click="$close();">
-      {{ 'Add' }}
+      {{ 'Register' }}
     </button>
   </div>
 </div>

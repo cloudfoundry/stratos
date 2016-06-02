@@ -76,7 +76,7 @@
      * @public
      */
     remove: function (id) {
-      return this.$http.delete('/api/service-instances/' + id);
+      return this.$http.delete('/pp/v1/service-instances/' + id);
     },
 
     /**
