@@ -496,11 +496,11 @@
     createDeploymentTarget: function () {
       return this.hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
                                                   this.userInput.serviceInstance.name,
-                                                  this.userInput.serviceInstance.url,
-                                                  this.userInput.serviceInstance.account,
-                                                  this.userInput.serviceInstance.account_password,
-                                                  this.userInput.organization.entity.name || 'cnapui',
-                                                  this.userInput.space.entity.name || 'cnapuispace');
+                                                  this.userInput.serviceInstance.api_endpoint.Host,
+                                                  this.userInput.clusterUsername,
+                                                  this.userInput.clusterPassword,
+                                                  this.userInput.organization.entity.name,
+                                                  this.userInput.space.entity.name);
     },
 
     createPipeline: function (targetId) {
