@@ -57,6 +57,16 @@
       return this.$http.post('/pp/v1/register/hcf', data, config);
     },
 
+    createHCE: function (url, name) {
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var data = this.$httpParamSerializer({ api_endpoint: url, cnsi_name: name });
+      return this.$http.post('/pp/v1/register/hce', data, config);
+    },
+
     /**
      * @function remove
      * @memberof app.api.serviceInstance.ServiceInstanceApi
