@@ -228,6 +228,7 @@
         .CreateApp(newAppSpec, {}, config)
         .then(function (response) {
           that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
+          that.all();
           return response.data;
         });
     },
