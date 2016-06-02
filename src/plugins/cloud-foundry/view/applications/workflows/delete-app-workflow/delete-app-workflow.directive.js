@@ -121,7 +121,7 @@
       });
 
       this.$q.all([
-        tryDeleteEachRoute,
+        tryDeleteEachRoute.promise,
         this.deleteServiceBindings()
       ]).then(function () {
         that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid).then(function () {
