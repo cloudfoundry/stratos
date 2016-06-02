@@ -23,10 +23,11 @@ type CNSIRequest struct {
 	GUID     string
 	UserGUID string
 
-	Method string
-	Body   []byte
-	Header http.Header
-	URL    *url.URL
+	Method      string
+	Body        []byte
+	Header      http.Header
+	URL         *url.URL
+	StatusCode  int
 
 	Response []byte
 	Error    error
@@ -192,6 +193,9 @@ func (p *portalProxy) proxy(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusRequestTimeout, "Request timed out")
 		}
 
+		// in passthrough mode, set the status code to that of the single response
+		c.Response().WriteHeader(res.StatusCode)
+
 		// we don't care if this fails
 		_, _ = c.Response().Write(res.Response)
 
@@ -226,6 +230,7 @@ func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest
 	if err != nil {
 		cnsiRequest.Error = err
 	} else if res.Body != nil {
+		cnsiRequest.StatusCode = res.StatusCode
 		cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
 		defer res.Body.Close()
 	}
