@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS tokens (
   refresh_token TEXT        NOT NULL,
   token_expiry  BIGINT      NOT NULL,
   last_updated  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-  CONSTRAINT tokens_user_guid_cnsi_guid_token_type_key UNIQUE (user_guid, cnsi_guid, token_type) NOT DEFERRABLE INITIALLY IMMEDIATE,
-	CONSTRAINT tokens_user_guid_token_type_key UNIQUE (user_guid, token_type) NOT DEFERRABLE INITIALLY IMMEDIATE
+  CONSTRAINT tokens_user_guid_cnsi_guid_key UNIQUE (user_guid, cnsi_guid) NOT DEFERRABLE INITIALLY IMMEDIATE,
+  CONSTRAINT tokens_user_guid_token_type_key UNIQUE (user_guid, token_type) NOT DEFERRABLE INITIALLY IMMEDIATE
 )
 WITH (OIDS=FALSE);
 

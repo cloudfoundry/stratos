@@ -21,7 +21,7 @@ const (
 
 	saveCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
                    VALUES ($1, $2, $3, $4, $5, $6)
-                   ON CONFLICT ON CONSTRAINT tokens_user_guid_cnsi_guid_token_type_key
+                   ON CONFLICT ON CONSTRAINT tokens_user_guid_cnsi_guid_key
                    DO UPDATE SET auth_token = EXCLUDED.auth_token, refresh_token = EXCLUDED.refresh_token, token_expiry = EXCLUDED.token_expiry`
 )
 
