@@ -62,28 +62,36 @@
     // TODO (kdomico): Hi! I've used the same github user approach. Update here as well or let me know if I need to do it
     // TODO (rcox): Improvements - Check if project id already exists in hce model?
     /* eslint-enable */
-    that.hceModel.getUserByGithubId('18697775')
-      .then(function() {
-        return that.hceModel.getProjects();
-      })
-      .then(function() {
-        return that.hceModel.getProject(that.model.application.summary.name);
-      })
-      .then(function(project) {
-        that.hasProject = !(angular.isUndefined(project) || project === null);
-        if (that.hasProject) {
-          updateData();
-          updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
-        }
-      })
-      .catch(function(error) {
-        that.$log.error('Failed to fetch project or process delivery logs data: ', error);
-        that.fetchError = error;
-      });
+    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
+    this.cnsiModel.list().then(function () {
+      var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
+      if (hceCnsis.length > 0) {
+        that.hceCnsi = hceCnsis[0];
+
+        that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
+          .then(function() {
+            return that.hceModel.getProjects(that.hceCnsi.guid);
+          })
+          .then(function() {
+            return that.hceModel.getProject(that.model.application.summary.name);
+          })
+          .then(function(project) {
+            that.hasProject = !(angular.isUndefined(project) || project === null);
+            if (that.hasProject) {
+              updateData();
+              updateModelPromise = $interval(updateData, 30 * 1000, 0, true);
+            }
+          })
+          .catch(function(error) {
+            that.$log.error('Failed to fetch project or process delivery logs data: ', error);
+            that.fetchError = error;
+          });
+      }
+    });
 
     function updateData() {
       var project = that.hceModel.getProject(that.model.application.summary.name);
-      return that.hceModel.getPipelineExecutions(project.id)
+      return that.hceModel.getPipelineExecutions(that.hceCnsi.guid, project.id)
         .then(function () {
           // Fetch pipeline executions and their events
 
@@ -170,7 +178,7 @@
     }
 
     function fetchEvents(eventsPerExecution, executionId) {
-      return that.hceModel.getPipelineEvents(executionId)
+      return that.hceModel.getPipelineEvents(that.hceCnsi.guid, executionId)
         .then(function(events) {
           // if (eventsPerExecution[executionId]) {
           //   // used with mock, to be removed
@@ -393,6 +401,7 @@
         templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/execution.html',
         title: rawExecution.message
       }, {
+        guid: that.hceCnsi.guid,
         execution: rawExecution,
         events: that.eventsPerExecution[execution.id],
         viewEvent: function (build) {
@@ -422,6 +431,7 @@
         controller: 'eventDetailViewController',
         title: event.type
       }, {
+        guid: this.hceCnsi.guid,
         event: event
       });
     }

@@ -39,7 +39,7 @@
 
     // If we fetch large files before the slideout is shown the animation looks odd. Provide a pause before we fetch
     $timeout(function() {
-      hceModel.downloadArtifact(event.artifactId)
+      hceModel.downloadArtifact(vm.context.guid, event.artifactId)
         .then(function(artifact) {
           if (artifact) {
             vm.log = artifact;

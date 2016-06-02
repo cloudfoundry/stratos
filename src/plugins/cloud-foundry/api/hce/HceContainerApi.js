@@ -23,35 +23,43 @@
     * @param {object} $http - the Angular $http service
     * @property {object} $http - the Angular $http service
     * @property {string} baseUrl - the API base URL
-    * @property {object} defaultHeaders - the default headers
     */
   function HceContainerApi($http) {
     this.$http = $http;
-    this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
+    this.baseUrl = '/pp/v1/proxy/v2';
   }
 
   angular.extend(HceContainerApi.prototype, {
     /**
      * @name addBuildContainer
      * @description Add a BuildContainer instance.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addBuildContainer: function (data, params) {
+    addBuildContainer: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/build_containers';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -59,20 +67,33 @@
     /**
      * @name addImage
      * @description Add a Image instance.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addImage: function (data, params) {
+    addImage: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -80,20 +101,33 @@
     /**
      * @name addImageRegistry
      * @description Add a ImageRegistry instance.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addImageRegistry: function (data, params) {
+    addImageRegistry: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images/registries';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -101,20 +135,33 @@
     /**
      * @name getBuildContainer
      * @description Get the BuildContainer specified in the request.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} containerId - The (HCE) item id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getBuildContainer: function (containerId, params) {
+    getBuildContainer: function (guid, containerId, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/build_containers/{container_id}'
         .replace('{' + 'container_id' + '}', containerId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -122,18 +169,31 @@
     /**
      * @name getBuildContainers
      * @description List BuildContainer instances.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getBuildContainers: function (params) {
+    getBuildContainers: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/build_containers';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -141,20 +201,33 @@
     /**
      * @name getImage
      * @description Get the Image specified in the request.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} imageId - The (HCE) image id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getImage: function (imageId, params) {
+    getImage: function (guid, imageId, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images/{image_id}'
         .replace('{' + 'image_id' + '}', imageId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -162,18 +235,31 @@
     /**
      * @name getImageRegistries
      * @description List ImageRegistry instances.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getImageRegistries: function (params) {
+    getImageRegistries: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images/registries';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -181,39 +267,33 @@
     /**
      * @name getImageRegistry
      * @description Get the ImageRegistry specified in the request.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} registryId - The (HCE) item id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getImageRegistry: function (registryId, params) {
+    getImageRegistry: function (guid, registryId, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images/registries/{registry_id}'
         .replace('{' + 'registry_id' + '}', registryId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
 
-      return this.$http(config);
-    },
-
-    /**
-     * @name getImageTypes
-     * @description Enumeration of Container image types, e.g. &#x60;DOCKER&#x60;, &#x60;ROCKET&#x60;, etc.\n
-     * @param {object} params - the query parameters
-     * @returns {promise} A resolved/rejected promise
-     */
-    getImageTypes: function (params) {
-      var path = this.baseUrl + '/containers/images/types';
-
-      var config = {
-        method: 'GET',
-        url: path,
-        params: params || {},
-        headers: this.defaultHeaders
-      };
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -221,18 +301,31 @@
     /**
      * @name getImages
      * @description List Image instances.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getImages: function (params) {
+    getImages: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -240,20 +333,33 @@
     /**
      * @name removeBuildContainer
      * @description Remove (unregister) the specified BuildContainer.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} containerId - The (HCE) BuildContainer id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeBuildContainer: function (containerId, params) {
+    removeBuildContainer: function (guid, containerId, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/build_containers/{container_id}'
         .replace('{' + 'container_id' + '}', containerId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -261,20 +367,33 @@
     /**
      * @name removeImage
      * @description Remove (unregister) the specified Image.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} imageId - The (HCE) Image id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeImage: function (imageId, params) {
+    removeImage: function (guid, imageId, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images/{image_id}'
         .replace('{' + 'image_id' + '}', imageId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -282,20 +401,33 @@
     /**
      * @name removeImageRegistry
      * @description Remove (unregister) the specified ImageRegistry.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} registryId - The (HCE) ImageRegistry id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeImageRegistry: function (registryId, params) {
+    removeImageRegistry: function (guid, registryId, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images/registries/{registry_id}'
         .replace('{' + 'registry_id' + '}', registryId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -303,22 +435,35 @@
     /**
      * @name updateBuildContainer
      * @description Update the specified build container
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} containerId - BuildContainer id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateBuildContainer: function (containerId, data, params) {
+    updateBuildContainer: function (guid, containerId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/build_containers/{container_id}'
         .replace('{' + 'container_id' + '}', containerId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -326,22 +471,35 @@
     /**
      * @name updateImage
      * @description Update the specified container image.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} imageId - Container image id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateImage: function (imageId, data, params) {
+    updateImage: function (guid, imageId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images/{image_id}'
         .replace('{' + 'image_id' + '}', imageId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -349,22 +507,35 @@
     /**
      * @name updateImageRegistry
      * @description Update the specified container registry.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} registryId - Registry id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateImageRegistry: function (registryId, data, params) {
+    updateImageRegistry: function (guid, registryId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/containers/images/registries/{registry_id}'
         .replace('{' + 'registry_id' + '}', registryId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     }

@@ -23,35 +23,43 @@
     * @param {object} $http - the Angular $http service
     * @property {object} $http - the Angular $http service
     * @property {string} baseUrl - the API base URL
-    * @property {object} defaultHeaders - the default headers
     */
   function HceDeploymentApi($http) {
     this.$http = $http;
-    this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
+    this.baseUrl = '/pp/v1/proxy/v2';
   }
 
   angular.extend(HceDeploymentApi.prototype, {
     /**
      * @name addDeploymentTarget
      * @description Add a deployment target.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addDeploymentTarget: function (data, params) {
+    addDeploymentTarget: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -59,20 +67,33 @@
     /**
      * @name deploymentOccurred
      * @description Record a deployment.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    deploymentOccurred: function (data, params) {
+    deploymentOccurred: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'POST',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -80,20 +101,33 @@
     /**
      * @name getDeployment
      * @description Get the specified deployment.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} deploymentId - Deployment id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getDeployment: function (deploymentId, params) {
+    getDeployment: function (guid, deploymentId, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/{deployment_id}'
         .replace('{' + 'deployment_id' + '}', deploymentId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -101,20 +135,33 @@
     /**
      * @name getDeploymentTarget
      * @description Get the specified deployment target.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} targetId - DeploymentTarget id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getDeploymentTarget: function (targetId, params) {
+    getDeploymentTarget: function (guid, targetId, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -122,18 +169,31 @@
     /**
      * @name getDeploymentTargets
      * @description List the registered deployment targets, optionally filtering.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getDeploymentTargets: function (params) {
+    getDeploymentTargets: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -141,18 +201,31 @@
     /**
      * @name getDeployments
      * @description List deployments, optionally filtering by Project id or Build id.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getDeployments: function (params) {
+    getDeployments: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -160,20 +233,33 @@
     /**
      * @name removeDeployment
      * @description Remove the specified deployment.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} deploymentId - Deployment id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeDeployment: function (deploymentId, params) {
+    removeDeployment: function (guid, deploymentId, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/{deployment_id}'
         .replace('{' + 'deployment_id' + '}', deploymentId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -181,20 +267,33 @@
     /**
      * @name removeDeploymentTarget
      * @description Remove (unregister) the specified deployment target.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} targetId - DeploymentTarget id.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeDeploymentTarget: function (targetId, params) {
+    removeDeploymentTarget: function (guid, targetId, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -202,22 +301,35 @@
     /**
      * @name updateTarget
      * @description Update the specified DeploymentTarget.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} targetId - DeploymentTarget id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateTarget: function (targetId, data, params) {
+    updateTarget: function (guid, targetId, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/deployments/targets/{target_id}'
         .replace('{' + 'target_id' + '}', targetId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'PUT',
         url: path,
         params: params || {},
         data: data,
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     }

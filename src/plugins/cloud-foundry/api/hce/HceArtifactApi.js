@@ -23,35 +23,43 @@
     * @param {object} $http - the Angular $http service
     * @property {object} $http - the Angular $http service
     * @property {string} baseUrl - the API base URL
-    * @property {object} defaultHeaders - the default headers
     */
   function HceArtifactApi($http) {
     this.$http = $http;
-    this.baseUrl = '/api/ce/v2';
-    this.defaultHeaders = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    };
+    this.baseUrl = '/pp/v1/proxy/v2';
   }
 
   angular.extend(HceArtifactApi.prototype, {
     /**
      * @name deleteArtifact
      * @description Deletes the artifact specified in the request params.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} artifactId - The id of the artifact to delete.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    deleteArtifact: function (artifactId, params) {
+    deleteArtifact: function (guid, artifactId, params, httpConfigOptions) {
       var path = this.baseUrl + '/artifacts/{artifact_id}'
         .replace('{' + 'artifact_id' + '}', artifactId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'DELETE',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -59,20 +67,33 @@
     /**
      * @name downloadArtifact
      * @description Download the file specified by the artifact id. This operation may result in a redirect.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} artifactId - The id of the artifact to download.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    downloadArtifact: function (artifactId, params) {
+    downloadArtifact: function (guid, artifactId, params, httpConfigOptions) {
       var path = this.baseUrl + '/artifacts/{artifact_id}/download'
         .replace('{' + 'artifact_id' + '}', artifactId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -80,20 +101,33 @@
     /**
      * @name getArtifact
      * @description Get the artifact specified in request.
+     * @param {string} guid - the HCE instance GUID
      * @param {!number} artifactId - The id of the artifact.
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getArtifact: function (artifactId, params) {
+    getArtifact: function (guid, artifactId, params, httpConfigOptions) {
       var path = this.baseUrl + '/artifacts/{artifact_id}'
         .replace('{' + 'artifact_id' + '}', artifactId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -101,18 +135,31 @@
     /**
      * @name getArtifacts
      * @description List the list of artifacts associated with the specified PipelineExecution.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getArtifacts: function (params) {
+    getArtifacts: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/artifacts';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
 
       var config = {
         method: 'GET',
         url: path,
         params: params || {},
-        headers: this.defaultHeaders
+        headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     },
@@ -120,13 +167,17 @@
     /**
      * @name uploadArtifact
      * @description Upload an artifact for the specified PipelineExecution.
+     * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request form data
      * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    uploadArtifact: function (data, params) {
+    uploadArtifact: function (guid, data, params, httpConfigOptions) {
       var path = this.baseUrl + '/artifacts';
-      var headers = angular.extend({}, this.defaultHeaders);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
       headers['Content-Type'] = 'application/x-gzip';
 
       var config = {
@@ -136,6 +187,14 @@
         data: data,
         headers: headers
       };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
 
       return this.$http(config);
     }
