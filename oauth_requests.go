@@ -10,11 +10,6 @@ import (
 )
 
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Request) (*http.Response, error) {
-	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
-	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
-	}
-
 	// Temporary measure until HCE has authentication
 	shouldSkipTokenAuth := "true" == cnsiRequest.Header.Get("x-cnap-skip-token-auth")
 	if shouldSkipTokenAuth {
@@ -28,6 +23,11 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 		}
 
 		return nil, fmt.Errorf("Request failed")
+	}
+
+	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
 
 	got401 := false
