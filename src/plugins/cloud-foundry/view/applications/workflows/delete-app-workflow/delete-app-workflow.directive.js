@@ -108,15 +108,30 @@
      */
     deleteApp: function () {
       var that = this;
-      var task1 = this.removeAppFromRoutes();
-      var task2 = this.deleteServiceBindings();
-      var task3 = this.appModel.deleteApp(this.cnsiGuid, this.appModel.application.summary.guid);
 
-      task1.then(function () {
-        that.tryDeleteEachRoute();
+      var tryDeleteEachRoute = this.$q.defer();
+      var deleteApp = this.$q.defer();
+
+      this.removeAppFromRoutes().then(function () {
+        that.tryDeleteEachRoute().then(function () {
+          tryDeleteEachRoute.resolve();
+        }, function () {
+          tryDeleteEachRoute.reject();
+        });
       });
 
-      return this.$q.all([task1, task2, task3]);
+      this.$q.all([
+        tryDeleteEachRoute.promise,
+        this.deleteServiceBindings()
+      ]).then(function () {
+        that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid).then(function () {
+          deleteApp.resolve();
+        }, function () {
+          deleteApp.reject();
+        });
+      });
+
+      return deleteApp.promise;
     },
 
     /**
@@ -153,7 +168,7 @@
 
       Object.keys(checkedServiceValue).forEach(function (guid) {
         if (checkedServiceValue[guid]) {
-          tasks.push(that.serviceBindingModel.deleteServiceBinding(that.cnsiGuid, guid, { async: true }));
+          tasks.push(that.serviceBindingModel.deleteServiceBinding(that.cnsiGuid, guid, { async: false }));
         }
       });
 
