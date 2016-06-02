@@ -147,6 +147,10 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	header := getEchoHeaders(c)
 	header.Del("Cookie")
 
+	// Temporarily copy this header over to allow us to skip auth for HCE calls
+	// until it has authentcation set up. It'll be used in doOauthFlowRequest later
+	header.Add("x-cnap-skip-token-auth", c.Request().Header().Get("x-cnap-skip-token-auth"))
+
 	portalUserGUID, err := getPortalUserGUID(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
