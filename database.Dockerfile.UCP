@@ -7,6 +7,6 @@ ENV DB_HOST="portal-db" DB="postgres" DB_USER="stolon" \
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
 
 COPY /db/run.sh /
-COPY /db/InitialSchema.sql /
+COPY /db/initial/InitialSchema.sql /
 
 CMD ["/run.sh"]
