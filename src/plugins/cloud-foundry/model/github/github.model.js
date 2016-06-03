@@ -81,6 +81,21 @@
     },
 
     /**
+     * @function getBranch
+     * @memberof cloud-foundry.model.github.GithubModel
+     * @description Get specified branch
+     * @param {string} repo - the repo full name
+     * @param {string} repo - the branch name
+     * @returns {promise} A promise object
+     * @public
+     */
+    getBranch: function (repo, branch) {
+      var that = this;
+      var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
+      return githubApi.getBranch(repo, branch);
+    },
+
+    /**
      * @function commits
      * @memberof cloud-foundry.model.github.GithubModel
      * @description Get commits for a branch

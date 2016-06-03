@@ -384,6 +384,16 @@
         });
     },
 
+    removeProject: function (guid, projectId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .deleteProject(guid, projectId, {}, this.hceProxyConfig)
+        .then(function (response) {
+          that.getProjects(guid);
+          return response;
+        });
+    },
+
     /**
      * @function removeNotificationTarget
      * @memberof cloud-foundry.model.hce.HceModel

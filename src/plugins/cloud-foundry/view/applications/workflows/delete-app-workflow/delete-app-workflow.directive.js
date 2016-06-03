@@ -51,11 +51,13 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.deletingApplication = false;
     this.cnsiGuid = null;
+    this.hceCnsiGuid = null;
 
-    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (event, cnsiGuid) {
-      that.startWorkflow(cnsiGuid);
+    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (event, data) {
+      that.startWorkflow(data);
     });
   }
 
@@ -64,6 +66,7 @@
       var that = this;
       var path = 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/';
       this.cnsiGuid = null;
+      this.hceCnsiGuid = null;
       this.data = {};
       this.userInput = {
         checkedRouteValue: _.keyBy(this.appModel.application.summary.routes, 'guid'),
@@ -221,10 +224,11 @@
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description start workflow
      */
-    startWorkflow: function (cnsiGuid) {
+    startWorkflow: function (data) {
       this.deletingApplication = true;
       this.reset();
-      this.cnsiGuid = cnsiGuid;
+      this.cnsiGuid = data.cnsiGuid;
+      this.hceCnsiGuid = data.hceCnsiGuid;
     },
 
     /**
@@ -244,6 +248,9 @@
     finishWorkflow: function () {
       var that = this;
       this.deleteApp().then(function () {
+        if (that.appModel.application.project) {
+          that.hceModel.removeProject(that.hceCnsiGuid, that.appModel.application.project.id);
+        }
         that.deletingApplication = false;
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
       });

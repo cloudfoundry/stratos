@@ -89,6 +89,28 @@
     },
 
     /**
+     * @function getBranch
+     * @memberof cloud-foundry.api.github.GithubApi
+     * @description Get specified branch
+     * @param {string} repo - the repo full name
+     * @param {string} branch - the branch name
+     * @returns {promise}
+     * @public
+     */
+    getBranch: function (repo, branch, params) {
+      var url = this.githubApiUrl + 'repos/' + repo + '/branches/' + branch;
+      var config = {
+        params: params || {},
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: 'token ' + this.token
+        }
+      };
+
+      return this.$http.get(url, config);
+    },
+
+    /**
     * @function commits
     * @memberof cloud-foundry.api.github.GithubApi
     * @description Get commits for a repo
