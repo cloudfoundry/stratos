@@ -27,7 +27,9 @@
   }
 
   ClusterRegistrationController.$inject = [
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.api.apiManager',
+    'helion.framework.widgets.detailView'
   ];
 
   /**
@@ -36,17 +38,21 @@
    * @name ClusterRegistrationController
    * @constructor
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.api.apiManager} apiManager - the application api manager
+   * @param {helion.framework.widgets.detailView} detailView - detail view service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the cluster instance model
    * @property {array} clusterInstances - the cluster instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ClusterRegistrationController(modelManager) {
+  function ClusterRegistrationController(modelManager, apiManager, detailView) {
     this.overlay = angular.isDefined(this.showClusterOverlayRegistration);
     this.clusterAddFlyoutActive = false;
     this.clusterInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.clusterInstances = this.clusterInstanceModel.serviceInstances;
     this.clusterInstanceModel.list();
+    this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
+    this.detailView = detailView;
   }
 
   angular.extend(ClusterRegistrationController.prototype, {
@@ -66,6 +72,29 @@
      */
     hideClusterAddForm: function () {
       this.clusterAddFlyoutActive = false;
+    },
+
+    /**
+     * @function showHCEEndpointAddForm
+     * @memberOf app.view.ClusterRegistrationController
+     * @description Show the HCE Endpoint add form detail view
+     */
+    showHCEEndpointAddForm: function () {
+      var that = this;
+      var data = { name: '', url: '' };
+      this.detailView(
+        {
+          templateUrl: 'app/view/hce-registration/hce-registration.html',
+          title: 'Register Code Engine Endpoint'
+        },
+        {
+          data: data
+        }
+      ).result.then(function () {
+        return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
+          that.clusterInstanceModel.list();
+        });
+      });
     }
   });
 
