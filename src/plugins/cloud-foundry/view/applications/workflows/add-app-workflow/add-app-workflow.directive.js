@@ -87,14 +87,6 @@
         that.getSpacesForOrganization(organization.metadata.guid);
       }
     });
-
-    $scope.$watch(function () {
-      return that.options && that.options.subflow;
-    }, function (subflow) {
-      if (subflow === 'pipeline') {
-        that.getHceInstances();
-      }
-    });
   }
 
   angular.extend(AddAppWorkflowController.prototype, {
@@ -519,13 +511,21 @@
     },
 
     triggerPipeline: function () {
-      return this.hceModel.triggerPipelineExecution(this.userInput.hceCnsi.guid, this.userInput.projectId, 'HEAD');
+      var that = this;
+      this.githubModel.getBranch(this.userInput.repo.full_name, this.userInput.branch)
+        .then(function (response) {
+          var branch = response.data;
+          that.hceModel.triggerPipelineExecution(that.userInput.hceCnsi.guid,
+                                                 that.userInput.projectId,
+                                                 branch.commit.sha);
+        });
     },
 
     startWorkflow: function () {
       var that = this;
       this.addingApplication = true;
       this.reset();
+      this.getHceInstances();
       this.serviceInstanceModel.list()
         .then(function (serviceInstances) {
           var validServiceInstances = _.chain(_.values(serviceInstances))
