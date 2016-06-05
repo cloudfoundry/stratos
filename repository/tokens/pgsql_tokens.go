@@ -26,8 +26,8 @@ const (
                    WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	countCNSITokens = `SELECT COUNT(*)
-										FROM tokens
-										WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
+                   FROM tokens
+                   WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
 	                   VALUES ($1, $2, $3, $4, $5, $6)`
@@ -69,7 +69,8 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) err
 		fmt.Printf("Unknown error attempting to find UAA token: %v", err)
 	}
 
-	if count == 0 {
+	switch count {
+	case 0:
 		fmt.Println("Existing UAA token not found - attempting insert.")
 
 		// Row not found
@@ -80,7 +81,7 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) err
 		}
 
 		fmt.Println("UAA token INSERT complete.")
-	} else {
+	default:
 		fmt.Println("Existing UAA token found - attempting update.")
 
 		// Found a match - update it
@@ -139,7 +140,8 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		fmt.Printf("Unknown error attempting to find CNSI token: %v", err)
 	}
 
-	if count == 0 {
+	switch count {
+	case 0:
 		fmt.Println("Existing CNSI token not found - attempting insert.")
 
 		// Row not found
@@ -150,7 +152,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		}
 
 		fmt.Println("CNSI token INSERT complete.")
-	} else {
+	default:
 		fmt.Println("Existing CNSI token found - attempting update.")
 
 		// Found a match - update it
