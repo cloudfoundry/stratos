@@ -127,7 +127,7 @@
         params: params || {},
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token
+          Authorization: 'token ' + this.token.access_token
         }
       };
 
