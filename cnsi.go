@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -338,6 +339,23 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tok
 	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t)
 	if err != nil {
 		return fmt.Errorf("Unable to save a CNSI Token: %v", err)
+	}
+
+	return nil
+}
+
+func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) error {
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Printf("Unable to establish a database reference: '%v'", err)
+		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
+	}
+
+	err = tokenRepo.DeleteCNSIToken(cnsiGUID, userGUID)
+	if err != nil {
+		log.Printf("Unable to delete a CNSI Token: %v", err)
+		return fmt.Errorf("Unable to delete a CNSI Token: %v", err)
 	}
 
 	return nil

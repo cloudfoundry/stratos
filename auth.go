@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -75,11 +76,11 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
-	fmt.Println("loginToCNSI start")
+	log.Println("loginToCNSI start")
 
 	cnsiGUID := c.FormValue("cnsi_guid")
 
-	fmt.Printf("CNSI: %s", cnsiGUID)
+	log.Printf("CNSI: %s", cnsiGUID)
 
 	if len(cnsiGUID) == 0 {
 		return newHTTPShadowError(
@@ -91,8 +92,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	endpoint := ""
 	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
 
-	fmt.Printf("CNSI Record: %v", cnsiRecord)
-	fmt.Println("")
+	log.Printf("CNSI Record: %v", cnsiRecord)
 
 	if !ok {
 		return newHTTPShadowError(
@@ -113,8 +113,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 			"Login failed: %v", err)
 	}
 
-	fmt.Printf("UAA Response: %v", uaaRes)
-	fmt.Println("")
+	log.Printf("UAA Response: %v", uaaRes)
 
 	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
 	userID, ok := p.getSessionStringValue(c, "user_id")
@@ -123,12 +122,11 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	}
 	u.UserGUID = userID
 
-	fmt.Printf("User ID: %s", userID)
-	fmt.Println("")
+	log.Printf("User ID: %s", userID)
 
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 
-	fmt.Println("After SAVE of CNSI token")
+	log.Println("After SAVE of CNSI token")
 
 	resp := &LoginRes{
 		Account:     u.UserGUID,
@@ -144,8 +142,38 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	c.Response().Header().Set("Content-Type", "application/json")
 	c.Response().Write(jsonString)
 
-	fmt.Println("loginToCNSI complete")
+	log.Println("loginToCNSI complete")
 
+	return nil
+}
+
+func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
+
+	log.Println("logoutOfCNSI start")
+
+	cnsiGUID := c.FormValue("cnsi_guid")
+
+	log.Printf("CNSI: %s", cnsiGUID)
+
+	if len(cnsiGUID) == 0 {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Missing target endpoint",
+			"Need CNSI GUID passed as form param")
+	}
+
+	userID, ok := p.getSessionStringValue(c, "user_id")
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
+	}
+
+	log.Printf("User ID: %s", userID)
+
+	p.deleteCNSIToken(cnsiGUID, userID)
+
+	log.Println("After DELETE of CNSI token")
+
+	log.Println("logoutOfCNSI complete")
 	return nil
 }
 
@@ -255,13 +283,22 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 
 	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
 	if err != nil {
-		fmt.Println("DANGER WILL ROBINSON!!!!")
-		fmt.Printf("%v", err)
-		fmt.Println(" ")
+		log.Printf("%v", err)
 		return tokens.TokenRecord{}, err
 	}
 
 	return tokenRecord, nil
+}
+
+func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
+
+	err := p.unsetCNSITokenRecord(cnsiID, userGUID)
+	if err != nil {
+		log.Printf("%v", err)
+		return err
+	}
+
+	return nil
 }
 
 // As of 5/18/2016 - not used

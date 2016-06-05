@@ -35,6 +35,9 @@ const (
 	updateCNSIToken = `UPDATE tokens
 	                   SET auth_token = $4, refresh_token = $5, token_expiry = $6
 	                   WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = $3`
+
+	deleteCNSIToken = `DELETE FROM tokens
+                     WHERE token_type = 'cnsi' AND user_guid = $1 AND cnsi_guid = $2`
 )
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
@@ -187,4 +190,23 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string) (
 	}
 
 	return *tr, nil
+}
+
+// DeleteCNSIToken - remove a CNSI token (disconnect from a given CNSI)
+func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string) error {
+
+	if cnsiGUID == "" {
+		return fmt.Errorf("Unable to delete CNSI Token without a valid CNSI GUID.")
+	}
+
+	if userGUID == "" {
+		return fmt.Errorf("Unable to delete CNSI Token without a valid User GUID.")
+	}
+
+	_, err := p.db.Exec(deleteCNSIToken, cnsiGUID, userGUID)
+	if err != nil {
+		return fmt.Errorf("Unable to Delete CNSI token: %v", err)
+	}
+
+	return nil
 }

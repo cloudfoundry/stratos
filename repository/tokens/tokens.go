@@ -20,5 +20,6 @@ type Repository interface {
 	SaveUAAToken(userGUID string, tokenRecord TokenRecord) error
 
 	FindCNSIToken(cnsiGUID string, userGUID string) (TokenRecord, error)
+	DeleteCNSIToken(cnsiGUID string, userGUID string) error
 	SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
 }
