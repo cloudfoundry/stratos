@@ -73,9 +73,9 @@
       });
     });
 
-    this.cnsiModel.list();
     this.userCnsiModel.list().then(function () {
       angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
+      that.cnsiModel.list()
     });
   }
 

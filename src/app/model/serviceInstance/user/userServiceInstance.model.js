@@ -12,12 +12,13 @@
     .run(registerUserServiceInstanceModel);
 
   registerUserServiceInstanceModel.$inject = [
+    '$q',
     'app.api.apiManager',
     'app.model.modelManager'
   ];
 
-  function registerUserServiceInstanceModel(apiManager, modelManager) {
-    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance(apiManager));
+  function registerUserServiceInstanceModel($q, apiManager, modelManager) {
+    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance($q, apiManager));
   }
 
   /**
@@ -30,7 +31,8 @@
    * @property {number} numValid - the number of valid user service instances
    * @class
    */
-  function UserServiceInstance(apiManager) {
+  function UserServiceInstance($q, apiManager) {
+    this.$q = $q;
     this.apiManager = apiManager;
     this.serviceInstances = {};
     this.numValid = 0;
@@ -81,23 +83,25 @@
     list: function () {
       var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      return serviceInstanceApi.list()
+      var cfInfoApi = this.apiManager.retrieve('cloud-foundry.api.Info');
+      var deferred = this.$q.defer();
+
+      serviceInstanceApi.list()
         .then(function (response) {
           var items = response.data;
+          var guids = _.map(items, 'guid') || [];
+          var cfg = { headers: { 'x-cnap-cnsi-list': guids.join(',') } };
 
-          // check token expirations
-          var now = (new Date()).getTime() / 1000;
-          angular.forEach(items, function (item) {
-            if (!_.isNil(item.token_expiry)) {
-              item.valid = item.token_expiry > now;
-            }
+          // call /v2/info to refresh tokens, then list
+          cfInfoApi.GetInfo({}, cfg).then(function () {
+            serviceInstanceApi.list().then(function (listResponse) {
+              that.onList(listResponse);
+              deferred.resolve(that.serviceInstances);
+            });
           });
-
-          that.serviceInstances = _.keyBy(items, 'guid');
-          that.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
-
-          return that.serviceInstances;
         });
+
+      return deferred.promise;
     },
 
     /**
@@ -134,6 +138,21 @@
       } else {
         angular.extend(this.serviceInstances[guid], newCnsi);
       }
+    },
+
+    onList: function (response) {
+      var items = response.data;
+
+      // check token expirations
+      var now = (new Date()).getTime() / 1000;
+      angular.forEach(items, function (item) {
+        if (!_.isNil(item.token_expiry)) {
+          item.valid = item.token_expiry > now;
+        }
+      });
+
+      this.serviceInstances = _.keyBy(items, 'guid');
+      this.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
     }
   });
 
