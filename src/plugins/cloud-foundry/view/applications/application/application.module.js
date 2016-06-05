@@ -73,7 +73,7 @@
           var routes = that.model.application.summary.routes;
           if (routes.length) {
             var route = routes[0];
-            var path = typeof route.path !== typeof undefined ? '/' + route.path : '';
+            var path = angular.isUndefined(route.path) ? '/' + route.path : '';
             var url = 'http://' + route.host + '.' + route.domain.name + path;
             that.$window.open(url, '_blank');
           }
