@@ -85,9 +85,9 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 	// config. This is to bypass an issue with docker-compose not being able to
 	// handle multi-line variables in an env_file
 	devCertsDir := "dev-certs/"
-	_, err_devcert := os.Stat(devCertsDir + certFilename)
-	_, err_devkey := os.Stat(devCertsDir + certKeyFilename)
-	if err_devcert == nil && err_devkey == nil {
+	_, errDevcert := os.Stat(devCertsDir + certFilename)
+	_, errDevkey := os.Stat(devCertsDir + certKeyFilename)
+	if errDevcert == nil && errDevkey == nil {
 		return devCertsDir + certFilename, devCertsDir + certKeyFilename, nil
 	}
 
@@ -162,11 +162,22 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
 	sessionGroup := e.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
+
+	// Connect to HCF cluster
 	sessionGroup.Post("/auth/login/cnsi", p.loginToCNSI)
+
+	// Disconnect HCF cluster
+	sessionGroup.Post("/auth/logout/cnsi", p.logoutOfCNSI)
+
+	// Register clusters
 	sessionGroup.Post("/register/hcf", p.registerHCFCluster)
 	sessionGroup.Post("/register/hce", p.registerHCECluster)
+
+	// CNSI operations
 	sessionGroup.Get("/cnsis", p.listCNSIs)
 	sessionGroup.Get("/cnsis/registered", p.listRegisteredCNSIs)
+	// sessionGroup.Delete("/cnsis", p.removeHCFCluster)
+
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
 }
