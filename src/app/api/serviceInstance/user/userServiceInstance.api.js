@@ -81,6 +81,7 @@
       };
       var disconnectData = {cnsi_guid: id};
       var data = this.$httpParamSerializer(disconnectData);
+      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs.
       return this.$http.post('/pp/v1/auth/logout/cnsi', data, config);
     },
 

@@ -75,8 +75,17 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
+    // TODO(woodnt): can I change this to guid or will that break things elsewhere?
     remove: function (id) {
-      return this.$http.delete('/pp/v1/service-instances/' + id);
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var removalData = {cnsi_guid: id};
+      var data = this.$httpParamSerializer(removalData);
+      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs.
+      return this.$http.post('/pp/v1/unregister', data, config);
     },
 
     /**

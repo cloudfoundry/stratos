@@ -90,15 +90,22 @@
         .then(function (response) {
           var items = response.data;
           var guids = _.map(items, 'guid') || [];
-          var cfg = { headers: { 'x-cnap-cnsi-list': guids.join(',') } };
 
-          // call /v2/info to refresh tokens, then list
-          cfInfoApi.GetInfo({}, cfg).then(function () {
-            serviceInstanceApi.list().then(function (listResponse) {
-              that.onList(listResponse);
-              deferred.resolve(that.serviceInstances);
+          that.serviceInstances = {};
+
+          if (_.isEmpty(guids)) {
+            deferred.resolve(that.serviceInstances);
+          } else {
+
+            var cfg = { headers: { 'x-cnap-cnsi-list': guids.join(',') } };
+            // call /v2/info to refresh tokens, then list
+            cfInfoApi.GetInfo({}, cfg).then(function () {
+              serviceInstanceApi.list().then(function (listResponse) {
+                that.onList(listResponse);
+                deferred.resolve(that.serviceInstances);
+              });
             });
-          });
+          }
         });
 
       return deferred.promise;
