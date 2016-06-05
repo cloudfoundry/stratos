@@ -48,6 +48,7 @@
   function ServiceRegistrationController($scope, modelManager) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
+    this.clusterAddFlyoutActive = false;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userModel = modelManager.retrieve('app.model.user');
@@ -109,7 +110,12 @@
      */
     disconnect: function (serviceInstance) {
       var that = this;
-      this.userCnsiModel.disconnect(serviceInstance.id)
+
+      // TODO: Our mocking system uses "id" but the real systems use "guid".
+      //       This bandaid will allow the use of either.
+      var id = angular.isUndefined(serviceInstance.guid) ? serviceInstance.id : serviceInstance.guid;
+
+      this.userCnsiModel.disconnect(id)
         .then(function success() {
           delete serviceInstance.account;
           delete serviceInstance.expires_at;
@@ -126,6 +132,24 @@
       this.userCnsiModel.numValid += 1;
       this.credentialsFormOpen = false;
       this.activeServiceInstance = null;
+    },
+
+    /**
+     * @function showClusterAddForm
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Show the cluster add form flyout
+     */
+    showClusterAddForm: function () {
+      this.clusterAddFlyoutActive = true;
+    },
+
+    /**
+     * @function hideClusterAddForm
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Hide the cluster add form flyout
+     */
+    hideClusterAddForm: function () {
+      this.clusterAddFlyoutActive = false;
     }
   });
 

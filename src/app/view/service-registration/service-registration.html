@@ -23,7 +23,13 @@
             <th translate>URL</th>
             <th translate>User Account</th>
             <th translate>Valid Until</th>
-            <th class="registration-actions"></th>
+            <th class="registration-actions">
+              <button class="btn btn-primary"
+                      translate
+                      ng-click="serviceRegistrationCtrl.showClusterAddForm()">
+                Add Cluster
+              </button>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -49,6 +55,11 @@
               </a>
               <a class="btn btn-link btn-sm" ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
                 ng-click="serviceRegistrationCtrl.disconnect(cnsi)" translate>Disconnect</a>
+              <a class="btn btn-link btn-sm"
+                 translate
+                 ng-click="serviceRegistrationCtrl.cnsiModel.remove(cnsi)">
+                remove
+              </a>
             </td>
           </tr>
         </tbody>
@@ -75,4 +86,10 @@
     on-cancel="serviceRegistrationCtrl.onConnectCancel()"
     on-submit="serviceRegistrationCtrl.onConnectSuccess(serviceInstance)">
   </credentials-form>
+</flyout>
+<flyout flyout-active="serviceRegistrationCtrl.clusterAddFlyoutActive"
+  flyout-close-icon="'helion-icon helion-icon-Close'">
+  <add-cluster-form on-cancel="serviceRegistrationCtrl.hideClusterAddForm()"
+    on-submit="serviceRegistrationCtrl.hideClusterAddForm()">
+  </add-cluster-form>
 </flyout>
