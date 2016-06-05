@@ -1,1 +1,5 @@
-// github.scss
+#github-auth-callback-page {
+  @include flex-align(center, center);
+  padding: $hpe-unit-space * 10;
+  text-align: center;
+}
