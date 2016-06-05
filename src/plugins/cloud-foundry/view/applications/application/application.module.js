@@ -73,7 +73,8 @@
           var routes = that.model.application.summary.routes;
           if (routes.length) {
             var route = routes[0];
-            var url = 'http://' + route.host + '.' + route.domain.name + '/' + route.path;
+            var path = typeof route.path !== typeof undefined ? '/' + route.path : '';
+            var url = 'http://' + route.host + '.' + route.domain.name + path;
             that.$window.open(url, '_blank');
           }
         },
