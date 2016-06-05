@@ -128,6 +128,7 @@
             templateUrl: path + 'name.html',
             form: 'application-name-form',
             nextBtnText: gettext('Create and continue'),
+            cancelBtnText: gettext('Cancel'),
             onNext: function () {
               that.createApp();
               // For the demo, we need to pull in the model data. There MUST be a better way to get/store that guid.
