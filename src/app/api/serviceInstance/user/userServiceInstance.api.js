@@ -72,8 +72,16 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
+    // TODO woodnt: can we change this param name to guid from id?
     disconnect: function (id) {
-      return this.$http.delete('/api/service-instances/user/' + id);
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var disconnectData = {cnsi_guid: id};
+      var data = this.$httpParamSerializer(disconnectData);
+      return this.$http.post('/pp/v1/auth/logout/cnsi', data, config);
     },
 
     /**
