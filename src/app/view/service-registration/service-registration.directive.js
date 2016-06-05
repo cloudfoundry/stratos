@@ -170,7 +170,7 @@
       this.detailView(
         {
           templateUrl: 'app/view/hce-registration/hce-registration.html',
-          title: 'Register Code Engine Endpoint'
+          title: gettext('Register Code Engine Endpoint')
         },
         {
           data: data
