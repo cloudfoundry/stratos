@@ -159,7 +159,10 @@
 
     deleteApp: function () {
       if (this.model.application.summary.services.length || this.model.application.summary.routes.length) {
-        var guids = { cnsiGuid: this.cnsiGuid, hceCnsiGuid: this.hceCnsi.guid };
+        var guids = {
+          cnsiGuid: this.cnsiGuid,
+          hceCnsiGuid: this.hceCnsi ? this.hceCnsi.guid : ''
+        };
         this.eventService.$emit('cf.events.START_DELETE_APP_WORKFLOW', guids);
       } else {
         this.simpleDeleteAppDialog();

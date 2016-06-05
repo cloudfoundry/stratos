@@ -543,7 +543,9 @@
     },
 
     finishWorkflow: function () {
-      this.triggerPipeline();
+      if (this.options.subflow === 'pipeline') {
+        this.triggerPipeline();
+      }
       this.addingApplication = false;
     }
   });
