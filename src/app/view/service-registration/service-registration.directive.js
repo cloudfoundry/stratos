@@ -29,7 +29,9 @@
 
   ServiceRegistrationController.$inject = [
     '$scope',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.api.apiManager',
+    'helion.framework.widgets.detailView'
   ];
 
   /**
@@ -45,7 +47,7 @@
    * @property {array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ServiceRegistrationController($scope, modelManager) {
+  function ServiceRegistrationController($scope, modelManager, apiManager, detailView) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.clusterAddFlyoutActive = false;
@@ -53,8 +55,10 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userModel = modelManager.retrieve('app.model.user');
     this.serviceInstances = {};
+    this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
+    this.detailView = detailView;
 
     $scope.$watchCollection(function () {
       return that.cnsiModel.serviceInstances;
@@ -150,6 +154,32 @@
      */
     hideClusterAddForm: function () {
       this.clusterAddFlyoutActive = false;
+    },
+
+    /**
+     * @function showHCEEndpointAddForm
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Show the HCE Endpoint add form detail view
+     */
+    showHCEEndpointAddForm: function () {
+      // This code is shamelessly copied from app/view/cluster-registration/cluster-registration.directive.js
+      // I take that back, it was EXTREMELY SHAMEFUL.
+      // -- woodnt
+      var that = this;
+      var data = { name: '', url: '' };
+      this.detailView(
+        {
+          templateUrl: 'app/view/hce-registration/hce-registration.html',
+          title: 'Register Code Engine Endpoint'
+        },
+        {
+          data: data
+        }
+      ).result.then(function () {
+        return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
+          that.cnsiModel.list();
+        });
+      });
     }
   });
 
