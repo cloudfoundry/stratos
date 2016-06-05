@@ -173,10 +173,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.Post("/register/hcf", p.registerHCFCluster)
 	sessionGroup.Post("/register/hce", p.registerHCECluster)
 
+	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.
+	sessionGroup.Post("/unregister", p.unregisterCluster)
+	// sessionGroup.Delete("/cnsis", p.removeCluster)
+
 	// CNSI operations
 	sessionGroup.Get("/cnsis", p.listCNSIs)
 	sessionGroup.Get("/cnsis/registered", p.listRegisteredCNSIs)
-	// sessionGroup.Delete("/cnsis", p.removeHCFCluster)
 
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
