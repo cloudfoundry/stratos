@@ -198,9 +198,13 @@
         appAction.disabled = that.isPending;
       });
 
-      this.appActions[1].hidden = newState === 'STOPPED';
-      this.appActions[3].hidden = newState === 'STARTED';
-      this.appActions[4].hidden = newState === 'STARTED';
+      // TODO: This list-index mechanism is WAY fragile. Now we can't reorder the actions without re-counting indexes.
+      // TODO: Why are we both conditionally hiding and conditionally disabling these appActions?  That seems ... odd.
+      this.appActions[1].hidden = newState === 'STOPPED';  // Stop
+      this.appActions[2].hidden = newState === 'STOPPED';  // Restart
+      this.appActions[3].hidden = newState === 'STARTED';  // Delete
+      this.appActions[4].hidden = newState === 'STARTED';  // Start
+      // Index 5 is CLI Instructions
 
       if (newState === 'STARTED' || newState === 'STOPPED') {
         this.init();
