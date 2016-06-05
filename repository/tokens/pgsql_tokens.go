@@ -37,7 +37,7 @@ const (
 	                   WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = $3`
 
 	deleteCNSIToken = `DELETE FROM tokens
-                     WHERE token_type = 'cnsi' AND user_guid = $1 AND cnsi_guid = $2`
+                     WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
 )
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
