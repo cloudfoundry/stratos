@@ -10,6 +10,10 @@ const (
                   FROM tokens
                   WHERE token_type = 'uaa' AND user_guid = $1`
 
+	countUAATokens = `SELECT COUNT(*)
+                    FROM tokens
+                    WHERE token_type = 'uaa' AND user_guid = $1`
+
 	insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
 	                  VALUES ($1, $2, $3, $4, $5)`
 
@@ -18,6 +22,10 @@ const (
 	                  WHERE user_guid = $1 AND token_type = $2`
 
 	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
+                   FROM tokens
+                   WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
+
+	countCNSITokens = `SELECT COUNT(*)
                    FROM tokens
                    WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
@@ -55,10 +63,14 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) err
 	}
 
 	// Is there an existing token?
-	err := p.db.QueryRow(findUAAToken, userGUID).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
-	switch {
-	case err == sql.ErrNoRows:
+	var count int
+	err := p.db.QueryRow(countUAATokens, userGUID).Scan(&count)
+	if err != nil {
+		fmt.Printf("Unknown error attempting to find UAA token: %v", err)
+	}
 
+	switch count {
+	case 0:
 		fmt.Println("Existing UAA token not found - attempting insert.")
 
 		// Row not found
@@ -69,12 +81,7 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) err
 		}
 
 		fmt.Println("UAA token INSERT complete.")
-
-	case err != nil:
-		fmt.Printf("Unknown error attempting to find UAA token: %v", err)
-
 	default:
-
 		fmt.Println("Existing UAA token found - attempting update.")
 
 		// Found a match - update it
@@ -127,10 +134,14 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	}
 
 	// Is there an existing token?
-	err := p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
-	switch {
-	case err == sql.ErrNoRows:
+	var count int
+	err := p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
+	if err != nil {
+		fmt.Printf("Unknown error attempting to find CNSI token: %v", err)
+	}
 
+	switch count {
+	case 0:
 		fmt.Println("Existing CNSI token not found - attempting insert.")
 
 		// Row not found
@@ -141,12 +152,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		}
 
 		fmt.Println("CNSI token INSERT complete.")
-
-	case err != nil:
-		fmt.Printf("Unknown error attempting to find CNSI token: %v", err)
-
 	default:
-
 		fmt.Println("Existing CNSI token found - attempting update.")
 
 		// Found a match - update it
