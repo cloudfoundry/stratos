@@ -10,19 +10,23 @@ const (
                   FROM tokens
                   WHERE token_type = 'uaa' AND user_guid = $1`
 
-	saveUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
-                  VALUES ($1, $2, $3, $4, $5)
-                  ON CONFLICT ON CONSTRAINT tokens_user_guid_token_type_key
-                  DO UPDATE SET auth_token = EXCLUDED.auth_token, refresh_token = EXCLUDED.refresh_token, token_expiry = EXCLUDED.token_expiry`
+	insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
+	                  VALUES ($1, $2, $3, $4, $5)`
+
+	updateUAAToken = `UPDATE tokens
+	                  SET auth_token = $3, refresh_token = $4, token_expiry = $5
+	                  WHERE user_guid = $1 AND token_type = $2`
 
 	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
                    FROM tokens
                    WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
-	saveCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
-                   VALUES ($1, $2, $3, $4, $5, $6)
-                   ON CONFLICT ON CONSTRAINT tokens_user_guid_cnsi_guid_key
-                   DO UPDATE SET auth_token = EXCLUDED.auth_token, refresh_token = EXCLUDED.refresh_token, token_expiry = EXCLUDED.token_expiry`
+	insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
+	                   VALUES ($1, $2, $3, $4, $5, $6)`
+
+	updateCNSIToken = `UPDATE tokens
+	                   SET auth_token = $4, refresh_token = $5, token_expiry = $6
+	                   WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = $3`
 )
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
@@ -50,9 +54,37 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord) err
 		return fmt.Errorf("Unable to save UAA Token without a valid Refresh Token.")
 	}
 
-	if _, err := p.db.Exec(saveUAAToken, userGUID, "uaa", tr.AuthToken, tr.RefreshToken,
-		tr.TokenExpiry); err != nil {
-		return fmt.Errorf("Unable to Save UAA token: %v", err)
+	// Is there an existing token?
+	err := p.db.QueryRow(findUAAToken, userGUID).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
+	switch {
+	case err == sql.ErrNoRows:
+
+		fmt.Println("Existing UAA token not found - attempting insert.")
+
+		// Row not found
+		if _, insertErr := p.db.Exec(insertUAAToken, userGUID, "uaa", tr.AuthToken, tr.RefreshToken,
+			tr.TokenExpiry); insertErr != nil {
+			fmt.Printf("Unable to INSERT UAA token: %v", insertErr)
+			return fmt.Errorf("Unable to INSERT UAA token: %v", insertErr)
+		}
+
+		fmt.Println("UAA token INSERT complete.")
+
+	case err != nil:
+		fmt.Printf("Unknown error attempting to find UAA token: %v", err)
+
+	default:
+
+		fmt.Println("Existing UAA token found - attempting update.")
+
+		// Found a match - update it
+		if _, uodateErr := p.db.Exec(updateUAAToken, userGUID, "uaa", tr.AuthToken, tr.RefreshToken,
+			tr.TokenExpiry); uodateErr != nil {
+			fmt.Printf("Unable to UPDATE UAA token: %v", uodateErr)
+			return fmt.Errorf("Unable to UPDATE UAA token: %v", uodateErr)
+		}
+
+		fmt.Println("UAA token UPDATE complete.")
 	}
 
 	return nil
@@ -94,9 +126,37 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		return fmt.Errorf("Unable to save CNSI Token without a valid Refresh Token.")
 	}
 
-	if _, err := p.db.Exec(saveCNSIToken, cnsiGUID, userGUID, "cnsi", tr.AuthToken,
-		tr.RefreshToken, tr.TokenExpiry); err != nil {
-		return fmt.Errorf("Unable to Save CNSI token: %v", err)
+	// Is there an existing token?
+	err := p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&tr.AuthToken, &tr.RefreshToken, &tr.TokenExpiry)
+	switch {
+	case err == sql.ErrNoRows:
+
+		fmt.Println("Existing CNSI token not found - attempting insert.")
+
+		// Row not found
+		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", tr.AuthToken,
+			tr.RefreshToken, tr.TokenExpiry); insertErr != nil {
+			fmt.Printf("Unable to INSERT CNSI token: %v", insertErr)
+			return fmt.Errorf("Unable to INSERT CNSI token: %v", insertErr)
+		}
+
+		fmt.Println("CNSI token INSERT complete.")
+
+	case err != nil:
+		fmt.Printf("Unknown error attempting to find CNSI token: %v", err)
+
+	default:
+
+		fmt.Println("Existing CNSI token found - attempting update.")
+
+		// Found a match - update it
+		if _, updateErr := p.db.Exec(updateCNSIToken, cnsiGUID, userGUID, "cnsi", tr.AuthToken,
+			tr.RefreshToken, tr.TokenExpiry); updateErr != nil {
+			fmt.Printf("Unable to UPDATE CNSI token: %v", updateErr)
+			return fmt.Errorf("Unable to UPDATE CNSI token: %v", updateErr)
+		}
+
+		fmt.Println("CNSI token UPDATE complete.")
 	}
 
 	return nil
