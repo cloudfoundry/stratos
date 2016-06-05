@@ -57,6 +57,8 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    // Adding a service model for the demo.
+    this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
@@ -128,6 +130,8 @@
             nextBtnText: gettext('Create and continue'),
             onNext: function () {
               that.createApp();
+              // For the demo, we need to pull in the model data. There MUST be a better way to get/store that guid.
+              that.serviceModel.all(that.userInput.serviceInstance.guid, {});
             }
           },
           {
@@ -258,6 +262,8 @@
         userInput: this.userInput,
         subflow: 'pipeline',
         serviceInstances: [],
+        // Adding the demo's service model to options.
+        serviceModel: this.serviceModel,
         organizations: [],
         spaces: [],
         domains: [],
