@@ -40,8 +40,6 @@
       var message = JSON.parse(event.data);
       if (message.name === 'GitHub Oauth - token') {
         that.token = message.data;
-
-        console.log(that.token);
       }
     });
   }
