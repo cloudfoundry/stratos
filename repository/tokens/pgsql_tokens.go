@@ -26,8 +26,8 @@ const (
                    WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	countCNSITokens = `SELECT COUNT(*)
-				FROM tokens
-				WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
+										FROM tokens
+										WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
 	                   VALUES ($1, $2, $3, $4, $5, $6)`
