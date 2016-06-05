@@ -91,6 +91,8 @@ func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tok
 		return t, fmt.Errorf("Could not get user token info from access token")
 	}
 
+	u.UserGUID = userGUID
+
 	t, err = p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new token: %v", err)
