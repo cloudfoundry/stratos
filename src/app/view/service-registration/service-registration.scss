@@ -23,7 +23,10 @@
   }
 
   .registration-actions {
-    min-width: 150px;
+    //min-width: 150px;
+    // For the demo, we need to keep 2 buttons worth of width.
+    // Not sure if ems are right here.
+    min-width: 29em;
   }
 
   .registration-status {
