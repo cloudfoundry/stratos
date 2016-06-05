@@ -151,6 +151,18 @@
     {
       "name": "GITHUB_ACCESS_TOKEN",
       "value": "__REPLACE_WITH_TOKEN__"
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_ID",
+      "value": "__REPLACE__"
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_SECRET",
+      "value": "__REPLACE__"
+    },
+    {
+      "name": "GITHUB_OAUTH_REDIRECT_URL",
+      "value": "__REPLACE__"
     }
   ]
 }

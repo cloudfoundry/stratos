@@ -146,6 +146,15 @@
         },
         {
           "name": "GITHUB_ACCESS_TOKEN"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_ID"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_SECRET"
+        },
+        {
+          "name": "GITHUB_OAUTH_REDIRECT_URL"
         }
       ]
     },
@@ -687,6 +696,33 @@
     {
         "name": "GITHUB_ACCESS_TOKEN",
         "description": "GitHub access token used for HCE",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_CLIENT_ID",
+        "description": "GitHub client ID for OAuth",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_CLIENT_SECRET",
+        "description": "GitHub client secret for OAuth",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_REDIRECT_URL",
+        "description": "GitHub redirect url for OAuth",
         "default": "",
         "example": "",
         "data_type": "string",
