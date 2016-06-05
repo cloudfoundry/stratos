@@ -1,1 +1,29 @@
-<h1>Deploy App</h1>
+<h4 translate>Deploy Using CLI</h4>
+<p translate>You are almost done!</p>
+<p translate>To deploy your app, follow these steps:</p>
+<p translate>1. Download the CLI.</p>
+<p translate>2. Add a manifest.yml to your source code or update your existing one by <strong>copying & pasting</strong> the code below:</p>
+<div class="row">
+  <div class="col-sm-12 col-md-12">
+    <div class="hpe-copy hpe-copy-dark">
+      <pre class="hpe-pre-dark">
+---
+<span class="text-primary" translate># We have created a temporary app in the gallery</span>
+<span class="text-primary" translate># We have created a delivery pipeline</span>
+applications:
+<span class="text-primary" translate># We have reserved a name/route for your app</span>
+- name: {{ wizardCtrl.options.userInput.name }}
+  host: {{ wizardCtrl.options.userInput.host }}
+  domain: {{ wizardCtrl.options.userInput.domain.entity.name }}<span ng-if="wizardCtrl.options.userInput.services">
+  <span class="text-primary" translate># We have provisioned and bound services</span>
+  services:<span ng-repeat="service in wizardCtrl.options.userInput.services">
+  - {{ service.label }}</span>
+  declared-services:<span ng-repeat="service in wizardCtrl.options.userInput.services">
+    {{ service.name }}:
+      label: {{ service.label }}
+      plan: {{ service.plan }}</span></pre>
+    </div>
+  </div>
+</div>
+<p translate>3. Using the CLI, target your Cloud Foundry endpoint, login, and push to the endpoint.</p>
+
