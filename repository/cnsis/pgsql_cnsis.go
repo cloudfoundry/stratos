@@ -21,7 +21,11 @@ const (
 
 	saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint)
               VALUES ($1, $2, $3, $4, $5, $6)`
+
+	deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 )
+
+// TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
 
 // PostgresCNSIRepository is a PostgreSQL-backed CNSI repository
 type PostgresCNSIRepository struct {
@@ -154,6 +158,16 @@ func (p *PostgresCNSIRepository) Save(guid string, cnsi CNSIRecord) error {
 	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
 		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
+	}
+
+	return nil
+}
+
+// Delete - Persist a CNSI Record to a datastore
+func (p *PostgresCNSIRepository) Delete(guid string) error {
+
+	if _, err := p.db.Exec(deleteCNSI, guid); err != nil {
+		return fmt.Errorf("Unable to Delete CNSI record: %v", err)
 	}
 
 	return nil

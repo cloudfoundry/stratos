@@ -132,6 +132,41 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 	return nil
 }
 
+// TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls.
+func (p *portalProxy) unregisterCluster(c echo.Context) error {
+
+	log.Println("unregisterCluster start")
+
+	cnsiGUID := c.FormValue("cnsi_guid")
+
+	log.Printf("CNSI: %s", cnsiGUID)
+
+	if len(cnsiGUID) == 0 {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Missing target endpoint",
+			"Need CNSI GUID passed as form param")
+	}
+
+	p.unsetCNSIRecord(cnsiGUID)
+
+	log.Println("After DELETE of CNSI record")
+
+	userID, ok := p.getSessionStringValue(c, "user_id")
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
+	}
+
+	log.Printf("User ID: %s", userID)
+
+	p.unsetCNSITokenRecord(cnsiGUID, userID)
+
+	log.Println("After DELETE of CNSI token")
+
+	log.Println("unregisterCluster complete")
+	return nil
+}
+
 func (p *portalProxy) listCNSIs(c echo.Context) error {
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
@@ -309,6 +344,21 @@ func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 	err = cnsiRepo.Save(guid, c)
 	if err != nil {
 		return fmt.Errorf("Unable to save a CNSI record: '%v'", err)
+	}
+
+	return nil
+}
+
+func (p *portalProxy) unsetCNSIRecord(guid string) error {
+
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
+	}
+
+	err = cnsiRepo.Delete(guid)
+	if err != nil {
+		return fmt.Errorf("Unable to delete a CNSI record: '%v'", err)
 	}
 
 	return nil

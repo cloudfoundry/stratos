@@ -40,6 +40,8 @@ const (
                      WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
 )
 
+// TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
+
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
 type PgsqlTokenRepository struct {
 	db *sql.DB

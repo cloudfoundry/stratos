@@ -38,5 +38,6 @@ type Repository interface {
 	List() ([]*CNSIRecord, error)
 	ListByUser(userGUID string) ([]*RegisteredCluster, error)
 	Find(guid string) (CNSIRecord, error)
+	Delete(guid string) error
 	Save(guid string, cnsiRecord CNSIRecord) error
 }
