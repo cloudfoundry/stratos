@@ -356,7 +356,7 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
 	}
 
-	err = cnsiRepo.Delete(guid, c)
+	err = cnsiRepo.Delete(guid)
 	if err != nil {
 		return fmt.Errorf("Unable to delete a CNSI record: '%v'", err)
 	}

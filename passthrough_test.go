@@ -246,7 +246,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRecordRow)
 
-	cr = pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r, ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
+	cr = pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r, ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header, false)
 
 	// verify expectations met
 	if dberr := mock.ExpectationsWereMet(); dberr != nil {
