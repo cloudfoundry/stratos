@@ -67,7 +67,7 @@
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
       return serviceInstanceApi.remove(serviceInstance.guid)
         .then(function () {
-          _.pull(that.serviceInstances, serviceInstance);
+          that.list();
         });
     },
 

@@ -60,6 +60,9 @@
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
     this.detailView = detailView;
 
+    // TODO woodnt: There must be a more reproducable/general way of doing this.
+    this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
+
     $scope.$watchCollection(function () {
       return that.cnsiModel.serviceInstances;
     }, function (newCnsis) {
@@ -75,7 +78,7 @@
 
     this.userCnsiModel.list().then(function () {
       angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
-      that.cnsiModel.list()
+      that.cnsiModel.list();
     });
   }
 
@@ -125,6 +128,7 @@
           delete serviceInstance.expires_at;
           delete serviceInstance.valid;
           that.userCnsiModel.numValid -= 1;
+          that.cfModel.all();
         });
     },
 
@@ -136,6 +140,18 @@
       this.userCnsiModel.numValid += 1;
       this.credentialsFormOpen = false;
       this.activeServiceInstance = null;
+    },
+
+    remove: function (serviceInstance) {
+      var that = this;
+      this.cnsiModel.remove(serviceInstance)
+        .then(function success() {
+          that.serviceInstances = {};
+          that.userCnsiModel.list().then(function () {
+            angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
+            that.cnsiModel.list();
+          });
+        });
     },
 
     /**
