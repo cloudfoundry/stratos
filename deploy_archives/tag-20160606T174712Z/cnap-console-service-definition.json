@@ -1,0 +1,733 @@
+{
+  "name": "cnap-console",
+  "version": "20160606T174712Z",
+  "vendor": "HPE",
+  "volumes": [
+    {
+      "name": "data",
+      "size_gb": 10,
+      "filesystem": "ext4",
+      "shared": false
+    },
+    {
+      "name": "stolon-data",
+      "size_gb": 10,
+      "filesystem": "ext4",
+      "shared": false
+    }
+  ],
+  "components": [
+    {
+      "name": "db",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "db",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-db:20160606T174712Z",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "cnap-console-db",
+          "protocol": "TCP",
+          "source_port": 3306,
+          "target_port": 3306,
+          "public": true
+        }
+      ],
+      "volume_mounts": [
+        {
+          "volume_name": "data",
+          "mountpoint": "/var/lib/mysql"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "MYSQL_ROOT_PASSWORD"
+        },
+        {
+          "name": "MYSQL_DATABASE"
+        },
+        {
+          "name": "MYSQL_USER"
+        },
+        {
+          "name": "MYSQL_PASSWORD"
+        }
+      ]
+    },
+    {
+      "name": "cf-service",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "cf-service",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-mock-api:20160606T174712Z",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "mock-api",
+          "protocol": "TCP",
+          "source_port": 3002,
+          "target_port": 3002,
+          "public": true
+        }
+      ]
+    },
+    {
+      "name": "auth-service",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "auth-service",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-mock-auth:20160606T174712Z",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "mock-auth",
+          "protocol": "TCP",
+          "source_port": 3001,
+          "target_port": 3001,
+          "public": true
+        }
+      ]
+    },
+    {
+      "name": "api",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "api",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-api:20160606T174712Z",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "api",
+          "protocol": "TCP",
+          "source_port": 3000,
+          "target_port": 3000,
+          "public": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "PORT"
+        },
+        {
+          "name": "MYSQL_ROOT_PASSWORD"
+        },
+        {
+          "name": "MYSQL_DATABASE"
+        },
+        {
+          "name": "MYSQL_USER"
+        },
+        {
+          "name": "MYSQL_PASSWORD"
+        },
+        {
+          "name": "GITHUB_ACCESS_TOKEN"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_ID"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_SECRET"
+        },
+        {
+          "name": "GITHUB_OAUTH_REDIRECT_URL"
+        }
+      ]
+    },
+    {
+      "name": "cnap-console-nginx",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "cnap-console-nginx",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-server:20160606T174712Z",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "api",
+          "protocol": "TCP",
+          "source_port": 80,
+          "target_port": 80,
+          "public": true
+        },
+        {
+          "name": "api-443",
+          "protocol": "TCP",
+          "source_port": 443,
+          "target_port": 443,
+          "public": true
+        }
+      ]
+    },
+    {
+      "name": "pp",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "pp",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-proxy:20160606T174712Z",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "proxy",
+          "protocol": "TCP",
+          "source_port": 3003,
+          "target_port": 3003,
+          "public": true
+        }
+      ],
+      "parameters": [
+        {
+          "name": "PGSQL_USER"
+        },
+        {
+          "name": "PGSQL_PASSWORD"
+        },
+        {
+          "name": "PGSQL_DATABASE"
+        },
+        {
+          "name": "PGSQL_HOST"
+        },
+        {
+          "name": "PGSQL_PORT"
+        },
+        {
+          "name": "PGSQL_CONNECT_TIMEOUT"
+        },
+        {
+          "name": "PGSQL_SSL_MODE"
+        },
+        {
+          "name": "CERT"
+        },
+        {
+          "name": "CERT_KEY"
+        },
+        {
+          "name": "HTTP_CLIENT_TIMEOUT_IN_SECS"
+        },
+        {
+          "name": "SKIP_TLS_VERIFICATION"
+        },
+        {
+          "name": "TLS_ADDRESS"
+        },
+        {
+          "name": "CONSOLE_CLIENT"
+        },
+        {
+          "name": "CONSOLE_CLIENT_SECRET"
+        },
+        {
+          "name": "HCF_CLIENT"
+        },
+        {
+          "name": "HCF_CLIENT_SECRET"
+        },
+        {
+          "name": "UAA_ENDPOINT"
+        },
+        {
+          "name": "ALLOWED_ORIGINS"
+        },
+        {
+          "name": "COOKIE_STORE_SECRET"
+        }
+      ]
+    },
+    {
+      "name": "portal-db",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "portal-db",
+      "image": "docker.io/postgres:9.5",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "capabilities": [],
+      "affinity": [],
+      "labels": [
+        "label1",
+        "label2"
+      ],
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "portal-db",
+          "protocol": "TCP",
+          "source_port": 5432,
+          "target_port": 5432,
+          "public": true
+        }
+      ],
+      "volume_mounts": [],
+      "parameters": [
+        {
+          "name": "POSTGRES_PASSWORD"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "PGDATA"
+        }
+      ]
+    }
+  ],
+  "preflight": [],
+  "postflight": [
+    {
+      "name": "configuration",
+      "version": "0.1.0",
+      "vendor": "HPE",
+      "external_name": "configuration",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-database-configuration:20160606T174712Z",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "parameters": [
+        {
+          "name": "DB_HOST"
+        },
+        {
+          "name": "DB"
+        },
+        {
+          "name": "CFGDB_PORT"
+        },
+        {
+          "name": "DB_USER"
+        },
+        {
+          "name": "DB_PW_FILE"
+        },
+        {
+          "name": "STRATOS_DB"
+        },
+        {
+          "name": "STRATOS_USER"
+        },
+        {
+          "name": "STRATOS_PWD"
+        },
+        {
+          "name": "SQL"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "POSTGRES_PASSWORD"
+        }
+      ],
+      "min_instances": 1,
+      "max_instances": 1,
+      "retry_count": 100
+    }
+  ],
+  "parameters": [
+    {
+        "name": "MYSQL_ROOT_PASSWORD",
+        "description": "The root password for MySQL",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "MYSQL_DATABASE",
+        "description": "MySQL database name",
+        "default": "db",
+        "example": "db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "MYSQL_USER",
+        "description": "MySQL user name",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "MYSQL_PASSWORD",
+        "description": "MySQL password",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PORT",
+        "description": "MySQL port number",
+        "default": "3306",
+        "example": "3306",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_USER",
+        "description": "Postgres username",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_PASSWORD",
+        "description": "Postgres password",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_DATABASE",
+        "description": "Postgres database name",
+        "default": "portal-db",
+        "example": "portal-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_HOST",
+        "description": "Postgres hostname",
+        "default": "portal-db",
+        "example": "postal-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_PORT",
+        "description": "Postgres port",
+        "default": "5432",
+        "example": "5432",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_CONNECT_TIMEOUT",
+        "description": "Postgres password",
+        "default": "10",
+        "example": "10",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGSQL_SSL_MODE",
+        "description": "Postgres SSL mode",
+        "default": "disable",
+        "example": "disable",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "POSTGRES_DB",
+        "description": "Postgres database name",
+        "default": "stratos-db",
+        "example": "stratos-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "POSTGRES_PASSWORD",
+        "description": "Postgres password",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "POSTGRES_USER",
+        "description": "Postgres username",
+        "default": "stolon",
+        "example": "stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "PGDATA",
+        "description": "placeholder",
+        "default": "/database",
+        "example": "/database",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "DB_USER",
+        "description": "PostgreSQL user",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "DB_HOST",
+        "description": "PostgreSQL host address",
+        "default": "portal-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "CFGDB_PORT",
+        "description": "PostgreSQL port",
+        "default": "5432",
+        "example": "5432",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+       "name": "DB",
+       "description": "PostgreSQL default db ??",
+       "default": "postgres",
+       "example": "postgres",
+       "data_type": "string",
+       "required": true,
+       "secret": false
+    },
+    {
+        "name": "CERT",
+        "description": "Certificate",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "CERT_KEY",
+        "description": "Certificate Key",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
+        "description": "HTTP client timeoout",
+        "default": "10",
+        "example": "10",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "SKIP_TLS_VERIFICATION",
+        "description": "To skip TLS or now?",
+        "default": "true",
+        "example": "true",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "TLS_ADDRESS",
+        "description": "TLS Address",
+        "default": ":3003",
+        "example": ":3003",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "CONSOLE_CLIENT",
+        "description": "Console client",
+        "default": "console",
+        "example": "console",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "CONSOLE_CLIENT_SECRET",
+        "description": "Console client secret",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HCF_CLIENT",
+        "description": "HCF client",
+        "default": "cf",
+        "example": "cf",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HCF_CLIENT_SECRET",
+        "description": "HCF client secret",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "UAA_ENDPOINT",
+        "description": "UAA endpoint",
+        "default": "https://login.hcf.helion.lol/oauth/token",
+        "example": "https://login.hcf.helion.lol/oauth/token",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "ALLOWED_ORIGINS",
+        "description": "Allowed origins - TBD",
+        "default": "https://localhost,https://127.0.0.1",
+        "example": "https://localhost,https://127.0.0.1",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "COOKIE_STORE_SECRET",
+        "description": "Cookie store secret",
+        "default": "cookiesecret",
+        "example": "cookiesecret",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "DB_PW_FILE",
+        "description": "Database password file",
+        "default": "/etc/secrets/stolon",
+        "example": "/etc/secrets/stolon",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "STRATOS_DB",
+        "description": "Stratos database",
+        "default": "stratos-db",
+        "example": "stratos-db",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "STRATOS_USER",
+        "description": "Stratos user",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "STRATOS_PWD",
+        "description": "Stratos password",
+        "default": "stratos",
+        "example": "stratos",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "SQL",
+        "description": "Initial Stratos database schema",
+        "default": "./InitialSchema.sql",
+        "example": "./InitialSchema.sql",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_ACCESS_TOKEN",
+        "description": "GitHub access token used for HCE",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_CLIENT_ID",
+        "description": "GitHub client ID for OAuth",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_CLIENT_SECRET",
+        "description": "GitHub client secret for OAuth",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_REDIRECT_URL",
+        "description": "GitHub redirect url for OAuth",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    }
+  ]
+}
