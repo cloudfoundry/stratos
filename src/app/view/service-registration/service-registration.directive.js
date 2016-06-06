@@ -31,7 +31,8 @@
     '$scope',
     'app.model.modelManager',
     'app.api.apiManager',
-    'helion.framework.widgets.detailView'
+    'helion.framework.widgets.detailView',
+    '$window'
   ];
 
   /**
@@ -47,7 +48,7 @@
    * @property {array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ServiceRegistrationController($scope, modelManager, apiManager, detailView) {
+  function ServiceRegistrationController($scope, modelManager, apiManager, detailView, $window) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.clusterAddFlyoutActive = false;
@@ -59,6 +60,7 @@
     this.credentialsFormOpen = false;
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
     this.detailView = detailView;
+    this.$window = $window;
 
     // TODO woodnt: There must be a more reproducable/general way of doing this.
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
@@ -150,6 +152,9 @@
           that.userCnsiModel.list().then(function () {
             angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
             that.cnsiModel.list();
+            if (that.cnsiModel.serviceInstances.length === 0) {
+              that.$window.location.reload();
+            }
           });
         });
     },
