@@ -422,6 +422,7 @@
         if (hceCnsis.length > 0) {
           var hceOptions = _.map(hceCnsis, function (o) { return { label: o.api_endpoint.Host, value: o }; });
           [].push.apply(that.options.hceCnsis, hceOptions);
+          that.userInput.hceCnsi = hceOptions[0].value;
         }
       });
     },
