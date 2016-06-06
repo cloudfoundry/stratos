@@ -1,0 +1,168 @@
+{
+  "name": "cnap-console",
+  "version": "20160606T031839Z",
+  "vendor": "HPE",
+  "labels": [
+    "CNAP-console-2"
+  ],
+  "instance_id": "cnapconsole",
+  "description": "A cnap instance",
+  "parameters": [
+    {
+      "name": "MYSQL_ROOT_PASSWORD",
+      "value": "stratos"
+    },
+    {
+      "name": "MYSQL_DATABASE",
+      "value": "stratos-db"
+    },
+    {
+      "name": "MYSQL_USER",
+      "value": "stratos"
+    },
+    {
+      "name": "MYSQL_PASSWORD",
+      "value": "stratos"
+    },
+    {
+      "name": "PORT",
+      "value": "3000"
+    },
+    {
+      "name": "PGSQL_USER",
+      "value": "stolon"
+    },
+    {
+      "name": "PGSQL_PASSWORD",
+      "value": "stolon"
+    },
+    {
+      "name": "PGSQL_DATABASE",
+      "value": "stratos-db"
+    },
+    {
+      "name": "PGSQL_HOST",
+      "value": "portal-db"
+    },
+    {
+      "name": "PGSQL_PORT",
+      "value": "5432"
+    },
+    {
+      "name": "PGSQL_CONNECT_TIMEOUT",
+      "value": "10"
+    },
+    {
+      "name": "PGSQL_SSL_MODE",
+      "value": "disable"
+    },
+    {
+      "name": "POSTGRES_USER",
+      "value": "stolon"
+    },
+    {
+      "name": "POSTGRES_PASSWORD",
+      "value": "stolon"
+    },
+    {
+      "name": "POSTGRES_DB",
+      "value": "stratos-db"
+    },
+    {
+      "name": "PGDATA",
+      "value": "/database"
+    },
+    {
+      "name": "CERT",
+      "value": "-----BEGIN CERTIFICATE-----\nMIIExzCCA6+gAwIBAgIJAM7Lg3RUci9qMA0GCSqGSIb3DQEBBQUAMIGdMQswCQYD\nVQQGEwJVUzEXMBUGA1UECBMOU291dGggQ2Fyb2xpbmExEzARBgNVBAcTCkdyZWVu\ndmlsbGUxDDAKBgNVBAoTA0hQRTEOMAwGA1UECxMFQ2xvdWQxGjAYBgNVBAMTEWxv\nY2FsLmV4YW1wbGUuY29tMSYwJAYJKoZIhvcNAQkBFhd3Y2hyaXNqb2huc29uQGdt\nYWlsLmNvbTAeFw0xNjA1MDIyMTU4NDBaFw0xNzA1MDIyMTU4NDBaMIGdMQswCQYD\nVQQGEwJVUzEXMBUGA1UECBMOU291dGggQ2Fyb2xpbmExEzARBgNVBAcTCkdyZWVu\ndmlsbGUxDDAKBgNVBAoTA0hQRTEOMAwGA1UECxMFQ2xvdWQxGjAYBgNVBAMTEWxv\nY2FsLmV4YW1wbGUuY29tMSYwJAYJKoZIhvcNAQkBFhd3Y2hyaXNqb2huc29uQGdt\nYWlsLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKyF0MdJx6no\nDrZprHuy9+SG16to+CmXLIeRl6EBCCa0fYtV0RJNRY4bfPvXeaw5qYSAlQXPWNTY\n/JhViEJQbapnOyx2FZ/vabg/0f2vNfvpiNkYZVDq88cpesj7KlFNYLBS62ai1lTZ\nzJ+JtKS5nsqPmEFUwjvxUFOiWuacuhknDop4QcP/bWMrFUgo45nLVzhC/IL2UbCq\n+juGX7LoFByGq1GKZLZFFOZos9sreaZvd6XsmOHlRGWLCcaVYB1Mx1vdk6HefkYi\najWwUdMd/miazXlN7+HnceaYEbCYnxVZYn1m7rYjlStaroej7bX6Y/qo4lIQMnHA\nEqkjreCkKlECAwEAAaOCAQYwggECMB0GA1UdDgQWBBSv7zHXDfXoH1vWsx/bWuyO\nygCFmTCB0gYDVR0jBIHKMIHHgBSv7zHXDfXoH1vWsx/bWuyOygCFmaGBo6SBoDCB\nnTELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDlNvdXRoIENhcm9saW5hMRMwEQYDVQQH\nEwpHcmVlbnZpbGxlMQwwCgYDVQQKEwNIUEUxDjAMBgNVBAsTBUNsb3VkMRowGAYD\nVQQDExFsb2NhbC5leGFtcGxlLmNvbTEmMCQGCSqGSIb3DQEJARYXd2Nocmlzam9o\nbnNvbkBnbWFpbC5jb22CCQDOy4N0VHIvajAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\nDQEBBQUAA4IBAQAYH60Nv6akwEGrjLGj0/yGCflyFXs0AY5PM8Fx3BQxVp8UD3B/\nXubhvuIbwDn7PFByvKktdqD2N33sGZfsCCKAdphTMecWixsYpX9geNNSoN/yKeaF\n10PWTtZE13HpcIb3V8Hl/sFsXHZSyX0Khz1ykbuSgu8zQAORG7cwnxvKogwsV8ZY\nq4PzD0m3meAWY+iu1tGlHI0sufAlMVT60Mbwh40yB5157NUj8eu7IYNO2a1X4Ca2\nJ9+DuvNYmgvXEqcX3uCquBh7BrOiVp7A0ZE40TjrztNBc6+hXBiFMRIT1LmQW3EM\nBbvJ2JJ8yACev/2iNTYjlU/XtcxXQHUHw+fc\n-----END CERTIFICATE-----"
+    },
+    {
+      "name": "CERT_KEY",
+      "value": "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEArIXQx0nHqegOtmmse7L35IbXq2j4KZcsh5GXoQEIJrR9i1XR\nEk1Fjht8+9d5rDmphICVBc9Y1Nj8mFWIQlBtqmc7LHYVn+9puD/R/a81++mI2Rhl\nUOrzxyl6yPsqUU1gsFLrZqLWVNnMn4m0pLmeyo+YQVTCO/FQU6Ja5py6GScOinhB\nw/9tYysVSCjjmctXOEL8gvZRsKr6O4ZfsugUHIarUYpktkUU5miz2yt5pm93peyY\n4eVEZYsJxpVgHUzHW92Tod5+RiJqNbBR0x3+aJrNeU3v4edx5pgRsJifFVlifWbu\ntiOVK1quh6Pttfpj+qjiUhAyccASqSOt4KQqUQIDAQABAoIBAGZUxT7AM49DVx65\n1ZZV1JYXqWtByxkYU1BiencEnqoemuz/zRA3B0/AXEUhTUlrtnIitsIIeB9gSYuu\nCDGVdUcDDmVT8YW5Q5MHP+5ic/nlTse+obH6eviiUPNPj41EAVr1BC4P3mPcAHSN\nALpIY7iwrdXqiX92pnfFMHfjdLsfpqpN3Ay51eQ98ql5JLdYjT2cQFHCpGMTPrtO\nbuB2H4e+mVXzY1WFEJLQVD4ZCOFqcjGXBe/BSfcFhcHNHF2/MqRIhdiGYMKx7n8s\np1eupGTdmdh0qXyT4t9nW4i3Sr6yaSMrOJhh+DI0GujVDzwoypLL6Sheqbl4MWwM\nuP9h5AECgYEA4QoZf1TlhQvhqZZ5CWXtYE+Ty0oo31vn1HSQlV5Oi/Y5wMIdIji1\nYh4WMJQLJ90mi1WH1UBA5fQtgg15A3ieNkqWgJLk3WIl0I27OhgZhCVGei74gpgW\nXO5Si5oLc+F/86hxwXskhf4UBNoTF8vZFJu/LSOpcQ+xVTjnp8Qf4EECgYEAxEIS\n8cD+RUM1YalZ1KeDm15l1GlkFV1inH3BC6WJPu6vRVhSHLrDyGkGA8QBlApeH+Ke\nIJ7tZdzZ+N4EXqBguRJPe7xHZuQj5RlzpM3OYHbNVIIhNDJX56Vq0yHGPG/edyOW\nOKH1KEsB/psKc1ImD1r4uRxpLaKpj3MvEC4UxhECgYEAr5tW/EL+fA0iglj2iHvu\neZp/hUKQlIO+a86uSLD38EYrGR0g6OSBvlgmDrBn6Cqt+kq7HZDvU8JwhK0Iwsms\nBEe+HAUE7TC6u3zuHk5SEwmXbp8as6YExW4AIgoKZ9oPI89NPaNfg+QaMRMPlSEw\ne+FxlMLgZWbOhedK9mKYUUECgYBT6wjctLBE/4r42ogdxQ8iRUf3fqUb+ZVr4t3D\n1CGOdlMdrLlXrYh/zmCTBaHDInfC3IzO2AYcs0XFA3IM4DjbiffQqd5CIbUzhiGL\ny7C+UK5Vv1rhTdGGrJWz99IjD5apjN70ElSYyRHuQ29BhlPd5wFJbduPdulX/GGY\nYovhcQKBgEbAgcTIWltkloiAgueqgpy9SVmwS7rMYHBu4Gp41gKxLJ/ODUBW7Ezx\nvvp/4BiwhId2dERGhvLcQZzExT77YoZ8wkfBJQVpYd2A/8ABdyaSNX68/TtsdH09\nyXqQsXV6L+Lf6Y2RMlHTrcPSwFc0wVfacgbAy62bOLPlPKsnMSP6\n-----END RSA PRIVATE KEY-----"
+    },
+    {
+      "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
+      "value": "10"
+    },
+    {
+      "name": "SKIP_TLS_VERIFICATION",
+      "value": "true"
+    },
+    {
+      "name": "TLS_ADDRESS",
+      "value": ":3003"
+    },
+    {
+      "name": "CONSOLE_CLIENT",
+      "value": "console"
+    },
+    {
+      "name": "HCF_CLIENT",
+      "value": "cf"
+    },
+    {
+      "name": "UAA_ENDPOINT",
+      "value": "http://ident-api.ucp.svc.cluster.ucp:8080/oauth/token"
+    },
+    {
+      "name": "ALLOWED_ORIGINS",
+      "value": "http://192.168.200.3,https://192.168.200.3,http://172.17.27.1,https://172.17.27.1,http://10.254.248.45,https://10.254.248.45"
+    },
+    {
+      "name": "COOKIE_STORE_SECRET",
+      "value": "cookiesecret"
+    },
+    {
+      "name": "DB_HOST",
+      "value": "portal-db"
+    },
+    {
+      "name": "DB",
+      "value": "postgres"
+    },
+    {
+      "name": "CFGDB_PORT",
+      "value": "5432"
+    },
+    {
+      "name": "DB_USER",
+      "value": "stolon"
+    },
+    {
+      "name": "DB_PW_FILE",
+      "value": "/etc/secrets/stolon"
+    },
+    {
+      "name": "STRATOS_DB",
+      "value": "stratos-db"
+    },
+    {
+      "name": "STRATOS_USER",
+      "value": "stratos"
+    },
+    {
+      "name": "STRATOS_PWD",
+      "value": "stratos"
+    },
+    {
+      "name": "SQL",
+      "value": "./InitialSchema.sql"
+    },
+    {
+      "name": "GITHUB_ACCESS_TOKEN",
+      "value": "__REPLACE_WITH_TOKEN__"
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_ID",
+      "value": "8767f6b1dca6f2110588"
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_SECRET",
+      "value": "2711ecd243d9b313063f23fe256a961aed037ec7"
+    },
+    {
+      "name": "GITHUB_OAUTH_REDIRECT_URL",
+      "value": "http://console.helion.space"
+    }
+  ]
+}
