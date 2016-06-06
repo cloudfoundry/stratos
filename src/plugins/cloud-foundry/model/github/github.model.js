@@ -40,7 +40,7 @@
   angular.extend(GithubModel.prototype, {
 
     getToken: function () {
-      return this.apiManager.retrieve('cloud-foundry.api.github').token;
+      return this.apiManager.retrieve('cloud-foundry.api.github').token.access_token;
     },
 
     /**
