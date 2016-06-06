@@ -1,0 +1,9 @@
+#github-auth-callback-page {
+  @include flex-align(center, center, column);
+  padding: $hpe-unit-space * 10;
+  text-align: center;
+
+  h1 {
+    margin-bottom: $hpe-unit-space * 2;
+  }
+}
