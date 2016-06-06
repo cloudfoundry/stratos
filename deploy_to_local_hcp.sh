@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-
 set -eu
 
-# Get service port
+TAG=tag-20160606T202654Z
+SVC_DEFN=${TAG}/cnap-console-service-definition.json
+INS_DEFN=${TAG}/cnap-console-instance-definition.json
+MASTER_IP=192.168.200.2
+NODE_IP=192.168.200.3
 
-SERVICE_PORT=$(curl -Ss http://192.168.200.2:8080/api/v1/namespaces/ucp/services/ipmgr | jq '.spec.ports[0].nodePort')
+# Get service port
+SERVICE_PORT=$(curl -Ss http://${MASTER_IP}:8080/api/v1/namespaces/ucp/services/ipmgr | jq '.spec.ports[0].nodePort')
 echo "Service Port: $SERVICE_PORT"
 
 # Post SDL
-curl -H "Content-Type: application/json" -X POST -d @ucp/definition/cnap-console-service-definition.json http://192.168.200.3:${SERVICE_PORT}/v1/services
+curl -H "Content-Type: application/json" -X POST -d @${SVC_DEFN} http://${NODE_IP}:${SERVICE_PORT}/v1/services
 
 sleep 5
 
 # Post Instance
-curl -H "Content-Type: application/json" -X POST -d @ucp/instance/cnap-console-service-instance.json http://192.168.200.3:${SERVICE_PORT}/v1/instances
+curl -H "Content-Type: application/json" -X POST -d @${INS_DEFN} http://${NODE_IP}:${SERVICE_PORT}/v1/instances
