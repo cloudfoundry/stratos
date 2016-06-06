@@ -154,15 +154,15 @@
     },
     {
       "name": "GITHUB_OAUTH_CLIENT_ID",
-      "value": "8767f6b1dca6f2110588"
+      "value": "__REPLACE_WITH_OAUTH_CLIENT_ID__"
     },
     {
       "name": "GITHUB_OAUTH_CLIENT_SECRET",
-      "value": "2711ecd243d9b313063f23fe256a961aed037ec7"
+      "value": "__REPLACE_WITH_OAUTH_CLIENT_SECRET__"
     },
     {
       "name": "GITHUB_OAUTH_REDIRECT_URL",
-      "value": "http://console.helion.space"
+      "value": "__REPLACE_WITH_OAUTH_REDIRECT_URL__"
     }
   ]
 }
