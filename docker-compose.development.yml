@@ -32,6 +32,10 @@ api:
   extends:
     file: common.yml
     service: api
+  environment:
+    GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID}
+    GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET}
+    GITHUB_OAUTH_REDIRECT_URL: ${GITHUB_OAUTH_REDIRECT_URL}
   links:
     - db:db
     - auth:auth_service
