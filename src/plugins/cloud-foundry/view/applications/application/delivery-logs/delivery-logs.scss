@@ -27,8 +27,25 @@
     }
   }
   .delivery-logs-builds {
+
+    // Min width every column except for the first
+    th:nth-child(2), th:nth-child(4), th:nth-child(5) {
+      min-width: 150px;
+    }
+    th:nth-child(3) {
+      min-width: 190px;
+    }
+
+    table:first-child > thead:first-child > tr:first-child {
+      @media (max-width: $screen-sm-min) {
+        th {
+          min-width: 0;
+        }
+      }
+    }
+
     .temp-deploying {
-      color:$salmon
+      color:$salmon;
     }
   }
 }

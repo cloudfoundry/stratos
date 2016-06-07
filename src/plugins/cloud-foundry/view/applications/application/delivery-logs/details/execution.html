@@ -21,19 +21,19 @@
         <td ng-switch="event.state" class="row result-col event-result" id="result-col">
           <div ng-switch-when="succeeded">
             <span class="helion-icon helion-icon-Active_S text-primary"></span>
-            <span translate>{{ event.type }}</span>
+            <span translate>{{ event.name }}</span>
           </div>
           <div ng-switch-when="running">
             <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
-            <span translate>{{ event.type }}</span>
+            <span translate>{{ event.name }}</span>
           </div>
           <div ng-switch-when="failed">
             <span class="helion-icon helion-icon-Critical_S text-danger"></span>
-            <span translate>{{ event.type }}</span>
+            <span translate>{{ event.name }}</span>
           </div>
           <div ng-switch-default>
             <span class="helion-icon helion-icon-Active_S"></span>
-            <span translate>{{ event.type }}</span>
+            <span translate>{{ event.name }}</span>
           </div>
 
         </td>
@@ -42,10 +42,11 @@
           {{ event.startDate | amDateFormat:'L - LTS'}}
         </td>
         <td></td>
-        <td class="row result-col">
+        <td class="row result-col" ng-if="event.duration">
           <span translate>Duration: </span>
           {{ event.durationString }}
         </td>
+        <td class="row result-col" ng-if="!event.duration"></td>
         <td ng-switch="event.state == 'succeeded' || event.state == 'failed'" class="event-view">
           <div ng-switch-when="true">
             <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewEvent(event)">
