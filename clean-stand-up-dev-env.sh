@@ -1,6 +1,21 @@
 #!/bin/bash
 
 echo "===== Cleaning up cached intermediate items"
+
+echo "----- helion-ui-framework"
+cd ../helion-ui-framework
+rm -rf dist/
+rm -rf lib/
+rm -rf node_modules/
+rm -rf bower_components/
+cd -
+
+echo "----- helion-ui-theme"
+cd ../helion-ui-theme
+rm -rf dist/
+cd -
+
+echo "----- stratos-ui"
 cd ../stratos-ui
 rm -rf dist/
 rm -rf npm_modules
