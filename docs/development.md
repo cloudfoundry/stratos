@@ -3,12 +3,12 @@ In this section, we describe how to set up your local development environment so
 
 Please ensure you have the following installed:
 - Docker
-- Virtualbox
 - Vagrant
 - VMWare Fusion or Workstation
   - send an email to **hp@vmware.com** with subject "Fusion License Request" or "Workstation License Request"
 - vagrant-reload plugin
-- vagrant-vmware-fusion plugin (or vagrant-vmware-workstation)
+- vagrant-vmware-fusion plugin (or vagrant-vmware-workstation) - **you will need to purchase a license**
+- VirtualBox (optional)
 
 ### <a id="install-ucp"></a>1. Install UCP
 - Create a Dockerhub account
@@ -64,19 +64,20 @@ export GITHUB_OAUTH_REDIRECT_URL=<HOMEPAGE URL>
     - stratos-node-server
     - stratos-server
     - stratos-ui
-    - portal-proxy (important! clone into **src/github.com/hpcloud**)
-- Create a Docker machine
-  - `docker-machine create --driver virtualbox`
-  - `eval $(docker-machine env default)`
-- Generate portal-proxy binary
-  - `cd $GOPATH/src/github.com/hpcloud/portal-proxy`
-  - `./tools/build_portal_proxy.sh`
+    - portal-proxy (important! clone into **$GOPATH/src/github.com/hpcloud**)
+- [Create a Docker machine](create_docker_machine.md)
+  - To keep using VirtualBox, you can run these commands:
+    - `docker-machine create --driver virtualbox`
+    - `eval $(docker-machine env default)`
 - Determine and set the UAA endpoint:
   - `curl -Ss http://192.168.200.2:8080/api/v1/namespaces/ucp/services/ident-api | jq '.spec.ports[0].nodePort'`
   - In `proxy.env`, set the following variables:
     - `CONSOLE_CLIENT=console`
     - `UAA_ENDPOINT=https://192.168.200.3:<IDENT-API-PORT>/oauth/token`
-- Back in stratos-deploy, build and run:
+- Generate portal-proxy binary (or use the `stand-up-dev-env.sh` script)
+  - `cd $GOPATH/src/github.com/hpcloud/portal-proxy`
+  - `./tools/build_portal_proxy.sh`
+- Back in stratos-deploy, build and run (or use the `stand-up-dev-env.sh` script):
 ```
 docker-compose -f docker-compose.development.yml build
 docker-compose -f docker-compose.development.yml up -d
@@ -85,3 +86,8 @@ docker logs -f stratosdeploy_ui_1
 - Get the Docker machine IP: `docker-machine ip default`
 - The Console UI should be available at the IP address returned above
 - Please ask any Console UI team member for login credentials
+
+#### Helpful Scripts
+There are two scripts available for your convenience:
+- [stand-up-dev-env.sh](../stand-up-dev-env.sh)
+- [cleanup-docker-compose.sh](../cleanup-docker-compose.sh)

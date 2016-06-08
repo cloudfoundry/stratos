@@ -29,12 +29,12 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
   - `sudo apt-get update && sudo apt-get install jq curl wget`
   - `wget https://s3-us-west-2.amazonaws.com/ucp-concourse/ucp-bootstrap_1.1.22%2Bmaster.50a8819.20160519190312_amd64.deb`
   - `sudo dpkg -i <debian bootstrap file name>`
-- Create a `bootstrap.ini` file ([template](bootstrap.ini))
+- Create a `bootstrap.ini` file ([template](bootstrap-1.1.22.ini))
 - Copy your `id_rsa` file to `/home/ubuntu/.ssh/id_rsa`. Ensure it only has read-only rights.
   - `chmod 0400 id_rsa`
 - Run boostrap:
-  - `bootstrap --config bootstrap.ini version`
-  - `bootstrap --config bootstrap.ini install`
+  - `bootstrap --config bootstrap-1.1.22.ini version`
+  - `bootstrap --config bootstrap-1.1.22.ini install`
 
   Note: You will get an error message on completion of the install. This is a known bug for this version. Ignore the error as UCP is actually running.
   ```
