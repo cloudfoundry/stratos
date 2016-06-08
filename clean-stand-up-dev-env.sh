@@ -31,6 +31,7 @@ echo "===== Standing up the Helion Stackato Console"
 docker-compose -f docker-compose.development.yml build && docker-compose -f docker-compose.development.yml up -d
 docker ps
 
-echo "The Stackato UI should now be available at $(docker-machine ip)"
+echo "Discover the IP address of the Helion Stackato Console:"
+echo "docker-machine ip [machine-name]"
 
 echo "===== Done!"
