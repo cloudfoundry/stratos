@@ -37,7 +37,7 @@
 
     var that = this;
     $window.addEventListener('message', function (event) {
-      var message = JSON.parse(event.data);
+      var message = angular.fromJson(event.data);
       if (message.name === 'GitHub Oauth - token') {
         that.token = message.data;
       }
