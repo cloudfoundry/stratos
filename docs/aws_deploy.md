@@ -33,8 +33,8 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
 - Copy your `id_rsa` file to `/home/ubuntu/.ssh/id_rsa`. Ensure it only has read-only rights.
   - `chmod 0400 id_rsa`
 - Run boostrap:
-  - `bootstrap --config bootstrap-1.1.22.ini version`
-  - `bootstrap --config bootstrap-1.1.22.ini install`
+  - `bootstrap --config bootstrap.ini version`
+  - `bootstrap --config bootstrap.ini install`
 
   Note: You will get an error message on completion of the install. This is a known bug for this version. Ignore the error as UCP is actually running.
   ```
