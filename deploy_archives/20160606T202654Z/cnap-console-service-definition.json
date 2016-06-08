@@ -1,6 +1,6 @@
 {
   "name": "cnap-console",
-  "version": "1.0.0",
+  "version": "20160606T202654Z",
   "vendor": "HPE",
   "volumes": [
     {
@@ -22,7 +22,7 @@
       "version": "1.0.0",
       "vendor": "HPE",
       "external_name": "db",
-      "image": "docker-registry.helion.space:443/helioncf/cnap-console-db:latest",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-db:20160606T202654Z",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -65,7 +65,7 @@
       "version": "1.0.0",
       "vendor": "HPE",
       "external_name": "cf-service",
-      "image": "docker-registry.helion.space:443/helioncf/cnap-console-mock-api:latest",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-mock-api:20160606T202654Z",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -88,7 +88,7 @@
       "version": "1.0.0",
       "vendor": "HPE",
       "external_name": "auth-service",
-      "image": "docker-registry.helion.space:443/helioncf/cnap-console-mock-auth:latest",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-mock-auth:20160606T202654Z",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -111,7 +111,7 @@
       "version": "1.0.0",
       "vendor": "HPE",
       "external_name": "api",
-      "image": "docker-registry.helion.space:443/helioncf/cnap-console-api:latest",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-api:20160606T202654Z",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -146,6 +146,15 @@
         },
         {
           "name": "GITHUB_ACCESS_TOKEN"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_ID"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_SECRET"
+        },
+        {
+          "name": "GITHUB_OAUTH_REDIRECT_URL"
         }
       ]
     },
@@ -154,7 +163,7 @@
       "version": "1.0.0",
       "vendor": "HPE",
       "external_name": "cnap-console-nginx",
-      "image": "docker-registry.helion.space:443/helioncf/cnap-console-server:latest",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-server:20160606T202654Z",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -184,7 +193,7 @@
       "version": "1.0.0",
       "vendor": "HPE",
       "external_name": "pp",
-      "image": "docker-registry.helion.space:443/helioncf/cnap-console-proxy:latest",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-proxy:20160606T202654Z",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -310,7 +319,7 @@
       "version": "0.1.0",
       "vendor": "HPE",
       "external_name": "configuration",
-      "image": "docker-registry.helion.space:443/helioncf/cnap-console-database-configuration:latest",
+      "image": "docker-registry.helion.space:443/helioncf/cnap-console-database-configuration:20160606T202654Z",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
       "platform": "linux-x86_64",
@@ -687,6 +696,33 @@
     {
         "name": "GITHUB_ACCESS_TOKEN",
         "description": "GitHub access token used for HCE",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_CLIENT_ID",
+        "description": "GitHub client ID for OAuth",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_CLIENT_SECRET",
+        "description": "GitHub client secret for OAuth",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "GITHUB_OAUTH_REDIRECT_URL",
+        "description": "GitHub redirect url for OAuth",
         "default": "",
         "example": "",
         "data_type": "string",
