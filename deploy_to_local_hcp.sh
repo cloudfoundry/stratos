@@ -1,11 +1,22 @@
 #!/usr/bin/env bash
 set -eu
 
-TAG=tag-20160606T202654Z
-SVC_DEFN=${TAG}/cnap-console-service-definition.json
-INS_DEFN=${TAG}/cnap-console-instance-definition.json
+# The IP address of the master & node VMs
 MASTER_IP=192.168.200.2
 NODE_IP=192.168.200.3
+
+# The tagged release to deploy into HCP
+TAG=$1
+if [ -z "$1" ]
+  then
+    echo "You must supply the tag of a specific release to deply. No tag parameter supplied."
+    exit 1
+fi
+
+# The fully qualified path to the definityion and instance files
+SVC_DEFN=deploy_archives/${TAG}/cnap-console-service-definition.json
+INS_DEFN=deploy_archives/${TAG}/cnap-console-instance-definition.json
+
 
 # Get service port
 SERVICE_PORT=$(curl -Ss http://${MASTER_IP}:8080/api/v1/namespaces/ucp/services/ipmgr | jq '.spec.ports[0].nodePort')
