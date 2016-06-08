@@ -36,6 +36,7 @@
     * @function associateAppWithRoute
     * @memberof cloud-foundry.model.route
     * @description associate app with the route
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - route identifier
     * @param {string} appGuid - app identifier
     * @returns {promise} A resolved/rejected promise
@@ -53,6 +54,7 @@
     * @function removeAppFromRoute
     * @memberof cloud-foundry.model.route
     * @description remove app from the route
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - route identifier
     * @param {string} appGuid - app identifier
     * @returns {promise} A resolved/rejected promise
@@ -81,7 +83,9 @@
     * @function deleteApp
     * @memberof cloud-foundry.model.route
     * @description deletes a particular route
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - route identifier
+    * @param {boolean} recursive - flag for recursive delete or not (not currently used by sub-code)
     * @returns {promise} A resolved/rejected promise
     * @public
     */
@@ -97,6 +101,7 @@
     * @function listAllAppsForRoute
     * @memberof cloud-foundry.model.route
     * @description lists all apps for the route and store the response in the model
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - route identifier
     * @param {object} params - optional parameters
     * @returns {promise} A resolved/rejected promise
@@ -119,6 +124,7 @@
     * @function listAllAppsForRouteWithoutStore
     * @memberof cloud-foundry.model.route
     * @description get all apps for the route
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - route identifier
     * @param {object} params - optional parameters
     * @returns {promise} A resolved/rejected promise

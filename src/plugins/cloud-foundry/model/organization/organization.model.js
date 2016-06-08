@@ -34,6 +34,7 @@
     * @function listAllOrganizations
     * @memberof cloud-foundry.model.organization
     * @description lists all organizations
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {object} params - optional parameters
     * @returns {promise} A resolved/rejected promise
     * @public
@@ -53,7 +54,8 @@
     * @function listAllSpacesForOrganization
     * @memberof cloud-foundry.model.organization
     * @description lists all spaces for organization
-    * @param {string} guid - organization id
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+    * @param {string} orgGuid - organization id
     * @param {object} params - optional parameters
     * @returns {promise} A resolved/rejected promise
     * @public

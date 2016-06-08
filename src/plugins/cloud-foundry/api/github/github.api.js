@@ -94,6 +94,7 @@
      * @description Get specified branch
      * @param {string} repo - the repo full name
      * @param {string} branch - the branch name
+     * @param {object} params - additional params to send
      * @returns {promise}
      * @public
      */

@@ -35,6 +35,7 @@
      * @function listAllSharedDomains
      * @memberof cloud-foundry.model.private-domain
      * @description list all shared domains
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object} params - optional parameters
      * @returns {promise} A resolved/rejected promise
      * @public

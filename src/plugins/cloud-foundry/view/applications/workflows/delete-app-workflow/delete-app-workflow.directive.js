@@ -222,6 +222,7 @@
     /**
      * @function startWorkflow
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
+     * @param {object} data - cnsiGuid and hceCnsiGuid
      * @description start workflow
      */
     startWorkflow: function (data) {
