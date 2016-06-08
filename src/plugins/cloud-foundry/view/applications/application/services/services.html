@@ -16,18 +16,21 @@
         <dd>{{ ::service.entity.version }}</dd>
         <dt translate>Category</dt>
         <dd>{{ ::service.entity.extra.categories }}</dd>
-        <dt class="service-attached">1 <span translate>Attached</span></dt>
+        <dt>
+          <span class="service-attached"></span>
+          <span>1 <span translate>Attached</span></span>
+        </dt>
       </dl>
-      <div class="service-actions">
+      <div class="service-actions action-header">
         <actions-menu actions="applicationServicesCtrl.serviceActions"
           action-target="service" menu-icon="helion-icon helion-icon-More"
           menu-position="actions-menu-right">
         </actions-menu>
-        <button class="btn btn-sm btn-link" translate
-          ng-click="applicationServicesCtrl.eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', service)">
-          Add Service
-          <i class="helion-icon helion-icon-Plus"></i>
-        </button>
+
+        <a class="btn btn-link" ng-click="applicationServicesCtrl.eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', service)">
+          <i class="helion-icon helion-icon-Right_Arrow"></i>
+          <span translate>Add Service</span>
+        </a>
       </div>
     </div>
   </div>
