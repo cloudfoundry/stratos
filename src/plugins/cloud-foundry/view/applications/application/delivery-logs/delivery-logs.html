@@ -20,27 +20,27 @@
     <dl class="dl-horizontal">
       <dt translate>LAST BUILD</dt>
       <dd>
-        <a ng-if="appDelLogsCtrl.last.build.event" class="" href=""
-           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.build.event)">
-          {{ appDelLogsCtrl.last.build.event.id }}</a>
-        <span ng-if="appDelLogsCtrl.last.build.event" am-time-ago="appDelLogsCtrl.last.build.event.endDate"></span>
-        <span ng-if="!appDelLogsCtrl.last.build.event" translate>None</span>
+        <a ng-if="appDelLogsCtrl.last.build" class="" href=""
+           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.build)">
+          {{ appDelLogsCtrl.last.build.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.build" am-time-ago="appDelLogsCtrl.last.build.endDate"></span>
+        <span ng-if="!appDelLogsCtrl.last.build" translate>None</span>
       </dd>
       <dt translate>LAST TEST</dt>
       <dd>
-        <a ng-if="appDelLogsCtrl.last.test.event" class="" href=""
-           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.test.event)">
-          {{ appDelLogsCtrl.last.test.event.id }}</a>
-        <span ng-if="appDelLogsCtrl.last.test.event" am-time-ago="appDelLogsCtrl.last.test.event.endDate"></span>
-        <span ng-if="!appDelLogsCtrl.last.test.event" translate>None</span>
+        <a ng-if="appDelLogsCtrl.last.test" class="" href=""
+           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.test)">
+          {{ appDelLogsCtrl.last.test.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.test" am-time-ago="appDelLogsCtrl.last.test.endDate"></span>
+        <span ng-if="!appDelLogsCtrl.last.test" translate>None</span>
       </dd>
       <dt translate>LAST DEPLOYMENT</dt>
       <dd>
-        <a ng-if="appDelLogsCtrl.last.deploy.event" class="" href=""
-           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.deploy.event)">
-          {{ appDelLogsCtrl.last.deploy.event.id }}</a>
-        <span ng-if="appDelLogsCtrl.last.deploy.event" am-time-ago="appDelLogsCtrl.last.deploy.event.endDate"></span>
-        <span ng-if="!appDelLogsCtrl.last.deploy.event" translate>None</span>
+        <a ng-if="appDelLogsCtrl.last.deploy" class="" href=""
+           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.deploy)">
+          {{ appDelLogsCtrl.last.deploy.id }}</a>
+        <span ng-if="appDelLogsCtrl.last.deploy" am-time-ago="appDelLogsCtrl.last.deploy.endDate"></span>
+        <span ng-if="!appDelLogsCtrl.last.deploy" translate>None</span>
       </dd>
     </dl>
   </div>
@@ -90,7 +90,7 @@
               <a translate class="" href="" ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
             </div>
             <div ng-switch-when="running">
-              <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+              <spinner></spinner>
               <span translate>{{ execution.result.label }}</span>
             </div>
             <div ng-switch-when="failed">

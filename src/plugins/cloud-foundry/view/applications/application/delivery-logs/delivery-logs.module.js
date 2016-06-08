@@ -94,7 +94,7 @@
         that.hasProject = !(angular.isUndefined(project) || project === null);
         if (that.hasProject) {
           that.updateData();
-          updateModelPromise = $interval(_.bind(that.updateData, that), 30 * 1000, 0, true);
+          //updateModelPromise = $interval(_.bind(that.updateData, that), 30 * 1000, 0, true);
         }
       })
       .catch(function (error) {
@@ -111,6 +111,40 @@
   }
 
   angular.extend(ApplicationDeliveryLogsController.prototype, {
+
+    eventTypes: {
+      // Required to determine 'Last Build|Last Test|Last Deploy' summary at top of page
+      BUILDING: 'Building',
+      TESTING: 'Testing',
+      DEPLOYING: 'Deploying',
+      // Require to know if the execution has finished (execution state is not trustworthy)
+      WATCHDOG: 'watchdog',
+      PIPELINE_COMPLETED: 'pipeline_completed'
+    },
+
+    eventStates: {
+      // Required to determine if the execution has succeeded|failed
+      SUCCEEDED: 'succeeded',
+      FAILED: 'failed',
+      // Required to show that the execution is still running
+      RUNNING: 'running'
+    },
+
+    // These will need to be localised
+    eventNames: {
+      // Custom event names to accurately reflect what's going on FINALISING: 'Finalising'
+      BUILDING: 'Building',
+      TESTING: 'Testing',
+      DEPLOYING: 'Deploying',
+      FINALISING: 'Finalising',
+      // Override normal event name's
+      WATCHDOG: 'Terminated',
+      PIPELINE_COMPLETED: 'Completed',
+      // Override <x>ing states with these
+      BUILD: 'Build',
+      TEST: 'Test',
+      DEPLOY: 'Deploy'
+    },
 
     triggerBuild: function() {
       /* eslint-disable */
@@ -143,14 +177,14 @@
         return;
       }
 
-      this.viewEvent(events.length - 1);
+      this.viewEvent(events[events.length - 1]);
     },
 
     viewEvent: function(event) {
       this.detailView({
         templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/event.html',
         controller: 'eventDetailViewController',
-        title: event.type
+        title: event.name
       }, {
         event: event
       });
@@ -226,13 +260,13 @@
       // Reset the last successful build/test/deploy events
       this.last = {
         build: {
-          mEndData: moment(0)
+          mEndDate: moment(0)
         },
         test: {
-          mEndData: moment(0)
+          mEndDate: moment(0)
         },
         deploy: {
-          mEndData: moment(0)
+          mEndDate: moment(0)
         }
       };
 
@@ -280,32 +314,29 @@
       }
 
       switch (event.type) {
-        case 'Building':
-          event.name = 'Build';
-          // Only consider successful events for now on
-          if (event.state === 'succeeded' && lastEvents.build.mEndData.diff(event.mEndDate) < 0) {
-            lastEvents.build.mEndData = event.mEndDate;
-            lastEvents.build.event = event;
+        case this.eventTypes.BUILDING:
+          event.name = this.eventNames.BUILD;
+          if (event.state === this.eventStates.SUCCEEDED && lastEvents.build.mEndDate.diff(event.mEndDate) < 0) {
+            lastEvents.build = event;
           }
           break;
-        case 'Testing':
-          event.name = 'Test';
-          // Only consider successful events for now on
-          if (event.state === 'succeeded' && lastEvents.test.mEndData.diff(event.mEndDate) < 0) {
-            lastEvents.test.mEndData = event.mEndDate;
-            lastEvents.test.event = event;
+        case this.eventTypes.TESTING:
+          event.name = this.eventNames.TEST;
+          if (event.state === this.eventStates.SUCCEEDED && lastEvents.test.mEndDate.diff(event.mEndDate) < 0) {
+            lastEvents.test = event;
           }
           break;
-        case 'Deploying':
-          event.name = 'Deploy';
-          // Only consider successful events for now on
-          if (event.state === 'succeeded' && lastEvents.deploy.mEndData.diff(event.mEndDate) < 0) {
-            lastEvents.deploy.mEndData = event.mEndDate;
-            lastEvents.deploy.event = event;
+        case this.eventTypes.DEPLOYING:
+          event.name = this.eventNames.DEPLOY;
+          if (event.state === this.eventStates.SUCCEEDED && lastEvents.deploy.mEndDate.diff(event.mEndDate) < 0) {
+            lastEvents.deploy = event;
           }
           break;
-        case 'pipeline_complete':
-          event.name = 'Completed';
+        case this.eventTypes.WATCHDOG:
+          event.name = this.eventNames.WATCHDOG;
+          break;
+        case this.eventTypes.PIPELINE_COMPLETED:
+          event.name = this.eventNames.PIPELINE_COMPLETED;
           break;
       }
     },
@@ -321,59 +352,84 @@
       // Localise the reason creation date string (use i18n date/time format)
       execution.reason.createdDateString = this.moment(execution.reason.createdDate).format('L - LTS');
 
-      this.determineExecutionResult(execution, events);
-    },
+      this.addCurrentState(execution, events);
 
-    /**
-     * @name ApplicationDeliveryLogsController.determineExecutionResult
-     * @description The execution result is actually junk, need to look at the latest execution event and use that
-     * as the execution result. Also required to update the result with translated text, which makes is searchable.
-     * Lastly, assume that a successful 'Building' event at the end of an execution means that it's currently 'Testing'
-     * (same applies for Testing and Deploying).
-     * @param {object} execution - execution to update
-     * @param {array} events - HCE events associated with the execution
-     */
-    determineExecutionResult: function(execution, events) {
+      //The execution result is actually junk, need to look at the latest execution event and use that
+      // as the execution result. Also required to update the result with translated text, which makes is searchable.
+      var event = events[events.length - 1];
+
       if (!events || events.length === 0) {
+        // Clear the result
         execution.result = undefined;
         return;
       }
 
-      var event = events[events.length - 1];
+      execution.result = {
+        state: this.determineExecutionState(event),
+        label: event.name
+      };
+    },
 
-      if (event.state === 'succeeded') {
-        switch (event.type) {
-          case 'Building':
-            this.addInProgressEvent(events, event, 'Testing');
-            event = events[events.length - 1];
-            break;
-          case 'Testing':
-            this.addInProgressEvent(events, event, 'Deploying');
-            event = events[events.length - 1];
-            break;
-          case 'Deploying':
-            this.addInProgressEvent(events, event, 'Finalising');
-            event = events[events.length - 1];
-            break;
+    /**
+     * @name ApplicationDeliveryLogsController.addCurrentState
+     * @description  Assume that a successful 'Building' event at the end of an execution means that it's currently
+     * 'Testing' (same applies for Testing and Deploying). If we don't need this feature, remove this function
+     * @param {object} execution - relevant execution
+     * @param {array} events - HCE events associated with the execution
+     */
+    addCurrentState: function(execution, events) {
+      var that = this;
+
+      function addProgressEvent(events, previousEvent, name) {
+        var newEvent = {
+          startDate: previousEvent.endDate,
+          name: name,
+          state: that.eventStates.RUNNING
+        };
+        that.parseEvent(newEvent, {});
+        events.push(newEvent);
+      }
+
+      if (!events || events.length === 0) {
+        if (execution.state !== 'completed') {
+          addProgressEvent(events, { endDate: moment() }, this.eventNames.BUILDING);
+        } else {
+          return;
         }
       }
 
-      execution.result = {
-        state: event.state,
-        label: event.name
-      };
+      var event = events[events.length - 1];
 
+      if (event.state === this.eventStates.SUCCEEDED) {
+        switch (event.type) {
+          case this.eventTypes.BUILDING:
+            addProgressEvent(events, event, this.eventNames.TESTING);
+            break;
+          case this.eventTypes.TESTING:
+            addProgressEvent(events, event, this.eventNames.DEPLOYING);
+            break;
+          case this.eventTypes.DEPLOYING:
+            addProgressEvent(events, event, this.eventNames.FINALISING);
+            break;
+        }
+      }
     },
 
-    addInProgressEvent: function(events, previousEvent, name) {
-      var newEvent = {
-        startDate: previousEvent.endDate,
-        name: name,
-        type: 'inprogress',
-        state: 'running'
-      };
-      this.parseEvent(newEvent);
-      events.push(newEvent);
+    /**
+     * @name ApplicationDeliveryLogsController.determineExecutionState
+     * @description Determines the execution state from the last received event
+     * @param {object} event - Last HCE event of an execution
+     * @returns {string} - Updated execution state
+     */
+    determineExecutionState: function(event) {
+      if (
+        event.type === this.eventTypes.PIPELINE_COMPLETED ||
+        event.type === this.eventTypes.WATCHDOG ||
+        event.state === this.eventStates.FAILED) {
+        return event.state;
+      } else {
+        return this.eventStates.RUNNING;
+      }
     },
 
     createMockExecutions: function() {
@@ -481,6 +537,23 @@
           result: 'Failure'
         },
         {
+          concoursePipelineId: '7362eeb20-219f-11e6-8838-71fe4dbc2489',
+          id: 97,
+          message: 'This will complete all pipeline events',
+          name: 'Success',
+          reason: {
+            author: 'MAli',
+            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
+            commitSha: '623d97f1fc9189c9a9fcc66978e3c85af856262fe',
+            commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
+            compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
+            createdDate: moment().subtract(65064, 'seconds').format(),
+            pullRequestId: null,
+            type: 'CI'
+          },
+          result: 'completed'
+        },
+        {
           id: 1,
           concoursePipelineId: 'ad291070-2bea-11e6-bd82-61cf59328c85',
           name: 'Merge pull request #6 from Stackato-Apps/gorouter-bug-workaround\n\nApp-side workaround for CF gorouter bug',
@@ -560,40 +633,47 @@
       switch (executionId) {
         case 91:
           return [
-            createEvent(90, 'Building', 'failed', 46, 40, 91)
+            createEvent(90, this.eventTypes.BUILDING, this.eventStates.FAILED, 46, 40, 91)
           ];
         case 92:
           return [
-            createEvent(91, 'Building', 'succeeded', 500, 510, 92),
-            createEvent(92, 'Testing', 'succeeded', 600, 650, 92),
-            createEvent(93, 'Deploying', 'failed', 650, 40, 92)
+            createEvent(91, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 500, 510, 92),
+            createEvent(92, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 600, 650, 92),
+            createEvent(93, this.eventTypes.DEPLOYING, this.eventStates.FAILED, 650, 40, 92)
           ];
         case 93:
           return [
-            createEvent(94, 'Building', 'succeeded', 4606, 4600, 93),
-            createEvent(95, 'Testing', 'succeeded', 4600, 4560, 93)
+            createEvent(94, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 4606, 4600, 93),
+            createEvent(95, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 4600, 4560, 93)
             // createEvent(96, 'Deploying', 'deploying', 4560, 4510, 93)
           ];
         case 94:
           return [
-            createEvent(97, 'Building', 'succeeded', 50064, 50060, 94),
-            createEvent(98, 'Testing', 'succeeded', 50055, 50050, 94),
-            createEvent(99, 'Deploying', 'succeeded', 50050, 50045, 94)
+            createEvent(97, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 50064, 50060, 94),
+            createEvent(98, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 50055, 50050, 94),
+            createEvent(99, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, 50050, 50045, 94)
           ];
         case 95:
           return [];
         case 96:
           return [
-            createEvent(100, 'Building', 'succeeded', 60064, 60060, 96),
-            createEvent(101, 'Testing', 'failed', 60060, 60000, 96)
+            createEvent(100, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 60064, 60060, 96),
+            createEvent(101, this.eventTypes.TESTING, this.eventStates.FAILED, 60060, 60000, 96)
+          ];
+        case 97:
+          return [
+            createEvent(102, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 65064, 65060, 97),
+            createEvent(103, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 65055, 65050, 97),
+            createEvent(104, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, 65050, 65045, 97),
+            createEvent(105, this.eventTypes.PIPELINE_COMPLETED, this.eventStates.SUCCEEDED, 65045, 65000, 97)
           ];
         case 1:
           return [
             {
               id: 1,
               name: "Building",
-              type: "Building",
-              state: "succeeded",
+              type: this.eventTypes.BUILDING,
+              state: this.eventStates.SUCCEEDED,
               startDate: "2016-06-06T13:29:44.000Z",
               endDate: "2016-06-06T13:29:45.000Z",
               execution_id: 1,
@@ -602,8 +682,8 @@
             {
               id: 2,
               name: "Testing",
-              type: "Testing",
-              state: "succeeded",
+              type: this.eventTypes.TESTING,
+              state: this.eventStates.SUCCEEDED,
               startDate: "2016-06-06T13:29:44.000Z",
               endDate: "2016-06-06T13:30:16.000Z",
               execution_id: 1,
@@ -611,8 +691,8 @@
             }, {
               id: 3,
               name: "Watchdog Terminated",
-              type: "watchdog",
-              state: "failed",
+              type: this.eventTypes.WATCHDOG,
+              state: this.eventStates.FAILED,
               startDate: "2016-06-06T13:31:55.000Z",
               endDate: "2016-06-06T13:31:55.000Z",
               execution_id: 1,
@@ -624,8 +704,8 @@
             {
               "id": 4,
               "name": "Watchdog Terminated",
-              "type": "watchdog",
-              "state": "failed",
+              "type": this.eventTypes.WATCHDOG,
+              "state": this.eventStates.FAILED,
               "startDate": "2016-06-06T15:51:04.000Z",
               "endDate": "2016-06-06T15:51:04.000Z",
               "execution_id": 2,

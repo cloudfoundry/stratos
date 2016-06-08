@@ -47,6 +47,14 @@
     .temp-deploying {
       color:$salmon;
     }
+
+    spinner {
+      width: 14px;
+      height: 14px;
+      .spinner-container {
+        top: 3px;
+      }
+    }
   }
 }
 

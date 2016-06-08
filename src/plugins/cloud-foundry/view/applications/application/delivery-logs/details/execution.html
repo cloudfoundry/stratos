@@ -24,7 +24,7 @@
             <span translate>{{ event.name }}</span>
           </div>
           <div ng-switch-when="running">
-            <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
+            <spinner></spinner>
             <span translate>{{ event.name }}</span>
           </div>
           <div ng-switch-when="failed">
