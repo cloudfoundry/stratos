@@ -242,6 +242,8 @@ func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest
 
 	res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	if err != nil {
+		cnsiRequest.StatusCode = 500
+		cnsiRequest.Response = []byte(err.Error())
 		cnsiRequest.Error = err
 	} else if res.Body != nil {
 		cnsiRequest.StatusCode = res.StatusCode
