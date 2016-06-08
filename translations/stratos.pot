@@ -72,11 +72,11 @@ msgid "Authentication failed, please try reconnect."
 msgstr ""
 
 #: view/cluster-registration/cluster-registration-message-box/cluster-registration-message-box.html:2
-msgid "Before you get started with CNAP, you will have to register clusters to see what apps you have access to."
+msgid "Before you get started with Helion Stackato, you will have to register clusters to see what apps you have access to."
 msgstr ""
 
 #: view/service-registration/service-registration.html:15
-msgid "Before you get started with CNAP, you will have to register into services to see what apps you have access to."
+msgid "Before you get started with Helion Stackato, you will have to register into services to see what apps you have access to."
 msgstr ""
 
 #: cloud-foundry/view/applications/application/summary/summary.html:35
@@ -84,7 +84,7 @@ msgid "BUILDPACK"
 msgstr ""
 
 #: view/login-page/login-page.html:38
-msgid "Built for Enterprise applications, CNAP has open source Cloud Foundry as a core component and adds support for things that Enterprise operations teams need most such as resiliency, ease of management, and ease of install. It also provides additional capabilities for developers such as a continuous integration and deployment service that automates build, test, and deployment actions."
+msgid "Built for Enterprise applications, Helion Stackato has open source Cloud Foundry as a core component and adds support for things that Enterprise operations teams need most such as resiliency, ease of management, and ease of install. It also provides additional capabilities for developers such as a continuous integration and deployment service that automates build, test, and deployment actions."
 msgstr ""
 
 #: cloud-foundry/view/applications/application/services/service/service.html:37
@@ -122,11 +122,11 @@ msgstr ""
 #: view/navbar/navbar.html:15
 #: view/page-footer/page-footer.html:5
 #: view/service-registration/service-registration.html:5
-msgid "CNAP"
+msgid "Helion Stackato"
 msgstr ""
 
 #: view/login-page/login-page.html:13
-msgid "CNAP tag line: discovering, composing, developing and managing Cloud Native workloads which are hosted in a myriad of: public, managed and private cloud/compute providers."
+msgid "Helion Stackato tag line: discovering, composing, developing and managing Cloud Native workloads which are hosted in a myriad of: public, managed and private cloud/compute providers."
 msgstr ""
 
 #: view/service-registration/service-registration.html:48

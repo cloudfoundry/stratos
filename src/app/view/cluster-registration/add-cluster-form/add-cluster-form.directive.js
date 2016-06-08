@@ -31,6 +31,7 @@
   }
 
   AddClusterFormController.$inject = [
+    '$scope',
     'app.model.modelManager'
   ];
 
@@ -39,17 +40,30 @@
    * @memberof app.view
    * @name AddClusterFormController
    * @constructor
+   * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {string} url - the cluster endpoint
    * @property {string} name - the cluster friendly name
    * @property {boolean} addClusterError - flag error adding cluster
    */
-  function AddClusterFormController(modelManager) {
+  function AddClusterFormController($scope, modelManager) {
+    var that = this;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.url = null;
     this.name = null;
     this.addClusterError = false;
+    this.existingApiEndpoints = [];
+
+    $scope.$watch(function () {
+      return that.serviceInstanceModel.serviceInstances;
+    }, function (newCnsis) {
+      that.existingApiEndpoints = _.map(newCnsis,
+                                        function (c) {
+                                          var endpoint = c.api_endpoint;
+                                          return endpoint.Scheme + '://' + endpoint.Host;
+                                        });
+    });
   }
 
   angular.extend(AddClusterFormController.prototype, {

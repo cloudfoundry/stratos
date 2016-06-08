@@ -18,7 +18,11 @@
    * @name EventDetailViewController
    * @constructor
    * @param {object} $timeout - Angular timeout service
+<<<<<<< HEAD
    * @param {object} $log - the angular $log service
+=======
+   * @param {object} $log - the Angular $log service
+>>>>>>> master
    * @param {object} context -
    * @param {object} content -
    * @param {object} moment - the moment timezone component
@@ -39,7 +43,11 @@
 
     // If we fetch large files before the slideout is shown the animation looks odd. Provide a pause before we fetch
     $timeout(function() {
+<<<<<<< HEAD
       hceModel.downloadArtifact(event.artifactId)
+=======
+      hceModel.downloadArtifact(vm.context.guid, event.artifact_id)
+>>>>>>> master
         .then(function(artifact) {
           if (artifact) {
             vm.log = artifact;
@@ -48,7 +56,11 @@
           }
         })
         .catch(function(error) {
+<<<<<<< HEAD
           $log.error('Failed to download artifact with id: ' + event.artifactId, error);
+=======
+          $log.error('Failed to download artifact with id: ' + event.artifact_id, error);
+>>>>>>> master
         })
         .finally(function() {
           if (!vm.log) {

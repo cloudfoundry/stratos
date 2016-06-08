@@ -25,50 +25,66 @@
 
    /*
     * Create a Stack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/stacks/create_a_stack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/stacks/create_a_stack.html
     */
-    CreateStack: function (value, params) {
+    CreateStack: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/stacks';
+      config.url = '/pp/v1/proxy/v2/stacks';
       config.method = 'POST';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Delete a Particular Stack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/stacks/delete_a_particular_stack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/stacks/delete_a_particular_stack.html
     */
-    DeleteStack: function (guid, params) {
+    DeleteStack: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/stacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/stacks/' + guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Stacks
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/stacks/list_all_stacks.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/stacks/list_all_stacks.html
     */
-    ListAllStacks: function (params) {
+    ListAllStacks: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/stacks';
+      config.url = '/pp/v1/proxy/v2/stacks';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Retrieve a Particular Stack
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/stacks/retrieve_a_particular_stack.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/stacks/retrieve_a_particular_stack.html
     */
-    RetrieveStack: function (guid, params) {
+    RetrieveStack: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/stacks/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/stacks/' + guid + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

@@ -17,7 +17,7 @@
   ];
 
   function registerApplicationModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.application', new Application(apiManager));
+    modelManager.register('cloud-foundry.model.application', new Application(apiManager, modelManager));
   }
 
   /**
@@ -31,9 +31,11 @@
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @class
    */
-  function Application(apiManager) {
+  function Application(apiManager, modelManager) {
     this.apiManager = apiManager;
+    this.modelManager = modelManager;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
+    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.data = {};
     this.application = {
       summary: {
@@ -56,7 +58,11 @@
      **/
     all: function (guid, options) {
       var that = this;
-      return this.applicationApi.ListAllApps(guid, options)
+      var cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
+                   .values()
+                   .map('guid')
+                   .value();
+      return this.applicationApi.ListAllApps(options, {headers: { 'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
           that.onAll(response);
         });
@@ -71,11 +77,14 @@
      * @returns {promise} A promise object
      * @public
      **/
-    usage: function (guid, options) {
+    usage: function (cnsiGuid, guid, options) {
       var that = this;
-      return this.applicationApi.GetDetailedStatsForStartedApp(guid, options)
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.applicationApi.GetDetailedStatsForStartedApp(guid, options, config)
         .then(function (response) {
-          that.onUsage(response);
+          that.onUsage(response.data[cnsiGuid]);
         });
     },
 
@@ -106,12 +115,15 @@
      * @returns {promise} a promise object
      * @public
      */
-    getAppSummary: function (guid) {
+    getAppSummary: function (cnsiGuid, guid) {
       var that = this;
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetAppSummary(guid)
+        .GetAppSummary(guid, {}, config)
         .then(function (response) {
-          that.onSummary(response);
+          that.onSummary(response.data[cnsiGuid]);
         });
     },
 
@@ -123,15 +135,25 @@
      * @returns {promise} a promise object
      * @public
      */
-    startApp: function (guid) {
+    startApp: function (cnsiGuid, guid) {
       var that = this;
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       this.appStateSwitchTo = 'STARTED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {state: 'STARTED'}, {})
+        .UpdateApp(guid, {state: 'STARTED'}, {}, config)
         .then(
           function (response) {
-            that.onAppStateChangeSuccess(response);
+            var data = response.data[cnsiGuid];
+            if (angular.isDefined(data.entity)) {
+              that.onAppStateChangeSuccess(data);
+            } else if (data.error_code === 'CF-AppPackageInvalid') {
+              that.onAppStateChangeInvalid();
+            } else {
+              that.onAppStateChangeFailure();
+            }
             return response;
           },
           function (error) {
@@ -149,15 +171,23 @@
      * @returns {promise} a promise object
      * @public
      */
-    stopApp: function (guid) {
+    stopApp: function (cnsiGuid, guid) {
       var that = this;
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       this.appStateSwitchTo = 'STOPPED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {state: 'STOPPED'}, {})
+        .UpdateApp(guid, {state: 'STOPPED'}, {}, config)
         .then(
           function (response) {
-            that.onAppStateChangeSuccess(response);
+            var data = response.data[cnsiGuid];
+            if (angular.isDefined(data.entity)) {
+              that.onAppStateChangeSuccess(data);
+            } else {
+              that.onAppStateChangeFailure();
+            }
             return response;
           },
           function (error) {
@@ -174,27 +204,32 @@
      * @param {string} guid - the application id
      * @public
      */
-    restartApp: function (guid) {
+    restartApp: function (cnsiGuid, guid) {
       var that = this;
-      this.stopApp(guid).then(function () {
-        that.startApp(guid);
+      this.stopApp(cnsiGuid, guid).then(function () {
+        that.startApp(cnsiGuid, guid);
       });
     },
 
     /**
-     * @function create
+     * @function createApp
      * @memberof cloud-foundry.model.application
      * @description Create an application
      * @param {object} newAppSpec - values for the new Application
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    create: function (newAppSpec) {
+    createApp: function (cnsiGuid, newAppSpec) {
       var that = this;
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .CreateApp(newAppSpec)
+        .CreateApp(newAppSpec, {}, config)
         .then(function (response) {
-          that.getAppSummary(response.data.metadata.guid);
+          that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
+          that.all();
+          return response.data;
         });
     },
 
@@ -207,12 +242,15 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    update: function (guid, newAppSpec) {
+    update: function (cnsiGuid, newAppSpec) {
       var that = this;
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-      return applicationApi.UpdateApp(guid, newAppSpec)
+      return applicationApi.UpdateApp(guid, newAppSpec, {}, config)
         .then(function (response) {
-          that.getAppSummary(response.data.metadata.guid);
+          that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
         });
     },
 
@@ -224,9 +262,12 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    deleteApp: function (guid) {
+    deleteApp: function (cnsiGuid, guid) {
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .DeleteApp(guid);
+        .DeleteApp(guid, {}, config);
     },
 
     /**
@@ -238,12 +279,16 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    getAppStats: function (guid, params) {
+    getAppStats: function (cnsiGuid, guid, params) {
       var that = this;
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetDetailedStatsForStartedApp(guid, params)
+        .GetDetailedStatsForStartedApp(guid, params, config)
         .then(function (response) {
-          that.application.stats = response.data['0'].stats;
+          var data = response.data[cnsiGuid];
+          that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
         });
     },
 
@@ -266,7 +311,7 @@
      * @private
      */
     onUsage: function (response) {
-      this.data.usage = response.data;
+      this.data.usage = response;
     },
 
     /**
@@ -288,7 +333,7 @@
      * @private
      */
     onSummary: function (response) {
-      this.application.summary = response.data;
+      this.application.summary = response;
     },
 
     /**
@@ -299,7 +344,7 @@
      * @private
      */
     onAppStateChangeSuccess: function (response) {
-      this.application.summary.state = response.data.entity.state;
+      this.application.summary.state = response.entity.state;
       this.appStateSwitchTo = '';
     },
 
@@ -311,6 +356,11 @@
      */
     onAppStateChangeFailure: function () {
       this.application.summary.state = 'ERROR';
+      this.appStateSwitchTo = '';
+    },
+
+    onAppStateChangeInvalid: function () {
+      this.application.summary.state = 'STOPPED';
       this.appStateSwitchTo = '';
     }
   });

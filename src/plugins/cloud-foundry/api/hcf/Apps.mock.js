@@ -8,7 +8,7 @@
 
     GetAppSummary: function (guid) {
       return {
-        url: '/api/cf/v2/apps/' + guid + '/summary',
+        url: '/pp/v1/proxy/v2/apps/' + guid + '/summary',
 
         response: {
 
@@ -108,7 +108,7 @@
 
     UpdateApp: function (guid, value) {
       return {
-        url: '/api/cf/v2/apps/' + guid + '',
+        url: '/pp/v1/proxy/v2/apps/' + guid + '',
 
         response: {
 
@@ -171,7 +171,7 @@
 
     CreateApp: function (newAppSpec) {
       return {
-        url: '/api/cf/v2/apps',
+        url: '/pp/v1/proxy/v2/apps',
 
         response: {
 
@@ -239,7 +239,7 @@
 
     DeleteApp: function (guid) {
       return {
-        url: '/api/cf/v2/apps/' + guid + '',
+        url: '/pp/v1/proxy/v2/apps/' + guid + '',
 
         response: {
           204: {
@@ -254,7 +254,7 @@
 
     GetDetailedStatsForStartedApp: function(guid) {
       return {
-        url: '/api/cf/v2/apps/' + guid + '/stats',
+        url: '/pp/v1/proxy/v2/apps/' + guid + '/stats',
 
         response: {
 

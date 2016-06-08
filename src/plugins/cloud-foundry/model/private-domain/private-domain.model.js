@@ -20,9 +20,8 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.private-domain.PrivateDomain
-   * @memberOf cloud-foundry.model.private-domain
-   * @name cloud-foundry.model.domain.PrivateDomain
+   * @memberOf cloud-foundry.model
+   * @name PrivateDomain
    * @param {app.api.apiManager} apiManager - the private-domain API manager
    * @property {app.api.apiManager} apiManager - the private-domain API manager
    * @class
@@ -40,11 +39,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllPrivateDomains: function (params) {
+    listAllPrivateDomains: function (cnsiGuid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.PrivateDomains')
-        .ListAllPrivateDomains(params)
+        .ListAllPrivateDomains(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });

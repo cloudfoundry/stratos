@@ -13,38 +13,38 @@
 
   registerGithubApi.$inject = [
     '$http',
-    'app.api.apiManager',
-    'app.event.eventService'
+    '$window',
+    'app.api.apiManager'
   ];
 
-  function registerGithubApi($http, apiManager, eventService) {
-    apiManager.register('cloud-foundry.api.github', new GithubApi($http, eventService));
+  function registerGithubApi($http, $window, apiManager) {
+    apiManager.register('cloud-foundry.api.github', new GithubApi($http, $window));
   }
 
   /**
    * @memberof cloud-foundry.api.github
    * @name GithubApi
    * @param {object} $http - the Angular $http service
+   * @param {object} $window - the Angular $window service
    * @property {object} $http - the Angular $http service
+   * @property {object} token - the object
    * @class
    */
-  function GithubApi($http, eventService) {
-    var that = this;
+  function GithubApi($http, $window) {
     this.$http = $http;
     this.githubApiUrl = 'https://api.github.com/';
     this.token = null;
 
-    // TODO (kdomico): Temporarily retrieve token from env variable in Node server
-    eventService.$on(eventService.events.REDIRECT, function () {
-      that.$http.get('/api/gh/token')
-        .then(function (response) {
-          that.token = response.data.token;
-        });
+    var that = this;
+    $window.addEventListener('message', function (event) {
+      var message = JSON.parse(event.data);
+      if (message.name === 'GitHub Oauth - token') {
+        that.token = message.data;
+      }
     });
   }
 
   angular.extend(GithubApi.prototype, {
-
    /**
     * @function repos
     * @memberof cloud-foundry.api.github.GithubApi
@@ -59,7 +59,7 @@
         params: params || {},
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token
+          Authorization: 'token ' + this.token.access_token
         }
       };
 
@@ -81,7 +81,29 @@
         params: params || {},
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token
+          Authorization: 'token ' + this.token.access_token
+        }
+      };
+
+      return this.$http.get(url, config);
+    },
+
+    /**
+     * @function getBranch
+     * @memberof cloud-foundry.api.github.GithubApi
+     * @description Get specified branch
+     * @param {string} repo - the repo full name
+     * @param {string} branch - the branch name
+     * @returns {promise}
+     * @public
+     */
+    getBranch: function (repo, branch, params) {
+      var url = this.githubApiUrl + 'repos/' + repo + '/branches/' + branch;
+      var config = {
+        params: params || {},
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: 'token ' + this.token.access_token
         }
       };
 
@@ -103,7 +125,7 @@
         params: params || {},
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token
+          Authorization: 'token ' + this.token.access_token
         }
       };
 

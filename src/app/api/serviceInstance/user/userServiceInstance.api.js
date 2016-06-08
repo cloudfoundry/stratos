@@ -13,11 +13,13 @@
 
   registerUserServiceInstanceApi.$inject = [
     '$http',
+    '$httpParamSerializer',
     'app.api.apiManager'
   ];
 
-  function registerUserServiceInstanceApi($http, apiManager) {
-    apiManager.register('app.api.serviceInstance.user', new UserServiceInstanceApi($http));
+  function registerUserServiceInstanceApi($http, $httpParamSerializer, apiManager) {
+    apiManager.register('app.api.serviceInstance.user',
+      new UserServiceInstanceApi($http, $httpParamSerializer));
   }
 
   /**
@@ -25,11 +27,14 @@
    * @memberof app.api.serviceInstance.user
    * @name UserServiceInstanceApi
    * @param {object} $http - the Angular $http service
+   * @param {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @property {object} $http - the Angular $http service
+   * @property {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @class
    */
-  function UserServiceInstanceApi($http) {
+  function UserServiceInstanceApi($http, $httpParamSerializer) {
     this.$http = $http;
+    this.$httpParamSerializer = $httpParamSerializer;
   }
 
   angular.extend(UserServiceInstanceApi.prototype, {
@@ -37,12 +42,26 @@
      * @function connect
      * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
      * @description Connect a service instance
-     * @param {string} url - the service instance endpoint
+     * @param {string} guid - the CNSI guid
+     * @param {string} username - the login username
+     * @param {string} password - the login password
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (url) {
-      return this.$http.post('/api/service-instances/user/connect', { url: url });
+    connect: function (guid, username, password) {
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var loginData = {
+        cnsi_guid: guid,
+        username: username,
+        password: password
+      };
+      var data = this.$httpParamSerializer(loginData);
+
+      return this.$http.post('/pp/v1/auth/login/cnsi', data, config);
     },
 
     /**
@@ -53,19 +72,28 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
+    // TODO woodnt: can we change this param name to guid from id?
     disconnect: function (id) {
-      return this.$http.delete('/api/service-instances/user/' + id);
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var disconnectData = {cnsi_guid: id};
+      var data = this.$httpParamSerializer(disconnectData);
+      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs.
+      return this.$http.post('/pp/v1/auth/logout/cnsi', data, config);
     },
 
     /**
      * @function list
      * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
-     * @description Returns a list of service instances for the user
+     * @description Returns a list of registered CNSIs for the user
      * @returns {promise} A resolved/rejected promise
      * @public
      */
     list: function () {
-      return this.$http.get('/api/service-instances/user');
+      return this.$http.get('/pp/v1/cnsis/registered');
     },
 
     /**

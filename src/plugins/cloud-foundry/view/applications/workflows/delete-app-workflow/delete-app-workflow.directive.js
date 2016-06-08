@@ -51,10 +51,13 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.deletingApplication = false;
+    this.cnsiGuid = null;
+    this.hceCnsiGuid = null;
 
-    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function () {
-      that.startWorkflow();
+    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (event, data) {
+      that.startWorkflow(data);
     });
   }
 
@@ -62,6 +65,8 @@
     reset: function () {
       var that = this;
       var path = 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/';
+      this.cnsiGuid = null;
+      this.hceCnsiGuid = null;
       this.data = {};
       this.userInput = {
         checkedRouteValue: _.keyBy(this.appModel.application.summary.routes, 'guid'),
@@ -106,15 +111,30 @@
      */
     deleteApp: function () {
       var that = this;
-      var task1 = this.removeAppFromRoutes();
-      var task2 = this.deleteServiceBindings();
-      var task3 = this.appModel.deleteApp(this.appModel.application.summary.guid);
 
-      task1.then(function () {
-        that.tryDeleteEachRoute();
+      var tryDeleteEachRoute = this.$q.defer();
+      var deleteApp = this.$q.defer();
+
+      this.removeAppFromRoutes().then(function () {
+        that.tryDeleteEachRoute().then(function () {
+          tryDeleteEachRoute.resolve();
+        }, function () {
+          tryDeleteEachRoute.reject();
+        });
       });
 
-      return this.$q.all([task1, task2, task3]);
+      this.$q.all([
+        tryDeleteEachRoute.promise,
+        this.deleteServiceBindings()
+      ]).then(function () {
+        that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid).then(function () {
+          deleteApp.resolve();
+        }, function () {
+          deleteApp.reject();
+        });
+      });
+
+      return deleteApp.promise;
     },
 
     /**
@@ -131,7 +151,7 @@
 
       Object.keys(checkedRouteValue).forEach(function (guid) {
         if (checkedRouteValue[guid]) {
-          tasks.push(that.routeModel.removeAppFromRoute(guid, appGuid));
+          tasks.push(that.routeModel.removeAppFromRoute(that.cnsiGuid, guid, appGuid));
         }
       });
 
@@ -151,7 +171,7 @@
 
       Object.keys(checkedServiceValue).forEach(function (guid) {
         if (checkedServiceValue[guid]) {
-          tasks.push(that.serviceBindingModel.deleteServiceBinding(guid, { async: true }));
+          tasks.push(that.serviceBindingModel.deleteServiceBinding(that.cnsiGuid, guid, { async: false }));
         }
       });
 
@@ -168,10 +188,10 @@
     deleteRouteIfPossible: function (routeId) {
       var that = this;
       return this.$q(function (resolve, reject) {
-        that.routeModel.listAllAppsForRouteWithoutStore(routeId)
+        that.routeModel.listAllAppsForRouteWithoutStore(that.cnsiGuid, routeId)
           .then(function (apps) {
             if (apps.length === 0) {
-              that.routeModel.deleteRoute(routeId).then(resolve, reject);
+              that.routeModel.deleteRoute(that.cnsiGuid, routeId).then(resolve, reject);
             } else {
               reject();
             }
@@ -204,9 +224,11 @@
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description start workflow
      */
-    startWorkflow: function () {
+    startWorkflow: function (data) {
       this.deletingApplication = true;
       this.reset();
+      this.cnsiGuid = data.cnsiGuid;
+      this.hceCnsiGuid = data.hceCnsiGuid;
     },
 
     /**
@@ -226,6 +248,9 @@
     finishWorkflow: function () {
       var that = this;
       this.deleteApp().then(function () {
+        if (that.appModel.application.project) {
+          that.hceModel.removeProject(that.hceCnsiGuid, that.appModel.application.project.id);
+        }
         that.deletingApplication = false;
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
       });

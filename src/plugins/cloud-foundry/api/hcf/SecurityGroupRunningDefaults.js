@@ -25,37 +25,49 @@
 
    /*
     * Removing a Security Group as a default for running Apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_group_running_defaults/removing_a_security_group_as_a_default_for_running_apps.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_group_running_defaults/removing_a_security_group_as_a_default_for_running_apps.html
     */
-    RemovingSecurityGroupAsDefaultForRunningApps: function (guid, params) {
+    RemovingSecurityGroupAsDefaultForRunningApps: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/config/running_security_groups/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/config/running_security_groups/' + guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Return the Security Groups used for running Apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_group_running_defaults/return_the_security_groups_used_for_running_apps.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_group_running_defaults/return_the_security_groups_used_for_running_apps.html
     */
-    ReturnSecurityGroupsUsedForRunningApps: function (params) {
+    ReturnSecurityGroupsUsedForRunningApps: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/config/running_security_groups';
+      config.url = '/pp/v1/proxy/v2/config/running_security_groups';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Set a Security Group as a default for running Apps
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/security_group_running_defaults/set_a_security_group_as_a_default_for_running_apps.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/security_group_running_defaults/set_a_security_group_as_a_default_for_running_apps.html
     */
-    SetSecurityGroupAsDefaultForRunningApps: function (guid, params) {
+    SetSecurityGroupAsDefaultForRunningApps: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/config/running_security_groups/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/config/running_security_groups/' + guid + '';
       config.method = 'PUT';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

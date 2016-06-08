@@ -25,13 +25,17 @@
 
    /*
     * Get Info
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/info/get_info.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/info/get_info.html
     */
-    GetInfo: function (params) {
+    GetInfo: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/info';
+      config.url = '/pp/v1/proxy/v2/info';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

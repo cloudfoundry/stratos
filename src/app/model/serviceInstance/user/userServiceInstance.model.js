@@ -12,12 +12,13 @@
     .run(registerUserServiceInstanceModel);
 
   registerUserServiceInstanceModel.$inject = [
+    '$q',
     'app.api.apiManager',
     'app.model.modelManager'
   ];
 
-  function registerUserServiceInstanceModel(apiManager, modelManager) {
-    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance(apiManager));
+  function registerUserServiceInstanceModel($q, apiManager, modelManager) {
+    modelManager.register('app.model.serviceInstance.user', new UserServiceInstance($q, apiManager));
   }
 
   /**
@@ -26,13 +27,14 @@
    * @name app.model.serviceInstance.user.UserServiceInstance
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
-   * @property {array} serviceInstances - the service instances available to user
+   * @property {object} serviceInstances - the service instances available to user
    * @property {number} numValid - the number of valid user service instances
    * @class
    */
-  function UserServiceInstance(apiManager) {
+  function UserServiceInstance($q, apiManager) {
+    this.$q = $q;
     this.apiManager = apiManager;
-    this.serviceInstances = [];
+    this.serviceInstances = {};
     this.numValid = 0;
   }
 
@@ -41,13 +43,21 @@
      * @function connect
      * @memberof app.api.serviceInstance.user.UserServiceInstance
      * @description Connect a service instance
-     * @param {string} url - the service instance endpoint
+     * @param {string} guid - the CNSI GUID
+     * @param {string} name - the CNSI name
+     * @param {string} username - the login username
+     * @param {string} password - the login password
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    connect: function (url) {
+    connect: function (guid, name, username, password) {
+      var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      return serviceInstanceApi.connect(url);
+      return serviceInstanceApi.connect(guid, username, password)
+        .then(function (response) {
+          that.onConnect(guid, name, response);
+          return response;
+        });
     },
 
     /**
@@ -73,24 +83,32 @@
     list: function () {
       var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      return serviceInstanceApi.list()
+      var cfInfoApi = this.apiManager.retrieve('cloud-foundry.api.Info');
+      var deferred = this.$q.defer();
+
+      serviceInstanceApi.list()
         .then(function (response) {
-          var items = response.data.items;
+          var items = response.data;
+          var guids = _.map(items, 'guid') || [];
 
-          // check token expirations
-          var now = (new Date()).getTime() / 1000;
-          angular.forEach(items, function (item) {
-            if (!_.isNil(item.expires_at)) {
-              item.valid = item.expires_at > now;
-            }
-          });
+          that.serviceInstances = {};
 
-          that.serviceInstances.length = 0;
-          [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
-          that.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
+          if (_.isEmpty(guids)) {
+            deferred.resolve(that.serviceInstances);
+          } else {
 
-          return that.serviceInstances;
+            var cfg = { headers: { 'x-cnap-cnsi-list': guids.join(',') } };
+            // call /v2/info to refresh tokens, then list
+            cfInfoApi.GetInfo({}, cfg).then(function () {
+              serviceInstanceApi.list().then(function (listResponse) {
+                that.onList(listResponse);
+                deferred.resolve(that.serviceInstances);
+              });
+            });
+          }
         });
+
+      return deferred.promise;
     },
 
     /**
@@ -104,6 +122,44 @@
     register: function (urls) {
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
       return serviceInstanceApi.register(urls);
+    },
+
+    /**
+     * @function onConnect
+     * @memberof app.model.serviceInstance.user.UserServiceInstance
+     * @description onConnect handler
+     * @param {string} guid - the CNSI GUID
+     * @param {string} name - the CNSI name
+     * @param {object} response - the HTTP response
+     * @returns {void}
+     * @private
+     */
+    onConnect: function (guid, name, response) {
+      var newCnsi = response.data;
+      newCnsi.guid = guid;
+      newCnsi.name = name;
+      newCnsi.valid = true;
+
+      if (angular.isUndefined(this.serviceInstances[guid])) {
+        this.serviceInstances[guid] = newCnsi;
+      } else {
+        angular.extend(this.serviceInstances[guid], newCnsi);
+      }
+    },
+
+    onList: function (response) {
+      var items = response.data;
+
+      // check token expirations
+      var now = (new Date()).getTime() / 1000;
+      angular.forEach(items, function (item) {
+        if (!_.isNil(item.token_expiry)) {
+          item.valid = item.token_expiry > now;
+        }
+      });
+
+      this.serviceInstances = _.keyBy(items, 'guid');
+      this.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
     }
   });
 

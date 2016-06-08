@@ -143,7 +143,7 @@
     // method calls
     it('should set `data` on all()', function () {
 
-      $httpBackend.when('GET', '/api/cf/v2/services')
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/services')
         .respond(200, mockData);
 
       serviceModel.all().then(function () {

@@ -37,6 +37,7 @@
     this.id = $stateParams.guid;
 
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.hceCnsi = null;
 
     this.project = null;
     this.notificationTargets = [];
@@ -46,7 +47,7 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          this.hceModel.removeNotificationTarget(target.id)
+          this.hceModel.removeNotificationTarget('123', target.id)
             .then(function () {
               _.remove(that.notificationTargets, { id: target.id });
             });
@@ -70,41 +71,51 @@
     ];
     /* eslint-enable */
 
-    this.hceModel.getUserByGithubId('123456')
-      .then(function () {
-        that.hceModel.getProjects()
+    // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
+    this.cnsiModel.list().then(function () {
+      var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
+      if (hceCnsis.length > 0) {
+        that.hceCnsi = hceCnsis[0];
+        that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
           .then(function () {
-            that.getProject();
+            that.hceModel.getProjects(that.hceCnsi.guid)
+              .then(function () {
+                that.getProject();
+              });
+            that.hceModel.getImageRegistries(that.hceCnsi.guid);
+          }, function (response) {
+            if (response.status === 404) {
+              that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
+              that.hceModel.getImageRegistries(that.hceCnsi.guid);
+            }
           });
-        that.hceModel.getImageRegistries();
-      }, function (response) {
-        if (response.status === 404) {
-          that.hceModel.createUser('123456', 'login', 'token');
-          that.hceModel.getImageRegistries();
-        }
-      });
+      }
+    });
   }
 
   angular.extend(ApplicationDeliveryPipelineController.prototype, {
     getProject: function () {
-      var that = this;
-      this.project = this.hceModel.getProject(this.model.application.summary.name);
-      if (angular.isDefined(this.project)) {
-        this.hceModel.getDeploymentTarget(this.project.deployment_target_id)
-          .then(function (response) {
-            that.project.deploymentTarget = response.data;
-          });
+      if (this.hceCnsi) {
+        var that = this;
+        this.project = this.hceModel.getProject(this.model.application.summary.name);
+        if (angular.isDefined(this.project)) {
+          this.hceModel.getDeploymentTarget(this.hceCnsi.guid, this.project.deployment_target_id)
+            .then(function (response) {
+              that.project.deploymentTarget = response.data[that.hceCnsi.guid];
+            });
 
-        this.hceModel.getBuildContainer(this.project.build_container_id)
-          .then(function (response) {
-            that.project.buildContainer = response.data;
-          });
+          this.hceModel.getBuildContainer(this.hceCnsi.guid, this.project.build_container_id)
+            .then(function (response) {
+              that.project.buildContainer = response.data[that.hceCnsi.guid];
+            });
 
-        this.hceModel.getNotificationTargets(this.project.id)
-          .then(function (response) {
-            that.notificationTargets.length = 0;
-            [].push.apply(that.notificationTargets, response.data);
-          });
+          this.hceModel.getNotificationTargets(this.hceCnsi.guid, this.project.id)
+            .then(function (response) {
+              that.notificationTargets.length = 0;
+              [].push.apply(that.notificationTargets, response.data[that.hceCnsi.guid]);
+            });
+        }
       }
     }
   });

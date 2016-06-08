@@ -10,7 +10,8 @@
   function applicationGalleryCard() {
     return {
       bindToController: {
-        app: '='
+        app: '=',
+        cnsiGuid: '='
       },
       controller: ApplicationGalleryCardController,
       controllerAs: 'applicationGalleryCardCtrl',
@@ -32,7 +33,11 @@
 
   angular.extend(ApplicationGalleryCardController.prototype, {
     goToApp: function () {
-      this.$state.go('cf.applications.application.summary', { guid: this.app.metadata.guid });
+      var guids = {
+        cnsiGuid: this.cnsiGuid,
+        guid: this.app.metadata.guid
+      };
+      this.$state.go('cf.applications.application.summary', guids);
     }
   });
 

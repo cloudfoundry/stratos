@@ -8,7 +8,7 @@
 
     FilterPrivateDomainsByName: function () {
       return {
-        url: '/api/cf/v2/private_domains',
+        url: '/pp/v1/proxy/v2/private_domains',
 
         response: {
 
@@ -48,7 +48,7 @@
 
     ListAllPrivateDomains: function () {
       return {
-        url: '/api/cf/v2/private_domains',
+        url: '/pp/v1/proxy/v2/private_domains',
 
         response: {
 
@@ -102,7 +102,7 @@
 
     ListAllSharedOrganizationsForPrivateDomain: function (guid) {
       return {
-        url: '/api/cf/v2/private_domains/' + guid + '/shared_organizations',
+        url: '/pp/v1/proxy/v2/private_domains/' + guid + '/shared_organizations',
 
         response: {
 
@@ -162,7 +162,7 @@
 
     RetrievePrivateDomain: function (guid) {
       return {
-        url: '/api/cf/v2/private_domains/' + guid + '',
+        url: '/pp/v1/proxy/v2/private_domains/' + guid + '',
 
         response: {
 

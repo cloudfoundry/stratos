@@ -25,63 +25,83 @@
 
    /*
     * Creating a Service Plan Visibility
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/creating_a_service_plan_visibility.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/creating_a_service_plan_visibility.html
     */
-    CreateServicePlanVisibility: function (value, params) {
+    CreateServicePlanVisibility: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plan_visibilities';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities';
       config.method = 'POST';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Delete a Particular Service Plan Visibilities
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/delete_a_particular_service_plan_visibilities.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/delete_a_particular_service_plan_visibilities.html
     */
-    DeleteServicePlanVisibilities: function (guid, params) {
+    DeleteServicePlanVisibilities: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plan_visibilities/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities/' + guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Service Plan Visibilities
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/list_all_service_plan_visibilities.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/list_all_service_plan_visibilities.html
     */
-    ListAllServicePlanVisibilities: function (params) {
+    ListAllServicePlanVisibilities: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plan_visibilities';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Retrieve a Particular Service Plan Visibility
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/retrieve_a_particular_service_plan_visibility.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/retrieve_a_particular_service_plan_visibility.html
     */
-    RetrieveServicePlanVisibility: function (guid, params) {
+    RetrieveServicePlanVisibility: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plan_visibilities/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities/' + guid + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Updating a Service Plan Visibility
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_plan_visibilities/updating_a_service_plan_visibility.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_plan_visibilities/updating_a_service_plan_visibility.html
     */
-    UpdateServicePlanVisibility: function (guid, value, params) {
+    UpdateServicePlanVisibility: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_plan_visibilities/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_plan_visibilities/' + guid + '';
       config.method = 'PUT';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

@@ -20,9 +20,8 @@
   }
 
   /**
-   * @namespace cloud-foundry.model.shared-domain.SharedDomain
-   * @memberOf cloud-foundry.model.shared-domain
-   * @name cloud-foundry.model.shared-domain.SharedDomain
+   * @memberOf cloud-foundry.model
+   * @name SharedDomain
    * @param {app.api.apiManager} apiManager - the shared-domain API manager
    * @property {app.api.apiManager} apiManager - the shared-domain API manager
    * @class
@@ -40,11 +39,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSharedDomains: function (params) {
+    listAllSharedDomains: function (cnsiGuid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.SharedDomains')
-        .ListAllSharedDomains(params)
+        .ListAllSharedDomains(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });

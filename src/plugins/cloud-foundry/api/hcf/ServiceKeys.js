@@ -25,50 +25,66 @@
 
    /*
     * Create a Service Key
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_keys/create_a_service_key.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_keys/create_a_service_key.html
     */
-    CreateServiceKey: function (value, params) {
+    CreateServiceKey: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_keys';
+      config.url = '/pp/v1/proxy/v2/service_keys';
       config.method = 'POST';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Delete a Particular Service Key
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_keys/delete_a_particular_service_key.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_keys/delete_a_particular_service_key.html
     */
-    DeleteServiceKey: function (guid, params) {
+    DeleteServiceKey: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_keys/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_keys/' + guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Service Keys
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_keys/list_all_service_keys.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_keys/list_all_service_keys.html
     */
-    ListAllServiceKeys: function (params) {
+    ListAllServiceKeys: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_keys';
+      config.url = '/pp/v1/proxy/v2/service_keys';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Retrieve a Particular Service Key
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/service_keys/retrieve_a_particular_service_key.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/service_keys/retrieve_a_particular_service_key.html
     */
-    RetrieveServiceKey: function (guid, params) {
+    RetrieveServiceKey: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/service_keys/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/service_keys/' + guid + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

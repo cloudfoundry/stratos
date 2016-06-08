@@ -19,7 +19,7 @@
         url: 'c1_url'
       }];
 
-      $httpBackend.when('GET', '/api/service-instances').respond(200, { items: items });
+      $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, { items: items });
     }));
 
     describe('without overlay', function () {

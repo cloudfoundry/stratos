@@ -13,11 +13,13 @@
 
   registerServiceInstanceApi.$inject = [
     '$http',
+    '$httpParamSerializer',
     'app.api.apiManager'
   ];
 
-  function registerServiceInstanceApi($http, apiManager) {
-    apiManager.register('app.api.serviceInstance', new ServiceInstanceApi($http));
+  function registerServiceInstanceApi($http, $httpParamSerializer, apiManager) {
+    apiManager.register('app.api.serviceInstance',
+      new ServiceInstanceApi($http, $httpParamSerializer));
   }
 
   /**
@@ -25,11 +27,14 @@
    * @memberof app.api.serviceInstance
    * @name ServiceInstanceApi
    * @param {object} $http - the Angular $http service
+   * @param {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @property {object} $http - the Angular $http service
+   * @property {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @class
    */
-  function ServiceInstanceApi($http) {
+  function ServiceInstanceApi($http, $httpParamSerializer) {
     this.$http = $http;
+    this.$httpParamSerializer = $httpParamSerializer;
   }
 
   angular.extend(ServiceInstanceApi.prototype, {
@@ -43,7 +48,23 @@
      * @public
      */
     create: function (url, name) {
-      return this.$http.post('/api/service-instances', { url: url, name: name });
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var data = this.$httpParamSerializer({ api_endpoint: url, cnsi_name: name });
+      return this.$http.post('/pp/v1/register/hcf', data, config);
+    },
+
+    createHCE: function (url, name) {
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var data = this.$httpParamSerializer({ api_endpoint: url, cnsi_name: name });
+      return this.$http.post('/pp/v1/register/hce', data, config);
     },
 
     /**
@@ -54,8 +75,17 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
+    // TODO(woodnt): can I change this to guid or will that break things elsewhere?
     remove: function (id) {
-      return this.$http.delete('/api/service-instances/' + id);
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var removalData = {cnsi_guid: id};
+      var data = this.$httpParamSerializer(removalData);
+      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs.
+      return this.$http.post('/pp/v1/unregister', data, config);
     },
 
     /**
@@ -66,7 +96,7 @@
      * @public
      */
     list: function () {
-      return this.$http.get('/api/service-instances');
+      return this.$http.get('/pp/v1/cnsis');
     }
   });
 

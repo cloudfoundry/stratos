@@ -65,9 +65,9 @@
       var that = this;
 
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
-      return serviceInstanceApi.remove(serviceInstance.id)
+      return serviceInstanceApi.remove(serviceInstance.guid)
         .then(function () {
-          _.pull(that.serviceInstances, serviceInstance);
+          that.list();
         });
     },
 
@@ -83,12 +83,14 @@
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
       return serviceInstanceApi.list()
         .then(function (response) {
-          var items = response.data.items || [];
+          var items = response.data || [];
           that.serviceInstances.length = 0;
           [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
 
+          var hcfOnly = _.filter(that.serviceInstances, { cnsi_type: 'hcf' }) || [];
+
           return {
-            numAvailable: that.serviceInstances.length
+            numAvailable: hcfOnly.length
           };
         });
     }

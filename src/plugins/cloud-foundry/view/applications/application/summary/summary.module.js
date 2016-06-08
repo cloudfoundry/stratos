@@ -33,7 +33,9 @@
    */
   function ApplicationSummaryController(modelManager, $stateParams) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.id = $stateParams.guid;
+    this.userCnsiModel.list();
   }
 
   angular.extend(ApplicationSummaryController.prototype, {

@@ -2,11 +2,12 @@
   'use strict';
 
   describe('user service instance API', function () {
-    var $httpBackend, userServiceInstanceApi;
+    var $httpBackend, $httpParamSerializer, userServiceInstanceApi;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
+      $httpParamSerializer = $injector.get('$httpParamSerializer');
 
       var apiManager = $injector.get('app.api.apiManager');
       userServiceInstanceApi = apiManager.retrieve('app.api.serviceInstance.user');
@@ -26,19 +27,22 @@
     });
 
     it('should send POST request for connect', function () {
-      $httpBackend.expectPOST('/api/service-instances/user/connect', { url: 'url' }).respond(200, '');
-      userServiceInstanceApi.connect('url');
+      var loginData = {
+        cnsi_guid: 'cnsi_guid',
+        username: 'username',
+        password: 'password'
+      };
+      $httpBackend.expectPOST('/pp/v1/auth/login/cnsi', $httpParamSerializer(loginData)).respond(200, '');
+      userServiceInstanceApi.connect('cnsi_guid', 'username', 'password');
       $httpBackend.flush();
     });
 
     it('should return service instances for specified user', function () {
-      var data = {
-        items: ['x','y','z']
-      };
-      $httpBackend.when('GET', '/api/service-instances/user').respond(200, data);
+      var data = ['x','y','z'];
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, data);
 
       userServiceInstanceApi.list().then(function (response) {
-        expect(response.data).toEqual({items: ['x','y','z']});
+        expect(response.data).toEqual(['x','y','z']);
       });
 
       $httpBackend.flush();

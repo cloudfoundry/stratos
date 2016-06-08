@@ -25,50 +25,83 @@
 
    /*
     * Delete a Particular Route Mapping
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes_mapping/delete_a_particular_route_mapping.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes_mapping/delete_a_particular_route_mapping.html
     */
-    DeleteRouteMapping: function (guid, params) {
+    DeleteRouteMapping: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/route_mappings/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/route_mappings/' + guid + '';
       config.method = 'DELETE';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * List all Route Mappings
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes_mapping/list_all_route_mappings.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes_mapping/list_all_route_mappings.html
     */
-    ListAllRouteMappings: function (params) {
+    ListAllRouteMappings: function (params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/route_mappings';
+      config.url = '/pp/v1/proxy/v2/route_mappings';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Mapping an App and a Route
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes_mapping/mapping_an_app_and_a_route.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes_mapping/mapping_an_app_and_a_route.html
     */
-    MappingAppAndRoute: function (value, params) {
+    MappingAppAndRoute: function (value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/route_mappings';
+      config.url = '/pp/v1/proxy/v2/route_mappings';
       config.method = 'POST';
       config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     },
 
    /*
     * Retrieve a Particular Route Mapping
-    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/231/routes_mapping/retrieve_a_particular_route_mapping.html
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes_mapping/retrieve_a_particular_route_mapping.html
     */
-    RetrieveRouteMapping: function (guid, params) {
+    RetrieveRouteMapping: function (guid, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/api/cf/v2/route_mappings/' + guid + '';
+      config.url = '/pp/v1/proxy/v2/route_mappings/' + guid + '';
       config.method = 'GET';
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
+      return this.$http(config);
+    },
+
+   /*
+    * Updating a Route Mapping
+    * For detailed information, see online documentation at: http://apidocs.cloudfoundry.org/237/routes_mapping/updating_a_route_mapping.html
+    */
+    UpdateRouteMapping: function (guid, value, params, httpConfigOptions) {
+      var config = {};
+      config.params = params;
+      config.url = '/pp/v1/proxy/v2/route_mappings/' + guid + '';
+      config.method = 'PUT';
+      config.data = value;
+
+      for (var option in httpConfigOptions) {
+        config[option] = httpConfigOptions[option]
+      }
       return this.$http(config);
     }
 

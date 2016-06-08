@@ -2,7 +2,7 @@
   <nav class="navbar navbar-fixed-top" ng-if="serviceRegistrationCtrl.overlay">
     <div class="container-fluid">
       <div class="navbar-header">
-        <span class="navbar-brand" translate>CNAP</span>
+        <span class="navbar-brand" translate>Helion Stackato</span>
       </div>
     </div>
   </nav>
@@ -13,7 +13,7 @@
         <span class="helion-icon helion-icon-Help pull-right"></span>
       </h2>
       <p translate>
-        Before you get started with CNAP, you will have to register into services to see what apps you have access to.
+        Before you get started with Helion Stackato, you will have to register into services to see what apps you have access to.
       </p>
       <table class="table table-actionable">
         <thead>
@@ -23,32 +23,50 @@
             <th translate>URL</th>
             <th translate>User Account</th>
             <th translate>Valid Until</th>
-            <th class="registration-actions"></th>
+            <th class="registration-actions">
+              <button class="btn btn-primary"
+                      translate
+                      ng-click="serviceRegistrationCtrl.showHCEEndpointAddForm()">
+                Add HCE Endpoint
+              </button>
+              <button class="btn btn-primary"
+                      translate
+                      ng-click="serviceRegistrationCtrl.showClusterAddForm()">
+                Add Cluster
+              </button>
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="serviceInstance in serviceRegistrationCtrl.serviceInstances"
-            show-table-inline-message="{{ serviceInstance.valid === false ? serviceRegistrationCtrl.warningMsg : ''}}">
+          <tr ng-repeat="(name, cnsi) in serviceRegistrationCtrl.serviceInstances"
+            show-table-inline-message="{{ serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false ? serviceRegistrationCtrl.warningMsg : ''}}">
             <td class="text-center registration-status">
               <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                ng-if="serviceInstance.valid"></span>
+                ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"></span>
               <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
-                ng-if="serviceInstance.valid === false"></span>
+                ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false"></span>
               <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-warning"
-                ng-if="serviceInstance.error"></span>
+                ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].error"></span>
             </td>
-            <td>{{serviceInstance.name}}</td>
-            <td>{{serviceInstance.url}}</td>
-            <td>{{serviceInstance.account}}</td>
-            <td>{{serviceInstance.expires_at | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
+            <td>{{cnsi.name}}</td>
+            <td>{{cnsi.api_endpoint.Host}}</td>
+            <td>{{serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].account}}</td>
+            <td>{{serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].token_expiry | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
             <td class="text-right">
-              <a class="btn btn-link btn-sm" ng-if="!serviceInstance.valid"
-                ng-click="serviceRegistrationCtrl.connect(serviceInstance)">
-                <span ng-if="serviceInstance.valid === false" translate>Reconnect</span>
-                <span ng-if="serviceInstance.valid === undefined" translate>Connect</span>
+              <span ng-if="cnsi.cnsi_type === 'hcf'">  <!-- Remove this span-wrapper once HCE clusters have correct auth. -->
+                <a class="btn btn-link btn-sm" ng-if="!serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
+                  ng-click="serviceRegistrationCtrl.connect(cnsi)">
+                  <span ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false" translate>Reconnect</span>
+                  <span ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === undefined" translate>Connect</span>
+                </a>
+                <a class="btn btn-link btn-sm" ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
+                  ng-click="serviceRegistrationCtrl.disconnect(cnsi)" translate>Disconnect</a>
+              </span>
+              <a class="btn btn-link btn-sm"
+                 translate
+                 ng-click="serviceRegistrationCtrl.remove(cnsi)">
+                remove
               </a>
-              <a class="btn btn-link btn-sm" ng-if="serviceInstance.valid"
-                ng-click="serviceRegistrationCtrl.disconnect(serviceInstance)" translate>Disconnect</a>
             </td>
           </tr>
         </tbody>
@@ -56,14 +74,14 @@
     </div>
   </div>
   <div class="fixed-footer" ng-if="serviceRegistrationCtrl.overlay">
-    <span class="registration-notification" ng-if="serviceRegistrationCtrl.serviceInstanceModel.numValid > 0"
+    <span class="registration-notification" ng-if="serviceRegistrationCtrl.userCnsiModel.numValid > 0"
       translate
-      translate-n="serviceRegistrationCtrl.serviceInstanceModel.numValid"
-      translate-plural="{{serviceRegistrationCtrl.serviceInstanceModel.numValid}} clusters registered">
-      {{serviceRegistrationCtrl.serviceInstanceModel.numValid}} cluster registered
+      translate-n="serviceRegistrationCtrl.userCnsiModel.numValid"
+      translate-plural="{{serviceRegistrationCtrl.userCnsiModel.numValid}} clusters registered">
+      {{serviceRegistrationCtrl.userCnsiModel.numValid}} cluster registered
     </span>
     <button type="button" class="btn btn-primary"
-      ng-disabled="serviceRegistrationCtrl.serviceInstanceModel.numValid === 0"
+      ng-disabled="serviceRegistrationCtrl.userCnsiModel.numValid === 0"
       ng-click="serviceRegistrationCtrl.completeRegistration()" translate>
       Done
     </button>
@@ -75,4 +93,10 @@
     on-cancel="serviceRegistrationCtrl.onConnectCancel()"
     on-submit="serviceRegistrationCtrl.onConnectSuccess(serviceInstance)">
   </credentials-form>
+</flyout>
+<flyout flyout-active="serviceRegistrationCtrl.clusterAddFlyoutActive"
+  flyout-close-icon="'helion-icon helion-icon-Close'">
+  <add-cluster-form on-cancel="serviceRegistrationCtrl.hideClusterAddForm()"
+    on-submit="serviceRegistrationCtrl.hideClusterAddForm()">
+  </add-cluster-form>
 </flyout>

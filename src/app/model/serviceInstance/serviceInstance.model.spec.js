@@ -2,21 +2,20 @@
   'use strict';
 
   describe('service instance model', function () {
-    var $httpBackend, serviceInstance, mockData;
+    var $httpBackend, $httpParamSerializer, serviceInstance, mockData;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
+      $httpParamSerializer = $injector.get('$httpParamSerializer');
 
       var modelManager = $injector.get('app.model.modelManager');
       serviceInstance = modelManager.retrieve('app.model.serviceInstance');
 
-      mockData = {
-        items: [
-          { id: 1, name: 'cluster1', url:' cluster1_url' },
-          { id: 2, name: 'cluster2', url:' cluster2_url' }
-        ]
-      };
+      mockData = [
+        { id: 1, name: 'cluster1', url:' cluster1_url' },
+        { id: 2, name: 'cluster2', url:' cluster2_url' }
+      ];
     }));
 
     afterEach(function () {
@@ -39,7 +38,7 @@
         { id: 2, name: 'cluster2', url:' cluster2_url' }
       ];
 
-      $httpBackend.when('GET', '/api/service-instances')
+      $httpBackend.when('GET', '/pp/v1/cnsis')
         .respond(200, mockData);
 
       serviceInstance.list().then(function () {
@@ -50,7 +49,7 @@
     });
 
     it('should set `serviceInstances` to [] on list() and no items returned', function () {
-      $httpBackend.when('GET', '/api/service-instances').respond(200, {});
+      $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, {});
 
       serviceInstance.list().then(function () {
         expect(serviceInstance.serviceInstances).toEqual([]);
@@ -60,7 +59,7 @@
     });
 
     it('should not set `serviceInstances` on list() and error', function () {
-      $httpBackend.when('GET', '/api/service-instances')
+      $httpBackend.when('GET', '/pp/v1/cnsis')
         .respond(403, {});
 
       serviceInstance.list().then(function () {}, function (error) {
@@ -74,7 +73,8 @@
 
     it('should POST correct data on create()', function () {
       var mockRespondData = { id: 1, url: 'url', name: 'name' };
-      $httpBackend.expectPOST('/api/service-instances', { url: 'url', name: 'name' })
+      var postData = $httpParamSerializer({ api_endpoint: 'url', cnsi_name: 'name' });
+      $httpBackend.expectPOST('/pp/v1/register/hcf', postData)
         .respond(200, mockRespondData);
       serviceInstance.create('url', 'name')
         .then(function () {

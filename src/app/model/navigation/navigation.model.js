@@ -57,14 +57,15 @@
     // The rootScope never gets destroyed so we can safely ignore the eslint error
     $rootScope.$on('$stateChangeSuccess', function(event, toState) { // eslint-disable-line angular/on-watch
       // Set currentState on our menu
-      that.menu.currentState = toState.data.activeMenuState;
+      if (toState.data) {
+        that.menu.currentState = toState.data.activeMenuState;
+      }
       // Scroll to the console-view's top after a state transition
       var consoleView = angular.element(document).find('console-view');
       if (consoleView[0]) {
         consoleView[0].scrollTop = 0;
       }
     });
-
   }
 
   angular.extend(NavigationModel.prototype, {

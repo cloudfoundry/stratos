@@ -37,7 +37,6 @@
   }
 
   CredentialsFormController.$inject = [
-    '$scope',
     'app.event.eventService',
     'app.model.modelManager'
   ];
@@ -49,7 +48,6 @@
    * @description Controller for credentialsForm directive that handles
    * service/cluster registration
    * @constructor
-   * @param {object} $scope - this controller's directive scope
    * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
    * @property {app.event.eventService} eventService - the application event bus
@@ -59,7 +57,7 @@
    * @property {boolean} serverFailedToRespond - an error flag for no server response
    * @property {object} _data - the view data (copy of service)
    */
-  function CredentialsFormController($scope, eventService, modelManager) {
+  function CredentialsFormController(eventService, modelManager) {
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.eventService = eventService;
     this.authenticating = false;
@@ -93,11 +91,16 @@
     connect: function () {
       var that = this;
       this.authenticating = true;
-      this.serviceInstanceModel.connect(this.cnsi.url)
+      this.serviceInstanceModel.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password)
         .then(function success(response) {
           that.reset();
           if (angular.isDefined(that.onSubmit)) {
             that.onSubmit({ serviceInstance: response.data });
+          }
+        }, function (err) {
+          if (err.status === 400) {
+            that.failedRegister = true;
+            that.authenticating = false;
           }
         });
     },

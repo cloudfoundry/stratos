@@ -39,6 +39,10 @@
 
   angular.extend(GithubModel.prototype, {
 
+    getToken: function () {
+      return this.apiManager.retrieve('cloud-foundry.api.github').token.access_token;
+    },
+
     /**
      * @function repos
      * @memberof cloud-foundry.model.github.GithubModel
@@ -74,6 +78,21 @@
         }, function () {
           that.onBranchesError();
         });
+    },
+
+    /**
+     * @function getBranch
+     * @memberof cloud-foundry.model.github.GithubModel
+     * @description Get specified branch
+     * @param {string} repo - the repo full name
+     * @param {string} repo - the branch name
+     * @returns {promise} A promise object
+     * @public
+     */
+    getBranch: function (repo, branch) {
+      var that = this;
+      var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
+      return githubApi.getBranch(repo, branch);
     },
 
     /**
