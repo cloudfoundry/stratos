@@ -2,13 +2,14 @@
   'use strict';
 
   describe('add-cluster-form directive', function () {
-    var $httpBackend, $scope, element, addClusterFormCtrl;
+    var $httpBackend, $scope, element, addClusterFormCtrl, serviceInstanceModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
+      var modelManager = $injector.get('app.model.modelManager');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       $scope.onCancel = angular.noop;
@@ -23,6 +24,7 @@
       $scope.$apply();
 
       addClusterFormCtrl = element.controller('addClusterForm');
+      serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       spyOn(addClusterFormCtrl, 'onCancel').and.callThrough();
       spyOn(addClusterFormCtrl, 'onSubmit').and.callThrough();
       spyOn(addClusterFormCtrl, 'clearForm').and.callThrough();
@@ -42,6 +44,10 @@
     it('should have `url` and `name` properties initially set to null', function () {
       expect(addClusterFormCtrl.url).toBe(null);
       expect(addClusterFormCtrl.name).toBe(null);
+    });
+
+    it('should have `existingApiEndpoints` initially empty', function () {
+      expect(addClusterFormCtrl.existingApiEndpoints).toEqual([]);
     });
 
     it('should have `onCancel` and `onSubmit` initially bound', function () {

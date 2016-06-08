@@ -22,7 +22,7 @@
 
       $httpBackend.when('GET', getBuildContainers.url).respond(200, getBuildContainers.response['200'].body);
       $httpBackend.expectGET(getBuildContainers.url);
-      hceModel.getBuildContainers();
+      hceModel.getBuildContainers('guid');
       $httpBackend.flush();
 
       expect(hceModel.data.buildContainers.length).toBeGreaterThan(0);
@@ -36,7 +36,7 @@
 
       $httpBackend.when('GET', getImageRegistries.url).respond(200, getImageRegistries.response['200'].body);
       $httpBackend.expectGET(getImageRegistries.url);
-      hceModel.getImageRegistries();
+      hceModel.getImageRegistries('guid');
       $httpBackend.flush();
 
       expect(hceModel.data.imageRegistries.length).toBeGreaterThan(0);
@@ -53,7 +53,7 @@
 
       $httpBackend.when('GET', getDeploymentTargets.url).respond(200, getDeploymentTargets.response['200'].body);
       $httpBackend.expectGET(getDeploymentTargets.url);
-      hceModel.getDeploymentTargets();
+      hceModel.getDeploymentTargets('guid');
       $httpBackend.flush();
 
       expect(hceModel.data.deploymentTargets.length).toBeGreaterThan(0);
@@ -91,7 +91,7 @@
 
       $httpBackend.when('POST', addDeploymentTarget.url).respond(201, addDeploymentTarget.response['201'].body);
       $httpBackend.expectPOST(addDeploymentTarget.url);
-      hceModel.createDeploymentTarget('name', 'url', 'username', 'password', 'org', 'space', 'cloudfoundry');
+      hceModel.createDeploymentTarget('guid', 'name', 'url', 'username', 'password', 'org', 'space', 'cloudfoundry');
       $httpBackend.flush();
 
       expect(hceModel.data.deploymentTargets.length).toBe(1);
@@ -112,7 +112,7 @@
 
       $httpBackend.when('POST', addDeploymentTarget.url).respond(201, addDeploymentTarget.response['201'].body);
       $httpBackend.expectPOST(addDeploymentTarget.url);
-      hceModel.createDeploymentTarget('name', 'url', 'username', 'password', 'org', 'space');
+      hceModel.createDeploymentTarget('guid', 'name', 'url', 'username', 'password', 'org', 'space');
       $httpBackend.flush();
 
       expect(hceModel.data.deploymentTargets.length).toBe(1);
@@ -146,7 +146,7 @@
 
       $httpBackend.when('POST', createUser.url).respond(201, createUser.response['201'].body);
       $httpBackend.expectPOST(createUser.url);
-      hceModel.createUser(1, 'user', 'github', 'GithubToken');
+      hceModel.createUser('guid', 1, 'user', 'github', 'GithubToken');
       $httpBackend.flush();
 
       expect(hceModel.data.user).not.toEqual({});
