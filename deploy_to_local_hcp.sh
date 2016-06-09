@@ -15,7 +15,7 @@ fi
 
 # The fully qualified path to the definityion and instance files
 SVC_DEFN=deploy_archives/${TAG}/cnap-console-service-definition.json
-INS_DEFN=deploy_archives/${TAG}/cnap-console-instance-definition.json
+INS_DEFN=deploy_archives/${TAG}/cnap-console-service-instance.json
 
 
 # Get service port
