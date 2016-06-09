@@ -9,4 +9,19 @@
   </div>
 </div>
 
+<div class="applications-empty" ng-if="applicationsListCtrl.ready && !applicationsListCtrl.model.data.applications.length">
+  <div ng-if="applicationsListCtrl.userCnsiModel.numValid === 0">
+    <div class="applications-msg" translate>You cannot view any applications.</div>
+    <div class="applications-cta" ><a class="btn-link" href="#/account/settings" translate>
+      Go to your settings</a> <span translate>to fix your connections or connect to new clusters.</span>
+    </div>
+  </div>
+  <div ng-if="applicationsListCtrl.userCnsiModel.numValid > 0">
+    <div class="applications-msg" translate>You have no applications.</div>
+    <div class="applications-cta">
+      <a class="btn btn-link" ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')" translate><span>Add an application.</span></a>
+    </div>
+  </div>
+</div>
+
 <div ui-view></div>

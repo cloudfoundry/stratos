@@ -36,13 +36,15 @@
    */
   function ApplicationsListController(modelManager, eventService) {
     var that = this;
+    that.ready = false;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
 
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userCnsiModel.list().then(function () {
       that.model.all();
-    });
+      that.ready = true;
+    })
   }
 
   angular.extend(ApplicationsListController.prototype, {
