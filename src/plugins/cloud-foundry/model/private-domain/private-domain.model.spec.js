@@ -22,7 +22,7 @@
       var ListAllPrivateDomains = mock.cloudFoundryAPI.PrivateDomains.ListAllPrivateDomains();
       $httpBackend.whenGET(ListAllPrivateDomains.url).respond(200, ListAllPrivateDomains.response['200'].body);
       $httpBackend.expectGET(ListAllPrivateDomains.url);
-      privateDomainModel.listAllPrivateDomains({}).then(function (resources) {
+      privateDomainModel.listAllPrivateDomains('guid', {}).then(function (resources) {
         result = resources;
       });
       $httpBackend.flush();

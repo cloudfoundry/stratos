@@ -67,7 +67,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
         .ListAllServiceBindings(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });

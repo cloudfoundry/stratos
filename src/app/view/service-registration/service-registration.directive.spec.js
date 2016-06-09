@@ -2,7 +2,7 @@
   'use strict';
 
   describe('service-registration directive', function () {
-    var $compile, $httpBackend, $scope;
+    var $compile, $httpBackend, $httpParamSerializer, $scope;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -10,6 +10,7 @@
     beforeEach(inject(function ($injector) {
       $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
+      $httpParamSerializer = $injector.get('$httpParamSerializer');
       $scope = $injector.get('$rootScope').$new();
       $scope.showRegistration = false;
 
@@ -19,6 +20,8 @@
         url: 'c1_url'
       }];
 
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, { guid: {} });
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
     }));
@@ -66,23 +69,12 @@
         expect(serviceRegistrationCtrl.credentialsFormOpen).toBe(true);
       });
 
-      xit('should call disconnect on model on disconnect()', function () {
-        $httpBackend.flush();
+      it('should call disconnect on model on disconnect()', function () {
+        var data = { cnsi_guid: 'cnsi_guid' };
+        $httpBackend.expectPOST('/pp/v1/auth/logout/cnsi', $httpParamSerializer(data)).respond(200, '');
 
-        var serviceInstance = { name: 'c1', url: 'c1_url' };
-        var mockResponse = {
-          id: 1,
-          url: 'c1_url',
-          username: 'dev',
-          account: 'dev',
-          expires_at: 3600
-        };
+        var serviceInstance = { guid: 'cnsi_guid' };
 
-        serviceRegistrationCtrl.connect(serviceInstance);
-        serviceRegistrationCtrl.onConnectSuccess(mockResponse);
-
-        $httpBackend.when('DELETE', '/api/service-instances/user/1').respond(200, {});
-        $httpBackend.expectDELETE('/api/service-instances/user/1');
         serviceRegistrationCtrl.disconnect(serviceInstance);
         $httpBackend.flush();
 

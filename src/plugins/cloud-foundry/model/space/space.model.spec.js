@@ -23,7 +23,7 @@
       $httpBackend.whenGET(ListAllSpaces.url).respond(200, ListAllSpaces.response['200'].body);
       $httpBackend.expectGET(ListAllSpaces.url);
       expect(result).not.toBeDefined();
-      spaceModel.listAllSpaces({}).then(function (resources) {
+      spaceModel.listAllSpaces('guid', {}).then(function (resources) {
         result = resources;
       });
       $httpBackend.flush();

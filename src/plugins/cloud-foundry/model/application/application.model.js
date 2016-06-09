@@ -249,7 +249,7 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    update: function (cnsiGuid, newAppSpec) {
+    update: function (cnsiGuid, guid, newAppSpec) {
       var that = this;
       var config = {
         headers: { 'x-cnap-cnsi-list': cnsiGuid }
