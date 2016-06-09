@@ -9,7 +9,7 @@
   </div>
 </div>
 
-<div class="applications-empty" ng-if="applicationsListCtrl.ready && !applicationsListCtrl.model.data.applications.length">
+<div class="applications-empty" ng-if="applicationsListCtrl.ready && applicationsListCtrl.model.data.applications.length === 0">
   <div ng-if="applicationsListCtrl.userCnsiModel.numValid === 0">
     <div class="applications-msg" translate>You cannot view any applications.</div>
     <div class="applications-cta" ><a class="btn-link" href="#/account/settings" translate>
