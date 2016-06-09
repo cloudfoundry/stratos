@@ -1,7 +1,4 @@
-id_rsa*
-known_hosts
 *.rc
 demo/*
-portal-proxy
-vendor/*
 dev-certs/*
+portal-proxy
