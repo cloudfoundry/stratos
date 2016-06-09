@@ -1,1 +1,5 @@
 @import "pipeline-subflow/pipeline-subflow";
+
+.media-list.hpe-add-option-list > .media.service-panel {
+  padding: $hpe-unit-space 0;
+}

@@ -1,31 +1,9 @@
 <h1>Services</h1>
-<div class="panel panel-default"
-  ng-repeat="service in wizardCtrl.options.serviceModel.data.resources track by service.metadata.guid">
-  <div class="panel-body service-panel">
-    <div class="col-md-6 service-text">
-      <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
-      <div>
-        <h4 class="font-semi-bold">{{ ::service.entity.label }}</h4>
-        <p>
-          {{ ::service.entity.description }}
-        </p>
-      </div>
-    </div>
-    <div class="col-md-6 service-metadata">
-      <dl>
-        <dt translate>Version</dt>
-        <dd>{{ ::service.entity.version }}</dd>
-        <dt translate>Category</dt>
-        <dd>{{ ::service.entity.extra.categories }}</dd>
-        <dt class="service-attached">1 <span translate>Attached</span></dt>
-      </dl>
-      <div class="service-actions">
-        <button class="btn btn-sm btn-link" translate
-          ng-click="applicationServicesCtrl.eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', service)">
-          Add Service
-          <i class="helion-icon helion-icon-Plus"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+<ul class="media-list hpe-add-option-list">
+  <li class="media service-panel"
+    ng-repeat="service in wizardCtrl.options.services track by service.metadata.guid">
+    <service-card service="service" app="wizardCtrl.options.userInput.application" add-only="true"
+      cnsi-guid="wizardCtrl.options.userInput.serviceInstance.guid">
+    </service-card>
+  </li>
+</ul>

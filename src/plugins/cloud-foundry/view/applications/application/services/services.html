@@ -1,35 +1,8 @@
 <div class="panel panel-default"
-  ng-repeat="service in applicationServicesCtrl.model.data.resources track by service.metadata.guid">
+  ng-repeat="service in applicationServicesCtrl.services track by service.metadata.guid">
   <div class="panel-body service-panel">
-    <div class="col-md-6 service-text">
-      <i class="helion-icon helion-icon-4x helion-icon-Service_business service-icon"></i>
-      <div>
-        <h4 class="font-semi-bold">{{ ::service.entity.label }}</h4>
-        <p>
-          {{ ::service.entity.description }}
-        </p>
-      </div>
-    </div>
-    <div class="col-md-6 service-metadata">
-      <dl>
-        <dt translate>Version</dt>
-        <dd>{{ ::service.entity.version }}</dd>
-        <dt translate>Category</dt>
-        <dd>{{ ::service.entity.extra.categories }}</dd>
-        <dt class="service-attached">1 <span translate>Attached</span></dt>
-      </dl>
-      <div class="service-actions">
-        <actions-menu actions="applicationServicesCtrl.serviceActions"
-          action-target="service" menu-icon="helion-icon helion-icon-More"
-          menu-position="actions-menu-right">
-        </actions-menu>
-        <button class="btn btn-sm btn-link" translate
-          ng-click="applicationServicesCtrl.eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', service)">
-          Add Service
-          <i class="helion-icon helion-icon-Plus"></i>
-        </button>
-      </div>
-    </div>
+    <service-card service="service" app="applicationServicesCtrl.appModel.application"
+      cnsi-guid="applicationServicesCtrl.cnsiGuid"></service-card>
   </div>
 </div>
 

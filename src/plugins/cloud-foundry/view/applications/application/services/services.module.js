@@ -34,30 +34,19 @@
    * @property {string} id - the application GUID
    */
   function ApplicationServicesController(modelManager, eventService, $stateParams) {
-    this.model = modelManager.retrieve('cloud-foundry.model.service');
+    var that = this;
+    this.model = modelManager.retrieve('cloud-foundry.model.space');
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.eventService = eventService;
     this.id = $stateParams.guid;
     this.cnsiGuid = $stateParams.cnsiGuid;
-    this.model.all(this.cnsiGuid, {});
-    this.serviceActions = [
-      {
-        name: gettext('Detach'),
-        execute: function (target) {
-          /* eslint-disable */
-          alert('Detach ' + target.entity.label);
-          /* eslint-enable */
-        }
-      },
-      {
-        name: gettext('Manage Services'),
-        execute: function (target) {
-          /* eslint-disable */
-          alert('Manage services for ' + target.entity.label);
-          /* eslint-enable */
-        }
-      }
-    ];
+    this.services = [];
+
+    var spaceGuid = this.appModel.application.summary.space_guid;
+    this.model.listAllServicesForSpace(this.cnsiGuid, spaceGuid)
+      .then(function (services) {
+        that.services.length = 0;
+        [].push.apply(that.services, services);
+      });
   }
 
   angular.extend(ApplicationServicesController.prototype, {
