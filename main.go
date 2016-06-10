@@ -24,7 +24,7 @@ var (
 
 func main() {
 	log.SetOutput(os.Stdout)
-	log.Println("Started Portal Proxy")
+	// log.Println("Started Portal Proxy")
 
 	var portalConfig portalConfig
 	portalConfig, err := loadPortalConfig(portalConfig)
@@ -33,7 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Println("Proxy Configuration loaded up")
+	// log.Println("Proxy Configuration loaded up")
 	var databaseConfig datastore.DatabaseConfig
 	databaseConfig, err = loadDatabaseConfig(databaseConfig)
 	if err != nil {
@@ -41,7 +41,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Println("Database Configuration loaded up")
+	// log.Println("Database Configuration loaded up")
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
 	if err != nil {
@@ -50,17 +50,17 @@ func main() {
 	}
 	defer databaseConnectionPool.Close()
 
-	log.Println("Spinning up a new Portal Proxy")
+	// log.Println("Spinning up a new Portal Proxy")
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool)
 
-	log.Println("Initializing the HTTP client")
+	// log.Println("Initializing the HTTP client")
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
 
-	log.Printf("Starting the proxy on IP %s and port %s", portalConfig.TLSAddress, 80)
-	log.Printf("%v", portalConfig)
+	// log.Printf("Starting the proxy on IP %s and port %d", portalConfig.TLSAddress, 80)
+	// log.Printf("%v", portalConfig)
 	if err := start(portalProxy); err != nil {
-		log.Printf("Unable to start the proxy: %v", err)
+		// log.Printf("Unable to start the proxy: %v", err)
 		os.Exit(1)
 	}
 }
@@ -176,9 +176,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Disconnect HCF cluster
 	sessionGroup.Post("/auth/logout/cnsi", p.logoutOfCNSI)
 
-	// GitHub OAuth
-	sessionGroup.Get("/github/oauth/auth", p.githubAuth)
-	sessionGroup.Get("/github/oauth/redirect", p.githubRedirect)
+	// should be referenced as /v1/github/oauth/auth
+	sessionGroup.Get("/github/oauth/auth", p.handleGitHubAuth)
+
+	// should be referenced as /v1/github/oauth/callback
+	sessionGroup.Get("/github/oauth/callback", p.handleGitHubCallback)
 
 	// Register clusters
 	sessionGroup.Post("/register/hcf", p.registerHCFCluster)

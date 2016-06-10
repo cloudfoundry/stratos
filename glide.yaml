@@ -11,3 +11,6 @@ import:
   - middleware
 - package: github.com/lib/pq
 - package: github.com/satori/go.uuid
+- package: golang.org/x/oauth2
+  subpackages:
+  - github
