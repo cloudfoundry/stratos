@@ -43,15 +43,15 @@ docker-compose -f docker-compose.development.yml build
 
 ### Run
 ```
-docker-compose up
+docker-compose -f docker-compose.development.yml up
 ```
 
 ### Or run in background
 ```
-docker-compose up -d
+docker-compose -f docker-compose.development.yml up -d
 ```
 
-Wait until the UI container finishing building (the `stratosdeploy_ui_1` container stop running), the Web UI should now be running on your docker host ID, usually 192.168.99.100.
+Wait until the UI container finishing building (the `stratosdeploy_ui_1` container stop running), the Web UI should now be running on your docker host ID, discoverable via `docker-machine ip [machine-name]`
 
 ### Stop
 

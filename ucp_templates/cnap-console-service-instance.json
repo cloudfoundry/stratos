@@ -9,26 +9,6 @@
   "description": "A cnap instance",
   "parameters": [
     {
-      "name": "MYSQL_ROOT_PASSWORD",
-      "value": "stratos"
-    },
-    {
-      "name": "MYSQL_DATABASE",
-      "value": "stratos-db"
-    },
-    {
-      "name": "MYSQL_USER",
-      "value": "stratos"
-    },
-    {
-      "name": "MYSQL_PASSWORD",
-      "value": "stratos"
-    },
-    {
-      "name": "PORT",
-      "value": "3000"
-    },
-    {
       "name": "PGSQL_USER",
       "value": "stolon"
     },

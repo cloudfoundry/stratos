@@ -4,12 +4,6 @@
   "vendor": "HPE",
   "volumes": [
     {
-      "name": "data",
-      "size_gb": 10,
-      "filesystem": "ext4",
-      "shared": false
-    },
-    {
       "name": "stolon-data",
       "size_gb": 10,
       "filesystem": "ext4",
@@ -17,147 +11,6 @@
     }
   ],
   "components": [
-    {
-      "name": "db",
-      "version": "1.0.0",
-      "vendor": "HPE",
-      "external_name": "db",
-      "image": "{{REGISTRY}}/helioncf/cnap-console-db:{{TAG}}",
-      "min_RAM_mb": 256,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
-      "platform": "linux-x86_64",
-      "workload_type": "container",
-      "min_instances": 1,
-      "max_instances": 1,
-      "service_ports": [
-        {
-          "name": "cnap-console-db",
-          "protocol": "TCP",
-          "source_port": 3306,
-          "target_port": 3306,
-          "public": true
-        }
-      ],
-      "volume_mounts": [
-        {
-          "volume_name": "data",
-          "mountpoint": "/var/lib/mysql"
-        }
-      ],
-      "parameters": [
-        {
-          "name": "MYSQL_ROOT_PASSWORD"
-        },
-        {
-          "name": "MYSQL_DATABASE"
-        },
-        {
-          "name": "MYSQL_USER"
-        },
-        {
-          "name": "MYSQL_PASSWORD"
-        }
-      ]
-    },
-    {
-      "name": "cf-service",
-      "version": "1.0.0",
-      "vendor": "HPE",
-      "external_name": "cf-service",
-      "image": "{{REGISTRY}}/helioncf/cnap-console-mock-api:{{TAG}}",
-      "min_RAM_mb": 256,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
-      "platform": "linux-x86_64",
-      "workload_type": "container",
-      "min_instances": 1,
-      "max_instances": 1,
-      "service_ports": [
-        {
-          "name": "mock-api",
-          "protocol": "TCP",
-          "source_port": 3002,
-          "target_port": 3002,
-          "public": true
-        }
-      ]
-    },
-    {
-      "name": "auth-service",
-      "version": "1.0.0",
-      "vendor": "HPE",
-      "external_name": "auth-service",
-      "image": "{{REGISTRY}}/helioncf/cnap-console-mock-auth:{{TAG}}",
-      "min_RAM_mb": 256,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
-      "platform": "linux-x86_64",
-      "workload_type": "container",
-      "min_instances": 1,
-      "max_instances": 1,
-      "service_ports": [
-        {
-          "name": "mock-auth",
-          "protocol": "TCP",
-          "source_port": 3001,
-          "target_port": 3001,
-          "public": true
-        }
-      ]
-    },
-    {
-      "name": "api",
-      "version": "1.0.0",
-      "vendor": "HPE",
-      "external_name": "api",
-      "image": "{{REGISTRY}}/helioncf/cnap-console-api:{{TAG}}",
-      "min_RAM_mb": 256,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
-      "platform": "linux-x86_64",
-      "workload_type": "container",
-      "min_instances": 1,
-      "max_instances": 1,
-      "service_ports": [
-        {
-          "name": "api",
-          "protocol": "TCP",
-          "source_port": 3000,
-          "target_port": 3000,
-          "public": true
-        }
-      ],
-      "parameters": [
-        {
-          "name": "PORT"
-        },
-        {
-          "name": "MYSQL_ROOT_PASSWORD"
-        },
-        {
-          "name": "MYSQL_DATABASE"
-        },
-        {
-          "name": "MYSQL_USER"
-        },
-        {
-          "name": "MYSQL_PASSWORD"
-        },
-        {
-          "name": "GITHUB_ACCESS_TOKEN"
-        },
-        {
-          "name": "GITHUB_OAUTH_CLIENT_ID"
-        },
-        {
-          "name": "GITHUB_OAUTH_CLIENT_SECRET"
-        },
-        {
-          "name": "GITHUB_OAUTH_REDIRECT_URL"
-        }
-      ]
-    },
     {
       "name": "cnap-console-nginx",
       "version": "1.0.0",
@@ -374,51 +227,6 @@
     }
   ],
   "parameters": [
-    {
-        "name": "MYSQL_ROOT_PASSWORD",
-        "description": "The root password for MySQL",
-        "default": "",
-        "example": "",
-        "data_type": "string",
-        "required": true,
-        "secret": false
-    },
-    {
-        "name": "MYSQL_DATABASE",
-        "description": "MySQL database name",
-        "default": "db",
-        "example": "db",
-        "data_type": "string",
-        "required": true,
-        "secret": false
-    },
-    {
-        "name": "MYSQL_USER",
-        "description": "MySQL user name",
-        "default": "stratos",
-        "example": "stratos",
-        "data_type": "string",
-        "required": true,
-        "secret": false
-    },
-    {
-        "name": "MYSQL_PASSWORD",
-        "description": "MySQL password",
-        "default": "stratos",
-        "example": "stratos",
-        "data_type": "string",
-        "required": true,
-        "secret": false
-    },
-    {
-        "name": "PORT",
-        "description": "MySQL port number",
-        "default": "3306",
-        "example": "3306",
-        "data_type": "string",
-        "required": true,
-        "secret": false
-    },
     {
         "name": "PGSQL_USER",
         "description": "Postgres username",
@@ -698,15 +506,6 @@
         "description": "Initial Stratos database schema",
         "default": "./InitialSchema.sql",
         "example": "./InitialSchema.sql",
-        "data_type": "string",
-        "required": true,
-        "secret": false
-    },
-    {
-        "name": "GITHUB_ACCESS_TOKEN",
-        "description": "GitHub access token used for HCE",
-        "default": "",
-        "example": "",
         "data_type": "string",
         "required": true,
         "secret": false
