@@ -53,6 +53,7 @@
       var that = this;
       this.data = {};
 
+      this.newBinding = null;
       this.createNew = true;
       this.userInput = {
         name: null,
@@ -73,7 +74,7 @@
               templateUrl: this.path + 'instance.html',
               nextBtnText: gettext('Add Service Instance'),
               onNext: function () {
-                that.addService().then(function () {
+                return that.addService().then(function () {
                   that.addBinding();
                 });
               }
@@ -162,12 +163,18 @@
     },
 
     addBinding: function () {
+      var that = this;
       var bindingSpec = {
         service_instance_guid: this.options.serviceInstance.metadata.guid,
         app_guid: this.app.summary.guid
       };
 
-      return this.bindingModel.createServiceBinding(this.cnsiGuid, bindingSpec);
+      return this.bindingModel.createServiceBinding(this.cnsiGuid, bindingSpec)
+        .then(function (newBinding) {
+          if (angular.isDefined(newBinding.metadata)) {
+            that.newBinding = newBinding;
+          }
+        });
     },
 
     stopWorkflow: function () {
@@ -178,11 +185,12 @@
       var that = this;
       if (!this.confirm) {
         this.addService().then(function () {
-          that.addBinding();
-          that.$uibModalInstance.dismiss('finish');
+          that.addBinding().then(function () {
+            that.$uibModalInstance.close(that.newBinding);
+          });
         });
       } else {
-        this.$uibModalInstance.dismiss('finish');
+        this.$uibModalInstance.close(that.newBinding);
       }
     }
   });

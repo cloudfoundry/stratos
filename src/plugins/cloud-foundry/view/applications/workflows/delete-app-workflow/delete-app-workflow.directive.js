@@ -166,16 +166,26 @@
      */
     deleteServiceBindings: function () {
       var that = this;
-      var tasks = [];
+      var deferred = this.$q.defer();
       var checkedServiceValue = this.userInput.checkedServiceValue;
 
-      Object.keys(checkedServiceValue).forEach(function (guid) {
-        if (checkedServiceValue[guid]) {
-          tasks.push(that.serviceBindingModel.deleteServiceBinding(that.cnsiGuid, guid, { async: false }));
-        }
-      });
+      var bindingGuids = _.chain(checkedServiceValue)
+                          .filter(function (o) { return o; })
+                          .map('guid')
+                          .value();
+      if (bindingGuids.length > 0) {
+        var q = 'service_instance_guid IN ' + bindingGuids.join(',');
+        this.serviceBindingModel.listAllServiceBindings(this.cnsiGuid, { q: q })
+          .then(function (bindings) {
+            var tasks = [];
+            angular.forEach(bindings, function (binding) {
+              tasks.push(that.serviceBindingModel.deleteServiceBinding(that.cnsiGuid, binding.metadata.guid, { async: false }));
+            });
+            that.$q.all(tasks).then(deferred.resolve, deferred.reject);
+          });
+      }
 
-      return this.$q.all(tasks);
+      return deferred.promise;
     },
 
     /**
