@@ -49,12 +49,9 @@
   function ApplicationDeliveryLogsController($scope, $stateParams, $interval, $q, $log, moment, modelManager, detailView) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hasProject = null;
-    this.last = {
-      build: null,
-      test: null,
-      deploy: null
-    };
+    this.last = {};
     this.executionSearchTerms = ['message', 'result.label', 'reason.createdDateString', 'reason.author', 'reason.type'];
     this.id = $stateParams.guid;
     // Pass through anything needed by prototype extend
@@ -62,6 +59,7 @@
     this.$q = $q;
     this.moment = moment;
     this.$log = $log;
+    this.hceCnsi = {};
 
     var that = this;
     var updateModelPromise, promise;
@@ -69,21 +67,34 @@
     /* eslint-disable */
     // TODO (rcox): Both vars + anything associated with to be removed once everything is wired in
     /* eslint-enable */
-    this.addMock = true;
-    this.haveBackend = false;
+    this.addMock = false;
+    this.haveBackend = true;
 
     if (this.haveBackend) {
       /* eslint-disable */
       // TODO (kdomico): Hi! I've used the same github user approach. Update here as well or let me know if I need to do it
       // TODO (rcox): Improvements - Check if project id already exists in hce model?
       /* eslint-enable */
-      promise = that.hceModel.getUserByGithubId('18697775')
-        .then(function() {
-          return that.hceModel.getProjects();
-        })
-        .then(function() {
-          //that.model.application.summary.name = 'test';// Temp override
-          return that.hceModel.getProject(that.model.application.summary.name);
+      promise = this.cnsiModel.list()
+        .then(function () {
+          var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
+          if (hceCnsis.length > 0) {
+            that.hceCnsi = hceCnsis[0];
+            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
+              .then(function() {
+                return that.hceModel.getProjects(that.hceCnsi.guid)
+                  .then(function() {
+                    return that.hceModel.getProject(that.model.application.summary.name);
+                  });
+              })
+              .catch(function(response) {
+                if (response.status === 404) {
+                  that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
+                }
+              });
+          } else {
+            return $q.reject('No CNSI found');
+          }
         });
     } else {
       promise = $q.when({});
@@ -94,11 +105,10 @@
         that.hasProject = !(angular.isUndefined(project) || project === null);
         if (that.hasProject) {
           that.updateData();
-          //updateModelPromise = $interval(_.bind(that.updateData, that), 30 * 1000, 0, true);
+          updateModelPromise = $interval(_.bind(that.updateData, that), 30 * 1000, 0, true);
         }
       })
-      .catch(function (error) {
-        $log.error('Failed to fetch project or process delivery logs data: ', error);
+      .catch(function () {
         that.hasProject = 'error';
       });
 
@@ -118,7 +128,7 @@
       TESTING: 'Testing',
       DEPLOYING: 'Deploying',
       // Require to know if the execution has finished (execution state is not trustworthy)
-      WATCHDOG: 'watchdog',
+      WATCHDOG_TERMINATED: 'watchdog',
       PIPELINE_COMPLETED: 'pipeline_completed'
     },
 
@@ -128,22 +138,6 @@
       FAILED: 'failed',
       // Required to show that the execution is still running
       RUNNING: 'running'
-    },
-
-    // These will need to be localised
-    eventNames: {
-      // Custom event names to accurately reflect what's going on FINALISING: 'Finalising'
-      BUILDING: 'Building',
-      TESTING: 'Testing',
-      DEPLOYING: 'Deploying',
-      FINALISING: 'Finalising',
-      // Override normal event name's
-      WATCHDOG: 'Terminated',
-      PIPELINE_COMPLETED: 'Completed',
-      // Override <x>ing states with these
-      BUILD: 'Build',
-      TEST: 'Test',
-      DEPLOY: 'Deploy'
     },
 
     triggerBuild: function() {
@@ -162,6 +156,7 @@
         templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/execution.html',
         title: rawExecution.message
       }, {
+        guid: that.hceCnsi.guid,
         execution: rawExecution,
         events: that.eventsPerExecution[execution.id],
         viewEvent: function(build) {
@@ -186,6 +181,7 @@
         controller: 'eventDetailViewController',
         title: event.name
       }, {
+        guid: this.hceCnsi.guid,
         event: event
       });
     },
@@ -207,7 +203,7 @@
       if (this.haveBackend) {
         var project = this.hceModel.getProject(this.model.application.summary.name);
         // Fetch pipeline executions
-        promise = this.hceModel.getPipelineExecutions(project.id);
+        promise = this.hceModel.getPipelineExecutions(that.hceCnsi.guid, project.id);
       } else {
         that.hceModel.data.pipelineExecutions = [];
         promise = this.$q.when();
@@ -234,14 +230,18 @@
           // for the table to work this conversion needs to happen before being pushed to scope. So two options,
           // either append these values to the existing hceModel.data object or clone and update as needed for this
           // specific directive
-          /* eslint-disable */
-          that.parsedHceModel = JSON.parse(JSON.stringify(that.hceModel.data));
-          /* eslint-enable */
+          that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
 
           for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
             var execution = that.parsedHceModel.pipelineExecutions[i];
             that.parseExecution(execution, that.eventsPerExecution[execution.id]);
           }
+
+          that.parsedHceModel.pipelineExecutions =
+            _.orderBy(that.parsedHceModel.pipelineExecutions, function(execution) {
+              var created = _.get(execution, 'reason.mCreatedDateString');
+              return created ? created.unix() : Number.MAX_VALUE;
+            }, 'desc');
         })
         .catch(function(error) {
           that.$log.error('Failed to fetch/process pipeline executions or events: ', error);
@@ -252,27 +252,17 @@
      * @name ApplicationDeliveryLogsController.fetchEvents
      * @description For the given execution find all related events. Also sort events in time order and parse
      * @param {object} eventsPerExecution - execution id : events name:key object
-     * @param {object} executionId - id of execution
+     * @param {string} executionId - id of execution
      * @returns {object} promise to use for completion notification
      */
     fetchEvents: function(eventsPerExecution, executionId) {
       var that = this;
       // Reset the last successful build/test/deploy events
-      this.last = {
-        build: {
-          mEndDate: moment(0)
-        },
-        test: {
-          mEndDate: moment(0)
-        },
-        deploy: {
-          mEndDate: moment(0)
-        }
-      };
+      this.last = { };
 
       var promise;
       if (this.haveBackend) {
-        promise = this.hceModel.getPipelineEvents(executionId);
+        promise = that.hceModel.getPipelineEvents(that.hceCnsi.guid, executionId);
       } else if (this.addMock) {
         promise = this.$q.when(this.createMockEvents(executionId));
       } else {
@@ -282,11 +272,11 @@
       return promise
         .then(function(events) {
           for (var i = 0; i < events.length; i++) {
-            that.parseEvent(events[i], that.last);
+            that.parseEvent(events[i]);
           }
-          events = _.sortBy(events, function(event) {
-            return event.mEndDate ? event.mEndDate.utc() : Number.MAX_VALUE;
-          });
+          events = _.orderBy(events, function(event) {
+            return event.mEndDate ? event.mEndDate.unix() : Number.MAX_VALUE;
+          }, 'asc');
           eventsPerExecution[executionId] = events;
         });
     },
@@ -297,9 +287,8 @@
      * dates, calculating duration if missing, localising dates and labels, discovering the latest build/test/deploy
      * events, etc
      * @param {object} event - event to parse
-     * @param {object} lastEvents - collection of most recent events per type
      */
-    parseEvent: function(event, lastEvents) {
+    parseEvent: function(event) {
       event.mStartDate = event.startDate ? moment(event.startDate) : undefined;
       event.mEndDate = event.endDate ? moment(event.endDate) : undefined;
 
@@ -313,31 +302,40 @@
         event.durationString = gettext('Unknown');
       }
 
+      // Update event name such that they are set before the table filter is applied. Note the change in tense for
+      // building, testing and deploying (we get these events after they've actually finished). It would be good to do
+      // this directly in a language file, however these are auto generated.
       switch (event.type) {
         case this.eventTypes.BUILDING:
-          event.name = this.eventNames.BUILD;
-          if (event.state === this.eventStates.SUCCEEDED && lastEvents.build.mEndDate.diff(event.mEndDate) < 0) {
-            lastEvents.build = event;
-          }
+          event.name = gettext('Build');
           break;
         case this.eventTypes.TESTING:
-          event.name = this.eventNames.TEST;
-          if (event.state === this.eventStates.SUCCEEDED && lastEvents.test.mEndDate.diff(event.mEndDate) < 0) {
-            lastEvents.test = event;
-          }
+          event.name = gettext('Test');
           break;
         case this.eventTypes.DEPLOYING:
-          event.name = this.eventNames.DEPLOY;
-          if (event.state === this.eventStates.SUCCEEDED && lastEvents.deploy.mEndDate.diff(event.mEndDate) < 0) {
-            lastEvents.deploy = event;
-          }
+          event.name = gettext('Deploy');
           break;
-        case this.eventTypes.WATCHDOG:
-          event.name = this.eventNames.WATCHDOG;
+        case this.eventTypes.WATCHDOG_TERMINATED:
+          event.name = gettext('Terminated');
           break;
         case this.eventTypes.PIPELINE_COMPLETED:
-          event.name = this.eventNames.PIPELINE_COMPLETED;
+          event.name = gettext('Completed');
           break;
+      }
+
+      this.determineLatestEvent(event);
+    },
+
+    /**
+     * @name ApplicationDeliveryLogsController.determineLatestEvent
+     * @description Is this event the latest of it's type for this application? If so track it
+     * @param {object} event - HCE event
+     */
+    determineLatestEvent: function(event) {
+      var type = event.type.toLowerCase();
+      if (!this.last[type] ||
+        event.state === this.eventStates.SUCCEEDED && this.last[type].mEndDate.diff(event.mEndDate) < 0) {
+        this.last[type] = event;
       }
     },
 
@@ -350,9 +348,8 @@
      */
     parseExecution: function(execution, events) {
       // Localise the reason creation date string (use i18n date/time format)
-      execution.reason.createdDateString = this.moment(execution.reason.createdDate).format('L - LTS');
-
-      this.addCurrentState(execution, events);
+      execution.reason.mCreatedDateString = this.moment(execution.reason.createdDate);
+      execution.reason.createdDateString = execution.reason.mCreatedDateString.format('L - LTS');
 
       //The execution result is actually junk, need to look at the latest execution event and use that
       // as the execution result. Also required to update the result with translated text, which makes is searchable.
@@ -366,53 +363,9 @@
 
       execution.result = {
         state: this.determineExecutionState(event),
-        label: event.name
+        label: event.name,
+        hasLog: event.artifact_id
       };
-    },
-
-    /**
-     * @name ApplicationDeliveryLogsController.addCurrentState
-     * @description  Assume that a successful 'Building' event at the end of an execution means that it's currently
-     * 'Testing' (same applies for Testing and Deploying). If we don't need this feature, remove this function
-     * @param {object} execution - relevant execution
-     * @param {array} events - HCE events associated with the execution
-     */
-    addCurrentState: function(execution, events) {
-      var that = this;
-
-      function addProgressEvent(events, previousEvent, name) {
-        var newEvent = {
-          startDate: previousEvent.endDate,
-          name: name,
-          state: that.eventStates.RUNNING
-        };
-        that.parseEvent(newEvent, {});
-        events.push(newEvent);
-      }
-
-      if (!events || events.length === 0) {
-        if (execution.state !== 'completed') {
-          addProgressEvent(events, { endDate: moment() }, this.eventNames.BUILDING);
-        } else {
-          return;
-        }
-      }
-
-      var event = events[events.length - 1];
-
-      if (event.state === this.eventStates.SUCCEEDED) {
-        switch (event.type) {
-          case this.eventTypes.BUILDING:
-            addProgressEvent(events, event, this.eventNames.TESTING);
-            break;
-          case this.eventTypes.TESTING:
-            addProgressEvent(events, event, this.eventNames.DEPLOYING);
-            break;
-          case this.eventTypes.DEPLOYING:
-            addProgressEvent(events, event, this.eventNames.FINALISING);
-            break;
-        }
-      }
     },
 
     /**
@@ -424,7 +377,7 @@
     determineExecutionState: function(event) {
       if (
         event.type === this.eventTypes.PIPELINE_COMPLETED ||
-        event.type === this.eventTypes.WATCHDOG ||
+        event.type === this.eventTypes.WATCHDOG_TERMINATED ||
         event.state === this.eventStates.FAILED) {
         return event.state;
       } else {
@@ -432,6 +385,7 @@
       }
     },
 
+    /* eslint-disable */
     createMockExecutions: function() {
       return [
         {
@@ -617,7 +571,7 @@
     },
 
     createMockEvents: function(executionId) {
-      function createEvent(id, type, state, startOffset, endOffset) {
+      function createEvent(id, type, state, startOffset, endOffset, artifactId) {
         return {
           id: id,
           name: type,
@@ -625,47 +579,48 @@
           state: state,
           startDate: moment().subtract(startOffset, 'seconds').format(),
           endDate: moment().subtract(endOffset, 'seconds').format(),
-          artifactId: id,
-          duration: (endOffset - startOffset) * 1000
+          artifact_id: artifactId,
+          duration: (endOffset - startOffset) * 1000,
+          execution_id: executionId
         };
       }
 
       switch (executionId) {
         case 91:
           return [
-            createEvent(90, this.eventTypes.BUILDING, this.eventStates.FAILED, 46, 40, 91)
+            createEvent(90, this.eventTypes.BUILDING, this.eventStates.FAILED, 46, 40, 91, 1)
           ];
         case 92:
           return [
-            createEvent(91, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 500, 510, 92),
-            createEvent(92, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 600, 650, 92),
-            createEvent(93, this.eventTypes.DEPLOYING, this.eventStates.FAILED, 650, 40, 92)
+            createEvent(91, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 500, 510, 92, 1),
+            createEvent(92, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 600, 650, 92, 1),
+            createEvent(93, this.eventTypes.DEPLOYING, this.eventStates.FAILED, 650, 40, 92, 1)
           ];
         case 93:
           return [
-            createEvent(94, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 4606, 4600, 93),
-            createEvent(95, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 4600, 4560, 93)
+            createEvent(94, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 4606, 4600, 93, 1),
+            createEvent(95, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 4600, 4560, 93, 1)
             // createEvent(96, 'Deploying', 'deploying', 4560, 4510, 93)
           ];
         case 94:
           return [
-            createEvent(97, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 50064, 50060, 94),
-            createEvent(98, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 50055, 50050, 94),
-            createEvent(99, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, 50050, 50045, 94)
+            createEvent(97, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 50064, 50060, 94, 1),
+            createEvent(98, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 50055, 50050, 94, 1),
+            createEvent(99, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, 50050, 50045, 94, 1)
           ];
         case 95:
           return [];
         case 96:
           return [
-            createEvent(100, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 60064, 60060, 96),
-            createEvent(101, this.eventTypes.TESTING, this.eventStates.FAILED, 60060, 60000, 96)
+            createEvent(100, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 60064, 60060, 96, 1),
+            createEvent(101, this.eventTypes.TESTING, this.eventStates.FAILED, 60060, 60000, 96, 1)
           ];
         case 97:
           return [
-            createEvent(102, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 65064, 65060, 97),
-            createEvent(103, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 65055, 65050, 97),
-            createEvent(104, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, 65050, 65045, 97),
-            createEvent(105, this.eventTypes.PIPELINE_COMPLETED, this.eventStates.SUCCEEDED, 65045, 65000, 97)
+            createEvent(102, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 65064, 65060, 97, 1),
+            createEvent(103, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 65055, 65050, 97, 1),
+            createEvent(104, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, 65050, 65045, 97, 1),
+            createEvent(105, this.eventTypes.PIPELINE_COMPLETED, this.eventStates.SUCCEEDED, 65045, 65000, 97, 1)
           ];
         case 1:
           return [
@@ -691,7 +646,7 @@
             }, {
               id: 3,
               name: "Watchdog Terminated",
-              type: this.eventTypes.WATCHDOG,
+              type: this.eventTypes.WATCHDOG_TERMINATED,
               state: this.eventStates.FAILED,
               startDate: "2016-06-06T13:31:55.000Z",
               endDate: "2016-06-06T13:31:55.000Z",
@@ -704,7 +659,7 @@
             {
               "id": 4,
               "name": "Watchdog Terminated",
-              "type": this.eventTypes.WATCHDOG,
+              "type": this.eventTypes.WATCHDOG_TERMINATED,
               "state": this.eventStates.FAILED,
               "startDate": "2016-06-06T15:51:04.000Z",
               "endDate": "2016-06-06T15:51:04.000Z",
@@ -717,6 +672,7 @@
 
       }
     }
+    /* eslint-enable */
   });
 
 })();
