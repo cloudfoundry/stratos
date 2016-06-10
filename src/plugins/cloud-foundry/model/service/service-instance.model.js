@@ -55,6 +55,25 @@
     },
 
     /**
+     * @function createServiceInstance
+     * @memberof cloud-foundry.model.service-instance.ServiceInstance
+     * @description Create a service instance
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {object} newInstanceSpec - the service instance spec
+     * @returns {promise} A promise object
+     * @public
+     */
+    createServiceInstance: function (cnsiGuid, newInstanceSpec) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.serviceInstanceApi.CreateServiceInstance(newInstanceSpec, {}, httpConfig)
+        .then(function (response) {
+          return response.data[cnsiGuid];
+        });
+    },
+
+    /**
      * @function onAll
      * @memberof cloud-foundry.model.service-instance.ServiceInstance
      * @description onAll handler at model layer

@@ -24,11 +24,13 @@
   }
 
   ServiceCardController.$inject = [
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'helion.framework.widgets.detailView'
   ];
 
-  function ServiceCardController(modelManager) {
+  function ServiceCardController(modelManager, detailView) {
     var that = this;
+    this.detailView = detailView;
     this.model = modelManager.retrieve('cloud-foundry.model.service');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -99,12 +101,35 @@
 
   angular.extend(ServiceCardController.prototype, {
     addService: function () {
+      var that = this;
+      var config = {
+        controller: 'addServiceWorkflowController',
+        controllerAs: 'addServiceWorkflowCtrl',
+        detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html'
+      };
+      var context = {
+        cnsiGuid: this.cnsiGuid,
+        service: this.service,
+        app: this.app,
+        confirm: !this.allowAddOnly
+      };
+      this.detailView(config, context).closed
+        .then(function () {
+          that.handleServiceWorkflowFinished();
+        });
     },
 
     detach: function () {
+
     },
 
     manageInstances: function () {
+
+    },
+
+    handleServiceWorkflowFinished: function () {
+      this.numAttached++;
+      this.numAdded++;
     }
   });
 
