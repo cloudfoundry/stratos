@@ -37,7 +37,8 @@
      * @function deleteServiceBinding
      * @memberof  cloud-foundry.model.serviceBinding
      * @description delete a particular service binding
-     * @param {string} guid - the service binding id
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - identifier of service binding
      * @param {object} params - params for url building
      * @returns {promise} A promise object
      * @public
@@ -54,6 +55,7 @@
      * @function listAllServiceBindings
      * @memberof  cloud-foundry.model.serviceBinding
      * @description list all service bindings
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object} params - params for url building
      * @returns {promise} A promise object
      * @public
@@ -65,7 +67,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
         .ListAllServiceBindings(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });

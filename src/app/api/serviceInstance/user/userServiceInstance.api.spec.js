@@ -26,18 +26,29 @@
       expect(userServiceInstanceApi.$http).toBeDefined();
     });
 
+    it('should have `$httpParamSerializer` property defined', function () {
+      expect(userServiceInstanceApi.$httpParamSerializer).toBeDefined();
+    });
+
     it('should send POST request for connect', function () {
-      var loginData = {
+      var data = {
         cnsi_guid: 'cnsi_guid',
         username: 'username',
         password: 'password'
       };
-      $httpBackend.expectPOST('/pp/v1/auth/login/cnsi', $httpParamSerializer(loginData)).respond(200, '');
+      $httpBackend.expectPOST('/pp/v1/auth/login/cnsi', $httpParamSerializer(data)).respond(200, {});
       userServiceInstanceApi.connect('cnsi_guid', 'username', 'password');
       $httpBackend.flush();
     });
 
-    it('should return service instances for specified user', function () {
+    it('should send POST request for disconnect', function () {
+      var data = { cnsi_guid: 'cnsi_guid' };
+      $httpBackend.expectPOST('/pp/v1/auth/logout/cnsi', $httpParamSerializer(data)).respond(200, '');
+      userServiceInstanceApi.disconnect('cnsi_guid');
+      $httpBackend.flush();
+    });
+
+    it('should send GET request and return CNSIs', function () {
       var data = ['x','y','z'];
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, data);
 
@@ -54,12 +65,6 @@
       };
       $httpBackend.expectPOST('/api/service-instances/user/register', data).respond(200, '');
       userServiceInstanceApi.register(['url1', 'url2']);
-      $httpBackend.flush();
-    });
-
-    it('should send POST request for disconnect', function () {
-      $httpBackend.expectDELETE('/api/service-instances/user/1').respond(200, '');
-      userServiceInstanceApi.disconnect(1);
       $httpBackend.flush();
     });
   });

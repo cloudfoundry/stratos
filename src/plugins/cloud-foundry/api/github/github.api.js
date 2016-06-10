@@ -37,7 +37,7 @@
 
     var that = this;
     $window.addEventListener('message', function (event) {
-      var message = JSON.parse(event.data);
+      var message = angular.fromJson(event.data);
       if (message.name === 'GitHub Oauth - token') {
         that.token = message.data;
       }
@@ -94,6 +94,7 @@
      * @description Get specified branch
      * @param {string} repo - the repo full name
      * @param {string} branch - the branch name
+     * @param {object} params - additional params to send
      * @returns {promise}
      * @public
      */

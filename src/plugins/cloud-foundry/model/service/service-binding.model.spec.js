@@ -21,7 +21,7 @@
       var DeleteServiceBinding = mock.cloudFoundryAPI.ServiceBindings.DeleteServiceBinding('123');
       $httpBackend.whenDELETE(DeleteServiceBinding.url).respond(204, DeleteServiceBinding.response['204'].body);
       $httpBackend.expectDELETE(DeleteServiceBinding.url);
-      model.deleteServiceBinding('123');
+      model.deleteServiceBinding('guid', '123');
       $httpBackend.flush();
       expect(DeleteServiceBinding.response['204'].body).toBeDefined();
     });
@@ -32,7 +32,7 @@
       $httpBackend.expectGET(ListAllServiceBindings.url);
       var result;
       expect(result).not.toBeDefined();
-      model.listAllServiceBindings({}).then(function (resources) {
+      model.listAllServiceBindings('guid', {}).then(function (resources) {
         result = resources;
       });
       $httpBackend.flush();

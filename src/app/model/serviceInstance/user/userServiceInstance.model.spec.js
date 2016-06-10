@@ -28,9 +28,24 @@
     });
 
     it('should have initial properties defined', function () {
+      expect(userServiceInstance.$q).toBeDefined();
       expect(userServiceInstance.apiManager).toBeDefined();
       expect(userServiceInstance.serviceInstances).toEqual({});
       expect(userServiceInstance.numValid).toBe(0);
+    });
+
+    it('should POST correct data on connect()', function () {
+      var data = { cnsi_guid: 'c1', username: 'username', password: 'password' };
+      $httpBackend.expectPOST('/pp/v1/auth/login/cnsi', $httpParamSerializer(data)).respond(200, {});
+      userServiceInstance.connect('c1', 'name', 'username', 'password');
+      $httpBackend.flush();
+    });
+
+    it('should POST correct data on disconnect()', function () {
+      var data = { cnsi_guid: 'cnsi_guid' };
+      $httpBackend.expectPOST('/pp/v1/auth/logout/cnsi', $httpParamSerializer(data)).respond(200, {});
+      userServiceInstance.disconnect('cnsi_guid');
+      $httpBackend.flush();
     });
 
     it('should set `serviceInstances` on list()', function () {
@@ -39,6 +54,7 @@
         c2: { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
       };
 
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/cnsis/registered')
         .respond(200, mockData);
 
@@ -51,14 +67,27 @@
       $httpBackend.flush();
     });
 
+    it('should not set `serviceInstances` on list() if no clusters', function () {
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
+
+      userServiceInstance.list().then(function (response) {
+        expect(response).toEqual({});
+        expect(userServiceInstance.serviceInstances).toEqual({});
+        expect(userServiceInstance.numValid).toBe(0);
+      });
+
+      $httpBackend.flush();
+    });
+
     it('should set valid === true for service instance if not expired', function () {
       var data = [
         { guid: 'c1', name: 'cluster1', url:' cluster1_url', token_expiry: (new Date()).getTime() + 36000 },
         { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
       ];
 
-      $httpBackend.when('GET', '/pp/v1/cnsis/registered')
-        .respond(200, data);
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, data);
 
       userServiceInstance.list().then(function () {
         expect(userServiceInstance.numValid).toBe(1);
@@ -75,8 +104,8 @@
         { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
       ];
 
-      $httpBackend.when('GET', '/pp/v1/cnsis/registered')
-        .respond(200, data);
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, data);
 
       userServiceInstance.list().then(function () {
         expect(userServiceInstance.numValid).toBe(0);
@@ -87,8 +116,8 @@
     });
 
     it('should not set `serviceInstances` on list() and error', function () {
-      $httpBackend.when('GET', '/pp/v1/cnsis/registered')
-        .respond(403, {});
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(403, {});
 
       userServiceInstance.list().then(function () {}, function (error) {
         expect(error.status).toBe(403);
@@ -100,16 +129,21 @@
       $httpBackend.flush();
     });
 
-    it('should POST correct data on connect()', function () {
-      var postData = $httpParamSerializer({ cnsi_guid: 'c1', username: 'username', password: 'password' });
-      $httpBackend.expectPOST('/pp/v1/auth/login/cnsi', postData).respond(200, '');
-      userServiceInstance.connect('c1', 'name', 'username', 'password');
-      $httpBackend.flush();
-    });
+    it('should not set `serviceInstances` on list() and info error', function () {
+      var data = [
+        { guid: 'c1', name: 'cluster1', url:' cluster1_url', token_expiry: (new Date()).getTime() + 36000 },
+        { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
+      ];
 
-    it('should POST correct data on disconnect()', function () {
-      $httpBackend.expectDELETE('/api/service-instances/user/1').respond(200, '');
-      userServiceInstance.disconnect(1);
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(403, {});
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, data);
+
+      userServiceInstance.list().then(function (response) {
+        expect(response).toEqual({});
+        expect(userServiceInstance.serviceInstances).toEqual({});
+        expect(userServiceInstance.numValid).toBe(0);
+      });
+
       $httpBackend.flush();
     });
 

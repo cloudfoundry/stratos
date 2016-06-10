@@ -24,6 +24,7 @@
    * @memberof cloud-foundry.model.application
    * @name Application
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {app.model.modelManager} modelManager - the Model management service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
@@ -72,6 +73,7 @@
      * @function usage
      * @memberof cloud-foundry.model.application
      * @description List the usage at the model layer
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - application guid
      * @param {object} options - options for url building
      * @returns {promise} A promise object
@@ -111,6 +113,7 @@
      * @function getAppSummary
      * @memberof cloud-foundry.model.application
      * @description get summary of an application at the model layer
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
      * @returns {promise} a promise object
      * @public
@@ -131,6 +134,7 @@
      * @function startApp
      * @memberof cloud-foundry.model.application
      * @description start an application
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
      * @returns {promise} a promise object
      * @public
@@ -167,6 +171,7 @@
      * @function stopApp
      * @memberof cloud-foundry.model.application
      * @description stop an application
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
      * @returns {promise} a promise object
      * @public
@@ -201,6 +206,7 @@
      * @function restartApp
      * @memberof cloud-foundry.model.application
      * @description restart an application
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
      * @public
      */
@@ -215,6 +221,7 @@
      * @function createApp
      * @memberof cloud-foundry.model.application
      * @description Create an application
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object} newAppSpec - values for the new Application
      * @returns {promise} A resolved/rejected promise
      * @public
@@ -237,12 +244,12 @@
      * @function update
      * @memberof cloud-foundry.model.application
      * @description Update an application
-     * @param {string} guid - Application identifier
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object} newAppSpec - values to update Application
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    update: function (cnsiGuid, newAppSpec) {
+    update: function (cnsiGuid, guid, newAppSpec) {
       var that = this;
       var config = {
         headers: { 'x-cnap-cnsi-list': cnsiGuid }
@@ -258,6 +265,7 @@
      * @function deleteApp
      * @memberof cloud-foundry.model.application
      * @description Detete an application
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - Application identifier
      * @returns {promise} A resolved/rejected promise
      * @public
@@ -274,6 +282,7 @@
      * @function getAppStats
      * @memberof cloud-foundry.model.application
      * @description Returns the stats for the STARTED app
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
      * @param {object} params - options for getting the stats of an app
      * @returns {promise} A resolved/rejected promise

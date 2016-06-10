@@ -41,6 +41,8 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {helion.framework.widgets.detailView} detailView - detail view service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {app.model.user} userModel - the user model

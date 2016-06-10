@@ -39,7 +39,7 @@
      * @function all
      * @memberof  cloud-foundry.model.service
      * @description List all services at the model layer
-     * @param {string} guid - service guid
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object} options - options for url building
      * @returns {promise} A promise object
      * @public

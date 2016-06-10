@@ -25,6 +25,7 @@
    * @namespace app.model.serviceInstance.user.UserServiceInstance
    * @memberof app.model.serviceInstance.user
    * @name app.model.serviceInstance.user.UserServiceInstance
+   * @param {object} $q - the Angular Promise service
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {object} serviceInstances - the service instances available to user
@@ -92,6 +93,7 @@
           var guids = _.map(items, 'guid') || [];
 
           that.serviceInstances = {};
+          that.numValid = 0;
 
           if (_.isEmpty(guids)) {
             deferred.resolve(that.serviceInstances);
