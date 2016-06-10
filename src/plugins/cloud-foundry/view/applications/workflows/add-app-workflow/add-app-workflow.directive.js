@@ -46,6 +46,7 @@
    * @property {object} organizationModel - the organization model
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
+   * @property {object} error - error map
    */
   function AddAppWorkflowController(modelManager, eventService, $scope, $q) {
     var that = this;
@@ -70,6 +71,7 @@
     });
 
     this.userInput = {};
+    this.errors = {};
 
     $scope.$watch(function () {
       return that.userInput.serviceInstance;
@@ -114,6 +116,7 @@
         imageRegistry: null,
         projectId: null
       };
+      this.errors = {};
 
       this.data.workflow = {
         allowJump: false,
@@ -126,7 +129,7 @@
           {
             title: gettext('Name'),
             templateUrl: path + 'name.html',
-            form: 'application-name-form',
+            formName: 'application-name-form',
             nextBtnText: gettext('Create and continue'),
             cancelBtnText: gettext('Cancel'),
             onNext: function () {
@@ -157,6 +160,7 @@
             ready: true,
             title: gettext('Select Source'),
             templateUrl: path + 'pipeline-subflow/select-source.html',
+            formName: 'application-source-form',
             nextBtnText: gettext('Next'),
             onNext: function () {
               // TODO (kdomico): Get or create fake HCE user until HCE API is complete
@@ -179,6 +183,7 @@
             ready: true,
             title: gettext('Select Repository'),
             templateUrl: path + 'pipeline-subflow/select-repository.html',
+            formName: 'application-repo-form',
             nextBtnText: gettext('Next'),
             onNext: function () {
               that.getPipelineDetailsData();
@@ -212,6 +217,7 @@
             ready: true,
             title: gettext('Pipeline Details'),
             templateUrl: path + 'pipeline-subflow/pipeline-details.html',
+            formName: 'application-pipeline-details-form',
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
               that.hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
@@ -237,12 +243,14 @@
             ready: true,
             title: gettext('Notifications'),
             templateUrl: path + 'pipeline-subflow/notifications.html',
+            formName: 'application-pipeline-notification-form',
             nextBtnText: gettext('Skip')
           },
           {
             ready: true,
             title: gettext('Deploy App'),
             templateUrl: path + 'pipeline-subflow/deploy.html',
+            formName: 'application-pipeline-deploy-form',
             nextBtnText: gettext('Finished code change'),
             isLastStep: true
           }
@@ -252,6 +260,7 @@
             ready: true,
             title: gettext('Deploy'),
             templateUrl: path + 'cli-subflow/deploy.html',
+            formName: 'application-cli-deploy-form',
             nextBtnText: gettext('Finished with code change'),
             isLastStep: true
           }
@@ -261,6 +270,7 @@
       this.options = {
         workflow: that.data.workflow,
         userInput: this.userInput,
+        errors: this.errors,
         subflow: 'pipeline',
         serviceInstances: [],
         // Adding the demo's service model to options.
