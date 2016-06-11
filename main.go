@@ -24,12 +24,13 @@ var (
 
 func main() {
 	log.SetOutput(os.Stdout)
-	// log.Println("Started Portal Proxy")
+
+	log.Println("Started Portal Proxy")
 
 	var portalConfig portalConfig
 	portalConfig, err := loadPortalConfig(portalConfig)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
@@ -37,7 +38,7 @@ func main() {
 	var databaseConfig datastore.DatabaseConfig
 	databaseConfig, err = loadDatabaseConfig(databaseConfig)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
@@ -45,22 +46,22 @@ func main() {
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 	defer databaseConnectionPool.Close()
 
-	// log.Println("Spinning up a new Portal Proxy")
+	log.Println("Spinning up a new Portal Proxy")
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool)
 
-	// log.Println("Initializing the HTTP client")
+	log.Println("Initializing the HTTP client")
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
 
-	// log.Printf("Starting the proxy on IP %s and port %d", portalConfig.TLSAddress, 80)
-	// log.Printf("%v", portalConfig)
+	log.Printf("Starting the proxy on IP %s and port %d", portalConfig.TLSAddress, 80)
+	log.Printf("%v", portalConfig)
 	if err := start(portalProxy); err != nil {
-		// log.Printf("Unable to start the proxy: %v", err)
+		log.Printf("Unable to start the proxy: %v", err)
 		os.Exit(1)
 	}
 }
