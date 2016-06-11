@@ -21,18 +21,18 @@
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="binding in manageServicesCtrl.serviceBindings">
-        <td>{{ manageServicesCtrl.serviceInstances[binding.entity.service_instance_guid].entity.name }}</td>
-        <td>{{ manageServicesCtrl.serviceInstances[binding.entity.service_instance_guid].servicePlan.entity.name }}</td>
+      <tr ng-repeat="instance in manageServicesCtrl.serviceInstances">
+        <td>{{ instance.name }}</td>
+        <td>{{ instance.service_plan.name }}</td>
         <td class="text-right">
           <button class="btn btn-link btn-sm"
-            ng-click="manageServicesCtrl.viewEnvVariables(binding)">
+            ng-click="manageServicesCtrl.viewEnvVariables(instance)">
             <i class="helion-icon helion-icon-2x helion-icon-Share"></i>
           </button>
         </td>
         <td class="text-right">
           <button class="btn btn-link btn-sm"
-            ng-click="manageServicesCtrl.detach(binding)" translate>Detach</button>
+            ng-click="manageServicesCtrl.detach(instance)" translate>Detach</button>
         </td>
       </tr>
     </tbody>

@@ -134,7 +134,7 @@
             nextBtnText: gettext('Create and continue'),
             cancelBtnText: gettext('Cancel'),
             onNext: function () {
-              that.createApp().then(function () {
+              return that.createApp().then(function () {
                 that.spaceModel.listAllServicesForSpace(
                   that.userInput.serviceInstance.guid,
                   that.userInput.space.metadata.guid
@@ -148,7 +148,10 @@
           {
             title: gettext('Services'),
             templateUrl: path + 'services.html',
-            nextBtnText: gettext('Next')
+            nextBtnText: gettext('Next'),
+            onNext: function () {
+              that.userInput.services = that.appModel.application.summary.services;
+            }
           },
           {
             title: gettext('Delivery'),

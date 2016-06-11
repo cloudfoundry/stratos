@@ -1,4 +1,8 @@
-<h1>Services</h1>
+<h4 class="step-title" translate>Select services</h4>
+
+<p ng-if="wizardCtrl.options.services.length === 0" translate>
+  No services were found. Please contact your administrator.
+</p>
 <ul class="media-list hpe-add-option-list">
   <li class="media service-panel"
     ng-repeat="service in wizardCtrl.options.services track by service.metadata.guid">

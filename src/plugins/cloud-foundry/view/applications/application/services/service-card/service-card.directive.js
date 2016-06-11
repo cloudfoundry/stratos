@@ -24,18 +24,18 @@
   }
 
   ServiceCardController.$inject = [
+    '$scope',
     'app.model.modelManager',
     'helion.framework.widgets.detailView'
   ];
 
-  function ServiceCardController(modelManager, detailView) {
+  function ServiceCardController($scope, modelManager, detailView) {
     var that = this;
     this.detailView = detailView;
-    this.model = modelManager.retrieve('cloud-foundry.model.service');
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.allowAddOnly = angular.isDefined(this.addOnly) ? this.addOnly : false;
+    this.serviceBindings = [];
     this.numAttached = 0;
     this.numAdded = 0;
     this.actions = [
@@ -59,30 +59,11 @@
       }
     ];
 
-    this.servicePlans = {};
-    this.serviceInstances = {};
-    this.serviceBindings = [];
-
-    // Get number of attached service instances to this app for this service
-    this.model.allServicePlans(this.cnsiGuid, this.service.metadata.guid)
-      .then(function (servicePlans) {
-        that.servicePlans = _.keyBy(servicePlans, guidMap);
-
-        var spaceGuid = that.app.summary.space_guid;
-        var guids = _.keys(that.servicePlans) || [];
-        var q = 'service_plan_guid IN ' + guids.join(',');
-
-        that.spaceModel.listAllServiceInstancesForSpace(that.cnsiGuid, spaceGuid, { q: q })
-          .then(function (serviceInstances) {
-            that.serviceInstances = _.keyBy(serviceInstances, guidMap);
-          });
-      });
-
-    this.init();
-  }
-
-  function guidMap(o) {
-    return o.metadata.guid;
+    $scope.$watch(function () {
+      return that.app.summary.services;
+    }, function () {
+      that.init();
+    });
   }
 
   angular.extend(ServiceCardController.prototype, {
@@ -90,8 +71,8 @@
       var that = this;
       var serviceInstances = _.chain(this.app.summary.services)
                               .filter(function (o) {
-                                        return o.service_plan.service.guid === that.service.metadata.guid;
-                                      })
+                                return o.service_plan.service.guid === that.service.metadata.guid;
+                              })
                               .map('guid')
                               .value();
       if (serviceInstances.length > 0) {
@@ -105,7 +86,8 @@
             that.updateActions();
           });
       } else {
-        that.updateActions();
+        this.serviceBindings.length = 0;
+        this.updateActions();
       }
     },
 
@@ -123,8 +105,8 @@
         confirm: !this.allowAddOnly
       };
       this.detailView(config, context).result
-        .then(function (newBinding) {
-          that.handleServiceWorkflowFinished(newBinding);
+        .then(function () {
+          that.numAdded++;
         });
     },
 
@@ -132,17 +114,13 @@
       var that = this;
       if (this.serviceBindings.length === 1) {
         this.bindingModel.deleteServiceBinding(this.cnsiGuid, this.serviceBindings[0].metadata.guid)
-          .then(function (response) {
-            if (response.data[that.cnsiGuid] === null) {
-              that.serviceBindings.length = 0;
-              that.updateActions();
-            }
+          .then(function () {
+            that.appModel.getAppSummary(that.cnsiGuid, that.app.summary.guid);
           });
       }
     },
 
     manageInstances: function () {
-      var that = this;
       var config = {
         controller: 'manageServicesController',
         controllerAs: 'manageServicesCtrl',
@@ -151,21 +129,9 @@
       var context = {
         cnsiGuid: this.cnsiGuid,
         app: this.app,
-        service: this.service,
-        servicePlans: this.servicePlans,
-        serviceInstances: this.serviceInstances,
-        serviceBindings: this.serviceBindings
+        service: this.service
       };
-      this.detailView(config, context).closed
-        .then(function () {
-          that.updateActions();
-        });
-    },
-
-    handleServiceWorkflowFinished: function (newBinding) {
-      this.serviceBindings.push(newBinding);
-      this.updateActions();
-      this.numAdded++;
+      this.detailView(config, context);
     },
 
     updateActions: function () {

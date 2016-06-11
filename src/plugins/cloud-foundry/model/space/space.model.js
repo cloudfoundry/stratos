@@ -57,7 +57,7 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object} params - extra params to pass to request
-     * @return {promise} A resolved/rejected promise
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     listAllServicesForSpace: function (cnsiGuid, guid, params) {
@@ -78,7 +78,7 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object} params - extra params to pass to request
-     * @return {promise} A resolved/rejected promise
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     listAllServiceInstancesForSpace: function (cnsiGuid, guid, params) {

@@ -16,12 +16,16 @@
    * @memberof cloud-foundry.view.applications
    * @name AddServiceWorkflowController
    * @constructor
+   * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {$uibModalInstance} $uibModalInstance - the modal instance
+   * @param {object} context - the detail view context/data
    */
   function AddServiceWorkflowController($q, modelManager, $uibModalInstance, context) {
     var that = this;
     this.$q = $q;
     this.$uibModalInstance = $uibModalInstance;
+    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
@@ -31,7 +35,6 @@
     this.service = context.service;
     this.app = context.app;
     this.confirm = context.confirm || false;
-    this.createNew = true;
     this.path = 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/';
 
     this.addServiceActions = {
@@ -54,17 +57,18 @@
       this.data = {};
 
       this.newBinding = null;
-      this.createNew = true;
       this.userInput = {
         name: null,
         plan: null,
         existingServiceInstance: null
       };
+      this.errors = {};
 
       this.data = {
         workflow: {
           allowJump: false,
           allowBack: false,
+          allowCancelAtLastStep: true,
           hideStepNavStack: true,
           btnText: {
             cancel: this.confirm ? gettext('Cancel') : gettext('Back to Services')
@@ -72,6 +76,7 @@
           steps: [
             {
               templateUrl: this.path + 'instance.html',
+              formName: 'addInstanceForm',
               nextBtnText: gettext('Add Service Instance'),
               onNext: function () {
                 return that.addService().then(function () {
@@ -97,18 +102,22 @@
 
       this.options = {
         userInput: this.userInput,
+        errors: this.errors,
         workflow: this.data.workflow,
         servicePlans: [],
         servicePlanMap: {},
         instances: [],
+        instanceNames: [],
         service: this.service,
+        isCreateNew: true,
         createNew: function (createNewInstance) {
-          that.createNew = createNewInstance;
+          that.options.isCreateNew = createNewInstance;
         },
         serviceInstance: null,
         servicePlan: null
       };
 
+      var boundInstances = _.keyBy(this.app.summary.services, 'guid');
       this.serviceModel.allServicePlans(this.cnsiGuid, this.service.metadata.guid)
         .then(function (servicePlans) {
           var plans = _.map(servicePlans, function (o) { return { label: o.entity.name, value: o }; });
@@ -122,11 +131,18 @@
           if (planGuids.length > 0) {
             var q = 'service_plan_guid IN ' + planGuids.join(',');
 
-            that.spaceModel.listAllServiceInstancesForSpace(that.cnsiGuid, that.spaceGuid, { q: q })
+            that.spaceModel.listAllServiceInstancesForSpace(that.cnsiGuid, that.spaceGuid, { q: q, 'inline-relations-depth': 2 })
               .then(function (serviceInstances) {
-                var instances = _.sortBy(serviceInstances, function (o) { return o.entity.name; });
+                var instances = _.chain(serviceInstances)
+                                 .filter(function (o) { return !boundInstances[o.metadata.guid]; })
+                                 .sortBy(function (o) { return o.entity.name; })
+                                 .value();
                 that.options.instances.length = 0;
                 [].push.apply(that.options.instances, instances);
+
+                var instanceNames = _.map(instances, function (o) { return o.entity.name; });
+                that.options.instanceNames.length = 0;
+                [].push.apply(that.options.instanceNames, instanceNames);
               });
           }
         });
@@ -136,7 +152,7 @@
       var that = this;
       var deferred = this.$q.defer();
 
-      if (this.createNew) {
+      if (this.options.isCreateNew) {
         var newInstance = {
           name: this.options.userInput.name,
           service_plan_guid: this.options.userInput.plan.metadata.guid,
@@ -172,6 +188,7 @@
       return this.bindingModel.createServiceBinding(this.cnsiGuid, bindingSpec)
         .then(function (newBinding) {
           if (angular.isDefined(newBinding.metadata)) {
+            that.appModel.getAppSummary(that.cnsiGuid, that.app.summary.guid);
             that.newBinding = newBinding;
           }
         });
@@ -186,11 +203,11 @@
       if (!this.confirm) {
         this.addService().then(function () {
           that.addBinding().then(function () {
-            that.$uibModalInstance.close(that.newBinding);
+            that.$uibModalInstance.close();
           });
         });
       } else {
-        this.$uibModalInstance.close(that.newBinding);
+        this.$uibModalInstance.close();
       }
     }
   });

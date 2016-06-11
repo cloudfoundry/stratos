@@ -3,3 +3,9 @@
 .media-list.hpe-add-option-list > .media.service-panel {
   padding: $hpe-unit-space 0;
 }
+
+add-app-workflow {
+  .flyout-content {
+    z-index: 1040;
+  }
+}
