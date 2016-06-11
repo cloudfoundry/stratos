@@ -35,6 +35,7 @@ func (p *portalProxy) handleGitHubAuth(c echo.Context) error {
 
 	url := oauthConf.AuthCodeURL(oauthStateString, oauth2.AccessTypeOnline)
 
+	// TODO (wchrisjohnson) SECURITY RISK - remove this log statement once running
 	log.Printf("OAuth url: %s", url)
 
 	return c.Redirect(302, url)
