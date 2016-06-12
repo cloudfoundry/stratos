@@ -46,7 +46,6 @@
    * @property {object} organizationModel - the organization model
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
-   * @property {object} error - error map
    */
   function AddAppWorkflowController(modelManager, eventService, $scope, $q) {
     var that = this;
@@ -71,7 +70,6 @@
     });
 
     this.userInput = {};
-    this.errors = {};
 
     $scope.$watch(function () {
       return that.userInput.serviceInstance;
@@ -116,7 +114,6 @@
         imageRegistry: null,
         projectId: null
       };
-      this.errors = {};
 
       this.data.workflow = {
         allowJump: false,
@@ -271,6 +268,8 @@
         workflow: that.data.workflow,
         userInput: this.userInput,
         errors: this.errors,
+        appNames: [],
+        routeNames: [],
         subflow: 'pipeline',
         serviceInstances: [],
         // Adding the demo's service model to options.
@@ -543,6 +542,25 @@
       var that = this;
       this.addingApplication = true;
       this.reset();
+
+      var updateApps = this.appModel.all();
+      updateApps.then(function () {
+        angular.forEach(that.appModel.data.applications, function (cnsiApps) {
+          [].push.apply(that.options.appNames, _.map(cnsiApps.resources, function (app) {
+            return app.entity.name;
+          }));
+        });
+      });
+
+      var updateRoutes = this.routeModel.listAllRoutes({});
+      updateRoutes.then(function (data) {
+        angular.forEach(data, function (cnsiRoute) {
+          [].push.apply(that.options.routeNames, _.map(cnsiRoute.resources, function (route) {
+            return route.entity.host;
+          }));
+        });
+      });
+
       this.getHceInstances();
       this.serviceInstanceModel.list()
         .then(function (serviceInstances) {

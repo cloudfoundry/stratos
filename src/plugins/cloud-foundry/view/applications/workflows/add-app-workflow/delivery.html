@@ -34,7 +34,7 @@
   </li>
 </ul>
 
-<form ng-if="wizardCtrl.options.subflow === 'pipeline'">
+<div ng-if="wizardCtrl.options.subflow === 'pipeline'">
   <div class="form-group">
     <label class="control-label" translate>HCE Cluster</label>
     <select-input
@@ -45,4 +45,4 @@
       tabindex="0" required>
     </select-input>
   </div>
-</form>
+</div>

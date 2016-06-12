@@ -4,82 +4,108 @@
   Create a unique name for your application. The name you create will be reserved even if you exit.
 </p>
 
-<form>
-  <div class="form-group form-group-large"
-    ng-class="{'has-error' : wizardCtrl.options.errors.dupAppName}"
-    focusable-input>
-    <label class="control-label"
-      for="add-app-workflow-application-name" required translate>
-      Application name
-    </label>
-    <span class="control-message" translate>
+<div class="form-group form-group-large"
+  ng-class="{'has-error': wizardForm['application-name-form'].appName.$invalid && wizardForm['application-name-form'].appName.$dirty}"
+  focusable-input>
+  <label class="control-label"
+    for="add-app-workflow-application-name" required translate>
+    Application name
+  </label>
+  <span class="control-message" >
+    <span
+      translate
+      ng-if="!wizardForm['application-name-form'].appName.$viewValue">
+      Application name is required
+    </span>
+    <span
+      translate
+      ng-if="wizardForm['application-name-form'].appName.$viewValue">
       This name already exists. Choose a new one.
     </span>
-    <input ng-model="wizardCtrl.options.userInput.name" type="text" class="form-control"
-      id="add-app-workflow-application-name" required autofocus>
-  </div>
+  </span>
+  <input
+    ng-model="wizardCtrl.options.userInput.name"
+    type="text" class="form-control"
+    id="add-app-workflow-application-name"
+    name="appName"
+    helion-unique items="wizardCtrl.options.appNames"
+    required
+    autofocus/>
+</div>
 
-  <p class="control-label" translate><br>Select deploy location</p>
+<p class="control-label" translate><br>Select deploy location</p>
 
-  <div class="form-group form-group-large">
-    <label class="control-label" required translate>Cluster</label>
-    <select-input
-      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-      ng-model="wizardCtrl.options.userInput.serviceInstance"
-      input-options="wizardCtrl.options.serviceInstances"
-      placeholder="{{'Select Cluster' | translate}}"
-      tabindex="0" required>
-    </select-input>
-  </div>
+<div class="form-group form-group-large">
+  <label class="control-label" required translate>Cluster</label>
+  <select-input
+    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+    ng-model="wizardCtrl.options.userInput.serviceInstance"
+    input-options="wizardCtrl.options.serviceInstances"
+    placeholder="{{'Select Cluster' | translate}}"
+    tabindex="0" required>
+  </select-input>
+</div>
 
-  <div class="form-group form-group-large">
-    <label class="control-label" required translate>Organization</label>
-    <select-input
-      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-      ng-model="wizardCtrl.options.userInput.organization"
-      input-options="wizardCtrl.options.organizations"
-      placeholder="{{'Select Organization' | translate}}"
-      tabindex="0" required>
-    </select-input>
-  </div>
+<div class="form-group form-group-large">
+  <label class="control-label" required translate>Organization</label>
+  <select-input
+    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+    ng-model="wizardCtrl.options.userInput.organization"
+    input-options="wizardCtrl.options.organizations"
+    placeholder="{{'Select Organization' | translate}}"
+    tabindex="0" required>
+  </select-input>
+</div>
 
+<div class="form-group form-group-large">
+  <label class="control-label" required translate>Space</label>
+  <select-input
+    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+    ng-model="wizardCtrl.options.userInput.space"
+    input-options="wizardCtrl.options.spaces"
+    placeholder="{{'Select Space' | translate}}"
+    tabindex="0" required>
+  </select-input>
+</div>
 
-  <div class="form-group form-group-large">
-    <label class="control-label" required translate>Space</label>
-    <select-input
-      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-      ng-model="wizardCtrl.options.userInput.space"
-      input-options="wizardCtrl.options.spaces"
-      placeholder="{{'Select Space' | translate}}"
-      tabindex="0" required>
-    </select-input>
-  </div>
+<p class="control-label" translate><br>Create a route</p>
 
-  <p class="control-label" translate><br>Create a route</p>
-
-  <div class="form-group form-group-large"
-    ng-class="{'has-error' : wizardCtrl.options.errors.dupRouteName}"
-    focusable-input>
-    <label class="control-label"
-      for="add-app-workflow-application-name" required translate>
-      Host
-    </label>
-    <span class="control-message" translate>
+<div class="form-group form-group-large"
+  ng-class="{'has-error' : wizardForm['application-name-form'].routeName.$invalid && wizardForm['application-name-form'].routeName.$dirty}"
+  focusable-input>
+  <label class="control-label"
+    for="add-app-workflow-application-name" required translate>
+    Host
+  </label>
+  <span class="control-message">
+    <span
+      translate
+      ng-if="!wizardForm['application-name-form'].routeName.$viewValue">
+      Route name is required
+    </span>
+    <span
+      translate
+      ng-if="wizardForm['application-name-form'].routeName.$viewValue">
       A route with this name already exists. Choose a new one.
     </span>
-    <input ng-model="wizardCtrl.options.userInput.host" type="text" class="form-control"
-      id="add-app-workflow-application-host" required>
-  </div>
+  </span>
+  <input
+    ng-model="wizardCtrl.options.userInput.host"
+    type="text" class="form-control"
+    id="add-app-workflow-application-host"
+    name="routeName"
+    helion-unique items="wizardCtrl.options.routeNames"
+    required>
+</div>
 
-  <div class="form-group form-group-large">
-    <label class="control-label" required translate>Domain</label>
-    <select-input
-      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-      ng-model="wizardCtrl.options.userInput.domain"
-      input-options="wizardCtrl.options.domains"
-      placeholder="{{'Select Domain' | translate}}"
-      tabindex="0" required>
-    </select-input>
-  </div>
+<div class="form-group form-group-large">
+  <label class="control-label" required translate>Domain</label>
+  <select-input
+    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+    ng-model="wizardCtrl.options.userInput.domain"
+    input-options="wizardCtrl.options.domains"
+    placeholder="{{'Select Domain' | translate}}"
+    tabindex="0" required>
+  </select-input>
+</div>
 
-</form>
