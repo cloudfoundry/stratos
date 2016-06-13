@@ -1,1 +1,57 @@
-<h3 translate>Variables</h3>
+<div ng-if="!applicationVariablesCtrl.fetchError && applicationVariablesCtrl.isFetching" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="!applicationVariablesCtrl.fetchError && !applicationVariablesCtrl.isFetching">
+  <div class="action-header">
+    <span translate>Variables</span>
+    <!--
+    <a class="btn btn-link">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Add variable</span>
+    </a>
+    -->
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-body"
+         ng-if="!applicationVariablesCtrl.hasVariables()" translate>
+      You have no variables.
+    </div>
+    <table class="table table-actionable"
+           ng-if="applicationVariablesCtrl.hasVariables()" >
+      <thead>
+      <tr>
+        <th class="sort-column" translate>Name</th>
+        <th translate>Value</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="name in applicationVariablesCtrl.variableNames">
+        <td>{{ name }}</td>
+        <td>{{ applicationVariablesCtrl.model.application.variables.environment_json[name] }}</td>
+        <td></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="panel panel-default summary" ng-if="!applicationVariablesCtrl.isFetching">
+  <div class="panel-heading action-header">
+    <span translate>Variables</span>
+    <a class="btn btn-link" ng-click="applicationVariablesCtrl.refreshVariables()">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Refresh</span>
+    </a>
+  </div>
+  <div ng-if="applicationVariablesCtrl.fetchError" class="alert alert-danger">
+    <div translate>An error occurred retrieving application variables</div>
+  </div>
+  <div class="app-variables" ng-if="!applicationVariablesCtrl.fetchError">
+    <div ng-repeat="(sname, svars) in applicationVariablesCtrl.model.application.variables">
+      <div ng-repeat="(name, vars) in svars" class="app-variable">
+        <div>{{name}}=<span ng-if="!applicationVariablesCtrl.isObject(vars)">{{vars}}</span></div>
+        <pre ng-if="applicationVariablesCtrl.isObject(vars)">{{vars | prettyJson}}</pre>
+      </div>
+    </div>
+  </div>
+</div>

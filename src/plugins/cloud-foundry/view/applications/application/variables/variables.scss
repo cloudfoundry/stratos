@@ -1,0 +1,18 @@
+.app-variables {
+  padding: $hpe-unit-space;
+  background-color: $hpe-primary-fg;
+  color: $white;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+
+  .app-variable {
+    pre {
+      background-color: inherit;
+      color: inherit;
+      font-size: inherit;
+      border: 0;
+      padding: 0;
+      line-height: inherit;
+      margin: 0;
+    }
+  }
+}
