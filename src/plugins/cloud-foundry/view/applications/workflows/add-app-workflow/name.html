@@ -70,6 +70,17 @@
 
 <p class="control-label" translate><br>Create a route</p>
 
+<div class="form-group form-group-large">
+  <label class="control-label" required translate>Domain</label>
+  <select-input
+    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+    ng-model="wizardCtrl.options.userInput.domain"
+    input-options="wizardCtrl.options.domains"
+    placeholder="{{'Select Domain' | translate}}"
+    tabindex="0" required>
+  </select-input>
+</div>
+
 <div class="form-group form-group-large"
   ng-class="{'has-error' : wizardForm['application-name-form'].routeName.$invalid && wizardForm['application-name-form'].routeName.$dirty}"
   focusable-input>
@@ -97,15 +108,3 @@
     helion-unique items="wizardCtrl.options.routeNames"
     required>
 </div>
-
-<div class="form-group form-group-large">
-  <label class="control-label" required translate>Domain</label>
-  <select-input
-    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-    ng-model="wizardCtrl.options.userInput.domain"
-    input-options="wizardCtrl.options.domains"
-    placeholder="{{'Select Domain' | translate}}"
-    tabindex="0" required>
-  </select-input>
-</div>
-
