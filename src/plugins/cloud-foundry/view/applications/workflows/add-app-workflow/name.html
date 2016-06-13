@@ -106,6 +106,7 @@
     id="add-app-workflow-application-host"
     name="routeName"
     helion-unique items="wizardCtrl.options.routeNames"
+    ng-disabled="!wizardCtrl.options.userInput.domain"
     required>
 </div>
 
@@ -118,6 +119,7 @@
     ng-model="wizardCtrl.options.userInput.path"
     type="text" class="form-control"
     id="add-app-workflow-application-path"
+    ng-disabled="!wizardCtrl.options.userInput.domain"
     name="path">
 </div>
 
@@ -130,5 +132,6 @@
     ng-model="wizardCtrl.options.userInput.port"
     type="text" class="form-control"
     id="add-app-workflow-application-port"
+    ng-disabled="!wizardCtrl.options.userInput.domain"
     name="port">
 </div>
