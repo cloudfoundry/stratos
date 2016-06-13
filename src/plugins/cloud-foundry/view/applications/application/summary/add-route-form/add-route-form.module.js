@@ -30,7 +30,6 @@
 
   AddRouteController.$inject = [
     '$stateParams',
-    'app.api.apiManager',
     'app.model.modelManager'
 
   ];
@@ -41,12 +40,10 @@
    * @name AddRouteController
    * @constructor
    * @param {Object} $stateParams - the UI router $stateParams service
-   * @param {app.api.apiManager} apiManager - the application api manager
    * @param {app.api.modelManager} modelManager - the application model manager
    */
-  function AddRouteController($stateParams, apiManager, modelManager) {
+  function AddRouteController($stateParams, modelManager) {
 
-    console.log(arguments)
     this.addRouteError = false;
     this.applicationId = $stateParams.guid;
     this.cnsiGuid = $stateParams.cnsiGuid;
