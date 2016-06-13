@@ -31,8 +31,8 @@ func (p *portalProxy) handleGitHubAuth(c echo.Context) error {
 			Endpoint:     github.Endpoint,
 		}
 
-		// TODO (wchrisjohnson): Change this to something purely and significantly
-		// random and stuff it in the user's session.
+		// TODO (wchrisjohnson): TEAMFOUR-561 - Change this to something purely and
+		// significantly random and stuff it in the user's session.
 
 		// AArondL: This is a configuration parameter that appears to be passed in.
 		// This means it's anything but random. The idea behind a nonce like this is
@@ -44,15 +44,15 @@ func (p *portalProxy) handleGitHubAuth(c echo.Context) error {
 		oauthStateString = p.Config.GitHubOAuthState
 	)
 
-	// TODO (wchrisjohnson): SECURITY RISK - remove this log statement once running
+	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
 	log.Printf("oauthConf: %v", oauthConf)
 
-	// TODO (wchrisjohnson): SECURITY RISK - remove this log statement once running
+	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
 	log.Printf("oauthStateString: %s", oauthStateString)
 
 	url := oauthConf.AuthCodeURL(oauthStateString, oauth2.AccessTypeOnline)
 
-	// TODO (wchrisjohnson): SECURITY RISK - remove this log statement once running
+	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
 	log.Printf("OAuth url: %s", url)
 
 	return c.Redirect(302, url)
@@ -72,8 +72,8 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 			Endpoint:     github.Endpoint,
 		}
 
-		// TODO (wchrisjohnson): Change this to something purely and significantly
-		// random and stuff it in the user's session.
+		// TODO (wchrisjohnson): TEAMFOUR-561 - Change this to something purely and
+		// significantly random and stuff it in the user's session.
 
 		// AArondL: This is a configuration parameter that appears to be passed in.
 		// This means it's anything but random. The idea behind a nonce like this is
@@ -85,7 +85,7 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 		oauthStateString = p.Config.GitHubOAuthState
 	)
 
-	// TODO (wchrisjohnson): Change this to a template and put in a file.
+	// TODO (wchrisjohnson): TEAMFOUR-561 - Change this to a template and put in a file.
 	var successHTML = `
     <!doctype html>
     <html>
@@ -111,7 +111,7 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 		return c.HTML(http.StatusBadRequest, msg)
 	}
 
-	// TODO (wchrisjohnson): SECURITY RISK - remove this log statement once running
+	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
 	log.Printf("Got state: %s", state)
 
 	code := c.FormValue("code")
@@ -122,7 +122,7 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 		return c.HTML(http.StatusBadRequest, msg)
 	}
 
-	// TODO (wchrisjohnson): SECURITY RISK - remove this log statement once running
+	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
 	log.Printf("Got token: %+v\n", token)
 
 	// JSON Stringify the token
@@ -133,7 +133,7 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 		return c.HTML(http.StatusInternalServerError, msg)
 	}
 
-	// TODO (wchrisjohnson): Convert to a template
+	// TODO (wchrisjohnson): TEAMFOUR-561 - Convert to a template
 
 	// This is an entry point for an XSS attack because you have no logic to
 	// escape the token at all. Printf should never be used for HTML templating
