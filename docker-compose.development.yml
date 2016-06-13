@@ -1,29 +1,33 @@
-# The development docker-compose file.
+version: '2'
+services:
 
-postgres:
-  extends:
-    file: common.yml
-    service: postgres
-
-
-proxy:
-  extends:
-    file: common.yml
-    service: proxy
-  links:
-    - postgres:postgres
+  # The development docker-compose file.
+  # Use this to have things like "gulp watch" running in the UI.
 
 
-nginx:
-  extends:
-    file: common.yml
-    service: nginx
-  links:
-    - proxy:proxy
+  postgres:
+    extends:
+      file: common.yml
+      service: postgres
 
 
-ui:
-  extends:
-    file: common.yml
-    service: ui
-  dockerfile: Dockerfile
+  proxy:
+    extends:
+      file: common.yml
+      service: proxy
+    links:
+      - postgres:postgres
+
+
+  nginx:
+    extends:
+      file: common.yml
+      service: nginx
+    links:
+      - proxy:proxy
+
+
+  ui:
+    extends:
+      file: common.yml
+      service: ui
