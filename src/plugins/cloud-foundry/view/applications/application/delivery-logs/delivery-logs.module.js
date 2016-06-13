@@ -102,6 +102,7 @@
 
     promise
       .then(function (project) {
+        that.project = project;
         that.hasProject = !(angular.isUndefined(project) || project === null);
         if (that.hasProject) {
           that.updateData();
@@ -141,9 +142,18 @@
     },
 
     triggerBuild: function() {
-      /* eslint-disable */
-      alert('TODO: trigger build');
-      /* eslint-enable */
+      var that = this;
+
+      this.detailView({
+        templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/trigger-build/trigger-build.html',
+        title: gettext('Select a Commit'),
+        controller: 'triggerBuildsDetailViewController'
+      }, {
+        guid: that.hceCnsi.guid,
+        project: that.project
+      }).result.then(function() {
+        that.updateData();
+      });
     },
 
     viewExecution: function(execution) {

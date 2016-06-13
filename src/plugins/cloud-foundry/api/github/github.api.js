@@ -120,7 +120,7 @@
     * @returns {promise}
     * @public
     */
-    commits: function (repo) {
+    commits: function (repo, params) {
       var url = this.githubApiUrl + 'repos/' + repo + '/commits';
       var config = {
         params: params || {},
@@ -129,7 +129,6 @@
           Authorization: 'token ' + this.token.access_token
         }
       };
-
       return this.$http.get(url, config);
     }
   });

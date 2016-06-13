@@ -1,0 +1,41 @@
+<div class="delivery-log-trigger-build">
+  <div ng-if="!detailViewCtrl.hasToken">
+    <github-authentication></github-authentication>
+    <a class="btn btn-primary" ng-click="detailViewCtrl.update()" translate>Refresh</a>
+  </div>
+  <div ng-if="detailViewCtrl.hasToken" class="delivery-log-trigger-build-has-token">
+    <div ng-if="detailViewCtrl.githubModel.data.commits.length < 1" class="delivery-log-trigger-build-no-commits">
+      <span translate>No commits found</span>
+    </div>
+    <div ng-if="detailViewCtrl.githubModel.data.commits.length > 0" class="delivery-log-trigger-build-commits">
+      <table class="table table-outlined">
+        <thead>
+        <tr>
+          <th translate></th>
+          <th translate>COMMIT MESSAGE</th>
+          <th translate>COMMIT USER</th>
+          <th translate>COMMIT SHA</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="commit in detailViewCtrl.githubModel.data.commits">
+          <td><radio-input ng-model="detailViewCtrl.selectedCommit" input-value="commit"></radio-input></td>
+          <td>{{ commit.commit.message }}</td>
+          <td>{{ commit.author.login }}</td>
+          <td>{{ commit.sha | limitTo:8}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="delivery-log-trigger-build-buttons pull-right">
+      <button type="button" class="btn btn-default cancel" ng-click="$dismiss()">
+        CANCEL
+      </button>
+      <button type="button" class="btn btn-primary next" ng-click="detailViewCtrl.build()"
+        ng-disabled="!detailViewCtrl.selectedCommit"
+        ng-if="detailViewCtrl.githubModel.data.commits.length > 0">
+        START BUILD
+      </button>
+    </div>
+  </div>
+</div>

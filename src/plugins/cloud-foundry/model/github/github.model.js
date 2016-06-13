@@ -40,7 +40,7 @@
   angular.extend(GithubModel.prototype, {
 
     getToken: function () {
-      return this.apiManager.retrieve('cloud-foundry.api.github').token.access_token;
+      return _.get(this.apiManager.retrieve('cloud-foundry.api.github'), 'token.access_token');
     },
 
     /**
@@ -99,14 +99,22 @@
      * @memberof cloud-foundry.model.github.GithubModel
      * @description Get commits for a branch
      * @param {string} repo - the repo to get commits for
-     * @param {string} branch - the branch to get commits for
+     * @param {string} branch - the branch to get commits for (optional - default matches git's default branch)
+     * @param {number} quantity - the number of commits to return (optional - defaults to github api's per_page)
      * @returns {promise} A promise object
      * @public
      */
-    commits: function (repo, branch) {
+    commits: function (repo, branch, quantity) {
       var that = this;
+      var params = {};
+      if (angular.isDefined(branch)) {
+        params.sha = branch;
+      }
+      if (angular.isDefined(quantity)) {
+        params.per_page = quantity;
+      }
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
-      return githubApi.commits(repo, branch)
+      return githubApi.commits(repo, params)
         .then(function (response) {
           that.onCommits(response);
         }, function () {
