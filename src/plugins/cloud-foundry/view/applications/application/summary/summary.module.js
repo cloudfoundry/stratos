@@ -1,4 +1,4 @@
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -50,6 +50,24 @@
       var url = angular.isDefined(buildpack) && buildpack !== null ? buildpack : '';
       url = url.trim().toLowerCase();
       return url.indexOf('http://') === 0 || url.indexOf('https://') === 0;
+    },
+
+    /**
+     * @function showAddRouteForm
+     * @description Show Add a Route form
+     * @public
+     **/
+    showAddRouteForm: function() {
+      this.addRouteFlyoutActive = true;
+
+    },
+    /**
+     * @function hideAddRouteForm
+     * @description Hide Add a Route form
+     * @public
+     **/
+    hideAddRouteForm: function() {
+      this.addRouteFlyoutActive = false;
     }
   });
 

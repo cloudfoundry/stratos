@@ -98,8 +98,8 @@
 <div>
   <div class="action-header">
     <span translate>Routes</span>
-    <a class="btn btn-link">
-      <i class="helion-icon helion-icon-Right_Arrow"></i>
+    <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()">
+      <i class="helion-icon helion-icon-Right_Arrow" ></i>
       <span translate>Add routes</span>
     </a>
   </div>
@@ -124,6 +124,12 @@
       </tbody>
     </table>
   </div>
+  <flyout flyout-active="applicationSummaryCtrl.addRouteFlyoutActive"
+          flyout-close-icon="'helion-icon helion-icon-Close'">
+    <add-route-form on-cancel="applicationSummaryCtrl.hideAddRouteForm()"
+                      on-submit="applicationSummaryCtrl.hideAddRouteForm()">
+    </add-route-form>
+  </flyout>
 </div>
 
 <div>
