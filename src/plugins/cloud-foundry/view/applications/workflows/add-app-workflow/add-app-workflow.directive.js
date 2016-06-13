@@ -24,6 +24,7 @@
   AddAppWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
+    'github.view.githubOauthService',
     '$scope',
     '$q'
   ];
@@ -47,13 +48,14 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function AddAppWorkflowController(modelManager, eventService, $scope, $q) {
+  function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q) {
     var that = this;
 
     this.$scope = $scope;
     this.$q = $q;
     this.addingApplication = false;
     this.eventService = eventService;
+    this.githubOauthService = githubOauthService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -160,18 +162,30 @@
             formName: 'application-source-form',
             nextBtnText: gettext('Next'),
             onNext: function () {
-              // TODO (kdomico): Get or create fake HCE user until HCE API is complete
-              that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
-                .then(angular.noop, function (response) {
-                  if (response.status === 404) {
-                    that.hceModel.createUser(that.userInput.hceCnsi.guid, '123456', 'login', 'token');
-                  }
-                });
+              try {
+                 // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+                 that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
+                  .then(angular.noop, function (response) {
+                    if (response.status === 404) {
+                      that.hceModel.createUser(that.userInput.hceCnsi.guid, '123456', 'login', 'token');
+                    }
+                  });
+              } catch (err) {}
 
-              return that.githubModel.repos()
+              var oauth;
+              if (that.userInput.source === 'github') {
+                oauth = that.githubOauthService.start();
+              } else {
+                oauth = $q.defer().resolve();
+                oauth = oauth.promise;
+              }
+
+              return oauth
                 .then(function () {
-                  var repos = _.filter(that.githubModel.data.repos,
-                                       function (o) { return o.permissions.admin; });
+                  return that.githubModel.repos();
+                })
+                .then(function () {
+                  var repos = _.filter(that.githubModel.data.repos || [], function (o) { return o.permissions.admin; });
                   [].push.apply(that.options.repos, repos);
                 });
             }
