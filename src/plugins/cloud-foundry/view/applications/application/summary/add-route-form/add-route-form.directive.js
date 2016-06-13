@@ -5,10 +5,6 @@
     .module('cloud-foundry.view.applications.application.summary')
     .directive('addRouteForm', addRouteForm);
 
-  addRouteForm.$inject = [
-    'app.basePath'
-  ];
-
   /**
    * @namespace cloud-foundry.view.applications.application.summary.addRouteForm
    * @memberof cloud-foundry.view.applications.application.summary
@@ -67,7 +63,7 @@
   }
 
   function isUndefinedOrNull(val) {
-    return angular.isUndefined(val) || val === null
+    return angular.isUndefined(val) || val === null;
   }
 
   angular.extend(AddRouteController.prototype, {
@@ -96,9 +92,7 @@
       }
       this.routeModel.createRoute(this.cnsiGuid, data)
         .then(function(response) {
-          console.log('Created route: ' + JSON.stringify(response));
           var routeId = response.metadata.guid;
-          // var routeId = response.data[that.cnsiGuid].metadata.guid;
           return that.routeModel.associateAppWithRoute(that.cnsiGuid, routeId, that.applicationId);
       }).then(function() {
         // Update application summary model
