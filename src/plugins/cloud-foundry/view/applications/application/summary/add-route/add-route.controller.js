@@ -14,10 +14,13 @@
   ];
 
   /**
-   * @name EventDetailViewController
+   * @name AddRouteController
    * @constructor
+   * @param {Object} context
+   * @param {Object} content
    * @param {Object} $stateParams - the UI router $stateParams service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {Object} $uibModalInstance
    */
   function AddRouteController(context, content, $stateParams, modelManager, $uibModalInstance) {
     var vm = this;
