@@ -267,6 +267,15 @@
         },
         {
           "name": "COOKIE_STORE_SECRET"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_ID"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_SECRET"
+        },
+        {
+          "name": "GITHUB_OAUTH_STATE"
         }
       ]
     },
@@ -721,8 +730,8 @@
         "secret": false
     },
     {
-        "name": "GITHUB_OAUTH_REDIRECT_URL",
-        "description": "GitHub redirect url for OAuth",
+        "name": "GITHUB_OAUTH_STATE",
+        "description": "GitHub random state string for OAuth",
         "default": "",
         "example": "",
         "data_type": "string",

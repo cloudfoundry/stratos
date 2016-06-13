@@ -149,10 +149,6 @@
       "value": "./InitialSchema.sql"
     },
     {
-      "name": "GITHUB_ACCESS_TOKEN",
-      "value": "__REPLACE_WITH_TOKEN__"
-    },
-    {
       "name": "GITHUB_OAUTH_CLIENT_ID",
       "value": "__REPLACE__"
     },
@@ -161,7 +157,7 @@
       "value": "__REPLACE__"
     },
     {
-      "name": "GITHUB_OAUTH_REDIRECT_URL",
+      "name": "GITHUB_OAUTH_STATE",
       "value": "__REPLACE__"
     }
   ]
