@@ -121,7 +121,7 @@ func newPortalProxy(pc portalConfig, dcp *sql.DB) *portalProxy {
 }
 
 func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Duration) {
-	tr := &http.Transport{}
+	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
 	if skipCertVerification {
 		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
