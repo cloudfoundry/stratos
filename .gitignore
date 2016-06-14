@@ -6,6 +6,8 @@ dist
 docs/src
 lib
 src/index.scss
+src/plugins/.plugins.scss
+tools/.coverage-karma/
 tools/dev_config.json
 translations/js
 translations/**/*.mo
