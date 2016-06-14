@@ -70,6 +70,17 @@
 
     /**
      * @function hasVariables
+     * @description Prettify object to JSON
+     * @param {object} v - variable
+     * @returns {string} Pretty-fied json repersentation
+     * @public
+     **/
+    prettyJson: function(v) {
+      return angular.toJson(v, true);
+    },
+
+    /**
+     * @function hasVariables
      * @description Determine if application has variables
      * @returns {boolean} Indicating if the application has variables
      * @public

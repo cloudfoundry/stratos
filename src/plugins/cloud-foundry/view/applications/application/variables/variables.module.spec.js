@@ -32,7 +32,12 @@
       expect($controller.isObject(123)).toBe(false);
       expect($controller.isObject({name: true})).toBe(true);
       expect($controller.isObject(['name'])).toBe(true);
-    })
+    });
+
+    it("pretty json checks", function () {
+      var obj = { name: 'value' };
+      expect($controller.prettyJson(obj)).toBe(JSON.stringify(obj, null, 2));
+    });
 
     describe("no variables checks", function () {
       beforeEach(inject(function ($injector) {
