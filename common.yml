@@ -72,7 +72,7 @@ api:
 
 proxy:
   build: $GOPATH/src/github.com/hpcloud/portal-proxy
-  dockerfile: server.Dockerfile
+  dockerfile: Dockerfile.server
   ports:
     - "3003:3003"
   env_file:
