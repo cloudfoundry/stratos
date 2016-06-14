@@ -1,0 +1,53 @@
+hash: 21820434709470e49c64df0f854d3352088ca664d193e29bc6cd434518c27a7c
+updated: 2016-06-11T08:07:31.375646661-07:00
+imports:
+- name: github.com/davecgh/go-spew
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  subpackages:
+  - spew
+- name: github.com/dgrijalva/jwt-go
+  version: c04502f106d7c5b3fae17c5da49a1bbdd3006b3c
+- name: github.com/klauspost/compress
+  version: 14eb9c4951195779ecfbec34431a976de7335b0a
+  subpackages:
+  - flate
+  - gzip
+  - zlib
+- name: github.com/klauspost/cpuid
+  version: 09cded8978dc9e80714c4d85b0322337b0a1e5e0
+- name: github.com/klauspost/crc32
+  version: 19b0b332c9e4516a6370a0456e6182c3b5036720
+- name: github.com/labstack/gommon
+  version: 722aa12d41c236ce78ff48eac1cafe0107ecdc9d
+  subpackages:
+  - color
+  - log
+  - bytes
+- name: github.com/mattn/go-colorable
+  version: 9056b7a9f2d1f2d96498d6d146acd1f9d5ed3d59
+- name: github.com/mattn/go-isatty
+  version: 56b76bdf51f7708750eac80fa38b952bb9f32639
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 8d64eb7173c7753d6419fd4a9caf057398611364
+  subpackages:
+  - assert
+- name: github.com/valyala/fasthttp
+  version: 8db7d05839b5f4d21d5da1fcb3897d294ff6fd9f
+  subpackages:
+  - fasthttputil
+- name: github.com/valyala/fasttemplate
+  version: 3b874956e03f1636d171bda64b130f9135f42cff
+- name: golang.org/x/net
+  version: 3f122ce3dbbe488b7e6a8bdb26f41edec852a40b
+  subpackages:
+  - context
+  - websocket
+- name: golang.org/x/sys
+  version: 7f918dd405547ecb864d14a8ecbbfe205b5f930f
+  subpackages:
+  - unix
+devImports: []
