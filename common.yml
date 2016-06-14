@@ -1,40 +1,75 @@
-postgres:
-  image: postgres:latest
-  env_file:
-    ./postgres.env
-  ports:
-    - "5432:5432"
-  volumes:
-    - $GOPATH/src/github.com/hpcloud/portal-proxy/db/initial:/docker-entrypoint-initdb.d
+version: '2'
+services:
+
+  ##############################################################################
+  # These two "services" are not meant to be instantiated, but instead extended.
+  # Unfortunately, this is necessary for those working at the HPE office where
+  # the proxy is a sad, Sad, SAD way of life.
+  ##############################################################################
+
+  imageCommon:
+    environment:
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+      - no_proxy=${no_proxy}
 
 
-proxy:
-  build: $GOPATH/src/github.com/hpcloud/portal-proxy
-  dockerfile: Dockerfile.server
-  ports:
-    - "3003:3003"
-  env_file:
-    ./proxy.env
-  volumes:
-    - $GOPATH/src/github.com/hpcloud/portal-proxy:/srv
+  buildCommon:
+    extends: imageCommon
+    build:
+      args:
+        - http_proxy=${http_proxy}
+        - https_proxy=${https_proxy}
+        - no_proxy=${no_proxy}
+
+  ##############################################################################
 
 
-nginx:
-  build: ../stratos-server
-  dockerfile: Dockerfile.dev
-  ports:
-    - "80:80"
-  volumes:
-    - ../stratos-ui/dist:/usr/share/nginx/html:ro
-  # NOTE: links field must be included individually if extending this file.
-  #links:
-  #  - api:api
+  postgres:
+    extends: imageCommon
+    image: postgres:latest
+    env_file:
+      ./postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - $GOPATH/src/github.com/hpcloud/portal-proxy/db/initial:/docker-entrypoint-initdb.d
 
 
-ui:
-  build: ../stratos-ui
-  dockerfile: Dockerfile.prod
-  volumes:
-    - ../stratos-ui:/usr/src/app
-    - ../helion-ui-framework:/usr/src/helion-ui-framework
-    - ../helion-ui-theme:/usr/src/helion-ui-theme
+  proxy:
+    extends: buildCommon
+    build:
+      context: $GOPATH/src/github.com/hpcloud/portal-proxy
+      dockerfile: Dockerfile.server
+    ports:
+      - "3003:3003"
+    env_file:
+      ./proxy.env
+    volumes:
+      - $GOPATH/src/github.com/hpcloud/portal-proxy:/srv
+
+
+  nginx:
+    extends: buildCommon
+    build:
+      context: ../stratos-server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "80:80"
+    volumes:
+      - ../stratos-ui/dist:/usr/share/nginx/html:ro
+    # NOTE: links field must be included individually if extending this file.
+    #links:
+    #  - proxy:proxy
+
+
+  ui:
+    extends: buildCommon
+    build:
+      context: ../stratos-ui
+      dockerfile: Dockerfile
+
+    volumes:
+      - ../stratos-ui:/usr/src/app
+      - ../helion-ui-framework:/usr/src/helion-ui-framework
+      - ../helion-ui-theme:/usr/src/helion-ui-theme
