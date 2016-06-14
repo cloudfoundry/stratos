@@ -1,26 +1,27 @@
-hash: a9d8320bb111d9b819ab304d031e4ba10f3a1c73a6b34d81976a85f4ea7df157
-updated: 2016-05-21T14:40:32.886722183-04:00
+hash: c19a9277f07909083151c1e0daf99c6ffc04d459c519814888447f312aeebe65
+updated: 2016-06-08T23:40:25.179110322-04:00
 imports:
 - name: github.com/dgrijalva/jwt-go
-  version: 40bd0f3b4891a9d7f121bfb7b8e8b0525625e262
+  version: c04502f106d7c5b3fae17c5da49a1bbdd3006b3c
 - name: github.com/gorilla/context
-  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+  version: aed02d124ae4a0e94fea4541c8effd05bf0c8296
 - name: github.com/gorilla/securecookie
-  version: 667fe4e3466a040b780561fe9b51a83a3753eefc
+  version: ff356348f74133a59d3e93aa24b5b4551b6fe90d
 - name: github.com/gorilla/sessions
-  version: a4e6dd28f9e9274729417506b9bd0a6c3edb91ce
+  version: 56ba4b0a11da87516629a57408a5f7e4c8ea7b0b
 - name: github.com/hpcloud/ucpconfig
   version: 0eace611cfcb89291849724f4704b390b436fe71
 - name: github.com/kat-co/vala
   version: 8e262b9679ecfc9a9f550f3fbd39a8e5edbb4cbe
 - name: github.com/labstack/echo
-  version: 795ab0ad7791d7dd36aa1877b70a62e899441b47
+  version: f4088cf59417809ed6292c4dcdcd14cd1a34f738
   subpackages:
   - engine
   - engine/standard
   - middleware
+  - log
 - name: github.com/labstack/gommon
-  version: b5f03e345acd2096591b6f738cb8d2b9b3231c50
+  version: 722aa12d41c236ce78ff48eac1cafe0107ecdc9d
   subpackages:
   - log
   - bytes
@@ -30,19 +31,19 @@ imports:
   subpackages:
   - oid
 - name: github.com/mattn/go-colorable
-  version: e8a10ddc7d2a7fe255f6fd7f501070a4cb62c183
+  version: 9056b7a9f2d1f2d96498d6d146acd1f9d5ed3d59
 - name: github.com/mattn/go-isatty
   version: 56b76bdf51f7708750eac80fa38b952bb9f32639
 - name: github.com/satori/go.uuid
-  version: f9ab0dce87d815821e221626b772e3475a0d2749
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
 - name: golang.org/x/net
-  version: 0c607074acd38c5f23d1344dfe74c977464d1257
+  version: 313cf39d4ac368181bce6960ac9be9e7cee67e68
   subpackages:
   - context
 - name: golang.org/x/sys
-  version: d4feaf1a7e61e1d9e79e6c4e76c6349e9cab0a03
+  version: 076b546753157f758b316e59bcb51e6807c04057
   subpackages:
   - unix
 devImports: []

@@ -8,7 +8,7 @@ set -x
 pushd $(git rev-parse --show-toplevel)
 
 docker build --tag portal-proxy-server \
-             --file server.Dockerfile \
+             --file Dockerfile.server \
              .
 
 docker run -it \

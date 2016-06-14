@@ -30,11 +30,8 @@ tools/build_portal_proxy.sh bash
 ... <lots of output here> ...
 root@427ed6a1c84b:/go/src/github.com/hpcloud/portal-proxy#
 
-# Run the following if you need to re-get dependencies
-root@427ed6a1c84b:/go/src/github.com/hpcloud/portal-proxy# tools/on_container_get_deps.sh
-
-# Or, to just run the build script:
-root@427ed6a1c84b:/go/src/github.com/hpcloud/portal-proxy# tools/on_container_build.sh
+# Or, just build:
+root@427ed6a1c84b:/go/src/github.com/hpcloud/portal-proxy# go build
 ```
 
 ### Plans for the future

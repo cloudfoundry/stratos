@@ -1,22 +1,13 @@
 package: github.com/hpcloud/portal-proxy
-homepage: github.com/hpcloud/portal-proxy
-license: Apache 2.0
 import:
 - package: github.com/gorilla/context
-  version: 1.1
 - package: github.com/gorilla/sessions
-  version: a4e6dd28f9e9274729417506b9bd0a6c3edb91ce
 - package: github.com/hpcloud/ucpconfig
-  version: 0eace611cfcb89291849724f4704b390b436fe71
+- package: github.com/kat-co/vala
 - package: github.com/labstack/echo
-  version: 795ab0ad7791d7dd36aa1877b70a62e899441b47
   subpackages:
   - engine
   - engine/standard
   - middleware
-- package: github.com/satori/go.uuid
-  version: 1.0.0
 - package: github.com/lib/pq
-  version: ee1442bda7bd1b6a84e913bdb421cb1874ec629d
-  subpackages:
-  - oid
+- package: github.com/satori/go.uuid
