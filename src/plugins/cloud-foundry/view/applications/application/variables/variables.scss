@@ -16,3 +16,37 @@
     }
   }
 }
+.add-variable-dialog {
+  margin-right: $hpe-unit-space * 5;
+
+  .alert {
+    margin-top: $hpe-unit-space;
+  }
+
+  .form-actions {
+    clear: both;
+    margin-top: $hpe-unit-space * 2;
+
+    button:not(:first-child) {
+      margin-left: $hpe-unit-space;
+    }
+  }
+}
+
+table.app-variables-table {
+  .actions-menu-list.dropdown-menu {
+    right: 0;
+    left: inherit;
+  }
+
+  tr td.table-inline-message .popover.hpe-popover-alert-warning {
+    > .arrow {
+      border-bottom-color: $state-danger-bg;
+    }
+
+    > .popover-content {
+      background-color: $state-danger-bg;
+    }
+  }
+}
+

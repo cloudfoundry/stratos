@@ -288,7 +288,10 @@
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
       return applicationApi.UpdateApp(guid, newAppSpec, {}, config)
         .then(function (response) {
-          that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
+          if(response.data[cnsiGuid].metadata) {
+            that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
+          }
+          return response.data[cnsiGuid];
         });
     },
 

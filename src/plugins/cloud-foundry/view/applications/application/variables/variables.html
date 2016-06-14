@@ -1,41 +1,44 @@
-<div ng-if="!applicationVariablesCtrl.fetchError && applicationVariablesCtrl.isFetching" class="message-box message-box-no-bg">
+<div ng-if="!applicationVariablesCtrl.fetchError && applicationVariablesCtrl.isBusy" class="message-box message-box-no-bg">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
-<div ng-if="!applicationVariablesCtrl.fetchError && !applicationVariablesCtrl.isFetching">
+<div ng-if="!applicationVariablesCtrl.fetchError && !applicationVariablesCtrl.isBusy">
   <div class="action-header">
     <span translate>Variables</span>
-    <!--
-    <a class="btn btn-link">
+    <a class="btn btn-link" ng-click="applicationVariablesCtrl.addVariable()">
       <i class="helion-icon helion-icon-Right_Arrow"></i>
       <span translate>Add variable</span>
     </a>
-    -->
   </div>
   <div class="panel panel-default">
     <div class="panel-body"
          ng-if="!applicationVariablesCtrl.hasVariables()" translate>
       You have no variables.
     </div>
-    <table class="table table-actionable"
-           ng-if="applicationVariablesCtrl.hasVariables()" >
+    <table class="app-variables-table table table-actionable" ng-if="applicationVariablesCtrl.hasVariables()" >
       <thead>
-      <tr>
-        <th class="sort-column" translate>Name</th>
-        <th translate>Value</th>
-        <th></th>
-      </tr>
+        <tr>
+          <th class="sort-column" translate>Name</th>
+          <th translate>Value</th>
+          <th translate>Action</th>
+        </tr>
       </thead>
       <tbody>
-      <tr ng-repeat="name in applicationVariablesCtrl.variableNames">
-        <td>{{ name }}</td>
-        <td>{{ applicationVariablesCtrl.model.application.variables.environment_json[name] }}</td>
-        <td></td>
-      </tr>
+        <tr ng-repeat-start="name in applicationVariablesCtrl.variableNames">
+          <td>{{ name }}</td>
+          <td>{{ applicationVariablesCtrl.model.application.variables.environment_json[name] }}</td>
+          <td>
+            <actions-menu actions="applicationVariablesCtrl.variableActions"
+                          action-target="name" menu-icon="helion-icon helion-icon-More"></actions-menu>
+          </td>
+        </tr>
+        <tr ng-repeat-end ng-if="name === applicationVariablesCtrl.deleteError"
+          table-inline-message message="{{ applicationVariablesCtrl.deleteErrorMsg }}">
+        </tr>
       </tbody>
     </table>
   </div>
 </div>
-<div class="panel panel-default summary" ng-if="!applicationVariablesCtrl.isFetching">
+<div class="panel panel-default summary" ng-if="!applicationVariablesCtrl.isBusy">
   <div class="panel-heading action-header">
     <span translate>Variables</span>
     <a class="btn btn-link" ng-click="applicationVariablesCtrl.refreshVariables()">
@@ -43,7 +46,7 @@
       <span translate>Refresh</span>
     </a>
   </div>
-  <div ng-if="applicationVariablesCtrl.fetchError" class="alert alert-danger">
+  <div ng-if="applicationVariablesCtrl.fetchError" class="alert alert-danger alert-with-icon">
     <div translate>An error occurred retrieving application variables</div>
   </div>
   <div class="app-variables" ng-if="!applicationVariablesCtrl.fetchError">
