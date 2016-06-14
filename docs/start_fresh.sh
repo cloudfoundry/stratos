@@ -4,7 +4,6 @@ set -eu
 cd ../..
 git clone https://github.com/hpcloud/helion-ui-theme.git
 git clone https://github.com/hpcloud/helion-ui-framework.git
-git clone https://github.com/hpcloud/stratos-server.git
 git clone https://github.com/hpcloud/stratos-ui.git
 
 export GOPATH=$(pwd)
