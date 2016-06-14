@@ -34,7 +34,7 @@ docker-machine create --driver virtualbox --virtualbox-cpu-count "2" default
 
 ### Build and run Helion Stratos Console UI
 ```
-docker build -t stratos-ui .
+docker build -f Dockerfile.dev -t stratos-ui .
 docker run -it --rm --name stratos-ui \
            -v $(pwd):/usr/src/app \
            -v $(pwd)/../helion-ui-framework:/usr/src/helion-ui-framework \
