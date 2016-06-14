@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu
 
 echo "===== Cleaning up cached intermediate items"
 

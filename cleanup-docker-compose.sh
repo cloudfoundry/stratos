@@ -1,4 +1,6 @@
 #!/bin/bash
+set -eu
+
 echo "Cleaning up docker-compose"
 docker-compose stop && docker-compose rm -f
 docker stop stratosdeploy_proxy_1 && docker rm stratosdeploy_proxy_1

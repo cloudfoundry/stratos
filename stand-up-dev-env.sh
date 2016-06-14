@@ -1,4 +1,6 @@
 #!/bin/bash
+set -eu
+
 cd $GOPATH/src/github.com/hpcloud/portal-proxy/tools/
 ./build_portal_proxy.sh
 cd -

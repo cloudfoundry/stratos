@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eu
 
 # set the defaults for docker registry and tag
 DOCKER_REGISTRY=docker-registry.helion.space:443

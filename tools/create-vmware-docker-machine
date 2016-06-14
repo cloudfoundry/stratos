@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -eu
 
 # USAGE:  docker-machine-create <machine-name>
 #   machine-name defaults to "default"
