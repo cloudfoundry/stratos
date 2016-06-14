@@ -1,7 +1,19 @@
 .delivery-log-trigger-build {
-  .delivery-log-trigger-build-has-token {
-    .delivery-log-trigger-build-commits {
-      table tbody tr td {
+
+  .delivery-log-flex {
+    @include flex-align(flex-start, stretch, column);
+    flex: 1 1 auto;
+  }
+
+
+  .delivery-log-trigger-build-commits {
+    flex: 1 1 auto;
+
+    table {
+      th {
+        max-width: 200px;
+      }
+      tbody tr td {
         vertical-align: middle;
 
         max-width: 200px;
@@ -10,14 +22,22 @@
         white-space: nowrap;
       }
     }
-    .delivery-log-trigger-build-buttons {
-      button {
-        margin: 10px
-      }
+  }
+  .delivery-log-trigger-build-buttons {
+    flex: 0 0 auto;
+    align-self: flex-end;
 
-      button:last-of-type {
-        margin-right: 0;
-      }
+    button {
+      margin: 0px 10px 20px 10px;
     }
+
+    button:last-of-type {
+      margin-right: 0;
+    }
+  }
+
+  .alert {
+    margin: $hpe-unit-space 0;
+    width: 100%;
   }
 }

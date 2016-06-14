@@ -57,9 +57,9 @@
 
 // Very specific selector makes this 24, override this for the two places it's used in this context
 #build-result-col {
-  & > div  > span.helion-icon {
-      font-size: 14px;
-    }
+  & > div > span.helion-icon {
+    font-size: 14px;
+  }
   & > span {
     padding-left: 5px;
   }
