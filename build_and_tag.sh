@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eu
 
 # set the defaults for docker registry and tag
 DOCKER_REGISTRY=docker-registry.helion.space:443
@@ -70,12 +70,6 @@ rm -rf ${__DIRNAME}/output/*
 # Cleanup prior to generating the UI container
 rm -rf ${__DIRNAME}/../stratos-ui/dist
 rm -rf ${__DIRNAME}/../stratos-server/dist
-
-# Build and publish all of the images for Stratos Console UI
-buildAndPublishImage cnap-console-db Dockerfile.UCP  ${__DIRNAME}/../stratos-identity-db
-buildAndPublishImage cnap-console-mock-api Dockerfile.mock_api.UCP ${__DIRNAME}/../stratos-node-server
-buildAndPublishImage cnap-console-mock-auth Dockerfile.mock_auth.UCP ${__DIRNAME}/../stratos-node-server
-buildAndPublishImage cnap-console-api Dockerfile.UCP ${__DIRNAME}/../stratos-node-server
 
 # Build Portal Proxy
 PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
