@@ -60,7 +60,6 @@ export GITHUB_OAUTH_STATE=<STATE>
   - Otherwise, manually clone the following repositories:
     - helion-ui-theme
     - helion-ui-framework
-    - stratos-server
     - stratos-ui
     - portal-proxy (important! clone into **$GOPATH/src/github.com/hpcloud**)
 - [Create a Docker machine](create_docker_machine.md)
