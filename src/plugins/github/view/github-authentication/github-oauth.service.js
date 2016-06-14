@@ -27,7 +27,7 @@
   angular.extend(GithubOauthService.prototype, {
     start: function () {
       var that = this;
-      var win = this.$window.open('/api/gh/auth', '_blank');
+      var win = this.$window.open('/pp/v1/github/oauth/auth', '_blank');
       win.focus();
 
       return this.$q(function(resolve, reject) {
