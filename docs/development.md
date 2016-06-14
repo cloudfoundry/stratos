@@ -46,12 +46,12 @@ Please ensure you have the following installed:
 - Head over to: https://github.com/settings/developers
 - Register the Console UI as a new application
   - Homepage URL: `http://<DOCKER MACHINE IP>` (ex. `192.168.99.100`)
-  - Authorization callback URL: `http://<DOCKER MACHINE IP>/api/gh/redirect`
-- Set the following environmental variables using the generated client ID and secret:
+  - Authorization callback URL: `http://<DOCKER MACHINE IP>/pp/v1/github/oauth/callback`
+- Set the following environmental variables using the generated client ID, secret and state:
 ```
 export GITHUB_OAUTH_CLIENT_ID=<CLIENT ID>
 export GITHUB_OAUTH_CLIENT_SECRET=<CLIENT SECRET>
-export GITHUB_OAUTH_REDIRECT_URL=<HOMEPAGE URL>
+export GITHUB_OAUTH_STATE=<STATE>
 ```
 
 ### <a id="running-ui"></a>4. Running the Helion Stackato v4.0 Console UI
@@ -60,8 +60,6 @@ export GITHUB_OAUTH_REDIRECT_URL=<HOMEPAGE URL>
   - Otherwise, manually clone the following repositories:
     - helion-ui-theme
     - helion-ui-framework
-    - stratos-identity-db
-    - stratos-node-server
     - stratos-server
     - stratos-ui
     - portal-proxy (important! clone into **$GOPATH/src/github.com/hpcloud**)

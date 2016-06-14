@@ -69,7 +69,7 @@ rm -rf ${__DIRNAME}/output/*
 
 # Cleanup prior to generating the UI container
 rm -rf ${__DIRNAME}/../stratos-ui/dist
-rm -rf ${__DIRNAME}/../stratos-server/dist
+rm -rf ${__DIRNAME}/../stratos-ui/containers/nginx/dist
 
 # Build Portal Proxy
 PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
@@ -92,11 +92,11 @@ docker run --rm \
   node:4.2.3 \
   /bin/bash ./provision.sh
 
-# Copy the artifacts from the above to the stratos-server
-cp -R ${__DIRNAME}/../stratos-ui/dist ${__DIRNAME}/../stratos-server/dist
+# Copy the artifacts from the above to the nginx container
+cp -R ${__DIRNAME}/../stratos-ui/dist ${__DIRNAME}/../stratos-ui/containers/nginx/dist
 
-# Build and push an image based on stratos-server
-buildAndPublishImage cnap-console-server Dockerfile.UCP ${__DIRNAME}/../stratos-server
+# Build and push an image based on the nginx container
+buildAndPublishImage cnap-console-server Dockerfile.UCP ${__DIRNAME}/../stratos-ui/containers/nginx
 
 echo "Creating service and instance definition"
 

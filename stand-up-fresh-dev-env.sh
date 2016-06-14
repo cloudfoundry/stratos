@@ -12,6 +12,7 @@ cd -
 
 echo "----- stratos-ui"
 cd ../stratos-ui
+rm -rf containers/nginx/dist/
 rm -rf dist/
 rm -rf npm_modules
 rm -rf src/lib/
