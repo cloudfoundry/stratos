@@ -8,7 +8,7 @@ In order to use one of these builds to stand up the Console in an HCP environmen
 
 2. The service definition file is ready to be used without changes.
 
-3. You will need to register your instance of the Console with GitHub. This REQUIRES you to have a stable URL where the Console will be available. Once your application is registered with GitHub, you should have a GitHub client id, client secret, and a redirect url.
+3. You will need to register your instance of the Console with GitHub. This REQUIRES you to have a stable URL where the Console will be available. Once your application is registered with GitHub, you should have a GitHub client id, client secret, and a state.
 
 4. Open the instance definition file, scroll to the bottom and:
 
@@ -16,8 +16,4 @@ In order to use one of these builds to stand up the Console in an HCP environmen
 
   b. Replace "\__REPLACE_WITH_OAUTH_CLIENT_SECRET\__" with your GitHub registered client secret.
 
-  c. Replace "\__REPLACE_WITH_OAUTH_REDIRECT_URL\__" with your GitHub registered redirect URL.
-
-  Be aware that at the moment, this is NOT the full URL, but is just the host.
-
-  As an example for the console that responds @ `http://console.helion.space`, the URL would be `http://console.helion.space` and NOT `http://console.helion.space/api/gh/redirect` as you might expect from the GitHub OAuth documentation. We have an issue opened to rectify this ASAP.
+  c. Replace "\__REPLACE_WITH_OAUTH_STATE\__" with a random test string.

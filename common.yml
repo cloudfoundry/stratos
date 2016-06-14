@@ -52,7 +52,7 @@ services:
   nginx:
     extends: buildCommon
     build:
-      context: ../stratos-server
+      context: ../stratos-ui/containers/nginx
       dockerfile: Dockerfile.dev
     ports:
       - "80:80"
@@ -67,7 +67,7 @@ services:
     extends: buildCommon
     build:
       context: ../stratos-ui
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
 
     volumes:
       - ../stratos-ui:/usr/src/app
