@@ -1,5 +1,8 @@
 FROM ubuntu:14.04
 
+RUN apt-get update && \
+    apt-get install -y --reinstall ca-certificates ca-certificates-java
+
 RUN mkdir -p /srv
 
 WORKDIR /srv

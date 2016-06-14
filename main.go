@@ -25,35 +25,43 @@ var (
 func main() {
 	log.SetOutput(os.Stdout)
 
+	log.Println("Started Portal Proxy")
+
 	var portalConfig portalConfig
 	portalConfig, err := loadPortalConfig(portalConfig)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
+	// log.Println("Proxy Configuration loaded up")
 	var databaseConfig datastore.DatabaseConfig
 	databaseConfig, err = loadDatabaseConfig(databaseConfig)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
+	// log.Println("Database Configuration loaded up")
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 	defer databaseConnectionPool.Close()
 
+	log.Println("Spinning up a new Portal Proxy")
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool)
 
+	log.Println("Initializing the HTTP client")
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
 
+	log.Printf("Starting the proxy on IP %s and port %d", portalConfig.TLSAddress, 80)
+	log.Printf("%v", portalConfig)
 	if err := start(portalProxy); err != nil {
-		fmt.Println(err)
+		log.Printf("Unable to start the proxy: %v", err)
 		os.Exit(1)
 	}
 }
@@ -168,6 +176,12 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
 	// Disconnect HCF cluster
 	sessionGroup.Post("/auth/logout/cnsi", p.logoutOfCNSI)
+
+	// should be referenced as /v1/github/oauth/auth
+	sessionGroup.Get("/github/oauth/auth", p.handleGitHubAuth)
+
+	// should be referenced as /v1/github/oauth/callback
+	sessionGroup.Get("/github/oauth/callback", p.handleGitHubCallback)
 
 	// Register clusters
 	sessionGroup.Post("/register/hcf", p.registerHCFCluster)

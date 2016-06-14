@@ -1,8 +1,12 @@
-hash: c19a9277f07909083151c1e0daf99c6ffc04d459c519814888447f312aeebe65
-updated: 2016-06-08T23:40:25.179110322-04:00
+hash: 1e34e98f801076e16d36ec3bb652feef0c1b91fc402169077771779547edf8db
+updated: 2016-06-13T22:45:13.825359401-04:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: c04502f106d7c5b3fae17c5da49a1bbdd3006b3c
+- name: github.com/golang/protobuf
+  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
+  subpackages:
+  - proto
 - name: github.com/gorilla/context
   version: aed02d124ae4a0e94fea4541c8effd05bf0c8296
 - name: github.com/gorilla/securecookie
@@ -14,7 +18,7 @@ imports:
 - name: github.com/kat-co/vala
   version: 8e262b9679ecfc9a9f550f3fbd39a8e5edbb4cbe
 - name: github.com/labstack/echo
-  version: f4088cf59417809ed6292c4dcdcd14cd1a34f738
+  version: 6e183fd3d8063a14da04fa4439c52fb6b84d1cdb
   subpackages:
   - engine
   - engine/standard
@@ -39,11 +43,25 @@ imports:
 - name: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
 - name: golang.org/x/net
-  version: 313cf39d4ac368181bce6960ac9be9e7cee67e68
+  version: 3f122ce3dbbe488b7e6a8bdb26f41edec852a40b
   subpackages:
   - context
+- name: golang.org/x/oauth2
+  version: 65a8d08c6292395d47053be10b3c5e91960def76
+  subpackages:
+  - github
+  - internal
 - name: golang.org/x/sys
-  version: 076b546753157f758b316e59bcb51e6807c04057
+  version: 7f918dd405547ecb864d14a8ecbbfe205b5f930f
   subpackages:
   - unix
+- name: google.golang.org/appengine
+  version: 7f59a8c76b8594d06044bfe0bcbe475cb2020482
+  subpackages:
+  - urlfetch
+  - internal
+  - internal/urlfetch
+  - internal/base
+  - internal/datastore
+  - internal/remote_api
 devImports: []
