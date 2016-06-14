@@ -63,6 +63,7 @@
       }
       vm.routeModel.createRoute(vm.cnsiGuid, data)
         .then(function(response) {
+
           if (!(response.metadata && response.metadata.guid)) {
             throw 'Invalid response: ' + JSON.stringify(response);
           }
@@ -88,7 +89,7 @@
 
 
     /**
-     * @function addRouteError
+     * @function onAddRouteError
      * @memberof cloud-foundry.view.applications.application.summary.AddRouteController
      * @description Display error when adding a route
      */
