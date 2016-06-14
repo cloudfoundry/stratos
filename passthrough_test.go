@@ -59,8 +59,13 @@ func TestPassthroughDoRequest(t *testing.T) {
 	pp := setupPortalProxy()
 	pp.DatabaseConnectionPool = db
 
+	sql := `SELECT (.+) FROM tokens WHERE (.+)`
+	mock.ExpectQuery(sql).
+		WithArgs(mockCNSIGUID, mockUserGUID).
+		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+
 	// set up the database expectation for pp.setCNSITokenRecord
-	sql := `INSERT INTO tokens`
+	sql = `INSERT INTO tokens`
 	mock.ExpectExec(sql).
 		WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, mockTokenRecord.TokenExpiry).
 		WillReturnResult(sqlmock.NewResult(1, 1))

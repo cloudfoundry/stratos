@@ -48,8 +48,13 @@ func TestLoginToUAA(t *testing.T) {
 	defer db.Close()
 	pp.DatabaseConnectionPool = db
 
+	sql := `SELECT (.+) FROM tokens WHERE (.+)`
+	mock.ExpectQuery(sql).
+		WithArgs(mockUserGUID).
+		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+
 	// --- set up the database expectation for pp.saveUAAToken
-	sql := `INSERT INTO tokens`
+	sql = `INSERT INTO tokens`
 	var newExpiry = 1234567
 	mock.ExpectExec(sql).
 		WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
@@ -135,8 +140,13 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 	defer db.Close()
 	pp.DatabaseConnectionPool = db
 
+	sql := `SELECT (.+) FROM tokens WHERE (.+)`
+	mock.ExpectQuery(sql).
+		WithArgs(mockUserGUID).
+		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+
 	// --- set up the database expectation for pp.saveUAAToken
-	sql := `INSERT INTO tokens`
+	sql = `INSERT INTO tokens`
 	mock.ExpectExec(sql).
 		WillReturnError(errors.New("Unknown Database Error"))
 
@@ -206,6 +216,11 @@ func TestLoginToCNSI(t *testing.T) {
 	if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
+
+	sql = `SELECT (.+) FROM tokens WHERE (.+)`
+	mock.ExpectQuery(sql).
+		WithArgs(mockCNSIGUID, mockUserGUID).
+		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 	// Setup expectation that the CNSI token will get saved
 	sql = `INSERT INTO tokens`
