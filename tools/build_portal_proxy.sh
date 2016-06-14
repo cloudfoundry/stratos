@@ -3,9 +3,12 @@
 # NOTE: You can execute commands on the docker-container by passing "CMD" arguments into this
 #       helper script.  For example: "build_portal_proxy.sh bash"
 
+set -e
 set -x
 
 pushd $(git rev-parse --show-toplevel)
+
+glide install
 
 docker build --tag portal-proxy-builder \
              --file Dockerfile.build \
