@@ -48,7 +48,6 @@
 
     this.eventService = eventService;
     this.$q = $q;
-    this.$timeout = $timeout;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
