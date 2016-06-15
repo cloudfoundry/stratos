@@ -301,6 +301,18 @@
         });
     },
 
+    getEnv: function (cnsiGuid, guid, params) {
+      var that = this;
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetEnvForApp(guid, params, config)
+        .then(function (response) {
+          return response.data[cnsiGuid];
+        });
+    },
+
     /**
      * @function onAll
      * @memberof  cloud-foundry.model.application
