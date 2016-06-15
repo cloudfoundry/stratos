@@ -255,7 +255,7 @@
         cli: [
           {
             ready: true,
-            title: gettext('Deploy'),
+            title: gettext('Deploy App'),
             templateUrl: path + 'cli-subflow/deploy.html',
             formName: 'application-cli-deploy-form',
             nextBtnText: gettext('Finished with code change'),
@@ -423,6 +423,16 @@
       };
     },
 
+    /**
+     * @function redefineWorkflowWithoutHce
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description redefine the workflow if there is no HCE service instances registered
+     */
+    redefineWorkflowWithoutHce: function () {
+      this.data.workflow.steps.pop();
+      [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
+    },
+
     getHceInstances: function () {
       var that = this;
       this.cnsiModel.list().then(function () {
@@ -432,6 +442,8 @@
           var hceOptions = _.map(hceCnsis, function (o) { return { label: o.api_endpoint.Host, value: o }; });
           [].push.apply(that.options.hceCnsis, hceOptions);
           that.userInput.hceCnsi = hceOptions[0].value;
+        } else {
+          that.redefineWorkflowWithoutHce();
         }
       });
     },
