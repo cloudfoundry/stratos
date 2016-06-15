@@ -183,6 +183,8 @@
             });
             that.$q.all(tasks).then(deferred.resolve, deferred.reject);
           });
+      } else {
+        deferred.resolve();
       }
 
       return deferred.promise;

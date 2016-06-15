@@ -131,6 +131,27 @@
     },
 
     /**
+     * @function listServiceBindings
+     * @memberof cloud-foundry.model.application
+     * @description List service bindings for application
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the application guid
+     * @param {object} params - the extra params to pass to request
+     * @returns {promise} A promise object
+     * @public
+     */
+    listServiceBindings: function (cnsiGuid, guid, params) {
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .ListAllServiceBindingsForApp(guid, params, config)
+        .then(function (response) {
+          return response.data[cnsiGuid].resources;
+        });
+    },
+
+    /**
      * @function startApp
      * @memberof cloud-foundry.model.application
      * @description start an application
@@ -245,6 +266,7 @@
      * @memberof cloud-foundry.model.application
      * @description Update an application
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - the application guid
      * @param {object} newAppSpec - values to update Application
      * @returns {promise} A resolved/rejected promise
      * @public
@@ -301,8 +323,17 @@
         });
     },
 
+    /**
+     * @function getEnv
+     * @memberof cloud-foundry.model.application
+     * @description Get env variables for application
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the application guid
+     * @param {object} params - the extra params to pass to request
+     * @returns {promise} A promise object
+     * @public
+     */
     getEnv: function (cnsiGuid, guid, params) {
-      var that = this;
       var config = {
         headers: { 'x-cnap-cnsi-list': cnsiGuid }
       };

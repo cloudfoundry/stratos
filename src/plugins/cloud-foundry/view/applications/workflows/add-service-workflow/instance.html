@@ -10,51 +10,56 @@
   <uib-tabset class="select-instance-tabs col-sm-12" active="active">
     <uib-tab index="0" heading="{{ 'Create New Instance' | translate }}" active="true"
       select="wizardCtrl.options.createNew(true)">
-      <form>
-        <div class="form-group" focusable-input>
+      <form name="createNewForm" ng-if="wizardCtrl.options.isCreateNew">
+        <div class="form-group" focusable-input
+          ng-class="{'has-error': addInstanceForm.createNewForm.name.$invalid && addInstanceForm.createNewForm.name.$dirty}">
           <label class="control-label" required translate>
             Name
           </label>
-          <input type="text" class="form-control" tabindex="0"
+          <input type="text" name="name" class="form-control" tabindex="0"
             ng-model="wizardCtrl.options.userInput.name" ng-trim="false"
+            helion-unique items="wizardCtrl.options.instanceNames" ignore-case
             ng-pattern="/^[a-zA-Z\d\-\_]+$/" required autofocus>
         </div>
 
         <div class="form-group">
           <label class="control-label" translate>Plan</label>
-          <select-input
+          <select-input name="plan"
             arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
             ng-model="wizardCtrl.options.userInput.plan"
             input-options="wizardCtrl.options.servicePlans"
             placeholder="{{'Select a Plan' | translate}}"
-            tabindex="0">
+            tabindex="0" required>
           </select-input>
         </div>
       </form>
     </uib-tab>
     <uib-tab index="1" heading="{{ 'Choose Existing Instance' | translate }}"
-      select="wizardCtrl.options.createNew(false)">
-      <table class="table table-outlined existing-instances-table">
-        <thead>
-          <tr>
-            <th class="select-col"></th>
-            <th translate>Name</th>
-            <th translate>Plan</th>
-            <th translate>Apps Attached</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="row-vertical-middle" ng-repeat="instance in wizardCtrl.options.instances">
-            <td>
-              <radio-input ng-model="wizardCtrl.options.userInput.existingServiceInstance" input-value="instance">
-              </radio-input>
-            </td>
-            <td>{{ instance.entity.name }}</td>
-            <td>{{ wizardCtrl.options.servicePlanMap[instance.entity.service_plan_guid].entity.name }}</td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
+      select="wizardCtrl.options.createNew(false)" disable="wizardCtrl.options.instances.length === 0">
+      <form ng-if="!wizardCtrl.options.isCreateNew">
+        <table class="table table-outlined existing-instances-table">
+          <thead>
+            <tr>
+              <th class="select-col"></th>
+              <th translate>Name</th>
+              <th translate>Plan</th>
+              <th translate>Apps Attached</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-vertical-middle" ng-repeat="instance in wizardCtrl.options.instances">
+              <td>
+                <radio-input ng-model="wizardCtrl.options.userInput.existingServiceInstance"
+                  input-value="instance" required>
+                </radio-input>
+              </td>
+              <td>{{ instance.entity.name }}</td>
+              <td>{{ wizardCtrl.options.servicePlanMap[instance.entity.service_plan_guid].entity.name }}</td>
+              <td>{{ instance.entity.service_bindings.length || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
     </uib-tab>
   </uib-tabset>
 </div>

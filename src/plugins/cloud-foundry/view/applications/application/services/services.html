@@ -1,3 +1,6 @@
+<p ng-if="applicationServicesCtrl.services.length === 0" translate>
+  No services were found. Please contact your administrator.
+</p>
 <div class="panel panel-default"
   ng-repeat="service in applicationServicesCtrl.services track by service.metadata.guid">
   <div class="panel-body service-panel">

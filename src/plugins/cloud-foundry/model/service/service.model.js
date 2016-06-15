@@ -117,6 +117,7 @@
      * @memberof cloud-foundry.model.service
      * @description onAll handler at model layer
      * @param {string} response - the json return from the api call
+     * @returns {object} The response
      * @private
      */
     onAll: function (response) {
