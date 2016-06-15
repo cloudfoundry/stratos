@@ -89,13 +89,20 @@ You can now issue the same `curl` commands to install Helion Code Engine and the
 
 **Please see the "deploy_archives" folder for recent Console UI service definition & instance definition files suitable for deployment.**
 
-Run the following curl commands to deploy the Console. The files below reference docker images that exist in the shared HPE docker registry. There are no other files necessary to stand up the Console in your HCP environment.
-```
-curl -H "Content-Type: application/json" \
-     -X POST -d @<SERVICE DEFINITION FILE> \
-     http://<MASTER PRIVATE IP>:<NODE_PORT>/v1/services
+* Update the INSTANCE DEFINITION FILE (cnap-console-service-definition.json) with values specific to the target environment you are deploying into (local HCP, AWS, etc.)
 
-curl -H "Content-Type: application/json" \
-     -X POST -d @<INSTANCE DEFINITION FILE> \
-     http://<MASTER PRIVATE IP>:<NODE_PORT>/v1/instances
-```
+  - Replace the value for the "GITHUB_OAUTH_CLIENT_ID" with the client ID of the developer application you created when you [register the application](development.md#register-ui)
+
+  - Replace the value for the "GITHUB_OAUTH_CLIENT_SECRET" with the client secret of the developer application you created when you [register the application](development.md#register-ui)
+
+* Run the following curl commands to deploy the Console. The files below reference docker images that exist in the shared HPE docker registry. There are no other files necessary to stand up the Console in your HCP environment.
+
+  ```
+  curl -H "Content-Type: application/json" \
+       -X POST -d @<SERVICE DEFINITION FILE> \
+       http://<MASTER PRIVATE IP>:<NODE_PORT>/v1/services
+
+  curl -H "Content-Type: application/json" \
+       -X POST -d @<INSTANCE DEFINITION FILE> \
+       http://<MASTER PRIVATE IP>:<NODE_PORT>/v1/instances
+  ```
