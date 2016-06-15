@@ -56,7 +56,6 @@
     this.eventService = eventService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     // Adding a service model for the demo.
     this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
