@@ -4,6 +4,8 @@ set -eu
 PROG=$(basename ${BASH_SOURCE[0]})
 PROGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+ENV_RC="development.rc"
+
 CLEAN=false
 
 
@@ -30,6 +32,19 @@ function clean {
     rm -rf npm_modules
     rm -rf src/lib/
     popd
+}
+
+
+function env_vars {
+    echo "===== Environment variables"
+    if [ -f $ENV_RC ] ; then
+        echo "Found environment variables file: $ENV_RC"
+        source $ENV_RC
+    else
+        echo "Did not find environment variables file: $ENV_RC"
+        echo "Your build may fail if the proper environment variables are missing."
+    fi
+
 }
 
 
@@ -71,10 +86,10 @@ while getopts ":hc" opt ; do
 done
 
 pushd "$PROGDIR"
+env_vars
 if [ "$CLEAN" = "true" ] ; then
     clean
 fi
 build
 info
 popd
-

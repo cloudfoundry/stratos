@@ -1,0 +1,25 @@
+# This file contains common environment-variables for standing up a development
+# environment using docker-compose.
+#
+# Copy this file to dev-env.rc and edit the values as necessary.
+# Note: stand-up-dev-env.sh will try to use the dev-env.rc file if it's present.
+
+
+################
+# GitHub OAuth #
+################
+
+export GITHUB_OAUTH_CLIENT_ID=
+export GITHUB_OAUTH_CLIENT_SECRET=
+export GITHUB_OAUTH_STATE=
+
+
+###################
+# Corporate Proxy #
+###################
+
+# HPE's corporate proxy makes things pretty difficult.
+
+#export http_proxy=http://proxy.houston.hpecorp.net:8088
+#export https_proxy=$http_proxy
+#export no_proxy=localhost,127.0.0.1,.hpcloud.net,.hp.com,192.168.56.102,192.168.99.100,192.168.222.130
