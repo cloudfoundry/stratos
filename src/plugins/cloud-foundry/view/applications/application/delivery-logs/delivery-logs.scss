@@ -1,6 +1,14 @@
 @import "details/execution";
 @import "details/event";
 
+//TODO (RC): fix + move into ui theme
+.table > thead > tr {
+  th.st-sort-ascent, th.st-sort-descent {
+    //border-bottom: 2px solid green;
+    border-bottom: 2px solid green;
+  }
+}
+
 .application-details {
   .delivery-logs-summary {
     & > dl {

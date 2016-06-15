@@ -44,62 +44,81 @@
       </dd>
     </dl>
   </div>
-
-  <div id="delivery-logs-search" class="panel panel-default delivery-logs-search">
-    <form>
-      <div class="form-group search-field" focusable-input>
-        <label class="control-label" for="build-search" required translate>
-          Search Builds
-        </label>
-        <div>
-          <input ng-model="appDelLogsCtrl.searchValue" type="text" class="form-control" id="build-search">
-          <i class="helion-icon helion-icon-Search"></i>
+  <!--st-pipe="appDelLogsCtrl.updateDisplayed"-->
+  <div id="delivery-logs"
+       st-table="appDelLogsCtrl.displayedExecutions"
+       st-safe-src="appDelLogsCtrl.parsedHceModel.pipelineExecutions"
+       st-set-filter="deliveryLogsBuildFilter"
+       >
+    <div id="delivery-logs-search" class="panel panel-default delivery-logs-search">
+      <form>
+        <div class="form-group search-field" focusable-input>
+          <label class="control-label" for="build-search" required translate>
+            Search Builds
+          </label>
+          <div>
+            <input ng-model="appDelLogsCtrl.searchValue" type="text" class="form-control" id="build-search"
+                   st-search>
+            <i class="helion-icon helion-icon-Search"></i>
+          </div>
         </div>
-      </div>
-    </form>
-  </div>
-
-  <div id="delivery-logs-builds" class="delivery-logs-builds">
-    <div class="action-header">
-      <span translate>Builds</span>
-      <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()">
-        <i class="helion-icon helion-icon-Right_Arrow"></i>
-        <span translate>Trigger Build</span>
-      </a>
+      </form>
     </div>
-    <div class="panel panel-default">
-      <table class="table table-actionable">
-        <thead>
-        <tr>
-          <th translate>MESSAGE</th>
-          <th translate>RESULT</th>
-          <th translate>TIME</th>
-          <th translate>COMMIT AUTHOR</th>
-          <th translate>REASON</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr
-          ng-repeat="execution in appDelLogsCtrl.parsedHceModel.pipelineExecutions | byProperties:appDelLogsCtrl.searchValue:appDelLogsCtrl.executionSearchTerms">
-          <td><a class="" href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
-          <td ng-if="!execution.result" class="row result-col">
-          <td ng-if="execution.result" class="row result-col" id="build-result-col">
-            <div ng-switch="execution.result.state" class="pull-left">
-              <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-primary"></span>
-              <span ng-switch-when="running"><spinner></spinner></span>
-              <span ng-switch-when="failed" class="helion-icon helion-icon-Critical_S text-danger"></span>
-              <span ng-switch-default class="helion-icon helion-icon-Active_S"></span>
-            </div>
-            <span translate>{{ execution.result.label }}</span>
-            <a translate ng-if="execution.result.artifact_id"
-               ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
-          </td>
-          <td>{{ execution.reason.createdDateString }}</td>
-          <td>{{ execution.reason.author }}</td>
-          <td>{{ execution.reason.type }}</td>
-        </tr>
-        </tbody>
-      </table>
+
+    <div id="delivery-logs-builds" class="delivery-logs-builds">
+      <div class="action-header">
+        <span translate>Builds</span>
+        <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()">
+          <i class="helion-icon helion-icon-Right_Arrow"></i>
+          <span translate>Trigger Build</span>
+        </a>
+      </div>
+      <div class="panel panel-default">
+        <table class="table table-actionable" >
+          <thead>
+          <tr>
+            <th st-sort="message" translate>MESSAGE</th>
+            <th translate>RESULT</th>
+            <th st-sort="reason.mCreatedDate" st-sort-default="reverse" translate>TIME</th>
+            <th st-sort="reason.author" translate>COMMIT AUTHOR</th>
+            <th st-sort="reason.type" translate>REASON</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr
+            ng-repeat="execution in appDelLogsCtrl.displayedExecutions">
+            <td><a href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
+            <td ng-if="!execution.result" class="row result-col">
+            <td ng-if="execution.result" class="row result-col" id="build-result-col">
+              <div ng-switch="execution.result.state" class="pull-left">
+                <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-primary"></span>
+                <span ng-switch-when="running"><spinner></spinner></span>
+                <span ng-switch-when="failed" class="helion-icon helion-icon-Critical_S text-danger"></span>
+                <span ng-switch-default class="helion-icon helion-icon-Active_S"></span>
+              </div>
+              <span translate>{{ execution.result.label }}</span>
+              <a translate ng-if="execution.result.artifact_id"
+                 ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
+            </td>
+            <td>{{ execution.reason.createdDate | amDateFormat:'L - LTS' }}</td>
+            <td>{{ execution.reason.author }}</td>
+            <td>{{ execution.reason.type }}</td>
+          </tr>
+          </tbody>
+          <tfoot ng-init="appDelLogsCtrl.showExecutions = 5"
+                 ng-show="appDelLogsCtrl.showExecutions < appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
+          <tr>
+            <td colspan="5" class="text-center">
+              <a ng-click="appDelLogsCtrl.showExecutions = appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
+                <span translate>Show All</span> ({{appDelLogsCtrl.parsedHceModel.pipelineExecutions.length}})
+              </a>
+              <div ng-show="false" st-pagination="" st-items-by-page="appDelLogsCtrl.showExecutions"></div>
+            </td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+
     </div>
   </div>
 </div>

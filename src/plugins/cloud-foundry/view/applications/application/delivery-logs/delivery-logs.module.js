@@ -42,7 +42,7 @@
    * @param {helion.framework.widgets.detailView} detailView - the helion framework detailView widget
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} hceModel - the Code Engine Applications Model
-   * @property {string} hasProject - true if a HCE project exists for this application
+   * @property {object} hasProject - true if a HCE project exists for this application, null if still determining
    * @property {object} last - contains the last successful build, test and deploy events
    * @property {string} id - the application GUID
    */
@@ -50,16 +50,15 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
+    this.hceCnsi = {};
     this.hasProject = null;
     this.last = {};
-    this.executionSearchTerms = ['message', 'result.label', 'reason.createdDateString', 'reason.author', 'reason.type'];
     this.id = $stateParams.guid;
     // Pass through anything needed by prototype extend
     this.detailView = detailView;
     this.$q = $q;
     this.moment = moment;
     this.$log = $log;
-    this.hceCnsi = {};
 
     var that = this;
     var updateModelPromise, promise;
@@ -80,7 +79,7 @@
           var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
           if (hceCnsis.length > 0) {
             that.hceCnsi = hceCnsis[0];
-            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
+            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '18697775')
               .then(function() {
                 return that.hceModel.getProjects(that.hceCnsi.guid)
                   .then(function() {
@@ -116,6 +115,10 @@
       if (updateModelPromise) {
         $interval.cancel(updateModelPromise);
       }
+    });
+
+    that.execWatch = $scope.$watch(function() { return that.displayedExecutions; }, function(visibleExecutions) {
+      that.updateVisibleExecutions(visibleExecutions);
     });
 
   }
@@ -191,13 +194,9 @@
      * @description Fetch all execution and event data. Parse the output
      */
     updateData: function() {
-      /* eslint-disable */
-      // TODO (rcox): Need to optimise for projects with large amount of executions/builds
-      // - only process visible executions
-      // - Don't fetch events for all executions
-      // - See TEAMFOUR-375
-      /* eslint-enable */
       var that = this;
+
+      that.eventsPerExecution = {};
 
       var promise;
       if (this.haveBackend) {
@@ -216,32 +215,13 @@
 
       promise
         .then(function() {
-          // ParseFetch pipeline execution's events
-          that.eventsPerExecution = {};
-
-          var fetchEventsPromises = [];
-          for (var i = 0; i < that.hceModel.data.pipelineExecutions.length; i++) {
-            fetchEventsPromises.push(that.fetchEvents(that.eventsPerExecution, that.hceModel.data.pipelineExecutions[i].id));
-          }
-          return that.$q.all(fetchEventsPromises);
-        })
-        .then(function() {
-          // The ux will need to show the translated & localise date/time in the table. In order for the search filter
-          // for the table to work this conversion needs to happen before being pushed to scope. So two options,
-          // either append these values to the existing hceModel.data object or clone and update as needed for this
-          // specific directive
+          // The ux will need to show additional properties. In order to not muddy the original model make a copy
           that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
 
           for (var i = 0; i < that.parsedHceModel.pipelineExecutions.length; i++) {
             var execution = that.parsedHceModel.pipelineExecutions[i];
             that.parseExecution(execution, that.eventsPerExecution[execution.id]);
           }
-
-          that.parsedHceModel.pipelineExecutions =
-            _.orderBy(that.parsedHceModel.pipelineExecutions, function(execution) {
-              var created = _.get(execution, 'reason.mCreatedDateString');
-              return created ? created.unix() : Number.MAX_VALUE;
-            }, 'desc');
         })
         .catch(function(error) {
           that.$log.error('Failed to fetch/process pipeline executions or events: ', error);
@@ -289,7 +269,6 @@
      * @param {object} event - event to parse
      */
     parseEvent: function(event) {
-      event.mStartDate = event.startDate ? moment(event.startDate) : undefined;
       event.mEndDate = event.endDate ? moment(event.endDate) : undefined;
 
       if (!event.duration && (event.startDate && event.endDate)) {
@@ -347,19 +326,18 @@
      * @param {array} events - HCE events associated with the execution
      */
     parseExecution: function(execution, events) {
-      // Localise the reason creation date string (use i18n date/time format)
-      execution.reason.mCreatedDateString = this.moment(execution.reason.createdDate);
-      execution.reason.createdDateString = execution.reason.mCreatedDateString.format('L - LTS');
+      // Used to sort items in table
+      execution.reason.mCreatedDate = this.moment(execution.reason.createdDate);
 
       //The execution result is actually junk, need to look at the latest execution event and use that
       // as the execution result. Also required to update the result with translated text, which makes is searchable.
-      var event = events[events.length - 1];
-
       if (!events || events.length === 0) {
         // Clear the result
         execution.result = undefined;
         return;
       }
+
+      var event = events[events.length - 1];
 
       execution.result = {
         state: this.determineExecutionState(event),
@@ -383,6 +361,42 @@
       } else {
         return this.eventStates.RUNNING;
       }
+    },
+
+    updateVisibleExecutions: function(visibleExecutions) {
+      // Nothing visible? Nothing to update
+      if (!visibleExecutions || visibleExecutions.length === 0) {
+        return;
+      }
+
+      var that = this;
+
+      // Run through each visible execution and fetch it's event (each is a separate call)
+      var fetchEventsPromises = [];
+      for (var i = 0; i < visibleExecutions.length; i++) {
+        var execution = visibleExecutions[i];
+        if (!that.eventsPerExecution[execution.id]) {
+          fetchEventsPromises.push(that.fetchEvents(that.eventsPerExecution, execution.id));
+        }
+      }
+
+      // Once all the events for every visible execution has completed parse those events to determine what the
+      // execution's 'result' is.
+      that.$q.all(fetchEventsPromises).then(function() {
+        for (var i = 0; i < visibleExecutions.length; i++) {
+          var execution = visibleExecutions[i];
+          that.parseExecution(execution, that.eventsPerExecution[execution.id]);
+        }
+
+        // Also check that there are more events to fetch. If not then stop watching this collection
+        var eventsStillToFetch = _.findIndex(that.parsedHceModel.pipelineExecutions, function(execution) {
+          return angular.isUndefined(that.eventsPerExecution[execution.id]);
+        });
+
+        if (eventsStillToFetch < 0) {
+          that.execWatch();
+        }
+      });
     },
 
     /* eslint-disable */
