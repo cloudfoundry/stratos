@@ -2,14 +2,13 @@
   'use strict';
 
   describe('add-cluster-form directive', function () {
-    var $httpBackend, $scope, element, addClusterFormCtrl, serviceInstanceModel;
+    var $httpBackend, $scope, element, addClusterFormCtrl;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
-      var modelManager = $injector.get('app.model.modelManager');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
       $scope.onCancel = angular.noop;
@@ -24,7 +23,6 @@
       $scope.$apply();
 
       addClusterFormCtrl = element.controller('addClusterForm');
-      serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       spyOn(addClusterFormCtrl, 'onCancel').and.callThrough();
       spyOn(addClusterFormCtrl, 'onSubmit').and.callThrough();
       spyOn(addClusterFormCtrl, 'clearForm').and.callThrough();

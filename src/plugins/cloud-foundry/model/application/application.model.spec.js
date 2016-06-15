@@ -88,7 +88,7 @@
       applicationModel.createApp('guid', newAppSpec);
       applicationModel.getAppSummary('guid', guid);
       $httpBackend.flush();
-      expect(CreateApp.response['201'].body['guid'].entity.name).toBe(newAppSpec.name);
+      expect(CreateApp.response['201'].body.guid.entity.name).toBe(newAppSpec.name);
     });
 
     it('updateApp', function () {
@@ -104,8 +104,8 @@
       applicationModel.update('guid', guid, newAppSpec);
       applicationModel.getAppSummary('guid', guid);
       $httpBackend.flush();
-      expect(UpdateApp.response['201'].body['guid'].entity.name).toBe(newAppSpec.name);
-      expect(UpdateApp.response['201'].body['guid'].metadata.guid).toBe(guid);
+      expect(UpdateApp.response['201'].body.guid.entity.name).toBe(newAppSpec.name);
+      expect(UpdateApp.response['201'].body.guid.metadata.guid).toBe(guid);
     });
 
     it('deleteApp', function () {
@@ -114,7 +114,7 @@
       $httpBackend.expectDELETE(DeleteApp.url);
       applicationModel.deleteApp('guid', 123);
       $httpBackend.flush();
-      expect(DeleteApp.response['204'].body['guid']).toBeDefined();
+      expect(DeleteApp.response['204'].body.guid).toBeDefined();
     });
 
     it('getAppStats', function () {
@@ -126,7 +126,7 @@
       $httpBackend.expectGET(GetDetailedStatsForStartedApp.url);
       applicationModel.getAppStats('guid', guid, params);
       $httpBackend.flush();
-      expect(GetDetailedStatsForStartedApp.response['200'].body['guid']['0'].state).toBe('RUNNING');
+      expect(GetDetailedStatsForStartedApp.response['200'].body.guid['0'].state).toBe('RUNNING');
       expect(applicationModel.application.stats.usage.disk).toBe(66392064);
     });
   });

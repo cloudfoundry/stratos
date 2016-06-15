@@ -60,7 +60,7 @@
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     // Adding a service model for the demo.
-    this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
+    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
@@ -108,6 +108,7 @@
         space: null,
         host: null,
         domain: null,
+        application: null,
         hceCnsi: null,
         source: 'github',
         repo: null,
@@ -132,9 +133,15 @@
             nextBtnText: gettext('Create and continue'),
             cancelBtnText: gettext('Cancel'),
             onNext: function () {
-              that.createApp();
-              // For the demo, we need to pull in the model data. There MUST be a better way to get/store that guid.
-              that.serviceModel.all(that.userInput.serviceInstance.guid, {});
+              that.createApp().then(function () {
+                that.spaceModel.listAllServicesForSpace(
+                  that.userInput.serviceInstance.guid,
+                  that.userInput.space.metadata.guid
+                ).then(function (services) {
+                  that.options.services.length = 0;
+                  [].push.apply(that.options.services, services);
+                });
+              });
             }
           },
           {
@@ -286,8 +293,7 @@
         routeNames: [],
         subflow: 'pipeline',
         serviceInstances: [],
-        // Adding the demo's service model to options.
-        serviceModel: this.serviceModel,
+        services: [],
         organizations: [],
         spaces: [],
         domains: [],
@@ -503,7 +509,12 @@
         that.appModel.createApp(cnsiGuid, {
           name: that.userInput.name,
           space_guid: that.userInput.space.metadata.guid
-        }).then(function (app) {
+        }).then(function (response) {
+          var deferred = that.$q.defer();
+          var app = response[cnsiGuid];
+          var summaryPromise = that.appModel.getAppSummary(cnsiGuid, app.metadata.guid);
+
+          // Add route
           var routeSpec = {
             host: that.userInput.host,
             domain_guid: that.userInput.domain.metadata.guid,
@@ -518,12 +529,19 @@
             routeSpec.path = that.userInput.path;
           }
 
-          that.routeModel.createRoute(cnsiGuid, routeSpec)
+          var routePromise = that.routeModel.createRoute(cnsiGuid, routeSpec)
             .then(function (route) {
               that.routeModel
-                .associateAppWithRoute(cnsiGuid, route.metadata.guid, app[cnsiGuid].metadata.guid)
+                .associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid)
                 .then(resolve, reject);
             });
+
+          var promises = [summaryPromise, routePromise];
+          that.$q.all(promises).then(function () {
+            that.userInput.application = that.appModel.application;
+          }, deferred.reject);
+
+          return deferred.promise;
         });
       });
     },

@@ -48,6 +48,48 @@
         .then(function (response) {
           return response.data[cnsiGuid].resources;
         });
+    },
+
+    /**
+     * @function listAllServicesForSpace
+     * @memberof cloud-foundry.model.space
+     * @description List all services available for space
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the space guid
+     * @param {object} params - extra params to pass to request
+     * @return {promise} A resolved/rejected promise
+     * @public
+     */
+    listAllServicesForSpace: function (cnsiGuid, guid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllServicesForSpace(guid, params, httpConfig)
+        .then(function (response) {
+          return response.data[cnsiGuid].resources;
+        });
+    },
+
+    /**
+     * @function listAllServiceInstancesForSpace
+     * @memberof cloud-foundry.model.space
+     * @description List all service instances available for space
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the space guid
+     * @param {object} params - extra params to pass to request
+     * @return {promise} A resolved/rejected promise
+     * @public
+     */
+    listAllServiceInstancesForSpace: function (cnsiGuid, guid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllServiceInstancesForSpace(guid, params, httpConfig)
+        .then(function (response) {
+          return response.data[cnsiGuid].resources;
+        });
     }
   });
 

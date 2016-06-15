@@ -2,7 +2,7 @@
   'use strict';
 
   describe('service model', function () {
-    var $httpBackend, serviceModel, mockData;
+    var $httpBackend, serviceModel;
 
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry'));
@@ -59,7 +59,7 @@
       var ListAllServices = mock.cloudFoundryAPI.Services.ListAllServices();
       $httpBackend.whenGET(ListAllServices.url).respond(200, ListAllServices.response['200'].body);
       $httpBackend.expectGET(ListAllServices.url);
-      serviceModel.all('guid').then(function (resources) {
+      serviceModel.all('guid').then(function () {
         expect(serviceModel.data).toBeDefined();
       });
       $httpBackend.flush();
