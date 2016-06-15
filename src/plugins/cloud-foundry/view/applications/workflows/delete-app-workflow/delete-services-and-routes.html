@@ -1,55 +1,70 @@
 <div>
-  <p translate>
-    Unchecked items will be orphaned when you delete this app.
-  </p>
 
-  <div class="caption" translate>
-    Select items to be deleted:
+  <div ng-if="wizardCtrl.options.isBusy" class="message-box message-box-no-bg">
+    <p translate>Checking application for associated items that can be safely deleted.</p>
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
 
-  <!-- Routes -->
-  <table class="table table-outlined table-selectable"
-    ng-if="wizardCtrl.options.appModel.application.summary.routes.length">
-    <thead>
-      <tr>
-        <th></th>
-        <th translate>Route</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="route in wizardCtrl.options.appModel.application.summary.routes">
-        <td>
-          <checkbox-input
-            ng-model="wizardCtrl.options.userInput.checkedRouteValue[route.guid]">
-          </checkbox-input>
-        </td>
-        <td>{{ route.host + '.' + route.domain.name  + '/' + route.path }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div ng-if="!wizardCtrl.options.isBusy">
+    <p translate>
+        Unchecked items will be orphaned when you delete this app.
+    </p>
 
-  <!-- Services -->
-  <table class="table table-outlined table-selectable"
-    ng-if="wizardCtrl.options.appModel.application.summary.services.length">
-    <thead>
-      <tr>
-        <th></th>
-        <th translate>Service Name</th>
-        <th translate>Service</th>
-        <th translate>Plan</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="service in wizardCtrl.options.appModel.application.summary.services">
-        <td>
-          <checkbox-input
-            ng-model="wizardCtrl.options.userInput.checkedServiceValue[service.guid]">
-          </checkbox-input>
-        </td>
-        <td>{{ service.name }}</td>
-        <td>{{ service.service_plan.service.label }}</td>
-        <td>{{ service.service_plan.name }}</td>
-      </tr>
-    </tbody>
-  </table>
+    <div class="caption" translate>
+      Select items to be deleted:
+    </div>
+
+    <!-- Routes -->
+    <table class="table table-outlined table-selectable"
+      ng-if="wizardCtrl.options.safeRoutes.length">
+      <thead>
+        <tr>
+          <th></th>
+          <th translate>Route</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="route in wizardCtrl.options.safeRoutes">
+          <td>
+            <checkbox-input
+              ng-model="wizardCtrl.options.userInput.checkedRouteValue[route.guid]">
+            </checkbox-input>
+          </td>
+          <td>{{ route.host + '.' + route.domain.name  + '/' + route.path }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Services -->
+    <table class="table table-outlined table-selectable"
+      ng-if="wizardCtrl.options.appModel.application.summary.services.length">
+      <thead>
+        <tr>
+          <th></th>
+          <th translate>Service Name</th>
+          <th translate>Service</th>
+          <th translate>Plan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="service in wizardCtrl.options.appModel.application.summary.services">
+          <td>
+            <checkbox-input
+              ng-model="wizardCtrl.options.userInput.checkedServiceValue[service.guid]">
+            </checkbox-input>
+          </td>
+          <td>{{ service.name }}</td>
+          <td>{{ service.service_plan.service.label }}</td>
+          <td>{{ service.service_plan.name }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div ng-if="wizardCtrl.options.safeRoutes.length === 0 && wizardCtrl.options.appModel.application.summary.services.length === 0">
+      <p translate>
+        There are no associated items that can be deleted.
+      </p>
+    </div>
+
+  </div>
 </div>
