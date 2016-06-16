@@ -1,5 +1,5 @@
 hash: 1e34e98f801076e16d36ec3bb652feef0c1b91fc402169077771779547edf8db
-updated: 2016-06-13T22:45:13.825359401-04:00
+updated: 2016-06-14T18:06:23.335221077-04:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: c04502f106d7c5b3fae17c5da49a1bbdd3006b3c
@@ -52,7 +52,7 @@ imports:
   - github
   - internal
 - name: golang.org/x/sys
-  version: 7f918dd405547ecb864d14a8ecbbfe205b5f930f
+  version: 5a8c7f28c1853e998847117cf1f3fe96ce88a59f
   subpackages:
   - unix
 - name: google.golang.org/appengine
