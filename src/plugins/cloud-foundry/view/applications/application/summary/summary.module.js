@@ -21,7 +21,7 @@
   ApplicationSummaryController.$inject = [
     'app.model.modelManager',
     '$stateParams',
-    'helion.framework.widgets.detailView'
+    'cloud-foundry.view.applications.application.summary.addRoutes'
 
   ];
 
@@ -33,11 +33,11 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationSummaryController(modelManager, $stateParams, detailView) {
+  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.id = $stateParams.guid;
-    this.detailView = detailView;
+    this.addRoutesService = addRoutesService;
     this.userCnsiModel.list();
   }
 
@@ -61,39 +61,7 @@
      * @public
      **/
     showAddRouteForm: function() {
-
-      // Create a map of domain names -> domain guids
-      var domains = [];
-      this.model.application.summary.available_domains.forEach(function(domain) {
-        domains.push({
-          label: domain.name,
-          value: domain.guid
-        });
-      });
-
-      var spaceGuid = this.model.application.summary.space_guid;
-      var data = {
-        host: null,
-        port: null,
-        path: null,
-        space_guid: spaceGuid,
-        domain_guid: domains[0].value
-      };
-
-      this.detailView(
-        {
-          templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/add-route/add-route.html',
-          title: gettext('Add a Route'),
-          controller: 'addRouteController'
-        },
-        {
-          data: data,
-          options: {
-            domains: domains
-          }
-        }
-      );
-
+      this.addRoutesService.add();
     },
     /**
      * @function hideAddRouteForm
