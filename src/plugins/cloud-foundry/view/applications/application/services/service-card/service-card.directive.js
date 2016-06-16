@@ -7,6 +7,12 @@
 
   serviceCard.$inject = [];
 
+  /**
+   * @memberof cloud-foundry.view.applications.application.services
+   * @name serviceCard
+   * @description The service card directive
+   * @returns {object} The service card directive definition object
+   */
   function serviceCard() {
     return {
       bindToController: {
@@ -29,6 +35,23 @@
     'helion.framework.widgets.detailView'
   ];
 
+  /**
+   * @memberof cloud-foundry.view.applications.application.services.serviceCard
+   * @name ServiceCardController
+   * @description Controller for service card directive
+   * @constructor
+   * @param {object} $scope - the Angular $scope service
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {helion.framework.widgets.detailView} detailView - the detail view service
+   * @property {helion.framework.widgets.detailView} detailView - the detail view service
+   * @property {cloud-foundry.model.application} appModel - the Cloud Foundry application model
+   * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model
+   * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)
+   * @property {array} serviceBindings - the service instances bound to specified app
+   * @property {number} numAttached - the number of service instances bound to specified app
+   * @property {number} numAdded - the number of new service instances bound to specified app
+   * @property {array} actions - the actions that can be performed from this service card
+   */
   function ServiceCardController($scope, modelManager, detailView) {
     var that = this;
     this.detailView = detailView;
@@ -67,6 +90,12 @@
   }
 
   angular.extend(ServiceCardController.prototype, {
+    /**
+     * @function init
+     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @description Fetch service bindings for this app and update content
+     * @returns {void}
+     */
     init: function () {
       var that = this;
       var serviceInstances = _.chain(this.app.summary.services)
@@ -91,6 +120,12 @@
       }
     },
 
+    /**
+     * @function addService
+     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @description Show the add service detail view
+     * @returns {void}
+     */
     addService: function () {
       var that = this;
       var config = {
@@ -110,6 +145,12 @@
         });
     },
 
+    /**
+     * @function detach
+     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @description Detach service instance from app
+     * @returns {void}
+     */
     detach: function () {
       var that = this;
       if (this.serviceBindings.length === 1) {
@@ -120,6 +161,12 @@
       }
     },
 
+    /**
+     * @function manageInstances
+     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @description Show the manage services detail view
+     * @returns {void}
+     */
     manageInstances: function () {
       var config = {
         controller: 'manageServicesController',
@@ -134,6 +181,12 @@
       this.detailView(config, context);
     },
 
+    /**
+     * @function updateActions
+     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @description Update service actions visibility
+     * @returns {void}
+     */
     updateActions: function () {
       this.numAttached = this.serviceBindings.length;
       this.actions[1].hidden = this.numAttached !== 1;

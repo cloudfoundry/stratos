@@ -10,7 +10,7 @@ service-card {
 
   .service-text {
     display: flex;
-    width: 50%;
+    flex-grow: 1;
 
     h4 {
       margin-top: 0;
@@ -19,21 +19,22 @@ service-card {
 
   .service-metadata {
     display: flex;
-    width: 50%;
+    flex-grow: 1;
     padding-left: $hpe-unit-space;
 
-    dt {
-      text-transform: uppercase;
+    dl {
+      flex-grow: 1;
+      dt {
+        text-transform: uppercase;
 
-      &:not(:first-of-type) {
-        margin-top: $hpe-unit-space / 2;
+        &:not(:first-of-type) {
+          margin-top: $hpe-unit-space / 2;
+        }
       }
     }
 
     .service-actions {
-      display: flex;
-      flex-direction: column;
-      margin-left: auto;
+      @include flex-align($flex-direction: column);
       text-align: right;
 
       .actions-menu {
