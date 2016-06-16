@@ -62,14 +62,6 @@
      **/
     showAddRouteForm: function() {
       this.addRoutesService.add();
-    },
-    /**
-     * @function hideAddRouteForm
-     * @description Hide Add a Route form
-     * @public
-     **/
-    hideAddRouteForm: function() {
-      this.addRouteFlyoutActive = false;
     }
   });
 
