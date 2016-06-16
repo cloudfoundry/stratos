@@ -53,7 +53,7 @@
     <div ng-repeat="(sname, svars) in applicationVariablesCtrl.model.application.variables">
       <div ng-repeat="(name, vars) in svars" class="app-variable">
         <div>{{name}}=<span ng-if="!applicationVariablesCtrl.isObject(vars)">{{vars}}</span></div>
-        <pre ng-if="applicationVariablesCtrl.isObject(vars)">{{ applicationVariablesCtrl.prettyJson(vars) }}</pre>
+        <pre ng-if="applicationVariablesCtrl.isObject(vars)">{{ vars | prettyJson }}</pre>
       </div>
     </div>
   </div>

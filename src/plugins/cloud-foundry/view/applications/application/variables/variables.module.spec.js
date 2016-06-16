@@ -2,11 +2,9 @@
   'use strict';
 
   describe('variables view', function () {
-    var $controller, createController;
-    var $rootScope;
-    var cnsi_guid = 'HCF_GUID';
+    var $controller, createController, $rootScope, $q;
+    var cnsiGuid = 'HCF_GUID';
     var guid = 'APP_ID';
-    var $q;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
@@ -16,7 +14,7 @@
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
       var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
-      $stateParams.cnsiGuid = cnsi_guid;
+      $stateParams.cnsiGuid = cnsiGuid;
       $stateParams.guid = guid;
       var ApplicationVariablesController = $state.get('cf.applications.application.variables').controller;
       createController = function (avMgr) {
@@ -34,18 +32,12 @@
       expect($controller.isObject(['name'])).toBe(true);
     });
 
-    it("pretty json checks", function () {
-      var obj = { name: 'value' };
-      expect($controller.prettyJson(obj)).toBe(JSON.stringify(obj, null, 2));
-    });
-
     describe("no variables checks", function () {
       beforeEach(inject(function ($injector) {
-          var modelManager = $injector.get('app.model.modelManager');
-          var model = modelManager.retrieve('cloud-foundry.model.application');
-          model.application = { variables: undefined }
-        }
-      ));
+        var modelManager = $injector.get('app.model.modelManager');
+        var model = modelManager.retrieve('cloud-foundry.model.application');
+        model.application = { variables: undefined };
+      }));
 
       it("should not have any variables", function () {
         expect($controller.hasVariables()).toBe(false);
@@ -54,20 +46,20 @@
 
     describe("with variables checks", function () {
       beforeEach(inject(function ($injector) {
-          var modelManager = $injector.get('app.model.modelManager');
-          //variables.environment_json
-          var model = modelManager.retrieve('cloud-foundry.model.application');
-          model.application = {
-            variables: {
-              environment_json: {
-                'ENV_1': 'TEST1',
-                'env_2': 'test2',
-                'test_3': 'value_3'
-              }
+        var modelManager = $injector.get('app.model.modelManager');
+        //variables.environment_json
+        var model = modelManager.retrieve('cloud-foundry.model.application');
+        model.application = {
+          variables: {
+            environment_json: {
+              ENV_1: 'TEST1',
+              env_2: 'test2',
+              test_3: 'value_3'
             }
           }
-        }
-      ));
+        };
+      }
+    ));
 
       it("should have variables", function () {
         expect($controller.hasVariables()).toBe(true);
@@ -87,13 +79,13 @@
         $httpBackend.flush();
         expect($controller.fetchError).toBe(true);
         expect($controller.isBusy).toBe(false);
-      })
+      });
 
       it("should handle success", function () {
         var data = {
-          'HCF_GUID': {
+          HCF_GUID: {
             environment_json: {
-              'env_1': 'test1'
+              env_1: 'test1'
             }
           }
         };
@@ -107,7 +99,7 @@
         expect($controller.variableNames.length).toBe(1);
         expect($controller.variableNames[0]).toBe('env_1');
         expect($controller.refreshVariables).toHaveBeenCalled();
-      })
+      });
     });
 
     describe("add", function () {
