@@ -87,7 +87,7 @@
        * @returns {boolean}
        */
       delete: function(app) {
-        return this.baseAccess.update(app);
+        return this.baseAccess.delete(app);
       },
 
       /**
