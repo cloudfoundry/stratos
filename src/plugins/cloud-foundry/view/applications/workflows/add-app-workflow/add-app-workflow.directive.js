@@ -100,6 +100,7 @@
 
       var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
       this.data = {};
+      this.errors = {};
 
       this.userInput = {
         name: null,
@@ -133,13 +134,15 @@
             nextBtnText: gettext('Create and continue'),
             cancelBtnText: gettext('Cancel'),
             onNext: function () {
-              return that.createApp().then(function () {
-                that.spaceModel.listAllServicesForSpace(
-                  that.userInput.serviceInstance.guid,
-                  that.userInput.space.metadata.guid
-                ).then(function (services) {
-                  that.options.services.length = 0;
-                  [].push.apply(that.options.services, services);
+              return that.validateNewRoute().then(function () {
+                return that.createApp().then(function () {
+                  that.spaceModel.listAllServicesForSpace(
+                    that.userInput.serviceInstance.guid,
+                    that.userInput.space.metadata.guid
+                  ).then(function (services) {
+                    that.options.services.length = 0;
+                    [].push.apply(that.options.services, services);
+                  });
                 });
               });
             }
@@ -353,6 +356,34 @@
           that.finishWorkflow();
         }
       };
+    },
+
+    /**
+     * @function validateNewRoute
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description check a route exists
+     * @returns {promise} A resolved/rejected promise
+     */
+    validateNewRoute: function () {
+      var that = this;
+      return this.$q(function (resolve, reject) {
+        that.routeModel.checkRouteExists(
+          that.userInput.serviceInstance.guid,
+          that.userInput.domain.metadata.guid,
+          that.userInput.host,
+          that.userInput.path,
+          that.userInput.port
+        )
+        .then(function (data) {
+          if (data && data.code === 10000) {
+            that.errors.invalidRoute = false;
+            resolve();
+          } else {
+            that.errors.invalidRoute = true;
+            reject();
+          }
+        });
+      });
     },
 
     /**
