@@ -31,6 +31,11 @@ $applications-msg-height: 50px;
     font-size: 24px;
   }
 
+  .helion-icon {
+    color: $dove-gray;
+    margin-bottom: $hpe-unit-space * .5;
+  }
+
   .btn span {
     text-transform: none;
     font-size: $font-size-h1;
