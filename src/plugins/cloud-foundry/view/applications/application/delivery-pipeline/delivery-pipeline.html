@@ -4,16 +4,24 @@
     <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
     <h3 translate>You have not set up a delivery pipeline</h3>
   </p>
-  <button class="btn btn-primary" translate>set up delivery pipeline</button>
+  <button ng-click="applicationDeliveryPipelineCtrl.setupPipeline()" class="btn btn-primary" translate>set up delivery pipeline</button>
 </div>
-<div ng-if="applicationDeliveryPipelineCtrl.project">
+<div ng-if="applicationDeliveryPipelineCtrl.isDeleting" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="!applicationDeliveryPipelineCtrl.isDeleting && applicationDeliveryPipelineCtrl.project">
   <div class="card panel panel-default">
     <div class="panel-heading action-header">
       <span translate>Summary</span>
-      <button class="btn btn-link">
+      <a class="btn btn-link" ng-click="applicationDeliveryPipelineCtrl.deletePipeline()">
         <i class="helion-icon helion-icon-Right_Arrow"></i>
         <span translate>Delete Pipeline</span>
-      </button>
+      </a>
+    </div>
+    <div ng-if="applicationDeliveryPipelineCtrl.deleteError" class="alert alert-danger">
+      <p translate>
+        An error occurred deleting this pipeline. Please try again. If this error persists, please contact the administrator.
+      </p>
     </div>
     <div class="panel-body">
       <div class="row">
