@@ -1,36 +1,15 @@
-<div class="service-confirm">
-
-  <div class="success-message col-md-8">
-    <div class="alert alert-success alert-no-bg">
-      <p class="font-semi-bold" translate>Service <span class="category-name" translate>
-        {{ wizardCtrl.options.service.entity.extra.categories }}
-        </span> has been successfully added.</p>
-    </div>
+<div class="service-confirm col-sm-12">
+  <div class="alert alert-info alert-no-bg alert-bordered">
+    <p translate>A best practice for persisting the binding of this service to your application is to update your application's manifest file.</p>
   </div>
-
-  <div class="caution-message col-md-8">
-    <div class="alert alert-warning alert-no-bg">
-      <p translate>
-        Please take a moment to add the following to your application manifest to describe your app's dependency
-        on this service. Adding something to a manifest doesn't persist the binding.
-      </p>
-    </div>
-  </div>
-
-  <div class="manifest col-md-8">
-    <div class="panel panel-bordered">
-      <div class="panel-heading action-header">
-        <span translate>Manifest Snippet</span>
-        <button class="btn btn-link">
-          <i class="helion-icon helion-icon-Right_Arrow"></i>
-          <span translate>Copy</span>
-        </button>
-      </div>
-      <div class="panel-body">
-        <div>Instance 234</div>
-        <div>Type: MongoDB</div>
+  <h4 translate>Add to Manifest</h4>
+  <div class="row">
+    <div class="col-sm-12 col-md-12">
+      <div class="hpe-copy hpe-copy-dark">
+        <pre class="hpe-pre-dark">
+services:
+- {{ wizardCtrl.options.serviceInstance.entity.name }}</span></pre>
       </div>
     </div>
   </div>
-
 </div>

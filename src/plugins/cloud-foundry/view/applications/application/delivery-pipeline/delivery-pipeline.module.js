@@ -20,7 +20,8 @@
 
   ApplicationDeliveryPipelineController.$inject = [
     'app.model.modelManager',
-    '$stateParams'
+    '$stateParams',
+    'helion.framework.widgets.dialog.confirm'
   ];
 
   /**
@@ -28,13 +29,15 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(modelManager, $stateParams) {
+  function ApplicationDeliveryPipelineController(modelManager, $stateParams, confirmDialog) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
+    this.confirmDialog = confirmDialog;
 
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.hceCnsi = null;
@@ -42,6 +45,9 @@
     this.project = null;
     this.notificationTargets = [];
     this.postDeployActions = [];
+
+    this.isDeleting = false;
+    this.deleteError = false;
 
     this.notificationTargetActions = [
       {
@@ -95,6 +101,30 @@
   }
 
   angular.extend(ApplicationDeliveryPipelineController.prototype, {
+    deletePipeline: function () {
+      var that = this;
+      this.confirmDialog({
+        title: 'Delete Pipeline',
+        description: 'Are you sure you want to delete this pipeline?',
+        buttonText: {
+          yes: 'Delete',
+          no: 'Cancel'
+        }
+      }).result.then(function () {
+        that.isDeleting = true;
+        return that.hceModel.removeProject(that.hceCnsi.guid, that.project.id)
+          .then(function () {
+            that.getProject();
+          })
+          .catch(function () {
+            that.deleteError = true;
+          })
+          .finally(function () {
+            that.isDeleting = false;
+          });
+      });
+    },
+
     getProject: function () {
       if (this.hceCnsi) {
         var that = this;

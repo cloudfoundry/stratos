@@ -1,0 +1,6 @@
+FROM nginx
+
+COPY ./conf/nginx.dev.conf /etc/nginx/nginx.conf
+
+EXPOSE 80 443
+CMD [ "nginx", "-g", "daemon off;" ]

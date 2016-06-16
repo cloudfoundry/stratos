@@ -1,5 +1,4 @@
 .delivery-log-execution {
-  margin-right: $hpe-unit-space * 5;
   color: $gray-darker;
 
   .delivery-log-execution-detail {
@@ -11,6 +10,7 @@
     & > dl {
       padding-bottom: $hpe-unit-space;
       padding-left: 0px;
+      padding-top: $hpe-unit-space;
 
       dt, dd {
         padding-top: $hpe-unit-space / 2;
@@ -46,8 +46,12 @@
       }
     }
 
-    .temp-deploying {
-      color:$salmon
+    spinner {
+      width: 14px;
+      height: 14px;
+      .spinner-container {
+        top: 3px;
+      }
     }
   }
 }

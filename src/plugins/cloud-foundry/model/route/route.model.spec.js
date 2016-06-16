@@ -51,7 +51,7 @@
       routeModel.listAllAppsForRoute('guid', '123');
       $httpBackend.flush();
       expect(routeModel.route.id).toBe('123');
-      expect(routeModel.route.apps).toEqual(ListAllAppsForRoute.response['200'].body['guid']);
+      expect(routeModel.route.apps).toEqual(ListAllAppsForRoute.response['200'].body.guid);
     });
 
     it('listAllAppsForRouteWithoutStore', function () {

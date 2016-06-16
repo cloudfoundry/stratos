@@ -51,7 +51,28 @@
       };
       return this.serviceApi.ListAllServices(options, httpConfig)
         .then(function (response) {
-          that.onAll(response.data[cnsiGuid]);
+          return that.onAll(response.data[cnsiGuid]);
+        });
+    },
+
+    /**
+     * @function allServicePlans
+     * @memberof cloud-foundry.model.service
+     * @description LIst all service plans for service
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the service guid
+     * @param {object} options - additional parameters for request
+     * @returns {promise} A promise object
+     * @public
+     */
+    allServicePlans: function (cnsiGuid, guid, options) {
+      var that = this;
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.serviceApi.ListAllServicePlansForService(guid, options, httpConfig)
+        .then(function (response) {
+          return that.onAllServicePlans(response.data[cnsiGuid]);
         });
     },
 
@@ -93,18 +114,33 @@
 
     /**
      * @function onAll
-     * @memberof  cloud-foundry.model.service
+     * @memberof cloud-foundry.model.service
      * @description onAll handler at model layer
      * @param {string} response - the json return from the api call
+     * @returns {object} The response
      * @private
      */
     onAll: function (response) {
-      this.data = response;
+      this.data = response.resources;
+      return response.resources;
+    },
+
+    /**
+     * @function onAllServicePlans
+     * @memberof cloud-foundry.model.service
+     * @description onAllServicePlans handler at model layer
+     * @param {string} response - the JSON returned from API call
+     * @returns {object} The response
+     * @private
+     */
+    onAllServicePlans: function (response) {
+      this.data.servicePlans = response.resources;
+      return response.resources;
     },
 
     /**
      * @function onUsage
-     * @memberof  cloud-foundry.model.service
+     * @memberof cloud-foundry.model.service
      * @description onUsage handler at model layer
      * @param {string} response - the return from the api call
      * @private
@@ -115,7 +151,7 @@
 
     /**
      * @function onFiles
-     * @memberof  cloud-foundry.model.service
+     * @memberof cloud-foundry.model.service
      * @description onFiles handler at model layer
      * @param {string} response - the return from the api call
      * @private

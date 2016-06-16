@@ -176,12 +176,13 @@ gulp.task('browsersync', function (callback) {
   try {
     // Need a JSON file named 'dev_config.json'
     var devOptions = require('./dev_config.json');
-    // Need key 'api' with the URL to the API server
-    proxyOptions = node_url.parse(devOptions.api);
-    proxyOptions.route = '/api';
-    gutil.log('Proxying API requests to:', gutil.colors.magenta(devOptions.api));
+    // Need key 'pp' with the URL to the API server
+    proxyOptions = node_url.parse(devOptions.pp);
+    proxyOptions.route = '/pp';
+    gutil.log('Proxying API requests to:', gutil.colors.magenta(devOptions.pp));
   } catch (e) {
-    throw new gutil.PluginError('browsersync', 'dev_config.json file is required with API endpoint configuration');
+    throw new gutil.PluginError('browsersync', 'dev_config.json file is required with portal-proxy(pp) endpoint' +
+      'configuration');
   }
 
   browserSync.init({
