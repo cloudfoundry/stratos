@@ -1,4 +1,0 @@
----
-applications:
-- name: stratos-ui
-  mem: 128M

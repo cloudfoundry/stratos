@@ -1,0 +1,48 @@
+.manage-instances {
+  padding: $hpe-unit-space*2 $hpe-unit-space*4;
+
+  .manage-instances-header {
+    display: flex;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+    }
+
+    .close {
+      margin-left: auto;
+    }
+  }
+
+  .service-description {
+    display: flex;
+    padding: $hpe-unit-space 0;
+
+    .helion-icon.service-icon {
+      padding: $hpe-unit-space;
+    }
+  }
+
+  .btn-link {
+    &:hover,
+    &:focus,
+    &:active {
+      text-decoration: none;
+      outline: 0;
+    }
+  }
+
+  .min-col-header {
+    width: 1px;
+    white-space: nowrap;
+  }
+}
+
+.env-variables {
+  margin-right: $hpe-unit-space * 4;
+  margin-top: $hpe-unit-space;
+
+  pre {
+    white-space: pre-wrap;
+  }
+}

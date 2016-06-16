@@ -1,5 +1,4 @@
 .delivery-log-event {
-  margin-right: $hpe-unit-space * 5;
   color: $gray-darker;
   height: calc(100% - 128px);
 }
@@ -15,7 +14,8 @@
   }
 }
 
-// TODO: Move to ui-theme
+// TODO: Move to helion-ui-theme or default in helion-ui-framework
 .detail-view-content {
   height: 100%;
+  margin-right: $hpe-unit-space * 5;
 }

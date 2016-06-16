@@ -34,6 +34,26 @@
   angular.extend(ServiceBinding.prototype, {
 
     /**
+     * @function createServiceBinding
+     * @memberof cloud-foundry.model.serviceBinding
+     * @description Create a service binding
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {object} bindingSpec - the binding spec
+     * @returns {promise} A promise object
+     * @public
+     */
+    createServiceBinding: function (cnsiGuid, bindingSpec) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
+        .CreateServiceBinding(bindingSpec, {}, httpConfig)
+        .then(function (response) {
+          return response.data[cnsiGuid];
+        });
+    },
+
+    /**
      * @function deleteServiceBinding
      * @memberof  cloud-foundry.model.serviceBinding
      * @description delete a particular service binding
@@ -67,7 +87,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
         .ListAllServiceBindings(params, httpConfig)
         .then(function (response) {
-          return response.data.resources;
+          return response.data[cnsiGuid].resources;
         });
     }
   });

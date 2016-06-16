@@ -24,6 +24,7 @@
   AddAppWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
+    'github.view.githubOauthService',
     '$scope',
     '$q'
   ];
@@ -47,18 +48,19 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function AddAppWorkflowController(modelManager, eventService, $scope, $q) {
+  function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q) {
     var that = this;
 
     this.$scope = $scope;
     this.$q = $q;
     this.addingApplication = false;
     this.eventService = eventService;
+    this.githubOauthService = githubOauthService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     // Adding a service model for the demo.
-    this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
+    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
@@ -106,6 +108,7 @@
         space: null,
         host: null,
         domain: null,
+        application: null,
         hceCnsi: null,
         source: 'github',
         repo: null,
@@ -126,19 +129,28 @@
           {
             title: gettext('Name'),
             templateUrl: path + 'name.html',
-            form: 'application-name-form',
+            formName: 'application-name-form',
             nextBtnText: gettext('Create and continue'),
             cancelBtnText: gettext('Cancel'),
             onNext: function () {
-              that.createApp();
-              // For the demo, we need to pull in the model data. There MUST be a better way to get/store that guid.
-              that.serviceModel.all(that.userInput.serviceInstance.guid, {});
+              return that.createApp().then(function () {
+                that.spaceModel.listAllServicesForSpace(
+                  that.userInput.serviceInstance.guid,
+                  that.userInput.space.metadata.guid
+                ).then(function (services) {
+                  that.options.services.length = 0;
+                  [].push.apply(that.options.services, services);
+                });
+              });
             }
           },
           {
             title: gettext('Services'),
             templateUrl: path + 'services.html',
-            nextBtnText: gettext('Next')
+            nextBtnText: gettext('Next'),
+            onNext: function () {
+              that.userInput.services = that.appModel.application.summary.services;
+            }
           },
           {
             title: gettext('Delivery'),
@@ -157,20 +169,33 @@
             ready: true,
             title: gettext('Select Source'),
             templateUrl: path + 'pipeline-subflow/select-source.html',
+            formName: 'application-source-form',
             nextBtnText: gettext('Next'),
             onNext: function () {
-              // TODO (kdomico): Get or create fake HCE user until HCE API is complete
-              that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
-                .then(angular.noop, function (response) {
-                  if (response.status === 404) {
-                    that.hceModel.createUser(that.userInput.hceCnsi.guid, '123456', 'login', 'token');
-                  }
-                });
+              try {
+                 // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+                 that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
+                  .then(angular.noop, function (response) {
+                    if (response.status === 404) {
+                      that.hceModel.createUser(that.userInput.hceCnsi.guid, '123456', 'login', 'token');
+                    }
+                  });
+              } catch (err) {}
 
-              return that.githubModel.repos()
+              var oauth;
+              if (that.userInput.source === 'github') {
+                oauth = that.githubOauthService.start();
+              } else {
+                oauth = $q.defer().resolve();
+                oauth = oauth.promise;
+              }
+
+              return oauth
                 .then(function () {
-                  var repos = _.filter(that.githubModel.data.repos,
-                                       function (o) { return o.permissions.admin; });
+                  return that.githubModel.repos();
+                })
+                .then(function () {
+                  var repos = _.filter(that.githubModel.data.repos || [], function (o) { return o.permissions.admin; });
                   [].push.apply(that.options.repos, repos);
                 });
             }
@@ -179,6 +204,7 @@
             ready: true,
             title: gettext('Select Repository'),
             templateUrl: path + 'pipeline-subflow/select-repository.html',
+            formName: 'application-repo-form',
             nextBtnText: gettext('Next'),
             onNext: function () {
               that.getPipelineDetailsData();
@@ -212,6 +238,7 @@
             ready: true,
             title: gettext('Pipeline Details'),
             templateUrl: path + 'pipeline-subflow/pipeline-details.html',
+            formName: 'application-pipeline-details-form',
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
               that.hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
@@ -237,12 +264,14 @@
             ready: true,
             title: gettext('Notifications'),
             templateUrl: path + 'pipeline-subflow/notifications.html',
+            formName: 'application-pipeline-notification-form',
             nextBtnText: gettext('Skip')
           },
           {
             ready: true,
             title: gettext('Deploy App'),
             templateUrl: path + 'pipeline-subflow/deploy.html',
+            formName: 'application-pipeline-deploy-form',
             nextBtnText: gettext('Finished code change'),
             isLastStep: true
           }
@@ -250,8 +279,9 @@
         cli: [
           {
             ready: true,
-            title: gettext('Deploy'),
+            title: gettext('Deploy App'),
             templateUrl: path + 'cli-subflow/deploy.html',
+            formName: 'application-cli-deploy-form',
             nextBtnText: gettext('Finished with code change'),
             isLastStep: true
           }
@@ -261,10 +291,12 @@
       this.options = {
         workflow: that.data.workflow,
         userInput: this.userInput,
+        errors: this.errors,
+        appNames: [],
+        routeNames: [],
         subflow: 'pipeline',
         serviceInstances: [],
-        // Adding the demo's service model to options.
-        serviceModel: this.serviceModel,
+        services: [],
         organizations: [],
         spaces: [],
         domains: [],
@@ -414,6 +446,16 @@
       };
     },
 
+    /**
+     * @function redefineWorkflowWithoutHce
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description redefine the workflow if there is no HCE service instances registered
+     */
+    redefineWorkflowWithoutHce: function () {
+      this.data.workflow.steps.pop();
+      [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
+    },
+
     getHceInstances: function () {
       var that = this;
       this.cnsiModel.list().then(function () {
@@ -422,6 +464,9 @@
         if (hceCnsis.length > 0) {
           var hceOptions = _.map(hceCnsis, function (o) { return { label: o.api_endpoint.Host, value: o }; });
           [].push.apply(that.options.hceCnsis, hceOptions);
+          that.userInput.hceCnsi = hceOptions[0].value;
+        } else {
+          that.redefineWorkflowWithoutHce();
         }
       });
     },
@@ -467,7 +512,12 @@
         that.appModel.createApp(cnsiGuid, {
           name: that.userInput.name,
           space_guid: that.userInput.space.metadata.guid
-        }).then(function (app) {
+        }).then(function (response) {
+          var deferred = that.$q.defer();
+          var app = response[cnsiGuid];
+          var summaryPromise = that.appModel.getAppSummary(cnsiGuid, app.metadata.guid);
+
+          // Add route
           var routeSpec = {
             host: that.userInput.host,
             domain_guid: that.userInput.domain.metadata.guid,
@@ -482,12 +532,19 @@
             routeSpec.path = that.userInput.path;
           }
 
-          that.routeModel.createRoute(cnsiGuid, routeSpec)
+          var routePromise = that.routeModel.createRoute(cnsiGuid, routeSpec)
             .then(function (route) {
               that.routeModel
-                .associateAppWithRoute(cnsiGuid, route.metadata.guid, app[cnsiGuid].metadata.guid)
+                .associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid)
                 .then(resolve, reject);
             });
+
+          var promises = [summaryPromise, routePromise];
+          that.$q.all(promises).then(function () {
+            that.userInput.application = that.appModel.application;
+          }, deferred.reject);
+
+          return deferred.promise;
         });
       });
     },
@@ -532,6 +589,25 @@
       var that = this;
       this.addingApplication = true;
       this.reset();
+
+      var updateApps = this.appModel.all();
+      updateApps.then(function () {
+        angular.forEach(that.appModel.data.applications, function (cnsiApps) {
+          [].push.apply(that.options.appNames, _.map(cnsiApps.resources, function (app) {
+            return app.entity.name;
+          }));
+        });
+      });
+
+      var updateRoutes = this.routeModel.listAllRoutes({});
+      updateRoutes.then(function (data) {
+        angular.forEach(data, function (cnsiRoute) {
+          [].push.apply(that.options.routeNames, _.map(cnsiRoute.resources, function (route) {
+            return route.entity.host;
+          }));
+        });
+      });
+
       this.getHceInstances();
       this.serviceInstanceModel.list()
         .then(function (serviceInstances) {

@@ -13,8 +13,8 @@
       serviceInstance = modelManager.retrieve('app.model.serviceInstance');
 
       mockData = [
-        { id: 1, name: 'cluster1', url:' cluster1_url' },
-        { id: 2, name: 'cluster2', url:' cluster2_url' }
+        { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf' },
+        { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'hce' }
       ];
     }));
 
@@ -32,17 +32,38 @@
       expect(serviceInstance.serviceInstances).toEqual([]);
     });
 
+    it('should POST correct data on create()', function () {
+      var response = { cnsi_type: 'hcf', api_endpoint: 'url', name: 'name' };
+      var data = { api_endpoint: 'url', cnsi_name: 'name' };
+      $httpBackend.expectPOST('/pp/v1/register/hcf', $httpParamSerializer(data)).respond(200, response);
+      serviceInstance.create('url', 'name')
+        .then(function () {
+          var serviceInstances = serviceInstance.serviceInstances;
+          expect(serviceInstances.length).toBe(1);
+        });
+      $httpBackend.flush();
+    });
+
+    it('should POST correct service instance on remove()', function () {
+      var data = { cnsi_guid: 'cnsi_guid' };
+      $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, {});
+      $httpBackend.expectPOST('/pp/v1/unregister', $httpParamSerializer(data)).respond(200, {});
+      serviceInstance.remove({ guid: 'cnsi_guid' });
+      $httpBackend.flush();
+    });
+
     it('should set `serviceInstances` on list()', function () {
       var expectedData = [
-        { id: 1, name: 'cluster1', url:' cluster1_url' },
-        { id: 2, name: 'cluster2', url:' cluster2_url' }
+        { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf' },
+        { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'hce' }
       ];
 
       $httpBackend.when('GET', '/pp/v1/cnsis')
         .respond(200, mockData);
 
-      serviceInstance.list().then(function () {
+      serviceInstance.list().then(function (response) {
         expect(serviceInstance.serviceInstances).toEqual(expectedData);
+        expect(response.numAvailable).toBe(1);
       });
 
       $httpBackend.flush();
@@ -68,27 +89,6 @@
         expect(serviceInstance.serviceInstances).toEqual([]);
       });
 
-      $httpBackend.flush();
-    });
-
-    it('should POST correct data on create()', function () {
-      var mockRespondData = { id: 1, url: 'url', name: 'name' };
-      var postData = $httpParamSerializer({ api_endpoint: 'url', cnsi_name: 'name' });
-      $httpBackend.expectPOST('/pp/v1/register/hcf', postData)
-        .respond(200, mockRespondData);
-      serviceInstance.create('url', 'name')
-        .then(function () {
-          var serviceInstances = serviceInstance.serviceInstances;
-          expect(serviceInstances.length).toBe(1);
-          expect(serviceInstances[0]).toEqual({ id: 1, url: 'url', name: 'name' });
-        });
-      $httpBackend.flush();
-    });
-
-    it('should DELETE correct service instance on remove()', function () {
-      $httpBackend.expectDELETE('/api/service-instances/1').respond(200, '');
-      var mockInstance = { id: 1, name: 'cluster1', url:' cluster1_url' };
-      serviceInstance.remove(mockInstance);
       $httpBackend.flush();
     });
   });

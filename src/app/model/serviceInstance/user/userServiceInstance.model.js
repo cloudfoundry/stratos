@@ -93,6 +93,7 @@
           var guids = _.map(items, 'guid') || [];
 
           that.serviceInstances = {};
+          that.numValid = 0;
 
           if (_.isEmpty(guids)) {
             deferred.resolve(that.serviceInstances);

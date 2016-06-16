@@ -8,7 +8,7 @@
 
     createUser: function (userId, login, vcs, secret) {
       return {
-        url: '/api/ce/v2/users',
+        url: '/pp/v1/proxy/v2/users',
         response: {
           201: {
             body: {
@@ -29,7 +29,7 @@
 
     getUser: function (userId) {
       return {
-        url: '/api/ce/v2/users/' + userId,
+        url: '/pp/v1/proxy/v2/users/' + userId,
         response: {
           200: {
             body: {

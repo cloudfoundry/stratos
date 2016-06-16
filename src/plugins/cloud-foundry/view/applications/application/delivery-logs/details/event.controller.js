@@ -17,14 +17,15 @@
   /**
    * @name EventDetailViewController
    * @constructor
-   * @param {object} $timeout - Angular timeout service
+   * @param {object} $timeout - the angular $timeout service
    * @param {object} $log - the Angular $log service
-   * @param {object} context -
-   * @param {object} content -
+   * @param {object} context - parameter object passed in to DetailView
+   * @param {object} content - configuration object passed in to DetailView
    * @param {object} moment - the moment timezone component
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @property {object} context -
-   * @property {object} content -
+   * @property {object} context - parameter object passed in to DetailView
+   * @property {object} content - configuration object passed in to DetailView
+   * @property {object} log - The log / artifact associated with the event
    * @property {string} duration - The duration of the event
    */
   function EventDetailViewController($timeout, $log, context, content, moment, modelManager) {

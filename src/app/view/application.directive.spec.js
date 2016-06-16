@@ -18,8 +18,9 @@
       $compile($element)($scope);
       $scope.$apply();
       applicationCtrl = $element.controller('application');
-      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, { items: [] });
-      $httpBackend.when('GET', '/api/gh/token').respond(200, { token: 'token' });
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, { guid: {} });
+      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
     }));
 
     afterEach(function() {
@@ -199,8 +200,11 @@
         });
 
         it('should not show cluster registration if cluster count > 0', function () {
+          var responseData = [
+            { id: 1, name: 'name', api_endpoint: { Scheme: 'http', Host: 'api.host.com' }, cnsi_type: 'hcf' }
+          ];
           $httpBackend.when('GET', '/pp/v1/cnsis')
-            .respond(200, [{ id: 1, url: 'url', name: 'name' }]);
+            .respond(200, responseData);
 
           applicationCtrl.login('admin', 'admin');
           $httpBackend.flush();

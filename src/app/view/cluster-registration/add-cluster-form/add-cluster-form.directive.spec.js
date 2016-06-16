@@ -44,6 +44,10 @@
       expect(addClusterFormCtrl.name).toBe(null);
     });
 
+    it('should have `existingApiEndpoints` initially empty', function () {
+      expect(addClusterFormCtrl.existingApiEndpoints).toEqual([]);
+    });
+
     it('should have `onCancel` and `onSubmit` initially bound', function () {
       expect(addClusterFormCtrl.onCancel).toBeDefined();
       expect(addClusterFormCtrl.onSubmit).toBeDefined();

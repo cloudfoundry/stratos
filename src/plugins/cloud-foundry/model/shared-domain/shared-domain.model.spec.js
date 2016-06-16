@@ -21,7 +21,7 @@
       var ListAllSharedDomains = mock.cloudFoundryAPI.SharedDomains.ListAllSharedDomains();
       $httpBackend.whenGET(ListAllSharedDomains.url).respond(200, ListAllSharedDomains.response['200'].body);
       $httpBackend.expectGET(ListAllSharedDomains.url);
-      sharedDomainModel.listAllSharedDomains({}).then(function (resources) {
+      sharedDomainModel.listAllSharedDomains('guid', {}).then(function (resources) {
         result = resources;
       });
       $httpBackend.flush();

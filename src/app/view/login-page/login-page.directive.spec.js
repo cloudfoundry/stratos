@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  // Fix me test
   describe('login-page directive', function () {
     var $element, $controller;
 
@@ -21,6 +22,13 @@
         },
         navigator: {
           userAgent: null
+        },
+        addEventListener: function (event, callback) {
+          if (event === 'message') {
+            return callback({
+              data: '{"name":"GitHub Oauth - token"}'
+            });
+          }
         }
       });
       $provide.value('smoothScroll', angular.noop);

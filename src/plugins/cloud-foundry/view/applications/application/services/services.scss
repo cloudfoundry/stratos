@@ -1,55 +1,7 @@
+@import "manage-services/manage-services";
+@import "service-card/service-card";
+
 .service-panel {
   display: flex;
   align-items: stretch;
-}
-
-.service-text {
-  display: flex;
-}
-
-.service-icon {
-  display: block;
-  padding: $hpe-unit-space * 1.5;
-  padding-left: 0;
-}
-
-.service-metadata {
-  display: flex;
-  padding-left: $hpe-unit-space;
-
-  dt {
-    text-transform: uppercase;
-
-    &:not(:first-of-type) {
-      margin-top: $hpe-unit-space / 2;
-    }
-  }
-
-  .service-actions {
-    display: flex;
-    flex-direction: column;
-    margin-left: auto;
-    text-align: right;
-
-    .btn-link {
-      margin-top: auto;
-      padding-right: 0;
-
-      &:hover,
-      &:focus,
-      &:active {
-        text-decoration: none;
-      }
-
-      .helion-icon {
-        font-weight: $hpe-font-weight-semibold;
-      }
-    }
-  }
-
-  .service-attached:before {
-    font-family: 'helion-icons';
-    content: '\e916';
-    margin-right: 5px;
-  }
 }

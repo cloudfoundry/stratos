@@ -1,10 +1,10 @@
 <div class="add-cluster-form">
   <h2 translate>Register Cluster</h2>
-  <p translate>Enter the cluster API endpoint and name</p>
+  <p translate>Enter the cluster API endpoint URL and name</p>
   <form name="addClusterFormCtrl.addClusterForm" ng-submit="addClusterFormCtrl.addCluster()">
     <div class="form-group" focusable-input
       ng-class="{'has-error': addClusterFormCtrl.addClusterForm.url.$invalid && addClusterFormCtrl.addClusterForm.url.$dirty}">
-      <label class="control-label" translate>Cluster Address</label>
+      <label class="control-label" translate>Cluster URL</label>
       <input type="text" name="url" class="form-control" ng-model="addClusterFormCtrl.url"
         ng-pattern="/^http(s)?://api\.(.)+$/" required
         helion-unique items="addClusterFormCtrl.existingApiEndpoints" ignore-case/>
