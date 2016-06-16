@@ -49,14 +49,16 @@
 
       _createAccessCheckerList: function(flags) {
 
+        var ServiceInstanceAccess = modelManager
+          .retrieve('cloud-foundry.model.auth.checkers.serviceInstanceAccess');
         var OrganizationAccess = modelManager
           .retrieve('cloud-foundry.model.auth.checkers.organizationAccess');
-        var ServiceInstanceAccess = modelManager
-          .retrieve('cloud-foundry.model.auth.checkers.ServiceInstanceAccess');
-        var RouteAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.RouteAccess');
+        var RouteAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.routeAccess');
         var ApplicationAccess = modelManager
-          .retrieve('cloud-foundry.model.auth.checkers.ApplicationAccess');
+          .retrieve('cloud-foundry.model.auth.checkers.applicationAccess');
+
         var checkers = [];
+
         checkers.push(new OrganizationAccess(this));
         checkers.push(new ServiceInstanceAccess(this, flags));
         checkers.push(new RouteAccess(this, flags));
@@ -89,8 +91,8 @@
 
       _getAccessChecker: function(resourceType, flags) {
         var checkers = this._createAccessCheckerList(flags);
-        return checkers.find(function(x) {
-          return x.canHandle(resourceType);
+        return _.find(checkers, function(checker) {
+          return checker.canHandle(resourceType);
         });
       }
     });

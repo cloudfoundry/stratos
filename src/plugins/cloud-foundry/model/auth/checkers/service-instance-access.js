@@ -17,7 +17,7 @@
 
   function register(modelManager) {
     modelManager.register('cloud-foundry.model.auth.checkers.serviceInstanceAccess',
-      ServiceInstanceAccessFactory);
+      ServiceInstanceAccessFactory(modelManager));
   }
 
 
@@ -27,8 +27,7 @@
       this.principal = principal;
       this.flags = flags;
 
-      // Moved from inheritance to composition
-      this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess');
+      this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
     angular.extend(ServiceInstanceAccess.prototype, {

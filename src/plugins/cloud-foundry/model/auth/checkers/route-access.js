@@ -30,7 +30,7 @@
 
     }
 
-    angular.extend(RouteAccess.prototype,  {
+    angular.extend(RouteAccess.prototype, {
       create: function(space) {
 
         // Admin

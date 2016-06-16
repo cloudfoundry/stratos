@@ -32,6 +32,13 @@
 
     angular.extend(OrganizationAccess.prototype, {
 
+      create: function() {
+        return this.principal.isAdmin();
+      },
+
+      delete: function() {
+        return this.principal.isAdmin();
+      },
       // TODO
       update: function(org) {
         if (this.baseAccess.update(org)) {
