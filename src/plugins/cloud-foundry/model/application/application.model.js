@@ -131,6 +131,37 @@
     },
 
     /**
+     * @function getAppVariables
+     * @memberof cloud-foundry.model.application
+     * @description get variables of an application at the model layer
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - the application id
+     * @returns {promise} a promise object
+     * @public
+     **/
+    getAppVariables: function (cnsiGuid, guid) {
+      var that = this;
+      var config = {
+        headers: {
+          'x-cnap-cnsi-list': cnsiGuid
+        }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetEnvForApp(guid, {}, config)
+        .then(function (response) {
+          var data = response.data[cnsiGuid];
+          if (data.error_code) {
+            throw data;
+          } else {
+            return response.data[cnsiGuid];
+          }
+        })
+        .then(function (data) {
+          that.application.variables = data;
+        });
+    },
+
+    /**
      * @function listServiceBindings
      * @memberof cloud-foundry.model.application
      * @description List service bindings for application
@@ -139,7 +170,7 @@
      * @param {object} params - the extra params to pass to request
      * @returns {promise} A promise object
      * @public
-     */
+     **/
     listServiceBindings: function (cnsiGuid, guid, params) {
       var config = {
         headers: { 'x-cnap-cnsi-list': cnsiGuid }
@@ -279,7 +310,10 @@
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
       return applicationApi.UpdateApp(guid, newAppSpec, {}, config)
         .then(function (response) {
-          that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
+          if(response.data[cnsiGuid].metadata) {
+            that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
+          }
+          return response.data[cnsiGuid];
         });
     },
 

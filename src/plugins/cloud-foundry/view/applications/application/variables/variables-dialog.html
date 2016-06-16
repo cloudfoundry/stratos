@@ -1,0 +1,37 @@
+<div class="detail-view-content add-variable-dialog">
+  <div class="detail-view-header">
+    <h4 ng-if="!appVarCtrl.isEdit" translate>Add New Variable</h4>
+    <h4 ng-if="appVarCtrl.isEdit" translate>Edit Variable</h4>
+  </div>
+  <button type="button" class="detail-view-close close" ng-click="$dismiss()"></button>
+  <div class="add-variable-form">
+    <p ng-if="!appVarCtrl.isEdit" translate>New variables will not be applied until the application is manually restarted.</p>
+    <p ng-if="appVarCtrl.isEdit" translate>Changes to this variable will not be applied until the application is manually restarted.</p>
+    <form name="appVarCtrl.addVariableForm" ng-submit="appVarCtrl.applyChange()">
+      <div class="form-group" focusable-input>
+        <label class="control-label" translate>Name</label>
+        <input type="text" name="var_name" class="form-control" ng-model="appVarCtrl.varName" required ng-readonly="appVarCtrl.isEdit"/>
+      </div>
+      <div class="form-group" focusable-input>
+        <label class="control-label" translate>Value</label>
+        <input type="text" class="form-control" ng-model="appVarCtrl.varValue" required/>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-default"
+                ng-click="$dismiss()" translate>Cancel</button>
+        <button ng-if="!appVarCtrl.isEdit" type="submit" class="btn btn-primary"
+                ng-disabled="appVarCtrl.addVariableForm.$invalid" translate>Add Variable</button>
+        <button ng-if="appVarCtrl.isEdit" type="submit" class="btn btn-primary"
+                ng-disabled="appVarCtrl.addVariableForm.$invalid" translate>Update Variable</button>
+      </div>
+    </form>
+    <div ng-if="appVarCtrl.addError" class="alert alert-danger">
+      <p ng-if="!appVarCtrl.isEdit" translate>
+        There was a problem adding this variable. Please try again. If this error persists, please contact the administrator.
+      </p>
+      <p ng-if="appVarCtrl.isEdit" translate>
+        There was a problem updating this variable. Please try again. If this error persists, please contact the administrator.
+      </p>
+    </div>
+  </div>
+</div>
