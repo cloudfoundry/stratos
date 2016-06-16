@@ -27,6 +27,15 @@
         case 'STOPPED':
           icon = 'helion-icon-Critical_S text-danger';
           break;
+        case 'ok':
+          icon = 'helion-icon-Active_S text-primary';
+          break;
+        case 'warning':
+          icon = 'helion-icon-Warning_S text-warning';
+          break;
+        case 'error':
+          icon = 'helion-icon-Critical_S text-danger';
+          break;
         default:
           icon = '';
       }

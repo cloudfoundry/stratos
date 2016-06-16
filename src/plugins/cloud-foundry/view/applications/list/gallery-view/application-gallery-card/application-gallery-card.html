@@ -3,10 +3,10 @@
   <dl class="dl-horizontal">
     <dt translate>App State</dt>
     <dd class="text-capitalize">
-      {{applicationGalleryCardCtrl.app.entity.state | lowercase}}
+      {{applicationGalleryCardCtrl.app.state.label | lowercase}}
       <span class="app-status">
         <span ng-if="applicationGalleryCardCtrl.app.entity.state !== 'PENDING'"
-          class="helion-icon {{ applicationGalleryCardCtrl.app.entity.state | appStateIcon }}">
+          class="helion-icon {{ applicationGalleryCardCtrl.app.state.indicator | appStateIcon }}">
         </span>
         <bounce-spinner classes="bounce-spinner-sm"
           ng-if="applicationGalleryCardCtrl.app.entity.state === 'PENDING'">

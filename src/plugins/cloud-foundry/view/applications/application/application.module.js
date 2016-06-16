@@ -71,6 +71,7 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
+    this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.isPending = this.model.application.summary.state === 'PENDING';
     this.UPDATE_INTERVAL = 1000; // milliseconds
@@ -152,6 +153,13 @@
   angular.extend(ApplicationController.prototype, {
     init: function () {
       var that = this;
+      this.ready = false;
+      this.model.getAppSummary(this.cnsiGuid, this.id)
+        .then(that.model.getAppStats(that.cnsiGuid, that.id))
+        .finally(function() {
+          that.ready = true;
+        });
+
       this.model.application.project = null;
 
       /* eslint-disable */

@@ -18,4 +18,13 @@
       text-align: right;
     }
   }
+
+  .app-status-block {
+    line-height: 0;
+
+    .app-status {
+      margin-left: 0;
+      margin-right: 2px;
+    }
+  }
 }

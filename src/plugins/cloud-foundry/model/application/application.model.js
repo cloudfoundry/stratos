@@ -13,11 +13,13 @@
 
   registerApplicationModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.application.stateService',
+    '$q'
   ];
 
-  function registerApplicationModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.application', new Application(apiManager, modelManager));
+  function registerApplicationModel(modelManager, apiManager, appStateService, $q) {
+    modelManager.register('cloud-foundry.model.application', new Application(apiManager, modelManager, appStateService, $q));
   }
 
   /**
@@ -32,11 +34,13 @@
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @class
    */
-  function Application(apiManager, modelManager) {
+  function Application(apiManager, modelManager, appStateService,$q) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
+    this.appStateService = appStateService;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.$q = $q;
     this.data = {};
     this.application = {
       summary: {
@@ -65,7 +69,26 @@
                    .value();
       return this.applicationApi.ListAllApps(options, {headers: { 'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
-          that.onAll(response);
+          // For all of the apps in the running state, we may need to get stats in order to be able to
+          // determine the user-friendly state of the application
+          var tasks = [];
+          _.each(response.data, function (appsResponse, cnsi) {
+            _.each(appsResponse.resources, function(app) {
+              if(app.entity.state === 'STARTED') {
+                // We need more information
+                tasks.push(that.returnAppStats(cnsi, app.metadata.guid).then(function(stats) {
+                  app.instances = stats.data[cnsi];
+                  app.state = that.appStateService.get(app.entity, app.instances);
+                  return stats.data[cnsi];
+                }));
+              } else {
+                app.state = that.appStateService.get(app.entity);
+              }
+            });
+          });
+          return that.$q.all(tasks).then(function () {
+            return that.onAll(response);
+          });
         });
     },
 
@@ -124,6 +147,7 @@
         .GetAppSummary(guid, {}, config)
         .then(function (response) {
           that.onSummary(response.data[cnsiGuid]);
+          return response;
         });
     },
 
@@ -186,6 +210,7 @@
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .UpdateApp(guid, {state: 'STARTED'})
+        .then(that.getAppStats(cnsiGuid, guid))
         .then(
           function (response) {
             var data = response.data[cnsiGuid];
@@ -323,6 +348,15 @@
      */
     getAppStats: function (cnsiGuid, guid, params) {
       var that = this;
+      return that.returnAppStats(cnsiGuid, guid, params).then(function (response) {
+        var data = response.data[cnsiGuid];
+        that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
+        // Stats for all instances
+        that.application.instances = data;
+      });
+    },
+
+    returnAppStats: function (cnsiGuid, guid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetDetailedStatsForStartedApp(guid, params)
         .then(function (response) {
@@ -391,6 +425,7 @@
      */
     onSummary: function (response) {
       this.application.summary = response;
+      this.onAppStateChange();
     },
 
     /**
@@ -403,6 +438,10 @@
     onAppStateChangeSuccess: function (response) {
       this.application.summary.state = response.entity.state;
       this.appStateSwitchTo = '';
+
+      console.log('app state change occurred');
+      console.log(this.application.summary.state);
+      this.onAppStateChange();
     },
 
     /**
@@ -414,11 +453,17 @@
     onAppStateChangeFailure: function () {
       this.application.summary.state = 'ERROR';
       this.appStateSwitchTo = '';
+      this.onAppStateChange();
     },
 
     onAppStateChangeInvalid: function () {
       this.application.summary.state = 'STOPPED';
       this.appStateSwitchTo = '';
+      this.onAppStateChange();
+    },
+
+    onAppStateChange: function () {
+      this.application.state = this.appStateService.get(this.application.summary, this.application.instances);
     }
   });
 
