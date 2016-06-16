@@ -70,11 +70,22 @@
 
 <p class="control-label" translate><br>Create a route</p>
 
+<div class="form-group form-group-large">
+  <label class="control-label" required translate>Domain</label>
+  <select-input
+    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+    ng-model="wizardCtrl.options.userInput.domain"
+    input-options="wizardCtrl.options.domains"
+    placeholder="{{'Select Domain' | translate}}"
+    tabindex="0" required>
+  </select-input>
+</div>
+
 <div class="form-group form-group-large"
   ng-class="{'has-error' : wizardForm['application-name-form'].routeName.$invalid && wizardForm['application-name-form'].routeName.$dirty}"
   focusable-input>
   <label class="control-label"
-    for="add-app-workflow-application-name" required translate>
+    for="add-app-workflow-application-host" required translate>
     Host
   </label>
   <span class="control-message">
@@ -95,17 +106,32 @@
     id="add-app-workflow-application-host"
     name="routeName"
     helion-unique items="wizardCtrl.options.routeNames"
+    ng-disabled="!wizardCtrl.options.userInput.domain"
     required>
 </div>
 
-<div class="form-group form-group-large">
-  <label class="control-label" required translate>Domain</label>
-  <select-input
-    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-    ng-model="wizardCtrl.options.userInput.domain"
-    input-options="wizardCtrl.options.domains"
-    placeholder="{{'Select Domain' | translate}}"
-    tabindex="0" required>
-  </select-input>
+<div class="form-group form-group-large" focusable-input>
+  <label class="control-label"
+    for="add-app-workflow-application-path" translate>
+    Path (optional)
+  </label>
+  <input
+    ng-model="wizardCtrl.options.userInput.path"
+    type="text" class="form-control"
+    id="add-app-workflow-application-path"
+    ng-disabled="!wizardCtrl.options.userInput.domain"
+    name="path">
 </div>
 
+<div class="form-group form-group-large" focusable-input>
+  <label class="control-label"
+    for="add-app-workflow-application-port" translate>
+    Port (optional)
+  </label>
+  <input
+    ng-model="wizardCtrl.options.userInput.port"
+    type="text" class="form-control"
+    id="add-app-workflow-application-port"
+    ng-disabled="!wizardCtrl.options.userInput.domain"
+    name="port">
+</div>

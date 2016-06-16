@@ -18,34 +18,25 @@
     <table class="table table-outlined">
       <tbody>
       <tr ng-repeat="event in detailViewCtrl.context.events">
-        <td ng-switch="event.state" class="row result-col event-result" id="result-col">
-          <div ng-switch-when="succeeded">
-            <span class="helion-icon helion-icon-Active_S text-primary"></span>
-            <span translate>{{ event.type }}</span>
+        <td ng-switch="event.state" class="row result-col event-result" id="build-result-col">
+          <div ng-switch="event.state" class="pull-left">
+            <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-primary"></span>
+            <span ng-switch-when="running"><spinner></spinner></span>
+            <span ng-switch-when="failed" class="helion-icon helion-icon-Critical_S text-danger"></span>
+            <span ng-switch-default class="helion-icon helion-icon-Active_S"></span>
           </div>
-          <div ng-switch-when="running">
-            <span class="helion-icon helion-icon-Active_S temp-deploying"></span>
-            <span translate>{{ event.type }}</span>
-          </div>
-          <div ng-switch-when="failed">
-            <span class="helion-icon helion-icon-Critical_S text-danger"></span>
-            <span translate>{{ event.type }}</span>
-          </div>
-          <div ng-switch-default>
-            <span class="helion-icon helion-icon-Active_S"></span>
-            <span translate>{{ event.type }}</span>
-          </div>
-
+          <span translate>{{ event.name }}</span>
         </td>
         <td class="row result-col">
           <span translate>Started: </span>
           {{ event.startDate | amDateFormat:'L - LTS'}}
         </td>
         <td></td>
-        <td class="row result-col">
+        <td class="row result-col" ng-if="typeof(event.durationString) !== 'undefined'">
           <span translate>Duration: </span>
           {{ event.durationString }}
         </td>
+        <td class="row result-col" ng-if="typeof(event.durationString) === 'undefined'"></td>
         <td ng-switch="event.state == 'succeeded' || event.state == 'failed'" class="event-view">
           <div ng-switch-when="true">
             <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewEvent(event)">

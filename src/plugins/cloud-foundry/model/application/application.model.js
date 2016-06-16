@@ -147,7 +147,7 @@
         }
       };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-      .GetEnvForApp(guid, {}, config)
+        .GetEnvForApp(guid, {}, config)
         .then(function (response) {
           var data = response.data[cnsiGuid];
           if (data.error_code) {
@@ -158,6 +158,27 @@
         })
         .then(function (data) {
           that.application.variables = data;
+        });
+    },
+
+    /**
+    * @function listServiceBindings
+    * @memberof cloud-foundry.model.application
+    * @description List service bindings for application
+                                             * @param {string} cnsiGuid - the CNSI guid
+    * @param {string} guid - the application guid
+    * @param {object} params - the extra params to pass to request
+    * @returns {promise} A promise object
+    * @public
+    */
+    listServiceBindings: function (cnsiGuid, guid, params) {
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .ListAllServiceBindingsForApp(guid, params, config)
+        .then(function (response) {
+          return response.data[cnsiGuid].resources;
         });
     },
 
@@ -276,6 +297,7 @@
      * @memberof cloud-foundry.model.application
      * @description Update an application
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - the application guid
      * @param {object} newAppSpec - values to update Application
      * @returns {promise} A resolved/rejected promise
      * @public
@@ -332,6 +354,27 @@
         .then(function (response) {
           var data = response.data[cnsiGuid];
           that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
+        });
+    },
+
+    /**
+     * @function getEnv
+     * @memberof cloud-foundry.model.application
+     * @description Get env variables for application
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the application guid
+     * @param {object} params - the extra params to pass to request
+     * @returns {promise} A promise object
+     * @public
+     */
+    getEnv: function (cnsiGuid, guid, params) {
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .GetEnvForApp(guid, params, config)
+        .then(function (response) {
+          return response.data[cnsiGuid];
         });
     },
 

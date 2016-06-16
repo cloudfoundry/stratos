@@ -1,0 +1,45 @@
+<div class="service-text">
+  <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
+  <div>
+    <h4 class="font-semi-bold">{{ ::serviceCardCtrl.service.entity.label }}</h4>
+    <p>{{ ::serviceCardCtrl.service.entity.description }}</p>
+  </div>
+</div>
+<div class="service-metadata">
+  <dl>
+    <dt class="font-semi-bold" translate>Version</dt>
+    <dd>{{ ::serviceCardCtrl.service.entity.version }}</dd>
+    <dt class="font-semi-bold" translate>Category</dt>
+    <dd>{{ ::serviceCardCtrl.service.entity.extra.categories }}</dd>
+    <dt class="service-attached font-semi-bold"
+      ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 0">
+      {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
+    </dt>
+  </dl>
+  <div class="service-actions">
+    <actions-menu actions="serviceCardCtrl.actions" ng-if="!serviceCardCtrl.allowAddOnly"
+      action-target="service" menu-icon="helion-icon helion-icon-2x helion-icon-More"
+      menu-position="actions-menu-right">
+    </actions-menu>
+    <div class="service-added font-semi-bold text-uppercase"
+      ng-if="serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAdded > 0">
+      {{ serviceCardCtrl.numAdded }} <span translate>Attached</span>
+    </div>
+    <button class="btn btn-sm btn-link"
+      ng-if="serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0"
+      ng-click="serviceCardCtrl.addService()" translate>
+      Add Service
+      <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+    </button>
+    <button class="btn btn-sm btn-link"
+      ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached === 1"
+      ng-click="serviceCardCtrl.detach()" translate>
+      Detach
+    </button>
+    <button class="btn btn-sm btn-link"
+      ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 1"
+      ng-click="serviceCardCtrl.manageInstances()" translate>
+      Manage Instances
+    </button>
+  </div>
+</div>
