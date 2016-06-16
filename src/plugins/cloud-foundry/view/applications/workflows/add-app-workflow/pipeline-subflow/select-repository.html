@@ -35,7 +35,7 @@
   <tbody>
     <tr class="row-vertical-middle" ng-repeat="repo in wizardCtrl.options.displayedRepos">
       <td>
-        <radio-input ng-model="wizardCtrl.options.userInput.repo" input-value="repo">
+        <radio-input ng-model="wizardCtrl.options.userInput.repo" input-value="repo" required>
         </radio-input>
       </td>
       <td>{{ ::repo.full_name }}</td>
