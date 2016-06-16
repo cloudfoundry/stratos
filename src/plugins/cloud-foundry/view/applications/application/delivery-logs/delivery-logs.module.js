@@ -21,7 +21,6 @@
   ApplicationDeliveryLogsController.$inject = [
     '$scope',
     '$stateParams',
-    '$interval',
     '$q',
     '$log',
     'moment',
@@ -46,7 +45,7 @@
    * @property {object} last - contains the last successful build, test and deploy events
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryLogsController($scope, $stateParams, $interval, $q, $log, moment, modelManager, detailView) {
+  function ApplicationDeliveryLogsController($scope, $stateParams, $q, $log, moment, modelManager, detailView) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
@@ -61,13 +60,13 @@
     this.$log = $log;
 
     var that = this;
-    var updateModelPromise, promise;
+    var promise;
 
     /* eslint-disable */
     // TODO (rcox): Both vars + anything associated with to be removed once everything is wired in
     /* eslint-enable */
-    this.addMock = false;
-    this.haveBackend = true;
+    this.addMock = 20;
+    this.haveBackend = false;
 
     if (this.haveBackend) {
       /* eslint-disable */
@@ -104,18 +103,11 @@
         that.hasProject = !(angular.isUndefined(project) || project === null);
         if (that.hasProject) {
           that.updateData();
-          updateModelPromise = $interval(_.bind(that.updateData, that), 30 * 1000, 0, true);
         }
       })
       .catch(function () {
         that.hasProject = 'error';
       });
-
-    $scope.$on("$destroy", function () {
-      if (updateModelPromise) {
-        $interval.cancel(updateModelPromise);
-      }
-    });
 
     that.execWatch = $scope.$watch(function() { return that.displayedExecutions; }, function(visibleExecutions) {
       that.updateVisibleExecutions(visibleExecutions);
@@ -400,188 +392,54 @@
     },
 
     /* eslint-disable */
+    // TODO (rcox): Remove all mock functions
+    mockExecutions: 0,
+
+    mockEvents: 0,
+
+    randomString: function(length) {
+      var text = "";
+      var possible = "ABCDEFG HIJKLMN OPQRSTUV WXYZabcde fghi jklmn opqrstu vwxyz01 2345 6789 ";
+
+      for (var i = 1; i < length; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+      return text;
+    },
+
+    randomNumber: function(min, max) {
+      var result = Math.floor(Math.random() * (max - min + 1)) + min;
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+
     createMockExecutions: function() {
-      return [
-        {
-          concoursePipelineId: '1362eeb20-219f-11e6-8838-71fe4dbc2489',
-          id: 91,
-          message: 'Update lastupdated.txt',
-          name: 'Commit number 2',
+      var that = this;
+
+      function createRandomExecution() {
+        var authors = [ 'DBaldwin', 'JAubrey', 'GNuman', 'BAtman', 'MAli', 'btat', 'richard-cox' ];
+        var types = [ 'manual' ];
+        var results = [ 'Failure'];
+        return {
+          concoursePipelineId: that.randomString(20),
+          id: that.mockExecutions++,
+          message: that.randomString(that.randomNumber(1, 100)),
+          name: that.randomString(that.randomNumber(1, 10)),
           reason: {
-            author: 'DBaldwin',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
-            commitSha: '123d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(46, 'seconds').format(),
+            commitSha: that.randomString(20),
+            author: authors[that.randomNumber(0, authors.length - 1)],
+            createdDate: moment().subtract(that.randomNumber(1, 3000), 'seconds').format(),
             pullRequestId: null,
-            type: 'manual'
+            type: types[that.randomNumber(0, types.length - 1)]
           },
-          result: 'Failure'
-        },
-        {
-          concoursePipelineId: '2362eeb20-219f-11e6-8838-71fe4dbc2489',
-          id: 92,
-          message: 'Update lastupdated.txt',
-          name: 'Commit number 2',
-          reason: {
-            author: 'DBaldwin',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
-            commitSha: '123d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(460, 'seconds').format(),
-            pullRequestId: null,
-            type: 'manual'
-          },
-          result: 'Success'
-        },
-        {
-          concoursePipelineId: '3362eeb20-219f-11e6-8838-71fe4dbc2489',
-          id: 93,
-          message: 'Fixed the log in so logs go in',
-          name: 'Change to log in',
-          reason: {
-            author: 'JAubrey',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
-            commitSha: '423d97aasdasfffcc66978e3c85af856262fe',
-            commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(4606, 'seconds').format(),
-            pullRequestId: null,
-            type: 'manual'
-          },
-          result: 'Deploying'
-        },
-        {
-          concoursePipelineId: '4362eeb20-219f-11e6-8838-71fe4dbc2489',
-          id: 94,
-          message: 'Fixed broken broker',
-          name: 'Fixed broken broker',
-          reason: {
-            author: 'GNuman',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
-            commitSha: '523d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(50064, 'seconds').format(),
-            pullRequestId: null,
-            type: 'manual'
-          },
-          result: 'Success'
-        },
-        {
-          concoursePipelineId: '5362eeb20-219f-11e6-8838-71fe4dbc2489',
-          id: 95,
-          message: 'Break the build',
-          name: 'Break the build',
-          reason: {
-            author: 'BAtman',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
-            commitSha: '623d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(55064, 'seconds').format(),
-            pullRequestId: null,
-            type: 'because why not'
-          },
-          result: 'unknown'
-        },
-        {
-          concoursePipelineId: '6362eeb20-219f-11e6-8838-71fe4dbc2489',
-          id: 96,
-          message: 'Break the build',
-          name: 'Break the build',
-          reason: {
-            author: 'BAtman',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
-            commitSha: '623d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(60064, 'seconds').format(),
-            pullRequestId: null,
-            type: 'manual'
-          },
-          result: 'Failure'
-        },
-        {
-          concoursePipelineId: '7362eeb20-219f-11e6-8838-71fe4dbc2489',
-          id: 97,
-          message: 'This will complete all pipeline events',
-          name: 'Success',
-          reason: {
-            author: 'MAli',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
-            commitSha: '623d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            commitUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            compareUrl: 'https://github.com/richard-cox/empty-nodejs-application/commit/23d97f1fc9189c9a9fcc66978e3c85af856262fe',
-            createdDate: moment().subtract(65064, 'seconds').format(),
-            pullRequestId: null,
-            type: 'CI'
-          },
-          result: 'completed'
-        },
-        {
-          id: 1,
-          concoursePipelineId: 'ad291070-2bea-11e6-bd82-61cf59328c85',
-          name: 'Merge pull request #6 from Stackato-Apps/gorouter-bug-workaround\n\nApp-side workaround for CF gorouter bug',
-          result: 'Enqueued Build',
-          message: 'Merge pull request #6 from Stackato-Apps/gorouter-bug-workaround\n\nApp-side workaround for CF gorouter bug',
-          project: {
-            applicationImage: {},
-            buildContainer: {},
-            repo: {}
-          },
-          reason: {
-            author: 'btat',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/1832069?v=3',
-            commitUrl: 'https://github.com/richard-cox/node-env/commit/85db6972f573b6a9f8bb24a5ee060d1c77ee4b19',
-            commitSha: '85db6972f573b6a9f8bb24a5ee060d1c77ee4b19',
-            createdDate: '2016-06-06T13:29:21Z',
-            type: 'manual'
-          }
-        },
-        {
-          id: 2,
-          concoursePipelineId: 'd5a6d6a0-2bfd-11e6-bd82-61cf59328c85',
-          name: 'Merge pull request #6 from Stackato-Apps/gorouter-bug-workaround\n\nApp-side workaround for CF gorouter bug',
-          result: 'Enqueued Build',
-          message: 'Merge pull request #6 from Stackato-Apps/gorouter-bug-workaround\n\nApp-side workaround for CF gorouter bug',
-          project: {
-            applicationImage: {},
-            buildContainer: {},
-            repo: {}
-          },
-          reason: {
-            author: 'btat',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/1832069?v=3',
-            commitUrl: 'https://github.com/richard-cox/node-env/commit/85db6972f573b6a9f8bb24a5ee060d1c77ee4b19',
-            commitSha: '85db6972f573b6a9f8bb24a5ee060d1c77ee4b19',
-            createdDate: '2016-06-06T15:46:29Z',
-            type: 'manual'
-          }
-        },
-        {
-          id: 3,
-          concoursePipelineId: 'c5a3e940-2bfe-11e6-bd82-61cf59328c85',
-          name: 'Update manifest.yml',
-          result: 'Enqueued Build',
-          message: 'Update manifest.yml',
-          project: {
-            applicationImage: {},
-            buildContainer: {},
-            repo: {}
-          },
-          reason: {
-            author: 'richard-cox',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/18697775?v=3',
-            commitUrl: 'https://github.com/richard-cox/node-env/commit/4ae6c69033da93c8b484ce61b9d726e10524a988',
-            commitSha: '4ae6c69033da93c8b484ce61b9d726e10524a988',
-            createdDate: '2016-06-06T15:53:12Z',
-            type: 'manual'
-          }
+          result: results[that.randomNumber(0, results.length - 1)]
         }
-      ];
+      }
+
+      var result = [];
+      for(var i=0; i<that.addMock; i++) {
+        result.push(createRandomExecution());
+      }
+      return result;
     },
 
     createMockEvents: function(executionId) {
@@ -594,97 +452,47 @@
           startDate: moment().subtract(startOffset, 'seconds').format(),
           endDate: moment().subtract(endOffset, 'seconds').format(),
           artifact_id: artifactId,
-          duration: (endOffset - startOffset) * 1000,
+          duration: (startOffset - endOffset) * 1000,
           execution_id: executionId
         };
       }
 
-      switch (executionId) {
-        case 91:
-          return [
-            createEvent(90, this.eventTypes.BUILDING, this.eventStates.FAILED, 46, 40, 91, 1)
-          ];
-        case 92:
-          return [
-            createEvent(91, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 500, 510, 92, 1),
-            createEvent(92, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 600, 650, 92, 1),
-            createEvent(93, this.eventTypes.DEPLOYING, this.eventStates.FAILED, 650, 40, 92, 1)
-          ];
-        case 93:
-          return [
-            createEvent(94, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 4606, 4600, 93, 1),
-            createEvent(95, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 4600, 4560, 93, 1)
-            // createEvent(96, 'Deploying', 'deploying', 4560, 4510, 93)
-          ];
-        case 94:
-          return [
-            createEvent(97, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 50064, 50060, 94, 1),
-            createEvent(98, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 50055, 50050, 94, 1),
-            createEvent(99, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, 50050, 50045, 94, 1)
-          ];
-        case 95:
-          return [];
-        case 96:
-          return [
-            createEvent(100, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 60064, 60060, 96, 1),
-            createEvent(101, this.eventTypes.TESTING, this.eventStates.FAILED, 60060, 60000, 96, 1)
-          ];
-        case 97:
-          return [
-            createEvent(102, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, 65064, 65060, 97, 1),
-            createEvent(103, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, 65055, 65050, 97, 1),
-            createEvent(104, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, 65050, 65045, 97, 1),
-            createEvent(105, this.eventTypes.PIPELINE_COMPLETED, this.eventStates.SUCCEEDED, 65045, 65000, 97, 1)
-          ];
-        case 1:
-          return [
-            {
-              id: 1,
-              name: "Building",
-              type: this.eventTypes.BUILDING,
-              state: this.eventStates.SUCCEEDED,
-              startDate: "2016-06-06T13:29:44.000Z",
-              endDate: "2016-06-06T13:29:45.000Z",
-              execution_id: 1,
-              artifact_id: 1
-            },
-            {
-              id: 2,
-              name: "Testing",
-              type: this.eventTypes.TESTING,
-              state: this.eventStates.SUCCEEDED,
-              startDate: "2016-06-06T13:29:44.000Z",
-              endDate: "2016-06-06T13:30:16.000Z",
-              execution_id: 1,
-              artifact_id: 2
-            }, {
-              id: 3,
-              name: "Watchdog Terminated",
-              type: this.eventTypes.WATCHDOG_TERMINATED,
-              state: this.eventStates.FAILED,
-              startDate: "2016-06-06T13:31:55.000Z",
-              endDate: "2016-06-06T13:31:55.000Z",
-              execution_id: 1,
-              artifact_id: 3
-            }
-          ];
-        case 2:
-          return [
-            {
-              "id": 4,
-              "name": "Watchdog Terminated",
-              "type": this.eventTypes.WATCHDOG_TERMINATED,
-              "state": this.eventStates.FAILED,
-              "startDate": "2016-06-06T15:51:04.000Z",
-              "endDate": "2016-06-06T15:51:04.000Z",
-              "execution_id": 2,
-              "artifact_id": 4
-            }
-          ];
-        case 3:
-          return [];
+      var mod = executionId % 4;
+      var states = [ this.eventStates.FAILED, this.eventStates.SUCCEEDED ];
+      var terminatedStates = [ this.eventTypes.PIPELINE_COMPLETED, this.eventTypes.WATCHDOG_TERMINATED ];
+      var startTime = this.randomNumber(1, 60000);
 
+
+      var that = this;
+      function iterateTime() {
+        startTime = startTime - that.randomNumber(1, startTime);
+        startTime = startTime > 0 ? startTime : 0;
+        return startTime;
       }
+
+      var events = [];
+      if (mod === 3) {
+        events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+        events.push(createEvent(this.mockEvents++, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+        events.push(createEvent(this.mockEvents++, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+        var terminatedState = terminatedStates[this.randomNumber(0, terminatedStates.length -1)];
+        var state = terminatedState === this.eventTypes.WATCHDOG_TERMINATED ? this.eventStates.FAILED : states[this.randomNumber(0, states.length-1)]
+        events.push(createEvent(this.mockEvents++, terminatedState, state, startTime, iterateTime(), 1));
+      }
+      if (mod === 2) {
+        events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+        events.push(createEvent(this.mockEvents++, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+        events.push(createEvent(this.mockEvents++, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+      }
+      if (mod === 1) {
+        events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+        events.push(createEvent(this.mockEvents++, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+      }
+      if (mod === 0) {
+        events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
+      }
+
+      return events;
     }
     /* eslint-enable */
   });
