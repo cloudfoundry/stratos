@@ -387,7 +387,7 @@
     removeProject: function (guid, projectId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .deleteProject(guid, projectId, {}, this.hceProxyConfig)
+        .deleteProject(guid, projectId, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
           that.getProjects(guid);
           return response;

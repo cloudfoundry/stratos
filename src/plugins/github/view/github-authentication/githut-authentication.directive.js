@@ -38,7 +38,7 @@
 
   angular.extend(GithubAuthenticationController.prototype, {
     openAuthWindow: function () {
-      var win = this.$window.open('/api/gh/auth', '_blank');
+      var win = this.$window.open('/pp/v1/github/oauth/auth', '_blank');
       win.focus();
     }
   });

@@ -98,7 +98,7 @@
             that.onSubmit({ serviceInstance: response.data });
           }
         }, function (err) {
-          if (err.status === 400) {
+          if (err.status >= 400) {
             that.failedRegister = true;
             that.authenticating = false;
           }

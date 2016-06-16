@@ -27,13 +27,39 @@
     }
   }
   .delivery-logs-builds {
-    .temp-deploying {
-      color:$salmon
+
+    // Min width every column except for the first
+    th:nth-child(2), th:nth-child(4), th:nth-child(5) {
+      min-width: 150px;
+    }
+    th:nth-child(3) {
+      min-width: 190px;
+    }
+
+    table:first-child > thead:first-child > tr:first-child {
+      @media (max-width: $screen-sm-min) {
+        th {
+          min-width: 0;
+        }
+      }
+    }
+
+    spinner {
+      width: 14px;
+      height: 14px;
+      .spinner-container {
+        top: 2px;
+      }
     }
   }
 }
 
 // Very specific selector makes this 24, override this for the two places it's used in this context
-#result-col > div > span.helion-icon {
-  font-size: 14px;
+#build-result-col {
+  & > div  > span.helion-icon {
+      font-size: 14px;
+    }
+  & > span {
+    padding-left: 5px;
+  }
 }
