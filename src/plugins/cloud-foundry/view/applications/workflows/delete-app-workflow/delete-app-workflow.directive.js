@@ -76,13 +76,12 @@
       this.data.workflow = {
         initControllers: function(wizard) {
           that.wizard = wizard;
-          wizard.$scope.$on('ON_INIT_SUCCESS', function() {
+          wizard.postInitTask.promise.then(function() {
             that.options.isBusy = true;
             that.wizard.nextBtnDisabled = true;
             that.checkAppRoutes().finally(function() {
               that.wizard.nextBtnDisabled = false;
               that.options.isBusy = false;
-              that.options.safeRoutes = [];
             });
           })
         },
