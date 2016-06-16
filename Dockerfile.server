@@ -1,14 +1,13 @@
 FROM ubuntu:14.04
 
 RUN apt-get update && \
-    apt-get install -y --reinstall ca-certificates ca-certificates-java
-
-RUN mkdir -p /srv
+    apt-get install -y --reinstall ca-certificates ca-certificates-java && \
+    mkdir -p /srv
 
 WORKDIR /srv
 
 COPY portal-proxy portal-proxy
-COPY ./dev-certs /srv/dev-certs
+COPY dev-certs dev-certs
 
 RUN chmod +x portal-proxy
 
