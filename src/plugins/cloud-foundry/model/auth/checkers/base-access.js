@@ -21,7 +21,6 @@
 
 
   function BaseAccess(principal) {
-
     return {
       create: function() {
         return principal.isAdmin();

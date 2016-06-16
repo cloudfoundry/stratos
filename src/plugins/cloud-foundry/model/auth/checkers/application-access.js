@@ -20,12 +20,22 @@
       ApplicationAccessFactory(modelManager));
   }
 
-
+  /**
+   * @name: ApplicationAccessFactory
+   * @description: Function to return an ApplicationAccess class
+   * @param {app.api.modelManager}  modelManager - the Model management service
+   * @returns {ApplicationAccess}
+   */
   function ApplicationAccessFactory(modelManager) {
 
-    // BaseAccess is injected by users, because we can't do the following as it may not be available
-    // var BaseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess');
 
+    /**
+     * @name: ApplicationAccess
+     * @description: Constructor for ApplicationAccess
+     * @param {Principal} principal Principal instance
+     * @param {Array} flags feature flags
+     * @constructor
+     */
     function ApplicationAccess(principal, flags) {
       this.principal = principal;
       this.flags = flags;
@@ -35,6 +45,12 @@
 
     angular.extend(ApplicationAccess.prototype, {
 
+      /**
+       * @name: create
+       * @description: Does user have create application permission in the space
+       * @param {Object} space Domain space
+       * @returns {boolean}
+       */
       create: function(space) {
 
         // Admin
@@ -46,6 +62,12 @@
         return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, space.metadata.guid);
       },
 
+      /**
+       * @name: update
+       * @description: Does user have update application permission
+       * @param {Object} app Application detail
+       * @returns {boolean}
+       */
       update: function(app) {
 
         // Admin
@@ -57,9 +79,23 @@
         return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, app.entity.space_guid);
 
       },
+
+      /**
+       * @name: delete
+       * @description: Does user have delete application permission
+       * @param {Object} app Application detail
+       * @returns {boolean}
+       */
       delete: function(app) {
         return this.baseAccess.update(app);
       },
+
+      /**
+       * @name: canHandle
+       * @description: Specifies that this ACL checker can handle `application` permission
+       * @param {String} resource
+       * @returns {boolean}
+       */
       canHandle: function(resource) {
         return resource === 'application';
       }

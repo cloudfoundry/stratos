@@ -20,9 +20,21 @@
       RouteAccessFactory(modelManager));
   }
 
-
+  /**
+   * @name: RouteAccessFactory
+   * @description: Function to return an RouteAccess class
+   * @param {app.api.modelManager}  modelManager - the Model management service
+   * @returns {RouteAccess}
+   */
   function RouteAccessFactory(modelManager) {
 
+    /**
+     * @name: RouteAccess
+     * @description: Constructor for RouteAccess
+     * @param {Principal} principal Principal instance
+     * @param {Array} flags feature flags
+     * @constructor
+     */
     function RouteAccess(principal, flags) {
       this.principal = principal;
       this.flags = flags;
@@ -31,6 +43,13 @@
     }
 
     angular.extend(RouteAccess.prototype, {
+
+      /**
+       * @name: create
+       * @description: Does user have create route permission in the space
+       * @param {Object} space Domain space
+       * @returns {boolean}
+       */
       create: function(space) {
 
         // Admin
@@ -53,6 +72,12 @@
         return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, space.metadata.guid);
       },
 
+      /**
+       * @name: update
+       * @description: Does user have update route permission
+       * @param {Object} route route detail
+       * @returns {boolean}
+       */
       update: function(route) {
         // Admin
         if (this.baseAccess.update(route)) {
@@ -74,6 +99,12 @@
         return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, route.entity.space_guid);
       },
 
+      /**
+       * @name: delete
+       * @description: Does user have delete route permission
+       * @param {Object} route route detail
+       * @returns {boolean}
+       */
       delete: function(route) {
         // Admin
         if (this.baseAccess.update(route)) {
@@ -91,6 +122,14 @@
           route.entity.space_guid);
       },
 
+
+
+      /**
+       * @name: canHandle
+       * @description: Specifies that this ACL checker can handle `route` permission
+       * @param {String} resource
+       * @returns {boolean}
+       */
       canHandle: function(resource) {
         return resource === 'route';
       }

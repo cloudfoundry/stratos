@@ -22,6 +22,12 @@
   }
 
 
+  /**
+   * @name: PrincipalFactory
+   * @description: Function to return a Principal instance
+   * @param {app.api.modelManager}  modelManager - the Model management service
+   * @returns {Principal}
+   */
   function PrincipalFactory(modelManager) {
 
     return {
