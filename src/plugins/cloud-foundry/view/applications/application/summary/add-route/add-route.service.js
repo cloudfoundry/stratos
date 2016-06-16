@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.summary')
-    .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory);
+    .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory)
+    .controller('cloud-foundry.view.applications.application.summary.addRoutesCtrl', AddRouteController);
 
   AddRouteServiceFactory.$inject = [
     'app.model.modelManager',

@@ -40,7 +40,7 @@
         dismiss: angular.noop
       };
       var $controller = $injector.get('$controller');
-      addRouteController = $controller('addRouteController', {
+      addRouteController = $controller('cloud-foundry.view.applications.application.summary.addRoutesCtrl', {
         context: context,
         content: content,
         $stateParams: $stateParams,
