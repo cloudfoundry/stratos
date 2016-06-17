@@ -2,6 +2,6 @@
 
 set -e -u -x
 
-export GOPATH=/go/src/github.com/hpcloud/portal-proxy
+export GOPATH=$PWD/portal-proxy
 
 go build -o built-project/portal-proxy github.com/hpcloud/portal-proxy
