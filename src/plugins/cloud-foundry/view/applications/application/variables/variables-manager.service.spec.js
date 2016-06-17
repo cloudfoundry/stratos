@@ -2,7 +2,7 @@
   'use strict';
 
   describe('variables manager service', function () {
-    var $controller, $q, modelManager, dialogContext;
+    var $controller, $q, modelManager, dialogContext, dialog;
 
     beforeEach(module('green-box-console'));
     beforeEach(module(function ($provide) {
@@ -28,6 +28,12 @@
     }));
 
     describe("add", function() {
+      beforeEach(inject(function ($injector) {
+        var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+        dialog = appVarsManager.add('test_guid', 'test_id');
+        expect(dialog).not.toBe(null);
+      }));
+
       it("check var name and value are empty", function() {
         var controller = new $controller(modelManager, undefined, dialogContext);
         expect(controller.varName).toBe('');
@@ -37,7 +43,12 @@
     });
 
     describe("edit", function() {
-      it("check var name and value are empty", function() {
+      beforeEach(inject(function ($injector) {
+        var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+        dialog = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
+        expect(dialog).not.toBe(null);
+      }));
+      it("check var name and value are not empty", function() {
         var controller = new $controller(modelManager, undefined, dialogContext);
         expect(controller.varName).toBe('edit_var');
         expect(controller.varValue).toBe('edit_value');
@@ -53,6 +64,9 @@
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
         $httpBackend.expectPUT(APP_VAR_UPDATE);
+        var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+        dialog = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
+        expect(dialog).not.toBe(null);
       }));
 
       it("should update variable and close dialog", function() {
