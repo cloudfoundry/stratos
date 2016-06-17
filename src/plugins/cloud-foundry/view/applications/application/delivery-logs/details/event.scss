@@ -9,13 +9,7 @@
     background-color: rgba(0,0,0,0.75);
     color: #fff;
     height: 100%;
-    margin: 0;
+    margin: 0 0 50px 0;
     padding: 10px;
   }
-}
-
-// TODO: Move to helion-ui-theme or default in helion-ui-framework
-.detail-view-content {
-  height: 100%;
-  margin-right: $hpe-unit-space * 5;
 }
