@@ -1,7 +1,8 @@
 <div class="delivery-log-trigger-build delivery-log-flex">
   <!-- User has no github token -->
   <div ng-if="!detailViewCtrl.hasToken">
-    <button class="btn btn-primary" type="button" ng-click="detailViewCtrl.githubAuth()">Authenticate with Github</button>
+    <button translate class="btn btn-primary" type="button" ng-click="detailViewCtrl.githubAuth()">
+      Authenticate with Github</button>
     <div class="alert alert-warning" ng-if="!detailViewCtrl.githubAuthFailed">
       <p translate >Please authenticate with github before continuing</p>
     </div>

@@ -1,5 +1,7 @@
 .delivery-log-trigger-build {
 
+  padding-top: $hpe-unit-space;
+
   .delivery-log-flex {
     @include flex-align(flex-start, stretch, column);
     flex: 1 1 auto;
