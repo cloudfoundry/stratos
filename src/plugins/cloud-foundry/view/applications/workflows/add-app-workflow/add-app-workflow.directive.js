@@ -35,6 +35,7 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
+   * @param {object} githubOauthService - github oauth service
    * @param {object} $scope - angular $scope
    * @param {object} $q - angular $q service
    * @property {object} $scope - angular $scope
@@ -100,6 +101,7 @@
 
       var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
       this.data = {};
+      this.errors = {};
 
       this.userInput = {
         name: null,
@@ -173,14 +175,16 @@
             nextBtnText: gettext('Next'),
             onNext: function () {
               try {
-                 // TODO (kdomico): Get or create fake HCE user until HCE API is complete
-                 that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
+                // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+                that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
                   .then(angular.noop, function (response) {
                     if (response.status === 404) {
                       that.hceModel.createUser(that.userInput.hceCnsi.guid, '123456', 'login', 'token');
                     }
                   });
-              } catch (err) {}
+              } catch (err) {
+                this.errors.getUserByGithubId = true;
+              }
 
               var oauth;
               if (that.userInput.source === 'github') {

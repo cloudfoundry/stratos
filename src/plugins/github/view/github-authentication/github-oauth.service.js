@@ -3,12 +3,16 @@
 
   angular
     .module('github.view')
-    .service('github.view.githubOauthService', GithubOauthService);
+    .factory('github.view.githubOauthService', githubOauthServiceFactory);
 
-  GithubOauthService.$inject = [
+  githubOauthServiceFactory.$inject = [
     '$window',
     '$q'
   ];
+
+  function githubOauthServiceFactory($window, $q) {
+    return new GithubOauthService($window, $q);
+  }
 
   /**
    * @memberof github.view
