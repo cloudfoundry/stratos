@@ -1,0 +1,18 @@
+.card.panel {
+  .delivery-pipeline-summary {
+    &.panel-body {
+      padding-top: $hpe-unit-space * .5;
+    }
+
+    dl {
+      dt, dd {
+        padding-top: $hpe-unit-space * .5;
+        font-size: $font-size-base;
+      }
+
+      dd {
+        text-transform: none;
+      }
+    }
+  }
+}
