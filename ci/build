@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e -u -x
+
+export GOPATH=/go/src/github.com/hpcloud/portal-proxy
+
+go build -o built-project/portal-proxy github.com/hpcloud/portal-proxy
