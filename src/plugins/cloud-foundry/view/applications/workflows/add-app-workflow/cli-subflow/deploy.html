@@ -17,11 +17,7 @@ applications:
   domain: {{ wizardCtrl.options.userInput.domain.entity.name }}<span ng-if="wizardCtrl.options.userInput.services">
   <span class="text-primary" translate># We have provisioned and bound services</span>
   services:<span ng-repeat="service in wizardCtrl.options.userInput.services">
-  - {{ service.label }}</span>
-  declared-services:<span ng-repeat="service in wizardCtrl.options.userInput.services">
-    {{ service.name }}:
-      label: {{ service.label }}
-      plan: {{ service.plan }}</span></pre>
+  - {{ service.name }}</span></pre>
     </div>
   </div>
 </div>

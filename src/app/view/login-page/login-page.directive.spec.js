@@ -25,7 +25,7 @@
         },
         addEventListener: function (event, callback) {
           if (event === 'message') {
-            callback({
+            return callback({
               data: '{"name":"GitHub Oauth - token"}'
             });
           }

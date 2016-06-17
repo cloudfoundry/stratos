@@ -1,88 +1,64 @@
-add-service-workflow {
-  .flyout-content .wizard-body .wizard-step {
-    .select-instance-tabs {
-      .nav-tabs .uib-tab {
-        margin: 0;
-        padding-left: $hpe-unit-space / 3;
-        padding-right: $hpe-unit-space / 3;
-        padding-top: 0;
-      }
-      .nav-tabs > li.active > a,
-      .nav-tabs > li.active > a:hover,
-      .nav-tabs > li.active > a:focus {
-        background-color: white;
-      }
-      .tab-content {
-        .tab-pane {
-          form:not(.form-horizontal) .form-group {
-            width: 100%;
-          }
-          form {
-            padding-top: $hpe-unit-space / 2;
-          }
-        }
+.add-service-workflow {
+  padding: $hpe-unit-space*2 $hpe-unit-space*4;
+
+  .add-service-workflow-header {
+    display: flex;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+    }
+
+    .close {
+      margin-left: auto;
+    }
+  }
+
+  .select-instance {
+    padding: $hpe-unit-space 0;
+  }
+
+  .service-confirm {
+    margin: $hpe-unit-space 0;
+
+    .alert {
+      margin-bottom: $hpe-unit-space;
+    }
+  }
+
+  .service-description {
+    display: flex;
+
+    .helion-icon.service-icon {
+      padding: $hpe-unit-space;
+    }
+  }
+
+  .select-instance-tabs {
+    .nav.nav-tabs {
+      .uib-tab > a {
+        background: transparent;
       }
     }
 
-    .service-summary {
-      display: flex;
-      flex-flow: column;
+    .tab-content {
+      padding: $hpe-unit-space 0;
 
-      .service-badge-category {
-        display: flex;
-        flex-flow: row;
-
-        .service-badge {
-          padding: 0;
-
-          i {
-            margin: 0;
-            padding: 0;
-          }
-          .service-category {
-            padding: 0;
-          }
-        }
-      }
-      .service-label {
-        padding-top: $hpe-unit-space;
-      }
-    }
-
-    .service-confirm {
-
-      .caution-message {
-        margin: 0;
-        padding-left: $hpe-unit-space * 6;
-        padding-top: $hpe-unit-space * 4;
-
-        .alert {
-          padding-bottom: 0;
-          padding-left: $hpe-unit-space / 2;
-
-          p {
-            padding-left: $hpe-unit-space * 2;
-          }
-        }
-      }
-
-      .manifest {
-        padding-left: $hpe-unit-space * 5.5;
-        padding-top: $hpe-unit-space / 2;
-
-        .btn {
-          min-width: $hpe-unit-space * 3;
-
-          .helion-icon-Right_Arrow {
-            text-align: left;
-          }
-        }
-
-        .panel-heading, .panel-body {
-          padding: $hpe-unit-space / 2;
+      .existing-instances-table {
+        tbody > tr td {
+          vertical-align: middle;
         }
       }
     }
+  }
 
+  .wizard-foot {
+    border-top: 1px solid $gray-light;
+    text-align: right;
+    padding-top: $hpe-unit-space / 2;
+
+    .btn {
+      margin-left: $hpe-unit-space / 2;
+    }
   }
 }
