@@ -4,13 +4,3 @@
 .control-title {
   margin-top: $hpe-unit-space;
 }
-
-.new-route {
-  display: flex;
-
-  .form-group {
-    width: auto;
-    min-width: $hpe-unit-space * 7.5;
-    margin-right: -1px;
-  }
-}
