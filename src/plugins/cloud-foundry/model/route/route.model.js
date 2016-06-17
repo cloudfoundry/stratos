@@ -36,6 +36,29 @@
 
   angular.extend(Route.prototype, {
    /**
+    * @function checkRouteExists
+    * @memberof cloud-foundry.model.route
+    * @description check a route exists
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+    * @param {string} domainGuid - route's domain identifier
+    * @param {string} host - route's host part
+    * @param {string} path - route's path part
+    * @param {string} port - route's port part
+    * @returns {promise} A resolved/rejected promise
+    * @public
+    */
+    checkRouteExists: function (cnsiGuid, domainGuid, host, path, port) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Routes')
+        .CheckRouteExists(domainGuid, host, path || '', port || '', {}, httpConfig)
+        .then(function (response) {
+          return response.data[cnsiGuid];
+        });
+    },
+
+   /**
     * @function associateAppWithRoute
     * @memberof cloud-foundry.model.route
     * @description associate app with the route

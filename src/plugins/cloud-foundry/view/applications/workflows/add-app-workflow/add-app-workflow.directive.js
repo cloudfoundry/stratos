@@ -35,6 +35,7 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
+   * @param {object} githubOauthService - github oauth service
    * @param {object} $scope - angular $scope
    * @param {object} $q - angular $q service
    * @property {object} $scope - angular $scope
@@ -75,8 +76,8 @@
 
     $scope.$watch(function () {
       return that.userInput.serviceInstance;
-    }, function (newValue) {
-      if (newValue) {
+    }, function (serviceInstance) {
+      if (serviceInstance) {
         that.getOrganizations();
         that.getDomains().then(function () {
           that.userInput.domain = that.options.domains[0].value;
@@ -91,6 +92,14 @@
         that.getSpacesForOrganization(organization.metadata.guid);
       }
     });
+
+    $scope.$watch(function () {
+      return that.userInput.space;
+    }, function (space) {
+      if (space) {
+        that.getAppsForSpace(space.metadata.guid);
+      }
+    });
   }
 
   angular.extend(AddAppWorkflowController.prototype, {
@@ -100,6 +109,7 @@
 
       var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
       this.data = {};
+      this.errors = {};
 
       this.userInput = {
         name: null,
@@ -133,13 +143,15 @@
             nextBtnText: gettext('Create and continue'),
             cancelBtnText: gettext('Cancel'),
             onNext: function () {
-              return that.createApp().then(function () {
-                that.spaceModel.listAllServicesForSpace(
-                  that.userInput.serviceInstance.guid,
-                  that.userInput.space.metadata.guid
-                ).then(function (services) {
-                  that.options.services.length = 0;
-                  [].push.apply(that.options.services, services);
+              return that.validateNewRoute().then(function () {
+                return that.createApp().then(function () {
+                  that.spaceModel.listAllServicesForSpace(
+                    that.userInput.serviceInstance.guid,
+                    that.userInput.space.metadata.guid
+                  ).then(function (services) {
+                    that.options.services.length = 0;
+                    [].push.apply(that.options.services, services);
+                  });
                 });
               });
             }
@@ -173,14 +185,16 @@
             nextBtnText: gettext('Next'),
             onNext: function () {
               try {
-                 // TODO (kdomico): Get or create fake HCE user until HCE API is complete
-                 that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
+                // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+                that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
                   .then(angular.noop, function (response) {
                     if (response.status === 404) {
                       that.hceModel.createUser(that.userInput.hceCnsi.guid, '123456', 'login', 'token');
                     }
                   });
-              } catch (err) {}
+              } catch (err) {
+                this.errors.getUserByGithubId = true;
+              }
 
               var oauth;
               if (that.userInput.source === 'github') {
@@ -292,13 +306,12 @@
         workflow: that.data.workflow,
         userInput: this.userInput,
         errors: this.errors,
-        appNames: [],
-        routeNames: [],
         subflow: 'pipeline',
         serviceInstances: [],
         services: [],
         organizations: [],
         spaces: [],
+        apps: [],
         domains: [],
         hceCnsis: [],
         notificationTargets: [
@@ -356,6 +369,34 @@
     },
 
     /**
+     * @function validateNewRoute
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description check a route exists
+     * @returns {promise} A resolved/rejected promise
+     */
+    validateNewRoute: function () {
+      var that = this;
+      return this.$q(function (resolve, reject) {
+        that.routeModel.checkRouteExists(
+          that.userInput.serviceInstance.guid,
+          that.userInput.domain.metadata.guid,
+          that.userInput.host,
+          that.userInput.path,
+          that.userInput.port
+        )
+        .then(function (data) {
+          if (data && data.code === 10000) {
+            that.errors.invalidRoute = false;
+            resolve();
+          } else {
+            that.errors.invalidRoute = true;
+            reject();
+          }
+        });
+      });
+    },
+
+    /**
      * @function getOrganizations
      * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
      * @description get organizations
@@ -387,6 +428,23 @@
           that.options.spaces.length = 0;
           [].push.apply(that.options.spaces, _.map(spaces, that.selectOptionMapping));
           that.userInput.space = that.options.spaces[0].value;
+        });
+    },
+
+    /**
+     * @function getAppsForSpace
+     * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+     * @description get apps for space
+     * @param {string} guid - the space GUID
+     * @returns {promise} A resolved/rejected promise
+     */
+    getAppsForSpace: function (guid) {
+      var that = this;
+      var cnsiGuid = that.userInput.serviceInstance.guid;
+      return this.spaceModel.listAllAppsForSpace(cnsiGuid, guid)
+        .then(function (apps) {
+          that.options.apps.length = 0;
+          [].push.apply(that.options.apps, _.map(apps, that.selectOptionMapping));
         });
     },
 
@@ -589,25 +647,7 @@
       var that = this;
       this.addingApplication = true;
       this.reset();
-
-      var updateApps = this.appModel.all();
-      updateApps.then(function () {
-        angular.forEach(that.appModel.data.applications, function (cnsiApps) {
-          [].push.apply(that.options.appNames, _.map(cnsiApps.resources, function (app) {
-            return app.entity.name;
-          }));
-        });
-      });
-
-      var updateRoutes = this.routeModel.listAllRoutes({});
-      updateRoutes.then(function (data) {
-        angular.forEach(data, function (cnsiRoute) {
-          [].push.apply(that.options.routeNames, _.map(cnsiRoute.resources, function (route) {
-            return route.entity.host;
-          }));
-        });
-      });
-
+      this.appModel.all();
       this.getHceInstances();
       this.serviceInstanceModel.list()
         .then(function (serviceInstances) {

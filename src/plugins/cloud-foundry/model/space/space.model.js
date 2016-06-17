@@ -31,6 +31,27 @@
 
   angular.extend(Space.prototype, {
    /**
+    * @function listAllAppsForSpace
+    * @memberof cloud-foundry.model.space
+    * @description lists all spaces
+    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+    * @param {string} guid - space GUID.
+    * @param {object} params - optional parameters
+    * @returns {promise} A resolved/rejected promise
+    * @public
+    */
+    listAllAppsForSpace: function (cnsiGuid, guid, params) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllAppsForSpace(guid, params, httpConfig)
+        .then(function (response) {
+          return response.data[cnsiGuid].resources;
+        });
+    },
+
+   /**
     * @function listAllSpaces
     * @memberof cloud-foundry.model.space
     * @description lists all spaces
