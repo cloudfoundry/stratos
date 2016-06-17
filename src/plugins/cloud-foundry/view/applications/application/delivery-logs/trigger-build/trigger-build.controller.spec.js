@@ -26,6 +26,7 @@
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
     beforeEach(module('app.model'));
+    beforeEach(module('github.view'));
     beforeEach(module('ng', function($exceptionHandlerProvider) {
       // angular-mock implementation differs in the way it handles exceptions thrown by promises (it does not nicely
       // wrap them as per the actual implementation). Therefor disable so we can test error cases.
@@ -48,7 +49,8 @@
         $uibModalInstance: $uibModalInstance,
         context: defaultContext,
         content: {},
-        modelManager: modelManager
+        modelManager: modelManager,
+        githubOauthService: $injector.get('github.view.githubOauthService')
       });
       expect(controller).toBeDefined();
       expect(controller.selectedCommit).not.toBeDefined();

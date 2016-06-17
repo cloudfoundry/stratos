@@ -10,7 +10,8 @@
     '$uibModalInstance',
     'context',
     'content',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'github.view.githubOauthService'
   ];
 
   /**
@@ -21,8 +22,9 @@
    * @param {object} context - parameter object passed in to DetailView
    * @param {object} content - configuration object passed in to DetailView
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} githubOauthService - Service to obtain github auth creds
    */
-  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, context, content, modelManager) {
+  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, context, content, modelManager, githubOauthService) {
     var that = this;
     that.context = context;
     that.content = content;
@@ -31,6 +33,7 @@
     that.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
+    that.githubOauthService = githubOauthService;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -71,6 +74,19 @@
         .catch(function() {
           that.fetchError = true;
         });
+    },
+
+    githubAuth: function() {
+      var that = this;
+      that.githubOauthService.start()
+        .then(function() {
+          that.fetchCommits();
+        })
+        .catch(function() {
+          that.githubAuthFailed = true;
+        });
     }
+
+
   });
 })();
