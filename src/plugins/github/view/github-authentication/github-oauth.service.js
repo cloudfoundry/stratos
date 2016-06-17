@@ -10,13 +10,20 @@
     '$q'
   ];
 
+  /**
+   * @memberof github.view
+   * @name githubOauthServiceFactory
+   * @constructor
+   * @param {object} $window - angular $window service
+   * @param {object} $q - angular $q service
+   */
   function githubOauthServiceFactory($window, $q) {
     return new GithubOauthService($window, $q);
   }
 
   /**
    * @memberof github.view
-   * @name githubOauthService
+   * @name GithubOauthService
    * @constructor
    * @param {object} $window - angular $window service
    * @param {object} $q - angular $q service
