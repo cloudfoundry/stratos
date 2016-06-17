@@ -510,6 +510,7 @@
      * @description redefine the workflow if there is no HCE service instances registered
      */
     redefineWorkflowWithoutHce: function () {
+      this.options.subflow = 'cli';
       this.data.workflow.steps.pop();
       [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
     },

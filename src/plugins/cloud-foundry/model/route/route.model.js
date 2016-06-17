@@ -87,11 +87,8 @@
     * @public
     */
     removeAppFromRoute: function (cnsiGuid, guid, appGuid) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .RemoveAppFromRoute(guid, appGuid, {}, httpConfig);
+        .RemoveAppFromRoute(guid, appGuid);
     },
 
     createRoute: function (cnsiGuid, routeSpec) {
@@ -116,11 +113,8 @@
     * @public
     */
     deleteRoute: function (cnsiGuid, guid, recursive) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .DeleteRoute(guid, recursive, {}, httpConfig);
+        .DeleteRoute(guid, recursive);
     },
 
    /**
@@ -135,11 +129,8 @@
     */
     listAllAppsForRoute: function (cnsiGuid, guid, params) {
       var that = this;
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllAppsForRoute(guid, params, httpConfig)
+        .ListAllAppsForRoute(guid, params)
         .then(function (response) {
           that.route.id = guid;
           that.route.apps = response.data[cnsiGuid];
@@ -158,11 +149,8 @@
     * @public
     */
     listAllAppsForRouteWithoutStore: function (cnsiGuid, guid, params) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllAppsForRoute(guid, params, httpConfig)
+        .ListAllAppsForRoute(guid, params)
         .then(function (response) {
           return response.data[cnsiGuid].resources;
         });
