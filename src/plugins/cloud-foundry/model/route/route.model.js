@@ -120,6 +120,7 @@
         .then(function (response) {
           that.route.id = guid;
           that.route.apps = response.data[cnsiGuid];
+          return response.data[cnsiGuid];
         });
     },
 

@@ -74,6 +74,17 @@
       };
 
       this.data.workflow = {
+        initControllers: function(wizard) {
+          that.wizard = wizard;
+          wizard.postInitTask.promise.then(function() {
+            that.options.isBusy = true;
+            that.wizard.nextBtnDisabled = true;
+            that.checkAppRoutes().finally(function() {
+              that.wizard.nextBtnDisabled = false;
+              that.options.isBusy = false;
+            });
+          })
+        },
         allowCancelAtLastStep: true,
         title: gettext('Delete App, Pipeline, and Selected Items'),
         hideStepNavStack: true,
@@ -89,7 +100,9 @@
       this.options = {
         workflow: that.data.workflow,
         userInput: this.userInput,
-        appModel: this.appModel
+        appModel: this.appModel,
+        isBusy: true,
+        safeRoutes: []
       };
 
       this.deleteApplicationActions = {
@@ -101,6 +114,24 @@
           that.finishWorkflow();
         }
       };
+    },
+
+    checkAppRoutes: function () {
+      var that = this;
+      this.options.safeRoutes = [];
+      var tasks = [];
+      var routes = this.appModel.application.summary.routes;
+      routes.forEach(function (route) {
+        tasks.push(that.routeModel.listAllAppsForRoute(that.cnsiGuid, route.guid));
+      });
+      return this.$q.all(tasks).then(function (results) {
+        results.forEach(function (routeInfo, index) {
+          // Check that each route is only bound to 1 app (which implicitly must be this app)
+          if(routeInfo.total_results === 1) {
+            that.options.safeRoutes.push(routes[index]);
+          }
+        });
+      });
     },
 
     /**
