@@ -20,7 +20,7 @@ module.exports = function (config) {
       'lib/angular-mocks/angular-mocks.js',
 
       'config.js',
-      'plugins/cloud-foundry/plugin.config.js',
+      'plugins/*/plugin.config.js',
 
       'lib/helion-ui-framework/dist/**/*.html', {
         pattern: 'lib/helion-ui-theme/dist/images/*.png',
