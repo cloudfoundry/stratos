@@ -1,4 +1,4 @@
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -20,7 +20,9 @@
 
   ApplicationSummaryController.$inject = [
     'app.model.modelManager',
-    '$stateParams'
+    '$stateParams',
+    'cloud-foundry.view.applications.application.summary.addRoutes'
+
   ];
 
   /**
@@ -31,10 +33,11 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationSummaryController(modelManager, $stateParams) {
+  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.id = $stateParams.guid;
+    this.addRoutesService = addRoutesService;
     this.userCnsiModel.list();
   }
 
@@ -50,6 +53,15 @@
       var url = angular.isDefined(buildpack) && buildpack !== null ? buildpack : '';
       url = url.trim().toLowerCase();
       return url.indexOf('http://') === 0 || url.indexOf('https://') === 0;
+    },
+
+    /**
+     * @function showAddRouteForm
+     * @description Show Add a Route form
+     * @public
+     **/
+    showAddRouteForm: function() {
+      this.addRoutesService.add();
     }
   });
 

@@ -1,0 +1,54 @@
+<div class="add-route">
+  <h4 translate>Add a Route</h4>
+  <form name="addRouteForm" >
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>Host</label>
+      <input type="text" name="host" class="form-control" ng-model="addRouteCtrl.context.data.host"
+             required
+             placeholder="{{'a unique identifier for this app' | translate}}"
+      />
+    </div>
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>Domain</label>
+      <select-input
+        class="form-control"
+        ng-model="addRouteCtrl.context.data.domain_guid"
+        arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+        input-options="addRouteCtrl.context.options.domains"
+        required
+      />
+    </div>
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>Port (optional)</label>
+      <input type="number" name="port" class="form-control" ng-model="addRouteCtrl.context.data.port"
+             placeholder="{{'e.g. 8080' | translate}}"
+      />
+    </div>
+    <div class="form-group" focusable-input>
+      <label class="control-label" translate>Path (optional)</label>
+      <input type="text" name="path" class="form-control" ng-model="addRouteCtrl.context.data.path"
+             placeholder="{{'e.g. /app/is/here' | translate}}"
+      />
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default"
+              ng-click="addRouteCtrl.cancel()" translate>
+        Cancel
+      </button>
+      <button class="btn btn-primary"
+              ng-click="addRouteCtrl.addRoute()" translate>
+        Create Route
+      </button>
+    </div>
+  </form>
+
+  <div ng-show="addRouteCtrl.addRouteError" class="alert alert-danger">
+    <p translate>
+      There was a problem adding or associating this route with your app. Please try again. If this error persists,
+      please contact the administrator.
+    </p>
+  </div>
+
+
+</div>
