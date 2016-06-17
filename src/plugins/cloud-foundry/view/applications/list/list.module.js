@@ -36,13 +36,28 @@
    */
   function ApplicationsListController(modelManager, eventService) {
     var that = this;
+    that.ready = false;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
-
+    this.hasApps = false;
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userCnsiModel.list().then(function () {
-      that.model.all();
-    });
+      that.model.all().finally(function() {
+        // Check the data we have and determine if we have any applications
+        that.hasApps = false;
+        if(that.model.data && that.model.data.applications) {
+          var appCount = _.reduce(that.model.data.applications, function (sum, app) {
+            if (!app.error && app.resources) {
+              return sum + app.resources.length;
+            } else {
+              return sum;
+            }
+          }, 0);
+          that.hasApps = (appCount > 0);
+        }
+        that.ready = true;
+      });
+    })
   }
 
   angular.extend(ApplicationsListController.prototype, {

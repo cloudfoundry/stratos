@@ -1,5 +1,43 @@
 @import "gallery-view/gallery-view";
 
+$applications-msg-height: 50px;
+
 .applications-header {
   font-size: $hpe-unit-space;
+}
+
+.applications-empty {
+  clear: both;
+  text-align: center;
+  padding: $hpe-unit-space*2 0;
+  width: 70%;
+  margin: auto;
+
+  .applications-msg, .applications-cta {
+    font-weight: $hpe-font-weight-semibold;
+    color: $dove-gray;
+
+    .btn-link {
+      font-weight: $hpe-font-weight-semibold;
+    }
+  }
+  .applications-msg {
+    font-size: $font-size-h1;
+    height: $applications-msg-height;
+    line-height: $font-size-h1;
+  }
+
+  .applications-cta {
+    font-size: 24px;
+  }
+
+  .helion-icon {
+    color: $dove-gray;
+    margin-bottom: $hpe-unit-space * .5;
+  }
+
+  .btn span {
+    text-transform: none;
+    font-size: $font-size-h1;
+  }
 }
