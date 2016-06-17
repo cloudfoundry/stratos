@@ -10,11 +10,10 @@
   ];
 
   /**
-   * @namespace cloud-foundry.view.applications.application.delivery-logs.deliveryLogsBuildFilter
-   * @memberof cloud-foundry.view.applications.application.delivery-logs
    * @name deliveryLogsBuildFilter
    * @description An angular filter which wraps byProperties filter searching for specific properties. Used as a
    * workaround for smart-table's inability to restrict search to n columns (instead of all or nothing)
+   * @param {object} $filter - the angular $filter service
    * @returns {Function} The filter itself
    */
   function deliveryLogsBuildFilter($filter) {
