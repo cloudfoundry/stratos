@@ -33,7 +33,6 @@
    * @constructor
    * @param {object} $scope - the controller's $scope
    * @param {object} $stateParams - the UI router $stateParams service
-   * @param {object} $interval - the angular $interval service
    * @param {object} $q - the angular $q service
    * @param {object} $log - the angular $log service
    * @param {object} moment - the moment timezone component
@@ -63,10 +62,10 @@
     var promise;
 
     /* eslint-disable */
-    // TODO (rcox): Both vars + anything associated with to be removed once everything is wired in
+    // TODO (rcox): Both vars + anything associated with to be removed once everything is wired in. See TEAMFOUR-596
     /* eslint-enable */
-    this.addMock = 20;
-    this.haveBackend = false;
+    this.addMock = false;
+    this.haveBackend = true;
 
     if (this.haveBackend) {
       /* eslint-disable */
@@ -78,7 +77,7 @@
           var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
           if (hceCnsis.length > 0) {
             that.hceCnsi = hceCnsis[0];
-            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '18697775')
+            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
               .then(function() {
                 return that.hceModel.getProjects(that.hceCnsi.guid)
                   .then(function() {
