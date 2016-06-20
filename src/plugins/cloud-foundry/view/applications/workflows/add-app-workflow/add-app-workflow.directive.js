@@ -73,6 +73,7 @@
     });
 
     this.userInput = {};
+    this.options = {};
 
     $scope.$watch(function () {
       return that.userInput.serviceInstance;
@@ -98,6 +99,14 @@
     }, function (space) {
       if (space) {
         that.getAppsForSpace(space.metadata.guid);
+      }
+    });
+
+    $scope.$watch(function () {
+      return that.options.subflow;
+    }, function (subflow) {
+      if (subflow) {
+        that.appendSubflow(that.data.subflows[subflow]);
       }
     });
   }
@@ -158,22 +167,26 @@
           },
           {
             title: gettext('Services'),
+            formName: 'application-services-form',
             templateUrl: path + 'services.html',
             nextBtnText: gettext('Next'),
             onNext: function () {
               that.userInput.services = that.appModel.application.summary.services;
+              that.options.subflow = 'pipeline';
             }
           },
           {
             title: gettext('Delivery'),
+            formName: 'application-delivery-form',
             templateUrl: path + 'delivery.html',
             nextBtnText: gettext('Next'),
             onNext: function () {
-              that.appendSubflow(that.data.subflows[that.options.subflow]);
             }
           }
         ]
       };
+
+      this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
 
       this.data.subflows = {
         pipeline: [
@@ -200,7 +213,8 @@
               if (that.userInput.source === 'github') {
                 oauth = that.githubOauthService.start();
               } else {
-                oauth = $q.defer().resolve();
+                oauth = that.$q.defer();
+                oauth.resolve();
                 oauth = oauth.promise;
               }
 
@@ -306,7 +320,7 @@
         workflow: that.data.workflow,
         userInput: this.userInput,
         errors: this.errors,
-        subflow: 'pipeline',
+        subflow: null,
         serviceInstances: [],
         services: [],
         organizations: [],
@@ -555,6 +569,7 @@
      * @param {object} subflow - the sub workflow to append
      */
     appendSubflow: function (subflow) {
+      this.data.workflow.steps.length = this.data.countMainWorkflowSteps;
       [].push.apply(this.data.workflow.steps, subflow);
     },
 
