@@ -585,7 +585,7 @@
 
           // Set optional fields for creating route
           if (that.userInput.port) {
-            routeSpec.port = that.userInput.port;
+            routeSpec.port = Number(that.userInput.port);
           }
           if (that.userInput.path) {
             routeSpec.path = that.userInput.path;
