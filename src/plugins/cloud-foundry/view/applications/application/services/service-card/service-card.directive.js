@@ -106,7 +106,7 @@
                               .value();
       if (serviceInstances.length > 0) {
         var q = 'service_instance_guid IN ' + serviceInstances.join(',');
-        this.bindingModel.listAllServiceBindings(this.cnsiGuid, { q: q })
+        return this.bindingModel.listAllServiceBindings(this.cnsiGuid, { q: q })
           .then(function (bindings) {
             var appGuid = that.app.summary.guid;
             var appBindings = _.filter(bindings, function (o) { return o.entity.app_guid === appGuid; });
@@ -139,7 +139,7 @@
         app: this.app,
         confirm: !this.allowAddOnly
       };
-      this.detailView(config, context).result
+      return this.detailView(config, context).result
         .then(function () {
           that.numAdded++;
         });
@@ -154,7 +154,7 @@
     detach: function () {
       var that = this;
       if (this.serviceBindings.length === 1) {
-        this.bindingModel.deleteServiceBinding(this.cnsiGuid, this.serviceBindings[0].metadata.guid)
+        return this.bindingModel.deleteServiceBinding(this.cnsiGuid, this.serviceBindings[0].metadata.guid)
           .then(function () {
             that.appModel.getAppSummary(that.cnsiGuid, that.app.summary.guid);
           });
@@ -178,7 +178,7 @@
         app: this.app,
         service: this.service
       };
-      this.detailView(config, context);
+      return this.detailView(config, context);
     },
 
     /**

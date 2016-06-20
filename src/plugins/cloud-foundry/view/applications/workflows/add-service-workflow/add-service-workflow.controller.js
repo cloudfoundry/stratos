@@ -118,7 +118,7 @@
       };
 
       var boundInstances = _.keyBy(this.app.summary.services, 'guid');
-      this.serviceModel.allServicePlans(this.cnsiGuid, this.service.metadata.guid)
+      return this.serviceModel.allServicePlans(this.cnsiGuid, this.service.metadata.guid)
         .then(function (servicePlans) {
           var plans = _.map(servicePlans, function (o) { return { label: o.entity.name, value: o }; });
           that.options.servicePlans.length = 0;
@@ -201,7 +201,7 @@
     finishWorkflow: function () {
       var that = this;
       if (!this.confirm) {
-        this.addService().then(function () {
+        return this.addService().then(function () {
           that.addBinding().then(function () {
             that.$uibModalInstance.close();
           });
