@@ -61,11 +61,8 @@
     * @public
     */
     listAllSpaces: function (cnsiGuid, params) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllSpaces(params, httpConfig)
+        .ListAllSpaces(params)
         .then(function (response) {
           return response.data[cnsiGuid].resources;
         });

@@ -81,10 +81,7 @@
      **/
     usage: function (cnsiGuid, guid, options) {
       var that = this;
-      var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
-      return this.applicationApi.GetDetailedStatsForStartedApp(guid, options, config)
+      return this.applicationApi.GetDetailedStatsForStartedApp(guid, options)
         .then(function (response) {
           that.onUsage(response.data[cnsiGuid]);
         });
@@ -141,13 +138,8 @@
      **/
     getAppVariables: function (cnsiGuid, guid) {
       var that = this;
-      var config = {
-        headers: {
-          'x-cnap-cnsi-list': cnsiGuid
-        }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetEnvForApp(guid, {}, config)
+        .GetEnvForApp(guid)
         .then(function (response) {
           var data = response.data[cnsiGuid];
           if (data.error_code) {
@@ -172,11 +164,8 @@
      * @public
      **/
     listServiceBindings: function (cnsiGuid, guid, params) {
-      var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .ListAllServiceBindingsForApp(guid, params, config)
+        .ListAllServiceBindingsForApp(guid, params)
         .then(function (response) {
           return response.data[cnsiGuid].resources;
         });
@@ -193,13 +182,10 @@
      */
     startApp: function (cnsiGuid, guid) {
       var that = this;
-      var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       this.appStateSwitchTo = 'STARTED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {state: 'STARTED'}, {}, config)
+        .UpdateApp(guid, {state: 'STARTED'})
         .then(
           function (response) {
             var data = response.data[cnsiGuid];
@@ -230,13 +216,10 @@
      */
     stopApp: function (cnsiGuid, guid) {
       var that = this;
-      var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       this.appStateSwitchTo = 'STOPPED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {state: 'STOPPED'}, {}, config)
+        .UpdateApp(guid, {state: 'STOPPED'})
         .then(
           function (response) {
             var data = response.data[cnsiGuid];
@@ -304,11 +287,8 @@
      */
     update: function (cnsiGuid, guid, newAppSpec) {
       var that = this;
-      var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-      return applicationApi.UpdateApp(guid, newAppSpec, {}, config)
+      return applicationApi.UpdateApp(guid, newAppSpec)
         .then(function (response) {
           if(response.data[cnsiGuid].metadata) {
             that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
@@ -327,11 +307,8 @@
      * @public
      */
     deleteApp: function (cnsiGuid, guid) {
-      var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .DeleteApp(guid, {}, config);
+        .DeleteApp(guid);
     },
 
     /**
@@ -346,11 +323,8 @@
      */
     getAppStats: function (cnsiGuid, guid, params) {
       var that = this;
-      var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetDetailedStatsForStartedApp(guid, params, config)
+        .GetDetailedStatsForStartedApp(guid, params)
         .then(function (response) {
           var data = response.data[cnsiGuid];
           that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
@@ -368,11 +342,8 @@
      * @public
      */
     getEnv: function (cnsiGuid, guid, params) {
-      var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetEnvForApp(guid, params, config)
+        .GetEnvForApp(guid, params)
         .then(function (response) {
           return response.data[cnsiGuid];
         });
