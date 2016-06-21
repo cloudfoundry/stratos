@@ -121,3 +121,19 @@ node$ docker logs 4499d41872a2
 # Inspect a container to view ENV vars, etc.
 node$ sudo docker inspect d48da0be6e66
 ```
+
+# Helpful Tools
+
+We've created a few tools to help with other general stuff.
+
+1. Creating a vmware docker-machine
+```
+tools/create-vmware-docker-machine.sh
+```
+Creates a vmware based docker-machine and adjusts it's networking to use NFS instead of the standard vmware sharing.
+
+2. Restarting the portal-proxy container
+```
+tools/restart_proxy.sh
+```
+Destroys the existing portal-proxy container and rebuilds it.
