@@ -68,7 +68,7 @@
     this.isPending = this.model.application.summary.state === 'PENDING';
     this.appActions = [
       {
-        name: gettext('Launch App'),
+        name: gettext('View App'),
         execute: function () {
           var routes = that.model.application.summary.routes;
           if (routes.length) {
