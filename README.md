@@ -137,3 +137,9 @@ Creates a vmware based docker-machine and adjusts it's networking to use NFS ins
 tools/restart_proxy.sh
 ```
 Destroys the existing portal-proxy container and rebuilds it.
+
+3. Connecting to the postgres DB
+```
+tools/connect_postgres.sh
+```
+Connects you into the postgres DB so you can clean out bad old things.  :-)
