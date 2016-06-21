@@ -83,10 +83,9 @@
                   .then(function() {
                     return that.hceModel.getProject(that.model.application.summary.name);
                   });
-              })
-              .catch(function(response) {
+              }, function(response) {
                 if (response.status === 404) {
-                  that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
+                  that.hceModel.createUser(that.hceCnsi.guid, '132456', 'login', 'token');
                 }
               });
           } else {
@@ -196,7 +195,6 @@
      */
     updateData: function() {
       var that = this;
-
       that.eventsPerExecution = {};
 
       var promise;
@@ -379,6 +377,10 @@
         if (!that.eventsPerExecution[execution.id]) {
           fetchEventsPromises.push(that.fetchEvents(that.eventsPerExecution, execution.id));
         }
+      }
+
+      if (fetchEventsPromises.length < 1) {
+        return;
       }
 
       // Once all the events for every visible execution has completed parse those events to determine what the
