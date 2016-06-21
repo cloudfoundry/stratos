@@ -84,6 +84,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	// TODO(woodnt): Remove most of the log.Print statements in this file.  We really need to not display a lot of this data.
+	//               TEAMFOUR-619
 	log.Println("loginToCNSI start")
 
 	cnsiGUID := c.FormValue("cnsi_guid")
@@ -356,6 +357,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	}
 
 	// FIXME(woodnt): OBVIOUSLY this needs to not be hard-coded.
+	//                Currently this is waiting on https://jira.hpcloud.net/browse/TEAMFOUR-617
 	resp := &VerifySessionRes{
 		Account:	"admin",
 		//Scope: 		"cloud_controller.admin",
