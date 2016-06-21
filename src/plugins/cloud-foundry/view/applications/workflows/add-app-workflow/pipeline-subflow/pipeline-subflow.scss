@@ -4,7 +4,7 @@ add-app-workflow {
       border: 1px solid $table-border-color;
     }
 
-    // TODO: From here onwards, code will be moved to helion-ui-theme
+    // TODO: From here onwards, code will be moved to helion-ui-theme https://jira.hpcloud.net/browse/TEAMFOUR-624
     > thead > tr > th.text-left,
     > tbody > tr:not([table-inline-message]) > td.text-left {
       &:last-child:not(.text-center) {

@@ -68,20 +68,19 @@
      * @function disconnect
      * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
      * @description Disconnect user from service instance
-     * @param {number} id - the service instance ID
+     * @param {number} guid - the service instance ID
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    // TODO woodnt: can we change this param name to guid from id?
-    disconnect: function (id) {
+    disconnect: function (guid) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
-      var disconnectData = {cnsi_guid: id};
+      var disconnectData = {cnsi_guid: guid};
       var data = this.$httpParamSerializer(disconnectData);
-      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs.
+      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs. https://jira.hpcloud.net/browse/TEAMFOUR-620
       return this.$http.post('/pp/v1/auth/logout/cnsi', data, config);
     },
 

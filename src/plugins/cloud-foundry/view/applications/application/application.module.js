@@ -141,7 +141,7 @@
       this.model.getAppStats(this.cnsiGuid, this.id);
       this.model.application.project = null;
 
-      // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+      // TODO(kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
       this.cnsiModel.list().then(function () {
         var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
         if (hceCnsis.length > 0) {
@@ -198,8 +198,8 @@
         appAction.disabled = that.isPending;
       });
 
-      // TODO: This list-index mechanism is WAY fragile. Now we can't reorder the actions without re-counting indexes.
-      // TODO: Why are we both conditionally hiding and conditionally disabling these appActions?  That seems ... odd.
+      // TODO(woodnt): This list-index mechanism is WAY fragile. Now we can't reorder the actions without re-counting indexes. https://jira.hpcloud.net/browse/TEAMFOUR-621
+      // TODO(woodnt): Why are we both conditionally hiding and conditionally disabling these appActions?  That seems ... odd. https://jira.hpcloud.net/browse/TEAMFOUR-622
       this.showOrHideLaunchApp(newState, null);
       // Index 0 is Launch App though it's handled in it's own special method because it requires route info.
       this.appActions[1].hidden = newState !== 'STARTED';  // Stop

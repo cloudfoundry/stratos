@@ -65,15 +65,15 @@
     var updateModelPromise, promise;
 
     /* eslint-disable */
-    // TODO (rcox): Both vars + anything associated with to be removed once everything is wired in
+    // TODO (rcox): Both vars + anything associated with to be removed once everything is wired in https://jira.hpcloud.net/browse/TEAMFOUR-628
     /* eslint-enable */
     this.addMock = false;
     this.haveBackend = true;
 
     if (this.haveBackend) {
       /* eslint-disable */
-      // TODO (kdomico): Hi! I've used the same github user approach. Update here as well or let me know if I need to do it
-      // TODO (rcox): Improvements - Check if project id already exists in hce model?
+      // TODO (kdomico): Hi! I've used the same github user approach. Update here as well or let me know if I need to do it https://jira.hpcloud.net/browse/TEAMFOUR-628
+      // TODO (rcox): Improvements - Check if project id already exists in hce model? https://jira.hpcloud.net/browse/TEAMFOUR-628
       /* eslint-enable */
       promise = this.cnsiModel.list()
         .then(function () {
@@ -202,7 +202,7 @@
      */
     updateData: function() {
       /* eslint-disable */
-      // TODO (rcox): Need to optimise for projects with large amount of executions/builds
+      // TODO (rcox): Need to optimise for projects with large amount of executions/builds https://jira.hpcloud.net/browse/TEAMFOUR-629
       // - only process visible executions
       // - Don't fetch events for all executions
       // - See TEAMFOUR-375
