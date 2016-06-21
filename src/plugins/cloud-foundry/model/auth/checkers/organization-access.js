@@ -66,7 +66,7 @@
       /**
        * @name: delete
        * @description: Does user have delete organization permission
-       * Original source contained a `//TODO` annotation
+       * Original source contained a `//TODO(irfran):` annotation https://jira.hpcloud.net/browse/TEAMFOUR-625
        * @param {Object} app Application detail
        * @returns {boolean}
        */

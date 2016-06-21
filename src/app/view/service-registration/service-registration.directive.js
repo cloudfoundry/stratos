@@ -62,7 +62,7 @@
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
     this.detailView = detailView;
 
-    // TODO woodnt: There must be a more reproducable/general way of doing this.
+    // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
 
     $scope.$watchCollection(function () {
@@ -120,8 +120,8 @@
     disconnect: function (serviceInstance) {
       var that = this;
 
-      // TODO: Our mocking system uses "id" but the real systems use "guid".
-      //       This bandaid will allow the use of either.
+      // Our mocking system uses "id" but the real systems use "guid".
+      // This bandaid will allow the use of either.
       var id = angular.isUndefined(serviceInstance.guid) ? serviceInstance.id : serviceInstance.guid;
 
       this.userCnsiModel.disconnect(id)

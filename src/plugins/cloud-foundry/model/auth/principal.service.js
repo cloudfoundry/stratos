@@ -38,7 +38,7 @@
   angular.extend(PrincipalService.prototype, {
 
     /**
-     * // TODO Not original implement relied on localStorage to retrieve current user
+     * //TODO(irfran): Not original implement relied on localStorage to retrieve current user https://jira.hpcloud.net/browse/TEAMFOUR-625
      * @name: getCurrentUser
      * @description: Retrieves current user
      */
@@ -53,7 +53,7 @@
     },
 
     /**
-     * //TODO Not original implement relied on localStorage to store current user
+     * //TODO(irfran): Not original implement relied on localStorage to store current user https://jira.hpcloud.net/browse/TEAMFOUR-625
      * @name: setCurrentUser
      * @description: get a Principal instance for the current user
      * @param {Object} authInfo
