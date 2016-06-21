@@ -177,6 +177,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Disconnect HCF cluster
 	sessionGroup.Post("/auth/logout/cnsi", p.logoutOfCNSI)
 
+	// Verify Session
+	sessionGroup.Get("/auth/session/verify", p.verifySession)
+
 	// should be referenced as /v1/github/oauth/auth
 	sessionGroup.Get("/github/oauth/auth", p.handleGitHubAuth)
 
