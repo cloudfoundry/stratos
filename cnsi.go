@@ -132,7 +132,7 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 	return nil
 }
 
-// TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls.
+// TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls.  https://jira.hpcloud.net/browse/TEAMFOUR-631
 func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
 	log.Println("unregisterCluster start")

@@ -286,7 +286,7 @@ func TestRegisterHCEClusterWithInvalidAPIEndpoint(t *testing.T) {
 }
 
 func TestRegisterHCEClusterWithBadV2Request(t *testing.T) {
-	t.Skip("TODO: fix this!")
+	t.Skip("TODO: fix this!")  // https://jira.hpcloud.net/browse/TEAMFOUR-637
 	t.Parallel()
 
 	mockInfo := setupMockServer(t,
@@ -345,7 +345,7 @@ func TestRegisterHCEClusterButCantSaveCNSIRecord(t *testing.T) {
 }
 
 func TestListCNSIs(t *testing.T) {
-	t.Skip("TODO: fix this test")
+	t.Skip("TODO: fix this test")  // https://jira.hpcloud.net/browse/TEAMFOUR-637
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)

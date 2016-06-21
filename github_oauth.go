@@ -12,8 +12,8 @@ import (
 	"github.com/labstack/echo"
 )
 
-// TODO (wchrisjohnson): Make configurable w/a default.
-// AarondL: These scopes should probably be configurable with a default.
+// TODO (wchrisjohnson): Make configurable w/a default.  https://jira.hpcloud.net/browse/TEAMFOUR-632
+// AarondL: These scopes should probably be configurable with a default.  https://jira.hpcloud.net/browse/TEAMFOUR-632
 
 // Define the necessary OAuth scopes needed by the application
 var scopes = []string{"admin:repo_hook", "repo", "repo:status"}
