@@ -83,14 +83,15 @@
      * @public
      */
     verifySession: function () {
-      if (this.$cookies.get('portal-session')) {
-        return this.$q(function(resolve) {
-          resolve({ data: { account: 'admin', scope: 'cloud_controller.admin' } });
-        });
-      }
-      return this.$q(function(resolve, reject) {
-        reject({});
-      });
+      // if (this.$cookies.get('portal-session')) {
+      //   return this.$q(function(resolve) {
+      //     resolve({ data: { account: 'admin', scope: 'cloud_controller.admin' } });
+      //   });
+      // }
+      // return this.$q(function(resolve, reject) {
+      //   reject({});
+      // });
+      return this.$http.get('/pp/v1/auth/session/verify');
     }
   });
 
