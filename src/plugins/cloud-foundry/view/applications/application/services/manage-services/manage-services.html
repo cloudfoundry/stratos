@@ -1,14 +1,9 @@
 <div class="manage-instances">
-  <div class="manage-instances-header">
-    <h3 translate>Manage Service Instances</h3>
-    <button type="button" class="close helion-icon helion-icon-Close"
-      ng-click="manageServicesCtrl.close()"></button>
-  </div>
   <div class="service-description col-sm-12">
     <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
     <div>
-      <h4 class="font-semi-bold">{{ manageServicesCtrl.service.entity.label }}</h4>
-      <p>{{ manageServicesCtrl.service.entity.description }}</p>
+      <h4 class="font-semi-bold">{{ detailViewCtrl.context.data.service.entity.label }}</h4>
+      <p>{{ detailViewCtrl.context.data.service.entity.description }}</p>
     </div>
   </div>
   <table class="table table-outlined instances-table">
@@ -21,18 +16,18 @@
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="instance in manageServicesCtrl.serviceInstances">
+      <tr ng-repeat="instance in detailViewCtrl.context.serviceInstances">
         <td>{{ instance.name }}</td>
         <td>{{ instance.service_plan.name }}</td>
         <td class="text-right">
           <button class="btn btn-link btn-sm"
-            ng-click="manageServicesCtrl.viewEnvVariables(instance)">
+            ng-click="detailViewCtrl.context.viewEnvVariables(instance)">
             <i class="helion-icon helion-icon-2x helion-icon-Share"></i>
           </button>
         </td>
         <td class="text-right">
           <button class="btn btn-link btn-sm"
-            ng-click="manageServicesCtrl.detach(instance)" translate>Detach</button>
+            ng-click="detailViewCtrl.context.detach(instance)" translate>Detach</button>
         </td>
       </tr>
     </tbody>

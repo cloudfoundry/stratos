@@ -32,7 +32,7 @@
   ServiceCardController.$inject = [
     '$scope',
     'app.model.modelManager',
-    'helion.framework.widgets.detailView'
+    'app.event.eventService'
   ];
 
   /**
@@ -42,25 +42,23 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {helion.framework.widgets.detailView} detailView - the detail view service
-   * @property {helion.framework.widgets.detailView} detailView - the detail view service
+   * @param {app.event.eventService} eventService - the event management service
+   * @property {app.event.eventService} eventService - the event management service
    * @property {cloud-foundry.model.application} appModel - the Cloud Foundry application model
    * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model
    * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)
    * @property {array} serviceBindings - the service instances bound to specified app
    * @property {number} numAttached - the number of service instances bound to specified app
-   * @property {number} numAdded - the number of new service instances bound to specified app
    * @property {array} actions - the actions that can be performed from this service card
    */
-  function ServiceCardController($scope, modelManager, detailView) {
+  function ServiceCardController($scope, modelManager, eventService) {
     var that = this;
-    this.detailView = detailView;
+    this.eventService = eventService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.allowAddOnly = angular.isDefined(this.addOnly) ? this.addOnly : false;
     this.serviceBindings = [];
     this.numAttached = 0;
-    this.numAdded = 0;
     this.actions = [
       {
         name: gettext('Add Service'),
@@ -94,9 +92,26 @@
      * @function init
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
      * @description Fetch service bindings for this app and update content
-     * @returns {void}
+     * @returns {promise} A promise object
      */
     init: function () {
+      this.serviceBindings.length = 0;
+
+      var serviceInstances = this.getServiceInstanceGuids();
+      if (serviceInstances.length > 0) {
+        return this.getServiceBindings(serviceInstances);
+      } else {
+        this.updateActions();
+      }
+    },
+
+    /**
+     * @function getServiceInstanceGuids
+     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @description Get service instances for app
+     * @returns {array} A list of service instance GUIDs
+     */
+    getServiceInstanceGuids: function () {
       var that = this;
       var serviceInstances = _.chain(this.app.summary.services)
                               .filter(function (o) {
@@ -104,20 +119,27 @@
                               })
                               .map('guid')
                               .value();
-      if (serviceInstances.length > 0) {
-        var q = 'service_instance_guid IN ' + serviceInstances.join(',');
-        return this.bindingModel.listAllServiceBindings(this.cnsiGuid, { q: q })
-          .then(function (bindings) {
-            var appGuid = that.app.summary.guid;
-            var appBindings = _.filter(bindings, function (o) { return o.entity.app_guid === appGuid; });
-            that.serviceBindings.length = 0;
-            [].push.apply(that.serviceBindings, appBindings);
-            that.updateActions();
-          });
-      } else {
-        this.serviceBindings.length = 0;
-        this.updateActions();
-      }
+      return serviceInstances;
+    },
+
+    /**
+     * @function getServiceBindings
+     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @description Get service bindings for specified service instances
+     * @param {array} serviceInstanceGuids A list of service instance GUIDs
+     * @returns {promise} A promise object
+     */
+    getServiceBindings: function (serviceInstanceGuids) {
+      var that = this;
+
+      var q = 'service_instance_guid IN ' + serviceInstanceGuids.join(',');
+      return this.bindingModel.listAllServiceBindings(this.cnsiGuid, { q: q })
+        .then(function (bindings) {
+          var appGuid = that.app.summary.guid;
+          var appBindings = _.filter(bindings, function (o) { return o.entity.app_guid === appGuid; });
+          [].push.apply(that.serviceBindings, appBindings);
+          that.updateActions();
+        });
     },
 
     /**
@@ -127,22 +149,14 @@
      * @returns {void}
      */
     addService: function () {
-      var that = this;
       var config = {
-        controller: 'addServiceWorkflowController',
-        controllerAs: 'addServiceWorkflowCtrl',
-        detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/add-service-workflow.html'
-      };
-      var context = {
-        cnsiGuid: this.cnsiGuid,
-        service: this.service,
         app: this.app,
-        confirm: !this.allowAddOnly
+        cnsiGuid: this.cnsiGuid,
+        confirm: !this.allowAddOnly,
+        service: this.service
       };
-      return this.detailView(config, context).result
-        .then(function () {
-          that.numAdded++;
-        });
+
+      this.eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
     },
 
     /**
@@ -169,16 +183,12 @@
      */
     manageInstances: function () {
       var config = {
-        controller: 'manageServicesController',
-        controllerAs: 'manageServicesCtrl',
-        detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/application/services/manage-services/manage-services.html'
-      };
-      var context = {
-        cnsiGuid: this.cnsiGuid,
         app: this.app,
+        cnsiGuid: this.cnsiGuid,
         service: this.service
       };
-      return this.detailView(config, context);
+
+      this.eventService.$emit('cf.events.START_MANAGE_SERVICES', config);
     },
 
     /**
