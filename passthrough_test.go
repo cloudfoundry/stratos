@@ -77,7 +77,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		t.Errorf("There were unfulfilled expectations: %s", dberr)
 	}
 
-	// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers
+	// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers  https://jira.hpcloud.net/browse/TEAMFOUR-636
 	done := make(chan CNSIRequest)
 	kill := make(chan struct{})
 

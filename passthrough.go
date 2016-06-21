@@ -174,7 +174,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		// TODO: Pass headers through in all cases, not just single pass through
+		// TODO: Pass headers through in all cases, not just single pass through  https://jira.hpcloud.net/browse/TEAMFOUR-635
 		//req.Header = header
 	}
 

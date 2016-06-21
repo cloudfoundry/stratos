@@ -162,7 +162,7 @@ func (p *portalProxy) initCookieStore() {
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
-	// TODO(wchrisjohnson): remove prior to shipping
+	// TODO(wchrisjohnson): remove prior to shipping  https://jira.hpcloud.net/browse/TEAMFOUR-633
 	e.Static("/*", "demo")
 
 	e.Post("/v1/auth/login/uaa", p.loginToUAA)
@@ -187,7 +187,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.Post("/register/hcf", p.registerHCFCluster)
 	sessionGroup.Post("/register/hce", p.registerHCECluster)
 
-	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.
+	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
 	sessionGroup.Post("/unregister", p.unregisterCluster)
 	// sessionGroup.Delete("/cnsis", p.removeCluster)
 
