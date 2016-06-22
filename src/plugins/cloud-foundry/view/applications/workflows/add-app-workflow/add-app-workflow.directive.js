@@ -172,7 +172,7 @@
             nextBtnText: gettext('Next'),
             onNext: function () {
               that.userInput.services = that.appModel.application.summary.services;
-              that.options.subflow = 'pipeline';
+              that.options.subflow = that.options.subflow || 'pipeline';
             }
           },
           {
@@ -525,6 +525,7 @@
      */
     redefineWorkflowWithoutHce: function () {
       this.options.subflow = 'cli';
+      this.data.countMainWorkflowSteps -= 1;
       this.data.workflow.steps.pop();
       [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
     },
