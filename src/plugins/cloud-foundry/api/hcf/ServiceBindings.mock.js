@@ -47,15 +47,17 @@
     DeleteServiceBinding: function (guid) {
       return {
         url: '/pp/v1/proxy/v2/service_bindings/' + guid,
-
         response: {
+          200: {
+            body: { guid: null }
+          },
 
           204: {
             body: { guid: {} }
           },
 
           500: {
-            body: { guid: {} }
+            body: { guid: { error_code: 1000 } }
           }
         }
       };
@@ -89,9 +91,7 @@
                       "credentials": {
                         "creds-key-64": "creds-val-64"
                       },
-                      "binding_options": {
-
-                      },
+                      "binding_options": {},
                       "gateway_data": null,
                       "gateway_name": "",
                       "syslog_drain_url": null,

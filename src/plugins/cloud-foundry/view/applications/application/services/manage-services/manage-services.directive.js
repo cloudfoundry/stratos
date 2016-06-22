@@ -22,6 +22,7 @@
   }
 
   ManageServicesController.$inject = [
+    '$q',
     '$scope',
     'app.model.modelManager',
     'app.event.eventService',
@@ -32,10 +33,12 @@
    * @memberof cloud-foundry.view.applications
    * @name ManageServicesController
    * @constructor
+   * @param {object} $q - the Angular $q service
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.event.eventService} eventService - the event management service
    * @param {helion.framework.widgets.detailView} detailView - the detail view service
+   * @property {object} $q - the Angular $q service
    * @property {helion.framework.widgets.detailView} detailView - the detail view service
    * @property {cloud-foundry.model.application} appModel - the CF application model
    * @property {cloud-foundry.model.service-binding} bindingModel - the CF service binding model
@@ -43,8 +46,9 @@
    * @property {array} serviceInstances - service instances associated with this service
    * @property {object} serviceBindings - service bindings associated with this app
    */
-  function ManageServicesController($scope, modelManager, eventService, detailView) {
+  function ManageServicesController($q, $scope, modelManager, eventService, detailView) {
     var that = this;
+    this.$q = $q;
     this.detailView = detailView;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -54,7 +58,7 @@
     this.serviceBindings = {};
 
     var manageServicesEvent = eventService.$on('cf.events.START_MANAGE_SERVICES', function (event, config) {
-      that.reset(config).then(function () {
+      that.$q.when(that.reset(config)).then(function () {
         that.modal = that.startManageServices();
       });
     });
