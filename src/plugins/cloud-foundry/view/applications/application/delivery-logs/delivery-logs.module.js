@@ -69,8 +69,9 @@
 
     if (this.haveBackend) {
       /* eslint-disable */
-      // TODO (kdomico): Hi! I've used the same github user approach. Update here as well or let me know if I need to do it
-      // TODO (rcox): Improvements - Check if project id already exists in hce model?
+      // TODO (kdomico): RC .. Hi! I've used the same github user approach. Update here as well or let me know if I need
+      // to do it. See https://jira.hpcloud.net/browse/TEAMFOUR-623. There's a number of unit tests implement for this
+      // at the moment. They will also need to be updated. I can do that part, just let me know the PR
       /* eslint-enable */
       promise = this.cnsiModel.list()
         .then(function () {
@@ -403,7 +404,7 @@
     },
 
     /* eslint-disable */
-    // TODO (rcox): Remove all mock functions
+    // TODO (rcox): Remove all mock properties and functions below. See TEAMFOUR-596
     mockExecutions: 0,
 
     mockEvents: 0,

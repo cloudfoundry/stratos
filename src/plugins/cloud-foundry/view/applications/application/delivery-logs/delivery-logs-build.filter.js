@@ -2,7 +2,8 @@
   'use strict';
 
   // The filters
-  angular.module('cloud-foundry.view.applications.application.delivery-logs')
+  angular
+    .module('cloud-foundry.view.applications.application.delivery-logs')
     .filter('deliveryLogsBuildFilter', deliveryLogsBuildFilter);
 
   deliveryLogsBuildFilter.$inject = [
