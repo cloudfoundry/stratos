@@ -62,7 +62,7 @@
      * @param {object} params - params for url building
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     deleteServiceBinding: function (cnsiGuid, guid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
         .DeleteServiceBinding(guid, params);
@@ -76,7 +76,7 @@
      * @param {object} params - params for url building
      * @returns {promise} A promise object
      * @public
-     **/
+     */
     listAllServiceBindings: function (cnsiGuid, params) {
       var httpConfig = {
         headers: { 'x-cnap-cnsi-list': cnsiGuid }
