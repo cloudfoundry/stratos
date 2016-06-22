@@ -1,9 +1,3 @@
-<div class="add-service-workflow">
-  <div class="add-service-workflow-header">
-    <h3 translate>Add Service to {{ addServiceWorkflowCtrl.app.summary.name }}</h3>
-    <button type="button" class="close helion-icon helion-icon-Close"
-      ng-click="addServiceWorkflowCtrl.stopWorkflow()"></button>
-  </div>
-  <wizard actions="addServiceWorkflowCtrl.addServiceActions"
-    options="addServiceWorkflowCtrl.options"></wizard>
-</div>
+<wizard class="add-service-workflow"
+  actions="detailViewCtrl.context.addServiceActions"
+  options="detailViewCtrl.context.options"></wizard>

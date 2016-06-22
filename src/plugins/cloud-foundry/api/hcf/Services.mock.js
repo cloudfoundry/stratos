@@ -107,6 +107,46 @@
           }
         }
       };
+    },
+
+    ListAllServicePlansForService: function (guid) {
+      return {
+        url: '/pp/v1/proxy/v2/services/' + guid + '/service_plans',
+        response: {
+          200: {
+            body: {
+              guid: {
+                total_results: 1,
+                total_pages: 1,
+                prev_url: null,
+                next_url: null,
+                resources: [
+                  {
+                    metadata: {
+                      guid: "a5ac915f-b746-42c5-8506-6d318bf21107",
+                      url: "/v2/service_plans/a5ac915f-b746-42c5-8506-6d318bf21107",
+                      created_at: "2016-05-12T00:45:19Z",
+                      updated_at: null
+                    },
+                    entity: {
+                      name: "name-1686",
+                      free: false,
+                      description: "desc-109",
+                      service_guid: "b2728c78-1057-4021-9c84-d2158f8f20df",
+                      extra: null,
+                      unique_id: "e010ae61-ec46-433d-bdf6-136ead10828b",
+                      public: true,
+                      active: true,
+                      service_url: "/v2/services/b2728c78-1057-4021-9c84-d2158f8f20df",
+                      service_instances_url: "/v2/service_plans/a5ac915f-b746-42c5-8506-6d318bf21107/service_instances"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   };
 

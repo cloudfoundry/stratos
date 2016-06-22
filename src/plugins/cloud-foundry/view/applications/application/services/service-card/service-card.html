@@ -23,7 +23,7 @@
     </actions-menu>
     <div class="service-added font-semi-bold text-uppercase"
       ng-if="serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAdded > 0">
-      {{ serviceCardCtrl.numAdded }} <span translate>Attached</span>
+      {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
     </div>
     <button class="btn btn-sm btn-link"
       ng-if="serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0"

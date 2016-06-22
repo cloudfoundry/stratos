@@ -1,18 +1,4 @@
 .add-service-workflow {
-  padding: $hpe-unit-space*2 $hpe-unit-space*4;
-
-  .add-service-workflow-header {
-    display: flex;
-    align-items: center;
-
-    h3 {
-      margin: 0;
-    }
-
-    .close {
-      margin-left: auto;
-    }
-  }
 
   .select-instance {
     padding: $hpe-unit-space 0;
