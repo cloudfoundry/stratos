@@ -29,7 +29,7 @@
     };
 
     function request(config) {
-      if (!config.url.startsWith('/pp')) {
+      if (_.isString(config.url) && !_.startsWith(config.url, '/pp')) {
         return config;
       }
 
