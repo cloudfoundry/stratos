@@ -29,6 +29,10 @@
     };
 
     function request(config) {
+      if (!config.url.startsWith('/pp')) {
+        return config;
+      }
+
       var cnsiGuid = $stateParams.cnsiGuid;
       if (angular.isUndefined(config.headers['x-cnap-cnsi-list']) && angular.isDefined(cnsiGuid)) {
         config.headers['x-cnap-cnsi-list'] = cnsiGuid;
