@@ -17,8 +17,9 @@ import (
 )
 
 type v2Info struct {
-	AuthorizationEndpoint string `json:"authorization_endpoint"`
-	TokenEndpoint         string `json:"token_endpoint"`
+	AuthorizationEndpoint   string `json:"authorization_endpoint"`
+	TokenEndpoint           string `json:"token_endpoint"`
+	DopplerLoggingEndpoint  string `json:"doppler_logging_endpoint"`
 }
 
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
@@ -54,11 +55,12 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	// save data to temporary map
 	newCNSI := cnsis.CNSIRecord{
-		Name:                  cnsiName,
-		CNSIType:              cnsis.CNSIHCF,
-		APIEndpoint:           apiEndpointURL,
-		TokenEndpoint:         v2InfoResponse.TokenEndpoint,
-		AuthorizationEndpoint: v2InfoResponse.AuthorizationEndpoint,
+		Name:                    cnsiName,
+		CNSIType:                cnsis.CNSIHCF,
+		APIEndpoint:             apiEndpointURL,
+		TokenEndpoint:           v2InfoResponse.TokenEndpoint,
+		AuthorizationEndpoint:   v2InfoResponse.AuthorizationEndpoint,
+		DopplerLoggingEndpoint:  v2InfoResponse.DopplerLoggingEndpoint,
 	}
 
 	err = p.setCNSIRecord(guid, newCNSI)
@@ -285,7 +287,7 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	if err = dec.Decode(&v2InfoReponse); err != nil {
 		return v2InfoReponse, err
 	}
-
+	fmt.Println("Returning ", v2InfoReponse)
 	return v2InfoReponse, nil
 }
 
@@ -323,11 +325,13 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
+		log.Println("cnsis.NewPostgresCNSIRepository failed", err)
 		return cnsis.CNSIRecord{}, false
 	}
 
 	rec, err := cnsiRepo.Find(guid)
 	if err != nil {
+		log.Println("cnsiRepo.Find failed", err)
 		return cnsis.CNSIRecord{}, false
 	}
 

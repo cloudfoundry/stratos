@@ -16,12 +16,13 @@ const (
 
 // CNSIRecord - <TBD>
 type CNSIRecord struct {
-	GUID                  string   `json:"guid"`
-	Name                  string   `json:"name"`
-	CNSIType              CNSIType `json:"cnsi_type"`
-	APIEndpoint           *url.URL `json:"api_endpoint"`
-	AuthorizationEndpoint string   `json:"authorization_endpoint"`
-	TokenEndpoint         string   `json:"token_endpoint"`
+	GUID                    string   `json:"guid"`
+	Name                    string   `json:"name"`
+	CNSIType                CNSIType `json:"cnsi_type"`
+	APIEndpoint             *url.URL `json:"api_endpoint"`
+	AuthorizationEndpoint   string   `json:"authorization_endpoint"`
+	TokenEndpoint           string   `json:"token_endpoint"`
+	DopplerLoggingEndpoint  string   `json:"doppler_logging_endpoint"`
 }
 
 // RegisteredCluster - <TBD>

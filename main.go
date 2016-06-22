@@ -165,35 +165,38 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// TODO(wchrisjohnson): remove prior to shipping  https://jira.hpcloud.net/browse/TEAMFOUR-633
 	e.Static("/*", "demo")
 
-	e.Post("/v1/auth/login/uaa", p.loginToUAA)
-	e.Post("/v1/auth/logout", p.logout)
+	e.POST("/v1/auth/login/uaa", p.loginToUAA)
+	e.POST("/v1/auth/logout", p.logout)
 
 	sessionGroup := e.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
 
 	// Connect to HCF cluster
-	sessionGroup.Post("/auth/login/cnsi", p.loginToCNSI)
+	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
 
 	// Disconnect HCF cluster
-	sessionGroup.Post("/auth/logout/cnsi", p.logoutOfCNSI)
+	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
 
 	// should be referenced as /v1/github/oauth/auth
-	sessionGroup.Get("/github/oauth/auth", p.handleGitHubAuth)
+	sessionGroup.GET("/github/oauth/auth", p.handleGitHubAuth)
 
 	// should be referenced as /v1/github/oauth/callback
-	sessionGroup.Get("/github/oauth/callback", p.handleGitHubCallback)
+	sessionGroup.GET("/github/oauth/callback", p.handleGitHubCallback)
 
 	// Register clusters
-	sessionGroup.Post("/register/hcf", p.registerHCFCluster)
-	sessionGroup.Post("/register/hce", p.registerHCECluster)
+	sessionGroup.POST("/register/hcf", p.registerHCFCluster)
+	sessionGroup.POST("/register/hce", p.registerHCECluster)
 
 	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
-	sessionGroup.Post("/unregister", p.unregisterCluster)
-	// sessionGroup.Delete("/cnsis", p.removeCluster)
+	sessionGroup.POST("/unregister", p.unregisterCluster)
+	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
 	// CNSI operations
-	sessionGroup.Get("/cnsis", p.listCNSIs)
-	sessionGroup.Get("/cnsis/registered", p.listRegisteredCNSIs)
+	sessionGroup.GET("/cnsis", p.listCNSIs)
+	sessionGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
+
+	// Applications Log Streams
+	e.GET("/applogs/:cnsiGuid/:appGuid", p.tailAppLogs)
 
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
