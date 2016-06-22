@@ -77,7 +77,7 @@
     ];
     /* eslint-enable */
 
-    // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+    // TODO(kdomico): Get or create fake HCE user until HCE API is complete  https://jira.hpcloud.net/browse/TEAMFOUR-623
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.cnsiModel.list().then(function () {
       var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];

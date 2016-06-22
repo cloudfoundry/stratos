@@ -185,7 +185,7 @@
             nextBtnText: gettext('Next'),
             onNext: function () {
               try {
-                // TODO (kdomico): Get or create fake HCE user until HCE API is complete
+                // TODO (kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
                 that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
                   .then(angular.noop, function (response) {
                     if (response.status === 404) {

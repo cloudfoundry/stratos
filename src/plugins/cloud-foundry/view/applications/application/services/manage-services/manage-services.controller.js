@@ -44,7 +44,7 @@
       if (this.serviceInstances.length > 0) {
         var guids = _.map(this.serviceInstances, 'guid');
         var q = 'service_instance_guid IN ' + guids.join(',');
-        this.appModel.listServiceBindings(this.cnsiGuid, this.app.summary.guid, { q: q })
+        return this.appModel.listServiceBindings(this.cnsiGuid, this.app.summary.guid, { q: q })
           .then(function (bindings) {
             that.serviceBindings = _.keyBy(bindings, function (o) { return o.entity.service_instance_guid; });
           });
@@ -54,7 +54,7 @@
     detach: function (instance) {
       var that = this;
       var binding = this.serviceBindings[instance.guid];
-      this.bindingModel.deleteServiceBinding(this.cnsiGuid, binding.metadata.guid)
+      return this.bindingModel.deleteServiceBinding(this.cnsiGuid, binding.metadata.guid)
         .then(function (response) {
           if (response.data[that.cnsiGuid] === null) {
             _.pull(that.serviceInstances, instance);
@@ -70,7 +70,7 @@
     viewEnvVariables: function (instance) {
       var that = this;
       var serviceLabel = this.service.entity.label;
-      this.appModel.getEnv(this.cnsiGuid, this.app.summary.guid)
+      return this.appModel.getEnv(this.cnsiGuid, this.app.summary.guid)
         .then(function (variables) {
           var vcap = variables.system_env_json.VCAP_SERVICES;
           if (angular.isDefined(vcap) && vcap[serviceLabel]) {

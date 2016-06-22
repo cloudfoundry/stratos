@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -130,8 +130,8 @@
     disconnect: function (serviceInstance) {
       var that = this;
 
-      // TODO: Our mocking system uses "id" but the real systems use "guid".
-      //       This bandaid will allow the use of either.
+      // Our mocking system uses "id" but the real systems use "guid".
+      // This bandaid will allow the use of either.
       var id = angular.isUndefined(serviceInstance.guid) ? serviceInstance.id : serviceInstance.guid;
 
       this.userCnsiModel.disconnect(id)

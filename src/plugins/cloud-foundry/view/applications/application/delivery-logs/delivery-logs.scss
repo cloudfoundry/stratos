@@ -29,20 +29,32 @@
   }
   .delivery-logs-builds {
 
-    // Min width every column except for the first
-    th:nth-child(2), th:nth-child(4), th:nth-child(5) {
-      min-width: 150px;
-    }
-    th:nth-child(3) {
-      min-width: 190px;
-    }
+    table{
 
-    table:first-child > thead:first-child > tr:first-child {
-      @media (max-width: $screen-sm-min) {
-        th {
-          min-width: 0;
+      thead {
+        // Min width every column except for the first
+        th:nth-child(2), th:nth-child(4), th:nth-child(5) {
+          min-width: 150px;
+        }
+        th:nth-child(3) {
+          min-width: 190px;
         }
       }
+
+      // TODO (RC): Discuss with ux approach to long message content (elipse but wide table OR super wide table mode)
+      //tbody tr {
+      //  td {
+      //    max-width: 300px;
+      //    overflow: hidden;
+      //    text-overflow: ellipsis;
+      //    white-space: nowrap;
+      //  }
+      //  @media (max-width: $screen-sm-min) {
+      //    td {
+      //      max-width: 200px;
+      //    }
+      //  }
+      //}
     }
 
     spinner {

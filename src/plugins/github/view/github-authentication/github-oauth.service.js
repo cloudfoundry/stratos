@@ -46,6 +46,7 @@
           var message = angular.fromJson(event.data);
           if (message.name === 'GitHub Oauth - token' && message.data && message.data.access_token) {
             resolve();
+            win.close();
           } else {
             reject();
           }
