@@ -1,4 +1,4 @@
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -61,7 +61,7 @@
     this.credentialsFormOpen = false;
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
     this.detailView = detailView;
-
+    this.currentEndpoints = [];
     // TODO woodnt: There must be a more reproducable/general way of doing this.
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
 
@@ -78,7 +78,17 @@
       });
     });
 
-    this.userCnsiModel.list().then(function () {
+    $scope.$watchCollection(function() {
+      return that.serviceInstances;
+    }, function(newCnsis) {
+      that.currentEndpoints = _.map(newCnsis,
+        function(c) {
+          var endpoint = c.api_endpoint;
+          return endpoint.Scheme + '://' + endpoint.Host;
+        });
+    });
+
+    this.userCnsiModel.list().then(function() {
       angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
       that.cnsiModel.list();
     });
@@ -183,6 +193,7 @@
       // This code is shamelessly copied from app/view/cluster-registration/cluster-registration.directive.js
       // I take that back, it was EXTREMELY SHAMEFUL.
       // -- woodnt
+
       var that = this;
       var data = { name: '', url: '' };
       this.detailView(
@@ -191,7 +202,10 @@
           title: gettext('Register Code Engine Endpoint')
         },
         {
-          data: data
+          data: data,
+          options: {
+            instances: this.currentEndpoints
+          }
         }
       ).result.then(function () {
         return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
