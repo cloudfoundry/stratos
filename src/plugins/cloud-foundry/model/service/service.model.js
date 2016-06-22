@@ -46,10 +46,7 @@
      **/
     all: function (cnsiGuid, options) {
       var that = this;
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
-      return this.serviceApi.ListAllServices(options, httpConfig)
+      return this.serviceApi.ListAllServices(options)
         .then(function (response) {
           return that.onAll(response.data[cnsiGuid]);
         });

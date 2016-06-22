@@ -23,12 +23,12 @@
         An error occurred deleting this pipeline. Please try again. If this error persists, please contact the administrator.
       </p>
     </div>
-    <div class="panel-body">
+    <div class="panel-body delivery-pipeline-summary">
       <div class="row">
         <dl class="dl-horizontal col-md-6">
           <dt translate>source</dt>
           <dd>
-            {{ applicationDeliveryPipelineCtrl.project.repo.vcs }}
+            {{ applicationDeliveryPipelineCtrl.project.repo.vcs | uppercase}}
           </dd>
           <dt translate>repo</dt>
           <dd>
@@ -44,9 +44,9 @@
           </dd>
         </dl>
         <dl class="dl-horizontal col-md-6">
-          <dt translate>hce endpoint</dt>
+          <dt translate>hce endpoint url</dt>
           <dd>
-            {{ applicationDeliveryPipelineCtrl.project.deploymentTarget.url }}
+            {{ applicationDeliveryPipelineCtrl.hceCnsi.api_endpoint.Scheme }}://{{ applicationDeliveryPipelineCtrl.hceCnsi.api_endpoint.Host }}{{ applicationDeliveryPipelineCtrl.hceCnsi.api_endpoint.Path }}
           </dd>
         </dl>
       </div>
@@ -62,9 +62,8 @@
       </button>
     </div>
     <div class="panel panel-default">
-      <div class="panel-body">
-        <span ng-if="!applicationDeliveryPipelineCtrl.notificationTargets.length"
-          translate>You have no notification targets.</span>
+      <div class="panel-body" ng-if="!applicationDeliveryPipelineCtrl.notificationTargets.length">
+        <span translate>You have no notification targets.</span>
       </div>
       <table ng-if="applicationDeliveryPipelineCtrl.notificationTargets.length"
         class="table table-actionable">
@@ -100,9 +99,8 @@
       </button>
     </div>
     <div class="panel panel-default">
-      <div class="panel-body">
-        <span ng-if="!applicationDeliveryPipelineCtrl.postDeployActions.length"
-          translate>You have no post deploy actions.</span>
+      <div class="panel-body" ng-if="!applicationDeliveryPipelineCtrl.postDeployActions.length">
+        <span translate>You have no post deploy actions.</span>
       </div>
       <table ng-if="applicationDeliveryPipelineCtrl.postDeployActions.length"
         class="table table-actionable">
@@ -138,9 +136,8 @@
       </button>
     </div>
     <div class="panel panel-default">
-      <div class="panel-body">
-        <span ng-if="!applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries.length"
-          translate>You have no container registries.</span>
+      <div class="panel-body" ng-if="!applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries.length">
+        <span translate>You have no container registries.</span>
       </div>
       <table ng-if="applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries.length"
         class="table table-actionable">

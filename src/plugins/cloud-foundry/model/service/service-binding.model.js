@@ -64,11 +64,8 @@
      * @public
      **/
     deleteServiceBinding: function (cnsiGuid, guid, params) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .DeleteServiceBinding(guid, params, httpConfig);
+        .DeleteServiceBinding(guid, params);
     },
 
     /**

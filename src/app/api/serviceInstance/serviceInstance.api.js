@@ -71,20 +71,19 @@
      * @function remove
      * @memberof app.api.serviceInstance.ServiceInstanceApi
      * @description Remove service instance
-     * @param {number} id - the ID of the service instance to remove
+     * @param {number} guid - the ID of the service instance to remove
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    // TODO(woodnt): can I change this to guid or will that break things elsewhere?
-    remove: function (id) {
+    remove: function (guid) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
-      var removalData = {cnsi_guid: id};
+      var removalData = {cnsi_guid: guid};
       var data = this.$httpParamSerializer(removalData);
-      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs.
+      // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs. https://jira.hpcloud.net/browse/TEAMFOUR-620
       return this.$http.post('/pp/v1/unregister', data, config);
     },
 

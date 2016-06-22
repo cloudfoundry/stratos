@@ -98,8 +98,8 @@
 <div>
   <div class="action-header">
     <span translate>Routes</span>
-    <a class="btn btn-link">
-      <i class="helion-icon helion-icon-Right_Arrow"></i>
+    <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()">
+      <i class="helion-icon helion-icon-Right_Arrow" ></i>
       <span translate>Add routes</span>
     </a>
   </div>
@@ -118,7 +118,7 @@
       </thead>
       <tbody>
         <tr ng-repeat="route in appCtrl.model.application.summary.routes">
-          <td>{{ route.host + '.' + route.domain.name  + '/' + route.path }}</td>
+          <td>{{ route.host + '.' + route.domain.name + route.path }}</td>
           <td></td>
         </tr>
       </tbody>

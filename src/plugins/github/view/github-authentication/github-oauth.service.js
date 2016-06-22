@@ -3,16 +3,27 @@
 
   angular
     .module('github.view')
-    .service('github.view.githubOauthService', GithubOauthService);
+    .factory('github.view.githubOauthService', githubOauthServiceFactory);
 
-  GithubOauthService.$inject = [
+  githubOauthServiceFactory.$inject = [
     '$window',
     '$q'
   ];
 
   /**
    * @memberof github.view
-   * @name githubOauthService
+   * @name githubOauthServiceFactory
+   * @constructor
+   * @param {object} $window - angular $window service
+   * @param {object} $q - angular $q service
+   */
+  function githubOauthServiceFactory($window, $q) {
+    return new GithubOauthService($window, $q);
+  }
+
+  /**
+   * @memberof github.view
+   * @name GithubOauthService
    * @constructor
    * @param {object} $window - angular $window service
    * @param {object} $q - angular $q service
@@ -35,6 +46,7 @@
           var message = angular.fromJson(event.data);
           if (message.name === 'GitHub Oauth - token' && message.data && message.data.access_token) {
             resolve();
+            win.close();
           } else {
             reject();
           }
