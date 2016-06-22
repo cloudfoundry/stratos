@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -e -u -x
-
-export GOPATH=$PWD/portal-proxy
-
-go build -o built-project/portal-proxy github.com/hpcloud/portal-proxy
