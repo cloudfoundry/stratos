@@ -57,6 +57,7 @@
     this.$q = $q;
     this.moment = moment;
     this.$log = $log;
+    this.$scope = $scope;
 
     var that = this;
     var promise;
@@ -108,10 +109,6 @@
       .catch(function () {
         that.hasProject = 'error';
       });
-
-    that.execWatch = $scope.$watch(function() { return that.displayedExecutions; }, function(visibleExecutions) {
-      that.updateVisibleExecutions(visibleExecutions);
-    });
 
   }
 
@@ -196,7 +193,20 @@
      */
     updateData: function() {
       var that = this;
+
+      // Reset/init the locally cached events and start watching the visible executions (only events for executions that
+      // are visible will be fetched)
       that.eventsPerExecution = {};
+      // Watch the visible executions. This will internally stop watching if all executions have had their events
+      // fetched. Also debounce the execution to avoid initialisation flip flop
+      if (that.execWatch) {
+        that.execWatch();
+      }
+      that.execWatch = that.$scope.$watch(function() {
+        return that.displayedExecutions;
+      }, _.debounce(function(visibleExecutions) {
+        that.updateVisibleExecutions(visibleExecutions);
+      }, 500));
 
       var promise;
       if (this.haveBackend) {

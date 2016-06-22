@@ -632,7 +632,16 @@
     describe('dynamic loading of events when execution visible - updateVisibleExecutions', function() {
       beforeEach(function() {
         createController(true);
-        controller.eventsPerExecution = {};
+        // Call updateModel to set up watch, we'll test if this watch is correctly called
+        spyOn(hceModel, 'getProject').and.callFake(function() {
+          return project;
+        });
+        spyOn(hceModel, 'getPipelineExecutions').and.callFake(function() {
+          return $q.when();
+        });
+        _.set(controller, 'hceModel.data.pipelineExecutions', []);
+        controller.updateData();
+        $rootScope.$apply();
       });
 
       it('Nothing visible? Nothing to update', function() {
@@ -725,7 +734,7 @@
 
       });
 
-      it('fetch event succeeds, watch not killed', function() {
+      it('fetch event succeeds, watch should not be killed', function() {
         var execution1 = {
           id: 'one',
           reason: {
