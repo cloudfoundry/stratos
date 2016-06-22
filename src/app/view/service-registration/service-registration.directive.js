@@ -62,7 +62,7 @@
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
     this.detailView = detailView;
     this.currentEndpoints = [];
-    // TODO woodnt: There must be a more reproducable/general way of doing this.
+    // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
 
     $scope.$watchCollection(function () {
