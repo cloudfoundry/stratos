@@ -1,6 +1,6 @@
 FROM nginx
 
-COPY ./nginx.UCP.conf /etc/nginx/nginx.conf
+COPY ./nginx.conf.HCP /etc/nginx/nginx.conf
 COPY ./dist/ /usr/share/nginx/html
 
 EXPOSE 80 443
