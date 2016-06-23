@@ -96,8 +96,12 @@
                 <span ng-switch-default class="helion-icon helion-icon-Active_S"></span>
               </div>
               <span translate>{{ execution.result.label }}</span>
-              <a translate ng-if="execution.result.artifact_id"
-                 ng-click="appDelLogsCtrl.viewEventForExecution(execution)">view</a>
+              <a translate
+                 ng-if="execution.result.state === appDelLogsCtrl.eventStates.SUCCEEDED &&
+                        appCtrl.model.application.summary.routes[0]"
+                 target="_blank"
+                 ng-init="route=appCtrl.model.application.summary.routes[0]"
+                 ng-href="http://{{ route.host + '.' + route.domain.name + route.path }}">view</a>
             </td>
             <td>{{ execution.reason.createdDate | amDateFormat:'L - LTS' }}</td>
             <td>{{ execution.reason.author }}</td>
