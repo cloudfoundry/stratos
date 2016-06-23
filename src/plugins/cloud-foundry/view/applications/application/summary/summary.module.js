@@ -22,7 +22,6 @@
     'app.model.modelManager',
     '$stateParams',
     'cloud-foundry.view.applications.application.summary.addRoutes'
-
   ];
 
   /**
@@ -30,8 +29,11 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
-   * @property {object} model - the Cloud Foundry Applications Model
+   * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
+   * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
+   * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
+   * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    */
   function ApplicationSummaryController(modelManager, $stateParams, addRoutesService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');

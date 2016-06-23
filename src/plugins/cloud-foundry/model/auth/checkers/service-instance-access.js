@@ -26,25 +26,22 @@
    * @param {app.api.modelManager}  modelManager - the Model management service
    * @returns {ServiceInstanceAccess}
    * @constructor
-     */
+   */
   function ServiceInstanceAccessFactory(modelManager) {
-
     /**
      * @name: ServiceInstanceAccess
      * @description: Constructor for ServiceInstanceAccess
      * @param {Principal} principal Principal instance
      * @param {Array} flags feature flags
      * @constructor
-       */
+     */
     function ServiceInstanceAccess(principal, flags) {
       this.principal = principal;
       this.flags = flags;
-
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
     angular.extend(ServiceInstanceAccess.prototype, {
-
       /**
        * @name: create
        * @description: Does user have create service instance permission in the space
@@ -52,7 +49,6 @@
        * @returns {boolean}
        */
       create: function(space) {
-
         // Admin
         if (this.baseAccess.create(space)) {
           return true;
@@ -67,28 +63,28 @@
       /**
        * @name: update
        * @description: Does user have update service instance permission
-       * @param {Object} service_instance service instance detail
+       * @param {Object} serviceInstance service instance detail
        * @returns {boolean}
        */
-      update: function(service_instance) {
+      update: function(serviceInstance) {
         // Admin
-        if (this.baseAccess.update(service_instance)) {
+        if (this.baseAccess.update(serviceInstance)) {
           return true;
         }
 
         // If user is developer in space the service instances belongs to
         return this.baseAccess
-          ._doesContainGuid(this.principal.userInfo.entity.spaces, service_instance.entity.space_guid);
+          ._doesContainGuid(this.principal.userInfo.entity.spaces, serviceInstance.entity.space_guid);
       },
 
       /**
        * @name: delete
        * @description: Does user have delete application permission
-       * @param {Object} service_instance service instance detail
+       * @param {Object} serviceInstance service instance detail
        * @returns {boolean}
        */
-      delete: function(service_instance) {
-        return this.baseAccess.update(service_instance);
+      delete: function(serviceInstance) {
+        return this.baseAccess.update(serviceInstance);
       },
 
       /**
@@ -104,6 +100,5 @@
 
     return ServiceInstanceAccess;
   }
-
 
 })();

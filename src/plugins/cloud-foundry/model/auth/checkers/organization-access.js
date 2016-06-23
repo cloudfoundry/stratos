@@ -26,8 +26,7 @@
    * @param {app.api.modelManager}  modelManager - the Model management service
    * @returns {OrganizationAccess}
    */
-    function OrganizationAccessFactory(modelManager) {
-
+  function OrganizationAccessFactory(modelManager) {
     /**
      * @name: OrganizationAccess
      * @description: Constructor for OrganizationAccess
@@ -39,7 +38,6 @@
       this.principal = principal;
       this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-
     }
 
     angular.extend(OrganizationAccess.prototype, {
@@ -94,6 +92,5 @@
 
     return OrganizationAccess;
   }
-
 
 })();

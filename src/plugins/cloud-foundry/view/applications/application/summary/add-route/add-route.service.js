@@ -4,7 +4,7 @@
   angular
     .module('cloud-foundry.view.applications.application.summary')
     .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory)
-    .controller('cloud-foundry.view.applications.application.summary.addRoutesCtrl', AddRouteController);
+    .controller('addRouteController', AddRouteController);
 
   AddRouteServiceFactory.$inject = [
     'app.model.modelManager',
@@ -67,8 +67,8 @@
    * @constructor
    * @param {Object} $stateParams - the UI router $stateParams service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {Object} $uibModalInstance
-   * @param {Object} context
+   * @param {Object} $uibModalInstance - the Angular UI Bootstrap $uibModalInstance service
+   * @param {Object} context - the uibModal context
    */
   function AddRouteController($stateParams, modelManager, $uibModalInstance, context) {
     var vm = this;
@@ -82,7 +82,6 @@
 
     vm.context = context;
   }
-
 
   angular.extend(AddRouteController.prototype, {
 
@@ -110,18 +109,20 @@
         .then(function(response) {
 
           if (!(response.metadata && response.metadata.guid)) {
-            throw 'Invalid response: ' + JSON.stringify(response);
+            /* eslint-disable no-throw-literal */
+            throw 'Invalid response: ' + angular.toJson(response);
+            /* eslint-enable no-throw-literal */
           }
           var routeId = response.metadata.guid;
           return vm.routeModel.associateAppWithRoute(vm.cnsiGuid, routeId, vm.applicationId);
         }).then(function() {
-        // Update application summary model
-        return vm.model.getAppSummary(vm.cnsiGuid, vm.applicationId);
-      }).then(function() {
-        vm.uibModelInstance.close();
-      }).catch(function() {
-        vm.onAddRouteError();
-      });
+          // Update application summary model
+          return vm.model.getAppSummary(vm.cnsiGuid, vm.applicationId);
+        }).then(function() {
+          vm.uibModelInstance.close();
+        }).catch(function() {
+          vm.onAddRouteError();
+        });
     },
     /**
      * @function cancel
@@ -130,7 +131,6 @@
     cancel: function() {
       this.uibModelInstance.dismiss();
     },
-
 
     /**
      * @function onAddRouteError
