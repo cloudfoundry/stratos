@@ -1,8 +1,9 @@
 <div class="add-route">
   <h4 translate>Add a Route</h4>
   <form name="addRouteForm" >
-    <div class="form-group" focusable-input>
-      <label class="control-label" translate>Host</label>
+    <div class="form-group " ng-class="{'has-error':addRouteCtrl.routeExists}" focusable-input>
+      <label class="control-label"  translate>Host</label>
+      <span class="control-message" translate>A route with this name already exists. Choose a new one</span>
       <input type="text" name="host" class="form-control" ng-model="addRouteCtrl.context.data.host"
              required
              placeholder="{{'a unique identifier for this app' | translate}}"
@@ -31,6 +32,13 @@
       />
 
     </div>
+    <div ng-show="addRouteCtrl.addRouteError" class="alert alert-danger">
+      <p translate>
+        There was a problem adding or associating this route with your app. Please try again. If this error persists,
+        please contact the administrator.
+      </p>
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-default"
               ng-click="addRouteCtrl.cancel()" translate>
@@ -42,13 +50,6 @@
       </button>
     </div>
   </form>
-
-  <div ng-show="addRouteCtrl.addRouteError" class="alert alert-danger">
-    <p translate>
-      There was a problem adding or associating this route with your app. Please try again. If this error persists,
-      please contact the administrator.
-    </p>
-  </div>
 
 
 </div>

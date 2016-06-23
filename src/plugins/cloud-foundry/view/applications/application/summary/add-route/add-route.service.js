@@ -56,6 +56,7 @@
   }
 
   AddRouteController.$inject = [
+    '$scope',
     '$stateParams',
     'app.model.modelManager',
     '$uibModalInstance',
@@ -65,22 +66,32 @@
   /**
    * @name AddRouteController
    * @constructor
+   * @param {Object} $scope
    * @param {Object} $stateParams - the UI router $stateParams service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {Object} $uibModalInstance
    * @param {Object} context
    */
-  function AddRouteController($stateParams, modelManager, $uibModalInstance, context) {
+  function AddRouteController($scope, $stateParams, modelManager, $uibModalInstance, context) {
     var vm = this;
 
-    vm.addRouteError = false;
     vm.applicationId = $stateParams.guid;
     vm.cnsiGuid = $stateParams.cnsiGuid;
     vm.model = modelManager.retrieve('cloud-foundry.model.application');
     vm.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     vm.uibModelInstance = $uibModalInstance;
-
     vm.context = context;
+
+    vm.addRouteError = false;
+    vm.routeExists = false;
+
+    $scope.$watch(function() {
+      return vm.context.data.host;
+    }, function() {
+      if (vm.routeExists) {
+        vm.routeExists = false;
+      }
+    });
   }
 
 
@@ -110,7 +121,7 @@
         .then(function(response) {
 
           if (!(response.metadata && response.metadata.guid)) {
-            throw 'Invalid response: ' + JSON.stringify(response);
+            throw response;
           }
           var routeId = response.metadata.guid;
           return vm.routeModel.associateAppWithRoute(vm.cnsiGuid, routeId, vm.applicationId);
@@ -119,7 +130,15 @@
         return vm.model.getAppSummary(vm.cnsiGuid, vm.applicationId);
       }).then(function() {
         vm.uibModelInstance.close();
-      }).catch(function() {
+      }).catch(function(error) {
+
+        // check if error is CF-RouteHostTaken indicating that the route has already been created
+        if (_.isPlainObject(error) &&
+          error.error_code &&
+          error.error_code === 'CF-RouteHostTaken') {
+          vm.routeExists = true;
+          return;
+        }
         vm.onAddRouteError();
       });
     },
