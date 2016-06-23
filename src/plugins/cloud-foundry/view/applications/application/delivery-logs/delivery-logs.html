@@ -21,7 +21,7 @@
       <dt translate>LAST BUILD</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.building" class="" href=""
-           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.building)">
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.building, appDelLogsCtrl.hceCnsi.guid)">
           {{ appDelLogsCtrl.last.building.id }}</a>
         <span ng-if="appDelLogsCtrl.last.building" am-time-ago="appDelLogsCtrl.last.building.endDate"></span>
         <span ng-if="!appDelLogsCtrl.last.building" translate>None</span>
@@ -29,7 +29,7 @@
       <dt translate>LAST TEST</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.testing" class="" href=""
-           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.testing)">
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.testing, appDelLogsCtrl.hceCnsi.guid)">
           {{ appDelLogsCtrl.last.testing.id }}</a>
         <span ng-if="appDelLogsCtrl.last.testing" am-time-ago="appDelLogsCtrl.last.testing.endDate"></span>
         <span ng-if="!appDelLogsCtrl.last.testing" translate>None</span>
@@ -37,7 +37,7 @@
       <dt translate>LAST DEPLOYMENT</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.deploying" class="" href=""
-           ng-click="appDelLogsCtrl.viewEvent(appDelLogsCtrl.last.deploying)">
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.testing, appDelLogsCtrl.hceCnsi.deploying)">
           {{ appDelLogsCtrl.last.deploying.id }}</a>
         <span ng-if="appDelLogsCtrl.last.deploying" am-time-ago="appDelLogsCtrl.last.deploying.endDate"></span>
         <span ng-if="!appDelLogsCtrl.last.deploying" translate>None</span>
