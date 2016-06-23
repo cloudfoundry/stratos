@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS tokens (
   auth_token    BYTEA       NOT NULL,
   refresh_token BYTEA       NOT NULL,
   token_expiry  BIGINT      NOT NULL,
+  scope         TEXT        NOT NULL,
   last_updated  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
 )
 WITH (OIDS=FALSE);

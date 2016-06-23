@@ -2,6 +2,7 @@ package tokens
 
 // TokenRecord -
 type TokenRecord struct {
+	Scope        string
 	AuthToken    string
 	RefreshToken string
 	TokenExpiry  int64

@@ -60,7 +60,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken, uaaRes.Scope)
 	if err != nil {
 		return err
 	}
@@ -268,12 +268,13 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 	return &response, nil
 }
 
-func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
+func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string, scope string) error {
 	key := u.UserGUID
 	tokenRecord := tokens.TokenRecord{
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
+		Scope:        scope,
 	}
 
 	err := p.setUAATokenRecord(key, tokenRecord)

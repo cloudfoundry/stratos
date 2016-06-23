@@ -15,11 +15,11 @@ const (
                     FROM tokens
                     WHERE token_type = 'uaa' AND user_guid = $1`
 
-	insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
-	                  VALUES ($1, $2, $3, $4, $5)`
+	insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry, scope)
+	                  VALUES ($1, $2, $3, $4, $5, $6)`
 
 	updateUAAToken = `UPDATE tokens
-	                  SET auth_token = $3, refresh_token = $4, token_expiry = $5
+	                  SET auth_token = $3, refresh_token = $4, token_expiry = $5, scope = $6
 	                  WHERE user_guid = $1 AND token_type = $2`
 
 	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
@@ -70,6 +70,12 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 
 	if tr.RefreshToken == "" {
 		msg := "Unable to save UAA Token without a valid Refresh Token."
+		log.Println(msg)
+		return fmt.Errorf(msg)
+	}
+
+	if tr.Scope == "" {
+		msg := "Unable to save UAA Token without a valid scope."
 		log.Println(msg)
 		return fmt.Errorf(msg)
 	}
