@@ -138,3 +138,5 @@ go get github.com/stretchr/testify
 go get github.com/smartystreets/goconvey
 $GOPATH/bin/goconvey
 ```
+
+Testing the trigger:true in the Concourse pipeline.
