@@ -25,13 +25,13 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
 
 
 * Create an instance
-  - AMI: Ubuntu Server 14.04 LTS (HVM), SSD Volume Type - ami-9abea4fb
+  - AMI: Ubuntu Server 14.04 LTS (HVM), SSD Volume Type (ami-9abea4fb in Oregon region)
   - Instance type: t2.micro
   - Subnet: *select public subnet of VPC*
   - Auto-assign Public IP: Enable
   - Create a security group that allows SSH (port 22 inbound)
 
-### Install UCP from the Jumpbox
+### Install HCP from the Jumpbox
 * Once the jumpbox instance is running, SSH into it.
   Note: Select the instance from the list in the AWS Console and click "Connect". This will show you the correct command to use.
 
@@ -39,11 +39,11 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
 * On the instance, install necessary tools:
   ```
   sudo apt-get update && sudo apt-get install jq curl wget
-  wget https://s3-us-west-2.amazonaws.com/ucp-concourse/ucp-bootstrap_1.1.22%2Bmaster.50a8819.20160519190312_amd64.deb
+  wget https://s3-us-west-2.amazonaws.com/hcp-concourse/hcp-bootstrap_1.2.3%2Bmaster.dd447a0.20160615081232_amd64.deb
   sudo dpkg -i <debian bootstrap file name>
   ```
 
-* Create a `bootstrap.ini` file ([template](bootstrap-1.1.22.ini))
+* Create a `bootstrap.properties` file ([template](bootstrap-1.2.3.properties))
 
 * Copy your `id_rsa` file to `/home/ubuntu/.ssh/id_rsa`. Ensure it only has read-only rights.
   ```
@@ -52,21 +52,15 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
 
 * Run boostrap on the jumpbox:
   ```
-  bootstrap --config bootstrap.ini version
-  bootstrap --config bootstrap.ini install
-  ```
-  Note: You will get an error message on completion of the install. This is a known bug for this version. Ignore the error as UCP is actually running.
-  ```
-  ERRO[0757] Unable to populate initial cluster state: No public ip was found for the node running ipmgr
-  No public ip was found for the node running ipmgr
+  bootstrap install bootstrap.properties
   ```
 
-* Locate your `ucp-k8s-master` and `ucp-k8s-node` hosts in your VPC and find both private IPs. The best way is to filter instances by your keypair name.
+* Locate your `hcp-k8s-master` and `hcp-k8s-node` hosts in your VPC and find both private IPs. The best way is to filter instances by your keypair name.
 
 * Using the private IP of the master host, get the ipmgr port:
   ```
   curl -Ss \
-    http://<MASTER PRIVATE IP>:8080/api/v1/namespaces/ucp/services/ipmgr | \
+    http://<MASTER PRIVATE IP>:8080/api/v1/namespaces/hcp/services/ipmgr | \
     jq '.spec.ports[0].nodePort'
   ```
 
@@ -100,9 +94,9 @@ You can now issue the same `curl` commands to install Helion Code Engine and the
   ```
   curl -H "Content-Type: application/json" \
        -X POST -d @<SERVICE DEFINITION FILE> \
-       http://<MASTER PRIVATE IP>:<NODE_PORT>/v1/services
+       http://<NODE PRIVATE IP>:<IPMGR_PORT>/v1/services
 
   curl -H "Content-Type: application/json" \
        -X POST -d @<INSTANCE DEFINITION FILE> \
-       http://<MASTER PRIVATE IP>:<NODE_PORT>/v1/instances
+       http://<NODE PRIVATE IP>:<IPMGR_PORT>/v1/instances
   ```

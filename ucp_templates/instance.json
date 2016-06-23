@@ -82,7 +82,7 @@
     },
     {
       "name": "UAA_ENDPOINT",
-      "value": "http://ident-api.ucp.svc.cluster.ucp:8080/oauth/token"
+      "value": "http://ident-api.hcp.svc.cluster.hcp:8080/oauth/token"
     },
     {
       "name": "ALLOWED_ORIGINS",
