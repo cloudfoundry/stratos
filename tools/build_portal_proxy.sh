@@ -8,8 +8,8 @@ set -x
 
 pushd $(git rev-parse --show-toplevel)
 
-# TODO(woodnt): This can likely be removed.  Test and fix.  https://jira.hpcloud.net/browse/TEAMFOUR-638
-glide install
+# If/when we ever stop vendoring our packages, we'll need to run glide install here.
+#glide install
 
 docker build --tag portal-proxy-builder \
              --file Dockerfile.build \
