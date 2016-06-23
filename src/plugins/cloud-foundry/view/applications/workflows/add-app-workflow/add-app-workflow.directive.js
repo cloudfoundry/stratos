@@ -179,9 +179,7 @@
             title: gettext('Delivery'),
             formName: 'application-delivery-form',
             templateUrl: path + 'delivery.html',
-            nextBtnText: gettext('Next'),
-            onNext: function () {
-            }
+            nextBtnText: gettext('Next')
           }
         ]
       };
