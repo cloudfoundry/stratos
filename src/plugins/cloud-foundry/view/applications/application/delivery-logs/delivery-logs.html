@@ -44,7 +44,6 @@
       </dd>
     </dl>
   </div>
-  <!--st-pipe="appDelLogsCtrl.updateDisplayed"-->
   <div id="delivery-logs"
        st-table="appDelLogsCtrl.displayedExecutions"
        st-safe-src="appDelLogsCtrl.parsedHceModel.pipelineExecutions"
@@ -101,7 +100,7 @@
                         appCtrl.model.application.summary.routes[0]"
                  target="_blank"
                  ng-init="route=appCtrl.model.application.summary.routes[0]"
-                 ng-href="http://{{ route.host + '.' + route.domain.name + route.path }}">view</a>
+                 ng-href="http://{{ route.host + '.' + route.domain.name + (route.port ? ':' + route.port : '') + '/' + route.path }}">view</a>
             </td>
             <td>{{ execution.reason.createdDate | amDateFormat:'L - LTS' }}</td>
             <td>{{ execution.reason.author }}</td>
