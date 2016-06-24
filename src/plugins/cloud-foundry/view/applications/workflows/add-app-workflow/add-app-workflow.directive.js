@@ -392,9 +392,7 @@
         that.routeModel.checkRouteExists(
           that.userInput.serviceInstance.guid,
           that.userInput.domain.metadata.guid,
-          that.userInput.host,
-          that.userInput.path,
-          that.userInput.port
+          that.userInput.host
         )
         .then(function (data) {
           if (data && data.code === 10000) {
@@ -596,14 +594,6 @@
             domain_guid: that.userInput.domain.metadata.guid,
             space_guid: that.userInput.space.metadata.guid
           };
-
-          // Set optional fields for creating route
-          if (that.userInput.port) {
-            routeSpec.port = Number(that.userInput.port);
-          }
-          if (that.userInput.path) {
-            routeSpec.path = that.userInput.path;
-          }
 
           var routePromise = that.routeModel.createRoute(cnsiGuid, routeSpec)
             .then(function (route) {
