@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/engine/standard"
 
 	"github.com/hpcloud/portal-proxy/repository/tokens"
+	"time"
 )
 
 // UAAResponse - <TBD>
@@ -31,6 +32,12 @@ type LoginRes struct {
 	TokenExpiry int64    `json:"token_expiry"`
 	APIEndpoint *url.URL `json:"api_endpoint"`
 	Scope       string   `json:"scope"`
+}
+
+// VerifySessionRes - <TBD>
+type VerifySessionRes struct {
+	Account		string	`json:"account"`
+	Scope		string	`json:"scope"`
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -76,6 +83,8 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
+	// TODO(woodnt): Remove most of the log.Print statements in this file.  We really need to not display a lot of this data.
+	//               TEAMFOUR-619
 	log.Println("loginToCNSI start")
 
 	cnsiGUID := c.FormValue("cnsi_guid")
@@ -330,6 +339,36 @@ func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error 
 	if err != nil {
 		return fmt.Errorf("Database error saving UAA token: %v", err)
 	}
+
+	return nil
+}
+
+func (p *portalProxy) verifySession(c echo.Context) error {
+
+	sessionExpireTime, ok := p.getSessionInt64Value(c, "exp")
+	if !ok {
+		log.Println("Could not find session date")
+		return echo.NewHTTPError(http.StatusForbidden, "Could not find session date")
+	}
+
+	if time.Now().After(time.Unix(sessionExpireTime, 0)){
+		log.Println("Session has expired")
+		return echo.NewHTTPError(http.StatusForbidden, "Session has expired")
+	}
+
+	// FIXME(woodnt): OBVIOUSLY this needs to not be hard-coded.
+	//                Currently this is waiting on https://jira.hpcloud.net/browse/TEAMFOUR-617
+	resp := &VerifySessionRes{
+		Account:	"admin",
+		//Scope: 		"cloud_controller.admin",
+		Scope: 		"openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write",
+	}
+
+	err := c.JSON(http.StatusOK, resp); if err != nil {
+		return err
+	}
+
+	log.Println("verifySession complete")
 
 	return nil
 }

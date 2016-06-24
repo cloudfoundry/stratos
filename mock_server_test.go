@@ -74,7 +74,7 @@ func setupPortalProxy() *portalProxy {
 	return pp
 }
 
-func setupHTTPTest(req *http.Request) (http.ResponseWriter, *echo.Echo, echo.Context, *portalProxy) {
+func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy) {
 	res := httptest.NewRecorder()
 	e, ctx := setupEchoContext(res, req)
 	pp := setupPortalProxy()

@@ -22,6 +22,15 @@ func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, 
 	return nil, false
 }
 
+func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, bool) {
+	intf, ok := p.getSessionValue(c, key)
+	if !ok {
+		return 0, false
+	}
+
+	return intf.(int64), true
+}
+
 func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string, bool) {
 	intf, ok := p.getSessionValue(c, key)
 	if !ok {
