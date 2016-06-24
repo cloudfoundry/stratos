@@ -1,8 +1,14 @@
 package: github.com/hpcloud/portal-proxy
 import:
+- package: github.com/cloudfoundry/noaa
+  subpackages:
+  - consumer
+  - errors
+- package: github.com/cloudfoundry/sonde-go/events
 - package: github.com/gorilla/context
 - package: github.com/gorilla/sessions
 - package: github.com/hpcloud/ucpconfig
+- package: github.com/gorilla/websocket
 - package: github.com/kat-co/vala
 - package: github.com/labstack/echo
   subpackages:

@@ -1,8 +1,24 @@
-hash: 1e34e98f801076e16d36ec3bb652feef0c1b91fc402169077771779547edf8db
-updated: 2016-06-14T18:06:23.335221077-04:00
+hash: 617b40ca2faa39aa071f50091f3c29426c666ace28d02a78759619c0b9d642a7
+updated: 2016-06-24T13:01:25.611756928+01:00
 imports:
+- name: github.com/cloudfoundry/noaa
+  version: 75f17396a9775320dabb89682c68255e5d68a9b8
+  subpackages:
+  - consumer
+  - errors
+  - consumer/internal
+- name: github.com/cloudfoundry/sonde-go
+  version: d6ed492b509e180ee7675ed15237906041e53a6e
+  subpackages:
+  - events
 - name: github.com/dgrijalva/jwt-go
   version: c04502f106d7c5b3fae17c5da49a1bbdd3006b3c
+- name: github.com/gogo/protobuf
+  version: 2752d97bbd91927dd1c43296dbf8700e50e2708c
+  subpackages:
+  - proto
+  - gogoproto
+  - protoc-gen-gogo/descriptor
 - name: github.com/golang/protobuf
   version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
   subpackages:
@@ -13,6 +29,14 @@ imports:
   version: ff356348f74133a59d3e93aa24b5b4551b6fe90d
 - name: github.com/gorilla/sessions
   version: 56ba4b0a11da87516629a57408a5f7e4c8ea7b0b
+- name: github.com/gorilla/websocket
+  version: a68708917c6a4f06314ab4e52493cc61359c9d42
+- name: github.com/hpcloud/portal-proxy
+  version: 7d7dcdc09ef1860ed47e7c32a8f628d7aa634d4f
+  subpackages:
+  - datastore
+  - repository/cnsis
+  - repository/tokens
 - name: github.com/hpcloud/ucpconfig
   version: 0eace611cfcb89291849724f4704b390b436fe71
 - name: github.com/kat-co/vala
@@ -63,5 +87,6 @@ imports:
   - internal/urlfetch
   - internal/base
   - internal/datastore
+  - internal/log
   - internal/remote_api
 devImports: []

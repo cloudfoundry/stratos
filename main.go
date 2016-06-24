@@ -196,7 +196,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
 
 	// Applications Log Streams
-	e.GET("/applogs/:cnsiGuid/:appGuid", p.tailAppLogs)
+	e.GET("/:cnsiGuid/apps/:appGuid/stream", p.appStream)
 
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
