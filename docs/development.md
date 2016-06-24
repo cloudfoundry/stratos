@@ -25,20 +25,30 @@ Please ensure you have the following installed:
 - SSH into the *master*: `vagrant ssh master`
 - Wait until all pods are in the "Running" state: `watch kubectl get pods --all-namespaces`
 
+### <a id="install-hsm"></a>2. Install Helion Service Manager on HCP
+- Download the [installer](https://s3-us-west-2.amazonaws.com/helion-service-manager/release/master/hsm-installer/0.1.27/setup.tgz)
+- Edit the `hcp_version` file and set it to `1.2.3`
+- Set environmental variables:
+  - `export HCP_NODE_IP=192.168.200.3`
+  - `export HCP_MASTER_IP=192.168.200.2`
+- Run the installation script: `./install.bash`
+- When installation has completed, make note of the API location. This is used by the HSM CLI to install other services such as Helion Code Engine.
+
 ### <a id="install-hce"></a>2. Install Helion Code Engine on HCP
-- Open another terminal
-- Download the [service definition template](https://github.com/hpcloud/code-engine/blob/master/ucp/definition/hce-service-definition.json.template)
-- Download the [instance definition template](https://github.com/hpcloud/code-engine/blob/master/ucp/instance/hce-service.json.template)
-- Set the image tags in the service definition to "kosher-prod"
-- Set the Dockerhub credentials in the instance definition
-- Obtain the registry mirror cert and cert key from a member of the Helion Code Engine team or Kelly
-- Register Helion Code Engine with HCP:
-  - Register (replacing port and definition file paths from previous steps):
-    - `curl -H "Content-Type: application/json" -X POST -d @hce-service-definition.json http://192.168.200.3:<IPMGR PORT>/v1/services`
-    - `curl -H "Content-Type: application/json" -X POST -d @hce-service.json http://192.168.200.3:<IPMGR PORT>/v1/instances`
+- Download the HSM CLI for your operating system. You will use this to install Helion Code Engine.
+  - [OSX](https://s3-us-west-2.amazonaws.com/helion-service-manager/release/master/hsm-cli/dist/0.1.27/hsm-0.1.27-darwin-amd64.tar.gz)
+  - [Windows](https://s3-us-west-2.amazonaws.com/helion-service-manager/release/master/hsm-cli/dist/0.1.27/hsm-0.1.27-windows-amd64.zip)
+  - [Linux](https://s3-us-west-2.amazonaws.com/helion-service-manager/release/master/hsm-cli/dist/0.1.27/hsm-0.1.27-linux-amd64.tar.gz)
+- Set the API: `./hsm api <HSM API from Step 2>`
+- Create a Helion Code Engine instance: `./hsm create-instance hpe-catalog:helionce`
+  - You will need to specify:
+    - instance name (ex. hce)
+    - Docker credentials
+    - SSL cert and key
+    - Mirror cert and key
 - Wait for all Helion Code Engine pods to be in the "Running" state
 - Get the port of the "hce-rest" service:
-  - `curl http://192.168.200.2:8080/api/v1/namespaces/helion-code-engine/services/hce-rest`
+  - `curl http://192.168.200.2:8080/api/v1/namespaces/<INSTANCE_NAME>/services/hce-rest`
   - You will need this port to register an HCE endpoint in the Console UI
 
 ### <a id="register-ui"></a>3. Register the Helion Stackato v4.0 Console UI on Github
