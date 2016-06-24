@@ -20,13 +20,6 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-// TODO(julbra): Remove DebugPrinter once I'm happy all works
-type ConsoleDebugPrinter struct{}
-func (c ConsoleDebugPrinter) Print(title, dump string) {
-	println("DEBUG PRINTER: ", title)
-	println("DEBUG PRINTER: ", dump)
-}
-
 func (p *portalProxy) appStream(c echo.Context) error {
 	var userGuid, dopplerAddress, authToken string
 
@@ -34,7 +27,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	cnsiGuid := c.Param("cnsiGuid")
 	appGuid := c.Param("appGuid")
 
-	log.Printf("Tailing log requested for App ID: %s - from CNSI: %s\n", appGuid, cnsiGuid)
+	log.Printf("Received request for log stream for App ID: %s - from CNSI: %s\n", appGuid, cnsiGuid)
 
 	// Get user GUID from session
 	userGuid, ok := getUserGuid(p, c)
@@ -84,8 +77,6 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	noaaConsumer := consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, nil)
 	defer noaaConsumer.Close()
 
-	// TODO(julbra): Remove DebugPrinter once I'm happy all works
-	noaaConsumer.SetDebugPrinter(ConsoleDebugPrinter{})
 	messages, err := getRecentLogs(noaaConsumer, cnsiGuid, appGuid, authToken, refreshTokenRecord)
 	if err != nil {
 		return err
@@ -140,10 +131,7 @@ func getUserGuid(p *portalProxy, c echo.Context) (string, bool) {
 	var userGuid string
 	userGuidIntf, ok := p.getSessionValue(c, "user_id")
 	if !ok {
-		// TODO(julbra): fail here instead once I integrated with stratos-ui
-		userGuid = "77e99faf-3875-4c10-877d-974ec25b77b0"
-		log.Println("Failed to get user GUID from session, using hardcoded default", userGuid)
-		return userGuid, true
+		return userGuid, false
 	} else {
 		log.Printf("User GUID obtained from session %v", userGuidIntf)
 		userGuid = userGuidIntf.(string)
@@ -171,7 +159,6 @@ func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGuid, appGuid, authToken
 			return messages, fmt.Errorf("Error getting recent messages for App %s on CNSI %s [%v]", appGuid, cnsiGuid, err)
 		}
 	}
-	log.Println("Got recent logs!")
 	return messages, nil
 }
 
@@ -179,16 +166,13 @@ func drainErrChan(errorChan <-chan error) {
 	for err := range errorChan {
 		// Note: we receive a nil error before the channel is closed so check here...
 		if err != nil {
-			log.Printf("DEBUG: received error from Doppler %v\n", err.Error())
+			log.Printf("Received error from Doppler %v\n", err.Error())
 		}
 	}
-	log.Println("DEBUG: errorChan was closed")
 }
 
 func drainMsgChan(msgChan <-chan *events.LogMessage, callback func(msg []byte)) {
 	for msg := range msgChan {
-		log.Printf("DEBUG: received message from Doppler %v\n", msg)
 		callback(msg.GetMessage())
 	}
-	log.Println("DEBUG: msgChan was closed")
 }
