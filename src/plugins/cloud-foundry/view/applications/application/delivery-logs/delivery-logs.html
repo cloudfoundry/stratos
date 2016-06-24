@@ -100,7 +100,7 @@
                         appCtrl.model.application.summary.routes[0]"
                  target="_blank"
                  ng-init="route=appCtrl.model.application.summary.routes[0]"
-                 ng-href="http://{{ route.host + '.' + route.domain.name + (route.port ? ':' + route.port : '') + '/' + route.path }}">view</a>
+                 ng-href="http://{{ route.host + '.' + route.domain.name + (route.port ? ':' + route.port : '') + route.path }}">view</a>
             </td>
             <td>{{ execution.reason.createdDate | amDateFormat:'L - LTS' }}</td>
             <td>{{ execution.reason.author }}</td>
