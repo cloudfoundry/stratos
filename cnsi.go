@@ -287,6 +287,7 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	if err = dec.Decode(&v2InfoReponse); err != nil {
 		return v2InfoReponse, err
 	}
+
 	return v2InfoReponse, nil
 }
 

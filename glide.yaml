@@ -20,4 +20,3 @@ import:
 - package: golang.org/x/oauth2
   subpackages:
   - github
-  
