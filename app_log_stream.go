@@ -29,11 +29,8 @@ func (p *portalProxy) appStream(c echo.Context) error {
 
 	log.Printf("Received request for log stream for App ID: %s - from CNSI: %s\n", appGuid, cnsiGuid)
 
-	// Get user GUID from session
-	userGuid, ok := getUserGuid(p, c)
-	if !ok {
-		return fmt.Errorf("Failed to get user id from session")
-	}
+	// The session middleware will have populated c."user_id" for us
+	userGuid = c.Get("user_id").(string)
 
 	// Extract the Doppler endpoint from the CNSI record
 	cnsiRecord, ok := p.getCNSIRecord(cnsiGuid)
@@ -124,19 +121,6 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	}
 
 	return nil
-}
-
-// Extract the userGuid from the session (Cookie)
-func getUserGuid(p *portalProxy, c echo.Context) (string, bool) {
-	var userGuid string
-	userGuidIntf, ok := p.getSessionValue(c, "user_id")
-	if !ok {
-		return userGuid, false
-	} else {
-		log.Printf("User GUID obtained from session %v", userGuidIntf)
-		userGuid = userGuidIntf.(string)
-		return userGuid, true
-	}
 }
 
 // Attempts to get the recent logs, if we get an unauthorized error we attempt to refresh our auth token
