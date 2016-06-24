@@ -1,0 +1,23 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source: {repository: busybox}
+inputs:
+- name: stratos-deploy
+- name: resource-version
+outputs:
+- name: tag-files
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    whoami
+    env
+    find .
+    pwd
+    ls -la
+    sh ./stratos-deploy/ci/scripts/generate_tag_files.sh
+    ls -la ./tag-files
+    cat ./tag-files/version_tag
