@@ -14,8 +14,8 @@ if [ -z "$1" ]
 fi
 
 # The fully qualified path to the definityion and instance files
-SVC_DEFN=deploy_archives/${TAG}/cnap-console-service-definition.json
-INS_DEFN=deploy_archives/${TAG}/cnap-console-service-instance.json
+SVC_DEFN=deploy_archives/${TAG}/stackato-console.sd.json
+INS_DEFN=deploy_archives/${TAG}/stackato-console-si.json
 
 
 # Get service port
