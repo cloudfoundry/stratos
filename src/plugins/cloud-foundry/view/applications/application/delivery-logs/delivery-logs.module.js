@@ -98,6 +98,16 @@
       promise = $q.when({});
     }
 
+    that.debouncedUpdateVisibleExecutions = _.debounce(function(visibleExecutions) {
+      that.updateVisibleExecutions(visibleExecutions);
+    }, 500);
+
+    $scope.$on("$destroy", function(){
+      if (that.debouncedUpdateVisibleExecutions) {
+        that.debouncedUpdateVisibleExecutions.cancel();
+      }
+    });
+
     promise
       .then(function (project) {
         that.project = project;
@@ -204,9 +214,7 @@
       }
       that.execWatch = that.$scope.$watch(function() {
         return that.displayedExecutions;
-      }, _.debounce(function(visibleExecutions) {
-        that.updateVisibleExecutions(visibleExecutions);
-      }, 500));
+      }, that.debouncedUpdateVisibleExecutions);
 
       var promise;
       if (this.haveBackend) {
