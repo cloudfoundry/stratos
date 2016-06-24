@@ -64,6 +64,7 @@
     this.currentEndpoints = [];
     // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
+    this.currentUserAccount = modelManager.retrieve('app.model.account');
 
     $scope.$watchCollection(function () {
       return that.cnsiModel.serviceInstances;
@@ -212,7 +213,17 @@
           that.cnsiModel.list();
         });
       });
-    }
+    },
+
+    /**
+     * @function overrideIsAdmin
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Hide the cluster add form flyout
+     */
+    overrideIsAdmin: function(isDeveloper) {
+      this.currentUserAccount.adminOverride = isDeveloper;
+    },
+
   });
 
 })();

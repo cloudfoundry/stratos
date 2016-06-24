@@ -53,9 +53,11 @@
 
     onLoggedOut: function () {},
 
-    registerNavigation: function () {
-      this.modelManager.retrieve('app.model.navigation').menu
-        .addMenuItem('cf.applications', 'cf.applications.list.gallery-view', gettext('Applications'));
+    registerNavigation: function() {
+      var account = this.modelManager.retrieve('app.model.account');
+      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+      menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', gettext('Applications'));
+      menu.addMenuItem('cf.endpoints', 'cf.applications.endpoints-view', gettext('Endpoints'));
     }
   });
 

@@ -38,6 +38,13 @@
           </tr>
         </thead>
         <tbody>
+
+          <!-- TODO(irfan) temporary switch for development, remove before merging -->
+        <div ng-switch="serviceRegistrationCtrl.currentUserAccount.isAdmin()">
+          <button class="btn btn-primary" ng-switch-when="true" ng-click="serviceRegistrationCtrl.overrideIsAdmin(true)">Switch to Developer View</button>
+          <button class="btn btn-primary" ng-switch-when="false" ng-click="serviceRegistrationCtrl.overrideIsAdmin(false)">Switch to Admin View</button>
+         </div>
+
           <tr ng-repeat="(name, cnsi) in serviceRegistrationCtrl.serviceInstances"
             show-table-inline-message="{{ serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false ? serviceRegistrationCtrl.warningMsg : ''}}">
             <td class="text-center registration-status">
