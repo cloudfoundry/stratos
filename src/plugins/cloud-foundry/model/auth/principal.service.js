@@ -16,11 +16,9 @@
   ];
 
   function register(modelManager) {
-
     var principalFactory = modelManager.retrieve('cloud-foundry.model.auth.principalFactory');
     modelManager.register('cloud-foundry.model.auth', new PrincipalService(principalFactory));
   }
-
 
   /**
    * @name: PrincipalService
@@ -28,15 +26,12 @@
    * @constructor
      */
   function PrincipalService(principalFactory) {
-
     // Original implementation also passed in $localStorage which was used
     // to store and retrieve `currentUser`
     this.principalFactory = principalFactory;
-
   }
 
   angular.extend(PrincipalService.prototype, {
-
     /**
      * //TODO(irfran): Not original implement relied on localStorage to retrieve current user https://jira.hpcloud.net/browse/TEAMFOUR-625
      * @name: getCurrentUser
@@ -59,9 +54,8 @@
      * @param {Object} authInfo
        */
     setCurrentUser: function(authInfo) {
-      var currentUser = this.principalFactory.create(authInfo);
+      var currentUser = this.principalFactory.create(authInfo);   // eslint-disable-line no-unused-vars
       // this.localStorage.currentUser = currentUser;
-
     }
   });
 

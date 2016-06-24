@@ -27,7 +27,6 @@
    * @returns {RouteAccess}
    */
   function RouteAccessFactory(modelManager) {
-
     /**
      * @name: RouteAccess
      * @description: Constructor for RouteAccess
@@ -39,11 +38,9 @@
       this.principal = principal;
       this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-
     }
 
     angular.extend(RouteAccess.prototype, {
-
       /**
        * @name: create
        * @description: Does user have create route permission in the space
@@ -51,7 +48,6 @@
        * @returns {boolean}
        */
       create: function(space) {
-
         // Admin
         if (this.baseAccess.create(space)) {
           return true;
@@ -122,8 +118,6 @@
           route.entity.space_guid);
       },
 
-
-
       /**
        * @name: canHandle
        * @description: Specifies that this ACL checker can handle `route` permission
@@ -137,6 +131,5 @@
 
     return RouteAccess;
   }
-
 
 })();

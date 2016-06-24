@@ -119,7 +119,6 @@
           that.githubAuthFailed = true;
         });
     }
-
   });
 
 })();

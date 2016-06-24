@@ -76,13 +76,13 @@
        * @name: isAllowed
        * @description: Is user permitted to do the action
        * @param {Object} context
-       * @param {String} resource_type ACL type
+       * @param {String} resourceType ACL type
        * @param {String} action action name
        * @param {Array} flags feature flags
          * @returns {*}
          */
-      isAllowed: function(context, resource_type, action, flags) {
-        var accessChecker = this._getAccessChecker(resource_type, flags);
+      isAllowed: function(context, resourceType, action, flags) {
+        var accessChecker = this._getAccessChecker(resourceType, flags);
         return accessChecker[action](context);
       },
 
@@ -136,8 +136,8 @@
             delete: 'delete'
           }
         };
-      }
-      ,
+      },
+
       /**
        * @name: _getAccessChecker
        * @description: Get Access checker for a given resource type
@@ -156,6 +156,5 @@
 
     return Principal;
   }
-
 
 })();

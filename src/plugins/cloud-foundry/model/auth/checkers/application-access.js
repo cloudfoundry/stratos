@@ -27,8 +27,6 @@
    * @returns {ApplicationAccess}
    */
   function ApplicationAccessFactory(modelManager) {
-
-
     /**
      * @name: ApplicationAccess
      * @description: Constructor for ApplicationAccess
@@ -40,11 +38,9 @@
       this.principal = principal;
       this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-
     }
 
     angular.extend(ApplicationAccess.prototype, {
-
       /**
        * @name: create
        * @description: Does user have create application permission in the space
@@ -52,7 +48,6 @@
        * @returns {boolean}
        */
       create: function(space) {
-
         // Admin
         if (this.baseAccess.create(space)) {
           return true;
@@ -69,7 +64,6 @@
        * @returns {boolean}
        */
       update: function(app) {
-
         // Admin
         if (this.baseAccess.update(app)) {
           return true;
@@ -77,7 +71,6 @@
 
         // If user is developer in space app belongs to
         return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, app.entity.space_guid);
-
       },
 
       /**
@@ -103,6 +96,5 @@
 
     return ApplicationAccess;
   }
-
 
 })();

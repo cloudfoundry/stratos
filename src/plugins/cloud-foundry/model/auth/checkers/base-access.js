@@ -19,7 +19,6 @@
     modelManager.register('cloud-foundry.model.auth.checkers.baseAccess', BaseAccess);
   }
 
-
   function BaseAccess(principal) {
     return {
       create: function() {
@@ -33,12 +32,12 @@
       delete: function() {
         return principal.isAdmin();
       },
+
       _doesContainGuid: function(array, guid) {
         return array.map(function(element) {
-            return element.metadata.guid;
-          }).indexOf(guid) > -1;
+          return element.metadata.guid;
+        }).indexOf(guid) > -1;
       }
-
     };
   }
 })();
