@@ -32,19 +32,19 @@ resources:
     type: git
     source:
       uri: git@github.com:hpcloud/stratos-ui.git
-      branch: concourse
+      branch: master
       private_key: {{github-private-key}}
   - name: portal-proxy
     type: git
     source:
       uri: git@github.com:hpcloud/portal-proxy.git
-      branch: concourse
+      branch: master
       private_key: {{github-private-key}}
   - name: stratos-deploy
     type: git
     source:
       uri: git@github.com:hpcloud/stratos-deploy.git
-      branch: concourse
+      branch: master
       private_key: {{github-private-key}}
 
   # docker images
@@ -108,32 +108,7 @@ jobs:
 
     #  Generate tag/version file
     - task: generate-tag-files
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source: {repository: busybox}
-        inputs:
-        - name: stratos-deploy
-        - name: resource-version
-        outputs:
-        - name: tag-files
-        run:
-          path: sh
-          args:
-          - -exc
-          - |
-            whoami
-            env
-            find .
-            pwd
-            ls -la
-            sh ./stratos-deploy/ci/scripts/generate_tag_files.sh
-            ls -la ./tag-files
-            cat ./tag-files/version_tag
-
-          # path: sh
-          # args: ["./stratos-deploy/ci/scripts/generate_tag_files.sh"]
+      file: stratos-deploy/ci/tasks/build-tag-file.yml
 
     # Build the Pportal Proxy image, push to registry
     - task: build-proxy-image

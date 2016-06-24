@@ -14,19 +14,54 @@ You can always follow the Concourse Tutorial README and use VirtualBox. Be aware
 
 Now you should be able to follow the tutorial.
 
-### Concourse related commands
+### Create a secrets file
+Create a secrets file, using the `secrets.yml-sample`; rename it to `<whatever>.yml`. The following placeholders should be updated as noted.
+
+#### s3-region-name
+This should be the name of the AWS Region your Concourse pipeline will run in.
+
+#### s3-version-bucket
+This should be a bucket in S3 that will contain a file that is used to track the current version of the Console.
+
+#### s3-version-key
+The full path within the noted `s3-version-bucket` to the version file, including the filename.
+
+#### s3-hsm-bucket
+The Helion Service Manager bucket name for Console HSM assets.
+
+#### s3-hsm-sdl
+The full path within the `s3-hsm-bucket` to the `sdl.json` file, including the filename.
+
+#### s3-hsm-instance
+The full path within the `s3-hsm-bucket` to the `instance.json` file, including the filename.
+
+#### s3-hsm-hcp-version
+The full path within the `s3-hsm-bucket` to the `hcp_version` file, including the filename.
+
+#### registry
+The registry used to store the tagged docker images required to install the Console within HCP. Generally this is one of two values:
+
+- `docker-registry.helion.space:443`, the shared internal HPE registry.
+- the registry url for DockerHub
+
+#### github-private-key
+This should be a private SSH key properly authorized to interact against the GitHub repos your pipeline with operate against.
+
+### Concourse related commands (examples)
+
+#### Shared Concourse environment for HPE
 
 Login to the shared Concourse environment:
 ```
 fly --target helion-console login --concourse-url https://concourse.helion.lol
 ```
 
-Set a pipeline
+Set a pipeline:
 ```
 fly -t helion-console sp -p console-ci-master -c console-ci-master.yml -l helion-creds.yml
 ```
 
-Destroy a pipeline
+Destroy a pipeline:
 ```
 fly -t helion-console dp -p console-ci-master
 ```
