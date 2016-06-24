@@ -249,9 +249,8 @@
                       var branches = _.map(that.githubModel.data.branches,
                                           function (o) {
                                             return {
-                                              label: o.name,
-                                              value: o.name,
-                                              disabled: _.indexOf(usedBranches, o.name) >= 0
+                                              label: o.name + ((_.indexOf(usedBranches, o.name) >= 0) ? gettext(' (used by other project)') : ''),
+                                              value: o.name
                                             };
                                           });
                       [].push.apply(that.options.branches, branches);
