@@ -45,12 +45,12 @@
    * @param {object} $scope - the Angular $scope
    * @param {object} $window - the Angular $window service
    * @param {object} $q - the Angular $q service
-   * @param {object} $window - the Angular $interval service
+   * @param {object} $interval - the Angular $interval service
    * @param {object} confirmDialog - the confirm dialog service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
-   * @property {object} $window - the Angular $interval service
+   * @property {object} $interval - the Angular $interval service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
@@ -214,7 +214,7 @@
       this.$q.when()
 
         .then(function () {
-          that.updateSummary()
+          that.updateSummary();
         })
 
         .then(function () {
@@ -229,6 +229,7 @@
     /**
      * @function updateSummary
      * @description update application summary
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     updateSummary: function () {
@@ -238,6 +239,7 @@
     /**
      * @function updateState
      * @description update application state
+     * @returns {promise} A resolved/rejected promise
      * @public
      */
     updateState: function () {
