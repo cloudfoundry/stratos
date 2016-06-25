@@ -188,7 +188,7 @@
 
     /**
      * @function stopUpdate
-     * @description start updating application
+     * @description stop updating application
      * @public
      */
     stopUpdate: function () {
