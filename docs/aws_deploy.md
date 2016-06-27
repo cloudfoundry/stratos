@@ -43,7 +43,7 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
   sudo dpkg -i <debian bootstrap file name>
   ```
 
-* Create a `bootstrap.properties` file ([template](bootstrap-1.2.3.properties))
+* Create a `bootstrap.properties` file ([template](bootstrap-1.2.3.properties)) and fill in the required properties. Note that if you're going to run HCF on HCP, you will need to upgrade the node instance type to something larger (ex. m4.xlarge).
 
 * Copy your `id_rsa` file to `/home/ubuntu/.ssh/id_rsa`. Ensure it only has read-only rights.
   ```
