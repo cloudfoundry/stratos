@@ -40,7 +40,7 @@ services:
     extends: buildCommon
     build:
       context: $GOPATH/src/github.com/hpcloud/portal-proxy
-      dockerfile: Dockerfile.server
+      dockerfile: Dockerfile.dev
     ports:
       - "3003:3003"
     env_file:
