@@ -21,16 +21,16 @@
   }
 
   /**
-   * @name: ServiceInstanceAccessFactory
-   * @description: Function to get a ServiceInstanceAccess class
+   * @name ServiceInstanceAccessFactory
+   * @description Function to get a ServiceInstanceAccess class
    * @param {app.api.modelManager}  modelManager - the Model management service
    * @returns {ServiceInstanceAccess}
    * @constructor
    */
   function ServiceInstanceAccessFactory(modelManager) {
     /**
-     * @name: ServiceInstanceAccess
-     * @description: Constructor for ServiceInstanceAccess
+     * @name ServiceInstanceAccess
+     * @description Constructor for ServiceInstanceAccess
      * @param {Principal} principal Principal instance
      * @param {Array} flags feature flags
      * @constructor
@@ -43,8 +43,8 @@
 
     angular.extend(ServiceInstanceAccess.prototype, {
       /**
-       * @name: create
-       * @description: Does user have create service instance permission in the space
+       * @name create
+       * @description Does user have create service instance permission in the space
        * @param {Object} space Domain space
        * @returns {boolean}
        */
@@ -61,8 +61,8 @@
       },
 
       /**
-       * @name: update
-       * @description: Does user have update service instance permission
+       * @name update
+       * @description Does user have update service instance permission
        * @param {Object} serviceInstance service instance detail
        * @returns {boolean}
        */
@@ -78,8 +78,8 @@
       },
 
       /**
-       * @name: delete
-       * @description: Does user have delete application permission
+       * @name delete
+       * @description Does user have delete application permission
        * @param {Object} serviceInstance service instance detail
        * @returns {boolean}
        */
@@ -88,9 +88,9 @@
       },
 
       /**
-       * @name: canHandle
-       * @description: Specifies that this ACL checker can handle `managed_service_instance` permission
-       * @param {String} resource
+       * @name canHandle
+       * @description Specifies that this ACL checker can handle `managed_service_instance` permission
+       * @param {String} resource - string representing the resource
        * @returns {boolean}
        */
       canHandle: function(resource) {

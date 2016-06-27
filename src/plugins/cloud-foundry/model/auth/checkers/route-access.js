@@ -21,15 +21,15 @@
   }
 
   /**
-   * @name: RouteAccessFactory
-   * @description: Function to return an RouteAccess class
+   * @name RouteAccessFactory
+   * @description Function to return an RouteAccess class
    * @param {app.api.modelManager}  modelManager - the Model management service
    * @returns {RouteAccess}
    */
   function RouteAccessFactory(modelManager) {
     /**
-     * @name: RouteAccess
-     * @description: Constructor for RouteAccess
+     * @name RouteAccess
+     * @description Constructor for RouteAccess
      * @param {Principal} principal Principal instance
      * @param {Array} flags feature flags
      * @constructor
@@ -42,8 +42,8 @@
 
     angular.extend(RouteAccess.prototype, {
       /**
-       * @name: create
-       * @description: Does user have create route permission in the space
+       * @name create
+       * @description Does user have create route permission in the space
        * @param {Object} space Domain space
        * @returns {boolean}
        */
@@ -69,8 +69,8 @@
       },
 
       /**
-       * @name: update
-       * @description: Does user have update route permission
+       * @name update
+       * @description Does user have update route permission
        * @param {Object} route route detail
        * @returns {boolean}
        */
@@ -96,8 +96,8 @@
       },
 
       /**
-       * @name: delete
-       * @description: Does user have delete route permission
+       * @name delete
+       * @description Does user have delete route permission
        * @param {Object} route route detail
        * @returns {boolean}
        */
@@ -119,9 +119,9 @@
       },
 
       /**
-       * @name: canHandle
-       * @description: Specifies that this ACL checker can handle `route` permission
-       * @param {String} resource
+       * @name canHandle
+       * @description Specifies that this ACL checker can handle `route` permission
+       * @param {String} resource - string representing the resource
        * @returns {boolean}
        */
       canHandle: function(resource) {
