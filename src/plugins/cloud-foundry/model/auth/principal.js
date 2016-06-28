@@ -20,8 +20,8 @@
   }
 
   /**
-   * @name: PrincipalFactory
-   * @description: Function to return an Principal class
+   * @name PrincipalFactory
+   * @description Function to return an Principal class
    * @param {app.api.modelManager}  modelManager - the Model management service
    * @returns {Principal}
    * @constructor
@@ -29,8 +29,8 @@
   function PrincipalFactory(modelManager) {
 
     /**
-     * @name: Principal
-     * @description: initialise a Principal object
+     * @name Principal
+     * @description initialise a Principal object
      * @param {String} username
      * @param {String} authToken
      * @param {String} refreshToken
@@ -39,7 +39,7 @@
      * @param {Object} scope
      * @param {Object} userInfo
      * @constructor
-       */
+     */
     function Principal(username, authToken, refreshToken, expiresIn, tokenType, scope, userInfo) {
       this.username = username;
       this.authToken = authToken;
@@ -53,46 +53,46 @@
     angular.extend(Principal.prototype, {
 
       /**
-       * @name: hasAccessTo
-       * @description: Does user have access to operation
+       * @name hasAccessTo
+       * @description Does user have access to operation
        * @param {String} operation operation name
        * @param {Array} flags feature flags
        * @returns {*}
-         */
+       */
       hasAccessTo: function(operation, flags) {
         return this.isAdmin() || flags[operation];
       },
 
       /**
-       * @name: isAdmin
-       * @description: Is user an admin
+       * @name isAdmin
+       * @description Is user an admin
        * @returns {boolean}
-         */
+       */
       isAdmin: function() {
         return _.includes(this.scope, 'cloud_controller.admin');
       },
 
       /**
-       * @name: isAllowed
-       * @description: Is user permitted to do the action
+       * @name isAllowed
+       * @description Is user permitted to do the action
        * @param {Object} context
-       * @param {String} resource_type ACL type
+       * @param {String} resourceType ACL type
        * @param {String} action action name
        * @param {Array} flags feature flags
-         * @returns {*}
-         */
-      isAllowed: function(context, resource_type, action, flags) {
-        var accessChecker = this._getAccessChecker(resource_type, flags);
+       * @returns {*}
+       */
+      isAllowed: function(context, resourceType, action, flags) {
+        var accessChecker = this._getAccessChecker(resourceType, flags);
         return accessChecker[action](context);
       },
 
       /**
-       * @name:_createAccessCheckerList
-       * @description: Internal method to create checker list
+       * @name_createAccessCheckerList
+       * @description Internal method to create checker list
        * @param {Array} flags feature flags
        * @returns {Array}
-         * @private
-         */
+       * @private
+       */
       _createAccessCheckerList: function(flags) {
 
         var ServiceInstanceAccess = modelManager
@@ -114,8 +114,9 @@
 
       /**
        * Access constants
+       * @returns {object}
        * @private
-         */
+       */
       _accessConstants: function() {
         return {
           resources: {
@@ -136,16 +137,16 @@
             delete: 'delete'
           }
         };
-      }
-      ,
+      },
+
       /**
-       * @name: _getAccessChecker
-       * @description: Get Access checker for a given resource type
+       * @name _getAccessChecker
+       * @description Get Access checker for a given resource type
        * @param resourceType
        * @param flags
        * @returns {*}
-         * @private
-         */
+       * @private
+       */
       _getAccessChecker: function(resourceType, flags) {
         var checkers = this._createAccessCheckerList(flags);
         return _.find(checkers, function(checker) {
@@ -156,6 +157,5 @@
 
     return Principal;
   }
-
 
 })();

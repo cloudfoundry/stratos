@@ -74,42 +74,6 @@
     },
 
     /**
-     * @function usage
-     * @memberof cloud-foundry.model.service
-     * @description List the usage at the model layer
-     * @param {string} guid - service guid
-     * @param {object} options - options for url building
-     * @returns {promise} A promise object
-     * @public
-     **/
-    usage: function (guid, options) {
-      var that = this;
-      return this.serviceApi.usage(guid, options)
-        .then(function (response) {
-          that.onUsage(response);
-        });
-    },
-
-    /**
-     * @function files
-     * @memberof  cloud-foundry.model.service
-     * @description List the files at the model layer
-     * @param {string} guid - service guid
-     * @param {string} instanceIndex - the instanceIndex
-     * @param {string} filepath - the filePath
-     * @param {object} options - options for url building
-     * @returns {promise} A promise object
-     * @public
-     **/
-    files: function (guid, instanceIndex, filepath, options) {
-      var that = this;
-      return this.serviceApi.files(guid, instanceIndex, filepath, options)
-        .then(function (response) {
-          that.onFiles(response);
-        });
-    },
-
-    /**
      * @function onAll
      * @memberof cloud-foundry.model.service
      * @description onAll handler at model layer
@@ -133,30 +97,7 @@
     onAllServicePlans: function (response) {
       this.data.servicePlans = response.resources;
       return response.resources;
-    },
-
-    /**
-     * @function onUsage
-     * @memberof cloud-foundry.model.service
-     * @description onUsage handler at model layer
-     * @param {string} response - the return from the api call
-     * @private
-     */
-    onUsage: function (response) {
-      this.data.usage = response.data;
-    },
-
-    /**
-     * @function onFiles
-     * @memberof cloud-foundry.model.service
-     * @description onFiles handler at model layer
-     * @param {string} response - the return from the api call
-     * @private
-     */
-    onFiles: function (response) {
-      this.data.files = response.data;
     }
-
   });
 
 })();

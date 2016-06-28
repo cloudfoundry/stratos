@@ -83,7 +83,7 @@
               that.wizard.nextBtnDisabled = false;
               that.options.isBusy = false;
             });
-          })
+          });
         },
         allowCancelAtLastStep: true,
         title: gettext('Delete App, Pipeline, and Selected Items'),
@@ -127,7 +127,7 @@
       return this.$q.all(tasks).then(function (results) {
         results.forEach(function (routeInfo, index) {
           // Check that each route is only bound to 1 app (which implicitly must be this app)
-          if(routeInfo.total_results === 1) {
+          if (routeInfo.total_results === 1) {
             that.options.safeRoutes.push(routes[index]);
           }
         });

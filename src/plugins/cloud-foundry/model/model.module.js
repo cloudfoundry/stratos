@@ -21,6 +21,7 @@
    * @description A $http interceptor that adds `x-cnap-cnsi-list`
    * header to each request if the CNSI guid is present in the
    * URL (route).
+   * @param {object} $stateParams - the UI router $stateParams service
    * @returns {object} The request function
    */
   function interceptor($stateParams) {

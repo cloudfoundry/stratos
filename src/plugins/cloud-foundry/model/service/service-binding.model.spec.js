@@ -2,7 +2,7 @@
   'use strict';
 
   describe('cloud-foundry.model.service-binding', function () {
-    var $httpBackend, model;
+    var $httpBackend, model, mockBindingsApi;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -10,6 +10,7 @@
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('app.model.modelManager');
       model = modelManager.retrieve('cloud-foundry.model.service-binding');
+      mockBindingsApi = mock.cloudFoundryAPI.ServiceBindings;
     }));
 
     afterEach(function() {
@@ -17,8 +18,29 @@
       $httpBackend.verifyNoOutstandingRequest();
     });
 
+    it('createServiceBinding', function () {
+      var bindingSpec = {
+        app_guid: 'app_123',
+        service_instance_guid: 'instance_123'
+      };
+      var CreateServiceBinding = mockBindingsApi.CreateServiceBinding(bindingSpec);
+      $httpBackend.whenPOST(CreateServiceBinding.url)
+        .respond(200, CreateServiceBinding.response['200'].body);
+      $httpBackend.expectPOST(CreateServiceBinding.url);
+
+      model.createServiceBinding('guid', bindingSpec)
+        .then(function (newBinding) {
+          expect(newBinding).toBeDefined();
+          expect(newBinding.metadata.guid).toBeDefined();
+          expect(newBinding.entity.app_guid).toBe('app_123');
+          expect(newBinding.entity.service_instance_guid).toBe('instance_123');
+        });
+
+      $httpBackend.flush();
+    });
+
     it('deleteServiceBinding', function () {
-      var DeleteServiceBinding = mock.cloudFoundryAPI.ServiceBindings.DeleteServiceBinding('123');
+      var DeleteServiceBinding = mockBindingsApi.DeleteServiceBinding('123');
       $httpBackend.whenDELETE(DeleteServiceBinding.url).respond(204, DeleteServiceBinding.response['204'].body);
       $httpBackend.expectDELETE(DeleteServiceBinding.url);
       model.deleteServiceBinding('guid', '123');
@@ -27,7 +49,7 @@
     });
 
     it('listAllServiceBindings', function () {
-      var ListAllServiceBindings = mock.cloudFoundryAPI.ServiceBindings.ListAllServiceBindings();
+      var ListAllServiceBindings = mockBindingsApi.ListAllServiceBindings();
       $httpBackend.whenGET(ListAllServiceBindings.url).respond(200, ListAllServiceBindings.response['200'].body);
       $httpBackend.expectGET(ListAllServiceBindings.url);
       var result;

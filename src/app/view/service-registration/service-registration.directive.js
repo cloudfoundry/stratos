@@ -62,7 +62,9 @@
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
     this.detailView = detailView;
     this.currentEndpoints = [];
+    /* eslint-disable */
     // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
+    /* eslint-enable */
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
 
     $scope.$watchCollection(function () {
@@ -125,20 +127,20 @@
      * @function disconnect
      * @memberOf app.view.ServiceRegistrationController
      * @description Disconnect service instance for user
-     * @param {object} serviceInstance - the service instance to disconnect
+     * @param {object} userServiceInstance - the model user version of the service instance to disconnect
      */
-    disconnect: function (serviceInstance) {
+    disconnect: function (userServiceInstance) {
       var that = this;
 
       // Our mocking system uses "id" but the real systems use "guid".
       // This bandaid will allow the use of either.
-      var id = angular.isUndefined(serviceInstance.guid) ? serviceInstance.id : serviceInstance.guid;
+      var id = angular.isUndefined(userServiceInstance.guid) ? userServiceInstance.id : userServiceInstance.guid;
 
       this.userCnsiModel.disconnect(id)
         .then(function success() {
-          delete serviceInstance.account;
-          delete serviceInstance.expires_at;
-          delete serviceInstance.valid;
+          delete userServiceInstance.account;
+          delete userServiceInstance.token_expiry;
+          delete userServiceInstance.valid;
           that.userCnsiModel.numValid -= 1;
           that.cfModel.all();
         });

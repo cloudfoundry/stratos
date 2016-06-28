@@ -1,8 +1,8 @@
 <div class="add-route">
   <h4 translate>Add a Route</h4>
-  <form name="addRouteForm" >
+  <form name="addRouteForm">
     <div class="form-group " ng-class="{'has-error':addRouteCtrl.routeExists}" focusable-input>
-      <label class="control-label"  translate>Host</label>
+      <label class="control-label" translate>Host</label>
       <span class="control-message" translate>A route with this name already exists. Choose a new one</span>
       <input type="text" name="host" class="form-control" ng-model="addRouteCtrl.context.data.host"
              required
@@ -19,26 +19,12 @@
         required
       />
     </div>
-    <div class="form-group" focusable-input>
-      <label class="control-label" translate>Port (optional)</label>
-      <input type="number" name="port" class="form-control" ng-model="addRouteCtrl.context.data.port"
-             placeholder="{{'e.g. 8080' | translate}}"
-      />
-    </div>
-    <div class="form-group" focusable-input>
-      <label class="control-label" translate>Path (optional)</label>
-      <input type="text" name="path" class="form-control" ng-model="addRouteCtrl.context.data.path"
-             placeholder="{{'e.g. /app/is/here' | translate}}"
-      />
-
-    </div>
     <div ng-show="addRouteCtrl.addRouteError" class="alert alert-danger">
       <p translate>
         There was a problem adding or associating this route with your app. Please try again. If this error persists,
         please contact the administrator.
       </p>
     </div>
-
     <div class="modal-footer">
       <button class="btn btn-default"
               ng-click="addRouteCtrl.cancel()" translate>
@@ -50,6 +36,4 @@
       </button>
     </div>
   </form>
-
-
 </div>
