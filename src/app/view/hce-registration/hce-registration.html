@@ -3,6 +3,16 @@
     <div class="form-group" focusable-input
          ng-class="{'has-error': hceRegistrationForm.url.$invalid && hceRegistrationForm.url.$dirty}">
       <label class="control-label" translate>Code Engine Endpoint</label>
+      <span class="control-message">
+        <span translate
+              ng-if="hceRegistrationForm.url.$error.pattern && hceRegistrationForm.url.$dirty">
+          Invalid url format
+        </span>
+        <span translate
+              ng-if="hceRegistrationForm.url.$error.helionUnique && hceRegistrationForm.url.$dirty">
+          Url is not unique
+        </span>
+      </span>
       <input type="text" name="url" class="form-control" ng-model="detailViewCtrl.context.data.url"
              required
              ng-pattern="/^http(s)?://(.)+$/"

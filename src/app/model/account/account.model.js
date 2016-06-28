@@ -124,7 +124,7 @@
     },
 
     /**
-     * @function onLoggedOut
+     * @function onLoggedIn
      * @memberof app.model.account.Account
      * @description Logged-in handler at model layer
      * @param {object} response - the HTTP response object

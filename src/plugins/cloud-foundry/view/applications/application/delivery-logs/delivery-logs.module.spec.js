@@ -289,55 +289,6 @@
       });
     });
 
-    describe('View Event for execution', function() {
-      var execution = {
-        id: 'two'
-      };
-
-      beforeEach(function() {
-        createController(true);
-        _.set(controller, 'hceCnsi.guid', cnsi.guid);
-      });
-
-      it('Without events', function() {
-        _.set(controller, 'eventsPerExecution', {});
-
-        spyOn(controller, 'viewEvent');
-
-        controller.viewEventForExecution(execution);
-        $rootScope.$apply();
-
-        expect(controller.viewEvent).not.toHaveBeenCalled();
-      });
-
-      it('With events', function() {
-        var event = {
-          event: '1',
-          name: 'name'
-        };
-        var events = [ event ];
-        _.set(controller, 'eventsPerExecution', {
-          one: [
-            {
-              event: '1'
-            },
-            {
-              event: '2'
-            }
-          ],
-          two: events
-        });
-
-        spyOn(controller, 'viewEvent');
-
-        controller.viewEventForExecution(execution);
-        $rootScope.$apply();
-
-        expect(controller.viewEvent).toHaveBeenCalled();
-        expect(controller.viewEvent.calls.argsFor(0)[0]).toEqual(event);
-      });
-    });
-
     describe('Fetching events', function() {
 
       var event1 = {
@@ -580,6 +531,56 @@
         expect(execution.result.state).toBeDefined();
         expect(execution.result.label).toEqual(event.name);
         expect(execution.result.hasLog).toBeTruthy();
+      });
+    });
+
+    describe('determine execution result', function() {
+
+      beforeEach(function() {
+        createController(true);
+      });
+
+      it('execution completed (pipeline_complete - failed)', function() {
+        var event = {
+          type: controller.eventTypes.PIPELINE_COMPLETED,
+          state: controller.eventStates.FAILED,
+          name: 'label'
+        };
+        var res = controller.determineExecutionResult(event);
+        expect(res.label).toEqual('Failed');
+        expect(res.state).toEqual(event.state);
+      });
+
+      it('execution completed (pipeline_complete - success)', function() {
+        var event = {
+          type: controller.eventTypes.PIPELINE_COMPLETED,
+          state: controller.eventStates.SUCCEEDED,
+          name: 'label'
+        };
+        var res = controller.determineExecutionResult(event);
+        expect(res.label).toEqual('Success');
+        expect(res.state).toEqual(event.state);
+      });
+
+      it('execution completed (failed event)', function() {
+        var event = {
+          type: controller.eventTypes.TESTING,
+          state: controller.eventStates.FAILED,
+          name: 'label'
+        };
+        var res = controller.determineExecutionResult(event);
+        expect(res.label).toEqual(event.name);
+        expect(res.state).toEqual(event.state);
+      });
+
+      it('execution still running', function() {
+        var event = {
+          type: controller.eventTypes.TESTING,
+          name: 'label'
+        };
+        var res = controller.determineExecutionResult(event);
+        expect(res.label).toEqual(event.name);
+        expect(res.state).toEqual(controller.eventStates.RUNNING);
       });
     });
 

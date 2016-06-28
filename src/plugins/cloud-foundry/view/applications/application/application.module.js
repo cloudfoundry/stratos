@@ -32,6 +32,8 @@
     '$stateParams',
     '$scope',
     '$window',
+    '$q',
+    '$interval',
     'helion.framework.widgets.dialog.confirm'
   ];
 
@@ -43,19 +45,25 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
    * @param {object} $window - the Angular $window service
+   * @param {object} $q - the Angular $q service
+   * @param {object} $interval - the Angular $interval service
    * @param {object} confirmDialog - the confirm dialog service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
+   * @property {object} $q - the Angular $q service
+   * @property {object} $interval - the Angular $interval service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
    */
-  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, confirmDialog) {
+  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, confirmDialog) {
     var that = this;
 
     this.$window = $window;
+    this.$q = $q;
+    this.$interval = $interval;
     this.eventService = eventService;
     this.confirmDialog = confirmDialog;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
@@ -64,9 +72,12 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
-    this.init();
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.isPending = this.model.application.summary.state === 'PENDING';
+    this.UPDATE_INTERVAL = 1000; // milliseconds
+
+    this.init();
+
     this.appActions = [
       {
         name: gettext('View App'),
@@ -133,16 +144,20 @@
     }, function (newRoutes) {
       that.onAppRoutesChange(newRoutes);
     });
+
+    $scope.$on('$destroy', function () {
+      that.stopUpdate();
+    });
   }
 
   angular.extend(ApplicationController.prototype, {
     init: function () {
       var that = this;
-      this.model.getAppSummary(this.cnsiGuid, this.id);
-      this.model.getAppStats(this.cnsiGuid, this.id);
       this.model.application.project = null;
 
+      /* eslint-disable */
       // TODO(kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
+      /* eslint-enable */
       this.cnsiModel.list().then(function () {
         var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
         if (hceCnsis.length > 0) {
@@ -156,6 +171,82 @@
             });
         }
       });
+
+      return this.startUpdate();
+    },
+
+    /**
+     * @function startUpdate
+     * @description start updating application view
+     * @public
+     */
+    startUpdate: function () {
+      var that = this;
+      if (!this.scheduledUpdate) {
+        this.scheduledUpdate = this.$interval(function () {
+          that.update();
+        }, this.UPDATE_INTERVAL);
+      }
+    },
+
+    /**
+     * @function stopUpdate
+     * @description stop updating application
+     * @public
+     */
+    stopUpdate: function () {
+      if (this.scheduledUpdate) {
+        this.$interval.cancel(this.scheduledUpdate);
+        delete this.scheduledUpdate;
+      }
+    },
+
+    /**
+     * @function update
+     * @description update application
+     * @public
+     */
+    update: function () {
+      if (this.updating) {
+        return;
+      }
+
+      var that = this;
+
+      this.updating = true;
+      this.$q.when()
+
+        .then(function () {
+          that.updateSummary();
+        })
+
+        .then(function () {
+          that.updateState();
+        })
+
+        .finally(function () {
+          that.updating = false;
+        });
+    },
+
+    /**
+     * @function updateSummary
+     * @description update application summary
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    updateSummary: function () {
+      return this.model.getAppSummary(this.cnsiGuid, this.id);
+    },
+
+    /**
+     * @function updateState
+     * @description update application state
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    updateState: function () {
+      return this.model.getAppStats(this.cnsiGuid, this.id);
     },
 
     deleteApp: function () {
@@ -199,8 +290,10 @@
         appAction.disabled = that.isPending;
       });
 
+      /* eslint-disable */
       // TODO(woodnt): This list-index mechanism is WAY fragile. Now we can't reorder the actions without re-counting indexes. https://jira.hpcloud.net/browse/TEAMFOUR-621
       // TODO(woodnt): Why are we both conditionally hiding and conditionally disabling these appActions?  That seems ... odd. https://jira.hpcloud.net/browse/TEAMFOUR-622
+      /* eslint-enable */
       this.showOrHideLaunchApp(newState, null);
       // Index 0 is Launch App though it's handled in it's own special method because it requires route info.
       this.appActions[1].hidden = newState !== 'STARTED';  // Stop
@@ -208,10 +301,6 @@
       this.appActions[3].hidden = newState !== 'STOPPED';  // Delete
       this.appActions[4].hidden = newState !== 'STOPPED';  // Start
       // Index 5 is CLI Instructions
-
-      if (newState === 'STARTED' || newState === 'STOPPED') {
-        this.init();
-      }
     },
 
     onAppRoutesChange: function (newRoutes) {

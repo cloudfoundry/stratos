@@ -67,7 +67,7 @@
                   <span ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === undefined" translate>Connect</span>
                 </a>
                 <a class="btn btn-link btn-sm" ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
-                  ng-click="serviceRegistrationCtrl.disconnect(cnsi)" translate>Disconnect</a>
+                  ng-click="serviceRegistrationCtrl.disconnect(serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid])" translate>Disconnect</a>
               </span>
               <a class="btn btn-link btn-sm"
                  translate

@@ -21,17 +21,15 @@
   }
 
   /**
-   * @name: ApplicationAccessFactory
-   * @description: Function to return an ApplicationAccess class
+   * @name ApplicationAccessFactory
+   * @description Function to return an ApplicationAccess class
    * @param {app.api.modelManager}  modelManager - the Model management service
    * @returns {ApplicationAccess}
    */
   function ApplicationAccessFactory(modelManager) {
-
-
     /**
-     * @name: ApplicationAccess
-     * @description: Constructor for ApplicationAccess
+     * @name ApplicationAccess
+     * @description Constructor for ApplicationAccess
      * @param {Principal} principal Principal instance
      * @param {Array} flags feature flags
      * @constructor
@@ -40,19 +38,16 @@
       this.principal = principal;
       this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
-
     }
 
     angular.extend(ApplicationAccess.prototype, {
-
       /**
-       * @name: create
-       * @description: Does user have create application permission in the space
+       * @name create
+       * @description Does user have create application permission in the space
        * @param {Object} space Domain space
        * @returns {boolean}
        */
       create: function(space) {
-
         // Admin
         if (this.baseAccess.create(space)) {
           return true;
@@ -63,13 +58,12 @@
       },
 
       /**
-       * @name: update
-       * @description: Does user have update application permission
+       * @name update
+       * @description Does user have update application permission
        * @param {Object} app Application detail
        * @returns {boolean}
        */
       update: function(app) {
-
         // Admin
         if (this.baseAccess.update(app)) {
           return true;
@@ -77,13 +71,12 @@
 
         // If user is developer in space app belongs to
         return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, app.entity.space_guid);
-
       },
 
       /**
-       * @name: delete
-       * @description: Does user have delete application permission
-       * @param {Object} app Application detail
+       * @name delete
+       * @description Does user have delete application permission
+       * @param {Object} app - Application detail
        * @returns {boolean}
        */
       delete: function(app) {
@@ -91,9 +84,9 @@
       },
 
       /**
-       * @name: canHandle
-       * @description: Specifies that this ACL checker can handle `application` permission
-       * @param {String} resource
+       * @name canHandle
+       * @description Specifies that this ACL checker can handle `application` permission
+       * @param {String} resource - String representing the resource
        * @returns {boolean}
        */
       canHandle: function(resource) {
@@ -103,6 +96,5 @@
 
     return ApplicationAccess;
   }
-
 
 })();

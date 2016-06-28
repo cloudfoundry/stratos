@@ -53,7 +53,7 @@
           url: 'cluster1_url',
           username: 'cluster1_username',
           account: 'cluster1_password',
-          expires_at: 3600
+          token_expiry: 3600
         };
         $httpBackend.when('POST', '/pp/v1/auth/login/cnsi').respond(200, mockResponse);
 
@@ -144,7 +144,7 @@
           url: 'cluster1_url',
           username: 'dev',
           account: 'dev',
-          expires_at: 3600
+          token_expiry: 3600
         };
         $httpBackend.when('POST', '/pp/v1/auth/login/cnsi').respond(200, mockResponse);
 
