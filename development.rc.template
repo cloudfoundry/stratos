@@ -1,8 +1,8 @@
 # This file contains common environment-variables for standing up a development
 # environment using docker-compose.
 #
-# Copy this file to dev-env.rc and edit the values as necessary.
-# Note: stand-up-dev-env.sh will try to use the dev-env.rc file if it's present.
+# Copy this file to development.rc and edit the values as necessary.
+# Note: stand-up-dev-env.sh will try to use it if it's present.
 
 
 ################
