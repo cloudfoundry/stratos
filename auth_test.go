@@ -11,8 +11,8 @@ import (
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 	"github.com/labstack/echo"
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 func TestLoginToUAA(t *testing.T) {
@@ -568,11 +568,10 @@ func TestVerifySession(t *testing.T) {
 
 	var expectedBody = "{\"account\":\"admin\",\"scope\":\"cloud_controller.admin\"}"
 	if res == nil || strings.TrimSpace(res.Body.String()) != expectedBody {
-		t.Errorf("Responce Body incorrect.  Expected %s  Received %s", expectedBody, res.Body)
+		t.Errorf("Response Body incorrect.  Expected %s  Received %s", expectedBody, res.Body)
 	}
 
 }
-
 
 func TestVerifySessionNoDate(t *testing.T) {
 	t.Parallel()
@@ -594,7 +593,7 @@ func TestVerifySessionNoDate(t *testing.T) {
 
 	err := pp.verifySession(ctx)
 	if err == nil {
-		t.Error("Expected an 403 error with 'Could not find session date' string. got %s", err)
+		t.Errorf("Expected an 403 error with 'Could not find session date' string. got %s", err)
 	}
 
 	errHTTP, ok := err.(*echo.HTTPError)
@@ -607,7 +606,6 @@ func TestVerifySessionNoDate(t *testing.T) {
 	}
 
 }
-
 
 func TestVerifySessionExpired(t *testing.T) {
 	t.Parallel()

@@ -136,5 +136,5 @@ go get github.com/stretchr/testify
 
 # The actual install and run
 go get github.com/smartystreets/goconvey
-$GOPATH/bin/goconvey
+$GOPATH/bin/goconvey -port 9999
 ```

@@ -371,7 +371,7 @@ func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (toke
 		return tokens.TokenRecord{}, false
 	}
 
-	tr, err := tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
+	tr, err := tokenRepo.FindCNSIToken(cnsiGUID, userGUID, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return tokens.TokenRecord{}, false
 	}
@@ -386,7 +386,7 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tok
 		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
 	}
 
-	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t)
+	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return fmt.Errorf("Unable to save a CNSI Token: %v", err)
 	}
