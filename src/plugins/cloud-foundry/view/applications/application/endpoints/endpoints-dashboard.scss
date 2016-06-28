@@ -1,0 +1,37 @@
+@import "tiles/service-tile";
+@import "tiles/base/base-tile";
+
+.endpoints {
+  $gallery-card-side-margins: 30px;
+  $gallery-card-max-width: 400px;
+  $gallery-card-layout-steps: 4;
+
+  .action-header{
+    position: relative;
+    button{
+      position: absolute;
+      top:10px;
+      right:10px;
+    }
+  }
+  .tile-btn {
+    text-transform: capitalize;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .welcome-message {
+    text-align: left;
+    padding: $hpe-unit-space*4 0;
+    //width: 70%;
+    //margin: auto;
+  }
+
+  @for $i from 1 through $gallery-card-layout-steps {
+    @media (min-width: $gallery-card-side-margins + $i * $gallery-card-max-width) {
+      .endpoint-tile.col-md-4.col-sm-1 {
+        width: percentage(1/$i);
+      }
+    }
+  }
+}

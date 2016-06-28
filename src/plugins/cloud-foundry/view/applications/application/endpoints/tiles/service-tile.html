@@ -1,0 +1,42 @@
+<div class="card panel panel-default service-tile">
+  <div class="panel-heading action-header">
+    <span ng-if="serviceTileCtrl.isHcf()" translate> Cloud Foundry Clusters</span>
+    <span ng-if="!serviceTileCtrl.isHcf()" translate> Code Engine Endpoints</span>
+    <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()"
+       ng-if="serviceTileCtrl.serviceInstancesCount()>=0">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</span>
+    </a>
+  </div>
+  <div class="panel-body no-instances" ng-if="serviceTileCtrl.serviceInstancesCount()===0">
+    <table>
+      <tr>
+        <td>
+          <span class="helion-icon helion-icon-lg helion-icon-Cluster"></span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p> There are no registered {{serviceTileCtrl.isHcf() ? 'clusters' : 'endpoints'}}.</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()">
+            <p> Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</p>
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <base-tile service-instances="serviceTileCtrl.serviceInstances"
+             service-type={{serviceTileCtrl.serviceType}}
+             ng-if="serviceTileCtrl.serviceInstancesCount() > 0"></base-tile>
+</div>
+
+<flyout flyout-active="serviceTileCtrl.clusterAddFlyoutActive"
+        flyout-close-icon="'helion-icon helion-icon-Close'">
+  <add-cluster-form on-cancel="serviceTileCtrl.hideClusterAddForm()"
+                    on-submit="serviceTileCtrl.hideClusterAddForm()">
+  </add-cluster-form>
+</flyout>

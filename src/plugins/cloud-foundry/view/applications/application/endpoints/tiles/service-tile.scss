@@ -1,0 +1,22 @@
+.service-tile {
+
+  .tile-btn {
+    text-transform: capitalize;
+    font-size: 16px;
+  }
+
+  .no-instances {
+    width: 75%;
+    margin: 0 auto;
+  }
+
+  .panel-body {
+    text-align: center;
+    th {
+      text-align: center;
+      box-sizing: content-box;
+    }
+
+  }
+}
+

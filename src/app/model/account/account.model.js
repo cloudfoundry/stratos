@@ -112,7 +112,6 @@
     isAdmin: function () {
 
       //TODO(irfan) Hook for development, remove before merging
-      console.log('adminOverride: ' + this.adminOverride);
       if(this.adminOverride){
          return false;
       }

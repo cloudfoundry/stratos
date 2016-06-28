@@ -16,7 +16,8 @@
       controller: ApplicationGalleryCardController,
       controllerAs: 'applicationGalleryCardCtrl',
       scope: {},
-      templateUrl: 'plugins/cloud-foundry/view/applications/list/gallery-view/application-gallery-card/application-gallery-card.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/list/' +
+      'gallery-view/application-gallery-card/application-gallery-card.html'
     };
   }
 
