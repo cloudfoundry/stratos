@@ -5,6 +5,16 @@
     <div class="form-group" focusable-input
       ng-class="{'has-error': addClusterFormCtrl.addClusterForm.url.$invalid && addClusterFormCtrl.addClusterForm.url.$dirty}">
       <label class="control-label" translate>Cluster URL</label>
+      <span class="control-message">
+        <span translate
+              ng-if="addClusterFormCtrl.addClusterForm.url.$error.pattern && addClusterFormCtrl.addClusterForm.url.$dirty">
+          Invalid url format
+        </span>
+        <span translate
+              ng-if="addClusterFormCtrl.addClusterForm.url.$error.helionUnique && addClusterFormCtrl.addClusterForm.url.$dirty">
+          Url is not unique
+        </span>
+      </span>
       <input type="text" name="url" class="form-control" ng-model="addClusterFormCtrl.url"
         ng-pattern="/^http(s)?://api\.(.)+$/" required
         helion-unique items="addClusterFormCtrl.existingApiEndpoints" ignore-case/>

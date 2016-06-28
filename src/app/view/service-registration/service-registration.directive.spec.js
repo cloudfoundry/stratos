@@ -156,8 +156,8 @@
         $scope.$apply();
 
         serviceRegistrationCtrl.serviceInstances = [
-          { name: 'c1', url: 'c1_url', api_endpoint: { Scheme: 'http', Host: 'c1_url' }, username: 'dev', expires_at: 3600, valid: true },
-          { name: 'c2', url: 'c2_url', api_endpoint: { Scheme: 'http', Host: 'c2_url' },username: 'dev', expires_at: 3600, valid: true },
+          { name: 'c1', url: 'c1_url', api_endpoint: { Scheme: 'http', Host: 'c1_url' }, username: 'dev', token_expiry: 3600, valid: true },
+          { name: 'c2', url: 'c2_url', api_endpoint: { Scheme: 'http', Host: 'c2_url' },username: 'dev', token_expiry: 3600, valid: true },
           { name: 'c3', url: 'c3_url', api_endpoint: { Scheme: 'http', Host: 'c3_url' } }
         ];
         serviceRegistrationCtrl.userCnsiModel.numValid = 2;

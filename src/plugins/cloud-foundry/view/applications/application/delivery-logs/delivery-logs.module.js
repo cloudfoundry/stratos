@@ -107,6 +107,16 @@
       promise = $q.when({});
     }
 
+    that.debouncedUpdateVisibleExecutions = _.debounce(function(visibleExecutions) {
+      that.updateVisibleExecutions(visibleExecutions);
+    }, 500);
+
+    $scope.$on("$destroy", function() {
+      if (that.debouncedUpdateVisibleExecutions) {
+        that.debouncedUpdateVisibleExecutions.cancel();
+      }
+    });
+
     promise
       .then(function (project) {
         that.project = project;
@@ -183,9 +193,7 @@
       }
       that.execWatch = that.$scope.$watch(function() {
         return that.displayedExecutions;
-      }, _.debounce(function(visibleExecutions) {
-        that.updateVisibleExecutions(visibleExecutions);
-      }, 500));
+      }, that.debouncedUpdateVisibleExecutions);
 
       var promise;
       if (this.haveBackend) {
@@ -328,28 +336,32 @@
 
       var event = events[events.length - 1];
 
-      execution.result = {
-        state: this.determineExecutionState(event),
-        label: event.name,
-        hasLog: event.artifact_id
-      };
+      execution.result = this.determineExecutionResult(event);
     },
 
     /**
-     * @name ApplicationDeliveryLogsController.determineExecutionState
-     * @description Determines the execution state from the last received event
+     * @name ApplicationDeliveryLogsController.determineExecutionResult
+     * @description Determines the execution result from the last received event
      * @param {object} event - Last HCE event of an execution
-     * @returns {string} - Updated execution state
+     * @returns {object} - Content required by UX to display the execution result
      */
-    determineExecutionState: function(event) {
-      if (
+    determineExecutionResult: function(event) {
+      var hasCompleted =
         event.type === this.eventTypes.PIPELINE_COMPLETED ||
         event.type === this.eventTypes.WATCHDOG_TERMINATED ||
-        event.state === this.eventStates.FAILED) {
-        return event.state;
-      } else {
-        return this.eventStates.RUNNING;
+        event.state === this.eventStates.FAILED;
+
+      var result = {
+        state: hasCompleted ? event.state : this.eventStates.RUNNING,
+        label: event.name
+      };
+
+      // Override the label for this specific case. This is the real 'result' of the execution
+      if (event.type === this.eventTypes.PIPELINE_COMPLETED) {
+        result.label = event.state === this.eventStates.SUCCEEDED ? gettext('Success') : gettext('Failed');
       }
+
+      return result;
     },
 
     /**

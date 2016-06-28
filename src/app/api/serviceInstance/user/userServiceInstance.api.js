@@ -80,7 +80,9 @@
       };
       var disconnectData = {cnsi_guid: guid};
       var data = this.$httpParamSerializer(disconnectData);
+      /* eslint-disable */
       // TODO(woodnt): This should likely be a delete.  We should investigate the Portal-proxy urls and verbs. https://jira.hpcloud.net/browse/TEAMFOUR-620
+      /* eslint-enable */
       return this.$http.post('/pp/v1/auth/logout/cnsi', data, config);
     },
 

@@ -196,7 +196,9 @@
             nextBtnText: gettext('Next'),
             onNext: function () {
               try {
+                /* eslint-disable */
                 // TODO (kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
+                /* eslint-enable */
                 that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
                   .then(angular.noop, function (response) {
                     if (response.status === 404) {
@@ -249,9 +251,8 @@
                       var branches = _.map(that.githubModel.data.branches,
                                           function (o) {
                                             return {
-                                              label: o.name,
-                                              value: o.name,
-                                              disabled: _.indexOf(usedBranches, o.name) >= 0
+                                              label: o.name + (_.indexOf(usedBranches, o.name) >= 0 ? gettext(' (used by other project)') : ''),
+                                              value: o.name
                                             };
                                           });
                       [].push.apply(that.options.branches, branches);
