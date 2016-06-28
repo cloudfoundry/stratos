@@ -29,8 +29,15 @@ function clean {
     echo "----- stratos-ui"
     pushd ../stratos-ui
     rm -rf dist/
-    rm -rf npm_modules
+    rm -rf npm_modules/
     rm -rf src/lib/
+    rm -rf tools/node_modules/
+    popd
+
+    echo "----- containers, images"
+    pushd ../stratos-deploy
+    docker-compose -f docker-compose.development.yml down --rmi 'all'
+    docker rmi -f portal-proxy-builder
     popd
 }
 
