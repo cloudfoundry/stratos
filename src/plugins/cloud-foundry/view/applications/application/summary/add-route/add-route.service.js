@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -11,13 +11,13 @@
     'helion.framework.widgets.detailView'
   ];
 
-  function AddRouteServiceFactory(modelManager, detailView) {
+  function AddRouteServiceFactory (modelManager, detailView) {
     return {
-      add: function() {
+      add: function () {
         var model = modelManager.retrieve('cloud-foundry.model.application');
         // Create a map of domain names -> domain guids
         var domains = [];
-        model.application.summary.available_domains.forEach(function(domain) {
+        model.application.summary.available_domains.forEach(function (domain) {
           domains.push({
             label: domain.name,
             value: domain.guid
@@ -66,7 +66,7 @@
    * @param {Object} $uibModalInstance - the Angular UI Bootstrap $uibModalInstance service
    * @param {Object} context - the uibModal context
    */
-  function AddRouteController($scope, $stateParams, modelManager, $uibModalInstance, context) {
+  function AddRouteController ($scope, $stateParams, modelManager, $uibModalInstance, context) {
     var that = this;
     that.addRouteError = false;
     that.applicationId = $stateParams.guid;
@@ -79,19 +79,18 @@
     that.addRouteError = false;
     that.routeExists = false;
 
-    $scope.$watch(function() {
+    $scope.$watch(function () {
       return that.context.data.host;
-    }, function() {
+    }, function () {
       if (that.routeExists) {
         that.routeExists = false;
       }
     });
   }
 
-
   angular.extend(AddRouteController.prototype, {
 
-    addRoute: function() {
+    addRoute: function () {
       var that = this;
       var data = {
         space_guid: that.context.data.space_guid,
@@ -100,7 +99,7 @@
       };
 
       this.routeModel.createRoute(that.cnsiGuid, data)
-        .then(function(response) {
+        .then(function (response) {
           if (!(response.metadata && response.metadata.guid)) {
             /* eslint-disable no-throw-literal */
             throw response;
@@ -110,16 +109,16 @@
           return that.routeModel.associateAppWithRoute(that.cnsiGuid, routeId, that.applicationId);
         })
 
-        .then(function() {
+        .then(function () {
           // Update application summary model
           return that.model.getAppSummary(that.cnsiGuid, that.applicationId);
         })
 
-        .then(function() {
+        .then(function () {
           that.uibModelInstance.close();
         })
 
-        .catch(function(error) {
+        .catch(function (error) {
           // check if error is CF-RouteHostTaken indicating that the route has already been created
           if (_.isPlainObject(error) &&
             error.error_code &&
@@ -135,7 +134,7 @@
      * @function cancel
      * @description Cancel adding a route. Clear the form and dismiss this form.
      */
-    cancel: function() {
+    cancel: function () {
       this.uibModelInstance.dismiss();
     },
 
@@ -143,7 +142,7 @@
      * @function onAddRouteError
      * @description Display error when adding a route
      */
-    onAddRouteError: function() {
+    onAddRouteError: function () {
       this.addRouteError = true;
     }
   });
