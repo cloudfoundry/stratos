@@ -346,7 +346,7 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 
 // encryptToken - TBD
 func encryptToken(key []byte, t string) (string, error) {
-
+	log.Println("===== encryptToken =")
 	log.Println("Token about to be encrypted.")
 	log.Println(t)
 
@@ -358,7 +358,7 @@ func encryptToken(key []byte, t string) (string, error) {
 		return "", fmt.Errorf(msg, encryptErr)
 	}
 
-	log.Println("Token encrypted.")
+	log.Println("Token encrypted:")
 	log.Println(ciphertextToken)
 
 	// Note:
@@ -380,8 +380,8 @@ func encryptToken(key []byte, t string) (string, error) {
 
 // decryptToken - TBD
 func decryptToken(key []byte, t string) (string, error) {
-
-	log.Println("Attempting decrypt of token")
+	log.Println("===== decryptToken =")
+	log.Println("Attempting decrypt of token:")
 	log.Println(t)
 
 	// Note:
