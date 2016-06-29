@@ -119,7 +119,7 @@
           that.uibModelInstance.close();
         })
 
-        .catch(function() {
+        .catch(function(error) {
           // check if error is CF-RouteHostTaken indicating that the route has already been created
           if (_.isPlainObject(error) &&
             error.error_code &&
