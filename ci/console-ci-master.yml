@@ -32,7 +32,7 @@ resources:
     type: git
     source:
       uri: git@github.com:hpcloud/stratos-ui.git
-      branch: helion-master-bower
+      branch: master
       private_key: {{github-private-key}}
   - name: portal-proxy
     type: git
