@@ -1,24 +1,38 @@
+
 account-actions, [account-actions] {
   display: block;
-  width: 557px;
-  height: 162px;
+  width: $hpe-grid-column-width * 4 - 2 * $hpe-unit-space;
 
   .account-info {
-    height: 80px;
+    margin-bottom: $hpe-grid-margin;
   }
 
   .actions {
-    display: table;
+    display: block;
     width: 100%;
 
     .action {
-      display: table-cell;
-      width: 33.3%;
-      text-align: center;
+      display: block;
+      white-space: nowrap;
+      padding: $hpe-unit-space * .5 0;
 
-      > * {
+      * {
         display: inline-block;
+        vertical-align: middle;
       }
+
+      a.btn-border-less {
+        color: $dove-gray2;
+
+        &:hover, &:focus, &:active {
+          color: $hpe-primary;
+        }
+      }
+
+      > a > i {
+        margin-right: $hpe-unit-space * .5;
+      }
+
     }
   }
 }
