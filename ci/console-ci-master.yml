@@ -32,7 +32,7 @@ resources:
     type: git
     source:
       uri: git@github.com:hpcloud/stratos-ui.git
-      branch: master
+      branch: helion-master-bower
       private_key: {{github-private-key}}
   - name: portal-proxy
     type: git
@@ -56,6 +56,10 @@ resources:
     type: docker-image
     source:
       repository: docker-registry.helion.space:443/helioncf/cnap-console-proxy
+  - name: database-config-image
+    type: docker-image
+    source:
+      repository: docker-registry.helion.space:443/helioncf/cnap-console-database-configuration
 
   # HSM assets
   - name: hsm-sdl-bucket
@@ -110,12 +114,19 @@ jobs:
     - task: generate-tag-files
       file: stratos-deploy/ci/tasks/build-tag-file.yml
 
-    # Build the Pportal Proxy image, push to registry
+    # Build the Portal Proxy image, push to registry
     - task: build-proxy-image
       file: stratos-deploy/ci/tasks/build-proxy-image.yml
     - put: portal-proxy-image
       params:
         dockerfile: portal-proxy-output/Dockerfile.UCP
+        build: portal-proxy-output
+        tag: tag-files/version_tag
+
+    # Build the database configuration image, push to registry
+    - put: database-config-image
+      params:
+        dockerfile: portal-proxy-output/Dockerfile.database.UCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 
