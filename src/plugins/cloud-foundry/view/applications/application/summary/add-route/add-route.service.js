@@ -1,10 +1,10 @@
-(function() {
+(function () {
   'use strict';
 
   angular
     .module('cloud-foundry.view.applications.application.summary')
     .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory)
-    .controller('cloud-foundry.view.applications.application.summary.addRoutesCtrl', AddRouteController);
+    .controller('addRouteController', AddRouteController);
 
   AddRouteServiceFactory.$inject = [
     'app.model.modelManager',
@@ -12,11 +12,8 @@
   ];
 
   function AddRouteServiceFactory(modelManager, detailView) {
-
     return {
-
       add: function() {
-
         var model = modelManager.retrieve('cloud-foundry.model.application');
         // Create a map of domain names -> domain guids
         var domains = [];
@@ -26,9 +23,7 @@
             value: domain.guid
           });
         });
-
         var spaceGuid = model.application.summary.space_guid;
-
         var data = {
           host: null,
           port: null,
@@ -44,7 +39,6 @@
             'application/summary/add-route/add-route.html'
           },
           {
-
             data: data,
             options: {
               domains: domains
@@ -67,62 +61,55 @@
    * @constructor
    * @param {Object} $stateParams - the UI router $stateParams service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {Object} $uibModalInstance
-   * @param {Object} context
+   * @param {Object} $uibModalInstance - the Angular UI Bootstrap $uibModalInstance service
+   * @param {Object} context - the uibModal context
    */
   function AddRouteController($stateParams, modelManager, $uibModalInstance, context) {
-    var vm = this;
-
-    vm.addRouteError = false;
-    vm.applicationId = $stateParams.guid;
-    vm.cnsiGuid = $stateParams.cnsiGuid;
-    vm.model = modelManager.retrieve('cloud-foundry.model.application');
-    vm.routeModel = modelManager.retrieve('cloud-foundry.model.route');
-    vm.uibModelInstance = $uibModalInstance;
-
-    vm.context = context;
+    var that = this;
+    that.addRouteError = false;
+    that.applicationId = $stateParams.guid;
+    that.cnsiGuid = $stateParams.cnsiGuid;
+    that.model = modelManager.retrieve('cloud-foundry.model.application');
+    that.routeModel = modelManager.retrieve('cloud-foundry.model.route');
+    that.uibModelInstance = $uibModalInstance;
+    that.context = context;
   }
-
 
   angular.extend(AddRouteController.prototype, {
 
     addRoute: function() {
-      var vm = this;
-
+      var that = this;
       var data = {
-        space_guid: vm.context.data.space_guid,
-        domain_guid: vm.context.data.domain_guid,
-        host: vm.context.data.host
+        space_guid: that.context.data.space_guid,
+        domain_guid: that.context.data.domain_guid,
+        host: that.context.data.host
       };
 
-      function isUndefinedOrNull(val) {
-        return angular.isUndefined(val) || val === null;
-      }
-
-      // Deal with optional fields
-      if (!isUndefinedOrNull(vm.context.data.port)) {
-        data.port = vm.context.data.port;
-      }
-      if (!isUndefinedOrNull(vm.context.data.path)) {
-        data.path = vm.context.data.path;
-      }
-      vm.routeModel.createRoute(vm.cnsiGuid, data)
-        .then(function(response) {
-
+      this.routeModel.createRoute(that.cnsiGuid, data)
+        .then(function (response) {
           if (!(response.metadata && response.metadata.guid)) {
-            throw 'Invalid response: ' + JSON.stringify(response);
+            /* eslint-disable no-throw-literal */
+            throw 'Invalid response: ' + angular.toJson(response);
+            /* eslint-enable no-throw-literal */
           }
           var routeId = response.metadata.guid;
-          return vm.routeModel.associateAppWithRoute(vm.cnsiGuid, routeId, vm.applicationId);
-        }).then(function() {
-        // Update application summary model
-        return vm.model.getAppSummary(vm.cnsiGuid, vm.applicationId);
-      }).then(function() {
-        vm.uibModelInstance.close();
-      }).catch(function() {
-        vm.onAddRouteError();
-      });
+          return that.routeModel.associateAppWithRoute(that.cnsiGuid, routeId, that.applicationId);
+        })
+
+        .then(function () {
+          // Update application summary model
+          return that.model.getAppSummary(that.cnsiGuid, that.applicationId);
+        })
+
+        .then(function () {
+          that.uibModelInstance.close();
+        })
+
+        .catch(function () {
+          that.onAddRouteError();
+        });
     },
+
     /**
      * @function cancel
      * @description Cancel adding a route. Clear the form and dismiss this form.
@@ -131,7 +118,6 @@
       this.uibModelInstance.dismiss();
     },
 
-
     /**
      * @function onAddRouteError
      * @description Display error when adding a route
@@ -139,7 +125,6 @@
     onAddRouteError: function() {
       this.addRouteError = true;
     }
-
   });
 
 })();

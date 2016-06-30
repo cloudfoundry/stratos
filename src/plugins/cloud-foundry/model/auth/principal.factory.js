@@ -16,15 +16,13 @@
   ];
 
   function register(modelManager) {
-
     modelManager.register('cloud-foundry.model.auth.principalFactory',
       PrincipalFactory(modelManager));
   }
 
-
   /**
-   * @name: PrincipalFactory
-   * @description: Function to return a Principal instance
+   * @name PrincipalFactory
+   * @description Function to return a Principal instance
    * @param {app.api.modelManager}  modelManager - the Model management service
    * @returns {Principal}
    */

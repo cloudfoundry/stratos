@@ -45,7 +45,7 @@
       that.model.all().finally(function() {
         // Check the data we have and determine if we have any applications
         that.hasApps = false;
-        if(that.model.data && that.model.data.applications) {
+        if (that.model.data && that.model.data.applications) {
           var appCount = _.reduce(that.model.data.applications, function (sum, app) {
             if (!app.error && app.resources) {
               return sum + app.resources.length;
@@ -53,11 +53,11 @@
               return sum;
             }
           }, 0);
-          that.hasApps = (appCount > 0);
+          that.hasApps = appCount > 0;
         }
         that.ready = true;
       });
-    })
+    });
   }
 
   angular.extend(ApplicationsListController.prototype, {

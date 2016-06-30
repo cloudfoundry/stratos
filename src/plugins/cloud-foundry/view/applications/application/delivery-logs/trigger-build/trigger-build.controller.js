@@ -86,6 +86,5 @@
           that.githubAuthFailed = true;
         });
     }
-
   });
 })();

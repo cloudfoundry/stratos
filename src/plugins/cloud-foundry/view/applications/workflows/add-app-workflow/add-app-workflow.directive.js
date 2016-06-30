@@ -73,6 +73,7 @@
     });
 
     this.userInput = {};
+    this.options = {};
 
     $scope.$watch(function () {
       return that.userInput.serviceInstance;
@@ -98,6 +99,14 @@
     }, function (space) {
       if (space) {
         that.getAppsForSpace(space.metadata.guid);
+      }
+    });
+
+    $scope.$watch(function () {
+      return that.options.subflow;
+    }, function (subflow) {
+      if (subflow) {
+        that.appendSubflow(that.data.subflows[subflow]);
       }
     });
   }
@@ -158,22 +167,24 @@
           },
           {
             title: gettext('Services'),
+            formName: 'application-services-form',
             templateUrl: path + 'services.html',
             nextBtnText: gettext('Next'),
             onNext: function () {
               that.userInput.services = that.appModel.application.summary.services;
+              that.options.subflow = that.options.subflow || 'pipeline';
             }
           },
           {
             title: gettext('Delivery'),
+            formName: 'application-delivery-form',
             templateUrl: path + 'delivery.html',
-            nextBtnText: gettext('Next'),
-            onNext: function () {
-              that.appendSubflow(that.data.subflows[that.options.subflow]);
-            }
+            nextBtnText: gettext('Next')
           }
         ]
       };
+
+      this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
 
       this.data.subflows = {
         pipeline: [
@@ -185,7 +196,9 @@
             nextBtnText: gettext('Next'),
             onNext: function () {
               try {
+                /* eslint-disable */
                 // TODO (kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
+                /* eslint-enable */
                 that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
                   .then(angular.noop, function (response) {
                     if (response.status === 404) {
@@ -200,7 +213,8 @@
               if (that.userInput.source === 'github') {
                 oauth = that.githubOauthService.start();
               } else {
-                oauth = $q.defer().resolve();
+                oauth = that.$q.defer();
+                oauth.resolve();
                 oauth = oauth.promise;
               }
 
@@ -237,9 +251,8 @@
                       var branches = _.map(that.githubModel.data.branches,
                                           function (o) {
                                             return {
-                                              label: o.name,
-                                              value: o.name,
-                                              disabled: _.indexOf(usedBranches, o.name) >= 0
+                                              label: o.name + (_.indexOf(usedBranches, o.name) >= 0 ? gettext(' (used by other project)') : ''),
+                                              value: o.name
                                             };
                                           });
                       [].push.apply(that.options.branches, branches);
@@ -306,7 +319,7 @@
         workflow: that.data.workflow,
         userInput: this.userInput,
         errors: this.errors,
-        subflow: 'pipeline',
+        subflow: null,
         serviceInstances: [],
         services: [],
         organizations: [],
@@ -380,9 +393,7 @@
         that.routeModel.checkRouteExists(
           that.userInput.serviceInstance.guid,
           that.userInput.domain.metadata.guid,
-          that.userInput.host,
-          that.userInput.path,
-          that.userInput.port
+          that.userInput.host
         )
         .then(function (data) {
           if (data && data.code === 10000) {
@@ -511,6 +522,7 @@
      */
     redefineWorkflowWithoutHce: function () {
       this.options.subflow = 'cli';
+      this.data.countMainWorkflowSteps -= 1;
       this.data.workflow.steps.pop();
       [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
     },
@@ -555,6 +567,7 @@
      * @param {object} subflow - the sub workflow to append
      */
     appendSubflow: function (subflow) {
+      this.data.workflow.steps.length = this.data.countMainWorkflowSteps;
       [].push.apply(this.data.workflow.steps, subflow);
     },
 
@@ -582,14 +595,6 @@
             domain_guid: that.userInput.domain.metadata.guid,
             space_guid: that.userInput.space.metadata.guid
           };
-
-          // Set optional fields for creating route
-          if (that.userInput.port) {
-            routeSpec.port = Number(that.userInput.port);
-          }
-          if (that.userInput.path) {
-            routeSpec.path = that.userInput.path;
-          }
 
           var routePromise = that.routeModel.createRoute(cnsiGuid, routeSpec)
             .then(function (route) {
