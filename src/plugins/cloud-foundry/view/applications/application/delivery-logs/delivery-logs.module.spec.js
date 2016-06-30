@@ -38,16 +38,16 @@
     }
 
     beforeEach(inject(function (_$stateParams_, _$q_, _$log_, _moment_, $injector, _$state_, _$rootScope_,
-                                _viewEventFactory_, _viewExecutionFactory_, _triggerBuildFactory_) {
+                                _viewEventDetailView_, _viewExecutionDetailView_, _triggerBuildDetailView_) {
       // Create the parameters required by the ctor
       $stateParams = _$stateParams_;
       $q = _$q_;
       $log = _$log_;
       moment = _moment_;
       modelManager = $injector.get('app.model.modelManager');
-      viewEvent = _viewEventFactory_;
-      viewExecution = _viewExecutionFactory_;
-      triggerBuild = _triggerBuildFactory_;
+      viewEvent = _viewEventDetailView_;
+      viewExecution = _viewExecutionDetailView_;
+      triggerBuild = _triggerBuildDetailView_;
 
       // Some generic vars needed in tests
       $state = _$state_;
@@ -255,82 +255,6 @@
         expect(viewExecution.open.calls.argsFor(0)[1]).toEqual(events);
       });
 
-    });
-
-    describe('View Event', function() {
-
-      var event = {
-        event: '1',
-        name: 'name'
-      };
-      beforeEach(function() {
-        createController(true);
-        _.set(controller, 'hceCnsi.guid', cnsi.guid);
-      });
-
-      it('View event', function() {
-        spyOn(controller, 'detailView');
-
-        controller.viewEvent(event);
-        $rootScope.$apply();
-
-        expect(controller.detailView).toHaveBeenCalled();
-        expect(controller.detailView.calls.argsFor(0).length).toBe(2);
-        expect(controller.detailView.calls.argsFor(0)[0].title).toEqual(event.name);
-        expect(controller.detailView.calls.argsFor(0)[1]).toEqual({
-          guid: cnsi.guid,
-          event: event
-        });
-      });
-    });
-
-    describe('View Event for execution', function() {
-      var execution = {
-        id: 'two'
-      };
-
-      beforeEach(function() {
-        createController(true);
-        _.set(controller, 'hceCnsi.guid', cnsi.guid);
-      });
-
-      it('Without events', function() {
-        _.set(controller, 'eventsPerExecution', {});
-
-        spyOn(controller, 'viewEvent');
-
-        controller.viewEventForExecution(execution);
-        $rootScope.$apply();
-
-        expect(controller.viewEvent).not.toHaveBeenCalled();
-      });
-
-      it('With events', function() {
-        var event = {
-          event: '1',
-          name: 'name'
-        };
-        var events = [ event ];
-        _.set(controller, 'eventsPerExecution', {
-          one: [
-            {
-              event: '1'
-            },
-            {
-              event: '2'
-            }
-          ],
-          two: events
-        });
-
-        spyOn(controller, 'viewEvent');
-
-        controller.viewEventForExecution(execution);
-        $rootScope.$apply();
-
-        expect(controller.viewEvent).toHaveBeenCalled();
-        expect(controller.viewEvent.calls.argsFor(0)[0]).toEqual(event);
-      });
     });
 
     describe('Fetching events', function() {
@@ -574,7 +498,6 @@
         expect(execution.result).toBeDefined();
         expect(execution.result.state).toBeDefined();
         expect(execution.result.label).toEqual(event.name);
-        expect(execution.result.hasLog).toBeTruthy();
       });
     });
 
@@ -626,31 +549,31 @@
         expect(res.label).toEqual(event.name);
         expect(res.state).toEqual(controller.eventStates.RUNNING);
       });
-    });
 
-    describe('determine execution state', function() {
-      beforeEach(function() {
-        createController(true);
-      });
-
-      it('determine state from event type', function() {
+      it('results for all states', function() {
         var types = _.values(controller.eventTypes);
         _.forEach(types, function(type) {
           var origState = 'orig';
           var event = {
             type: type,
-            state: origState
+            state: origState,
+            name: 'Name'
           };
-          var state = controller.determineExecutionState(event);
+          var state = controller.determineExecutionResult(event);
           switch (type) {
             case controller.eventTypes.BUILDING:
             case controller.eventTypes.TESTING:
             case controller.eventTypes.DEPLOYING:
-              expect(state).toEqual(controller.eventStates.RUNNING);
+              expect(state.label).toEqual(event.name);
+              expect(state.state).toEqual(controller.eventStates.RUNNING);
               break;
             case controller.eventTypes.PIPELINE_COMPLETED:
+              expect(state.state).toEqual(origState);
+              expect(state.label).toEqual('Failed');
+              break;
             case controller.eventTypes.WATCHDOG_TERMINATED:
-              expect(state).toEqual(origState);
+              expect(state.state).toEqual(origState);
+              expect(state.label).toEqual(event.name);
               break;
             default:
               fail('Unknown event type: ' + type);
@@ -659,19 +582,6 @@
         });
       });
 
-      it('determine state from event \'failed\' state', function() {
-        var state = controller.determineExecutionState({
-          state: controller.eventStates.FAILED
-        });
-        expect(state).toEqual(controller.eventStates.FAILED);
-      });
-
-      it('determine state from event state', function() {
-        var state = controller.determineExecutionState({
-          state: controller.eventStates.SUCCEEDED
-        });
-        expect(state).toEqual(controller.eventStates.RUNNING);
-      });
     });
 
     describe('dynamic loading of events when execution visible - updateVisibleExecutions', function() {

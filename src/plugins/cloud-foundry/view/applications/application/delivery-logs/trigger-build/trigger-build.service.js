@@ -2,18 +2,18 @@
   'use strict';
 
   /**
-   * @name cloud-foundry.view.applications.application.delivery-logs.triggerBuildFactory
+   * @name cloud-foundry.view.applications.application.delivery-logs.triggerBuildDetailView
    * @description Service to trigger a build from a selection of recent commits
    **/
   angular
     .module('cloud-foundry.view.applications.application.delivery-logs')
-    .factory('triggerBuildFactory', triggerBuildFactory);
+    .factory('triggerBuildDetailView', triggerBuildDetailView);
 
-  triggerBuildFactory.$inject = [
+  triggerBuildDetailView.$inject = [
     'helion.framework.widgets.detailView'
   ];
 
-  function triggerBuildFactory(detailView) {
+  function triggerBuildDetailView(detailView) {
     return {
       /**
        * @function open

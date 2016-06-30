@@ -31,7 +31,7 @@
       moment = $injector.get('moment');
       modelManager = $injector.get('app.model.modelManager');
 
-      var viewEvent = $injector.get('viewEventFactory');
+      var viewEvent = $injector.get('viewEventDetailView');
       promise = viewEvent.open(event, guid);
       expect(promise).not.toBe(null);
     }));
@@ -45,7 +45,9 @@
 
       describe("open", function() {
         it("Plumbing", function() {
+          /* eslint-disable */
           new $controller($timeout, $log, dialogContext, undefined, moment, modelManager);
+          /* eslint-enable */
           expect(dialogContext.guid).toEqual(guid);
           expect(dialogContext.event).toEqual(event);
         });

@@ -2,19 +2,19 @@
   'use strict';
 
   /**
-   * @name cloud-foundry.view.applications.application.delivery-logs.viewExecutionFactory
+   * @name cloud-foundry.view.applications.application.delivery-logs.viewExecutionDetailView
    * @description Service for viewing an execution, specifically the list of events
    **/
   angular
     .module('cloud-foundry.view.applications.application.delivery-logs')
-    .factory('viewExecutionFactory', viewExecutionFactory);
+    .factory('viewExecutionDetailView', viewExecutionDetailView);
 
-  viewExecutionFactory.$inject = [
+  viewExecutionDetailView.$inject = [
     'helion.framework.widgets.detailView',
-    'viewEventFactory'
+    'viewEventDetailView'
   ];
 
-  function viewExecutionFactory(detailView, viewEventFactory) {
+  function viewExecutionDetailView(detailView, viewEventDetailView) {
     return {
       /**
        * @function open
@@ -33,7 +33,7 @@
           guid: cnsiGuid,
           execution: execution,
           events: events,
-          viewEvent: viewEventFactory.open
+          viewEvent: viewEventDetailView.open
         }).result;
       }
     };

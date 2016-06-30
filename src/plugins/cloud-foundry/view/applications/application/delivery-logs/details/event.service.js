@@ -2,18 +2,18 @@
   'use strict';
 
   /**
-   * @name cloud-foundry.view.applications.application.delivery-logs.viewEventFactory
+   * @name cloud-foundry.view.applications.application.delivery-logs.viewEventDetailView
    * @description Service for viewing an execution's event, specifically the log
    **/
   angular
     .module('cloud-foundry.view.applications.application.delivery-logs')
-    .factory('viewEventFactory', viewEventFactory);
+    .factory('viewEventDetailView', viewEventDetailView);
 
-  viewEventFactory.$inject = [
+  viewEventDetailView.$inject = [
     'helion.framework.widgets.detailView'
   ];
 
-  function viewEventFactory(detailView) {
+  function viewEventDetailView(detailView) {
     return {
       /**
        * @function open

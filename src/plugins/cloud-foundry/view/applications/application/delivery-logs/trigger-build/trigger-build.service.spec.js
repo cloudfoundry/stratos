@@ -53,7 +53,7 @@
       githubModel = modelManager.retrieve('cloud-foundry.model.github');
       githubOauthService = $injector.get('github.view.githubOauthService');
 
-      var triggerBuild = $injector.get('triggerBuildFactory');
+      var triggerBuild = $injector.get('triggerBuildDetailView');
       promise = triggerBuild.open(project, cnsi);
       expect(promise).not.toBe(null);
     }));
@@ -67,9 +67,10 @@
 
       describe("open", function() {
         it("Plumbing / Initial state", function() {
+          /* eslint-disable */
           new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
             githubOauthService);
-
+          /* eslint-enable */
           expect(dialogContext.project).toEqual(project);
           expect(dialogContext.guid).toEqual(cnsi);
         });

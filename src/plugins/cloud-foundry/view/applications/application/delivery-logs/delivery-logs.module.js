@@ -25,9 +25,9 @@
     '$log',
     'moment',
     'app.model.modelManager',
-    'viewEventFactory',
-    'viewExecutionFactory',
-    'triggerBuildFactory'
+    'viewEventDetailView',
+    'viewExecutionDetailView',
+    'triggerBuildDetailView'
   ];
 
   /**
@@ -39,9 +39,9 @@
    * @param {object} $log - the angular $log service
    * @param {object} moment - the moment timezone component
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {viewEventFactory} viewEvent - factory to show event details slide out
-   * @param {viewExecutionFactory} viewExecution - factory to show execution details slide out
-   * @param {triggerBuildFactory} viewTriggerBuild - factory to show trigger builds slide out
+   * @param {viewEventDetailView} viewEvent - show event details slide out
+   * @param {viewExecutionDetailView} viewExecution - show execution details slide out
+   * @param {triggerBuildDetailView} viewTriggerBuild - show trigger builds slide out
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} hceModel - the Code Engine Applications Model
    * @property {object} hasProject - true if a HCE project exists for this application, null if still determining
@@ -68,6 +68,7 @@
     this.$log = $log;
     this.$scope = $scope;
 
+    console.log('this.model.application.summary ', this.model.application.summary);
     var that = this;
     var promise;
 
@@ -88,7 +89,7 @@
           var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
           if (hceCnsis.length > 0) {
             that.hceCnsi = hceCnsis[0];
-            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
+            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '132456')
               .then(function() {
                 return that.hceModel.getProjects(that.hceCnsi.guid)
                   .then(function() {
