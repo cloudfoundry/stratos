@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS tokens (
   user_guid     VARCHAR(36) NOT NULL,
   cnsi_guid     VARCHAR(36),
   token_type    VARCHAR(4)  NOT NULL,
-  auth_token    TEXT        NOT NULL,
-  refresh_token TEXT        NOT NULL,
+  auth_token    BYTEA       NOT NULL,
+  refresh_token BYTEA       NOT NULL,
   token_expiry  BIGINT      NOT NULL,
   last_updated  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
 )

@@ -2,7 +2,6 @@ package tokens
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"fmt"
 	"log"
 )
@@ -25,11 +24,11 @@ const (
 
 	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
                    FROM tokens
-                   WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
+                   WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	countCNSITokens = `SELECT COUNT(*)
-                   FROM tokens
-                   WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
+                     FROM tokens
+                     WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
 	                   VALUES ($1, $2, $3, $4, $5, $6)`
@@ -87,23 +86,35 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 		log.Println("Existing UAA token not found - attempting insert.")
 
 		log.Println("Encrypting Auth Token before INSERT.")
-		ciphertextAuthToken, encryptErr := encryptToken(encryptionKey, tr.AuthToken)
-		if encryptErr != nil {
-			return encryptErr
+		ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
+		if err != nil {
+			return err
 		}
+		log.Println("ciphertext Auth Token:")
+		log.Println(ciphertextAuthToken)
 
 		log.Println("Encrypting Refresh Token before INSERT.")
-		ciphertextRefreshToken, encryptErr := encryptToken(encryptionKey, tr.RefreshToken)
-		if encryptErr != nil {
-			return encryptErr
+		ciphertextRefreshToken, err := encryptToken(encryptionKey, tr.RefreshToken)
+		if err != nil {
+			return err
 		}
+		log.Println("ciphertext Refresh Token:")
+		log.Println(ciphertextRefreshToken)
 
-		if _, insertErr := p.db.Exec(insertUAAToken, userGUID, "uaa",
+		log.Println("JUST BEFORE INSERT:")
+		log.Println(insertUAAToken)
+		log.Println(userGUID)
+		log.Println("uaa")
+		log.Println(ciphertextAuthToken)
+		log.Println(ciphertextRefreshToken)
+		log.Println(tr.TokenExpiry)
+
+		if _, err := p.db.Exec(insertUAAToken, userGUID, "uaa",
 			ciphertextAuthToken, ciphertextRefreshToken,
-			tr.TokenExpiry); insertErr != nil {
+			tr.TokenExpiry); err != nil {
 			msg := "Unable to INSERT UAA token: %v"
-			log.Printf(msg, insertErr)
-			return fmt.Errorf(msg, insertErr)
+			log.Printf(msg, err)
+			return fmt.Errorf(msg, err)
 		}
 
 		log.Println("UAA token INSERT complete.")
@@ -149,8 +160,8 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 
 	// temp vars to retrieve db data
 	var (
-		ciphertextAuthToken    string
-		ciphertextRefreshToken string
+		ciphertextAuthToken    []byte
+		ciphertextRefreshToken []byte
 		tokenExpiry            int64
 	)
 
@@ -286,8 +297,8 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 
 	// temp vars to retrieve db data
 	var (
-		ciphertextAuthToken    string
-		ciphertextRefreshToken string
+		ciphertextAuthToken    []byte
+		ciphertextRefreshToken []byte
 		tokenExpiry            int64
 	)
 
@@ -344,72 +355,59 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 	return nil
 }
 
+// Note:
+// When it's time to store the encrypted token in PostgreSQL, it's gets a bit
+// hairy. The encrypted token is binary data, not really text data, which
+// typically has a character set, unlike binary data. Generally speaking, it
+// comes down to one of two choices: store it in a bytea column, and deal with
+// some funkiness; or store it in a text column and make sure to base64 encode
+// it going in and decode it coming out.
+// https://wiki.postgresql.org/wiki/BinaryFilesInDB
+// http://engineering.pivotal.io/post/ByteA_versus_TEXT_in_PostgreSQL/
+// I chose option 1.
+
 // encryptToken - TBD
-func encryptToken(key []byte, t string) (string, error) {
+func encryptToken(key []byte, t string) ([]byte, error) {
 	log.Println("===== encryptToken =")
 	log.Println("Token about to be encrypted.")
 	log.Println(t)
 
 	var plaintextToken = []byte(t)
-	ciphertextToken, encryptErr := encrypt(key, plaintextToken)
-	if encryptErr != nil {
+	ciphertextToken, err := encrypt(key, plaintextToken)
+	if err != nil {
 		msg := "Unable to encrypt token: %v"
-		log.Printf(msg, encryptErr)
-		return "", fmt.Errorf(msg, encryptErr)
+		log.Printf(msg, err)
+		return nil, fmt.Errorf(msg, err)
 	}
 
 	log.Println("Token encrypted:")
 	log.Println(ciphertextToken)
 
-	// Note:
-	// When it's time to store the encrypted token in PostgreSQL, it's gets a bit
-	// hairy. The encrypted token is binary data, not really text data, which
-	// typically has a character set, unlike binary data. Generally speaking, it
-	// comes down to one of two choices: store it in a bytea column, and deal with
-	// some funkiness; or store it in a text column and make sure to base64 encode
-	// it going in and decode it coming out.
-	// https://wiki.postgresql.org/wiki/BinaryFilesInDB
-	// http://engineering.pivotal.io/post/ByteA_versus_TEXT_in_PostgreSQL/
-	// I chose option 2.
-
-	token := base64.StdEncoding.EncodeToString(ciphertextToken)
-	log.Println("Token base64 encoded")
-	log.Println(token)
-	return token, nil
+	return ciphertextToken, nil
 }
 
+// Note:
+// When it's time to store the encrypted token in PostgreSQL, it's gets a bit
+// hairy. The encrypted token is binary data, not really text data, which
+// typically has a character set, unlike binary data. Generally speaking, it
+// comes down to one of two choices: store it in a bytea column, and deal with
+// some funkiness; or store it in a text column and make sure to base64 encode
+// it going in and decode it coming out.
+// https://wiki.postgresql.org/wiki/BinaryFilesInDB
+// http://engineering.pivotal.io/post/ByteA_versus_TEXT_in_PostgreSQL/
+// I chose option 1.
+
 // decryptToken - TBD
-func decryptToken(key []byte, t string) (string, error) {
+func decryptToken(key, t []byte) (string, error) {
 	log.Println("===== decryptToken =")
 	log.Println("Attempting decrypt of token:")
 	log.Println(t)
 
-	// Note:
-	// When it's time to store the encrypted token in PostgreSQL, it's gets a bit
-	// hairy. The encrypted token is binary data, not really text data, which
-	// typically has a character set, unlike binary data. Generally speaking, it
-	// comes down to one of two choices: store it in a bytea column, and deal with
-	// some funkiness; or store it in a text column and make sure to base64 encode
-	// it going in and decode it coming out.
-	// https://wiki.postgresql.org/wiki/BinaryFilesInDB
-	// http://engineering.pivotal.io/post/ByteA_versus_TEXT_in_PostgreSQL/
-	// I chose option 2.
-
-	strCipherTextToken, err := base64.StdEncoding.DecodeString(t)
+	plaintextToken, err := decrypt(key, t)
 	if err != nil {
-		msg := "Unable to decode token: %v"
+		msg := "Unable to decrypt token: %v"
 		log.Printf(msg, err)
 		return "", fmt.Errorf(msg, err)
-	}
-	log.Println("Token base64 decoded.")
-	log.Println(strCipherTextToken)
-
-	var ciphertextToken = []byte(strCipherTextToken)
-	plaintextToken, decryptErr := decrypt(key, ciphertextToken)
-	if decryptErr != nil {
-		msg := "Unable to decrypt token: %v"
-		log.Printf(msg, decryptErr)
-		return "", fmt.Errorf(msg, decryptErr)
 	}
 	log.Println("Token decrypted.")
 	log.Println(string(plaintextToken))
