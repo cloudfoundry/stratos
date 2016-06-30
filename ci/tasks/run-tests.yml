@@ -1,0 +1,28 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: node
+    tag: 4.4.4-slim
+inputs:
+- name: stratos-ui-pr
+- name: helion-ui-theme
+- name: helion-ui-framework
+outputs:
+- name: console-ui-tests-output
+run:
+  path: sh
+  args:
+  - -c
+  - |
+      set -e -x
+      apt-get update
+      apt-get install -y bzip2
+      apt-get install -y libfreetype6
+      apt-get install -y libfontconfig
+      apt-get install -y git
+      cd stratos-ui-pr/tools
+      npm install
+      ./node_modules/.bin/bower install --allow-root --force
+      npm run gate-check
