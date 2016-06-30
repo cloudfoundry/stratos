@@ -68,7 +68,6 @@
     this.$log = $log;
     this.$scope = $scope;
 
-    console.log('this.model.application.summary ', this.model.application.summary);
     var that = this;
     var promise;
 
