@@ -9,7 +9,7 @@ resources:
   type: git
   source:
     uri: git@github.com:hpcloud/stratos-deploy.git
-    branch: 523-stratos-ui-tests
+    branch: master
     private_key: {{github-private-key}}
 - name: stratos-ui-pr
   type: pull-request
