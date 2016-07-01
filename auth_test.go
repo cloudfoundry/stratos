@@ -54,7 +54,6 @@ func TestLoginToUAA(t *testing.T) {
 		WithArgs(mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
-	// --- set up the database expectation for pp.saveUAAToken
 	sql = `INSERT INTO tokens`
 	var newExpiry = 1234567
 	mock.ExpectExec(sql).
@@ -566,7 +565,8 @@ func TestVerifySession(t *testing.T) {
 		t.Errorf("Expected content type 'application/json', got: %s", contentType)
 	}
 
-	var expectedBody = "{\"account\":\"admin\",\"scope\":\"cloud_controller.admin\"}"
+	// var expectedBody = "{\"account\":\"admin\",\"scope\":\"cloud_controller.admin\"}"
+	var expectedBody = "{\"account\":\"admin\",\"scope\":\"openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write\"}"
 	if res == nil || strings.TrimSpace(res.Body.String()) != expectedBody {
 		t.Errorf("Response Body incorrect.  Expected %s  Received %s", expectedBody, res.Body)
 	}

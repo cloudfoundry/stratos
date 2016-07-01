@@ -84,12 +84,12 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 	pp := setupPortalProxy()
 	pp.DatabaseConnectionPool = db
 
+	// set up the database expectation for pp.setCNSITokenRecord
 	sql := `SELECT (.+) FROM tokens WHERE (.+)`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID, mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
-	// set up the database expectation for pp.setCNSITokenRecord
 	sql = `INSERT INTO tokens`
 	mock.ExpectExec(sql).
 		WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, mockTokenRecord.TokenExpiry).
@@ -213,12 +213,12 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 	pp := setupPortalProxy()
 	pp.DatabaseConnectionPool = db
 
+	// 1) Set up the database expectation for pp.setCNSITokenRecord
 	sql := `SELECT (.+) FROM tokens WHERE (.+)`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID, mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
-	// 1) Set up the database expectation for pp.setCNSITokenRecord
 	sql = `INSERT INTO tokens`
 	mock.ExpectExec(sql).
 		WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, mockTokenRecord.TokenExpiry).
@@ -267,6 +267,14 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 	// p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	//   p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
 	//     tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t)
+
+	// Set up the COUNT check to determine if a token record already exists
+	sql = `SELECT (.+) FROM tokens WHERE (.+)`
+	mock.ExpectQuery(sql).
+		WithArgs(mockCNSIGUID, mockUserGUID).
+		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+
+	// Expect the INSERT
 	sql = `INSERT INTO tokens`
 	var newExpiry = 1234567
 	mock.ExpectExec(sql).

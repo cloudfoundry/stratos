@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -61,11 +62,15 @@ func setupMockReq(method string, urlString string, formValues map[string]string)
 }
 
 func setupPortalProxy() *portalProxy {
+	key := make([]byte, 32)
+	_, _ = rand.Read(key)
+
 	pc := portalConfig{
-		ConsoleClient:       "console",
-		ConsoleClientSecret: "",
-		UAAEndpoint:         "https://login.52.38.188.107.nip.io/oauth/token",
-		CookieStoreSecret:   "hiddenraisinsohno!",
+		ConsoleClient:        "console",
+		ConsoleClientSecret:  "",
+		UAAEndpoint:          "https://login.52.38.188.107.nip.io/oauth/token",
+		CookieStoreSecret:    "hiddenraisinsohno!",
+		EncryptionKeyInBytes: key,
 	}
 
 	pp := newPortalProxy(pc, nil)
