@@ -96,7 +96,7 @@
                   });
               }, function(response) {
                 if (response.status === 404) {
-                  that.hceModel.createUser(that.hceCnsi.guid, '132456', 'login', 'token');
+                  that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
                 }
               });
           } else {
