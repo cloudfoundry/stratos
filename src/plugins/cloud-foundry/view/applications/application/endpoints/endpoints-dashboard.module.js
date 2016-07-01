@@ -109,13 +109,6 @@
 
     hideWelcomeMessage: function () {
       this.showWelcomeMessage = false;
-    },
-
-    goToEndpointsView: function (serviceType) {
-      var params = {
-        serviceType: serviceType
-      };
-      this.$state.go('cf.endpoints-view', params);
     }
 
   });

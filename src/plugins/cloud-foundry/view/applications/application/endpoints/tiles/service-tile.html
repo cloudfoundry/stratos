@@ -31,7 +31,9 @@
   </div>
   <base-tile service-instances="serviceTileCtrl.serviceInstances"
              service-type={{serviceTileCtrl.serviceType}}
-             ng-if="serviceTileCtrl.serviceInstancesCount() > 0"></base-tile>
+             ng-if="serviceTileCtrl.serviceInstancesCount() > 0"
+             ng-click="serviceTileCtrl.goToEndpointsView()">
+  </base-tile>
 </div>
 
 <flyout flyout-active="serviceTileCtrl.clusterAddFlyoutActive"

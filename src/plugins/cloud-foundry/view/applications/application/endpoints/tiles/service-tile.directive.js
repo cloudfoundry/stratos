@@ -1,11 +1,11 @@
-(function() {
+(function () {
   'use strict';
 
   angular
     .module('cloud-foundry.view.applications.application.endpoints')
     .directive('serviceTile', serviceTile);
 
-  function serviceTile() {
+  function serviceTile () {
     return {
       scope: {
         serviceType: '@'
@@ -20,8 +20,8 @@
     '$scope',
     'app.model.modelManager',
     'app.api.apiManager',
-    'helion.framework.widgets.detailView'
-
+    'helion.framework.widgets.detailView',
+    '$state'
   ];
 
   /**
@@ -33,13 +33,14 @@
    * @param detailView
    *  @constructor
    */
-  function ServiceTileController($scope, modelManager, apiManager, detailView) {
+  function ServiceTileController ($scope, modelManager, apiManager, detailView, $state) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceType = $scope.serviceType;
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.detailView = detailView;
+    this.$state = $state;
 
     this.clusterAddFlyoutActive = false;
     this.serviceInstances = {};
@@ -47,11 +48,11 @@
 
     $scope.$watchCollection(function () {
       return that.serviceInstanceModel.serviceInstances;
-    }, function(serviceInstances) {
-      var filteredInstances = _.filter(serviceInstances, function(serviceInstance) {
+    }, function (serviceInstances) {
+      var filteredInstances = _.filter(serviceInstances, function (serviceInstance) {
         return serviceInstance.cnsi_type === that.serviceType;
       });
-      _.forEach(filteredInstances, function(serviceInstance) {
+      _.forEach(filteredInstances, function (serviceInstance) {
         var guid = serviceInstance.guid;
         if (angular.isUndefined(that.serviceInstances[guid])) {
           that.serviceInstances[guid] = serviceInstance;
@@ -61,7 +62,7 @@
       });
 
       that.currentEndpoints = _.map(that.serviceInstances,
-        function(c) {
+        function (c) {
           var endpoint = c.api_endpoint;
           return endpoint.Scheme + '://' + endpoint.Host;
         });
@@ -70,12 +71,12 @@
 
   angular.extend(ServiceTileController.prototype, {
 
-    serviceInstancesCount: function() {
+    serviceInstancesCount: function () {
       return _.keys(this.serviceInstances).length;
     },
 
 
-    showClusterAddForm: function() {
+    showClusterAddForm: function () {
 
       var that = this;
       if (this.isHcf()) {
@@ -94,20 +95,27 @@
               instances: this.currentEndpoints
             }
           }
-        ).result.then(function() {
-          return that.serviceInstanceApi.createHCE(data.url, data.name).then(function() {
+        ).result.then(function () {
+          return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
             that.serviceInstanceModel.list();
           });
         });
       }
     },
 
-    hideClusterAddForm: function() {
+    hideClusterAddForm: function () {
       this.clusterAddFlyoutActive = false;
     },
 
-    isHcf: function() {
+    isHcf: function () {
       return this.serviceType === 'hcf';
+    },
+
+    goToEndpointsView: function () {
+      var params = {
+        serviceType: this.serviceType
+      };
+      this.$state.go('cf.endpoints-view', params);
     }
 
 
