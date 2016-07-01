@@ -41,6 +41,9 @@
       };
       var $controller = $injector.get('$controller');
       addRouteController = $controller('addRouteController', {
+        $scope: {
+          $watch: angular.noop
+        },
         context: context,
         content: content,
         $stateParams: $stateParams,
@@ -58,10 +61,8 @@
       expect(addRouteController).toBeDefined();
     });
 
-    it('should have `host`, `port` and `path`properties initially set to null', function() {
+    it('should have `host` property initially set to null', function() {
       expect(addRouteController.context.data.host).toBe(null);
-      expect(addRouteController.context.data.port).toBe(null);
-      expect(addRouteController.context.data.path).toBe(null);
     });
 
     it('should have `domain_guid`, `space_guid` set to appropriate values', function() {
