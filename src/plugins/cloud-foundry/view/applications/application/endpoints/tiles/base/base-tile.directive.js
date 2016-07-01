@@ -19,11 +19,16 @@
   }
 
   BaseTileController.$inject = [
-    '$scope',
     'app.model.modelManager'
   ];
 
-  function BaseTileController($scope, modelManager) {
+  /**
+   * @memberof cloud-foundry.view.applications.application.endpoints
+   * @name BaseTileController
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @constructor
+   */
+  function BaseTileController(modelManager) {
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userCnsiModel.list();
   }
@@ -31,10 +36,23 @@
   angular.extend(BaseTileController.prototype, {
 
 
+    /**
+     * @function getInstancesCount
+     * @description Get total number of services
+     * @memberOf cloud-foundry.view.applications.application.endpoints
+     * @returns {Number} count
+     */
     getInstancesCount: function() {
       return _.keys(this.serviceInstances).length;
     },
 
+    /**
+     *      * @memberOf cloud-foundry.view.applications.application.endpoints
+     getServiceInstanceCount
+     * @description Get number of services in a particular status
+     * @memberOf cloud-foundry.view.applications.application.endpoints
+     * @returns {Number} count
+     */
     getServiceInstanceCount: function(status) {
       // TODO
       // If cnsi_type is HCE, then currently.
@@ -60,6 +78,12 @@
       return count;
     },
 
+    /**
+     * @function isHcf
+     * @description Is tile an HCF instance?
+     * @memberOf cloud-foundry.view.applications.application.endpoints
+     * @returns {Boolean}
+     */
     isHcf: function() {
       return this.serviceType === 'hcf';
     }

@@ -2,9 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.endpoints', [
-      'cloud-foundry.view.applications.application.endpoints.view'
-    ])
+    .module('cloud-foundry.view.applications.application.endpoints.view', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -12,47 +10,47 @@
   ];
 
   function registerRoute ($stateProvider) {
-    $stateProvider.state('cf.endpoints-dashboard', {
-      url: '/endpoints-dashboard',
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/endpoints/endpoints-dashboard.html',
-      controller: EndpointsDashboardController,
-      controllerAs: 'endpointsDashboardCtrl'
+    $stateProvider.state('cf.endpoints-view', {
+      url: '/endpoints-view/:serviceType',
+      templateUrl: 'plugins/cloud-foundry/view/applications/application/endpoints/endpoints-view.html',
+      controller: EndpointsViewController,
+      controllerAs: 'endpointsViewCtrl'
     });
   }
 
-  EndpointsDashboardController.$inject = [
+  EndpointsViewController.$inject = [
     'app.model.modelManager',
     'app.api.apiManager',
+    '$stateParams',
     'helion.framework.widgets.detailView',
-    '$scope',
-    '$state'
+    '$scope'
   ];
 
-  function EndpointsDashboardController (modelManager, apiManager, detailView, $scope, $state) {
+  function EndpointsViewController (modelManager, apiManager, $stateParams, detailView, $scope) {
+
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
     this.detailView = detailView;
-    this.$state = $state;
-
+    this.serviceType = $stateParams.serviceType;
     this.currentEndpoints = [];
     this.serviceInstances = {};
+    this.clusterAddFlyoutActive = true;
 
-    // Show welcome message only if no endpoints are registered
-    this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length !== 0;
     var that = this;
     this.serviceInstanceModel.list();
-    this.clusterAddFlyoutActive = false;
 
+    // FIXME there is got to be a better way than this?
+    this.showDropdown = {};
     $scope.$watchCollection(function () {
       return that.serviceInstanceModel.serviceInstances;
     }, function (serviceInstances) {
 
-      if (that.showWelcomeMessage && serviceInstances.length > 0) {
-        that.showWelcomeMessage = false;
-      }
-      _.forEach(serviceInstances, function (serviceInstance) {
+      var filteredInstances = _.filter(serviceInstances, function(serviceInstance) {
+        return serviceInstance.cnsi_type === that.serviceType;
+      });
+      _.forEach(filteredInstances, function (serviceInstance) {
         var guid = serviceInstance.guid;
         if (angular.isUndefined(that.serviceInstances[guid])) {
           that.serviceInstances[guid] = serviceInstance;
@@ -64,13 +62,29 @@
       that.currentEndpoints = _.map(that.serviceInstances,
         function (c) {
           var endpoint = c.api_endpoint;
-          return endpoint.Scheme + '://' + endpoint.Host;
+
+          return {
+            name: c.name,
+            url: endpoint.Scheme + '://' + endpoint.Host,
+            connected: true
+          };
         });
     });
-
   }
 
-  angular.extend(EndpointsDashboardController.prototype, {
+  angular.extend(EndpointsViewController.prototype, {
+
+    connect: function (serviceInstance) {
+      // TODO implement HCE authentication
+    },
+
+    disconnect: function (serviceInstance) {
+      // TODO implement HCE authentication
+    },
+
+    unregister: function (serviceInstance) {
+      // TODO remove...
+    },
 
     showClusterAddForm: function () {
 
@@ -98,26 +112,29 @@
         });
       }
     },
+    isDisconnected: function () {
+      // TODO implement HCE authentication
+    },
+    isConnected: function () {
+      // TODO implement HCE authentication
+      return true;
+    },
 
-    hideClusterAddForm: function () {
-      this.clusterAddFlyoutActive = false;
+    setShowDropdown: function (index) {
+      var that = this;
+      if (this.showDropdown[index]) {
+        this.showDropdown[index] = false;
+        return;
+      } else {
+        _.each(_.keys(this.showDropdown), function (rowIndex) {
+          that.showDropdown[rowIndex] = false;
+        });
+        this.showDropdown[index] = true;
+      }
     },
 
     isHcf: function () {
       return this.serviceType === 'hcf';
-    },
-
-    hideWelcomeMessage: function () {
-      this.showWelcomeMessage = false;
-    },
-
-    goToEndpointsView: function (serviceType) {
-      var params = {
-        serviceType: serviceType
-      };
-      this.$state.go('cf.endpoints-view', params);
     }
-
   });
-
 })();

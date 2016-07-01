@@ -24,20 +24,28 @@
 
   ];
 
+  /**
+   *
+   * @memberOf cloud-foundry.view.applications.application.endpoints
+   * @param $scope
+   * @param modelManager
+   * @param apiManager
+   * @param detailView
+   *  @constructor
+   */
   function ServiceTileController($scope, modelManager, apiManager, detailView) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceType = $scope.serviceType;
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
+    this.detailView = detailView;
 
-    console.log('My Service type is: ' + this.serviceType);
     this.clusterAddFlyoutActive = false;
     this.serviceInstances = {};
-    this.detailView = detailView;
     var that = this;
 
-    $scope.$watchCollection(function() {
+    $scope.$watchCollection(function () {
       return that.serviceInstanceModel.serviceInstances;
     }, function(serviceInstances) {
       var filteredInstances = _.filter(serviceInstances, function(serviceInstance) {

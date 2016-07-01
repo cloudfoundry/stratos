@@ -1,0 +1,51 @@
+<div class="endpoints-view">
+  <div class="header">
+    <div class="applications-header font-semi-bold pull-left" translate>Code Engine Endpoints</div>
+    <button class="btn btn-primary" ng-click="endpointsViewCtrl.showClusterAddForm()">Register Endpoint</button>
+
+  </div>
+
+  <div id="welcome-message" class="welcome-message">
+    <div class="panel panel-default">
+      <div class="action-header">
+        <span class="helion-icon helion-icon-Information"></span>
+        <span>In order to set up a delivery pipeline, you must connect to an endpoint.</span>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-actionable">
+    <thead>
+    <tr>
+      <th translate=""><span>Name</span></th>
+      <th translate=""><span>Endpoint url</span></th>
+      <th translate=""><span>Connection</span></th>
+      <th translate=""><span></span></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="endpoint in endpointsViewCtrl.currentEndpoints">
+      <td>{{endpoint.name}}</td>
+      <td>{{endpoint.url}}</td>
+      <td>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
+      <td>
+        <div class="actions-menu dropdown" ng-class="{'open': endpointsViewCtrl.showDropdown[$index]}"
+             ng-click="endpointsViewCtrl.setShowDropdown($index)" tabindex="1">
+          <i class="actions-menu-icon dropdown-toggle helion-icon helion-icon-lg helion-icon-More"
+             style="cursor: pointer;"></i>
+          <ul class="actions-menu-list dropdown-menu">
+            <li class="actions-menu-item" ng-if="endpointsViewCtrl.isDisconnected(endpoint)"
+                ng-click="endpointsViewCtrl.connect(endpoint)">Connect
+            </li>
+            <li class="actions-menu-item" ng-if="endpointsViewCtrl.isConnected(endpoint)"
+                ng-click="endpointsViewCtrl.disconnect(endpoint)">Disconnect
+            </li>
+            <li class="actions-menu-item" ng-click="endpointsViewCtrl.unregister(endpoint)">Unregister</li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+</div>

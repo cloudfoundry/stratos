@@ -57,7 +57,7 @@
       var account = this.modelManager.retrieve('app.model.account');
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', gettext('Applications'));
-      menu.addMenuItem('cf.endpoints', 'cf.applications.endpoints-dashboard', gettext('Endpoints'));
+      menu.addMenuItem('cf.endpoints', 'cf.endpoints-dashboard', gettext('Endpoints'));
     }
   });
 
