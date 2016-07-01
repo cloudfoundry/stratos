@@ -1,1 +1,15 @@
-<h3 translate>Log Stream</h3>
+<div class="panel panel-default summary">
+  <div class="panel-heading action-header">
+    <span translate>Log Stream</span>
+    <a class="btn btn-link" ng-click="applicationLogStreamCtrl.autoScroll()">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Scroll to bottom</span>
+    </a>
+  </div>
+  <log-viewer class="log-viewer"
+              auto-scroll-on="applicationLogStreamCtrl.autoScrollOn"
+              websocket-url="applicationLogStreamCtrl.websocketUrl"
+              colorize="true"
+              filter="applicationLogStreamCtrl.jsonFilter"
+              max-size="262144"></log-viewer>
+</div>
