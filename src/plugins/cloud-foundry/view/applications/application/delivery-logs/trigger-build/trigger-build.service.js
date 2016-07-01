@@ -1,9 +1,40 @@
-(function() {
+(function () {
   'use strict';
 
+  /**
+   * @name cloud-foundry.view.applications.application.delivery-logs.triggerBuildDetailView
+   * @description Service to trigger a build from a selection of recent commits
+   **/
   angular
     .module('cloud-foundry.view.applications.application.delivery-logs')
-    .controller('triggerBuildsDetailViewController', TriggerBuildsDetailViewController);
+    .factory('triggerBuildDetailView', triggerBuildDetailView);
+
+  triggerBuildDetailView.$inject = [
+    'helion.framework.widgets.detailView'
+  ];
+
+  function triggerBuildDetailView(detailView) {
+    return {
+      /**
+       * @function open
+       * @description Open a detail-view showing selection of commits that can be built against
+       * @param {object} project - project to build
+       * @param {string} cnsiGuid - cnsi to find the event log at
+       * @returns {object} The resolved/rejected promise
+       * @public
+       **/
+      open: function(project, cnsiGuid) {
+        return detailView({
+          templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/trigger-build/trigger-build.html',
+          title: gettext('Select a Commit'),
+          controller: TriggerBuildsDetailViewController
+        }, {
+          guid: cnsiGuid,
+          project: project
+        }).result;
+      }
+    };
+  }
 
   TriggerBuildsDetailViewController.$inject = [
     '$timeout',
@@ -24,7 +55,8 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} githubOauthService - Service to obtain github auth creds
    */
-  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, context, content, modelManager, githubOauthService) {
+  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, context, content, modelManager,
+                                             githubOauthService) {
     var that = this;
     that.context = context;
     that.content = content;
@@ -69,7 +101,8 @@
       this.githubModel.commits(this.context.project.repo.full_name, this.context.project.repo.branch, 20)
         .then(function() {
           that.fetchError = false;
-          that.selectedCommit = _.get(that, 'githubModel.data.commits.length') ? that.githubModel.data.commits[0] : null;
+          that.selectedCommit =
+            _.get(that, 'githubModel.data.commits.length') ? that.githubModel.data.commits[0] : null;
         })
         .catch(function() {
           that.fetchError = true;
@@ -87,4 +120,5 @@
         });
     }
   });
+
 })();

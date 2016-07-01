@@ -25,7 +25,9 @@
     '$log',
     'moment',
     'app.model.modelManager',
-    'helion.framework.widgets.detailView'
+    'viewEventDetailView',
+    'viewExecutionDetailView',
+    'triggerBuildDetailView'
   ];
 
   /**
@@ -37,14 +39,17 @@
    * @param {object} $log - the angular $log service
    * @param {object} moment - the moment timezone component
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {helion.framework.widgets.detailView} detailView - the helion framework detailView widget
+   * @param {viewEventDetailView} viewEvent - show event details slide out
+   * @param {viewExecutionDetailView} viewExecution - show execution details slide out
+   * @param {triggerBuildDetailView} viewTriggerBuild - show trigger builds slide out
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} hceModel - the Code Engine Applications Model
    * @property {object} hasProject - true if a HCE project exists for this application, null if still determining
    * @property {object} last - contains the last successful build, test and deploy events
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryLogsController($scope, $stateParams, $q, $log, moment, modelManager, detailView) {
+  function ApplicationDeliveryLogsController($scope, $stateParams, $q, $log, moment, modelManager, viewEvent,
+                                             viewExecution, viewTriggerBuild) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
@@ -53,7 +58,11 @@
     this.last = {};
     this.id = $stateParams.guid;
     // Pass through anything needed by prototype extend
-    this.detailView = detailView;
+    this.views = {
+      viewEvent: viewEvent,
+      viewExecution: viewExecution,
+      viewTriggerBuild: viewTriggerBuild
+    };
     this.$q = $q;
     this.moment = moment;
     this.$log = $log;
@@ -87,7 +96,7 @@
                   });
               }, function(response) {
                 if (response.status === 404) {
-                  that.hceModel.createUser(that.hceCnsi.guid, '132456', 'login', 'token');
+                  that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
                 }
               });
           } else {
@@ -144,47 +153,27 @@
 
     triggerBuild: function() {
       var that = this;
-
-      this.detailView({
-        templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/trigger-build/trigger-build.html',
-        title: gettext('Select a Commit'),
-        controller: 'triggerBuildsDetailViewController'
-      }, {
-        guid: that.hceCnsi.guid,
-        project: that.project
-      }).result.then(function() {
+      this.views.viewTriggerBuild.open(this.project, this.hceCnsi.guid).then(function() {
         that.updateData();
       });
     },
 
     viewExecution: function(execution) {
-      var that = this;
-      var rawExecution = _.find(that.hceModel.data.pipelineExecutions, function(o) {
+      var rawExecution = _.find(this.hceModel.data.pipelineExecutions, function(o) {
         return o.id === execution.id;
       });
 
-      this.detailView({
-        templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/execution.html',
-        title: rawExecution.message
-      }, {
-        guid: that.hceCnsi.guid,
-        execution: rawExecution,
-        events: that.eventsPerExecution[execution.id],
-        viewEvent: function(build) {
-          that.viewEvent(build);
-        }
-      });
+      this.views.viewExecution.open(rawExecution, this.eventsPerExecution[execution.id], this.hceCnsi.guid);
     },
 
-    viewEvent: function(event) {
-      this.detailView({
-        templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/event.html',
-        controller: 'eventDetailViewController',
-        title: event.name
-      }, {
-        guid: this.hceCnsi.guid,
-        event: event
-      });
+    viewEventForExecution: function(execution) {
+      var events = this.eventsPerExecution[execution.id];
+
+      if (!events || events.length === 0) {
+        return;
+      }
+
+      this.views.viewEvent.open(events[events.length - 1], this.cnsiModel.guid);
     },
 
     /**
@@ -375,6 +364,12 @@
       return result;
     },
 
+    /**
+     * @name ApplicationDeliveryLogsController.updateVisibleExecutions
+     * @description Only some executions are visible. For thos visible executions fetch their associated events. If
+     * all executions have their events stop watching the visibileExecutions collection
+     * @param {array} visibleExecutions - List of executions that are visible to the user
+     */
     updateVisibleExecutions: function(visibleExecutions) {
       // Nothing visible? Nothing to update
       if (!visibleExecutions || visibleExecutions.length === 0) {
