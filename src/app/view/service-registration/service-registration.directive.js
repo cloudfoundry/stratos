@@ -218,7 +218,6 @@
     },
 
     isAdmin: function () {
-      console.log('isAdmin: ' + this.currentUserAccount.isAdmin());
       return this.currentUserAccount.isAdmin();
     },
 

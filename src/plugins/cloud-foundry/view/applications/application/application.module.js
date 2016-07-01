@@ -8,8 +8,7 @@
       'cloud-foundry.view.applications.application.services',
       'cloud-foundry.view.applications.application.delivery-logs',
       'cloud-foundry.view.applications.application.delivery-pipeline',
-      'cloud-foundry.view.applications.application.variables',
-      'cloud-foundry.view.applications.application.endpoints'
+      'cloud-foundry.view.applications.application.variables'
     ])
     .config(registerRoute);
 
