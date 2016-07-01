@@ -235,7 +235,14 @@
      * @public
      */
     updateSummary: function () {
-      return this.model.getAppSummary(this.cnsiGuid, this.id);
+      var that = this;
+      return this.model.getAppSummary(this.cnsiGuid, this.id).then(function() {
+        // Convenience property, rather than verbose html determine which build pack to use here. Also resolves issue
+        // where ng-if expressions (with function) were not correctly updating after on scope application.summary
+        // changed
+        that.appBuildPack = that.model.application.summary.buildpack ||
+          that.model.application.summary.detected_buildpack;
+      });
     },
 
     /**
