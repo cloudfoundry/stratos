@@ -85,30 +85,19 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 	case 0:
 		log.Println("Existing UAA token not found - attempting insert.")
 
-		log.Println("Encrypting Auth Token before INSERT.")
+		log.Println("Encrypting Auth Token")
 		ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
 		if err != nil {
 			return err
 		}
-		log.Println("ciphertext Auth Token:")
-		log.Println(ciphertextAuthToken)
 
-		log.Println("Encrypting Refresh Token before INSERT.")
+		log.Println("Encrypting Refresh Token")
 		ciphertextRefreshToken, err := encryptToken(encryptionKey, tr.RefreshToken)
 		if err != nil {
 			return err
 		}
-		log.Println("ciphertext Refresh Token:")
-		log.Println(ciphertextRefreshToken)
 
-		log.Println("JUST BEFORE INSERT:")
-		log.Println(insertUAAToken)
-		log.Println(userGUID)
-		log.Println("uaa")
-		log.Println(ciphertextAuthToken)
-		log.Println(ciphertextRefreshToken)
-		log.Println(tr.TokenExpiry)
-
+		log.Println("Performing INSERT of encrypted tokens")
 		if _, err := p.db.Exec(insertUAAToken, userGUID, "uaa",
 			ciphertextAuthToken, ciphertextRefreshToken,
 			tr.TokenExpiry); err != nil {
@@ -117,24 +106,24 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 			return fmt.Errorf(msg, err)
 		}
 
-		log.Println("UAA token INSERT complete.")
+		log.Println("UAA token INSERT complete")
 
 	default:
-		log.Println("Existing UAA token found - attempting update.")
+		log.Println("Existing UAA token found - attempting update")
 
-		log.Println("Encrypting Auth Token before UPDATE.")
+		log.Println("Encrypting Auth Token")
 		ciphertextAuthToken, encryptErr := encryptToken(encryptionKey, tr.AuthToken)
 		if encryptErr != nil {
 			return encryptErr
 		}
 
-		log.Println("Encrypting Refresh Token before UPDATE.")
+		log.Println("Encrypting Refresh Token")
 		ciphertextRefreshToken, encryptErr := encryptToken(encryptionKey, tr.RefreshToken)
 		if encryptErr != nil {
 			return encryptErr
 		}
 
-		// Found a match - update it
+		log.Println("Performing UPDATE of encrypted tokens")
 		if _, updateErr := p.db.Exec(updateUAAToken, userGUID, "uaa",
 			ciphertextAuthToken, ciphertextRefreshToken,
 			tr.TokenExpiry); updateErr != nil {
@@ -173,13 +162,13 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 		return TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
-	log.Println("Decrypting Auth Token.")
+	log.Println("Decrypting Auth Token")
 	plaintextAuthToken, decryptErr := decryptToken(encryptionKey, ciphertextAuthToken)
 	if decryptErr != nil {
 		return TokenRecord{}, decryptErr
 	}
 
-	log.Println("Decrypting Refresh Token.")
+	log.Println("Decrypting Refresh Token")
 	plaintextRefreshToken, decryptErr := decryptToken(encryptionKey, ciphertextRefreshToken)
 	if decryptErr != nil {
 		return TokenRecord{}, decryptErr
@@ -232,13 +221,13 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	case 0:
 		log.Println("Existing CNSI token not found - attempting insert.")
 
-		log.Println("Encrypting Auth Token before INSERT.")
+		log.Println("Encrypting Auth Token")
 		ciphertextAuthToken, encryptErr := encryptToken(encryptionKey, tr.AuthToken)
 		if encryptErr != nil {
 			return encryptErr
 		}
 
-		log.Println("Encrypting Refresh Token before INSERT.")
+		log.Println("Encrypting Refresh Token")
 		ciphertextRefreshToken, encryptErr := encryptToken(encryptionKey, tr.RefreshToken)
 		if encryptErr != nil {
 			return encryptErr
@@ -255,13 +244,13 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	default:
 		log.Println("Existing CNSI token found - attempting update.")
 
-		log.Println("Encrypting Auth Token before UPDATE.")
+		log.Println("Encrypting Auth Token")
 		ciphertextAuthToken, encryptErr := encryptToken(encryptionKey, tr.AuthToken)
 		if encryptErr != nil {
 			return encryptErr
 		}
 
-		log.Println("Encrypting Refresh Token before UPDATE.")
+		log.Println("Encrypting Refresh Token")
 		ciphertextRefreshToken, encryptErr := encryptToken(encryptionKey, tr.RefreshToken)
 		if encryptErr != nil {
 			return encryptErr
@@ -274,7 +263,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 			return fmt.Errorf(msg, updateErr)
 		}
 
-		log.Println("CNSI token UPDATE complete.")
+		log.Println("CNSI token UPDATE complete")
 	}
 
 	return nil
@@ -309,13 +298,13 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 		return TokenRecord{}, fmt.Errorf(msg, err)
 	}
 
-	log.Println("Decrypting Auth Token.")
+	log.Println("Decrypting Auth Token")
 	plaintextAuthToken, decryptErr := decryptToken(encryptionKey, ciphertextAuthToken)
 	if decryptErr != nil {
 		return TokenRecord{}, decryptErr
 	}
 
-	log.Println("Decrypting Refresh Token.")
+	log.Println("Decrypting Refresh Token")
 	plaintextRefreshToken, decryptErr := decryptToken(encryptionKey, ciphertextRefreshToken)
 	if decryptErr != nil {
 		return TokenRecord{}, decryptErr
@@ -369,8 +358,6 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 // encryptToken - TBD
 func encryptToken(key []byte, t string) ([]byte, error) {
 	log.Println("===== encryptToken =")
-	log.Println("Token about to be encrypted.")
-	log.Println(t)
 
 	var plaintextToken = []byte(t)
 	ciphertextToken, err := encrypt(key, plaintextToken)
@@ -379,9 +366,6 @@ func encryptToken(key []byte, t string) ([]byte, error) {
 		log.Printf(msg, err)
 		return nil, fmt.Errorf(msg, err)
 	}
-
-	log.Println("Token encrypted:")
-	log.Println(ciphertextToken)
 
 	return ciphertextToken, nil
 }
@@ -400,8 +384,6 @@ func encryptToken(key []byte, t string) ([]byte, error) {
 // decryptToken - TBD
 func decryptToken(key, t []byte) (string, error) {
 	log.Println("===== decryptToken =")
-	log.Println("Attempting decrypt of token:")
-	log.Println(t)
 
 	plaintextToken, err := decrypt(key, t)
 	if err != nil {
@@ -409,8 +391,6 @@ func decryptToken(key, t []byte) (string, error) {
 		log.Printf(msg, err)
 		return "", fmt.Errorf(msg, err)
 	}
-	log.Println("Token decrypted.")
-	log.Println(string(plaintextToken))
 
 	return string(plaintextToken), nil
 }
