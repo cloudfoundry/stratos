@@ -74,33 +74,31 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 		return fmt.Errorf(msg)
 	}
 
+	log.Println("Encrypting Auth Token")
+	ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Encrypting Refresh Token")
+	ciphertextRefreshToken, err := encryptToken(encryptionKey, tr.RefreshToken)
+	if err != nil {
+		return err
+	}
+
 	// Is there an existing token?
 	var count int
-	err := p.db.QueryRow(countUAATokens, userGUID).Scan(&count)
+	err = p.db.QueryRow(countUAATokens, userGUID).Scan(&count)
 	if err != nil {
 		log.Printf("Unknown error attempting to find UAA token: %v", err)
 	}
 
 	switch count {
 	case 0:
-		log.Println("Existing UAA token not found - attempting insert.")
-
-		log.Println("Encrypting Auth Token")
-		ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
-		if err != nil {
-			return err
-		}
-
-		log.Println("Encrypting Refresh Token")
-		ciphertextRefreshToken, err := encryptToken(encryptionKey, tr.RefreshToken)
-		if err != nil {
-			return err
-		}
 
 		log.Println("Performing INSERT of encrypted tokens")
-		if _, err := p.db.Exec(insertUAAToken, userGUID, "uaa",
-			ciphertextAuthToken, ciphertextRefreshToken,
-			tr.TokenExpiry); err != nil {
+		if _, err := p.db.Exec(insertUAAToken, userGUID, "uaa", ciphertextAuthToken,
+			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
 			msg := "Unable to INSERT UAA token: %v"
 			log.Printf(msg, err)
 			return fmt.Errorf(msg, err)
@@ -109,19 +107,6 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 		log.Println("UAA token INSERT complete")
 
 	default:
-		log.Println("Existing UAA token found - attempting update")
-
-		log.Println("Encrypting Auth Token")
-		ciphertextAuthToken, encryptErr := encryptToken(encryptionKey, tr.AuthToken)
-		if encryptErr != nil {
-			return encryptErr
-		}
-
-		log.Println("Encrypting Refresh Token")
-		ciphertextRefreshToken, encryptErr := encryptToken(encryptionKey, tr.RefreshToken)
-		if encryptErr != nil {
-			return encryptErr
-		}
 
 		log.Println("Performing UPDATE of encrypted tokens")
 		if _, updateErr := p.db.Exec(updateUAAToken, userGUID, "uaa",
@@ -163,15 +148,15 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 	}
 
 	log.Println("Decrypting Auth Token")
-	plaintextAuthToken, decryptErr := decryptToken(encryptionKey, ciphertextAuthToken)
-	if decryptErr != nil {
-		return TokenRecord{}, decryptErr
+	plaintextAuthToken, err := decryptToken(encryptionKey, ciphertextAuthToken)
+	if err != nil {
+		return TokenRecord{}, err
 	}
 
 	log.Println("Decrypting Refresh Token")
-	plaintextRefreshToken, decryptErr := decryptToken(encryptionKey, ciphertextRefreshToken)
-	if decryptErr != nil {
-		return TokenRecord{}, decryptErr
+	plaintextRefreshToken, err := decryptToken(encryptionKey, ciphertextRefreshToken)
+	if err != nil {
+		return TokenRecord{}, err
 	}
 
 	// Build a new TokenRecord based on the decrypted tokens
@@ -210,57 +195,45 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		return fmt.Errorf(msg)
 	}
 
-	// Is there an existing token?
+	log.Println("Encrypting Auth Token")
+	ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Encrypting Refresh Token")
+	ciphertextRefreshToken, err := encryptToken(encryptionKey, tr.RefreshToken)
+	if err != nil {
+		return err
+	}
+
 	var count int
-	err := p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
+	err = p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
 	if err != nil {
 		log.Printf("Unknown error attempting to find CNSI token: %v", err)
 	}
 
 	switch count {
 	case 0:
+
 		log.Println("Existing CNSI token not found - attempting insert.")
-
-		log.Println("Encrypting Auth Token")
-		ciphertextAuthToken, encryptErr := encryptToken(encryptionKey, tr.AuthToken)
-		if encryptErr != nil {
-			return encryptErr
-		}
-
-		log.Println("Encrypting Refresh Token")
-		ciphertextRefreshToken, encryptErr := encryptToken(encryptionKey, tr.RefreshToken)
-		if encryptErr != nil {
-			return encryptErr
-		}
-
-		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry); insertErr != nil {
+		if _, err := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
+			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
 			msg := "Unable to INSERT CNSI token: %v"
-			log.Printf(msg, insertErr)
-			return fmt.Errorf(msg, insertErr)
+			log.Printf(msg, err)
+			return fmt.Errorf(msg, err)
 		}
 
 		log.Println("CNSI token INSERT complete.")
+
 	default:
+
 		log.Println("Existing CNSI token found - attempting update.")
-
-		log.Println("Encrypting Auth Token")
-		ciphertextAuthToken, encryptErr := encryptToken(encryptionKey, tr.AuthToken)
-		if encryptErr != nil {
-			return encryptErr
-		}
-
-		log.Println("Encrypting Refresh Token")
-		ciphertextRefreshToken, encryptErr := encryptToken(encryptionKey, tr.RefreshToken)
-		if encryptErr != nil {
-			return encryptErr
-		}
-
-		if _, updateErr := p.db.Exec(updateCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry); updateErr != nil {
+		if _, err := p.db.Exec(updateCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
+			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
 			msg := "Unable to UPDATE CNSI token: %v"
-			log.Printf(msg, updateErr)
-			return fmt.Errorf(msg, updateErr)
+			log.Printf(msg, err)
+			return fmt.Errorf(msg, err)
 		}
 
 		log.Println("CNSI token UPDATE complete")
@@ -299,15 +272,15 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 	}
 
 	log.Println("Decrypting Auth Token")
-	plaintextAuthToken, decryptErr := decryptToken(encryptionKey, ciphertextAuthToken)
-	if decryptErr != nil {
-		return TokenRecord{}, decryptErr
+	plaintextAuthToken, err := decryptToken(encryptionKey, ciphertextAuthToken)
+	if err != nil {
+		return TokenRecord{}, err
 	}
 
 	log.Println("Decrypting Refresh Token")
-	plaintextRefreshToken, decryptErr := decryptToken(encryptionKey, ciphertextRefreshToken)
-	if decryptErr != nil {
-		return TokenRecord{}, decryptErr
+	plaintextRefreshToken, err := decryptToken(encryptionKey, ciphertextRefreshToken)
+	if err != nil {
+		return TokenRecord{}, err
 	}
 
 	// Build a new TokenRecord based on the decrypted tokens
