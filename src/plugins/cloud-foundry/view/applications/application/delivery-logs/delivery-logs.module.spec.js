@@ -3,8 +3,8 @@
 
   describe('Deliver Logs', function () {
 
-    var controller, $stateParams, $q, $log, moment, $state, $rootScope, detailView, hceModel, cnsiModel, modelManager,
-      $httpBackend;
+    var controller, $stateParams, $q, $log, moment, $state, $rootScope, hceModel, cnsiModel, modelManager,
+      $httpBackend, viewEvent, viewExecution, triggerBuild;
 
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
@@ -23,7 +23,7 @@
 
     function fakeModelCall(obj, func, reject, result, applyResultToProp) {
       // There's a number of places where we intercept requests to 'model' objects and supply out own response/data.
-      // This could have called the actual models and then interceppted the http requests... however wanted to make
+      // This could have called the actual models and then intercepted the http requests... however wanted to make
       // this test as independent as possible from anything going on in model land.
       spyOn(obj, func).and.callFake(function() {
         if (reject) {
@@ -37,14 +37,17 @@
       });
     }
 
-    beforeEach(inject(function (_$stateParams_, _$q_, _$log_, _moment_, $injector, _$state_, _$rootScope_) {
+    beforeEach(inject(function (_$stateParams_, _$q_, _$log_, _moment_, $injector, _$state_, _$rootScope_,
+                                _viewEventDetailView_, _viewExecutionDetailView_, _triggerBuildDetailView_) {
       // Create the parameters required by the ctor
       $stateParams = _$stateParams_;
       $q = _$q_;
       $log = _$log_;
       moment = _moment_;
       modelManager = $injector.get('app.model.modelManager');
-      detailView = jasmine.createSpyObj('detailView', ['close', 'dismiss']);
+      viewEvent = _viewEventDetailView_;
+      viewExecution = _viewExecutionDetailView_;
+      triggerBuild = _triggerBuildDetailView_;
 
       // Some generic vars needed in tests
       $state = _$state_;
@@ -65,7 +68,8 @@
       }
 
       var ApplicationDeliveryLogsController = $state.get('cf.applications.application.delivery-logs').controller;
-      controller = new ApplicationDeliveryLogsController($rootScope.$new(), $stateParams, $q, $log, moment, modelManager, detailView);
+      controller = new ApplicationDeliveryLogsController($rootScope.$new(), $stateParams, $q, $log, moment,
+        modelManager, viewEvent, viewExecution, triggerBuild);
 
       expect(controller).toBeDefined();
     }
@@ -177,40 +181,33 @@
         _.set(controller, 'project', project);
       });
 
-      it('Shows detail view - success', function() {
+      it('Shows slide out - success', function() {
         // Spy on the required functions to be called as a result of trigger
-        spyOn(controller, 'detailView').and.callFake(function() {
-          return {
-            result: $q.when()
-          };
+        spyOn(triggerBuild, 'open').and.callFake(function(project, guid) {
+          expect(project).toEqual(project);
+          expect(guid).toEqual(cnsi.guid);
+          return $q.when();
         });
         spyOn(controller, 'updateData');
 
         controller.triggerBuild();
         $rootScope.$apply();
 
-        expect(controller.detailView).toHaveBeenCalled();
-        expect(controller.detailView.calls.argsFor(0).length).toBe(2);
-        expect(controller.detailView.calls.argsFor(0)[1]).toEqual({
-          guid: cnsi.guid,
-          project: project
-        });
+        expect(triggerBuild.open).toHaveBeenCalled();
         expect(controller.updateData).toHaveBeenCalled();
       });
 
-      it('Shows detail view - failure', function() {
+      it('Shows slide out - failure', function() {
         // Spy on the required functions to be called as a result of trigger
-        spyOn(controller, 'detailView').and.callFake(function() {
-          return {
-            result: $q.reject()
-          };
+        spyOn(triggerBuild, 'open').and.callFake(function() {
+          return $q.reject();
         });
         spyOn(controller, 'updateData');
 
         controller.triggerBuild();
         $rootScope.$apply();
 
-        expect(controller.detailView).toHaveBeenCalled();
+        expect(triggerBuild.open).toHaveBeenCalled();
         expect(controller.updateData).not.toHaveBeenCalled();
       });
     });
@@ -246,47 +243,18 @@
 
       it('Shows detail view', function() {
         // Spy on the required functions to be called as a result of trigger
-        spyOn(controller, 'detailView');
-        spyOn(controller, 'viewEvent');
+        spyOn(viewExecution, 'open');
 
         controller.viewExecution(execution);
         $rootScope.$apply();
 
-        expect(controller.detailView).toHaveBeenCalled();
-        expect(controller.detailView.calls.argsFor(0).length).toBe(2);
-        var context = controller.detailView.calls.argsFor(0)[1];
-        expect(context.guid).toEqual(cnsi.guid);
-        expect(context.execution).toEqual(rawExecution);
-        expect(context.events).toEqual(events);
+        expect(viewExecution.open).toHaveBeenCalled();
+        expect(viewExecution.open.calls.argsFor(0).length).toBe(3);
+        expect(viewExecution.open.calls.argsFor(0)[2]).toEqual(cnsi.guid);
+        expect(viewExecution.open.calls.argsFor(0)[0]).toEqual(rawExecution);
+        expect(viewExecution.open.calls.argsFor(0)[1]).toEqual(events);
       });
 
-    });
-
-    describe('View Event', function() {
-
-      var event = {
-        event: '1',
-        name: 'name'
-      };
-      beforeEach(function() {
-        createController(true);
-        _.set(controller, 'hceCnsi.guid', cnsi.guid);
-      });
-
-      it('View event', function() {
-        spyOn(controller, 'detailView');
-
-        controller.viewEvent(event);
-        $rootScope.$apply();
-
-        expect(controller.detailView).toHaveBeenCalled();
-        expect(controller.detailView.calls.argsFor(0).length).toBe(2);
-        expect(controller.detailView.calls.argsFor(0)[0].title).toEqual(event.name);
-        expect(controller.detailView.calls.argsFor(0)[1]).toEqual({
-          guid: cnsi.guid,
-          event: event
-        });
-      });
     });
 
     describe('Fetching events', function() {
@@ -530,7 +498,6 @@
         expect(execution.result).toBeDefined();
         expect(execution.result.state).toBeDefined();
         expect(execution.result.label).toEqual(event.name);
-        expect(execution.result.hasLog).toBeTruthy();
       });
     });
 
@@ -582,31 +549,31 @@
         expect(res.label).toEqual(event.name);
         expect(res.state).toEqual(controller.eventStates.RUNNING);
       });
-    });
 
-    describe('determine execution state', function() {
-      beforeEach(function() {
-        createController(true);
-      });
-
-      it('determine state from event type', function() {
+      it('results for all states', function() {
         var types = _.values(controller.eventTypes);
         _.forEach(types, function(type) {
           var origState = 'orig';
           var event = {
             type: type,
-            state: origState
+            state: origState,
+            name: 'Name'
           };
-          var state = controller.determineExecutionState(event);
+          var state = controller.determineExecutionResult(event);
           switch (type) {
             case controller.eventTypes.BUILDING:
             case controller.eventTypes.TESTING:
             case controller.eventTypes.DEPLOYING:
-              expect(state).toEqual(controller.eventStates.RUNNING);
+              expect(state.label).toEqual(event.name);
+              expect(state.state).toEqual(controller.eventStates.RUNNING);
               break;
             case controller.eventTypes.PIPELINE_COMPLETED:
+              expect(state.state).toEqual(origState);
+              expect(state.label).toEqual('Failed');
+              break;
             case controller.eventTypes.WATCHDOG_TERMINATED:
-              expect(state).toEqual(origState);
+              expect(state.state).toEqual(origState);
+              expect(state.label).toEqual(event.name);
               break;
             default:
               fail('Unknown event type: ' + type);
@@ -615,19 +582,6 @@
         });
       });
 
-      it('determine state from event \'failed\' state', function() {
-        var state = controller.determineExecutionState({
-          state: controller.eventStates.FAILED
-        });
-        expect(state).toEqual(controller.eventStates.FAILED);
-      });
-
-      it('determine state from event state', function() {
-        var state = controller.determineExecutionState({
-          state: controller.eventStates.SUCCEEDED
-        });
-        expect(state).toEqual(controller.eventStates.RUNNING);
-      });
     });
 
     describe('dynamic loading of events when execution visible - updateVisibleExecutions', function() {

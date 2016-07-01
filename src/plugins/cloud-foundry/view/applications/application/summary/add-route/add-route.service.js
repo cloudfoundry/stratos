@@ -11,13 +11,13 @@
     'helion.framework.widgets.detailView'
   ];
 
-  function AddRouteServiceFactory(modelManager, detailView) {
+  function AddRouteServiceFactory (modelManager, detailView) {
     return {
-      add: function() {
+      add: function () {
         var model = modelManager.retrieve('cloud-foundry.model.application');
         // Create a map of domain names -> domain guids
         var domains = [];
-        model.application.summary.available_domains.forEach(function(domain) {
+        model.application.summary.available_domains.forEach(function (domain) {
           domains.push({
             label: domain.name,
             value: domain.guid
@@ -50,6 +50,7 @@
   }
 
   AddRouteController.$inject = [
+    '$scope',
     '$stateParams',
     'app.model.modelManager',
     '$uibModalInstance',
@@ -59,12 +60,13 @@
   /**
    * @name AddRouteController
    * @constructor
+   * @param {Object} $scope
    * @param {Object} $stateParams - the UI router $stateParams service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {Object} $uibModalInstance - the Angular UI Bootstrap $uibModalInstance service
    * @param {Object} context - the uibModal context
    */
-  function AddRouteController($stateParams, modelManager, $uibModalInstance, context) {
+  function AddRouteController ($scope, $stateParams, modelManager, $uibModalInstance, context) {
     var that = this;
     that.addRouteError = false;
     that.applicationId = $stateParams.guid;
@@ -73,11 +75,22 @@
     that.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     that.uibModelInstance = $uibModalInstance;
     that.context = context;
+
+    that.addRouteError = false;
+    that.routeExists = false;
+
+    $scope.$watch(function () {
+      return that.context.data.host;
+    }, function () {
+      if (that.routeExists) {
+        that.routeExists = false;
+      }
+    });
   }
 
   angular.extend(AddRouteController.prototype, {
 
-    addRoute: function() {
+    addRoute: function () {
       var that = this;
       var data = {
         space_guid: that.context.data.space_guid,
@@ -89,7 +102,7 @@
         .then(function (response) {
           if (!(response.metadata && response.metadata.guid)) {
             /* eslint-disable no-throw-literal */
-            throw 'Invalid response: ' + angular.toJson(response);
+            throw response;
             /* eslint-enable no-throw-literal */
           }
           var routeId = response.metadata.guid;
@@ -105,7 +118,14 @@
           that.uibModelInstance.close();
         })
 
-        .catch(function () {
+        .catch(function (error) {
+          // check if error is CF-RouteHostTaken indicating that the route has already been created
+          if (_.isPlainObject(error) &&
+            error.error_code &&
+            error.error_code === 'CF-RouteHostTaken') {
+            that.routeExists = true;
+            return;
+          }
           that.onAddRouteError();
         });
     },
@@ -114,7 +134,7 @@
      * @function cancel
      * @description Cancel adding a route. Clear the form and dismiss this form.
      */
-    cancel: function() {
+    cancel: function () {
       this.uibModelInstance.dismiss();
     },
 
@@ -122,7 +142,7 @@
      * @function onAddRouteError
      * @description Display error when adding a route
      */
-    onAddRouteError: function() {
+    onAddRouteError: function () {
       this.addRouteError = true;
     }
   });

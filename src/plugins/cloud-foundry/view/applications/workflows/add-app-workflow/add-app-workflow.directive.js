@@ -309,7 +309,7 @@
             title: gettext('Deploy App'),
             templateUrl: path + 'cli-subflow/deploy.html',
             formName: 'application-cli-deploy-form',
-            nextBtnText: gettext('Finished with code change'),
+            nextBtnText: gettext('Finished'),
             isLastStep: true
           }
         ]

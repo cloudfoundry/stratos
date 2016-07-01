@@ -1,9 +1,40 @@
 (function () {
   'use strict';
 
+  /**
+   * @name cloud-foundry.view.applications.application.delivery-logs.viewEventDetailView
+   * @description Service for viewing an execution's event, specifically the log
+   **/
   angular
     .module('cloud-foundry.view.applications.application.delivery-logs')
-    .controller('eventDetailViewController', EventDetailViewController);
+    .factory('viewEventDetailView', viewEventDetailView);
+
+  viewEventDetailView.$inject = [
+    'helion.framework.widgets.detailView'
+  ];
+
+  function viewEventDetailView(detailView) {
+    return {
+      /**
+       * @function open
+       * @description Open a detail-view showing event details, specifically the log
+       * @param {object} event - event to show
+       * @param {string} cnsiGuid - cnsi to find the event log at
+       * @returns {object} The resolved/rejected promise
+       * @public
+       **/
+      open: function(event, cnsiGuid) {
+        return detailView({
+          templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/event.html',
+          controller: EventDetailViewController,
+          title: event.name
+        }, {
+          guid: cnsiGuid,
+          event: event
+        }).result;
+      }
+    };
+  }
 
   EventDetailViewController.$inject = [
     '$timeout',

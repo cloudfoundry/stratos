@@ -45,8 +45,8 @@
       <dl class="dl-horizontal">
         <dt translate>BUILDPACK</dt>
         <dd class="nowrap align-right">
-          <span ng-if="!applicationSummaryCtrl.isWebLink(appCtrl.model.application.summary.buildpack)">{{ appCtrl.model.application.summary.buildpack }}</span>
-          <a ng-if="applicationSummaryCtrl.isWebLink(appCtrl.model.application.summary.buildpack)" target="buildpack" href="{{ appCtrl.model.application.summary.buildpack }}">{{ appCtrl.model.application.summary.buildpack }}</a>
+          <span ng-if="!applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)">{{ appCtrl.appBuildPack }}</span>
+          <a ng-if="applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)" target="buildpack" href="{{ appCtrl.appBuildPack }}">{{ appCtrl.appBuildPack }}</a>
         </dd>
 
         <dt translate>CLUSTER</dt>
