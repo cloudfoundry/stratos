@@ -22,6 +22,7 @@
     'base64',
     'app.model.modelManager',
     '$stateParams',
+    '$location',
     '$log'
   ];
 
@@ -33,9 +34,9 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationLogStreamController(base64, modelManager, $stateParams, $log) {
+  function ApplicationLogStreamController(base64, modelManager, $stateParams, $location, $log) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.websocketUrl = 'ws://' + 'localhost' + ':' + '80' + '/pp/v1/' +
+    this.websocketUrl = 'ws://' + $location.host() + '/pp/v1/' +
       $stateParams.cnsiGuid + '/apps/' + $stateParams.guid + '/stream';
 
     this.autoScrollOn = true; // auto-scroll by default
