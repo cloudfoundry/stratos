@@ -88,7 +88,7 @@
           var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
           if (hceCnsis.length > 0) {
             that.hceCnsi = hceCnsis[0];
-            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '132456')
+            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
               .then(function() {
                 return that.hceModel.getProjects(that.hceCnsi.guid)
                   .then(function() {
