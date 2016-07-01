@@ -35,36 +35,34 @@
         url: '/pp/v1/proxy/v2/deployments/targets?user_id=1',
         response: {
           200: {
-            body: {
-              guid: [
-                {
-                  id: 1,
-                  user_id: 1,
-                  name: 'Deployment Target Name',
-                  url: 'http://www.example.com/',
-                  userName: 'username',
-                  password: 'password',
-                  organization: 'org 1',
-                  space: 'space 1',
-                  type: 'cloudfoundry'
-                },
-                {
-                  id: 1,
-                  user_id: 1,
-                  name: 'Deployment Target Name 2',
-                  url: 'http://www.example2.com/',
-                  userName: 'username2',
-                  password: 'password2',
-                  organization: 'org 2',
-                  space: 'space 2',
-                  type: 'cloudfoundry'
-                }
-              ]
-            }
+            body: [
+              {
+                id: 1,
+                user_id: 1,
+                name: 'Deployment Target Name',
+                url: 'http://www.example.com/',
+                userName: 'username',
+                password: 'password',
+                organization: 'org 1',
+                space: 'space 1',
+                type: 'cloudfoundry'
+              },
+              {
+                id: 1,
+                user_id: 1,
+                name: 'Deployment Target Name 2',
+                url: 'http://www.example2.com/',
+                userName: 'username2',
+                password: 'password2',
+                organization: 'org 2',
+                space: 'space 2',
+                type: 'cloudfoundry'
+              }
+            ]
           },
 
           500: {
-            body: { guid: {} }
+            body: {}
           }
         }
       };

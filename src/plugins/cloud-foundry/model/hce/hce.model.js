@@ -78,7 +78,7 @@
      */
     getBuildContainer: function (guid, id) {
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getBuildContainer(guid, id, {}, this.hceProxyConfig);
+        .getBuildContainer(guid, id, {}, this.hceProxyPassthroughConfig);
     },
 
     /**
@@ -92,9 +92,9 @@
     getBuildContainers: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getBuildContainers(guid, {}, this.hceProxyConfig)
+        .getBuildContainers(guid, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          that.onGetBuildContainers(response, guid);
+          that.onGetBuildContainers(response);
         });
     },
 
@@ -109,7 +109,7 @@
      */
     getDeploymentTarget: function (guid, id) {
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .getDeploymentTarget(guid, id, {}, this.hceProxyConfig);
+        .getDeploymentTarget(guid, id, {}, this.hceProxyPassthroughConfig);
     },
 
     /**
@@ -123,9 +123,9 @@
     getDeploymentTargets: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .getDeploymentTargets(guid, { user_id: this.data.user.id }, this.hceProxyConfig)
+        .getDeploymentTargets(guid, { user_id: this.data.user.id }, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          that.onGetDeploymentTargets(response, guid);
+          that.onGetDeploymentTargets(response);
         });
     },
 
@@ -140,9 +140,9 @@
     getImageRegistries: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceContainerApi')
-        .getImageRegistries(guid, {}, this.hceProxyConfig)
+        .getImageRegistries(guid, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          that.onGetImageRegistries(response, guid);
+          that.onGetImageRegistries(response);
         });
     },
 
@@ -157,7 +157,7 @@
      */
     getNotificationTargets: function (guid, projectId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
-        .getNotificationTargets(guid, { project_id: projectId }, this.hceProxyConfig);
+        .getNotificationTargets(guid, { project_id: projectId }, this.hceProxyPassthroughConfig);
     },
 
     /**
@@ -183,9 +183,9 @@
     getProjects: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .getProjects(guid, { user_id: this.data.user.id }, this.hceProxyConfig)
+        .getProjects(guid, { user_id: this.data.user.id }, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          return that.onGetProjects(response, guid);
+          return that.onGetProjects(response);
         });
     },
 
@@ -237,9 +237,9 @@
     getPipelineExecutions: function (guid, projectId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .getPipelineExecutions(guid, { project_id: projectId }, this.hceProxyConfig)
+        .getPipelineExecutions(guid, { project_id: projectId }, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          that.onGetPipelineExecutions(response, guid);
+          that.onGetPipelineExecutions(response);
         });
     },
 
@@ -255,9 +255,9 @@
     getPipelineEvents: function (guid, executionId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .getPipelineEvents(guid, { execution_id: executionId }, this.hceProxyConfig)
+        .getPipelineEvents(guid, { execution_id: executionId }, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          return that.onGetPipelineEvents(response, guid);
+          return that.onGetPipelineEvents(response);
         });
     },
 
@@ -292,7 +292,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
         .addDeploymentTarget(guid, newTarget, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
-          return that.onCreateDeploymentTarget(response, guid);
+          return that.onCreateDeploymentTarget(response);
         });
     },
 
@@ -405,7 +405,7 @@
      */
     removeNotificationTarget: function (guid, targetId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
-        .removeNotificationTarget(guid, targetId, {}, this.hceProxyConfig);
+        .removeNotificationTarget(guid, targetId, {}, this.hceProxyPassthroughConfig);
     },
 
     /**
@@ -434,12 +434,11 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache build container
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetBuildContainers: function (response, guid) {
+    onGetBuildContainers: function (response) {
       this.data.buildContainers.length = 0;
-      [].push.apply(this.data.buildContainers, response.data[guid] || []);
+      [].push.apply(this.data.buildContainers, response.data || []);
     },
 
     /**
@@ -447,12 +446,11 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache deployment targets
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetDeploymentTargets: function (response, guid) {
+    onGetDeploymentTargets: function (response) {
       this.data.deploymentTargets.length = 0;
-      [].push.apply(this.data.deploymentTargets, response.data[guid] || []);
+      [].push.apply(this.data.deploymentTargets, response.data || []);
     },
 
     /**
@@ -460,12 +458,11 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache image registries
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetImageRegistries: function (response, guid) {
+    onGetImageRegistries: function (response) {
       this.data.imageRegistries.length = 0;
-      [].push.apply(this.data.imageRegistries, response.data[guid] || []);
+      [].push.apply(this.data.imageRegistries, response.data || []);
     },
 
     /**
@@ -473,12 +470,11 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache user projects
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @returns {array} An array of the user's projects
      * @private
      */
-    onGetProjects: function (response, guid) {
-      var projects = response.data[guid];
+    onGetProjects: function (response) {
+      var projects = response.data;
       this.data.projects = _.keyBy(projects, 'name') || {};
       return projects;
     },
@@ -538,12 +534,11 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache pipeline executions
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @private
      */
-    onGetPipelineExecutions: function (response, guid) {
+    onGetPipelineExecutions: function (response) {
       this.data.pipelineExecutions.length = 0;
-      [].push.apply(this.data.pipelineExecutions, response.data[guid] || []);
+      [].push.apply(this.data.pipelineExecutions, response.data || []);
     },
 
     /**
@@ -551,12 +546,11 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Extract data from response
      * @param {string} response - the JSON response from API call
-     * @param {string} guid - the HCE instance GUID
      * @returns {object} The collection of pipeline events
      * @private
      */
-    onGetPipelineEvents: function (response, guid) {
-      return response.data[guid];
+    onGetPipelineEvents: function (response) {
+      return response.data;
     },
 
     /**
