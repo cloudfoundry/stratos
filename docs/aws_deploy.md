@@ -71,19 +71,23 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
   docker login
   ```
 
-### Establish a DNS entry in Route53
+### Establish a DNS entry in Route53 (optional)
 
 AWS provides support for DNS thru [Route 53](https://github.com/hpcloud/hdp-resource-manager/blob/develop/cmd/bootstrap/docs/bootstrap.md#load-balancer-support)
 
-This is an option step, but will allow you to [register the application](development.md#register-ui) with Github (for the sake of OAuth) using a static URL.
+This is an optional step, but will allow you to [register the application](development.md#register-ui) with Github (for the sake of OAuth) using a static URL.
+
+If you don't do this, you will need to update the callback URL with each and every new deploy you do of the Console.
 
 ### Deploy the Console
 
-You can now issue the same `curl` commands to install Helion Code Engine and the Console UI using the master private IP and ipmgr port.
+You can now issue the same `curl` commands to install the Console UI using the master private IP and ipmgr port.
 
-**Please see the "deploy_archives" folder for recent Console UI service definition & instance definition files suitable for deployment.**
+The automated build process will push the latest Service Definition (SDL) and Instance Definition (IDL) files suitable for deployment to an Helion Service Manager bucket specific to the Console:
 
-* Update the INSTANCE DEFINITION FILE (cnap-console-service-definition.json) with values specific to the target environment you are deploying into (local HCP, AWS, etc.)
+https://console.aws.amazon.com/s3/home?region=us-west-2#&bucket=helion-service-manager&prefix=partner-services/helion-console/
+
+* Update the INSTANCE DEFINITION FILE (instance.json) with values specific to the target environment you are deploying into (local HCP, AWS, etc.)
 
   - Replace the value for the "GITHUB_OAUTH_CLIENT_ID" with the client ID of the developer application you created when you [register the application](development.md#register-ui)
 
