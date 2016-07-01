@@ -1,6 +1,8 @@
 <div class="endpoints-view">
   <div class="header">
-    <div class="applications-header font-semi-bold pull-left" translate>Code Engine Endpoints</div>
+    <div class="applications-header font-semi-bold pull-left" translate>
+      {{endpointsViewCtrl.isHcf() ? 'Cloud Foundry Clusters':'Code Engine Endpoints'}}
+    </div>
     <button class="btn btn-primary" ng-click="endpointsViewCtrl.showClusterAddForm()">Register Endpoint</button>
 
   </div>
@@ -49,3 +51,9 @@
   </table>
 
 </div>
+<flyout flyout-active="endpointsViewCtrl.clusterAddFlyoutActive"
+        flyout-close-icon="'helion-icon helion-icon-Close'">
+  <add-cluster-form on-cancel="endpointsViewCtrl.hideClusterAddForm()"
+                    on-submit="endpointsViewCtrl.hideClusterAddForm()">
+  </add-cluster-form>
+</flyout>

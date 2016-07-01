@@ -31,12 +31,12 @@
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
+    this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.detailView = detailView;
     this.serviceType = $stateParams.serviceType;
     this.currentEndpoints = [];
     this.serviceInstances = {};
-    this.clusterAddFlyoutActive = true;
+    this.clusterAddFlyoutActive = false;
 
     var that = this;
     this.serviceInstanceModel.list();
@@ -47,7 +47,7 @@
       return that.serviceInstanceModel.serviceInstances;
     }, function (serviceInstances) {
 
-      var filteredInstances = _.filter(serviceInstances, function(serviceInstance) {
+      var filteredInstances = _.filter(serviceInstances, function (serviceInstance) {
         return serviceInstance.cnsi_type === that.serviceType;
       });
       _.forEach(filteredInstances, function (serviceInstance) {
@@ -107,7 +107,7 @@
           }
         ).result.then(function () {
           return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-            that.cnsiModel.list();
+            that.serviceInstanceModel.list();
           });
         });
       }
@@ -135,6 +135,11 @@
 
     isHcf: function () {
       return this.serviceType === 'hcf';
+    },
+
+    hideClusterAddForm: function () {
+      this.clusterAddFlyoutActive = false;
     }
+
   });
 })();
