@@ -26,21 +26,22 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="endpoint in endpointsViewCtrl.currentEndpoints">
+    <tr ng-repeat="endpoint in endpointsViewCtrl.currentEndpoints"
+        show-table-inline-message="{{ !endpoint.connected ? endpointsViewCtrl.tokenExpiryMessage : ''}}">
       <td>{{endpoint.name}}</td>
       <td>{{endpoint.url}}</td>
-      <td>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
+      <td translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
       <td>
         <div class="actions-menu dropdown" ng-class="{'open': endpointsViewCtrl.showDropdown[$index]}"
              ng-click="endpointsViewCtrl.setShowDropdown($index)" tabindex="1">
           <i class="actions-menu-icon dropdown-toggle helion-icon helion-icon-lg helion-icon-More"
              style="cursor: pointer;"></i>
           <ul class="actions-menu-list dropdown-menu">
-            <li class="actions-menu-item" ng-if="endpointsViewCtrl.isDisconnected(endpoint)"
-                ng-click="endpointsViewCtrl.connect(endpoint)">Connect
+            <li class="actions-menu-item" ng-if="!endpoint.connected"
+                ng-click="endpointsViewCtrl.connect(endpoint.model)">Connect
             </li>
-            <li class="actions-menu-item" ng-if="endpointsViewCtrl.isConnected(endpoint)"
-                ng-click="endpointsViewCtrl.disconnect(endpoint)">Disconnect
+            <li class="actions-menu-item" ng-if="endpoint.connected"
+                ng-click="endpointsViewCtrl.disconnect(endpoint.model)">Disconnect
             </li>
             <li class="actions-menu-item" ng-click="endpointsViewCtrl.unregister(endpoint)">Unregister</li>
           </ul>
@@ -51,6 +52,13 @@
   </table>
 
 </div>
+<flyout flyout-active="endpointsViewCtrl.credentialsFormOpen"
+        flyout-close-icon="'helion-icon helion-icon-Close'">
+  <credentials-form cnsi="endpointsViewCtrl.activeServiceInstance"
+                    on-cancel="endpointsViewCtrl.onConnectCancel()"
+                    on-submit="endpointsViewCtrl.onConnectSuccess(serviceInstance)">
+  </credentials-form>
+</flyout>
 <flyout flyout-active="endpointsViewCtrl.clusterAddFlyoutActive"
         flyout-close-icon="'helion-icon helion-icon-Close'">
   <add-cluster-form on-cancel="endpointsViewCtrl.hideClusterAddForm()"

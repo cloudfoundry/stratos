@@ -37,7 +37,9 @@
     this.currentEndpoints = [];
     this.serviceInstances = {};
     this.clusterAddFlyoutActive = false;
+    this.tokenExpiryMessage = 'Token has expired';
 
+    this.activeServiceInstance = null;
     var that = this;
     this.serviceInstanceModel.list();
 
@@ -62,11 +64,11 @@
       that.currentEndpoints = _.map(that.serviceInstances,
         function (c) {
           var endpoint = c.api_endpoint;
-
           return {
             name: c.name,
             url: endpoint.Scheme + '://' + endpoint.Host,
-            connected: true
+            connected: that.isHcf() ? that.serviceInstances[c.guid].valid : true,
+            model: c
           };
         });
     });
@@ -76,6 +78,11 @@
 
     connect: function (serviceInstance) {
       // TODO implement HCE authentication
+      // Currently only implemented for HCF
+      if (this.isHcf()) {
+        this.activeServiceInstance = serviceInstance;
+        this.credentialsFormOpen = true;
+      }
     },
 
     disconnect: function (serviceInstance) {
@@ -112,13 +119,6 @@
         });
       }
     },
-    isDisconnected: function () {
-      // TODO implement HCE authentication
-    },
-    isConnected: function () {
-      // TODO implement HCE authentication
-      return true;
-    },
 
     setShowDropdown: function (index) {
       var that = this;
@@ -139,7 +139,15 @@
 
     hideClusterAddForm: function () {
       this.clusterAddFlyoutActive = false;
-    }
+    },
+    onConnectCancel: function () {
+      this.credentialsFormOpen = false;
+    },
 
+    onConnectSuccess: function () {
+      this.serviceInstanceModel.numValid += 1;
+      this.credentialsFormOpen = false;
+      this.activeServiceInstance = null;
+    }
   });
 })();
