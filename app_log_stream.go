@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -92,16 +93,21 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	//defer clientWebSocket.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Time{})
 
 	// Reusable closure to pump messages from Noaa to the client WebSocket
-	relayLogMsg := func(msg []byte) {
-		err := clientWebSocket.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			log.Println("Ooops Error writing data to WebSocket", err)
+	// N.B. We parse the messages as JSON for ease of use in the frontend
+	relayLogMsg := func(msg *events.LogMessage) {
+		if jsonMsg, err := json.Marshal(msg); err != nil {
+			log.Printf("Received unparsable message from Doppler %v, %v\n", jsonMsg, err)
+		} else {
+			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
+			if err != nil {
+				log.Println("Ooops Error writing data to WebSocket", err)
+			}
 		}
 	}
 
 	// Send the recent messages, sorted in Chronological order
 	for _, msg := range noaa.SortRecent(messages) {
-		relayLogMsg(msg.GetMessage())
+		relayLogMsg(msg)
 	}
 
 	log.Printf("Now streaming log from App ID: %s - on CNSI: %s\n", appGuid, cnsiGuid)
@@ -155,8 +161,8 @@ func drainErrChan(errorChan <-chan error) {
 	}
 }
 
-func drainMsgChan(msgChan <-chan *events.LogMessage, callback func(msg []byte)) {
+func drainMsgChan(msgChan <-chan *events.LogMessage, callback func(msg *events.LogMessage)) {
 	for msg := range msgChan {
-		callback(msg.GetMessage())
+		callback(msg)
 	}
 }
