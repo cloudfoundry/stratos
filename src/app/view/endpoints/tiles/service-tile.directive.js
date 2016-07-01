@@ -105,7 +105,6 @@
       this.$state.go('appEndpointsView', params);
     }
 
-
   });
 
 })();
