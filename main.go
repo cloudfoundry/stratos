@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -25,7 +26,7 @@ var (
 func main() {
 	log.SetOutput(os.Stdout)
 
-	log.Println("Started Portal Proxy")
+	log.Println("Proxy initialization started.")
 
 	var portalConfig portalConfig
 	portalConfig, err := loadPortalConfig(portalConfig)
@@ -33,16 +34,23 @@ func main() {
 		log.Println(err)
 		os.Exit(1)
 	}
+	log.Println("Proxy configuration loaded.")
 
-	// log.Println("Proxy Configuration loaded up")
+	portalConfig.EncryptionKeyInBytes, err = setEncryptionKey(portalConfig)
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	log.Println("Encryption key set.")
+
 	var databaseConfig datastore.DatabaseConfig
 	databaseConfig, err = loadDatabaseConfig(databaseConfig)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
+	log.Println("Proxy database configuration loaded.")
 
-	// log.Println("Database Configuration loaded up")
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
 	if err != nil {
@@ -50,20 +58,38 @@ func main() {
 		os.Exit(1)
 	}
 	defer databaseConnectionPool.Close()
+	log.Println("Proxy database connection pool created.")
 
-	log.Println("Spinning up a new Portal Proxy")
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool)
+	log.Println("Proxy waiting for requests.")
 
-	log.Println("Initializing the HTTP client")
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
+	log.Println("HTTP client initialized.")
 
-	log.Printf("Starting the proxy on IP %s and port %d", portalConfig.TLSAddress, 80)
 	log.Printf("%v", portalConfig)
 	if err := start(portalProxy); err != nil {
 		log.Printf("Unable to start the proxy: %v", err)
 		os.Exit(1)
 	}
+	log.Printf("Proxy listening on address %s and port %d", portalConfig.TLSAddress, 80)
+}
+
+// TODO (wchrisjohnson): This should be changed to pull in the encryption key from the env.
+// For the time being, I am just generating a 256 bit / 32 byte / AES-256 encryption key
+// here. By  the time I am done with this PR, this will come in via the env var.
+func setEncryptionKey(pc portalConfig) ([]byte, error) {
+	key := make([]byte, 32)
+	_, err := rand.Read(key)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// b64.StdEncoding.DecodeString(p.Config.EncryptionKey)
+	// portalConfig.EncryptionKey = b64.StdEncoding.EncodeToString(key)
+
+	return key, nil
 }
 
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {

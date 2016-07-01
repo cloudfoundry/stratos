@@ -16,10 +16,10 @@ type Token struct {
 
 // Repository is an application of the repository pattern for storing tokens
 type Repository interface {
-	FindUAAToken(userGUID string) (TokenRecord, error)
-	SaveUAAToken(userGUID string, tokenRecord TokenRecord) error
+	FindUAAToken(userGUID string, encryptionKey []byte) (TokenRecord, error)
+	SaveUAAToken(userGUID string, tokenRecord TokenRecord, encryptionKey []byte) error
 
-	FindCNSIToken(cnsiGUID string, userGUID string) (TokenRecord, error)
+	FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (TokenRecord, error)
 	DeleteCNSIToken(cnsiGUID string, userGUID string) error
-	SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
+	SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord, encryptionKey []byte) error
 }

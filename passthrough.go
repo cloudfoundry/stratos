@@ -186,7 +186,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 		go p.doRequest(cnsiRequest, done, kill)
 	}
 
-	timeout := time.After(5 * time.Second)
+	timeout := time.After(time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second)
 	responses := make(map[string]CNSIRequest)
 	for range cnsiList {
 		select {

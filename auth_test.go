@@ -11,8 +11,8 @@ import (
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 	"github.com/labstack/echo"
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 func TestLoginToUAA(t *testing.T) {
@@ -54,7 +54,6 @@ func TestLoginToUAA(t *testing.T) {
 		WithArgs(mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
-	// --- set up the database expectation for pp.saveUAAToken
 	sql = `INSERT INTO tokens`
 	var newExpiry = 1234567
 	mock.ExpectExec(sql).
@@ -566,13 +565,13 @@ func TestVerifySession(t *testing.T) {
 		t.Errorf("Expected content type 'application/json', got: %s", contentType)
 	}
 
-	var expectedBody = "{\"account\":\"admin\",\"scope\":\"cloud_controller.admin\"}"
+	// var expectedBody = "{\"account\":\"admin\",\"scope\":\"cloud_controller.admin\"}"
+	var expectedBody = "{\"account\":\"admin\",\"scope\":\"openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write\"}"
 	if res == nil || strings.TrimSpace(res.Body.String()) != expectedBody {
-		t.Errorf("Responce Body incorrect.  Expected %s  Received %s", expectedBody, res.Body)
+		t.Errorf("Response Body incorrect.  Expected %s  Received %s", expectedBody, res.Body)
 	}
 
 }
-
 
 func TestVerifySessionNoDate(t *testing.T) {
 	t.Parallel()
@@ -594,7 +593,7 @@ func TestVerifySessionNoDate(t *testing.T) {
 
 	err := pp.verifySession(ctx)
 	if err == nil {
-		t.Error("Expected an 403 error with 'Could not find session date' string. got %s", err)
+		t.Errorf("Expected an 403 error with 'Could not find session date' string. got %s", err)
 	}
 
 	errHTTP, ok := err.(*echo.HTTPError)
@@ -607,7 +606,6 @@ func TestVerifySessionNoDate(t *testing.T) {
 	}
 
 }
-
 
 func TestVerifySessionExpired(t *testing.T) {
 	t.Parallel()

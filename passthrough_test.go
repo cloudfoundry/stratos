@@ -293,6 +293,10 @@ func TestValidateCNSIListWithValidGUID(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to validate CNSI GUID list. %+v\n", err)
 	}
+
+	if dberr := mock.ExpectationsWereMet(); dberr != nil {
+		t.Errorf("There were unfulfilled expectations: %s", dberr)
+	}
 }
 
 func TestValidateCNSIListWithInvalidGUID(t *testing.T) {

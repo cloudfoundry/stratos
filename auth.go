@@ -12,8 +12,9 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
-	"github.com/hpcloud/portal-proxy/repository/tokens"
 	"time"
+
+	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
 // UAAResponse - <TBD>
@@ -36,8 +37,8 @@ type LoginRes struct {
 
 // VerifySessionRes - <TBD>
 type VerifySessionRes struct {
-	Account		string	`json:"account"`
-	Scope		string	`json:"scope"`
+	Account string `json:"account"`
+	Scope   string `json:"scope"`
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -335,7 +336,7 @@ func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error 
 		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
 	}
 
-	err = tokenRepo.SaveUAAToken(key, t)
+	err = tokenRepo.SaveUAAToken(key, t, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return fmt.Errorf("Database error saving UAA token: %v", err)
 	}
@@ -351,7 +352,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "Could not find session date")
 	}
 
-	if time.Now().After(time.Unix(sessionExpireTime, 0)){
+	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 		log.Println("Session has expired")
 		return echo.NewHTTPError(http.StatusForbidden, "Session has expired")
 	}
@@ -359,12 +360,13 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	// FIXME(woodnt): OBVIOUSLY this needs to not be hard-coded.
 	//                Currently this is waiting on https://jira.hpcloud.net/browse/TEAMFOUR-617
 	resp := &VerifySessionRes{
-		Account:	"admin",
+		Account: "admin",
 		//Scope: 		"cloud_controller.admin",
-		Scope: 		"openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write",
+		Scope: "openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write",
 	}
 
-	err := c.JSON(http.StatusOK, resp); if err != nil {
+	err := c.JSON(http.StatusOK, resp)
+	if err != nil {
 		return err
 	}
 

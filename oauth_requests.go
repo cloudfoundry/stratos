@@ -10,7 +10,8 @@ import (
 )
 
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Request) (*http.Response, error) {
-	// Temporary measure until HCE has authentication
+
+	// TODO (wchrisjohnson): Temporary measure until HCE has authentication; REMOVE befoe we ship
 	shouldSkipTokenAuth := "true" == cnsiRequest.Header.Get("x-cnap-skip-token-auth")
 	if shouldSkipTokenAuth {
 		res, err := httpClient.Do(req)
@@ -25,6 +26,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 		return nil, fmt.Errorf("Request failed")
 	}
 
+	// get a cnsi token record and a cnsi record
 	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
@@ -76,6 +78,10 @@ func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord
 func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokens.TokenRecord, err error) {
 
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
+
+	// TODO (wchrisjohnson): this call is unnecessary. The cnsi token record was retrieved
+	// a few lines above where this method was called. We should remove this and pass the
+	// token in.
 	userToken, ok := p.getCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)
