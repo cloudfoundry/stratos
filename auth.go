@@ -134,8 +134,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	log.Printf("User ID: %s", userID)
 
-	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
-
+	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, uaaRes.Scope)
 	log.Println("After SAVE of CNSI token")
 
 	resp := &LoginRes{
@@ -285,11 +284,12 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 	return nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (tokens.TokenRecord, error) {
+func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string, scope string) (tokens.TokenRecord, error) {
 	tokenRecord := tokens.TokenRecord{
-		TokenExpiry:  u.TokenExpiry,
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
+		TokenExpiry:  u.TokenExpiry,
+		Scope:        scope,
 	}
 
 	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)

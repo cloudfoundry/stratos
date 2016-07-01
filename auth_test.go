@@ -410,6 +410,7 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 	badCNSIID := ""
 	badAuthToken := ""
 	badRefreshToken := ""
+	badScope := ""
 	badUserInfo := userTokenInfo{
 		UserGUID:    "",
 		TokenExpiry: 0,
@@ -430,7 +431,7 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 	mock.ExpectExec(sql).
 		WillReturnError(errors.New("Unknown Database Error"))
 
-	tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken)
+	tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken, badScope)
 
 	if err == nil || tr != emptyTokenRecord {
 		t.Error("Should not be able to save a CNSI token with invalid user, CNSI, or token data.")
