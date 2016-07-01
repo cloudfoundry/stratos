@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.endpoints')
+    .module('app.view.endpoints')
     .directive('serviceTile', serviceTile);
 
   function serviceTile () {
@@ -12,7 +12,7 @@
       },
       controller: ServiceTileController,
       controllerAs: 'serviceTileCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/endpoints/tiles/service-tile.html'
+      templateUrl: 'app/view/endpoints/tiles/service-tile.html'
     };
   }
 
@@ -21,7 +21,9 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'helion.framework.widgets.detailView',
-    '$state'
+    '$state',
+    'app.view.hceRegistration'
+
   ];
 
   /**
@@ -33,7 +35,7 @@
    * @param detailView
    *  @constructor
    */
-  function ServiceTileController ($scope, modelManager, apiManager, detailView, $state) {
+  function ServiceTileController ($scope, modelManager, apiManager, detailView, $state, hceRegistration) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -41,6 +43,7 @@
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.detailView = detailView;
     this.$state = $state;
+    this.hceRegistration = hceRegistration;
 
     this.clusterAddFlyoutActive = false;
     this.serviceInstances = {};
@@ -83,23 +86,7 @@
         // TODO(irfan) : HCF is a flyout, both should be detail views
         this.clusterAddFlyoutActive = true;
       } else {
-        var data = {name: '', url: ''};
-        this.detailView(
-          {
-            templateUrl: 'app/view/hce-registration/hce-registration.html',
-            title: gettext('Register Code Engine Endpoint')
-          },
-          {
-            data: data,
-            options: {
-              instances: this.currentEndpoints
-            }
-          }
-        ).result.then(function () {
-          return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-            that.serviceInstanceModel.list();
-          });
-        });
+        this.hceRegistration.add();
       }
     },
 
@@ -115,7 +102,7 @@
       var params = {
         serviceType: this.serviceType
       };
-      this.$state.go('cf.endpoints-view', params);
+      this.$state.go('appEndpointsView', params);
     }
 
 

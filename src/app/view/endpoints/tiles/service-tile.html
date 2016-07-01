@@ -3,7 +3,7 @@
     <span ng-if="serviceTileCtrl.isHcf()" translate> Cloud Foundry Clusters</span>
     <span ng-if="!serviceTileCtrl.isHcf()" translate> Code Engine Endpoints</span>
     <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()"
-       ng-if="serviceTileCtrl.serviceInstancesCount()>=0">
+       ng-if="serviceTileCtrl.serviceInstancesCount()>0">
       <i class="helion-icon helion-icon-Right_Arrow"></i>
       <span translate>Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</span>
     </a>

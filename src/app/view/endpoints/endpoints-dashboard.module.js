@@ -2,8 +2,8 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.endpoints', [
-      'cloud-foundry.view.applications.application.endpoints.view'
+    .module('app.view.endpoints', [
+      'app.view.endpoints.view'
     ])
     .config(registerRoute);
 
@@ -12,9 +12,10 @@
   ];
 
   function registerRoute ($stateProvider) {
-    $stateProvider.state('cf.endpoints-dashboard', {
+
+    $stateProvider.state('appEndpointsDashboard', {
       url: '/endpoints-dashboard',
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/endpoints/endpoints-dashboard.html',
+      templateUrl: 'app/view/endpoints/endpoints-dashboard.html',
       controller: EndpointsDashboardController,
       controllerAs: 'endpointsDashboardCtrl'
     });
@@ -25,22 +26,24 @@
     'app.api.apiManager',
     'helion.framework.widgets.detailView',
     '$scope',
-    '$state'
+    '$state',
+    'app.view.hceRegistration'
   ];
 
-  function EndpointsDashboardController (modelManager, apiManager, detailView, $scope, $state) {
+  function EndpointsDashboardController (modelManager, apiManager, detailView, $scope, $state, hceRegistration) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
     this.detailView = detailView;
     this.$state = $state;
+    this.hceRegistration = hceRegistration;
 
     this.currentEndpoints = [];
     this.serviceInstances = {};
 
     // Show welcome message only if no endpoints are registered
-    this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length !== 0;
+    this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
     var that = this;
     this.serviceInstanceModel.list();
     this.clusterAddFlyoutActive = false;
@@ -79,23 +82,7 @@
         // TODO(irfan) : HCF is a flyout, both should be detail views
         this.clusterAddFlyoutActive = true;
       } else {
-        var data = {name: '', url: ''};
-        this.detailView(
-          {
-            templateUrl: 'app/view/hce-registration/hce-registration.html',
-            title: gettext('Register Code Engine Endpoint')
-          },
-          {
-            data: data,
-            options: {
-              instances: this.currentEndpoints
-            }
-          }
-        ).result.then(function () {
-          return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-            that.cnsiModel.list();
-          });
-        });
+        this.hceRegistration.add();
       }
     },
 

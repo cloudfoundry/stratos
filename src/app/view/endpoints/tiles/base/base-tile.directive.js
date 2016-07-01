@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.endpoints')
+    .module('app.view.endpoints')
     .directive('baseTile', baseTile);
 
   function baseTile() {
@@ -14,7 +14,7 @@
       },
       controller: BaseTileController,
       controllerAs: 'baseTileCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/endpoints/tiles/base/base-tile.html'
+      templateUrl: 'app/view/endpoints/tiles/base/base-tile.html'
     };
   }
 
@@ -63,6 +63,7 @@
         _.each(_.keys(that.serviceInstances), function(cnsiGuid) {
           var isConnected = status.toLowerCase() === 'connected';
 
+          console.log('Cnsi' + JSON.stringify(that.userCnsiModel.serviceInstances[cnsiGuid]));
           if (!_.isUndefined(that.userCnsiModel.serviceInstances[cnsiGuid]) &&
             that.userCnsiModel.serviceInstances[cnsiGuid].valid === isConnected) {
             count += 1;

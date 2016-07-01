@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -15,7 +15,7 @@
    * @param {string} path - the application base path
    * @returns {object} The service-registration directive definition object
    */
-  function serviceRegistration(path) {
+  function serviceRegistration (path) {
     return {
       bindToController: {
         showOverlayRegistration: '=?'
@@ -49,7 +49,7 @@
    * @property {array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ServiceRegistrationController($scope, modelManager, apiManager, detailView) {
+  function ServiceRegistrationController ($scope, modelManager, apiManager, detailView) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.clusterAddFlyoutActive = false;
@@ -81,17 +81,17 @@
       });
     });
 
-    $scope.$watchCollection(function() {
+    $scope.$watchCollection(function () {
       return that.serviceInstances;
-    }, function(newCnsis) {
+    }, function (newCnsis) {
       that.currentEndpoints = _.map(newCnsis,
-        function(c) {
+        function (c) {
           var endpoint = c.api_endpoint;
           return endpoint.Scheme + '://' + endpoint.Host;
         });
     });
 
-    this.userCnsiModel.list().then(function() {
+    this.userCnsiModel.list().then(function () {
       angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
       that.cnsiModel.list();
     });
@@ -138,7 +138,7 @@
       var id = angular.isUndefined(userServiceInstance.guid) ? userServiceInstance.id : userServiceInstance.guid;
 
       this.userCnsiModel.disconnect(id)
-        .then(function success() {
+        .then(function success () {
           delete userServiceInstance.account;
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
@@ -160,7 +160,7 @@
     remove: function (serviceInstance) {
       var that = this;
       this.cnsiModel.remove(serviceInstance)
-        .then(function success() {
+        .then(function success () {
           that.serviceInstances = {};
           that.userCnsiModel.list().then(function () {
             angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
@@ -198,7 +198,7 @@
       // -- woodnt
 
       var that = this;
-      var data = { name: '', url: '' };
+      var data = {name: '', url: ''};
       this.detailView(
         {
           templateUrl: 'app/view/hce-registration/hce-registration.html',
@@ -217,14 +217,19 @@
       });
     },
 
+    isAdmin: function () {
+      console.log('isAdmin: ' + this.currentUserAccount.isAdmin());
+      return this.currentUserAccount.isAdmin();
+    },
+
     /**
      * @function overrideIsAdmin
      * @memberOf app.view.ServiceRegistrationController
      * @description Hide the cluster add form flyout
      */
-    overrideIsAdmin: function(isDeveloper) {
-      this.currentUserAccount.adminOverride = isDeveloper;
-    },
+    overrideIsAdmin: function (isDeveloper) {
+      this.currentUserAccount.setAdminOverride(isDeveloper);
+    }
 
   });
 

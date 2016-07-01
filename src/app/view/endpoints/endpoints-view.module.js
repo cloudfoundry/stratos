@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.application.endpoints.view', [])
+    .module('app.view.endpoints.view', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -10,9 +10,9 @@
   ];
 
   function registerRoute ($stateProvider) {
-    $stateProvider.state('cf.endpoints-view', {
+    $stateProvider.state('appEndpointsView', {
       url: '/endpoints-view/:serviceType',
-      templateUrl: 'plugins/cloud-foundry/view/applications/application/endpoints/endpoints-view.html',
+      templateUrl: 'app/view/endpoints/endpoints-view.html',
       controller: EndpointsViewController,
       controllerAs: 'endpointsViewCtrl'
     });
@@ -23,35 +23,37 @@
     'app.api.apiManager',
     '$stateParams',
     'helion.framework.widgets.detailView',
-    '$scope'
+    '$scope',
+    'app.view.hceRegistration'
+
   ];
 
-  function EndpointsViewController (modelManager, apiManager, $stateParams, detailView, $scope) {
+  function EndpointsViewController (modelManager, apiManager, $stateParams, detailView, $scope, hceRegistration) {
 
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.detailView = detailView;
     this.serviceType = $stateParams.serviceType;
     this.currentEndpoints = [];
     this.serviceInstances = {};
     this.clusterAddFlyoutActive = false;
+    this.hceRegistration = hceRegistration;
     this.tokenExpiryMessage = 'Token has expired';
 
     this.activeServiceInstance = null;
     var that = this;
     this.serviceInstanceModel.list();
+    this.userServiceInstanceModel.list();
 
     // FIXME there is got to be a better way than this?
     this.showDropdown = {};
     $scope.$watchCollection(function () {
       return that.serviceInstanceModel.serviceInstances;
     }, function (serviceInstances) {
-
-      var filteredInstances = _.filter(serviceInstances, function (serviceInstance) {
-        return serviceInstance.cnsi_type === that.serviceType;
-      });
+      var filteredInstances = _.filter(serviceInstances, {cnsi_type: that.serviceType});
       _.forEach(filteredInstances, function (serviceInstance) {
         var guid = serviceInstance.guid;
         if (angular.isUndefined(that.serviceInstances[guid])) {
@@ -61,13 +63,18 @@
         }
       });
 
+
       that.currentEndpoints = _.map(that.serviceInstances,
         function (c) {
           var endpoint = c.api_endpoint;
+          var isConnected = true;
+          if (that.isHcf()) {
+            isConnected = that.serviceInstances[c.guid].valid;
+          }
           return {
             name: c.name,
             url: endpoint.Scheme + '://' + endpoint.Host,
-            connected: that.isHcf() ? that.serviceInstances[c.guid].valid : true,
+            connected: isConnected,
             model: c
           };
         });
@@ -100,23 +107,7 @@
         // TODO(irfan) : HCF is a flyout, both should be detail views
         this.clusterAddFlyoutActive = true;
       } else {
-        var data = {name: '', url: ''};
-        this.detailView(
-          {
-            templateUrl: 'app/view/hce-registration/hce-registration.html',
-            title: gettext('Register Code Engine Endpoint')
-          },
-          {
-            data: data,
-            options: {
-              instances: this.currentEndpoints
-            }
-          }
-        ).result.then(function () {
-          return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-            that.serviceInstanceModel.list();
-          });
-        });
+        this.hceRegistration.add();
       }
     },
 
@@ -124,7 +115,6 @@
       var that = this;
       if (this.showDropdown[index]) {
         this.showDropdown[index] = false;
-        return;
       } else {
         _.each(_.keys(this.showDropdown), function (rowIndex) {
           that.showDropdown[rowIndex] = false;
@@ -145,7 +135,7 @@
     },
 
     onConnectSuccess: function () {
-      this.serviceInstanceModel.numValid += 1;
+      this.userServiceInstanceModel.numValid += 1;
       this.credentialsFormOpen = false;
       this.activeServiceInstance = null;
     }
