@@ -1,0 +1,55 @@
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+resources:
+- name: stratos-ui-pr
+  type: pull-request
+  source:
+    access_token: {{github-access-token}}
+    repo: hpcloud/stratos-ui
+    uri: git@github.com:hpcloud/stratos-ui.git
+    private_key: {{github-private-key}}
+- name: helion-ui-theme
+  type: git
+  source:
+    uri: git@github.com:hpcloud/helion-ui-theme.git
+    branch: master
+    private_key: {{github-private-key}}
+- name: helion-ui-framework
+  type: git
+  source:
+    uri: git@github.com:hpcloud/helion-ui-framework.git
+    branch: master
+    private_key: {{github-private-key}}
+
+jobs:
+- name: console-ui-tests
+  plan:
+  # get dependencies
+  - get: helion-ui-theme
+    trigger: true
+  - get: helion-ui-framework
+    trigger: true
+  # get PR and set status to pending
+  - get: stratos-ui-pr
+    trigger: true
+  - put: stratos-ui-pr
+    params:
+      path: stratos-ui-pr
+      status: pending
+  # install libraries and run tests
+  - task: run-tests
+    file: stratos-ui-pr/ci/tasks/run-tests.yml
+    on_success:
+      put: stratos-ui-pr
+      params:
+        path: stratos-ui-pr
+        status: success
+    on_failure:
+      put: stratos-ui-pr
+      params:
+        path: stratos-ui-pr
+        status: failure

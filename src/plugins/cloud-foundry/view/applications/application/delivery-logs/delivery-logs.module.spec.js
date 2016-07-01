@@ -581,7 +581,6 @@
           }
         });
       });
-
     });
 
     describe('dynamic loading of events when execution visible - updateVisibleExecutions', function() {
