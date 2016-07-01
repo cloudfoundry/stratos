@@ -8,19 +8,19 @@ import (
 )
 
 const (
-	listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
+	listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint
                FROM cnsis`
 
 	listCNSIsByUser = `SELECT c.guid, c.name, c.api_endpoint, t.user_guid, t.token_expiry
                      FROM cnsis c, tokens t
                      WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2`
 
-	findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint
+	findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint
               FROM cnsis
               WHERE guid=$1`
 
-	saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint)
-              VALUES ($1, $2, $3, $4, $5, $6)`
+	saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint)
+              VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 )
@@ -57,7 +57,7 @@ func (p *PostgresCNSIRepository) List() ([]*CNSIRecord, error) {
 
 		cnsi := new(CNSIRecord)
 
-		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint)
+		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
 		}
@@ -128,7 +128,7 @@ func (p *PostgresCNSIRepository) Find(guid string) (CNSIRecord, error) {
 	cnsi := new(CNSIRecord)
 
 	err := p.db.QueryRow(findCNSI, guid).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
-		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint)
+		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -136,7 +136,7 @@ func (p *PostgresCNSIRepository) Find(guid string) (CNSIRecord, error) {
 	case err != nil:
 		return CNSIRecord{}, fmt.Errorf("Error trying to Find CNSI record: %v", err)
 	default:
-		// do nothing
+	// do nothing
 	}
 
 	// TODO(wchrisjohnson): discover a way to do this automagically
@@ -156,7 +156,7 @@ func (p *PostgresCNSIRepository) Find(guid string) (CNSIRecord, error) {
 func (p *PostgresCNSIRepository) Save(guid string, cnsi CNSIRecord) error {
 
 	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint); err != nil {
+		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}
 

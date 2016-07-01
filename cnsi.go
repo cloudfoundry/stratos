@@ -17,8 +17,9 @@ import (
 )
 
 type v2Info struct {
-	AuthorizationEndpoint string `json:"authorization_endpoint"`
-	TokenEndpoint         string `json:"token_endpoint"`
+	AuthorizationEndpoint   string `json:"authorization_endpoint"`
+	TokenEndpoint           string `json:"token_endpoint"`
+	DopplerLoggingEndpoint  string `json:"doppler_logging_endpoint"`
 }
 
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
@@ -54,11 +55,12 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	// save data to temporary map
 	newCNSI := cnsis.CNSIRecord{
-		Name:                  cnsiName,
-		CNSIType:              cnsis.CNSIHCF,
-		APIEndpoint:           apiEndpointURL,
-		TokenEndpoint:         v2InfoResponse.TokenEndpoint,
-		AuthorizationEndpoint: v2InfoResponse.AuthorizationEndpoint,
+		Name:                    cnsiName,
+		CNSIType:                cnsis.CNSIHCF,
+		APIEndpoint:             apiEndpointURL,
+		TokenEndpoint:           v2InfoResponse.TokenEndpoint,
+		AuthorizationEndpoint:   v2InfoResponse.AuthorizationEndpoint,
+		DopplerLoggingEndpoint:  v2InfoResponse.DopplerLoggingEndpoint,
 	}
 
 	err = p.setCNSIRecord(guid, newCNSI)

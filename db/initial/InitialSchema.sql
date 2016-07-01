@@ -17,12 +17,13 @@ CREATE INDEX tokens_token_type ON tokens (token_type);
 
 -- For storage of CNSI records
 CREATE TABLE IF NOT EXISTS cnsis (
-  guid            VARCHAR(36)   NOT NULL UNIQUE,
-  name            VARCHAR(255)  NOT NULL,
-  cnsi_type       VARCHAR(3)    NOT NULL,
-  api_endpoint    VARCHAR(255)  NOT NULL,
-  auth_endpoint   VARCHAR(255)  NOT NULL,
-  token_endpoint  VARCHAR(255)  NOT NULL,
+  guid                      VARCHAR(36)   NOT NULL UNIQUE,
+  name                      VARCHAR(255)  NOT NULL,
+  cnsi_type                 VARCHAR(3)    NOT NULL,
+  api_endpoint              VARCHAR(255)  NOT NULL,
+  auth_endpoint             VARCHAR(255)  NOT NULL,
+  token_endpoint            VARCHAR(255)  NOT NULL,
+  doppler_logging_endpoint  VARCHAR(255)  NOT NULL,
   last_updated    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
   PRIMARY KEY (guid)
 );
