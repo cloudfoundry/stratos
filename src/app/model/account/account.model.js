@@ -102,6 +102,10 @@
       return p;
     },
 
+    setAdminOverride: function(bool){
+      this.adminOverride = bool;
+    },
+
     /**
      * @function isAdmin
      * @memberof app.model.account.Account
@@ -112,8 +116,8 @@
     isAdmin: function () {
 
       //TODO(irfan) Hook for development, remove before merging
-      if(this.adminOverride){
-         return false;
+      if (this.adminOverride) {
+        return false;
       }
       var ADMIN_SCOPES = [
         'cloud_controller.admin',

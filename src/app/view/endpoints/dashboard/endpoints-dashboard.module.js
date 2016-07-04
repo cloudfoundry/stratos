@@ -32,6 +32,7 @@
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
+    this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.detailView = detailView;
     this.$state = $state;
     this.hceRegistration = hceRegistration;
@@ -93,6 +94,16 @@
 
     hideWelcomeMessage: function () {
       this.showWelcomeMessage = false;
+    },
+
+    /**
+     * @function isAdmin
+     * @memberOf app.view.endpoints.dashboard
+     * @description Is current user an admin?
+     * @returns {Boolean}
+     */
+    isUserAdmin: function () {
+      return this.currentUserAccount.isAdmin();
     }
 
   });

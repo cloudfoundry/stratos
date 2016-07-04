@@ -39,7 +39,8 @@
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceType = $scope.serviceType;
-    this.userServiceInstanceModel =  modelManager.retrieve('app.model.serviceInstance.user');;
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.$state = $state;
     this.hceRegistration = hceRegistration;
 
@@ -128,13 +129,13 @@
           var isConnected = status.toLowerCase() === 'connected';
           var isDisconnected = status.toLowerCase() === 'disconnected';
           if (_.isUndefined(that.userServiceInstanceModel.serviceInstances[cnsiGuid])) {
-             // disconnected state
+            // disconnected state
             // TODO may not be true when disconnect from instance is implemented
             if (isDisconnected) {
               count += 1;
             }
-          } else {
-             // valid or expired state
+          } else if (!isDisconnected) {
+            // valid or expired state
             if (that.userServiceInstanceModel.serviceInstances[cnsiGuid].valid === isConnected) {
               count += 1;
             }
@@ -148,6 +149,16 @@
       }
 
       return count;
+    },
+
+    /**
+     * @function isAdmin
+     * @memberOf app.view.endpoints.dashboard
+     * @description Is current user an admin?
+     * @returns {Boolean}
+     */
+    isUserAdmin: function () {
+      return this.currentUserAccount.isAdmin();
     }
 
   });

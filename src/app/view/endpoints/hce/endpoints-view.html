@@ -3,7 +3,10 @@
     <div class="applications-header font-semi-bold pull-left" translate>
       {{endpointsViewCtrl.isHcf() ? 'Cloud Foundry Clusters':'Code Engine Endpoints'}}
     </div>
-    <button class="btn btn-primary" ng-click="endpointsViewCtrl.showClusterAddForm()">Register Endpoint</button>
+    <button class="btn btn-primary"
+            ng-click="endpointsViewCtrl.showClusterAddForm()"
+            ng-show="endpointsViewCtrl.isUserAdmin()">Register Endpoint
+    </button>
 
   </div>
 
@@ -43,7 +46,10 @@
             <li class="actions-menu-item" ng-if="endpoint.connected"
                 ng-click="endpointsViewCtrl.disconnect(endpoint.model)">Disconnect
             </li>
-            <li class="actions-menu-item" ng-click="endpointsViewCtrl.unregister(endpoint)">Unregister</li>
+            <li class="actions-menu-item"
+                ng-click="endpointsViewCtrl.unregister(endpoint)"
+                ng-show="endpointsViewCtrl.isUserAdmin()">Unregister
+            </li>
           </ul>
         </div>
       </td>
