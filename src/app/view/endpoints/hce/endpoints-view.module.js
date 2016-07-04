@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.view', [])
+    .module('app.view.endpoints.hce', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -10,9 +10,9 @@
   ];
 
   function registerRoute ($stateProvider) {
-    $stateProvider.state('appEndpointsView', {
-      url: '/endpoints-view/:serviceType',
-      templateUrl: 'app/view/endpoints/endpoints-view.html',
+    $stateProvider.state('endpoints.hce', {
+      url: '/hce',
+      templateUrl: 'app/view/endpoints/hce/endpoints-view.html',
       controller: EndpointsViewController,
       controllerAs: 'endpointsViewCtrl'
     });
@@ -36,7 +36,7 @@
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.detailView = detailView;
-    this.serviceType = $stateParams.serviceType;
+    this.serviceType = 'hce';
     this.currentEndpoints = [];
     this.serviceInstances = {};
     this.clusterAddFlyoutActive = false;

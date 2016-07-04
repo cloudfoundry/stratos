@@ -2,60 +2,57 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints')
-    .directive('serviceTile', serviceTile);
+    .module('app.view.endpoints.dashboard', [])
+    .config(registerRoute);
 
-  function serviceTile () {
-    return {
-      scope: {
-        serviceType: '@'
-      },
-      controller: ServiceTileController,
-      controllerAs: 'serviceTileCtrl',
-      templateUrl: 'app/view/endpoints/tiles/service-tile.html'
-    };
+  registerRoute.$inject = [
+    '$stateProvider'
+  ];
+
+  function registerRoute ($stateProvider) {
+    $stateProvider.state('endpoints.dashboard', {
+      url: '/dashboard',
+      templateUrl: 'app/view/endpoints/dashboard/endpoints-dashboard.html',
+      controller: EndpointsDashboardController,
+      controllerAs: 'endpointsDashboardCtrl'
+    });
   }
 
-  ServiceTileController.$inject = [
-    '$scope',
+  EndpointsDashboardController.$inject = [
     'app.model.modelManager',
     'app.api.apiManager',
     'helion.framework.widgets.detailView',
+    '$scope',
     '$state',
     'app.view.hceRegistration'
-
   ];
 
-  /**
-   *
-   * @memberOf cloud-foundry.view.applications.application.endpoints
-   * @param $scope
-   * @param modelManager
-   * @param apiManager
-   * @param detailView
-   *  @constructor
-   */
-  function ServiceTileController ($scope, modelManager, apiManager, detailView, $state, hceRegistration) {
+  function EndpointsDashboardController (modelManager, apiManager, detailView, $scope, $state, hceRegistration) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.serviceType = $scope.serviceType;
-    this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
+    this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
     this.detailView = detailView;
     this.$state = $state;
     this.hceRegistration = hceRegistration;
 
-    this.clusterAddFlyoutActive = false;
+    this.currentEndpoints = [];
     this.serviceInstances = {};
+
+    // Show welcome message only if no endpoints are registered
+    this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
     var that = this;
+    this.serviceInstanceModel.list();
+    this.clusterAddFlyoutActive = false;
 
     $scope.$watchCollection(function () {
       return that.serviceInstanceModel.serviceInstances;
     }, function (serviceInstances) {
-      var filteredInstances = _.filter(serviceInstances, function (serviceInstance) {
-        return serviceInstance.cnsi_type === that.serviceType;
-      });
-      _.forEach(filteredInstances, function (serviceInstance) {
+
+      if (that.showWelcomeMessage && serviceInstances.length > 0) {
+        that.showWelcomeMessage = false;
+      }
+      _.forEach(serviceInstances, function (serviceInstance) {
         var guid = serviceInstance.guid;
         if (angular.isUndefined(that.serviceInstances[guid])) {
           that.serviceInstances[guid] = serviceInstance;
@@ -70,14 +67,10 @@
           return endpoint.Scheme + '://' + endpoint.Host;
         });
     });
+
   }
 
-  angular.extend(ServiceTileController.prototype, {
-
-    serviceInstancesCount: function () {
-      return _.keys(this.serviceInstances).length;
-    },
-
+  angular.extend(EndpointsDashboardController.prototype, {
 
     showClusterAddForm: function () {
 
@@ -98,11 +91,8 @@
       return this.serviceType === 'hcf';
     },
 
-    goToEndpointsView: function () {
-      var params = {
-        serviceType: this.serviceType
-      };
-      this.$state.go('appEndpointsView', params);
+    hideWelcomeMessage: function () {
+      this.showWelcomeMessage = false;
     }
 
   });

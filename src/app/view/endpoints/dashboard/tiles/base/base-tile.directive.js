@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints')
+    .module('app.view.endpoints.dashboard')
     .directive('baseTile', baseTile);
 
   function baseTile() {
@@ -14,7 +14,7 @@
       },
       controller: BaseTileController,
       controllerAs: 'baseTileCtrl',
-      templateUrl: 'app/view/endpoints/tiles/base/base-tile.html'
+      templateUrl: 'app/view/endpoints/dashboard/tiles/base/base-tile.html'
     };
   }
 
