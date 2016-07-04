@@ -1,0 +1,55 @@
+<div class="endpoint-view">
+  <div class="header">
+    <div class="font-semi-bold pull-left" translate>
+      Cloud Foundry Clusters
+    </div>
+    <button class="btn btn-primary" ng-click="clustersCtrl.showClusterAddForm()">Register Cluster</button>
+  </div>
+
+  <div id="welcome-message" class="welcome-message panel panel-default">
+    <span class="helion-icon helion-icon-Information"></span>
+    {{ 'You must connect to a cluster with your credentials to access and manage the cluster' | translate}}
+  </div>
+
+  <!--app-gallery-card-->
+  <div class="col-md-4 col-sm-1" ng-repeat="cluster in clustersCtrl.serviceInstanceModel.serviceInstances | filter:{ cnsi_type:'hcf'}">
+    <cluster-tile cluster="cluster"></cluster-tile>
+  </div>
+
+
+  <!--<table class="table table-actionable">-->
+    <!--<thead>-->
+    <!--<tr>-->
+      <!--<th translate=""><span>Name</span></th>-->
+      <!--<th translate=""><span>Endpoint url</span></th>-->
+      <!--<th translate=""><span>Connection</span></th>-->
+      <!--<th translate=""><span></span></th>-->
+    <!--</tr>-->
+    <!--</thead>-->
+    <!--<tbody>-->
+    <!--<tr ng-repeat="endpoint in endpointsViewCtrl.currentEndpoints"-->
+        <!--show-table-inline-message="{{ !endpoint.connected ? endpointsViewCtrl.tokenExpiryMessage : ''}}">-->
+      <!--<td>{{endpoint.name}}</td>-->
+      <!--<td>{{endpoint.url}}</td>-->
+      <!--<td translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>-->
+      <!--<td>-->
+        <!--<div class="actions-menu dropdown" ng-class="{'open': endpointsViewCtrl.showDropdown[$index]}"-->
+             <!--ng-click="endpointsViewCtrl.setShowDropdown($index)" tabindex="1">-->
+          <!--<i class="actions-menu-icon dropdown-toggle helion-icon helion-icon-lg helion-icon-More"-->
+             <!--style="cursor: pointer;"></i>-->
+          <!--<ul class="actions-menu-list dropdown-menu">-->
+            <!--<li class="actions-menu-item" ng-if="!endpoint.connected"-->
+                <!--ng-click="endpointsViewCtrl.connect(endpoint.model)">Connect-->
+            <!--</li>-->
+            <!--<li class="actions-menu-item" ng-if="endpoint.connected"-->
+                <!--ng-click="endpointsViewCtrl.disconnect(endpoint.model)">Disconnect-->
+            <!--</li>-->
+            <!--<li class="actions-menu-item" ng-click="endpointsViewCtrl.unregister(endpoint)">Unregister</li>-->
+          <!--</ul>-->
+        <!--</div>-->
+      <!--</td>-->
+    <!--</tr>-->
+    <!--</tbody>-->
+  <!--</table>-->
+
+</div>

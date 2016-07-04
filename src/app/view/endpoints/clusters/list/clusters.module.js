@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.hcf', [])
+    .module('app.view.endpoints')
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -11,15 +11,15 @@
 
   function registerRoute($stateProvider) {
     console.log('registering');
-    $stateProvider.state('endpoints.hcf', {
-      url: '/hcf',
-      templateUrl: 'app/view/endpoints/hcf/hcf-endpoints-view.html',
-      controller: HcfEndpointsViewController,
-      controllerAs: 'hcfEndpointsViewCtrl'
+    $stateProvider.state('endpoints.clusters', {
+      url: '/clusters',
+      templateUrl: 'app/view/endpoints/clusters/list/clusters.html',
+      controller: ClustersController,
+      controllerAs: 'clustersCtrl'
     });
   }
 
-  HcfEndpointsViewController.$inject = [
+  ClustersController.$inject = [
     'app.model.modelManager',
     'app.api.apiManager',
     '$stateParams',
@@ -29,12 +29,17 @@
 
   ];
 
-  function HcfEndpointsViewController(modelManager, apiManager, $stateParams, detailView, $scope, hceRegistration) {
+  function ClustersController(modelManager, apiManager, $stateParams, detailView, $scope, hceRegistration) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
+    this.serviceInstanceModel.list();
+
+
+
+
+    // this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    // this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     // this.detailView = detailView;
     // this.serviceType = $stateParams.serviceType;
     // this.currentEndpoints = [];
@@ -81,7 +86,7 @@
     // });
   }
 
-  angular.extend(HcfEndpointsViewController.prototype, {
+  angular.extend(ClustersController.prototype, {
 
     connect: function(serviceInstance) {
       // TODO implement HCE authentication

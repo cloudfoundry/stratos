@@ -2,11 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints', [
-      'app.view.endpoints.dashboard',
-      'app.view.endpoints.hcf',
-      'app.view.endpoints.hce'
-    ])
+    .module('app.view.endpoints', [ ])
     .config(registerRoute);
 
   registerRoute.$inject = [

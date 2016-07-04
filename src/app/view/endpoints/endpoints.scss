@@ -1,3 +1,33 @@
 @import "dashboard/endpoints-dashboard";
 @import "hce/endpoints-view";
-@import "hcf/hcf-endpoints-view";
+@import "clusters/list/clusters";
+
+
+.endpoint-view {
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+
+  .header {
+    font-size: $hpe-unit-space;
+    padding: $hpe-unit-space 0px;
+    position: relative;
+    button {
+      position: absolute;
+      right: 10px;
+    }
+  }
+
+  .welcome-message {
+    line-height: 1;
+    padding: $hpe-unit-space;
+    span:first-of-type {
+      padding-right: $hpe-unit-space - 10px;
+    }
+  }
+  th {
+    font-weight: normal
+  }
+}

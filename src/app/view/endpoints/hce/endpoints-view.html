@@ -1,6 +1,6 @@
-<div class="endpoints-view">
+<div class="endpoint-view">
   <div class="header">
-    <div class="applications-header font-semi-bold pull-left" translate>
+    <div class="font-semi-bold pull-left" translate>
       {{endpointsViewCtrl.isHcf() ? 'Cloud Foundry Clusters':'Code Engine Endpoints'}}
     </div>
     <button class="btn btn-primary"
@@ -10,13 +10,9 @@
 
   </div>
 
-  <div id="welcome-message" class="welcome-message">
-    <div class="panel panel-default">
-      <div class="action-header">
-        <span class="helion-icon helion-icon-Information"></span>
-        <span>In order to set up a delivery pipeline, you must connect to an endpoint.</span>
-      </div>
-    </div>
+  <div id="welcome-message" class="welcome-message panel panel-default">
+    <span class="helion-icon helion-icon-Information"></span>
+    {{ 'In order to set up a delivery pipeline, you must connect to an endpoint.' | translate}}
   </div>
 
   <table class="table table-actionable">

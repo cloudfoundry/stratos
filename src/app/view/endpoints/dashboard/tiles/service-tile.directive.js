@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.dashboard')
+    .module('app.view.endpoints')
     .directive('serviceTile', serviceTile);
 
   function serviceTile () {
@@ -116,7 +116,7 @@
      */
     goToEndpointsView: function () {
       if (this.isHcf()) {
-        this.$state.go('endpoints.hcf');
+        this.$state.go('endpoints.clusters');
       } else {
         this.$state.go('endpoints.hce', {
           serviceType: 'hce'
