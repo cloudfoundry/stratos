@@ -19,7 +19,6 @@
   ServiceTileController.$inject = [
     '$scope',
     'app.model.modelManager',
-    'app.api.apiManager',
     '$state',
     'app.view.hceRegistration',
     'app.view.hcfRegistration'
@@ -27,15 +26,18 @@
   ];
 
   /**
-   *
-   * @memberOf cloud-foundry.view.applications.application.endpoints
-   * @param $scope
-   * @param modelManager
-   * @param apiManager
-   * @param detailView
-   *  @constructor
+   * @namespace app.view.hcfRegistration.serviceTile
+   * @memberof app.view.hcfRegistration
+   * @name ServiceTileController
+   * @description Controller for HCE Endpoints View
+   * @param {object} $scope - angular $scope
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {object} $state - the UI router $state service
+   * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
+   * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
+   * @constructor
    */
-  function ServiceTileController ($scope, modelManager, apiManager, $state, hceRegistration, hcfRegistration) {
+  function ServiceTileController ($scope, modelManager, $state, hceRegistration, hcfRegistration) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -46,7 +48,6 @@
     this.hceRegistration = hceRegistration;
     this.hcfRegistration = hcfRegistration;
 
-    this.clusterAddFlyoutActive = false;
     this.serviceInstances = {};
     var that = this;
 
@@ -70,10 +71,23 @@
 
   angular.extend(ServiceTileController.prototype, {
 
+    /**
+     * @namespace app.view.endpoints.dashboard.serviceTile
+     * @memberof app.view.endpoints.dashboard
+     * @name serviceInstancesCount
+     * @description Get number of services
+     * @param {number} service number
+     */
     serviceInstancesCount: function () {
       return _.keys(this.serviceInstances).length;
     },
 
+    /**
+     * @namespace app.view.endpoints.dashboard.serviceTile
+     * @memberof app.view.endpoints.dashboard
+     * @name showClusterAddForm
+     * @description Show appropriate cluster add form
+     */
     showClusterAddForm: function () {
 
       if (this.isHcf()) {
@@ -83,10 +97,23 @@
       }
     },
 
+    /**
+     * @namespace app.view.endpoints.dashboard.serviceTile
+     * @memberof app.view.endpoints.dashboard
+     * @name isHcf
+     * @description Check if endpoint view instance is an HCF instance
+     * @return {Boolean}
+     */
     isHcf: function () {
       return this.serviceType === 'hcf';
     },
 
+    /**
+     * @namespace app.view.endpoints.dashboard.serviceTile
+     * @memberof app.view.endpoints.dashboard
+     * @name goToEndpointsView
+     * @description Show drill down view
+     */
     goToEndpointsView: function () {
       if (this.isHcf()) {
         this.$state.go('endpoints.hcf');
@@ -98,21 +125,10 @@
     },
 
     /**
-     * @function getInstancesCount
-     * @description Get total number of services
-     * @memberOf cloud-foundry.view.applications.application.endpoints
-     * @returns {Number} count
-     */
-    getInstancesCount: function () {
-      return _.keys(this.serviceInstances).length;
-    },
-
-    /**
      * @function getInstancesCountByStatus
-     * @memberOf cloud-foundry.view.applications.application.endpoints
-     getServiceInstanceCount
+     * @memberOf app.view.endpoints.dashboard
+     * @namespace app.view.endpoints.dashboard.getServiceInstanceCount
      * @description Get number of services in a particular status
-     * @memberOf cloud-foundry.view.applications.application.endpoints
      * @returns {Number} count
      */
     getInstancesCountByStatus: function (status) {
@@ -149,8 +165,8 @@
     },
 
     /**
-     * @function isAdmin
-     * @memberOf app.view.endpoints.dashboard
+     * @function isUserAdmin
+     * @memberOf app.view.endpoints.hce
      * @description Is current user an admin?
      * @returns {Boolean}
      */

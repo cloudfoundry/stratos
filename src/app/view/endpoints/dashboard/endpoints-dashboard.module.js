@@ -28,6 +28,19 @@
     'app.view.hcfRegistration'
   ];
 
+  /**
+   * @namespace app.view.endpoints.hce
+   * @memberof app.view.endpoints.hce
+   * @name EndpointsDashboardController
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.api.apiManager} apiManager - the api manager
+   * @param {helion.framework.widgets.detailView} detailView - the detail view service
+   * @param {object} $scope - angular $scope
+   * @param {object} $state - the UI router $state service
+   * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
+   * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
+   * @constructor
+   */
   function EndpointsDashboardController (modelManager, apiManager, detailView, $scope, $state, hceRegistration, hcfRegistration) {
 
     this.modelManager = modelManager;
@@ -75,6 +88,12 @@
 
   angular.extend(EndpointsDashboardController.prototype, {
 
+    /**
+     * @namespace app.view.endpoints.dashboard
+     * @memberof app.view.endpoints.dashboard
+     * @name showClusterAddForm
+     * @description Show cluster add form
+     */
     showClusterAddForm: function () {
       if (this.isHcf()) {
         this.hcfRegistration.add();
@@ -83,17 +102,30 @@
       }
     },
 
+    /**
+     * @namespace app.view.endpoints.dashboard
+     * @memberof app.view.endpoints.dashboard
+     * @name isHcf
+     * @description Check if endpoint view instance is an HCF instance
+     * @return {Boolean}
+     */
     isHcf: function () {
       return this.serviceType === 'hcf';
     },
 
+    /**
+     * @namespace app.view.endpoints.dashboard
+     * @memberof app.view.endpoints.dashboard
+     * @name hideWelcomeMessage
+     * @description Hide Welcome message
+     */
     hideWelcomeMessage: function () {
       this.showWelcomeMessage = false;
     },
 
     /**
-     * @function isAdmin
-     * @memberOf app.view.endpoints.dashboard
+     * @function isUserAdmin
+     * @memberOf app.view.endpoints.hce
      * @description Is current user an admin?
      * @returns {Boolean}
      */

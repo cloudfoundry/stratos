@@ -26,8 +26,18 @@
 
   ];
 
+  /**
+   * @namespace app.view.endpoints.hce
+   * @memberof app.view.endpoints.hce
+   * @name EndpointsViewController
+   * @description Controller for HCE Endpoints View
+   * @constructor
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.api.apiManager} apiManager - the api manager
+   * @param {object} $scope - angular $scope
+   * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
+   */
   function EndpointsViewController (modelManager, apiManager, $scope, hceRegistration) {
-
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -94,22 +104,58 @@
 
   angular.extend(EndpointsViewController.prototype, {
 
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name connect
+     * @description Connect to service
+     * @param {object} serviceInstance - Service instance
+     */
     connect: function (serviceInstance) {
       // TODO implement HCE authentication
+      // Currently only implemented for HCF
+        this.activeServiceInstance = serviceInstance;
+        this.credentialsFormOpen = true;
     },
 
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name disconnect
+     * @description disconnect from service
+     * @param {object} serviceInstance - Service instance
+     */
     disconnect: function (serviceInstance) {
       // TODO implement HCE authentication
     },
 
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name unregister
+     * @description unregister service
+     * @param {object} serviceInstance - Service instance
+     */
     unregister: function (serviceInstance) {
       // TODO remove...
     },
 
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name showClusterAddForm
+     * @description Show cluster add form
+     */
     showClusterAddForm: function () {
         this.hceRegistration.add();
     },
 
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name setShowDropdown
+     * @description Private method to control dropdowns
+     */
     setShowDropdown: function (index) {
       var that = this;
       if (this.showDropdown[index]) {
@@ -122,14 +168,35 @@
       }
     },
 
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name isHcf
+     * @description Check if endpoint view instance is an HCF instance
+     * @return {Boolean}
+     */
     isHcf: function () {
       return this.serviceType === 'hcf';
     },
 
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name isHcf
+     * @description Check if endpoint view instance is an HCF instance
+     * @return {Boolean}
+     */
     onConnectCancel: function () {
       this.credentialsFormOpen = false;
     },
 
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name onConnectSuccess
+     * @description dismiss view when connection succeeds
+     * @return {Boolean}
+     */
     onConnectSuccess: function () {
       this.userServiceInstanceModel.numValid += 1;
       this.credentialsFormOpen = false;
@@ -137,8 +204,8 @@
     },
 
     /**
-     * @function isAdmin
-     * @memberOf app.view.endpoints.dashboard
+     * @function isUserAdmin
+     * @memberOf app.view.endpoints.hce
      * @description Is current user an admin?
      * @returns {Boolean}
      */
