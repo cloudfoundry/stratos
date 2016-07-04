@@ -31,7 +31,9 @@
     '$scope',
     'app.model.modelManager',
     'app.api.apiManager',
-    'helion.framework.widgets.detailView'
+    'app.view.hceRegistration',
+    'app.view.hcfRegistration'
+
   ];
 
   /**
@@ -49,7 +51,7 @@
    * @property {array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ServiceRegistrationController ($scope, modelManager, apiManager, detailView) {
+  function ServiceRegistrationController ($scope, modelManager, apiManager, hceRegistration, hcfRegistration) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.clusterAddFlyoutActive = false;
@@ -60,7 +62,8 @@
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
-    this.detailView = detailView;
+    this.hceRegistration = hceRegistration;
+    this.hcfRegistration = hcfRegistration;
     this.currentEndpoints = [];
     /* eslint-disable */
     // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
@@ -175,16 +178,7 @@
      * @description Show the cluster add form flyout
      */
     showClusterAddForm: function () {
-      this.clusterAddFlyoutActive = true;
-    },
-
-    /**
-     * @function hideClusterAddForm
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Hide the cluster add form flyout
-     */
-    hideClusterAddForm: function () {
-      this.clusterAddFlyoutActive = false;
+      this.hcfRegistration.add();
     },
 
     /**
@@ -193,28 +187,7 @@
      * @description Show the HCE Endpoint add form detail view
      */
     showHCEEndpointAddForm: function () {
-      // This code is shamelessly copied from app/view/cluster-registration/cluster-registration.directive.js
-      // I take that back, it was EXTREMELY SHAMEFUL.
-      // -- woodnt
-
-      var that = this;
-      var data = {name: '', url: ''};
-      this.detailView(
-        {
-          templateUrl: 'app/view/hce-registration/hce-registration.html',
-          title: gettext('Register Code Engine Endpoint')
-        },
-        {
-          data: data,
-          options: {
-            instances: this.currentEndpoints
-          }
-        }
-      ).result.then(function () {
-        return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-          that.cnsiModel.list();
-        });
-      });
+      this.hceRegistration.add();
     },
 
     isAdmin: function () {

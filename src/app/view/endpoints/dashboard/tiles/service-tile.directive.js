@@ -21,7 +21,8 @@
     'app.model.modelManager',
     'app.api.apiManager',
     '$state',
-    'app.view.hceRegistration'
+    'app.view.hceRegistration',
+    'app.view.hcfRegistration'
 
   ];
 
@@ -34,7 +35,7 @@
    * @param detailView
    *  @constructor
    */
-  function ServiceTileController ($scope, modelManager, apiManager, $state, hceRegistration) {
+  function ServiceTileController ($scope, modelManager, apiManager, $state, hceRegistration, hcfRegistration) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -43,6 +44,7 @@
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.$state = $state;
     this.hceRegistration = hceRegistration;
+    this.hcfRegistration = hcfRegistration;
 
     this.clusterAddFlyoutActive = false;
     this.serviceInstances = {};
@@ -75,15 +77,10 @@
     showClusterAddForm: function () {
 
       if (this.isHcf()) {
-        // TODO(irfan) : HCF is a flyout, both should be detail views
-        this.clusterAddFlyoutActive = true;
+        this.hcfRegistration.add();
       } else {
         this.hceRegistration.add();
       }
-    },
-
-    hideClusterAddForm: function () {
-      this.clusterAddFlyoutActive = false;
     },
 
     isHcf: function () {

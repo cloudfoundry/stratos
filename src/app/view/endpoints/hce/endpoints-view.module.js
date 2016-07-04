@@ -36,7 +36,6 @@
     this.serviceType = 'hce';
     this.currentEndpoints = [];
     this.serviceInstances = {};
-    this.clusterAddFlyoutActive = false;
     this.hceRegistration = hceRegistration;
     this.tokenExpiryMessage = 'Token has expired';
     // FIXME there is got to be a better way than this?
@@ -97,11 +96,6 @@
 
     connect: function (serviceInstance) {
       // TODO implement HCE authentication
-      // Currently only implemented for HCF
-      if (this.isHcf()) {
-        this.activeServiceInstance = serviceInstance;
-        this.credentialsFormOpen = true;
-      }
     },
 
     disconnect: function (serviceInstance) {
@@ -113,13 +107,7 @@
     },
 
     showClusterAddForm: function () {
-
-      if (this.isHcf()) {
-        // TODO(irfan) : HCF is a flyout, both should be detail views
-        this.clusterAddFlyoutActive = true;
-      } else {
         this.hceRegistration.add();
-      }
     },
 
     setShowDropdown: function (index) {
@@ -138,9 +126,6 @@
       return this.serviceType === 'hcf';
     },
 
-    hideClusterAddForm: function () {
-      this.clusterAddFlyoutActive = false;
-    },
     onConnectCancel: function () {
       this.credentialsFormOpen = false;
     },

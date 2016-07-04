@@ -24,10 +24,11 @@
     'helion.framework.widgets.detailView',
     '$scope',
     '$state',
-    'app.view.hceRegistration'
+    'app.view.hceRegistration',
+    'app.view.hcfRegistration'
   ];
 
-  function EndpointsDashboardController (modelManager, apiManager, detailView, $scope, $state, hceRegistration) {
+  function EndpointsDashboardController (modelManager, apiManager, detailView, $scope, $state, hceRegistration, hcfRegistration) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -36,6 +37,7 @@
     this.detailView = detailView;
     this.$state = $state;
     this.hceRegistration = hceRegistration;
+    this.hcfRegistration = hcfRegistration;
 
     this.currentEndpoints = [];
     this.serviceInstances = {};
@@ -74,18 +76,11 @@
   angular.extend(EndpointsDashboardController.prototype, {
 
     showClusterAddForm: function () {
-
-      var that = this;
       if (this.isHcf()) {
-        // TODO(irfan) : HCF is a flyout, both should be detail views
-        this.clusterAddFlyoutActive = true;
+        this.hcfRegistration.add();
       } else {
         this.hceRegistration.add();
       }
-    },
-
-    hideClusterAddForm: function () {
-      this.clusterAddFlyoutActive = false;
     },
 
     isHcf: function () {
