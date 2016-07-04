@@ -18,7 +18,6 @@
     this.serviceInstanceModel.list();
     var that = this;
 
-
     return {
       add: function () {
         var data = {name: '', url: ''};
@@ -39,7 +38,6 @@
       }
     };
   }
-
 
   HceRegistrationController.$inject = [
     'app.model.modelManager',

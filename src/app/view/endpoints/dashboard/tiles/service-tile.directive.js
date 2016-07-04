@@ -20,7 +20,6 @@
     '$scope',
     'app.model.modelManager',
     'app.api.apiManager',
-    'helion.framework.widgets.detailView',
     '$state',
     'app.view.hceRegistration'
 
@@ -35,13 +34,12 @@
    * @param detailView
    *  @constructor
    */
-  function ServiceTileController ($scope, modelManager, apiManager, detailView, $state, hceRegistration) {
+  function ServiceTileController ($scope, modelManager, apiManager, $state, hceRegistration) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceType = $scope.serviceType;
-    this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
-    this.detailView = detailView;
+    this.userServiceInstanceModel =  modelManager.retrieve('app.model.serviceInstance.user');;
     this.$state = $state;
     this.hceRegistration = hceRegistration;
 
@@ -64,11 +62,6 @@
         }
       });
 
-      that.currentEndpoints = _.map(that.serviceInstances,
-        function (c) {
-          var endpoint = c.api_endpoint;
-          return endpoint.Scheme + '://' + endpoint.Host;
-        });
     });
   }
 
@@ -78,10 +71,8 @@
       return _.keys(this.serviceInstances).length;
     },
 
-
     showClusterAddForm: function () {
 
-      var that = this;
       if (this.isHcf()) {
         // TODO(irfan) : HCF is a flyout, both should be detail views
         this.clusterAddFlyoutActive = true;
@@ -106,6 +97,57 @@
           serviceType: 'hce'
         });
       }
+    },
+
+    /**
+     * @function getInstancesCount
+     * @description Get total number of services
+     * @memberOf cloud-foundry.view.applications.application.endpoints
+     * @returns {Number} count
+     */
+    getInstancesCount: function () {
+      return _.keys(this.serviceInstances).length;
+    },
+
+    /**
+     * @function getInstancesCountByStatus
+     * @memberOf cloud-foundry.view.applications.application.endpoints
+     getServiceInstanceCount
+     * @description Get number of services in a particular status
+     * @memberOf cloud-foundry.view.applications.application.endpoints
+     * @returns {Number} count
+     */
+    getInstancesCountByStatus: function (status) {
+      // TODO
+      // If cnsi_type is HCE, then currently.
+      // we don't have distinct states for it.
+      var count = 0;
+      var that = this;
+      if (that.serviceType === 'hcf') {
+        _.each(_.keys(that.serviceInstances), function (cnsiGuid) {
+          var isConnected = status.toLowerCase() === 'connected';
+          var isDisconnected = status.toLowerCase() === 'disconnected';
+          if (_.isUndefined(that.userServiceInstanceModel.serviceInstances[cnsiGuid])) {
+             // disconnected state
+            // TODO may not be true when disconnect from instance is implemented
+            if (isDisconnected) {
+              count += 1;
+            }
+          } else {
+             // valid or expired state
+            if (that.userServiceInstanceModel.serviceInstances[cnsiGuid].valid === isConnected) {
+              count += 1;
+            }
+          }
+        });
+      } else if (this.serviceType === 'hce') {
+
+        if (status.toLowerCase() === 'connected') {
+          return _.keys(this.serviceInstances).length;
+        }
+      }
+
+      return count;
     }
 
   });
