@@ -61,7 +61,7 @@ var _ = Describe("Consumer connecting through a Proxy", func() {
 		)
 
 		JustBeforeEach(func() {
-			incoming, errs = connection.StreamWithoutReconnect("", "")
+			incoming, errs = connection.StreamWithoutReconnect("fakeAppGuid", "authToken")
 		})
 
 		AfterEach(func() {
@@ -155,7 +155,7 @@ var _ = Describe("Consumer connecting through a Proxy", func() {
 
 		JustBeforeEach(func() {
 			close(messagesToSend)
-			incomingMessages, err = connection.RecentLogs("", "")
+			incomingMessages, err = connection.RecentLogs("fakeAppGuid", "authToken")
 		})
 
 		AfterEach(func() {

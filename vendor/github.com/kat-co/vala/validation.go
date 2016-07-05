@@ -164,10 +164,13 @@ func Not(checker Checker) Checker {
 
 // Equals performs a basic == on the given parameters and fails if
 // they are not equal.
-func Equals(lhs, rhs interface{}, paramName string) Checker {
+func Equals(param, value interface{}, paramName string) Checker {
 
 	return func() (pass bool, errMsg string) {
-		return (lhs == rhs), fmt.Sprintf("Parameters were not equal: %v, %v", lhs, rhs)
+		return (param == value), fmt.Sprintf("Parameters were not equal: %s(%v) != %v",
+			paramName,
+			param,
+			value)
 	}
 }
 

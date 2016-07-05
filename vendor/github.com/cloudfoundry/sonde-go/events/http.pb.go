@@ -380,22 +380,21 @@ func (m *HttpStop) GetApplicationId() *UUID {
 
 // / An HttpStartStop event represents the whole lifecycle of an HTTP request.
 type HttpStartStop struct {
-	StartTimestamp *int64    `protobuf:"varint,1,req,name=startTimestamp" json:"startTimestamp,omitempty"`
-	StopTimestamp  *int64    `protobuf:"varint,2,req,name=stopTimestamp" json:"stopTimestamp,omitempty"`
-	RequestId      *UUID     `protobuf:"bytes,3,req,name=requestId" json:"requestId,omitempty"`
-	PeerType       *PeerType `protobuf:"varint,4,req,name=peerType,enum=events.PeerType" json:"peerType,omitempty"`
-	Method         *Method   `protobuf:"varint,5,req,name=method,enum=events.Method" json:"method,omitempty"`
-	Uri            *string   `protobuf:"bytes,6,req,name=uri" json:"uri,omitempty"`
-	RemoteAddress  *string   `protobuf:"bytes,7,req,name=remoteAddress" json:"remoteAddress,omitempty"`
-	UserAgent      *string   `protobuf:"bytes,8,req,name=userAgent" json:"userAgent,omitempty"`
-	StatusCode     *int32    `protobuf:"varint,9,req,name=statusCode" json:"statusCode,omitempty"`
-	ContentLength  *int64    `protobuf:"varint,10,req,name=contentLength" json:"contentLength,omitempty"`
-	// / 11 used to be ParentRequestID which has been deprecated.
-	ApplicationId    *UUID    `protobuf:"bytes,12,opt,name=applicationId" json:"applicationId,omitempty"`
-	InstanceIndex    *int32   `protobuf:"varint,13,opt,name=instanceIndex" json:"instanceIndex,omitempty"`
-	InstanceId       *string  `protobuf:"bytes,14,opt,name=instanceId" json:"instanceId,omitempty"`
-	Forwarded        []string `protobuf:"bytes,15,rep,name=forwarded" json:"forwarded,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
+	StartTimestamp   *int64    `protobuf:"varint,1,req,name=startTimestamp" json:"startTimestamp,omitempty"`
+	StopTimestamp    *int64    `protobuf:"varint,2,req,name=stopTimestamp" json:"stopTimestamp,omitempty"`
+	RequestId        *UUID     `protobuf:"bytes,3,req,name=requestId" json:"requestId,omitempty"`
+	PeerType         *PeerType `protobuf:"varint,4,req,name=peerType,enum=events.PeerType" json:"peerType,omitempty"`
+	Method           *Method   `protobuf:"varint,5,req,name=method,enum=events.Method" json:"method,omitempty"`
+	Uri              *string   `protobuf:"bytes,6,req,name=uri" json:"uri,omitempty"`
+	RemoteAddress    *string   `protobuf:"bytes,7,req,name=remoteAddress" json:"remoteAddress,omitempty"`
+	UserAgent        *string   `protobuf:"bytes,8,req,name=userAgent" json:"userAgent,omitempty"`
+	StatusCode       *int32    `protobuf:"varint,9,req,name=statusCode" json:"statusCode,omitempty"`
+	ContentLength    *int64    `protobuf:"varint,10,req,name=contentLength" json:"contentLength,omitempty"`
+	ApplicationId    *UUID     `protobuf:"bytes,12,opt,name=applicationId" json:"applicationId,omitempty"`
+	InstanceIndex    *int32    `protobuf:"varint,13,opt,name=instanceIndex" json:"instanceIndex,omitempty"`
+	InstanceId       *string   `protobuf:"bytes,14,opt,name=instanceId" json:"instanceId,omitempty"`
+	Forwarded        []string  `protobuf:"bytes,15,rep,name=forwarded" json:"forwarded,omitempty"`
+	XXX_unrecognized []byte    `json:"-"`
 }
 
 func (m *HttpStartStop) Reset()                    { *m = HttpStartStop{} }
