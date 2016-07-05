@@ -1,0 +1,85 @@
+  <div class="container registration-content col-sm-12">
+      <div class="cluster-settings">
+        <div class="cluster row" ng-repeat="(name, cnsi) in clusterSettingsCtrl.serviceInstances">
+          <div class="col-md-12 overlay">
+          </div>
+          <div class="col-md-4">
+            <div class="cluster-icon">
+              <div class="helion-icon helion-icon-2x" ng-class="{
+                'helion-icon-Cluster' : cnsi.cnsi_type === 'hcf',
+                'helion-icon-Continuous_integration' : cnsi.cnsi_type === 'hce',
+              }"></div>
+            </div>
+            <div class="cluster-info">
+              <div class="cluster-name">{{cnsi.name}}</div>
+              <div class="cluster-properties">
+                <div class="cluster-property">
+                  <div translate>URL</div>
+                  <div>{{cnsi.api_endpoint.Host}}</div>
+                </div>
+                <div class="cluster-property">
+                  <div translate>Type</div>
+                  <div ng-if="cnsi.cnsi_type==='hcf'" translate>Cloud Foundry Cluster</div>
+                  <div ng-if="cnsi.cnsi_type==='hce'" translate>Code Engine</div>
+                </div>
+              </div>
+              <!--
+              <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+                    ng-if="clusterSettingsCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"></span>
+              <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+                    ng-if="clusterSettingsCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false"></span>
+              <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-warning"
+                    ng-if="clusterSettingsCtrl.userCnsiModel.serviceInstances[cnsi.guid].error"></span>
+              -->
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="cluster-info cluster-block">
+
+              <div class="cluster-name text-right action-header">
+                <bounce-spinner ng-if="cnsi._busy" classes="bounce-spinner-sm"></bounce-spinner>
+                <a ng-click="clusterSettingsCtrl.disconnect(cnsi)" ng-if="!cnsi._busy" class="btn btn-link">
+                  <i class="helion-icon helion-icon-Right_Arrow"></i>
+                  <span translate>Disconnect</span>
+                </a>
+              </div>
+                <div class="cluster-properties">
+                  <div class="cluster-property">
+                    <div translate>Token Expiration</div>
+                    <div>{{ cnsi.token_expiry * 1000 | date:'medium' }}</div>
+                  </div>
+                  <div class="cluster-property">
+                    <div translate>Token Expiration</div>
+                    <div>{{ cnsi.token_expiry }}</div>
+                  </div>
+                </div>
+            </div>
+          </div>
+    </div>
+  </div>
+  <div class="fixed-footer" ng-if="clusterSettingsCtrl.overlay">
+    <span class="registration-notification" ng-if="clusterSettingsCtrl.userCnsiModel.numValid > 0"
+          translate
+          translate-n="serviceRegistrationCtrl.userCnsiModel.numValid"
+          translate-plural="{{serviceRegistrationCtrl.userCnsiModel.numValid}} clusters registered">
+      {{serviceRegistrationCtrl.userCnsiModel.numValid}} cluster registered
+    </span>
+    <button type="button" class="btn btn-primary"
+            ng-disabled="clusterSettingsCtrl.userCnsiModel.numValid === 0"
+            ng-click="clusterSettingsCtrl.completeRegistration()" translate>
+      Done
+    </button>
+  </div>
+<flyout flyout-active="clusterSettingsCtrl.credentialsFormOpen"
+        flyout-close-icon="'helion-icon helion-icon-Close'">
+  <credentials-form cnsi="clusterSettingsCtrl.activeServiceInstance"
+                    on-cancel="clusterSettingsCtrl.onConnectCancel()"
+                    on-submit="clusterSettingsCtrl.onConnectSuccess(serviceInstance)">
+  </credentials-form>
+</flyout>
+<flyout flyout-active="clusterSettingsCtrl.clusterAddFlyoutActive"
+        flyout-close-icon="'helion-icon helion-icon-Close'">
+  <add-cluster-form on-cancel="clusterSettingsCtrl.hideClusterAddForm()"
+                    on-submit="clusterSettingsCtrl.hideClusterAddForm()">
+  </add-cluster-form>
+</flyout>
