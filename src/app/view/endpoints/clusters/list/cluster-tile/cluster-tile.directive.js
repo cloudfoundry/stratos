@@ -1,4 +1,4 @@
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -30,45 +30,92 @@
   /**
    * @name ClusterTileController
    * @constructor
-   * @param {object} $stateParams - the angular $state service
+   * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @property {array} actions - collection of relevant actions that can be executed against cluster
+   * @property {Array} actions - collection of relevant actions that can be executed against cluster
+   * @property {string} accountStatus - connected user's account status
+   * @property {number} orgCount - organisation count
+   * @property {number} userCount - user count
    */
   function ClusterTileController($state, modelManager) {
-    var that = this;
-
     this.$state = $state;
+    this.cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
+    this.cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
 
     this.actions = [];
+    this.accountStatus = null;
+    this.orgCount = null;
+    this.userCount = null;
 
-    if (this.service.isConnected) {
-      this.actions.push({
-        name: gettext('Disconnect'),
-        execute: function() {
-          that.disconnect(that.service.guid);
-        }
-      });
-    } else {
-      this.actions.push({
-        name: gettext('Connect'),
-        execute: function() {
-          that.connect(that.service);
-        }
-      });
-    }
+    this.setActions();
+    this.setAccountStatus();
+    this.setOrganisationCount();
+    this.setUserCount();
 
-    this.actions.push({
+  }
+
+  angular.extend(ClusterTileController.prototype, {
+
+    setActions: function() {
+      this.actions = [];
+
+      if (this.service.isConnected) {
+        this.actions.push({
+          name: gettext('Disconnect'),
+          execute: function() {
+            that.disconnect(that.service.guid);
+          }
+        });
+      } else {
+        this.actions.push({
+          name: gettext('Connect'),
+          execute: function() {
+            that.connect(that.service);
+          }
+        });
+      }
+
+      this.actions.push({
         name: gettext('Unregister'),
         execute: function() {
           that.unregister(that.service);
         }
       });
-  }
+    },
 
-  angular.extend(ClusterTileController.prototype, {
+    setAccountStatus: function() {
+      //TODO (RC): See TEAMFOUR-723. Need to fetch account info from scope. Dependent on TEAMFOUR-205 + TEAMFOUR-617.
+      this.accountStatus = null;
+    },
+
+    setUserCount: function() {
+      if (!this.service.isConnected) {
+        return;
+      }
+
+      var that = this;
+      // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
+      // just for the count. This will help in the case the connected user does not have privileges.
+      this.cfModelUsers.listAllUsers(this.service.guid).then(function(res) {
+        that.userCount = _.get(res, 'length');
+      });
+    },
+
+    setOrganisationCount: function() {
+      if (!this.service.isConnected) {
+        return;
+      }
+
+      var that = this;
+      // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
+      // just for the count. This will help in the case the connected user does not have privileges.
+      this.cfModelOrg.listAllOrganizations(this.service.guid).then(function(res) {
+        that.orgCount = _.get(res, 'length');
+      });
+    },
 
     summary: function() {
-      this.$state.go('endpoints.cluster', { guid: this.service.guid });
+      this.$state.go('endpoints.cluster', {guid: this.service.guid});
     }
 
   });

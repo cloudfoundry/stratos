@@ -4,12 +4,12 @@
   <dl class="dl-horizontal" ng-if="clusterTile.service.isConnected">
     <dt translate>ENDPOINT URL</dt>
     <dd>{{clusterTile.service.api_endpoint.Host}}</dd>
-    <dt translate>CF ACCOUNT STATUS</dt>
-    <dd>{{clusterTile.b}}</dd>
-    <dt translate>TOTAL ORGS</dt>
-    <dd>{{clusterTile.c}}</dd>
-    <dt translate>TOTAL USERS</dt>
-    <dd>{{clusterTile.d}}</dd>
+    <dt ng-if="clusterTile.accountStatus" translate>CF ACCOUNT STATUS</dt>
+    <dd ng-if="clusterTile.accountStatus">{{clusterTile.accountStatus}}</dd>
+    <dt ng-if="clusterTile.orgCount" translate>TOTAL ORGS</dt>
+    <dd ng-if="clusterTile.orgCount" >{{clusterTile.orgCount}}</dd>
+    <dt ng-if="clusterTile.userCount" translate>TOTAL USERS</dt>
+    <dd ng-if="clusterTile.userCount" >{{clusterTile.userCount}}</dd>
   </dl>
   <div ng-if="!clusterTile.service.isConnected" class="text-center">
     <i class="helion-icon-lg helion-icon helion-icon-Cluster"></i><br>
