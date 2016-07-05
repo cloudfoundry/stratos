@@ -135,7 +135,6 @@
         .list()
         .then(function onSuccess(data) {
           var noHCFInstances = (data.numAvailable === 0);
-          that.showError = false;
           // Admin
           if (account.isAdmin()) {
             // Show registration if we don't have any HCF instances
