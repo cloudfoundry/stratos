@@ -36,6 +36,10 @@ func main() {
 	}
 	log.Println("Proxy configuration loaded.")
 
+	initializeHTTPClient(portalConfig.SkipTLSVerification,
+		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
+	log.Println("HTTP client initialized.")
+
 	portalConfig.EncryptionKeyInBytes, err = setEncryptionKey(portalConfig)
 	if err != nil {
 		log.Println(err)
@@ -43,44 +47,20 @@ func main() {
 	}
 	log.Println("Encryption key set.")
 
-<<<<<<< 4ac66f5a156f28990cc5de581f5fa96fa7a8ebc5
-	var databaseConfig datastore.DatabaseConfig
-	databaseConfig, err = loadDatabaseConfig(databaseConfig)
+	var databaseConnectionPool *sql.DB
+	databaseConnectionPool, err = initConnPool()
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	log.Println("Proxy database configuration loaded.")
-=======
-	//
-	initializeHTTPClient(portalConfig.SkipTLSVerification,
-		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
->>>>>>> Initial commit
-
-	// load the database config from env vars; create db connection pool
-	dbConnPool, err := initConnPool()
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-<<<<<<< 4ac66f5a156f28990cc5de581f5fa96fa7a8ebc5
 	defer databaseConnectionPool.Close()
 	log.Println("Proxy database connection pool created.")
 
-	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool)
+	sessionStore := initSessionStore(databaseConnectionPool, portalConfig)
+	log.Println("Proxy database connection pool created.")
+
+	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
 	log.Println("Proxy waiting for requests.")
-
-	initializeHTTPClient(portalConfig.SkipTLSVerification,
-		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
-	log.Println("HTTP client initialized.")
-=======
-	defer dbConnPool.Close()
-
-	// initialize the postgres backed session store
-	sessStore := initSessionStore(dbConnPool, portalConfig)
-
-	portalProxy := newPortalProxy(portalConfig, dbConnPool, sessStore)
->>>>>>> Initial commit
 
 	log.Printf("%v", portalConfig)
 	if err := start(portalProxy); err != nil {
@@ -125,6 +105,16 @@ func initConnPool() (*sql.DB, error) {
 	return databaseConnectionPool, nil
 }
 
+func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {
+	store := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+	defer store.Close()
+
+	// Run a background goroutine to clean up expired sessions from the database.
+	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
+
+	return store
+}
+
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {
 	if err := ucpconfig.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
@@ -142,15 +132,6 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 	return dc, nil
-}
-
-func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {
-	store := pgstore.NewPGStoreFromPool(db, []byte(pc.CookieStoreSecret))
-
-	// Run a background goroutine to clean up expired sessions from the database.
-	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
-
-	return store
 }
 
 func createTempCertFiles(pc portalConfig) (string, string, error) {

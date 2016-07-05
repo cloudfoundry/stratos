@@ -125,8 +125,8 @@ func TestLoadPortalConfig(t *testing.T) {
 		t.Error(result.AllowedOrigins[1])
 	}
 
-	if result.CookieStoreSecret != "cookiesecret" {
-		t.Error("Unable to get CookieStoreSecret from config")
+	if result.SessionStoreSecret != "cookiesecret" {
+		t.Error("Unable to get SessionStoreSecret from config")
 	}
 }
 

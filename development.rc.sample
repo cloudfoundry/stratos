@@ -1,0 +1,50 @@
+# This file contains common environment-variables for standing up a development
+# environment using docker-compose.
+#
+# Copy this file to development.rc and edit the values as necessary.
+# Note: stand-up-dev-env.sh will try to use it if it's present.
+
+
+################
+# GitHub OAuth #
+################
+
+export GITHUB_OAUTH_CLIENT_ID=<add your OAuth client ID here>
+export GITHUB_OAUTH_CLIENT_SECRET=<add you OAuth client secret here>
+export GITHUB_OAUTH_STATE=thisshouldberando
+
+###################
+# Corporate Proxy #
+###################
+
+# HPE's corporate proxy makes things pretty difficult.
+
+#export http_proxy=http://proxy.houston.hpecorp.net:8088
+#export https_proxy=$http_proxy
+#export no_proxy=localhost,127.0.0.1,.hpcloud.net,.hp.com,192.168.56.102,192.168.99.100,192.168.222.130
+
+
+###################
+# All the things  #
+###################
+
+export PGSQL_USER='stratos'
+export PGSQL_PASSWORD='stratos'
+export PGSQL_DATABASE='stratos-db'
+export PGSQL_HOST='localhost'
+export PGSQL_PORT=5432
+export PGSQL_CONNECT_TIMEOUT=5
+export PGSQL_SSL_MODE='disable'
+
+export HTTP_CLIENT_TIMEOUT_IN_SECS=10
+export SKIP_TLS_VERIFICATION='true'
+export TLS_ADDRESS=':8080'
+export CONSOLE_CLIENT='portal-proxy'
+export CONSOLE_CLIENT_SECRET='ohsosecret!'
+export HCF_CLIENT='portal-proxy'
+export HCF_CLIENT_SECRET='ohsosecret!'
+export UAA_ENDPOINT='https://login.hcf.helion.lol/oauth/token'
+export ALLOWED_ORIGINS='https://localhost,https://127.0.0.1'
+export SESSION_STORE_SECRET='cookiesecret'
+export CERT=<cert file contents>
+export CERT_KEY=<key file contents>

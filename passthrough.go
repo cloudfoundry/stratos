@@ -165,6 +165,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	header := getEchoHeaders(c)
 	header.Del("Cookie")
 
+	// TODO (wchrisjohnson):
 	// Temporarily copy this header over to allow us to skip auth for HCE calls
 	// until it has authentcation set up. It'll be used in doOauthFlowRequest later
 	// [julbra] Is this not already copied by getEchoHeaders(c)?

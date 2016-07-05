@@ -70,30 +70,7 @@ glide update
 
 - Set environment variables
 
-The portal proxy is run using a series of environment variables. The best approach for development is to add a .rc file to export all of these. It should look something like this:
-
-```
-export PGSQL_USER='stratos'
-export PGSQL_PASSWORD='stratos'
-export PGSQL_DATABASE='stratos-db'
-export PGSQL_HOST='localhost'
-export PGSQL_PORT=5432
-export PGSQL_CONNECT_TIMEOUT=5
-export PGSQL_SSL_MODE='disable'
-
-export HTTP_CLIENT_TIMEOUT_IN_SECS=10
-export SKIP_TLS_VERIFICATION='true'
-export TLS_ADDRESS=':8080'
-export CONSOLE_CLIENT='portal-proxy'
-export CONSOLE_CLIENT_SECRET='ohsosecret!'
-export HCF_CLIENT='portal-proxy'
-export HCF_CLIENT_SECRET='ohsosecret!'
-export UAA_ENDPOINT='https://login.hcf.helion.lol/oauth/token'
-export ALLOWED_ORIGINS='https://localhost,https://127.0.0.1'
-export COOKIE_STORE_SECRET='cookiesecret'
-export CERT=<cert file contents>
-export CERT_KEY=<key file contents>
-```
+The portal proxy is run using a series of environment variables. The best approach for development is to add a .rc file to export all of these. Copy the `development.rc.sample` file to `development.rc` as a start.
 
 - Set up developer certs
 
