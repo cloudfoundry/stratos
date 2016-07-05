@@ -10,7 +10,6 @@
   ];
 
   function registerRoute($stateProvider) {
-    console.log('registering');
     $stateProvider.state('endpoints.clusters', {
       url: '/clusters',
       templateUrl: 'app/view/endpoints/clusters/list/clusters.html',
@@ -21,69 +20,29 @@
 
   ClustersController.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager',
-    '$stateParams',
-    'helion.framework.widgets.detailView',
-    '$scope',
-    'app.view.hceRegistration'
-
+    '$q'
   ];
 
-  function ClustersController(modelManager, apiManager, $stateParams, detailView, $scope, hceRegistration) {
-
+  function ClustersController(modelManager, $q) {
+    var that = this;
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.serviceInstanceModel.list();
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.serviceInstances = null;
 
-
-
-
-    // this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    // this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
-    // this.detailView = detailView;
-    // this.serviceType = $stateParams.serviceType;
-    // this.currentEndpoints = [];
-    // this.serviceInstances = {};
-    // this.clusterAddFlyoutActive = false;
-    // this.hceRegistration = hceRegistration;
-    // this.tokenExpiryMessage = 'Token has expired';
-    //
-    // this.activeServiceInstance = null;
-    // var that = this;
-    // this.serviceInstanceModel.list();
-    // this.userServiceInstanceModel.list();
-    //
-    // // FIXME there is got to be a better way than this?
-    // this.showDropdown = {};
-    // $scope.$watchCollection(function () {
-    //   return that.serviceInstanceModel.serviceInstances;
-    // }, function (serviceInstances) {
-    //   var filteredInstances = _.filter(serviceInstances, {cnsi_type: that.serviceType});
-    //   _.forEach(filteredInstances, function (serviceInstance) {
-    //     var guid = serviceInstance.guid;
-    //     if (angular.isUndefined(that.serviceInstances[guid])) {
-    //       that.serviceInstances[guid] = serviceInstance;
-    //     } else {
-    //       angular.extend(that.serviceInstances[guid], serviceInstance);
-    //     }
-    //   });
-    //
-    //
-    //   that.currentEndpoints = _.map(that.serviceInstances,
-    //     function (c) {
-    //       var endpoint = c.api_endpoint;
-    //       var isConnected = true;
-    //       if (that.isHcf()) {
-    //         isConnected = that.serviceInstances[c.guid].valid;
-    //       }
-    //       return {
-    //         name: c.name,
-    //         url: endpoint.Scheme + '://' + endpoint.Host,
-    //         connected: isConnected,
-    //         model: c
-    //       };
-    //     });
-    // });
+    $q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
+      .then(function() {
+        that.serviceInstances = [];
+        var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+        _.forEach(filteredInstances, function (serviceInstance) {
+          var cloned = JSON.parse(JSON.stringify(serviceInstance));
+          cloned.isConnected = that.userServiceInstanceModel.serviceInstances[cloned.guid].valid;
+          that.serviceInstances.push(cloned);
+        });
+      })
+      .catch(function() {
+        that.serviceInstances = false;
+      });
   }
 
   angular.extend(ClustersController.prototype, {
