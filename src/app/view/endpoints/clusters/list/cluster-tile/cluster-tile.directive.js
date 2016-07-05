@@ -10,7 +10,10 @@
   function ClusterTile() {
     return {
       bindToController: {
-        service: '='
+        service: '=',
+        connect: '=',
+        disconnect: '=',
+        unregister: '='
       },
       controller: ClusterTileController,
       controllerAs: 'clusterTile',
@@ -24,72 +27,48 @@
     'app.model.modelManager'
   ];
 
+  /**
+   * @name ClusterTileController
+   * @constructor
+   * @param {object} $stateParams - the angular $state service
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @property {array} actions - collection of relevant actions that can be executed against cluster
+   */
   function ClusterTileController($state, modelManager) {
+    var that = this;
+
     this.$state = $state;
 
     this.actions = [];
 
     if (this.service.isConnected) {
       this.actions.push({
-        name: 'Disconnect',
-        execute: this.diconnect
+        name: gettext('Disconnect'),
+        execute: function() {
+          that.disconnect(that.service.guid);
+        }
       });
-
-      // this.cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
-      //
-      // this.cfModelUsers.ListAllUsers(this.service.guid).then(function(res) {
-      //   console.log(res);
-      // });
-
     } else {
       this.actions.push({
-        name: 'Connect',
-        execute: this.connect
+        name: gettext('Connect'),
+        execute: function() {
+          that.connect(that.service);
+        }
       });
     }
 
     this.actions.push({
-        name: 'Unregister',
-        execute: this.unregister
+        name: gettext('Unregister'),
+        execute: function() {
+          that.unregister(that.service);
+        }
       });
-
-
-
   }
 
   angular.extend(ClusterTileController.prototype, {
 
     summary: function() {
       this.$state.go('endpoints.cluster', { guid: this.service.guid });
-    },
-
-    connect: function() {
-      alert('CONNECT CALLED');
-    },
-
-    diconnect: function() {
-      this.userCnsiModel.disconnect(id)
-        .then(function success () {
-          delete userServiceInstance.account;
-          delete userServiceInstance.token_expiry;
-          delete userServiceInstance.valid;
-          that.userCnsiModel.numValid -= 1;
-          that.cfModel.all();
-        });
-    },
-
-
-
-    unregister: function() {
-      var that = this;
-      this.cnsiModel.remove(serviceInstance)
-        .then(function success () {
-          that.serviceInstances = {};
-          that.userCnsiModel.list().then(function () {
-            angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
-            that.cnsiModel.list();
-          });
-        });
     }
 
   });

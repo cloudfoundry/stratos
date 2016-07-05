@@ -21,7 +21,7 @@
     return {
       add: function () {
         var data = {name: '', url: ''};
-        detailView(
+        return detailView(
           {
             detailViewTemplateUrl: 'app/view/cluster-registration/add-cluster-form/add-cluster-form.html',
             controller: AddClusterFormController,
@@ -35,11 +35,7 @@
           {
             data: data
           }
-        ).result.then(function () {
-          return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-            that.serviceInstanceModel.list();
-          });
-        });
+        ).result;
       }
     };
   }
@@ -83,7 +79,7 @@
       this.serviceInstanceModel.create(this.url, this.name)
         .then(function () {
           that.clearForm();
-          this.$uibModalInstance.close();
+          that.$uibModalInstance.close();
           // that.onSubmit();
         }, function () {
           that.onAddClusterError();

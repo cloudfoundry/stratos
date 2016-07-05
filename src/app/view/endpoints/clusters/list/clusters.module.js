@@ -20,88 +20,97 @@
 
   ClustersController.$inject = [
     'app.model.modelManager',
-    '$q'
+    '$q',
+    'app.view.hcfRegistration',
+    'helion.framework.widgets.dialog.confirm'
   ];
 
-  function ClustersController(modelManager, $q) {
-    var that = this;
-    this.modelManager = modelManager;
+  /**
+   * @name ClustersController
+   * @constructor
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} $q - the angular $q service
+   * @param {object} hcfRegistration - hcfRegistration - HCF Registration detail view service
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @property {array} actions - collection of relevant actions that can be executed against cluster
+   */
+  function ClustersController(modelManager, $q, hcfRegistration, confirmDialog) {
+    this.$q = $q;
+    this.hcfRegistration = hcfRegistration;
+    this.confirmDialog = confirmDialog;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.serviceInstances = null;
 
-    $q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
-      .then(function() {
-        that.serviceInstances = [];
-        var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
-        _.forEach(filteredInstances, function (serviceInstance) {
-          var cloned = JSON.parse(JSON.stringify(serviceInstance));
-          cloned.isConnected = that.userServiceInstanceModel.serviceInstances[cloned.guid].valid;
-          that.serviceInstances.push(cloned);
-        });
-      })
-      .catch(function() {
-        that.serviceInstances = false;
-      });
+    this.boundUnregister = angular.bind(this, this.unregister);
+    this.boundConnect = angular.bind(this, this.connect);
+    this.boundDisconnect = angular.bind(this, this.disconnect);
+
+    this.updateClusterList();
   }
 
   angular.extend(ClustersController.prototype, {
 
-    connect: function(serviceInstance) {
-      // TODO implement HCE authentication
-      this.activeServiceInstance = serviceInstance;
-      this.credentialsFormOpen = true;
+    updateClusterList: function() {
+      var that = this;
+
+      this.serviceInstances = null;
+
+      this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
+        .then(function() {
+          that.serviceInstances = [];
+          var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+          _.forEach(filteredInstances, function(serviceInstance) {
+            var cloned = JSON.parse(JSON.stringify(serviceInstance));
+            cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid');
+            that.serviceInstances.push(cloned);
+          });
+        })
+        .catch(function() {
+          that.serviceInstances = false;
+        });
     },
 
-    disconnect: function(serviceInstance) {
-      // TODO implement HCE authentication
+    connect: function(cnsiGUID) {
+      this.credentialsFormCNSI = cnsiGUID;
     },
 
-    register: function(serviceInstance) {
-      // TODO remove...
+    onConnectCancel: function() {
+      this.credentialsFormCNSI = false;
+    },
+
+    onConnectSuccess: function() {
+      this.credentialsFormCNSI = false;
+      this.updateClusterList();
+    },
+
+    disconnect: function(cnsiGUID) {
+      var that = this;
+      this.userServiceInstanceModel.disconnect(cnsiGUID).then(function() {
+        that.updateClusterList();
+      });
+    },
+
+    register: function() {
+      var that = this;
+      this.hcfRegistration.add().then(function() {
+        that.updateClusterList();
+      });
     },
 
     unregister: function(serviceInstance) {
-      // TODO remove...
+      var that = this;
+
+      this.confirmDialog({
+        title: gettext('Unregister Cluster'),
+        description: gettext('Are you sure you want to unregister cluster \'' + serviceInstance.name + '\''),
+        buttonText: {
+          yes: gettext('Unregister'),
+          no: gettext('Cancel')
+        }
+      }).result
+        .then(angular.bind(that.serviceInstanceModel, that.serviceInstanceModel.remove, serviceInstance))
+        .then(angular.bind(that, that.updateClusterList));
     }
 
-    // showClusterAddForm: function () {
-    //   var that = this;
-    //   if (this.isHcf()) {
-    //     // TODO(irfan) : HCF is a flyout, both should be detail views
-    //     this.clusterAddFlyoutActive = true;
-    //   } else {
-    //     this.hceRegistration.add();
-    //   }
-    // },
-
-    // setShowDropdown: function (index) {
-    //   var that = this;
-    //   if (this.showDropdown[index]) {
-    //     this.showDropdown[index] = false;
-    //   } else {
-    //     _.each(_.keys(this.showDropdown), function (rowIndex) {
-    //       that.showDropdown[rowIndex] = false;
-    //     });
-    //     this.showDropdown[index] = true;
-    //   }
-    // },
-    //
-    // isHcf: function () {
-    //   return this.serviceType === 'hcf';
-    // },
-
-    // hideClusterAddForm: function () {
-    //   this.clusterAddFlyoutActive = false;
-    // },
-    // onConnectCancel: function () {
-    //   this.credentialsFormOpen = false;
-    // },
-    //
-    // onConnectSuccess: function () {
-    //   this.userServiceInstanceModel.numValid += 1;
-    //   this.credentialsFormOpen = false;
-    //   this.activeServiceInstance = null;
-    // }
   });
 })();

@@ -11,7 +11,7 @@
 
   function registerRoute ($stateProvider) {
     $stateProvider.state('endpoints.dashboard', {
-      url: '/dashboard',
+      url: '',
       templateUrl: 'app/view/endpoints/dashboard/endpoints-dashboard.html',
       controller: EndpointsDashboardController,
       controllerAs: 'endpointsDashboardCtrl'
