@@ -1,6 +1,11 @@
-<gallery-card card-data="{ title:clusterTile.service.name}" card-actions="clusterTile.actions"
-              on-card-click="clusterTile.service.isConnected ? clusterTile.summary() : false"
-              card-actions-icon="helion-icon helion-icon-More">
+<gallery-card class="cluster-tile"
+              ng-class="{'unlink': !clusterTile.service.isConnected }"
+              card-data="{ title:clusterTile.service.name}"
+              card-actions="clusterTile.actions"
+              card-actions-icon="helion-icon helion-icon-More"
+              card-actions-position="actions-menu-below"
+              on-card-click="clusterTile.service.isConnected ? clusterTile.summary() : false">
+
   <dl class="dl-horizontal" ng-if="clusterTile.service.isConnected">
     <dt translate>ENDPOINT URL</dt>
     <dd>{{clusterTile.service.api_endpoint.Host}}</dd>

@@ -32,7 +32,6 @@
    * @param {object} $q - the angular $q service
    * @param {object} hcfRegistration - hcfRegistration - HCF Registration detail view service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
-   * @property {array} actions - collection of relevant actions that can be executed against cluster
    */
   function ClustersController(modelManager, $q, hcfRegistration, confirmDialog) {
     this.$q = $q;
@@ -40,6 +39,7 @@
     this.confirmDialog = confirmDialog;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.currentUserAccount = modelManager.retrieve('app.model.account');
 
     this.boundUnregister = angular.bind(this, this.unregister);
     this.boundConnect = angular.bind(this, this.connect);

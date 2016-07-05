@@ -1,0 +1,23 @@
+.cluster-tile {
+
+  &.unlink {
+    // Override some extreme oddness in gallary-card with undefined on-card-click
+    .panel-heading.linked, .panel-body.linked {
+      cursor: default;
+    }
+  }
+
+  .gallery-card-title {
+    text-transform: uppercase;
+  }
+
+  .dl-horizontal {
+    dd {
+      font-weight: 500;
+    }
+
+    dd:first-of-type {
+      text-transform: lowercase;
+    }
+  }
+}

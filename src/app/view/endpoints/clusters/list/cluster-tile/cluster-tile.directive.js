@@ -41,6 +41,7 @@
     this.$state = $state;
     this.cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
     this.cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
+    this.currentUserAccount = modelManager.retrieve('app.model.account');
 
     this.actions = [];
     this.accountStatus = null;
@@ -57,6 +58,7 @@
   angular.extend(ClusterTileController.prototype, {
 
     setActions: function() {
+      var that = this;
       this.actions = [];
 
       if (this.service.isConnected) {
@@ -75,12 +77,14 @@
         });
       }
 
-      this.actions.push({
-        name: gettext('Unregister'),
-        execute: function() {
-          that.unregister(that.service);
-        }
-      });
+      if (this.currentUserAccount.isAdmin()) {
+        this.actions.push({
+          name: gettext('Unregister'),
+          execute: function() {
+            that.unregister(that.service);
+          }
+        });
+      }
     },
 
     setAccountStatus: function() {

@@ -3,7 +3,7 @@
     <div class="font-semi-bold pull-left" translate>
       Cloud Foundry Clusters
     </div>
-    <button class="btn btn-primary" ng-click="clustersCtrl.register()">Register Cluster</button>
+    <button ng-if="clustersCtrl.currentUserAccount.isAdmin()" class="btn btn-primary" ng-click="clustersCtrl.register()">Register Cluster</button>
   </div>
 
   <div id="welcome-message" class="welcome-message panel panel-default">

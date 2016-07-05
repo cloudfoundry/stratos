@@ -19,13 +19,6 @@
     font-weight: 600;
   }
 
-  .welcome-message {
-    text-align: left;
-    padding: $hpe-unit-space*4 0;
-    //width: 70%;
-    //margin: auto;
-  }
-
   @for $i from 1 through $gallery-card-layout-steps {
     @media (min-width: $gallery-card-side-margins + $i * $gallery-card-max-width) {
       .endpoint-tile.col-md-4.col-sm-1 {

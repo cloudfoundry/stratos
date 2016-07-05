@@ -1,3 +1,10 @@
+@import 'cluster-tile/cluster-tile';
+
+.clusters-card {
+  min-height: 250px;
+  padding-left: 0px;
+}
+
 $clusters-card-side-margins: 0px;
 $clusters-card-max-width: 400px;
 $clusters-card-layout-steps: 4;

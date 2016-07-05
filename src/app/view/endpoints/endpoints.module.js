@@ -3,7 +3,9 @@
 
   angular
     .module('app.view.endpoints', [ ])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(register);
+
 
   registerRoute.$inject = [
     '$stateProvider'
@@ -13,8 +15,39 @@
     $stateProvider.state('endpoints', {
       url: '/endpoints',
       abstract: true,
-      template : '<div ui-view></div>'
+      template : '<div ui-view></div>',
+      data: {
+        activeMenuState: 'endpoints'
+      }
     });
   }
+
+  register.$inject = [
+    'app.model.modelManager',
+    'app.event.eventService'
+  ];
+
+  function register(modelManager, eventService) {
+    return new Endpoints(modelManager, eventService)
+  }
+
+  function Endpoints(modelManager, eventService) {
+    var that = this;
+    
+    this.modelManager = modelManager;
+
+    eventService.$on(eventService.events.LOGIN, function () {
+      that.onLoggedIn();
+    });
+  }
+
+  angular.extend(Endpoints.prototype, {
+
+    onLoggedIn: function() {
+      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+      menu.addMenuItem('endpoints', 'endpoints.dashboard', gettext('Endpoints'));
+    }
+
+  });
 
 })();
