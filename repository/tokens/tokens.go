@@ -23,4 +23,5 @@ type Repository interface {
 	FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (TokenRecord, error)
 	DeleteCNSIToken(cnsiGUID string, userGUID string) error
 	SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord, encryptionKey []byte) error
+	ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*TokenRecord, error)
 }

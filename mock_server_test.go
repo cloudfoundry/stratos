@@ -140,6 +140,7 @@ func urlMust(i string) *url.URL {
 }
 
 const mockUAAToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsInVzZXJfaWQiOiJhc2QtZ2pmZy1ib2IiLCJleHAiOjEyMzQ1Njd9.gO9WDYNEfMsnbz7-sICTNygzkqvWgMP2nm9BStJvvCw`
+const mockCNSIToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsInVzZXJfaWQiOiJhc2QtZ2pmZy1ib2IiLCJleHAiOjEyMzQ1Njd9.gO9WDYNEfMsnbz7-sICTNygzkqvWgMP2nm9BStJvvCw`
 
 var mockUAAResponse = UAAResponse{
 	AccessToken:  mockUAAToken,

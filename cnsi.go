@@ -17,9 +17,9 @@ import (
 )
 
 type v2Info struct {
-	AuthorizationEndpoint   string `json:"authorization_endpoint"`
-	TokenEndpoint           string `json:"token_endpoint"`
-	DopplerLoggingEndpoint  string `json:"doppler_logging_endpoint"`
+	AuthorizationEndpoint  string `json:"authorization_endpoint"`
+	TokenEndpoint          string `json:"token_endpoint"`
+	DopplerLoggingEndpoint string `json:"doppler_logging_endpoint"`
 }
 
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
@@ -55,12 +55,12 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	// save data to temporary map
 	newCNSI := cnsis.CNSIRecord{
-		Name:                    cnsiName,
-		CNSIType:                cnsis.CNSIHCF,
-		APIEndpoint:             apiEndpointURL,
-		TokenEndpoint:           v2InfoResponse.TokenEndpoint,
-		AuthorizationEndpoint:   v2InfoResponse.AuthorizationEndpoint,
-		DopplerLoggingEndpoint:  v2InfoResponse.DopplerLoggingEndpoint,
+		Name:                   cnsiName,
+		CNSIType:               cnsis.CNSIHCF,
+		APIEndpoint:            apiEndpointURL,
+		TokenEndpoint:          v2InfoResponse.TokenEndpoint,
+		AuthorizationEndpoint:  v2InfoResponse.AuthorizationEndpoint,
+		DopplerLoggingEndpoint: v2InfoResponse.DopplerLoggingEndpoint,
 	}
 
 	err = p.setCNSIRecord(guid, newCNSI)
@@ -379,6 +379,21 @@ func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (toke
 	}
 
 	return tr, true
+}
+
+func (p *portalProxy) listCNSITokenRecordsForUser(userGUID string) ([]*tokens.TokenRecord, error) {
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return nil, err
+	}
+
+	tokensList, err := tokenRepo.ListCNSITokensForUser(userGUID, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return tokensList, nil
 }
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) error {

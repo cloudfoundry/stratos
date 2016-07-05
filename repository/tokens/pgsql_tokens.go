@@ -26,6 +26,10 @@ const (
                    FROM tokens
                    WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
 
+	listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry, scope
+                           FROM tokens
+                           WHERE token_type = 'cnsi' AND user_guid = $1`
+
 	countCNSITokens = `SELECT COUNT(*)
                      FROM tokens
                      WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
@@ -306,6 +310,73 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 	tr.Scope = scope
 
 	return *tr, nil
+}
+
+// ListCNSITokensForUser - <TBD>
+func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*TokenRecord, error) {
+
+	log.Println("ListCNSITokensForUser")
+
+	if userGUID == "" {
+		msg := "Unable to list CNSI Tokens without a valid User GUID."
+		log.Println(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	rows, err := p.db.Query(listCNSITokensForUser, userGUID)
+	if err != nil {
+		msg := "Unable to retrieve CNSI records: %v"
+		log.Printf(msg, err)
+		return nil, fmt.Errorf(msg, err)
+	}
+	defer rows.Close()
+
+	if err = rows.Err(); err != nil {
+		msg := "Unable to List token records: %v"
+		log.Printf(msg, err)
+		return nil, fmt.Errorf(msg, err)
+	}
+
+	var tokenRecordList []*TokenRecord
+	tokenRecordList = make([]*TokenRecord, 0)
+
+	for rows.Next() {
+		var (
+			ciphertextAuthToken    []byte
+			ciphertextRefreshToken []byte
+			tokenExpiry            int64
+			scope                  string
+		)
+
+		err := rows.Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &scope)
+		if err != nil {
+			msg := "Unable to scan token records: %v"
+			log.Printf(msg, err)
+			return nil, fmt.Errorf(msg, err)
+		}
+
+		log.Println("Decrypting Auth Token")
+		plaintextAuthToken, err := decryptToken(encryptionKey, ciphertextAuthToken)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Println("Decrypting Refresh Token")
+		plaintextRefreshToken, err := decryptToken(encryptionKey, ciphertextRefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
+		tr := new(TokenRecord)
+		tr.AuthToken = plaintextAuthToken
+		tr.RefreshToken = plaintextRefreshToken
+		tr.TokenExpiry = tokenExpiry
+		tr.Scope = scope
+
+		tokenRecordList = append(tokenRecordList, tr)
+	}
+
+	return tokenRecordList, nil
 }
 
 // DeleteCNSIToken - remove a CNSI token (disconnect from a given CNSI)

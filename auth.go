@@ -12,8 +12,6 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
-	"time"
-
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
@@ -35,10 +33,17 @@ type LoginRes struct {
 	Scope       string   `json:"scope"`
 }
 
-// VerifySessionRes - <TBD>
-type VerifySessionRes struct {
-	Account string `json:"account"`
-	Scope   string `json:"scope"`
+// uaaPerms - <TBD>
+type uaaPerms struct {
+	Type  string `json:"type"`
+	Admin string `json:"admin"`
+}
+
+// hcfPerms - <TBD>
+type hcfPerms struct {
+	Type  string `json:"type"`
+	GUID  string `json:"guid"`
+	Admin string `json:"admin"`
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -51,6 +56,8 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 			"Access Denied: %v", err)
 		return err
 	}
+
+	log.Printf("UAA Reponse: %+v\n", uaaRes)
 
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = u.UserGUID
@@ -123,7 +130,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 			"Login failed: %v", err)
 	}
 
-	log.Printf("UAA Response: %v", uaaRes)
+	log.Printf("UAA Reponse: %+v\n", uaaRes)
 
 	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
 	userID, ok := p.getSessionStringValue(c, "user_id")
@@ -312,23 +319,22 @@ func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
 	return nil
 }
 
-// As of 5/18/2016 - not used
-// func (p *portalProxy) getUAATokenRecord(key string) tokens.TokenRecord {
-//
-// 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
-// 	if err != nil {
-// 		fmt.Printf("Database error getting repo for UAA token: %v", err)
-// 		return tokens.TokenRecord{}
-// 	}
-//
-// 	tr, err := tokenRepo.FindUAAToken(key)
-// 	if err != nil {
-// 		fmt.Printf("Database error finding UAA token: %v", err)
-// 		return tokens.TokenRecord{}
-// 	}
-//
-// 	return tr
-// }
+func (p *portalProxy) getUAATokenRecord(userGUID string) (tokens.TokenRecord, error) {
+
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		fmt.Printf("Database error getting repo for UAA token: %v", err)
+		return tokens.TokenRecord{}, err
+	}
+
+	tr, err := tokenRepo.FindUAAToken(userGUID, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		fmt.Printf("Database error finding UAA token: %v", err)
+		return tokens.TokenRecord{}, err
+	}
+
+	return tr, nil
+}
 
 func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error {
 
@@ -345,33 +351,107 @@ func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error 
 	return nil
 }
 
-func (p *portalProxy) verifySession(c echo.Context) error {
+// userinfo - returns info about the currently logged in user like so:
+// [ { type: 'hcf', guid: 1234asdf, admin: true },
+//   { type: 'hcf', guid: 1234asdg, admin: true },
+//   { type: 'hcf', guid: 1234asdh, admin: true },
+//   { type: 'uaa', admin: true },
+// ]
+func (p *portalProxy) userInfo(c echo.Context) error {
 
-	sessionExpireTime, ok := p.getSessionInt64Value(c, "exp")
+	log.Println("Entering userInfo")
+
+	sessionUser, ok := p.getSessionStringValue(c, "user_id")
 	if !ok {
-		log.Println("Could not find session date")
-		return echo.NewHTTPError(http.StatusForbidden, "Could not find session date")
+		msg := "Could not find session user_id"
+		log.Println(msg)
+		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
-		log.Println("Session has expired")
-		return echo.NewHTTPError(http.StatusForbidden, "Session has expired")
-	}
+	// this is what gets returned to the caller
+	arrPerms := []string{}
 
-	// FIXME(woodnt): OBVIOUSLY this needs to not be hard-coded.
-	//                Currently this is waiting on https://jira.hpcloud.net/browse/TEAMFOUR-617
-	resp := &VerifySessionRes{
-		Account: "admin",
-		//Scope: 		"cloud_controller.admin",
-		Scope: "openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write",
-	}
-
-	err := c.JSON(http.StatusOK, resp)
+	// get the HCF related perms for each HCF endpoint registered
+	arrPerms, err := getHCFPerms(p, sessionUser, arrPerms)
 	if err != nil {
 		return err
 	}
 
-	log.Println("verifySession complete")
+	// get the UAA related perms
+	arrPerms, err = getUAAPerms(p, sessionUser, arrPerms)
+	if err != nil {
+		return err
+	}
+
+	stringByte := "\x5B" + strings.Join(arrPerms, "\x2C\x20") + "\x5D"
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write([]byte(stringByte))
 
 	return nil
+}
+
+func getHCFPerms(p *portalProxy, u string, arrPerms []string) ([]string, error) {
+	// Get a list of registered CNSIs by the user`
+	registeredCNSIs, err := p.listCNSITokenRecordsForUser(u)
+	if err != nil {
+		msg := "Unable to find any registered CNSI tokens"
+		log.Println(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// spin thru all registered CNSIs and grab the scope from each
+	for i := 0; i < len(registeredCNSIs); i++ {
+		scope := registeredCNSIs[i].Scope
+		guid := u
+
+		// based on the scope, is the user an admin for this CNSI?
+		hcfAdmin := false
+		if strings.Contains(scope, "cloud_controller.admin") {
+			hcfAdmin = true
+		}
+
+		// build an entry for each HCF found for the user
+		hcfEntry := &hcfPerms{
+			Type:  "hcf",
+			GUID:  guid,
+			Admin: fmt.Sprintf("%t", hcfAdmin),
+		}
+
+		h, _ := json.Marshal(hcfEntry)
+		s := string(h)
+
+		arrPerms = append(arrPerms, s)
+	}
+
+	return arrPerms, nil
+}
+
+func getUAAPerms(p *portalProxy, u string, arrPerms []string) ([]string, error) {
+	// get the uaa token record
+	uaaTokenRecord, err := p.getUAATokenRecord(u)
+	if err != nil {
+		msg := "Unable to retrieve UAA token record."
+		log.Println(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// is the user a UAA admin?
+	uaaAdmin := false
+	if strings.Contains(uaaTokenRecord.Scope, "cloud_controller.admin") {
+		uaaAdmin = true
+	}
+
+	// add the uaa entry to the output
+	uaaEntry := &uaaPerms{
+		Type:  "uaa",
+		Admin: fmt.Sprintf("%t", uaaAdmin),
+	}
+
+	h, _ := json.Marshal(uaaEntry)
+	s := string(h)
+
+	arrPerms = append(arrPerms, s)
+
+	return arrPerms, nil
 }
