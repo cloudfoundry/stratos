@@ -30,3 +30,21 @@ CREATE TABLE IF NOT EXISTS cnsis (
 
 CREATE INDEX cnsis_name ON cnsis (name);
 CREATE INDEX cnsis_cnsi_type ON cnsis (cnsi_type);
+
+-- ----------------------------
+--  Table structure for "http_sessions"
+-- ----------------------------
+CREATE TABLE http_sessions (
+  id          BIGSERIAL NOT NULL UNIQUE,
+	key         TEXT,
+	data        TEXT,
+	created_on  TIMESTAMP(6) WITH TIME ZONE,
+	modified_on TIMESTAMP(6) WITH TIME ZONE,
+	expires_on  TIMESTAMP(6) WITH TIME ZONE
+)
+WITH (OIDS=FALSE);
+
+-- ----------------------------
+--  Primary key structure for table "http_sessions"
+-- ----------------------------
+ALTER TABLE http_sessions ADD CONSTRAINT http_sessions_pkey PRIMARY KEY (id) NOT DEFERRABLE INITIALLY IMMEDIATE;

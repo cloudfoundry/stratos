@@ -57,7 +57,9 @@ func main() {
 	log.Println("Proxy database connection pool created.")
 
 	sessionStore := initSessionStore(databaseConnectionPool, portalConfig)
-	log.Println("Proxy database connection pool created.")
+	defer sessionStore.Close()
+	defer sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
+	log.Println("Proxy session store initialized.")
 
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
 	log.Println("Proxy waiting for requests.")
@@ -67,7 +69,6 @@ func main() {
 		log.Printf("Unable to start the proxy: %v", err)
 		os.Exit(1)
 	}
-	log.Printf("Proxy listening on address %s and port %d", portalConfig.TLSAddress, 80)
 }
 
 // TODO (wchrisjohnson): This should be changed to pull in the encryption key from the env.
@@ -107,10 +108,6 @@ func initConnPool() (*sql.DB, error) {
 
 func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {
 	store := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
-	defer store.Close()
-
-	// Run a background goroutine to clean up expired sessions from the database.
-	defer store.StopCleanup(store.Cleanup(time.Minute * 5))
 
 	return store
 }
