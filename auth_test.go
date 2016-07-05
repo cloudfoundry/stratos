@@ -410,7 +410,6 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 	badCNSIID := ""
 	badAuthToken := ""
 	badRefreshToken := ""
-	badScope := ""
 	badUserInfo := userTokenInfo{
 		UserGUID:    "",
 		TokenExpiry: 0,
@@ -431,7 +430,7 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 	mock.ExpectExec(sql).
 		WillReturnError(errors.New("Unknown Database Error"))
 
-	tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken, badScope)
+	tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken)
 
 	if err == nil || tr != emptyTokenRecord {
 		t.Error("Should not be able to save a CNSI token with invalid user, CNSI, or token data.")
@@ -572,21 +571,20 @@ func TestUserInfo(t *testing.T) {
 	pp.DatabaseConnectionPool = db
 
 	var mockTokenExpiration = time.Now().AddDate(0, 0, 1).Unix()
-	var mockAdminScope = "openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write"
 
 	// 1 - setup 2 CNSI token rows
-	expectedCNSITokenRows := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "scope"}).
-		AddRow(mockCNSIToken, mockCNSIToken, mockTokenExpiration, mockAdminScope).
-		AddRow(mockCNSIToken, mockCNSIToken, mockTokenExpiration, mockAdminScope)
-	sql := `SELECT auth_token, refresh_token, token_expiry, scope FROM tokens`
+	expectedCNSITokenRows := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+		AddRow(mockCNSIToken, mockCNSIToken, mockTokenExpiration).
+		AddRow(mockCNSIToken, mockCNSIToken, mockTokenExpiration)
+	sql := `SELECT auth_token, refresh_token, token_expiry FROM tokens`
 	mock.ExpectQuery(sql).
 		WithArgs(mockUserGUID).
 		WillReturnRows(expectedCNSITokenRows)
 
 	// 2 - setup a single UAA token row
-	expectedUAATokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "scope"}).
-		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiration, mockAdminScope)
-	sql = `SELECT auth_token, refresh_token, token_expiry, scope FROM tokens`
+	expectedUAATokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiration)
+	sql = `SELECT auth_token, refresh_token, token_expiry FROM tokens`
 	mock.ExpectQuery(sql).
 		WithArgs(mockUserGUID).
 		WillReturnRows(expectedUAATokenRow)

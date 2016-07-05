@@ -67,7 +67,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken, uaaRes.Scope)
+	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	log.Printf("User ID: %s", userID)
 
-	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, uaaRes.Scope)
+	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	log.Println("After SAVE of CNSI token")
 
 	resp := &LoginRes{
@@ -274,13 +274,12 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 	return &response, nil
 }
 
-func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string, scope string) error {
+func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
 	key := u.UserGUID
 	tokenRecord := tokens.TokenRecord{
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
-		Scope:        scope,
 	}
 
 	err := p.setUAATokenRecord(key, tokenRecord)
@@ -291,12 +290,11 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 	return nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string, scope string) (tokens.TokenRecord, error) {
+func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (tokens.TokenRecord, error) {
 	tokenRecord := tokens.TokenRecord{
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
-		Scope:        scope,
 	}
 
 	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
@@ -391,9 +389,9 @@ func (p *portalProxy) userInfo(c echo.Context) error {
 	return nil
 }
 
-func getHCFPerms(p *portalProxy, u string, arrPerms []string) ([]string, error) {
+func getHCFPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, error) {
 	// Get a list of registered CNSIs by the user`
-	registeredCNSIs, err := p.listCNSITokenRecordsForUser(u)
+	CNSITokens, err := p.listCNSITokenRecordsForUser(userGUID)
 	if err != nil {
 		msg := "Unable to find any registered CNSI tokens"
 		log.Println(msg)
@@ -401,20 +399,26 @@ func getHCFPerms(p *portalProxy, u string, arrPerms []string) ([]string, error) 
 	}
 
 	// spin thru all registered CNSIs and grab the scope from each
-	for i := 0; i < len(registeredCNSIs); i++ {
-		scope := registeredCNSIs[i].Scope
-		guid := u
+	for i := 0; i < len(CNSITokens); i++ {
+
+		// get the scope out of the JWT token data
+		userTokenInfo, err := getUserTokenInfo(CNSITokens[i].AuthToken)
+		if err != nil {
+			msg := "Unable to find scope information in the CNSI Auth Token"
+			log.Println(msg)
+			return nil, fmt.Errorf(msg)
+		}
 
 		// based on the scope, is the user an admin for this CNSI?
 		hcfAdmin := false
-		if strings.Contains(scope, "cloud_controller.admin") {
+		if contains(userTokenInfo.Scope, "cloud_controller.admin") {
 			hcfAdmin = true
 		}
 
 		// build an entry for each HCF found for the user
 		hcfEntry := &hcfPerms{
 			Type:  "hcf",
-			GUID:  guid,
+			GUID:  userGUID,
 			Admin: fmt.Sprintf("%t", hcfAdmin),
 		}
 
@@ -427,18 +431,26 @@ func getHCFPerms(p *portalProxy, u string, arrPerms []string) ([]string, error) 
 	return arrPerms, nil
 }
 
-func getUAAPerms(p *portalProxy, u string, arrPerms []string) ([]string, error) {
+func getUAAPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, error) {
 	// get the uaa token record
-	uaaTokenRecord, err := p.getUAATokenRecord(u)
+	uaaTokenRecord, err := p.getUAATokenRecord(userGUID)
 	if err != nil {
 		msg := "Unable to retrieve UAA token record."
 		log.Println(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
+	// get the scope out of the JWT token data
+	userTokenInfo, err := getUserTokenInfo(uaaTokenRecord.AuthToken)
+	if err != nil {
+		msg := "Unable to find scope information in the UAA Auth Token"
+		log.Println(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
 	// is the user a UAA admin?
 	uaaAdmin := false
-	if strings.Contains(uaaTokenRecord.Scope, "cloud_controller.admin") {
+	if contains(userTokenInfo.Scope, "uaa.admin") {
 		uaaAdmin = true
 	}
 
@@ -454,4 +466,13 @@ func getUAAPerms(p *portalProxy, u string, arrPerms []string) ([]string, error) 
 	arrPerms = append(arrPerms, s)
 
 	return arrPerms, nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

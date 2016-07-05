@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	findUAAToken = `SELECT auth_token, refresh_token, token_expiry, scope
+	findUAAToken = `SELECT auth_token, refresh_token, token_expiry
                   FROM tokens
                   WHERE token_type = 'uaa' AND user_guid = $1`
 
@@ -15,18 +15,18 @@ const (
                     FROM tokens
                     WHERE token_type = 'uaa' AND user_guid = $1`
 
-	insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry, scope)
-	                  VALUES ($1, $2, $3, $4, $5, $6)`
+	insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
+	                  VALUES ($1, $2, $3, $4, $5)`
 
 	updateUAAToken = `UPDATE tokens
-	                  SET auth_token = $3, refresh_token = $4, token_expiry = $5, scope = $6
+	                  SET auth_token = $3, refresh_token = $4, token_expiry = $5
 	                  WHERE user_guid = $1 AND token_type = $2`
 
-	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, scope
+	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
                    FROM tokens
                    WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
 
-	listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry, scope
+	listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry
                            FROM tokens
                            WHERE token_type = 'cnsi' AND user_guid = $1`
 
@@ -34,11 +34,11 @@ const (
                      FROM tokens
                      WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
-	insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry, scope)
-	                   VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
+	                   VALUES ($1, $2, $3, $4, $5, $6)`
 
 	updateCNSIToken = `UPDATE tokens
-	                   SET auth_token = $4, refresh_token = $5, token_expiry = $6, scope = $7
+	                   SET auth_token = $4, refresh_token = $5, token_expiry = $6
 	                   WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = $3`
 
 	deleteCNSIToken = `DELETE FROM tokens
@@ -78,12 +78,6 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 		return fmt.Errorf(msg)
 	}
 
-	if tr.Scope == "" {
-		msg := "Unable to save UAA Token without a valid scope."
-		log.Println(msg)
-		return fmt.Errorf(msg)
-	}
-
 	log.Println("Encrypting Auth Token")
 	ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
@@ -108,7 +102,7 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 
 		log.Println("Performing INSERT of encrypted tokens")
 		if _, err := p.db.Exec(insertUAAToken, userGUID, "uaa", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry, tr.Scope); err != nil {
+			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
 			msg := "Unable to INSERT UAA token: %v"
 			log.Printf(msg, err)
 			return fmt.Errorf(msg, err)
@@ -121,7 +115,7 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 		log.Println("Performing UPDATE of encrypted tokens")
 		if _, updateErr := p.db.Exec(updateUAAToken, userGUID, "uaa",
 			ciphertextAuthToken, ciphertextRefreshToken,
-			tr.TokenExpiry, tr.Scope); updateErr != nil {
+			tr.TokenExpiry); updateErr != nil {
 			msg := "Unable to UPDATE UAA token: %v"
 			log.Printf(msg, updateErr)
 			return fmt.Errorf(msg, updateErr)
@@ -147,11 +141,10 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
 		tokenExpiry            int64
-		scope                  string
 	)
 
 	// Get the UAA record from the db
-	err := p.db.QueryRow(findUAAToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &scope)
+	err := p.db.QueryRow(findUAAToken, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
 		log.Printf(msg, err)
@@ -175,7 +168,6 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
 	tr.TokenExpiry = tokenExpiry
-	tr.Scope = scope
 
 	return *tr, nil
 }
@@ -207,12 +199,6 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		return fmt.Errorf(msg)
 	}
 
-	if tr.Scope == "" {
-		msg := "Unable to save CNSI Token without a valid Scope."
-		log.Println(msg)
-		return fmt.Errorf(msg)
-	}
-
 	log.Println("Encrypting Auth Token")
 	ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
@@ -236,7 +222,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	case 0:
 
 		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry, tr.Scope); insertErr != nil {
+			ciphertextRefreshToken, tr.TokenExpiry); insertErr != nil {
 			msg := "Unable to INSERT CNSI token: %v"
 			log.Printf(msg, err)
 			return fmt.Errorf(msg, err)
@@ -248,7 +234,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 		log.Println("Existing CNSI token found - attempting update.")
 		if _, err := p.db.Exec(updateCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry, tr.Scope); err != nil {
+			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
 			msg := "Unable to UPDATE CNSI token: %v"
 			log.Printf(msg, err)
 			return fmt.Errorf(msg, err)
@@ -280,10 +266,9 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 		ciphertextAuthToken    []byte
 		ciphertextRefreshToken []byte
 		tokenExpiry            int64
-		scope                  string
 	)
 
-	err := p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &scope)
+	err := p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
 	if err != nil {
 		msg := "Unable to Find CNSI token: %v"
 		log.Printf(msg, err)
@@ -307,7 +292,6 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 	tr.AuthToken = plaintextAuthToken
 	tr.RefreshToken = plaintextRefreshToken
 	tr.TokenExpiry = tokenExpiry
-	tr.Scope = scope
 
 	return *tr, nil
 }
@@ -345,10 +329,9 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 			ciphertextAuthToken    []byte
 			ciphertextRefreshToken []byte
 			tokenExpiry            int64
-			scope                  string
 		)
 
-		err := rows.Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &scope)
+		err := rows.Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
 		if err != nil {
 			msg := "Unable to scan token records: %v"
 			log.Printf(msg, err)
@@ -371,7 +354,6 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 		tr.AuthToken = plaintextAuthToken
 		tr.RefreshToken = plaintextRefreshToken
 		tr.TokenExpiry = tokenExpiry
-		tr.Scope = scope
 
 		tokenRecordList = append(tokenRecordList, tr)
 	}
@@ -417,7 +399,6 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 
 // encryptToken - TBD
 func encryptToken(key []byte, t string) ([]byte, error) {
-	log.Println("===== encryptToken =")
 
 	var plaintextToken = []byte(t)
 	ciphertextToken, err := encrypt(key, plaintextToken)
@@ -443,7 +424,6 @@ func encryptToken(key []byte, t string) ([]byte, error) {
 
 // decryptToken - TBD
 func decryptToken(key, t []byte) (string, error) {
-	log.Println("===== decryptToken =")
 
 	plaintextToken, err := decrypt(key, t)
 	if err != nil {
