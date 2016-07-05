@@ -134,11 +134,11 @@
       this.modelManager.retrieve('app.model.serviceInstance')
         .list()
         .then(function onSuccess(data) {
-          var noHCFInstances = (data.numAvailable === 0);
+          var noHCFInstances = data.numAvailable === 0;
           // Admin
           if (account.isAdmin()) {
             // Show registration if we don't have any HCF instances
-            that.showClusterRegistration = noHCFInstances
+            that.showClusterRegistration = noHCFInstances;
           } else {
             // Developer
             if (noHCFInstances) {
@@ -150,8 +150,8 @@
               // Need to get the user's service list to determine if they have any connected
               return userServiceInstanceModel.list().then(function() {
                 // Developer - allow user to connect services, if we have some and none are connected
-                that.showRegistration = (userServiceInstanceModel.numValid === 0);
-              })
+                that.showRegistration = userServiceInstanceModel.numValid === 0;
+              });
             }
           }
         })

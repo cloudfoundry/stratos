@@ -35,6 +35,7 @@
    * @name NavBarController
    * @description Controller for the navbar - navigation menu items can be hidden based on ui routerstate params
    * @constructor
+   * @param  {$stateParams} $stateParams - UI Router state params
    */
   function NavBarController($stateParams) {
     this.hideNavigation = $stateParams.hideNavigation;
