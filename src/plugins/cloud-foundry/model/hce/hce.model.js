@@ -40,7 +40,6 @@
       deploymentTargets: [],
       imageRegistries: [],
       projects: {},
-      user: {},
       pipelineExecutions: []
     };
 
@@ -123,7 +122,7 @@
     getDeploymentTargets: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .getDeploymentTargets(guid, { user_id: this.data.user.id }, this.hceProxyPassthroughConfig)
+        .getDeploymentTargets(guid, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
           that.onGetDeploymentTargets(response);
         });
@@ -183,45 +182,9 @@
     getProjects: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .getProjects(guid, { user_id: this.data.user.id }, this.hceProxyPassthroughConfig)
+        .getProjects(guid, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
           return that.onGetProjects(response);
-        });
-    },
-
-    /**
-     * @function getUser
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Get user by ID
-     * @param {string} guid - the HCE instance GUID
-     * @param {number} userId - the user's ID
-     * @returns {promise} A promise object
-     * @public
-     */
-    getUser: function (guid, userId) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUser(guid, userId, {}, this.hceProxyPassthroughConfig)
-        .then(function (response) {
-          that.onGetUser(response);
-        });
-    },
-
-    /**
-     * @function getUserByGithubId
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Get user by Github user ID
-     * @param {string} guid - the HCE instance GUID
-     * @param {string} githubUserId - the Github user ID
-     * @returns {promise} A promise object
-     * @public
-     */
-    getUserByGithubId: function (guid, githubUserId) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUserByGithubId(guid, githubUserId, {}, this.hceProxyPassthroughConfig)
-        .then(function (response) {
-          that.onGetUser(response);
         });
     },
 
@@ -279,7 +242,6 @@
     createDeploymentTarget: function (guid, name, url, username, password, org, space, targetType) {
       var that = this;
       var newTarget = {
-        user_id: this.data.user.id,
         name: name,
         url: url,
         userName: username,
@@ -316,7 +278,6 @@
       var newProject = {
         name: name,
         type: type,
-        user_id: this.data.user.id,
         build_container_id: buildContainerId,
         token: vcsToken,
         branchRefName: branch,
@@ -336,34 +297,6 @@
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
         .createProject(guid, newProject, {}, this.hceProxyPassthroughConfig);
-    },
-
-    /**
-     * @function createUser
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Create a new HCE user
-     * @param {string} guid - the HCE instance GUID
-     * @param {string} userId - the user ID
-     * @param {string} login - the user login name
-     * @param {string} token - the login token
-     * @param {string} vcs - the version control system (e.g. github)
-     * @returns {promise} A promise object
-     * @public
-     */
-    createUser: function (guid, userId, login, token, vcs) {
-      var that = this;
-      var newUser = {
-        userId: userId,
-        login: login,
-        vcs: vcs || 'github',
-        secret: token
-      };
-
-      return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .createUser(guid, newUser, {}, this.hceProxyPassthroughConfig)
-        .then(function (response) {
-          return that.onCreateUser(response);
-        });
     },
 
     /**
@@ -420,7 +353,6 @@
      */
     triggerPipelineExecution: function (guid, projectId, commitRef) {
       var data = {
-        user_id: this.data.user.id,
         project_id: projectId,
         commit_ref: commitRef
       };
@@ -480,21 +412,6 @@
     },
 
     /**
-     * @function onGetUser
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Cache user
-     * @param {string} response - the JSON response from API call
-     * @private
-     */
-    onGetUser: function (response) {
-      var user = response.data;
-      if (user) {
-        delete user.secret;
-        this.data.user = user;
-      }
-    },
-
-    /**
      * @function onCreateDeploymentTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache deployment target
@@ -509,24 +426,6 @@
       this.data.deploymentTargets.push(target);
 
       return target;
-    },
-
-    /**
-     * @function onCreateUser
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Cache user
-     * @param {string} response - the JSON response from API call
-     * @returns {object} The new user data
-     * @private
-     */
-    onCreateUser: function (response) {
-      var newUser = response.data;
-      if (newUser) {
-        delete newUser.secret;
-        this.data.user = newUser;
-      }
-
-      return newUser;
     },
 
     /**
@@ -578,7 +477,6 @@
         deploymentTargets: [],
         imageRegistries: [],
         projects: {},
-        user: {},
         pipelineExecutions: []
       };
     }

@@ -32,7 +32,7 @@
 
     getDeploymentTargets: function () {
       return {
-        url: '/pp/v1/proxy/v2/deployments/targets?user_id=1',
+        url: '/pp/v1/proxy/v2/deployments/targets',
         response: {
           200: {
             body: [

@@ -224,20 +224,6 @@
             formName: 'application-source-form',
             nextBtnText: gettext('Next'),
             onNext: function () {
-              try {
-                /* eslint-disable */
-                // TODO (kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
-                /* eslint-enable */
-                that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
-                  .then(angular.noop, function (response) {
-                    if (response.status === 404) {
-                      that.hceModel.createUser(that.userInput.hceCnsi.guid, '123456', 'login', 'token');
-                    }
-                  });
-              } catch (err) {
-                this.errors.getUserByGithubId = true;
-              }
-
               var oauth;
               if (that.userInput.source === 'github') {
                 oauth = that.githubOauthService.start();
