@@ -11,7 +11,8 @@
   angular
     .module('app.view', [
       'app.view.config-clusters',
-      'app.view.settings-page'
+      'app.view.settings-page',
+      'app.view.error-page'
     ]);
 
 })();
