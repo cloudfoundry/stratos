@@ -112,7 +112,7 @@
       // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
       // just for the count. This will help in the case the connected user does not have privileges.
       this.cfModelUsers.listAllUsers(this.service.guid).then(function(res) {
-        that.userCount = _.get(res, 'length');
+        that.userCount = _.get(res, 'length', null);
       });
     },
 
@@ -125,7 +125,7 @@
       // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
       // just for the count. This will help in the case the connected user does not have privileges.
       this.cfModelOrg.listAllOrganizations(this.service.guid).then(function(res) {
-        that.orgCount = _.get(res, 'length');
+        that.orgCount = _.get(res, 'length', null);
       });
     },
 
