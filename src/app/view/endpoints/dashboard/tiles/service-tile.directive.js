@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints')
+    .module('app.view.endpoints.dashboard')
     .directive('serviceTile', serviceTile);
 
   function serviceTile () {

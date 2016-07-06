@@ -2,7 +2,11 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints', [ ])
+    .module('app.view.endpoints', [
+      'app.view.endpoints.clusters',
+      'app.view.endpoints.dashboard',
+      'app.view.endpoints.hce'
+    ])
     .config(registerRoute)
     .run(register);
 
@@ -33,7 +37,7 @@
 
   function Endpoints(modelManager, eventService) {
     var that = this;
-    
+
     this.modelManager = modelManager;
 
     eventService.$on(eventService.events.LOGIN, function () {
