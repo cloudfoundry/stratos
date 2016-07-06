@@ -36,6 +36,7 @@
    * @property {string} accountStatus - connected user's account status
    * @property {number} orgCount - organisation count
    * @property {number} userCount - user count
+   * @property {object} cardData - gallery-card directive data object
    */
   function ClusterTileController($state, modelManager) {
     this.$state = $state;
@@ -47,6 +48,16 @@
     this.accountStatus = null;
     this.orgCount = null;
     this.userCount = null;
+    this.cardData = {
+      title: this.service.name
+    };
+    if (this.service.hasExpired) {
+      this.cardData.status = {
+        classes: 'danger',
+        icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
+        description: gettext('Token has expired')
+      }
+    }
 
     this.setActions();
     this.setAccountStatus();

@@ -62,6 +62,9 @@
           _.forEach(filteredInstances, function(serviceInstance) {
             var cloned = JSON.parse(JSON.stringify(serviceInstance));
             cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid');
+            var token_expiry =
+              _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
+            cloned.hasExpired = (new Date().getTime()) > token_expiry * 1000;
             that.serviceInstances.push(cloned);
           });
         })
