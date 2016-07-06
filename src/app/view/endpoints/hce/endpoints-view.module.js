@@ -55,24 +55,34 @@
     this.$q = $q;
 
     this._updateCurrentEndpoints();
-
+    var that = this;
     // Initialise action menus
     this.connectedActionMenu = [
       {
-        name: 'Disconnect', execute: _.partial(_.bind(this.disconnect, this))
+        name: 'Disconnect',
+        execute: function (endpoint) {
+          that.disconnect(endpoint.model);
+        }
       }];
 
     this.disconnectedActionMenu = [
       {
-        name: 'Connect', execute: _.partial(_.bind(this.connect, this))
+        name: 'Connect',
+        execute: function (endpoint) {
+          that.connect(endpoint.model);
+        }
       }];
 
     if (this.isUserAdmin()) {
+
+      var unregister = function(endpoint){
+         that.unregister(endpoint);
+      };
       this.connectedActionMenu.push(
-        {name: 'Unregister', execute: _.partial(_.bind(this.unregister, this))}
+        {name: 'Unregister', execute: unregister}
       );
       this.disconnectedActionMenu.push(
-        {name: 'Unregister', execute: _.partial(_.bind(this.unregister, this))}
+        {name: 'Unregister', execute: unregister}
       );
     }
 
@@ -227,7 +237,7 @@
               };
             });
 
-          // // FIXME Setting connection status to false to test connection case
+          // FIXME Setting connection status to false to test connection case
           // if (that.currentEndpoints.length > 0) {
           //   that.currentEndpoints[that.currentEndpoints.length - 1].connected = false;
           // }
