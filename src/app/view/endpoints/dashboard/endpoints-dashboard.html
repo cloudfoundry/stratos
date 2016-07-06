@@ -2,18 +2,18 @@
   <div class="action-bar app-actions-bar col-md-12 panel-less">
     <div class="applications-header font-semi-bold pull-left" translate>Endpoints</div>
   </div>
-
-  <div id="welcome-message" class="welcome-message"
-       ng-if="endpointsDashboardCtrl.showWelcomeMessage"
-        ng-show="endpointsDashboardCtrl.isUserAdmin()">
-    <div class="panel panel-default">
-      <div class="action-header">
-        Welcome to Stackato
-        <button type="button" class="close helion-icon helion-icon-Close"
-                ng-click="endpointsDashboardCtrl.hideWelcomeMessage()">
-        </button>
-      </div>
-      <div class=" panel-body">
+  <div ng-show="endpointsDashboardCtrl.listPromiseResolved">
+    <div id="welcome-message" class="welcome-message"
+         ng-if="endpointsDashboardCtrl.showWelcomeMessage"
+         ng-show="endpointsDashboardCtrl.isUserAdmin()">
+      <div class="panel panel-default">
+        <div class="action-header">
+          Welcome to Stackato
+          <button type="button" class="close helion-icon helion-icon-Close"
+                  ng-click="endpointsDashboardCtrl.hideWelcomeMessage()">
+          </button>
+        </div>
+        <div class=" panel-body">
 
       <span translate>
       To enable developers to use this Web console to interact with Stackato, please
@@ -30,11 +30,13 @@
       anyone who logs
       into this console. Once you register an endpoint, we recommend connecting it to your account so you can manage it.
         </span>
+        </div>
       </div>
     </div>
+
+    <service-tile service-instances="endpointsDashboardCtrl.serviceInstances" service-type="hcf"
+                  class="endpoint-tile col-md-4 col-sm-1"></service-tile>
+    <service-tile service-instances="endpointsDashboardCtrl.serviceInstances" service-type="hce"
+                  class="endpoint-tile col-md-4 col-sm-1"></service-tile>
   </div>
-
-  <service-tile service-type="hcf" class="endpoint-tile col-md-4 col-sm-1"></service-tile>
-  <service-tile service-type="hce" class="endpoint-tile col-md-4 col-sm-1"></service-tile>
-
 </div>

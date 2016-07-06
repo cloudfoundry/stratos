@@ -20,12 +20,10 @@
 
   EndpointsDashboardController.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager',
-    'helion.framework.widgets.detailView',
-    '$scope',
     '$state',
     'app.view.hceRegistration',
-    'app.view.hcfRegistration'
+    'app.view.hcfRegistration',
+    '$q'
   ];
 
   /**
@@ -33,56 +31,32 @@
    * @memberof app.view.endpoints.hce
    * @name EndpointsDashboardController
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.api.apiManager} apiManager - the api manager
-   * @param {helion.framework.widgets.detailView} detailView - the detail view service
-   * @param {object} $scope - angular $scope
    * @param {object} $state - the UI router $state service
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
    * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
+   * @param $q
    * @constructor
    */
-  function EndpointsDashboardController (modelManager, apiManager, detailView, $scope, $state, hceRegistration, hcfRegistration) {
+  function EndpointsDashboardController (modelManager, $state, hceRegistration, hcfRegistration, $q) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
-    this.detailView = detailView;
     this.$state = $state;
     this.hceRegistration = hceRegistration;
     this.hcfRegistration = hcfRegistration;
 
     this.currentEndpoints = [];
+    // Start off with an initial state
     this.serviceInstances = {};
-
+    this.listPromiseResolved = false;
     // Show welcome message only if no endpoints are registered
     this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
-    var that = this;
     this.serviceInstanceModel.list();
-    this.clusterAddFlyoutActive = false;
+    this.$q = $q;
 
-    $scope.$watchCollection(function () {
-      return that.serviceInstanceModel.serviceInstances;
-    }, function (serviceInstances) {
-
-      if (that.showWelcomeMessage && serviceInstances.length > 0) {
-        that.showWelcomeMessage = false;
-      }
-      _.forEach(serviceInstances, function (serviceInstance) {
-        var guid = serviceInstance.guid;
-        if (angular.isUndefined(that.serviceInstances[guid])) {
-          that.serviceInstances[guid] = serviceInstance;
-        } else {
-          angular.extend(that.serviceInstances[guid], serviceInstance);
-        }
-      });
-
-      that.currentEndpoints = _.map(that.serviceInstances,
-        function (c) {
-          var endpoint = c.api_endpoint;
-          return endpoint.Scheme + '://' + endpoint.Host;
-        });
-    });
+    this._updateEndpoints();
 
   }
 
@@ -95,10 +69,17 @@
      * @description Show cluster add form
      */
     showClusterAddForm: function () {
+      var that = this;
       if (this.isHcf()) {
-        this.hcfRegistration.add();
+        this.hcfRegistration.add()
+          .then(function () {
+            return that._updateEndpoints;
+          });
       } else {
-        this.hceRegistration.add();
+        this.hceRegistration.add()
+          .then(function () {
+            return that._updateEndpoints;
+          });
       }
     },
 
@@ -125,14 +106,41 @@
 
     /**
      * @function isUserAdmin
-     * @memberOf app.view.endpoints.hce
+     * @memberOf app.view.endpoints.dashboard
      * @description Is current user an admin?
      * @returns {Boolean}
      */
     isUserAdmin: function () {
       return this.currentUserAccount.isAdmin();
-    }
+    },
 
+    /**
+     * @function _updateEndpoints
+     * @memberOf app.view.endpoints.dashboard
+     * @description Is current user an admin?
+     * @returns {*}
+     * @private
+     */
+    _updateEndpoints: function () {
+
+      var that = this;
+      return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
+        .then(function () {
+          if (that.showWelcomeMessage && that.serviceInstanceModel.serviceInstances.length > 0) {
+            that.showWelcomeMessage = false;
+          }
+          _.forEach(that.serviceInstanceModel.serviceInstances, function (serviceInstance) {
+            var guid = serviceInstance.guid;
+            if (angular.isUndefined(that.serviceInstances[guid])) {
+              that.serviceInstances[guid] = serviceInstance;
+            } else {
+              angular.extend(that.serviceInstances[guid], serviceInstance);
+            }
+          });
+        }).then(function(){
+          that.listPromiseResolved = true;
+        });
+    }
   });
 
 })();

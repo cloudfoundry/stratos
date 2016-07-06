@@ -5,6 +5,10 @@
   $gallery-card-max-width: 400px;
   $gallery-card-layout-steps: 4;
 
+  .welcome-message {
+    padding: $hpe-unit-space $hpe-unit-space;
+  }
+
   .action-header{
     position: relative;
     button{

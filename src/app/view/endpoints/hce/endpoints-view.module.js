@@ -21,9 +21,9 @@
   EndpointsViewController.$inject = [
     'app.model.modelManager',
     'app.api.apiManager',
-    '$scope',
-    'app.view.hceRegistration'
-
+    'app.view.hceRegistration',
+    '$log',
+    '$q'
   ];
 
   /**
@@ -34,10 +34,11 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.api.apiManager} apiManager - the api manager
-   * @param {object} $scope - angular $scope
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
+   * @param $log
+   * @param $q
    */
-  function EndpointsViewController (modelManager, apiManager, $scope, hceRegistration) {
+  function EndpointsViewController (modelManager, apiManager, hceRegistration, $log, $q) {
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -48,58 +49,33 @@
     this.serviceInstances = {};
     this.hceRegistration = hceRegistration;
     this.tokenExpiryMessage = 'Token has expired';
-    // FIXME there is got to be a better way than this?
-    this.showDropdown = {};
+    this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
     this.activeServiceInstance = null;
-    var that = this;
+    this.$log = $log;
+    this.$q = $q;
 
-    this.serviceInstanceModel.list()
-      .then(function () {
-        return that.userServiceInstanceModel.list();
-      }).then(function () {
+    this._updateCurrentEndpoints();
 
-      $scope.$watchCollection(function () {
-        return that.serviceInstanceModel.serviceInstances;
-      }, function (serviceInstances) {
-        var filteredInstances = _.filter(serviceInstances, {cnsi_type: that.serviceType});
-        _.forEach(filteredInstances, function (serviceInstance) {
-          var guid = serviceInstance.guid;
-          if (angular.isUndefined(that.serviceInstances[guid])) {
-            that.serviceInstances[guid] = serviceInstance;
-          } else {
-            angular.extend(that.serviceInstances[guid], serviceInstance);
-          }
-        });
+    // Initialise action menus
+    this.connectedActionMenu = [
+      {
+        name: 'Disconnect', execute: _.partial(_.bind(this.disconnect, this))
+      }];
 
-        that.currentEndpoints = _.map(that.serviceInstances,
-          function (c) {
-            var endpoint = c.api_endpoint;
-            var isConnected = true;
-            if (that.isHcf()) {
-              isConnected = that.userServiceInstanceModel.serviceInstances[c.guid].valid;
-            }
-            return {
-              name: c.name,
-              guid: c.guid,
-              url: endpoint.Scheme + '://' + endpoint.Host,
-              connected: isConnected,
-              model: c
-            };
-          });
-      });
+    this.disconnectedActionMenu = [
+      {
+        name: 'Connect', execute: _.partial(_.bind(this.connect, this))
+      }];
 
-      // Set watch on userServiceInstanceModel to update conncetion states
-      $scope.$watchCollection(function () {
-        return that.userServiceInstanceModel.serviceInstances;
-      }, function (serviceInstances) {
-        _.each(serviceInstances, function (instance, guid) {
-          var endpointIndex = _.findIndex(that.currentEndpoints, {guid: guid});
-          if (that.isHcf()) {
-            that.currentEndpoints[endpointIndex].connected = instance.valid;
-          }
-        });
-      });
-    });
+    if (this.isUserAdmin()) {
+      this.connectedActionMenu.push(
+        {name: 'Unregister', execute: _.partial(_.bind(this.unregister, this))}
+      );
+      this.disconnectedActionMenu.push(
+        {name: 'Unregister', execute: _.partial(_.bind(this.unregister, this))}
+      );
+    }
+
   }
 
   angular.extend(EndpointsViewController.prototype, {
@@ -114,8 +90,8 @@
     connect: function (serviceInstance) {
       // TODO implement HCE authentication
       // Currently only implemented for HCF
-        this.activeServiceInstance = serviceInstance;
-        this.credentialsFormOpen = true;
+      this.activeServiceInstance = serviceInstance;
+      this.credentialsFormOpen = true;
     },
 
     /**
@@ -123,10 +99,27 @@
      * @memberof app.view.endpoints.hce
      * @name disconnect
      * @description disconnect from service
-     * @param {object} serviceInstance - Service instance
+     * @param {object} endpoint - endpoint
      */
-    disconnect: function (serviceInstance) {
-      // TODO implement HCE authentication
+    disconnect: function (endpoint) {
+      // TODO(irfan) Test once HCE authentication is implemented (TEAMFOUR-721)
+      var that = this;
+      var userServiceInstance = that.userServiceInstanceModel.serviceInstances[endpoint.guid];
+      if (angular.isUndefined(userServiceInstance)) {
+        that.$log.warn('Will not be able to disconnect from service! ' +
+          'This should work once HCE authentication is implemented!');
+        return;
+      }
+      this.userServiceInstanceModel.disconnect(endpoint.guid)
+        .then(function success () {
+          delete userServiceInstance.account;
+          delete userServiceInstance.token_expiry;
+          delete userServiceInstance.valid;
+          that.userServiceInstanceModel.numValid -= 1;
+          that.cfModel.all();
+        }).then(function () {
+        return _updateCurrentEndpoints();
+      });
     },
 
     /**
@@ -134,10 +127,14 @@
      * @memberof app.view.endpoints.hce
      * @name unregister
      * @description unregister service
-     * @param {object} serviceInstance - Service instance
+     * @param {object} endpoint - Service instance
      */
-    unregister: function (serviceInstance) {
-      // TODO remove...
+    unregister: function (endpoint) {
+      var that = this;
+      this.serviceInstanceModel.remove(endpoint.model)
+        .then(function success () {
+          return that._updateCurrentEndpoints(true);
+        });
     },
 
     /**
@@ -147,25 +144,10 @@
      * @description Show cluster add form
      */
     showClusterAddForm: function () {
-        this.hceRegistration.add();
-    },
-
-    /**
-     * @namespace app.view.endpoints.hce
-     * @memberof app.view.endpoints.hce
-     * @name setShowDropdown
-     * @description Private method to control dropdowns
-     */
-    setShowDropdown: function (index) {
       var that = this;
-      if (this.showDropdown[index]) {
-        this.showDropdown[index] = false;
-      } else {
-        _.each(_.keys(this.showDropdown), function (rowIndex) {
-          that.showDropdown[rowIndex] = false;
-        });
-        this.showDropdown[index] = true;
-      }
+      this.hceRegistration.add().then(function () {
+        return that._updateCurrentEndpoints();
+      });
     },
 
     /**
@@ -173,7 +155,6 @@
      * @memberof app.view.endpoints.hce
      * @name isHcf
      * @description Check if endpoint view instance is an HCF instance
-     * @return {Boolean}
      */
     isHcf: function () {
       return this.serviceType === 'hcf';
@@ -184,7 +165,6 @@
      * @memberof app.view.endpoints.hce
      * @name isHcf
      * @description Check if endpoint view instance is an HCF instance
-     * @return {Boolean}
      */
     onConnectCancel: function () {
       this.credentialsFormOpen = false;
@@ -195,7 +175,6 @@
      * @memberof app.view.endpoints.hce
      * @name onConnectSuccess
      * @description dismiss view when connection succeeds
-     * @return {Boolean}
      */
     onConnectSuccess: function () {
       this.userServiceInstanceModel.numValid += 1;
@@ -211,6 +190,48 @@
      */
     isUserAdmin: function () {
       return this.currentUserAccount.isAdmin();
+    },
+
+    _updateCurrentEndpoints: function (invalidateCurrentInstances) {
+      var that = this;
+      return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
+        .then(function () {
+
+          if (invalidateCurrentInstances) {
+            that.serviceInstances = {};
+          }
+          var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: that.serviceType});
+          _.forEach(filteredInstances, function (serviceInstance) {
+            var guid = serviceInstance.guid;
+            if (angular.isUndefined(that.serviceInstances[guid])) {
+              that.serviceInstances[guid] = serviceInstance;
+            } else {
+              angular.extend(that.serviceInstances[guid], serviceInstance);
+            }
+          });
+
+          that.currentEndpoints = _.map(filteredInstances,
+            function (c) {
+              var endpoint = c.api_endpoint;
+              // FIXME Once HCE auth is implement read connection status from userServiceInstanceModel (TEAMFOUR-721)
+              var isConnected = true;
+              if (that.isHcf()) {
+                isConnected = that.userServiceInstanceModel.serviceInstances[c.guid].valid;
+              }
+              return {
+                name: c.name,
+                guid: c.guid,
+                url: endpoint.Scheme + '://' + endpoint.Host,
+                connected: isConnected,
+                model: c
+              };
+            });
+
+          // // FIXME Setting connection status to false to test connection case
+          // if (that.currentEndpoints.length > 0) {
+          //   that.currentEndpoints[that.currentEndpoints.length - 1].connected = false;
+          // }
+        });
     }
   });
 })();

@@ -21,7 +21,7 @@
     return {
       add: function () {
         var data = {name: '', url: ''};
-        detailView(
+        return detailView(
           {
             detailViewTemplateUrl: 'app/view/hce-registration/hce-registration.html',
             title: gettext('Register Code Engine Endpoint'),

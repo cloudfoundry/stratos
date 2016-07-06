@@ -12,7 +12,6 @@ describe('Endpoints Dashboard', function() {
     beforeAll(function() {
       browser.driver.wait(resetTo.zeroClusterAdminWorkflow())
         .then(function() {
-          console.log('zeroClusterAdmin promise resolved!');
           helpers.setBrowserNormal();
           helpers.loadApp();
           loginPage.loginAsAdmin();

@@ -8,7 +8,8 @@
   function serviceTile () {
     return {
       scope: {
-        serviceType: '@'
+        serviceType: '@',
+        serviceInstances: '=?'
       },
       controller: ServiceTileController,
       controllerAs: 'serviceTileCtrl',
@@ -21,8 +22,8 @@
     'app.model.modelManager',
     '$state',
     'app.view.hceRegistration',
-    'app.view.hcfRegistration'
-
+    'app.view.hcfRegistration',
+    '$q'
   ];
 
   /**
@@ -35,9 +36,10 @@
    * @param {object} $state - the UI router $state service
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
    * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
+   * @param $q
    * @constructor
    */
-  function ServiceTileController ($scope, modelManager, $state, hceRegistration, hcfRegistration) {
+  function ServiceTileController ($scope, modelManager, $state, hceRegistration, hcfRegistration, $q) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -47,26 +49,20 @@
     this.$state = $state;
     this.hceRegistration = hceRegistration;
     this.hcfRegistration = hcfRegistration;
-
-    this.serviceInstances = {};
+    this.$q = $q;
+    this.serviceInstances = _.filter($scope.serviceInstances, {cnsi_type: this.serviceType});
+    // FIXME We should use ui-router/resolve for this, but can't currently
+    this.resolvedPromise = false;
     var that = this;
+    this._listServiceInstances()
+      .then(function () {
 
-    $scope.$watchCollection(function () {
-      return that.serviceInstanceModel.serviceInstances;
-    }, function (serviceInstances) {
-      var filteredInstances = _.filter(serviceInstances, function (serviceInstance) {
-        return serviceInstance.cnsi_type === that.serviceType;
+        $scope.$watchCollection(function () {
+          return that.serviceInstanceModel.serviceInstances;
+        }, function () {
+          that._updateInstances();
+        });
       });
-      _.forEach(filteredInstances, function (serviceInstance) {
-        var guid = serviceInstance.guid;
-        if (angular.isUndefined(that.serviceInstances[guid])) {
-          that.serviceInstances[guid] = serviceInstance;
-        } else {
-          angular.extend(that.serviceInstances[guid], serviceInstance);
-        }
-      });
-
-    });
   }
 
   angular.extend(ServiceTileController.prototype, {
@@ -76,7 +72,7 @@
      * @memberof app.view.endpoints.dashboard
      * @name serviceInstancesCount
      * @description Get number of services
-     * @param {number} service number
+     * @returns number of serviceInstances
      */
     serviceInstancesCount: function () {
       return _.keys(this.serviceInstances).length;
@@ -90,10 +86,17 @@
      */
     showClusterAddForm: function () {
 
+      var that = this;
       if (this.isHcf()) {
-        this.hcfRegistration.add();
+        this.hcfRegistration.add()
+          .then(function () {
+            return that._listServiceInstances;
+          });
       } else {
-        this.hceRegistration.add();
+        this.hceRegistration.add()
+          .then(function () {
+            return that._listServiceInstances;
+          });
       }
     },
 
@@ -102,7 +105,7 @@
      * @memberof app.view.endpoints.dashboard
      * @name isHcf
      * @description Check if endpoint view instance is an HCF instance
-     * @return {Boolean}
+     * @returns {Boolean}
      */
     isHcf: function () {
       return this.serviceType === 'hcf';
@@ -172,6 +175,33 @@
      */
     isUserAdmin: function () {
       return this.currentUserAccount.isAdmin();
+    },
+
+    _listServiceInstances: function () {
+
+      var that = this;
+      return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
+        .then(function () {
+          return that._updateInstances();
+        }).then(function () {
+          that.resolvedPromise = true;
+        });
+    },
+
+    _updateInstances: function () {
+
+      var that = this;
+      var filteredInstances = _.filter(this.serviceInstanceModel.serviceInstances, function (serviceInstance) {
+        return serviceInstance.cnsi_type === that.serviceType;
+      });
+      _.forEach(filteredInstances, function (serviceInstance) {
+        var guid = serviceInstance.guid;
+        if (angular.isUndefined(that.serviceInstances[guid])) {
+          that.serviceInstances[guid] = serviceInstance;
+        } else {
+          angular.extend(that.serviceInstances[guid], serviceInstance);
+        }
+      });
     }
 
   });
