@@ -1,25 +1,21 @@
 @import "dashboard/endpoints-dashboard";
 @import "clusters/list/clusters";
+@import "hce/endpoints-view";
 
-.endpoints-view {
+.endpoints {
 
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
 
-  th {
-    font-weight: normal
-  }
-
   .header {
     padding: $hpe-unit-space 0px;
     position: relative;
     button {
       position: absolute;
-      right: 10px;
+      right: 0px;
     }
-
   }
 
   .welcome-message {
@@ -35,6 +31,4 @@
       vertical-align: middle;
     }
   }
-
-
 }
