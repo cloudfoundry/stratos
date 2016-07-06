@@ -25,7 +25,8 @@
           {
             detailViewTemplateUrl: 'app/view/cluster-registration/add-cluster-form/add-cluster-form.html',
             controller: AddClusterFormController,
-            controllerAs: 'addClusterFormCtrl'
+            controllerAs: 'addClusterFormCtrl',
+            class: 'detail-view-thin'
             // scope: {
             //   onCancel: onCancel,
             //   onSubmit: onSubmit

@@ -1,6 +1,14 @@
 .add-cluster-form {
-  width: 50%;
-  margin: 0 auto;
+  margin: 0 $hpe-unit-space * 5;
+
+  form {
+    .form-actions {
+      margin-top: $hpe-unit-space * 2;
+      text-align: right;
+      padding: $hpe-unit-space 0 0 0;
+      border-top: 1px solid #e5e5e5;
+    }
+  }
   //
   //h2 {
   //  margin-top: $hpe-unit-space * 2.5;

@@ -25,7 +25,8 @@
           {
             detailViewTemplateUrl: 'app/view/hce-registration/hce-registration.html',
             title: gettext('Register Code Engine Endpoint'),
-            controller: HceRegistrationController
+            controller: HceRegistrationController,
+            class: 'detail-view-thin'
           },
           {
             data: data
