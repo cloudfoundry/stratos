@@ -572,18 +572,22 @@ func TestUserInfo(t *testing.T) {
 
 	var mockTokenExpiration = time.Now().AddDate(0, 0, 1).Unix()
 
+	// encryptToken(key []byte, t string) ([]byte, error) {
+
 	// 1 - setup 2 CNSI token rows
+	encryptedMockCNSIToken, _ := tokens.Encrypt(key, []byte(mockCNSIToken))
 	expectedCNSITokenRows := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-		AddRow(mockCNSIToken, mockCNSIToken, mockTokenExpiration).
-		AddRow(mockCNSIToken, mockCNSIToken, mockTokenExpiration)
+		AddRow(encryptedMockCNSIToken, encryptedMockCNSIToken, mockTokenExpiration).
+		AddRow(encryptedMockCNSIToken, encryptedMockCNSIToken, mockTokenExpiration)
 	sql := `SELECT auth_token, refresh_token, token_expiry FROM tokens`
 	mock.ExpectQuery(sql).
 		WithArgs(mockUserGUID).
 		WillReturnRows(expectedCNSITokenRows)
 
 	// 2 - setup a single UAA token row
+	encryptedMockUAAToken, _ := tokens.Encrypt(key, []byte(mockUAAToken))
 	expectedUAATokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiration)
+		AddRow(encryptedMockUAAToken, encryptedMockUAAToken, mockTokenExpiration)
 	sql = `SELECT auth_token, refresh_token, token_expiry FROM tokens`
 	mock.ExpectQuery(sql).
 		WithArgs(mockUserGUID).
@@ -603,7 +607,7 @@ func TestUserInfo(t *testing.T) {
 		t.Errorf("Expected content type 'application/json', got: %s", contentType)
 	}
 
-	var expectedBody = "[{\"type\":\"hcf\",\"guid\":\"asd-gjfg-bob\",\"admin\":\"true\"}, {\"type\":\"hcf\",\"guid\":\"asd-gjfg-bob\",\"admin\":\"true\"}, {\"type\":\"uaa\",\"admin\":\"true\"}]"
+	var expectedBody = "[{\"type\":\"hcf\",\"guid\":\"asd-gjfg-bob\",\"admin\":\"true\"}, {\"type\":\"hcf\",\"guid\":\"asd-gjfg-bob\",\"admin\":\"true\"}, {\"type\":\"uaa\",\"admin\":\"false\"}]"
 	if res == nil || strings.TrimSpace(res.Body.String()) != expectedBody {
 		t.Errorf("Response Body incorrect. \n Expected %s \n Received %s", expectedBody, res.Body)
 	}

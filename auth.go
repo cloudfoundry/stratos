@@ -404,9 +404,9 @@ func getHCFPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 		// get the scope out of the JWT token data
 		userTokenInfo, err := getUserTokenInfo(CNSITokens[i].AuthToken)
 		if err != nil {
-			msg := "Unable to find scope information in the CNSI Auth Token"
-			log.Println(msg)
-			return nil, fmt.Errorf(msg)
+			msg := "Unable to find scope information in the CNSI Auth Token: %s"
+			log.Printf(msg, err)
+			return nil, fmt.Errorf(msg, err)
 		}
 
 		// based on the scope, is the user an admin for this CNSI?
@@ -443,9 +443,9 @@ func getUAAPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 	// get the scope out of the JWT token data
 	userTokenInfo, err := getUserTokenInfo(uaaTokenRecord.AuthToken)
 	if err != nil {
-		msg := "Unable to find scope information in the UAA Auth Token"
-		log.Println(msg)
-		return nil, fmt.Errorf(msg)
+		msg := "Unable to find scope information in the UAA Auth Token: %s"
+		log.Printf(msg, err)
+		return nil, fmt.Errorf(msg, err)
 	}
 
 	// is the user a UAA admin?

@@ -401,7 +401,7 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 func encryptToken(key []byte, t string) ([]byte, error) {
 
 	var plaintextToken = []byte(t)
-	ciphertextToken, err := encrypt(key, plaintextToken)
+	ciphertextToken, err := Encrypt(key, plaintextToken)
 	if err != nil {
 		msg := "Unable to encrypt token: %v"
 		log.Printf(msg, err)
@@ -425,7 +425,7 @@ func encryptToken(key []byte, t string) ([]byte, error) {
 // decryptToken - TBD
 func decryptToken(key, t []byte) (string, error) {
 
-	plaintextToken, err := decrypt(key, t)
+	plaintextToken, err := Decrypt(key, t)
 	if err != nil {
 		msg := "Unable to decrypt token: %v"
 		log.Printf(msg, err)
