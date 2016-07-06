@@ -1,5 +1,5 @@
-hash: 4498995601ba709fa0843f870c218056218bf882009e6121a855ef8cc138397d
-updated: 2016-07-05T00:27:21.747042989-04:00
+hash: 1ba08f40f3ce19118e6a2c71733dba3cac93775d024b5519810fe1aa0b40ce1f
+updated: 2016-07-06T10:49:52.40996195-04:00
 imports:
 - name: github.com/antonlindstrom/pgstore
   version: 646ee398524f0eb81ad90aa8f40cbd74045c99b2
@@ -14,9 +14,9 @@ imports:
   subpackages:
   - events
 - name: github.com/coopernurse/gorp
-  version: 9cd2b5ef5b82fde4e7c51776ac3f94398b8af076
+  version: 40d48aca791a9228395fde36b51a45af06168091
 - name: github.com/dgrijalva/jwt-go
-  version: f0777076321ab64f6efc15a82d9d23b98539b943
+  version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/gogo/protobuf
   version: 2752d97bbd91927dd1c43296dbf8700e50e2708c
   subpackages:
@@ -40,7 +40,7 @@ imports:
 - name: github.com/kat-co/vala
   version: 43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b
 - name: github.com/labstack/echo
-  version: c00d017178d23261895b096b6e39e9b6bbca37dc
+  version: 451b2ccc9ffda7fd7fad2027b75d93b18ff87cbe
   subpackages:
   - engine
   - engine/standard
