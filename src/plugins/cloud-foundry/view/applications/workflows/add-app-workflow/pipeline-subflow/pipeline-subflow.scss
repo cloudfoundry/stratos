@@ -54,4 +54,9 @@ add-app-workflow {
   .deploy-alert {
     margin: $hpe-unit-space/2 0;
   }
+
+  .helion-icon-View.form-control-feedback {
+    cursor: pointer;
+    pointer-events: auto;
+  }
 }
