@@ -1,15 +1,18 @@
 (function () {
   'use strict';
 
+  /**
+   * @namespace cloud-foundry.model.application
+   * @memberOf cloud-foundry.model
+   */
   angular
-    .module('app.model')
+    .module('cloud-foundry.model')
     .factory('cloud-foundry.model.application.stateService', stateServiceFactory);
 
   stateServiceFactory.$inject = [];
 
   /**
-   * @namespace cloud-foundry.model.application.stateService
-   * @memberof app.model
+   * @function stateServiceFactory
    * @name cloud-foundry.model.application.stateService
    * @description Service to map app states to user-friendly state names, presentation and actions.
    * @returns {object} The Application State Service
@@ -28,29 +31,29 @@
      */
     var stateMetadata = {
       '?': {
-        'FAILED': {
+        FAILED: {
           label: 'Staging Failed',
           indicator: 'error'
         }
       },
-      'PENDING': {
+      PENDING: {
         '?': {
           label: 'Pending',
           indicator: 'busy'
         }
       },
-      'LOADING': {
+      LOADING: {
         '?': {
           label: 'Loading',
           indicator: 'busy'
         }
       },
-      'STOPPED': {
-        'PENDING': {
+      STOPPED: {
+        PENDING: {
           label: 'Offline while Updating',
           indicator: 'warning'
         },
-        'STAGED': {
+        STAGED: {
           label: 'Offline',
           indicator: 'warning'
         },
@@ -59,14 +62,14 @@
           indicator: 'warning'
         }
       },
-      'STARTED': {
-        'PENDING': {
+      STARTED: {
+        PENDING: {
           label: 'Staging App',
-          indicator: 'warning'
+          indicator: 'busy'
         },
         'STAGED(0,0,0)': {
           label: 'Starting App',
-          indicator: 'warning'
+          indicator: 'busy'
         },
         'STAGED(N,0,0)': {
           label: 'Online',
@@ -106,10 +109,11 @@
      * optionally its instance metadata.
      * @param {object} summary - the application summary metadata (either from summary or entity)
      * @param {object} appInstances - the application instances metadata (from the app stats API call)
+     * @returns {object} Object representing the state metadata for the application
      */
     function get(summary, appInstances) {
-      var appState = summary.state;
-      var pkgState = summary.package_state || '*NONE*';
+      var appState = summary ? summary.state : 'UNKNOWN';
+      var pkgState = (summary ? summary.package_state : '') || '*NONE*';
       var wildcard = stateMetadata['?'];
 
       // App state wildcard match, just match on package state
@@ -132,12 +136,12 @@
             var crashed, flapping;
             // If we know how many aer running and this is the same as the total # instances then
             // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
-            if(running === summary.instances) {
+            if (running === summary.instances) {
               crashed = 0;
-              flapping  =0;
+              flapping = 0;
             } else {
               crashed = getCount(undefined, appInstances, 'CRASHED');
-              if(crashed >= 0) {
+              if (crashed >= 0) {
                 flapping = summary.instances - crashed - running;
               } else {
                 // If we couldn't determine #crashed, then we can't calculate #flapping
@@ -145,10 +149,10 @@
               }
             }
 
-            var extState = pkgState + '('
-              + formatCount(running) + ','
-              + formatCount(crashed) + ','
-              + formatCount(flapping) + ')';
+            var extState = pkgState + '(' +
+              formatCount(running) + ',' +
+              formatCount(crashed) + ',' +
+              formatCount(flapping) + ')';
             if (appStateMatch[extState]) {
               return appStateMatch[extState];
             }
@@ -160,7 +164,7 @@
       return {
         label: 'Unknown',
         indicator: 'error'
-      }
+      };
     }
 
     /**
@@ -176,9 +180,9 @@
       // Use a value if one available
       if (angular.isDefined(value)) {
         return value;
-      } else if(appInstances) {
+      } else if (appInstances) {
         // Calculate form app instance metadata if available
-        return _.filter(appInstances, function (s) { return s.state == instanceState; }).length;
+        return _.filter(appInstances, function (s) { return s.state === instanceState; }).length;
       } else {
         // No value given and no instance data available, so return -1 to represent unknown
         return -1;
@@ -193,10 +197,10 @@
      * @returns {string} String representation of value for state matching
      */
     function formatCount(value) {
-      if(value === 0) {
+      if (value === 0) {
         return '0';
-      } else if(value > 0) {
-        return 'N'
+      } else if (value > 0) {
+        return 'N';
       } else {
         return '?';
       }

@@ -1,4 +1,5 @@
 @import "view/applications/applications";
+@import "view/util/util";
 
 @mixin hpe-state($color, $icon, $bg-color) {
   background-color: $bg-color;
@@ -36,7 +37,6 @@
 .action-target-state {
   display: inline-block;
   height: 24px;
-  width: 24px;
   font-size: $hpe-unit-space;
   line-height: 0;
 

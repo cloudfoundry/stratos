@@ -154,8 +154,7 @@
     init: function () {
       var that = this;
       this.ready = false;
-      this.model.getAppSummary(this.cnsiGuid, this.id)
-        .then(that.model.getAppStats(that.cnsiGuid, that.id))
+      this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .finally(function() {
           that.ready = true;
         });
@@ -222,15 +221,9 @@
 
       this.updating = true;
       this.$q.when()
-
         .then(function () {
           that.updateSummary();
         })
-
-        .then(function () {
-          that.updateState();
-        })
-
         .finally(function () {
           that.updating = false;
         });
@@ -244,7 +237,7 @@
      */
     updateSummary: function () {
       var that = this;
-      return this.model.getAppSummary(this.cnsiGuid, this.id).then(function() {
+      return this.model.getAppSummary(this.cnsiGuid, this.id, true).then(function() {
         // Convenience property, rather than verbose html determine which build pack to use here. Also resolves issue
         // where ng-if expressions (with function) were not correctly updating after on scope application.summary
         // changed

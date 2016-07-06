@@ -1,0 +1,2 @@
+<span ng-if="appIconCtrl.state !== 'busy'" class="app-status helion-icon {{ appIconCtrl.state | appStateIcon }}"></span>
+<bounce-spinner classes="bounce-spinner-sm" ng-if="appIconCtrl.state === 'busy'"></bounce-spinner>

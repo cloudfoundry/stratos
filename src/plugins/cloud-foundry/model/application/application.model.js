@@ -23,10 +23,12 @@
   }
 
   /**
-   * @memberof cloud-foundry.model.application
+   * @memberOf cloud-foundry.model.application
    * @name Application
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} appStateService - the Application State service
+   * @param {object} $q - the $q service for promise/deferred objects
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
@@ -34,7 +36,7 @@
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @class
    */
-  function Application(apiManager, modelManager, appStateService,$q) {
+  function Application(apiManager, modelManager, appStateService, $q) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.appStateService = appStateService;
@@ -58,10 +60,11 @@
      * @description List all applications at the model layer
      * @param {string} guid - application guid
      * @param {object} options - options for url building
+     * @param {boolean} sync - whether the response should wait for all app stats or just the app metadata
      * @returns {promise} A promise object
      * @public
      **/
-    all: function (guid, options) {
+    all: function (guid, options, sync) {
       var that = this;
       var cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
                    .values()
@@ -73,10 +76,10 @@
           // determine the user-friendly state of the application
           var tasks = [];
           _.each(response.data, function (appsResponse, cnsi) {
-            _.each(appsResponse.resources, function(app) {
-              if(app.entity.state === 'STARTED') {
+            _.each(appsResponse.resources, function (app) {
+              if (app.entity.state === 'STARTED') {
                 // We need more information
-                tasks.push(that.returnAppStats(cnsi, app.metadata.guid).then(function(stats) {
+                tasks.push(that.returnAppStats(cnsi, app.metadata.guid).then(function (stats) {
                   app.instances = stats.data[cnsi];
                   app.state = that.appStateService.get(app.entity, app.instances);
                   return stats.data[cnsi];
@@ -86,9 +89,15 @@
               }
             });
           });
-          return that.$q.all(tasks).then(function () {
+          if (!sync) {
+            // Fire off the stats requests in parallel - don't wait for them to complete
+            that.$q.all(tasks);
             return that.onAll(response);
-          });
+          } else {
+            return that.$q.all(tasks).then(function () {
+              return that.onAll(response);
+            });
+          }
         });
     },
 
@@ -135,19 +144,28 @@
      * @description get summary of an application at the model layer
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
+     * @param {booelan} includeStats - whether to also go and fetch the application stats if the app is RUNNING
      * @returns {promise} a promise object
      * @public
      */
-    getAppSummary: function (cnsiGuid, guid) {
+    getAppSummary: function (cnsiGuid, guid, includeStats) {
       var that = this;
       var config = {
         headers: { 'x-cnap-cnsi-list': cnsiGuid }
       };
+
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetAppSummary(guid, {}, config)
         .then(function (response) {
-          that.onSummary(response.data[cnsiGuid]);
-          return response;
+          if (!includeStats || response.data[cnsiGuid].state !== 'STARTED') {
+            that.onSummary(response.data[cnsiGuid]);
+            return response;
+          } else {
+            // We were asked for stats and this app is RUNNING, so go and get them
+            return that.getAppStats(cnsiGuid, guid).then(function () {
+              that.onSummary(response.data[cnsiGuid]);
+            });
+          }
         });
     },
 
@@ -350,18 +368,24 @@
       var that = this;
       return that.returnAppStats(cnsiGuid, guid, params).then(function (response) {
         var data = response.data[cnsiGuid];
-        that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
+        //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
         // Stats for all instances
         that.application.instances = data;
+        return response;
       });
     },
 
     returnAppStats: function (cnsiGuid, guid, params) {
+      var that = this;
+      var config = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetDetailedStatsForStartedApp(guid, params)
+        .GetDetailedStatsForStartedApp(guid, params, config)
         .then(function (response) {
           var data = response.data[cnsiGuid];
           that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
+          return response;
         });
     },
 
@@ -438,9 +462,6 @@
     onAppStateChangeSuccess: function (response) {
       this.application.summary.state = response.entity.state;
       this.appStateSwitchTo = '';
-
-      console.log('app state change occurred');
-      console.log(this.application.summary.state);
       this.onAppStateChange();
     },
 

@@ -4,14 +4,7 @@
     <dt translate>App State</dt>
     <dd class="text-capitalize">
       {{applicationGalleryCardCtrl.app.state.label | lowercase}}
-      <span class="app-status">
-        <span ng-if="applicationGalleryCardCtrl.app.entity.state !== 'PENDING'"
-          class="helion-icon {{ applicationGalleryCardCtrl.app.state.indicator | appStateIcon }}">
-        </span>
-        <bounce-spinner classes="bounce-spinner-sm"
-          ng-if="applicationGalleryCardCtrl.app.entity.state === 'PENDING'">
-        </bounce-spinner>
-      </span>
+      <app-state-icon class="app-status" state="applicationGalleryCardCtrl.app.state.indicator"></app-state-icon>
     </dd>
     <dt translate>Instance Quota</dt>
     <dd>{{applicationGalleryCardCtrl.app.entity.instances}}</dd>
