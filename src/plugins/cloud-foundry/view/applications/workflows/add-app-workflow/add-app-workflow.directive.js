@@ -136,7 +136,12 @@
         branch: null,
         buildContainer: null,
         imageRegistry: null,
-        projectId: null
+        projectId: null,
+        search: {
+          entity: {
+            label: ''
+          }
+        }
       };
 
       this.data.workflow = {
@@ -162,6 +167,10 @@
                   ).then(function (services) {
                     that.options.services.length = 0;
                     [].push.apply(that.options.services, services);
+
+                    var categories = _.map(services, function (o) { return { label: o.entity.label, value: o.entity.label }; });
+                    that.options.serviceCategories.length = 1;
+                    [].push.apply(that.options.serviceCategories, categories);
                   });
                 });
               });
@@ -324,6 +333,9 @@
         subflow: null,
         serviceInstances: [],
         services: [],
+        serviceCategories: [
+          { label: gettext('All Services'), value: '' }
+        ],
         organizations: [],
         spaces: [],
         apps: [],
