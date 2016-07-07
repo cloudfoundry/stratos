@@ -69,7 +69,7 @@
     // Initialise action menus
     this.connectedActionMenu = [
       {
-        name: 'Disconnect',
+        name: gettext('Disconnect'),
         execute: function (endpoint) {
           that.disconnect(endpoint.model);
         }
@@ -77,7 +77,7 @@
 
     this.disconnectedActionMenu = [
       {
-        name: 'Connect',
+        name: gettext('Connect'),
         execute: function (endpoint) {
           that.connect(endpoint.model);
         }
@@ -89,10 +89,10 @@
         that.unregister(endpoint);
       };
       this.connectedActionMenu.push(
-        {name: 'Unregister', execute: unregister}
+        {name: gettext('Unregister'), execute: unregister}
       );
       this.disconnectedActionMenu.push(
-        {name: 'Unregister', execute: unregister}
+        {name: gettext('Unregister'), execute: unregister}
       );
     }
 
