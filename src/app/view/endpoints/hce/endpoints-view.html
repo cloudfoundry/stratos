@@ -11,14 +11,14 @@
   </div>
 
   <div class="empty-view-message" ng-show="endpointsViewCtrl.showEmptyView()">
-      <div class="helion-icon helion-icon-3x helion-icon-3x helion-icon-Continuous_integration"></div>
-      <div class="view-msg" translate>You have no registered Code Engine endpoints.</div>
-      <div class="view-cta" ng-show="endpointsViewCtrl.isUserAdmin()">
-        <a class="btn btn-link" ng-click="endpointsViewCtrl.showClusterAddForm()" ><span translate>Register an Endpoint</span></a><span translate>to make it available to developers.</span>
-      </div>
+    <div class="helion-icon helion-icon-3x helion-icon-3x helion-icon-Continuous_integration"></div>
+    <div class="view-msg" translate>You have no registered Code Engine endpoints.</div>
+    <div class="view-cta" ng-show="endpointsViewCtrl.isUserAdmin()">
+      <a class="btn btn-link" ng-click="endpointsViewCtrl.showClusterAddForm()"><span
+        translate>Register an Endpoint</span></a><span translate>to make it available to developers.</span>
+    </div>
     <div class="view-cta" ng-show="!endpointsViewCtrl.isUserAdmin()">
-        <span translate>Please contact your administrator.</span>
-      </div>
+      <span translate>Please contact your administrator.</span>
     </div>
   </div>
 
@@ -54,6 +54,8 @@
     </table>
 
   </div>
+</div>
+
 </div>
 <flyout flyout-active="endpointsViewCtrl.credentialsFormOpen"
         flyout-close-icon="'helion-icon helion-icon-Close'">
