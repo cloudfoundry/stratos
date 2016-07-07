@@ -15,6 +15,9 @@ services:
     extends:
       file: common.yml
       service: proxy
+    environment:
+      CONSOLE_CLIENT: console
+      UAA_ENDPOINT: http://ident.helion.space:8080/oauth/token
     links:
       - postgres:postgres
 
