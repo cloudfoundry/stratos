@@ -204,12 +204,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
 
 	// Verify Session
-	sessionGroup.Get("/auth/session/verify", p.verifySession)
+	sessionGroup.GET("/auth/session/verify", p.verifySession)
 
-	// should be referenced as /v1/github/oauth/auth
+	// These URLs should be prefixed with "/v1"
 	sessionGroup.GET("/github/oauth/auth", p.handleGitHubAuth)
-
-	// should be referenced as /v1/github/oauth/callback
 	sessionGroup.GET("/github/oauth/callback", p.handleGitHubCallback)
 
 	// Register clusters
@@ -226,6 +224,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
 	// Applications Log Streams
 	sessionGroup.GET("/:cnsiGuid/apps/:appGuid/stream", p.appStream)
+
+	// User info
+	sessionGroup.GET("/userinfo", p.userInfo)
 
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)

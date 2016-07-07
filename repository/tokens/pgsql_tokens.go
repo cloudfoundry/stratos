@@ -26,6 +26,10 @@ const (
                    FROM tokens
                    WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
 
+	listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry
+                           FROM tokens
+                           WHERE token_type = 'cnsi' AND user_guid = $1`
+
 	countCNSITokens = `SELECT COUNT(*)
                      FROM tokens
                      WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
@@ -207,6 +211,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 		return err
 	}
 
+	// Is there an existing token?
 	var count int
 	err = p.db.QueryRow(countCNSITokens, cnsiGUID, userGUID).Scan(&count)
 	if err != nil {
@@ -216,9 +221,8 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	switch count {
 	case 0:
 
-		log.Println("Existing CNSI token not found - attempting insert.")
-		if _, err := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
+		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
+			ciphertextRefreshToken, tr.TokenExpiry); insertErr != nil {
 			msg := "Unable to INSERT CNSI token: %v"
 			log.Printf(msg, err)
 			return fmt.Errorf(msg, err)
@@ -292,6 +296,71 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 	return *tr, nil
 }
 
+// ListCNSITokensForUser - <TBD>
+func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*TokenRecord, error) {
+
+	log.Println("ListCNSITokensForUser")
+
+	if userGUID == "" {
+		msg := "Unable to list CNSI Tokens without a valid User GUID."
+		log.Println(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	rows, err := p.db.Query(listCNSITokensForUser, userGUID)
+	if err != nil {
+		msg := "Unable to retrieve CNSI records: %v"
+		log.Printf(msg, err)
+		return nil, fmt.Errorf(msg, err)
+	}
+	defer rows.Close()
+
+	if err = rows.Err(); err != nil {
+		msg := "Unable to List token records: %v"
+		log.Printf(msg, err)
+		return nil, fmt.Errorf(msg, err)
+	}
+
+	var tokenRecordList []*TokenRecord
+	tokenRecordList = make([]*TokenRecord, 0)
+
+	for rows.Next() {
+		var (
+			ciphertextAuthToken    []byte
+			ciphertextRefreshToken []byte
+			tokenExpiry            int64
+		)
+
+		err := rows.Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry)
+		if err != nil {
+			msg := "Unable to scan token records: %v"
+			log.Printf(msg, err)
+			return nil, fmt.Errorf(msg, err)
+		}
+
+		log.Println("Decrypting Auth Token")
+		plaintextAuthToken, err := decryptToken(encryptionKey, ciphertextAuthToken)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Println("Decrypting Refresh Token")
+		plaintextRefreshToken, err := decryptToken(encryptionKey, ciphertextRefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
+		tr := new(TokenRecord)
+		tr.AuthToken = plaintextAuthToken
+		tr.RefreshToken = plaintextRefreshToken
+		tr.TokenExpiry = tokenExpiry
+
+		tokenRecordList = append(tokenRecordList, tr)
+	}
+
+	return tokenRecordList, nil
+}
+
 // DeleteCNSIToken - remove a CNSI token (disconnect from a given CNSI)
 func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string) error {
 
@@ -330,10 +399,9 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 
 // encryptToken - TBD
 func encryptToken(key []byte, t string) ([]byte, error) {
-	log.Println("===== encryptToken =")
 
 	var plaintextToken = []byte(t)
-	ciphertextToken, err := encrypt(key, plaintextToken)
+	ciphertextToken, err := Encrypt(key, plaintextToken)
 	if err != nil {
 		msg := "Unable to encrypt token: %v"
 		log.Printf(msg, err)
@@ -356,9 +424,8 @@ func encryptToken(key []byte, t string) ([]byte, error) {
 
 // decryptToken - TBD
 func decryptToken(key, t []byte) (string, error) {
-	log.Println("===== decryptToken =")
 
-	plaintextToken, err := decrypt(key, t)
+	plaintextToken, err := Decrypt(key, t)
 	if err != nil {
 		msg := "Unable to decrypt token: %v"
 		log.Printf(msg, err)

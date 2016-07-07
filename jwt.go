@@ -8,8 +8,10 @@ import (
 )
 
 type userTokenInfo struct {
-	UserGUID    string `json:"user_id"`
-	TokenExpiry int64  `json:"exp"`
+	UserGUID    string   `json:"user_id"`
+	UserName    string   `json:"user_name"`
+	TokenExpiry int64    `json:"exp"`
+	Scope       []string `json:"scope"`
 }
 
 func getUserTokenInfo(tok string) (u *userTokenInfo, err error) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 
-	"github.com/labstack/echo"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
@@ -537,105 +537,78 @@ func TestLoginToCNSIWithBadCreds(t *testing.T) {
 	// }
 }
 
-func TestVerifySession(t *testing.T) {
-	t.Parallel()
+func TestUserInfo(t *testing.T) {
 
+	// Mock the request
 	req := setupMockReq("GET", "", map[string]string{
 		"username": "admin",
 		"password": "changeme",
 	})
 	res, _, ctx, pp := setupHTTPTest(req)
 
+	// create a fake encryption key
+	key := make([]byte, 32)
+	_, err := rand.Read(key)
+	if err != nil {
+		t.Fatalf("Got an error attempting to generate an encryption key: '%s'", err)
+	}
+	pp.Config.EncryptionKeyInBytes = key
+
 	// Set a dummy userid in session - normally the login to UAA would do this.
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = mockUserGUID
 	sessionValues["exp"] = time.Now().Add(time.Hour).Unix()
-
 	if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	if err := pp.verifySession(ctx); err != nil {
+	// setup database mocks
+	db, mock, dberr := sqlmock.New()
+	if dberr != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
+	}
+	defer db.Close()
+	pp.DatabaseConnectionPool = db
+
+	var mockTokenExpiration = time.Now().AddDate(0, 0, 1).Unix()
+
+	// encryptToken(key []byte, t string) ([]byte, error) {
+
+	// 1 - setup 2 CNSI token rows
+	encryptedMockCNSIToken, _ := tokens.Encrypt(key, []byte(mockCNSIToken))
+	expectedCNSITokenRows := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+		AddRow(encryptedMockCNSIToken, encryptedMockCNSIToken, mockTokenExpiration).
+		AddRow(encryptedMockCNSIToken, encryptedMockCNSIToken, mockTokenExpiration)
+	sql := `SELECT auth_token, refresh_token, token_expiry FROM tokens`
+	mock.ExpectQuery(sql).
+		WithArgs(mockUserGUID).
+		WillReturnRows(expectedCNSITokenRows)
+
+	// 2 - setup a single UAA token row
+	encryptedMockUAAToken, _ := tokens.Encrypt(key, []byte(mockUAAToken))
+	expectedUAATokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+		AddRow(encryptedMockUAAToken, encryptedMockUAAToken, mockTokenExpiration)
+	sql = `SELECT auth_token, refresh_token, token_expiry FROM tokens`
+	mock.ExpectQuery(sql).
+		WithArgs(mockUserGUID).
+		WillReturnRows(expectedUAATokenRow)
+
+	if err := pp.userInfo(ctx); err != nil {
 		t.Error(err)
+	}
+
+	if dberr := mock.ExpectationsWereMet(); dberr != nil {
+		t.Errorf("There were unfulfilled expectations: %s", dberr)
 	}
 
 	header := res.Header()
 	contentType := header.Get("Content-Type")
-	if contentType != "application/json; charset=utf-8" {
+	if contentType != "application/json" {
 		t.Errorf("Expected content type 'application/json', got: %s", contentType)
 	}
 
-	// var expectedBody = "{\"account\":\"admin\",\"scope\":\"cloud_controller.admin\"}"
-	var expectedBody = "{\"account\":\"admin\",\"scope\":\"openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write\"}"
+	var expectedBody = "[{\"type\":\"hcf\",\"guid\":\"asd-gjfg-bob\",\"admin\":\"true\"}, {\"type\":\"hcf\",\"guid\":\"asd-gjfg-bob\",\"admin\":\"true\"}, {\"type\":\"uaa\",\"admin\":\"false\"}]"
 	if res == nil || strings.TrimSpace(res.Body.String()) != expectedBody {
-		t.Errorf("Response Body incorrect.  Expected %s  Received %s", expectedBody, res.Body)
-	}
-
-}
-
-func TestVerifySessionNoDate(t *testing.T) {
-	t.Parallel()
-
-	req := setupMockReq("GET", "", map[string]string{
-		"username": "admin",
-		"password": "changeme",
-	})
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// Set a dummy userid in session - normally the login to UAA would do this.
-	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = mockUserGUID
-	// Note the lack of an "exp" key.
-
-	if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
-		t.Error(errors.New("Unable to mock/stub user in session object."))
-	}
-
-	err := pp.verifySession(ctx)
-	if err == nil {
-		t.Errorf("Expected an 403 error with 'Could not find session date' string. got %s", err)
-	}
-
-	errHTTP, ok := err.(*echo.HTTPError)
-	if !ok {
-		t.Error("Couldn't coerce our error into and HTTPError.")
-	}
-	var expectedCode = 403
-	if errHTTP.Code != expectedCode {
-		t.Errorf("Bad response code:  Expected %d  Received %d", expectedCode, errHTTP.Code)
-	}
-
-}
-
-func TestVerifySessionExpired(t *testing.T) {
-	t.Parallel()
-
-	req := setupMockReq("GET", "", map[string]string{
-		"username": "admin",
-		"password": "changeme",
-	})
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// Set a dummy userid in session - normally the login to UAA would do this.
-	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = mockUserGUID
-	sessionValues["exp"] = time.Now().Add(-time.Hour).Unix()
-
-	if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
-		t.Error(errors.New("Unable to mock/stub user in session object."))
-	}
-
-	err := pp.verifySession(ctx)
-	if err == nil {
-		t.Error("Expected an 403 error with 'Session has expired' string.")
-	}
-
-	errHTTP, ok := err.(*echo.HTTPError)
-	if !ok {
-		t.Error("Couldn't coerce our error into and HTTPError.")
-	}
-	var expectedCode = 403
-	if errHTTP.Code != expectedCode {
-		t.Errorf("Bad response code:  Expected %d  Received %d", expectedCode, errHTTP.Code)
+		t.Errorf("Response Body incorrect. \n Expected %s \n Received %s", expectedBody, res.Body)
 	}
 }

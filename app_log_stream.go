@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+
 	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/noaa/consumer"
 	noaa_errors "github.com/cloudfoundry/noaa/errors"
@@ -22,38 +23,38 @@ var upgrader = websocket.Upgrader{
 }
 
 func (p *portalProxy) appStream(c echo.Context) error {
-	var userGuid, dopplerAddress, authToken string
+	var userGUID, dopplerAddress, authToken string
 
 	// Get the CNSI and app IDs from route parameters
-	cnsiGuid := c.Param("cnsiGuid")
-	appGuid := c.Param("appGuid")
+	cnsiGUID := c.Param("cnsiGuid")
+	appGUID := c.Param("appGuid")
 
-	log.Printf("Received request for log stream for App ID: %s - from CNSI: %s\n", appGuid, cnsiGuid)
+	log.Printf("Received request for log stream for App ID: %s - from CNSI: %s\n", appGUID, cnsiGUID)
 
 	// The session middleware will have populated c."user_id" for us
-	userGuid = c.Get("user_id").(string)
+	userGUID = c.Get("user_id").(string)
 
 	// Extract the Doppler endpoint from the CNSI record
-	cnsiRecord, ok := p.getCNSIRecord(cnsiGuid)
+	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
 	if !ok {
-		return fmt.Errorf("Failed to get record for CNSI %s", cnsiGuid)
-	} else {
-		dopplerAddress = cnsiRecord.DopplerLoggingEndpoint
-		log.Printf("CNSI record Obtained! Using Doppler Logging Endpoint: %s", dopplerAddress)
+		return fmt.Errorf("Failed to get record for CNSI %s", cnsiGUID)
 	}
+
+	dopplerAddress = cnsiRecord.DopplerLoggingEndpoint
+	log.Printf("CNSI record Obtained! Using Doppler Logging Endpoint: %s", dopplerAddress)
 
 	// Reusable closure to refresh the authToken
 	refreshTokenRecord := func() error {
-		newTokenRecord, err := p.refreshToken(cnsiGuid, userGuid, p.Config.HCFClient, p.Config.HCFClientSecret, cnsiRecord.TokenEndpoint)
+		newTokenRecord, err := p.refreshToken(cnsiGUID, userGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsiRecord.TokenEndpoint)
 		if err != nil {
-			return fmt.Errorf("Error refreshing token for CNSI %s : [%v]", cnsiGuid, err)
+			return fmt.Errorf("Error refreshing token for CNSI %s : [%v]", cnsiGUID, err)
 		}
 		authToken = "bearer " + newTokenRecord.AuthToken
 		return nil
 	}
 
 	// Get the auth token for the CNSI from the DB, refresh it if it's expired
-	if tokenRecord, ok := p.getCNSITokenRecord(cnsiGuid, userGuid); ok {
+	if tokenRecord, ok := p.getCNSITokenRecord(cnsiGUID, userGUID); ok {
 		authToken = "bearer " + tokenRecord.AuthToken
 		expTime := time.Unix(tokenRecord.TokenExpiry, 0)
 		if expTime.Before(time.Now()) {
@@ -63,7 +64,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 			}
 		}
 	} else {
-		return fmt.Errorf("Error getting token for user %s on CNSI %s", userGuid, cnsiGuid)
+		return fmt.Errorf("Error getting token for user %s on CNSI %s", userGUID, cnsiGUID)
 	}
 
 	// Adapt echo.Context to Gorilla handler
@@ -75,7 +76,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	noaaConsumer := consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, nil)
 	defer noaaConsumer.Close()
 
-	messages, err := getRecentLogs(noaaConsumer, cnsiGuid, appGuid, authToken, refreshTokenRecord)
+	messages, err := getRecentLogs(noaaConsumer, cnsiGUID, appGUID, authToken, refreshTokenRecord)
 	if err != nil {
 		return err
 	}
@@ -110,8 +111,8 @@ func (p *portalProxy) appStream(c echo.Context) error {
 		relayLogMsg(msg)
 	}
 
-	log.Printf("Now streaming log from App ID: %s - on CNSI: %s\n", appGuid, cnsiGuid)
-	msgChan, errorChan := noaaConsumer.TailingLogs(appGuid, authToken)
+	log.Printf("Now streaming log from App ID: %s - on CNSI: %s\n", appGUID, cnsiGUID)
+	msgChan, errorChan := noaaConsumer.TailingLogs(appGUID, authToken)
 
 	// Process the app stream
 	go drainErrChan(errorChan)
@@ -130,8 +131,8 @@ func (p *portalProxy) appStream(c echo.Context) error {
 }
 
 // Attempts to get the recent logs, if we get an unauthorized error we attempt to refresh our auth token
-func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGuid, appGuid, authToken string, refreshTokenRecord func() error) ([]*events.LogMessage, error) {
-	messages, err := noaaConsumer.RecentLogs(appGuid, authToken)
+func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGUID, appGUID, authToken string, refreshTokenRecord func() error) ([]*events.LogMessage, error) {
+	messages, err := noaaConsumer.RecentLogs(appGUID, authToken)
 	if err != nil {
 		if ua, ok := err.(*noaa_errors.UnauthorizedError); ok {
 			// Annoyingly, CF also sends back "401 - Unauthorized" when the app doesn't exist...
@@ -140,13 +141,13 @@ func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGuid, appGuid, authToken
 			if err := refreshTokenRecord(); err != nil {
 				return messages, err
 			}
-			messages, err = noaaConsumer.RecentLogs(appGuid, authToken)
+			messages, err = noaaConsumer.RecentLogs(appGUID, authToken)
 			if err != nil {
-				msg := fmt.Sprintf("After refreshing token, we still failed to get recent messages for App %s on CNSI %s [%v]", appGuid, cnsiGuid, err)
+				msg := fmt.Sprintf("After refreshing token, we still failed to get recent messages for App %s on CNSI %s [%v]", appGUID, cnsiGUID, err)
 				return messages, echo.NewHTTPError(http.StatusUnauthorized, msg)
 			}
 		} else {
-			return messages, fmt.Errorf("Error getting recent messages for App %s on CNSI %s [%v]", appGuid, cnsiGuid, err)
+			return messages, fmt.Errorf("Error getting recent messages for App %s on CNSI %s [%v]", appGUID, cnsiGUID, err)
 		}
 	}
 	return messages, nil
