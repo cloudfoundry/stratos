@@ -1,65 +1,65 @@
-(function () {
+(function() {
   'use strict';
 
-  describe('endpoint clusters', function () {
-    var $q, $state, $scope, modelManager, confirmModal, clustersCtrl, hcfRegistration;
-    var serviceInstanceModel, userServiceInstanceModel, $uibModal;
+  describe('endpoint clusters', function() {
+    var $q, $state, $scope, modelManager, confirmModal, clustersCtrl, hcfRegistration, serviceInstanceModel,
+      userServiceInstanceModel, $uibModal;
 
     var hceService = {
-      "guid":"817ef115-7ae6-4591-a883-8f1c3447e012",
-      "name":"HCE service",
-      "cnsi_type":"hce",
-      "api_endpoint":{
-        "Scheme":"http",
-        "Opaque":"",
-        "User":null,
-        "Host":"16.25.175.36:4000",
-        "Path":"",
-        "RawPath":"",
-        "RawQuery":"",
-        "Fragment":""
+      guid: '817ef115-7ae6-4591-a883-8f1c3447e012',
+      name: 'HCE service',
+      cnsi_type: 'hce',
+      api_endpoint: {
+        Scheme: 'http',
+        Opaque: '',
+        User: null,
+        Host: '16.25.175.36:4000',
+        Path: '',
+        RawPath: '',
+        RawQuery: '',
+        Fragment: ''
       },
-      "authorization_endpoint":"",
-      "token_endpoint":""
+      authorization_endpoint: '',
+      token_endpoint: ''
     };
     var hcfService = {
-      "guid":"f7fbd0c7-1ce9-4e74-a891-7ffb16453af2",
-      "name":"lol",
-      "cnsi_type":"hcf",
-      "api_endpoint":{
-        "Scheme":"https",
-        "Opaque":"",
-        "User":null,
-        "Host":"api.hcf.helion.lol",
-        "Path":"",
-        "RawPath":"",
-        "RawQuery":"",
-        "Fragment":""
+      guid: 'f7fbd0c7-1ce9-4e74-a891-7ffb16453af2',
+      name: 'lol',
+      cnsi_type: 'hcf',
+      api_endpoint: {
+        Scheme: 'https',
+        Opaque: '',
+        User: null,
+        Host: 'api.hcf.helion.lol',
+        Path: '',
+        RawPath: '',
+        awQuery: '',
+        Fragment: ''
       },
-      "authorization_endpoint":"https://login.hcf.helion.lol",
-      "token_endpoint":"https://uaa.hcf.helion.lol"
+      authorization_endpoint: 'https://login.hcf.helion.lol',
+      token_endpoint: 'https://uaa.hcf.helion.lol'
     };
     var hcfUserService = {
-      "guid": "f7fbd0c7-1ce9-4e74-a891-7ffb16453af2",
-      "name": "lol",
-      "api_endpoint": {
-        "Scheme": "https",
-        "Opaque": "",
-        "User": null,
-        "Host": "api.hcf.helion.lol",
-        "Path": "",
-        "RawPath": "",
-        "RawQuery": "",
-        "Fragment": ""
+      guid: 'f7fbd0c7-1ce9-4e74-a891-7ffb16453af2',
+      name: 'lol',
+      api_endpoint: {
+        Scheme: 'https',
+        Opaque: '',
+        User: null,
+        Host: 'api.hcf.helion.lol',
+        Path: '',
+        RawPath: '',
+        RawQuery: '',
+        Fragment: ''
       },
-      "account": "88bceaa5-bdce-47b8-82f3-4afc14f266f9",
-      "token_expiry": Number.MAX_VALUE
+      account: '88bceaa5-bdce-47b8-82f3-4afc14f266f9',
+      token_expiry: Number.MAX_VALUE
     };
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
-    beforeEach(inject(function ($injector) {
+    beforeEach(inject(function($injector) {
       $q = $injector.get('$q');
       $state = $injector.get('$state');
       $scope = $injector.get('$rootScope').$new();
@@ -72,7 +72,6 @@
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
-
       var $httpBackend = $injector.get('$httpBackend');
       // Something other than the controller is calling these.
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(500);
@@ -84,15 +83,15 @@
       clustersCtrl = new ClustersCtrl(modelManager, $q, hcfRegistration, confirmModal);
     }
 
-    describe('Init', function () {
+    describe('Init', function() {
 
-      it('should be defined', function () {
+      it('should be defined', function() {
         createCluster();
 
         expect(clustersCtrl).toBeDefined();
       });
 
-      it('initial state', function () {
+      it('initial state', function() {
         spyOn(serviceInstanceModel, 'list');
         spyOn(userServiceInstanceModel, 'list');
 
@@ -112,7 +111,7 @@
 
       it('success - disconnected', function() {
         spyOn(serviceInstanceModel, 'list').and.callFake(function() {
-          serviceInstanceModel.serviceInstances = [ hceService, hcfService ];
+          serviceInstanceModel.serviceInstances = [hceService, hcfService];
           return $q.when(serviceInstanceModel.serviceInstances);
         });
         spyOn(userServiceInstanceModel, 'list').and.callFake(function() {
@@ -144,11 +143,11 @@
 
       it('success - connected + not expired token', function() {
         spyOn(serviceInstanceModel, 'list').and.callFake(function() {
-          serviceInstanceModel.serviceInstances = [ hceService, hcfService ];
+          serviceInstanceModel.serviceInstances = [hceService, hcfService];
           return $q.when(serviceInstanceModel.serviceInstances);
         });
         spyOn(userServiceInstanceModel, 'list').and.callFake(function() {
-          var cloned = JSON.parse(JSON.stringify(hcfUserService));
+          var cloned = angular.fromJson(angular.toJson(hcfUserService));
           cloned.valid = true;
           userServiceInstanceModel.serviceInstances = {};
           userServiceInstanceModel.serviceInstances[cloned.guid] = cloned;
@@ -169,11 +168,11 @@
 
       it('success - disconnected + expired token', function() {
         spyOn(serviceInstanceModel, 'list').and.callFake(function() {
-          serviceInstanceModel.serviceInstances = [ hceService, hcfService ];
+          serviceInstanceModel.serviceInstances = [hceService, hcfService];
           return $q.when(serviceInstanceModel.serviceInstances);
         });
         spyOn(userServiceInstanceModel, 'list').and.callFake(function() {
-          var cloned = JSON.parse(JSON.stringify(hcfUserService));
+          var cloned = angular.fromJson(angular.toJson(hcfUserService));
           cloned.token_expiry = Number.MIN_VALUE;
           userServiceInstanceModel.serviceInstances = {};
           userServiceInstanceModel.serviceInstances[cloned.guid] = cloned;
@@ -231,7 +230,7 @@
       it('correct param', function() {
         clustersCtrl.connect(hcfService.guid);
         expect(clustersCtrl.credentialsFormCNSI).toEqual(hcfService.guid);
-      })
+      });
     });
 
     describe('disconnect', function() {
@@ -240,7 +239,7 @@
       });
 
       it('success', function() {
-        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function(guid){
+        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function(guid) {
           expect(guid).toEqual(hcfUserService.guid);
           return $q.when();
         });
@@ -252,7 +251,7 @@
       });
 
       it('failure', function() {
-        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function(guid){
+        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function(guid) {
           expect(guid).toEqual(hcfUserService.guid);
           return $q.reject();
         });
@@ -261,7 +260,7 @@
         $scope.$digest();
         expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
         expect(clustersCtrl.updateClusterList).not.toHaveBeenCalled();
-      })
+      });
     });
 
     describe('register', function() {
@@ -285,8 +284,8 @@
         $scope.$digest();
         expect(hcfRegistration.add).toHaveBeenCalled();
         expect(clustersCtrl.updateClusterList).not.toHaveBeenCalled();
-      })
-    })
+      });
+    });
 
     describe('unregister', function() {
       beforeEach(function() {
@@ -325,8 +324,8 @@
 
         expect(serviceInstanceModel.remove).not.toHaveBeenCalled();
         expect(clustersCtrl.updateClusterList).not.toHaveBeenCalled();
-      })
-    })
+      });
+    });
   });
 
 })();

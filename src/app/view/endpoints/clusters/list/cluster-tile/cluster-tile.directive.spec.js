@@ -2,8 +2,7 @@
   'use strict';
 
   describe('endpoints clusters cluster-tile directive', function () {
-    var $scope, $q, $state, element, clusterTileCtrl, $compile;
-    var cfModelUsers, cfModelOrg;
+    var $scope, $q, $state, element, clusterTileCtrl, $compile, cfModelUsers, cfModelOrg;
 
     var initialService = {
       guid: "f7fbd0c7-1ce9-4e74-a891-7ffb16453af2",
@@ -31,7 +30,7 @@
       $state = $injector.get('$state');
       $compile = $injector.get('$compile');
       $scope = $injector.get('$rootScope').$new();
-      $scope.service = JSON.parse(JSON.stringify(initialService));
+      $scope.service = angular.fromJson(angular.toJson(initialService));
       $scope.connect = angular.noop;
       $scope.disconnect = angular.noop;
       $scope.unregister = angular.noop;
@@ -39,7 +38,6 @@
       var modelManager = $injector.get('app.model.modelManager');
       cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
       cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
-
 
     }));
 
@@ -62,7 +60,6 @@
       beforeEach(function() {
         createCtrl();
       });
-
 
       it('should be defined', function () {
         expect(element).toBeDefined();

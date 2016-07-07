@@ -56,7 +56,7 @@
         classes: 'danger',
         icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
         description: gettext('Token has expired')
-      }
+      };
     }
 
     this.setActions();
@@ -68,6 +68,12 @@
 
   angular.extend(ClusterTileController.prototype, {
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name setActions
+     * @description Set the contents of the tile's action menu
+     */
     setActions: function() {
       var that = this;
       this.actions = [];
@@ -98,11 +104,25 @@
       }
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name setAccountStatus
+     * @description Determine the account status for the connected user
+     */
     setAccountStatus: function() {
+      /* eslint-disable no-warning-comments */
       //TODO (RC): See TEAMFOUR-723. Need to fetch account info from scope. Dependent on TEAMFOUR-205 + TEAMFOUR-617.
+      /* eslint-enable no-warning-comments */
       this.accountStatus = null;
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name setUserCount
+     * @description Determine the number of users associated with this cluster
+     */
     setUserCount: function() {
       if (!this.service.isConnected) {
         return;
@@ -116,6 +136,12 @@
       });
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name setOrganisationCount
+     * @description Determine the number of organisations associated with this cluster
+     */
     setOrganisationCount: function() {
       if (!this.service.isConnected) {
         return;
@@ -129,6 +155,12 @@
       });
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name summary
+     * @description Navigate to the cluster summary page for this cluster
+     */
     summary: function() {
       this.$state.go('endpoints.cluster', {guid: this.service.guid});
     }

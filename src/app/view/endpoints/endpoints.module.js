@@ -10,7 +10,6 @@
     .config(registerRoute)
     .run(register);
 
-
   registerRoute.$inject = [
     '$stateProvider'
   ];
@@ -32,7 +31,7 @@
   ];
 
   function register(modelManager, eventService) {
-    return new Endpoints(modelManager, eventService)
+    return new Endpoints(modelManager, eventService);
   }
 
   function Endpoints(modelManager, eventService) {

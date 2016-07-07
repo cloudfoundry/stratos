@@ -52,6 +52,12 @@
 
   angular.extend(ClustersController.prototype, {
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name updateClusterList
+     * @description Update the list of clusters + determine their connected status
+     */
     updateClusterList: function() {
       var that = this;
 
@@ -61,15 +67,17 @@
           that.serviceInstances = [];
           var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
           _.forEach(filteredInstances, function(serviceInstance) {
-            var cloned = JSON.parse(JSON.stringify(serviceInstance));
+            var cloned = angular.fromJson(angular.toJson(serviceInstance));
             cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid', false);
 
             if (cloned.isConnected) {
               cloned.hasExpired = false;
             } else {
+              /* eslint-disable camelcase */
               var token_expiry =
                 _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
-              cloned.hasExpired = (new Date().getTime()) > token_expiry * 1000;
+              cloned.hasExpired = new Date().getTime() > token_expiry * 1000;
+              /* eslint-enable camelcase */
             }
             that.serviceInstances.push(cloned);
           });
@@ -79,19 +87,45 @@
         });
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name connect
+     * @description Connect this cluster using credentials about to be supplied
+     * @param {string} cnsiGUID identifier of cluster
+     */
     connect: function(cnsiGUID) {
       this.credentialsFormCNSI = cnsiGUID;
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name onConnectCancel
+     * @description Handle the cancel from connecting to a cluster
+     */
     onConnectCancel: function() {
       this.credentialsFormCNSI = false;
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name onConnectCancel
+     * @description Handle the success from connecting to a cluster
+     */
     onConnectSuccess: function() {
       this.credentialsFormCNSI = false;
       this.updateClusterList();
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name disconnect
+     * @description Disconnect this cluster
+     * @param {string} cnsiGUID identifier of cluster
+     */
     disconnect: function(cnsiGUID) {
       var that = this;
       this.userServiceInstanceModel.disconnect(cnsiGUID).then(function() {
@@ -99,6 +133,12 @@
       });
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name register
+     * @description Add a cluster to the console
+     */
     register: function() {
       var that = this;
       this.hcfRegistration.add().then(function() {
@@ -106,6 +146,13 @@
       });
     },
 
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name unregister
+     * @description Remove a cluster from the console
+     * @param {object} serviceInstance cnsi entry for cluster
+     */
     unregister: function(serviceInstance) {
       var that = this;
 

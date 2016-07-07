@@ -16,7 +16,6 @@
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.serviceInstanceModel.list();
-    var that = this;
 
     return {
       add: function () {
