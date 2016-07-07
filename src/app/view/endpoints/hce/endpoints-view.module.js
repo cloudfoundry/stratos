@@ -302,7 +302,7 @@
             // Prevent empty view being shown during an update
             that.resolvedUpdateCurrentEndpoint = false;
           }
-          that.setCurrentEndpoints();
+          that._setCurrentEndpoints();
           // FIXME Setting connection status to false to test connection case
           // if (that.currentEndpoints.length > 0) {
           //   that.currentEndpoints[that.currentEndpoints.length - 1].connected = false;
