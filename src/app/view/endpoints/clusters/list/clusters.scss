@@ -1,0 +1,29 @@
+@import 'cluster-tile/cluster-tile';
+
+.clusters-view {
+  .clusters-card {
+    min-height: 250px;
+    padding-left: 0px;
+  }
+
+  $clusters-card-side-margins: 0px;
+  $clusters-card-max-width: 400px;
+  $clusters-card-layout-steps: 4;
+
+  @for $i from 1 through $clusters-card-layout-steps {
+    @media (min-width: $clusters-card-side-margins + $i * $clusters-card-max-width) {
+      .clusters-card.col-md-4.col-sm-1 {
+        width: percentage(1/$i);
+      }
+    }
+  }
+
+.flyout-content-thin {
+  .flyout-content {
+    width: 564px;
+    min-width: 564px;
+    max-width: 564px;
+  }
+}
+}
+

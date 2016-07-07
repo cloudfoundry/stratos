@@ -1,0 +1,25 @@
+<gallery-card class="cluster-tile"
+              ng-class="{'unlink': !clusterTile.service.isConnected }"
+              card-data="clusterTile.cardData"
+              card-actions="clusterTile.actions"
+              card-actions-icon="helion-icon helion-icon-More"
+              card-actions-position="actions-menu-right"
+              on-card-click="clusterTile.service.isConnected ? clusterTile.summary() : false">
+
+  <dl class="dl-horizontal" ng-if="clusterTile.service.isConnected">
+    <dt translate>ENDPOINT URL</dt>
+    <dd>{{clusterTile.service.api_endpoint.Host}}</dd>
+    <dt ng-if="clusterTile.accountStatus" translate>CF ACCOUNT STATUS</dt>
+    <dd ng-if="clusterTile.accountStatus">{{clusterTile.accountStatus}}</dd>
+    <dt ng-if="clusterTile.orgCount" translate>TOTAL ORGS</dt>
+    <dd ng-if="clusterTile.orgCount" >{{clusterTile.orgCount}}</dd>
+    <dt ng-if="clusterTile.userCount" translate>TOTAL USERS</dt>
+    <dd ng-if="clusterTile.userCount" >{{clusterTile.userCount}}</dd>
+  </dl>
+  <div ng-if="!clusterTile.service.isConnected" class="text-center">
+    <i class="helion-icon-lg helion-icon helion-icon-Cluster"></i><br>
+    <a class="" ng-click="clusterTile.connect(clusterTile.service)" translate>Connect</a>
+      {{ ' to this cluster.' | translate }}<br>
+    <span translate="">ENDPOINT URL</span> {{clusterTile.service.api_endpoint.Host}}<br>
+  </div>
+</gallery-card>

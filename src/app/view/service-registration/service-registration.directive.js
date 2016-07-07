@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -15,7 +15,7 @@
    * @param {string} path - the application base path
    * @returns {object} The service-registration directive definition object
    */
-  function serviceRegistration(path) {
+  function serviceRegistration (path) {
     return {
       bindToController: {
         showOverlayRegistration: '=?'
@@ -31,7 +31,9 @@
     '$scope',
     'app.model.modelManager',
     'app.api.apiManager',
-    'helion.framework.widgets.detailView'
+    'app.view.hceRegistration',
+    'app.view.hcfRegistration'
+
   ];
 
   /**
@@ -42,14 +44,15 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {helion.framework.widgets.detailView} detailView - detail view service
+   * @param {app.view.hceRegistration} hceRegistration  HCE Registration service
+   * @param {app.view.hcfRegistration}  hcfRegistration   HCF Registration service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {app.model.user} userModel - the user model
    * @property {array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ServiceRegistrationController($scope, modelManager, apiManager, detailView) {
+  function ServiceRegistrationController ($scope, modelManager, apiManager, hceRegistration, hcfRegistration) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.clusterAddFlyoutActive = false;
@@ -60,12 +63,14 @@
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
     this.warningMsg = gettext('Authentication failed, please try reconnect.');
-    this.detailView = detailView;
+    this.hceRegistration = hceRegistration;
+    this.hcfRegistration = hcfRegistration;
     this.currentEndpoints = [];
     /* eslint-disable */
     // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
     /* eslint-enable */
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
+    this.currentUserAccount = modelManager.retrieve('app.model.account');
 
     $scope.$watchCollection(function () {
       return that.cnsiModel.serviceInstances;
@@ -80,17 +85,17 @@
       });
     });
 
-    $scope.$watchCollection(function() {
+    $scope.$watchCollection(function () {
       return that.serviceInstances;
-    }, function(newCnsis) {
+    }, function (newCnsis) {
       that.currentEndpoints = _.map(newCnsis,
-        function(c) {
+        function (c) {
           var endpoint = c.api_endpoint;
           return endpoint.Scheme + '://' + endpoint.Host;
         });
     });
 
-    this.userCnsiModel.list().then(function() {
+    this.userCnsiModel.list().then(function () {
       angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
       that.cnsiModel.list();
     });
@@ -137,7 +142,7 @@
       var id = angular.isUndefined(userServiceInstance.guid) ? userServiceInstance.id : userServiceInstance.guid;
 
       this.userCnsiModel.disconnect(id)
-        .then(function success() {
+        .then(function success () {
           delete userServiceInstance.account;
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
@@ -159,7 +164,7 @@
     remove: function (serviceInstance) {
       var that = this;
       this.cnsiModel.remove(serviceInstance)
-        .then(function success() {
+        .then(function success () {
           that.serviceInstances = {};
           that.userCnsiModel.list().then(function () {
             angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
@@ -174,16 +179,7 @@
      * @description Show the cluster add form flyout
      */
     showClusterAddForm: function () {
-      this.clusterAddFlyoutActive = true;
-    },
-
-    /**
-     * @function hideClusterAddForm
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Hide the cluster add form flyout
-     */
-    hideClusterAddForm: function () {
-      this.clusterAddFlyoutActive = false;
+      this.hcfRegistration.add();
     },
 
     /**
@@ -192,29 +188,23 @@
      * @description Show the HCE Endpoint add form detail view
      */
     showHCEEndpointAddForm: function () {
-      // This code is shamelessly copied from app/view/cluster-registration/cluster-registration.directive.js
-      // I take that back, it was EXTREMELY SHAMEFUL.
-      // -- woodnt
+      this.hceRegistration.add();
+    },
 
-      var that = this;
-      var data = { name: '', url: '' };
-      this.detailView(
-        {
-          templateUrl: 'app/view/hce-registration/hce-registration.html',
-          title: gettext('Register Code Engine Endpoint')
-        },
-        {
-          data: data,
-          options: {
-            instances: this.currentEndpoints
-          }
-        }
-      ).result.then(function () {
-        return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-          that.cnsiModel.list();
-        });
-      });
+    isAdmin: function () {
+      return this.currentUserAccount.isAdmin();
+    },
+
+    /**
+     * @function overrideIsAdmin
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Set the admin override
+     * @param {Bool} isDeveloper true when user is developer
+     */
+    overrideIsAdmin: function (isDeveloper) {
+      this.currentUserAccount.setAdminOverride(isDeveloper);
     }
+
   });
 
 })();

@@ -189,6 +189,8 @@ gulp.task('browsersync', function (callback) {
     proxyOptions = node_url.parse(devOptions.pp);
     proxyOptions.route = '/pp';
     gutil.log('Proxying API requests to:', gutil.colors.magenta(devOptions.pp));
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
   } catch (e) {
     throw new gutil.PluginError('browsersync', 'dev_config.json file is required with portal-proxy(pp) endpoint' +
       'configuration');

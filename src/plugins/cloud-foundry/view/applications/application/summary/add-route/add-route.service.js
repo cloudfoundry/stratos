@@ -60,7 +60,7 @@
   /**
    * @name AddRouteController
    * @constructor
-   * @param {Object} $scope
+   * @param {Object} $scope - Angular $scope
    * @param {Object} $stateParams - the UI router $stateParams service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {Object} $uibModalInstance - the Angular UI Bootstrap $uibModalInstance service

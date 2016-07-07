@@ -58,7 +58,7 @@
    * @property {object} _data - the view data (copy of service)
    */
   function CredentialsFormController(eventService, modelManager) {
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.eventService = eventService;
     this.authenticating = false;
     this.failedRegister = false;
@@ -91,7 +91,7 @@
     connect: function () {
       var that = this;
       this.authenticating = true;
-      this.serviceInstanceModel.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password)
+      this.userServiceInstanceModel.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password)
         .then(function success(response) {
           that.reset();
           if (angular.isDefined(that.onSubmit)) {
