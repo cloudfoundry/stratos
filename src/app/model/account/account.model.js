@@ -17,7 +17,7 @@
     'app.api.apiManager'
   ];
 
-  function registerAccountModel($cookies, modelManager, apiManager) {
+  function registerAccountModel ($cookies, modelManager, apiManager) {
     modelManager.register('app.model.account', new Account($cookies, apiManager));
   }
 
@@ -33,11 +33,14 @@
    * @property {object} data - the account data object
    * @class
    */
-  function Account($cookies, apiManager) {
+  function Account ($cookies, apiManager) {
     this.$cookies = $cookies;
     this.apiManager = apiManager;
     this.loggedIn = false;
     this.data = {};
+
+    // TODO(irfan) Hook for development
+    this.adminOverride = false;
   }
 
   angular.extend(Account.prototype, {
@@ -99,6 +102,10 @@
       return p;
     },
 
+    setAdminOverride: function (bool) {
+      this.adminOverride = bool;
+    },
+
     /**
      * @function isAdmin
      * @memberof app.model.account.Account
@@ -107,6 +114,11 @@
      * @returns {boolean} True if this user is an ITOps admin
      */
     isAdmin: function () {
+
+      //TODO(irfan) Hook for development
+      if (this.adminOverride) {
+        return false;
+      }
       var ADMIN_SCOPES = [
         'cloud_controller.admin',
         'ucp.admin'

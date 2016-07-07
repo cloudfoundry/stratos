@@ -1,0 +1,34 @@
+.cluster-tile {
+
+  &.unlink {
+    // Override some extreme oddness in gallary-card with undefined on-card-click
+    .panel-heading.linked, .panel-body.linked {
+      cursor: default;
+    }
+  }
+
+  .gallery-card-title {
+    text-transform: uppercase;
+  }
+
+  .panel-footer {
+    background: $gallery-card-status-danger;
+    .gallery-card-status, .gallery-card-status-text {
+      padding: 4px;
+      color: white;
+    }
+    .gallery-card-status-text {
+      padding-bottom: 6px;
+    }
+  }
+
+  .dl-horizontal {
+    dd {
+      font-weight: 500;
+    }
+
+    dd:first-of-type {
+      text-transform: lowercase;
+    }
+  }
+}

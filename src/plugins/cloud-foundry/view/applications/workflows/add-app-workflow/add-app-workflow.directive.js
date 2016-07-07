@@ -123,6 +123,8 @@
       this.userInput = {
         name: null,
         serviceInstance: null,
+        clusterUsername: null,
+        clusterPassword: null,
         organization: null,
         space: null,
         host: null,

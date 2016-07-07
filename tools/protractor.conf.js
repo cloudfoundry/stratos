@@ -19,6 +19,8 @@ exports.config = {
 
   params: {
     hostIp: '',
-    port: ''
+    port: '',
+    adminUser: '',
+    adminPassword: ''
   }
 };

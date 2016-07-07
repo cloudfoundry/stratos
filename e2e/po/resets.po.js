@@ -3,6 +3,8 @@
 var request = require('../../tools/node_modules/request');
 var helpers = require('./helpers.po');
 var host = helpers.getHost();
+var adminUser = browser.params.adminUser || 'admin';
+var adminPassword = browser.params.adminPassword || 'admin';
 
 module.exports = {
 
@@ -22,8 +24,8 @@ module.exports = {
 function devWorkflow(firstTime) {
   var req = newRequest();
 
-  return new Promise(function (resolve, reject) {
-    createSession(req, 'dev', 'dev').then(function () {
+  return new Promise(function(resolve, reject) {
+    createSession(req, 'dev', 'dev').then(function() {
       var promises = [];
       promises.push(setUser(req, !firstTime));
       promises.push(resetClusters(req));
@@ -50,9 +52,9 @@ function devWorkflow(firstTime) {
 function zeroClusterAdminWorkflow() {
   var req = newRequest();
 
-  return new Promise(function (resolve, reject) {
-    createSession(req, 'admin', 'admin').then(function () {
-      removeClusters(req).then(function () {
+  return new Promise(function(resolve, reject) {
+    createSession(req, adminUser, adminPassword).then(function() {
+      removeClusters(req).then(function() {
         resolve();
       }, function () {
         reject();
@@ -70,8 +72,8 @@ function zeroClusterAdminWorkflow() {
 function nClustersAdminWorkflow() {
   var req = newRequest();
 
-  return new Promise(function (resolve, reject) {
-    createSession(req, 'admin', 'admin').then(function () {
+  return new Promise(function(resolve, reject) {
+    createSession(req, adminUser, adminPassword).then(function() {
       var promises = [];
       promises.push(resetClusters(req));
 
@@ -139,9 +141,9 @@ function createSession(req, username, password) {
         password: password || 'dev'
       })
     };
+    req.post('http://' + host + '/pp/v1/auth/login/uaa', options)
+      .on('response', function(response) {
 
-    req.post('http://' + host + '/api/auth/login', options)
-      .on('response', function (response) {
         if (response.statusCode === 200) {
           resolve();
         } else {

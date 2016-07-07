@@ -131,10 +131,11 @@
      * @param {string} icon - the icon of the menu item
      * @param {string=} baseState - optional href / ng-router top-level base state e.g. cf.applications or cf.workspaces
      *                              (defaults to name)
+     * @param {number} pos - optional position in the menu to insert at
      * @returns {app.model.navigation.Menu} The navigation's Menu object
      */
-    addMenuItem: function (name, href, text, icon, baseState) {
-      this.push({
+    addMenuItem: function (name, href, text, icon, baseState, pos) {
+      var item = {
         name: name,
         href: href,
         text: text,
@@ -142,7 +143,13 @@
         // baseState is used to work out which menu entry is active based on any child state
         baseState: baseState || name, // defaults to name
         items: new Menu()   // sub-menu
-      });
+      };
+      if (angular.isNumber(pos)) {
+        this.splice(pos, 0, item);
+      } else {
+        this.push(item);
+      }
+
       return this;
     },
 

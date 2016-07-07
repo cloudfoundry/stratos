@@ -1,0 +1,34 @@
+@import "dashboard/endpoints-dashboard";
+@import "clusters/list/clusters";
+@import "hce/endpoints-view";
+
+.endpoints {
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+
+  .header {
+    padding: $hpe-unit-space 0px;
+    position: relative;
+    button {
+      position: absolute;
+      right: 0px;
+    }
+  }
+
+  .welcome-message {
+    padding: $hpe-unit-space * 0.5;
+    margin-top: $hpe-unit-space * 0.5;
+
+    > .helion-icon {
+      font-size: $hpe-unit-space;
+      margin-right: $hpe-unit-space * 0.5;
+    }
+
+    > span {
+      vertical-align: middle;
+    }
+  }
+}

@@ -2,6 +2,8 @@
 
 // Login page helpers
 var helpers = require('./helpers.po');
+var adminUser = browser.params.adminUser || 'admin';
+var adminPassword = browser.params.adminPassword || 'admin';
 
 module.exports = {
 
@@ -63,9 +65,9 @@ function enterLogin(username, password) {
 function login(username, password) {
   enterLogin(username, password);
   loginButton().click();
-  browser.driver.sleep(1000);
+  browser.driver.sleep(10000);
 }
 
 function loginAsAdmin() {
-  login('admin', 'admin');
+  login(adminUser, adminPassword);
 }

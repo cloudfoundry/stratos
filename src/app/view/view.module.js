@@ -12,6 +12,7 @@
     .module('app.view', [
       'app.view.config-clusters',
       'app.view.settings-page',
+      'app.view.endpoints',
       'app.view.error-page'
     ]);
 

@@ -1,0 +1,35 @@
+<div class="endpoints clusters-view">
+  <div class="header">
+    <div class="applications-header font-semi-bold pull-left" translate>
+      Cloud Foundry Clusters
+    </div>
+    <button ng-if="clustersCtrl.currentUserAccount.isAdmin()" class="btn btn-primary"
+            ng-click="clustersCtrl.register()" translate>Register Cluster</button>
+  </div>
+
+  <div id="welcome-message" class="welcome-message panel panel-default">
+    <span class="helion-icon helion-icon-Information"></span>
+    <span translate>You must connect to a cluster with your credentials to access and manage the cluster</span>
+  </div>
+
+  <div ng-if="clustersCtrl.serviceInstances === null" class="message-box message-box-no-bg">
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+  <div ng-if="clustersCtrl.serviceInstances === false" class="message-box message-box-no-bg">
+    <div translate>An error occurred retrieving clusters</div>
+  </div>
+  <div ng-if="clustersCtrl.serviceInstances">
+    <div class="clusters-card col-md-4 col-sm-1" ng-repeat="service in clustersCtrl.serviceInstances">
+      <cluster-tile service="service" connect="clustersCtrl.boundConnect" disconnect="clustersCtrl.boundDisconnect"
+                    unregister="clustersCtrl.boundUnregister"></cluster-tile>
+    </div>
+  </div>
+</div>
+
+<flyout class="flyout-content-thin" flyout-active="clustersCtrl.credentialsFormCNSI"
+        flyout-close-icon="'helion-icon helion-icon-Close'">
+  <credentials-form cnsi="clustersCtrl.credentialsFormCNSI"
+                    on-cancel="clustersCtrl.onConnectCancel()"
+                    on-submit="clustersCtrl.onConnectSuccess()">
+  </credentials-form>
+</flyout>

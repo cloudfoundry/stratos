@@ -1,0 +1,58 @@
+<div class="card panel panel-default service-tile">
+  <div class="panel-heading action-header">
+    <span ng-if="serviceTileCtrl.isHcf()" translate> Cloud Foundry Clusters</span>
+    <span ng-if="!serviceTileCtrl.isHcf()" translate> Code Engine Endpoints</span>
+    <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()"
+       ng-if="serviceTileCtrl.serviceInstancesCount()>0 && serviceTileCtrl.isUserAdmin() && serviceTileCtrl.resolvedPromise">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</span>
+    </a>
+  </div>
+  <div class="panel-body no-instances" ng-if="serviceTileCtrl.serviceInstancesCount()===0
+   && serviceTileCtrl.resolvedPromise">
+    <span ng-show="serviceTileCtrl.isHcf()" class="helion-icon helion-icon-lg helion-icon-Cluster"></span>
+    <span ng-show="!serviceTileCtrl.isHcf()"
+          class="helion-icon helion-icon-lg helion-icon-Continuous_integration"></span>
+    <div translate>There are no registered {{serviceTileCtrl.isHcf() ? 'clusters' : 'endpoints'}}.
+    </div>
+    <div ng-show="serviceTileCtrl.isUserAdmin()">
+      <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()">
+        <span translate> Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="panel-body base-tile"
+       ng-if="serviceTileCtrl.serviceInstancesCount()>0 && serviceTileCtrl.resolvedPromise"
+       ng-click="serviceTileCtrl.goToEndpointsView()">
+    <table>
+      <tr>
+        <th>
+          <span translate>Total Instances</span>
+          <p>{{serviceTileCtrl.serviceInstancesCount()}}</p>
+        </th>
+        <th>
+          <table>
+            <tr>
+              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S td-red"></td>
+              <td translate>Expired</td>
+              <td>{{serviceTileCtrl.getInstancesCountByStatus('Expired')}}</td>
+            </tr>
+            <tr>
+              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S"></td>
+              <td translate>Disconnected</td>
+              <td>{{serviceTileCtrl.getInstancesCountByStatus('Disconnected')}}</td>
+            </tr>
+            <tr>
+              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S td-green"></td>
+              <td translate>Connected</td>
+              <td>{{serviceTileCtrl.getInstancesCountByStatus('Connected')}}</td>
+            </tr>
+          </table>
+        </th>
+      </tr>
+    </table>
+  </div>
+
+
+</div>
