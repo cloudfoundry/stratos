@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -15,36 +16,48 @@ import (
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
-// UAAResponse - <TBD>
+// UAAResponse - Response returned by Cloud Foundry UAA Service
 type UAAResponse struct {
-	AccessToken  string `json:"access_token"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	Scope        string `json:"scope"`
-	JTI          string `json:"jti"`
+	AccessToken  string   `json:"access_token"`
+	TokenType    string   `json:"token_type"`
+	RefreshToken string   `json:"refresh_token"`
+	ExpiresIn    int      `json:"expires_in"`
+	Scope        []string `json:"scope"`
+	JTI          string   `json:"jti"`
 }
 
-// LoginRes - <TBD>
+// LoginRes - Response the proxy returns to the caller
 type LoginRes struct {
 	Account     string   `json:"account"`
 	TokenExpiry int64    `json:"token_expiry"`
 	APIEndpoint *url.URL `json:"api_endpoint"`
-	Scope       string   `json:"scope"`
+	Admin       bool     `json:"admin"`
 }
 
-// uaaPerms - <TBD>
+// VerifySessionRes - Response to the caller from a Verify Session action
+type VerifySessionRes struct {
+	Account string `json:"account"`
+	Admin   string `json:"admin"`
+}
+
+// uaaPerms - Does the user have Admin perms within the Cloud Foundry UAA Service?
 type uaaPerms struct {
 	Type  string `json:"type"`
 	Admin string `json:"admin"`
 }
 
-// hcfPerms - <TBD>
+// hcfPerms - Does the user have Admin perms within the Cloud Foundry HCF Service?
 type hcfPerms struct {
 	Type  string `json:"type"`
 	GUID  string `json:"guid"`
 	Admin string `json:"admin"`
 }
+
+// UAAAdminIdentifier - The identifier that the Cloud Foundry UAA Service uses to convey administrative level perms
+const UAAAdminIdentifier = "cloud_controller.admin"
+
+// HCFAdminIdentifier - The identifier that the Cloud Foundry HCF Service uses to convey administrative level perms
+const HCFAdminIdentifier = "uaa.admin"
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 
@@ -72,11 +85,16 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
+	uaaAdmin := false
+	if contains(uaaRes.Scope, UAAAdminIdentifier) {
+		uaaAdmin = true
+	}
+
 	resp := &LoginRes{
 		Account:     c.FormValue("username"),
 		TokenExpiry: u.TokenExpiry,
 		APIEndpoint: nil,
-		Scope:       uaaRes.Scope,
+		Admin:       uaaAdmin,
 	}
 	jsonString, err := json.Marshal(resp)
 	if err != nil {
@@ -144,11 +162,16 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	log.Println("After SAVE of CNSI token")
 
+	hcfAdmin := false
+	if contains(uaaRes.Scope, HCFAdminIdentifier) {
+		hcfAdmin = true
+	}
+
 	resp := &LoginRes{
 		Account:     u.UserGUID,
 		TokenExpiry: u.TokenExpiry,
 		APIEndpoint: cnsiRecord.APIEndpoint,
-		Scope:       uaaRes.Scope,
+		Admin:       hcfAdmin,
 	}
 	jsonString, err := json.Marshal(resp)
 	if err != nil {
@@ -349,6 +372,63 @@ func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error 
 	return nil
 }
 
+func (p *portalProxy) verifySession(c echo.Context) error {
+
+	sessionExpireTime, ok := p.getSessionInt64Value(c, "exp")
+	if !ok {
+		msg := "Could not find session date"
+		log.Println(msg)
+		return echo.NewHTTPError(http.StatusForbidden, msg)
+	}
+
+	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
+		msg := "Session has expired"
+		log.Println(msg)
+		return echo.NewHTTPError(http.StatusForbidden, msg)
+	}
+
+	sessionUser, ok := p.getSessionStringValue(c, "user_id")
+	if !ok {
+		msg := "Could not find user_id in Session"
+		log.Println(msg)
+		return echo.NewHTTPError(http.StatusForbidden, msg)
+	}
+
+	tr, err := p.getUAATokenRecord(sessionUser)
+	if err != nil {
+		msg := "Unable to find UAA Token: %s"
+		log.Printf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	// get the scope out of the JWT token data
+	userTokenInfo, err := getUserTokenInfo(tr.AuthToken)
+	if err != nil {
+		msg := "Unable to find scope information in the UAA Auth Token: %s"
+		log.Printf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	uaaAdmin := false
+	if contains(userTokenInfo.Scope, UAAAdminIdentifier) {
+		uaaAdmin = true
+	}
+
+	resp := &VerifySessionRes{
+		Account: sessionUser,
+		Admin:   fmt.Sprintf("%t", uaaAdmin),
+	}
+
+	err = c.JSON(http.StatusOK, resp)
+	if err != nil {
+		return err
+	}
+
+	log.Println("verifySession complete")
+
+	return nil
+}
+
 // userinfo - returns info about the currently logged in user like so:
 // [ { type: 'hcf', guid: 1234asdf, admin: true },
 //   { type: 'hcf', guid: 1234asdg, admin: true },
@@ -411,7 +491,7 @@ func getHCFPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 
 		// based on the scope, is the user an admin for this CNSI?
 		hcfAdmin := false
-		if contains(userTokenInfo.Scope, "cloud_controller.admin") {
+		if contains(userTokenInfo.Scope, UAAAdminIdentifier) {
 			hcfAdmin = true
 		}
 
@@ -450,7 +530,7 @@ func getUAAPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 
 	// is the user a UAA admin?
 	uaaAdmin := false
-	if contains(userTokenInfo.Scope, "uaa.admin") {
+	if contains(userTokenInfo.Scope, UAAAdminIdentifier) {
 		uaaAdmin = true
 	}
 
