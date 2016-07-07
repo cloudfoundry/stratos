@@ -2,7 +2,7 @@
   'use strict';
 
   describe('endpoint view tests', function () {
-    var $compile, $httpBackend, $scope, $q, controller,
+    var $httpBackend, $q, controller,
       modelManager, userServiceInstanceModel, serviceInstanceModel, items, apiManager;
     var detailViewCalled = false;
 
@@ -10,14 +10,13 @@
     beforeEach(module('green-box-console'));
     beforeEach(module('app.view.endpoints.hce'));
     beforeEach(module(function ($provide) {
-      var mock = function (config, context) {
+      var mock = function () {
         detailViewCalled = true;
         return {result: $q.reject()};
       };
       $provide.value('helion.framework.widgets.detailView', mock);
     }));
     beforeEach(inject(function ($injector) {
-      $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $q = $injector.get('$q');
       var $state = $injector.get('$state');

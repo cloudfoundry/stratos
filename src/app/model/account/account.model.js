@@ -17,7 +17,7 @@
     'app.api.apiManager'
   ];
 
-  function registerAccountModel($cookies, modelManager, apiManager) {
+  function registerAccountModel ($cookies, modelManager, apiManager) {
     modelManager.register('app.model.account', new Account($cookies, apiManager));
   }
 
@@ -33,13 +33,13 @@
    * @property {object} data - the account data object
    * @class
    */
-  function Account($cookies, apiManager) {
+  function Account ($cookies, apiManager) {
     this.$cookies = $cookies;
     this.apiManager = apiManager;
     this.loggedIn = false;
     this.data = {};
 
-    // TODO(irfan) Hook for development, remove before merging
+    // TODO(irfan) Hook for development
     this.adminOverride = false;
   }
 
@@ -102,7 +102,7 @@
       return p;
     },
 
-    setAdminOverride: function(bool){
+    setAdminOverride: function (bool) {
       this.adminOverride = bool;
     },
 
@@ -115,7 +115,7 @@
      */
     isAdmin: function () {
 
-      //TODO(irfan) Hook for development, remove before merging
+      //TODO(irfan) Hook for development
       if (this.adminOverride) {
         return false;
       }

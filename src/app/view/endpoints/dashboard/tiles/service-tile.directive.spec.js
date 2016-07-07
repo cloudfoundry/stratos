@@ -8,7 +8,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module(function ($provide) {
-      var mock = function (config, context) {
+      var mock = function () {
         detailViewCalled = true;
         return {result: $q.reject()};
       };

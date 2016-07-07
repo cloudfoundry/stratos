@@ -36,7 +36,7 @@
    * @param {object} $state - the UI router $state service
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
    * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
-   * @param $q
+   * @param {object} $q - the Angular $q service
    * @constructor
    */
   function ServiceTileController ($scope, modelManager, $state, hceRegistration, hcfRegistration, $q) {
@@ -56,7 +56,6 @@
     var that = this;
     this._listServiceInstances()
       .then(function () {
-
         $scope.$watchCollection(function () {
           return that.serviceInstanceModel.serviceInstances;
         }, function () {
@@ -72,7 +71,7 @@
      * @memberof app.view.endpoints.dashboard
      * @name serviceInstancesCount
      * @description Get number of services
-     * @returns number of serviceInstances
+     * @returns {Number} number of serviceInstances
      */
     serviceInstancesCount: function () {
       return _.keys(this.serviceInstances).length;
@@ -132,6 +131,7 @@
      * @memberOf app.view.endpoints.dashboard
      * @namespace app.view.endpoints.dashboard.getServiceInstanceCount
      * @description Get number of services in a particular status
+     * @param {string} status status
      * @returns {Number} count
      */
     getInstancesCountByStatus: function (status) {

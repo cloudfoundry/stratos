@@ -2,21 +2,20 @@
   'use strict';
 
   describe('endpoint dashboard tests', function () {
-    var $compile, $httpBackend, $scope, $q, controller, modelManager;
+    var $httpBackend, $q, controller, modelManager;
     var detailViewCalled = false;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module('app.view.endpoints.dashboard'));
     beforeEach(module(function ($provide) {
-      var mock = function (config, context) {
+      var mock = function () {
         detailViewCalled = true;
         return {result: $q.reject()};
       };
       $provide.value('helion.framework.widgets.detailView', mock);
     }));
     beforeEach(inject(function ($injector) {
-      $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $q = $injector.get('$q');
       var $state = $injector.get('$state');
@@ -25,10 +24,8 @@
       var hceReg = $injector.get('app.view.hceRegistration');
       var hcfReg = $injector.get('app.view.hcfRegistration');
 
-
       var EndpointsDashboardController = $state.get('endpoints.dashboard').controller;
       controller = new EndpointsDashboardController(modelManager, $state, hceReg, hcfReg, $q);
-
 
       var items = [{
         id: 1,

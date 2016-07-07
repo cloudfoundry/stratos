@@ -34,7 +34,7 @@
    * @param {object} $state - the UI router $state service
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
    * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
-   * @param $q
+   * @param {object} $q - the Angular $q service
    * @constructor
    */
   function EndpointsDashboardController (modelManager, $state, hceRegistration, hcfRegistration, $q) {
@@ -71,7 +71,7 @@
      * @memberof app.view.endpoints.dashboard
      * @name showClusterAddForm
      * @description Show cluster add form
-     * @param {Bool} isHcf
+     * @param {boolean} isHcf  when true show cluster add form for HCF
      */
     showClusterAddForm: function (isHcf) {
       var that = this;

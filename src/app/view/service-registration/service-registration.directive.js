@@ -44,8 +44,8 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {app.view.hceRegistration} hceRegistration
-   * @param {app.view.hcfRegistration}  hcfRegistration
+   * @param {app.view.hceRegistration} hceRegistration  HCE Registration service
+   * @param {app.view.hcfRegistration}  hcfRegistration   HCF Registration service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {app.model.user} userModel - the user model
@@ -198,7 +198,8 @@
     /**
      * @function overrideIsAdmin
      * @memberOf app.view.ServiceRegistrationController
-     * @description Hide the cluster add form flyout
+     * @description Set the admin override
+     * @param {Bool} isDeveloper true when user is developer
      */
     overrideIsAdmin: function (isDeveloper) {
       this.currentUserAccount.setAdminOverride(isDeveloper);

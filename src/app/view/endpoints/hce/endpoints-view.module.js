@@ -137,9 +137,10 @@
           delete userServiceInstance.valid;
           that.userServiceInstanceModel.numValid -= 1;
           that.cfModel.all();
-        }).then(function () {
-        return _updateCurrentEndpoints();
-      });
+        })
+        .then(function () {
+          return _updateCurrentEndpoints();
+        });
     },
 
     /**
@@ -186,6 +187,7 @@
      * @memberof app.view.endpoints.hce
      * @name isHcf
      * @description Check if endpoint view instance is an HCF instance
+     * @returns {boolean}
      */
     isHcf: function () {
       return this.serviceType === 'hcf';
@@ -303,10 +305,6 @@
             that.resolvedUpdateCurrentEndpoint = false;
           }
           that._setCurrentEndpoints();
-          // FIXME Setting connection status to false to test connection case
-          // if (that.currentEndpoints.length > 0) {
-          //   that.currentEndpoints[that.currentEndpoints.length - 1].connected = false;
-          // }
         }).then(function () {
           that.resolvedUpdateCurrentEndpoints = true;
         });
