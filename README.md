@@ -48,6 +48,8 @@ Here's how I fixed it:
 
 # 2) Remove the package from git
 $ git rm -r vendor/github.com/antonlindstrom
+$ git add vendor/github.com/antonlindstrom
+$ git commit -m "Remove the submodule based version of pgstore"
 
 # 3) Update the package with the full source
 # glide up -u -s
