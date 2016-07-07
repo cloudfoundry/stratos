@@ -50,13 +50,13 @@
     var that = this;
     this.routesActionMenu = [
       {
-        name: 'Unmap from App',
+        name: gettext('Unmap from App'),
         execute: function (route) {
           that.unmapRoute(route);
         }
       },
       {
-        name: 'Delete Route',
+        name: gettext('Delete Route'),
         execute: function (route) {
           that.deleteRoute(route);
         }
