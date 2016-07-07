@@ -12,35 +12,35 @@
   ];
 
   function registerApi($http, apiManager) {
-    apiManager.register('cloud-foundry.api.HceUserApi', new HceUserApi($http));
+    apiManager.register('cloud-foundry.api.HceVcsApi', new HceVcsApi($http));
   }
 
   /**
     * @constructor
-    * @name HceUserApi
+    * @name HceVcsApi
     * @description For more information on this API, please see:
     * https://github.com/hpcloud/hce-rest-service/blob/master/app/v2/swagger.yml
     * @param {object} $http - the Angular $http service
     * @property {object} $http - the Angular $http service
     * @property {string} baseUrl - the API base URL
     */
-  function HceUserApi($http) {
+  function HceVcsApi($http) {
     this.$http = $http;
     this.baseUrl = '/pp/v1/proxy/v2';
   }
 
-  angular.extend(HceUserApi.prototype, {
+  angular.extend(HceVcsApi.prototype, {
     /**
-     * @name createUser
-     * @description Create a user.
+     * @name addVcs
+     * @description Add a VCS instance.
      * @param {string} guid - the HCE instance GUID
      * @param {object} data - the request body
      * @param {object} params - the query parameters
      * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    createUser: function (guid, data, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users';
+    addVcs: function (guid, data, params, httpConfigOptions) {
+      var path = this.baseUrl + '/vcs';
       var headers = {
         'x-cnap-cnsi-list': guid
       };
@@ -65,17 +65,149 @@
     },
 
     /**
-     * @name deleteUser
-     * @description Delete the specified user.
+     * @name getVcs
+     * @description Get the specified VCS.
      * @param {string} guid - the HCE instance GUID
-     * @param {!number} userId - User id.
+     * @param {!number} vcsId - The (HCE) VCS id.
      * @param {object} params - the query parameters
      * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    deleteUser: function (guid, userId, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users/{user_id}'
-        .replace('{' + 'user_id' + '}', userId);
+    getVcs: function (guid, vcsId, params, httpConfigOptions) {
+      var path = this.baseUrl + '/vcs/{vcs_id}'
+        .replace('{' + 'vcs_id' + '}', vcsId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
+
+      var config = {
+        method: 'GET',
+        url: path,
+        params: params || {},
+        headers: headers
+      };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
+      return this.$http(config);
+    },
+
+    /**
+     * @name getVcsAuth
+     * @description Get the client credentials for the specified VCS.
+     * @param {string} guid - the HCE instance GUID
+     * @param {!number} vcsId - The (HCE) VCS id.
+     * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
+     * @returns {promise} A resolved/rejected promise
+     */
+    getVcsAuth: function (guid, vcsId, params, httpConfigOptions) {
+      var path = this.baseUrl + '/vcs/{vcs_id}/auth'
+        .replace('{' + 'vcs_id' + '}', vcsId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
+
+      var config = {
+        method: 'GET',
+        url: path,
+        params: params || {},
+        headers: headers
+      };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
+      return this.$http(config);
+    },
+
+    /**
+     * @name getVcses
+     * @description List VCS instances.
+     * @param {string} guid - the HCE instance GUID
+     * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
+     * @returns {promise} A resolved/rejected promise
+     */
+    getVcses: function (guid, params, httpConfigOptions) {
+      var path = this.baseUrl + '/vcs';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
+
+      var config = {
+        method: 'GET',
+        url: path,
+        params: params || {},
+        headers: headers
+      };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
+      return this.$http(config);
+    },
+
+    /**
+     * @name listVcsTypes
+     * @description List of vcs types, e.g. &#x60;GITHUB&#x60;, &#x60;SVN&#x60;, etc.\n
+     * @param {string} guid - the HCE instance GUID
+     * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
+     * @returns {promise} A resolved/rejected promise
+     */
+    listVcsTypes: function (guid, params, httpConfigOptions) {
+      var path = this.baseUrl + '/vcs/types';
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
+
+      var config = {
+        method: 'GET',
+        url: path,
+        params: params || {},
+        headers: headers
+      };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
+      return this.$http(config);
+    },
+
+    /**
+     * @name removeVcs
+     * @description Remove (unregister) the specified VCS.
+     * @param {string} guid - the HCE instance GUID
+     * @param {!number} vcsId - The (HCE) VCS id.
+     * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
+     * @returns {promise} A resolved/rejected promise
+     */
+    removeVcs: function (guid, vcsId, params, httpConfigOptions) {
+      var path = this.baseUrl + '/vcs/{vcs_id}'
+        .replace('{' + 'vcs_id' + '}', vcsId);
       var headers = {
         'x-cnap-cnsi-list': guid
       };
@@ -99,86 +231,18 @@
     },
 
     /**
-     * @name getUser
-     * @description Get the specified user.
+     * @name updateVcs
+     * @description Update the specified VCS.
      * @param {string} guid - the HCE instance GUID
-     * @param {!number} userId - User id.
-     * @param {object} params - the query parameters
-     * @param {object} httpConfigOptions - additional config options
-     * @returns {promise} A resolved/rejected promise
-     */
-    getUser: function (guid, userId, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users/{user_id}'
-        .replace('{' + 'user_id' + '}', userId);
-      var headers = {
-        'x-cnap-cnsi-list': guid
-      };
-
-      var config = {
-        method: 'GET',
-        url: path,
-        params: params || {},
-        headers: headers
-      };
-
-      angular.forEach(httpConfigOptions, function (optionConfig, option) {
-        if (option === 'headers') {
-          angular.extend(config[option], optionConfig);
-        } else {
-          config[option] = optionConfig;
-        }
-      });
-
-      return this.$http(config);
-    },
-
-    /**
-     * @name getUserByUaaId
-     * @description Get the HCE user account associated with the provided UAA user ID.
-     * @param {string} guid - the HCE instance GUID
-     * @param {!string} uaaId - The user&#39;s UAA user id.
-     * @param {object} params - the query parameters
-     * @param {object} httpConfigOptions - additional config options
-     * @returns {promise} A resolved/rejected promise
-     */
-    getUserByUaaId: function (guid, uaaId, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users/uaa/{uaa_id}'
-        .replace('{' + 'uaa_id' + '}', uaaId);
-      var headers = {
-        'x-cnap-cnsi-list': guid
-      };
-
-      var config = {
-        method: 'GET',
-        url: path,
-        params: params || {},
-        headers: headers
-      };
-
-      angular.forEach(httpConfigOptions, function (optionConfig, option) {
-        if (option === 'headers') {
-          angular.extend(config[option], optionConfig);
-        } else {
-          config[option] = optionConfig;
-        }
-      });
-
-      return this.$http(config);
-    },
-
-    /**
-     * @name updateUser
-     * @description Update the specified user.
-     * @param {string} guid - the HCE instance GUID
-     * @param {!number} userId - User id.
+     * @param {!number} vcsId - VCS id.
      * @param {object} data - the request body
      * @param {object} params - the query parameters
      * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    updateUser: function (guid, userId, data, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users/{user_id}'
-        .replace('{' + 'user_id' + '}', userId);
+    updateVcs: function (guid, vcsId, data, params, httpConfigOptions) {
+      var path = this.baseUrl + '/vcs/{vcs_id}'
+        .replace('{' + 'vcs_id' + '}', vcsId);
       var headers = {
         'x-cnap-cnsi-list': guid
       };

@@ -1,17 +1,6 @@
 FROM node:4.2.3
 
-RUN apt-get update && \
-    apt-get install -y openjdk-7-jre-headless && \
-    apt-get install -y xvfb wget openjdk-7-jre && \
-    apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic && \
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    dpkg --unpack google-chrome-stable_current_amd64.deb && \
-    apt-get install -f -y && \
-    apt-get clean && \
-    rm google-chrome-stable_current_amd64.deb && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /usr/src/app
-
+RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 CMD bash provision.sh && cd tools && node_modules/.bin/gulp watch
