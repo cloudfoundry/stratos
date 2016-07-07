@@ -56,17 +56,21 @@
       var that = this;
 
       this.serviceInstances = null;
-
       this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
         .then(function() {
           that.serviceInstances = [];
           var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
           _.forEach(filteredInstances, function(serviceInstance) {
             var cloned = JSON.parse(JSON.stringify(serviceInstance));
-            cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid');
-            var token_expiry =
-              _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
-            cloned.hasExpired = (new Date().getTime()) > token_expiry * 1000;
+            cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid', false);
+
+            if (cloned.isConnected) {
+              cloned.hasExpired = false;
+            } else {
+              var token_expiry =
+                _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
+              cloned.hasExpired = (new Date().getTime()) > token_expiry * 1000;
+            }
             that.serviceInstances.push(cloned);
           });
         })
