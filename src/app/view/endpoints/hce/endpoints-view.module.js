@@ -48,16 +48,18 @@
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.serviceType = 'hce';
     this.currentEndpoints = [];
-    // Optimistically assuming that serviceInstance is already initialised
-    this.serviceInstances = [];
-    if (this.serviceInstanceModel.serviceInstances.length > 0){
-      this.serviceInstances = _.filter(this.serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'});
+    this.serviceInstances = {};
+    this.resolvedUpdateCurrentEndpoints = false;
+    if (this.serviceInstanceModel.serviceInstances.length > 0) {
+      // serviceInstanceModel has previously been updated
+      // to decrease load time, we will use that data.
+      this._setCurrentEndpoints();
+      this.resolvedUpdateCurrentEndpoints = true;
     }
     this.hceRegistration = hceRegistration;
     this.tokenExpiryMessage = 'Token has expired';
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
     this.activeServiceInstance = null;
-    this.resolvedUpdateCurrentEndpoints = false;
     this.$log = $log;
     this.$q = $q;
     this.confirmDialog = confirmDialog;
@@ -246,6 +248,43 @@
     },
 
     /**
+     * @function _setCurrentEndpoints
+     * @memberOf app.view.endpoints.hce
+     * @description Convenience method to set Endpoints
+     * @private
+     */
+    _setCurrentEndpoints: function () {
+
+      var that = this;
+      var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: that.serviceType});
+      _.forEach(filteredInstances, function (serviceInstance) {
+        var guid = serviceInstance.guid;
+        if (angular.isUndefined(that.serviceInstances[guid])) {
+          that.serviceInstances[guid] = serviceInstance;
+        } else {
+          angular.extend(that.serviceInstances[guid], serviceInstance);
+        }
+      });
+
+      that.currentEndpoints = _.map(filteredInstances,
+        function (c) {
+          var endpoint = c.api_endpoint;
+          // FIXME Once HCE auth is implement read connection status from userServiceInstanceModel (TEAMFOUR-721)
+          var isConnected = true;
+          if (that.isHcf()) {
+            isConnected = that.userServiceInstanceModel.serviceInstances[c.guid].valid;
+          }
+          return {
+            name: c.name,
+            guid: c.guid,
+            url: endpoint.Scheme + '://' + endpoint.Host,
+            connected: isConnected,
+            model: c
+          };
+        });
+    },
+
+    /**
      * @function _updateCurrentEndpoints
      * @memberOf app.view.endpoints.hce
      * @param {Boolean} invalidateCurrentInstances empty local serviceInstances
@@ -263,33 +302,7 @@
             // Prevent empty view being shown during an update
             that.resolvedUpdateCurrentEndpoint = false;
           }
-          var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: that.serviceType});
-          _.forEach(filteredInstances, function (serviceInstance) {
-            var guid = serviceInstance.guid;
-            if (angular.isUndefined(that.serviceInstances[guid])) {
-              that.serviceInstances[guid] = serviceInstance;
-            } else {
-              angular.extend(that.serviceInstances[guid], serviceInstance);
-            }
-          });
-
-          that.currentEndpoints = _.map(filteredInstances,
-            function (c) {
-              var endpoint = c.api_endpoint;
-              // FIXME Once HCE auth is implement read connection status from userServiceInstanceModel (TEAMFOUR-721)
-              var isConnected = true;
-              if (that.isHcf()) {
-                isConnected = that.userServiceInstanceModel.serviceInstances[c.guid].valid;
-              }
-              return {
-                name: c.name,
-                guid: c.guid,
-                url: endpoint.Scheme + '://' + endpoint.Host,
-                connected: isConnected,
-                model: c
-              };
-            });
-
+          that.setCurrentEndpoints();
           // FIXME Setting connection status to false to test connection case
           // if (that.currentEndpoints.length > 0) {
           //   that.currentEndpoints[that.currentEndpoints.length - 1].connected = false;

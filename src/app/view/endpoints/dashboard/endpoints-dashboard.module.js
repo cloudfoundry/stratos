@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.dashboard', [ ])
+    .module('app.view.endpoints.dashboard', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -46,11 +46,15 @@
     this.$state = $state;
     this.hceRegistration = hceRegistration;
     this.hcfRegistration = hcfRegistration;
-
-    this.currentEndpoints = [];
-    // Start off with an initial state
-    this.serviceInstances = {};
     this.listPromiseResolved = false;
+
+    this.serviceInstances = {};
+    if (this.serviceInstanceModel.serviceInstances > 0) {
+      // serviceInstanceModel has previously been updated
+      // to decrease load time, we will use that data.
+      this.listPromiseResolved = true;
+      this._updateLocalServiceInstances();
+    }
     // Show welcome message only if no endpoints are registered
     this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
     this.serviceInstanceModel.list();
@@ -105,6 +109,25 @@
     },
 
     /**
+     * @function _updateLocalServiceInstances
+     * @memberOf app.view.endpoints.dashboard
+     * @description Updates local service instances
+     * @private
+     */
+    _updateLocalServiceInstances: function () {
+      var that = this;
+      if (this.showWelcomeMessage && this.serviceInstanceModel.serviceInstances.length > 0) {
+        this.showWelcomeMessage = false;
+      }
+      _.forEach(this.serviceInstanceModel.serviceInstances, function (serviceInstance) {
+        var guid = serviceInstance.guid;
+        if (angular.isUndefined(that.serviceInstances[guid])) {
+          that.serviceInstances[guid] = serviceInstance;
+        } else {
+          angular.extend(that.serviceInstances[guid], serviceInstance);
+        }
+      });
+    }, /**
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard
      * @description Is current user an admin?
@@ -116,18 +139,8 @@
       var that = this;
       return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
         .then(function () {
-          if (that.showWelcomeMessage && that.serviceInstanceModel.serviceInstances.length > 0) {
-            that.showWelcomeMessage = false;
-          }
-          _.forEach(that.serviceInstanceModel.serviceInstances, function (serviceInstance) {
-            var guid = serviceInstance.guid;
-            if (angular.isUndefined(that.serviceInstances[guid])) {
-              that.serviceInstances[guid] = serviceInstance;
-            } else {
-              angular.extend(that.serviceInstances[guid], serviceInstance);
-            }
-          });
-        }).then(function(){
+          that._updateLocalServiceInstances();
+        }).then(function () {
           that.listPromiseResolved = true;
         });
     }
