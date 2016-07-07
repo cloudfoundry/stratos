@@ -1,5 +1,5 @@
-hash: 1ba08f40f3ce19118e6a2c71733dba3cac93775d024b5519810fe1aa0b40ce1f
-updated: 2016-07-06T10:49:52.40996195-04:00
+hash: 9a8fb06e603f04b2fe9917219c27fa8e497b39e818f940464120877cbb320d02
+updated: 2016-07-06T22:21:51.440379667-04:00
 imports:
 - name: github.com/antonlindstrom/pgstore
   version: 646ee398524f0eb81ad90aa8f40cbd74045c99b2
@@ -14,7 +14,7 @@ imports:
   subpackages:
   - events
 - name: github.com/coopernurse/gorp
-  version: 40d48aca791a9228395fde36b51a45af06168091
+  version: 9cd2b5ef5b82fde4e7c51776ac3f94398b8af076
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/gogo/protobuf
@@ -69,7 +69,7 @@ imports:
   subpackages:
   - context
 - name: golang.org/x/oauth2
-  version: df5b72659a3b1789a345ea643bb7c28442681652
+  version: 7357e96168422ba1e6e7f21075713b72d58764e7
   subpackages:
   - github
   - internal

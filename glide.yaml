@@ -1,5 +1,6 @@
 package: github.com/hpcloud/portal-proxy
 import:
+- package: github.com/coopernurse/gorp
 - package: github.com/antonlindstrom/pgstore
 - package: github.com/cloudfoundry/noaa
   subpackages:
