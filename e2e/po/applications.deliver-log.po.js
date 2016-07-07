@@ -27,7 +27,7 @@ function getSummaryAt(index) {
   var value = sections.get(1).all(by.css('div')).get(index);
 
   return Q.all([label.getText(), value.element(by.css('a')).getText(), value.element(by.css('span')).getText()])
-    .then(function(res) {
+    .then(function (res) {
       return {
         label: res[0],
         values: {

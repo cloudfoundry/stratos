@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -51,7 +51,7 @@
      * @returns {boolean} Indicating if supplies buildpack is a web link
      * @public
      **/
-    isWebLink: function(buildpack) {
+    isWebLink: function (buildpack) {
       var url = angular.isDefined(buildpack) && buildpack !== null ? buildpack : '';
       url = url.trim().toLowerCase();
       return url.indexOf('http://') === 0 || url.indexOf('https://') === 0;
@@ -62,7 +62,7 @@
      * @description Show Add a Route form
      * @public
      **/
-    showAddRouteForm: function() {
+    showAddRouteForm: function () {
       this.addRoutesService.add();
     }
   });

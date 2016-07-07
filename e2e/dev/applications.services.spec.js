@@ -26,7 +26,7 @@ describe('Application - Services', function () {
     expect(galleryPage.servicePanelsAddServiceButtons().count()).toBeGreaterThan(0);
   });
 
-  describe('and you click on "Add Service"',function () {
+  describe('and you click on "Add Service"', function () {
     beforeAll(function () {
       galleryPage.showServiceDetails(0);
     });

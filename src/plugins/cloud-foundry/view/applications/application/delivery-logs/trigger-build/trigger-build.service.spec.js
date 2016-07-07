@@ -24,7 +24,7 @@
 
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
-    beforeEach(module('ng', function($exceptionHandlerProvider) {
+    beforeEach(module('ng', function ($exceptionHandlerProvider) {
       // angular-mock implementation differs in the way it handles exceptions thrown by promises (it does not nicely
       // wrap them as per the actual implementation). Therefor disable so we can test error cases.
       // See stratos-ui/src/plugins/cloud-foundry/model/github/github.model.js +
@@ -33,7 +33,7 @@
     }));
 
     beforeEach(module(function ($provide) {
-      var mock = function(config, context) {
+      var mock = function (config, context) {
         dialogContext = context;
         $controller = config.controller;
         return $q.reject();
@@ -58,15 +58,15 @@
       expect(promise).not.toBe(null);
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
 
-    describe('Factory', function() {
+    describe('Factory', function () {
 
-      describe("open", function() {
-        it("Plumbing / Initial state", function() {
+      describe("open", function () {
+        it("Plumbing / Initial state", function () {
           /* eslint-disable */
           new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
             githubOauthService);
@@ -77,10 +77,10 @@
       });
     });
 
-    describe('Controller', function() {
+    describe('Controller', function () {
       var controller;
 
-      beforeEach(function() {
+      beforeEach(function () {
         controller = new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
           githubOauthService);
         expect(controller).toBeDefined();
@@ -89,11 +89,11 @@
         expect(controller.triggerError).toBeFalsy();
       });
 
-      describe('github token', function() {
+      describe('github token', function () {
         // Once the github token side of things has settled down these will need updating
       });
 
-      describe('list commits', function() {
+      describe('list commits', function () {
 
         function setGithubToken() {
           // Calls to githubModel will fail before the http request if token.access_token is missing
@@ -102,14 +102,14 @@
           $scope.$digest();
         }
 
-        it('Don\'t fetch if no token present', function() {
+        it('Don\'t fetch if no token present', function () {
           spyOn(githubModel, 'commits').and.callThrough();
           controller.fetchCommits();
           expect(githubModel.commits).not.toHaveBeenCalled();
           // No requests should ha
         });
 
-        it('Fetch empty commit list', function() {
+        it('Fetch empty commit list', function () {
 
           setGithubToken();
 
@@ -123,11 +123,11 @@
           expect(controller.triggerError).toBeFalsy();
         });
 
-        it('Fetch populated commit list', function() {
+        it('Fetch populated commit list', function () {
 
           setGithubToken();
 
-          $httpBackend.expectGET(defaultCommitsRequest).respond([ defaultCommit, {}, {}, {} ]);
+          $httpBackend.expectGET(defaultCommitsRequest).respond([defaultCommit, {}, {}, {}]);
 
           controller.fetchCommits();
           $httpBackend.flush();
@@ -138,7 +138,7 @@
           expect(controller.triggerError).toBeFalsy();
         });
 
-        it('Fetch error', function() {
+        it('Fetch error', function () {
 
           setGithubToken();
 
@@ -156,14 +156,14 @@
 
       });
 
-      describe('build', function() {
+      describe('build', function () {
 
         beforeEach(function () {
           controller.selectedCommit = defaultCommit;
         });
 
-        it('Basic successful trigger', function() {
-          $httpBackend.expectPOST(defaultTriggerRequest, { commit_ref: defaultCommit.sha }).respond();
+        it('Basic successful trigger', function () {
+          $httpBackend.expectPOST(defaultTriggerRequest, {commit_ref: defaultCommit.sha}).respond();
           controller.build();
           $httpBackend.flush();
           expect($uibModalInstance.close).toHaveBeenCalled();
@@ -172,8 +172,8 @@
           expect(controller.triggerError).toBeFalsy();
         });
 
-        it('Basic failed trigger', function() {
-          $httpBackend.expectPOST(defaultTriggerRequest, { commit_ref: defaultCommit.sha }).respond(500);
+        it('Basic failed trigger', function () {
+          $httpBackend.expectPOST(defaultTriggerRequest, {commit_ref: defaultCommit.sha}).respond(500);
           controller.build();
           $httpBackend.flush();
           expect($uibModalInstance.close).not.toHaveBeenCalled();

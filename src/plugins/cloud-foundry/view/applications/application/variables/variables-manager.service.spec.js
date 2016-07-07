@@ -6,7 +6,7 @@
 
     beforeEach(module('green-box-console'));
     beforeEach(module(function ($provide) {
-      var mock = function(config, context) {
+      var mock = function (config, context) {
         dialogContext = context;
         $controller = config.controller;
         return $q.reject();
@@ -27,14 +27,14 @@
       };
     }));
 
-    describe("add", function() {
+    describe("add", function () {
       beforeEach(inject(function ($injector) {
         var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
         dialog = appVarsManager.add('test_guid', 'test_id');
         expect(dialog).not.toBe(null);
       }));
 
-      it("check var name and value are empty", function() {
+      it("check var name and value are empty", function () {
         var controller = new $controller(modelManager, undefined, dialogContext);
         expect(controller.varName).toBe('');
         expect(controller.varValue).toBe('');
@@ -42,13 +42,13 @@
       });
     });
 
-    describe("edit", function() {
+    describe("edit", function () {
       beforeEach(inject(function ($injector) {
         var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
         dialog = appVarsManager.edit('test_guid', 'test_id', 'edit_var');
         expect(dialog).not.toBe(null);
       }));
-      it("check var name and value are not empty", function() {
+      it("check var name and value are not empty", function () {
         var controller = new $controller(modelManager, undefined, dialogContext);
         expect(controller.varName).toBe('edit_var');
         expect(controller.varValue).toBe('edit_value');
@@ -56,10 +56,10 @@
       });
     });
 
-    describe("apply changes", function() {
+    describe("apply changes", function () {
       var APP_VAR_UPDATE = '/pp/v1/proxy/v2/apps/test_id';
       var $httpBackend;
-      var fakeModal = { close: jasmine.createSpy('dialogClose') };
+      var fakeModal = {close: jasmine.createSpy('dialogClose')};
 
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
@@ -69,7 +69,7 @@
         expect(dialog).not.toBe(null);
       }));
 
-      it("should update variable and close dialog", function() {
+      it("should update variable and close dialog", function () {
         fakeModal.close.calls.reset();
         $httpBackend.when('PUT', APP_VAR_UPDATE).respond(200, {test_guid: {}});
         var controller = new $controller(modelManager, fakeModal, dialogContext);
@@ -79,7 +79,7 @@
         expect(controller.addError).toBe(false);
       });
 
-      it("should have error and not close dialog", function() {
+      it("should have error and not close dialog", function () {
         fakeModal.close.calls.reset();
         $httpBackend.when('PUT', APP_VAR_UPDATE).respond(400, {test_guid: {}});
         var controller = new $controller(modelManager, fakeModal, dialogContext);
@@ -90,7 +90,7 @@
       });
     });
 
-    describe("delete", function() {
+    describe("delete", function () {
       var $httpBackend, appVarsManager;
       var APP_VAR_UPDATE = '/pp/v1/proxy/v2/apps/test_id';
       var okPromise = jasmine.createSpy('okPromise');
@@ -102,7 +102,7 @@
         appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
       }));
 
-      it("should delete variable", function() {
+      it("should delete variable", function () {
         okPromise.calls.reset();
         catchPromise.calls.reset();
         $httpBackend.when('PUT', APP_VAR_UPDATE).respond(200, {test_guid: {}});
@@ -112,7 +112,7 @@
         expect(catchPromise).not.toHaveBeenCalled();
       });
 
-      it("should not delete variable", function() {
+      it("should not delete variable", function () {
         okPromise.calls.reset();
         catchPromise.calls.reset();
         $httpBackend.when('PUT', APP_VAR_UPDATE).respond(500, {test_guid: {}});
@@ -122,7 +122,7 @@
         expect(catchPromise).toHaveBeenCalled();
       });
 
-      it("should not delete variable (error code returned)", function() {
+      it("should not delete variable (error code returned)", function () {
         okPromise.calls.reset();
         catchPromise.calls.reset();
         $httpBackend.when('PUT', APP_VAR_UPDATE).respond(200, {test_guid: {error_code: 'failed'}});

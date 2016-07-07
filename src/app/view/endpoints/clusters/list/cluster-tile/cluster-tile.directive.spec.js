@@ -56,8 +56,8 @@
       spyOn(clusterTileCtrl, 'unregister').and.callThrough();
     }
 
-    describe('defined + intialised', function() {
-      beforeEach(function() {
+    describe('defined + intialised', function () {
+      beforeEach(function () {
         createCtrl();
       });
 
@@ -79,13 +79,13 @@
       });
     });
 
-    describe('setActions', function() {
+    describe('setActions', function () {
 
-      beforeEach(function() {
+      beforeEach(function () {
         createCtrl();
       });
 
-      it('Connected', function() {
+      it('Connected', function () {
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setActions();
 
@@ -94,7 +94,7 @@
         expect(clusterTileCtrl.actions[0].name).toEqual('Disconnect');
       });
 
-      it('Not connected', function() {
+      it('Not connected', function () {
         clusterTileCtrl.service.isConnected = false;
         clusterTileCtrl.setActions();
 
@@ -103,7 +103,7 @@
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
       });
 
-      it('Is admin', function() {
+      it('Is admin', function () {
         spyOn(clusterTileCtrl.currentUserAccount, 'isAdmin').and.returnValue(true);
         clusterTileCtrl.setActions();
 
@@ -112,7 +112,7 @@
         expect(clusterTileCtrl.actions[1].name).toEqual('Unregister');
       });
 
-      it('Is not admin', function() {
+      it('Is not admin', function () {
         spyOn(clusterTileCtrl.currentUserAccount, 'isAdmin').and.returnValue(true);
         clusterTileCtrl.setActions();
 
@@ -123,12 +123,12 @@
 
     });
 
-    describe('setAccountStatus', function() {
-      beforeEach(function() {
+    describe('setAccountStatus', function () {
+      beforeEach(function () {
         createCtrl();
       });
 
-      it('Still null after call', function() {
+      it('Still null after call', function () {
         // To update once functionality added
         expect(clusterTileCtrl.accountStatus).toBeNull();
         clusterTileCtrl.setAccountStatus();
@@ -137,16 +137,16 @@
       });
     });
 
-    describe('setUserCount', function() {
-      beforeEach(function() {
+    describe('setUserCount', function () {
+      beforeEach(function () {
         spyOn(cfModelOrg, 'listAllOrganizations');
       });
 
-      afterEach(function() {
+      afterEach(function () {
         expect(cfModelOrg.listAllOrganizations).not.toHaveBeenCalled();
       });
 
-      it('Not connected, so no call to backend', function() {
+      it('Not connected, so no call to backend', function () {
         spyOn(cfModelUsers, 'listAllUsers');
         createCtrl();
 
@@ -159,8 +159,8 @@
         expect(cfModelUsers.listAllUsers).not.toHaveBeenCalled();
       });
 
-      it('Call succeeds', function() {
-        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function(cnsiGuid) {
+      it('Call succeeds', function () {
+        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function (cnsiGuid) {
           expect(cnsiGuid).toEqual(initialService.guid);
           return $q.when(['1', '2']);
         });
@@ -175,8 +175,8 @@
         expect(cfModelUsers.listAllUsers).toHaveBeenCalled();
       });
 
-      it('Call succeeds - no array', function() {
-        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function(cnsiGuid) {
+      it('Call succeeds - no array', function () {
+        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function (cnsiGuid) {
           expect(cnsiGuid).toEqual(initialService.guid);
           return $q.when();
         });
@@ -191,8 +191,8 @@
         expect(cfModelUsers.listAllUsers).toHaveBeenCalled();
       });
 
-      it('Call fails', function() {
-        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function(cnsiGuid) {
+      it('Call fails', function () {
+        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function (cnsiGuid) {
           expect(cnsiGuid).toEqual(initialService.guid);
           return $q.reject();
         });
@@ -208,16 +208,16 @@
       });
     });
 
-    describe('setOrganisationCount', function() {
-      beforeEach(function() {
+    describe('setOrganisationCount', function () {
+      beforeEach(function () {
         spyOn(cfModelUsers, 'listAllUsers');
       });
 
-      afterEach(function() {
+      afterEach(function () {
         expect(cfModelUsers.listAllUsers).not.toHaveBeenCalled();
       });
 
-      it('Not connected, so no call to backend', function() {
+      it('Not connected, so no call to backend', function () {
         spyOn(cfModelOrg, 'listAllOrganizations');
         createCtrl();
 
@@ -230,8 +230,8 @@
         expect(cfModelOrg.listAllOrganizations).not.toHaveBeenCalled();
       });
 
-      it('Call succeeds', function() {
-        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function(cnsiGuid) {
+      it('Call succeeds', function () {
+        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function (cnsiGuid) {
           expect(cnsiGuid).toEqual(initialService.guid);
           return $q.when(['1', '2']);
         });
@@ -246,8 +246,8 @@
         expect(cfModelOrg.listAllOrganizations).toHaveBeenCalled();
       });
 
-      it('Call succeeds - no array', function() {
-        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function(cnsiGuid) {
+      it('Call succeeds - no array', function () {
+        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function (cnsiGuid) {
           expect(cnsiGuid).toEqual(initialService.guid);
           return $q.when();
         });
@@ -262,8 +262,8 @@
         expect(cfModelOrg.listAllOrganizations).toHaveBeenCalled();
       });
 
-      it('Call fails', function() {
-        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function(cnsiGuid) {
+      it('Call fails', function () {
+        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function (cnsiGuid) {
           expect(cnsiGuid).toEqual(initialService.guid);
           return $q.reject();
         });
@@ -279,8 +279,8 @@
       });
     });
 
-    describe('summary', function() {
-      it('correctly executed', function() {
+    describe('summary', function () {
+      it('correctly executed', function () {
         createCtrl();
 
         spyOn($state, 'go');
@@ -291,13 +291,13 @@
       });
     });
 
-    describe('action call plumbing', function() {
-      beforeEach(function() {
+    describe('action call plumbing', function () {
+      beforeEach(function () {
         createCtrl();
       });
 
-      it('connect', function() {
-        var connect = _.find(clusterTileCtrl.actions, { name: 'Connect' });
+      it('connect', function () {
+        var connect = _.find(clusterTileCtrl.actions, {name: 'Connect'});
         expect(connect).toBeDefined();
         expect(connect.execute).toBeDefined();
 
@@ -308,11 +308,11 @@
         expect(clusterTileCtrl.connect.calls.argsFor(0)).toEqual([initialService]);
       });
 
-      it('disconnect', function() {
+      it('disconnect', function () {
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setActions();
 
-        var disconnect = _.find(clusterTileCtrl.actions, { name: 'Disconnect' });
+        var disconnect = _.find(clusterTileCtrl.actions, {name: 'Disconnect'});
         expect(disconnect).toBeDefined();
         expect(disconnect.execute).toBeDefined();
 
@@ -323,11 +323,11 @@
         expect(clusterTileCtrl.disconnect.calls.argsFor(0)).toEqual([initialService.guid]);
       });
 
-      it('unregister', function() {
+      it('unregister', function () {
         spyOn(clusterTileCtrl.currentUserAccount, 'isAdmin').and.returnValue(true);
         clusterTileCtrl.setActions();
 
-        var unregister = _.find(clusterTileCtrl.actions, { name: 'Unregister' });
+        var unregister = _.find(clusterTileCtrl.actions, {name: 'Unregister'});
         expect(unregister).toBeDefined();
         expect(unregister.execute).toBeDefined();
 

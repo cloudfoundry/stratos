@@ -17,7 +17,7 @@
       $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('listAllPrivateDomains', function() {
+    it('listAllPrivateDomains', function () {
       var result;
       var ListAllPrivateDomains = mock.cloudFoundryAPI.PrivateDomains.ListAllPrivateDomains();
       $httpBackend.whenGET(ListAllPrivateDomains.url).respond(200, ListAllPrivateDomains.response['200'].body);

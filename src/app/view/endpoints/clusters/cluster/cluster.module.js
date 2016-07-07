@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -27,7 +27,5 @@
     this.guid = $stateParams.guid;
   }
 
-  angular.extend(ClusterController.prototype, {
-
-  });
+  angular.extend(ClusterController.prototype, {});
 })();

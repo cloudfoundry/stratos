@@ -9,7 +9,7 @@
     '$stateProvider'
   ];
 
-  function registerRoute ($stateProvider) {
+  function registerRoute($stateProvider) {
     $stateProvider.state('endpoints.dashboard', {
       url: '',
       templateUrl: 'app/view/endpoints/dashboard/endpoints-dashboard.html',
@@ -37,7 +37,7 @@
    * @param {object} $q - the Angular $q service
    * @constructor
    */
-  function EndpointsDashboardController (modelManager, $state, hceRegistration, hcfRegistration, $q) {
+  function EndpointsDashboardController(modelManager, $state, hceRegistration, hcfRegistration, $q) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');

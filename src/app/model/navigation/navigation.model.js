@@ -55,7 +55,7 @@
 
     // Install a global state change handler
     // The rootScope never gets destroyed so we can safely ignore the eslint error
-    $rootScope.$on('$stateChangeSuccess', function(event, toState) { // eslint-disable-line angular/on-watch
+    $rootScope.$on('$stateChangeSuccess', function (event, toState) { // eslint-disable-line angular/on-watch
       // Set currentState on our menu
       if (toState.data) {
         that.menu.currentState = toState.data.activeMenuState;

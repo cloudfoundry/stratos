@@ -15,7 +15,7 @@
    * @param {string} path - the application base path
    * @returns {object} The service-registration directive definition object
    */
-  function serviceRegistration (path) {
+  function serviceRegistration(path) {
     return {
       bindToController: {
         showOverlayRegistration: '=?'
@@ -52,7 +52,7 @@
    * @property {array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ServiceRegistrationController ($scope, modelManager, apiManager, hceRegistration, hcfRegistration) {
+  function ServiceRegistrationController($scope, modelManager, apiManager, hceRegistration, hcfRegistration) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.clusterAddFlyoutActive = false;
@@ -142,7 +142,7 @@
       var id = angular.isUndefined(userServiceInstance.guid) ? userServiceInstance.id : userServiceInstance.guid;
 
       this.userCnsiModel.disconnect(id)
-        .then(function success () {
+        .then(function success() {
           delete userServiceInstance.account;
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
@@ -164,7 +164,7 @@
     remove: function (serviceInstance) {
       var that = this;
       this.cnsiModel.remove(serviceInstance)
-        .then(function success () {
+        .then(function success() {
           that.serviceInstances = {};
           that.userCnsiModel.list().then(function () {
             angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);

@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -47,7 +47,7 @@
        * @param {Object} space Domain space
        * @returns {boolean}
        */
-      create: function(space) {
+      create: function (space) {
         // Admin
         if (this.baseAccess.create(space)) {
           return true;
@@ -74,7 +74,7 @@
        * @param {Object} route route detail
        * @returns {boolean}
        */
-      update: function(route) {
+      update: function (route) {
         // Admin
         if (this.baseAccess.update(route)) {
           return true;
@@ -101,7 +101,7 @@
        * @param {Object} route route detail
        * @returns {boolean}
        */
-      delete: function(route) {
+      delete: function (route) {
         // Admin
         if (this.baseAccess.update(route)) {
           return true;
@@ -124,7 +124,7 @@
        * @param {String} resource - string representing the resource
        * @returns {boolean}
        */
-      canHandle: function(resource) {
+      canHandle: function (resource) {
         return resource === 'route';
       }
     });

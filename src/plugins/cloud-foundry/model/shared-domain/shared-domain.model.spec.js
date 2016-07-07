@@ -16,7 +16,7 @@
       $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('listAllSharedDomains', function() {
+    it('listAllSharedDomains', function () {
       var result;
       var ListAllSharedDomains = mock.cloudFoundryAPI.SharedDomains.ListAllSharedDomains();
       $httpBackend.whenGET(ListAllSharedDomains.url).respond(200, ListAllSharedDomains.response['200'].body);
