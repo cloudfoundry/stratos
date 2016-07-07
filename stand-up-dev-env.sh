@@ -29,15 +29,19 @@ function clean {
     echo "----- stratos-ui"
     pushd ../stratos-ui
     rm -rf dist/
-    rm -rf npm_modules/
+    rm -rf nginx/
     rm -rf src/lib/
     rm -rf tools/node_modules/
     popd
 
     echo "----- containers, images"
+    # it's ok if this section fails
+    set +e
     pushd ../stratos-deploy
     docker-compose -f docker-compose.development.yml down --rmi 'all'
     docker rmi -f portal-proxy-builder
+    # reset back to strict
+    set -e
     popd
 }
 
