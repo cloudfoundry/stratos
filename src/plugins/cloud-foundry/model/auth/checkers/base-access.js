@@ -35,8 +35,8 @@
 
       _doesContainGuid: function (array, guid) {
         return array.map(function (element) {
-            return element.metadata.guid;
-          }).indexOf(guid) > -1;
+          return element.metadata.guid;
+        }).indexOf(guid) > -1;
       }
     };
   }

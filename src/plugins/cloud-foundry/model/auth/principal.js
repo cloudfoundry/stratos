@@ -31,13 +31,13 @@
     /**
      * @name Principal
      * @description initialise a Principal object
-     * @param {String} username
-     * @param {String} authToken
-     * @param {String} refreshToken
-     * @param {String} expiresIn
-     * @param {String} tokenType
-     * @param {Object} scope
-     * @param {Object} userInfo
+     * @param {String} username - username
+     * @param {String} authToken - OAuth access token
+     * @param {String} refreshToken - OAuth refresh token
+     * @param {String} expiresIn - expires in
+     * @param {String} tokenType - token type
+     * @param {Object} scope - scope
+     * @param {Object} userInfo - user info
      * @constructor
      */
     function Principal(username, authToken, refreshToken, expiresIn, tokenType, scope, userInfo) {
@@ -55,8 +55,8 @@
       /**
        * @name hasAccessTo
        * @description Does user have access to operation
-       * @param {String} operation operation name
-       * @param {Array} flags feature flags
+       * @param {String} operation - operation name
+       * @param {Array} flags - feature flags
        * @returns {*}
        */
       hasAccessTo: function (operation, flags) {
@@ -75,10 +75,10 @@
       /**
        * @name isAllowed
        * @description Is user permitted to do the action
-       * @param {Object} context
-       * @param {String} resourceType ACL type
-       * @param {String} action action name
-       * @param {Array} flags feature flags
+       * @param {Object} context - context
+       * @param {String} resourceType - ACL type
+       * @param {String} action - action name
+       * @param {Array} flags - feature flags
        * @returns {*}
        */
       isAllowed: function (context, resourceType, action, flags) {
@@ -89,7 +89,7 @@
       /**
        * @name_createAccessCheckerList
        * @description Internal method to create checker list
-       * @param {Array} flags feature flags
+       * @param {Array} flags - feature flags
        * @returns {Array}
        * @private
        */
@@ -142,8 +142,8 @@
       /**
        * @name _getAccessChecker
        * @description Get Access checker for a given resource type
-       * @param resourceType
-       * @param flags
+       * @param {string} resourceType - resource type
+       * @param {array} flags - feature flags
        * @returns {*}
        * @private
        */
