@@ -67,10 +67,11 @@
      * @memberof app.view.endpoints.dashboard
      * @name showClusterAddForm
      * @description Show cluster add form
+     * @param {Bool} isHcf
      */
-    showClusterAddForm: function () {
+    showClusterAddForm: function (isHcf) {
       var that = this;
-      if (this.isHcf()) {
+      if (isHcf) {
         this.hcfRegistration.add()
           .then(function () {
             return that._updateEndpoints;
@@ -81,17 +82,6 @@
             return that._updateEndpoints;
           });
       }
-    },
-
-    /**
-     * @namespace app.view.endpoints.dashboard
-     * @memberof app.view.endpoints.dashboard
-     * @name isHcf
-     * @description Check if endpoint view instance is an HCF instance
-     * @return {Boolean}
-     */
-    isHcf: function () {
-      return this.serviceType === 'hcf';
     },
 
     /**

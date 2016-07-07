@@ -9,27 +9,17 @@
     </a>
   </div>
   <div class="panel-body no-instances" ng-if="serviceTileCtrl.serviceInstancesCount()===0
-  && serviceTileCtrl.isUserAdmin()
-  && serviceTileCtrl.resolvedPromise">
-    <table>
-      <tr>
-        <td>
-          <span class="helion-icon helion-icon-lg helion-icon-Cluster"></span>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p> There are no registered {{serviceTileCtrl.isHcf() ? 'clusters' : 'endpoints'}}.</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()">
-            <p> Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</p>
-          </a>
-        </td>
-      </tr>
-    </table>
+   && serviceTileCtrl.resolvedPromise">
+    <span ng-show="serviceTileCtrl.isHcf()" class="helion-icon helion-icon-lg helion-icon-Cluster"></span>
+    <span ng-show="!serviceTileCtrl.isHcf()"
+          class="helion-icon helion-icon-lg helion-icon-Continuous_integration"></span>
+    <div translate>There are no registered {{serviceTileCtrl.isHcf() ? 'clusters' : 'endpoints'}}.
+    </div>
+    <div ng-show="serviceTileCtrl.isUserAdmin()">
+      <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()">
+        <span> Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</span>
+      </a>
+    </div>
   </div>
 
   <div class="panel-body base-tile"

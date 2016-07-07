@@ -53,7 +53,7 @@
     describe('controller tests', function () {
 
       it('should have `serviceInstances` property initially be {}', function () {
-        expect(controller.serviceInstances).toEqual({});
+        expect(controller.serviceInstances).toEqual([]);
       });
 
       it('should show cluster registration detail view when showClusterAddForm is invoked', function () {

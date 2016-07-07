@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.hce', [ ])
+    .module('app.view.endpoints.hce', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -23,7 +23,8 @@
     'app.api.apiManager',
     'app.view.hceRegistration',
     '$log',
-    '$q'
+    '$q',
+    'helion.framework.widgets.dialog.confirm'
   ];
 
   /**
@@ -35,10 +36,11 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.api.apiManager} apiManager - the api manager
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
-   * @param $log
-   * @param $q
+   * @param {object} $log - the Angular $log service
+   * @param {object} $q - the Angular $q service
+   * @param {object} confirmDialog - the confirm dialog service
    */
-  function EndpointsViewController (modelManager, apiManager, hceRegistration, $log, $q) {
+  function EndpointsViewController (modelManager, apiManager, hceRegistration, $log, $q, confirmDialog) {
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -46,13 +48,19 @@
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.serviceType = 'hce';
     this.currentEndpoints = [];
-    this.serviceInstances = {};
+    // Optimistically assuming that serviceInstance is already initialised
+    this.serviceInstances = [];
+    if (this.serviceInstanceModel.serviceInstances.length > 0){
+      this.serviceInstances = _.filter(this.serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'});
+    }
     this.hceRegistration = hceRegistration;
     this.tokenExpiryMessage = 'Token has expired';
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
     this.activeServiceInstance = null;
+    this.resolvedUpdateCurrentEndpoints = false;
     this.$log = $log;
     this.$q = $q;
+    this.confirmDialog = confirmDialog;
 
     this._updateCurrentEndpoints();
     var that = this;
@@ -75,8 +83,8 @@
 
     if (this.isUserAdmin()) {
 
-      var unregister = function(endpoint){
-         that.unregister(endpoint);
+      var unregister = function (endpoint) {
+        that.unregister(endpoint);
       };
       this.connectedActionMenu.push(
         {name: 'Unregister', execute: unregister}
@@ -98,7 +106,7 @@
      * @param {object} serviceInstance - Service instance
      */
     connect: function (serviceInstance) {
-      // TODO implement HCE authentication
+      // TODO(irfan) Test once HCE authentication is implemented (TEAMFOUR-721)
       // Currently only implemented for HCF
       this.activeServiceInstance = serviceInstance;
       this.credentialsFormOpen = true;
@@ -141,10 +149,21 @@
      */
     unregister: function (endpoint) {
       var that = this;
-      this.serviceInstanceModel.remove(endpoint.model)
-        .then(function success () {
-          return that._updateCurrentEndpoints(true);
-        });
+      this.confirmDialog({
+        title: gettext('Unregister Endpoint'),
+        description: gettext('Are you sure you want to unregister the endpoint \'') + endpoint.name + '\'?',
+        buttonText: {
+          yes: gettext('Unregister'),
+          no: gettext('Cancel')
+        },
+        callback: function () {
+          that.serviceInstanceModel.remove(endpoint.model)
+            .then(function success () {
+              return that._updateCurrentEndpoints(true);
+            });
+        }
+      });
+
     },
 
     /**
@@ -202,13 +221,47 @@
       return this.currentUserAccount.isAdmin();
     },
 
+    /**
+     * @function showEmptyView
+     * @memberOf app.view.endpoints.hce
+     * @description Helper to determine if empty view should be shown
+     * @returns {boolean}
+     */
+    showEmptyView: function () {
+      if (this.resolvedUpdateCurrentEndpoints && this.currentEndpoints.length === 0) {
+        return true;
+      }
+    },
+
+    /**
+     * @function showListView
+     * @memberOf app.view.endpoints.hce
+     * @description Helper to determine if list view should be shown
+     * @returns {boolean}
+     */
+    showListView: function () {
+      if (this.resolvedUpdateCurrentEndpoints && this.currentEndpoints.length > 0) {
+        return true;
+      }
+    },
+
+    /**
+     * @function _updateCurrentEndpoints
+     * @memberOf app.view.endpoints.hce
+     * @param {Boolean} invalidateCurrentInstances empty local serviceInstances
+     * only used when removing instances.
+     * @returns {*}
+     * @private
+     */
     _updateCurrentEndpoints: function (invalidateCurrentInstances) {
       var that = this;
       return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
         .then(function () {
 
           if (invalidateCurrentInstances) {
-            that.serviceInstances = {};
+            that.serviceInstances = [];
+            // Prevent empty view being shown during an update
+            that.resolvedUpdateCurrentEndpoint = false;
           }
           var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: that.serviceType});
           _.forEach(filteredInstances, function (serviceInstance) {
@@ -241,6 +294,8 @@
           // if (that.currentEndpoints.length > 0) {
           //   that.currentEndpoints[that.currentEndpoints.length - 1].connected = false;
           // }
+        }).then(function () {
+          that.resolvedUpdateCurrentEndpoints = true;
         });
     }
   });
