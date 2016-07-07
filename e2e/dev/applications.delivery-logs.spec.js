@@ -32,7 +32,7 @@ describe('Application - Delivery Logs', function () {
     expect(browser.getCurrentUrl()).toMatch(reg);
   });
 
-  it('summary values should be populated', function(done) {
+  it('summary values should be populated', function (done) {
 
     function validateEntry(entry) {
       testPopulatedString(entry.label);
@@ -41,54 +41,54 @@ describe('Application - Delivery Logs', function () {
     }
 
     deliveryLogs.getSummaryCount()
-      .then(function(count) {
+      .then(function (count) {
         var summaries = [];
         for (var i = 0; i < count; i++) {
           summaries.push(deliveryLogs.getSummaryAt(i));
         }
         return Q.all(summaries);
       })
-      .then(function(res) {
+      .then(function (res) {
         for (var i = 0; i < res.length; i++) {
           validateEntry(res[i]);
         }
         done();
       })
-      .catch(function(error) {
+      .catch(function (error) {
         fail(error);
         done();
       });
 
   });
 
-  it('build data populated', function(done) {
+  it('build data populated', function (done) {
     deliveryLogs.getBuildsRowText(1)
-      .then(function(text) {
+      .then(function (text) {
         for (var i = 0; i < text.length; i++) {
           testPopulatedString(text[i]);
         }
         done();
       })
-      .catch(function(error) {
+      .catch(function (error) {
         fail(error);
         done();
       });
   });
 
-  it('basic search', function(done) {
+  it('basic search', function (done) {
     deliveryLogs.getBuildsCount()
-      .then(function(count) {
+      .then(function (count) {
         expect(count).not.toBe(1);
         return deliveryLogs.searchBuilds('Deploying');
       })
-      .then(function() {
+      .then(function () {
         return deliveryLogs.getBuildsCount();
       })
-      .then(function(count) {
+      .then(function (count) {
         expect(count).toBe(1);
         done();
       })
-      .catch(function(error) {
+      .catch(function (error) {
         fail(error);
         done();
       });

@@ -13,7 +13,7 @@
       mockBindingsApi = mock.cloudFoundryAPI.ServiceBindings;
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });

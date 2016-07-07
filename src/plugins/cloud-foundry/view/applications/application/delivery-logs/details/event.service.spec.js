@@ -14,7 +14,7 @@
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
     beforeEach(module(function ($provide) {
-      var mock = function(config, context) {
+      var mock = function (config, context) {
         dialogContext = context;
         $controller = config.controller;
         return $q.reject();
@@ -36,15 +36,15 @@
       expect(promise).not.toBe(null);
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
 
-    describe('Factory', function() {
+    describe('Factory', function () {
 
-      describe("open", function() {
-        it("Plumbing", function() {
+      describe("open", function () {
+        it("Plumbing", function () {
           /* eslint-disable */
           new $controller($timeout, $log, dialogContext, undefined, moment, modelManager);
           /* eslint-enable */
@@ -54,17 +54,17 @@
       });
     });
 
-    describe('Controller', function() {
+    describe('Controller', function () {
       var controller;
 
-      beforeEach(function() {
+      beforeEach(function () {
         controller = new $controller($timeout, $log, dialogContext, undefined, moment, modelManager);
         expect(controller).toBeDefined();
         expect(controller.log).toBeNull();
         expect(controller.duration).toBe('a few seconds');
       });
 
-      it('Fetch fails', function() {
+      it('Fetch fails', function () {
         $httpBackend.expectGET('/pp/v1/proxy/v2/artifacts/' + artifactId + '/download').respond(500);
         $timeout.flush();
         $httpBackend.flush();
@@ -72,7 +72,7 @@
         expect(controller.log).toBe(false);
       });
 
-      it('Fetch succeeds but no log', function() {
+      it('Fetch succeeds but no log', function () {
         $httpBackend.expectGET('/pp/v1/proxy/v2/artifacts/' + artifactId + '/download').respond();
         $timeout.flush();
         $httpBackend.flush();
@@ -80,7 +80,7 @@
         expect(controller.log).toBe(false);
       });
 
-      it('Fetch succeeds', function() {
+      it('Fetch succeeds', function () {
         var log = 'this is a log';
         $httpBackend.expectGET('/pp/v1/proxy/v2/artifacts/' + artifactId + '/download').respond(log);
         $timeout.flush();

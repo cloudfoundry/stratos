@@ -748,8 +748,8 @@ rules:
   # Require or disallow space before function opening parenthesis
   # http://eslint.org/docs/rules/space-before-function-paren
   space-before-function-paren:
-    - 0
-    - "always"
+    - 1
+    - {"anonymous": "always", "named": "never"}
 
   # Require a space before certain keywords
   # http://eslint.org/docs/rules/space-before-keywords

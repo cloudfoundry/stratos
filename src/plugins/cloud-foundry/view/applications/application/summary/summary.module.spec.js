@@ -3,7 +3,7 @@
 
   describe('summary view', function () {
 
-    describe('buildpack links', function() {
+    describe('buildpack links', function () {
 
       var $controller;
 
@@ -20,24 +20,24 @@
         expect($controller.isWebLink).toBeDefined();
       }));
 
-      it('http buildpack is a web link', function() {
+      it('http buildpack is a web link', function () {
         expect($controller.isWebLink('http://www.test.com')).toBe(true);
         expect($controller.isWebLink('  http://www.test.com')).toBe(true);
       });
 
-      it('https buildpack is a web link', function() {
+      it('https buildpack is a web link', function () {
         expect($controller.isWebLink('https://www.test.com')).toBe(true);
         expect($controller.isWebLink(' https://www.test.com')).toBe(true);
       });
 
-      it('empty buildpack is not a web link', function() {
+      it('empty buildpack is not a web link', function () {
         expect($controller.isWebLink('')).toBe(false);
         expect($controller.isWebLink(' ')).toBe(false);
         expect($controller.isWebLink(undefined)).toBe(false);
         expect($controller.isWebLink(null)).toBe(false);
       });
 
-      it('name buildpack is not a web link', function() {
+      it('name buildpack is not a web link', function () {
         expect($controller.isWebLink('name')).toBe(false);
         expect($controller.isWebLink(' name')).toBe(false);
       });

@@ -23,7 +23,7 @@
        * @returns {object} The resolved/rejected promise
        * @public
        **/
-      open: function(project, cnsiGuid) {
+      open: function (project, cnsiGuid) {
         return detailView({
           templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/trigger-build/trigger-build.html',
           title: gettext('Select a Commit'),
@@ -73,22 +73,22 @@
 
   angular.extend(TriggerBuildsDetailViewController.prototype, {
 
-    build: function() {
+    build: function () {
       var that = this;
 
       that.triggerError = false;
 
       that.hceModel.triggerPipelineExecution(that.context.guid, that.context.project.id, that.selectedCommit.sha)
-        .then(function() {
+        .then(function () {
           // Success, cause successful promise for modal
           that.$uibModalInstance.close();
         })
-        .catch(function() {
+        .catch(function () {
           that.triggerError = true;
         });
     },
 
-    fetchCommits: function() {
+    fetchCommits: function () {
       var that = this;
 
       this.hasToken = that.githubModel.getToken();
@@ -99,23 +99,23 @@
       that.fetchError = undefined;
 
       this.githubModel.commits(this.context.project.repo.full_name, this.context.project.repo.branch, 20)
-        .then(function() {
+        .then(function () {
           that.fetchError = false;
           that.selectedCommit =
             _.get(that, 'githubModel.data.commits.length') ? that.githubModel.data.commits[0] : null;
         })
-        .catch(function() {
+        .catch(function () {
           that.fetchError = true;
         });
     },
 
-    githubAuth: function() {
+    githubAuth: function () {
       var that = this;
       that.githubOauthService.start()
-        .then(function() {
+        .then(function () {
           that.fetchCommits();
         })
-        .catch(function() {
+        .catch(function () {
           that.githubAuthFailed = true;
         });
     }

@@ -19,11 +19,11 @@
       $scope.$apply();
       applicationCtrl = $element.controller('application');
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
-      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, { guid: {} });
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, {guid: {}});
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
@@ -106,9 +106,9 @@
 
       it('invoke `login` method - success', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
         $httpBackend.when('GET', '/api/users/loggedIn').respond(500, {});
-        $httpBackend.when('POST', '/api/users').respond(200, { id: 1 });
+        $httpBackend.when('POST', '/api/users').respond(200, {id: 1});
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         applicationCtrl.login('dev', 'dev');
@@ -123,7 +123,7 @@
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(400, {});
         $httpBackend.when('GET', '/api/users/loggedIn').respond(500, {});
-        $httpBackend.when('POST', '/api/users').respond(200, { id: 1 });
+        $httpBackend.when('POST', '/api/users').respond(200, {id: 1});
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         applicationCtrl.login('dev', 'baddev');
@@ -185,7 +185,7 @@
       describe('onLoggedIn as admin', function () {
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
-            .respond(200, { account: 'admin', scope: 'cloud_controller.admin' });
+            .respond(200, {account: 'admin', scope: 'cloud_controller.admin'});
         });
 
         it('should show cluster registration if cluster count === 0', function () {
@@ -201,7 +201,7 @@
 
         it('should not show cluster registration if cluster count > 0', function () {
           var responseData = [
-            { id: 1, name: 'name', api_endpoint: { Scheme: 'http', Host: 'api.host.com' }, cnsi_type: 'hcf' }
+            {id: 1, name: 'name', api_endpoint: {Scheme: 'http', Host: 'api.host.com'}, cnsi_type: 'hcf'}
           ];
           $httpBackend.when('GET', '/pp/v1/cnsis')
             .respond(200, responseData);
@@ -217,12 +217,12 @@
       describe('onLoggedIn as dev', function () {
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
-            .respond(200, { account: 'dev', scope: 'hdp3.dev' });
+            .respond(200, {account: 'dev', scope: 'hdp3.dev'});
         });
 
         it('should show service instance registration if first time', function () {
           $httpBackend.when('GET', '/api/users/loggedIn').respond(200, {});
-          $httpBackend.when('POST', '/api/users').respond(200, { id: 1, username: 'dev' });
+          $httpBackend.when('POST', '/api/users').respond(200, {id: 1, username: 'dev'});
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
@@ -234,7 +234,7 @@
         });
 
         it('should show service instance registration if unregistered', function () {
-          var mockUser = { id: 1, username: 'dev', registered: false };
+          var mockUser = {id: 1, username: 'dev', registered: false};
           $httpBackend.when('GET', '/api/users/loggedIn').respond(200, mockUser);
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
@@ -247,7 +247,7 @@
         });
 
         it('should not show service instance registration if registered', function () {
-          var mockUser = { id: 1, username: 'dev', registered: true };
+          var mockUser = {id: 1, username: 'dev', registered: true};
           $httpBackend.when('GET', '/api/users/loggedIn').respond(200, mockUser);
 
           applicationCtrl.login('dev', 'dev');

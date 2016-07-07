@@ -42,7 +42,7 @@
      */
     listAllSharedDomains: function (cnsiGuid, params) {
       var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+        headers: {'x-cnap-cnsi-list': cnsiGuid}
       };
       return this.apiManager.retrieve('cloud-foundry.api.SharedDomains')
         .ListAllSharedDomains(params, httpConfig)

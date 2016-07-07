@@ -42,7 +42,7 @@
     this.hasApps = false;
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userCnsiModel.list().then(function () {
-      that.model.all().finally(function() {
+      that.model.all().finally(function () {
         // Check the data we have and determine if we have any applications
         that.hasApps = false;
         if (that.model.data && that.model.data.applications) {
@@ -60,7 +60,6 @@
     });
   }
 
-  angular.extend(ApplicationsListController.prototype, {
-  });
+  angular.extend(ApplicationsListController.prototype, {});
 
 })();

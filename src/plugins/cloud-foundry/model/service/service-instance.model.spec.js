@@ -13,7 +13,7 @@
       mockInstancesApi = mock.cloudFoundryAPI.ServiceInstances;
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });

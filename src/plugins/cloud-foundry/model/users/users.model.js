@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -40,13 +40,13 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    GetUserSummary: function(cnsiGuid, userGuid, params) {
+    GetUserSummary: function (cnsiGuid, userGuid, params) {
       var httpConfig = {
         headers: {'x-cnap-cnsi-list': cnsiGuid}
       };
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .GetUserSummary(userGuid, params, httpConfig)
-        .then(function(response) {
+        .then(function (response) {
           return response.data[cnsiGuid].resources;
         });
     },
@@ -60,13 +60,13 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllUsers: function(cnsiGuid, params) {
+    listAllUsers: function (cnsiGuid, params) {
       var httpConfig = {
         headers: {'x-cnap-cnsi-list': cnsiGuid}
       };
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllUsers(params, httpConfig)
-        .then(function(response) {
+        .then(function (response) {
           return response.data[cnsiGuid].resources;
         });
     }

@@ -5,7 +5,7 @@
     .module('app.view.endpoints.dashboard')
     .directive('serviceTile', serviceTile);
 
-  function serviceTile () {
+  function serviceTile() {
     return {
       scope: {
         serviceType: '@',
@@ -39,7 +39,7 @@
    * @param {object} $q - the Angular $q service
    * @constructor
    */
-  function ServiceTileController ($scope, modelManager, $state, hceRegistration, hcfRegistration, $q) {
+  function ServiceTileController($scope, modelManager, $state, hceRegistration, hcfRegistration, $q) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');

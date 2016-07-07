@@ -1,7 +1,7 @@
-(function() {
+(function () {
   'use strict';
 
-  describe('endpoint clusters', function() {
+  describe('endpoint clusters', function () {
     var $q, $state, $scope, modelManager, confirmModal, clustersCtrl, hcfRegistration, serviceInstanceModel,
       userServiceInstanceModel, $uibModal;
 
@@ -59,7 +59,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
-    beforeEach(inject(function($injector) {
+    beforeEach(inject(function ($injector) {
       $q = $injector.get('$q');
       $state = $injector.get('$state');
       $scope = $injector.get('$rootScope').$new();
@@ -83,15 +83,15 @@
       clustersCtrl = new ClustersCtrl(modelManager, $q, hcfRegistration, confirmModal);
     }
 
-    describe('Init', function() {
+    describe('Init', function () {
 
-      it('should be defined', function() {
+      it('should be defined', function () {
         createCluster();
 
         expect(clustersCtrl).toBeDefined();
       });
 
-      it('initial state', function() {
+      it('initial state', function () {
         spyOn(serviceInstanceModel, 'list');
         spyOn(userServiceInstanceModel, 'list');
 
@@ -107,14 +107,14 @@
       });
     });
 
-    describe('updateClusterList', function() {
+    describe('updateClusterList', function () {
 
-      it('success - disconnected', function() {
-        spyOn(serviceInstanceModel, 'list').and.callFake(function() {
+      it('success - disconnected', function () {
+        spyOn(serviceInstanceModel, 'list').and.callFake(function () {
           serviceInstanceModel.serviceInstances = [hceService, hcfService];
           return $q.when(serviceInstanceModel.serviceInstances);
         });
-        spyOn(userServiceInstanceModel, 'list').and.callFake(function() {
+        spyOn(userServiceInstanceModel, 'list').and.callFake(function () {
           userServiceInstanceModel.serviceInstances = {};
           userServiceInstanceModel.serviceInstances[hcfUserService.guid] = hcfUserService;
           return $q.when(userServiceInstanceModel.serviceInstances);
@@ -141,12 +141,12 @@
         expect(clustersCtrl.serviceInstances[0].hasExpired).toEqual(false);
       });
 
-      it('success - connected + not expired token', function() {
-        spyOn(serviceInstanceModel, 'list').and.callFake(function() {
+      it('success - connected + not expired token', function () {
+        spyOn(serviceInstanceModel, 'list').and.callFake(function () {
           serviceInstanceModel.serviceInstances = [hceService, hcfService];
           return $q.when(serviceInstanceModel.serviceInstances);
         });
-        spyOn(userServiceInstanceModel, 'list').and.callFake(function() {
+        spyOn(userServiceInstanceModel, 'list').and.callFake(function () {
           var cloned = angular.fromJson(angular.toJson(hcfUserService));
           cloned.valid = true;
           userServiceInstanceModel.serviceInstances = {};
@@ -166,12 +166,12 @@
         expect(clustersCtrl.serviceInstances[0].hasExpired).toEqual(false);
       });
 
-      it('success - disconnected + expired token', function() {
-        spyOn(serviceInstanceModel, 'list').and.callFake(function() {
+      it('success - disconnected + expired token', function () {
+        spyOn(serviceInstanceModel, 'list').and.callFake(function () {
           serviceInstanceModel.serviceInstances = [hceService, hcfService];
           return $q.when(serviceInstanceModel.serviceInstances);
         });
-        spyOn(userServiceInstanceModel, 'list').and.callFake(function() {
+        spyOn(userServiceInstanceModel, 'list').and.callFake(function () {
           var cloned = angular.fromJson(angular.toJson(hcfUserService));
           cloned.token_expiry = Number.MIN_VALUE;
           userServiceInstanceModel.serviceInstances = {};
@@ -191,7 +191,7 @@
         expect(clustersCtrl.serviceInstances[0].hasExpired).toEqual(true);
       });
 
-      it('fail', function() {
+      it('fail', function () {
         spyOn(serviceInstanceModel, 'list').and.returnValue($q.reject());
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.reject());
 
@@ -209,37 +209,37 @@
       });
     });
 
-    describe('connect', function() {
+    describe('connect', function () {
 
-      beforeEach(function() {
+      beforeEach(function () {
         createCluster();
       });
 
-      it('on cancel', function() {
+      it('on cancel', function () {
         clustersCtrl.onConnectCancel();
         expect(clustersCtrl.credentialsFormCNSI).toBeFalsy();
       });
 
-      it('on success', function() {
+      it('on success', function () {
         spyOn(clustersCtrl, 'updateClusterList');
         clustersCtrl.onConnectSuccess();
         expect(clustersCtrl.credentialsFormCNSI).toBeFalsy();
         expect(clustersCtrl.updateClusterList).toHaveBeenCalled();
       });
 
-      it('correct param', function() {
+      it('correct param', function () {
         clustersCtrl.connect(hcfService.guid);
         expect(clustersCtrl.credentialsFormCNSI).toEqual(hcfService.guid);
       });
     });
 
-    describe('disconnect', function() {
-      beforeEach(function() {
+    describe('disconnect', function () {
+      beforeEach(function () {
         createCluster();
       });
 
-      it('success', function() {
-        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function(guid) {
+      it('success', function () {
+        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function (guid) {
           expect(guid).toEqual(hcfUserService.guid);
           return $q.when();
         });
@@ -250,8 +250,8 @@
         expect(clustersCtrl.updateClusterList).toHaveBeenCalled();
       });
 
-      it('failure', function() {
-        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function(guid) {
+      it('failure', function () {
+        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function (guid) {
           expect(guid).toEqual(hcfUserService.guid);
           return $q.reject();
         });
@@ -263,12 +263,12 @@
       });
     });
 
-    describe('register', function() {
-      beforeEach(function() {
+    describe('register', function () {
+      beforeEach(function () {
         createCluster();
       });
 
-      it('success', function() {
+      it('success', function () {
         spyOn(hcfRegistration, 'add').and.returnValue($q.when());
         spyOn(clustersCtrl, 'updateClusterList');
         clustersCtrl.register();
@@ -277,7 +277,7 @@
         expect(clustersCtrl.updateClusterList).toHaveBeenCalled();
       });
 
-      it('failure', function() {
+      it('failure', function () {
         spyOn(hcfRegistration, 'add').and.returnValue($q.reject());
         spyOn(clustersCtrl, 'updateClusterList');
         clustersCtrl.register();
@@ -287,16 +287,16 @@
       });
     });
 
-    describe('unregister', function() {
-      beforeEach(function() {
+    describe('unregister', function () {
+      beforeEach(function () {
         createCluster();
       });
 
-      it('success', function() {
+      it('success', function () {
         spyOn($uibModal, 'open').and.returnValue({
           result: $q.when()
         });
-        spyOn(serviceInstanceModel, 'remove').and.callFake(function(serviceInstance) {
+        spyOn(serviceInstanceModel, 'remove').and.callFake(function (serviceInstance) {
           expect(serviceInstance).toBe(hcfService);
           return $q.when();
         });
@@ -309,11 +309,11 @@
         expect(clustersCtrl.updateClusterList).toHaveBeenCalled();
       });
 
-      it('failure', function() {
+      it('failure', function () {
         spyOn($uibModal, 'open').and.returnValue({
           result: $q.reject()
         });
-        spyOn(serviceInstanceModel, 'remove').and.callFake(function(serviceInstance) {
+        spyOn(serviceInstanceModel, 'remove').and.callFake(function (serviceInstance) {
           expect(serviceInstance).toBe(hcfService);
           return $q.when();
         });

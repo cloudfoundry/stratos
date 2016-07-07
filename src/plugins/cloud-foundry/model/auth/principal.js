@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -25,7 +25,7 @@
    * @param {app.api.modelManager}  modelManager - the Model management service
    * @returns {Principal}
    * @constructor
-     */
+   */
   function PrincipalFactory(modelManager) {
 
     /**
@@ -59,7 +59,7 @@
        * @param {Array} flags feature flags
        * @returns {*}
        */
-      hasAccessTo: function(operation, flags) {
+      hasAccessTo: function (operation, flags) {
         return this.isAdmin() || flags[operation];
       },
 
@@ -68,7 +68,7 @@
        * @description Is user an admin
        * @returns {boolean}
        */
-      isAdmin: function() {
+      isAdmin: function () {
         return _.includes(this.scope, 'cloud_controller.admin');
       },
 
@@ -81,7 +81,7 @@
        * @param {Array} flags feature flags
        * @returns {*}
        */
-      isAllowed: function(context, resourceType, action, flags) {
+      isAllowed: function (context, resourceType, action, flags) {
         var accessChecker = this._getAccessChecker(resourceType, flags);
         return accessChecker[action](context);
       },
@@ -93,7 +93,7 @@
        * @returns {Array}
        * @private
        */
-      _createAccessCheckerList: function(flags) {
+      _createAccessCheckerList: function (flags) {
 
         var ServiceInstanceAccess = modelManager
           .retrieve('cloud-foundry.model.auth.checkers.serviceInstanceAccess');
@@ -117,7 +117,7 @@
        * @returns {object}
        * @private
        */
-      _accessConstants: function() {
+      _accessConstants: function () {
         return {
           resources: {
             space: 'space',
@@ -147,9 +147,9 @@
        * @returns {*}
        * @private
        */
-      _getAccessChecker: function(resourceType, flags) {
+      _getAccessChecker: function (resourceType, flags) {
         var checkers = this._createAccessCheckerList(flags);
-        return _.find(checkers, function(checker) {
+        return _.find(checkers, function (checker) {
           return checker.canHandle(resourceType);
         });
       }

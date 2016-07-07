@@ -12,7 +12,7 @@
       routeModel = modelManager.retrieve('cloud-foundry.model.route');
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });

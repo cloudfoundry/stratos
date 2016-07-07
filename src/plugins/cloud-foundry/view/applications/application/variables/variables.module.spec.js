@@ -36,7 +36,7 @@
       beforeEach(inject(function ($injector) {
         var modelManager = $injector.get('app.model.modelManager');
         var model = modelManager.retrieve('cloud-foundry.model.application');
-        model.application = { variables: undefined };
+        model.application = {variables: undefined};
       }));
 
       it("should not have any variables", function () {
@@ -46,20 +46,20 @@
 
     describe("with variables checks", function () {
       beforeEach(inject(function ($injector) {
-        var modelManager = $injector.get('app.model.modelManager');
-        //variables.environment_json
-        var model = modelManager.retrieve('cloud-foundry.model.application');
-        model.application = {
-          variables: {
-            environment_json: {
-              ENV_1: 'TEST1',
-              env_2: 'test2',
-              test_3: 'value_3'
+          var modelManager = $injector.get('app.model.modelManager');
+          //variables.environment_json
+          var model = modelManager.retrieve('cloud-foundry.model.application');
+          model.application = {
+            variables: {
+              environment_json: {
+                ENV_1: 'TEST1',
+                env_2: 'test2',
+                test_3: 'value_3'
+              }
             }
-          }
-        };
-      }
-    ));
+          };
+        }
+      ));
 
       it("should have variables", function () {
         expect($controller.hasVariables()).toBe(true);
