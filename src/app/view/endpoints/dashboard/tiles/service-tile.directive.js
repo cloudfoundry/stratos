@@ -51,7 +51,9 @@
     this.hcfRegistration = hcfRegistration;
     this.$q = $q;
     this.serviceInstances = _.filter($scope.serviceInstances, {cnsi_type: this.serviceType});
+    /* eslint-disable no-warning-comments */
     // FIXME We should use ui-router/resolve for this, but can't currently
+    /* eslint-enable no-warning-comments */
     this.resolvedPromise = false;
     var that = this;
     this._listServiceInstances()
@@ -135,9 +137,11 @@
      * @returns {Number} count
      */
     getInstancesCountByStatus: function (status) {
+      /* eslint-disable no-warning-comments */
       // TODO
       // If cnsi_type is HCE, then currently.
       // we don't have distinct states for it.
+      /* eslint-enable no-warning-comments */
       var count = 0;
       var that = this;
       if (that.serviceType === 'hcf') {
@@ -146,7 +150,9 @@
           var isDisconnected = status.toLowerCase() === 'disconnected';
           if (_.isUndefined(that.userServiceInstanceModel.serviceInstances[cnsiGuid])) {
             // disconnected state
+            /* eslint-disable no-warning-comments */
             // TODO may not be true when disconnect from instance is implemented
+            /* eslint-enable no-warning-comments */
             if (isDisconnected) {
               count += 1;
             }

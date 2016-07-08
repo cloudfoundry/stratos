@@ -39,7 +39,9 @@
     this.loggedIn = false;
     this.data = {};
 
+    /* eslint-disable no-warning-comments */
     // TODO(irfan) Hook for development
+    /* eslint-enable no-warning-comments */
     this.adminOverride = false;
   }
 
@@ -115,7 +117,9 @@
      */
     isAdmin: function () {
 
-      //TODO(irfan) Hook for development
+      /* eslint-disable no-warning-comments */
+      // TODO(irfan) Hook for development
+      /* eslint-enable no-warning-comments */
       if (this.adminOverride) {
         return false;
       }
