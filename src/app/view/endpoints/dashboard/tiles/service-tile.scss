@@ -1,4 +1,8 @@
 .service-tile {
+  
+  &.card.panel .service-chart-panel {
+    padding: $hpe-unit-space  $hpe-unit-space * .5;
+  }
 
   .tile-btn {
     text-transform: capitalize;
