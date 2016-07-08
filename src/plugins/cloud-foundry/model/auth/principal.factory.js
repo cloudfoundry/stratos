@@ -33,11 +33,9 @@
 
         var Principal = modelManager.retrieve('cloud-foundry.model.auth.principal');
         return new Principal(authInfo.username,
-          authInfo.access_token || authInfo.authToken,
-          authInfo.refresh_token || authInfo.refreshToken,
           authInfo.expires_in || authInfo.expiresIn,
-          authInfo.token_type || authInfo.tokenType,
-          authInfo.scope, authInfo.userInfo);
+          authInfo.isAdmin,
+          authInfo.userInfo);
       }
     };
   }
