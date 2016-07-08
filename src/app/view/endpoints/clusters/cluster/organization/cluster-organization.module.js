@@ -20,12 +20,10 @@
   }
 
   ClusterOrgController.$inject = [
-    'app.model.modelManager',
-    '$stateParams'
   ];
 
-  function ClusterOrgController(modelManager, $stateParams) {}  // eslint-disable-line no-unused-vars
+  function ClusterOrgController() {
+  }
 
   angular.extend(ClusterOrgController.prototype, {});
-
 })();

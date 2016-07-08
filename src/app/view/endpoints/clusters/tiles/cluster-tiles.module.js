@@ -40,12 +40,14 @@
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
+    this.loading = false;
 
     this.boundUnregister = angular.bind(this, this.unregister);
     this.boundConnect = angular.bind(this, this.connect);
     this.boundDisconnect = angular.bind(this, this.disconnect);
 
-    this.updateClusterList();
+    this.createClusterList();
+    this.refreshClusterModel();
   }
 
   angular.extend(ClusterTilesController.prototype, {
@@ -53,36 +55,47 @@
     /**
      * @namespace app.view.endpoints.clusters
      * @memberof app.view.endpoints.clusters
-     * @name updateClusterList
-     * @description Update the list of clusters + determine their connected status
+     * @name refreshClusterList
+     * @description Update the core model data + create the cluster list
      */
-    updateClusterList: function () {
+    refreshClusterModel: function () {
       var that = this;
-
-      this.serviceInstances = null;
+      this.loading = true;
       this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
         .then(function () {
-          that.serviceInstances = [];
-          var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
-          _.forEach(filteredInstances, function (serviceInstance) {
-            var cloned = angular.fromJson(angular.toJson(serviceInstance));
-            cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid', false);
-
-            if (cloned.isConnected) {
-              cloned.hasExpired = false;
-            } else {
-              /* eslint-disable camelcase */
-              var token_expiry =
-                _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
-              cloned.hasExpired = new Date().getTime() > token_expiry * 1000;
-              /* eslint-enable camelcase */
-            }
-            that.serviceInstances.push(cloned);
-          });
+          that.createClusterList();
+          that.loading = false;
         })
         .catch(function () {
-          that.serviceInstances = false;
+          that.loading = null;
         });
+    },
+
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name createClusterList
+     * @description Create the list of clusters + determine their connected status
+     */
+    createClusterList: function () {
+      var that = this;
+      this.serviceInstances = {};
+      var filteredInstances = _.filter(this.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
+      _.forEach(filteredInstances, function (serviceInstance) {
+        var cloned = angular.fromJson(angular.toJson(serviceInstance));
+        cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid', false);
+
+        if (cloned.isConnected) {
+          cloned.hasExpired = false;
+        } else {
+          /* eslint-disable camelcase */
+          var token_expiry =
+            _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
+          cloned.hasExpired = new Date().getTime() > token_expiry * 1000;
+          /* eslint-enable camelcase */
+        }
+        that.serviceInstances[cloned.guid] = cloned;
+      });
     },
 
     /**
@@ -114,7 +127,7 @@
      */
     onConnectSuccess: function () {
       this.credentialsFormCNSI = false;
-      this.updateClusterList();
+      this.refreshClusterModel();
     },
 
     /**
@@ -127,7 +140,7 @@
     disconnect: function (cnsiGUID) {
       var that = this;
       this.userServiceInstanceModel.disconnect(cnsiGUID).then(function () {
-        that.updateClusterList();
+        that.refreshClusterModel();
       });
     },
 
@@ -140,7 +153,7 @@
     register: function () {
       var that = this;
       this.hcfRegistration.add().then(function () {
-        that.updateClusterList();
+        that.refreshClusterModel();
       });
     },
 
@@ -163,7 +176,21 @@
         }
       }).result
         .then(angular.bind(that.serviceInstanceModel, that.serviceInstanceModel.remove, serviceInstance))
-        .then(angular.bind(that, that.updateClusterList));
+        .then(angular.bind(that, that.refreshClusterModel));
+    },
+
+    state: function () {
+      var hasClusters = _.get(_.keys(this.serviceInstances), 'length', 0) > 0;
+      if (hasClusters) {
+        return '';
+      } else if (this.loading) {
+        return 'loading';
+      } else if (this.loading === null) {
+        return 'loadError';
+      } else if (!hasClusters) {
+        return 'noClusters';
+      }
+      return 'unknown';
     }
 
   });

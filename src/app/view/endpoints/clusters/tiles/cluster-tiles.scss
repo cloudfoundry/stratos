@@ -1,6 +1,9 @@
 @import 'cluster-tile/cluster-tile';
 
 .cluster-tiles {
+  .header {
+    margin-bottom: $hpe-unit-space*2;
+  }
   .clusters-card {
     min-height: 250px;
     padding-left: 0px;
