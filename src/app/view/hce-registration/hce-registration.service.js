@@ -11,7 +11,7 @@
     'helion.framework.widgets.detailView'
   ];
 
-  function HceRegistrationFactory (modelManager, apiManager, detailView) {
+  function HceRegistrationFactory(modelManager, apiManager, detailView) {
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
@@ -21,11 +21,12 @@
     return {
       add: function () {
         var data = {name: '', url: ''};
-        detailView(
+        return detailView(
           {
             detailViewTemplateUrl: 'app/view/hce-registration/hce-registration.html',
             title: gettext('Register Code Engine Endpoint'),
-            controller: HceRegistrationController
+            controller: HceRegistrationController,
+            class: 'detail-view-thin'
           },
           {
             data: data
@@ -45,8 +46,17 @@
     '$scope'
   ];
 
-
-  function HceRegistrationController (modelManager, context, $scope) {
+  /**
+   * @namespace app.view
+   * @memberof app.view.hceRegistration
+   * @name HceRegistrationController
+   * @description Controller for HCE Registration detail view
+   * @constructor
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {object} context - context object
+   * @param {object} $scope - angular $scope
+   */
+  function HceRegistrationController(modelManager, context, $scope) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.context = context;
 

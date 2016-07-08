@@ -1,34 +1,38 @@
-add-cluster-form {
-  display: flex;
-  justify-content: center;
-
-  .add-cluster-form {
-    max-width: 350px;
-
-    h2 {
-      margin-top: $hpe-unit-space * 2.5;
-    }
-  }
+.add-cluster-form {
+  margin: 0 $hpe-unit-space * 5;
 
   form {
-    margin-top: $hpe-unit-space;
-
-    .form-group {
-      width: 100%;
+    .form-actions {
+      margin-top: $hpe-unit-space * 2;
+      text-align: right;
+      padding: $hpe-unit-space 0 0 0;
+      border-top: 1px solid #e5e5e5;
     }
   }
+  //
+  //h2 {
+  //  margin-top: $hpe-unit-space * 2.5;
+  //}
+  //
+  //form {
+  //  margin-top: $hpe-unit-space;
+  //
+  //  .form-group {
+  //    width: 100%;
+  //  }
+  //}
 
   .alert-danger {
     margin-top: $hpe-unit-space;
   }
-
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: $hpe-unit-space;
-
-    button:not(:first-child) {
-      margin-left: $hpe-unit-space / 4;
-    }
-  }
+  //
+  //.form-actions {
+  //  display: flex;
+  //  justify-content: flex-end;
+  //  margin-top: $hpe-unit-space;
+  //
+  //  button:not(:first-child) {
+  //    margin-left: $hpe-unit-space / 4;
+  //  }
+  //}
 }

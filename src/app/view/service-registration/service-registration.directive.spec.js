@@ -42,7 +42,6 @@
         $scope.$apply();
 
         serviceRegistrationCtrl = element.controller('serviceRegistration');
-        serviceRegistrationCtrl.userModel.data = { id: 1 };
       });
 
       it('should be defined', function () {
@@ -108,7 +107,6 @@
         $scope.$apply();
 
         serviceRegistrationCtrl = element.controller('serviceRegistration');
-        serviceRegistrationCtrl.userModel.data = { id: 1 };
       });
 
       it('should be defined', function () {
@@ -140,18 +138,15 @@
       });
 
       it('should not be hidden on completeRegistration() and numValid === 0', function () {
-        spyOn(serviceRegistrationCtrl.userModel, 'updateRegistered').and.callThrough();
         $scope.showRegistration = true;
         $scope.$apply();
 
         serviceRegistrationCtrl.completeRegistration();
 
-        expect(serviceRegistrationCtrl.userModel.updateRegistered).not.toHaveBeenCalled();
         expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(true);
       });
 
       it('should be hidden on completeRegistration() and numValid > 0', function () {
-        spyOn(serviceRegistrationCtrl.userModel, 'updateRegistered').and.callThrough();
         $scope.showRegistration = true;
         $scope.$apply();
 
@@ -162,12 +157,11 @@
         ];
         serviceRegistrationCtrl.userCnsiModel.numValid = 2;
 
-        $httpBackend.when('PUT', '/api/users/1').respond(200, { registered: true });
-        $httpBackend.expectPUT('/api/users/1', { registered: true });
+        //$httpBackend.when('PUT', '/api/users/1').respond(200, { registered: true });
+        //$httpBackend.expectPUT('/api/users/1', { registered: true });
         serviceRegistrationCtrl.completeRegistration();
         $httpBackend.flush();
 
-        expect(serviceRegistrationCtrl.userModel.updateRegistered).toHaveBeenCalledWith(true);
         expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(false);
       });
     });

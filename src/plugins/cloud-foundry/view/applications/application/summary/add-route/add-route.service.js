@@ -11,7 +11,7 @@
     'helion.framework.widgets.detailView'
   ];
 
-  function AddRouteServiceFactory (modelManager, detailView) {
+  function AddRouteServiceFactory(modelManager, detailView) {
     return {
       add: function () {
         var model = modelManager.retrieve('cloud-foundry.model.application');
@@ -60,13 +60,13 @@
   /**
    * @name AddRouteController
    * @constructor
-   * @param {Object} $scope
+   * @param {Object} $scope - Angular $scope
    * @param {Object} $stateParams - the UI router $stateParams service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {Object} $uibModalInstance - the Angular UI Bootstrap $uibModalInstance service
    * @param {Object} context - the uibModal context
    */
-  function AddRouteController ($scope, $stateParams, modelManager, $uibModalInstance, context) {
+  function AddRouteController($scope, $stateParams, modelManager, $uibModalInstance, context) {
     var that = this;
     that.addRouteError = false;
     that.applicationId = $stateParams.guid;

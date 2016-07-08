@@ -27,3 +27,21 @@
     placeholder="{{'Select Container Registry' | translate}}" tabindex="0"
     arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"></select-input>
 </div>
+
+<p class="control-title" translate>Connect Pipeline to Cluster</p>
+<div class="form-group">
+  <label class="control-label" translate>Cluster Selected</label>
+  <input class="form-control" type="text"
+    ng-value="wizardCtrl.options.userInput.serviceInstance.name" readonly>
+</div>
+<div class="form-group">
+  <label class="control-label" translate>Username</label>
+  <input type="text" class="form-control"
+    ng-model="wizardCtrl.options.userInput.clusterUsername" required/>
+</div>
+<div class="form-group has-feedback">
+  <label class="control-label" translate>Password</label>
+  <input type="password" class="form-control"
+    ng-model="wizardCtrl.options.userInput.clusterPassword"
+    password-reveal password-reveal-icon="'helion-icon helion-icon-View'" required/>
+</div>

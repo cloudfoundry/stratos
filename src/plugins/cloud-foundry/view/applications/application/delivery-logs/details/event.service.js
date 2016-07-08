@@ -23,7 +23,7 @@
        * @returns {object} The resolved/rejected promise
        * @public
        **/
-      open: function(event, cnsiGuid) {
+      open: function (event, cnsiGuid) {
         return detailView({
           templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/event.html',
           controller: EventDetailViewController,
@@ -70,19 +70,19 @@
     var hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
     // If we fetch large files before the slideout is shown the animation looks odd. Provide a pause before we fetch
-    $timeout(function() {
+    $timeout(function () {
       hceModel.downloadArtifact(vm.context.guid, event.artifact_id)
-        .then(function(artifact) {
+        .then(function (artifact) {
           if (artifact) {
             vm.log = artifact;
           } else {
             vm.log = false;
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           $log.error('Failed to download artifact with id: ' + event.artifact_id, error);
         })
-        .finally(function() {
+        .finally(function () {
           if (!vm.log) {
             vm.log = false;
           }

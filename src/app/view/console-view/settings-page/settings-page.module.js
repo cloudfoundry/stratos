@@ -36,7 +36,6 @@
     this.modelManager = modelManager;
   }
 
-  angular.extend(SettingsController.prototype, {
-  });
+  angular.extend(SettingsController.prototype, {});
 
 })();

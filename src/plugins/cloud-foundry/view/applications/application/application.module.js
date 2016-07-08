@@ -71,6 +71,7 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
+    this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.isPending = this.model.application.summary.state === 'PENDING';
     this.UPDATE_INTERVAL = 1000; // milliseconds
@@ -152,13 +153,19 @@
   angular.extend(ApplicationController.prototype, {
     init: function () {
       var that = this;
+      this.ready = false;
+      this.model.getAppSummary(this.cnsiGuid, this.id, true)
+        .finally(function() {
+          that.ready = true;
+        });
+
       this.model.application.project = null;
 
       /* eslint-disable */
       // TODO(kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
       /* eslint-enable */
       this.cnsiModel.list().then(function () {
-        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
+        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
         if (hceCnsis.length > 0) {
           that.hceCnsi = hceCnsis[0];
           that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
@@ -214,15 +221,9 @@
 
       this.updating = true;
       this.$q.when()
-
         .then(function () {
           that.updateSummary();
         })
-
-        .then(function () {
-          that.updateState();
-        })
-
         .finally(function () {
           that.updating = false;
         });
@@ -236,7 +237,7 @@
      */
     updateSummary: function () {
       var that = this;
-      return this.model.getAppSummary(this.cnsiGuid, this.id).then(function() {
+      return this.model.getAppSummary(this.cnsiGuid, this.id, true).then(function () {
         // Convenience property, rather than verbose html determine which build pack to use here. Also resolves issue
         // where ng-if expressions (with function) were not correctly updating after on scope application.summary
         // changed
@@ -314,7 +315,7 @@
       this.showOrHideLaunchApp(null, newRoutes);
     },
 
-    showOrHideLaunchApp: function(newState, newRoutes) {
+    showOrHideLaunchApp: function (newState, newRoutes) {
       var state = _.isNil(newState) ? this.model.application.summary.state : newState;
       var routes = _.isNil(newRoutes) ? this.model.application.summary.routes : newRoutes;
       this.appActions[0].hidden = _.isNil(routes) || routes.length === 0 || state !== 'STARTED';

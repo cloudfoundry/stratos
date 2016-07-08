@@ -74,12 +74,12 @@
       };
 
       this.data.workflow = {
-        initControllers: function(wizard) {
+        initControllers: function (wizard) {
           that.wizard = wizard;
-          wizard.postInitTask.promise.then(function() {
+          wizard.postInitTask.promise.then(function () {
             that.options.isBusy = true;
             that.wizard.nextBtnDisabled = true;
-            that.checkAppRoutes().finally(function() {
+            that.checkAppRoutes().finally(function () {
               that.wizard.nextBtnDisabled = false;
               that.options.isBusy = false;
             });
@@ -201,16 +201,18 @@
       var checkedServiceValue = this.userInput.checkedServiceValue;
 
       var bindingGuids = _.chain(checkedServiceValue)
-                          .filter(function (o) { return o; })
-                          .map('guid')
-                          .value();
+        .filter(function (o) {
+          return o;
+        })
+        .map('guid')
+        .value();
       if (bindingGuids.length > 0) {
         var q = 'service_instance_guid IN ' + bindingGuids.join(',');
-        this.serviceBindingModel.listAllServiceBindings(this.cnsiGuid, { q: q })
+        this.serviceBindingModel.listAllServiceBindings(this.cnsiGuid, {q: q})
           .then(function (bindings) {
             var tasks = [];
             angular.forEach(bindings, function (binding) {
-              tasks.push(that.serviceBindingModel.deleteServiceBinding(that.cnsiGuid, binding.metadata.guid, { async: false }));
+              tasks.push(that.serviceBindingModel.deleteServiceBinding(that.cnsiGuid, binding.metadata.guid, {async: false}));
             });
             that.$q.all(tasks).then(deferred.resolve, deferred.reject);
           });

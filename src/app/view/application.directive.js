@@ -112,12 +112,15 @@
      */
     onLoggedIn: function () {
       var that = this;
-      this.eventService.$emit(this.eventService.events.LOGIN);
       this.loggedIn = true;
       this.failedLogin = false;
       this.serverErrorOnLogin = false;
       this.serverFailedToRespond = false;
       this.showGlobalSpinner = true;
+
+      // If we have a setup error, then we don't want ot continue loging to some other page
+      // We will reditect to our error page
+      this.continueLogin = true;
 
       /**
        * Show cluster registration if user is ITOps (hdp3.admin).
@@ -125,34 +128,39 @@
        * developer if unregistered.
        */
       var account = this.modelManager.retrieve('app.model.account');
-      if (account.isAdmin()) {
-        this.modelManager.retrieve('app.model.serviceInstance')
-          .list()
-          .then(function onSuccess(data) {
-            that.showClusterRegistration = data.numAvailable === 0;
-            that.showGlobalSpinner = false;
-          });
-      } else {
-        /**
-         * If no user data was found or the user is unregistered
-         * show the "first-time" service instance registration
-         */
-        var userModel = this.modelManager.retrieve('app.model.user');
-        userModel.getLoggedInUser()
-          .then(function onSuccess(user) {
-            if (_.isEmpty(user)) {
-              userModel.create()
-                .then(function () {
-                  that.showRegistration = true;
-                });
-            } else if (!user.registered) {
-              that.showRegistration = true;
+
+      // Fetch the list of services instances
+      // TODO: If this fails, we should show a notification message
+      this.modelManager.retrieve('app.model.serviceInstance')
+        .list()
+        .then(function onSuccess(data) {
+          var noHCFInstances = data.numAvailable === 0;
+          // Admin
+          if (account.isAdmin()) {
+            // Show registration if we don't have any HCF instances
+            that.showClusterRegistration = noHCFInstances;
+          } else {
+            // Developer
+            if (noHCFInstances) {
+              // No HCF instances, so the system is not setup and the user can't fix this
+              that.continueLogin = false;
+              that.eventService.$emit(that.eventService.events.TRANSFER, 'error-page', {error: 'notSetup'});
+            } else {
+              var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
+              // Need to get the user's service list to determine if they have any connected
+              return userServiceInstanceModel.list().then(function() {
+                // Developer - allow user to connect services, if we have some and none are connected
+                that.showRegistration = userServiceInstanceModel.numValid === 0;
+              });
             }
-          })
-          .finally(function () {
-            that.showGlobalSpinner = false;
-          });
-      }
+          }
+        })
+        .finally(function () {
+          that.showGlobalSpinner = false;
+          if (that.continueLogin) {
+            that.eventService.$emit(that.eventService.events.LOGIN);
+          }
+        });
     },
 
     /**

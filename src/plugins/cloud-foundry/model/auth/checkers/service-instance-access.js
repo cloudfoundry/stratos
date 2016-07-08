@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -48,7 +48,7 @@
        * @param {Object} space Domain space
        * @returns {boolean}
        */
-      create: function(space) {
+      create: function (space) {
         // Admin
         if (this.baseAccess.create(space)) {
           return true;
@@ -66,7 +66,7 @@
        * @param {Object} serviceInstance service instance detail
        * @returns {boolean}
        */
-      update: function(serviceInstance) {
+      update: function (serviceInstance) {
         // Admin
         if (this.baseAccess.update(serviceInstance)) {
           return true;
@@ -83,7 +83,7 @@
        * @param {Object} serviceInstance service instance detail
        * @returns {boolean}
        */
-      delete: function(serviceInstance) {
+      delete: function (serviceInstance) {
         return this.baseAccess.update(serviceInstance);
       },
 
@@ -93,7 +93,7 @@
        * @param {String} resource - string representing the resource
        * @returns {boolean}
        */
-      canHandle: function(resource) {
+      canHandle: function (resource) {
         return resource === 'managed_service_instance';
       }
     });

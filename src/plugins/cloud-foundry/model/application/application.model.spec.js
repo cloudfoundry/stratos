@@ -12,7 +12,7 @@
       applicationModel = modelManager.retrieve('cloud-foundry.model.application');
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
@@ -30,12 +30,16 @@
 
     it('startApp', function () {
       var GetAppSummary = mock.cloudFoundryAPI.Apps.GetAppSummary('123');
-      var UpdateApp = mock.cloudFoundryAPI.Apps.UpdateApp('123', { state: 'STARTED' });
+      var UpdateApp = mock.cloudFoundryAPI.Apps.UpdateApp('123', {state: 'STARTED'});
+      var GetDetailedStatsForStartedApp = mock.cloudFoundryAPI.Apps.GetDetailedStatsForStartedApp('123');
 
       $httpBackend.whenGET(GetAppSummary.url).respond(200, GetAppSummary.response['200'].body);
       $httpBackend.whenPUT(UpdateApp.url).respond(201, UpdateApp.response['201'].body);
+      $httpBackend.whenGET(GetDetailedStatsForStartedApp.url).respond(200,
+        GetDetailedStatsForStartedApp.response['200'].body);
       $httpBackend.expectGET(GetAppSummary.url);
       $httpBackend.expectPUT(UpdateApp.url);
+      $httpBackend.expectGET(GetDetailedStatsForStartedApp.url);
       applicationModel.getAppSummary('guid', '123');
       applicationModel.startApp('guid', '123');
       $httpBackend.flush();
@@ -45,7 +49,7 @@
 
     it('stopApp', function () {
       var GetAppSummary = mock.cloudFoundryAPI.Apps.GetAppSummary('123');
-      var UpdateApp = mock.cloudFoundryAPI.Apps.UpdateApp('123', { state: 'STOPPED' });
+      var UpdateApp = mock.cloudFoundryAPI.Apps.UpdateApp('123', {state: 'STOPPED'});
 
       $httpBackend.whenGET(GetAppSummary.url).respond(200, GetAppSummary.response['200'].body);
       $httpBackend.whenPUT(UpdateApp.url).respond(201, UpdateApp.response['201'].body);
@@ -60,12 +64,16 @@
 
     it('restartApp', function () {
       var GetAppSummary = mock.cloudFoundryAPI.Apps.GetAppSummary('123');
-      var UpdateApp = mock.cloudFoundryAPI.Apps.UpdateApp('123', { state: 'STARTED' });
+      var UpdateApp = mock.cloudFoundryAPI.Apps.UpdateApp('123', {state: 'STARTED'});
+      var GetDetailedStatsForStartedApp = mock.cloudFoundryAPI.Apps.GetDetailedStatsForStartedApp('123');
 
       $httpBackend.whenGET(GetAppSummary.url).respond(200, GetAppSummary.response['200'].body);
+      $httpBackend.whenGET(GetDetailedStatsForStartedApp.url).respond(200,
+        GetDetailedStatsForStartedApp.response['200'].body);
       $httpBackend.whenPUT(UpdateApp.url).respond(201, UpdateApp.response['201'].body);
       $httpBackend.expectGET(GetAppSummary.url);
       $httpBackend.expectPUT(UpdateApp.url);
+      $httpBackend.expectGET(GetDetailedStatsForStartedApp.url);
       applicationModel.getAppSummary('guid', '123');
       applicationModel.restartApp('guid', '123');
       $httpBackend.flush();
@@ -82,7 +90,7 @@
       var GetAppSummary = mock.cloudFoundryAPI.Apps.GetAppSummary(guid);
       $httpBackend.whenGET(GetAppSummary.url).respond(200, GetAppSummary.response['200'].body);
       $httpBackend.whenPOST(CreateApp.url).respond(201, CreateApp.response['201'].body);
-      $httpBackend.whenGET('/pp/v1/proxy/v2/apps').respond(200, { guid: {} });
+      $httpBackend.whenGET('/pp/v1/proxy/v2/apps').respond(200, {guid: {}});
       $httpBackend.expectPOST(CreateApp.url);
       $httpBackend.expectGET(GetAppSummary.url);
       applicationModel.createApp('guid', newAppSpec);
@@ -122,7 +130,7 @@
       var params = {};
       var GetDetailedStatsForStartedApp = mock.cloudFoundryAPI.Apps.GetDetailedStatsForStartedApp(guid);
       $httpBackend.whenGET(GetDetailedStatsForStartedApp.url)
-                        .respond(200, GetDetailedStatsForStartedApp.response['200'].body);
+        .respond(200, GetDetailedStatsForStartedApp.response['200'].body);
       $httpBackend.expectGET(GetDetailedStatsForStartedApp.url);
       applicationModel.getAppStats('guid', guid, params);
       $httpBackend.flush();

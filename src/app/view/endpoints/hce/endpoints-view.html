@@ -1,61 +1,60 @@
-<div class="endpoints-view">
+<div class="endpoints endpoints-view">
   <div class="header">
-    <div class="applications-header font-semi-bold pull-left" translate>
+    <div ng-show="endpointsViewCtrl.showListView()" class="applications-header font-semi-bold pull-left" translate>
       {{endpointsViewCtrl.isHcf() ? 'Cloud Foundry Clusters':'Code Engine Endpoints'}}
     </div>
     <button class="btn btn-primary"
             ng-click="endpointsViewCtrl.showClusterAddForm()"
-            ng-show="endpointsViewCtrl.isUserAdmin()">Register Endpoint
+            ng-show="endpointsViewCtrl.isUserAdmin() && endpointsViewCtrl.showListView()">Register Endpoint
     </button>
 
   </div>
 
-  <div id="welcome-message" class="welcome-message">
-    <div class="panel panel-default">
-      <div class="action-header">
-        <span class="helion-icon helion-icon-Information"></span>
-        <span>In order to set up a delivery pipeline, you must connect to an endpoint.</span>
-      </div>
+  <div class="empty-view-message" ng-show="endpointsViewCtrl.showEmptyView()">
+    <div class="helion-icon helion-icon-3x helion-icon-3x helion-icon-Continuous_integration"></div>
+    <div class="view-msg" translate>You have no registered Code Engine endpoints.</div>
+    <div class="view-cta" ng-show="endpointsViewCtrl.isUserAdmin()">
+      <a class="btn btn-link" ng-click="endpointsViewCtrl.showClusterAddForm()"><span
+        translate>Register an Endpoint</span></a><span translate>to make it available to developers.</span>
+    </div>
+    <div class="view-cta" ng-show="!endpointsViewCtrl.isUserAdmin()">
+      <span translate>Please contact your administrator.</span>
     </div>
   </div>
 
-  <table class="table table-actionable">
-    <thead>
-    <tr>
-      <th translate=""><span>Name</span></th>
-      <th translate=""><span>Endpoint url</span></th>
-      <th translate=""><span>Connection</span></th>
-      <th translate=""><span></span></th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="endpoint in endpointsViewCtrl.currentEndpoints"
-        show-table-inline-message="{{ !endpoint.connected ? endpointsViewCtrl.tokenExpiryMessage : ''}}">
-      <td>{{endpoint.name}}</td>
-      <td>{{endpoint.url}}</td>
-      <td translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
-      <td>
-        <div class="actions-menu dropdown" ng-class="{'open': endpointsViewCtrl.showDropdown[$index]}"
-             ng-click="endpointsViewCtrl.setShowDropdown($index)" tabindex="1">
-          <i class="actions-menu-icon dropdown-toggle helion-icon helion-icon-lg helion-icon-More"
-             style="cursor: pointer;"></i>
-          <ul class="actions-menu-list dropdown-menu">
-            <li class="actions-menu-item" ng-if="!endpoint.connected"
-                ng-click="endpointsViewCtrl.connect(endpoint.model)">Connect
-            </li>
-            <li class="actions-menu-item" ng-if="endpoint.connected"
-                ng-click="endpointsViewCtrl.disconnect(endpoint.model)">Disconnect
-            </li>
-            <li class="actions-menu-item"
-                ng-click="endpointsViewCtrl.unregister(endpoint)"
-                ng-show="endpointsViewCtrl.isUserAdmin()">Unregister
-            </li>
-          </ul>
-        </div>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  <div ng-show="endpointsViewCtrl.showListView()">
+    <div id="welcome-message" class="welcome-message panel panel-default">
+      <span class="helion-icon helion-icon-Information"></span>
+      <span translate>In order to set up a delivery pipeline, you must connect to an endpoint.</span>
+    </div>
+
+    <table class="table table-actionable">
+      <thead>
+      <tr>
+        <th translate=""><span>Name</span></th>
+        <th translate=""><span>Endpoint url</span></th>
+        <th translate=""><span>Connection</span></th>
+        <th translate=""><span></span></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="endpoint in endpointsViewCtrl.currentEndpoints"
+          show-table-inline-message=" {{!endpoint.connected ? endpointsViewCtrl.tokenExpiryMessage : ''}}">
+        <td>{{endpoint.name}}</td>
+        <td>{{endpoint.url}}</td>
+        <td translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
+        <td>
+          <actions-menu actions="endpoint.connected ? endpointsViewCtrl.connectedActionMenu :
+                      endpointsViewCtrl.disconnectedActionMenu"
+                        action-target="endpoint" menu-icon="helion-icon helion-icon-More"
+                        menu-position="actions-menu-right"></actions-menu>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
 
 </div>
 <flyout flyout-active="endpointsViewCtrl.credentialsFormOpen"
@@ -64,10 +63,4 @@
                     on-cancel="endpointsViewCtrl.onConnectCancel()"
                     on-submit="endpointsViewCtrl.onConnectSuccess(serviceInstance)">
   </credentials-form>
-</flyout>
-<flyout flyout-active="endpointsViewCtrl.clusterAddFlyoutActive"
-        flyout-close-icon="'helion-icon helion-icon-Close'">
-  <add-cluster-form on-cancel="endpointsViewCtrl.hideClusterAddForm()"
-                    on-submit="endpointsViewCtrl.hideClusterAddForm()">
-  </add-cluster-form>
 </flyout>

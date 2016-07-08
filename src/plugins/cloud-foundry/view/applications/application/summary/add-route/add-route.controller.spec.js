@@ -1,7 +1,7 @@
-(function() {
+(function () {
   'use strict';
 
-  describe('AddRouteController', function() {
+  describe('AddRouteController', function () {
     var addRouteController, $httpBackend, modelManager, $uibModalInstance;
 
     var spaceGuid = 'testSpace';
@@ -19,7 +19,7 @@
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.summary'));
 
-    beforeEach(inject(function($injector) {
+    beforeEach(inject(function ($injector) {
 
       var context = {
         data: {
@@ -57,20 +57,20 @@
       spyOn(addRouteController, 'onAddRouteError').and.callThrough();
     }));
 
-    it('should be defined', function() {
+    it('should be defined', function () {
       expect(addRouteController).toBeDefined();
     });
 
-    it('should have `host` property initially set to null', function() {
+    it('should have `host` property initially set to null', function () {
       expect(addRouteController.context.data.host).toBe(null);
     });
 
-    it('should have `domain_guid`, `space_guid` set to appropriate values', function() {
+    it('should have `domain_guid`, `space_guid` set to appropriate values', function () {
       expect(addRouteController.context.data.space_guid).toEqual(spaceGuid);
       expect(addRouteController.context.data.domain_guid).toEqual(domainGuid);
     });
 
-    it('should successfully add a route', function() {
+    it('should successfully add a route', function () {
 
       $httpBackend.when('POST', '/pp/v1/proxy/v2/routes').respond(200, mockAddRouteResponse);
       $httpBackend.when('PUT', '/pp/v1/proxy/v2/routes/testGuid/apps/' + applicationId).respond(200, {});
@@ -83,7 +83,7 @@
       expect(addRouteController.onAddRouteError).not.toHaveBeenCalled();
     });
 
-    it('should invoke onAddRouteError when failing to associate a route', function() {
+    it('should invoke onAddRouteError when failing to associate a route', function () {
       $httpBackend.when('POST', '/pp/v1/proxy/v2/routes').respond(200, mockAddRouteResponse);
       $httpBackend.when('PUT', '/pp/v1/proxy/v2/routes/testGuid/apps/' + applicationId).respond(500, {});
 
@@ -95,7 +95,7 @@
       expect(addRouteController.addRouteError).toBe(true);
     });
 
-    it('should invoke onAddRouteError when failing to add a route', function() {
+    it('should invoke onAddRouteError when failing to add a route', function () {
       $httpBackend.when('POST', '/pp/v1/proxy/v2/routes').respond(500, mockAddRouteResponse);
 
       addRouteController.addRoute();
@@ -106,7 +106,7 @@
       expect(addRouteController.addRouteError).toBe(true);
     });
 
-    it('should invoke onAddRouteError when failing to update AppSummary', function() {
+    it('should invoke onAddRouteError when failing to update AppSummary', function () {
       $httpBackend.when('POST', '/pp/v1/proxy/v2/routes').respond(200, mockAddRouteResponse);
       $httpBackend.when('PUT', '/pp/v1/proxy/v2/routes/testGuid/apps/' + applicationId).respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps/' + applicationId + '/summary').respond(500, {});

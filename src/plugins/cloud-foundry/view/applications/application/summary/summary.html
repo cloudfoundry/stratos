@@ -30,8 +30,11 @@
         </dd>
 
         <dt translate>STATE</dt>
-        <dd class="pull-right">
-          {{ appCtrl.model.application.summary.state }}
+        <dd class="pull-right app-status-block">
+          <div ng-if="appCtrl.ready">
+          <span class="app-status helion-icon {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
+          <span class="app-status">{{ appCtrl.model.application.state.label }}</span>
+          </div>
         </dd>
 
         <dt translate>MODIFIED</dt>
@@ -117,9 +120,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="route in appCtrl.model.application.summary.routes">
+        <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.getRouteId(route)">
           <td>{{ route.host + '.' + route.domain.name + route.path }}</td>
-          <td></td>
+          <td>
+            <actions-menu actions="applicationSummaryCtrl.routesActionMenu"
+                            action-target="route"
+                            menu-position="actions-menu-right"
+                            menu-icon="helion-icon helion-icon-More"></actions-menu>
+          </td>
         </tr>
       </tbody>
     </table>

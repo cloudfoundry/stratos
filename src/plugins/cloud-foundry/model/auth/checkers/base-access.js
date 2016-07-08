@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -21,20 +21,20 @@
 
   function BaseAccess(principal) {
     return {
-      create: function() {
+      create: function () {
         return principal.isAdmin();
       },
 
-      update: function() {
+      update: function () {
         return principal.isAdmin();
       },
 
-      delete: function() {
+      delete: function () {
         return principal.isAdmin();
       },
 
-      _doesContainGuid: function(array, guid) {
-        return array.map(function(element) {
+      _doesContainGuid: function (array, guid) {
+        return array.map(function (element) {
           return element.metadata.guid;
         }).indexOf(guid) > -1;
       }

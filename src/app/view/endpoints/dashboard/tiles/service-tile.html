@@ -3,71 +3,29 @@
     <span ng-if="serviceTileCtrl.isHcf()" translate> Cloud Foundry Clusters</span>
     <span ng-if="!serviceTileCtrl.isHcf()" translate> Code Engine Endpoints</span>
     <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()"
-       ng-if="serviceTileCtrl.serviceInstancesCount()>0 && serviceTileCtrl.isUserAdmin()">
+       ng-if="serviceTileCtrl.serviceInstancesCount()>0 && serviceTileCtrl.isUserAdmin() && serviceTileCtrl.resolvedPromise">
       <i class="helion-icon helion-icon-Right_Arrow"></i>
       <span translate>Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</span>
     </a>
   </div>
-  <div class="panel-body no-instances" ng-if="serviceTileCtrl.serviceInstancesCount()===0 && serviceTileCtrl.isUserAdmin()">
-    <table>
-      <tr>
-        <td>
-          <span class="helion-icon helion-icon-lg helion-icon-Cluster"></span>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p> There are no registered {{serviceTileCtrl.isHcf() ? 'clusters' : 'endpoints'}}.</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()">
-            <p> Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</p>
-          </a>
-        </td>
-      </tr>
-    </table>
+  <div class="panel-body no-instances" ng-if="serviceTileCtrl.serviceInstancesCount()===0
+   && serviceTileCtrl.resolvedPromise">
+    <span ng-show="serviceTileCtrl.isHcf()" class="helion-icon helion-icon-lg helion-icon-Cluster"></span>
+    <span ng-show="!serviceTileCtrl.isHcf()"
+          class="helion-icon helion-icon-lg helion-icon-Continuous_integration"></span>
+    <div translate>There are no registered {{serviceTileCtrl.isHcf() ? 'clusters' : 'endpoints'}}.
+    </div>
+    <div ng-show="serviceTileCtrl.isUserAdmin()">
+      <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()">
+        <span translate> Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</span>
+      </a>
+    </div>
   </div>
 
-  <div class="panel-body base-tile"
-       ng-if="serviceTileCtrl.serviceInstancesCount()>0"
+  <div class="panel-body base-tile service-chart-panel"
+       ng-if="serviceTileCtrl.serviceInstancesCount()>0 && serviceTileCtrl.resolvedPromise"
        ng-click="serviceTileCtrl.goToEndpointsView()">
-    <table>
-      <tr>
-        <th>
-          <span translate>Total Instances</span>
-          <p>{{serviceTileCtrl.getInstancesCount()}}</p>
-        </th>
-        <th>
-          <table>
-            <tr>
-              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S td-red"></td>
-              <td translate>Expired</td>
-              <td>{{serviceTileCtrl.getInstancesCountByStatus('Expired')}}</td>
-            </tr>
-            <tr>
-              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S"></td>
-              <td translate>Disconnected</td>
-              <td>{{serviceTileCtrl.getInstancesCountByStatus('Disconnected')}}</td>
-            </tr>
-            <tr>
-              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S td-green"></td>
-              <td translate>Connected</td>
-              <td>{{serviceTileCtrl.getInstancesCountByStatus('Connected')}}</td>
-            </tr>
-          </table>
-        </th>
-      </tr>
-    </table>
-  </div>
-
+       <ring-chart labels="serviceTileCtrl.chartLabels" data="serviceTileCtrl.chartData"></ring-chart>
+ </div>
 
 </div>
-
-<flyout flyout-active="serviceTileCtrl.clusterAddFlyoutActive"
-        flyout-close-icon="'helion-icon helion-icon-Close'">
-  <add-cluster-form on-cancel="serviceTileCtrl.hideClusterAddForm()"
-                    on-submit="serviceTileCtrl.hideClusterAddForm()">
-  </add-cluster-form>
-</flyout>

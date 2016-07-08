@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -48,7 +48,7 @@
        * @param {Object} space - Domain space
        * @returns {boolean}
        */
-      create: function(space) {
+      create: function (space) {
         return this.principal.isAdmin(space);
       },
 
@@ -57,7 +57,7 @@
        * @description Does user have update organization permission
        * @returns {boolean}
        */
-      delete: function() {
+      delete: function () {
         return this.principal.isAdmin();
       },
 
@@ -69,7 +69,7 @@
        * @returns {boolean}
        */
 
-      update: function(org) {
+      update: function (org) {
         if (this.baseAccess.update(org)) {
           return true;
         }
@@ -85,7 +85,7 @@
        * @param {String} resource - string specifying resource
        * @returns {boolean}
        */
-      canHandle: function(resource) {
+      canHandle: function (resource) {
         return resource === 'organization';
       }
     });

@@ -51,12 +51,12 @@
       }
     },
 
-    onLoggedOut: function () {},
+    onLoggedOut: function () {
+    },
 
-    registerNavigation: function() {
+    registerNavigation: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', gettext('Applications'));
-      menu.addMenuItem('app.endpoints', 'endpoints.dashboard', gettext('Endpoints'));
+      menu.addMenuItem('cf.applications', 'cf.applications.list.gallery-view', gettext('Applications'), null, null, 0);
     }
   });
 

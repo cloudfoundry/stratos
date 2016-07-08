@@ -36,7 +36,7 @@
       beforeEach(inject(function ($injector) {
         var modelManager = $injector.get('app.model.modelManager');
         var model = modelManager.retrieve('cloud-foundry.model.application');
-        model.application = { variables: undefined };
+        model.application = {variables: undefined};
       }));
 
       it("should not have any variables", function () {
@@ -58,8 +58,7 @@
             }
           }
         };
-      }
-    ));
+      }));
 
       it("should have variables", function () {
         expect($controller.hasVariables()).toBe(true);

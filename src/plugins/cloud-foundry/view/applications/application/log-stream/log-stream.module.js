@@ -29,8 +29,11 @@
   /**
    * @name ApplicationLogStreamController
    * @constructor
+   * @param {object} base64 - base64 service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
+   * @param {object} $location - the Angular $location service
+   * @param {object} $log - the Angular $log service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
@@ -45,22 +48,22 @@
     // They can re-enable auto-scroll either by:
     // - manually scrolling to the bottom
     // - clicking the auto-scroll button
-    this.autoScroll = function() {
+    this.autoScroll = function () {
       this.autoScrollOn = true;
     };
 
-    this.jsonFilter = function(jsonString) {
+    this.jsonFilter = function (jsonString) {
       try {
-        var messageObj = JSON.parse(jsonString);
+        var messageObj = angular.fromJson(jsonString);
         var messageString = base64.decode(messageObj.message) + '\n';
 
         var colour;
         switch (messageObj.source_type) {
           case 'APP':
-              colour = 'green';
-                break;
+            colour = 'green';
+            break;
           default:
-                colour = 'red';
+            colour = 'red';
         }
         var messageSource = coloredLog('[' + messageObj.source_type + '.' + messageObj.source_instance + ']', colour);
 
