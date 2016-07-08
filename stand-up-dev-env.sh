@@ -41,8 +41,8 @@ function clean {
     docker-compose -f docker-compose.development.yml down --rmi 'all'
     docker rmi -f portal-proxy-builder
     # reset back to strict
-    set -e
     popd
+    set -e
 }
 
 
