@@ -14,3 +14,12 @@ $gallery-card-layout-steps: 4;
   margin-left: $hpe-unit-space / 5;
   vertical-align: middle;
 }
+
+// Tweak the card width slightly when samller to stop application state name over-running
+@media (min-width: 768px) {
+  gallery-card {
+    .card .dl-horizontal dd {
+        margin-left: 170px;
+    }
+  }
+}

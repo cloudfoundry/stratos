@@ -1,0 +1,12 @@
+app-state-icon bounce-spinner {
+  line-height: 1;
+}
+
+app-state-icon.app-status {
+  line-height: 1;
+  vertical-align: text-top;
+
+  bounce-spinner {
+    vertical-align: middle;
+  }
+}
