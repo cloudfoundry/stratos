@@ -498,7 +498,7 @@ func getHCFPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 		// build an entry for each HCF found for the user
 		hcfEntry := &hcfPerms{
 			Type:  "hcf",
-			GUID:  userGUID,
+			GUID:  userTokenInfo.UserGUID,
 			Admin: fmt.Sprintf("%t", hcfAdmin),
 		}
 
