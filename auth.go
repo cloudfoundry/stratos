@@ -18,12 +18,12 @@ import (
 
 // UAAResponse - Response returned by Cloud Foundry UAA Service
 type UAAResponse struct {
-	AccessToken  string   `json:"access_token"`
-	TokenType    string   `json:"token_type"`
-	RefreshToken string   `json:"refresh_token"`
-	ExpiresIn    int      `json:"expires_in"`
-	Scope        []string `json:"scope"`
-	JTI          string   `json:"jti"`
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	Scope        string `json:"scope"`
+	JTI          string `json:"jti"`
 }
 
 // LoginRes - Response the proxy returns to the caller
@@ -86,7 +86,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	}
 
 	uaaAdmin := false
-	if contains(uaaRes.Scope, UAAAdminIdentifier) {
+	if contains(strings.Split(uaaRes.Scope, " "), UAAAdminIdentifier) {
 		uaaAdmin = true
 	}
 
@@ -163,7 +163,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	log.Println("After SAVE of CNSI token")
 
 	hcfAdmin := false
-	if contains(uaaRes.Scope, HCFAdminIdentifier) {
+	if contains(strings.Split(uaaRes.Scope, " "), HCFAdminIdentifier) {
 		hcfAdmin = true
 	}
 
