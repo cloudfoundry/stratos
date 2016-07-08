@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.clusters')
+    .module('app.view.endpoints.clusters.tiles')
     .directive('clusterTile', ClusterTile);
 
   ClusterTile.$inject = [];
@@ -18,7 +18,7 @@
       controller: ClusterTileController,
       controllerAs: 'clusterTile',
       scope: {},
-      templateUrl: 'app/view/endpoints/clusters/list/cluster-tile/cluster-tile.html'
+      templateUrl: 'app/view/endpoints/clusters/tiles/cluster-tile/cluster-tile.html'
     };
   }
 
@@ -162,7 +162,7 @@
      * @description Navigate to the cluster summary page for this cluster
      */
     summary: function () {
-      this.$state.go('endpoints.cluster', {guid: this.service.guid});
+      this.$state.go('endpoint.clusters.cluster.detail', {guid: this.service.guid});
     }
 
   });
