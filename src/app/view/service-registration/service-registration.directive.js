@@ -48,7 +48,6 @@
    * @param {app.view.hcfRegistration}  hcfRegistration   HCF Registration service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
-   * @property {app.model.user} userModel - the user model
    * @property {array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
@@ -58,7 +57,6 @@
     this.clusterAddFlyoutActive = false;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.userModel = modelManager.retrieve('app.model.user');
     this.serviceInstances = {};
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
@@ -110,10 +108,7 @@
     completeRegistration: function () {
       var that = this;
       if (this.userCnsiModel.numValid > 0) {
-        this.userModel.updateRegistered(true)
-          .then(function () {
-            that.showOverlayRegistration = false;
-          });
+        that.showOverlayRegistration = false;
       }
     },
 

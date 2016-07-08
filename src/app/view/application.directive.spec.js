@@ -4,6 +4,12 @@
   describe('application directive', function () {
     var $httpBackend, $element, applicationCtrl;
 
+    var testAptEndpoint = {
+      Scheme: 'https',
+      Host: 'api.test.com',
+      Path: ''
+    }
+
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
@@ -20,7 +26,6 @@
       applicationCtrl = $element.controller('application');
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, {guid: {}});
-      $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
     }));
 
     afterEach(function () {
@@ -104,13 +109,15 @@
 
       // method invocation
 
-      it('invoke `login` method - success', function () {
+      it('invoke `login` method - success - dev user - no hcf services', function () {
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
-        $httpBackend.when('GET', '/api/users/loggedIn').respond(500, {});
-        $httpBackend.when('POST', '/api/users').respond(200, {id: 1});
-        $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
+        $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
+        $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
+        $httpBackend.expectGET('/pp/v1/cnsis');
+        // No endpoints are set up, so we should go to error page
+        $httpBackend.expectGET('/app/view/console-error/console-error.html');
         applicationCtrl.login('dev', 'dev');
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(true);
@@ -118,6 +125,41 @@
         expect(applicationCtrl.serverErrorOnLogin).toBe(false);
         expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
+
+      it('invoke `login` method - success - admin user - no hcf services', function () {
+        applicationCtrl.loggedIn = false;
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'admin', scope: 'ucp.admin' });
+        $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
+        $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
+        $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
+        $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
+        $httpBackend.expectGET('/pp/v1/cnsis');
+        // No endpoints are set up - but admin user - so will not go to error page
+        applicationCtrl.login('dev', 'dev');
+        $httpBackend.flush();
+        expect(applicationCtrl.loggedIn).toBe(true);
+        expect(applicationCtrl.failedLogin).toBe(false);
+        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        expect(applicationCtrl.serverFailedToRespond).toBe(false);
+      });
+
+      it('invoke `login` method - success - dev user - with services', function () {
+        applicationCtrl.loggedIn = false;
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
+        $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
+          { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
+        ]);
+        $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
+        $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
+        $httpBackend.expectGET('/pp/v1/cnsis');
+        applicationCtrl.login('dev', 'dev');
+        $httpBackend.flush();
+        expect(applicationCtrl.loggedIn).toBe(true);
+        expect(applicationCtrl.failedLogin).toBe(false);
+        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        expect(applicationCtrl.serverFailedToRespond).toBe(false);
+      });
+
 
       it('invoke `login` method - failure with bad credentials', function () {
         applicationCtrl.loggedIn = false;
@@ -191,6 +233,7 @@
         it('should show cluster registration if cluster count === 0', function () {
           $httpBackend.when('GET', '/pp/v1/cnsis')
             .respond(200, []);
+          $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
           applicationCtrl.login('admin', 'admin');
           $httpBackend.flush();
@@ -205,6 +248,7 @@
           ];
           $httpBackend.when('GET', '/pp/v1/cnsis')
             .respond(200, responseData);
+          $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
           applicationCtrl.login('admin', 'admin');
           $httpBackend.flush();
@@ -218,11 +262,12 @@
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
             .respond(200, {account: 'dev', scope: 'hdp3.dev'});
+          $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
+            { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
+          ]);
         });
 
-        it('should show service instance registration if first time', function () {
-          $httpBackend.when('GET', '/api/users/loggedIn').respond(200, {});
-          $httpBackend.when('POST', '/api/users').respond(200, {id: 1, username: 'dev'});
+        it('should show service instance registration if we dot not have registered services', function () {
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
@@ -233,22 +278,13 @@
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
         });
 
-        it('should show service instance registration if unregistered', function () {
-          var mockUser = {id: 1, username: 'dev', registered: false};
-          $httpBackend.when('GET', '/api/users/loggedIn').respond(200, mockUser);
-          $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
-          $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
-
-          applicationCtrl.login('dev', 'dev');
-          $httpBackend.flush();
-
-          expect(applicationCtrl.showRegistration).toBe(true);
-          expect(applicationCtrl.showGlobalSpinner).toBe(false);
-        });
-
-        it('should not show service instance registration if registered', function () {
+        it('should not show service instance registration if we have registered services', function () {
           var mockUser = {id: 1, username: 'dev', registered: true};
-          $httpBackend.when('GET', '/api/users/loggedIn').respond(200, mockUser);
+          var future = 50000 + (new Date()).getTime() / 1000;
+
+          $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, [
+            { account: 'test', token_expiry: future, guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
+          ]);
 
           applicationCtrl.login('dev', 'dev');
           $httpBackend.flush();

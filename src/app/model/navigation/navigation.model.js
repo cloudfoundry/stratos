@@ -52,6 +52,9 @@
     this.eventService.$on(this.eventService.events.REDIRECT, function (event, state) {
       that.onAutoNav(event, state);
     });
+    this.eventService.$on(this.eventService.events.TRANSFER, function (event, state, params) {
+      that.$state.go(state, params, {location: false});
+    });
 
     // Install a global state change handler
     // The rootScope never gets destroyed so we can safely ignore the eslint error
