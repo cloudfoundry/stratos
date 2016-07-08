@@ -42,6 +42,7 @@
     this.$httpParamSerializer = $httpParamSerializer;
     this.$q = $q;
     this.$cookies = $cookies;
+    this.sessionName = 'stackato-console-session';
   }
 
   angular.extend(AccountApi.prototype, {
@@ -83,13 +84,19 @@
      * @public
      */
     verifySession: function () {
-      if (this.$cookies.get('portal-session')) {
+      if (this.$cookies.get(this.sessionName)) {
         return this.$http.get('/pp/v1/auth/session/verify');
       }
-      return this.$q(function (resolve, reject) {
-        reject({});
-      });
+      return this.$q.reject(this.sessionName + ' cookie missing!');
+    },
+
+    userInfo: function () {
+      if (this.$cookies.get(this.sessionName)) {
+        return this.$http.get('/pp/v1/userinfo');
+      }
+      return this.$q.reject(this.sessionName + ' cookie missing!');
     }
+
   });
 
 })();

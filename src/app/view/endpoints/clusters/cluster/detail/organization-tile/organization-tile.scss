@@ -1,4 +1,4 @@
-.cluster-tile {
+.organization-tile {
 
   &.unlink {
     // Override some extreme oddness in gallery-card with undefined on-card-click
@@ -9,17 +9,6 @@
 
   .gallery-card-title {
     text-transform: uppercase;
-  }
-
-  .panel-footer {
-    background: $gallery-card-status-danger;
-    .gallery-card-status, .gallery-card-status-text {
-      padding: 4px;
-      color: white;
-    }
-    .gallery-card-status-text {
-      padding-bottom: 6px;
-    }
   }
 
   .dl-horizontal {

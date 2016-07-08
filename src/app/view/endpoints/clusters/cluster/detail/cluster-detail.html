@@ -1,1 +1,12 @@
-<h1>Cluster Summary: {{ clusterController.guid }}</h1>
+<h1>{{ clusterController.clusterName }}</h1>
+<div ng-if="clusterController.orgs === null" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="clusterController.organizations === false" class="message-box message-box-no-bg">
+  <div translate>An error occurred retrieving organizations</div>
+</div>
+<div ng-if="clusterController.organizations">
+  <div class="clusters-card col-md-4 col-sm-1" ng-repeat="organization in clusterController.organizations">
+    <organization-tile organization="organization"></organization-tile>
+  </div>
+</div>

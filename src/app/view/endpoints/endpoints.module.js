@@ -48,7 +48,7 @@
 
     onLoggedIn: function() {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'));
+      menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'), 1);
     }
 
   });

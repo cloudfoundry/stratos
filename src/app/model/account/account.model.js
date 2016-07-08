@@ -155,7 +155,8 @@
      * @private
      */
     onLoggedOut: function () {
-      this.$cookies.remove('portal-session');
+      var sessionName = this.apiManager.retrieve('app.api.account').sessionName;
+      this.$cookies.remove(sessionName);
       this.loggedIn = false;
       delete this.data;
     }

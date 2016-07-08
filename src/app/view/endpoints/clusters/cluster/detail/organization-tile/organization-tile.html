@@ -1,0 +1,16 @@
+<gallery-card class="organization-tile"
+              card-data="{ title:organizationTileCtrl.organization.name}"
+              card-actions="organizationTileCtrl.actions"
+              card-actions-icon="helion-icon helion-icon-More"
+              card-actions-position="actions-menu-right"
+              on-card-click="organizationTileCtrl.summary()">
+
+  <dl class="dl-horizontal">
+    <dt translate>total apps</dt>
+    <dd>{{organizationTileCtrl.organization.total_apps}}</dd>
+    <dt translate>instances</dt>
+    <dd>{{organizationTileCtrl.organization.instances}}</dd>
+    <dt translate>memory utilization</dt>
+    <dd>{{ organizationTileCtrl.organization.memory_utilization }}</dd>
+  </dl>
+</gallery-card>
