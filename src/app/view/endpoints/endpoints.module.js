@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -46,7 +46,7 @@
 
   angular.extend(Endpoints.prototype, {
 
-    onLoggedIn: function() {
+    onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'));
     }
