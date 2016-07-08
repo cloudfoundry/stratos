@@ -133,17 +133,17 @@
     },
 
     /**
-     * @name getUserByGithubId
-     * @description Get the specified user.
+     * @name getUserByUaaId
+     * @description Get the HCE user account associated with the provided UAA user ID.
      * @param {string} guid - the HCE instance GUID
-     * @param {!number} githubId - Users github account id.
+     * @param {!string} uaaId - The user&#39;s UAA user id.
      * @param {object} params - the query parameters
      * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getUserByGithubId: function (guid, githubId, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users/github/{github_id}'
-        .replace('{' + 'github_id' + '}', githubId);
+    getUserByUaaId: function (guid, uaaId, params, httpConfigOptions) {
+      var path = this.baseUrl + '/users/uaa/{uaa_id}'
+        .replace('{' + 'uaa_id' + '}', uaaId);
       var headers = {
         'x-cnap-cnsi-list': guid
       };

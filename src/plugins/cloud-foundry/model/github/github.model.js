@@ -53,11 +53,11 @@
     repos: function () {
       var that = this;
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
-      return githubApi.repos({ per_page: 100 })
+      return githubApi.repos({per_page: 100})
         .then(function (response) {
           that.onRepos(response);
         })
-        .catch(function(err) {
+        .catch(function (err) {
           that.onReposError();
           throw err;
         });
@@ -71,14 +71,14 @@
      * @returns {promise} A promise object
      * @public
      */
-    branches: function(repo) {
+    branches: function (repo) {
       var that = this;
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
       return githubApi.branches(repo)
-        .then(function(response) {
+        .then(function (response) {
           that.onBranches(response);
         })
-        .catch(function(err) {
+        .catch(function (err) {
           that.onBranchesError();
           throw err;
         });
@@ -122,7 +122,7 @@
         .then(function (response) {
           that.onCommits(response);
         })
-        .catch(function(err) {
+        .catch(function (err) {
           that.onCommitsError();
           throw err;
         });

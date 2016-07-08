@@ -38,6 +38,9 @@
     this.apiManager = apiManager;
     this.loggedIn = false;
     this.data = {};
+
+    // TODO(irfan) Hook for development
+    this.adminOverride = false;
   }
 
   angular.extend(Account.prototype, {
@@ -99,6 +102,10 @@
       return p;
     },
 
+    setAdminOverride: function (bool) {
+      this.adminOverride = bool;
+    },
+
     /**
      * @function isAdmin
      * @memberof app.model.account.Account
@@ -107,6 +114,11 @@
      * @returns {boolean} True if this user is an ITOps admin
      */
     isAdmin: function () {
+
+      //TODO(irfan) Hook for development
+      if (this.adminOverride) {
+        return false;
+      }
       var ADMIN_SCOPES = [
         'cloud_controller.admin',
         'ucp.admin'

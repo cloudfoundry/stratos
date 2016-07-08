@@ -25,7 +25,7 @@
        * @returns {object} The resolved/rejected promise
        * @public
        **/
-      add: function(cnsiGuid, id) {
+      add: function (cnsiGuid, id) {
         return detailView({
           controller: ApplicationVariablesDialogController,
           controllerAs: 'appVarCtrl',
@@ -44,7 +44,7 @@
        * @returns {object} The resolved/rejected promise
        * @public
        **/
-      edit: function(cnsiGuid, id, variableName) {
+      edit: function (cnsiGuid, id, variableName) {
         return detailView({
           controller: ApplicationVariablesDialogController,
           controllerAs: 'appVarCtrl',
@@ -65,11 +65,11 @@
        * @returns {object} The resolved/rejected promise
        * @public
        **/
-      delete: function(cnsiGuid, id, variableName) {
+      delete: function (cnsiGuid, id, variableName) {
         var model = modelManager.retrieve('cloud-foundry.model.application');
         var vars = _.clone(model.application.variables.environment_json);
         delete vars[variableName];
-        var updateData = { environment_json: vars };
+        var updateData = {environment_json: vars};
         return model.update(cnsiGuid, id, updateData).then(function (data) {
           if (data.error_code) {
             return $q.reject(data);
@@ -107,12 +107,12 @@
      * @description Add or Update the application variable
      * @public
      **/
-    applyChange: function() {
+    applyChange: function () {
       var that = this;
       this.addError = false;
       var vars = _.clone(this.model.application.variables.environment_json);
       vars[this.varName] = this.varValue;
-      var updateData = { environment_json: vars };
+      var updateData = {environment_json: vars};
       this.model.update(this.cnsiGuid, this.id, updateData).then(function () {
         that.$modal.close();
       }).catch(function () {

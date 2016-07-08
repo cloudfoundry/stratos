@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -39,7 +39,7 @@
      * @name getCurrentUser
      * @description Retrieves current user
      */
-    getCurrentUser: function() {
+    getCurrentUser: function () {
       // Original implementation retrieved `currentUser` from localStorage
       // var currentUser = this.localStorage.currentUser;
       // if(angular.isDefined(currentUser)) {
@@ -57,7 +57,7 @@
      * @description get a Principal instance for the current user
      * @param {Object} authInfo - object containing authentication information
      */
-    setCurrentUser: function(authInfo) {
+    setCurrentUser: function (authInfo) {
       var currentUser = this.principalFactory.create(authInfo);   // eslint-disable-line no-unused-vars
       // this.localStorage.currentUser = currentUser;
     }

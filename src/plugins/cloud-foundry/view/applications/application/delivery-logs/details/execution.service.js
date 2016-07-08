@@ -25,7 +25,7 @@
        * @returns {object} The resolved/rejected promise
        * @public
        **/
-      open: function(execution, events, cnsiGuid) {
+      open: function (execution, events, cnsiGuid) {
         return detailView({
           templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-logs/details/execution.html',
           title: execution.message

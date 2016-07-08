@@ -45,11 +45,11 @@
     // They can re-enable auto-scroll either by:
     // - manually scrolling to the bottom
     // - clicking the auto-scroll button
-    this.autoScroll = function() {
+    this.autoScroll = function () {
       this.autoScrollOn = true;
     };
 
-    this.jsonFilter = function(jsonString) {
+    this.jsonFilter = function (jsonString) {
       try {
         var messageObj = JSON.parse(jsonString);
         var messageString = base64.decode(messageObj.message) + '\n';

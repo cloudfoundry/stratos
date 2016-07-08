@@ -89,12 +89,12 @@
           if (hceCnsis.length > 0) {
             that.hceCnsi = hceCnsis[0];
             return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
-              .then(function() {
+              .then(function () {
                 return that.hceModel.getProjects(that.hceCnsi.guid)
-                  .then(function() {
+                  .then(function () {
                     return that.hceModel.getProject(that.model.application.summary.name);
                   });
-              }, function(response) {
+              }, function (response) {
                 if (response.status === 404) {
                   that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
                 }
@@ -107,11 +107,11 @@
       promise = $q.when({});
     }
 
-    that.debouncedUpdateVisibleExecutions = _.debounce(function(visibleExecutions) {
+    that.debouncedUpdateVisibleExecutions = _.debounce(function (visibleExecutions) {
       that.updateVisibleExecutions(visibleExecutions);
     }, 500);
 
-    $scope.$on("$destroy", function() {
+    $scope.$on("$destroy", function () {
       if (that.debouncedUpdateVisibleExecutions) {
         that.debouncedUpdateVisibleExecutions.cancel();
       }
@@ -151,22 +151,22 @@
       RUNNING: 'running'
     },
 
-    triggerBuild: function() {
+    triggerBuild: function () {
       var that = this;
-      this.views.viewTriggerBuild.open(this.project, this.hceCnsi.guid).then(function() {
+      this.views.viewTriggerBuild.open(this.project, this.hceCnsi.guid).then(function () {
         that.updateData();
       });
     },
 
-    viewExecution: function(execution) {
-      var rawExecution = _.find(this.hceModel.data.pipelineExecutions, function(o) {
+    viewExecution: function (execution) {
+      var rawExecution = _.find(this.hceModel.data.pipelineExecutions, function (o) {
         return o.id === execution.id;
       });
 
       this.views.viewExecution.open(rawExecution, this.eventsPerExecution[execution.id], this.hceCnsi.guid);
     },
 
-    viewEventForExecution: function(execution) {
+    viewEventForExecution: function (execution) {
       var events = this.eventsPerExecution[execution.id];
 
       if (!events || events.length === 0) {
@@ -180,7 +180,7 @@
      * @name ApplicationDeliveryLogsController.updateData
      * @description Fetch all execution and event data. Parse the output
      */
-    updateData: function() {
+    updateData: function () {
       var that = this;
 
       // Reset/init the locally cached events and start watching the visible executions (only events for executions that
@@ -191,7 +191,7 @@
       if (that.execWatch) {
         that.execWatch();
       }
-      that.execWatch = that.$scope.$watch(function() {
+      that.execWatch = that.$scope.$watch(function () {
         return that.displayedExecutions;
       }, that.debouncedUpdateVisibleExecutions);
 
@@ -205,13 +205,13 @@
         promise = this.$q.when();
       }
       if (this.addMock) {
-        promise.then(function() {
+        promise.then(function () {
           that.hceModel.data.pipelineExecutions = that.hceModel.data.pipelineExecutions.concat(that.createMockExecutions());
         });
       }
 
       promise
-        .then(function() {
+        .then(function () {
           // The ux will need to show additional properties. In order to not muddy the original model make a copy
           that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
 
@@ -220,7 +220,7 @@
             that.parseExecution(execution, that.eventsPerExecution[execution.id]);
           }
         })
-        .catch(function(error) {
+        .catch(function (error) {
           that.$log.error('Failed to fetch/process pipeline executions or events: ', error);
         });
     },
@@ -232,10 +232,10 @@
      * @param {string} executionId - id of execution
      * @returns {object} promise to use for completion notification
      */
-    fetchEvents: function(eventsPerExecution, executionId) {
+    fetchEvents: function (eventsPerExecution, executionId) {
       var that = this;
       // Reset the last successful build/test/deploy events
-      this.last = { };
+      this.last = {};
 
       var promise;
       if (this.haveBackend) {
@@ -247,11 +247,11 @@
       }
 
       return promise
-        .then(function(events) {
+        .then(function (events) {
           for (var i = 0; i < events.length; i++) {
             that.parseEvent(events[i]);
           }
-          events = _.orderBy(events, function(event) {
+          events = _.orderBy(events, function (event) {
             return event.mEndDate ? event.mEndDate.unix() : Number.MAX_VALUE;
           }, 'asc');
           eventsPerExecution[executionId] = events;
@@ -265,7 +265,7 @@
      * events, etc
      * @param {object} event - event to parse
      */
-    parseEvent: function(event) {
+    parseEvent: function (event) {
       event.mEndDate = event.endDate ? moment(event.endDate) : undefined;
 
       if (!event.duration && (event.startDate && event.endDate)) {
@@ -307,7 +307,7 @@
      * @description Is this event the latest of it's type for this application? If so track it
      * @param {object} event - HCE event
      */
-    determineLatestEvent: function(event) {
+    determineLatestEvent: function (event) {
       var type = event.type.toLowerCase();
       if (!this.last[type] ||
         event.state === this.eventStates.SUCCEEDED && this.last[type].mEndDate.diff(event.mEndDate) < 0) {
@@ -322,7 +322,7 @@
      * @param {object} execution - execution to update
      * @param {array} events - HCE events associated with the execution
      */
-    parseExecution: function(execution, events) {
+    parseExecution: function (execution, events) {
       // Used to sort items in table
       execution.reason.mCreatedDate = this.moment(execution.reason.createdDate);
 
@@ -345,7 +345,7 @@
      * @param {object} event - Last HCE event of an execution
      * @returns {object} - Content required by UX to display the execution result
      */
-    determineExecutionResult: function(event) {
+    determineExecutionResult: function (event) {
       var hasCompleted =
         event.type === this.eventTypes.PIPELINE_COMPLETED ||
         event.type === this.eventTypes.WATCHDOG_TERMINATED ||
@@ -370,7 +370,7 @@
      * all executions have their events stop watching the visibileExecutions collection
      * @param {array} visibleExecutions - List of executions that are visible to the user
      */
-    updateVisibleExecutions: function(visibleExecutions) {
+    updateVisibleExecutions: function (visibleExecutions) {
       // Nothing visible? Nothing to update
       if (!visibleExecutions || visibleExecutions.length === 0) {
         return;
@@ -393,14 +393,14 @@
 
       // Once all the events for every visible execution has completed parse those events to determine what the
       // execution's 'result' is.
-      that.$q.all(fetchEventsPromises).then(function() {
+      that.$q.all(fetchEventsPromises).then(function () {
         for (var i = 0; i < visibleExecutions.length; i++) {
           var execution = visibleExecutions[i];
           that.parseExecution(execution, that.eventsPerExecution[execution.id]);
         }
 
         // Also check that there are more events to fetch. If not then stop watching this collection
-        var eventsStillToFetch = _.findIndex(that.parsedHceModel.pipelineExecutions, function(execution) {
+        var eventsStillToFetch = _.findIndex(that.parsedHceModel.pipelineExecutions, function (execution) {
           return angular.isUndefined(that.eventsPerExecution[execution.id]);
         });
 
@@ -416,7 +416,7 @@
 
     mockEvents: 0,
 
-    randomString: function(length) {
+    randomString: function (length) {
       var text = "";
       var possible = "ABCDEFG HIJKLMN OPQRSTUV WXYZabcde fghi jklmn opqrstu vwxyz01 2345 6789 ";
 
@@ -426,18 +426,18 @@
       return text;
     },
 
-    randomNumber: function(min, max) {
+    randomNumber: function (min, max) {
       var result = Math.floor(Math.random() * (max - min + 1)) + min;
       return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
-    createMockExecutions: function() {
+    createMockExecutions: function () {
       var that = this;
 
       function createRandomExecution() {
-        var authors = [ 'DBaldwin', 'JAubrey', 'GNuman', 'BAtman', 'MAli', 'btat', 'richard-cox' ];
-        var types = [ 'manual' ];
-        var results = [ 'Failure'];
+        var authors = ['DBaldwin', 'JAubrey', 'GNuman', 'BAtman', 'MAli', 'btat', 'richard-cox'];
+        var types = ['manual'];
+        var results = ['Failure'];
         return {
           concoursePipelineId: that.randomString(20),
           id: that.mockExecutions++,
@@ -455,13 +455,13 @@
       }
 
       var result = [];
-      for(var i=0; i<that.addMock; i++) {
+      for (var i = 0; i < that.addMock; i++) {
         result.push(createRandomExecution());
       }
       return result;
     },
 
-    createMockEvents: function(executionId) {
+    createMockEvents: function (executionId) {
       function createEvent(id, type, state, startOffset, endOffset, artifactId) {
         return {
           id: id,
@@ -477,12 +477,13 @@
       }
 
       var mod = executionId % 4;
-      var states = [ this.eventStates.FAILED, this.eventStates.SUCCEEDED ];
-      var terminatedStates = [ this.eventTypes.PIPELINE_COMPLETED, this.eventTypes.WATCHDOG_TERMINATED ];
+      var states = [this.eventStates.FAILED, this.eventStates.SUCCEEDED];
+      var terminatedStates = [this.eventTypes.PIPELINE_COMPLETED, this.eventTypes.WATCHDOG_TERMINATED];
       var startTime = this.randomNumber(1, 60000);
 
 
       var that = this;
+
       function iterateTime() {
         startTime = startTime - that.randomNumber(1, startTime);
         startTime = startTime > 0 ? startTime : 0;
@@ -494,8 +495,8 @@
         events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
         events.push(createEvent(this.mockEvents++, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
         events.push(createEvent(this.mockEvents++, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-        var terminatedState = terminatedStates[this.randomNumber(0, terminatedStates.length -1)];
-        var state = terminatedState === this.eventTypes.WATCHDOG_TERMINATED ? this.eventStates.FAILED : states[this.randomNumber(0, states.length-1)]
+        var terminatedState = terminatedStates[this.randomNumber(0, terminatedStates.length - 1)];
+        var state = terminatedState === this.eventTypes.WATCHDOG_TERMINATED ? this.eventStates.FAILED : states[this.randomNumber(0, states.length - 1)]
         events.push(createEvent(this.mockEvents++, terminatedState, state, startTime, iterateTime(), 1));
       }
       if (mod === 2) {

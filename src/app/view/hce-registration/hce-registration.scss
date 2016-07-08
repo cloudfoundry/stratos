@@ -1,7 +1,10 @@
 .hce-registration {
-  margin-right: 120px;
+
+    margin: 0 $hpe-unit-space * 5;
 
   .modal-footer {
-    text-align: left;
+    text-align: right;
+    padding: $hpe-unit-space 0 0 0;
+    margin-top: $hpe-unit-space * 2;
   }
 }
