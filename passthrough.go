@@ -142,6 +142,18 @@ func (p *portalProxy) validateCNSIList(cnsiList []string) error {
 	return nil
 }
 
+func fwdCNSIStandardHeaders(cnsiRequest CNSIRequest, req *http.Request) {
+	for k, v := range cnsiRequest.Header {
+		switch {
+		case k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cnap-"):
+		// Skip these. Note: "Referer" causes HCF to fail with a 403
+		default:
+			// Forwarding everything else
+			req.Header[k] = v
+		}
+	}
+}
+
 func (p *portalProxy) proxy(c echo.Context) error {
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
@@ -155,6 +167,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 
 	// Temporarily copy this header over to allow us to skip auth for HCE calls
 	// until it has authentcation set up. It'll be used in doOauthFlowRequest later
+	// [julbra] Is this not already copied by getEchoHeaders(c)?
 	header.Add("x-cnap-skip-token-auth", c.Request().Header().Get("x-cnap-skip-token-auth"))
 
 	portalUserGUID, err := getPortalUserGUID(c)
@@ -173,9 +186,6 @@ func (p *portalProxy) proxy(c echo.Context) error {
 			err := errors.New("Requested passthrough to multiple CNSIs. Only single CNSI passthroughs are supported.")
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-
-		// TODO: Pass headers through in all cases, not just single pass through  https://jira.hpcloud.net/browse/TEAMFOUR-635
-		//req.Header = header
 	}
 
 	// send the request to each CNSI
@@ -236,9 +246,8 @@ func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest
 		goto End
 	}
 
-	if cnsiRequest.PassThrough {
-		req.Header = cnsiRequest.Header
-	}
+	// Copy original headers through, except custom portal-proxy Headers
+	fwdCNSIStandardHeaders(cnsiRequest, req)
 
 	res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	if err != nil {
