@@ -158,7 +158,7 @@
       // TODO(kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
       /* eslint-enable */
       this.cnsiModel.list().then(function () {
-        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
+        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
         if (hceCnsis.length > 0) {
           that.hceCnsi = hceCnsis[0];
           that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
@@ -236,7 +236,7 @@
      */
     updateSummary: function () {
       var that = this;
-      return this.model.getAppSummary(this.cnsiGuid, this.id).then(function() {
+      return this.model.getAppSummary(this.cnsiGuid, this.id).then(function () {
         // Convenience property, rather than verbose html determine which build pack to use here. Also resolves issue
         // where ng-if expressions (with function) were not correctly updating after on scope application.summary
         // changed
@@ -314,7 +314,7 @@
       this.showOrHideLaunchApp(null, newRoutes);
     },
 
-    showOrHideLaunchApp: function(newState, newRoutes) {
+    showOrHideLaunchApp: function (newState, newRoutes) {
       var state = _.isNil(newState) ? this.model.application.summary.state : newState;
       var routes = _.isNil(newRoutes) ? this.model.application.summary.routes : newRoutes;
       this.appActions[0].hidden = _.isNil(routes) || routes.length === 0 || state !== 'STARTED';

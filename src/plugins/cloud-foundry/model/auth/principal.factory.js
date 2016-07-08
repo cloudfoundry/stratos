@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -29,7 +29,7 @@
   function PrincipalFactory(modelManager) {
 
     return {
-      create: function(authInfo) {
+      create: function (authInfo) {
 
         var Principal = modelManager.retrieve('cloud-foundry.model.auth.principal');
         return new Principal(authInfo.username,

@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -74,21 +74,21 @@
      * @name setActions
      * @description Set the contents of the tile's action menu
      */
-    setActions: function() {
+    setActions: function () {
       var that = this;
       this.actions = [];
 
       if (this.service.isConnected) {
         this.actions.push({
           name: gettext('Disconnect'),
-          execute: function() {
+          execute: function () {
             that.disconnect(that.service.guid);
           }
         });
       } else {
         this.actions.push({
           name: gettext('Connect'),
-          execute: function() {
+          execute: function () {
             that.connect(that.service);
           }
         });
@@ -97,7 +97,7 @@
       if (this.currentUserAccount.isAdmin()) {
         this.actions.push({
           name: gettext('Unregister'),
-          execute: function() {
+          execute: function () {
             that.unregister(that.service);
           }
         });
@@ -110,7 +110,7 @@
      * @name setAccountStatus
      * @description Determine the account status for the connected user
      */
-    setAccountStatus: function() {
+    setAccountStatus: function () {
       /* eslint-disable no-warning-comments */
       //TODO (RC): See TEAMFOUR-723. Need to fetch account info from scope. Dependent on TEAMFOUR-205 + TEAMFOUR-617.
       /* eslint-enable no-warning-comments */
@@ -123,7 +123,7 @@
      * @name setUserCount
      * @description Determine the number of users associated with this cluster
      */
-    setUserCount: function() {
+    setUserCount: function () {
       if (!this.service.isConnected) {
         return;
       }
@@ -131,7 +131,7 @@
       var that = this;
       // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
       // just for the count. This will help in the case the connected user does not have privileges.
-      this.cfModelUsers.listAllUsers(this.service.guid).then(function(res) {
+      this.cfModelUsers.listAllUsers(this.service.guid).then(function (res) {
         that.userCount = _.get(res, 'length', null);
       });
     },
@@ -142,7 +142,7 @@
      * @name setOrganisationCount
      * @description Determine the number of organisations associated with this cluster
      */
-    setOrganisationCount: function() {
+    setOrganisationCount: function () {
       if (!this.service.isConnected) {
         return;
       }
@@ -150,7 +150,7 @@
       var that = this;
       // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
       // just for the count. This will help in the case the connected user does not have privileges.
-      this.cfModelOrg.listAllOrganizations(this.service.guid).then(function(res) {
+      this.cfModelOrg.listAllOrganizations(this.service.guid).then(function (res) {
         that.orgCount = _.get(res, 'length', null);
       });
     },
@@ -161,7 +161,7 @@
      * @name summary
      * @description Navigate to the cluster summary page for this cluster
      */
-    summary: function() {
+    summary: function () {
       this.$state.go('endpoints.cluster', {guid: this.service.guid});
     }
 

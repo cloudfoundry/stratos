@@ -17,7 +17,7 @@
     'app.api.apiManager'
   ];
 
-  function registerAccountModel ($cookies, modelManager, apiManager) {
+  function registerAccountModel($cookies, modelManager, apiManager) {
     modelManager.register('app.model.account', new Account($cookies, apiManager));
   }
 
@@ -33,7 +33,7 @@
    * @property {object} data - the account data object
    * @class
    */
-  function Account ($cookies, apiManager) {
+  function Account($cookies, apiManager) {
     this.$cookies = $cookies;
     this.apiManager = apiManager;
     this.loggedIn = false;

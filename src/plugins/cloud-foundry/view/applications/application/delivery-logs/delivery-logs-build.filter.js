@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   // The filters
@@ -21,7 +21,7 @@
 
     var searchProperties = ['message', 'result.label', 'reason.createdDate', 'reason.author', 'reason.type'];
 
-    return function(input, predicate) {
+    return function (input, predicate) {
       return $filter('byProperties')(input, predicate.$, searchProperties);
     };
   }

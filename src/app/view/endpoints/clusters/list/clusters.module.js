@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -58,15 +58,15 @@
      * @name updateClusterList
      * @description Update the list of clusters + determine their connected status
      */
-    updateClusterList: function() {
+    updateClusterList: function () {
       var that = this;
 
       this.serviceInstances = null;
       this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
-        .then(function() {
+        .then(function () {
           that.serviceInstances = [];
           var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hcf'});
-          _.forEach(filteredInstances, function(serviceInstance) {
+          _.forEach(filteredInstances, function (serviceInstance) {
             var cloned = angular.fromJson(angular.toJson(serviceInstance));
             cloned.isConnected = _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'valid', false);
 
@@ -82,7 +82,7 @@
             that.serviceInstances.push(cloned);
           });
         })
-        .catch(function() {
+        .catch(function () {
           that.serviceInstances = false;
         });
     },
@@ -94,7 +94,7 @@
      * @description Connect this cluster using credentials about to be supplied
      * @param {string} cnsiGUID identifier of cluster
      */
-    connect: function(cnsiGUID) {
+    connect: function (cnsiGUID) {
       this.credentialsFormCNSI = cnsiGUID;
     },
 
@@ -104,7 +104,7 @@
      * @name onConnectCancel
      * @description Handle the cancel from connecting to a cluster
      */
-    onConnectCancel: function() {
+    onConnectCancel: function () {
       this.credentialsFormCNSI = false;
     },
 
@@ -114,7 +114,7 @@
      * @name onConnectCancel
      * @description Handle the success from connecting to a cluster
      */
-    onConnectSuccess: function() {
+    onConnectSuccess: function () {
       this.credentialsFormCNSI = false;
       this.updateClusterList();
     },
@@ -126,9 +126,9 @@
      * @description Disconnect this cluster
      * @param {string} cnsiGUID identifier of cluster
      */
-    disconnect: function(cnsiGUID) {
+    disconnect: function (cnsiGUID) {
       var that = this;
-      this.userServiceInstanceModel.disconnect(cnsiGUID).then(function() {
+      this.userServiceInstanceModel.disconnect(cnsiGUID).then(function () {
         that.updateClusterList();
       });
     },
@@ -139,9 +139,9 @@
      * @name register
      * @description Add a cluster to the console
      */
-    register: function() {
+    register: function () {
       var that = this;
-      this.hcfRegistration.add().then(function() {
+      this.hcfRegistration.add().then(function () {
         that.updateClusterList();
       });
     },
@@ -153,7 +153,7 @@
      * @description Remove a cluster from the console
      * @param {object} serviceInstance cnsi entry for cluster
      */
-    unregister: function(serviceInstance) {
+    unregister: function (serviceInstance) {
       var that = this;
 
       this.confirmDialog({

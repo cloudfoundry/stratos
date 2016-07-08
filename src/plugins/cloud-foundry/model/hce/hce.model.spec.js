@@ -12,7 +12,7 @@
       hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
@@ -48,7 +48,7 @@
     });
 
     it('getDeploymentTargets', function () {
-      hceModel.data.user = { id: 1 };
+      hceModel.data.user = {id: 1};
       var getDeploymentTargets = mock.hceApi.HceDeploymentApi.getDeploymentTargets();
 
       $httpBackend.when('GET', getDeploymentTargets.url).respond(200, getDeploymentTargets.response['200'].body);
@@ -85,9 +85,9 @@
     });
 
     it('createDeploymentTarget', function () {
-      hceModel.data.user = { id: 1 };
+      hceModel.data.user = {id: 1};
       var addDeploymentTarget = mock.hceApi.HceDeploymentApi
-                                  .addDeploymentTarget('name', 'url', 'username', 'password', 'org', 'space', 'cloudfoundry');
+        .addDeploymentTarget('name', 'url', 'username', 'password', 'org', 'space', 'cloudfoundry');
 
       $httpBackend.when('POST', addDeploymentTarget.url).respond(201, addDeploymentTarget.response['201'].body);
       $httpBackend.expectPOST(addDeploymentTarget.url);
@@ -106,9 +106,9 @@
     });
 
     it('createDeploymentTarget', function () {
-      hceModel.data.user = { id: 1 };
+      hceModel.data.user = {id: 1};
       var addDeploymentTarget = mock.hceApi.HceDeploymentApi
-                                  .addDeploymentTarget('name', 'url', 'username', 'password', 'org', 'space', 'cloudfoundry');
+        .addDeploymentTarget('name', 'url', 'username', 'password', 'org', 'space', 'cloudfoundry');
 
       $httpBackend.when('POST', addDeploymentTarget.url).respond(201, addDeploymentTarget.response['201'].body);
       $httpBackend.expectPOST(addDeploymentTarget.url);
@@ -120,7 +120,7 @@
     });
 
     it('createProject', function () {
-      hceModel.data.user = { id: 1 };
+      hceModel.data.user = {id: 1};
       var repo = {
         vcs: 'github',
         full_name: 'test_owner/test_repo',
@@ -133,7 +133,7 @@
         httpUrl: 'https://github.com/test_owner/test_repo'
       };
       var createProject = mock.hceApi.HceProjectApi
-                            .createProject('name', 'github', 'GithubToken', 1, 'java', 2, repo, 'master');
+        .createProject('name', 'github', 'GithubToken', 1, 'java', 2, repo, 'master');
 
       $httpBackend.when('POST', createProject.url).respond(201, createProject.response['201'].body);
       $httpBackend.expectPOST(createProject.url);

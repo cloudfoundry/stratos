@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -18,7 +18,7 @@
     $stateProvider.state('endpoints', {
       url: '/endpoints',
       abstract: true,
-      template : '<div ui-view></div>',
+      template: '<div ui-view></div>',
       data: {
         activeMenuState: 'endpoints'
       }
@@ -46,7 +46,7 @@
 
   angular.extend(Endpoints.prototype, {
 
-    onLoggedIn: function() {
+    onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('endpoints', 'endpoints.dashboard', gettext('Endpoints'));
     }

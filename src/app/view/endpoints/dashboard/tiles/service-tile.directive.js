@@ -5,7 +5,7 @@
     .module('app.view.endpoints.dashboard')
     .directive('serviceTile', serviceTile);
 
-  function serviceTile () {
+  function serviceTile() {
     return {
       scope: {
         serviceType: '@',
@@ -39,7 +39,7 @@
    * @param {object} $q - the Angular $q service
    * @constructor
    */
-  function ServiceTileController ($scope, modelManager, $state, hceRegistration, hcfRegistration, $q) {
+  function ServiceTileController($scope, modelManager, $state, hceRegistration, hcfRegistration, $q) {
 
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -54,6 +54,15 @@
     // FIXME We should use ui-router/resolve for this, but can't currently
     this.resolvedPromise = false;
     var that = this;
+
+    this.chartLabels = {
+      totalOne: gettext('Endpoint'),
+      total: gettext('Endpoints'),
+      ok: gettext('Connected'),
+      critical: gettext('Expired'),
+      unknown: gettext('Disconnected')
+    };
+
     this._listServiceInstances()
       .then(function () {
         $scope.$watchCollection(function () {
@@ -188,6 +197,14 @@
         });
     },
 
+    _updateChart: function () {
+      this.chartData = {
+        ok: this.getInstancesCountByStatus('Connected'),
+        critical: this.getInstancesCountByStatus('Expired'),
+        unknown: this.getInstancesCountByStatus('Disconnected')
+      };
+    },
+
     _updateInstances: function () {
 
       var that = this;
@@ -202,6 +219,8 @@
           angular.extend(that.serviceInstances[guid], serviceInstance);
         }
       });
+
+      this._updateChart();
     }
 
   });

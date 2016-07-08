@@ -25,10 +25,10 @@
       $scope.$apply();
       applicationCtrl = $element.controller('application');
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
-      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, { guid: {} });
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, {guid: {}});
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
@@ -111,7 +111,7 @@
 
       it('invoke `login` method - success - dev user - no hcf services', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
         $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
@@ -165,7 +165,7 @@
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(400, {});
         $httpBackend.when('GET', '/api/users/loggedIn').respond(500, {});
-        $httpBackend.when('POST', '/api/users').respond(200, { id: 1 });
+        $httpBackend.when('POST', '/api/users').respond(200, {id: 1});
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         applicationCtrl.login('dev', 'baddev');
@@ -227,7 +227,7 @@
       describe('onLoggedIn as admin', function () {
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
-            .respond(200, { account: 'admin', scope: 'cloud_controller.admin' });
+            .respond(200, {account: 'admin', scope: 'cloud_controller.admin'});
         });
 
         it('should show cluster registration if cluster count === 0', function () {
@@ -244,7 +244,7 @@
 
         it('should not show cluster registration if cluster count > 0', function () {
           var responseData = [
-            { id: 1, name: 'name', api_endpoint: { Scheme: 'http', Host: 'api.host.com' }, cnsi_type: 'hcf' }
+            {id: 1, name: 'name', api_endpoint: {Scheme: 'http', Host: 'api.host.com'}, cnsi_type: 'hcf'}
           ];
           $httpBackend.when('GET', '/pp/v1/cnsis')
             .respond(200, responseData);
@@ -261,7 +261,7 @@
       describe('onLoggedIn as dev', function () {
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
-            .respond(200, { account: 'dev', scope: 'hdp3.dev' });
+            .respond(200, {account: 'dev', scope: 'hdp3.dev'});
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
             { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
           ]);
@@ -279,7 +279,7 @@
         });
 
         it('should not show service instance registration if we have registered services', function () {
-          var mockUser = { id: 1, username: 'dev', registered: true };
+          var mockUser = {id: 1, username: 'dev', registered: true};
           var future = 50000 + (new Date()).getTime() / 1000;
 
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, [

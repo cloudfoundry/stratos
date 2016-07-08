@@ -15,7 +15,7 @@
         name: 'appName'
       }
     };
-    var cnsi = { guid: 1234, name: 'appName', url:' cluster2_url', cnsi_type: 'hce' };
+    var cnsi = {guid: 1234, name: 'appName', url: ' cluster2_url', cnsi_type: 'hce'};
     var cnsiList = [cnsi];
     var project = {name: application.summary.name, id: '4321'};
     var projects = {};
@@ -25,9 +25,9 @@
       // There's a number of places where we intercept requests to 'model' objects and supply out own response/data.
       // This could have called the actual models and then intercepted the http requests... however wanted to make
       // this test as independent as possible from anything going on in model land.
-      spyOn(obj, func).and.callFake(function() {
+      spyOn(obj, func).and.callFake(function () {
         if (reject) {
-          return $q.reject({ status: reject});
+          return $q.reject({status: reject});
         }
         if (applyResultToProp) {
           _.set(obj, applyResultToProp, result);
@@ -74,14 +74,14 @@
       expect(controller).toBeDefined();
     }
 
-    afterEach(function() {
+    afterEach(function () {
       // Not necessarily needed, but will catch any requests that have not been overwritten.
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
 
-    describe('Ctor', function() {
-      it('Initial state', function() {
+    describe('Ctor', function () {
+      it('Initial state', function () {
         fakeModelCall(cnsiModel, 'list', true, 'serviceInstances');
 
         createController();
@@ -95,7 +95,7 @@
         expect(controller.id).not.toBeNull();
       });
 
-      it('Ctor fails, CNIS request fails', function() {
+      it('Ctor fails, CNIS request fails', function () {
         fakeModelCall(cnsiModel, 'list', 500);
 
         createController();
@@ -105,7 +105,7 @@
         expect(controller.hasProject).toEqual('error');
       });
 
-      it('Ctor fails at no CNSI List', function() {
+      it('Ctor fails at no CNSI List', function () {
         fakeModelCall(cnsiModel, 'list', false, [], 'serviceInstances');
 
         createController();
@@ -115,7 +115,7 @@
         expect(controller.hasProject).toEqual('error');
       });
 
-      it('Ctor fails at no github user', function() {
+      it('Ctor fails at no github user', function () {
         fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
         fakeModelCall(hceModel, 'getUserByGithubId', 404);
         fakeModelCall(hceModel, 'createUser', false, {});
@@ -129,7 +129,7 @@
         expect(controller.hasProject).toEqual(false);
       });
 
-      it('Ctor fails at get projects', function() {
+      it('Ctor fails at get projects', function () {
         fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
         fakeModelCall(hceModel, 'getUserByGithubId', false);
         fakeModelCall(hceModel, 'createUser', false, {});
@@ -144,7 +144,7 @@
         expect(controller.hasProject).toEqual('error');
       });
 
-      it('Ctor fails at no projects', function() {
+      it('Ctor fails at no projects', function () {
         fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
         fakeModelCall(hceModel, 'getUserByGithubId', false);
         fakeModelCall(hceModel, 'createUser', false, {});
@@ -157,7 +157,7 @@
         expect(controller.hasProject).toBe(false);
       });
 
-      it('Ctor succeeds!', function() {
+      it('Ctor succeeds!', function () {
         fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
         fakeModelCall(hceModel, 'getUserByGithubId', false);
         fakeModelCall(hceModel, 'createUser', false, {});
@@ -174,16 +174,16 @@
 
     });
 
-    describe('Trigger Build', function() {
-      beforeEach(function() {
+    describe('Trigger Build', function () {
+      beforeEach(function () {
         createController(true);
         _.set(controller, 'hceCnsi.guid', cnsi.guid);
         _.set(controller, 'project', project);
       });
 
-      it('Shows slide out - success', function() {
+      it('Shows slide out - success', function () {
         // Spy on the required functions to be called as a result of trigger
-        spyOn(triggerBuild, 'open').and.callFake(function(project, guid) {
+        spyOn(triggerBuild, 'open').and.callFake(function (project, guid) {
           expect(project).toEqual(project);
           expect(guid).toEqual(cnsi.guid);
           return $q.when();
@@ -197,9 +197,9 @@
         expect(controller.updateData).toHaveBeenCalled();
       });
 
-      it('Shows slide out - failure', function() {
+      it('Shows slide out - failure', function () {
         // Spy on the required functions to be called as a result of trigger
-        spyOn(triggerBuild, 'open').and.callFake(function() {
+        spyOn(triggerBuild, 'open').and.callFake(function () {
           return $q.reject();
         });
         spyOn(controller, 'updateData');
@@ -212,8 +212,8 @@
       });
     });
 
-    describe('View Execution', function() {
-      var execution = {id: 'two' };
+    describe('View Execution', function () {
+      var execution = {id: 'two'};
       var rawExecution = {id: 'two', junkParam: true};
       var executions = [{id: 'one'}, rawExecution];
       var events = [
@@ -234,14 +234,14 @@
         two: events
       };
 
-      beforeEach(function() {
+      beforeEach(function () {
         createController(true);
         _.set(controller, 'hceCnsi.guid', cnsi.guid);
         _.set(controller, 'hceModel.data.pipelineExecutions', executions);
         _.set(controller, 'eventsPerExecution', eventsPerExecution);
       });
 
-      it('Shows detail view', function() {
+      it('Shows detail view', function () {
         // Spy on the required functions to be called as a result of trigger
         spyOn(viewExecution, 'open');
 
@@ -257,7 +257,7 @@
 
     });
 
-    describe('Fetching events', function() {
+    describe('Fetching events', function () {
 
       var event1 = {
         some: 'value1'
@@ -268,12 +268,12 @@
       var eventsPerExecution = {};
       var executionId = '1';
 
-      beforeEach(function() {
+      beforeEach(function () {
         createController(true);
         _.set(controller, 'hceCnsi.guid', cnsi.guid);
       });
 
-      afterEach(function() {
+      afterEach(function () {
         expect(hceModel.getPipelineEvents).toHaveBeenCalled();
         expect(hceModel.getPipelineEvents.calls.argsFor(0)).toBeDefined();
         expect(hceModel.getPipelineEvents.calls.argsFor(0).length).toBe(2);
@@ -281,56 +281,56 @@
         expect(hceModel.getPipelineEvents.calls.argsFor(0)[1]).toEqual(executionId);
       });
 
-      it('Failed call', function() {
+      it('Failed call', function () {
         fakeModelCall(hceModel, 'getPipelineEvents', 500);
 
-        controller.fetchEvents({}, executionId).then(function() {
+        controller.fetchEvents({}, executionId).then(function () {
           fail('Fetch should not have succeeded');
         });
       });
 
-      it('Empty call', function() {
+      it('Empty call', function () {
         fakeModelCall(hceModel, 'getPipelineEvents', false, [event1]);
         spyOn(controller, 'parseEvent');
 
-        controller.fetchEvents(eventsPerExecution, executionId).then(function() {
+        controller.fetchEvents(eventsPerExecution, executionId).then(function () {
           expect(eventsPerExecution[executionId]).toEqual([event1]);
           expect(controller.parseEvent).toHaveBeenCalledWith(event1);
-        }).catch(function() {
+        }).catch(function () {
           fail('Fetch should not have failed');
         });
 
       });
 
-      it('Some events', function() {
+      it('Some events', function () {
         var events = [event1, event2];
 
         fakeModelCall(hceModel, 'getPipelineEvents', false, events);
         spyOn(controller, 'parseEvent');
 
-        controller.fetchEvents(eventsPerExecution, executionId).then(function() {
+        controller.fetchEvents(eventsPerExecution, executionId).then(function () {
           expect(eventsPerExecution[executionId]).toEqual(events);
           expect(controller.parseEvent).toHaveBeenCalledWith(event1);
           expect(controller.parseEvent).toHaveBeenCalledWith(event2);
-        }).catch(function() {
+        }).catch(function () {
           fail('Fetch should not have failed');
         });
 
       });
     });
 
-    describe('parse event', function() {
-      beforeEach(function() {
+    describe('parse event', function () {
+      beforeEach(function () {
         createController(true);
         spyOn(controller, 'determineLatestEvent');
       });
 
-      afterEach(function() {
+      afterEach(function () {
         expect(controller.determineLatestEvent).toHaveBeenCalled();
         expect(controller.determineLatestEvent.calls.argsFor(0)[0]).toBeDefined();
       });
 
-      it('Empty event', function() {
+      it('Empty event', function () {
         var event = {};
         controller.parseEvent(event);
         expect(event.mEndDate).toBeUndefined();
@@ -339,7 +339,7 @@
         expect(event.name).toBeUndefined();
       });
 
-      it('Populated event', function() {
+      it('Populated event', function () {
         var event = {
           endDate: moment().format(),
           duration: 400,
@@ -353,7 +353,7 @@
         expect(event.name).toBeDefined();
       });
 
-      it('Populated event - calculate duration', function() {
+      it('Populated event - calculate duration', function () {
         var event = {
           startDate: moment().subtract(100, 's').format(),
           endDate: moment().format()
@@ -365,11 +365,11 @@
         expect(event.durationString).not.toEqual('Unknown');
       });
 
-      it('Populated event - event types', function() {
+      it('Populated event - event types', function () {
         //['Building', 'Testing', 'Deploying', 'watchdog', 'pipeline_completed']
         var eventTypes = _.values(controller.eventTypes);
         expect(eventTypes.length).toBeGreaterThan(0);
-        _.forEach(eventTypes, function(type) {
+        _.forEach(eventTypes, function (type) {
           var event = {
             type: type
           };
@@ -379,16 +379,16 @@
       });
     });
 
-    describe('determine latest event', function() {
+    describe('determine latest event', function () {
 
       var eventType = 'type';
 
-      beforeEach(function() {
+      beforeEach(function () {
         createController(true);
-        controller.last = { };
+        controller.last = {};
       });
 
-      it('no previous event of this type used', function() {
+      it('no previous event of this type used', function () {
         var event = {
           type: eventType
         };
@@ -396,7 +396,7 @@
         expect(controller.last[eventType]).toEqual(event);
       });
 
-      it('later event but not succeeded', function() {
+      it('later event but not succeeded', function () {
         var event = {
           type: eventType,
           mEndDate: moment()
@@ -412,7 +412,7 @@
         expect(controller.last[eventType]).toEqual(event);
       });
 
-      it('succeeded event but not later', function() {
+      it('succeeded event but not later', function () {
         var event = {
           type: eventType,
           mEndDate: moment()
@@ -429,7 +429,7 @@
         expect(controller.last[eventType]).toEqual(event);
       });
 
-      it('succeeded and later event', function() {
+      it('succeeded and later event', function () {
         var event = {
           type: eventType,
           mEndDate: moment()
@@ -448,12 +448,12 @@
 
     });
 
-    describe('parse execution', function() {
-      beforeEach(function() {
+    describe('parse execution', function () {
+      beforeEach(function () {
         createController(true);
       });
 
-      it('no events obj', function() {
+      it('no events obj', function () {
         var execution = {
           reason: {
             createdDate: moment().format()
@@ -463,7 +463,7 @@
         expect(execution.result).toBeUndefined();
       });
 
-      it('empty events obj', function() {
+      it('empty events obj', function () {
         var execution = {
           reason: {
             createdDate: moment().format()
@@ -473,7 +473,7 @@
         expect(execution.result).toBeUndefined();
       });
 
-      it('sets moment created date', function() {
+      it('sets moment created date', function () {
         var execution = {
           reason: {
             createdDate: moment().format()
@@ -483,7 +483,7 @@
         expect(execution.reason.mCreatedDate).toBeDefined();
       });
 
-      it('sets correct \'result\' property', function() {
+      it('sets correct \'result\' property', function () {
         var execution = {
           reason: {
             createdDate: moment().format()
@@ -493,7 +493,7 @@
           name: 'event name',
           artifact_id: 'artifact id'
         };
-        var events = [ event ];
+        var events = [event];
         controller.parseExecution(execution, events);
         expect(execution.result).toBeDefined();
         expect(execution.result.state).toBeDefined();
@@ -501,13 +501,13 @@
       });
     });
 
-    describe('determine execution result', function() {
+    describe('determine execution result', function () {
 
-      beforeEach(function() {
+      beforeEach(function () {
         createController(true);
       });
 
-      it('execution completed (pipeline_complete - failed)', function() {
+      it('execution completed (pipeline_complete - failed)', function () {
         var event = {
           type: controller.eventTypes.PIPELINE_COMPLETED,
           state: controller.eventStates.FAILED,
@@ -518,7 +518,7 @@
         expect(res.state).toEqual(event.state);
       });
 
-      it('execution completed (pipeline_complete - success)', function() {
+      it('execution completed (pipeline_complete - success)', function () {
         var event = {
           type: controller.eventTypes.PIPELINE_COMPLETED,
           state: controller.eventStates.SUCCEEDED,
@@ -529,7 +529,7 @@
         expect(res.state).toEqual(event.state);
       });
 
-      it('execution completed (failed event)', function() {
+      it('execution completed (failed event)', function () {
         var event = {
           type: controller.eventTypes.TESTING,
           state: controller.eventStates.FAILED,
@@ -540,7 +540,7 @@
         expect(res.state).toEqual(event.state);
       });
 
-      it('execution still running', function() {
+      it('execution still running', function () {
         var event = {
           type: controller.eventTypes.TESTING,
           name: 'label'
@@ -550,9 +550,9 @@
         expect(res.state).toEqual(controller.eventStates.RUNNING);
       });
 
-      it('results for all states', function() {
+      it('results for all states', function () {
         var types = _.values(controller.eventTypes);
-        _.forEach(types, function(type) {
+        _.forEach(types, function (type) {
           var origState = 'orig';
           var event = {
             type: type,
@@ -584,14 +584,14 @@
 
     });
 
-    describe('dynamic loading of events when execution visible - updateVisibleExecutions', function() {
-      beforeEach(function() {
+    describe('dynamic loading of events when execution visible - updateVisibleExecutions', function () {
+      beforeEach(function () {
         createController(true);
         // Call updateModel to set up watch, we'll test if this watch is correctly called
-        spyOn(hceModel, 'getProject').and.callFake(function() {
+        spyOn(hceModel, 'getProject').and.callFake(function () {
           return project;
         });
-        spyOn(hceModel, 'getPipelineExecutions').and.callFake(function() {
+        spyOn(hceModel, 'getPipelineExecutions').and.callFake(function () {
           return $q.when();
         });
         _.set(controller, 'hceModel.data.pipelineExecutions', []);
@@ -599,7 +599,7 @@
         $rootScope.$apply();
       });
 
-      it('Nothing visible? Nothing to update', function() {
+      it('Nothing visible? Nothing to update', function () {
         spyOn(controller, 'fetchEvents');
         controller.updateVisibleExecutions();
         expect(controller.fetchEvents).not.toHaveBeenCalled();
@@ -607,14 +607,14 @@
         expect(controller.fetchEvents).not.toHaveBeenCalled();
       });
 
-      it('fetch event fails', function() {
+      it('fetch event fails', function () {
         var visibleExecutions = [
           {
             id: 'one'
           }
         ];
         spyOn(controller, 'parseExecution');
-        spyOn(controller, 'fetchEvents').and.callFake(function(eventsPerExecution, id) {
+        spyOn(controller, 'fetchEvents').and.callFake(function (eventsPerExecution, id) {
           expect(eventsPerExecution).toEqual({});
           expect(id).toEqual('one');
           return $q.reject();
@@ -625,7 +625,7 @@
         expect(controller.parseExecution).not.toHaveBeenCalled();
       });
 
-      it('all events already downloaded', function() {
+      it('all events already downloaded', function () {
         var execution = {
           id: 'one',
           reason: {
@@ -646,7 +646,7 @@
         expect(controller.parseExecution).not.toHaveBeenCalled();
       });
 
-      it('fetch event succeeds', function() {
+      it('fetch event succeeds', function () {
         var execution = {
           id: 'one',
           reason: {
@@ -661,11 +661,11 @@
             id: 'three'
           }
         ];
-        var visibleExecutions = [ execution ];
-        var allExecutions = [ execution ];
+        var visibleExecutions = [execution];
+        var allExecutions = [execution];
 
         _.set(controller, 'parsedHceModel.pipelineExecutions', allExecutions);
-        spyOn(controller, 'fetchEvents').and.callFake(function(eventsPerExecution, id) {
+        spyOn(controller, 'fetchEvents').and.callFake(function (eventsPerExecution, id) {
           expect(eventsPerExecution).toEqual({});
           expect(id).toEqual('one');
           eventsPerExecution[id] = events;
@@ -689,7 +689,7 @@
 
       });
 
-      it('fetch event succeeds, watch should not be killed', function() {
+      it('fetch event succeeds, watch should not be killed', function () {
         var execution1 = {
           id: 'one',
           reason: {
@@ -710,11 +710,11 @@
             id: 'three'
           }
         ];
-        var visibleExecutions = [ execution1 ];
-        var allExecutions = [ execution1, execution2 ];
+        var visibleExecutions = [execution1];
+        var allExecutions = [execution1, execution2];
 
         _.set(controller, 'parsedHceModel.pipelineExecutions', allExecutions);
-        spyOn(controller, 'fetchEvents').and.callFake(function(eventsPerExecution, id) {
+        spyOn(controller, 'fetchEvents').and.callFake(function (eventsPerExecution, id) {
           expect(eventsPerExecution).toEqual({});
           expect(id).toEqual('one');
           eventsPerExecution[id] = events;
@@ -734,11 +734,11 @@
 
     });
 
-    describe('update data', function() {
+    describe('update data', function () {
 
       var execution;
 
-      beforeEach(function() {
+      beforeEach(function () {
         createController(true);
 
         _.set(controller, 'hceCnsi.guid', cnsi.guid);
@@ -750,12 +750,12 @@
         };
       });
 
-      it('get executions fails', function() {
-        spyOn(hceModel, 'getProject').and.callFake(function(appName) {
+      it('get executions fails', function () {
+        spyOn(hceModel, 'getProject').and.callFake(function (appName) {
           expect(appName).toEqual(application.summary.name);
           return project;
         });
-        spyOn(hceModel, 'getPipelineExecutions').and.callFake(function() {
+        spyOn(hceModel, 'getPipelineExecutions').and.callFake(function () {
           return $q.reject();
         });
         controller.updateData();
@@ -763,18 +763,18 @@
         expect(controller.parsedHceModel).toBeUndefined();
       });
 
-      it('pipeline result cloned successfully, execution is parsed', function() {
-        spyOn(hceModel, 'getProject').and.callFake(function(appName) {
+      it('pipeline result cloned successfully, execution is parsed', function () {
+        spyOn(hceModel, 'getProject').and.callFake(function (appName) {
           expect(appName).toEqual(application.summary.name);
           return project;
         });
-        spyOn(hceModel, 'getPipelineExecutions').and.callFake(function(guid, projectId) {
+        spyOn(hceModel, 'getPipelineExecutions').and.callFake(function (guid, projectId) {
           expect(guid).toEqual(cnsi.guid);
           expect(projectId).toEqual(project.id);
           _.set(hceModel, 'data.pipelineExecutions', [execution]);
           return $q.when();
         });
-        spyOn(controller, 'parseExecution').and.callFake(function(inExecution, inEvents) {
+        spyOn(controller, 'parseExecution').and.callFake(function (inExecution, inEvents) {
           expect(inExecution).toEqual(execution);
           expect(inEvents).toBeUndefined(inEvents);
         });

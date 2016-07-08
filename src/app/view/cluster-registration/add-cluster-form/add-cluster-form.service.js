@@ -11,7 +11,7 @@
     'helion.framework.widgets.detailView'
   ];
 
-  function AddClusterFormFactory (modelManager, apiManager, detailView) {
+  function AddClusterFormFactory(modelManager, apiManager, detailView) {
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
@@ -46,7 +46,7 @@
     '$uibModalInstance'
   ];
 
-  function AddClusterFormController (modelManager, context, $scope, $uibModalInstance) {
+  function AddClusterFormController(modelManager, context, $scope, $uibModalInstance) {
     var that = this;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.$uibModalInstance = $uibModalInstance;

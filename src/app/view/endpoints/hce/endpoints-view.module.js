@@ -9,7 +9,7 @@
     '$stateProvider'
   ];
 
-  function registerRoute ($stateProvider) {
+  function registerRoute($stateProvider) {
     $stateProvider.state('endpoints.hce', {
       url: '/hce',
       templateUrl: 'app/view/endpoints/hce/endpoints-view.html',
@@ -40,7 +40,7 @@
    * @param {object} $q - the Angular $q service
    * @param {object} confirmDialog - the confirm dialog service
    */
-  function EndpointsViewController (modelManager, apiManager, hceRegistration, $log, $q, confirmDialog) {
+  function EndpointsViewController(modelManager, apiManager, hceRegistration, $log, $q, confirmDialog) {
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -131,7 +131,7 @@
         return;
       }
       this.userServiceInstanceModel.disconnect(endpoint.guid)
-        .then(function success () {
+        .then(function success() {
           delete userServiceInstance.account;
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
@@ -161,7 +161,7 @@
         },
         callback: function () {
           that.serviceInstanceModel.remove(endpoint.model)
-            .then(function success () {
+            .then(function success() {
               return that._updateCurrentEndpoints(true);
             });
         }

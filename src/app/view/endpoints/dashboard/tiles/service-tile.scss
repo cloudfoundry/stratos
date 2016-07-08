@@ -1,5 +1,9 @@
 .service-tile {
 
+  &.card.panel .service-chart-panel {
+    padding: $hpe-unit-space  $hpe-unit-space * .5;
+  }
+
   .tile-btn {
     text-transform: capitalize;
     font-size: 16px;
@@ -16,14 +20,14 @@
       text-align: center;
       box-sizing: content-box;
     }
-
   }
-  .base-tile {
 
+  .base-tile {
     td {
       text-align: left;
       padding: 10px;
     }
+
     .td-red {
       color: red;
     }
@@ -33,5 +37,7 @@
     }
   }
 
+  ring-chart > svg {
+    margin-right: $hpe-unit-space * .5;
+  }
 }
-

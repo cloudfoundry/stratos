@@ -11,7 +11,7 @@
     'helion.framework.widgets.detailView'
   ];
 
-  function HceRegistrationFactory (modelManager, apiManager, detailView) {
+  function HceRegistrationFactory(modelManager, apiManager, detailView) {
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
@@ -56,7 +56,7 @@
    * @param {object} context - context object
    * @param {object} $scope - angular $scope
    */
-  function HceRegistrationController (modelManager, context, $scope) {
+  function HceRegistrationController(modelManager, context, $scope) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.context = context;
 

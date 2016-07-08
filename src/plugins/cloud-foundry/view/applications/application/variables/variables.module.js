@@ -43,8 +43,8 @@
 
     /* eslint-disable */
     this.variableActions = [
-      { name: gettext('Edit Variable'), execute: _.bind(that.editVariable, this) },
-      { name: gettext('Delete Variable'), execute: _.bind(that.deleteVariable, this) }
+      {name: gettext('Edit Variable'), execute: _.bind(that.editVariable, this)},
+      {name: gettext('Delete Variable'), execute: _.bind(that.deleteVariable, this)}
     ];
 
     this.deleteErrorMsg = gettext('An error occurred deleting this variable. Please try again.');
@@ -64,7 +64,7 @@
      * @returns {boolean} Indicating if value is an object
      * @public
      **/
-    isObject: function(v) {
+    isObject: function (v) {
       return angular.isObject(v);
     },
 
@@ -74,7 +74,7 @@
      * @returns {boolean} Indicating if the application has variables
      * @public
      **/
-    hasVariables: function() {
+    hasVariables: function () {
       return angular.isDefined(this.model.application.variables) &&
         angular.isDefined(this.model.application.variables.environment_json) &&
         Object.keys(this.model.application.variables.environment_json).length > 0;
@@ -85,7 +85,7 @@
      * @description Refreshes the application variables from HCF
      * @public
      **/
-    refreshVariables: function() {
+    refreshVariables: function () {
       var that = this;
       this.isBusy = true;
       this.fetchError = false;
@@ -94,9 +94,11 @@
           that.fetchError = false;
           that.variableNames = _.sortBy(
             _.keys(that.model.application.variables.environment_json),
-            function (v) { return v.toUpperCase() });
+            function (v) {
+              return v.toUpperCase()
+            });
         }).catch(function () {
-          that.fetchError = true;
+        that.fetchError = true;
       }).finally(function () {
         that.isBusy = false;
       })
@@ -107,9 +109,9 @@
      * @description Open the add variable dialog and add a new application variable
      * @public
      **/
-    addVariable: function() {
+    addVariable: function () {
       var that = this;
-      this.appVarsManager.add(this.cnsiGuid , this.id).then(function () {
+      this.appVarsManager.add(this.cnsiGuid, this.id).then(function () {
         that.refreshVariables();
       });
     },
@@ -120,7 +122,7 @@
      * @param {string} name - the name of the variable to edit
      * @public
      **/
-    editVariable: function(name) {
+    editVariable: function (name) {
       var that = this;
       this.appVarsManager.edit(this.cnsiGuid, this.id, name).then(function () {
         that.refreshVariables();
@@ -133,7 +135,7 @@
      * @param {string} name - the name of the variable to delete
      * @public
      **/
-    deleteVariable: function(name) {
+    deleteVariable: function (name) {
       var that = this;
       this.isBusy = true;
       this.deleteError = false;
@@ -141,10 +143,10 @@
         .then(function () {
           that.refreshVariables();
         }).catch(function () {
-          that.deleteError = name;
-        }).finally(function () {
-          that.isBusy = false;
-        });
+        that.deleteError = name;
+      }).finally(function () {
+        that.isBusy = false;
+      });
     }
   });
 })();
