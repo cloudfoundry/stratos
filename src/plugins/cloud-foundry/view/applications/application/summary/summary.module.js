@@ -9,7 +9,7 @@
     '$stateProvider'
   ];
 
-  function registerRoute ($stateProvider) {
+  function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.summary', {
       url: '/summary',
       templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/summary.html',
@@ -31,13 +31,14 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
-   * @param confirmDialog
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
+   * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    */
-  function ApplicationSummaryController (modelManager, $stateParams, addRoutesService, confirmDialog) {
+  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, confirmDialog) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.routesModel = modelManager.retrieve('cloud-foundry.model.route');

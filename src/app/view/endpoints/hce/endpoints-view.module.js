@@ -108,7 +108,9 @@
      * @param {object} serviceInstance - Service instance
      */
     connect: function (serviceInstance) {
+      /* eslint-disable no-warning-comments */
       // TODO(irfan) Test once HCE authentication is implemented (TEAMFOUR-721)
+      /* eslint-enable no-warning-comments */
       // Currently only implemented for HCF
       this.activeServiceInstance = serviceInstance;
       this.credentialsFormOpen = true;
@@ -122,7 +124,9 @@
      * @param {object} endpoint - endpoint
      */
     disconnect: function (endpoint) {
+      /* eslint-disable no-warning-comments */
       // TODO(irfan) Test once HCE authentication is implemented (TEAMFOUR-721)
+      /* eslint-enable no-warning-comments */
       var that = this;
       var userServiceInstance = that.userServiceInstanceModel.serviceInstances[endpoint.guid];
       if (angular.isUndefined(userServiceInstance)) {
@@ -271,7 +275,9 @@
       that.currentEndpoints = _.map(filteredInstances,
         function (c) {
           var endpoint = c.api_endpoint;
+          /* eslint-disable no-warning-comments */
           // FIXME Once HCE auth is implement read connection status from userServiceInstanceModel (TEAMFOUR-721)
+          /* eslint-enable no-warning-comments */
           var isConnected = true;
           if (that.isHcf()) {
             isConnected = that.userServiceInstanceModel.serviceInstances[c.guid].valid;
