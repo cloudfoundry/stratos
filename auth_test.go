@@ -71,7 +71,7 @@ func TestLoginToUAA(t *testing.T) {
 	header := res.Header()
 	setCookie := header.Get("Set-Cookie")
 
-	if !strings.HasPrefix(string(setCookie), "portal-session=") {
+	if !strings.HasPrefix(string(setCookie), "stackato-console-session=") {
 		t.Errorf("Session was not set: %v", setCookie)
 	}
 }
@@ -108,7 +108,7 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 	header := res.Header()
 	setCookie := header.Get("Set-Cookie")
 
-	if strings.HasPrefix(string(setCookie), "portal-session=") {
+	if strings.HasPrefix(string(setCookie), "stackato-console-session=") {
 		t.Errorf("Session should not be set with invalid creds: %v", setCookie)
 	}
 }
@@ -399,7 +399,7 @@ func TestLogout(t *testing.T) {
 	header := res.Header()
 	setCookie := header.Get("Set-Cookie")
 
-	if strings.HasPrefix(string(setCookie), "portal-session=") && !strings.HasPrefix(string(setCookie), "portal-session=; Max-Age=0") {
+	if strings.HasPrefix(string(setCookie), "stackato-console-session=") && !strings.HasPrefix(string(setCookie), "stackato-console-session=; Max-Age=0") {
 		t.Errorf("Session should not exist after logout: %v", setCookie)
 	}
 }
