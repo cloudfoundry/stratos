@@ -163,7 +163,7 @@
 
       // No match against the state table, so return unknown
       return {
-        label: 'Unknown',
+        label: gettext('Unknown'),
         indicator: 'error'
       };
     }
