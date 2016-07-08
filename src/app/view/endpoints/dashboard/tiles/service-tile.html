@@ -22,37 +22,10 @@
     </div>
   </div>
 
-  <div class="panel-body base-tile"
+  <div class="panel-body base-tile service-chart-panel"
        ng-if="serviceTileCtrl.serviceInstancesCount()>0 && serviceTileCtrl.resolvedPromise"
        ng-click="serviceTileCtrl.goToEndpointsView()">
-    <table>
-      <tr>
-        <th>
-          <span translate>Total Instances</span>
-          <p>{{serviceTileCtrl.serviceInstancesCount()}}</p>
-        </th>
-        <th>
-          <table>
-            <tr>
-              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S td-red"></td>
-              <td translate>Expired</td>
-              <td>{{serviceTileCtrl.getInstancesCountByStatus('Expired')}}</td>
-            </tr>
-            <tr>
-              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S"></td>
-              <td translate>Disconnected</td>
-              <td>{{serviceTileCtrl.getInstancesCountByStatus('Disconnected')}}</td>
-            </tr>
-            <tr>
-              <td class="helion-icon-lg helion-icon helion-icon-Disabled_S td-green"></td>
-              <td translate>Connected</td>
-              <td>{{serviceTileCtrl.getInstancesCountByStatus('Connected')}}</td>
-            </tr>
-          </table>
-        </th>
-      </tr>
-    </table>
-  </div>
-
+       <ring-chart labels="serviceTileCtrl.chartLabels" data="serviceTileCtrl.chartData"></ring-chart>
+ </div>
 
 </div>
