@@ -34,6 +34,10 @@
       color: #00b388;
     }
   }
+  
+  ring-chart > svg {
+    margin-right: $hpe-unit-space * .5;
+  }
 
 }
 
