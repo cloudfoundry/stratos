@@ -60,7 +60,6 @@
     var that = this;
     that.context = context;
     that.content = content;
-    that.hasToken = false;
     that.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     that.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     that.$uibModalInstance = $uibModalInstance;
@@ -91,8 +90,7 @@
     fetchCommits: function () {
       var that = this;
 
-      this.hasToken = that.githubModel.getToken();
-      if (!this.hasToken) {
+      if (!this.githubModel.isAuthenticated()) {
         return;
       }
 

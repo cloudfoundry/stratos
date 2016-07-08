@@ -319,7 +319,6 @@
      * @param {string} guid - the HCE instance GUID
      * @param {string} name - the project name
      * @param {string} vcs - the VCS type
-     * @param {string} vcsToken - the VCS token
      * @param {number} targetId - the deployment target ID
      * @param {number} buildContainerId - the build container ID
      * @param {object} repo - the repo to use
@@ -327,13 +326,12 @@
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (guid, name, vcs, vcsToken, targetId, buildContainerId, repo, branch) {
+    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch) {
       var newProject = {
         name: name,
         vcs_id: vcs.vcs_id,
         build_container_id: buildContainerId,
         deployment_target_id: targetId,
-        token: vcsToken,
         branchRefName: branch,
         repo: {
           vcs: vcs.vcs_type,
@@ -349,8 +347,14 @@
         }
       };
 
+      // Special header to insert Github token
+      var headers = angular.extend(
+        {headers: {'x-cnap-github-token-required': true}},
+        this.hceProxyPassthroughConfig
+      );
+
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .createProject(guid, newProject, {}, this.hceProxyPassthroughConfig);
+        .createProject(guid, newProject, {}, headers);
     },
 
     /**

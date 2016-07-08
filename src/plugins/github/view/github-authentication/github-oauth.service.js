@@ -44,7 +44,7 @@
       return this.$q(function (resolve, reject) {
         that.$window.addEventListener('message', function (event) {
           var message = angular.fromJson(event.data);
-          if (message.name === 'GitHub Oauth - token' && message.data && message.data.access_token) {
+          if (message.name === 'GitHub Oauth - token') {
             resolve();
             win.close();
           } else {
