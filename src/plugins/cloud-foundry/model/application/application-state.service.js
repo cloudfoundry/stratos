@@ -32,84 +32,71 @@
     var stateMetadata = {
       '?': {
         FAILED: {
-          label: 'Staging Failed',
+          label: gettext('Staging Failed'),
           indicator: 'error'
         }
       },
       PENDING: {
         '?': {
-          label: 'Pending',
+          label: gettext('Pending'),
           indicator: 'busy'
         }
       },
       LOADING: {
         '?': {
-          label: 'Loading',
+          label: gettext('Loading'),
           indicator: 'busy'
         }
       },
       STOPPED: {
         PENDING: {
-          label: 'Offline while Updating',
+          label: gettext('Offline while Updating'),
           indicator: 'warning'
         },
         STAGED: {
-          label: 'Offline',
+          label: gettext('Offline'),
           indicator: 'warning'
         },
         '*NONE*': {
-          label: 'Incomplete',
+          label: gettext('Incomplete'),
           indicator: 'warning'
         }
       },
       STARTED: {
         PENDING: {
-          label: 'Staging App',
+          label: gettext('Staging App'),
           indicator: 'busy'
         },
         'STAGED(0,0,0)': {
-          label: 'Starting App',
+          label: gettext('Starting App'),
           indicator: 'busy'
         },
         'STAGED(N,0,0)': {
-          label: 'Online',
+          label: gettext('Online'),
           indicator: 'ok'
         },
         'STAGED(0,N,0)': {
-          label: 'Crashed',
+          label: gettext('Crashed'),
           indicator: 'error'
         },
         'STAGED(0,0,N)': {
-          label: 'Crashing',
+          label: gettext('Crashing'),
           indicator: 'error'
         },
         'STAGED(0,N,N)': {
-          label: 'Crashing',
+          label: gettext('Crashing'),
           indicator: 'error'
         },
         'STAGED(N,N,0)': {
-          label: 'Partially Online',
+          label: gettext('Partially Online'),
           indicator: 'warning'
         },
         'STAGED(N,0,N)': {
-          label: 'Partially Online',
+          label: gettext('Partially Online'),
           indicator: 'warning'
         }
       }
     };
-
-    // Localize the labels in the state metadata lookup object
-    function localizeLabels(obj) {
-      _.each(obj, function(item) {
-        if (item.label) {
-          item.label = gettext(item.label);
-        } else {
-          localizeLabels(item);
-        }
-      });
-    };
-
-    localizeLabels(stateMetadata);
 
     // This service supports a single 'get' method
     return {
