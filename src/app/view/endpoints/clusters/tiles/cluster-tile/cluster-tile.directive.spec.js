@@ -285,7 +285,7 @@
 
         spyOn($state, 'go');
         clusterTileCtrl.summary();
-        expect($state.go.calls.argsFor(0)).toEqual(['endpoints.cluster', {guid: initialService.guid}]);
+        expect($state.go.calls.argsFor(0)).toEqual(['endpoint.clusters.cluster.detail', {guid: initialService.guid}]);
         expect($state.go.calls.count()).toEqual(1);
 
       });

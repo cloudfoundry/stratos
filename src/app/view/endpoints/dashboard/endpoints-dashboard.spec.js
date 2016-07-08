@@ -24,7 +24,7 @@
       var hceReg = $injector.get('app.view.hceRegistration');
       var hcfReg = $injector.get('app.view.hcfRegistration');
 
-      var EndpointsDashboardController = $state.get('endpoints.dashboard').controller;
+      var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
       controller = new EndpointsDashboardController(modelManager, $state, hceReg, hcfReg, $q);
 
       var items = [{

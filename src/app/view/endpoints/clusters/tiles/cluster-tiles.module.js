@@ -2,9 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.clusters', [
-      'app.view.endpoints.cluster'
-    ])
+    .module('app.view.endpoints.clusters.tiles', [])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -12,15 +10,15 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoints.clusters', {
-      url: '/clusters',
-      templateUrl: 'app/view/endpoints/clusters/list/clusters.html',
-      controller: ClustersController,
+    $stateProvider.state('endpoint.clusters.tiles', {
+      url: '',
+      templateUrl: 'app/view/endpoints/clusters/tiles/cluster-tiles.html',
+      controller: ClusterTilesController,
       controllerAs: 'clustersCtrl'
     });
   }
 
-  ClustersController.$inject = [
+  ClusterTilesController.$inject = [
     'app.model.modelManager',
     '$q',
     'app.view.hcfRegistration',
@@ -28,14 +26,14 @@
   ];
 
   /**
-   * @name ClustersController
+   * @name ClusterTilesController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $q - the angular $q service
    * @param {object} hcfRegistration - hcfRegistration - HCF Registration detail view service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    */
-  function ClustersController(modelManager, $q, hcfRegistration, confirmDialog) {
+  function ClusterTilesController(modelManager, $q, hcfRegistration, confirmDialog) {
     this.$q = $q;
     this.hcfRegistration = hcfRegistration;
     this.confirmDialog = confirmDialog;
@@ -50,7 +48,7 @@
     this.updateClusterList();
   }
 
-  angular.extend(ClustersController.prototype, {
+  angular.extend(ClusterTilesController.prototype, {
 
     /**
      * @namespace app.view.endpoints.clusters

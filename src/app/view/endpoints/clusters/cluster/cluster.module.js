@@ -2,7 +2,10 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.cluster', [])
+    .module('app.view.endpoints.clusters.cluster', [
+      'app.view.endpoints.clusters.cluster.detail',
+      'app.view.endpoints.clusters.cluster.organization'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -10,11 +13,10 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoints.cluster', {
-      url: '/cluster/:guid',
-      templateUrl: 'app/view/endpoints/clusters/cluster/cluster.html',
-      controller: ClusterController,
-      controllerAs: 'clusterController'
+    $stateProvider.state('endpoint.clusters.cluster', {
+      url: '/:guid',
+      abstract: true,
+      template: '<ui-view/>'
     });
   }
 

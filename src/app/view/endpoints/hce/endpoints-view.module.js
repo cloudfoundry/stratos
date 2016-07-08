@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoints.hce', {
+    $stateProvider.state('endpoint.hce', {
       url: '/hce',
       templateUrl: 'app/view/endpoints/hce/endpoints-view.html',
       controller: EndpointsViewController,
