@@ -98,6 +98,20 @@
       }
     };
 
+    // Localize the labels in the state metadata lookup object
+    function localizeLabels(obj) {
+      _.each(obj, function(item) {
+        if (item.label) {
+          item.label = gettext(item.label);
+        } else {
+          localizeLabels(item);
+        }
+      });
+    };
+
+    localizeLabels(stateMetadata);
+
+    // This service supports a single 'get' method
     return {
       get: get
     };
