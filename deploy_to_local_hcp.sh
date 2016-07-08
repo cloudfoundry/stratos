@@ -9,7 +9,7 @@ NODE_IP=192.168.200.3
 TAG=$1
 if [ -z "$1" ]
   then
-    echo "You must supply the tag of a specific release to deply. No tag parameter supplied."
+    echo "You must supply the tag of a specific release to deploy. No tag parameter supplied."
     exit 1
 fi
 

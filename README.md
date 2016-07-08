@@ -90,6 +90,20 @@ $ curl -Ss http://192.168.200.2:8080/api/v1/namespaces/ucp/services/ipmgr | jq '
 $ curl -X DELETE http://192.168.200.3:<port>/v1/instances/cnapconsole
 ```
 
+## Deploying the Console against HCP externally (AWS, etc.)
+
+1. Grab the service definition (SDL) and instance definition (IDL) json files for a specific build. Typically, these are located in the HSM bucket on Amazon AWS S3.
+
+2. If you haven't already done so, you will need to register your instance of the Console with GitHub.  Once your application is registered with GitHub, you will be have a client id & client secret associated with that application.
+
+3. The SDL file (sdl.json) is ready to be used without changes.
+
+4. Open the IDL file (instance.json) and scroll to the bottom.
+
+  a. Replace "\__REPLACE_WITH_OAUTH_CLIENT_ID\__" with your GitHub registered client id.
+
+  b. Replace "\__REPLACE_WITH_OAUTH_CLIENT_SECRET\__" with your GitHub registered client secret.
+
 ## Useful commands
 
 1. List Registry contents
