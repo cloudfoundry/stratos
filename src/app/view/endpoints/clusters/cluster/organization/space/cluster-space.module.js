@@ -26,8 +26,6 @@
 
   function ClusterSpaceController(modelManager, $stateParams) {
     this.guid = $stateParams.guid;
-    this.org = $stateParams.org;
-    this.space = $stateParams.space;
   }
 
   angular.extend(ClusterSpaceController.prototype, {});

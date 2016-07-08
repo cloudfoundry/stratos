@@ -25,7 +25,7 @@
 
   function ClusterSpaceController(modelManager, $stateParams) {
     this.guid = $stateParams.guid;
-    this.org = $stateParams.org;
+    this.organization = $stateParams.organization;
     this.space = $stateParams.space;
   }
 

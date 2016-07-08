@@ -2,9 +2,7 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.clusters.cluster.organization', [
-      'app.view.endpoints.clusters.cluster.organization.space'
-    ])
+    .module('app.view.endpoints.clusters.cluster.organization')
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -12,10 +10,11 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint.clusters.cluster.organization', {
-      url: '/:org',
-      abstract: true,
-      template: '<ui-view/>'
+    $stateProvider.state('endpoint.clusters.cluster.organization.detail', {
+      url: '',
+      templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/cluster-organization-detail.html',
+      controller: ClusterOrgController,
+      controllerAs: 'clusterController'
     });
   }
 
@@ -26,7 +25,7 @@
 
   function ClusterOrgController(modelManager, $stateParams) {
     this.guid = $stateParams.guid;
-    this.org = $stateParams.org;
+    this.organization = $stateParams.organization;
   }
 
   angular.extend(ClusterOrgController.prototype, {});
