@@ -8,7 +8,7 @@
       Scheme: 'https',
       Host: 'api.test.com',
       Path: ''
-    }
+    };
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -160,7 +160,6 @@
         expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
 
-
       it('invoke `login` method - failure with bad credentials', function () {
         applicationCtrl.loggedIn = false;
         $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(400, {});
@@ -279,7 +278,6 @@
         });
 
         it('should not show service instance registration if we have registered services', function () {
-          var mockUser = {id: 1, username: 'dev', registered: true};
           var future = 50000 + (new Date()).getTime() / 1000;
 
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, [

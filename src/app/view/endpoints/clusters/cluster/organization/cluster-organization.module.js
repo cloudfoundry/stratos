@@ -24,7 +24,8 @@
     '$stateParams'
   ];
 
-  function ClusterOrgController(modelManager, $stateParams) {  }
+  function ClusterOrgController(modelManager, $stateParams) {}  // eslint-disable-line no-unused-vars
 
   angular.extend(ClusterOrgController.prototype, {});
+
 })();
