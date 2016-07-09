@@ -67,7 +67,7 @@
 
       it('check initial state', function () {
         expect(clusterTileCtrl.actions).toBeDefined();
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toEqual(false);
+        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeUndefined();
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
 
@@ -89,7 +89,7 @@
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setActions();
 
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toEqual(false);
+        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeUndefined();
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Disconnect');
       });
@@ -98,7 +98,7 @@
         clusterTileCtrl.service.isConnected = false;
         clusterTileCtrl.setActions();
 
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toEqual(false);
+        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeUndefined();
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
       });

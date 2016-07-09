@@ -26,6 +26,7 @@
       applicationCtrl = $element.controller('application');
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, {guid: {}});
+      $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, '');
     }));
 
     afterEach(function () {
@@ -111,7 +112,7 @@
 
       it('invoke `login` method - success - dev user - no hcf services', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', admin: false});
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
         $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
@@ -128,7 +129,7 @@
 
       it('invoke `login` method - success - admin user - no hcf services', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'admin', scope: 'ucp.admin' });
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'admin', admin: true });
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
         $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
@@ -145,7 +146,7 @@
 
       it('invoke `login` method - success - dev user - with services', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', admin: false });
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
           { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
         ]);
@@ -226,7 +227,7 @@
       describe('onLoggedIn as admin', function () {
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
-            .respond(200, {account: 'admin', scope: 'cloud_controller.admin'});
+            .respond(200, {account: 'admin', admin: true});
         });
 
         it('should show cluster registration if cluster count === 0', function () {
@@ -260,7 +261,7 @@
       describe('onLoggedIn as dev', function () {
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
-            .respond(200, {account: 'dev', scope: 'hdp3.dev'});
+            .respond(200, {account: 'dev', admin: false});
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
             { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
           ]);
