@@ -57,7 +57,7 @@
        * @returns {*}
        */
       hasAccessTo: function (operation, flags) {
-        return this.isAdmin() || flags[operation];
+        return this.isAdmin || flags[operation];
       },
 
       /**
