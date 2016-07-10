@@ -23,7 +23,7 @@ module.exports = function (config) {
       'plugins/*/plugin.config.js',
 
       'lib/helion-ui-framework/dist/**/*.html', {
-        pattern: 'lib/helion-ui-theme/dist/images/*.png',
+        pattern: 'lib/helion-ui-framework/dist/images/*.png',
         watched: false,
         included: false,
         served: true,
@@ -73,7 +73,7 @@ module.exports = function (config) {
     },
 
     proxies: {
-      '/lib/helion-ui-theme/dist/images/': '/base/lib/helion-ui-theme/dist/images/'
+      '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/'
     },
 
     reporters: ['progress', 'coverage']
