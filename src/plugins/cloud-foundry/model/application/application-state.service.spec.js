@@ -11,7 +11,7 @@
       appStateService = $injector.get('cloud-foundry.model.application.stateService');
     }));
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
@@ -31,7 +31,7 @@
         };
         var instances = [];
         var running = 0;
-        _.each(instanceSstates, function(s) {
+        _.each(instanceSstates, function (s) {
           instances.push({state: s});
           if (s === 'RUNNING') { running++; }
         });

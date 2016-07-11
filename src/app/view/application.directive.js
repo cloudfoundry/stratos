@@ -130,7 +130,9 @@
       var account = this.modelManager.retrieve('app.model.account');
 
       // Fetch the list of services instances
+      /* eslint-disable */
       // TODO: If this fails, we should show a notification message
+      /* eslint-enable */
       this.modelManager.retrieve('app.model.serviceInstance')
         .list()
         .then(function onSuccess(data) {
@@ -148,7 +150,7 @@
             } else {
               var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
               // Need to get the user's service list to determine if they have any connected
-              return userServiceInstanceModel.list().then(function() {
+              return userServiceInstanceModel.list().then(function () {
                 // Developer - allow user to connect services, if we have some and none are connected
                 that.showRegistration = userServiceInstanceModel.numValid === 0;
               });

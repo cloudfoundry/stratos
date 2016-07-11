@@ -15,10 +15,10 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoints', {
-      url: '/endpoints',
+    $stateProvider.state('endpoint', {
+      url: '/endpoint',
       abstract: true,
-      template: '<div ui-view></div>',
+      template : '<ui-view/>',
       data: {
         activeMenuState: 'endpoints'
       }
@@ -48,7 +48,7 @@
 
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoints', 'endpoints.dashboard', gettext('Endpoints'));
+      menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'));
     }
 
   });

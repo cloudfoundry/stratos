@@ -123,12 +123,7 @@
       if (this.adminOverride) {
         return false;
       }
-      var ADMIN_SCOPES = [
-        'cloud_controller.admin',
-        'ucp.admin'
-      ];
-      return angular.isDefined(this.data.scope) &&
-        _.intersection(this.data.scope, ADMIN_SCOPES).length > 0;
+      return this.data.isAdmin;
     },
 
     /**
@@ -144,7 +139,7 @@
       var loginRes = response.data;
       this.data = {
         username: loginRes.account,
-        scope: loginRes.scope ? loginRes.scope.split(' ') : []
+        isAdmin: loginRes.admin
       };
     },
 
@@ -155,7 +150,8 @@
      * @private
      */
     onLoggedOut: function () {
-      this.$cookies.remove('portal-session');
+      var sessionName = this.apiManager.retrieve('app.api.account').sessionName;
+      this.$cookies.remove(sessionName);
       this.loggedIn = false;
       delete this.data;
     }

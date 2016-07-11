@@ -26,7 +26,7 @@
       var hceReg = $injector.get('app.view.hceRegistration');
       var log = $injector.get('$log');
 
-      var EndpointsViewController = $state.get('endpoints.hce').controller;
+      var EndpointsViewController = $state.get('endpoint.hce').controller;
       controller = new EndpointsViewController(modelManager, apiManager, hceReg, log, $q);
 
       items = [{

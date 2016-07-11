@@ -22,15 +22,15 @@
   function BaseAccess(principal) {
     return {
       create: function () {
-        return principal.isAdmin();
+        return principal.isAdmin;
       },
 
       update: function () {
-        return principal.isAdmin();
+        return principal.isAdmin;
       },
 
       delete: function () {
-        return principal.isAdmin();
+        return principal.isAdmin;
       },
 
       _doesContainGuid: function (array, guid) {

@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoints.dashboard', {
+    $stateProvider.state('endpoint.dashboard', {
       url: '',
       templateUrl: 'app/view/endpoints/dashboard/endpoints-dashboard.html',
       controller: EndpointsDashboardController,
