@@ -33,23 +33,29 @@
     this.$state = $state;
     this.actions = [];
     this.setActions();
-
-    console.log('organizationTileCtrl.organization.name', JSON.stringify(this.organization));
   }
 
   angular.extend(OrganizationTileController.prototype, {
 
     setActions: function () {
       this.actions.push({
-        name: 'Test',
+        name: 'Edit Organization',
         execute: function () {
-          console.log('Test');
+        }
+      });
+      this.actions.push({
+        name: 'Delete Organization',
+        execute: function () {
+        }
+      });
+      this.actions.push({
+        name: 'Assign User(s)',
+        execute: function () {
         }
       });
     },
 
     summary: function () {
-      console.log('This is', this);
     }
 
   });

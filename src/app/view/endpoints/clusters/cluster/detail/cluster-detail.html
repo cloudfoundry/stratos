@@ -1,12 +1,38 @@
-<h1>{{ clusterController.clusterName }}</h1>
-<div ng-if="clusterController.orgs === null" class="message-box message-box-no-bg">
-  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
-</div>
-<div ng-if="clusterController.organizations === false" class="message-box message-box-no-bg">
-  <div translate>An error occurred retrieving organizations</div>
-</div>
-<div ng-if="clusterController.organizations">
-  <div class="clusters-card col-md-4 col-sm-1" ng-repeat="organization in clusterController.organizations">
-    <organization-tile organization="organization"></organization-tile>
+<div class="cluster-detail col-md-9 col-sm-12">
+  <h1 style="height: 40px">{{ clusterController.cluster.name }}</h1>
+
+  <!--TODO directive?-->
+  <div class="cluster-detail-panel">
+    Placeholder for Cluster Details<br>
+    CF Endpoint URL:
+    {{ clusterController.cluster.api_endpoint.Scheme }}://{{ clusterController.cluster.api_endpoint.Host }}
   </div>
+
+  <ul class="application-nav nav nav-tabs col-sm-12">
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.organizations" translate>
+        Organizations
+      </a>
+    </li>
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.users" translate>
+        Users
+      </a>
+    </li>
+  </ul>
+  <ui-view></ui-view>
+
 </div>
+
+<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
+  <li ng-repeat="clusterAction in clusterController.clusterActions">
+    <button class="btn btn-link btn-border-less"
+            ng-disabled="clusterAction.disabled"
+            ng-hide="clusterAction.hidden"
+            ng-click="clusterAction.execute()">
+      <i ng-class="clusterAction.icon"></i> {{ clusterAction.name }}
+    </button>
+  </li>
+</ul>
+
+

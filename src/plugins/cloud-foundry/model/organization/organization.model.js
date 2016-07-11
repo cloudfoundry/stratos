@@ -13,11 +13,12 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'app.utils.utilsService',
+    'userInfoService',
     '$q'
   ];
 
-  function registerOrgModel(modelManager, apiManager, utils, $q) {
-    modelManager.register('cloud-foundry.model.organization', new Organization(apiManager, utils, $q));
+  function registerOrgModel(modelManager, apiManager, utils, userInfoService, $q) {
+    modelManager.register('cloud-foundry.model.organization', new Organization(apiManager, utils, userInfoService, $q));
   }
 
   /**
@@ -27,10 +28,11 @@
    * @property {app.api.apiManager} apiManager - the API manager
    * @class
    */
-  function Organization(apiManager, utils, $q) {
+  function Organization(apiManager, utils, userInfoService, $q) {
     this.apiManager = apiManager;
     this.$q = $q;
     this.utils = utils;
+    this.userInfoService = userInfoService;
 
     var passThroughHeader = {
       'x-cnap-passthrough': 'true'
@@ -95,15 +97,26 @@
       var usedMemP = orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig);
       var instancesP = orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig);
       var quotaP = orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig);
-      var rolesP = orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig).then(function (res) {
-        console.log('RetrievingRolesOfAllUsersInOrganization', res);
-      });
 
-      var userInfoP = that.apiManager.retrieve('app.api.account').userInfo().then(function (res) {
-        console.log('userInfo', res);
+      var rolesP = orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig);
+      var userInfoP = that.userInfoService.userInfo();
 
-      }, function (error) {
-        console.log('userInfo error', error);
+      that.$q.all({roles: rolesP, userInfo: userInfoP}).then(function(values) {
+        // console.log('Roles:', values.roles);
+        // console.log('userInfo:', values.userInfo);
+        // Find our user in the list of all OrgUsers
+        var userGuid;
+        for (var i = 0; i < values.userInfo.data.length; i++) {
+          var userPerms = values.userInfo.data[i];
+          if (userPerms.type === 'hcf' && userPerms.cnsi_guid === cnsiGuid) {
+            userGuid = userPerms.user_guid;
+            break;
+          }
+        }
+        if (!userGuid) {
+          throw new Error('Failed to get HCF user GUID');
+        }
+
       });
 
 
@@ -112,9 +125,9 @@
           var spaces = res.data.resources;
           var promises = [];
           _.forEach(spaces, function (space) {
-            console.log('a space: ', space);
+            // console.log('a space: ', space);
             var promise = spaceApi.ListAllAppsForSpace(space.metadata.guid, params, httpConfig).then(function (res2) {
-              console.log('All apps: ', res2);
+              // console.log('All apps: ', res2);
               return res2.data.resources.length;
             });
             promises.push(promise);
@@ -145,7 +158,11 @@
 
         // var memQuota = that.utils.mbToHumanSize(-1); // test infinite quota
         details.memory_utilization_percentage = (100 * usedMem / memQuota).toFixed(1);
-        details.memory_utilization = usedMemHuman + ' / ' + memQuotaHuman + ' [' + details.memory_utilization_percentage + '%]';
+        // details.memory_utilization = usedMemHuman + ' / ' + memQuotaHuman + ' [' + details.memory_utilization_percentage + '%]';
+        details.memory_utilization = usedMemHuman + ' / ' + memQuotaHuman;
+
+        details.mem_used = 1024 * usedMem;
+        details.mem_quota = 1024 * memQuota;
 
         // Set instances utilisation
         var instancesUsed = vals.instances.data.instance_usage;

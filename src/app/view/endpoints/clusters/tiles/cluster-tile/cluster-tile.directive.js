@@ -162,7 +162,7 @@
      * @description Navigate to the cluster summary page for this cluster
      */
     summary: function () {
-      this.$state.go('endpoint.clusters.cluster.detail', {guid: this.service.guid});
+      this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: this.service.guid});
     }
 
   });

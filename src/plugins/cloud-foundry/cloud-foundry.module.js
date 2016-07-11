@@ -42,12 +42,6 @@
       // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
       if (this.$location.path() === '') {
         this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
-      } else if (this.$state.current.name !== '') {
-        // If $location.path() is not empty and the state is set, ui-router won't reload for us
-        // We reload manually to trigger any $stateChangeSuccess logic
-
-        // N.B we only reach this after pasting a deep URL in a new tab from a non-loggedIn state
-        this.$state.reload();
       }
     },
 

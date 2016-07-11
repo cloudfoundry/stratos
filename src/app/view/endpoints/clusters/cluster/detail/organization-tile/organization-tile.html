@@ -12,5 +12,8 @@
     <dd>{{organizationTileCtrl.organization.instances}}</dd>
     <dt translate>memory utilization</dt>
     <dd>{{ organizationTileCtrl.organization.memory_utilization }}</dd>
+      <percent-gauge title=""
+                     value="{{ organizationTileCtrl.organization.mem_used / organizationTileCtrl.organization.mem_quota }}"
+                     value-text="{{ organizationTileCtrl.organization.memory_utilization }}" />
   </dl>
 </gallery-card>

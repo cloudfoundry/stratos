@@ -1,0 +1,13 @@
+<div ng-if="clusterOrganizationsController.organizations === null" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="clusterOrganizationsController.organizations === false" class="message-box message-box-no-bg">
+  <div translate>An error occurred retrieving organizations</div>
+</div>
+<div class="organizations-card-container" ng-if="clusterOrganizationsController.organizations">
+  <div class="organizations-card col-md-4 col-sm-1" ng-repeat="organization in clusterOrganizationsController.organizations">
+    <organization-tile organization="organization"></organization-tile>
+  </div>
+</div>
+
+
