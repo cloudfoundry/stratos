@@ -45,4 +45,17 @@
   .table > tbody > tr > td {
     vertical-align: middle;
   }
+
+  .user-setup {
+    .page-header {
+      padding: 0;
+      margin-bottom: 0;
+      border-bottom-width: 0;
+    }
+
+    h4 {
+      margin-bottom: $hpe-unit-space * 1.5;
+    }
+
+  }
 }

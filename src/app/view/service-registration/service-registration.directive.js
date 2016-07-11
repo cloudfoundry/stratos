@@ -107,9 +107,7 @@
      */
     completeRegistration: function () {
       var that = this;
-      if (this.userCnsiModel.numValid > 0) {
-        that.showOverlayRegistration = false;
-      }
+      that.showOverlayRegistration = false;
     },
 
     /**
