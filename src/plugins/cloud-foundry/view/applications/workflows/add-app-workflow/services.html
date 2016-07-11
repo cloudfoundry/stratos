@@ -9,7 +9,7 @@
     <label class="control-label" translate>Category</label>
     <select-input
       arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-      ng-model="wizardCtrl.options.userInput.search.entity.label"
+      ng-model="wizardCtrl.options.userInput.searchCategory"
       input-options="wizardCtrl.options.serviceCategories"
       tabindex="0">
     </select-input>
@@ -18,7 +18,7 @@
 
 <ul class="media-list hpe-add-option-list">
   <li class="media service-panel"
-    ng-repeat="service in wizardCtrl.options.services | filter:wizardCtrl.options.userInput.search track by service.metadata.guid">
+    ng-repeat="service in wizardCtrl.options.services | filter:wizardCtrl.options.userInput.search:true track by service.metadata.guid">
     <service-card service="service" app="wizardCtrl.options.userInput.application" add-only="true"
       cnsi-guid="wizardCtrl.options.userInput.serviceInstance.guid">
     </service-card>

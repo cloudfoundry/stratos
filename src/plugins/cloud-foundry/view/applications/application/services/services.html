@@ -27,7 +27,7 @@
 </div>
 
 <div class="panel panel-default"
-  ng-repeat="service in applicationServicesCtrl.services | filter:applicationServicesCtrl.search track by service.metadata.guid">
+  ng-repeat="service in applicationServicesCtrl.services | filter:applicationServicesCtrl.category:true | filter:applicationServicesCtrl.search track by service.metadata.guid">
   <div class="panel-body service-panel">
     <service-card service="service" app="applicationServicesCtrl.appModel.application"
       cnsi-guid="applicationServicesCtrl.cnsiGuid"></service-card>
