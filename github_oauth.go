@@ -12,8 +12,19 @@ import (
 	"github.com/labstack/echo"
 )
 
-// TODO (wchrisjohnson): Make configurable w/a default.  https://jira.hpcloud.net/browse/TEAMFOUR-632
-// AarondL: These scopes should probably be configurable with a default.  https://jira.hpcloud.net/browse/TEAMFOUR-632
+// GitHubAuthCheckResp - Response used to tell caller whether the user has gone thru
+// the GitHub OAuth2 flow
+type GitHubAuthCheckResp struct {
+	Authorized bool `json:"authorized"`
+}
+
+// githubOAuthTokenKey - the key used to store the user's GitHub OAuth token in session
+const githubOAuthTokenKey = "github_oauth_token"
+
+// TODO (wchrisjohnson): Make configurable w/a default.
+//    https://jira.hpcloud.net/browse/TEAMFOUR-632
+// AarondL: These scopes should probably be configurable with a default.
+//    https://jira.hpcloud.net/browse/TEAMFOUR-632
 
 // Define the necessary OAuth scopes needed by the application
 var scopes = []string{"admin:repo_hook", "repo", "repo:status"}
@@ -30,9 +41,9 @@ func (p *portalProxy) handleGitHubAuth(c echo.Context) error {
 			Endpoint:     github.Endpoint,
 		}
 
-		// TODO (wchrisjohnson): TEAMFOUR-561 - Change this to something purely and
-		// significantly random and stuff it in the user's session.
-
+		// TODO (wchrisjohnson): Change this to something purely and significantly
+		// random and stuff it in the user's session.
+		//    https://jira.hpcloud.net/browse/TEAMFOUR-561
 		// AArondL: This is a configuration parameter that appears to be passed in.
 		// This means it's anything but random. The idea behind a nonce like this is
 		// to store it in the session so that the server has some identification for
@@ -43,15 +54,18 @@ func (p *portalProxy) handleGitHubAuth(c echo.Context) error {
 		oauthStateString = p.Config.GitHubOAuthState
 	)
 
-	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
+	// TODO (wchrisjohnson): SECURITY RISK - remove this log statement
+	//    https://jira.hpcloud.net/browse/TEAMFOUR-561
 	log.Printf("oauthConf: %v", oauthConf)
 
-	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
+	// TODO (wchrisjohnson): SECURITY RISK - remove this log statement
+	//    https://jira.hpcloud.net/browse/TEAMFOUR-561
 	log.Printf("oauthStateString: %s", oauthStateString)
 
 	url := oauthConf.AuthCodeURL(oauthStateString, oauth2.AccessTypeOnline)
 
-	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
+	// TODO (wchrisjohnson): SECURITY RISK - remove this log statement
+	//    https://jira.hpcloud.net/browse/TEAMFOUR-561
 	log.Printf("OAuth url: %s", url)
 
 	return c.Redirect(302, url)
@@ -84,6 +98,9 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 	)
 
 	// TODO (wchrisjohnson): TEAMFOUR-561 - Change this to a template and put in a file.
+	// This is an entry point for an XSS attack because you have no logic to
+	// escape the token at all. Printf should never be used for HTML templating
+	// because of that. Please use the html/template package to get this functionality.
 	var successHTML = `
     <!doctype html>
     <html>
@@ -91,14 +108,6 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
     <body id="github-auth-callback-page">
     <h1 class="text-center">GitHub authorization is done.</h1>
     <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
-    <script>
-      (function () {
-        window.opener.postMessage(JSON.stringify({
-          name: 'GitHub Oauth - token',
-          data: %s
-        }), window.location.origin);
-      })();
-    </script>
     </body>
     </html>`
 
@@ -123,19 +132,45 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 	// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
 	log.Printf("Got token: %+v\n", token)
 
-	// JSON Stringify the token
-	jsonStringToken, err := json.Marshal(token)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to convert token structure to JSON. '%s'\n", err)
-		log.Printf(msg)
-		return c.HTML(http.StatusInternalServerError, msg)
+	// stuff the token into the user's session
+	sessionValues := make(map[string]interface{})
+	sessionValues[githubOAuthTokenKey] = token
+
+	log.Println("Storing token in session")
+	if err = p.setSessionValues(c, sessionValues); err != nil {
+		return err
 	}
 
-	// TODO (wchrisjohnson): TEAMFOUR-561 - Convert to a template
+	return c.HTML(http.StatusOK, successHTML)
+}
 
-	// This is an entry point for an XSS attack because you have no logic to
-	// escape the token at all. Printf should never be used for HTML templating
-	// because of that. Please use the html/template package to get this functionality.
+func (p *portalProxy) verifyGitHubAuthToken(c echo.Context) error {
 
-	return c.HTML(http.StatusOK, fmt.Sprintf(successHTML, jsonStringToken))
+	log.Println("Entering verifyGitHubToken")
+
+	var GitHubOAuthTokenExists = false
+
+	// We check for the existence of the oauth token in the session
+	// we dont care about the token itself at this point.
+	log.Println("Checking session for token")
+	_, ok := p.getSessionStringValue(c, githubOAuthTokenKey)
+	if ok {
+		log.Println("GitHub OAuth token found in the session.")
+		GitHubOAuthTokenExists = true
+	}
+
+	log.Println("Preparing response")
+	authResp := &GitHubAuthCheckResp{
+		Authorized: GitHubOAuthTokenExists,
+	}
+
+	jsonString, err := json.Marshal(authResp)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+
+	return nil
 }

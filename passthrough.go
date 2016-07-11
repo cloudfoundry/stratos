@@ -34,6 +34,8 @@ type CNSIRequest struct {
 	Error    error
 }
 
+const gitHubAPIURL = "https://api.github.com/"
+
 func getEchoURL(c echo.Context) url.URL {
 	log.Println("getEchoURL")
 	u := c.Request().URL().(*standard.URL).URL
@@ -271,15 +273,107 @@ func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest
 		cnsiRequest.StatusCode = 500
 		cnsiRequest.Response = []byte(err.Error())
 		cnsiRequest.Error = err
-	} else if res.Body != nil {
-		cnsiRequest.StatusCode = res.StatusCode
-		cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
-		defer res.Body.Close()
 	}
+
+	if res.Body == nil {
+		cnsiRequest.StatusCode = 500
+		cnsiRequest.Response = []byte(err.Error())
+		cnsiRequest.Error = err
+	}
+
+	cnsiRequest.StatusCode = res.StatusCode
+	cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 End:
 	select {
 	case done <- cnsiRequest:
 	case <-kill:
 	}
+}
+
+func (p *portalProxy) github(c echo.Context) error {
+
+	log.Println("github passthru ...")
+
+	log.Printf("GitHub API URL: %s", gitHubAPIURL)
+
+	var (
+		uri    *url.URL
+		header http.Header
+		// body   io.Reader
+		// res    *http.Response
+		// req    *http.Request
+		// err error
+	)
+
+	uri = makeRequestURI(c)
+	log.Printf("URI: %+v\n", uri)
+
+	header = getEchoHeaders(c)
+	log.Printf("Headers: %+v\n", header)
+
+	// req, body, err = getRequestParts(c)
+	// if err != nil {
+	// 	return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	// }
+	// log.Printf("Request: %+v\n", req)
+	// log.Printf("Body: %+v\n", body)
+
+	url := fmt.Sprintf("%s/%s", gitHubAPIURL, "test")
+
+	return c.Redirect(302, url)
+
+	// if len(reqBody) > 0 {
+	// 	body = bytes.NewReader(reqBody)
+	// }
+	// req, err = http.NewRequest(cnsiRequest.Method, cnsiRequest.URL.String(), body)
+	// if err != nil {
+	// 	cnsiRequest.Error = err
+	// 	goto End
+	// }
+
+	// // send the request to each CNSI
+	// done := make(chan CNSIRequest)
+	// kill := make(chan struct{})
+	// for _, cnsi := range cnsiList {
+	// 	cnsiRequest := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
+	// 	go p.doRequest(cnsiRequest, done, kill)
+	// }
+	//
+	// timeout := time.After(time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second)
+	// responses := make(map[string]CNSIRequest)
+	// for range cnsiList {
+	// 	select {
+	// 	case res := <-done:
+	// 		responses[res.GUID] = res
+	// 	case <-timeout:
+	// 	}
+	// }
+	//
+	// if shouldPassthrough {
+	// 	cnsiGUID := cnsiList[0]
+	// 	res, ok := responses[cnsiGUID]
+	// 	if !ok {
+	// 		return echo.NewHTTPError(http.StatusRequestTimeout, "Request timed out")
+	// 	}
+	//
+	// 	// in passthrough mode, set the status code to that of the single response
+	// 	c.Response().WriteHeader(res.StatusCode)
+	//
+	// 	// we don't care if this fails
+	// 	_, _ = c.Response().Write(res.Response)
+	//
+	// 	return nil
+	// }
+
+	// jsonResponse := buildJSONResponse(cnsiList, responses)
+	// e := json.NewEncoder(c.Response())
+	// err = e.Encode(jsonResponse)
+	// if err != nil {
+	// 	log.Printf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
+	// }
+	// return err
+
+	// return nil
 }

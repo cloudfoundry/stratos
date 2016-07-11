@@ -281,9 +281,14 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Verify Session
 	sessionGroup.GET("/auth/session/verify", p.verifySession)
 
-	// These URLs should be prefixed with "/v1"
+	// Initiate OAuth flow against GitHub on behalf of a user
 	sessionGroup.GET("/github/oauth/auth", p.handleGitHubAuth)
+
+	// GitHub OAuth callback/response
 	sessionGroup.GET("/github/oauth/callback", p.handleGitHubCallback)
+
+	// Verify existence of GitHub token in Session
+	sessionGroup.GET("/github/oauth/verify", p.verifyGitHubAuthToken)
 
 	// CNSI operations
 	sessionGroup.GET("/cnsis", p.listCNSIs)
@@ -308,6 +313,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
+	// This is used for passthru of HCF/HCE requests
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
+
+	// This used for passthru of GitHub requests
+	group = sessionGroup.Group("/github")
+	group.Any("/*", p.github)
 }

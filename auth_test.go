@@ -551,7 +551,7 @@ func TestLoginToCNSIWithBadCreds(t *testing.T) {
 	// }
 }
 
-func TestVerifySession(t *testing.T) {
+func TestVerifyUAAPerms(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", map[string]string{
@@ -569,7 +569,7 @@ func TestVerifySession(t *testing.T) {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	if err := pp.verifySession(ctx); err != nil {
+	if err := pp.verifyUAAPerms(ctx); err != nil {
 		t.Error(err)
 	}
 
@@ -587,7 +587,7 @@ func TestVerifySession(t *testing.T) {
 
 }
 
-func TestVerifySessionNoDate(t *testing.T) {
+func TestVerifyUAAPermsNoDate(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", map[string]string{
@@ -605,7 +605,7 @@ func TestVerifySessionNoDate(t *testing.T) {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	err := pp.verifySession(ctx)
+	err := pp.verifyUAAPerms(ctx)
 	if err == nil {
 		t.Errorf("Expected an 403 error with 'Could not find session date' string. got %s", err)
 	}
@@ -621,7 +621,7 @@ func TestVerifySessionNoDate(t *testing.T) {
 
 }
 
-func TestVerifySessionExpired(t *testing.T) {
+func TestVerifyUAAPermsExpired(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", map[string]string{
@@ -639,7 +639,7 @@ func TestVerifySessionExpired(t *testing.T) {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	err := pp.verifySession(ctx)
+	err := pp.verifyUAAPerms(ctx)
 	if err == nil {
 		t.Error("Expected an 403 error with 'Session has expired' string.")
 	}
