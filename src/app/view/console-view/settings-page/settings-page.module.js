@@ -34,6 +34,8 @@
   function SettingsController(eventService, modelManager) {
     this.eventService = eventService;
     this.modelManager = modelManager;
+
+    this.model = modelManager.retrieve('app.model.account');
   }
 
   angular.extend(SettingsController.prototype, {});

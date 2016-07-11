@@ -1,6 +1,6 @@
   <div class="container registration-content col-sm-12">
       <div class="cluster-settings">
-        <div class="cluster row" ng-repeat="(name, cnsi) in clusterSettingsCtrl.serviceInstances">
+        <div class="cluster row" ng-repeat="(name, cnsi) in clusterSettingsCtrl.serviceInstances" ng-if="clusterSettingsCtrl.isValid(cnsi)">
           <div class="col-md-12 overlay">
           </div>
           <div class="col-md-4">
@@ -43,6 +43,7 @@
                   <span translate>Disconnect</span>
                 </a>
               </div>
+              <!--
                 <div class="cluster-properties">
                   <div class="cluster-property">
                     <div translate>Token Expiration</div>
@@ -53,23 +54,13 @@
                     <div>{{ cnsi.token_expiry }}</div>
                   </div>
                 </div>
+              -->
             </div>
           </div>
-    </div>
   </div>
-  <div class="fixed-footer" ng-if="clusterSettingsCtrl.overlay">
-    <span class="registration-notification" ng-if="clusterSettingsCtrl.userCnsiModel.numValid > 0"
-          translate
-          translate-n="serviceRegistrationCtrl.userCnsiModel.numValid"
-          translate-plural="{{serviceRegistrationCtrl.userCnsiModel.numValid}} clusters registered">
-      {{serviceRegistrationCtrl.userCnsiModel.numValid}} cluster registered
-    </span>
-    <button type="button" class="btn btn-primary"
-            ng-disabled="clusterSettingsCtrl.userCnsiModel.numValid === 0"
-            ng-click="clusterSettingsCtrl.completeRegistration()" translate>
-      Done
-    </button>
-  </div>
+
+</div>
+
 <flyout flyout-active="clusterSettingsCtrl.credentialsFormOpen"
         flyout-close-icon="'helion-icon helion-icon-Close'">
   <credentials-form cnsi="clusterSettingsCtrl.activeServiceInstance"

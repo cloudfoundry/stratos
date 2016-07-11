@@ -99,6 +99,21 @@
   }
 
   angular.extend(ClusterSettingsController.prototype, {
+
+    // FIXME: When HCE support authentication, update this
+    /**
+     * @function isValid
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Determines if the service is connected and can be included in the list
+     */
+    isValid: function(cnsi) {
+      if (cnsi.cnsi_type === 'hce') {
+        return true;
+      } else {
+        return cnsi.valid;
+      }
+    },
+
     /**
      * @function completeRegistration
      * @memberOf app.view.ServiceRegistrationController
