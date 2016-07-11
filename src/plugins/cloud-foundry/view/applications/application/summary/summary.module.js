@@ -22,6 +22,7 @@
     'app.model.modelManager',
     '$stateParams',
     'cloud-foundry.view.applications.application.summary.addRoutes',
+    'cloud-foundry.view.applications.application.summary.editApp',
     'helion.framework.widgets.dialog.confirm'
   ];
 
@@ -31,6 +32,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
+   * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
@@ -38,7 +40,7 @@
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    */
-  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, confirmDialog) {
+  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, editAppService, confirmDialog) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
@@ -46,6 +48,7 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.addRoutesService = addRoutesService;
     this.confirmDialog = confirmDialog;
+    this.editAppService = editAppService;
     this.userCnsiModel.list();
 
     var that = this;
@@ -133,9 +136,18 @@
      * @description tracking function for routes
      * @param {object} route route metadata
      * @returns {string} route ID
-       */
+     */
     getRouteId: function (route) {
       return route.host + '.' + route.domain.name + route.path;
+    },
+
+    /**
+     * @function editApp
+     * @description Display edit app detail view
+     * @public
+     */
+    editApp: function () {
+      this.editAppService.add(this.cnsiGuid, this.id);
     }
   });
 
