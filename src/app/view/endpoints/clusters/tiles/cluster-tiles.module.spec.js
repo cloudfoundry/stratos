@@ -148,6 +148,7 @@
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(false);
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toBeDefined();
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(false);
+        expect(clusterTilesCtrl.state).toEqual('');
       });
 
       it('cluster - connected + not expired token', function () {
@@ -163,6 +164,7 @@
         expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(true);
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(false);
+        expect(clusterTilesCtrl.state).toEqual('');
       });
 
       it('clusters - disconnected + expired token', function () {
@@ -178,16 +180,18 @@
         expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(false);
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(true);
+        expect(clusterTilesCtrl.state).toEqual('');
       });
 
       it('no clusters', function () {
         serviceInstanceModel.serviceInstances = [];
         userServiceInstanceModel.serviceInstances = {};
 
-        createCluster();
+        clusterTilesCtrl.createClusterList();
 
         expect(clusterTilesCtrl.serviceInstances).toBeDefined();
         expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(0);
+        expect(clusterTilesCtrl.state).toEqual('noClusters');
       });
     });
 
@@ -202,11 +206,11 @@
         spyOn(clusterTilesCtrl, 'refreshClusterModel').and.callThrough();
         spyOn(clusterTilesCtrl, 'createClusterList');
 
-        expect(clusterTilesCtrl.loading).toBeFalsy();
+        expect(clusterTilesCtrl.state).toEqual('loadError');
         clusterTilesCtrl.refreshClusterModel();
-        expect(clusterTilesCtrl.loading).toBeTruthy();
+        expect(clusterTilesCtrl.state).toEqual('loading');
         $scope.$digest();
-        expect(clusterTilesCtrl.loading).toBeNull();
+        expect(clusterTilesCtrl.state).toEqual('loadError');
         expect(clusterTilesCtrl.createClusterList).not.toHaveBeenCalled();
       });
 
@@ -219,11 +223,11 @@
         spyOn(clusterTilesCtrl, 'refreshClusterModel').and.callThrough();
         spyOn(clusterTilesCtrl, 'createClusterList');
 
-        expect(clusterTilesCtrl.loading).toBeFalsy();
+        expect(clusterTilesCtrl.state).toEqual('noClusters');
         clusterTilesCtrl.refreshClusterModel();
-        expect(clusterTilesCtrl.loading).toBeTruthy();
+        expect(clusterTilesCtrl.state).toEqual('loading');
         $scope.$digest();
-        expect(clusterTilesCtrl.loading).toBeFalsy();
+        expect(clusterTilesCtrl.state).toEqual('noClusters');
         expect(clusterTilesCtrl.createClusterList).toHaveBeenCalled();
       });
     });
@@ -355,32 +359,33 @@
       it('has clusters, always show them', function () {
         clusterTilesCtrl.serviceInstances = {};
         clusterTilesCtrl.serviceInstances[hcfService.guid] = hcfService;
-        clusterTilesCtrl.loading = true;
-        expect(clusterTilesCtrl.state()).toEqual('');
+        clusterTilesCtrl.updateState(true, false);
+        expect(clusterTilesCtrl.state).toEqual('');
       });
 
       it('no clusters, loading', function () {
         clusterTilesCtrl.serviceInstances = {};
-        clusterTilesCtrl.loading = true;
-        expect(clusterTilesCtrl.state()).toEqual('loading');
+        clusterTilesCtrl.updateState(true, false);
+        expect(clusterTilesCtrl.state).toEqual('loading');
       });
 
       it('no clusters, load error', function () {
         clusterTilesCtrl.serviceInstances = {};
-        clusterTilesCtrl.loading = null;
-        expect(clusterTilesCtrl.state()).toEqual('loadError');
+        clusterTilesCtrl.updateState(false, true);
+        expect(clusterTilesCtrl.state).toEqual('loadError');
       });
 
       it('no clusters, loaded', function () {
         clusterTilesCtrl.serviceInstances = {};
-        clusterTilesCtrl.loading = false;
-        expect(clusterTilesCtrl.state()).toEqual('noClusters');
+        clusterTilesCtrl.updateState(false, false);
+        expect(clusterTilesCtrl.state).toEqual('noClusters');
       });
 
       it('handles null clusters', function () {
         clusterTilesCtrl.serviceInstances = null;
         clusterTilesCtrl.loading = true;
-        expect(clusterTilesCtrl.state()).toEqual('loading');
+        clusterTilesCtrl.updateState(true, false);
+        expect(clusterTilesCtrl.state).toEqual('loading');
       });
 
     });

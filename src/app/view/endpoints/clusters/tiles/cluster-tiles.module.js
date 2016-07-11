@@ -60,14 +60,14 @@
      */
     refreshClusterModel: function () {
       var that = this;
-      this.loading = true;
+      this.updateState(true, false);
       this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
         .then(function () {
+          that.updateState(false, false);
           that.createClusterList();
-          that.loading = false;
         })
         .catch(function () {
-          that.loading = null;
+          that.updateState(false, true);
         });
     },
 
@@ -88,14 +88,13 @@
         if (cloned.isConnected) {
           cloned.hasExpired = false;
         } else {
-          /* eslint-disable camelcase */
-          var token_expiry =
+          var tokenExpiry =
             _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
-          cloned.hasExpired = new Date().getTime() > token_expiry * 1000;
-          /* eslint-enable camelcase */
+          cloned.hasExpired = new Date().getTime() > tokenExpiry * 1000;
         }
         that.serviceInstances[cloned.guid] = cloned;
       });
+      this.updateState(false, false);
     },
 
     /**
@@ -179,18 +178,25 @@
         .then(angular.bind(that, that.refreshClusterModel));
     },
 
-    state: function () {
+    /**
+     * @namespace app.view.endpoints.clusters
+     * @memberof app.view.endpoints.clusters
+     * @name updateState
+     * @description Determine the state of the model (contains clusters/doesn't contain clusters/loading/failed to load)
+     * @param {boolean} loading true if loading async data
+     * @param {boolean} loadError true if the async load of data failed
+     */
+    updateState: function (loading, loadError) {
       var hasClusters = _.get(_.keys(this.serviceInstances), 'length', 0) > 0;
       if (hasClusters) {
-        return '';
-      } else if (this.loading) {
-        return 'loading';
-      } else if (this.loading === null) {
-        return 'loadError';
-      } else if (!hasClusters) {
-        return 'noClusters';
+        this.state = '';
+      } else if (loading) {
+        this.state = 'loading';
+      } else if (loadError) {
+        this.state = 'loadError';
+      } else {
+        this.state = 'noClusters';
       }
-      return 'unknown';
     }
 
   });
