@@ -16,7 +16,9 @@
     $stateProvider.state('endpoint.clusters.cluster', {
       url: '/:guid',
       abstract: true,
-      template: '<ui-view/>'
+      template: '<ui-view/>',
+      controller: ClusterController,
+      controllerAs: 'clusterController'
     });
   }
 
@@ -27,6 +29,12 @@
 
   function ClusterController(modelManager, $stateParams) {
     this.guid = $stateParams.guid;
+
+    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.spaceModel.listAllSpaces(this.guid).then(function () {
+      console.log('heeeere');
+      //_.get(that.spaceModel, 'data.' + that.clusterGuid + 'spaces');
+    });
   }
 
   angular.extend(ClusterController.prototype, {});

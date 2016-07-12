@@ -59,6 +59,7 @@
     },
 
     summary: function () {
+      this.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: this.organization.metadata.guid});
     }
 
   });

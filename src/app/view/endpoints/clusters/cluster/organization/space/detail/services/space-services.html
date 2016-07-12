@@ -1,0 +1,43 @@
+
+ <!--{{ spaceServicesController.spaceModel.data[spaceServicesController.clusterGuid].serviceInstances[spaceServicesController.spaceGuid] }}-->
+
+<div class="space-services-table" st-table="spaceServicesController.spaceModel.data[spaceServicesController.clusterGuid].serviceInstances[spaceServicesController.spaceGuid]">
+
+  <div id="delivery-logs-builds" class="delivery-logs-builds">
+    <div class="panel panel-default">
+      <table class="table table-actionable" >
+        <thead>
+        <tr>
+          <th st-sort="entity.name" translate>SERVICE INSTANCES</th>
+          <th st-sort="entity.type" translate>TYPE</th>
+          <th translate>PLAN</th>
+          <th translate>APPLICATION ATTACHED</th>
+          <th translate>ACTION</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr
+          ng-repeat="instance in spaceServicesController.spaceModel.data[spaceServicesController.clusterGuid].serviceInstances[spaceServicesController.spaceGuid]">
+          <td>{{ instance.entity.name }}</td>
+          <td>{{ instance.entity.type }}</td>
+          <td>{{ 'instance.c' }}</td>
+          <td>{{ 'instance.d' }}</td>
+          <td>{{ 'instance.e' }}</td>
+        </tr>
+        </tbody>
+        <tfoot ng-init="spaceServicesController.showExecutions = 5"
+               ng-show="spaceServicesController.showExecutions < appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
+        <tr>
+          <td colspan="5" class="text-center">
+            <a ng-click="spaceServicesController.showExecutions = appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
+              <span translate>Show All</span> ({{appDelLogsCtrl.parsedHceModel.pipelineExecutions.length}})
+            </a>
+            <div ng-show="false" st-pagination="" st-items-by-page="spaceServicesController.showExecutions"></div>
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+
+  </div>
+</div>

@@ -88,6 +88,7 @@
       that.organizations = [];
       _.forEach(orgs, function (org) {
         that.organizationModel.getOrganizationDetails(that.guid, org).then(function (orgDetails) {
+          _.set(orgDetails, 'metadata.guid', org.metadata.guid);
           that.organizations.push(orgDetails);
 
           that.updateTotalApps();

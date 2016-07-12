@@ -15,7 +15,8 @@
     $stateProvider.state('endpoint.clusters.cluster.organization.space', {
       url: '/:space',
       abstract: true,
-      template: '<ui-view/>'
+      template: '<ui-view/>',
+      controller: ClusterSpaceController
     });
   }
 
@@ -25,7 +26,12 @@
   ];
 
   function ClusterSpaceController(modelManager, $stateParams) {
-    this.guid = $stateParams.guid;
+    var clusterGuid = $stateParams.guid;
+    var spaceGuid = $stateParams.space;
+
+    console.log('ClusterSpaceController');
+    var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    spaceModel.listAllServiceInstancesForSpace(clusterGuid, spaceGuid);
   }
 
   angular.extend(ClusterSpaceController.prototype, {});

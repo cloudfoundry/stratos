@@ -1,0 +1,77 @@
+@import 'detail/cluster-detail';
+@import 'organization/space/detail/services/space-services';
+
+
+.cluster-gallery-card {
+  &.unlink {
+    // Override some extreme oddness in gallery-card with undefined on-card-click
+    .panel-heading.linked, .panel-body.linked {
+      cursor: default;
+    }
+  }
+
+  .panel-body {
+    .col-md-6 {
+      padding-left: 0;
+    }
+    .dl-horizontal {
+      dd {
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      dd:first-of-type {
+        text-transform: lowercase;
+      }
+    }
+  }
+
+  .panel-footer {
+    background: $gallery-card-status-danger;
+    .gallery-card-status, .gallery-card-status-text {
+      padding: 4px;
+      color: white;
+    }
+    .gallery-card-status-text {
+      padding-bottom: 6px;
+    }
+  }
+}
+
+.cluster-gallery-card-container {
+
+  $card-max-width: 420px;
+  $card-layout-steps: 5;
+
+  .cluster-gallery-card-parent {
+    padding-left: 0;
+
+    @for $i from 1 through $card-layout-steps {
+      @media (min-width: $i * $card-max-width) {
+        &.responsive-grid {
+          width: percentage(1/$i);
+        }
+      }
+    }
+
+    @media (min-width: 768px) {
+      gallery-card {
+        .card .dl-horizontal dd {
+          margin-left: 100px;
+        }
+        .dl-horizontal dt {
+          width: 140px;
+        }
+      }
+    }
+  }
+
+  @for $i from $card-layout-steps through 1 {
+    @media (min-width: $i * $card-max-width) and (max-width: $card-max-width + $i * $card-max-width) {
+      >:nth-child(#{$i}n) {
+        padding-right: 0
+      }
+    }
+  }
+
+}

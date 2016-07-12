@@ -3,6 +3,7 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster.organization', [
+      'app.view.endpoints.clusters.cluster.organization.detail',
       'app.view.endpoints.clusters.cluster.organization.space'
     ])
     .config(registerRoute);
@@ -24,7 +25,11 @@
     '$stateParams'
   ];
 
-  function ClusterOrgController(modelManager, $stateParams) {  }
+  function ClusterOrgController(modelManager, $stateParams) {
+    console.log('ClusterOrgController: ', $stateParams.organization);
+  }
 
-  angular.extend(ClusterOrgController.prototype, {});
+  angular.extend(ClusterOrgController.prototype, {
+
+  });
 })();

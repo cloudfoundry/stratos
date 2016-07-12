@@ -1,0 +1,7 @@
+<div class="cluster-gallery-card-container">
+  <div class="cluster-gallery-card-parent col-md-4 col-sm-1 responsive-grid"
+       ng-repeat="(spaceGuid, space) in clusterDetailSpacesController.spaceModel.data[clusterDetailSpacesController.clusterGuid].spaces[clusterDetailSpacesController.organizationGuid]">
+    <organization-space-tile space="space"></organization-space-tile>
+  </div>
+</div>
+
