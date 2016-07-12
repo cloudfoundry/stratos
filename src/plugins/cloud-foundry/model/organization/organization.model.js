@@ -26,6 +26,8 @@
    * @name Organization
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
+   * @param {app.api.apiManager} apiManager - the API manager
+   * @property {app.api.apiManager} apiManager - the API manager 
    * @class
    */
   function Organization(apiManager, utils, userInfoService, $q) {
@@ -84,6 +86,15 @@
         });
     },
 
+    /**
+     * @function  getOrganizationDetails
+     * @memberof cloud-foundry.model.organization
+     * @description gather all sorts of details about an organization
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server
+     * @param {string} org - organization entry as returned by listAllOrganizations()
+     * @param {object} params - optional parameters
+     * @returns {promise} A promise which will be resolved with the organizations's details
+     * */
     getOrganizationDetails: function (cnsiGuid, org, params) {
 
       var that = this;
