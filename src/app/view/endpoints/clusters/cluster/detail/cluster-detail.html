@@ -1,11 +1,43 @@
 <div class="cluster-detail col-md-9 col-sm-12">
   <h1 style="height: 40px">{{ clusterController.cluster.name }}</h1>
 
-  <!--TODO directive?-->
-  <div class="cluster-detail-panel">
-    Placeholder for Cluster Details<br>
-    CF Endpoint URL:
-    {{ clusterController.cluster.api_endpoint.Scheme }}://{{ clusterController.cluster.api_endpoint.Host }}
+  <div class="panel panel-default">
+    <div class="panel-heading action-header">
+      <span translate>Summary</span>
+      <a class="btn btn-link">
+        <i class="helion-icon helion-icon-Right_Arrow"></i>
+        <span translate>Edit</span>
+      </a>
+    </div>
+
+    <div class="panel-body card cluster-summary-panel row">
+      <div class="col-md-6">
+        <dl class="dl-horizontal">
+          <dt translate>Total Applications</dt>
+          <dd>
+            {{ clusterController.totalApps }}
+          </dd>
+          <dt translate>Total Memory</dt>
+          <dd>
+            {{ clusterController.totalMemoryUsed }}
+          </dd>
+        </dl>
+        </div>
+      <div class="col-md-6 col-sm-1">
+        <dl class="dl-horizontal">
+          <dt translate>CF Endpoint URL</dt>
+          <dd>
+            {{ clusterController.cluster.api_endpoint.Scheme }}://{{ clusterController.cluster.api_endpoint.Host }}
+          </dd>
+          <dt translate>CF Interactions</dt>
+          <dd>
+            <a class="btn btn-link">
+              <span translate>CLI Commands</span>
+            </a>
+          </dd>
+        </dl>
+      </div>
+    </div>
   </div>
 
   <ul class="application-nav nav nav-tabs col-sm-12">

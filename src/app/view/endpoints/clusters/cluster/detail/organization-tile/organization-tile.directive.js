@@ -40,16 +40,19 @@
     setActions: function () {
       this.actions.push({
         name: 'Edit Organization',
+        disabled: true,
         execute: function () {
         }
       });
       this.actions.push({
         name: 'Delete Organization',
+        disabled: true,
         execute: function () {
         }
       });
       this.actions.push({
         name: 'Assign User(s)',
+        disabled: true,
         execute: function () {
         }
       });

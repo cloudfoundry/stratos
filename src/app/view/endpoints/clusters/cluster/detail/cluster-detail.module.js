@@ -25,12 +25,19 @@
 
   ClusterDetailController.$inject = [
     'app.model.modelManager',
-    '$stateParams'
+    '$stateParams',
+    '$scope',
+    'app.utils.utilsService'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils) {
     var that = this;
     this.guid = $stateParams.guid;
+
+    this.$scope = $scope;
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizations = [];
+    this.totalApps = 0;
 
     // Get the cluster info
     this.cluster = {
@@ -63,6 +70,33 @@
         icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
       }
     ];
+
+    this.updateTotalApps = function () {
+      that.totalApps = 0;
+      var totalMemoryMb = 0;
+      _.forEach(that.organizationModel.organizations[that.guid], function (org) {
+        that.totalApps += org.total_apps;
+        totalMemoryMb += org.mem_used;
+      });
+      that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
+    };
+
+    this.organizationModel.listAllOrganizations(this.guid, {}).then(function (orgs) {
+      that.organizations = [];
+      _.forEach(orgs, function (org) {
+        that.organizationModel.getOrganizationDetails(that.guid, org).then(function (orgDetails) {
+          that.organizations.push(orgDetails);
+
+          that.updateTotalApps();
+
+          // Sort orgs by created date
+          that.organizations.sort(function (o1, o2) {
+            return o1.created_at - o2.created_at;
+          });
+        });
+
+      });
+    });
 
   }
 

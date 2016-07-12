@@ -1,38 +1,62 @@
 @import 'organization-tile/organization-tile';
 
 .cluster-detail {
-  .cluster-detail-panel {
-    margin-bottom: 15px;
-    width: 100%;
-    height: 200px;
-    background-color: #ccc;
+
+  .cluster-summary-panel {
+    .dl-horizontal > dd {
+      text-transform: none;
+      font-weight: 500;
+      .btn {
+        padding: 0;
+        font-size: inherit;
+        text-transform: none;
+      }
+    }
   }
+
   .application-nav {
     margin-bottom: 15px;
   }
 
   .organizations-card-container {
 
-
+    $organizations-card-max-width: 420px;
+    $organizations-card-layout-steps: 5;
 
     .organizations-card {
-      min-height: 250px;
       padding-left: 0;
-    }
 
-    $organizations-card-max-width: 400px;
-    $organizations-card-layout-steps: 4;
-
-    @for $i from 1 through $organizations-card-layout-steps {
-      @media (min-width: $i * $organizations-card-max-width) {
-        .organizations-card.col-md-4.col-sm-1 {
-          width: percentage(1/$i);
+      @for $i from 1 through $organizations-card-layout-steps {
+        @media (min-width: $i * $organizations-card-max-width) {
+          &.col-md-4.col-sm-1 {
+            width: percentage(1/$i);
+          }
         }
       }
+
+      @media (min-width: 768px) {
+        gallery-card {
+          .card .dl-horizontal dd {
+            margin-left: 100px;
+          }
+          .dl-horizontal dt {
+            width: 140px;
+          }
+        }
+      }
+
+      .percent-gauge {
+        padding-top: 0;
+        .percent-gauge-quota-bar {
+          margin-top: 0;
+        }
+      }
+
     }
+
     @for $i from $organizations-card-layout-steps through 1 {
       @media (min-width: $i * $organizations-card-max-width) and (max-width: $organizations-card-max-width + $i * $organizations-card-max-width) {
-        :nth-child(#{$i}n) {
+        >:nth-child(#{$i}n) {
           padding-right: 0
         }
       }

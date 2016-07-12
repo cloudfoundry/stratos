@@ -33,6 +33,7 @@
     this.$q = $q;
     this.utils = utils;
     this.userInfoService = userInfoService;
+    this.organizations = {};
 
     var passThroughHeader = {
       'x-cnap-passthrough': 'true'
@@ -89,6 +90,7 @@
       var httpConfig = this.makeHttpConfig(cnsiGuid);
       var orgGuid = org.metadata.guid;
       var orgQuotaGuid = org.entity.quota_definition_guid;
+      var createdDate = moment(org.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
 
       var spaceApi = that.apiManager.retrieve('cloud-foundry.api.Spaces');
       var orgsApi = that.apiManager.retrieve('cloud-foundry.api.Organizations');
@@ -149,20 +151,22 @@
       }).then(function (vals) {
         var details = {};
 
-        // Set memory utilisation
-        var usedMem = vals.memory.data.memory_usage_in_mb;
-        var memQuota = vals.quota.data.entity.memory_limit;
+        // Set created date for sorting
+        details.created_at = createdDate.unix();
 
-        var usedMemHuman = that.utils.mbToHumanSize(usedMem);
-        var memQuotaHuman = that.utils.mbToHumanSize(memQuota);
+        // Set memory utilisation
+        var usedMemMb = vals.memory.data.memory_usage_in_mb;
+        var memQuotaMb = vals.quota.data.entity.memory_limit;
+
+        var usedMemHuman = that.utils.mbToHumanSize(usedMemMb);
+        var memQuotaHuman = that.utils.mbToHumanSize(memQuotaMb);
 
         // var memQuota = that.utils.mbToHumanSize(-1); // test infinite quota
-        details.memory_utilization_percentage = (100 * usedMem / memQuota).toFixed(1);
-        // details.memory_utilization = usedMemHuman + ' / ' + memQuotaHuman + ' [' + details.memory_utilization_percentage + '%]';
+        details.memory_utilization_percentage = (100 * usedMemMb / memQuotaMb).toFixed(1);
         details.memory_utilization = usedMemHuman + ' / ' + memQuotaHuman;
 
-        details.mem_used = 1024 * usedMem;
-        details.mem_quota = 1024 * memQuota;
+        details.mem_used = usedMemMb;
+        details.mem_quota = memQuotaMb;
 
         // Set instances utilisation
         var instancesUsed = vals.instances.data.instance_usage;
@@ -177,6 +181,10 @@
 
         details.name = org.entity.name;
 
+        if (_.isUndefined(that.organizations[cnsiGuid])) {
+          that.organizations[cnsiGuid] = {};
+        }
+        that.organizations[cnsiGuid][orgGuid] = details;
         return details;
       });
     }
