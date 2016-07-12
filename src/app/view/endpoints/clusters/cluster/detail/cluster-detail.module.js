@@ -53,18 +53,21 @@
     this.clusterActions = [
       {
         name: gettext('Create Organization'),
+        disabled: true,
         execute: function () {
         },
         icon: 'helion-icon-lg helion-icon helion-icon-Tree'
       },
       {
         name: gettext('Create Space'),
+        disabled: true,
         execute: function () {
         },
         icon: 'helion-icon-lg helion-icon helion-icon-Tree'
       },
       {
         name: gettext('Assign User(s)'),
+        disabled: true,
         execute: function () {
         },
         icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
