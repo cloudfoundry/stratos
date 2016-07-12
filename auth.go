@@ -54,10 +54,10 @@ type hcfPerms struct {
 }
 
 // UAAAdminIdentifier - The identifier that the Cloud Foundry UAA Service uses to convey administrative level perms
-const UAAAdminIdentifier = "cloud_controller.admin"
+const UAAAdminIdentifier = "uaa.admin"
 
 // HCFAdminIdentifier - The identifier that the Cloud Foundry HCF Service uses to convey administrative level perms
-const HCFAdminIdentifier = "uaa.admin"
+const HCFAdminIdentifier = "cloud_controller.admin"
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 
