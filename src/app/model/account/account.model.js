@@ -123,7 +123,7 @@
       if (this.adminOverride) {
         return false;
       }
-      return this.data.isAdmin;
+      return this.data && this.data.isAdmin;
     },
 
     /**
