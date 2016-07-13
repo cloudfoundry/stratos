@@ -10,7 +10,6 @@
   ];
 
   function registerRoute($stateProvider) {
-    console.log('Registering route endpoint.clusters.cluster.detail.users');
     $stateProvider.state('endpoint.clusters.cluster.detail.users', {
       url: '/users',
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail-users.html',

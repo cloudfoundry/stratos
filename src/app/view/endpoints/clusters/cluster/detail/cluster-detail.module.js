@@ -13,7 +13,6 @@
   ];
 
   function registerRoute($stateProvider) {
-    console.log('Registering endpoint.clusters.cluster.detail');
     $stateProvider.state('endpoint.clusters.cluster.detail', {
       url: '',
       abstract: true,
