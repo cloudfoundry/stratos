@@ -35,6 +35,7 @@
    * @param {app.event.eventService} eventService - the event bus service
    * @param {object} $state - ui-router $state service
    * @param {object} $rootScope - Angular rootScope object
+   * @param {object} $log - angular log service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {object} $state - ui-router $state service
    * @property {app.model.navigation} menu - the navigation model
@@ -110,6 +111,7 @@
    * @namespace app.model.navigation.Menu
    * @memberof app.model.navigation
    * @name app.model.navigation.Menu
+   * @param {object} $log - angular log service
    * @property {string} currentState - current ui-router state
    */
   function Menu($log) {

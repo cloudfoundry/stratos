@@ -20,15 +20,15 @@
 
   ClusterUsersController.$inject = [
     'app.model.modelManager',
-    '$stateParams'
+    '$stateParams',
+    '$log'
   ];
 
-  function ClusterUsersController(modelManager, $stateParams) {
-    var that = this;
+  function ClusterUsersController(modelManager, $stateParams, $log) {
     this.guid = $stateParams.guid;
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.usersModel.listAllUsers(this.guid, {}).then(function (res) {
-      console.log('Received list of Users: ', res);
+      $log.debug('Received list of Users: ', res);
     });
   }
 

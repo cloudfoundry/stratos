@@ -28,6 +28,7 @@
    * @name OrganizationTileController
    * @constructor
    * @param {object} $state - the angular $state service
+   * @param {object} utils - our utils service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationTileController($state, utils) {
@@ -64,7 +65,7 @@
     } else {
       // If there are more than one role, don't show the user role
       if (roles.length > 1) {
-        _.remove(roles, function(role) {
+        _.remove(roles, function (role) {
           return role === 'org_user';
         });
       }

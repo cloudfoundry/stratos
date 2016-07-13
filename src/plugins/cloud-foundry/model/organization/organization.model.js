@@ -26,10 +26,16 @@
   /**
    * @memberof cloud-foundry.model
    * @name Organization
-   * @param {app.api.apiManager} apiManager - the API manager
-   * @property {app.api.apiManager} apiManager - the API manager
-   * @param {app.api.apiManager} apiManager - the API manager
-   * @property {app.api.apiManager} apiManager - the API manager
+   * @param {object} apiManager - the API manager
+   * @property {object} apiManager - the API manager
+   * @param {object} utils - the utils service
+   * @property {object} utils - the utils service
+   * @param {object} userInfoService - the userInfoService service
+   * @property {object} userInfoService - the userInfoService service
+   * @param {object} $q - angular $q service
+   * @property {object} $q - angular $q service
+   * @param {object} $log - angular $log service
+   * @property {object} $log - angular $log service
    * @class
    */
   function Organization(apiManager, utils, userInfoService, $q, $log) {
@@ -117,7 +123,7 @@
       var rolesP = orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig);
       var userInfoP = that.userInfoService.userInfo();
 
-      var orgRolesP = that.$q.all({roles: rolesP, userInfo: userInfoP}).then(function(values) {
+      var orgRolesP = that.$q.all({roles: rolesP, userInfo: userInfoP}).then(function (values) {
         var i, userGuid, myRoles;
 
         // Find our user's GUID
@@ -145,7 +151,6 @@
         }
         return myRoles;
       });
-
 
       var appCountsP = this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
