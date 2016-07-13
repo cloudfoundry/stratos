@@ -3,7 +3,8 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster.organization', [
-      'app.view.endpoints.clusters.cluster.organization.space'
+      'app.view.endpoints.clusters.cluster.organization.space',
+      'app.view.endpoints.clusters.cluster.organization.detail'
     ])
     .config(registerRoute);
 
