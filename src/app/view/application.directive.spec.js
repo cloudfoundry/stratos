@@ -2,13 +2,13 @@
   'use strict';
 
   describe('application directive', function () {
-    var $httpBackend, $element, applicationCtrl;
+    var $httpBackend, $element, applicationCtrl, $state;
 
     var testAptEndpoint = {
       Scheme: 'https',
       Host: 'api.test.com',
       Path: ''
-    }
+    };
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -19,6 +19,7 @@
 
       var markup = '<application></application>';
 
+      $state = $injector.get('$state');
       $httpBackend = $injector.get('$httpBackend');
       $element = angular.element(markup);
       $compile($element)($scope);
@@ -135,7 +136,7 @@
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         $httpBackend.expectGET('/pp/v1/cnsis');
         // No endpoints are set up - but admin user - so will not go to error page
-        applicationCtrl.login('dev', 'dev');
+        applicationCtrl.login('admin', 'admin');
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(true);
         expect(applicationCtrl.failedLogin).toBe(false);
@@ -159,7 +160,6 @@
         expect(applicationCtrl.serverErrorOnLogin).toBe(false);
         expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
-
 
       it('invoke `login` method - failure with bad credentials', function () {
         applicationCtrl.loggedIn = false;
@@ -201,15 +201,23 @@
       });
 
       it('invoke `logout` method - success', function () {
+        spyOn(applicationCtrl, 'reload').and.returnValue(false);
         applicationCtrl.loggedIn = true;
         $httpBackend.when('POST', '/pp/v1/auth/logout').respond(200, {});
         $httpBackend.expectPOST('/pp/v1/auth/logout');
         applicationCtrl.logout();
         $httpBackend.flush();
-        expect(applicationCtrl.loggedIn).toBe(false);
-        expect(applicationCtrl.failedLogin).toBe(false);
-        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
-        expect(applicationCtrl.serverFailedToRespond).toBe(false);
+
+        //$rootScope.$digest();
+
+        // App should reload
+        expect(applicationCtrl.reload).toHaveBeenCalled();
+
+        // Re-work if we re-instate logout in-app with model clean-up
+        //expect(applicationCtrl.loggedIn).toBe(false);
+        //expect(applicationCtrl.failedLogin).toBe(false);
+        //expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        //expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
 
       it('invoke `logout` method - failure', function () {
@@ -227,19 +235,22 @@
       describe('onLoggedIn as admin', function () {
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
-            .respond(200, {account: 'admin', scope: 'cloud_controller.admin'});
+            .respond(200, {account: 'admin', admin: true});
         });
 
-        it('should show cluster registration if cluster count === 0', function () {
+        it('should go to endpoints dashboard if cluster count === 0', function () {
           $httpBackend.when('GET', '/pp/v1/cnsis')
             .respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
           applicationCtrl.login('admin', 'admin');
           $httpBackend.flush();
+          //$rootScope.$digest();
 
-          expect(applicationCtrl.showClusterRegistration).toBe(true);
+          expect(applicationCtrl.showClusterRegistration).toBe(false);
+          expect(applicationCtrl.redirectState).toBe('endpoint.dashboard');
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
+          expect($state.current.name).toBe('endpoint.dashboard');
         });
 
         it('should not show cluster registration if cluster count > 0', function () {
@@ -253,6 +264,7 @@
           applicationCtrl.login('admin', 'admin');
           $httpBackend.flush();
 
+          expect(applicationCtrl.redirectState).toBe(false);
           expect(applicationCtrl.showClusterRegistration).toBe(false);
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
         });
@@ -279,7 +291,6 @@
         });
 
         it('should not show service instance registration if we have registered services', function () {
-          var mockUser = {id: 1, username: 'dev', registered: true};
           var future = 50000 + (new Date()).getTime() / 1000;
 
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, [

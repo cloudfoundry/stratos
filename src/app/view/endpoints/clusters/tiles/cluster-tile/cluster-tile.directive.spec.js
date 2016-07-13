@@ -56,18 +56,18 @@
       spyOn(clusterTileCtrl, 'unregister').and.callThrough();
     }
 
-    describe('defined + intialised', function () {
-      beforeEach(function () {
-        createCtrl();
-      });
-
+    describe('defined + initialised', function () {
       it('should be defined', function () {
+        createCtrl();
+
         expect(element).toBeDefined();
       });
 
-      it('check initial state', function () {
+      it('check initial state - null', function () {
+        createCtrl();
+
         expect(clusterTileCtrl.actions).toBeDefined();
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toEqual(false);
+        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeFalsy();
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
 
@@ -76,6 +76,17 @@
         expect(clusterTileCtrl.userCount).toBeNull();
         expect(clusterTileCtrl.cardData).toBeDefined();
         expect(clusterTileCtrl.cardData.title).toEqual(initialService.name);
+      });
+
+      it('check initial state - not null', function () {
+        $scope.service.isConnected = true;
+        spyOn(cfModelUsers, 'listAllUsers').and.returnValue($q.when([1]));
+        spyOn(cfModelOrg, 'listAllOrganizations').and.returnValue($q.when([1]));
+        createCtrl();
+
+        expect(clusterTileCtrl.accountStatus).toBeNull();
+        expect(clusterTileCtrl.orgCount).toEqual(1);
+        expect(clusterTileCtrl.userCount).toEqual(1);
       });
     });
 
@@ -89,7 +100,7 @@
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setActions();
 
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toEqual(false);
+        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeFalsy();
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Disconnect');
       });
@@ -98,7 +109,7 @@
         clusterTileCtrl.service.isConnected = false;
         clusterTileCtrl.setActions();
 
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toEqual(false);
+        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeFalsy();
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
       });

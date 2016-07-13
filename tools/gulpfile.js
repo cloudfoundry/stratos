@@ -62,14 +62,18 @@ gulp.task('copy:js', function () {
 // Copy 'lib' folder to 'dist'
 // Note: gulp.src does not support symlinks, so use vinyl-fs.
 // Even with vinyl-fs, when copying symlink dirs, it only copies 1 level deep of folder
-// so, we copy explicitly our helion-* repos' dist folder - these are the repositories that you
+// so, we copy explicitly our helion-framework repo' dist folder - this is the repository that you
 // might be using 'bower link' with
 gulp.task('copy:lib', function () {
   return vfs.src([
-    paths.src + 'lib/**/*',
-    paths.src + 'lib/helion-*/dist/**/*'
-  ]).pipe(vfs.dest(paths.dist + 'lib'));
+    paths.src + 'lib/helion-ui-framework/dist/**/*'
+  ]).pipe(vfs.dest(paths.dist + 'lib/helion-ui-framework/dist'));
 });
+
+gulp.task('copy:lib-ui', ['copy:lib'], function () {
+  return vfs.src([paths.src + 'lib/**/*']).pipe(vfs.dest(paths.dist + 'lib'));
+});
+
 
 // Copy the ui-framework font files to dist
 gulp.task('copy:fonts', function () {
@@ -88,7 +92,7 @@ gulp.task('copy:translations', function () {
 });
 
 // Compile SCSS to CSS
-gulp.task('css', function () {
+gulp.task('css', ['inject:scss'], function () {
   return gulp
     .src(scssSourceFiles, { base: paths.src })
     .pipe(gulpif(usePlumber, plumber({
@@ -121,7 +125,7 @@ gulp.task('inject:index', ['copy:index'], function () {
 gulp.task('inject:scss', function () {
   return gulp
     .src(paths.src + 'index.tmpl.scss')
-    .pipe(wiredep(config.bower))
+    .pipe(wiredep(config.bowerDev))
     .pipe(rename('index.scss'))
     .pipe(gulp.dest(paths.src));
 });
@@ -221,9 +225,8 @@ gulp.task('default', function (next) {
     'plugin',
     'translate:compile',
     'copy:js',
-    'copy:lib',
+    'copy:lib-ui',
     'copy:fonts',
-    'inject:scss',
     'css',
     'copy:html',
     'inject:index',

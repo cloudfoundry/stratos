@@ -30,7 +30,9 @@
   ApplicationController.$inject = [
     '$timeout',
     'app.event.eventService',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    '$state',
+    '$window'
   ];
 
   /**
@@ -40,6 +42,8 @@
    * @param {function} $timeout - angular $timeout service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {$state} $state - Angular ui-router $state service
+   * @param {$window} $window - Angular $window service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {boolean} loggedIn - a flag indicating if user logged in
@@ -48,10 +52,12 @@
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController($timeout, eventService, modelManager) {
+  function ApplicationController($timeout, eventService, modelManager, $state, $window) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
+    this.$state = $state;
+    this.$window = $window;
     this.loggedIn = false;
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
@@ -118,9 +124,12 @@
       this.serverFailedToRespond = false;
       this.showGlobalSpinner = true;
 
-      // If we have a setup error, then we don't want ot continue loging to some other page
-      // We will reditect to our error page
+      // If we have a setup error, then we don't want to continue login to some other page
+      // We will redirect to our error page instead
       this.continueLogin = true;
+
+      // State that we should go to
+      this.redirectState = false;
 
       /**
        * Show cluster registration if user is ITOps (hdp3.admin).
@@ -130,15 +139,19 @@
       var account = this.modelManager.retrieve('app.model.account');
 
       // Fetch the list of services instances
+      /* eslint-disable */
       // TODO: If this fails, we should show a notification message
+      /* eslint-enable */
       this.modelManager.retrieve('app.model.serviceInstance')
         .list()
         .then(function onSuccess(data) {
           var noHCFInstances = data.numAvailable === 0;
           // Admin
           if (account.isAdmin()) {
-            // Show registration if we don't have any HCF instances
-            that.showClusterRegistration = noHCFInstances;
+            // Go the endpoints dashboard if there are no HCF clusters
+            if (noHCFInstances) {
+              that.redirectState = 'endpoint.dashboard';
+            }
           } else {
             // Developer
             if (noHCFInstances) {
@@ -148,7 +161,7 @@
             } else {
               var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
               // Need to get the user's service list to determine if they have any connected
-              return userServiceInstanceModel.list().then(function() {
+              return userServiceInstanceModel.list().then(function () {
                 // Developer - allow user to connect services, if we have some and none are connected
                 that.showRegistration = userServiceInstanceModel.numValid === 0;
               });
@@ -158,7 +171,14 @@
         .finally(function () {
           that.showGlobalSpinner = false;
           if (that.continueLogin) {
-            that.eventService.$emit(that.eventService.events.LOGIN);
+            // When we notify listeners that login has completed, in some cases we don't want them
+            // to redirect tp their page - we might want to control that the go to the endpoints dahsboard (for exmample).
+            // So, we pass this flag to tell them login happenned, but that they should not redirect
+            that.eventService.$emit(that.eventService.events.LOGIN, !!that.redirectState);
+            // We need to dpo this after the login events are handled, so that ui-router states we might go to are registered
+            if (that.redirectState) {
+              that.eventService.$emit(that.eventService.events.REDIRECT, that.redirectState);
+            }
           }
         });
     },
@@ -205,8 +225,23 @@
       this.modelManager.retrieve('app.model.account')
         .logout()
         .then(function () {
-          that.onLoggedOut();
+          // no point calling this as we are going to reload the app
+          //that.onLoggedOut();
+
+          that.reload();
         });
+    },
+
+    /**
+     * @function reload
+     * @memberof app.view.application.ApplicationController
+     * @description Reload the application
+     * @public
+     */
+    reload: function () {
+      // FIXME: Can we clean the model and all current state instead? (reload the app for now)
+      // Hard reload of the app in the browser ensures all state is cleared
+      this.$window.location = '/';
     },
 
     /**

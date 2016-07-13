@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -27,8 +27,9 @@
     return new Clusters();
   }
 
-  function Clusters() {  }
+  function Clusters() {
+  }
 
-  angular.extend(Clusters.prototype, {  });
+  angular.extend(Clusters.prototype, {});
 
 })();

@@ -6,15 +6,16 @@
               on-card-click="organizationTileCtrl.summary()">
 
   <dl class="dl-horizontal">
+    <dt translate>role(s)</dt>
+    <dd>{{organizationTileCtrl.roles}}</dd>
     <dt translate>total apps</dt>
-    <dd>{{organizationTileCtrl.organization.total_apps}}</dd>
+    <dd>{{organizationTileCtrl.organization.totalApps}}</dd>
     <dt translate>instances</dt>
-    <dd>{{organizationTileCtrl.organization.instances}}</dd>
+    <dd>{{organizationTileCtrl.instances}}</dd>
     <dt translate>memory utilization</dt>
-    <dd>{{ organizationTileCtrl.organization.memory_utilization }}</dd>
+    <dd>{{ organizationTileCtrl.memory }}</dd>
       <percent-gauge title=""
-                     value="{{ organizationTileCtrl.organization.mem_used / organizationTileCtrl.organization.mem_quota }}"
-                     value-text="{{ organizationTileCtrl.organization.memory_utilization }}"
+                     value="{{ organizationTileCtrl.organization.memUsed / organizationTileCtrl.organization.memQuota }}"
                      bar-only="true"/>
   </dl>
 </gallery-card>

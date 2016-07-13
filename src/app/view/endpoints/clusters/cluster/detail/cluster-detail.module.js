@@ -13,7 +13,6 @@
   ];
 
   function registerRoute($stateProvider) {
-    console.log('Registering endpoint.clusters.cluster.detail');
     $stateProvider.state('endpoint.clusters.cluster.detail', {
       url: '',
       abstract: true,
@@ -27,10 +26,11 @@
     'app.model.modelManager',
     '$stateParams',
     '$scope',
+    '$log',
     'app.utils.utilsService'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, $log, utils) {
     var that = this;
     this.guid = $stateParams.guid;
 
@@ -78,14 +78,15 @@
       that.totalApps = 0;
       var totalMemoryMb = 0;
       _.forEach(that.organizationModel.organizations[that.guid], function (org) {
-        that.totalApps += org.total_apps;
-        totalMemoryMb += org.mem_used;
+        that.totalApps += org.totalApps;
+        totalMemoryMb += org.memUsed;
       });
       that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
     };
 
     this.organizationModel.listAllOrganizations(this.guid, {}).then(function (orgs) {
       that.organizations = [];
+      that.updateTotalApps();
       _.forEach(orgs, function (org) {
         that.organizationModel.getOrganizationDetails(that.guid, org).then(function (orgDetails) {
           _.set(orgDetails, 'metadata.guid', org.metadata.guid);
@@ -93,13 +94,15 @@
 
           that.updateTotalApps();
 
-          // Sort orgs by created date
+          // Sort organizations by created date
           that.organizations.sort(function (o1, o2) {
             return o1.created_at - o2.created_at;
           });
         });
 
       });
+    }).catch(function (error) {
+      $log.error('Error while listing organizations', error);
     });
 
   }

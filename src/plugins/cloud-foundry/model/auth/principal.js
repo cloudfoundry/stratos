@@ -32,21 +32,18 @@
      * @name Principal
      * @description initialise a Principal object
      * @param {String} username - username
-     * @param {String} authToken - OAuth access token
-     * @param {String} refreshToken - OAuth refresh token
      * @param {String} expiresIn - expires in
-     * @param {String} tokenType - token type
-     * @param {Object} scope - scope
+     * @param {Boolean} isAdmin - is this user and admin
      * @param {Object} userInfo - user info
      * @constructor
      */
-    function Principal(username, authToken, refreshToken, expiresIn, tokenType, scope, userInfo) {
+    function Principal(username, expiresIn, isAdmin, userInfo) {
       this.username = username;
-      this.authToken = authToken;
-      this.refreshToken = refreshToken;
+      // this.authToken = authToken;
+      // this.refreshToken = refreshToken;
       this.expiresIn = expiresIn;
-      this.tokenType = tokenType;
-      this.scope = scope;
+      // this.tokenType = tokenType;
+      this.isAdmin = isAdmin;
       this.userInfo = userInfo;
     }
 
@@ -60,16 +57,7 @@
        * @returns {*}
        */
       hasAccessTo: function (operation, flags) {
-        return this.isAdmin() || flags[operation];
-      },
-
-      /**
-       * @name isAdmin
-       * @description Is user an admin
-       * @returns {boolean}
-       */
-      isAdmin: function () {
-        return _.includes(this.scope, 'cloud_controller.admin');
+        return this.isAdmin || flags[operation];
       },
 
       /**

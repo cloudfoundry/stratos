@@ -23,21 +23,30 @@
     $organizations-card-max-width: 420px;
     $organizations-card-layout-steps: 5;
 
-    .organizations-card {
+    .organization-card {
       padding-left: 0;
 
-      @for $i from 1 through $organizations-card-layout-steps {
+      position: relative;
+      float: left;
+      padding-right: 15px;
+      min-height: 1px;
+
+      // Set width in percentages for all layout steps
+      width: 100%;
+
+      // Many columns
+      @for $i from 2 through $organizations-card-layout-steps {
         @media (min-width: $i * $organizations-card-max-width) {
-          &.col-md-4.col-sm-1 {
-            width: percentage(1/$i);
-          }
+          width: percentage(1/$i);
         }
       }
 
-      @media (min-width: 768px) {
+      // Give more room to the value than the label
+      @media (min-width: 2 * $organizations-card-max-width) {
         gallery-card {
           .card .dl-horizontal dd {
             margin-left: 100px;
+            text-align: right;
           }
           .dl-horizontal dt {
             width: 140px;
@@ -45,6 +54,7 @@
         }
       }
 
+      // Pull the percent-gauge up
       .percent-gauge {
         padding-top: 0;
         .percent-gauge-quota-bar {
@@ -54,8 +64,9 @@
 
     }
 
+    // Ensure the last card in every row doesn't have right-padding
     @for $i from $organizations-card-layout-steps through 1 {
-      @media (min-width: $i * $organizations-card-max-width) and (max-width: $organizations-card-max-width + $i * $organizations-card-max-width) {
+      @media (min-width: $i * $organizations-card-max-width) and (max-width: $organizations-card-max-width + $i * $organizations-card-max-width - 1) {
         >:nth-child(#{$i}n) {
           padding-right: 0
         }
