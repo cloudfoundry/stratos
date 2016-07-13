@@ -14,11 +14,13 @@
     'app.api.apiManager',
     'app.utils.utilsService',
     'userInfoService',
-    '$q'
+    '$q',
+    '$log'
   ];
 
-  function registerOrgModel(modelManager, apiManager, utils, userInfoService, $q) {
-    modelManager.register('cloud-foundry.model.organization', new Organization(apiManager, utils, userInfoService, $q));
+  function registerOrgModel(modelManager, apiManager, utils, userInfoService, $q, $log) {
+    modelManager.register('cloud-foundry.model.organization',
+      new Organization(apiManager, utils, userInfoService, $q, $log));
   }
 
   /**
@@ -27,12 +29,13 @@
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {app.api.apiManager} apiManager - the API manager
-   * @property {app.api.apiManager} apiManager - the API manager 
+   * @property {app.api.apiManager} apiManager - the API manager
    * @class
    */
-  function Organization(apiManager, utils, userInfoService, $q) {
+  function Organization(apiManager, utils, userInfoService, $q, $log) {
     this.apiManager = apiManager;
     this.$q = $q;
+    this.$log = $log;
     this.utils = utils;
     this.userInfoService = userInfoService;
     this.organizations = {};
@@ -114,12 +117,11 @@
       var rolesP = orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig);
       var userInfoP = that.userInfoService.userInfo();
 
-      that.$q.all({roles: rolesP, userInfo: userInfoP}).then(function(values) {
-        // console.log('Roles:', values.roles);
-        // console.log('userInfo:', values.userInfo);
-        // Find our user in the list of all OrgUsers
-        var userGuid;
-        for (var i = 0; i < values.userInfo.data.length; i++) {
+      var orgRolesP = that.$q.all({roles: rolesP, userInfo: userInfoP}).then(function(values) {
+        var i, userGuid, myRoles;
+
+        // Find our user's GUID
+        for (i = 0; i < values.userInfo.data.length; i++) {
           var userPerms = values.userInfo.data[i];
           if (userPerms.type === 'hcf' && userPerms.cnsi_guid === cnsiGuid) {
             userGuid = userPerms.user_guid;
@@ -130,6 +132,18 @@
           throw new Error('Failed to get HCF user GUID');
         }
 
+        // Find my user's roles
+        for (i = 0; i < values.roles.data.resources.length; i++) {
+          var roles = values.roles.data.resources[i];
+          if (roles.metadata.guid === userGuid) {
+            myRoles = roles.entity.organization_roles;
+            break;
+          }
+        }
+        if (!myRoles) {
+          throw new Error('Failed to find my roles in this organization');
+        }
+        return myRoles;
       });
 
 
@@ -138,10 +152,11 @@
           var spaces = res.data.resources;
           var promises = [];
           _.forEach(spaces, function (space) {
-            // console.log('a space: ', space);
             var promise = spaceApi.ListAllAppsForSpace(space.metadata.guid, params, httpConfig).then(function (res2) {
-              // console.log('All apps: ', res2);
               return res2.data.resources.length;
+            }).catch(function (error) {
+              that.$log.error('Failed to ListAllAppsForSpace', error);
+              throw error;
             });
             promises.push(promise);
           });
@@ -152,45 +167,38 @@
             });
             return total;
           });
+        }).catch(function (error) {
+          that.$log.error('Failed to ListAllSpacesForOrganization', error);
+          throw error;
         });
 
       return this.$q.all({
         memory: usedMemP,
         quota: quotaP,
         instances: instancesP,
-        apps: appCountsP
+        apps: appCountsP,
+        roles: orgRolesP
       }).then(function (vals) {
         var details = {};
+
+        details.guid = orgGuid;
 
         // Set created date for sorting
         details.created_at = createdDate.unix();
 
         // Set memory utilisation
-        var usedMemMb = vals.memory.data.memory_usage_in_mb;
-        var memQuotaMb = vals.quota.data.entity.memory_limit;
+        details.memUsed = vals.memory.data.memory_usage_in_mb;
+        details.memQuota = vals.quota.data.entity.memory_limit;
 
-        var usedMemHuman = that.utils.mbToHumanSize(usedMemMb);
-        var memQuotaHuman = that.utils.mbToHumanSize(memQuotaMb);
-
-        // var memQuota = that.utils.mbToHumanSize(-1); // test infinite quota
-        details.memory_utilization_percentage = (100 * usedMemMb / memQuotaMb).toFixed(1);
-        details.memory_utilization = usedMemHuman + ' / ' + memQuotaHuman;
-
-        details.mem_used = usedMemMb;
-        details.mem_quota = memQuotaMb;
-
-        // Set instances utilisation
-        var instancesUsed = vals.instances.data.instance_usage;
-        var appInstanceQuota = vals.quota.data.entity.app_instance_limit;
-        if (appInstanceQuota === -1) {
-          appInstanceQuota = '∞';
-        }
-        details.instances = instancesUsed + ' / ' + appInstanceQuota;
+        details.instances = vals.instances.data.instance_usage;
+        details.instancesQuota = vals.quota.data.entity.app_instance_limit;
 
         // Set total apps count
-        details.total_apps = vals.apps;
+        details.totalApps = vals.apps;
 
         details.name = org.entity.name;
+
+        details.roles = vals.roles;
 
         if (_.isUndefined(that.organizations[cnsiGuid])) {
           that.organizations[cnsiGuid] = {};
