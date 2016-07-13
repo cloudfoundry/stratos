@@ -165,10 +165,11 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	header := getEchoHeaders(c)
 	header.Del("Cookie")
 
-	// TODO (wchrisjohnson):
-	// Temporarily copy this header over to allow us to skip auth for HCE calls
-	// until it has authentcation set up. It'll be used in doOauthFlowRequest later
+	// TODO (wchrisjohnson): Temporarily copy this header over to allow us to skip
+	// auth for HCE calls until it has authentcation set up. It'll be used in
+	// doOauthFlowRequest later
 	// [julbra] Is this not already copied by getEchoHeaders(c)?
+	// https://jira.hpcloud.net/browse/TEAMFOUR-693
 	header.Add("x-cnap-skip-token-auth", c.Request().Header().Get("x-cnap-skip-token-auth"))
 
 	portalUserGUID, err := getPortalUserGUID(c)
@@ -187,6 +188,10 @@ func (p *portalProxy) proxy(c echo.Context) error {
 			err := errors.New("Requested passthrough to multiple CNSIs. Only single CNSI passthroughs are supported.")
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
+
+		// TODO: Pass headers through in all cases, not just single pass through
+		// https://jira.hpcloud.net/browse/TEAMFOUR-635
+		//req.Header = header
 	}
 
 	// send the request to each CNSI
