@@ -1,28 +1,25 @@
 ---
 platform: linux
-image_resource:
-  type: docker-image
-  source:
-    repository: node
-    tag: 4.4.4-slim
 inputs:
-- name: stratos-ui-pr
+- name: stratos-deploy
+- name: portal-proxy-output
+  path: src/github.com/hpcloud/portal-proxy
+- name: stratos-ui
 - name: helion-ui-theme
 - name: helion-ui-framework
-outputs:
-- name: console-ui-tests-output
+image_resource:
+  type: docker-image
+  source: {repository: "mumoshu/dcind", tag: "latest"}
 run:
   path: sh
   args:
-  - -c
-  - |
-      set -e -x
-      apt-get update
-      apt-get install -y bzip2
-      apt-get install -y libfreetype6
-      apt-get install -y libfontconfig
-      apt-get install -y git
-      cd stratos-ui-pr/tools
-      npm install
-      ./node_modules/.bin/bower install --allow-root --force
-      npm run gate-check
+    - -exc
+    - |
+      source /docker-lib.sh
+      start_docker
+      export GOPATH=$PWD
+      cd stratos-deploy
+      COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
+      COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
+      docker logs -f stratosdeploy_ui_1
+      sh ./ci/scripts/check_tests.sh

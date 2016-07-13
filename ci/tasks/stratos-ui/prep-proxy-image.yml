@@ -1,0 +1,23 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: docker-registry.helion.space:443/helioncf/proxy-builder
+inputs:
+- name: portal-proxy
+- name: stratos-deploy
+outputs:
+- name: portal-proxy-output
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    mkdir -p /go/src/github.com/hpcloud
+    cp -r ./portal-proxy /go/src/github.com/hpcloud
+    cd /go/src/github.com/hpcloud/portal-proxy
+    go build
+    cd -
+    cp -r /go/src/github.com/hpcloud/portal-proxy/. ./portal-proxy-output
+    sh ./stratos-deploy/ci/scripts/generate_cert.sh
