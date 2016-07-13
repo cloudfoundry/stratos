@@ -27,8 +27,8 @@
     this.modelManager = modelManager;
     this.$state = $state;
     this.$location = $location;
-    this.eventService.$on(this.eventService.events.LOGIN, function () {
-      that.onLoggedIn();
+    this.eventService.$on(this.eventService.events.LOGIN, function (ev, preventRedirect) {
+      that.onLoggedIn(preventRedirect);
     });
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
       that.onLoggedOut();
@@ -36,12 +36,14 @@
   }
 
   angular.extend(CloudFoundry.prototype, {
-    onLoggedIn: function () {
+    onLoggedIn: function (preventRedirect) {
       this.registerNavigation();
-
-      // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
-      if (this.$location.path() === '') {
-        this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+      // Only redirect if we are permitted
+      if (!preventRedirect) {
+        // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
+        if (this.$location.path() === '') {
+          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+        }
       }
     },
 

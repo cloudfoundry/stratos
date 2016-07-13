@@ -1,27 +1,38 @@
 <div class="endpoints cluster-tiles">
-  <div class="header">
-    <div class="applications-header font-semi-bold pull-left" translate>
-      Cloud Foundry Clusters
+  <div ng-switch="clustersCtrl.state">
+    <div ng-switch-when="loading" class="message-box message-box-no-bg">
+      <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
     </div>
-    <button ng-if="clustersCtrl.currentUserAccount.isAdmin()" class="btn btn-primary"
-            ng-click="clustersCtrl.register()" translate>Register Cluster</button>
-  </div>
-
-  <div id="welcome-message" class="welcome-message panel panel-default">
-    <span class="helion-icon helion-icon-Information"></span>
-    <span translate>You must connect to a cluster with your credentials to access and manage the cluster</span>
-  </div>
-
-  <div ng-if="clustersCtrl.serviceInstances === null" class="message-box message-box-no-bg">
-    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
-  </div>
-  <div ng-if="clustersCtrl.serviceInstances === false" class="message-box message-box-no-bg">
-    <div translate>An error occurred retrieving clusters</div>
-  </div>
-  <div ng-if="clustersCtrl.serviceInstances">
-    <div class="clusters-card col-md-4 col-sm-1" ng-repeat="service in clustersCtrl.serviceInstances">
-      <cluster-tile service="service" connect="clustersCtrl.boundConnect" disconnect="clustersCtrl.boundDisconnect"
-                    unregister="clustersCtrl.boundUnregister"></cluster-tile>
+    <div ng-switch-when="loadError" class="message-box message-box-no-bg">
+      <div translate>An error occurred retrieving clusters</div>
+    </div>
+    <div ng-switch-when="noClusters" class="empty-view-message">
+      <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
+      <div class="view-msg" translate>There are no registered Cloud Foundry clusters.</div>
+      <div class="view-cta" ng-show="clustersCtrl.currentUserAccount.isAdmin()">
+        <a class="btn btn-link" ng-click="clustersCtrl.register()"><span translate>Register a cluster</span></a>
+        <span translate>to make it available to developers.</span>
+      </div>
+      <div class="view-cta" ng-show="!clustersCtrl.currentUserAccount.isAdmin()">
+        <span translate>Please contact your administrator.</span>
+      </div>
+    </div>
+    <div ng-switch-default>
+      <div class="header">
+        <div class="applications-header font-semi-bold pull-left" translate>
+          Cloud Foundry Clusters
+        </div>
+        <button ng-if="clustersCtrl.currentUserAccount.isAdmin()" class="btn btn-primary"
+                ng-click="clustersCtrl.register()" translate>Register Cluster</button>
+      </div>
+      <div id="welcome-message" class="welcome-message panel panel-default">
+        <span class="helion-icon helion-icon-Information"></span>
+        <span translate>You must connect to a cluster with your credentials to access and manage the cluster</span>
+      </div>
+      <div class="clusters-card col-md-4 col-sm-1" ng-repeat="(guid, service) in clustersCtrl.serviceInstances">
+        <cluster-tile service="service" connect="clustersCtrl.boundConnect" disconnect="clustersCtrl.boundDisconnect"
+                      unregister="clustersCtrl.boundUnregister"></cluster-tile>
+      </div>
     </div>
   </div>
 </div>

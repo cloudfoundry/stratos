@@ -16,6 +16,13 @@ module.exports = function () {
       directory: '../src/lib/',
       ignorePath: '../src/'
     },
+	
+	bowerDev: {
+      bowerJson: require('./bower.json'),
+      directory: '../src/lib/',
+      ignorePath: '../src/',
+      devDependencies: false
+	},
 
     cssFiles: [
       paths.dist + 'index.css'

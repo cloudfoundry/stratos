@@ -88,6 +88,13 @@
         return this.$http.get('/pp/v1/auth/session/verify');
       }
       return this.$q.reject(this.sessionName + ' cookie missing!');
+    },
+
+    userInfo: function () {
+      if (this.$cookies.get(this.sessionName)) {
+        return this.$http.get('/pp/v1/userinfo');
+      }
+      return this.$q.reject(this.sessionName + ' cookie missing!');
     }
 
   });

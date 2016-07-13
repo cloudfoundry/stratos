@@ -23,6 +23,7 @@
   }
 
   ClusterTileController.$inject = [
+    '$scope',
     '$state',
     'app.model.modelManager'
   ];
@@ -30,6 +31,7 @@
   /**
    * @name ClusterTileController
    * @constructor
+   * @param {object} $scope - the angular $scope service
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
@@ -38,7 +40,7 @@
    * @property {number} userCount - user count
    * @property {object} cardData - gallery-card directive data object
    */
-  function ClusterTileController($state, modelManager) {
+  function ClusterTileController($scope, $state, modelManager) {
     this.$state = $state;
     this.cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
     this.cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
@@ -59,11 +61,16 @@
       };
     }
 
-    this.setActions();
-    this.setAccountStatus();
-    this.setOrganisationCount();
-    this.setUserCount();
-
+    var that = this;
+    $scope.$watch(function () { return that.service; }, function (newVal) {
+      if (!newVal) {
+        return;
+      }
+      that.setActions();
+      that.setAccountStatus();
+      that.setOrganisationCount();
+      that.setUserCount();
+    });
   }
 
   angular.extend(ClusterTileController.prototype, {
@@ -146,7 +153,6 @@
       if (!this.service.isConnected) {
         return;
       }
-
       var that = this;
       // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
       // just for the count. This will help in the case the connected user does not have privileges.

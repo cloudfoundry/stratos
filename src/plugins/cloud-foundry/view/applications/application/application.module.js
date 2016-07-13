@@ -155,7 +155,7 @@
       var that = this;
       this.ready = false;
       this.model.getAppSummary(this.cnsiGuid, this.id, true)
-        .finally(function() {
+        .finally(function () {
           that.ready = true;
         });
 

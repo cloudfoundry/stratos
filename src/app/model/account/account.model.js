@@ -123,12 +123,7 @@
       if (this.adminOverride) {
         return false;
       }
-      var ADMIN_SCOPES = [
-        'cloud_controller.admin',
-        'ucp.admin'
-      ];
-      return angular.isDefined(this.data.scope) &&
-        _.intersection(this.data.scope, ADMIN_SCOPES).length > 0;
+      return this.data && this.data.isAdmin;
     },
 
     /**
@@ -144,7 +139,7 @@
       var loginRes = response.data;
       this.data = {
         username: loginRes.account,
-        scope: loginRes.scope ? loginRes.scope.split(' ') : []
+        isAdmin: loginRes.admin
       };
     },
 

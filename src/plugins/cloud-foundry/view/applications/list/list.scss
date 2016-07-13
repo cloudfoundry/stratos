@@ -23,8 +23,8 @@ $applications-msg-height: 50px;
   }
   .applications-msg {
     font-size: $font-size-h1;
-    height: $applications-msg-height;
-    line-height: $font-size-h1;
+    //height: $applications-msg-height;
+    line-height: $font-size-h1 * 1.2;
   }
 
   .applications-cta {

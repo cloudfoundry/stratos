@@ -45,11 +45,12 @@
       /**
        * @name create
        * @description Does user have create organization permission in the space
-       * @param {Object} space - Domain space
        * @returns {boolean}
        */
-      create: function (space) {
-        return this.principal.isAdmin(space);
+      create: function () {
+        // Formerly, this had a param: @param {Object} space - Domain space
+        // Not sure if we need that or not.
+        return this.principal.isAdmin;
       },
 
       /**
@@ -58,7 +59,7 @@
        * @returns {boolean}
        */
       delete: function () {
-        return this.principal.isAdmin();
+        return this.principal.isAdmin;
       },
 
       /**

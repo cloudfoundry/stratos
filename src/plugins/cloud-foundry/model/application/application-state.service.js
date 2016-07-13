@@ -13,7 +13,7 @@
 
   /**
    * @function stateServiceFactory
-   * @name cloud-foundry.model.application.stateService
+   * @memberof cloud-foundry.model.application
    * @description Service to map app states to user-friendly state names, presentation and actions.
    * @returns {object} The Application State Service
    */

@@ -20,11 +20,10 @@
   }
 
   ClusterOrgController.$inject = [
-    'app.model.modelManager',
-    '$stateParams'
   ];
 
-  function ClusterOrgController(modelManager, $stateParams) {  }
+  function ClusterOrgController() {
+  }
 
   angular.extend(ClusterOrgController.prototype, {});
 })();
