@@ -107,16 +107,15 @@
       });
     });
 
-    describe('updateClusterList', function () {
+    describe('createClusterList', function () {
 
-      it('success - disconnected', function () {
+      beforeEach(function () {
         spyOn(serviceInstanceModel, 'list').and.callFake(function () {
-          serviceInstanceModel.serviceInstances = [hceService, hcfService];
+          serviceInstanceModel.serviceInstances = [];
           return $q.when(serviceInstanceModel.serviceInstances);
         });
         spyOn(userServiceInstanceModel, 'list').and.callFake(function () {
           userServiceInstanceModel.serviceInstances = {};
-          userServiceInstanceModel.serviceInstances[hcfUserService.guid] = hcfUserService;
           return $q.when(userServiceInstanceModel.serviceInstances);
         });
 
@@ -126,86 +125,110 @@
         expect(userServiceInstanceModel.list).toHaveBeenCalled();
 
         // Before promises return
-        expect(clusterTilesCtrl.serviceInstances).toBeNull();
+        expect(clusterTilesCtrl.serviceInstances).toEqual({});
 
         // Kick off promises
         $scope.$digest();
 
-        // After promises return
-        expect(clusterTilesCtrl.serviceInstances).toBeDefined();
-        expect(clusterTilesCtrl.serviceInstances.length).toEqual(1);
-        expect(clusterTilesCtrl.serviceInstances[0]).not.toBe(hcfService);
-        expect(clusterTilesCtrl.serviceInstances[0].isConnected).toBeDefined();
-        expect(clusterTilesCtrl.serviceInstances[0].isConnected).toEqual(false);
-        expect(clusterTilesCtrl.serviceInstances[0].hasExpired).toBeDefined();
-        expect(clusterTilesCtrl.serviceInstances[0].hasExpired).toEqual(false);
+        // After promises return, still empty
+        expect(clusterTilesCtrl.serviceInstances).toEqual({});
       });
 
-      it('success - connected + not expired token', function () {
-        spyOn(serviceInstanceModel, 'list').and.callFake(function () {
-          serviceInstanceModel.serviceInstances = [hceService, hcfService];
-          return $q.when(serviceInstanceModel.serviceInstances);
-        });
-        spyOn(userServiceInstanceModel, 'list').and.callFake(function () {
-          var cloned = angular.fromJson(angular.toJson(hcfUserService));
-          cloned.valid = true;
-          userServiceInstanceModel.serviceInstances = {};
-          userServiceInstanceModel.serviceInstances[cloned.guid] = cloned;
-          return $q.when(userServiceInstanceModel.serviceInstances);
-        });
+      it('cluster - disconnected', function () {
+        serviceInstanceModel.serviceInstances = [hceService, hcfService];
+        userServiceInstanceModel.serviceInstances = {};
+        userServiceInstanceModel.serviceInstances[hcfUserService.guid] = hcfUserService;
 
-        createCluster();
-        // updateClusterList should have been called as part of creation.
-
-        // Kick off promises
-        $scope.$digest();
+        clusterTilesCtrl.createClusterList();
 
         expect(clusterTilesCtrl.serviceInstances).toBeDefined();
-        expect(clusterTilesCtrl.serviceInstances.length).toEqual(1);
-        expect(clusterTilesCtrl.serviceInstances[0].isConnected).toEqual(true);
-        expect(clusterTilesCtrl.serviceInstances[0].hasExpired).toEqual(false);
+        expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid]).not.toBe(hcfService);
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toBeDefined();
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(false);
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toBeDefined();
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(false);
+        expect(clusterTilesCtrl.state).toEqual('');
       });
 
-      it('success - disconnected + expired token', function () {
-        spyOn(serviceInstanceModel, 'list').and.callFake(function () {
-          serviceInstanceModel.serviceInstances = [hceService, hcfService];
-          return $q.when(serviceInstanceModel.serviceInstances);
-        });
-        spyOn(userServiceInstanceModel, 'list').and.callFake(function () {
-          var cloned = angular.fromJson(angular.toJson(hcfUserService));
-          cloned.token_expiry = Number.MIN_VALUE;
-          userServiceInstanceModel.serviceInstances = {};
-          userServiceInstanceModel.serviceInstances[cloned.guid] = cloned;
-          return $q.when(userServiceInstanceModel.serviceInstances);
-        });
+      it('cluster - connected + not expired token', function () {
+        serviceInstanceModel.serviceInstances = [hceService, hcfService];
+        var cloned = angular.fromJson(angular.toJson(hcfUserService));
+        cloned.valid = true;
+        userServiceInstanceModel.serviceInstances = {};
+        userServiceInstanceModel.serviceInstances[cloned.guid] = cloned;
 
-        createCluster();
-        // updateClusterList should have been called as part of creation.
-
-        // Kick off promises
-        $scope.$digest();
+        clusterTilesCtrl.createClusterList();
 
         expect(clusterTilesCtrl.serviceInstances).toBeDefined();
-        expect(clusterTilesCtrl.serviceInstances.length).toEqual(1);
-        expect(clusterTilesCtrl.serviceInstances[0].isConnected).toEqual(false);
-        expect(clusterTilesCtrl.serviceInstances[0].hasExpired).toEqual(true);
+        expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(true);
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(false);
+        expect(clusterTilesCtrl.state).toEqual('');
       });
 
-      it('fail', function () {
+      it('clusters - disconnected + expired token', function () {
+        serviceInstanceModel.serviceInstances = [hceService, hcfService];
+        var cloned = angular.fromJson(angular.toJson(hcfUserService));
+        cloned.token_expiry = Number.MIN_VALUE;
+        userServiceInstanceModel.serviceInstances = {};
+        userServiceInstanceModel.serviceInstances[cloned.guid] = cloned;
+
+        clusterTilesCtrl.createClusterList();
+
+        expect(clusterTilesCtrl.serviceInstances).toBeDefined();
+        expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(false);
+        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(true);
+        expect(clusterTilesCtrl.state).toEqual('');
+      });
+
+      it('no clusters', function () {
+        serviceInstanceModel.serviceInstances = [];
+        userServiceInstanceModel.serviceInstances = {};
+
+        clusterTilesCtrl.createClusterList();
+
+        expect(clusterTilesCtrl.serviceInstances).toBeDefined();
+        expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(0);
+        expect(clusterTilesCtrl.state).toEqual('noClusters');
+      });
+    });
+
+    describe('refreshClusterModel', function () {
+
+      it('Calls fail', function () {
         spyOn(serviceInstanceModel, 'list').and.returnValue($q.reject());
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.reject());
-
         createCluster();
-        // updateClusterList should have been called as part of creation.
-
-        // Before' promises return
-        expect(clusterTilesCtrl.serviceInstances).toBeNull();
-
-        // Kick off promises
         $scope.$digest();
 
-        // After promises return
-        expect(clusterTilesCtrl.serviceInstances).toBeFalsy();
+        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.callThrough();
+        spyOn(clusterTilesCtrl, 'createClusterList');
+
+        expect(clusterTilesCtrl.state).toEqual('loadError');
+        clusterTilesCtrl.refreshClusterModel();
+        expect(clusterTilesCtrl.state).toEqual('loading');
+        $scope.$digest();
+        expect(clusterTilesCtrl.state).toEqual('loadError');
+        expect(clusterTilesCtrl.createClusterList).not.toHaveBeenCalled();
+      });
+
+      it('Call succeeds', function () {
+        spyOn(serviceInstanceModel, 'list').and.returnValue($q.when([]));
+        spyOn(userServiceInstanceModel, 'list').and.returnValue($q.when([]));
+        createCluster();
+        $scope.$digest();
+
+        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.callThrough();
+        spyOn(clusterTilesCtrl, 'createClusterList');
+
+        expect(clusterTilesCtrl.state).toEqual('noClusters');
+        clusterTilesCtrl.refreshClusterModel();
+        expect(clusterTilesCtrl.state).toEqual('loading');
+        $scope.$digest();
+        expect(clusterTilesCtrl.state).toEqual('noClusters');
+        expect(clusterTilesCtrl.createClusterList).toHaveBeenCalled();
       });
     });
 
@@ -221,10 +244,10 @@
       });
 
       it('on success', function () {
-        spyOn(clusterTilesCtrl, 'updateClusterList');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel');
         clusterTilesCtrl.onConnectSuccess();
         expect(clusterTilesCtrl.credentialsFormCNSI).toBeFalsy();
-        expect(clusterTilesCtrl.updateClusterList).toHaveBeenCalled();
+        expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
       });
 
       it('correct param', function () {
@@ -243,11 +266,11 @@
           expect(guid).toEqual(hcfUserService.guid);
           return $q.when();
         });
-        spyOn(clusterTilesCtrl, 'updateClusterList');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel');
         clusterTilesCtrl.disconnect(hcfUserService.guid);
         $scope.$digest();
         expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
-        expect(clusterTilesCtrl.updateClusterList).toHaveBeenCalled();
+        expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
       });
 
       it('failure', function () {
@@ -255,11 +278,11 @@
           expect(guid).toEqual(hcfUserService.guid);
           return $q.reject();
         });
-        spyOn(clusterTilesCtrl, 'updateClusterList');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel');
         clusterTilesCtrl.disconnect(hcfUserService.guid);
         $scope.$digest();
         expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
-        expect(clusterTilesCtrl.updateClusterList).not.toHaveBeenCalled();
+        expect(clusterTilesCtrl.refreshClusterModel).not.toHaveBeenCalled();
       });
     });
 
@@ -270,20 +293,20 @@
 
       it('success', function () {
         spyOn(hcfRegistration, 'add').and.returnValue($q.when());
-        spyOn(clusterTilesCtrl, 'updateClusterList');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel');
         clusterTilesCtrl.register();
         $scope.$digest();
         expect(hcfRegistration.add).toHaveBeenCalled();
-        expect(clusterTilesCtrl.updateClusterList).toHaveBeenCalled();
+        expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
       });
 
       it('failure', function () {
         spyOn(hcfRegistration, 'add').and.returnValue($q.reject());
-        spyOn(clusterTilesCtrl, 'updateClusterList');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel');
         clusterTilesCtrl.register();
         $scope.$digest();
         expect(hcfRegistration.add).toHaveBeenCalled();
-        expect(clusterTilesCtrl.updateClusterList).not.toHaveBeenCalled();
+        expect(clusterTilesCtrl.refreshClusterModel).not.toHaveBeenCalled();
       });
     });
 
@@ -300,13 +323,13 @@
           expect(serviceInstance).toBe(hcfService);
           return $q.when();
         });
-        spyOn(clusterTilesCtrl, 'updateClusterList');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel');
 
         clusterTilesCtrl.unregister(hcfService);
         $scope.$digest();
 
         expect(serviceInstanceModel.remove).toHaveBeenCalled();
-        expect(clusterTilesCtrl.updateClusterList).toHaveBeenCalled();
+        expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
       });
 
       it('failure', function () {
@@ -317,14 +340,54 @@
           expect(serviceInstance).toBe(hcfService);
           return $q.when();
         });
-        spyOn(clusterTilesCtrl, 'updateClusterList');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel');
 
         clusterTilesCtrl.unregister(hcfService);
         $scope.$digest();
 
         expect(serviceInstanceModel.remove).not.toHaveBeenCalled();
-        expect(clusterTilesCtrl.updateClusterList).not.toHaveBeenCalled();
+        expect(clusterTilesCtrl.refreshClusterModel).not.toHaveBeenCalled();
       });
+    });
+
+    describe('state', function () {
+
+      beforeEach(function () {
+        createCluster();
+      });
+
+      it('has clusters, always show them', function () {
+        clusterTilesCtrl.serviceInstances = {};
+        clusterTilesCtrl.serviceInstances[hcfService.guid] = hcfService;
+        clusterTilesCtrl.updateState(true, false);
+        expect(clusterTilesCtrl.state).toEqual('');
+      });
+
+      it('no clusters, loading', function () {
+        clusterTilesCtrl.serviceInstances = {};
+        clusterTilesCtrl.updateState(true, false);
+        expect(clusterTilesCtrl.state).toEqual('loading');
+      });
+
+      it('no clusters, load error', function () {
+        clusterTilesCtrl.serviceInstances = {};
+        clusterTilesCtrl.updateState(false, true);
+        expect(clusterTilesCtrl.state).toEqual('loadError');
+      });
+
+      it('no clusters, loaded', function () {
+        clusterTilesCtrl.serviceInstances = {};
+        clusterTilesCtrl.updateState(false, false);
+        expect(clusterTilesCtrl.state).toEqual('noClusters');
+      });
+
+      it('handles null clusters', function () {
+        clusterTilesCtrl.serviceInstances = null;
+        clusterTilesCtrl.loading = true;
+        clusterTilesCtrl.updateState(true, false);
+        expect(clusterTilesCtrl.state).toEqual('loading');
+      });
+
     });
   });
 

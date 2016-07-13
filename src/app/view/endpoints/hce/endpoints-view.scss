@@ -1,41 +1,7 @@
 .endpoints-view {
 
-  $msg-height: 50px;
   th {
     font-weight: normal
   }
 
-  .empty-view-message {
-    clear: both;
-    text-align: center;
-    padding: $hpe-unit-space*2 0;
-    width: 70%;
-    margin: auto;
-
-    .helion-icon{
-      color: $dove-gray;
-    }
-
-    .view-msg {
-      font-size: $font-size-h1;
-      height: $msg-height;
-      line-height: $font-size-h1;
-      font-weight: $hpe-font-weight-semibold;
-      color: $dove-gray;
-
-    }
-    .view-cta {
-      font-size: 24px;
-      vertical-align: bottom;
-    }
-
-    .btn{
-      padding: 0 1px;
-      vertical-align: baseline;
-    }
-    .btn span {
-      text-transform: none;
-      font-size: $hpe-unit-space;
-    }
-  }
 }
