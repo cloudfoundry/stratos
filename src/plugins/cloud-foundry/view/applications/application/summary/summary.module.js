@@ -147,7 +147,7 @@
      * @public
      */
     editApp: function () {
-      this.editAppService.add(this.cnsiGuid, this.id);
+      this.editAppService.display(this.cnsiGuid, this.id);
     }
   });
 

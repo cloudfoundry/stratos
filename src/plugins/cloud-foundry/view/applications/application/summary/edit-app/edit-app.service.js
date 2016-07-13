@@ -10,13 +10,32 @@
     'helion.framework.widgets.asyncTaskDialog'
   ];
 
+  /**
+   * @name editAppFactory
+   * @description Factory get Show Edit App dialog
+   * @constructor
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog - Async Task Dialog service
+   */
   function editAppFactory(modelManager, asyncTaskDialog) {
     return {
-      add: function (cnsiGuid, appGuid) {
+
+      /**
+       * @name display
+       * @description Display Edit App Dialog
+       * @param {String} cnsiGuid CNSI GUID
+       * @param {String} appGuid  Application GUID
+       * @returns {*} asyncTaskDialog
+       */
+      display: function (cnsiGuid, appGuid) {
 
         var model = modelManager.retrieve('cloud-foundry.model.application');
         var updateAppPromise = function (updatedAppSpec) {
-          return model.update(cnsiGuid, appGuid, updatedAppSpec);
+          return model.update(cnsiGuid, appGuid, updatedAppSpec)
+            .then(function () {
+              // Trigger update of Application View data
+              model.all();
+            });
         };
 
         var data = {
