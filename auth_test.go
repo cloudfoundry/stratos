@@ -201,6 +201,7 @@ func TestLoginToCNSI(t *testing.T) {
 	}
 	defer db.Close()
 	pp.DatabaseConnectionPool = db
+	pp.SessionStore = initSessionStore(db, pp.Config)
 
 	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
 		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint)
@@ -365,6 +366,7 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 	}
 	defer db.Close()
 	pp.DatabaseConnectionPool = db
+	pp.SessionStore = initSessionStore(db, pp.Config)
 
 	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
 		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint)

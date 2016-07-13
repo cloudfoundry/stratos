@@ -209,11 +209,11 @@ var (
 
 // Error handlers
 var (
-	notFoundHandler = func(c Context) error {
+	NotFoundHandler = func(c Context) error {
 		return ErrNotFound
 	}
 
-	methodNotAllowedHandler = func(c Context) error {
+	MethodNotAllowedHandler = func(c Context) error {
 		return ErrMethodNotAllowed
 	}
 )
@@ -243,7 +243,7 @@ func (e *Echo) NewContext(req engine.Request, res engine.Response) Context {
 		response: res,
 		echo:     e,
 		pvalues:  make([]string, *e.maxParam),
-		handler:  notFoundHandler,
+		handler:  NotFoundHandler,
 	}
 }
 
@@ -476,7 +476,6 @@ func (e *Echo) add(method, path string, handler HandlerFunc, middleware ...Middl
 		Handler: name,
 	}
 	e.router.routes[method+path] = r
-	// e.router.routes = append(e.router.routes, r)
 }
 
 // Group creates a new router group with prefix and optional group-level middleware.

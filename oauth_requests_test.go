@@ -15,7 +15,8 @@ import (
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
-// TODO(wchrisjohnson): check that Authorization header starts with "bearer "  https://jira.hpcloud.net/browse/TEAMFOUR-634
+// TODO(wchrisjohnson): check that Authorization header starts with "bearer "
+// https://jira.hpcloud.net/browse/TEAMFOUR-634
 
 func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 	t.Parallel()

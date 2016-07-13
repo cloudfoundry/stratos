@@ -41,8 +41,8 @@ func New(addr string) *Server {
 func WithTLS(addr, certFile, keyFile string) *Server {
 	c := engine.Config{
 		Address:     addr,
-		TLSCertfile: certFile,
-		TLSKeyfile:  keyFile,
+		TLSCertFile: certFile,
+		TLSKeyFile:  keyFile,
 	}
 	return WithConfig(c)
 }
@@ -84,6 +84,8 @@ func WithConfig(c engine.Config) (s *Server) {
 		}),
 		logger: glog.New("echo"),
 	}
+	s.ReadTimeout = c.ReadTimeout
+	s.WriteTimeout = c.WriteTimeout
 	s.Handler = s.ServeHTTP
 	return
 }
@@ -109,16 +111,16 @@ func (s *Server) Start() error {
 
 func (s *Server) startDefaultListener() error {
 	c := s.config
-	if c.TLSCertfile != "" && c.TLSKeyfile != "" {
-		return s.ListenAndServeTLS(c.Address, c.TLSCertfile, c.TLSKeyfile)
+	if c.TLSCertFile != "" && c.TLSKeyFile != "" {
+		return s.ListenAndServeTLS(c.Address, c.TLSCertFile, c.TLSKeyFile)
 	}
 	return s.ListenAndServe(c.Address)
 }
 
 func (s *Server) startCustomListener() error {
 	c := s.config
-	if c.TLSCertfile != "" && c.TLSKeyfile != "" {
-		return s.ServeTLS(c.Listener, c.TLSCertfile, c.TLSKeyfile)
+	if c.TLSCertFile != "" && c.TLSKeyFile != "" {
+		return s.ServeTLS(c.Listener, c.TLSCertFile, c.TLSKeyFile)
 	}
 	return s.Serve(c.Listener)
 }

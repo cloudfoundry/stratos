@@ -69,12 +69,11 @@ func setupPortalProxy() *portalProxy {
 		ConsoleClient:        "console",
 		ConsoleClientSecret:  "",
 		UAAEndpoint:          "https://login.52.38.188.107.nip.io/oauth/token",
-		CookieStoreSecret:    "hiddenraisinsohno!",
+		SessionStoreSecret:   "hiddenraisinsohno!",
 		EncryptionKeyInBytes: key,
 	}
 
-	pp := newPortalProxy(pc, nil)
-	pp.initCookieStore()
+	pp := newPortalProxy(pc, nil, nil)
 
 	return pp
 }

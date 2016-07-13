@@ -1,11 +1,14 @@
 package: github.com/hpcloud/portal-proxy
 import:
+- package: github.com/coopernurse/gorp
+- package: github.com/antonlindstrom/pgstore
 - package: github.com/cloudfoundry/noaa
   subpackages:
   - consumer
   - errors
 - package: github.com/cloudfoundry/sonde-go/events
 - package: github.com/gorilla/context
+  version: a8d44e7d8e4d532b6a27a02dd82abb31cc1b01bd
 - package: github.com/gorilla/sessions
 - package: github.com/hpcloud/ucpconfig
 - package: github.com/gorilla/websocket

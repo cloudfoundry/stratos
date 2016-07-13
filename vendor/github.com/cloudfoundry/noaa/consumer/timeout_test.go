@@ -31,6 +31,12 @@ var (
 )
 
 var _ = Describe("Timeout", func() {
+	AfterSuite(func() {
+		if testServer != nil {
+			testServer.Close()
+		}
+	})
+
 	BeforeEach(func() {
 		internal.HandshakeTimeout = testHandshakeTimeout
 
@@ -40,9 +46,6 @@ var _ = Describe("Timeout", func() {
 
 	AfterEach(func() {
 		cnsmr.Close()
-		if testServer != nil {
-			testServer.Close()
-		}
 	})
 
 	Describe("TailingLogsWithoutReconnect", func() {
