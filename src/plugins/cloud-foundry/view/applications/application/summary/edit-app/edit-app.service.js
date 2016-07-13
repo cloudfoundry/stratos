@@ -23,18 +23,19 @@
           name: model.application.summary.name,
           memory: model.application.summary.memory,
           instances: model.application.summary.instances
-        }
+        };
+
         return asyncTaskDialog(
           {
             title: 'Edit App',
             templateUrl: 'plugins/cloud-foundry/view/applications/' +
-            'application/summary/edit-app/edit-app.html'
-          },
-          {
-            data: data,
-            buttonTitles:{
+            'application/summary/edit-app/edit-app.html',
+            buttonTitles: {
               submit: 'Save'
             }
+          },
+          {
+            data: data
           },
           updateAppPromise
         );
