@@ -27,7 +27,8 @@
     return new Clusters();
   }
 
-  function Clusters() {}
+  function Clusters() {
+  }
 
   angular.extend(Clusters.prototype, {});
 
