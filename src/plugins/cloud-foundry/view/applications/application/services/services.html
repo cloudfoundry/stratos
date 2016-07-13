@@ -1,8 +1,33 @@
 <p ng-if="applicationServicesCtrl.services.length === 0" translate>
   No services were found. Please contact your administrator.
 </p>
+
+<div class="panel panel-default" ng-if="applicationServicesCtrl.services.length">
+  <div class="panel-body service-filter-panel">
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label class="control-label" translate>Show</label>
+        <select-input
+          arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+          ng-model="applicationServicesCtrl.searchCategory"
+          input-options="applicationServicesCtrl.serviceCategories"
+          tabindex="0">
+        </select-input>
+      </div>
+      <div class="form-group addon-form-group filter-form-group">
+        <div class="input-group">
+          <span class="input-group-addon">
+            <i class="helion-icon helion-icon-lg helion-icon-Filter"></i>
+          </span>
+          <input type="text" class="form-control" ng-model="applicationServicesCtrl.search.$"/>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="panel panel-default"
-  ng-repeat="service in applicationServicesCtrl.services track by service.metadata.guid">
+  ng-repeat="service in applicationServicesCtrl.services | filter:applicationServicesCtrl.category:true | filter:applicationServicesCtrl.search track by service.metadata.guid">
   <div class="panel-body service-panel">
     <service-card service="service" app="applicationServicesCtrl.appModel.application"
       cnsi-guid="applicationServicesCtrl.cnsiGuid"></service-card>
