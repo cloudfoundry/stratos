@@ -144,7 +144,7 @@
      * @description get summary of an application at the model layer
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
-     * @param {booelan} includeStats - whether to also go and fetch the application stats if the app is RUNNING
+     * @param {boolean=} includeStats - whether to also go and fetch the application stats if the app is RUNNING
      * @returns {promise} a promise object
      * @public
      */
@@ -158,12 +158,12 @@
         .GetAppSummary(guid, {}, config)
         .then(function (response) {
           if (!includeStats || response.data[cnsiGuid].state !== 'STARTED') {
-            that.onSummary(response.data[cnsiGuid]);
+            that.onSummary(cnsiGuid, guid, response.data[cnsiGuid]);
             return response;
           } else {
             // We were asked for stats and this app is RUNNING, so go and get them
             return that.getAppStats(cnsiGuid, guid).then(function () {
-              that.onSummary(response.data[cnsiGuid]);
+              that.onSummary(cnsiGuid, guid, response.data[cnsiGuid]);
             });
           }
         });
@@ -447,7 +447,10 @@
      * @param {object} response - the json return from the api call
      * @private
      */
-    onSummary: function (response) {
+    onSummary: function (cnsiGuid, guid, response) {
+      _.set(this, 'appSummary.' + cnsiGuid + '.' + guid, response);
+
+      // FIXME: This is application specific and should be kept seperete from a generic appSummary call
       this.application.summary = response;
       this.onAppStateChange();
     },

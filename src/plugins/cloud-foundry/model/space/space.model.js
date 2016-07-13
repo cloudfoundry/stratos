@@ -136,8 +136,42 @@
         });
     },
 
+    /**
+     * @function listAllRoutesForSpace
+     * @memberof cloud-foundry.model.space
+     * @description Lost all routes for service
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the space guid
+     * @param {object} options - additional parameters for request
+     * @returns {promise} A promise object
+     * @public
+     */
+    listAllRoutesForSpace: function (cnsiGuid, guid, options) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllRoutesForSpace(guid, options, this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          return that.onListAllRoutesForSpace(cnsiGuid, guid, response.data.resources);
+        });
+    },
+
     onAllServiceInstancesForSpace: function(cnsiGuid, spaceGuid, instances) {
       _.set(this.data, cnsiGuid + '.serviceInstances.' + spaceGuid, instances);
+    },
+
+    /**
+     * @function onListAllRoutesForSpace
+     * @memberof cloud-foundry.model.space
+     * @description listAllRoutesForSpace handler at model layer
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} spaceGuid - the space guid
+     * @param {string} routes - the JSON returned from API call
+     * @returns {object} The response
+     * @private
+     */
+    onListAllRoutesForSpace: function (cnsiGuid, spaceGuid, routes) {
+      _.set(this, 'routes.' + cnsiGuid + '.' + spaceGuid, routes);
+      return routes;
     }
   });
 

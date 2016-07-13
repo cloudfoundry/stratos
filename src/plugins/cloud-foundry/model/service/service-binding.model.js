@@ -29,6 +29,18 @@
    */
   function ServiceBinding(apiManager) {
     this.apiManager = apiManager;
+
+    var passThroughHeader = {
+      'x-cnap-passthrough': 'true'
+    };
+
+    this.makeHttpConfig = function (cnsiGuid) {
+      var headers = {'x-cnap-cnsi-list': cnsiGuid};
+      angular.extend(headers, passThroughHeader);
+      return {
+        headers: headers
+      };
+    };
   }
 
   angular.extend(ServiceBinding.prototype, {
@@ -78,14 +90,22 @@
      * @public
      */
     listAllServiceBindings: function (cnsiGuid, params) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .ListAllServiceBindings(params, httpConfig)
+        .ListAllServiceBindings(params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid].resources;
+          that.onListAllServiceBindings(cnsiGuid, response.data.resources);
+          return response.data.resources;
         });
+    },
+
+    onListAllServiceBindings: function (cnsiGuid, bindings) {
+      var that = this;
+      var path = 'allServiceBindings.' + cnsiGuid;
+      _.unset(this, path);
+      _.forEach(bindings, function (binding) {
+        _.set(that, path + '.' + binding.entity.service_instance_guid, binding);
+      });
     }
   });
 

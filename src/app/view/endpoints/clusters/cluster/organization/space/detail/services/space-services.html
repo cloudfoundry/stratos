@@ -1,14 +1,13 @@
+<div class="space-services-table"
+     st-table="spaceSrvsCtrl.visibleServiceInstances"
+     st-safe-src="spaceSrvsCtrl.spaceModel.data[spaceSrvsCtrl.clusterGuid].serviceInstances[spaceSrvsCtrl.spaceGuid]">
 
- <!--{{ spaceServicesController.spaceModel.data[spaceServicesController.clusterGuid].serviceInstances[spaceServicesController.spaceGuid] }}-->
-
-<div class="space-services-table" st-table="spaceServicesController.spaceModel.data[spaceServicesController.clusterGuid].serviceInstances[spaceServicesController.spaceGuid]">
-
-  <div id="delivery-logs-builds" class="delivery-logs-builds">
+  <div>
     <div class="panel panel-default">
       <table class="table table-actionable" >
         <thead>
         <tr>
-          <th st-sort="entity.name" translate>SERVICE INSTANCES</th>
+          <th st-sort="entity.name" st-sort-default="true" translate>SERVICE INSTANCES</th>
           <th st-sort="entity.type" translate>TYPE</th>
           <th translate>PLAN</th>
           <th translate>APPLICATION ATTACHED</th>
@@ -17,22 +16,28 @@
         </thead>
         <tbody>
         <tr
-          ng-repeat="instance in spaceServicesController.spaceModel.data[spaceServicesController.clusterGuid].serviceInstances[spaceServicesController.spaceGuid]">
+          ng-repeat="instance in spaceSrvsCtrl.visibleServiceInstances">
           <td>{{ instance.entity.name }}</td>
-          <td>{{ instance.entity.type }}</td>
-          <td>{{ 'instance.c' }}</td>
-          <td>{{ 'instance.d' }}</td>
-          <td>{{ 'instance.e' }}</td>
+          <td>{{ spaceSrvsCtrl.service[instance.metadata.guid].entity.label }}</td>
+          <td>{{ spaceSrvsCtrl.servicePlan[instance.metadata.guid].entity.name }}</td>
+          <td>{{ spaceSrvsCtrl.appModel.appSummary[spaceSrvsCtrl.clusterGuid][spaceSrvsCtrl.serviceBindingModel.allServiceBindings[spaceSrvsCtrl.clusterGuid][instance.metadata.guid].entity.app_guid].name }}</td>
+          <td>
+            <actions-menu actions="spaceSrvsCtrl.actions"
+                          action-target="instance"
+                          menu-icon="helion-icon helion-icon-More"
+                          menu-position="actions-menu-right">
+            </actions-menu>
+          </td>
         </tr>
         </tbody>
-        <tfoot ng-init="spaceServicesController.showExecutions = 5"
-               ng-show="spaceServicesController.showExecutions < appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
+        <tfoot ng-init="spaceSrvsCtrl.showInstances = 5"
+               ng-show="spaceSrvsCtrl.showInstances < spaceSrvsCtrl.spaceModel.data[spaceSrvsCtrl.clusterGuid].serviceInstances[spaceSrvsCtrl.spaceGuid].length">
         <tr>
           <td colspan="5" class="text-center">
-            <a ng-click="spaceServicesController.showExecutions = appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
-              <span translate>Show All</span> ({{appDelLogsCtrl.parsedHceModel.pipelineExecutions.length}})
+            <a ng-click="spaceSrvsCtrl.showInstances = spaceSrvsCtrl.spaceModel.data[spaceSrvsCtrl.clusterGuid].serviceInstances[spaceSrvsCtrl.spaceGuid].length">
+              <span translate>Show All</span> ({{spaceSrvsCtrl.spaceModel.data[spaceSrvsCtrl.clusterGuid].serviceInstances[spaceSrvsCtrl.spaceGuid].length}})
             </a>
-            <div ng-show="false" st-pagination="" st-items-by-page="spaceServicesController.showExecutions"></div>
+            <div ng-show="false" st-pagination="" st-items-by-page="spaceSrvsCtrl.showInstances"></div>
           </td>
         </tr>
         </tfoot>

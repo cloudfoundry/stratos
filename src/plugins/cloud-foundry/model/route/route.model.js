@@ -32,6 +32,18 @@
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.route = {};
+
+    var passThroughHeader = {
+      'x-cnap-passthrough': 'true'
+    };
+
+    this.makeHttpConfig = function(cnsiGuid) {
+      var headers = {'x-cnap-cnsi-list': cnsiGuid};
+      angular.extend(headers, passThroughHeader);
+      return {
+        headers: headers
+      };
+    };
   }
 
   angular.extend(Route.prototype, {
@@ -153,6 +165,24 @@
         .ListAllAppsForRoute(guid, params)
         .then(function (response) {
           return response.data[cnsiGuid].resources;
+        });
+    },
+
+    /**
+     * @function listAllRouteMappingsForRoute
+     * @memberof cloud-foundry.model.route
+     * @description get all mappings for this route
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - route identifier
+     * @param {object=} params - optional parameters
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    listAllRouteMappingsForRoute: function (cnsiGuid, guid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Routes')
+        .ListAllRouteMappingsForRoute(guid, params, this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          return response.data.resources;
         });
     },
 

@@ -25,13 +25,26 @@
    * @name Service
    * @param {app.api.apiManager} apiManager - the service API manager
    * @property {app.api.apiManager} apiManager - the service API manager
-   * @property {app.api.serviceApi} serviceApi - the service API proxy
+   * @property {app.api.servicePlanApi} serviceApi - the service API proxy
    * @class
    */
   function Service(apiManager) {
     this.apiManager = apiManager;
     this.serviceApi = this.apiManager.retrieve('cloud-foundry.api.Services');
     this.data = {};
+
+    var passThroughHeader = {
+      'x-cnap-passthrough': 'true'
+    };
+
+    this.makeHttpConfig = function (cnsiGuid) {
+      var headers = {'x-cnap-cnsi-list': cnsiGuid};
+      angular.extend(headers, passThroughHeader);
+      return {
+        headers: headers
+      };
+    };
+
   }
 
   angular.extend(Service.prototype, {
@@ -70,6 +83,23 @@
       return this.serviceApi.ListAllServicePlansForService(guid, options, httpConfig)
         .then(function (response) {
           return that.onAllServicePlans(response.data[cnsiGuid]);
+        });
+    },
+
+    /**
+     * @function retrieveService
+     * @memberof cloud-foundry.model.service
+     * @description Retrieve a sinble service
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the service guid
+     * @param {object} options - additional parameters for request
+     * @returns {promise} A promise object
+     * @public
+     */
+    retrieveService: function (cnsiGuid, guid, options) {
+      return this.serviceApi.RetrieveService(guid, options, this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          return response.data;
         });
     },
 

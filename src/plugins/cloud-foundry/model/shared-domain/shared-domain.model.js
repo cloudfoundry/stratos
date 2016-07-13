@@ -41,14 +41,20 @@
      * @public
      */
     listAllSharedDomains: function (cnsiGuid, params) {
+      var that = this;
       var httpConfig = {
         headers: {'x-cnap-cnsi-list': cnsiGuid}
       };
       return this.apiManager.retrieve('cloud-foundry.api.SharedDomains')
         .ListAllSharedDomains(params, httpConfig)
         .then(function (response) {
+          that.onListAllSharedDomains(cnsiGuid, response.data[cnsiGuid].resources);
           return response.data[cnsiGuid].resources;
         });
+    },
+
+    onListAllSharedDomains: function (cnsiGuid, domains) {
+      _.set(this, 'domains.' + cnsiGuid, _.keyBy(domains, 'metadata.guid'));
     }
   });
 
