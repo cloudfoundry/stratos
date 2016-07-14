@@ -27,8 +27,8 @@
     this.modelManager = modelManager;
     this.$state = $state;
     this.$location = $location;
-    this.eventService.$on(this.eventService.events.LOGIN, function () {
-      that.onLoggedIn();
+    this.eventService.$on(this.eventService.events.LOGIN, function (ev, preventRedirect) {
+      that.onLoggedIn(preventRedirect);
     });
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
       that.onLoggedOut();
@@ -36,18 +36,20 @@
   }
 
   angular.extend(CloudFoundry.prototype, {
-    onLoggedIn: function () {
+    onLoggedIn: function (preventRedirect) {
       this.registerNavigation();
+      // Only redirect if we are permitted
+      if (!preventRedirect) {
+        // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
+        if (this.$location.path() === '') {
+          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+        } else if (this.$state.current.name !== '') {
+          // If $location.path() is not empty and the state is set, ui-router won't reload for us
+          // We reload manually to trigger any $stateChangeSuccess logic
 
-      // Only redirect from the login page: preserve ui-context when reloading/refreshing in nested views
-      if (this.$location.path() === '') {
-        this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
-      } else if (this.$state.current.name !== '') {
-        // If $location.path() is not empty and the state is set, ui-router won't reload for us
-        // We reload manually to trigger any $stateChangeSuccess logic
-
-        // N.B we only reach this after pasting a deep URL in a new tab from a non-loggedIn state
-        this.$state.reload();
+          // N.B we only reach this after pasting a deep URL in a new tab from a non-loggedIn state
+          this.$state.reload();
+        }
       }
     },
 

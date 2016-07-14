@@ -14,4 +14,4 @@ RUN apt-get update && \
 
 WORKDIR /usr/src/app
 
-CMD bash provision.sh && cd tools && node_modules/.bin/gulp watch
+CMD bash provision.sh && cd tools && npm run gate-check && xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
