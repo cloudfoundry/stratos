@@ -70,11 +70,12 @@
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceCnsi = null;
+    this.invalidHce = false;
     this.id = $stateParams.guid;
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.isPending = this.model.application.summary.state === 'PENDING';
-    this.UPDATE_INTERVAL = 1000; // milliseconds
+    this.UPDATE_INTERVAL = 10000000; // milliseconds
 
     this.init();
 
@@ -154,16 +155,24 @@
     init: function () {
       var that = this;
       this.ready = false;
+      // Fetching flag onlt set initially - subsequent calls update the data, so we don't want to show a busy indicator
+      // in those cases
+      this.model.application.pipeline.fetching = true;
       this.model.getAppSummary(this.cnsiGuid, this.id, true)
-        .finally(function () {
+      .then(function () {
+        console.log(that.application);
+        that.model.updateDeliveryPipelineMetadata();
+      })
+      .finally(function () {
           that.ready = true;
-        });
+      });
 
       this.model.application.project = null;
 
       /* eslint-disable */
       // TODO(kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
       /* eslint-enable */
+      /*
       this.cnsiModel.list().then(function () {
         var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
         if (hceCnsis.length > 0) {
@@ -177,6 +186,7 @@
             });
         }
       });
+      */
 
       return this.startUpdate();
     },
@@ -222,7 +232,9 @@
       this.updating = true;
       this.$q.when()
         .then(function () {
-          that.updateSummary();
+          that.updateSummary().then(function () {
+            that.model.getDeliveryPipelineMetadata();
+          })
         })
         .finally(function () {
           that.updating = false;

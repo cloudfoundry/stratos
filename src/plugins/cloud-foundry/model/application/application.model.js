@@ -48,7 +48,12 @@
       summary: {
         state: 'LOADING'
       },
-      stats: {}
+      stats: {},
+      pipeline: {
+        fetching: false,
+        valid: false,
+        hceCnsi: undefined
+      }
     };
     this.appStateSwitchTo = '';
   }
@@ -411,6 +416,82 @@
         .then(function (response) {
           return response.data[cnsiGuid];
         });
+    },
+
+    _getHceApiEndpoint: function (cnsi) {
+      // Retrieve dynamicllay as this model may load before the one we need
+      var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+      var endpoint = cnsi.api_endpoint.Scheme + '://' + cnsi.api_endpoint.Host;
+      endpoint += (cnsi.api_endpoint.Path) ? '/' + cnsi.api_endpoint.Path : '';
+      return hceModel.info(cnsi.guid).then(function (data) {
+        cnsi.info = _.clone(data);
+        return cnsi;
+      }).catch(function () {
+        // Swallow errors - don't fail if an info call failes to an HCE instance
+        return cnsi;
+      })
+    },
+
+    _listHceCnsis: function () {
+      var that = this;
+      // We cache on the application - so if you add an HCE while on the app, we won't detect that
+      // Saves making lots of calls
+      if (this.hceServiceInfo) {
+        return this.$q.when(this.hceServiceInfo);
+      } else {
+        var promise = this.serviceInstanceModel.serviceInstances ? this.$q.when(this.serviceInstanceModel.serviceInstances) : this.cnsiModel.list();
+        return promise.then(function () {
+          var hceCnsis = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'}) || [];
+          var tasks = [];
+          _.each(hceCnsis, function (cnsi) {
+            tasks.push(that._getHceApiEndpoint(cnsi));
+          });
+          return that.$q.all(tasks).then(function (data) {
+            that.hceServiceInfo = data;
+            return data;
+          });
+        });
+      }
+    },
+
+    updateDeliveryPipelineMetadata: function () {
+      var that = this;
+      var pipeline = this.application.pipeline;
+      // Retrieve dynamicllay as this model may load before the one we need
+      var hcfUserProvidedServiceInstanceModel = that.modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
+      // Async: work out if this application has a delivery pipeline
+      // Look at the services for one named 'hce-<APP_GUID>'
+      var hceServiceLink = 'hce-' + that.application.summary.guid;
+      var hceServiceData = _.find(that.application.summary.services, function(svc) {
+        return svc.name === hceServiceLink;
+      });
+
+      pipeline.valid = false;
+      pipeline.hceCnsi = null;
+      if (hceServiceData) {
+        // Go fetch the service metadata
+        hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
+        .then(function (data) {
+          // Now we need to see if the CNSI is known
+          if (data && data.entity && data.entity.credentials && data.entity.credentials.apiUrl) {
+            // HCE API Endpoint
+            pipeline.hceApiUrl = data.entity.credentials.apiUrl;
+            return that._listHceCnsis().then(function (hceEndpoints) {
+              var hceInstance = _.find(hceEndpoints, function (hce) {
+                var url = hce.info ? hce.info.api_public_uri : (hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host);
+                return pipeline.hceApiUrl.indexOf(url) === 0;
+              });
+              pipeline.hceCnsi = hceInstance;
+              pipeline.valid = angular.isDefined(hceInstance);
+            });
+          }
+        })
+        .finally(function () {
+          pipeline.fetching = false;
+        });
+      } else {
+        pipeline.fetching = false;
+      }
     },
 
     /**
