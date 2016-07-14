@@ -93,9 +93,9 @@
      * @param {object} data - the form data
      * @returns {promise} A promise object
      */
-    addHce: function (data) {
+    addHce: function () {
       var that = this;
-      return this.serviceInstanceModel.createHce(data.url, data.name)
+      return this.serviceInstanceModel.createHce(this.context.data.url, this.context.data.name)
         .then(function () {
           that.$uibModalInstance.close();
         }, function () {
