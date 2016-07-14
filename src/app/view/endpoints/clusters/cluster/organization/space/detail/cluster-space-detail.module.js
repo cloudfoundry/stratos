@@ -54,12 +54,6 @@
         }
       }
     ];
-
-    // $scope.$watch(function () {
-    //   return _.get(that.spaceModel, 'data.' + that.clusterGuid + '.spaces');
-    // }, function(newVal) {
-    //   that.spaces = newVal;
-    // });
   }
 
   angular.extend(ClusterSpaceController.prototype, {

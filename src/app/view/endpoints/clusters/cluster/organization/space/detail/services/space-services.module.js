@@ -14,7 +14,13 @@
       url: '/services',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/space/detail/services/space-services.html',
       controller: SpaceServicesController,
-      controllerAs: 'spaceSrvsCtrl'
+      controllerAs: 'spaceSrvsCtrl',
+      ncyBreadcrumb: {
+        label: gettext('Space'),
+        parent: function () {
+          return 'endpoint.clusters.cluster.organization.detail.spaces';
+        }
+      }
     });
   }
 
@@ -44,14 +50,12 @@
         name: gettext('Delete Service'),
         disabled: true,
         execute: function () {
-          alert('Delete Service');
         }
       },
       {
         name: gettext('Detach Service'),
         disabled: true,
         execute: function () {
-          alert('Detach Service');
         }
       }
     ];
@@ -59,7 +63,9 @@
     this.appSummary = {};
     this.servicePlan = {};
     this.service = {};
+
     this.visibleServiceInstances = [];
+
     // Try to avoid some thrash by tracking which have been updated this time around.
     this.processed = {};
 

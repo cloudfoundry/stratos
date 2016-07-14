@@ -444,13 +444,15 @@
      * @function onSummary
      * @memberof  cloud-foundry.model.application
      * @description onSummary handler at model layer
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the space guid
      * @param {object} response - the json return from the api call
      * @private
      */
     onSummary: function (cnsiGuid, guid, response) {
       _.set(this, 'appSummary.' + cnsiGuid + '.' + guid, response);
 
-      // FIXME: This is application specific and should be kept seperete from a generic appSummary call
+      // FIXME: This is application specific and should be kept separate from a generic appSummary call
       this.application.summary = response;
       this.onAppStateChange();
     },

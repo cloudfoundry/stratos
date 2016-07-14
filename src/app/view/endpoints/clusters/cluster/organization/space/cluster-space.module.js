@@ -16,25 +16,15 @@
       url: '/space/:space',
       abstract: true,
       template: '<ui-view/>',
-      controller: ClusterSpaceController
+      controller: ClusterSpaceController,
+      controllerAs: 'clusterSpaceController'
     });
   }
 
-  ClusterSpaceController.$inject = [
-    'app.model.modelManager',
-    '$stateParams'
-  ];
+  ClusterSpaceController.$inject = [ ];
 
-  function ClusterSpaceController(modelManager, $stateParams) {
-    var clusterGuid = $stateParams.guid;
-    var spaceGuid = $stateParams.space;
+  function ClusterSpaceController() {
 
-    // Fetch all space related data for this space. Some stats may also fetch additional data
-    var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    //spaceModel.listAllServiceInstancesForSpace(clusterGuid, spaceGuid);
-
-    // TODO (RC): Called earlier in the stack
-    //spaceModel.listAllRoutesForSpace(clusterGuid, spaceGuid);
   }
 
   angular.extend(ClusterSpaceController.prototype, {});

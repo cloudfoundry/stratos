@@ -17,7 +17,7 @@
       controllerAs: 'clustersCtrl',
       ncyBreadcrumb: {
         label: gettext('Cloud Foundry Clusters'),
-        parent: function() {
+        parent: function () {
           return 'endpoint.dashboard';
         }
       }

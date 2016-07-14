@@ -34,7 +34,9 @@
 
     this.guid = $stateParams.guid;
 
-    // Cache all organizations and their details associated with this cluster
+    console.log('ROOT CLUSTER STATE');
+
+    // Cache all organizations associated with this cluster
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.organizationModel.listAllOrganizations(this.guid, {}).then(function (orgs) {
       _.forEach(orgs, function (org) {
@@ -44,15 +46,11 @@
       $log.error('Error while listing organizations', error);
     });
 
-    // this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     // TODO (RC): There's a few places we call this for the core endpoints screens (before we hit a specific clusters
     // page). Need to reduce all these calls to one and watch cache.
+    // Cache all user service instance data
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userServiceInstanceModel.list();
-
-    // Cache space data for this cluster
-    // var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    // spaceModel.listAllSpaces(this.guid);
 
     // Needed to show a Space's list of service instances (requires app name, from app guid, from service binding)
     var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');

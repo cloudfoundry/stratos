@@ -17,7 +17,8 @@
       url: '/:organization',
       abstract: true,
       template: '<ui-view/>',
-      controller: ClusterOrgController
+      controller: ClusterOrgController,
+      controllerAs: 'clusterOrgController'
     });
   }
 

@@ -14,7 +14,6 @@
       },
       controller: OrganizationSpaceTileController,
       controllerAs: 'orgSpaceTileCtrl',
-      scope: {},
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/spaces/space-tile/organization-space-tile.html'
     };
   }
@@ -30,6 +29,9 @@
    * @name OrganizationSpaceTileController
    * @constructor
    * @param {object} $state - the angular $state service
+   * @param {object} $stateParams - the angular $stateParams service
+   * @param {app.model.modelManager} modelManager - the model management service
+   * @param {object} $scope - the angular $scope service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationSpaceTileController($state, $stateParams, modelManager, $scope) {
@@ -51,20 +53,17 @@
         name: gettext('Edit Space'),
         disabled: true,
         execute: function () {
-          alert('Edit Space');
         }
       }, {
         name: gettext('Delete Space'),
         disabled: true,
         execute: function () {
-          alert('Delete Space');
         }
       },
       {
         name: gettext('Assign User(sa)'),
         disabled: true,
         execute: function () {
-          alert('Assign User(s)');
         }
       }
     ];
@@ -75,7 +74,6 @@
       if (!spaceDetail) {
         return;
       }
-
       // Present memory usage
       // var usedMemHuman = that.utils.mbToHumanSize(orgDetail.memUsed);
       // var memQuotaHuman = that.utils.mbToHumanSize(orgDetail.memQuota);

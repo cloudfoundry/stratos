@@ -3,30 +3,30 @@
               card-actions="spaceSummaryTileCtrl.actions"
               card-actions-icon="helion-icon helion-icon-More"
               card-actions-position="actions-menu-right">
-  <div class="col-md-5">
+  <div class="col-md-5" ng-if="spaceSummaryTileCtrl.spaceDetail()">
     <dl class="dl-horizontal">
-      <dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>APPLICATIONS</dt>
-      <dd ng-if="spaceSummaryTileCtrl.spaceDetail()">{{ spaceSummaryTileCtrl.spaceDetail().totalApps }}</dd>
-      <dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>SERVICES</dt>
-      <dd ng-if="spaceSummaryTileCtrl.spaceDetail()">{{ spaceSummaryTileCtrl.spaceDetail().totalServices }}</dd>
-      <dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>ROUTES</dt>
-      <dd ng-if="spaceSummaryTileCtrl.spaceDetail()">{{ spaceSummaryTileCtrl.spaceDetail().totalRoutes }}</dd>
+      <dt translate>APPLICATIONS</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().totalApps }}</dd>
+      <dt translate>SERVICES</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().totalServices }}</dd>
+      <dt translate>ROUTES</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().totalRoutes }}</dd>
       <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>DISK</dt>-->
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
       <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>MEMORY</dt>-->
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
     </dl>
   </div>
-  <div class="col-md-7">
+  <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail() && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
     <dl class="dl-horizontal">
-      <dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>CF SPACE ROLE</dt>
-      <dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{ spaceSummaryTileCtrl.roles }}</dd>
-      <dt ng-if="spaceSummaryTileCtrl.spaceDetail() && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint" translate>CF ENDPOINT URL</dt>
-      <dd ng-if="spaceSummaryTileCtrl.spaceDetail() && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
+      <dt translate>CF SPACE ROLE</dt>
+      <dd>{{ spaceSummaryTileCtrl.roles }}</dd>
+      <dt translate>CF ENDPOINT URL</dt>
+      <dd>
         {{ spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint.Scheme }}://{{ spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint.Host }}
       </dd>
-      <dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>CR INTERACTIONS</dt>
-      <dd ng-if="spaceSummaryTileCtrl.spaceDetail()"><a class="btn btn-link"><span translate>CLI Commands</span></a></dd>
+      <dt translate>CR INTERACTIONS</dt>
+      <dd><a class="btn btn-link"><span translate>CLI Commands</span></a></dd>
     </dl>
   </div>
 </gallery-card>

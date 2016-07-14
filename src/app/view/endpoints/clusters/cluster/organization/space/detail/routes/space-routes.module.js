@@ -14,7 +14,13 @@
       url: '/routes',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/space/detail/routes/space-routes.html',
       controller: SpaceRoutesController,
-      controllerAs: 'spaceRoutesCtrl'
+      controllerAs: 'spaceRoutesCtrl',
+      ncyBreadcrumb: {
+        label: gettext('Space'),
+        parent: function () {
+          return 'endpoint.clusters.cluster.organization.detail.spaces';
+        }
+      }
     });
   }
 
@@ -46,14 +52,12 @@
         name: gettext('Delete Route'),
         disabled: true,
         execute: function () {
-          alert('Delete Route');
         }
       },
       {
         name: gettext('Unmap Route'),
         disabled: true,
         execute: function () {
-          alert('Unmap Route');
         }
       }
     ];

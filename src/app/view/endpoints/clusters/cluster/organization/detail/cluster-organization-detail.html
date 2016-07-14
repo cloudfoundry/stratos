@@ -1,5 +1,8 @@
+<div ng-if="!clusterOrgDetailController.organization()" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
 
-<div class="cluster-detail col-md-9 col-sm-12">
+<div ng-if="clusterOrgDetailController.organization()" class="cluster-detail col-md-9 col-sm-12">
   <h1 style="height: 40px">Organization : {{ clusterOrgDetailController.organizationModel.organizations[clusterOrgDetailController.clusterGuid][clusterOrgDetailController.organizationGuid].org.entity.name }}</h1>
   <organization-summary-tile
     cluster-guid="clusterOrgDetailController.clusterGuid"
@@ -22,7 +25,7 @@
 
 </div>
 
-<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
+<ul ng-if="clusterOrgDetailController.organization()" class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
   <li ng-repeat="action in clusterOrgDetailController.actions">
     <button class="btn btn-link btn-border-less"
             ng-disabled="action.disabled"

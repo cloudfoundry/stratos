@@ -30,8 +30,10 @@
   /**
    * @name OrganizationSummaryTileController
    * @constructor
+   * @param {object} $scope - the angular $scope service
    * @param {object} $stateParams - the angular $stateParams service
-   * @property {Array} actions - collection of relevant actions that can be executed against cluster
+   * @param {app.model.modelManager} modelManager - the model management service
+   * @param {app.utils.utilsService} utils - the console utils service
    */
   function OrganizationSummaryTileController($scope, $stateParams, modelManager, utils) {
     var that = this;
@@ -51,14 +53,12 @@
         name: gettext('Edit Organization'),
         disabled: true,
         execute: function () {
-          alert('Edit Organization');
         }
       },
       {
         name: gettext('Delete Organization'),
         disabled: true,
         execute: function () {
-          alert('Delete Organization');
         }
       }
     ];

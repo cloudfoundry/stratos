@@ -37,7 +37,7 @@
       'x-cnap-passthrough': 'true'
     };
 
-    this.makeHttpConfig = function(cnsiGuid) {
+    this.makeHttpConfig = function (cnsiGuid) {
       var headers = {'x-cnap-cnsi-list': cnsiGuid};
       angular.extend(headers, passThroughHeader);
       return {

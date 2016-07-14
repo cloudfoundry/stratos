@@ -16,8 +16,8 @@
       controller: ClusterDetailSpacesController,
       controllerAs: 'clusterDetailSpacesController',
       ncyBreadcrumb: {
-        label: '{{clusterDetailSpacesController.organizationModel.organizations[clusterDetailSpacesController.clusterGuid][clusterDetailSpacesController.organizationGuid].org.entity.name}}',
-        parent: function() {
+        label: gettext('Organization'),
+        parent: function () {
           return 'endpoint.clusters.cluster.detail.organizations';
         }
       }

@@ -30,6 +30,9 @@
    * @name SpaceSummaryTileController
    * @constructor
    * @param {object} $state - the angular $state service
+   * @param {app.model.modelManager} modelManager - the model management service
+   * @param {object} $scope - the angular $scope service
+   * @param {object} $stateParams - the angular $stateParams service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, modelManager, $scope, $stateParams) {
@@ -56,14 +59,12 @@
         name: gettext('Edit Space'),
         disabled: true,
         execute: function () {
-          alert('Edit Space');
         }
       },
       {
         name: gettext('Delete Space'),
         disabled: true,
         execute: function () {
-          alert('Delete Space');
         }
       }
     ];

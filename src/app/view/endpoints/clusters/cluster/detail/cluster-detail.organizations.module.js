@@ -16,7 +16,7 @@
       controller: ClusterOrganizationsController,
       controllerAs: 'clusterOrganizationsController',
       ncyBreadcrumb: {
-        label: 'a{{clusterOrganizationsController.userServiceInstanceModel.serviceInstances[clusterOrganizationsController.clusterGuid].name}}',
+        label: gettext('Cluster'),
         parent: function () {
           return 'endpoint.clusters.tiles';
         }

@@ -17,11 +17,7 @@
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/cluster-organization-detail.html',
       controller: ClusterOrgDetailController,
       controllerAs: 'clusterOrgDetailController',
-      abstract: true,
-      ncyBreadcrumb: {
-        skip: true
-      }
-
+      abstract: true
     });
   }
 
@@ -31,10 +27,12 @@
   ];
 
   function ClusterOrgDetailController(modelManager, $stateParams) {
-    // var that = this;
-
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
+
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.orgPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid;
+
     this.actions = [
       {
         name: gettext('Create Organization'),
@@ -58,10 +56,11 @@
         }
       }
     ];
-    this.organization = null;
-
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
   }
 
-  angular.extend(ClusterOrgDetailController.prototype, {});
+  angular.extend(ClusterOrgDetailController.prototype, {
+    organization: function () {
+      return _.get(this.organizationModel, this.orgPath);
+    }
+  });
 })();

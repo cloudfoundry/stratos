@@ -28,6 +28,7 @@
   /**
    * @name OrganizationTileController
    * @constructor
+   * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $state - the angular $state service
    * @param {object} utils - our utils service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster

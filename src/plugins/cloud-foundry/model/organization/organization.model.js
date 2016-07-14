@@ -28,6 +28,8 @@
    * @name Organization
    * @param {object} apiManager - the API manager
    * @property {object} apiManager - the API manager
+   * @param {object} modelManager - the app's model manager
+   * @property {object} modelManager - the app's model manager
    * @param {object} utils - the utils service
    * @property {object} utils - the utils service
    * @param {object} userInfoService - the userInfoService service
@@ -114,8 +116,16 @@
         });
     },
 
-    //The list of all organization roles is: org_user, org_manager, org_auditor, billing_manager
-    organizationRoleToString: function(role) {
+    /**
+     * @function organizationRoleToString
+     * @memberof cloud-foundry.model.organization
+     * @description Converts an organization role to a localized string. The list of all organization
+     * roles is: org_user, org_manager, org_auditor, billing_manager
+     * @param {string} role - The organization role
+     * @returns {string} A localised version of the role
+     * @public
+     */
+    organizationRoleToString: function (role) {
       switch (role) {
         case 'org_user':
           return gettext('User');
@@ -129,7 +139,15 @@
       return role;
     },
 
-    //The list of all organization roles is: org_user, org_manager, org_auditor, billing_manager
+    /**
+     * @function organizationRoleToString
+     * @memberof cloud-foundry.model.organization
+     * @description Converts a list of cloud-foundry organization roles to a localized list. The list of all
+     * organization roles is: org_user, org_manager, org_auditor, billing_manager
+     * @param {Array} roles - A list of cloud-foundry organization roles
+     * @returns {string} A localised version of the role
+     * @public
+     */
     organizationRolesToString: function (roles) {
       var that = this;
 
@@ -148,9 +166,6 @@
         }).join(', ');
       }
     },
-
-
-
 
     /**
      * @function  getOrganizationDetails
@@ -210,32 +225,32 @@
       });
 
       var allSpacesP = this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function(res) {
+        .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
           return res.data.resources;
         });
 
       var appCountsP = allSpacesP.then(function (spaces) {
-          var promises = [];
-          _.forEach(spaces, function (space) {
-            var promise = spaceApi.ListAllAppsForSpace(space.metadata.guid, params, httpConfig).then(function (res2) {
-              return res2.data.resources.length;
-            }).catch(function (error) {
-              that.$log.error('Failed to ListAllAppsForSpace', error);
-              throw error;
-            });
-            promises.push(promise);
+        var promises = [];
+        _.forEach(spaces, function (space) {
+          var promise = spaceApi.ListAllAppsForSpace(space.metadata.guid, params, httpConfig).then(function (res2) {
+            return res2.data.resources.length;
+          }).catch(function (error) {
+            that.$log.error('Failed to ListAllAppsForSpace', error);
+            throw error;
           });
-          return that.$q.all(promises).then(function (appCounts) {
-            var total = 0;
-            _.forEach(appCounts, function (count) {
-              total += count;
-            });
-            return total;
-          });
-        }).catch(function (error) {
-          that.$log.error('Failed to ListAllSpacesForOrganization', error);
-          throw error;
+          promises.push(promise);
         });
+        return that.$q.all(promises).then(function (appCounts) {
+          var total = 0;
+          _.forEach(appCounts, function (count) {
+            total += count;
+          });
+          return total;
+        });
+      }).catch(function (error) {
+        that.$log.error('Failed to ListAllSpacesForOrganization', error);
+        throw error;
+      });
 
       var servicesP = this.listAllServicesForOrganization(cnsiGuid, orgGuid);
       var spaceModel = this.modelManager.retrieve('cloud-foundry.model.space');

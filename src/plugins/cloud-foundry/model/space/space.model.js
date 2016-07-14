@@ -25,6 +25,10 @@
    * @name Space
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
+   * @param {object} userInfoService - the userInfoService service
+   * @property {object} userInfoService - the userInfoService service
+   * @param {object} $q - angular $q service
+   * @property {object} $q - angular $q service
    * @class
    */
   function Space(apiManager, userInfoService, $q) {
@@ -59,47 +63,28 @@
     * @public
     */
     listAllAppsForSpace: function (cnsiGuid, guid, params) {
-      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllAppsForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
-        .then(function(response) {
-          that.onAllAppsForSpace(cnsiGuid, guid, response.data.resources);
+        .then(function (response) {
           return response.data.resources;
         });
     },
 
-    onAllAppsForSpace: function(cnsiGuid, spaceGuid, apps) {
-      _.set(this.data, cnsiGuid + '.apps.' + spaceGuid, apps);
-    },
-
-   /**
-    * @function listAllSpaces
-    * @memberof cloud-foundry.model.space
-    * @description lists all spaces
-    * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-    * @param {object} params - optional parameters
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    listAllSpaces: function (cnsiGuid, params) {
-     // var that = this;
-     return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-       .ListAllSpaces(params, this.makeHttpConfig(cnsiGuid))
-       .then(function(response) {
-        // that.onAllSpaces(cnsiGuid, response.data.resources);
-         return response.data.resources;
-       });
-    },
-
-    onAllSpaces: function(cnsiGuid, spaces) {
-      // var that = this;
-      // _.unset(this.data, cnsiGuid + '.spaces');
-      // _.forEach(spaces, function(space) {
-      //   var dataPath = cnsiGuid + '.spaces.' + space.entity.organization_guid;
-      //   var orgSpaces = _.get(that.data, dataPath, {});
-      //   orgSpaces[space.metadata.guid] = space;
-      //   _.set(that.data, dataPath, orgSpaces);
-      // });
+    /**
+     * @function listAllSpaces
+     * @memberof cloud-foundry.model.space
+     * @description lists all spaces
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {object} params - optional parameters
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    listAllSpaces: function(cnsiGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllSpaces(params, this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          return response.data.resources;
+        });
     },
 
     /**
@@ -131,11 +116,9 @@
      * @public
      */
     listAllServiceInstancesForSpace: function (cnsiGuid, guid, params) {
-      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllServiceInstancesForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.onAllServiceInstancesForSpace(cnsiGuid, guid, response.data.resources);
           return response.data.resources;
         });
     },
@@ -151,34 +134,22 @@
      * @public
      */
     listAllRoutesForSpace: function (cnsiGuid, guid, options) {
-      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllRoutesForSpace(guid, options, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllRoutesForSpace(cnsiGuid, guid, response.data.resources);
+          return response.data.resources;
         });
     },
 
-    onAllServiceInstancesForSpace: function(cnsiGuid, spaceGuid, instances) {
-      _.set(this.data, cnsiGuid + '.serviceInstances.' + spaceGuid, instances);
-    },
-
     /**
-     * @function onListAllRoutesForSpace
+     * @function spaceRoleToString
      * @memberof cloud-foundry.model.space
-     * @description listAllRoutesForSpace handler at model layer
-     * @param {string} cnsiGuid - the CNSI guid
-     * @param {string} spaceGuid - the space guid
-     * @param {string} routes - the JSON returned from API call
-     * @returns {object} The response
-     * @private
+     * @description Converts a space role to a localized string. The list of all organization
+     * roles is: space_user, space_manager, space_auditor, space_developer
+     * @param {string} role - The organization role
+     * @returns {string} A localised version of the role
+     * @public
      */
-    onListAllRoutesForSpace: function (cnsiGuid, spaceGuid, routes) {
-      _.set(this, 'routes.' + cnsiGuid + '.' + spaceGuid, routes);
-      return routes;
-    },
-
-    //The list of all organization roles is: org_user, org_manager, org_auditor, billing_manager
     spaceRoleToString: function (role) {
       switch (role) {
         case 'space_user':
@@ -193,7 +164,15 @@
       return role;
     },
 
-    //The list of all organization roles is: org_user, org_manager, org_auditor, billing_manager
+    /**
+     * @function spaceRolesToString
+     * @memberof cloud-foundry.model.space
+     * @description Converts a list of cloud-foundry organization roles to a localized list. The list of all
+     * organization roles is: space_user, space_manager, space_auditor, space_developer
+     * @param {Array} roles - A list of cloud-foundry space roles
+     * @returns {string} A localised version of the role
+     * @public
+     */
     spaceRolesToString: function (roles) {
       var that = this;
 
