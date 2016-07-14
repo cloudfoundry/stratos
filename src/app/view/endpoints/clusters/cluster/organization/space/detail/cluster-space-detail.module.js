@@ -28,34 +28,43 @@
     this.organizationGuid = $stateParams.organization;
     this.spaceGuid = $stateParams.space;
 
-    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.spacePath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces.' + this.spaceGuid;
 
     this.spaceActions = [
       {
         name: gettext('Create Organization'),
+        disabled: true,
         icon: 'helion-icon-lg helion-icon helion-icon-Tree',
         execute: function () {
         }
       },
       {
         name: gettext('Create Space'),
+        disabled: true,
         icon: 'helion-icon-lg helion-icon helion-icon-Tree',
         execute: function () {
         }
       },
       {
         name: gettext('Assign User(s)'),
+        disabled: true,
         icon: 'helion-icon-lg helion-icon helion-icon-Add_user',
         execute: function () {
         }
       }
     ];
+
+    // $scope.$watch(function () {
+    //   return _.get(that.spaceModel, 'data.' + that.clusterGuid + '.spaces');
+    // }, function(newVal) {
+    //   that.spaces = newVal;
+    // });
   }
 
   angular.extend(ClusterSpaceController.prototype, {
-
     space: function () {
-      return _.get(this.spaceModel.data, this.clusterGuid + '.spaces.' + this.organizationGuid + '.' + this.spaceGuid);
+      return _.get(this.organizationModel, this.spacePath);
     }
 
   });

@@ -10,7 +10,6 @@
   function SpaceSummaryTile() {
     return {
       bindToController: {
-        clusterGuid: '=',
         space: '='
       },
       controller: SpaceSummaryTileController,
@@ -21,7 +20,10 @@
   }
 
   SpaceSummaryTileController.$inject = [
-    '$state'
+    '$state',
+    'app.model.modelManager',
+    '$scope',
+    '$stateParams'
   ];
 
   /**
@@ -30,28 +32,68 @@
    * @param {object} $state - the angular $state service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function SpaceSummaryTileController($state) {
+  function SpaceSummaryTileController($state, modelManager, $scope, $stateParams) {
+    var that = this;
+
+    this.clusterGuid = $stateParams.guid;
+    this.organizationGuid = $stateParams.organization;
+    this.spaceGuid = $stateParams.space;
+
     this.$state = $state;
+
+    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.spacePath = 'spaces.' + this.clusterGuid + '.' + this.spaceGuid;
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.orgPath = 'organizations.' + this.clusterGuid;
+    this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
+
     this.cardData = {
       title: gettext('Summary')
     };
+
     this.actions = [
       {
         name: gettext('Edit Space'),
+        disabled: true,
         execute: function () {
           alert('Edit Space');
         }
       },
       {
         name: gettext('Delete Space'),
+        disabled: true,
         execute: function () {
           alert('Delete Space');
         }
       }
     ];
+
+    $scope.$watch(function () {
+      return that.spaceDetail();
+    }, function (spaceDetail) {
+      if (!spaceDetail) {
+        return;
+      }
+
+      // Present memory usage
+      // var usedMemHuman = that.utils.mbToHumanSize(orgDetail.memUsed);
+      // var memQuotaHuman = that.utils.mbToHumanSize(orgDetail.memQuota);
+      // that.memory = usedMemHuman + ' / ' + memQuotaHuman;
+
+      // Present the user's roles
+      that.roles = that.spaceModel.spaceRolesToString(spaceDetail.roles);
+    });
   }
 
   angular.extend(SpaceSummaryTileController.prototype, {
+
+    spaceDetail: function () {
+      return _.get(this.spaceModel, this.spacePath);
+    },
+
+    orgDetails: function () {
+      return _.get(this.organizationModel, this.orgPath + '.' + _.get(this.space, 'entity.organization_guid'));
+    }
   });
 
 })();

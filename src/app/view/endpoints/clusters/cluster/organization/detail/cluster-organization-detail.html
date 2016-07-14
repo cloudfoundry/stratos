@@ -1,7 +1,6 @@
 
 <div class="cluster-detail col-md-9 col-sm-12">
-  <h1 style="height: 40px">Organization : {{ clusterOrgDetailController.organization.name }}</h1>
-
+  <h1 style="height: 40px">Organization : {{ clusterOrgDetailController.organizationModel.organizations[clusterOrgDetailController.clusterGuid][clusterOrgDetailController.organizationGuid].org.entity.name }}</h1>
   <organization-summary-tile
     cluster-guid="clusterOrgDetailController.clusterGuid"
     organization="clusterOrgDetailController.organization">
@@ -24,7 +23,7 @@
 </div>
 
 <ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
-  <li ng-repeat="action in clusterOrgDetailController.orgActions">
+  <li ng-repeat="action in clusterOrgDetailController.actions">
     <button class="btn btn-link btn-border-less"
             ng-disabled="action.disabled"
             ng-hide="action.hidden"

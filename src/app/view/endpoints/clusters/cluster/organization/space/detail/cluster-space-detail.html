@@ -1,10 +1,13 @@
-<div class="cluster-detail col-md-9 col-sm-12">
+<div ng-if="!clusterSpaceController.space()" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
 
+<div ng-if="clusterSpaceController.space()" class="cluster-detail col-md-9 col-sm-12">
   <h1 style="height: 40px">Space : {{ clusterSpaceController.space().entity.name }}</h1>
 
-  <space-summary-tile
-    cluster-guid="clusterOrgDetailController.clusterGuid"
-    space="clusterOrgDetailController.space">
+  <space-summary-tile ng-if="clusterSpaceController.space()"
+                      cluster-guid="clusterSpaceController.clusterGuid"
+                      space="clusterSpaceController.space()">
   </space-summary-tile>
 
   <ul class="application-nav nav nav-tabs col-sm-12">
@@ -25,10 +28,12 @@
     </li>
   </ul>
   <ui-view></ui-view>
-
 </div>
 
-<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
+
+
+
+<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col" ng-if="clusterSpaceController.space()">
   <li ng-repeat="action in clusterSpaceController.spaceActions">
     <button class="btn btn-link btn-border-less"
             ng-disabled="action.disabled"

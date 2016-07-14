@@ -1,20 +1,20 @@
 <gallery-card class="cluster-gallery-card"
-              card-data="organizationSpaceTileCtrl.cardData"
-              card-actions="organizationSpaceTileCtrl.actions"
+              card-data="orgSpaceTileCtrl.cardData"
+              card-actions="orgSpaceTileCtrl.actions"
               card-actions-icon="helion-icon helion-icon-More"
               card-actions-position="actions-menu-right"
-              on-card-click="organizationSpaceTileCtrl.summary()">
+              on-card-click="orgSpaceTileCtrl.summary()">
   <dl class="dl-horizontal">
-    <dt translate>ROLE</dt>
-    <dd>{{'1'}}</dd>
-    <dt ng-if="true" translate>TOTAL APPS</dt>
-    <dd ng-if="true">{{'1'}}</dd>
-    <dt ng-if="true" translate>INSTANCES</dt>
-    <dd ng-if="true">{{'1'}}</dd>
-    <dt ng-if="true" translate>DISK</dt>
-    <dd ng-if="true">{{'1'}}</dd>
-    <dt ng-if="true" translate>MEMORY UTILIZATION</dt>
-    <dd ng-if="true">{{'1'}}</dd>
+    <dt ng-if="orgSpaceTileCtrl.spaceDetail()"translate>ROLE</dt>
+    <dd ng-if="orgSpaceTileCtrl.spaceDetail()">{{ orgSpaceTileCtrl.roles }}</dd>
+    <dt ng-if="orgSpaceTileCtrl.spaceDetail()" translate>TOTAL APPS</dt>
+    <dd ng-if="orgSpaceTileCtrl.spaceDetail()">{{ orgSpaceTileCtrl.spaceDetail().totalApps }}</dd>
+    <dt ng-if="orgSpaceTileCtrl.spaceDetail()" translate>INSTANCES</dt>
+    <dd ng-if="orgSpaceTileCtrl.spaceDetail()">{{ orgSpaceTileCtrl.spaceDetail().totalInstances }} / {{ orgSpaceTileCtrl.orgDetails().instancesQuota === -1 ? '∞' : orgSpaceTileCtrl.orgDetails().instancesQuota}}</dd>
+    <!--<dt ng-if="true" translate>DISK</dt>-->
+    <!--<dd ng-if="true">{{'1'}}</dd>-->
+    <!--<dt ng-if="true" translate>MEMORY UTILIZATION</dt>-->
+    <!--<dd ng-if="true">{{'1'}}</dd>-->
   </dl>
 
 </gallery-card>

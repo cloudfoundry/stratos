@@ -31,8 +31,10 @@
 
     // Fetch all space related data for this space. Some stats may also fetch additional data
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    spaceModel.listAllServiceInstancesForSpace(clusterGuid, spaceGuid);
-    spaceModel.listAllRoutesForSpace(clusterGuid, spaceGuid);
+    //spaceModel.listAllServiceInstancesForSpace(clusterGuid, spaceGuid);
+
+    // TODO (RC): Called earlier in the stack
+    //spaceModel.listAllRoutesForSpace(clusterGuid, spaceGuid);
   }
 
   angular.extend(ClusterSpaceController.prototype, {});

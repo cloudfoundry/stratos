@@ -16,7 +16,12 @@
       url: '',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/cluster-organization-detail.html',
       controller: ClusterOrgDetailController,
-      controllerAs: 'clusterOrgDetailController'
+      controllerAs: 'clusterOrgDetailController',
+      abstract: true,
+      ncyBreadcrumb: {
+        skip: true
+      }
+
     });
   }
 
@@ -26,43 +31,36 @@
   ];
 
   function ClusterOrgDetailController(modelManager, $stateParams) {
-    var that = this;
+    // var that = this;
 
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
-    this.orgActions = [
+    this.actions = [
       {
         name: gettext('Create Organization'),
         icon: 'helion-icon-lg helion-icon helion-icon-Tree',
+        disabled: true,
         execute: function () {
         }
       },
       {
         name: gettext('Create Space'),
         icon: 'helion-icon-lg helion-icon helion-icon-Tree',
+        disabled: true,
         execute: function () {
         }
       },
       {
         name: gettext('Assign User(s)'),
         icon: 'helion-icon-lg helion-icon helion-icon-Add_user',
+        disabled: true,
         execute: function () {
         }
       }
     ];
     this.organization = null;
-    this.spaces = [];
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.organizationModel.listAllOrganizations(this.clusterGuid).then(function (orgs) {
-      var org = _.find(orgs, {metadata: {guid: that.organizationGuid}});
-      if (!org) {
-        return;
-      }
-      that.organizationModel.getOrganizationDetails(that.clusterGuid, org).then(function(orgDetails) {
-        that.organization = orgDetails;
-      });
-    });
   }
 
   angular.extend(ClusterOrgDetailController.prototype, {});

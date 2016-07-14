@@ -1,30 +1,32 @@
 <gallery-card class="cluster-gallery-card organization-summary-tile"
-              card-data="organizationSummaryTileCtrl.cardData"
-              card-actions="organizationSummaryTileCtrl.actions"
+              card-data="orgSummaryTileCtrl.cardData"
+              card-actions="orgSummaryTileCtrl.actions"
               card-actions-icon="helion-icon helion-icon-More"
               card-actions-position="actions-menu-right">
-  <div class="col-md-6">
+  <div class="col-md-5">
     <dl class="dl-horizontal">
-      <dt translate>APPLICATIONS</dt>
-      <dd>{{'1'}}</dd>
-      <dt ng-if="true" translate>SERVICES</dt>
-      <dd ng-if="true">{{'1'}}</dd>
-      <dt ng-if="true" translate>ROUTES</dt>
-      <dd ng-if="true" >{{'1'}}</dd>
-      <dt ng-if="true" translate>DISK</dt>
-      <dd ng-if="true" >{{'1'}}</dd>
-      <dt ng-if="true" translate>MEMORY UTILIZATION</dt>
-      <dd ng-if="true" >{{'1'}}</dd>
+      <dt ng-if="orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid].totalApps" translate>APPLICATIONS</dt>
+      <dd ng-if="orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid].totalApps">{{ orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid].totalApps}}</dd>
+      <dt ng-if="orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid].services" translate>SERVICES</dt>
+      <dd ng-if="orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid].services">{{ orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid].services.length}}</dd>
+      <dt ng-if="orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid]" translate>ROUTES</dt>
+      <dd ng-if="orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid]">{{ orgSummaryTileCtrl.orgModel.organizations[orgSummaryTileCtrl.clusterGuid][orgSummaryTileCtrl.organizationGuid].totalRoutes}}</dd>
+      <dt ng-if="orgSummaryTileCtrl.memory" translate>MEMORY UTILIZATION</dt>
+      <dd ng-if="orgSummaryTileCtrl.memory">{{ orgSummaryTileCtrl.memory }}</dd>
     </dl>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-7">
     <dl class="dl-horizontal">
-      <dt ng-if="true" translate>CF ORG ROLE</dt>
-      <dd ng-if="true" >{{'1'}}</dd>
-      <dt ng-if="true" translate>CF ENDPOINT URL</dt>
-      <dd ng-if="true" >{{'1'}}</dd>
-      <dt ng-if="true" translate>CR INTERACTIONS</dt>
-      <dd ng-if="true" >{{'1'}}</dd>
+      <dt ng-if="orgSummaryTileCtrl.roles" translate>CF ORG ROLE</dt>
+      <dd>{{ orgSummaryTileCtrl.roles }}</dd>
+      <dt ng-if="orgSummaryTileCtrl.userServiceInstance.serviceInstances[orgSummaryTileCtrl.clusterGuid].api_endpoint" translate>CF ENDPOINT URL</dt>
+      <dd ng-if="orgSummaryTileCtrl.userServiceInstance.serviceInstances[orgSummaryTileCtrl.clusterGuid].api_endpoint">
+        {{ orgSummaryTileCtrl.userServiceInstance.serviceInstances[orgSummaryTileCtrl.clusterGuid].api_endpoint.Scheme }}://{{ orgSummaryTileCtrl.userServiceInstance.serviceInstances[orgSummaryTileCtrl.clusterGuid].api_endpoint.Host }}
+      </dd>
+      <dt translate>CR INTERACTIONS</dt>
+      <dd>
+        <a class="btn btn-link"><span translate>CLI Commands</span></a>
+      </dd>
     </dl>
   </div>
 </gallery-card>

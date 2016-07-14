@@ -31,6 +31,7 @@
     this.organizationGuid = $stateParams.organization;
     this.spaceGuid = $stateParams.space;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.spacePath = 'spaces.' + this.clusterGuid + '.' + this.spaceGuid;
     this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.servicePlanModel = modelManager.retrieve('cloud-foundry.model.service-plan');
@@ -41,12 +42,14 @@
       {
         // FIXME (RC): This should option should only be shown if user is cf admin (currently blocked)
         name: gettext('Delete Service'),
+        disabled: true,
         execute: function () {
           alert('Delete Service');
         }
       },
       {
         name: gettext('Detach Service'),
+        disabled: true,
         execute: function () {
           alert('Detach Service');
         }
@@ -58,7 +61,7 @@
     this.service = {};
     this.visibleServiceInstances = [];
     // Try to avoid some thrash by tracking which have been updated this time around.
-    this.processed = {}
+    this.processed = {};
 
     $scope.$watch(function () {
       return that.visibleServiceInstances;
@@ -103,6 +106,10 @@
           });
 
       });
+    },
+
+    spaceDetail: function () {
+      return _.get(this.spaceModel, this.spacePath);
     }
 
   });

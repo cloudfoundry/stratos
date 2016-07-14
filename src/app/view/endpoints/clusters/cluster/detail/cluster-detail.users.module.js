@@ -14,7 +14,13 @@
       url: '/users',
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail-users.html',
       controller: ClusterUsersController,
-      controllerAs: 'clusterUsersController'
+      controllerAs: 'clusterUsersController',
+      ncyBreadcrumb: {
+        label: '{{clusterOrganizationsController.userServiceInstanceModel.serviceInstances[clusterOrganizationsController.guid].name}}',
+        parent: function() {
+          return 'endpoint.clusters.tiles';
+        }
+      }
     });
   }
 
@@ -26,6 +32,7 @@
 
   function ClusterUsersController(modelManager, $stateParams, $log) {
     this.guid = $stateParams.guid;
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.usersModel.listAllUsers(this.guid, {}).then(function (res) {
       $log.debug('Received list of Users: ', res);

@@ -14,13 +14,24 @@
       url: '/organizations',
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail-organizations.html',
       controller: ClusterOrganizationsController,
-      controllerAs: 'clusterOrganizationsController'
+      controllerAs: 'clusterOrganizationsController',
+      ncyBreadcrumb: {
+        label: 'a{{clusterOrganizationsController.userServiceInstanceModel.serviceInstances[clusterOrganizationsController.clusterGuid].name}}',
+        parent: function () {
+          return 'endpoint.clusters.tiles';
+        }
+      }
     });
   }
 
-  ClusterOrganizationsController.$inject = [];
+  ClusterOrganizationsController.$inject = [
+    '$stateParams',
+    'app.model.modelManager'
+  ];
 
-  function ClusterOrganizationsController() {
+  function ClusterOrganizationsController($stateParams, modelManager) {
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.clusterGuid = $stateParams.guid;
   }
 
   angular.extend(ClusterOrganizationsController.prototype, {});

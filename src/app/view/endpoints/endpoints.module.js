@@ -18,9 +18,12 @@
     $stateProvider.state('endpoint', {
       url: '/endpoint',
       abstract: true,
-      template : '<ui-view/>',
+      template : '</span><ui-view/>',
       data: {
         activeMenuState: 'endpoints'
+      },
+      ncyBreadcrumb: {
+        label: gettext('Endpoints')
       }
     });
   }

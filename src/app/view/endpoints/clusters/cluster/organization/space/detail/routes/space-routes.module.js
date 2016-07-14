@@ -34,6 +34,7 @@
     this.modelManager = modelManager;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.spacePath = 'spaces.' + this.clusterGuid + '.' + this.spaceGuid;
     this.privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
 
@@ -43,12 +44,14 @@
       {
         // FIXME (RC): This should option should only be shown if user is cf admin (currently blocked)
         name: gettext('Delete Route'),
+        disabled: true,
         execute: function () {
           alert('Delete Route');
         }
       },
       {
         name: gettext('Unmap Route'),
+        disabled: true,
         execute: function () {
           alert('Unmap Route');
         }
@@ -95,6 +98,10 @@
             });
           });
       });
+    },
+
+    spaceDetail: function () {
+      return _.get(this.spaceModel, this.spacePath);
     }
 
   });

@@ -1,5 +1,5 @@
 <div class="cluster-detail col-md-9 col-sm-12">
-  <h1 style="height: 40px">{{ clusterController.cluster.name }}</h1>
+  <h1 style="height: 40px">{{ clusterController.cnsiModel.serviceInstances[clusterController.guid].name }}</h1>
 
   <div class="panel panel-default">
     <div class="panel-heading action-header">
@@ -25,9 +25,9 @@
         </div>
       <div class="col-md-7">
         <dl class="dl-horizontal">
-          <dt ng-if="clusterController.cluster.api_endpoint" translate>CF Endpoint URL</dt>
-          <dd ng-if="clusterController.cluster.api_endpoint">
-            {{ clusterController.cluster.api_endpoint.Scheme }}://{{ clusterController.cluster.api_endpoint.Host }}
+          <dt ng-if="clusterController.cnsiModel.serviceInstances[clusterController.guid].api_endpoint" translate>CF Endpoint URL</dt>
+          <dd ng-if="clusterController.cnsiModel.serviceInstances[clusterController.guid].api_endpoint">
+            {{ clusterController.cnsiModel.serviceInstances[clusterController.guid].api_endpoint.Scheme }}://{{ clusterController.cnsiModel.serviceInstances[clusterController.guid].api_endpoint.Host }}
           </dd>
           <dt translate>CF Interactions</dt>
           <dd>

@@ -14,32 +14,33 @@
       url: '/spaces',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/spaces/cluster-organization-detail-spaces.html',
       controller: ClusterDetailSpacesController,
-      controllerAs: 'clusterDetailSpacesController'
+      controllerAs: 'clusterDetailSpacesController',
+      ncyBreadcrumb: {
+        label: '{{clusterDetailSpacesController.organizationModel.organizations[clusterDetailSpacesController.clusterGuid][clusterDetailSpacesController.organizationGuid].org.entity.name}}',
+        parent: function() {
+          return 'endpoint.clusters.cluster.detail.organizations';
+        }
+      }
     });
   }
 
   ClusterDetailSpacesController.$inject = [
-    '$scope',
     'app.model.modelManager',
     '$stateParams'
   ];
 
-  function ClusterDetailSpacesController($scope, modelManager, $stateParams) {
-    var that = this;
-
+  function ClusterDetailSpacesController(modelManager, $stateParams) {
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
-    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-
-    // $scope.$watch(function () {
-    //   return _.get(that.spaceModel, 'data.' + that.clusterGuid + '.spaces');
-    // }, function(newVal) {
-    //   that.spaces = newVal;
-    // });
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.spacesPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces';
   }
 
   angular.extend(ClusterDetailSpacesController.prototype, {
+    spaces: function () {
+      return _.get(this.organizationModel, this.spacesPath);
+    }
 
   });
 })();

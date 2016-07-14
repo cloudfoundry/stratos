@@ -1,6 +1,10 @@
 @import 'detail/cluster-detail';
 @import 'organization/space/detail/services/space-services';
 
+.cluster-breadcrumb {
+  width: 100%;
+  margin-top: 1px;
+}
 
 .cluster-gallery-card {
   &.unlink {
@@ -11,18 +15,25 @@
   }
 
   .panel-body {
-    .col-md-6 {
+    .col-md-5 {
       padding-left: 0;
     }
     .dl-horizontal {
       dd {
         font-weight: 500;
         white-space: nowrap;
+        text-transform: none;
+
+        a.btn {
+          font-size: inherit;
+          padding: 0;
+          height: inherit;
+        }
       }
 
-      dd:first-of-type {
-        text-transform: lowercase;
-      }
+      //dd:first-of-type {
+      //  text-transform: lowercase;
+      //}
     }
   }
 

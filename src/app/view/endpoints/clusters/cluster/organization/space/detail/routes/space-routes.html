@@ -1,6 +1,6 @@
 <div class="space-services-table"
      st-table="spaceRoutesCtrl.visibleRoutes"
-     st-safe-src="spaceRoutesCtrl.spaceModel.routes[spaceRoutesCtrl.clusterGuid][spaceRoutesCtrl.spaceGuid]">
+     st-safe-src="spaceRoutesCtrl.spaceDetail().routes">
   <div>
     <div class="panel panel-default">
       <table class="table table-actionable" >
@@ -26,11 +26,11 @@
         </tr>
         </tbody>
         <tfoot ng-init="spaceRoutesCtrl.showRoutes = 5"
-               ng-show="spaceRoutesCtrl.showRoutes < spaceRoutesCtrl.spaceModel.routes[spaceRoutesCtrl.clusterGuid][spaceRoutesCtrl.spaceGuid].length">
+               ng-show="spaceRoutesCtrl.showRoutes < spaceRoutesCtrl.spaceDetail().routes.length">
         <tr>
           <td colspan="5" class="text-center">
-            <a ng-click="spaceRoutesCtrl.showRoutes = spaceRoutesCtrl.spaceModel.routes[spaceRoutesCtrl.clusterGuid][spaceRoutesCtrl.spaceGuid].length">
-              <span translate>Show All</span> ({{spaceRoutesCtrl.spaceModel.routes[spaceRoutesCtrl.clusterGuid][spaceRoutesCtrl.spaceGuid].length}})
+            <a ng-click="spaceRoutesCtrl.showRoutes = spaceRoutesCtrl.spaceDetail().routes.length">
+              <span translate>Show All</span> ({{spaceRoutesCtrl.spaceDetail().routes.length}})
             </a>
             <div ng-show="false" st-pagination="" st-items-by-page="spaceRoutesCtrl.showRoutes"></div>
           </td>

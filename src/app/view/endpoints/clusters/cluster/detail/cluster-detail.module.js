@@ -26,11 +26,10 @@
     'app.model.modelManager',
     '$stateParams',
     '$scope',
-    '$log',
     'app.utils.utilsService'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, $log, utils) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils) {
     var that = this;
     this.guid = $stateParams.guid;
 
@@ -39,16 +38,16 @@
     this.organizations = [];
     this.totalApps = 0;
 
-    // Get the cluster info
-    this.cluster = {
-      name: '',
-      api_endpoint: ''
-    };
-
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.cnsiModel.list().then(function (registeredInstances) {
-      that.cluster = registeredInstances[that.guid];
-    });
+    // // Get the cluster info
+    // this.cluster = {
+    //   name: '',
+    //   api_endpoint: ''
+    // };
+    //
+    // this.cnsiModel.list().then(function (registeredInstances) {
+    //   that.cluster = registeredInstances[that.guid];
+    // });
 
     this.clusterActions = [
       {
@@ -84,26 +83,42 @@
       that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
     };
 
-    this.organizationModel.listAllOrganizations(this.guid, {}).then(function (orgs) {
+    $scope.$watch(function () { return _.get(that.organizationModel, 'organizations.' + that.guid); }, function (orgDetails) {
+      if (!orgDetails) {
+        return;
+      }
       that.organizations = [];
-      that.updateTotalApps();
-      _.forEach(orgs, function (org) {
-        that.organizationModel.getOrganizationDetails(that.guid, org).then(function (orgDetails) {
-          _.set(orgDetails, 'metadata.guid', org.metadata.guid);
-          that.organizations.push(orgDetails);
+      _.forEach(orgDetails, function (orgDetail) {
+        that.organizations.push(orgDetail);
 
-          that.updateTotalApps();
+        that.updateTotalApps();
 
-          // Sort organizations by created date
-          that.organizations.sort(function (o1, o2) {
-            return o1.created_at - o2.created_at;
-          });
+        // Sort organizations by created date
+        that.organizations.sort(function (o1, o2) {
+          return o1.created_at - o2.created_at;
         });
-
       });
-    }).catch(function (error) {
-      $log.error('Error while listing organizations', error);
     });
+
+    // this.organizationModel.listAllOrganizations(this.guid, {}).then(function (orgs) {
+    //   that.organizations = [];
+    //   that.updateTotalApps();
+    //   _.forEach(orgs, function (org) {
+    //     that.organizationModel.getOrganizationDetails(that.guid, org).then(function (orgDetails) {
+    //       that.organizations.push(orgDetails);
+    //
+    //       that.updateTotalApps();
+    //
+    //       // Sort organizations by created date
+    //       that.organizations.sort(function (o1, o2) {
+    //         return o1.created_at - o2.created_at;
+    //       });
+    //     });
+    //
+    //   });
+    // }).catch(function (error) {
+    //   $log.error('Error while listing organizations', error);
+    // });
 
   }
 
