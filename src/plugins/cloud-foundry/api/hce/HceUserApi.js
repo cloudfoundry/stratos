@@ -31,57 +31,21 @@
 
   angular.extend(HceUserApi.prototype, {
     /**
-     * @name createUser
-     * @description Create a user.
+     * @name getAuthenticatedUser
+     * @description Get the HCE currently authenticated user.
      * @param {string} guid - the HCE instance GUID
-     * @param {object} data - the request body
      * @param {object} params - the query parameters
      * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    createUser: function (guid, data, params, httpConfigOptions) {
+    getAuthenticatedUser: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/users';
       var headers = {
         'x-cnap-cnsi-list': guid
       };
 
       var config = {
-        method: 'POST',
-        url: path,
-        params: params || {},
-        data: data,
-        headers: headers
-      };
-
-      angular.forEach(httpConfigOptions, function (optionConfig, option) {
-        if (option === 'headers') {
-          angular.extend(config[option], optionConfig);
-        } else {
-          config[option] = optionConfig;
-        }
-      });
-
-      return this.$http(config);
-    },
-
-    /**
-     * @name deleteUser
-     * @description Delete the specified user.
-     * @param {string} guid - the HCE instance GUID
-     * @param {!number} userId - User id.
-     * @param {object} params - the query parameters
-     * @param {object} httpConfigOptions - additional config options
-     * @returns {promise} A resolved/rejected promise
-     */
-    deleteUser: function (guid, userId, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users/{user_id}'
-        .replace('{' + 'user_id' + '}', userId);
-      var headers = {
-        'x-cnap-cnsi-list': guid
-      };
-
-      var config = {
-        method: 'DELETE',
+        method: 'GET',
         url: path,
         params: params || {},
         headers: headers
@@ -152,42 +116,6 @@
         method: 'GET',
         url: path,
         params: params || {},
-        headers: headers
-      };
-
-      angular.forEach(httpConfigOptions, function (optionConfig, option) {
-        if (option === 'headers') {
-          angular.extend(config[option], optionConfig);
-        } else {
-          config[option] = optionConfig;
-        }
-      });
-
-      return this.$http(config);
-    },
-
-    /**
-     * @name updateUser
-     * @description Update the specified user.
-     * @param {string} guid - the HCE instance GUID
-     * @param {!number} userId - User id.
-     * @param {object} data - the request body
-     * @param {object} params - the query parameters
-     * @param {object} httpConfigOptions - additional config options
-     * @returns {promise} A resolved/rejected promise
-     */
-    updateUser: function (guid, userId, data, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users/{user_id}'
-        .replace('{' + 'user_id' + '}', userId);
-      var headers = {
-        'x-cnap-cnsi-list': guid
-      };
-
-      var config = {
-        method: 'PUT',
-        url: path,
-        params: params || {},
-        data: data,
         headers: headers
       };
 
