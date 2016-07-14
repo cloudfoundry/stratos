@@ -77,6 +77,10 @@
       "value": "console"
     },
     {
+      "name": "HCE_CLIENT",
+      "value": "console"
+    },
+    {
       "name": "HCF_CLIENT",
       "value": "cf"
     },

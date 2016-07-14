@@ -107,6 +107,12 @@
           "name": "CONSOLE_CLIENT_SECRET"
         },
         {
+          "name": "HCE_CLIENT"
+        },
+        {
+          "name": "HCE_CLIENT_SECRET"
+        },
+        {
           "name": "HCF_CLIENT"
         },
         {
@@ -414,6 +420,24 @@
     {
         "name": "CONSOLE_CLIENT_SECRET",
         "description": "Console client secret",
+        "default": "",
+        "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HCE_CLIENT",
+        "description": "HCE client",
+        "default": "console",
+        "example": "console",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HCE_CLIENT_SECRET",
+        "description": "HCE client secret",
         "default": "",
         "example": "",
         "data_type": "string",
