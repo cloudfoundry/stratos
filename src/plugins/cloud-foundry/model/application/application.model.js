@@ -420,6 +420,14 @@
         });
     },
 
+    /**
+     * @function _getHceApiEndpoint
+     * @memberof cloud-foundry.model.application
+     * @description Try and hget the API endpoint url for a given HCE service from the /info metadata.
+     * @param {object} cnsi - cnsi metadata for the specified HCE service
+     * @returns {promise} A promise object
+     * @private
+     */
     _getHceApiEndpoint: function (cnsi) {
       // Retrieve dynamicllay as this model may load before the one we need
       var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
@@ -434,6 +442,14 @@
       })
     },
 
+    /**
+     * @function _listHceCnsis
+     * @memberof cloud-foundry.model.application
+     * @description Invoke the /info endpoint of all HCE instances available to the user, in order to get their public API url.
+     * The url we have registeed can be different to the API url returned by the /info endpoint.
+     * @returns {promise} A promise object
+     * @private
+     */
     _listHceCnsis: function () {
       var that = this;
       // We cache on the application - so if you add an HCE while on the app, we won't detect that
@@ -456,9 +472,20 @@
       }
     },
 
-    updateDeliveryPipelineMetadata: function () {
+    /**
+     * @function updateDeliveryPipelineMetadata
+     * @memberof cloud-foundry.model.application
+     * @description Update the pipeline metadatf for the application
+     * @param {boolea} refresh - indictaes if cached hce metadata should be refershed
+     * @returns {promise} A promise object
+     * @public
+     */
+    updateDeliveryPipelineMetadata: function (refresh) {
       var that = this;
       var pipeline = this.application.pipeline;
+      if (refresh) {
+        this.hceServiceInfo = undefined;
+      }
       // Retrieve dynamicllay as this model may load before the one we need
       var hcfUserProvidedServiceInstanceModel = that.modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
       // Async: work out if this application has a delivery pipeline
@@ -472,7 +499,7 @@
       pipeline.hceCnsi = null;
       if (hceServiceData) {
         // Go fetch the service metadata
-        hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
+        return hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
         .then(function (data) {
           // Now we need to see if the CNSI is known
           if (data && data.entity && data.entity.credentials && data.entity.credentials.apiUrl) {
@@ -485,6 +512,7 @@
               });
               pipeline.hceCnsi = hceInstance;
               pipeline.valid = angular.isDefined(hceInstance);
+              return pipeline;
             });
           }
         })
@@ -493,6 +521,7 @@
         });
       } else {
         pipeline.fetching = false;
+        return that.$q.when(pipeline);
       }
     },
 

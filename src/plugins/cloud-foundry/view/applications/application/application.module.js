@@ -75,7 +75,8 @@
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.isPending = this.model.application.summary.state === 'PENDING';
-    this.UPDATE_INTERVAL = 10000000; // milliseconds
+    // 10 seconds (1 second if too frequent)
+    this.UPDATE_INTERVAL = 10000; // milliseconds
 
     this.init();
 
@@ -155,19 +156,20 @@
     init: function () {
       var that = this;
       this.ready = false;
+      this.model.application.project = null;
       // Fetching flag onlt set initially - subsequent calls update the data, so we don't want to show a busy indicator
       // in those cases
       this.model.application.pipeline.fetching = true;
       this.model.getAppSummary(this.cnsiGuid, this.id, true)
       .then(function () {
-        console.log(that.application);
-        that.model.updateDeliveryPipelineMetadata();
+        that.model.updateDeliveryPipelineMetadata(true);
       })
       .finally(function () {
-          that.ready = true;
+        that.ready = true;
+        // Don't start updating until we have compelted the first init
+        that.startUpdate();
       });
 
-      this.model.application.project = null;
 
       /* eslint-disable */
       // TODO(kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
@@ -187,8 +189,6 @@
         }
       });
       */
-
-      return this.startUpdate();
     },
 
     /**
@@ -233,7 +233,7 @@
       this.$q.when()
         .then(function () {
           that.updateSummary().then(function () {
-            that.model.getDeliveryPipelineMetadata();
+            that.model.updateDeliveryPipelineMetadata();
           })
         })
         .finally(function () {
