@@ -139,9 +139,7 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 		return err
 	}
 
-	c.Response().WriteHeader(http.StatusCreated)
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
+	c.JSON(http.StatusCreated, jsonString)
 
 	return nil
 }
