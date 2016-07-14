@@ -24,12 +24,6 @@ resources:
     repo: hpcloud/stratos-ui
     uri: git@github.com:hpcloud/stratos-ui.git
     private_key: {{github-private-key}}
-- name: helion-ui-theme
-  type: git
-  source:
-    uri: git@github.com:hpcloud/helion-ui-theme.git
-    branch: master
-    private_key: {{github-private-key}}
 - name: helion-ui-framework
   type: git
   source:
@@ -43,7 +37,6 @@ jobs:
   # get dependencies
   - get: stratos-deploy
   - get: portal-proxy
-  - get: helion-ui-theme
   - get: helion-ui-framework
 
   # get PR and set status to pending
