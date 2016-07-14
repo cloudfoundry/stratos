@@ -54,6 +54,11 @@ type hcfPerms struct {
 	Admin string `json:"admin"`
 }
 
+type userInfo struct {
+	UAAPermissions uaaPerms   `json:"uaa"`
+	HCFPermissions []hcfPerms `json:"hcf"`
+}
+
 // UAAAdminIdentifier - The identifier that the Cloud Foundry UAA Service uses to convey administrative level perms
 const UAAAdminIdentifier = "uaa.admin"
 
@@ -86,10 +91,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	uaaAdmin := false
-	if contains(strings.Split(uaaRes.Scope, " "), UAAAdminIdentifier) {
-		uaaAdmin = true
-	}
+	uaaAdmin := strings.Contains(uaaRes.Scope, UAAAdminIdentifier)
 
 	resp := &LoginRes{
 		Account:     c.FormValue("username"),
@@ -169,10 +171,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	log.Println("After SAVE of CNSI token")
 
-	hcfAdmin := false
-	if contains(strings.Split(uaaRes.Scope, " "), HCFAdminIdentifier) {
-		hcfAdmin = true
-	}
+	hcfAdmin := strings.Contains(uaaRes.Scope, HCFAdminIdentifier)
 
 	resp := &LoginRes{
 		Account:     u.UserGUID,
@@ -416,10 +415,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return fmt.Errorf(msg, err)
 	}
 
-	uaaAdmin := false
-	if contains(userTokenInfo.Scope, UAAAdminIdentifier) {
-		uaaAdmin = true
-	}
+	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
 
 	resp := &VerifySessionRes{
 		Account: sessionUser,
@@ -453,30 +449,29 @@ func (p *portalProxy) userInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	// this is what gets returned to the caller
-	arrPerms := []string{}
-
 	// get the HCF related perms for each HCF endpoint registered
-	arrPerms, err := getHCFPerms(p, sessionUser, arrPerms)
+	hcfPermissions, err := p.getHCFPerms(sessionUser)
 	if err != nil {
 		return err
 	}
 
 	// get the UAA related perms
-	arrPerms, err = getUAAPerms(p, sessionUser, arrPerms)
+	uaaPermissions, err := p.getUAAPerms(sessionUser)
 	if err != nil {
 		return err
 	}
 
-	stringByte := "\x5B" + strings.Join(arrPerms, "\x2C\x20") + "\x5D"
-
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte(stringByte))
+	u := &userInfo{
+		UAAPermissions: *uaaPermissions,
+		HCFPermissions: hcfPermissions,
+	}
+	j, _ := json.Marshal(u)
+	c.JSON(http.StatusOK, j)
 
 	return nil
 }
 
-func getHCFPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, error) {
+func (p *portalProxy) getHCFPerms(userGUID string) ([]hcfPerms, error) {
 	// Get a list of registered CNSIs by the user`
 	CNSITokens, err := p.listCNSITokenRecordsForUser(userGUID)
 	if err != nil {
@@ -484,6 +479,8 @@ func getHCFPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 		log.Println(msg)
 		return nil, fmt.Errorf(msg)
 	}
+
+	HCFPermissions := make([]hcfPerms, len(CNSITokens))
 
 	// spin thru all registered CNSIs and grab the scope from each
 	for i := 0; i < len(CNSITokens); i++ {
@@ -497,10 +494,7 @@ func getHCFPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 		}
 
 		// based on the scope, is the user an admin for this CNSI?
-		hcfAdmin := false
-		if contains(userTokenInfo.Scope, UAAAdminIdentifier) {
-			hcfAdmin = true
-		}
+		hcfAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
 
 		// build an entry for each HCF found for the user
 		hcfEntry := &hcfPerms{
@@ -508,17 +502,13 @@ func getHCFPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 			GUID:  userTokenInfo.UserGUID,
 			Admin: fmt.Sprintf("%t", hcfAdmin),
 		}
-
-		h, _ := json.Marshal(hcfEntry)
-		s := string(h)
-
-		arrPerms = append(arrPerms, s)
+		HCFPermissions[i] = *hcfEntry
 	}
 
-	return arrPerms, nil
+	return HCFPermissions, nil
 }
 
-func getUAAPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, error) {
+func (p *portalProxy) getUAAPerms(userGUID string) (*uaaPerms, error) {
 	// get the uaa token record
 	uaaTokenRecord, err := p.getUAATokenRecord(userGUID)
 	if err != nil {
@@ -536,10 +526,7 @@ func getUAAPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 	}
 
 	// is the user a UAA admin?
-	uaaAdmin := false
-	if contains(userTokenInfo.Scope, UAAAdminIdentifier) {
-		uaaAdmin = true
-	}
+	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
 
 	// add the uaa entry to the output
 	uaaEntry := &uaaPerms{
@@ -547,19 +534,5 @@ func getUAAPerms(p *portalProxy, userGUID string, arrPerms []string) ([]string, 
 		Admin: fmt.Sprintf("%t", uaaAdmin),
 	}
 
-	h, _ := json.Marshal(uaaEntry)
-	s := string(h)
-
-	arrPerms = append(arrPerms, s)
-
-	return arrPerms, nil
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
+	return uaaEntry, nil
 }
