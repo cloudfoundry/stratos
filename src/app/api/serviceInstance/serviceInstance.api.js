@@ -57,7 +57,16 @@
       return this.$http.post('/pp/v1/register/hcf', data, config);
     },
 
-    createHCE: function (url, name) {
+    /**
+     * @function createHce
+     * @memberof app.api.serviceInstance.ServiceInstanceApi
+     * @description Create a HCE service instance
+     * @param {string} url - the service instance endpoint
+     * @param {string} name - the service instance friendly name
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    createHce: function (url, name) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
