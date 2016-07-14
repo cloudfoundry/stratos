@@ -22,6 +22,10 @@ type v2Info struct {
 	DopplerLoggingEndpoint string `json:"doppler_logging_endpoint"`
 }
 
+type hceInfo struct {
+	AuthorizationEndpoint string `json:"auth_endpoint"`
+}
+
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	cnsiName := c.FormValue("cnsi_name")
@@ -103,25 +107,24 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 			"Failed to get API Endpoint: %v", err)
 	}
 
-	// HCE doesn't provide this yet
-	//	infoResponse, err := getHCEInfo(apiEndpoint)
-	//	if err != nil {
-	//		return newHTTPShadowError(
-	//			http.StatusBadRequest,
-	//			"Failed to get endpoint 'info'",
-	//			"Failed to get api endpoint 'info': %v",
-	//			err)
-	//	}
+	infoResponse, err := getHCEInfo(apiEndpoint)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to get endpoint 'info'",
+			"Failed to get api endpoint 'info': %v",
+			err)
+	}
 
 	guid := uuid.NewV4().String()
 
 	// save data to temporary map
 	newCNSI := cnsis.CNSIRecord{
-		Name:        cnsiName,
-		CNSIType:    cnsis.CNSIHCE,
-		APIEndpoint: apiEndpointURL,
-		//		TokenEndpoint:         infoResponse.TokenEndpoint,
-		//		AuthorizationEndpoint: infoResponse.AuthorizationEndpoint,
+		Name:                  cnsiName,
+		CNSIType:              cnsis.CNSIHCE,
+		APIEndpoint:           apiEndpointURL,
+		TokenEndpoint:         infoResponse.AuthorizationEndpoint,
+		AuthorizationEndpoint: infoResponse.AuthorizationEndpoint,
 	}
 
 	err = p.setCNSIRecord(guid, newCNSI)
@@ -129,7 +132,16 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 		return err
 	}
 
-	c.String(http.StatusCreated, guid)
+	// set the guid on the object so it's returned in the response
+	newCNSI.GUID = guid
+	jsonString, err := json.Marshal(newCNSI)
+	if err != nil {
+		return err
+	}
+
+	c.Response().WriteHeader(http.StatusCreated)
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
 
 	return nil
 }
@@ -291,8 +303,8 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	return v2InfoReponse, nil
 }
 
-func getHCEInfo(apiEndpoint string) (v2Info, error) {
-	var infoReponse v2Info
+func getHCEInfo(apiEndpoint string) (hceInfo, error) {
+	var infoReponse hceInfo
 
 	uri, err := url.Parse(apiEndpoint)
 	if err != nil {

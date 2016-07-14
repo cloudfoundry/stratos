@@ -140,7 +140,15 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
-	uaaRes, u, err := p.login(c, p.Config.HCFClient, p.Config.HCFClientSecret, tokenEndpoint)
+	clientId := p.Config.HCFClient
+	clientSecret := p.Config.HCFClientSecret
+
+	if cnsiRecord.CNSIType == "hce" {
+		clientId = p.Config.HCEClient
+		clientSecret = p.Config.HCEClientSecret
+	}
+
+	uaaRes, u, err := p.login(c, clientId, clientSecret, tokenEndpoint)
 	if err != nil {
 		return newHTTPShadowError(
 			http.StatusUnauthorized,
