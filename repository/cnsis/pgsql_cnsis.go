@@ -11,7 +11,7 @@ const (
 	listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint
                FROM cnsis`
 
-	listCNSIsByUser = `SELECT c.guid, c.name, c.api_endpoint, t.user_guid, t.token_expiry
+	listCNSIsByUser = `SELECT c.guid, c.name, c.cnsi_type, c.api_endpoint, t.user_guid, t.token_expiry
                      FROM cnsis c, tokens t
                      WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2`
 
@@ -94,13 +94,18 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredClust
 
 	for rows.Next() {
 		var (
-			pURL string
+			pCNSIType string
+			pURL      string
 		)
 
 		cluster := new(RegisteredCluster)
-		err := rows.Scan(&cluster.GUID, &cluster.Name, &pURL, &cluster.Account, &cluster.TokenExpiry)
+		err := rows.Scan(&cluster.GUID, &cluster.Name, &pCNSIType, &pURL, &cluster.Account, &cluster.TokenExpiry)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan cluster records: %v", err)
+		}
+
+		if cluster.CNSIType, err = getCNSIType(pCNSIType); err != nil {
+			return nil, fmt.Errorf("Unable to get CNSI type: %v", err)
 		}
 
 		if cluster.APIEndpoint, err = url.Parse(pURL); err != nil {
@@ -136,7 +141,7 @@ func (p *PostgresCNSIRepository) Find(guid string) (CNSIRecord, error) {
 	case err != nil:
 		return CNSIRecord{}, fmt.Errorf("Error trying to Find CNSI record: %v", err)
 	default:
-	// do nothing
+		// do nothing
 	}
 
 	// TODO(wchrisjohnson): discover a way to do this automagically

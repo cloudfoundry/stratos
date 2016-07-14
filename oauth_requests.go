@@ -35,8 +35,14 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 	got401 := false
 	expTime := time.Unix(tokenRec.TokenExpiry, 0)
 	for {
+		clientID := p.Config.HCFClient
+
+		if cnsi.CNSIType == cnsis.CNSIHCE {
+			clientID = p.Config.HCEClient
+		}
+
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.refreshToken(cnsiRequest.GUID, cnsiRequest.UserGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.refreshToken(cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
 			if err != nil {
 				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
 			}

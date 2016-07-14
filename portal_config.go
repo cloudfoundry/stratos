@@ -8,6 +8,7 @@ type portalConfig struct {
 	TLSCertKey              string   `ucp:"CERT_KEY"`
 	ConsoleClient           string   `ucp:"CONSOLE_CLIENT"`
 	ConsoleClientSecret     string   `ucp:"CONSOLE_CLIENT_SECRET"`
+	HCEClient               string   `ucp:"HCE_CLIENT"`
 	HCFClient               string   `ucp:"HCF_CLIENT"`
 	HCFClientSecret         string   `ucp:"HCF_CLIENT_SECRET"`
 	UAAEndpoint             string   `ucp:"UAA_ENDPOINT"`

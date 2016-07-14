@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
+	"github.com/hpcloud/portal-proxy/repository/cnsis"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
@@ -140,7 +141,13 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
-	uaaRes, u, err := p.login(c, p.Config.HCFClient, p.Config.HCFClientSecret, tokenEndpoint)
+	clientID := p.Config.HCFClient
+
+	if cnsiRecord.CNSIType == cnsis.CNSIHCE {
+		clientID = p.Config.HCEClient
+	}
+
+	uaaRes, u, err := p.login(c, clientID, "", tokenEndpoint)
 	if err != nil {
 		return newHTTPShadowError(
 			http.StatusUnauthorized,
