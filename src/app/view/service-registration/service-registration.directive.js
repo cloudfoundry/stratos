@@ -102,7 +102,7 @@
   angular.extend(ServiceRegistrationController.prototype, {
     /**
      * @function completeRegistration
-     * @memberOf app.view.ServiceRegistrationController
+     * @memberof app.view.ServiceRegistrationController
      * @description Set service instances as registered
      */
     completeRegistration: function () {
@@ -112,7 +112,7 @@
 
     /**
      * @function connect
-     * @memberOf app.view.ServiceRegistrationController
+     * @memberof app.view.ServiceRegistrationController
      * @description Connect service instance for user
      * @param {object} serviceInstance - the service instance to connect
      */
@@ -123,7 +123,7 @@
 
     /**
      * @function disconnect
-     * @memberOf app.view.ServiceRegistrationController
+     * @memberof app.view.ServiceRegistrationController
      * @description Disconnect service instance for user
      * @param {object} userServiceInstance - the model user version of the service instance to disconnect
      */
@@ -168,7 +168,7 @@
 
     /**
      * @function showClusterAddForm
-     * @memberOf app.view.ServiceRegistrationController
+     * @memberof app.view.ServiceRegistrationController
      * @description Show the cluster add form flyout
      */
     showClusterAddForm: function () {
@@ -177,25 +177,21 @@
 
     /**
      * @function showHCEEndpointAddForm
-     * @memberOf app.view.ServiceRegistrationController
+     * @memberof app.view.ServiceRegistrationController
      * @description Show the HCE Endpoint add form detail view
      */
     showHCEEndpointAddForm: function () {
       this.hceRegistration.add();
     },
 
+    /**
+     * @function isAdmin
+     * @memberof app.view.ServiceRegistrationController
+     * @description Determines if the current user is an admin user
+     * @returns {boolean} to indicate if the user is an admin user
+     */
     isAdmin: function () {
       return this.currentUserAccount.isAdmin();
-    },
-
-    /**
-     * @function overrideIsAdmin
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Set the admin override
-     * @param {Bool} isDeveloper true when user is developer
-     */
-    overrideIsAdmin: function (isDeveloper) {
-      this.currentUserAccount.setAdminOverride(isDeveloper);
     }
 
   });

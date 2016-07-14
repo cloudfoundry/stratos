@@ -137,13 +137,14 @@
         expect(element.find('div').length).toBeGreaterThan(0);
       });
 
-      it('should not be hidden on completeRegistration() and numValid === 0', function () {
+      // You can now hide the registration dialog even if you did not connect any services
+      it('should be hidden on completeRegistration() and numValid === 0', function () {
         $scope.showRegistration = true;
         $scope.$apply();
 
         serviceRegistrationCtrl.completeRegistration();
 
-        expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(true);
+        expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(false);
       });
 
       it('should be hidden on completeRegistration() and numValid > 0', function () {

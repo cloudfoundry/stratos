@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -30,8 +30,7 @@
   ClusterSettingsController.$inject = [
     '$scope',
     'app.model.modelManager',
-    'app.api.apiManager',
-    'helion.framework.widgets.detailView'
+    'app.api.apiManager'
   ];
 
   /**
@@ -42,26 +41,23 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {helion.framework.widgets.detailView} detailView - detail view service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
-   * @property {app.model.user} userModel - the user model
    * @property {array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ClusterSettingsController($scope, modelManager, apiManager, detailView) {
+  function ClusterSettingsController($scope, modelManager, apiManager) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.clusterAddFlyoutActive = false;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.userModel = modelManager.retrieve('app.model.user');
     this.serviceInstances = {};
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
-    this.warningMsg = gettext('Authentication failed, please try reconnect.');
-    this.detailView = detailView;
+    //this.warningMsg = gettext('Authentication failed, please try reconnect.');
     this.currentEndpoints = [];
+
     /* eslint-disable */
     // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
     /* eslint-enable */
@@ -80,21 +76,19 @@
       });
     });
 
-    $scope.$watchCollection(function() {
+    $scope.$watchCollection(function () {
       return that.serviceInstances;
-    }, function(newCnsis) {
+    }, function (newCnsis) {
       that.currentEndpoints = _.map(newCnsis,
-        function(c) {
+        function (c) {
           var endpoint = c.api_endpoint;
           return endpoint.Scheme + '://' + endpoint.Host;
         });
     });
 
-    this.userCnsiModel.list().then(function() {
+    this.userCnsiModel.list().then(function () {
       angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
       that.cnsiModel.list();
-
-      console.log(that.serviceInstances);
     });
   }
 
@@ -103,41 +97,17 @@
     // FIXME: When HCE support authentication, update this
     /**
      * @function isValid
-     * @memberOf app.view.ServiceRegistrationController
+     * @memberof app.view.ServiceRegistrationController
+     * @param {object} cnsi - cnsi object to check for validity
      * @description Determines if the service is connected and can be included in the list
+     * @returns {boolean} indicating if the specified cnsi is valid
      */
-    isValid: function(cnsi) {
+    isValid: function (cnsi) {
       if (cnsi.cnsi_type === 'hce') {
         return true;
       } else {
         return cnsi.valid;
       }
-    },
-
-    /**
-     * @function completeRegistration
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Set service instances as registered
-     */
-    completeRegistration: function () {
-      var that = this;
-      if (this.userCnsiModel.numValid > 0) {
-        this.userModel.updateRegistered(true)
-          .then(function () {
-            that.showOverlayRegistration = false;
-          });
-      }
-    },
-
-    /**
-     * @function connect
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Connect service instance for user
-     * @param {object} serviceInstance - the service instance to connect
-     */
-    connect: function (serviceInstance) {
-      this.activeServiceInstance = serviceInstance;
-      this.credentialsFormOpen = true;
     },
 
     /**
@@ -148,9 +118,6 @@
      */
     disconnect: function (userServiceInstance) {
       var that = this;
-
-      console.log('Disconnect');
-      console.log(userServiceInstance);
       userServiceInstance._busy = true;
 
       // Our mocking system uses "id" but the real systems use "guid".
@@ -166,79 +133,9 @@
           that.cfModel.all();
         }).catch(function () {
         // Failed
-      }).finally(function() {
-        delete userServiceInstance._busy;
-      })
-    },
-
-    onConnectCancel: function () {
-      this.credentialsFormOpen = false;
-    },
-
-    onConnectSuccess: function () {
-      this.userCnsiModel.numValid += 1;
-      this.credentialsFormOpen = false;
-      this.activeServiceInstance = null;
-    },
-
-    remove: function (serviceInstance) {
-      var that = this;
-      this.cnsiModel.remove(serviceInstance)
-        .then(function success() {
-          that.serviceInstances = {};
-          that.userCnsiModel.list().then(function () {
-            angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
-            that.cnsiModel.list();
-          });
+        }).finally(function () {
+          delete userServiceInstance._busy;
         });
-    },
-
-    /**
-     * @function showClusterAddForm
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Show the cluster add form flyout
-     */
-    showClusterAddForm: function () {
-      this.clusterAddFlyoutActive = true;
-    },
-
-    /**
-     * @function hideClusterAddForm
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Hide the cluster add form flyout
-     */
-    hideClusterAddForm: function () {
-      this.clusterAddFlyoutActive = false;
-    },
-
-    /**
-     * @function showHCEEndpointAddForm
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Show the HCE Endpoint add form detail view
-     */
-    showHCEEndpointAddForm: function () {
-      // This code is shamelessly copied from app/view/cluster-registration/cluster-registration.directive.js
-      // I take that back, it was EXTREMELY SHAMEFUL.
-      // -- woodnt
-
-      var that = this;
-      var data = { name: '', url: '' };
-      this.detailView(
-        {
-          templateUrl: 'app/view/hce-registration/hce-registration.html',
-          title: gettext('Register Code Engine Endpoint')
-        },
-        {
-          data: data,
-          options: {
-            instances: this.currentEndpoints
-          }
-        }
-      ).result.then(function () {
-        return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-          that.cnsiModel.list();
-        });
-      });
     }
   });
 
