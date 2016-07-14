@@ -107,6 +107,9 @@
           "name": "CONSOLE_CLIENT_SECRET"
         },
         {
+          "name": "HCE_CLIENT"
+        },
+        {
           "name": "HCF_CLIENT"
         },
         {
@@ -416,6 +419,15 @@
         "description": "Console client secret",
         "default": "",
         "example": "",
+        "data_type": "string",
+        "required": true,
+        "secret": false
+    },
+    {
+        "name": "HCE_CLIENT",
+        "description": "HCE client",
+        "default": "console",
+        "example": "console",
         "data_type": "string",
         "required": true,
         "secret": false
