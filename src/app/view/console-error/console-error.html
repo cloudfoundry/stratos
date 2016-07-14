@@ -12,6 +12,11 @@
           <div class="applications-msg" translate>Helion Stackato encountered an unexpected error.</div>
           <div class="applications-cta" translate>Please contact your administrator.</div>
         </div>
+        <div ng-if="errPageCtrl.error === 'upgrading'">
+          <div class="helion-icon helion-icon-3x helion-icon-Install"></div>
+          <div class="applications-msg" translate>The Helion Stackato Console is being upgraded.</div>
+          <div class="applications-cta" translate>Please wait for the upgrade to complete and then refresh or contact your administrator for further information.</div>
+        </div>
       </div>
     </div>
   </div>
