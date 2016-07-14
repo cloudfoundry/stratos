@@ -72,16 +72,29 @@ rm -rf ${__DIRNAME}/../stratos-ui/dist
 rm -rf ${__DIRNAME}/../stratos-ui/containers/nginx/dist
 
 # Build Portal Proxy
+# PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
+# pushd ${PORTAL_PROXY_PATH}
+# ./tools/build_portal_proxy.sh
+# popd
+
+# TODO (wchrisjohnson) document this and add a shell script to regenerate the
+# image when necessary.
+# Build the Proxy executable in a container, and leave it on the local filesystem
+# Use the existing build container we created for the CI process
 PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
 pushd ${PORTAL_PROXY_PATH}
-./tools/build_portal_proxy.sh
+docker run -it \
+           --rm \
+           --name proxy-builder \
+           --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
+           $DOCKER_REGISTRY/helioncf/proxy-builder
 popd
 
 # Build and publish the container image for the portal proxy
-buildAndPublishImage cnap-console-proxy Dockerfile.server ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-proxy Dockerfile.UCP ${PORTAL_PROXY_PATH}
 
 # Build the postgres configuration container
-buildAndPublishImage cnap-console-database-configuration Dockerfile.database.UCP ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-database-creation Dockerfile.database.UCP ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
 docker run --rm \
@@ -95,15 +108,16 @@ docker run --rm \
 cp -R ${__DIRNAME}/../stratos-ui/dist ${__DIRNAME}/../stratos-ui/containers/nginx/dist
 
 # Build and push an image based on the nginx container
-buildAndPublishImage cnap-console-server Dockerfile.UCP ${__DIRNAME}/../stratos-ui/containers/nginx
+buildAndPublishImage hsc-console Dockerfile.UCP ${__DIRNAME}/../stratos-ui/containers/nginx
 
 echo "Creating service and instance definition"
 
 mkdir -p ${__DIRNAME}/output
-for FILE in ${__DIRNAME}/ucp_templates/*.json ; do
+for FILE in ${__DIRNAME}/hcp_templates/*.json ; do
   ofile=${__DIRNAME}/output/$(basename $FILE)
   cat $FILE | sed s/{{TAG}}/$TAG/g | sed s/{{REGISTRY}}/$DOCKER_REGISTRY/g > $ofile
 done
 
 echo "Build complete. Tag is $TAG and UCP definitions are in ${__DIRNAME}/output/"
 echo "The definitions are using registry: $DOCKER_REGISTRY and tag: $TAG"
+echo "BE SURE TO UPDATE ANY ENV VARS IN YOUR instance.json FILE."

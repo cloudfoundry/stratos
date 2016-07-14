@@ -1,0 +1,24 @@
+{
+  "name": "helion-stackato-console",
+  "version": "{{TAG}}",
+  "vendor": "HPE",
+  "instance_id": "hsc",
+  "description": "An instance of the Helion Stackato Console",
+  "labels": [],
+  "scaling": [],
+  "volumes": [],
+  "parameters": [
+    {
+      "name": "GITHUB_OAUTH_CLIENT_ID",
+      "value": "__REPLACE__"
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_SECRET",
+      "value": "__REPLACE__"
+    },
+    {
+      "name": "GITHUB_OAUTH_STATE",
+      "value": "__REPLACE__"
+    }
+  ]
+}
