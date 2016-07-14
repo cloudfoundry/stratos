@@ -1,10 +1,13 @@
 .hce-registration {
-
-    margin: 0 $hpe-unit-space * 5;
+  margin: 0 $hpe-unit-space * 5;
 
   .modal-footer {
     text-align: right;
     padding: $hpe-unit-space 0 0 0;
     margin-top: $hpe-unit-space * 2;
   }
+}
+
+.alert-danger.register-error {
+  margin-top: $hpe-unit-space;
 }

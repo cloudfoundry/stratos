@@ -66,8 +66,10 @@
      **/
     all: function (guid, options, sync) {
       var that = this;
+      this.data.applications = [];
       var cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
         .values()
+        .filter({cnsi_type: 'hcf'})
         .map('guid')
         .value();
       return this.applicationApi.ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
