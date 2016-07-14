@@ -496,7 +496,8 @@
       });
 
       pipeline.valid = false;
-      pipeline.hceCnsi = null;
+      pipeline.hceCnsi = undefined;
+      pipeline.hceApiUrl = undefined;
       if (hceServiceData) {
         // Go fetch the service metadata
         return hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)

@@ -1,10 +1,19 @@
-<div ng-if="!applicationDeliveryPipelineCtrl.project"
-  class="message-box message-box-no-bg">
-  <p>
-    <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
-    <h3 translate>You have not set up a delivery pipeline</h3>
-  </p>
-  <button ng-click="applicationDeliveryPipelineCtrl.setupPipeline()" class="btn btn-primary" translate>set up delivery pipeline</button>
+<div ng-if="!applicationDeliveryPipelineCtrl.project">
+  <div ng-if="!applicationDeliveryPipelineCtrl.model.application.pipeline.valid && applicationDeliveryPipelineCtrl.model.application.pipeline.hceApiUrl"
+    class="message-box message-box-no-bg">
+    <p>
+      <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
+      <h3 translate>The Code Engine associated with this application is not registered with the Console.</h3>
+    </p>
+  </div>
+  <div ng-if="!applicationDeliveryPipelineCtrl.model.application.pipeline.hceApiUrl"
+    class="message-box message-box-no-bg">
+    <p>
+      <div class="helion-icon helion-icon-3x helion-icon-Continuous_integration"></div>
+      <h3 translate>You have not set up a delivery pipeline</h3>
+    </p>
+    <button ng-click="applicationDeliveryPipelineCtrl.setupPipeline()" class="btn btn-primary" translate>set up delivery pipeline</button>
+  </div>
 </div>
 <div ng-if="applicationDeliveryPipelineCtrl.isDeleting" class="message-box message-box-no-bg">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
