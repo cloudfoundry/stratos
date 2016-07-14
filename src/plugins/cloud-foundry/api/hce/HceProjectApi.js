@@ -35,12 +35,11 @@
      * @description Add a member (user) to a project.
      * @param {string} guid - the HCE instance GUID
      * @param {!number} projectId - The project id.
-     * @param {object} data - the request body
      * @param {object} params - the query parameters
      * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    addMember: function (guid, projectId, data, params, httpConfigOptions) {
+    addMember: function (guid, projectId, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects/{project_id}/members'
         .replace('{' + 'project_id' + '}', projectId);
       var headers = {
@@ -51,7 +50,6 @@
         method: 'POST',
         url: path,
         params: params || {},
-        data: data,
         headers: headers
       };
 
@@ -339,12 +337,11 @@
      * @description Remove a member (user) from a project.
      * @param {string} guid - the HCE instance GUID
      * @param {!number} projectId - The project id.
-     * @param {object} data - the request body
      * @param {object} params - the query parameters
      * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    removeMember: function (guid, projectId, data, params, httpConfigOptions) {
+    removeMember: function (guid, projectId, params, httpConfigOptions) {
       var path = this.baseUrl + '/projects/{project_id}/members'
         .replace('{' + 'project_id' + '}', projectId);
       var headers = {
@@ -355,7 +352,6 @@
         method: 'DELETE',
         url: path,
         params: params || {},
-        data: data,
         headers: headers
       };
 

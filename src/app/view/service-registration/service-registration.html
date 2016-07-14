@@ -59,15 +59,13 @@
             <td>{{serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].account}}</td>
             <td>{{serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].token_expiry | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
             <td class="text-right">
-              <span ng-if="cnsi.cnsi_type === 'hcf'">  <!-- Remove this span-wrapper once HCE clusters have correct auth. -->
-                <a class="btn btn-link btn-sm" ng-if="!serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
-                  ng-click="serviceRegistrationCtrl.connect(cnsi)">
-                  <span ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false" translate>Reconnect</span>
-                  <span ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === undefined" translate>Connect</span>
-                </a>
-                <a class="btn btn-link btn-sm" ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
-                  ng-click="serviceRegistrationCtrl.disconnect(serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid])" translate>Disconnect</a>
-              </span>
+              <a class="btn btn-link btn-sm" ng-if="!serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
+                ng-click="serviceRegistrationCtrl.connect(cnsi)">
+                <span ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false" translate>Reconnect</span>
+                <span ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === undefined" translate>Connect</span>
+              </a>
+              <a class="btn btn-link btn-sm" ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
+                ng-click="serviceRegistrationCtrl.disconnect(serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid])" translate>Disconnect</a>
               <a class="btn btn-link btn-sm"
                  translate
                  ng-click="serviceRegistrationCtrl.remove(cnsi)">

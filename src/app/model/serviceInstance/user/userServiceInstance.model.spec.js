@@ -131,8 +131,8 @@
 
     it('should not set `serviceInstances` on list() and info error', function () {
       var data = [
-        { guid: 'c1', name: 'cluster1', url:' cluster1_url', token_expiry: (new Date()).getTime() + 36000 },
-        { guid: 'c2', name: 'cluster2', url:' cluster2_url' }
+        { guid: 'c1', name: 'cluster1', cnsi_type: 'hcf', url:' cluster1_url', token_expiry: (new Date()).getTime() + 36000 },
+        { guid: 'c2', name: 'cluster2', cnsi_type: 'hcf', url:' cluster2_url' }
       ];
 
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(403, {});
