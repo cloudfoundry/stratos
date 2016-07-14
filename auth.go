@@ -48,6 +48,11 @@ type ConnectedUser struct {
 	Admin bool   `json:"admin"`
 }
 
+type userInfo struct {
+	UAAPermissions uaaPerms   `json:"uaa"`
+	HCFPermissions []hcfPerms `json:"hcf"`
+}
+
 // UAAAdminIdentifier - The identifier that the Cloud Foundry UAA Service uses to convey administrative level perms
 const UAAAdminIdentifier = "hcp.admin"
 

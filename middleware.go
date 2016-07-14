@@ -33,6 +33,26 @@ func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func (p *portalProxy) stackatoAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// if user is an admin, passthrough request
+		// get the user guid
+		if userID, ok := p.getSessionValue(c, "user_id"); ok {
+			// check their admin status in UAA
+			u, err := p.getUAAPerms(userID.(string))
+			if err != nil {
+				return c.NoContent(http.StatusUnauthorized)
+			}
+
+			if u.Admin == "true" {
+				return h(c)
+			}
+		}
+
+		return c.NoContent(http.StatusUnauthorized)
+	}
+}
+
 func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Println("errorLoggingMiddleware")

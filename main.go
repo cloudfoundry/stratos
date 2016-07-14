@@ -285,14 +285,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	sessionGroup.GET("/github/oauth/auth", p.handleGitHubAuth)
 	sessionGroup.GET("/github/oauth/callback", p.handleGitHubCallback)
 
-	// Register clusters
-	sessionGroup.POST("/register/hcf", p.registerHCFCluster)
-	sessionGroup.POST("/register/hce", p.registerHCECluster)
-
-	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
-	sessionGroup.POST("/unregister", p.unregisterCluster)
-	// sessionGroup.DELETE("/cnsis", p.removeCluster)
-
 	// CNSI operations
 	sessionGroup.GET("/cnsis", p.listCNSIs)
 	sessionGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
@@ -305,6 +297,16 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
 	// Version info
 	sessionGroup.GET("/version", p.getVersions)
+
+	adminGroup := sessionGroup
+	adminGroup.Use(p.stackatoAdminMiddleware)
+	// Register clusters
+	adminGroup.POST("/register/hcf", p.registerHCFCluster)
+	adminGroup.POST("/register/hce", p.registerHCECluster)
+
+	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
+	adminGroup.POST("/unregister", p.unregisterCluster)
+	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
