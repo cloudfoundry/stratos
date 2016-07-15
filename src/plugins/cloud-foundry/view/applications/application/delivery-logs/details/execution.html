@@ -39,7 +39,7 @@
         <td class="row result-col" ng-if="typeof(event.durationString) === 'undefined'"></td>
         <td ng-switch="event.state == 'succeeded' || event.state == 'failed'" class="event-view">
           <div ng-switch-when="true">
-            <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewEvent(event, detailViewCtrl.context.cnsiGuid)">
+            <a class="btn btn-link" href="" ng-click="detailViewCtrl.context.viewEvent(event, detailViewCtrl.context.guid)">
               <i class="helion-icon helion-icon-Right_Arrow"></i>
               <span translate>View</span>
             </a>

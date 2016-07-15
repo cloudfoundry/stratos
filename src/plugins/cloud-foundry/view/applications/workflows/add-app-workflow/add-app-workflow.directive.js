@@ -653,7 +653,6 @@
     },
 
     createPipeline: function (targetId) {
-      var projectType = this.userInput.buildContainer.build_container_label.split(' ')[0];
       return this.hceModel.createProject(this.userInput.hceCnsi.guid,
                                          this.userInput.name,
                                          this.userInput.source,

@@ -161,7 +161,7 @@
         return;
       }
 
-      this.views.viewEvent.open(events[events.length - 1], this.cnsiModel.guid);
+      this.views.viewEvent.open(events[events.length - 1], this.hceCnsi.guid);
     },
 
     /**
