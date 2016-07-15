@@ -134,12 +134,8 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 
 	// set the guid on the object so it's returned in the response
 	newCNSI.GUID = guid
-	jsonString, err := json.Marshal(newCNSI)
-	if err != nil {
-		return err
-	}
 
-	c.JSON(http.StatusCreated, jsonString)
+	c.JSON(http.StatusCreated, newCNSI)
 
 	return nil
 }
