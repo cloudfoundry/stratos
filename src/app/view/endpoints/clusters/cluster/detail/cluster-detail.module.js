@@ -74,12 +74,14 @@
       that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
     };
 
-    $scope.$watch(function () { return _.get(that.organizationModel, 'organizations.' + that.guid); }, function (orgDetails) {
+    $scope.$watch(function () {
+      return _.keys(_.get(that.organizationModel, 'organizations.' + that.guid, {})).length;
+    }, function (orgDetails) {
       if (!orgDetails) {
         return;
       }
       that.organizations = [];
-      _.forEach(orgDetails, function (orgDetail) {
+      _.forEach(that.organizationModel.organizations[that.guid], function (orgDetail) {
         that.organizations.push(orgDetail);
 
         that.updateTotalApps();
