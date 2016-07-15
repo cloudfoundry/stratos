@@ -56,7 +56,6 @@
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
     //this.warningMsg = gettext('Authentication failed, please try reconnect.');
-    this.currentEndpoints = [];
 
     /* eslint-disable */
     // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
@@ -76,16 +75,6 @@
       });
     });
 
-    $scope.$watchCollection(function () {
-      return that.serviceInstances;
-    }, function (newCnsis) {
-      that.currentEndpoints = _.map(newCnsis,
-        function (c) {
-          var endpoint = c.api_endpoint;
-          return endpoint.Scheme + '://' + endpoint.Host;
-        });
-    });
-
     this.userCnsiModel.list().then(function () {
       angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
       that.cnsiModel.list();
@@ -94,7 +83,9 @@
 
   angular.extend(ClusterSettingsController.prototype, {
 
+    /* eslint-disable */
     // FIXME: When HCE support authentication, update this
+    /* eslint-enable */
     /**
      * @function isValid
      * @memberof app.view.ServiceRegistrationController
