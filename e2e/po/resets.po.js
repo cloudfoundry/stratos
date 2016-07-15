@@ -24,8 +24,8 @@ module.exports = {
 function devWorkflow(firstTime) {
   var req = newRequest();
 
-  return new Promise(function (resolve, reject) {
-    createSession(req, 'dev', 'dev').then(function () {
+  return new Promise(function(resolve, reject) {
+    createSession(req, 'dev', 'dev').then(function() {
       var promises = [];
       promises.push(setUser(req, !firstTime));
       promises.push(resetClusters(req));
@@ -52,9 +52,9 @@ function devWorkflow(firstTime) {
 function zeroClusterAdminWorkflow() {
   var req = newRequest();
 
-  return new Promise(function (resolve, reject) {
-    createSession(req, adminUser, adminPassword).then(function () {
-      removeClusters(req).then(function () {
+  return new Promise(function(resolve, reject) {
+    createSession(req, adminUser, adminPassword).then(function() {
+      removeClusters(req).then(function() {
         resolve();
       }, function () {
         reject();
@@ -72,8 +72,8 @@ function zeroClusterAdminWorkflow() {
 function nClustersAdminWorkflow() {
   var req = newRequest();
 
-  return new Promise(function (resolve, reject) {
-    createSession(req, adminUser, adminPassword).then(function () {
+  return new Promise(function(resolve, reject) {
+    createSession(req, adminUser, adminPassword).then(function() {
       var promises = [];
       promises.push(resetClusters(req));
 
@@ -142,7 +142,7 @@ function createSession(req, username, password) {
       })
     };
     req.post('http://' + host + '/pp/v1/auth/login/uaa', options)
-      .on('response', function (response) {
+      .on('response', function(response) {
 
         if (response.statusCode === 200) {
           resolve();
@@ -163,9 +163,9 @@ function resetClusters(req) {
   return new Promise(function (resolve, reject) {
     removeClusters(req).then(function () {
       var clustersToAdd = [
-        {url: 'api.15.126.233.29.xip.io', name: 'HPE Cloud Foundry_01'},
-        {url: 'api.12.163.29.3.xip.io', name: 'HPE Cloud Foundry_02'},
-        {url: 'api.15.13.32.22.xip.io', name: 'HPE Cloud Foundry_03'}
+        { url: 'api.15.126.233.29.xip.io', name: 'HPE Cloud Foundry_01' },
+        { url: 'api.12.163.29.3.xip.io', name: 'HPE Cloud Foundry_02' },
+        { url: 'api.15.13.32.22.xip.io', name: 'HPE Cloud Foundry_03' }
       ];
 
       var promises = clustersToAdd.map(function (c) {
@@ -188,7 +188,7 @@ function resetClusters(req) {
  */
 function removeClusters(req) {
   return new Promise(function (resolve, reject) {
-    var data = '';
+    var data  = '';
     req.get('http://' + host + '/api/service-instances')
       .on('data', function (responseData) {
         data += responseData;
@@ -233,7 +233,7 @@ function resetUserServiceInstances(req) {
       ];
       var postUrl = 'service-instances/user/connect';
       var promises = serviceInstancesToAdd.map(function (instanceUrl) {
-        return sendRequest(req, 'POST', postUrl, {url: instanceUrl});
+        return sendRequest(req, 'POST', postUrl, { url: instanceUrl });
       });
       Promise.all(promises).then(function () {
         resolve();
@@ -297,7 +297,7 @@ function setUser(req, registered) {
       })
       .on('end', function () {
         var user = JSON.parse(data);
-        var body = {registered: registered};
+        var body = { registered: registered };
         if (Object.keys(user).length === 0) {
           sendRequest(req, 'POST', 'users', body)
             .then(function () {

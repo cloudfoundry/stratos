@@ -70,7 +70,6 @@
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceCnsi = null;
-    this.invalidHce = false;
     this.id = $stateParams.guid;
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
@@ -171,20 +170,14 @@
       });
 
 
-      /* eslint-disable */
-      // TODO(kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
-      /* eslint-enable */
       /*
       this.cnsiModel.list().then(function () {
         var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
         if (hceCnsis.length > 0) {
           that.hceCnsi = hceCnsis[0];
-          that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
+          that.hceModel.getProjects(that.hceCnsi.guid)
             .then(function () {
-              that.hceModel.getProjects(that.hceCnsi.guid)
-                .then(function () {
-                  that.model.application.project = that.hceModel.getProject(that.model.application.summary.name);
-                });
+              that.model.application.project = that.hceModel.getProject(that.model.application.summary.name);
             });
         }
       });

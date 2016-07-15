@@ -7,13 +7,13 @@
     </div>
   </nav>
   <div class="container registration-content">
-    <div class="row">
+    <div class="row user-setup">
       <h2 class="page-header">
-        <span translate>Setup your account</span>
+        <span translate>Welcome to Helion Stackato</span>
       </h2>
-      <p translate>
-        Before you get started with Helion Stackato, you will have to register into services to see what apps you have access to.
-      </p>
+      <h4 translate>
+        To get started, setup your account by connecting to clusters and other services.
+      </h4>
       <table class="table table-actionable">
         <thead>
           <tr>
@@ -22,28 +22,10 @@
             <th translate>URL</th>
             <th translate>User Account</th>
             <th translate>Valid Until</th>
-            <th class="registration-actions">
-              <button class="btn btn-primary"
-                      translate
-                      ng-click="serviceRegistrationCtrl.showHCEEndpointAddForm()">
-                Add HCE Endpoint
-              </button>
-              <button class="btn btn-primary"
-                      translate
-                      ng-click="serviceRegistrationCtrl.showClusterAddForm()">
-                Add Cluster
-              </button>
-            </th>
+            <th translate>&nbsp;</th>
           </tr>
         </thead>
         <tbody>
-
-          <!-- TODO(irfan) temporary switch for development, remove before merging -->
-        <div ng-switch="serviceRegistrationCtrl.currentUserAccount.isAdmin()">
-          <button class="btn btn-primary" ng-switch-when="true" ng-click="serviceRegistrationCtrl.overrideIsAdmin(true)">Switch to Developer View</button>
-          <button class="btn btn-primary" ng-switch-when="false" ng-click="serviceRegistrationCtrl.overrideIsAdmin(false)">Switch to Admin View</button>
-         </div>
-
           <tr ng-repeat="(name, cnsi) in serviceRegistrationCtrl.serviceInstances"
             show-table-inline-message="{{ serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false ? serviceRegistrationCtrl.warningMsg : ''}}">
             <td class="text-center registration-status">
@@ -66,11 +48,6 @@
               </a>
               <a class="btn btn-link btn-sm" ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
                 ng-click="serviceRegistrationCtrl.disconnect(serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid])" translate>Disconnect</a>
-              <a class="btn btn-link btn-sm"
-                 translate
-                 ng-click="serviceRegistrationCtrl.remove(cnsi)">
-                remove
-              </a>
             </td>
           </tr>
         </tbody>
@@ -85,22 +62,15 @@
       {{serviceRegistrationCtrl.userCnsiModel.numValid}} cluster registered
     </span>
     <button type="button" class="btn btn-primary"
-      ng-disabled="serviceRegistrationCtrl.userCnsiModel.numValid === 0"
       ng-click="serviceRegistrationCtrl.completeRegistration()" translate>
       Done
     </button>
   </div>
 </div>
 <flyout flyout-active="serviceRegistrationCtrl.credentialsFormOpen"
-  flyout-close-icon="'helion-icon helion-icon-Close'">
+  flyout-close-icon="'helion-icon helion-icon-Close'" class="flyout-content-thin" >
   <credentials-form cnsi="serviceRegistrationCtrl.activeServiceInstance"
     on-cancel="serviceRegistrationCtrl.onConnectCancel()"
     on-submit="serviceRegistrationCtrl.onConnectSuccess(serviceInstance)">
   </credentials-form>
-</flyout>
-<flyout flyout-active="serviceRegistrationCtrl.clusterAddFlyoutActive"
-  flyout-close-icon="'helion-icon helion-icon-Close'">
-  <add-cluster-form on-cancel="serviceRegistrationCtrl.hideClusterAddForm()"
-    on-submit="serviceRegistrationCtrl.hideClusterAddForm()">
-  </add-cluster-form>
 </flyout>

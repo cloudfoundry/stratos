@@ -22,6 +22,7 @@ var concat = require('gulp-concat-util'),
 
 var config = require('./gulp.config')();
 var paths = config.paths,
+  assetFiles = config.assetFiles,
   jsSourceFiles = config.jsSourceFiles,
   jsLibs = config.jsLibs,
   plugins = config.plugins,
@@ -56,6 +57,12 @@ gulp.task('copy:index', function () {
 gulp.task('copy:js', function () {
   return gulp
     .src(jsSourceFiles, { base: paths.src })
+    .pipe(gulp.dest(paths.dist));
+});
+
+gulp.task('copy:assets', function () {
+  return gulp
+    .src(assetFiles, { base: paths.src })
     .pipe(gulp.dest(paths.dist));
 });
 
@@ -229,6 +236,7 @@ gulp.task('default', function (next) {
     'copy:fonts',
     'css',
     'copy:html',
+    'copy:assets',
     'inject:index',
     next
   );

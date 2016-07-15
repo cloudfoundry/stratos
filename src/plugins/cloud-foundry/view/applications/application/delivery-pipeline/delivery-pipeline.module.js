@@ -53,7 +53,7 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          this.hceModel.removeNotificationTarget('123', target.id)
+          this.hceModel.removeNotificationTarget(that.hceCnsi.guid, target.id)
             .then(function () {
               _.remove(that.notificationTargets, { id: target.id });
             });
@@ -77,20 +77,18 @@
     ];
     /* eslint-enable */
 
-    // We assume that the pipeline metadata has been populated by the application control, to avoid fetching it
-    // for every tabs that needs it
-    // We could update this to use a promise that only fetches it if it is not cached
-    if (this.model.pipeline && this.model.pipeline.valid) {
-      // We have a valid pipeline - go and fetch the pipeline metadata
-      /* eslint-disable */
-      // TODO: @nwm: I have not been able to test this te
-      /* eslint-enable */
-      that.hceModel.getProjects(this.model.pipeline.hceCnsi.guid).then(function () {
-        that.getProject();
-      }).finally(function () {
-        that.hceModel.getImageRegistries(this.model.pipeline.hceCnsi.guid);
-      });
-    }
+    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
+    this.cnsiModel.list().then(function () {
+      var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
+      if (hceCnsis.length > 0) {
+        that.hceCnsi = hceCnsis[0];
+        that.hceModel.getProjects(that.hceCnsi.guid)
+          .then(function () {
+            that.getProject();
+          });
+        that.hceModel.getImageRegistries(that.hceCnsi.guid);
+      }
+    });
   }
 
   angular.extend(ApplicationDeliveryPipelineController.prototype, {

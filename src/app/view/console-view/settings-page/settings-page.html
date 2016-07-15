@@ -1,1 +1,25 @@
-<service-registration></service-registration>
+<div class="action-bar app-actions-bar col-md-12 panel-less">
+  <div ng-if="!applicationsListCtrl.needAdminSetup" class="applications-header font-semi-bold pull-left" translate>Settings</div>
+</div>
+
+<div class="container registration-content col-sm-12">
+  <div class="cluster-settings user-summary">
+    <div class="cluster row">
+      <div class="col-md-12">User Summary</div>
+    </div>
+    <div class="cluster row">
+      <div class="col-md-6">
+        <div class="cluster-info">
+          <div class="cluster-properties">
+            <div class="cluster-property">
+              <div translate>User</div>
+              <div>{{settingsCtrl.model.data.username}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<cluster_settings></cluster_settings>
