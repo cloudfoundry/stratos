@@ -1,6 +1,7 @@
 {
   "name": "helion-stackato-console",
-  "version": "{{TAG}}",
+  "product_version": "4.0",
+  "sdl_version": "{{TAG}}",
   "vendor": "HPE",
   "components": [
     {
@@ -13,12 +14,19 @@
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "capabilities": [],
-      "image": "{{REGISTRY}}/helioncf/hsc-console:{{TAG}}",
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-console:{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
         {
           "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "CONSOLE_CERT"
+        },
+        {
+          "name": "CONSOLE_CERT_KEY"
         }
       ],
       "affinity": [],
@@ -53,7 +61,8 @@
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "capabilities": [],
-      "image": "{{REGISTRY}}/helioncf/hsc-proxy:{{TAG}}",
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-proxy:{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -82,6 +91,12 @@
           "name": "PGSQL_SSL_MODE"
         },
         {
+          "name": "CONSOLE_PROXY_CERT"
+        },
+        {
+          "name": "CONSOLE_PROXY_CERT_KEY"
+        },
+        {
           "name": "HTTP_CLIENT_TIMEOUT_IN_SECS"
         },
         {
@@ -92,12 +107,6 @@
         },
         {
           "name": "CONSOLE_CLIENT"
-        },
-        {
-          "name": "CONSOLE_CLIENT_SECRET"
-        },
-        {
-          "name": "HCE_CLIENT"
         },
         {
           "name": "HCF_CLIENT"
@@ -152,7 +161,8 @@
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "capabilities": [],
-      "image": "docker.io/postgres:9.5",
+      "repository": "docker.io",
+      "image": "postgres:9.5",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -167,6 +177,12 @@
         },
         {
           "name": "PGDATA"
+        },
+        {
+          "name": "CONSOLE_DB_CERT"
+        },
+        {
+          "name": "CONSOLE_DB_CERT_KEY"
         }
       ],
       "affinity": [],
@@ -224,7 +240,8 @@
       "platform": "linux-x86_64",
       "workload_type": "container",
       "capabilities": [],
-      "image": "{{REGISTRY}}/helioncf/hsc-database-creation:{{TAG}}",
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-database-creation:{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
@@ -299,258 +316,389 @@
   "labels": [],
   "parameters": [
     {
-        "name": "CONSOLE_VERSION",
-        "description": "The current version of the Helion Stackato Console",
-        "default": "{{TAG}}",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_VERSION",
+      "description": "The current version of the Helion Stackato Console. This param will be automatically incremented with each release of the Console so as to allow HCP to properly restart each component at the time of upgrade. This should not be changed manually.",
+      "default": "{{TAG}}",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "PGSQL_USER",
-        "description": "Postgres username",
-        "default": "stolon",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_CA_CERT",
+      "description": "CA Cert that is used to sign other SSL Certificates",
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "ca_cert",
+          "generate": {
+            "type": "CACertificate",
+            "value_type": "certificate"
+          }
+        }
     },
     {
-        "name": "PGSQL_PASSWORD",
-        "description": "Postgres password",
-        "default": "stolon",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "PGSQL_USER",
+      "description": "Postgres username",
+      "default": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "PGSQL_DATABASE",
-        "description": "Postgres database name",
-        "default": "hsc-db",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "PGSQL_PASSWORD",
+      "description": "Postgres password",
+      "default": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "pgsql_password",
+          "generate": {
+            "type": "Password"
+          }
+        }
     },
     {
-        "name": "PGSQL_HOST",
-        "description": "Postgres hostname",
-        "default": "hsc-db-int",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "PGSQL_DATABASE",
+      "description": "Postgres database name",
+      "default": "hsc-db",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "PGSQL_PORT",
-        "description": "Postgres port",
-        "default": "5432",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "PGSQL_HOST",
+      "description": "Postgres hostname",
+      "default": "hsc-db-int",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "PGSQL_CONNECT_TIMEOUT",
-        "description": "Postgres password",
-        "default": "10",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "PGSQL_PORT",
+      "description": "Postgres port",
+      "default": "5432",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "PGSQL_SSL_MODE",
-        "description": "Postgres SSL mode",
-        "default": "disable",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "PGSQL_CONNECT_TIMEOUT",
+      "description": "Postgres password",
+      "default": "10",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "POSTGRES_DB",
-        "description": "Postgres database name",
-        "default": "stratos-db",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "PGSQL_SSL_MODE",
+      "description": "Postgres SSL mode",
+      "default": "disable",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "POSTGRES_PASSWORD",
-        "description": "Postgres password",
-        "default": "stolon",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "POSTGRES_DB",
+      "description": "Postgres database name",
+      "default": "stratos-db",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "POSTGRES_USER",
-        "description": "Postgres username",
-        "default": "stolon",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "POSTGRES_PASSWORD",
+      "description": "Postgres password",
+      "default": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "postgres_password",
+          "generate": {
+            "type": "Password"
+          }
+        }
     },
     {
-        "name": "PGDATA",
-        "description": "placeholder",
-        "default": "/database",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "POSTGRES_USER",
+      "description": "Postgres username",
+      "default": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "DB_USER",
-        "description": "PostgreSQL user",
-        "default": "stolon",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "PGDATA",
+      "description": "placeholder",
+      "default": "/database",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "DB_HOST",
-        "description": "PostgreSQL host address",
-        "default": "hsc-db-int",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "DB_USER",
+      "description": "PostgreSQL user",
+      "default": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "CFGDB_PORT",
-        "description": "PostgreSQL port",
-        "default": "5432",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "DB_HOST",
+      "description": "PostgreSQL host address",
+      "default": "hsc-db-int",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-       "name": "DB",
-       "description": "PostgreSQL default db ??",
-       "default": "postgres",
-       "data_type": "string",
-       "required": true,
-       "secret": false
+      "name": "CFGDB_PORT",
+      "description": "PostgreSQL port",
+      "default": "5432",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
-        "description": "HTTP client timeoout",
-        "default": "10",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "DB",
+      "description": "PostgreSQL default database",
+      "default": "postgres",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "SKIP_TLS_VERIFICATION",
-        "description": "To skip TLS or now?",
-        "default": "true",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_CERT",
+      "description": "TLS certificate for the Console",
+      "default": null,
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "console_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "certificate"
+          }
+        }
     },
     {
-        "name": "TLS_ADDRESS",
-        "description": "TLS Address",
-        "default": ":3003",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_CERT_KEY",
+      "description": "TLS private key for the Console",
+      "default": null,
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "console_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "private_key"
+          }
+        }
     },
     {
-        "name": "CONSOLE_CLIENT",
-        "description": "Console client",
-        "default": "console",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_PROXY_CERT",
+      "description": "TLS certificate for the Console Proxy",
+      "default": null,
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "console_proxy_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "certificate"
+          }
+        }
     },
     {
-        "name": "HCE_CLIENT",
-        "description": "HCE client",
-        "default": "console",
-        "example": "console",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_PROXY_CERT_KEY",
+      "description": "TLS private key for the Console Proxy",
+      "default": null,
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "console_proxy_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "private_key"
+          }
+        }
     },
     {
-        "name": "HCF_CLIENT",
-        "description": "HCF client",
-        "default": "cf",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_DB_CERT",
+      "description": "TLS certificate for the Console Database",
+      "default": null,
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "console_db_certificate",
+          "generate": {
+              "type": "Certificate",
+              "value_type": "certificate"
+          }
+        }
     },
     {
-        "name": "ALLOWED_ORIGINS",
-        "description": "Allowed origins - TBD",
-        "default": "https://localhost,https://127.0.0.1",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_DB_CERT_KEY",
+      "description": "TLS private key for the Console Database",
+      "default": null,
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "console_db_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "private_key"
+          }
+        }
     },
     {
-        "name": "SESSION_STORE_SECRET",
-        "description": "Session store secret",
-        "default": "cookiesecret",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
+      "description": "HTTP client timeoout",
+      "default": "10",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "DB_PW_FILE",
-        "description": "Database password file",
-        "default": "/etc/secrets/stolon",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "SKIP_TLS_VERIFICATION",
+      "description": "To skip TLS or now?",
+      "default": "true",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "STRATOS_DB",
-        "description": "Stratos database",
-        "default": "stratos-db",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "TLS_ADDRESS",
+      "description": "TLS Address",
+      "default": ":3003",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "STRATOS_USER",
-        "description": "Stratos user",
-        "default": "stratos",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "CONSOLE_CLIENT",
+      "description": "Console client",
+      "default": "console",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "STRATOS_PWD",
-        "description": "Stratos password",
-        "default": "stratos",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "SESSION_STORE_SECRET",
+      "description": "Session store secret",
+      "default": "cookiesecret",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "SQL",
-        "description": "Initial Stratos database schema",
-        "default": "./InitialSchema.sql",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "HCF_CLIENT",
+      "description": "HCF client",
+      "default": "cf",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "GITHUB_OAUTH_CLIENT_ID",
-        "description": "GitHub client ID for OAuth - see https://github.com/settings/applications/new",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "ALLOWED_ORIGINS",
+      "description": "Allowed origins - TBD",
+      "default": "https://localhost,https://127.0.0.1",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     },
     {
-        "name": "GITHUB_OAUTH_CLIENT_SECRET",
-        "description": "GitHub client secret for OAuth",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "SESSION_STORE_SECRET",
+      "description": "Console Proxy session store secret",
+      "default": "cookiesecret",
+      "data_type": "string",
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "session_store_secret",
+          "generate": {
+            "type": "Password"
+          }
+        }
     },
     {
-        "name": "GITHUB_OAUTH_STATE",
-        "description": "** DEPRECATED **",
-        "data_type": "string",
-        "required": true,
-        "secret": false
+      "name": "DB_PW_FILE",
+      "description": "Database password file used by the stolon library to stored the databse password",
+      "default": "/etc/secrets/stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STRATOS_DB",
+      "description": "Stackato database",
+      "default": "stratos-db",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STRATOS_USER",
+      "description": "Stackato database user used by the Console Proxy",
+      "default": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "STRATOS_PWD",
+      "description": "Stackato database password used by the Console Proxy",
+      "default": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "stackato_db_password",
+          "generate": {
+            "type": "Password"
+          }
+        }
+    },
+    {
+      "name": "SQL",
+      "description": "Initial Stackato database schema used by the Console Proxy",
+      "default": "./InitialSchema.sql",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_ID",
+      "description": "GitHub client ID for OAuth - see https://github.com/settings/applications/new",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_SECRET",
+      "description": "GitHub client secret for OAuth - see https://github.com/settings/applications/new",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "GITHUB_OAUTH_STATE",
+      "description": "** DEPRECATED ** will be removed as a part of TEAMFOUR-561",
+      "data_type": "string",
+      "required": true,
+      "secret": false
     }
   ]
 }
