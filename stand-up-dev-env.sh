@@ -1,9 +1,13 @@
 #!/bin/bash
 set -eu
 
+# Program Paths:
 PROG=$(basename ${BASH_SOURCE[0]})
-PROGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROG_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Stratos Paths:
+PROXY_DIR="${GOPATH}/src/github.com/hpcloud/portal-proxy/"
+DEV_DOCKER_COMPOSE="docker-compose.development.yml"
 ENV_RC="development.rc"
 
 CLEAN=false
@@ -35,14 +39,19 @@ function clean {
     popd
 
     echo "----- containers, images"
+    pushd ../stratos-deploy
     # it's ok if this section fails
     set +e
-    pushd ../stratos-deploy
-    docker-compose -f docker-compose.development.yml down --rmi 'all'
+    docker-compose -f ${DEV_DOCKER_COMPOSE} down --rmi 'all'
     docker rmi -f portal-proxy-builder
     # reset back to strict
-    popd
     set -e
+    popd
+
+    echo "----- portal-proxy"
+    pushd ${PROXY_DIR}
+    [ -f portal-proxy ] && rm portal-proxy
+    popd
 }
 
 
@@ -61,13 +70,13 @@ function env_vars {
 
 function build {
     echo "===== Building the portal proxy"
-    pushd $GOPATH/src/github.com/hpcloud/portal-proxy/tools/
+    pushd ${PROXY_DIR}/tools/
     ./build_portal_proxy.sh
     popd
 
     echo "===== Standing up the Helion Stackato Console"
-    docker-compose -f docker-compose.development.yml build && \
-        docker-compose -f docker-compose.development.yml up -d
+    docker-compose -f ${DEV_DOCKER_COMPOSE} build && \
+        docker-compose -f ${DEV_DOCKER_COMPOSE} up -d
 }
 
 
@@ -96,7 +105,7 @@ while getopts ":hc" opt ; do
     esac
 done
 
-pushd "$PROGDIR"
+pushd "$PROG_DIR"
 env_vars
 if [ "$CLEAN" = "true" ] ; then
     clean
