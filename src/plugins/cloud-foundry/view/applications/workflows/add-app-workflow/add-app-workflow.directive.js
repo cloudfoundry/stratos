@@ -139,7 +139,7 @@
         domain: null,
         application: null,
         hceCnsi: null,
-        source: 'github',
+        source: null,
         repo: null,
         branch: null,
         buildContainer: null,
@@ -208,7 +208,13 @@
             title: gettext('Delivery'),
             formName: 'application-delivery-form',
             templateUrl: path + 'delivery.html',
-            nextBtnText: gettext('Next')
+            nextBtnText: gettext('Next'),
+            onNext: function () {
+              if (that.options.subflow === 'pipeline') {
+                that.options.sources.length = 0;
+                return that.getVcsInstances();
+              }
+            }
           }
         ]
       };
@@ -225,7 +231,7 @@
             nextBtnText: gettext('Next'),
             onNext: function () {
               var oauth;
-              if (that.userInput.source === 'github') {
+              if (that.userInput.source.vcs_type === 'GITHUB') {
                 oauth = that.githubOauthService.start();
               } else {
                 oauth = that.$q.defer();
@@ -238,7 +244,7 @@
                   return that.githubModel.repos();
                 })
                 .then(function () {
-                  var repos = _.filter(that.githubModel.data.repos || [], function (o) { return o.permissions.admin; });
+                  var repos = that.githubModel.data.repos || [];
                   [].push.apply(that.options.repos, repos);
                 });
             }
@@ -362,26 +368,7 @@
             img: 'flowdock_logo.png'
           }
         ],
-        sources: [
-          {
-            img: 'github_octocat.png',
-            label: 'Github',
-            description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
-            value: 'github'
-          },
-          {
-            img: 'GitHub-Mark-120px-plus.png',
-            label: 'Github Enterprise',
-            description: gettext('Connect to a repository hosted on an on-premise Github Enterprise instance that you own or have admin rights to.'),
-            value: 'github-enterprise'
-          },
-          {
-            img: 'git.png',
-            label: 'Git',
-            description: gettext('Connect to a repository hosted locally. You will need to provide the name of the repo and the clone URL.'),
-            value: 'git'
-          }
-        ],
+        sources: [],
         repos: [],
         branches: [],
         buildContainers: [],
@@ -560,6 +547,28 @@
       });
     },
 
+    getVcsInstances: function () {
+      var that = this;
+      var vcsTypesPromise = that.hceModel.listVcsTypes(that.userInput.hceCnsi.guid);
+      var vcsInstancesPromise = that.hceModel.getVcses(that.userInput.hceCnsi.guid);
+      return that.$q.all([vcsTypesPromise, vcsInstancesPromise])
+        .then(function () {
+          var sources = _.map(that.hceModel.data.vcsInstances, function (o) {
+            var vcsType = that.hceModel.data.vcsTypes[o.vcs_type];
+            return {
+              img: vcsType.icon_url,
+              label: vcsType.vcs_type_label,
+              description: vcsType.description,
+              value: o
+            };
+          }) || [];
+          if (sources.length > 0) {
+            [].push.apply(that.options.sources, sources);
+            that.userInput.source = sources[0];
+          }
+        });
+    },
+
     getPipelineDetailsData: function () {
       var that = this;
 
@@ -650,7 +659,6 @@
                                          this.userInput.source,
                                          this.githubModel.getToken(),
                                          targetId,
-                                         projectType.toLowerCase(),
                                          this.userInput.buildContainer.build_container_id,
                                          this.userInput.repo,
                                          this.userInput.branch);
@@ -676,7 +684,7 @@
       this.serviceInstanceModel.list()
         .then(function (serviceInstances) {
           var validServiceInstances = _.chain(_.values(serviceInstances))
-                                       .filter('valid')
+                                       .filter({ cnsi_type: 'hcf', valid: true })
                                        .map(function (o) {
                                          return { label: o.api_endpoint.Host, value: o };
                                        })

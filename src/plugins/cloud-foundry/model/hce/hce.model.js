@@ -40,7 +40,9 @@
       deploymentTargets: [],
       imageRegistries: [],
       projects: {},
-      pipelineExecutions: []
+      pipelineExecutions: [],
+      vcsInstances: [],
+      vcsTypes: []
     };
 
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
@@ -48,17 +50,9 @@
     });
 
     // Proxy config to skip auth - used for HCE
-    this.hceProxyConfig = {
-      headers: {
-        'x-cnap-skip-token-auth': 'true'
-      }
-    };
-
-    // Proxy config to skip auth - used for HCE
     // and to pass through response directly (when we are only talking to a single CNSI)
     this.hceProxyPassthroughConfig = {
       headers: {
-        'x-cnap-skip-token-auth': 'true',
         'x-cnap-passthrough': 'true'
       }
     };
@@ -225,6 +219,40 @@
     },
 
     /**
+     * @function getVcses
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get VCS instances
+     * @param {string} guid - the HCE instance GUID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getVcses: function (guid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceVcsApi')
+        .getVcses(guid, {}, this.hceProxyPassthroughConfig)
+        .then(function (response) {
+          return that.onGetVcses(response);
+        });
+    },
+
+    /**
+     * @function listVcsTypes
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get VCS types
+     * @param {string} guid - the HCE instance GUID
+     * @returns {promise} A promise object
+     * @public
+     */
+    listVcsTypes: function (guid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceVcsApi')
+        .listVcsTypes(guid, {}, this.hceProxyPassthroughConfig)
+        .then(function (response) {
+          return that.onListVcsTypes(response);
+        });
+    },
+
+    /**
      * @function createDeploymentTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a new deployment target
@@ -267,32 +295,32 @@
      * @param {string} vcs - the VCS type
      * @param {string} vcsToken - the VCS token
      * @param {number} targetId - the deployment target ID
-     * @param {string} type - the platform type of the project (e.g. java, nodejs)
      * @param {number} buildContainerId - the build container ID
      * @param {object} repo - the repo to use
      * @param {string} branch - the branch to use
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (guid, name, vcs, vcsToken, targetId, type, buildContainerId, repo, branch) {
+    createProject: function (guid, name, vcs, vcsToken, targetId, buildContainerId, repo, branch) {
       var newProject = {
         name: name,
-        type: type,
+        vcs_id: vcs.vcs_id,
         build_container_id: buildContainerId,
+        deployment_target_id: targetId,
         token: vcsToken,
         branchRefName: branch,
         repo: {
-          vcs: vcs || 'github',
+          vcs: vcs.vcs_type,
           full_name: repo.full_name,
           owner: repo.owner.login,
           name: repo.name,
-          githubRepoId: repo.id,
+          github_repo_id: repo.id,
           branch: branch,
-          cloneUrl: repo.clone_url,
-          sshUrl: repo.ssh_url,
-          httpUrl: repo.html_url
-        },
-        deployment_target_id: targetId
+          clone_url: repo.clone_url,
+          http_url: repo.html_url,
+          ssh_url: repo.ssh_url,
+          webhook_url: repo.hooks_url
+        }
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
@@ -449,6 +477,17 @@
      * @private
      */
     onGetPipelineEvents: function (response) {
+      return response.data;
+    },
+
+    onGetVcses: function (response) {
+      this.data.vcsInstances = response.data;
+      return response.data;
+    },
+
+    onListVcsTypes: function (response) {
+      var vcsTypes = response.data;
+      this.data.vcsTypes = _.keyBy(vcsTypes, 'vcs_type') || {};
       return response.data;
     },
 
