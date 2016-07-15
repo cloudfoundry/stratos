@@ -93,7 +93,7 @@
       "value": "http://192.168.200.3,https://192.168.200.3,http://172.17.27.1,https://172.17.27.1,http://10.254.248.45,https://10.254.248.45"
     },
     {
-      "name": "COOKIE_STORE_SECRET",
+      "name": "SESSION_STORE_SECRET",
       "value": "cookiesecret"
     },
     {
