@@ -1,12 +1,16 @@
 FROM ubuntu:14.04
 
-ENV DB_HOST="portal-db" DB="postgres" DB_USER="stolon" \
-  POSTGRES_USER="stolon" POSTGRES_PASSWORD="stolon" CFGDB_PORT=5432 \
-  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="InitialSchema.sql"
+# Set env vars - deprecated as the container should have all env vars via HCP
+#ENV DB_HOST="portal-db" DB="postgres" DB_USER="stolon" \
+#  POSTGRES_USER="stolon" POSTGRES_PASSWORD="stolon" CFGDB_PORT=5432 \
+#  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="InitialSchema.sql"
 
+# Get the latest updates
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
 
-COPY /run-postflight-job.sh /
+# Copy all the necessary files
 COPY /initial/InitialSchema.sql /
+COPY /run-postflight-job.sh /
 
+# Trigger the database creation script
 CMD ["/run-postflight-job.sh"]

@@ -1,0 +1,20 @@
+FROM golang:1.6
+
+# Set env vars - deprecated as the container should have all env vars via HCP
+#ENV DB_HOST="portal-db" DB="postgres" DB_USER="stolon" \
+#  POSTGRES_USER="stolon" POSTGRES_PASSWORD="stolon" CFGDB_PORT=5432 \
+#  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos"
+
+# Get the latest updates
+RUN apt-get update && apt-get install -y gcc postgresql
+
+# Install Goose
+RUN go get 'bitbucket.org/liamstask/goose/cmd/goose'
+
+# Copy all the necessary files
+COPY /dbconf.yml /
+COPY /migrations /
+COPY /run-preflight-job.sh /
+
+# Trigger the database migration script
+CMD ["/run-preflight-job.sh"]
