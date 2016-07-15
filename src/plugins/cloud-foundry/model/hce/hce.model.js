@@ -201,7 +201,7 @@
     },
 
     /**
-     * @function getPipelineExecutions
+     * @function getPipelineEvents
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get events by execution ID
      * @param {string} guid - the HCE instance GUID
