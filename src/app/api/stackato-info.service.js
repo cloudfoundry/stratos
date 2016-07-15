@@ -6,9 +6,9 @@
    */
   angular
     .module('app')
-    .factory('userInfoService', UserInfoService);
+    .factory('stackatoInfoService', StackatoInfoService);
 
-  UserInfoService.$inject = [
+  StackatoInfoService.$inject = [
     '$q',
     '$cookies',
     '$http',
@@ -17,7 +17,7 @@
 
   /**
    * @memberof app
-   * @name app.userInfoService
+   * @name app.stackatoInfoService
    * @description User information service provider
    * @param {object} $q - the angular $q service
    * @param {object} $cookies - the angular $cookies service
@@ -25,18 +25,18 @@
    * @param {object} apiManager - API Manager used to fetch session details
    * @returns {object} The user info service
    */
-  function UserInfoService($q, $cookies, $http, apiManager) {
+  function StackatoInfoService($q, $cookies, $http, apiManager) {
     var sessionName = apiManager.retrieve('app.api.account').sessionName;
     return {
       /**
-       * @function userInfo
-       * @memberof app.userInfoService
+       * @function stackatoInfo
+       * @memberof app.stackatoInfoService
        * @description Fetch the user's authorisation information
        * @returns {promise} A promise object
        */
-      userInfo: function () {
+      stackatoInfo: function () {
         if ($cookies.get(sessionName)) {
-          return $http.get('/pp/v1/userinfo');
+          return $http.get('/pp/v1/stackato/info');
         }
         return $q.reject(sessionName + ' cookie missing!');
       }

@@ -44,7 +44,7 @@
     this.cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
     this.cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
-    this.userInfo = modelManager.retrieve('app.model.userInfo');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.actions = [];
     this.orgCount = null;

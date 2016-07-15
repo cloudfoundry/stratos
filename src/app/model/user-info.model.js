@@ -13,40 +13,40 @@
 
   registerUserInfoModel.$inject = [
     'app.model.modelManager',
-    'userInfoService'
+    'stackatoInfoService'
   ];
 
-  function registerUserInfoModel(modelManager, userInfoService) {
-    modelManager.register('app.model.userInfo', new UserInfo(userInfoService));
+  function registerUserInfoModel(modelManager, stackatoInfoService) {
+    modelManager.register('app.model.stackatoInfo', new StackatoInfo(stackatoInfoService));
   }
 
   /**
    * @namespace app.model.userInfo.UserInfo
    * @memberof app.model.userInfo
    * @name app.model.userInfo.UserInfo
-   * @param {app.api.userInfoService} userInfoService - Service with which to fetch data from
-   * @property {app.api.userInfoService} userInfoService - Service with which to fetch data from
+   * @param {app.api.stackatoInfoService} stackatoInfoService - Service with which to fetch data from
+   * @property {app.api.stackatoInfoService} stackatoInfoService - Service with which to fetch data from
    * @property {object} info - the user info data object
    * @class
    */
-  function UserInfo(userInfoService) {
-    this.userInfoService = userInfoService;
+  function StackatoInfo(stackatoInfoService) {
+    this.stackatoInfo = stackatoInfoService;
     this.info = {};
   }
 
-  angular.extend(UserInfo.prototype, {
+  angular.extend(StackatoInfo.prototype, {
     /**
-     * @function login
-     * @memberof app.model.userInfo.UserInfo
+     * @function getStackatoInfo
+     * @memberof app.model.stackatoInfo.StackatoInfo
      * @description Fetch the user's authorisation information per cnsi
      * @returns {promise} A promise object
      * @public
      */
-    getUserInfo: function () {
+    getStackatoInfo: function () {
       var that = this;
-      return this.userInfoService.userInfo()
+      return this.stackatoInfo.stackatoInfo()
         .then(function (response) {
-          that.onUserInfo(response);
+          that.onStackatoInfo(response);
           return that.info;
         });
     },
@@ -58,8 +58,8 @@
      * @param {object} response - the HTTP response object
      * @private
      */
-    onUserInfo: function (response) {
-      this.info = _.keyBy(response.data, 'cnsi_guid') || {};
+    onStackatoInfo: function (response) {
+      this.info = response.data;
     }
 
   });
