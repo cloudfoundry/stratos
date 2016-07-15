@@ -59,7 +59,6 @@ export GITHUB_OAUTH_CLIENT_SECRET=<CLIENT SECRET>
 * Clone all related repositories
   - If starting from a fresh install, run: `sh start_fresh.sh`. This will clone all necessary repositories.
   - Otherwise, manually clone the following repositories:
-    - helion-ui-theme
     - stratos-ui
     - portal-proxy (important! clone into **$GOPATH/src/github.com/hpcloud**)
 * [Create a Docker machine](create_docker_machine.md)
