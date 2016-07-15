@@ -34,8 +34,6 @@
 
     this.guid = $stateParams.guid;
 
-    console.log('ROOT CLUSTER STATE');
-
     // Cache all organizations associated with this cluster
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.organizationModel.listAllOrganizations(this.guid, {}).then(function (orgs) {
@@ -46,9 +44,11 @@
       $log.error('Error while listing organizations', error);
     });
 
-    // TODO (RC): There's a few places we call this for the core endpoints screens (before we hit a specific clusters
-    // page). Need to reduce all these calls to one and watch cache.
-    // Cache all user service instance data
+    /* eslint-disable no-warning-comments */
+    // TODO (TEAMFOUR-780): There's a few places we call this for the core endpoints screens (before we hit a specific
+    // clusters page). Need to reduce all these calls to one and watch cache.
+    // Cache all user service instance data. Also used by child states to determine cluster name in breadcrumbs
+    /* eslint-enable no-warning-comments */
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userServiceInstanceModel.list();
 

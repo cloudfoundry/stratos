@@ -40,7 +40,7 @@
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
-    this.orgModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.utils = utils;
@@ -64,7 +64,7 @@
     ];
 
     $scope.$watch(function () {
-      return _.get(that.orgModel, 'organizations.' + that.clusterGuid + '.' + that.organizationGuid);
+      return _.get(that.organizationModel, 'organizations.' + that.clusterGuid + '.' + that.organizationGuid);
     }, function (orgDetail) {
       if (!orgDetail) {
         return;
@@ -76,7 +76,7 @@
       that.memory = usedMemHuman + ' / ' + memQuotaHuman;
 
       // Present the user's roles
-      that.roles = that.orgModel.organizationRolesToString(orgDetail.roles);
+      that.roles = that.organizationModel.organizationRolesToString(orgDetail.roles);
     });
   }
 

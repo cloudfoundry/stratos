@@ -452,7 +452,9 @@
     onSummary: function (cnsiGuid, guid, response) {
       _.set(this, 'appSummary.' + cnsiGuid + '.' + guid, response);
 
-      // FIXME: This is application specific and should be kept separate from a generic appSummary call
+      /* eslint-disable no-warning-comments */
+      // FIXME (TEAMFOUR-779): This is application specific and should be kept separate from a generic appSummary call
+      /* eslint-enable no-warning-comments */
       this.application.summary = response;
       this.onAppStateChange();
     },

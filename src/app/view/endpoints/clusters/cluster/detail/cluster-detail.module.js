@@ -38,16 +38,7 @@
     this.organizations = [];
     this.totalApps = 0;
 
-    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    // // Get the cluster info
-    // this.cluster = {
-    //   name: '',
-    //   api_endpoint: ''
-    // };
-    //
-    // this.cnsiModel.list().then(function (registeredInstances) {
-    //   that.cluster = registeredInstances[that.guid];
-    // });
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.clusterActions = [
       {

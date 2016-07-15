@@ -3,7 +3,7 @@
 </div>
 
 <div ng-if="clusterSpaceController.space()" class="cluster-detail col-md-9 col-sm-12">
-  <h1 style="height: 40px">Space : {{ clusterSpaceController.space().entity.name }}</h1>
+  <h3>Space : {{ clusterSpaceController.space().entity.name }}</h3>
 
   <space-summary-tile ng-if="clusterSpaceController.space()"
                       cluster-guid="clusterSpaceController.clusterGuid"

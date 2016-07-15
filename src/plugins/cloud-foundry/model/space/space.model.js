@@ -79,7 +79,7 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSpaces: function(cnsiGuid, params) {
+    listAllSpaces: function (cnsiGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllSpaces(params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {

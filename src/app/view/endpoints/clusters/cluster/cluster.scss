@@ -1,88 +1,45 @@
 @import 'detail/cluster-detail';
 @import 'organization/space/detail/services/space-services';
 
-.cluster-breadcrumb {
-  width: 100%;
-  margin-top: 1px;
-}
+.cluster {
+  .cluster-breadcrumb {
+    //width: 100%;
+    margin-top: 1px;
 
-.cluster-gallery-card {
-  &.unlink {
-    // Override some extreme oddness in gallery-card with undefined on-card-click
-    .panel-heading.linked, .panel-body.linked {
-      cursor: default;
-    }
-  }
+    &.breadcrumb {
+      //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
+      margin-left: -15px;
+      width: calc(100% + 30px);
 
-  .panel-body {
-    .col-md-5 {
-      padding-left: 0;
-    }
-    .dl-horizontal {
-      dd {
-        font-weight: 500;
-        white-space: nowrap;
+      li {
         text-transform: none;
+        font-weight: inherit;
 
-        a.btn {
-          font-size: inherit;
-          padding: 0;
-          height: inherit;
+        //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
+        &:first-of-type {
+          padding-left: $hpe-unit-space / 2;
         }
-      }
 
-      //dd:first-of-type {
-      //  text-transform: lowercase;
-      //}
-    }
-  }
-
-  .panel-footer {
-    background: $gallery-card-status-danger;
-    .gallery-card-status, .gallery-card-status-text {
-      padding: 4px;
-      color: white;
-    }
-    .gallery-card-status-text {
-      padding-bottom: 6px;
-    }
-  }
-}
-
-.cluster-gallery-card-container {
-
-  $card-max-width: 420px;
-  $card-layout-steps: 5;
-
-  .cluster-gallery-card-parent {
-    padding-left: 0;
-
-    @for $i from 1 through $card-layout-steps {
-      @media (min-width: $i * $card-max-width) {
-        &.responsive-grid {
-          width: percentage(1/$i);
-        }
-      }
-    }
-
-    @media (min-width: 768px) {
-      gallery-card {
-        .card .dl-horizontal dd {
-          margin-left: 100px;
-        }
-        .dl-horizontal dt {
-          width: 140px;
+        // No way to hide current location in angular-breadcrumbs, do this via css
+        &:last-of-type {
+          display: none;
         }
       }
     }
   }
 
-  @for $i from $card-layout-steps through 1 {
-    @media (min-width: $i * $card-max-width) and (max-width: $card-max-width + $i * $card-max-width) {
-      >:nth-child(#{$i}n) {
-        padding-right: 0
-      }
-    }
+  // Give the headers a uniform padding
+  h3 {
+    margin: $hpe-unit-space 0;
   }
 
+  .cluster-detail {
+
+    padding-left: $hpe-unit-space;
+    padding-right: $hpe-unit-space;
+
+    .application-nav {
+      margin-bottom: 15px;
+    }
+  }
 }

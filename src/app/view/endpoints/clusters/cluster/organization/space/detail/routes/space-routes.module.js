@@ -16,7 +16,7 @@
       controller: SpaceRoutesController,
       controllerAs: 'spaceRoutesCtrl',
       ncyBreadcrumb: {
-        label: gettext('Space'),
+        label: '{{ clusterSpaceController.space().entity.name || "..." }}',
         parent: function () {
           return 'endpoint.clusters.cluster.organization.detail.spaces';
         }
@@ -48,7 +48,6 @@
 
     this.actions = [
       {
-        // FIXME (RC): This should option should only be shown if user is cf admin (currently blocked)
         name: gettext('Delete Route'),
         disabled: true,
         execute: function () {

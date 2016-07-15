@@ -4,8 +4,8 @@
 <div ng-if="clusterController.organizations === false" class="message-box message-box-no-bg">
   <div translate>An error occurred retrieving organizations</div>
 </div>
-<div class="organizations-card-container" ng-if="clusterController.organizations">
-  <div class="organization-card" ng-repeat="organization in clusterController.organizations">
+<div class="cluster-gallery-card-container" ng-if="clusterController.organizations">
+  <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterController.organizations">
     <organization-tile organization="organization"></organization-tile>
   </div>
 </div>

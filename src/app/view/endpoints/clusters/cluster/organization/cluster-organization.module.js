@@ -38,7 +38,6 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spacesPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces';
 
-    console.log('GOING TO ORG, FETCHING SPACES');
     $scope.$watch(function () {
       return _.get(that.organizationModel, that.spacesPath);
     }, function (spaces) {
