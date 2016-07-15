@@ -171,6 +171,10 @@
             }
           }
         })
+        .then(function () {
+          // Update stackatoInfo
+          return that.modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
+        })
         .finally(function () {
           that.showGlobalSpinner = false;
           if (that.continueLogin) {
