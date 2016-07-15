@@ -111,14 +111,14 @@ jobs:
       file: stratos-deploy/ci/tasks/build-proxy-image.yml
     - put: hsc-proxy-image
       params:
-        dockerfile: portal-proxy-output/Dockerfile.UCP
+        dockerfile: portal-proxy-output/Dockerfile.HCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 
     # Build the database configuration image, push to registry
     - put: hsc-database-creation-image
       params:
-        dockerfile: portal-proxy-output/Dockerfile.database.UCP
+        dockerfile: portal-proxy-output/Dockerfile.database.HCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 

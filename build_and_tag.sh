@@ -91,10 +91,10 @@ docker run -it \
 popd
 
 # Build and publish the container image for the portal proxy
-buildAndPublishImage hsc-proxy Dockerfile.UCP ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
 # Build the postgres configuration container
-buildAndPublishImage hsc-database-creation Dockerfile.database.UCP ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-database-creation Dockerfile.database.HCP ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
 docker run --rm \
@@ -108,7 +108,7 @@ docker run --rm \
 cp -R ${__DIRNAME}/../stratos-ui/dist ${__DIRNAME}/../stratos-ui/containers/nginx/dist
 
 # Build and push an image based on the nginx container
-buildAndPublishImage hsc-console Dockerfile.UCP ${__DIRNAME}/../stratos-ui/containers/nginx
+buildAndPublishImage hsc-console Dockerfile.HCP ${__DIRNAME}/../stratos-ui/containers/nginx
 
 echo "Creating service and instance definition"
 
@@ -118,6 +118,6 @@ for FILE in ${__DIRNAME}/hcp_templates/*.json ; do
   cat $FILE | sed s/{{TAG}}/$TAG/g | sed s/{{REGISTRY}}/$DOCKER_REGISTRY/g > $ofile
 done
 
-echo "Build complete. Tag is $TAG and UCP definitions are in ${__DIRNAME}/output/"
+echo "Build complete. Tag is $TAG and HCP definitions are in ${__DIRNAME}/output/"
 echo "The definitions are using registry: $DOCKER_REGISTRY and tag: $TAG"
 echo "BE SURE TO UPDATE ANY ENV VARS IN YOUR instance.json FILE."
