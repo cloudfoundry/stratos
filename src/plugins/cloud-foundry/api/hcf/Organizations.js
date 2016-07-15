@@ -34,7 +34,8 @@
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -46,12 +47,13 @@
     AssociateAuditorWithOrganizationByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxyv2/organizations/' + guid + '/auditors';
+      config.url = '/pp/v1/proxy/v2/organizations/' + guid + '/auditors';
       config.method = 'PUT';
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -67,7 +69,8 @@
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -79,12 +82,13 @@
     AssociateBillingManagerWithOrganizationByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxyv2/organizations/' + guid + '/billing_managers';
+      config.url = '/pp/v1/proxy/v2/organizations/' + guid + '/billing_managers';
       config.method = 'PUT';
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -100,7 +104,8 @@
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -112,12 +117,13 @@
     AssociateManagerWithOrganizationByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxyv2/organizations/' + guid + '/managers';
+      config.url = '/pp/v1/proxy/v2/organizations/' + guid + '/managers';
       config.method = 'PUT';
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -133,7 +139,8 @@
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -149,7 +156,8 @@
       config.method = 'PUT';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -161,12 +169,13 @@
     AssociateUserWithOrganizationByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxyv2/organizations/' + guid + '/users';
+      config.url = '/pp/v1/proxy/v2/organizations/' + guid + '/users';
       config.method = 'PUT';
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -183,7 +192,8 @@
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -199,7 +209,8 @@
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -215,7 +226,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -231,7 +243,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -247,7 +260,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -263,7 +277,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -279,7 +294,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -295,7 +311,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -311,7 +328,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -327,7 +345,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -343,7 +362,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -359,7 +379,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -375,7 +396,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -391,7 +413,8 @@
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -403,12 +426,13 @@
     RemoveAuditorWithOrganizationByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxyv2/organizations/' + guid + '/auditors';
+      config.url = '/pp/v1/proxy/v2/organizations/' + guid + '/auditors';
       config.method = 'DELETE';
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -424,7 +448,8 @@
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -436,12 +461,13 @@
     RemoveBillingManagerWithOrganizationByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxyv2/organizations/' + guid + '/billing_managers';
+      config.url = '/pp/v1/proxy/v2/organizations/' + guid + '/billing_managers';
       config.method = 'DELETE';
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -457,7 +483,8 @@
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -469,12 +496,13 @@
     RemoveManagerWithOrganizationByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxyv2/organizations/' + guid + '/managers';
+      config.url = '/pp/v1/proxy/v2/organizations/' + guid + '/managers';
       config.method = 'DELETE';
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -490,7 +518,8 @@
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -506,7 +535,8 @@
       config.method = 'DELETE';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -518,12 +548,13 @@
     RemoveUserWithOrganizationByUsername: function (guid, value, params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxyv2/organizations/' + guid + '/users';
+      config.url = '/pp/v1/proxy/v2/organizations/' + guid + '/users';
       config.method = 'DELETE';
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -539,7 +570,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -557,7 +589,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -573,7 +606,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -589,7 +623,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -606,7 +641,8 @@
       config.data = value;
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     }
