@@ -53,7 +53,7 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          this.hceModel.removeNotificationTarget('123', target.id)
+          this.hceModel.removeNotificationTarget(that.hceCnsi.guid, target.id)
             .then(function () {
               _.remove(that.notificationTargets, { id: target.id });
             });
@@ -77,27 +77,16 @@
     ];
     /* eslint-enable */
 
-    /* eslint-disable */
-    // TODO(kdomico): Get or create fake HCE user until HCE API is complete  https://jira.hpcloud.net/browse/TEAMFOUR-623
-    /* eslint-enable */
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.cnsiModel.list().then(function () {
       var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
       if (hceCnsis.length > 0) {
         that.hceCnsi = hceCnsis[0];
-        that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
+        that.hceModel.getProjects(that.hceCnsi.guid)
           .then(function () {
-            that.hceModel.getProjects(that.hceCnsi.guid)
-              .then(function () {
-                that.getProject();
-              });
-            that.hceModel.getImageRegistries(that.hceCnsi.guid);
-          }, function (response) {
-            if (response.status === 404) {
-              that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
-              that.hceModel.getImageRegistries(that.hceCnsi.guid);
-            }
+            that.getProject();
           });
+        that.hceModel.getImageRegistries(that.hceCnsi.guid);
       }
     });
   }
