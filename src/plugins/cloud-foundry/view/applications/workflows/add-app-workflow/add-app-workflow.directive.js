@@ -244,7 +244,7 @@
                   return that.githubModel.repos();
                 })
                 .then(function () {
-                  var repos = that.githubModel.data.repos || [];
+                  var repos = _.filter(that.githubModel.data.repos || [], function (o) { return o.permissions.admin; });
                   [].push.apply(that.options.repos, repos);
                 });
             }
@@ -564,7 +564,7 @@
           }) || [];
           if (sources.length > 0) {
             [].push.apply(that.options.sources, sources);
-            that.userInput.source = sources[0];
+            that.userInput.source = sources[0].value;
           }
         });
     },
