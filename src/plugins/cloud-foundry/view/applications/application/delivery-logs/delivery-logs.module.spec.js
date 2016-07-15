@@ -115,39 +115,19 @@
         expect(controller.hasProject).toEqual('error');
       });
 
-      it('Ctor fails at no github user', function () {
-        fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
-        fakeModelCall(hceModel, 'getUserByGithubId', 404);
-        fakeModelCall(hceModel, 'createUser', false, {});
-
-        createController();
-        $rootScope.$apply();
-
-        expect(hceModel.createUser).toHaveBeenCalled();
-        expect(controller.hceCnsi).toEqual(cnsiList[0]);
-        // This should really be 'error', but the 'create if not found' process will be re-worked at some point soon.
-        expect(controller.hasProject).toEqual(false);
-      });
-
       it('Ctor fails at get projects', function () {
         fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
-        fakeModelCall(hceModel, 'getUserByGithubId', false);
-        fakeModelCall(hceModel, 'createUser', false, {});
         fakeModelCall(hceModel, 'getProjects', 500);
 
         createController();
         $rootScope.$apply();
 
-        expect(hceModel.getUserByGithubId.calls.argsFor(0).length).toBe(2);
-        expect(hceModel.getUserByGithubId.calls.argsFor(0)[0]).toEqual(cnsi.guid);
         expect(hceModel.getProjects).toHaveBeenCalled();
         expect(controller.hasProject).toEqual('error');
       });
 
       it('Ctor fails at no projects', function () {
         fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
-        fakeModelCall(hceModel, 'getUserByGithubId', false);
-        fakeModelCall(hceModel, 'createUser', false, {});
         fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
 
         createController();
@@ -159,8 +139,6 @@
 
       it('Ctor succeeds!', function () {
         fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
-        fakeModelCall(hceModel, 'getUserByGithubId', false);
-        fakeModelCall(hceModel, 'createUser', false, {});
         fakeModelCall(hceModel, 'getProjects', false, projects, 'data.projects');
         // Not part of ctor, fail to avoid http requests
         fakeModelCall(hceModel, 'getPipelineExecutions', 500);

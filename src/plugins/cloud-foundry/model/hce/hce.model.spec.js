@@ -48,7 +48,6 @@
     });
 
     it('getDeploymentTargets', function () {
-      hceModel.data.user = {id: 1};
       var getDeploymentTargets = mock.hceApi.HceDeploymentApi.getDeploymentTargets();
 
       $httpBackend.when('GET', getDeploymentTargets.url).respond(200, getDeploymentTargets.response['200'].body);
@@ -58,7 +57,6 @@
 
       expect(hceModel.data.deploymentTargets.length).toBeGreaterThan(0);
       expect(hceModel.data.deploymentTargets[0].id).toBe(1);
-      expect(hceModel.data.deploymentTargets[0].user_id).toBe(1);
       expect(hceModel.data.deploymentTargets[0].name).toBe('Deployment Target Name');
       expect(hceModel.data.deploymentTargets[0].url).toBe('http://www.example.com/');
       expect(hceModel.data.deploymentTargets[0].userName).toBe('username');
@@ -68,24 +66,7 @@
       expect(hceModel.data.deploymentTargets[0].type).toBe('cloudfoundry');
     });
 
-    it('getUser', function () {
-      var getUser = mock.hceApi.HceUserApi.getUser(1);
-
-      $httpBackend.when('GET', getUser.url).respond(200, getUser.response['200'].body);
-      $httpBackend.expectGET(getUser.url);
-      hceModel.getUser('cnsi_guid', 1);
-      $httpBackend.flush();
-
-      expect(hceModel.data.user).not.toEqual({});
-      expect(hceModel.data.user.id).toBe(1);
-      expect(hceModel.data.user.userId).toBe('githubuser');
-      expect(hceModel.data.user.login).toBe('user');
-      expect(hceModel.data.user.vcs).toBe('github');
-      expect(hceModel.data.user.secret).toBeUndefined();
-    });
-
     it('createDeploymentTarget', function () {
-      hceModel.data.user = {id: 1};
       var addDeploymentTarget = mock.hceApi.HceDeploymentApi
         .addDeploymentTarget('name', 'url', 'username', 'password', 'org', 'space', 'cloudfoundry');
 
@@ -95,7 +76,6 @@
       $httpBackend.flush();
 
       expect(hceModel.data.deploymentTargets.length).toBe(1);
-      expect(hceModel.data.deploymentTargets[0].user_id).toBe(1);
       expect(hceModel.data.deploymentTargets[0].name).toBe('name');
       expect(hceModel.data.deploymentTargets[0].url).toBe('url');
       expect(hceModel.data.deploymentTargets[0].username).toBeUndefined();
@@ -106,7 +86,6 @@
     });
 
     it('createDeploymentTarget', function () {
-      hceModel.data.user = {id: 1};
       var addDeploymentTarget = mock.hceApi.HceDeploymentApi
         .addDeploymentTarget('name', 'url', 'username', 'password', 'org', 'space', 'cloudfoundry');
 
@@ -120,7 +99,6 @@
     });
 
     it('createProject', function () {
-      hceModel.data.user = {id: 1};
       var repo = {
         vcs: 'github',
         full_name: 'test_owner/test_repo',
@@ -133,24 +111,13 @@
         httpUrl: 'https://github.com/test_owner/test_repo'
       };
       var createProject = mock.hceApi.HceProjectApi
-        .createProject('name', 'github', 'GithubToken', 1, 'java', 2, repo, 'master');
+        .createProject('name', 'GithubToken', 1, 2, repo, 'master');
 
       $httpBackend.when('POST', createProject.url).respond(201, createProject.response['201'].body);
       $httpBackend.expectPOST(createProject.url);
-      hceModel.createProject('cnsi_guid', 'name', 'github', 'GithubToken', 1, 'java', 2, repo, 'master');
+      var vcs = { vcs_id: 1, vcs_type: 'github' };
+      hceModel.createProject('cnsi_guid', 'name', vcs, 'GithubToken', 1, 2, repo, 'master');
       $httpBackend.flush();
-    });
-
-    it('createUser', function () {
-      var createUser = mock.hceApi.HceUserApi.createUser(1, 'user', 'github', 'GithubToken');
-
-      $httpBackend.when('POST', createUser.url).respond(201, createUser.response['201'].body);
-      $httpBackend.expectPOST(createUser.url);
-      hceModel.createUser('guid', 1, 'user', 'github', 'GithubToken');
-      $httpBackend.flush();
-
-      expect(hceModel.data.user).not.toEqual({});
-      expect(hceModel.data.user.secret).toBeUndefined();
     });
   });
 
