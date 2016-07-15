@@ -71,26 +71,15 @@
     var that = this;
 
     /* eslint-disable */
-    // TODO (kdomico): RC .. Hi! I've used the same github user approach. Update here as well or let me know if I need
-    // to do it. See https://jira.hpcloud.net/browse/TEAMFOUR-623. There's a number of unit tests implement for this
-    // at the moment. They will also need to be updated. I can do that part, just let me know the PR
-    /* eslint-enable */
     this.cnsiModel.list()
       .then(function () {
         var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
         if (hceCnsis.length > 0) {
           that.hceCnsi = hceCnsis[0];
-          return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
-            .then(function () {
-              return that.hceModel.getProjects(that.hceCnsi.guid)
-                .then(function () {
-                  return that.hceModel.getProject(that.model.application.summary.name);
-                });
-            }, function (response) {
-              if (response.status === 404) {
-                that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
-              }
-            });
+            return that.hceModel.getProjects(that.hceCnsi.guid)
+              .then(function () {
+                return that.hceModel.getProject(that.model.application.summary.name);
+              });
         } else {
           return $q.reject('No CNSI found');
         }
@@ -159,7 +148,7 @@
         return;
       }
 
-      this.views.viewEvent.open(events[events.length - 1], this.cnsiModel.guid);
+      this.views.viewEvent.open(events[events.length - 1], this.hceCnsi.guid);
     },
 
     /**
