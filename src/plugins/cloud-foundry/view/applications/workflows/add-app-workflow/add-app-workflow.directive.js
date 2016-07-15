@@ -103,6 +103,14 @@
     });
 
     $scope.$watch(function () {
+      return that.userInput.searchCategory;
+    }, function (newSearchCategory) {
+      if (angular.isDefined(that.userInput.search)) {
+        that.userInput.search.entity.extra = newSearchCategory === 'all' ? undefined : newSearchCategory;
+      }
+    });
+
+    $scope.$watch(function () {
       return that.options.subflow;
     }, function (subflow) {
       if (subflow) {
@@ -136,7 +144,13 @@
         branch: null,
         buildContainer: null,
         imageRegistry: null,
-        projectId: null
+        projectId: null,
+        searchCategory: 'all',
+        search: {
+          entity: {
+            extra: undefined
+          }
+        }
       };
 
       this.data.workflow = {
@@ -162,6 +176,19 @@
                   ).then(function (services) {
                     that.options.services.length = 0;
                     [].push.apply(that.options.services, services);
+
+                    // retrieve categories that user can filter services by
+                    var categories = [];
+                    angular.forEach(services, function (service) {
+                      if (angular.isObject(service.entity.extra) && angular.isDefined(service.entity.extra.categories)) {
+                        var serviceCategories = _.map(service.entity.extra.categories,
+                                                      function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
+                        categories = _.unionBy(categories, serviceCategories, 'lower');
+                      }
+                    });
+                    categories = _.sortBy(categories, 'lower');
+                    that.options.serviceCategories.length = 1;
+                    [].push.apply(that.options.serviceCategories, categories);
                   });
                 });
               });
@@ -324,6 +351,9 @@
         subflow: null,
         serviceInstances: [],
         services: [],
+        serviceCategories: [
+          { label: gettext('All Services'), value: 'all' }
+        ],
         organizations: [],
         spaces: [],
         apps: [],

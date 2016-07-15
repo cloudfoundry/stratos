@@ -95,7 +95,6 @@
      * @description Show appropriate cluster add form
      */
     showClusterAddForm: function () {
-
       var that = this;
       if (this.isHcf()) {
         this.hcfRegistration.add()
@@ -146,38 +145,22 @@
      * @returns {Number} count
      */
     getInstancesCountByStatus: function (status) {
-      /* eslint-disable no-warning-comments */
-      // TODO
-      // If cnsi_type is HCE, then currently.
-      // we don't have distinct states for it.
-      /* eslint-enable no-warning-comments */
       var count = 0;
       var that = this;
-      if (that.serviceType === 'hcf') {
-        _.each(_.keys(that.serviceInstances), function (cnsiGuid) {
-          var isConnected = status.toLowerCase() === 'connected';
-          var isDisconnected = status.toLowerCase() === 'disconnected';
-          if (_.isUndefined(that.userServiceInstanceModel.serviceInstances[cnsiGuid])) {
-            // disconnected state
-            /* eslint-disable no-warning-comments */
-            // TODO may not be true when disconnect from instance is implemented
-            /* eslint-enable no-warning-comments */
-            if (isDisconnected) {
-              count += 1;
-            }
-          } else if (!isDisconnected) {
-            // valid or expired state
-            if (that.userServiceInstanceModel.serviceInstances[cnsiGuid].valid === isConnected) {
-              count += 1;
-            }
+      _.each(_.keys(that.serviceInstances), function (cnsiGuid) {
+        var isConnected = status.toLowerCase() === 'connected';
+        var isDisconnected = status.toLowerCase() === 'disconnected';
+        if (_.isUndefined(that.userServiceInstanceModel.serviceInstances[cnsiGuid])) {
+          if (isDisconnected) {
+            count += 1;
           }
-        });
-      } else if (this.serviceType === 'hce') {
-
-        if (status.toLowerCase() === 'connected') {
-          return _.keys(this.serviceInstances).length;
+        } else if (!isDisconnected) {
+          // valid or expired state
+          if (that.userServiceInstanceModel.serviceInstances[cnsiGuid].valid === isConnected) {
+            count += 1;
+          }
         }
-      }
+      });
 
       return count;
     },
@@ -193,7 +176,6 @@
     },
 
     _listServiceInstances: function () {
-
       var that = this;
       return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
         .then(function () {
@@ -212,7 +194,6 @@
     },
 
     _updateInstances: function () {
-
       var that = this;
       var filteredInstances = _.filter(this.serviceInstanceModel.serviceInstances, function (serviceInstance) {
         return serviceInstance.cnsi_type === that.serviceType;

@@ -51,9 +51,17 @@
 
       it('Updating app', function () {
         var testData = makeTestData('STOPPED', 'PENDING', ['RUNNING', 'CRASHED']);
+        testData.summary.package_updated_at = 'some date';
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Offline while Updating');
+      });
+
+      it('Incomplete app', function () {
+        var testData = makeTestData('STOPPED', 'PENDING', ['RUNNING', 'CRASHED']);
+        var res = appStateService.get(testData.summary, testData.instances);
+        expect(res.indicator).toBe('warning');
+        expect(res.label).toBe('Incomplete');
       });
 
       it('User stopped app', function () {

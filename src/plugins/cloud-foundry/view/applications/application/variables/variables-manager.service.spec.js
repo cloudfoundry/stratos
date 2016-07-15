@@ -105,7 +105,7 @@
       it("should delete variable", function () {
         okPromise.calls.reset();
         catchPromise.calls.reset();
-        $httpBackend.when('PUT', APP_VAR_UPDATE).respond(200, {test_guid: {}});
+        $httpBackend.when('PUT', APP_VAR_UPDATE).respond(200, {});
         appVarsManager.delete('test_guid', 'test_id', 'edit_var').then(okPromise).catch(catchPromise);
         $httpBackend.flush();
         expect(okPromise).toHaveBeenCalled();
@@ -115,7 +115,7 @@
       it("should not delete variable", function () {
         okPromise.calls.reset();
         catchPromise.calls.reset();
-        $httpBackend.when('PUT', APP_VAR_UPDATE).respond(500, {test_guid: {}});
+        $httpBackend.when('PUT', APP_VAR_UPDATE).respond(500, {});
         appVarsManager.delete('test_guid', 'test_id', 'edit_var').then(okPromise).catch(catchPromise);
         $httpBackend.flush();
         expect(okPromise).not.toHaveBeenCalled();
@@ -125,7 +125,7 @@
       it("should not delete variable (error code returned)", function () {
         okPromise.calls.reset();
         catchPromise.calls.reset();
-        $httpBackend.when('PUT', APP_VAR_UPDATE).respond(200, {test_guid: {error_code: 'failed'}});
+        $httpBackend.when('PUT', APP_VAR_UPDATE).respond(200, {error_code: 'failed'});
         appVarsManager.delete('test_guid', 'test_id', 'edit_var').then(okPromise).catch(catchPromise);
         $httpBackend.flush();
         expect(okPromise).not.toHaveBeenCalled();

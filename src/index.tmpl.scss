@@ -1,7 +1,5 @@
 // Font paths
 $fa-font-path               : "lib/font-awesome/fonts";
-$font-path                  : "lib/helion-ui-theme/dist/fonts/metric-font";
-$icon-font-path             : "lib/helion-ui-theme/dist/fonts/helion-icons/fonts";
 
 $page-header-height         : 96px !default;
 $page-footer-height         : 176px !default;
@@ -12,7 +10,8 @@ $page-header-fg             : #333 !default;
 $page-header-fg-unselected  : #999 !default;
 $page-header-bg             : #fff !default;
 
-$navbar-height              : $page-header-height !default;
+// Moved to helion-ui-framework, to override the bootstrqp default of 50px
+//$navbar-height              : $page-header-height !default;
 
 $checkbox-button-font-family    : "helion-icons" !default;
 $checkbox-button-unchecked-icon : "\e92a" !default; // helion-icon-Checkbox
@@ -22,18 +21,11 @@ $radio-button-font-family       : "helion-icons" !default;
 $radio-button-unchecked-icon    : "\e9f9" !default; // helion-icon-Radial_button
 $radio-button-checked-icon      : "\ea74" !default; // helion-icon-Radial_Black
 
-// Helion UI fonts and theme
-@import "lib/helion-ui-theme/dist/fonts/index";
-@import "lib/helion-ui-theme/dist/scss/theme/index";
-
 // Libs - auto-populated by wiredep from bower.json
 // bower:scss
 // endbower
 
-// Helion UI styles
-@import "lib/helion-ui-theme/dist/scss/mixin/index";
-@import "lib/helion-ui-theme/dist/scss/style/index";
-
 // App
+
 @import "app/app";
 @import "plugins/.plugins"; // auto-generated after running gulp

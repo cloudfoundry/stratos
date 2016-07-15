@@ -66,11 +66,13 @@
      **/
     all: function (guid, options, sync) {
       var that = this;
+      this.data.applications = [];
       var cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
-                   .values()
-                   .map('guid')
-                   .value();
-      return this.applicationApi.ListAllApps(options, {headers: { 'x-cnap-cnsi-list': cnsis.join(',')}})
+        .values()
+        .filter({cnsi_type: 'hcf'})
+        .map('guid')
+        .value();
+      return this.applicationApi.ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
           // For all of the apps in the running state, we may need to get stats in order to be able to
           // determine the user-friendly state of the application
@@ -151,7 +153,7 @@
     getAppSummary: function (cnsiGuid, guid, includeStats) {
       var that = this;
       var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+        headers: {'x-cnap-cnsi-list': cnsiGuid}
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
@@ -307,7 +309,7 @@
     createApp: function (cnsiGuid, newAppSpec) {
       var that = this;
       var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+        headers: {'x-cnap-cnsi-list': cnsiGuid}
       };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .CreateApp(newAppSpec, {}, config)
@@ -331,12 +333,18 @@
     update: function (cnsiGuid, guid, newAppSpec) {
       var that = this;
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-      return applicationApi.UpdateApp(guid, newAppSpec)
+      /** Since we are targeting a single cnsi, we will enable passthrough **/
+      var httpParams = {
+        headers: {
+          'x-cnap-passthrough': 'true'
+        }
+      };
+      return applicationApi.UpdateApp(guid, newAppSpec, null, httpParams)
         .then(function (response) {
-          if (response.data[cnsiGuid].metadata) {
-            that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
+          if (response.data.metadata) {
+            that.getAppSummary(cnsiGuid, response.data.metadata.guid);
           }
-          return response.data[cnsiGuid];
+          return response.data;
         });
     },
 
@@ -378,7 +386,7 @@
     returnAppStats: function (cnsiGuid, guid, params) {
       var that = this;
       var config = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+        headers: {'x-cnap-cnsi-list': cnsiGuid}
       };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetDetailedStatsForStartedApp(guid, params, config)

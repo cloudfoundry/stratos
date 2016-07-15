@@ -17,6 +17,7 @@
       controllerAs: 'errPageCtrl',
       params: {
         hideNavigation: true,
+        hideAccount: false,
         error: 'unknown'
       }
     });

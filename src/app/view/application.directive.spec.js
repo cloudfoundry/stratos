@@ -2,7 +2,7 @@
   'use strict';
 
   describe('application directive', function () {
-    var $httpBackend, $element, applicationCtrl;
+    var $httpBackend, $element, applicationCtrl, $state;
 
     var testAptEndpoint = {
       Scheme: 'https',
@@ -19,6 +19,7 @@
 
       var markup = '<application></application>';
 
+      $state = $injector.get('$state');
       $httpBackend = $injector.get('$httpBackend');
       $element = angular.element(markup);
       $compile($element)($scope);
@@ -26,7 +27,6 @@
       applicationCtrl = $element.controller('application');
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, {guid: {}});
-      $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, '');
     }));
 
     afterEach(function () {
@@ -112,7 +112,7 @@
 
       it('invoke `login` method - success - dev user - no hcf services', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', admin: false});
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {account: 'dev', scope: 'foo'});
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
         $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
@@ -129,14 +129,14 @@
 
       it('invoke `login` method - success - admin user - no hcf services', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'admin', admin: true });
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'admin', scope: 'ucp.admin' });
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, []);
         $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
         $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
         $httpBackend.expectGET('/pp/v1/cnsis');
         // No endpoints are set up - but admin user - so will not go to error page
-        applicationCtrl.login('dev', 'dev');
+        applicationCtrl.login('admin', 'admin');
         $httpBackend.flush();
         expect(applicationCtrl.loggedIn).toBe(true);
         expect(applicationCtrl.failedLogin).toBe(false);
@@ -146,7 +146,7 @@
 
       it('invoke `login` method - success - dev user - with services', function () {
         applicationCtrl.loggedIn = false;
-        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', admin: false });
+        $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
         $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
           { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
         ]);
@@ -201,15 +201,23 @@
       });
 
       it('invoke `logout` method - success', function () {
+        spyOn(applicationCtrl, 'reload').and.returnValue(false);
         applicationCtrl.loggedIn = true;
         $httpBackend.when('POST', '/pp/v1/auth/logout').respond(200, {});
         $httpBackend.expectPOST('/pp/v1/auth/logout');
         applicationCtrl.logout();
         $httpBackend.flush();
-        expect(applicationCtrl.loggedIn).toBe(false);
-        expect(applicationCtrl.failedLogin).toBe(false);
-        expect(applicationCtrl.serverErrorOnLogin).toBe(false);
-        expect(applicationCtrl.serverFailedToRespond).toBe(false);
+
+        //$rootScope.$digest();
+
+        // App should reload
+        expect(applicationCtrl.reload).toHaveBeenCalled();
+
+        // Re-work if we re-instate logout in-app with model clean-up
+        //expect(applicationCtrl.loggedIn).toBe(false);
+        //expect(applicationCtrl.failedLogin).toBe(false);
+        //expect(applicationCtrl.serverErrorOnLogin).toBe(false);
+        //expect(applicationCtrl.serverFailedToRespond).toBe(false);
       });
 
       it('invoke `logout` method - failure', function () {
@@ -230,16 +238,19 @@
             .respond(200, {account: 'admin', admin: true});
         });
 
-        it('should show cluster registration if cluster count === 0', function () {
+        it('should go to endpoints dashboard if cluster count === 0', function () {
           $httpBackend.when('GET', '/pp/v1/cnsis')
             .respond(200, []);
           $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, []);
 
           applicationCtrl.login('admin', 'admin');
           $httpBackend.flush();
+          //$rootScope.$digest();
 
-          expect(applicationCtrl.showClusterRegistration).toBe(true);
+          expect(applicationCtrl.showClusterRegistration).toBe(false);
+          expect(applicationCtrl.redirectState).toBe('endpoint.dashboard');
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
+          expect($state.current.name).toBe('endpoint.dashboard');
         });
 
         it('should not show cluster registration if cluster count > 0', function () {
@@ -253,6 +264,7 @@
           applicationCtrl.login('admin', 'admin');
           $httpBackend.flush();
 
+          expect(applicationCtrl.redirectState).toBe(false);
           expect(applicationCtrl.showClusterRegistration).toBe(false);
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
         });
@@ -261,7 +273,7 @@
       describe('onLoggedIn as dev', function () {
         beforeEach(function () {
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa')
-            .respond(200, {account: 'dev', admin: false});
+            .respond(200, {account: 'dev', scope: 'hdp3.dev'});
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
             { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
           ]);
