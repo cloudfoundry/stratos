@@ -40,7 +40,7 @@
     it('should send POST request for createHCE', function () {
       var data = { api_endpoint: 'url', cnsi_name: 'name' };
       $httpBackend.expectPOST('/pp/v1/register/hce', $httpParamSerializer(data)).respond(200, '');
-      serviceInstanceApi.createHCE('url', 'name');
+      serviceInstanceApi.createHce('url', 'name');
       $httpBackend.flush();
     });
 

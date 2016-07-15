@@ -129,12 +129,7 @@
      */
     disconnect: function (userServiceInstance) {
       var that = this;
-
-      // Our mocking system uses "id" but the real systems use "guid".
-      // This bandaid will allow the use of either.
-      var id = angular.isUndefined(userServiceInstance.guid) ? userServiceInstance.id : userServiceInstance.guid;
-
-      this.userCnsiModel.disconnect(id)
+      this.userCnsiModel.disconnect(userServiceInstance.guid)
         .then(function success() {
           delete userServiceInstance.account;
           delete userServiceInstance.token_expiry;
@@ -184,6 +179,12 @@
       this.hceRegistration.add();
     },
 
+    /**
+     * @function isAdmin
+     * @memberOf app.view.ServiceRegistrationController
+     * @description Return whether current user account is admin
+     * @returns {boolean} Whether user account is admin
+     */
     /**
      * @function isAdmin
      * @memberof app.view.ServiceRegistrationController

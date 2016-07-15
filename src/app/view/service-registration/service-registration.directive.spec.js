@@ -73,6 +73,8 @@
       });
 
       it('should call disconnect on model on disconnect()', function () {
+        var initialNumValid = serviceRegistrationCtrl.userCnsiModel.numValid;
+
         var data = { cnsi_guid: 'cnsi_guid' };
         $httpBackend.expectPOST('/pp/v1/auth/logout/cnsi', $httpParamSerializer(data)).respond(200, '');
 
@@ -84,7 +86,7 @@
         expect(serviceInstance.account).toBeUndefined();
         expect(serviceInstance.expires_at).toBeUndefined();
         expect(serviceInstance.valid).toBeUndefined();
-        expect(serviceRegistrationCtrl.userCnsiModel.numValid).toBe(0);
+        expect(serviceRegistrationCtrl.userCnsiModel.numValid).toBe(initialNumValid - 1);
       });
 
       it('should hide credentials form flyout `onConnectCancel`', function () {

@@ -58,7 +58,6 @@
     }
     this.hceRegistration = hceRegistration;
     this.tokenExpiryMessage = 'Token has expired';
-    this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
     this.activeServiceInstance = null;
     this.$log = $log;
     this.$q = $q;
@@ -108,10 +107,6 @@
      * @param {object} serviceInstance - Service instance
      */
     connect: function (serviceInstance) {
-      /* eslint-disable no-warning-comments */
-      // TODO(irfan) Test once HCE authentication is implemented (TEAMFOUR-721)
-      /* eslint-enable no-warning-comments */
-      // Currently only implemented for HCF
       this.activeServiceInstance = serviceInstance;
       this.credentialsFormOpen = true;
     },
@@ -124,26 +119,17 @@
      * @param {object} endpoint - endpoint
      */
     disconnect: function (endpoint) {
-      /* eslint-disable no-warning-comments */
-      // TODO(irfan) Test once HCE authentication is implemented (TEAMFOUR-721)
-      /* eslint-enable no-warning-comments */
       var that = this;
       var userServiceInstance = that.userServiceInstanceModel.serviceInstances[endpoint.guid];
-      if (angular.isUndefined(userServiceInstance)) {
-        that.$log.warn('Will not be able to disconnect from service! ' +
-          'This should work once HCE authentication is implemented!');
-        return;
-      }
       this.userServiceInstanceModel.disconnect(endpoint.guid)
         .then(function success() {
           delete userServiceInstance.account;
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
           that.userServiceInstanceModel.numValid -= 1;
-          that.cfModel.all();
         })
         .then(function () {
-          return _updateCurrentEndpoints();
+          return that._updateCurrentEndpoints();
         });
     },
 
@@ -217,6 +203,7 @@
       this.userServiceInstanceModel.numValid += 1;
       this.credentialsFormOpen = false;
       this.activeServiceInstance = null;
+      this._updateCurrentEndpoints();
     },
 
     /**
@@ -260,7 +247,6 @@
      * @private
      */
     _setCurrentEndpoints: function () {
-
       var that = this;
       var filteredInstances = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: that.serviceType});
       _.forEach(filteredInstances, function (serviceInstance) {
@@ -275,13 +261,9 @@
       that.currentEndpoints = _.map(filteredInstances,
         function (c) {
           var endpoint = c.api_endpoint;
-          /* eslint-disable no-warning-comments */
-          // FIXME Once HCE auth is implement read connection status from userServiceInstanceModel (TEAMFOUR-721)
-          /* eslint-enable no-warning-comments */
-          var isConnected = true;
-          if (that.isHcf()) {
-            isConnected = that.userServiceInstanceModel.serviceInstances[c.guid].valid;
-          }
+          var isConnected = angular.isDefined(that.userServiceInstanceModel.serviceInstances[c.guid]) &&
+                            that.userServiceInstanceModel.serviceInstances[c.guid].valid;
+
           return {
             name: c.name,
             guid: c.guid,
@@ -304,7 +286,6 @@
       var that = this;
       return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
         .then(function () {
-
           if (invalidateCurrentInstances) {
             that.serviceInstances = [];
             // Prevent empty view being shown during an update

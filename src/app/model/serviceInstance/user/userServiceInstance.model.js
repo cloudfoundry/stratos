@@ -65,13 +65,18 @@
      * @function disconnect
      * @memberof app.model.serviceInstance.user.UserServiceInstance
      * @description Disconnect user from service instance
-     * @param {number} id - the service instance ID
+     * @param {number} guid - the CNSI GUID
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    disconnect: function (id) {
+    disconnect: function (guid) {
+      var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      return serviceInstanceApi.disconnect(id);
+      return serviceInstanceApi.disconnect(guid)
+        .then(function (response) {
+          that.onDisconnect(guid);
+          return response;
+        });
     },
 
     /**
@@ -90,15 +95,17 @@
       serviceInstanceApi.list()
         .then(function (response) {
           var items = response.data;
-          var guids = _.map(items, 'guid') || [];
+          var guids = _.map(_.filter(items, {cnsi_type: 'hcf'}) || [], 'guid') || [];
 
           that.serviceInstances = {};
           that.numValid = 0;
 
           if (_.isEmpty(guids)) {
+            if (items.length > 0) {
+              that.onList(response);
+            }
             deferred.resolve(that.serviceInstances);
           } else {
-
             var cfg = { headers: { 'x-cnap-cnsi-list': guids.join(',') } };
             // call /v2/info to refresh tokens, then list
             cfInfoApi.GetInfo({}, cfg).then(function () {
@@ -146,6 +153,20 @@
         this.serviceInstances[guid] = newCnsi;
       } else {
         angular.extend(this.serviceInstances[guid], newCnsi);
+      }
+    },
+
+    /**
+     * @function onDisconnect
+     * @memberof app.model.serviceInstance.user.UserServiceInstance
+     * @description onDisconnect handler
+     * @param {string} guid - the CNSI GUID
+     * @returns {void}
+     * @private
+     */
+    onDisconnect: function (guid) {
+      if (angular.isDefined(this.serviceInstances[guid])) {
+        delete this.serviceInstances[guid];
       }
     },
 

@@ -1,12 +1,12 @@
 <div class="hce-registration">
   <div class="detail-view-header">
-    <h2 translate>Register Endpoint</h2>
-    <p translate>Enter the code engine endpoint URL and name.</p>
+    <h2 translate>Register Code Engine Endpoint</h2>
+    <p translate>Enter the Code Engine endpoint URL and name.</p>
   </div>
-    <form name="hceRegistrationForm">
+  <form name="hceRegistrationForm">
     <div class="form-group" focusable-input
          ng-class="{'has-error': hceRegistrationForm.url.$invalid && hceRegistrationForm.url.$dirty}">
-      <label class="control-label" translate>Code Engine Endpoint</label>
+      <label class="control-label" translate>Endpoint Address</label>
       <span class="control-message">
         <span translate
               ng-if="hceRegistrationForm.url.$error.pattern && hceRegistrationForm.url.$dirty">
@@ -17,26 +17,30 @@
           Url is not unique
         </span>
       </span>
-      <input type="text" name="url" class="form-control" ng-model="detailViewCtrl.context.data.url"
+      <input type="text" name="url" class="form-control" ng-model="hceRegistrationCtrl.context.data.url"
              required
              ng-pattern="/^http(s)?://(.)+$/"
-             helion-unique items="detailViewCtrl.context.options.instances"
+             helion-unique items="hceRegistrationCtrl.context.options.instances"
              ignore-case/>
     </div>
     <div class="form-group" focusable-input>
-      <label class="control-label" translate>Code Engine Name</label>
-      <input type="text" class="form-control" ng-model="detailViewCtrl.context.data.name" required/>
+      <label class="control-label" translate>Name</label>
+      <input type="text" class="form-control" ng-model="hceRegistrationCtrl.context.data.name" required/>
     </div>
   </form>
-
   <div class="modal-footer">
     <button class="btn btn-default"
-            ng-click="$dismiss()">
-      {{ 'Cancel' }}
+            ng-click="$dismiss()" translate>
+      Cancel
     </button>
     <button class="btn btn-primary"
-            ng-disabled="hceRegistrationForm.$invalid" ng-click="$close();">
-      {{ 'Register' }}
+            ng-disabled="hceRegistrationForm.$invalid" ng-click="hceRegistrationCtrl.addHce()" translate>
+      Register
     </button>
   </div>
+</div>
+<div ng-if="hceRegistrationCtrl.addHceError" class="alert alert-danger register-error">
+  <p translate>
+    There was a problem adding this Code Engine endpoint. Please try again. If this error persists, please contact the administrator.
+  </p>
 </div>
