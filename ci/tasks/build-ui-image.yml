@@ -6,7 +6,6 @@ image_resource:
     repository: node
     tag: '4.2.3'
 inputs:
-- name: helion-ui-theme
 - name: helion-ui-framework
 - name: stratos-ui
 outputs:

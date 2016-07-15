@@ -87,7 +87,6 @@ buildAndPublishImage cnap-console-database-configuration Dockerfile.database.UCP
 docker run --rm \
   -v ${__DIRNAME}/../stratos-ui:/usr/src/app \
   -v ${__DIRNAME}/../helion-ui-framework:/usr/src/helion-ui-framework \
-  -v ${__DIRNAME}/../helion-ui-theme:/usr/src/helion-ui-theme \
   -w /usr/src/app \
   node:4.2.3 \
   /bin/bash ./provision.sh

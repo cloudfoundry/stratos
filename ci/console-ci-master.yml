@@ -16,12 +16,6 @@ resources:
       region_name: {{s3-region-name}}
 
   # git repos
-  - name: helion-ui-theme
-    type: git
-    source:
-      uri: git@github.com:hpcloud/helion-ui-theme.git
-      branch: master
-      private_key: {{github-private-key}}
   - name: helion-ui-framework
     type: git
     source:
@@ -103,8 +97,6 @@ jobs:
       trigger: true
     - get: portal-proxy
       trigger: true
-    - get: helion-ui-theme
-      trigger: true
     - get: helion-ui-framework
       trigger: true
     - get: stratos-ui
@@ -166,11 +158,6 @@ jobs:
     - put: portal-proxy
       params:
         repository: portal-proxy
-        tag: tag-files/version_tag
-        only_tag: true
-    - put: helion-ui-theme
-      params:
-        repository: helion-ui-theme
         tag: tag-files/version_tag
         only_tag: true
     - put: helion-ui-framework

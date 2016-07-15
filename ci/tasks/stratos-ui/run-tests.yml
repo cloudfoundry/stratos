@@ -5,7 +5,6 @@ inputs:
 - name: portal-proxy-output
   path: src/github.com/hpcloud/portal-proxy
 - name: stratos-ui
-- name: helion-ui-theme
 - name: helion-ui-framework
 image_resource:
   type: docker-image

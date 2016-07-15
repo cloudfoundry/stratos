@@ -76,4 +76,3 @@ services:
     volumes:
       - ../stratos-ui:/usr/src/app
       - ../helion-ui-framework:/usr/src/helion-ui-framework
-      - ../helion-ui-theme:/usr/src/helion-ui-theme
