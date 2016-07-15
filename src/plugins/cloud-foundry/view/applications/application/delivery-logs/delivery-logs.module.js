@@ -69,55 +69,32 @@
     this.$scope = $scope;
 
     var that = this;
-    var promise;
 
     /* eslint-disable */
-    // TODO (rcox): Both vars + anything associated with to be removed once everything is wired in. See TEAMFOUR-596
+    // TODO (kdomico): RC .. Hi! I've used the same github user approach. Update here as well or let me know if I need
+    // to do it. See https://jira.hpcloud.net/browse/TEAMFOUR-623. There's a number of unit tests implement for this
+    // at the moment. They will also need to be updated. I can do that part, just let me know the PR
     /* eslint-enable */
-    this.addMock = false;
-    this.haveBackend = true;
-
-    if (this.haveBackend) {
-      /* eslint-disable */
-      // TODO (kdomico): RC .. Hi! I've used the same github user approach. Update here as well or let me know if I need
-      // to do it. See https://jira.hpcloud.net/browse/TEAMFOUR-623. There's a number of unit tests implement for this
-      // at the moment. They will also need to be updated. I can do that part, just let me know the PR
-      /* eslint-enable */
-      promise = this.cnsiModel.list()
-        .then(function () {
-          var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
-          if (hceCnsis.length > 0) {
-            that.hceCnsi = hceCnsis[0];
-            return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
-              .then(function () {
-                return that.hceModel.getProjects(that.hceCnsi.guid)
-                  .then(function () {
-                    return that.hceModel.getProject(that.model.application.summary.name);
-                  });
-              }, function (response) {
-                if (response.status === 404) {
-                  that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
-                }
-              });
-          } else {
-            return $q.reject('No CNSI found');
-          }
-        });
-    } else {
-      promise = $q.when({});
-    }
-
-    that.debouncedUpdateVisibleExecutions = _.debounce(function (visibleExecutions) {
-      that.updateVisibleExecutions(visibleExecutions);
-    }, 500);
-
-    $scope.$on("$destroy", function () {
-      if (that.debouncedUpdateVisibleExecutions) {
-        that.debouncedUpdateVisibleExecutions.cancel();
-      }
-    });
-
-    promise
+    this.cnsiModel.list()
+      .then(function () {
+        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
+        if (hceCnsis.length > 0) {
+          that.hceCnsi = hceCnsis[0];
+          return that.hceModel.getUserByGithubId(that.hceCnsi.guid, '123456')
+            .then(function () {
+              return that.hceModel.getProjects(that.hceCnsi.guid)
+                .then(function () {
+                  return that.hceModel.getProject(that.model.application.summary.name);
+                });
+            }, function (response) {
+              if (response.status === 404) {
+                that.hceModel.createUser(that.hceCnsi.guid, '123456', 'login', 'token');
+              }
+            });
+        } else {
+          return $q.reject('No CNSI found');
+        }
+      })
       .then(function (project) {
         that.project = project;
         that.hasProject = !(angular.isUndefined(project) || project === null);
@@ -129,6 +106,15 @@
         that.hasProject = 'error';
       });
 
+    that.debouncedUpdateVisibleExecutions = _.debounce(function (visibleExecutions) {
+      that.updateVisibleExecutions(visibleExecutions);
+    }, 500);
+
+    $scope.$on("$destroy", function () {
+      if (that.debouncedUpdateVisibleExecutions) {
+        that.debouncedUpdateVisibleExecutions.cancel();
+      }
+    });
   }
 
   angular.extend(ApplicationDeliveryLogsController.prototype, {
@@ -195,22 +181,9 @@
         return that.displayedExecutions;
       }, that.debouncedUpdateVisibleExecutions);
 
-      var promise;
-      if (this.haveBackend) {
-        var project = this.hceModel.getProject(this.model.application.summary.name);
-        // Fetch pipeline executions
-        promise = this.hceModel.getPipelineExecutions(that.hceCnsi.guid, project.id);
-      } else {
-        that.hceModel.data.pipelineExecutions = [];
-        promise = this.$q.when();
-      }
-      if (this.addMock) {
-        promise.then(function () {
-          that.hceModel.data.pipelineExecutions = that.hceModel.data.pipelineExecutions.concat(that.createMockExecutions());
-        });
-      }
-
-      promise
+      // Fetch pipeline executions
+      var project = this.hceModel.getProject(this.model.application.summary.name);
+      this.hceModel.getPipelineExecutions(that.hceCnsi.guid, project.id)
         .then(function () {
           // The ux will need to show additional properties. In order to not muddy the original model make a copy
           that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
@@ -237,16 +210,8 @@
       // Reset the last successful build/test/deploy events
       this.last = {};
 
-      var promise;
-      if (this.haveBackend) {
-        promise = that.hceModel.getPipelineEvents(that.hceCnsi.guid, executionId);
-      } else if (this.addMock) {
-        promise = this.$q.when(this.createMockEvents(executionId));
-      } else {
-        promise = this.$q.reject('No backend, no mock, therefor no events');
-      }
-
-      return promise
+      // Fetch events
+      return that.hceModel.getPipelineEvents(that.hceCnsi.guid, executionId)
         .then(function (events) {
           for (var i = 0; i < events.length; i++) {
             that.parseEvent(events[i]);
@@ -320,7 +285,7 @@
      * @description Update the execution to contain the required information. Due to the way search works ensure all
      * dates and text is localised before it hits the scope
      * @param {object} execution - execution to update
-     * @param {array} events - HCE events associated with the execution
+     * @param {Array} events - HCE events associated with the execution
      */
     parseExecution: function (execution, events) {
       // Used to sort items in table
@@ -368,7 +333,7 @@
      * @name ApplicationDeliveryLogsController.updateVisibleExecutions
      * @description Only some executions are visible. For thos visible executions fetch their associated events. If
      * all executions have their events stop watching the visibileExecutions collection
-     * @param {array} visibleExecutions - List of executions that are visible to the user
+     * @param {Array} visibleExecutions - List of executions that are visible to the user
      */
     updateVisibleExecutions: function (visibleExecutions) {
       // Nothing visible? Nothing to update
@@ -408,113 +373,8 @@
           that.execWatch();
         }
       });
-    },
-
-    /* eslint-disable */
-    // TODO (rcox): Remove all mock properties and functions below. See TEAMFOUR-596
-    mockExecutions: 0,
-
-    mockEvents: 0,
-
-    randomString: function (length) {
-      var text = "";
-      var possible = "ABCDEFG HIJKLMN OPQRSTUV WXYZabcde fghi jklmn opqrstu vwxyz01 2345 6789 ";
-
-      for (var i = 1; i < length; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-      return text;
-    },
-
-    randomNumber: function (min, max) {
-      var result = Math.floor(Math.random() * (max - min + 1)) + min;
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    },
-
-    createMockExecutions: function () {
-      var that = this;
-
-      function createRandomExecution() {
-        var authors = ['DBaldwin', 'JAubrey', 'GNuman', 'BAtman', 'MAli', 'btat', 'richard-cox'];
-        var types = ['manual'];
-        var results = ['Failure'];
-        return {
-          concoursePipelineId: that.randomString(20),
-          id: that.mockExecutions++,
-          message: that.randomString(that.randomNumber(1, 100)),
-          name: that.randomString(that.randomNumber(1, 10)),
-          reason: {
-            commitSha: that.randomString(20),
-            author: authors[that.randomNumber(0, authors.length - 1)],
-            createdDate: moment().subtract(that.randomNumber(1, 3000), 'seconds').format(),
-            pullRequestId: null,
-            type: types[that.randomNumber(0, types.length - 1)]
-          },
-          result: results[that.randomNumber(0, results.length - 1)]
-        }
-      }
-
-      var result = [];
-      for (var i = 0; i < that.addMock; i++) {
-        result.push(createRandomExecution());
-      }
-      return result;
-    },
-
-    createMockEvents: function (executionId) {
-      function createEvent(id, type, state, startOffset, endOffset, artifactId) {
-        return {
-          id: id,
-          name: type,
-          type: type,
-          state: state,
-          startDate: moment().subtract(startOffset, 'seconds').format(),
-          endDate: moment().subtract(endOffset, 'seconds').format(),
-          artifact_id: artifactId,
-          duration: (startOffset - endOffset) * 1000,
-          execution_id: executionId
-        };
-      }
-
-      var mod = executionId % 4;
-      var states = [this.eventStates.FAILED, this.eventStates.SUCCEEDED];
-      var terminatedStates = [this.eventTypes.PIPELINE_COMPLETED, this.eventTypes.WATCHDOG_TERMINATED];
-      var startTime = this.randomNumber(1, 60000);
-
-
-      var that = this;
-
-      function iterateTime() {
-        startTime = startTime - that.randomNumber(1, startTime);
-        startTime = startTime > 0 ? startTime : 0;
-        return startTime;
-      }
-
-      var events = [];
-      if (mod === 3) {
-        events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-        events.push(createEvent(this.mockEvents++, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-        events.push(createEvent(this.mockEvents++, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-        var terminatedState = terminatedStates[this.randomNumber(0, terminatedStates.length - 1)];
-        var state = terminatedState === this.eventTypes.WATCHDOG_TERMINATED ? this.eventStates.FAILED : states[this.randomNumber(0, states.length - 1)]
-        events.push(createEvent(this.mockEvents++, terminatedState, state, startTime, iterateTime(), 1));
-      }
-      if (mod === 2) {
-        events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-        events.push(createEvent(this.mockEvents++, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-        events.push(createEvent(this.mockEvents++, this.eventTypes.TESTING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-      }
-      if (mod === 1) {
-        events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-        events.push(createEvent(this.mockEvents++, this.eventTypes.DEPLOYING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-      }
-      if (mod === 0) {
-        events.push(createEvent(this.mockEvents++, this.eventTypes.BUILDING, this.eventStates.SUCCEEDED, startTime, iterateTime(), 1));
-      }
-
-      return events;
     }
-    /* eslint-enable */
+
   });
 
 })();
