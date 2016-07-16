@@ -45,15 +45,15 @@ resources:
   - name: hsc-console-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/helioncf/hsc-console
+      repository: docker-registry.helion.space:443/hsc/hsc-console
   - name: hsc-proxy-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/helioncf/hsc-proxy
+      repository: docker-registry.helion.space:443/hsc/hsc-proxy
   - name: hsc-database-creation-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/helioncf/hsc-database-creation
+      repository: docker-registry.helion.space:443/hsc/hsc-database-creation
 
   # HSM assets
   - name: hsm-sdl-bucket

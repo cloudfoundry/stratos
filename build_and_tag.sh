@@ -29,7 +29,7 @@ echo "Tag: $TAG"
 
 echo "Starting build"
 
-GROUP_NAME=helioncf
+GROUP_NAME=hsc
 BUILD_ARGS=""
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -85,9 +85,9 @@ PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
 pushd ${PORTAL_PROXY_PATH}
 docker run -it \
            --rm \
-           --name proxy-builder \
+           --name console-proxy-builder \
            --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
-           $DOCKER_REGISTRY/helioncf/proxy-builder
+           $DOCKER_REGISTRY/hsc/console-proxy-builder
 popd
 
 # Build and publish the container image for the portal proxy

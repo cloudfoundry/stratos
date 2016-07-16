@@ -43,7 +43,7 @@ function clean {
     # it's ok if this section fails
     set +e
     docker-compose -f ${DEV_DOCKER_COMPOSE} down --rmi 'all'
-    docker rmi -f portal-proxy-builder
+    docker rmi -f console-proxy-builder
     # reset back to strict
     set -e
     popd
