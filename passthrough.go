@@ -35,6 +35,7 @@ type CNSIRequest struct {
 }
 
 func getEchoURL(c echo.Context) url.URL {
+	log.Println("getEchoURL")
 	u := c.Request().URL().(*standard.URL).URL
 
 	// dereference so we get a copy
@@ -42,6 +43,7 @@ func getEchoURL(c echo.Context) url.URL {
 }
 
 func getEchoHeaders(c echo.Context) http.Header {
+	log.Println("getEchoHeaders")
 	h := make(http.Header)
 	originalHeader := c.Request().Header().(*standard.Header).Header
 	for k, v := range originalHeader {
@@ -57,6 +59,7 @@ func getEchoHeaders(c echo.Context) http.Header {
 }
 
 func makeRequestURI(c echo.Context) *url.URL {
+	log.Println("makeRequestURI")
 	uri := getEchoURL(c)
 	prefix := strings.TrimSuffix(c.Path(), "*")
 	uri.Path = strings.TrimPrefix(uri.Path, prefix)
@@ -65,6 +68,7 @@ func makeRequestURI(c echo.Context) *url.URL {
 }
 
 func getPortalUserGUID(c echo.Context) (string, error) {
+	log.Println("getPortalUserGUID")
 	portalUserGUIDIntf := c.Get("user_id")
 	if portalUserGUIDIntf == nil {
 		return "", errors.New("Corrupted session")
@@ -73,6 +77,7 @@ func getPortalUserGUID(c echo.Context) (string, error) {
 }
 
 func getRequestParts(c echo.Context) (engine.Request, []byte, error) {
+	log.Println("getRequestParts")
 	var body []byte
 	var err error
 	req := c.Request()
@@ -85,6 +90,7 @@ func getRequestParts(c echo.Context) (engine.Request, []byte, error) {
 }
 
 func buildJSONResponse(cnsiList []string, responses map[string]CNSIRequest) map[string]*json.RawMessage {
+	log.Println("buildJSONResponse")
 	jsonResponse := make(map[string]*json.RawMessage)
 	for _, guid := range cnsiList {
 		var response []byte
@@ -108,6 +114,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]CNSIRequest) map[
 }
 
 func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req engine.Request, uri *url.URL, body []byte, header http.Header, passThrough bool) CNSIRequest {
+	log.Println("buildCNSIRequest")
 	cnsiRequest := CNSIRequest{
 		GUID:     cnsiGUID,
 		UserGUID: userGUID,
@@ -133,6 +140,7 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req eng
 }
 
 func (p *portalProxy) validateCNSIList(cnsiList []string) error {
+	log.Println("validateCNSIList")
 	for _, cnsiGUID := range cnsiList {
 		if _, ok := p.getCNSIRecord(cnsiGUID); !ok {
 			return errors.New("Invalid CNSI GUID")
@@ -143,6 +151,7 @@ func (p *portalProxy) validateCNSIList(cnsiList []string) error {
 }
 
 func fwdCNSIStandardHeaders(cnsiRequest CNSIRequest, req *http.Request) {
+	log.Println("fwdCNSIStandardHeaders")
 	for k, v := range cnsiRequest.Header {
 		switch {
 		case k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cnap-"):
@@ -155,6 +164,7 @@ func fwdCNSIStandardHeaders(cnsiRequest CNSIRequest, req *http.Request) {
 }
 
 func (p *portalProxy) proxy(c echo.Context) error {
+	log.Println("proxy")
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
 
@@ -238,6 +248,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 }
 
 func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest, kill <-chan struct{}) {
+	log.Println("doRequest")
 	var body io.Reader
 	var res *http.Response
 	var req *http.Request

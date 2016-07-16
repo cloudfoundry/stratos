@@ -64,7 +64,8 @@ func main() {
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
 	log.Println("Proxy waiting for requests.")
 
-	log.Printf("%v", portalConfig)
+	log.Println("Proxy config at startup")
+	log.Printf("%+v\n", portalConfig)
 	if err := start(portalProxy); err != nil {
 		log.Printf("Unable to start the proxy: %v", err)
 		os.Exit(1)
@@ -75,6 +76,7 @@ func main() {
 // For the time being, I am just generating a 256 bit / 32 byte / AES-256 encryption key
 // here. By  the time I am done with this PR, this will come in via the env var.
 func setEncryptionKey(pc portalConfig) ([]byte, error) {
+	log.Println("setEncryptionKey")
 	key := make([]byte, 32)
 	_, err := rand.Read(key)
 
@@ -89,6 +91,7 @@ func setEncryptionKey(pc portalConfig) ([]byte, error) {
 }
 
 func initConnPool() (*sql.DB, error) {
+	log.Println("initConnPool")
 	// load up postgresql database configuration
 	var databaseConfig datastore.DatabaseConfig
 	databaseConfig, err := loadDatabaseConfig(databaseConfig)
@@ -107,12 +110,14 @@ func initConnPool() (*sql.DB, error) {
 }
 
 func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {
+	log.Println("initSessionStore")
 	store := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 
 	return store
 }
 
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {
+	log.Println("loadPortalConfig")
 	if err := ucpconfig.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
 	}
@@ -120,6 +125,7 @@ func loadPortalConfig(pc portalConfig) (portalConfig, error) {
 }
 
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
+	log.Println("loadDatabaseConfig")
 	if err := ucpconfig.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
@@ -132,6 +138,7 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 }
 
 func createTempCertFiles(pc portalConfig) (string, string, error) {
+	log.Println("createTempCertFiles")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
 
@@ -158,6 +165,7 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 }
 
 func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalProxy {
+	log.Println("newPortalProxy")
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
@@ -168,6 +176,7 @@ func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalPr
 }
 
 func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Duration) {
+	log.Println("initializeHTTPClient")
 	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
 	if skipCertVerification {
 		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -177,6 +186,7 @@ func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Durat
 }
 
 func start(p *portalProxy) error {
+	log.Println("start")
 	e := echo.New()
 
 	// Root level middleware
@@ -204,6 +214,7 @@ func start(p *portalProxy) error {
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
+	log.Println("registerRoutes")
 
 	e.POST("/v1/auth/login/uaa", p.loginToUAA)
 	e.POST("/v1/auth/logout", p.logout)

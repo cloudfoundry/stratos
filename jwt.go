@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"log"
 	"strings"
 )
 
@@ -15,6 +16,7 @@ type userTokenInfo struct {
 }
 
 func getUserTokenInfo(tok string) (u *userTokenInfo, err error) {
+	log.Println("getUserTokenInfo")
 	accessToken := strings.TrimPrefix(tok, "bearer ")
 	splits := strings.Split(accessToken, ".")
 

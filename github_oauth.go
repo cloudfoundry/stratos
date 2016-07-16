@@ -20,7 +20,6 @@ var scopes = []string{"admin:repo_hook", "repo", "repo:status"}
 
 // handleGitHubAuth <TBD>
 func (p *portalProxy) handleGitHubAuth(c echo.Context) error {
-
 	log.Println("handleGitHubAuth")
 
 	var (
@@ -60,7 +59,6 @@ func (p *portalProxy) handleGitHubAuth(c echo.Context) error {
 
 // handleGitHubCallback <TBD>
 func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
-
 	log.Println("handleGitHubCallback")
 
 	var (
