@@ -85,7 +85,7 @@
           "name": "PGSQL_PORT"
         },
         {
-          "name": "PGSQL_CONNECT_TIMEOUT"
+          "name": "PGSQL_CONNECT_TIMEOUT_IN_SECS"
         },
         {
           "name": "PGSQL_SSL_MODE"
@@ -103,7 +103,7 @@
           "name": "SKIP_TLS_VERIFICATION"
         },
         {
-          "name": "TLS_ADDRESS"
+          "name": "CONSOLE_PROXY_TLS_ADDRESS"
         },
         {
           "name": "CONSOLE_CLIENT"
@@ -340,7 +340,7 @@
     {
       "name": "PGSQL_USER",
       "description": "Postgres username",
-      "default": "stolon",
+      "default": "stratos",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -348,7 +348,7 @@
     {
       "name": "PGSQL_PASSWORD",
       "description": "Postgres password",
-      "default": "stolon",
+      "default": "stratos",
       "data_type": "string",
       "required": true,
       "secret": false,
@@ -363,7 +363,7 @@
     {
       "name": "PGSQL_DATABASE",
       "description": "Postgres database name",
-      "default": "hsc-db",
+      "default": "stratos-db",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -385,9 +385,9 @@
       "secret": false
     },
     {
-      "name": "PGSQL_CONNECT_TIMEOUT",
-      "description": "Postgres password",
-      "default": "10",
+      "name": "PGSQL_CONNECT_TIMEOUT_IN_SECS",
+      "description": "Postgres connection timeout",
+      "default": "100",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -564,7 +564,7 @@
     {
       "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
       "description": "HTTP client timeoout",
-      "default": "10",
+      "default": "100",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -578,7 +578,7 @@
       "secret": false
     },
     {
-      "name": "TLS_ADDRESS",
+      "name": "CONSOLE_PROXY_TLS_ADDRESS",
       "description": "TLS Address",
       "default": ":3003",
       "data_type": "string",
@@ -611,8 +611,8 @@
     },
     {
       "name": "ALLOWED_ORIGINS",
-      "description": "Allowed origins - TBD",
-      "default": "https://localhost,https://127.0.0.1",
+      "description": "Allowed origins - WHAT DOES THIS NEED TO BE SET TO ?!?!?!?!?!?!??",
+      "default": "https://localhost,https://127.0.0.1,http://192.168.200.2,https://192.168.200.2,http://192.168.200.3,https://192.168.200.3,http://172.17.27.1,https://172.17.27.1",
       "data_type": "string",
       "required": true,
       "secret": false

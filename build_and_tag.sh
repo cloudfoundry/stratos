@@ -65,22 +65,20 @@ function buildAndPublishImage {
 }
 
 # Cleanup the SDL/instance defs
+echo "Cleaning up ${__DIRNAME}/output/*"
 rm -rf ${__DIRNAME}/output/*
 
 # Cleanup prior to generating the UI container
+echo "Cleaning up ${__DIRNAME}/../stratos-ui/dist"
 rm -rf ${__DIRNAME}/../stratos-ui/dist
+echo "Cleaning up ${__DIRNAME}/../stratos-ui/containers/nginx/dist"
 rm -rf ${__DIRNAME}/../stratos-ui/containers/nginx/dist
-
-# Build Portal Proxy
-# PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
-# pushd ${PORTAL_PROXY_PATH}
-# ./tools/build_portal_proxy.sh
-# popd
 
 # TODO (wchrisjohnson) document this and add a shell script to regenerate the
 # image when necessary.
 # Build the Proxy executable in a container, and leave it on the local filesystem
 # Use the existing build container we created for the CI process
+echo "Building the Console Proxy executable"
 PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
 pushd ${PORTAL_PROXY_PATH}
 docker run -it \
@@ -91,12 +89,15 @@ docker run -it \
 popd
 
 # Build and publish the container image for the portal proxy
+echo "Building/publishing the container image for the Console Proxy"
 buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
 # Build the postgres configuration container
+echo "Building/publishing the container image for the Database Creator"
 buildAndPublishImage hsc-database-creation Dockerfile.database.HCP ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
+echo "Provision the UI"
 docker run --rm \
   -v ${__DIRNAME}/../stratos-ui:/usr/src/app \
   -v ${__DIRNAME}/../helion-ui-framework:/usr/src/helion-ui-framework \
@@ -105,13 +106,14 @@ docker run --rm \
   /bin/bash ./provision.sh
 
 # Copy the artifacts from the above to the nginx container
+echo "Copying UI artifacts to the nginx container"
 cp -R ${__DIRNAME}/../stratos-ui/dist ${__DIRNAME}/../stratos-ui/containers/nginx/dist
 
 # Build and push an image based on the nginx container
+echo "Building/publishing the container image for the Console web server"
 buildAndPublishImage hsc-console Dockerfile.HCP ${__DIRNAME}/../stratos-ui/containers/nginx
 
 echo "Creating service and instance definition"
-
 mkdir -p ${__DIRNAME}/output
 for FILE in ${__DIRNAME}/hcp_templates/*.json ; do
   ofile=${__DIRNAME}/output/$(basename $FILE)
