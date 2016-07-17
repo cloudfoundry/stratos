@@ -54,12 +54,13 @@ type PgsqlTokenRepository struct {
 
 // NewPgsqlTokenRepository - get a reference to the token data source
 func NewPgsqlTokenRepository(dcp *sql.DB) (Repository, error) {
+	log.Println("NewPgsqlTokenRepository")
 	return &PgsqlTokenRepository{db: dcp}, nil
 }
 
 // SaveUAAToken - Save the UAA token to the datastore
 func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, encryptionKey []byte) error {
-
+	log.Println("SaveUAAToken")
 	if userGUID == "" {
 		msg := "Unable to save UAA Token without a valid User GUID."
 		log.Println(msg)
@@ -129,7 +130,7 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 
 // FindUAAToken - return the UAA token from the datastore
 func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byte) (TokenRecord, error) {
-
+	log.Println("FindUAAToken")
 	if userGUID == "" {
 		msg := "Unable to find UAA Token without a valid User GUID."
 		log.Printf(msg)
@@ -174,7 +175,7 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 
 // SaveCNSIToken - Save the CNSI (UAA) token to the datastore
 func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr TokenRecord, encryptionKey []byte) error {
-
+	log.Println("SaveCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to save CNSI Token without a valid CNSI GUID."
 		log.Println(msg)
@@ -248,7 +249,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 // FindCNSIToken - retrieve a CNSI (UAA) token from the datastore
 func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (TokenRecord, error) {
-
+	log.Println("FindCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to find CNSI Token without a valid CNSI GUID."
 		log.Println(msg)
@@ -298,7 +299,6 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 
 // ListCNSITokensForUser - <TBD>
 func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*TokenRecord, error) {
-
 	log.Println("ListCNSITokensForUser")
 
 	if userGUID == "" {
@@ -363,7 +363,7 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 
 // DeleteCNSIToken - remove a CNSI token (disconnect from a given CNSI)
 func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string) error {
-
+	log.Println("DeleteCNSIToken")
 	if cnsiGUID == "" {
 		msg := "Unable to delete CNSI Token without a valid CNSI GUID."
 		log.Println(msg)
@@ -399,7 +399,7 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 
 // encryptToken - TBD
 func encryptToken(key []byte, t string) ([]byte, error) {
-
+	log.Println("encryptToken")
 	var plaintextToken = []byte(t)
 	ciphertextToken, err := Encrypt(key, plaintextToken)
 	if err != nil {
@@ -424,7 +424,7 @@ func encryptToken(key []byte, t string) ([]byte, error) {
 
 // decryptToken - TBD
 func decryptToken(key, t []byte) (string, error) {
-
+	log.Println("decryptToken")
 	plaintextToken, err := Decrypt(key, t)
 	if err != nil {
 		msg := "Unable to decrypt token: %v"

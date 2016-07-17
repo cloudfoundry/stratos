@@ -62,7 +62,7 @@ func main() {
 	log.Println("Proxy session store initialized.")
 
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
-	log.Println("Proxy waiting for requests.")
+	log.Println("Proxy initialization complete.")
 
 	log.Println("Proxy config at startup")
 	log.Printf("%+v\n", portalConfig)
@@ -111,6 +111,7 @@ func initConnPool() (*sql.DB, error) {
 
 func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {
 	log.Println("initSessionStore")
+	log.Printf("db %+v\n", db)
 	store := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 
 	return store
@@ -130,10 +131,15 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
+	log.Printf("Database Config: %+v\n", dc)
+
 	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
+
+	log.Printf("Database Config: %+v\n", dc)
+
 	return dc, nil
 }
 
