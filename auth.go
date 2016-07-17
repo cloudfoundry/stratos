@@ -67,7 +67,10 @@ const HCFAdminIdentifier = "cloud_controller.admin"
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Println("loginToUAA")
-	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.Config.UAAEndpoint)
+
+	var HCPIdentityEndpoint = fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
+
+	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
 	if err != nil {
 		err = newHTTPShadowError(
 			http.StatusUnauthorized,
@@ -281,9 +284,12 @@ func (p *portalProxy) getUAATokenWithRefreshToken(refreshToken, client, clientSe
 
 func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	log.Println("getUAAToken")
+	log.Printf("authEndpoint: %s", authEndpoint)
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create request for UAA: %v", err)
+		msg := "Failed to create request for UAA: %v"
+		log.Printf(msg, err)
+		return nil, fmt.Errorf(msg, err)
 	}
 
 	req.SetBasicAuth(client, clientSecret)
@@ -291,6 +297,7 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 
 	res, err := httpClient.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
+		log.Printf("Error performing http request - status: %d, error: %v", res.StatusCode, err)
 		return nil, logHTTPError(res, err)
 	}
 
@@ -299,6 +306,7 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 	var response UAAResponse
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&response); err != nil {
+		log.Printf("Error decoding response: %v", err)
 		return nil, fmt.Errorf("getUAAToken Decode: %s", err)
 	}
 

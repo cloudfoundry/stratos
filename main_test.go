@@ -138,7 +138,7 @@ func TestLoadDatabaseConfig(t *testing.T) {
 	os.Setenv("PGSQL_DATABASE", "stratos-db")
 	os.Setenv("PGSQL_HOST", "localhost")
 	os.Setenv("PGSQL_PORT", "5432")
-	os.Setenv("PGSQL_CONNECT_TIMEOOUT", "5")
+	os.Setenv("PGSQL_CONNECT_TIMEOOUT_IN_SECS", "5")
 	os.Setenv("PGSQL_SSL_MODE", "disable")
 
 	var dc datastore.DatabaseConfig

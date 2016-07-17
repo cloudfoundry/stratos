@@ -3,6 +3,7 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/kat-co/vala"
@@ -17,7 +18,7 @@ type DatabaseConfig struct {
 	Host                    string `ucp:"PGSQL_HOST"`
 	Port                    int    `ucp:"PGSQL_PORT"`
 	SSLMode                 string `ucp:"PGSQL_SSL_MODE"`
-	ConnectionTimeoutInSecs int    `ucp:"PGSQL_CONNECTION_TIMEOUT_IN_SECS"`
+	ConnectionTimeoutInSecs int    `ucp:"PGSQL_CONNECT_TIMEOUT_IN_SECS"`
 	SSLCertificate          string `ucp:"PGSQL_CERT"`
 	SSLKey                  string `ucp:"PGSQL_CERT_KEY"`
 	SSLRootCertificate      string `ucp:"PGSQL_ROOT_CERT"`
@@ -47,7 +48,7 @@ const (
 
 // NewDatabaseConnectionParametersFromConfig setup database connection parameters based on contents of config struct
 func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfig, error) {
-
+	log.Println("NewDatabaseConnectionParametersFromConfig")
 	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
 	if err != nil {
 		return dc, err
@@ -66,8 +67,8 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 	return dc, fmt.Errorf("Invalid SSL mode: %v", dc.SSLMode)
 }
 
-func validateRequiredDatabaseParams(username, password, database, host string,
-	port int) (err error) {
+func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
+	log.Println("validateRequiredDatabaseParams")
 	err = vala.BeginValidation().Validate(
 		vala.IsNotNil(username, "username"),
 		vala.IsNotNil(password, "password"),
@@ -85,10 +86,12 @@ func validateRequiredDatabaseParams(username, password, database, host string,
 
 // GetConnection returns a database connection to PostgreSQL
 func GetConnection(dc DatabaseConfig) (*sql.DB, error) {
+	log.Println("GetConnection")
 	return sql.Open("postgres", buildConnectionString(dc))
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
+	log.Println("buildConnectionString")
 	escapeStr := func(in string) string {
 		return strings.Replace(in, `'`, `\'`, -1)
 	}
@@ -116,6 +119,8 @@ func buildConnectionString(dc DatabaseConfig) string {
 	if dc.SSLRootCertificate != "" {
 		connStr = connStr + fmt.Sprintf(" sslrootcert='%s'", escapeStr(dc.SSLRootCertificate))
 	}
+
+	log.Printf("DB Connection string: %s", connStr)
 
 	return connStr
 }
