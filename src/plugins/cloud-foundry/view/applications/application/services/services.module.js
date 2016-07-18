@@ -70,7 +70,9 @@
           .then(function (services) {
             // retrieve categories and attachment data for service filtering
             var categories = [];
-            var attachedServices = _.map(summary.services, function (o) { return o.service_plan.service.guid; });
+            var attachedServices = _.chain(summary.services)
+                                    .filter(function () { return angular.isDefined(o.service_plan); })
+                                    .map(function (o) { return o.service_plan.service.guid; });
             angular.forEach(services, function (service) {
               if (attachedServices.length > 0) {
                 if (_.includes(attachedServices, service.metadata.guid)) {
