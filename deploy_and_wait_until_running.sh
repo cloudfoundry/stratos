@@ -10,6 +10,7 @@ set -eu
 
 HCP_NODE_ENDPOINT="${HCP_NODE_ENDPOINT:-http://192.168.200.3}"
 HCP_MASTER_ENDPOINT="${HCP_MASTER_ENDPOINT:-http://192.168.200.2:8080}"
+IDENTITY_TLS_ENDPOINT="https://192.168.200.3"
 SSH_COMMAND="${SSH_COMMAND:-"ssh $HCP_JUMPBOX"}"
 HCP_JUMPBOX="${HCP_JUMPBOX:-$HCP_MASTER_ENDPOINT}"
 
@@ -63,7 +64,8 @@ main() {
   echo "Identity endpoint LB: $IDENTITY_ENDPOINT"
   if [[ -z $IDENTITY_ENDPOINT || $IDENTITY_ENDPOINT == 'null' ]]; then
     IDENTITY_PORT=$(curl -Ss $HCP_MASTER_ENDPOINT/api/v1/namespaces/hcp/services/ident-api | jq '.spec.ports[0].nodePort')
-    IDENTITY_ENDPOINT=$HCP_NODE_ENDPOINT:$IDENTITY_PORT
+    # IDENTITY_ENDPOINT=$HCP_NODE_ENDPOINT:$IDENTITY_PORT
+    IDENTITY_ENDPOINT=$IDENTITY_TLS_ENDPOINT:$IDENTITY_PORT
   else
     IDENTITY_ENDPOINT="http://${IDENTITY_ENDPOINT}:8080"
   fi
@@ -71,20 +73,19 @@ main() {
 
   echo "======"
   echo "Retrieving Access Token..."
-  ACCESS_TOKEN=$(curl -s --connect-timeout 10 --max-time 10 -H "authorization: Basic aGNwOg==" -d 'grant_type=password&username=admin%40cnap.local&password=cnapadmin' ${IDENTITY_ENDPOINT}/oauth/token | jq --raw-output '.access_token')
+  ACCESS_TOKEN=$(curl -s -k --connect-timeout 10 --max-time 10 -H "authorization: Basic aGNwOg==" -d 'grant_type=password&username=admin%40cnap.local&password=cnapadmin' ${IDENTITY_ENDPOINT}/oauth/token | jq --raw-output '.access_token')
   echo "Access token:"
   echo "$ACCESS_TOKEN"
 
   echo "======"
   echo "Deleting UAA client 'console'..."
-  curl -s -i -X "DELETE" -H "authorization: bearer $ACCESS_TOKEN" $IDENTITY_ENDPOINT/oauth/clients/console || true
+  curl -s -k -i -X "DELETE" -H "authorization: bearer $ACCESS_TOKEN" $IDENTITY_ENDPOINT/oauth/clients/console || true
 
   echo "======"
   echo "Deleting the instance of the service..."
-  # TASK_DELETE=$($SSH_COMMAND curl -s -H "Content-Type: application/json" --max-time 30 -XDELETE ${HCP_NODE_ENDPOINT}:${HCP_PORT}/v1/instances/hsc?deleteVolumes=true)
-  TASK_DELETE=$($SSH_COMMAND curl -s -H "Content-Type: application/json" --max-time 30 -XDELETE ${HCP_NODE_ENDPOINT}:${HCP_PORT}/v1/instances/hsc)
+  TASK_DELETE=$(curl -s -X DELETE -H "authorization: bearer $ACCESS_TOKEN" -H "Content-Type: application/json" ${HCP_NODE_ENDPOINT}:${HCP_PORT}/v1/instances/hsc | jq --raw-output '.code')
   echo "deletion task: $TASK_DELETE"
-  if [[ $TASK_DELETE == *"not found"* ]]; then
+  if [[ $TASK_DELETE == *404* ]]; then
     echo "nothing to delete..."
   else
     echo "======"
@@ -99,17 +100,17 @@ main() {
   cat output/sdl.json
   SDL=$(cat output/sdl.json | base64)
   $SSH_COMMAND "echo \"$SDL\" | base64 -d > sdl.json"
-  TASK_SDL=$($SSH_COMMAND curl -s -H \"Content-Type: application/json\" -XPOST -d @./sdl.json ${HCP_NODE_ENDPOINT}:${HCP_PORT}/v1/services)
+  TASK_SDL=$($SSH_COMMAND curl -s -H \"Content-Type: application/json\" -H "authorization: bearer $ACCESS_TOKEN" -XPOST -d @./sdl.json ${HCP_NODE_ENDPOINT}:${HCP_PORT}/v1/services)
   echo "    Waiting for HCP to process SDL..."
   wait_for_task $TASK_SDL
 
   echo "    Creating service instance in HCP..."
   cat output/instance.json
-  INSTANCE_DEFINITION=$(cat output/instance.json | base64)
-  $SSH_COMMAND "echo \"$INSTANCE_DEFINITION\" | base64 -d > idl.json"
-  TASK_INSTANCE=$($SSH_COMMAND curl -s -H \"Content-Type: application/json\" -XPOST -d @./idl.json ${HCP_NODE_ENDPOINT}:${HCP_PORT}/v1/instances)
+  IDL=$(cat output/instance.json | base64)
+  $SSH_COMMAND "echo \"$IDL\" | base64 -d > idl.json"
+  TASK_IDL=$($SSH_COMMAND curl -s -H \"Content-Type: application/json\" -H "authorization: bearer $ACCESS_TOKEN" -XPOST -d @./idl.json ${HCP_NODE_ENDPOINT}:${HCP_PORT}/v1/instances)
   echo "    Waiting for HCP to process instance upload task..."
-  wait_for_task $TASK_INSTANCE
+  wait_for_task $TASK_IDL
 
   echo "======"
   echo "Waiting for HCP to tell us that hsc service started..."
