@@ -1,6 +1,12 @@
 @import "manage-services/manage-services";
 @import "service-card/service-card";
 
+.service-filter-panel {
+  .filter-form-group {
+    flex-grow: 1;
+  }
+}
+
 .service-panel {
   display: flex;
   align-items: stretch;

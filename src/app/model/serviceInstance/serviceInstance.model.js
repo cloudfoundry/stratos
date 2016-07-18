@@ -54,6 +54,24 @@
     },
 
     /**
+     * @function createHce
+     * @memberof app.model.serviceInstance.ServiceInstance
+     * @description Create an HCE service instance
+     * @param {string} url - the service instance API endpoint
+     * @param {string} name - the service instance friendly name
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    createHce: function (url, name) {
+      var that = this;
+      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
+      return serviceInstanceApi.createHce(url, name)
+        .then(function (response) {
+          that.serviceInstances.push(response.data);
+        });
+    },
+
+    /**
      * @function disconnect
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Remove service instance

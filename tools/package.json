@@ -36,7 +36,6 @@
     "gulp-plumber": "^1.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-util": "^3.0.7",
-    "is-utf8": "^0.2.1",
     "jasmine-core": "^2.4.1",
     "jsdoc": "^3.4.0",
     "karma": "^0.13.19",
@@ -53,6 +52,6 @@
     "q": "^1.4.1",
     "request": "2.69.0",
     "shelljs": "^0.5.3",
-    "vinyl-fs": "2.4.3"
+    "vinyl-fs": "^0.3.0"
   }
 }

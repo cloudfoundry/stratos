@@ -1,0 +1,22 @@
+.cluster-settings.user-summary {
+	.cluster.row {
+		margin: 0;
+		padding: 0;
+
+		&:first-child {
+			padding-top: $hpe-unit-space;
+			border-bottom: 1px solid #ccc;
+			padding-bottom: $hpe-unit-space * .5;
+		}
+
+		&:last-child {
+			padding-bottom: $hpe-unit-space;
+			padding-top: $hpe-unit-space * .5;
+			margin-bottom: $hpe-unit-space;
+		}
+
+		.cluster-info {
+			margin-left: 0;
+		}
+	}
+}

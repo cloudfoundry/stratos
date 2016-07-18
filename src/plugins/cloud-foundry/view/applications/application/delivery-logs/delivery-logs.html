@@ -37,7 +37,7 @@
       <dt translate>LAST DEPLOYMENT</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.deploying" class="" href=""
-           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.testing, appDelLogsCtrl.hceCnsi.deploying)">
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.deploying, appDelLogsCtrl.hceCnsi.guid)">
           {{ appDelLogsCtrl.last.deploying.id }}</a>
         <span ng-if="appDelLogsCtrl.last.deploying" am-time-ago="appDelLogsCtrl.last.deploying.endDate"></span>
         <span ng-if="!appDelLogsCtrl.last.deploying" translate>None</span>

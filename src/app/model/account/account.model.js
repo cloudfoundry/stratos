@@ -38,11 +38,6 @@
     this.apiManager = apiManager;
     this.loggedIn = false;
     this.data = {};
-
-    /* eslint-disable no-warning-comments */
-    // TODO(irfan) Hook for development
-    /* eslint-enable no-warning-comments */
-    this.adminOverride = false;
   }
 
   angular.extend(Account.prototype, {
@@ -104,10 +99,6 @@
       return p;
     },
 
-    setAdminOverride: function (bool) {
-      this.adminOverride = bool;
-    },
-
     /**
      * @function isAdmin
      * @memberof app.model.account.Account
@@ -116,13 +107,6 @@
      * @returns {boolean} True if this user is an ITOps admin
      */
     isAdmin: function () {
-
-      /* eslint-disable no-warning-comments */
-      // TODO(irfan) Hook for development
-      /* eslint-enable no-warning-comments */
-      if (this.adminOverride) {
-        return false;
-      }
       return this.data && this.data.isAdmin;
     },
 

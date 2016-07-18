@@ -40,8 +40,9 @@
       deploymentTargets: [],
       imageRegistries: [],
       projects: {},
-      user: {},
-      pipelineExecutions: []
+      pipelineExecutions: [],
+      vcsInstances: [],
+      vcsTypes: []
     };
 
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
@@ -49,17 +50,9 @@
     });
 
     // Proxy config to skip auth - used for HCE
-    this.hceProxyConfig = {
-      headers: {
-        'x-cnap-skip-token-auth': 'true'
-      }
-    };
-
-    // Proxy config to skip auth - used for HCE
     // and to pass through response directly (when we are only talking to a single CNSI)
     this.hceProxyPassthroughConfig = {
       headers: {
-        'x-cnap-skip-token-auth': 'true',
         'x-cnap-passthrough': 'true'
       }
     };
@@ -123,7 +116,7 @@
     getDeploymentTargets: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
-        .getDeploymentTargets(guid, { user_id: this.data.user.id }, this.hceProxyPassthroughConfig)
+        .getDeploymentTargets(guid, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
           that.onGetDeploymentTargets(response);
         });
@@ -183,45 +176,9 @@
     getProjects: function (guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .getProjects(guid, { user_id: this.data.user.id }, this.hceProxyPassthroughConfig)
+        .getProjects(guid, {}, this.hceProxyPassthroughConfig)
         .then(function (response) {
           return that.onGetProjects(response);
-        });
-    },
-
-    /**
-     * @function getUser
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Get user by ID
-     * @param {string} guid - the HCE instance GUID
-     * @param {number} userId - the user's ID
-     * @returns {promise} A promise object
-     * @public
-     */
-    getUser: function (guid, userId) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUser(guid, userId, {}, this.hceProxyPassthroughConfig)
-        .then(function (response) {
-          that.onGetUser(response);
-        });
-    },
-
-    /**
-     * @function getUserByGithubId
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Get user by Github user ID
-     * @param {string} guid - the HCE instance GUID
-     * @param {string} githubUserId - the Github user ID
-     * @returns {promise} A promise object
-     * @public
-     */
-    getUserByGithubId: function (guid, githubUserId) {
-      var that = this;
-      return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .getUserByGithubId(guid, githubUserId, {}, this.hceProxyPassthroughConfig)
-        .then(function (response) {
-          that.onGetUser(response);
         });
     },
 
@@ -244,7 +201,7 @@
     },
 
     /**
-     * @function getPipelineExecutions
+     * @function getPipelineEvents
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get events by execution ID
      * @param {string} guid - the HCE instance GUID
@@ -258,6 +215,40 @@
         .getPipelineEvents(guid, { execution_id: executionId }, this.hceProxyPassthroughConfig)
         .then(function (response) {
           return that.onGetPipelineEvents(response);
+        });
+    },
+
+    /**
+     * @function getVcses
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get VCS instances
+     * @param {string} guid - the HCE instance GUID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getVcses: function (guid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceVcsApi')
+        .getVcses(guid, {}, this.hceProxyPassthroughConfig)
+        .then(function (response) {
+          return that.onGetVcses(response);
+        });
+    },
+
+    /**
+     * @function listVcsTypes
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get VCS types
+     * @param {string} guid - the HCE instance GUID
+     * @returns {promise} A promise object
+     * @public
+     */
+    listVcsTypes: function (guid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceVcsApi')
+        .listVcsTypes(guid, {}, this.hceProxyPassthroughConfig)
+        .then(function (response) {
+          return that.onListVcsTypes(response);
         });
     },
 
@@ -279,7 +270,6 @@
     createDeploymentTarget: function (guid, name, url, username, password, org, space, targetType) {
       var that = this;
       var newTarget = {
-        user_id: this.data.user.id,
         name: name,
         url: url,
         userName: username,
@@ -305,65 +295,36 @@
      * @param {string} vcs - the VCS type
      * @param {string} vcsToken - the VCS token
      * @param {number} targetId - the deployment target ID
-     * @param {string} type - the platform type of the project (e.g. java, nodejs)
      * @param {number} buildContainerId - the build container ID
      * @param {object} repo - the repo to use
      * @param {string} branch - the branch to use
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (guid, name, vcs, vcsToken, targetId, type, buildContainerId, repo, branch) {
+    createProject: function (guid, name, vcs, vcsToken, targetId, buildContainerId, repo, branch) {
       var newProject = {
         name: name,
-        type: type,
-        user_id: this.data.user.id,
+        vcs_id: vcs.vcs_id,
         build_container_id: buildContainerId,
+        deployment_target_id: targetId,
         token: vcsToken,
         branchRefName: branch,
         repo: {
-          vcs: vcs || 'github',
+          vcs: vcs.vcs_type,
           full_name: repo.full_name,
           owner: repo.owner.login,
           name: repo.name,
-          githubRepoId: repo.id,
+          github_repo_id: repo.id,
           branch: branch,
-          cloneUrl: repo.clone_url,
-          sshUrl: repo.ssh_url,
-          httpUrl: repo.html_url
-        },
-        deployment_target_id: targetId
+          clone_url: repo.clone_url,
+          http_url: repo.html_url,
+          ssh_url: repo.ssh_url,
+          webhook_url: repo.hooks_url
+        }
       };
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
         .createProject(guid, newProject, {}, this.hceProxyPassthroughConfig);
-    },
-
-    /**
-     * @function createUser
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Create a new HCE user
-     * @param {string} guid - the HCE instance GUID
-     * @param {string} userId - the user ID
-     * @param {string} login - the user login name
-     * @param {string} token - the login token
-     * @param {string} vcs - the version control system (e.g. github)
-     * @returns {promise} A promise object
-     * @public
-     */
-    createUser: function (guid, userId, login, token, vcs) {
-      var that = this;
-      var newUser = {
-        userId: userId,
-        login: login,
-        vcs: vcs || 'github',
-        secret: token
-      };
-
-      return this.apiManager.retrieve('cloud-foundry.api.HceUserApi')
-        .createUser(guid, newUser, {}, this.hceProxyPassthroughConfig)
-        .then(function (response) {
-          return that.onCreateUser(response);
-        });
     },
 
     /**
@@ -420,7 +381,6 @@
      */
     triggerPipelineExecution: function (guid, projectId, commitRef) {
       var data = {
-        user_id: this.data.user.id,
         project_id: projectId,
         commit_ref: commitRef
       };
@@ -480,21 +440,6 @@
     },
 
     /**
-     * @function onGetUser
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Cache user
-     * @param {string} response - the JSON response from API call
-     * @private
-     */
-    onGetUser: function (response) {
-      var user = response.data;
-      if (user) {
-        delete user.secret;
-        this.data.user = user;
-      }
-    },
-
-    /**
      * @function onCreateDeploymentTarget
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Cache deployment target
@@ -509,24 +454,6 @@
       this.data.deploymentTargets.push(target);
 
       return target;
-    },
-
-    /**
-     * @function onCreateUser
-     * @memberof cloud-foundry.model.hce.HceModel
-     * @description Cache user
-     * @param {string} response - the JSON response from API call
-     * @returns {object} The new user data
-     * @private
-     */
-    onCreateUser: function (response) {
-      var newUser = response.data;
-      if (newUser) {
-        delete newUser.secret;
-        this.data.user = newUser;
-      }
-
-      return newUser;
     },
 
     /**
@@ -550,6 +477,17 @@
      * @private
      */
     onGetPipelineEvents: function (response) {
+      return response.data;
+    },
+
+    onGetVcses: function (response) {
+      this.data.vcsInstances = response.data;
+      return response.data;
+    },
+
+    onListVcsTypes: function (response) {
+      var vcsTypes = response.data;
+      this.data.vcsTypes = _.keyBy(vcsTypes, 'vcs_type') || {};
       return response.data;
     },
 
@@ -578,7 +516,6 @@
         deploymentTargets: [],
         imageRegistries: [],
         projects: {},
-        user: {},
         pipelineExecutions: []
       };
     }
