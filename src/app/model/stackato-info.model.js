@@ -9,14 +9,14 @@
    */
   angular
     .module('app.model')
-    .run(registerUserInfoModel);
+    .run(registerStackatoInfoModel);
 
-  registerUserInfoModel.$inject = [
+  registerStackatoInfoModel.$inject = [
     'app.model.modelManager',
     'stackatoInfoService'
   ];
 
-  function registerUserInfoModel(modelManager, stackatoInfoService) {
+  function registerStackatoInfoModel(modelManager, stackatoInfoService) {
     modelManager.register('app.model.stackatoInfo', new StackatoInfo(stackatoInfoService));
   }
 
