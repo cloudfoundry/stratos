@@ -1,6 +1,7 @@
 {
   "name": "helion-console",
-  "version": "{{TAG}}",
+  "sdl_version": "{{TAG}}",
+  "product_version": "1.0.0",
   "vendor": "HPE",
   "labels": [
     "CNAP-console-2"
@@ -86,7 +87,7 @@
     },
     {
       "name": "UAA_ENDPOINT",
-      "value": "http://ident-api.hcp.svc.cluster.hcp:8080/oauth/token"
+      "value": "https://ident-api.hcp.svc.cluster.hcp:443/oauth/token"
     },
     {
       "name": "ALLOWED_ORIGINS",
