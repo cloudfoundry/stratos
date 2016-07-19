@@ -1,8 +1,9 @@
 FROM ubuntu:14.04
 
-ENV DB_HOST="hsc-db" DB="postgres" DB_USER="stolon" \
-  POSTGRES_USER="stolon" POSTGRES_PASSWORD="stolon" CFGDB_PORT=5432 \
-  STRATOS_DB="stratos-db" STRATOS_USER="stratos" STRATOS_PWD="stratos" SQL="InitialSchema.sql"
+ENV DB_HOST="hsc-db-int" CFGDB_PORT=5432 \
+  POSTGRES_DB="postgres" POSTGRES_USER="stolon" POSTGRES_PASSWORD="stolon" \
+  PGSQL_DATABASE="stratos-db" PGSQL_USER="stratos" PGSQL_PASSWORD="stratos" \
+  SQL="InitialSchema.sql"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
 
