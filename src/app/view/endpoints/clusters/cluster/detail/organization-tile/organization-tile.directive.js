@@ -34,7 +34,6 @@
   function OrganizationTileController($state, utils) {
     this.$state = $state;
     this.actions = [];
-    this.setActions();
 
     // The list of all organization roles is: org_user, org_manager, org_auditor, billing_manager
     var ROLE_TO_STRING = {
@@ -73,31 +72,30 @@
         return ROLE_TO_STRING[role];
       }).join(', ');
     }
+
+    this.setActions = function () {
+      this.actions.push({
+        name: gettext('Edit Organization'),
+        disabled: true,
+        execute: function () {
+        }
+      });
+      this.actions.push({
+        name: gettext('Delete Organization'),
+        disabled: true,
+        execute: function () {
+        }
+      });
+      this.actions.push({
+        name: gettext('Assign User(s)'),
+        disabled: true,
+        execute: function () {
+        }
+      });
+    };
+
+    this.setActions();
+
   }
-
-  angular.extend(OrganizationTileController.prototype, {
-
-    setActions: function () {
-      this.actions.push({
-        name: 'Edit Organization',
-        disabled: true,
-        execute: function () {
-        }
-      });
-      this.actions.push({
-        name: 'Delete Organization',
-        disabled: true,
-        execute: function () {
-        }
-      });
-      this.actions.push({
-        name: 'Assign User(s)',
-        disabled: true,
-        execute: function () {
-        }
-      });
-    }
-
-  });
 
 })();

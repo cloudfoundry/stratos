@@ -1,13 +1,36 @@
-<div ng-if="clusterUsersController.users === null" class="message-box message-box-no-bg">
-  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
-</div>
-<div ng-if="clusterUsersController.users === false" class="message-box message-box-no-bg">
-  <div translate>An error occurred retrieving organizations</div>
-</div>
-<div ng-if="clusterUsersController.organizations">
-  <div class="clusters-card col-md-4 col-sm-1" ng-repeat="user in clusterUsersController.users">
-    <organization-tile organization="organization"></organization-tile>
+<div class="cluster-users-table"
+     st-table="clusterUsersController.visibleUsers"
+     st-safe-src="clusterUsersController.users">
+  <div>
+    <div class="panel panel-default">
+      <table class="table table-actionable" >
+        <thead>
+        <tr>
+          <th><checkbox-input class="select-all-checkbox" ng-change="clusterUsersController.selectAllChanged()" ng-model="clusterUsersController.selectAllUsers"></checkbox-input></th>
+          <th st-sort-default="true" st-sort="entity.username">USERS({{ clusterUsersController.users.length }})</th>
+          <th translate>Organization Roles</th>
+          <th translate>ACTION</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="" ng-repeat="user in clusterUsersController.visibleUsers">
+          <td ><checkbox-input ng-model="clusterUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
+          <td class="user-name">{{ user.entity.username }}</td>
+          <td class="roles-list">
+            <div class="role-pill" ng-repeat="orgRole in clusterUsersController.getOrganizationsRoles(user)">{{ orgRole.name }}: {{ orgRole.role }}<i class="close-icon helion-icon helion-icon-Close"></i></div>
+            <div ng-if="clusterUsersController.getOrganizationsRoles(user).length === 0" translate>None assigned</div>
+          </td>
+          <td>
+            <actions-menu actions="clusterUsersController.userActions"
+                          action-target="user"
+                          menu-icon="helion-icon helion-icon-More"
+                          menu-position="actions-menu-right">
+            </actions-menu>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 </div>
-
-

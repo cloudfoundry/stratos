@@ -23,25 +23,29 @@
     $organizations-card-max-width: 420px;
     $organizations-card-layout-steps: 5;
 
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+
     .organization-card {
-      padding-left: 0;
+      padding-right: 10px;
+      padding-left: 10px;
 
       position: relative;
       float: left;
-      padding-right: 15px;
       min-height: 1px;
 
-      // Set width in percentages for all layout steps
-      width: 100%;
+      // Set flex-base in percentages for all layout steps
+      flex: 1 1 100%;
 
       // Many columns
       @for $i from 2 through $organizations-card-layout-steps {
         @media (min-width: $i * $organizations-card-max-width) {
-          width: percentage(1/$i);
+          flex: 1 1 percentage(1/$i)
         }
       }
 
-      // Give more room to the value than the label
+      // Inside the cards, give more room to the value than the label
       @media (min-width: 2 * $organizations-card-max-width) {
         gallery-card {
           .card .dl-horizontal dd {
@@ -65,13 +69,71 @@
     }
 
     // Ensure the last card in every row doesn't have right-padding
-    @for $i from $organizations-card-layout-steps through 1 {
+    @for $i from $organizations-card-layout-steps - 1 through 1 {
       @media (min-width: $i * $organizations-card-max-width) and (max-width: $organizations-card-max-width + $i * $organizations-card-max-width - 1) {
         >:nth-child(#{$i}n) {
-          padding-right: 0
+          padding-right: 0;
+        }
+        >:nth-child(#{$i}n+1) {
+          padding-left: 0;
         }
       }
     }
+
+    @media (min-width: $organizations-card-layout-steps * $organizations-card-max-width) {
+      >:nth-child(#{$organizations-card-layout-steps}n) {
+        padding-right: 0;
+      }
+      >:nth-child(#{$organizations-card-layout-steps}n+1) {
+        padding-left: 0;
+      }
+    }
+
+    >:last-child {
+      padding-right: 0;
+    }
+
+  }
+
+  .cluster-users-table {
+    > div {
+      padding-top: 60px;
+    }
+
+    .select-all-checkbox {
+      .checkbox-input {
+        margin-bottom: -5px;
+      }
+    }
+
+    th {
+      text-transform: none;
+    }
+
+    .user-name {
+      white-space: nowrap;
+      min-width: 200px;
+    }
+
+    .roles-list {
+
+      .role-pill {
+        cursor: default;
+        float: left;
+        margin: 0 8px 8px 0;
+        padding: 0 4px 4px 4px;
+        border: solid 2px #ccc;
+        border-radius: 5px;
+      }
+
+      i.helion-icon.close-icon {
+        font-size: 12px;
+        font-weight: bolder;
+        color: #aaa;
+        margin-left: 10px;
+      }
+    }
+
   }
 
 }
