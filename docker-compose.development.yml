@@ -4,6 +4,11 @@ services:
   # The development docker-compose file.
   # Use this to have things like "gulp watch" running in the UI.
 
+  ui:
+    extends:
+      file: common.yml
+      service: ui
+
 
   postgres:
     extends:
@@ -25,9 +30,3 @@ services:
       service: nginx
     links:
       - proxy:proxy
-
-
-  ui:
-    extends:
-      file: common.yml
-      service: ui
