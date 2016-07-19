@@ -7,17 +7,10 @@ set -ex
 
 pushd $(git rev-parse --show-toplevel)
 
-docker build --tag portal-proxy-builder \
-             --file Dockerfile.build \
-             --build-arg http_proxy=${http_proxy} \
-             --build-arg https_proxy=${https_proxy} \
-             --build-arg no_proxy=${no_proxy} \
-             .
-
 docker run -it \
            --rm \
-           --name portal-proxy-builder \
+           --name console-proxy-builder \
            --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
-           portal-proxy-builder $*
+           docker-registry.helion.space:443/hsc/console-proxy-builder $*
 
 popd

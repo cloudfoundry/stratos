@@ -59,8 +59,13 @@ func main() {
 		log.Println(`--- Closing databaseConnectionPool`)
 		databaseConnectionPool.Close()
 	}()
-
 	log.Println("Proxy database connection pool created.")
+
+	err = datastore.Ping(databaseConnectionPool)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("Database connection pool appears to be working.")
 
 	sessionStore := initSessionStore(databaseConnectionPool, portalConfig)
 
@@ -110,20 +115,27 @@ func setEncryptionKey(pc portalConfig) ([]byte, error) {
 func initConnPool() (*sql.DB, error) {
 	log.Println("initConnPool")
 	// load up postgresql database configuration
-	var databaseConfig datastore.DatabaseConfig
-	databaseConfig, err := loadDatabaseConfig(databaseConfig)
+	var dc datastore.DatabaseConfig
+	dc, err := loadDatabaseConfig(dc)
 	if err != nil {
 		return nil, err
 	}
 
 	// initialize the database connection pool
-	var databaseConnectionPool *sql.DB
-	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
+	var pool *sql.DB
+	pool, err = datastore.GetConnection(dc)
 	if err != nil {
 		return nil, err
 	}
 
-	return databaseConnectionPool, nil
+	err = datastore.Ping(pool)
+	if err != nil {
+		log.Printf("initConnPool: %+v\n", err)
+		return nil, err
+	}
+	log.Println("initConnPool: Database connection pool appears to be working.")
+
+	return pool, nil
 }
 
 func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {

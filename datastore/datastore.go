@@ -124,3 +124,14 @@ func buildConnectionString(dc DatabaseConfig) string {
 
 	return connStr
 }
+
+// Ping - ping the database to ensure the connection/pool works.
+func Ping(db *sql.DB) error {
+	log.Println("Ping")
+	err := db.Ping()
+	if err != nil {
+		return fmt.Errorf("Unable to ping the database: %+v\n", err)
+	}
+
+	return nil
+}
