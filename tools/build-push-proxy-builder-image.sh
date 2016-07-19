@@ -11,21 +11,16 @@ PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
 pushd ${PORTAL_PROXY_PATH}
 pushd $(git rev-parse --show-toplevel)
 
-IMAGE_URL=${DOCKER_REGISTRY}/${GROUP_NAME}/${NAME}:${TAG}
-echo Building Docker Image for $NAME
+SHARED_IMAGE_URL=${DOCKER_REGISTRY}/${GROUP_NAME}/${NAME}:${TAG}
 
-# Build the image
-docker build --tag console-proxy-builder \
+echo "Building Docker Image for $NAME"
+docker build --tag ${NAME} \
              --file Dockerfile.build \
              .
 
-# Tag the new image
-echo Tagging the new image
-docker tag ${NAME} ${IMAGE_URL}
-
-# Push it to the shared private registry
-echo Pushing Docker Image ${IMAGE_URL}
-docker push ${IMAGE_URL}
+echo "Tag and push the shared image"
+docker tag ${NAME} ${SHARED_IMAGE_URL}
+docker push ${SHARED_IMAGE_URL}
 
 popd
 popd
