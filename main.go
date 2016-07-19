@@ -245,6 +245,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// User info
 	sessionGroup.GET("/userinfo", p.userInfo)
 
+	// Version info
+	sessionGroup.GET("/version", p.getVersions)
+
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
 }
