@@ -53,12 +53,29 @@ func main() {
 		log.Println(err)
 		os.Exit(1)
 	}
-	defer databaseConnectionPool.Close()
+
+	// defer databaseConnectionPool.Close()
+	defer func() {
+		log.Println(`--- Closing databaseConnectionPool`)
+		databaseConnectionPool.Close()
+	}()
+
 	log.Println("Proxy database connection pool created.")
 
 	sessionStore := initSessionStore(databaseConnectionPool, portalConfig)
-	defer sessionStore.Close()
-	defer sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
+
+	// defer sessionStore.Close()
+	defer func() {
+		log.Println(`--- Closing sessionStore`)
+		sessionStore.Close()
+	}()
+
+	// defer sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
+	defer func() {
+		log.Println(`--- Performing sessionStore cleanup`)
+		sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
+	}()
+
 	log.Println("Proxy session store initialized.")
 
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)

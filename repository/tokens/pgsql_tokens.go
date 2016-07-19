@@ -358,6 +358,8 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 		tokenRecordList = append(tokenRecordList, tr)
 	}
 
+	rows.Close()
+
 	return tokenRecordList, nil
 }
 

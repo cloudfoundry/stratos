@@ -79,6 +79,8 @@ func (p *PostgresCNSIRepository) List() ([]*CNSIRecord, error) {
 		return nil, fmt.Errorf("Unable to List CNSI records: %v", err)
 	}
 
+	rows.Close()
+
 	return cnsiList, nil
 }
 
@@ -113,6 +115,8 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredClust
 		if cluster.APIEndpoint, err = url.Parse(pURL); err != nil {
 			return nil, fmt.Errorf("Unable to parse API Endpoint: %v", err)
 		}
+
+		rows.Close()
 
 		clusterList = append(clusterList, cluster)
 	}
