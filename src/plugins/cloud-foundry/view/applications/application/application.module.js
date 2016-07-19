@@ -74,8 +74,7 @@
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.isPending = this.model.application.summary.state === 'PENDING';
-    // 10 seconds (1 second if too frequent)
-    this.UPDATE_INTERVAL = 10000; // milliseconds
+    this.UPDATE_INTERVAL = 1000; // milliseconds
 
     this.init();
 
