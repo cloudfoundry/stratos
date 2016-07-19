@@ -1,6 +1,4 @@
-FROM nodesource/jessie:4.2
-
-ENV NODE_ENV="development"
+FROM node:4.2.3
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
