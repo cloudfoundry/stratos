@@ -251,25 +251,22 @@
           "name": "DB_HOST"
         },
         {
-          "name": "DB"
+          "name": "POSTGRES_DB"
         },
         {
           "name": "CFGDB_PORT"
         },
         {
-          "name": "DB_USER"
+          "name": "POSTGRES_USER"
         },
         {
-          "name": "DB_PW_FILE"
+          "name": "PGSQL_DATABASE"
         },
         {
-          "name": "STRATOS_DB"
+          "name": "PGSQL_USER"
         },
         {
-          "name": "STRATOS_USER"
-        },
-        {
-          "name": "STRATOS_PWD"
+          "name": "PGSQL_PASSWORD"
         },
         {
           "name": "SQL"
@@ -338,6 +335,25 @@
         }
     },
     {
+      "name": "CONSOLE_CA_CERT_KEY_FILE",
+      "description": "The Console CA Key file on disk",
+      "default": "/etc/secrets/console-ca-cert-key"
+    },
+    {
+      "name": "console-ca-cert-key",
+      "description": "CA Key that is used to sign other SSL Certificates",
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "ca_cert",
+          "generate": {
+            "type": "CACertificate",
+            "value_type": "private_key"
+          }
+        }
+    },
+    {
       "name": "PGSQL_USER",
       "description": "Postgres username",
       "default": "stratos",
@@ -347,11 +363,19 @@
     },
     {
       "name": "PGSQL_PASSWORD",
-      "description": "Postgres password",
-      "default": "stratos",
+      "description": "The password for the Stackato DB"
+    },
+    {
+      "name": "PGSQL_PASSWORD_FILE",
+      "description": "The Stackato DB password file on disk",
+      "default": "/etc/secrets/pgsql-password"
+    },
+    {
+      "name": "pgsql-password",
+      "description": "Stackato DB password",
       "data_type": "string",
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
           "id": "pgsql_password",
@@ -403,18 +427,26 @@
     {
       "name": "POSTGRES_DB",
       "description": "Postgres database name",
-      "default": "stratos-db",
+      "default": "postgres",
       "data_type": "string",
       "required": true,
       "secret": false
     },
     {
       "name": "POSTGRES_PASSWORD",
+      "description": "The Postgresql password"
+    },
+    {
+      "name": "POSTGRES_PASSWORD_FILE",
+      "description": "The Postgres password file on disk",
+      "default": "/etc/secrets/postgres-password"
+    },
+    {
+      "name": "postgres-password",
       "description": "Postgres password",
-      "default": "stolon",
       "data_type": "string",
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
           "id": "postgres_password",
@@ -440,14 +472,6 @@
       "secret": false
     },
     {
-      "name": "DB_USER",
-      "description": "PostgreSQL user",
-      "default": "stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
       "name": "DB_HOST",
       "description": "PostgreSQL host address",
       "default": "hsc-db-int",
@@ -464,19 +488,20 @@
       "secret": false
     },
     {
-      "name": "DB",
-      "description": "PostgreSQL default database",
-      "default": "postgres",
-      "data_type": "string",
-      "required": true,
-      "secret": false
+      "name": "CONSOLE_CERT",
+      "description": "The Console TLS Certificate"
     },
     {
-      "name": "CONSOLE_CERT",
+      "name": "CONSOLE_CERT_FILE",
+      "description": "The Console TLS Certificate file on disk",
+      "default": "/etc/secrets/console-cert"
+    },
+    {
+      "name": "console-cert",
       "description": "TLS certificate for the Console",
       "default": null,
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
           "id": "console_certificate",
@@ -488,13 +513,22 @@
     },
     {
       "name": "CONSOLE_CERT_KEY",
+      "description": "The Console TLS Key"
+    },
+    {
+      "name": "CONSOLE_CERT_KEY_FILE",
+      "description": "The Console TLS Key file on disk",
+      "default": "/etc/secrets/console-cert-key"
+    },
+    {
+      "name": "console-cert-key",
       "description": "TLS private key for the Console",
       "default": null,
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
-          "id": "console_certificate",
+          "id": "console_cert",
           "generate": {
             "type": "Certificate",
             "value_type": "private_key"
@@ -503,10 +537,19 @@
     },
     {
       "name": "CONSOLE_PROXY_CERT",
+      "description": "The Console Proxy TLS Certificate"
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT_FILE",
+      "description": "The Console Proxy TLS Certificate file on disk",
+      "default": "/etc/secrets/console-proxy-cert"
+    },
+    {
+      "name": "console-proxy-cert",
       "description": "TLS certificate for the Console Proxy",
       "default": null,
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
           "id": "console_proxy_certificate",
@@ -518,10 +561,19 @@
     },
     {
       "name": "CONSOLE_PROXY_CERT_KEY",
+      "description": "The Console Proxy TLS Key"
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT_KEY_FILE",
+      "description": "The Console Proxy TLS Key file on disk",
+      "default": "/etc/secrets/console-proxy-cert-key"
+    },
+    {
+      "name": "console-proxy-cert-key",
       "description": "TLS private key for the Console Proxy",
       "default": null,
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
           "id": "console_proxy_certificate",
@@ -533,10 +585,19 @@
     },
     {
       "name": "CONSOLE_DB_CERT",
+      "description": "The Console Database TLS Certificate"
+    },
+    {
+      "name": "CONSOLE_DB_CERT_FILE",
+      "description": "The Console Database TLS Certificate file on disk",
+      "default": "/etc/secrets/console-db-cert"
+    },
+    {
+      "name": "console-db-cert",
       "description": "TLS certificate for the Console Database",
       "default": null,
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
           "id": "console_db_certificate",
@@ -548,10 +609,19 @@
     },
     {
       "name": "CONSOLE_DB_CERT_KEY",
+      "description": "The Console Database TLS Key"
+    },
+    {
+      "name": "CONSOLE_DB_CERT_KEY_FILE",
+      "description": "The Console Database TLS Key file on disk",
+      "default": "/etc/secrets/console-db-cert-key"
+    },
+    {
+      "name": "console-db-cert-key",
       "description": "TLS private key for the Console Database",
       "default": null,
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
           "id": "console_db_certificate",
@@ -594,14 +664,6 @@
       "secret": false
     },
     {
-      "name": "SESSION_STORE_SECRET",
-      "description": "Session store secret",
-      "default": "cookiesecret",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
       "name": "HCF_CLIENT",
       "description": "HCF client",
       "default": "cf",
@@ -619,53 +681,22 @@
     },
     {
       "name": "SESSION_STORE_SECRET",
+      "description": "The Console Proxy session store secret"
+    },
+    {
+      "name": "SESSION_STORE_SECRET_FILE",
+      "description": "The Console Proxy session store secret file on disk",
+      "default": "/etc/secrets/session-store-secret"
+    },
+    {
+      "name": "session-store-secret",
       "description": "Console Proxy session store secret",
-      "default": "cookiesecret",
       "data_type": "string",
       "required": true,
-      "secret": false,
+      "secret": true,
       "generator":
         {
           "id": "session_store_secret",
-          "generate": {
-            "type": "Password"
-          }
-        }
-    },
-    {
-      "name": "DB_PW_FILE",
-      "description": "Database password file used by the stolon library to stored the databse password",
-      "default": "/etc/secrets/stolon",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STRATOS_DB",
-      "description": "Stackato database",
-      "default": "stratos-db",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STRATOS_USER",
-      "description": "Stackato database user used by the Console Proxy",
-      "default": "stratos",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "STRATOS_PWD",
-      "description": "Stackato database password used by the Console Proxy",
-      "default": "stratos",
-      "data_type": "string",
-      "required": true,
-      "secret": false,
-      "generator":
-        {
-          "id": "stackato_db_password",
           "generate": {
             "type": "Password"
           }
