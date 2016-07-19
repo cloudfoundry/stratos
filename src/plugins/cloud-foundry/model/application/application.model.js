@@ -457,7 +457,8 @@
       if (this.hceServiceInfo) {
         return this.$q.when(this.hceServiceInfo);
       } else {
-        var promise = this.serviceInstanceModel.serviceInstances ? this.$q.when(this.serviceInstanceModel.serviceInstances) : this.cnsiModel.list();
+        var promise = (this.serviceInstanceModel.serviceInstances && _.keys(this.serviceInstanceModel.serviceInstances).length) ?
+          this.$q.when(this.serviceInstanceModel.serviceInstances) : this.serviceInstanceModel.list();
         return promise.then(function () {
           var hceCnsis = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'}) || [];
           var tasks = [];
@@ -497,19 +498,19 @@
 
       pipeline.valid = false;
       pipeline.hceCnsi = undefined;
-      pipeline.hceApiUrl = undefined;
+      pipeline.hce_api_url = undefined;
       if (hceServiceData) {
         // Go fetch the service metadata
         return hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
         .then(function (data) {
           // Now we need to see if the CNSI is known
-          if (data && data.entity && data.entity.credentials && data.entity.credentials.apiUrl) {
+          if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
             // HCE API Endpoint
-            pipeline.hceApiUrl = data.entity.credentials.apiUrl;
+            pipeline.hce_api_url = data.entity.credentials.hce_api_url;
             return that._listHceCnsis().then(function (hceEndpoints) {
               var hceInstance = _.find(hceEndpoints, function (hce) {
                 var url = hce.info ? hce.info.api_public_uri : (hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host);
-                return pipeline.hceApiUrl.indexOf(url) === 0;
+                return pipeline.hce_api_url.indexOf(url) === 0;
               });
               pipeline.hceCnsi = hceInstance;
               pipeline.valid = angular.isDefined(hceInstance);

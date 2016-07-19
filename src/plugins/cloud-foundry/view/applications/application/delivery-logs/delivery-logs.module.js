@@ -53,7 +53,6 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.hceCnsi = {};
     this.hasProject = null;
     this.last = {};
     this.id = $stateParams.guid;
@@ -67,33 +66,31 @@
     this.moment = moment;
     this.$log = $log;
     this.$scope = $scope;
+    this.busy = false;
+    this.project = undefined;
 
     var that = this;
 
-    /* eslint-disable */
-    this.cnsiModel.list()
-      .then(function () {
-        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
-        if (hceCnsis.length > 0) {
-          that.hceCnsi = hceCnsis[0];
-            return that.hceModel.getProjects(that.hceCnsi.guid)
-              .then(function () {
-                return that.hceModel.getProject(that.model.application.summary.name);
-              });
-        } else {
-          return $q.reject('No CNSI found');
-        }
-      })
-      .then(function (project) {
-        that.project = project;
-        that.hasProject = !(angular.isUndefined(project) || project === null);
-        if (that.hasProject) {
-          that.updateData();
-        }
-      })
-      .catch(function () {
-        that.hasProject = 'error';
-      });
+    this.$scope.$watch(function () {
+      return that.model.application.pipeline.valid && that.model.application.pipeline.hce_api_url;
+    }, function(v) {
+      var pipeline = that.model.application.pipeline;
+      if (pipeline.valid && pipeline.hceCnsi) {
+        that.busy = true;
+        that.hceModel.getProjects(pipeline.hceCnsi.guid)
+          .then(function () {
+            return that.hceModel.getProject(that.model.application.summary.name);
+          }).then(function (project) {
+            that.project = project;
+            that.hasProject = !(angular.isUndefined(project) || project === null);
+            if (that.hasProject) {
+              return that.updateData();
+            }
+          }).finally(function () {
+            that.busy = false;
+          })
+      }
+    });
 
     that.debouncedUpdateVisibleExecutions = _.debounce(function (visibleExecutions) {
       that.updateVisibleExecutions(visibleExecutions);
@@ -128,7 +125,8 @@
 
     triggerBuild: function () {
       var that = this;
-      this.views.viewTriggerBuild.open(this.project, this.hceCnsi.guid).then(function () {
+      var pipeline = that.model.application.pipeline;
+      this.views.viewTriggerBuild.open(this.project, pipeline.hceCnsi.guid).then(function () {
         that.updateData();
       });
     },
@@ -138,7 +136,8 @@
         return o.id === execution.id;
       });
 
-      this.views.viewExecution.open(rawExecution, this.eventsPerExecution[execution.id], this.hceCnsi.guid);
+      var pipeline = that.model.application.pipeline;
+      this.views.viewExecution.open(rawExecution, this.eventsPerExecution[execution.id], pipeline.hceCnsi.guid);
     },
 
     viewEventForExecution: function (execution) {
@@ -148,7 +147,8 @@
         return;
       }
 
-      this.views.viewEvent.open(events[events.length - 1], this.hceCnsi.guid);
+      var pipeline = that.model.application.pipeline;
+      this.views.viewEvent.open(events[events.length - 1], pipeline.hceCnsi.guid);
     },
 
     /**
@@ -170,9 +170,10 @@
         return that.displayedExecutions;
       }, that.debouncedUpdateVisibleExecutions);
 
+      var pipeline = that.model.application.pipeline;
       // Fetch pipeline executions
       var project = this.hceModel.getProject(this.model.application.summary.name);
-      this.hceModel.getPipelineExecutions(that.hceCnsi.guid, project.id)
+      this.hceModel.getPipelineExecutions(this.pipeline.hceCnsi.guid, project.id)
         .then(function () {
           // The ux will need to show additional properties. In order to not muddy the original model make a copy
           that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
@@ -196,11 +197,13 @@
      */
     fetchEvents: function (eventsPerExecution, executionId) {
       var that = this;
+      var pipeline = that.model.application.pipeline;
+      
       // Reset the last successful build/test/deploy events
       this.last = {};
 
       // Fetch events
-      return that.hceModel.getPipelineEvents(that.hceCnsi.guid, executionId)
+      return that.hceModel.getPipelineEvents(pipeline.hceCnsi.guid, executionId)
         .then(function (events) {
           for (var i = 0; i < events.length; i++) {
             that.parseEvent(events[i]);

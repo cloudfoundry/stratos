@@ -21,6 +21,7 @@
   ApplicationDeliveryPipelineController.$inject = [
     'app.model.modelManager',
     '$stateParams',
+    '$scope',
     'helion.framework.widgets.dialog.confirm'
   ];
 
@@ -33,10 +34,11 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(modelManager, $stateParams, confirmDialog) {
+  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
+    this.$scope = $scope;
     this.confirmDialog = confirmDialog;
 
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
@@ -48,6 +50,7 @@
 
     this.isDeleting = false;
     this.deleteError = false;
+    this.busy = false;
 
     this.notificationTargetActions = [
       {
@@ -77,14 +80,17 @@
     ];
     /* eslint-enable */
 
-    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.cnsiModel.list().then(function () {
-      var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
-      if (hceCnsis.length > 0) {
-        that.hceCnsi = hceCnsis[0];
+    this.$scope.$watch(function () {
+      return that.model.application.pipeline.valid && that.model.application.pipeline.hce_api_url;
+    }, function(v) {
+      if (that.model.application.pipeline.valid && that.model.application.pipeline.hceCnsi) {
+        that.busy = true;
+        that.hceCnsi = that.model.application.pipeline.hceCnsi;
         that.hceModel.getProjects(that.hceCnsi.guid)
           .then(function () {
             that.getProject();
+          }).finally(function () {
+            that.busy = false;
           });
         that.hceModel.getImageRegistries(that.hceCnsi.guid);
       }
