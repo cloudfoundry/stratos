@@ -1,4 +1,4 @@
-<div class="action-bar app-actions-bar col-md-12 panel-less">
+<div class="action-bar app-actions-bar panel-less">
   <div class="applications-header font-semi-bold pull-left" translate>Applications</div>
   <div class="pull-right">
     <button class="btn btn-primary"
@@ -6,6 +6,51 @@
       ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')">
       add application
     </button>
+  </div>
+</div>
+
+<div class="applications-filter" ng-if="applicationsListCtrl.ready && applicationsListCtrl.clusterCount > 0">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <form class="form-horizontal">
+        <div class="form-group">
+          <label class="control-label" translate>Cluster</label>
+          <select-input
+            arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+            ng-model="applicationsListCtrl.model.filterParams.cnsiGuid"
+            input-options="applicationsListCtrl.clusters"
+            tabindex="0"
+            ng-change="applicationsListCtrl.setClusterOrganizations()">
+          </select-input>
+        </div>
+        <div class="form-group" ng-if="applicationsListCtrl.model.filterParams.cnsiGuid !== 'all'">
+          <label class="control-label" translate>Organization</label>
+          <select-input
+            arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+            ng-model="applicationsListCtrl.model.filterParams.orgGuid"
+            input-options="applicationsListCtrl.organizations"
+            tabindex="0"
+            ng-change="applicationsListCtrl.setOrganizationSpaces()">
+          </select-input>
+        </div>
+        <div class="form-group" ng-if="applicationsListCtrl.model.filterParams.orgGuid !== 'all'">
+          <label class="control-label" translate>Space</label>
+          <select-input
+            arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+            ng-model="applicationsListCtrl.model.filterParams.spaceGuid"
+            input-options="applicationsListCtrl.spaces"
+            tabindex="0"
+            ng-change="applicationsListCtrl.getApps()">
+          </select-input>
+        </div>
+        <div class="reset-link">
+          <a class="btn-link"
+            ng-click="applicationsListCtrl.resetFilter()"
+            ng-if="applicationsListCtrl.model.filterParams.cnsiGuid !== 'all'"
+            translate>Reset</a>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
