@@ -11,7 +11,7 @@
     <dd class="cluster-tile-endpoint">{{clusterTile.service.api_endpoint.Host}}</dd>
     <dt ng-if="clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>CF ACCOUNT STATUS</dt>
     <dd class="cluster-tile-account" ng-if="clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>
-      {{ clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid].admin === 'true' ? 'Admin' : 'User'}}</dd>
+      {{ clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid].admin ? 'Admin' : 'User'}}</dd>
     <dt ng-if="clusterTile.orgCount" translate>TOTAL ORGS</dt>
     <dd ng-if="clusterTile.orgCount" >{{clusterTile.orgCount}}</dd>
     <dt ng-if="clusterTile.userCount" translate>TOTAL USERS</dt>
