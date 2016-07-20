@@ -51,6 +51,7 @@
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.clusterAddFlyoutActive = false;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.serviceInstances = {};
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
@@ -124,9 +125,39 @@
           that.cfModel.all();
         }).catch(function () {
         // Failed
-        }).finally(function () {
-          delete userServiceInstance._busy;
-        });
+      }).finally(function () {
+        delete userServiceInstance._busy;
+      });
+    },
+
+    /**
+     * @function getCnsiTypeText
+     * @memberOf app.view.ServiceRegistrationController
+     * @description helper for template to get CNSI Type text
+     * @param {object} cnsi CNSI
+     * @returns {string} CNSI text
+     */
+    getCnsiTypeText: function (cnsi) {
+      if (cnsi.cnsi_type === 'hcf') {
+        return gettext('Cloud Foundry Cluster');
+      } else if (cnsi.cnsi_type === 'hce') {
+        return gettext('Code Engine');
+      } else {
+        // Unknown type, just return type name
+        return gettext(cnsi.cnsi_type);
+      }
+    },
+
+    /**
+     * @function getClusterUserName
+     * @memberOf app.view.ServiceRegistrationController
+     * @description helper for template to get cluster user name
+     * @param {object} cnsi CNSI information
+     * @returns {string} CNSI user name
+     */
+    getClusterUserName: function (cnsi) {
+      return this.stackatoInfo.info.endpoints[cnsi.cnsi_type]
+        [cnsi.guid].user.name;
     }
   });
 
