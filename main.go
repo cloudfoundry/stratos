@@ -239,8 +239,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Applications Log Streams
 	sessionGroup.GET("/:cnsiGuid/apps/:appGuid/stream", p.appStream)
 
-	// User info
-	sessionGroup.GET("/userinfo", p.userInfo)
+	// Stackato info
+	sessionGroup.GET("/stackato/info", p.stackatoInfo)
 
 	// Version info
 	sessionGroup.GET("/version", p.getVersions)

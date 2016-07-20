@@ -38,25 +38,14 @@ type LoginRes struct {
 // VerifySessionRes - Response to the caller from a Verify Session action
 type VerifySessionRes struct {
 	Account string `json:"account"`
-	Admin   string `json:"admin"`
+	Admin   bool   `json:"admin"`
 }
 
-// uaaPerms - Does the user have Admin perms within the Cloud Foundry UAA Service?
-type uaaPerms struct {
-	Type  string `json:"type"`
-	Admin string `json:"admin"`
-}
-
-// hcfPerms - Does the user have Admin perms within the Cloud Foundry HCF Service?
-type hcfPerms struct {
-	Type  string `json:"type"`
+// ConnectedUser - details about the user connected to a specific service or UAA
+type ConnectedUser struct {
 	GUID  string `json:"guid"`
-	Admin string `json:"admin"`
-}
-
-type userInfo struct {
-	UAAPermissions uaaPerms   `json:"uaa"`
-	HCFPermissions []hcfPerms `json:"hcf"`
+	Name  string `json:"name"`
+	Admin bool   `json:"admin"`
 }
 
 // UAAAdminIdentifier - The identifier that the Cloud Foundry UAA Service uses to convey administrative level perms
@@ -419,7 +408,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	resp := &VerifySessionRes{
 		Account: sessionUser,
-		Admin:   fmt.Sprintf("%t", uaaAdmin),
+		Admin:   uaaAdmin,
 	}
 
 	err = c.JSON(http.StatusOK, resp)
@@ -432,83 +421,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	return nil
 }
 
-// userinfo - returns info about the currently logged in user like so:
-// [ { type: 'hcf', guid: 1234asdf, admin: true },
-//   { type: 'hcf', guid: 1234asdg, admin: true },
-//   { type: 'hcf', guid: 1234asdh, admin: true },
-//   { type: 'uaa', admin: true },
-// ]
-func (p *portalProxy) userInfo(c echo.Context) error {
-
-	log.Println("Entering userInfo")
-
-	sessionUser, ok := p.getSessionStringValue(c, "user_id")
-	if !ok {
-		msg := "Could not find session user_id"
-		log.Println(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
-
-	// get the HCF related perms for each HCF endpoint registered
-	hcfPermissions, err := p.getHCFPerms(sessionUser)
-	if err != nil {
-		return err
-	}
-
-	// get the UAA related perms
-	uaaPermissions, err := p.getUAAPerms(sessionUser)
-	if err != nil {
-		return err
-	}
-
-	u := &userInfo{
-		UAAPermissions: *uaaPermissions,
-		HCFPermissions: hcfPermissions,
-	}
-	j, _ := json.Marshal(u)
-	c.JSON(http.StatusOK, j)
-
-	return nil
-}
-
-func (p *portalProxy) getHCFPerms(userGUID string) ([]hcfPerms, error) {
-	// Get a list of registered CNSIs by the user`
-	CNSITokens, err := p.listCNSITokenRecordsForUser(userGUID)
-	if err != nil {
-		msg := "Unable to find any registered CNSI tokens"
-		log.Println(msg)
-		return nil, fmt.Errorf(msg)
-	}
-
-	HCFPermissions := make([]hcfPerms, len(CNSITokens))
-
-	// spin thru all registered CNSIs and grab the scope from each
-	for i := 0; i < len(CNSITokens); i++ {
-
-		// get the scope out of the JWT token data
-		userTokenInfo, err := getUserTokenInfo(CNSITokens[i].AuthToken)
-		if err != nil {
-			msg := "Unable to find scope information in the CNSI Auth Token: %s"
-			log.Printf(msg, err)
-			return nil, fmt.Errorf(msg, err)
-		}
-
-		// based on the scope, is the user an admin for this CNSI?
-		hcfAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
-
-		// build an entry for each HCF found for the user
-		hcfEntry := &hcfPerms{
-			Type:  "hcf",
-			GUID:  userTokenInfo.UserGUID,
-			Admin: fmt.Sprintf("%t", hcfAdmin),
-		}
-		HCFPermissions[i] = *hcfEntry
-	}
-
-	return HCFPermissions, nil
-}
-
-func (p *portalProxy) getUAAPerms(userGUID string) (*uaaPerms, error) {
+func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
 	// get the uaa token record
 	uaaTokenRecord, err := p.getUAATokenRecord(userGUID)
 	if err != nil {
@@ -529,10 +442,49 @@ func (p *portalProxy) getUAAPerms(userGUID string) (*uaaPerms, error) {
 	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
 
 	// add the uaa entry to the output
-	uaaEntry := &uaaPerms{
-		Type:  "uaa",
-		Admin: fmt.Sprintf("%t", uaaAdmin),
+	uaaEntry := &ConnectedUser{
+		GUID:  userGUID,
+		Name:  userTokenInfo.UserName,
+		Admin: uaaAdmin,
 	}
 
 	return uaaEntry, nil
+}
+
+func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool) {
+	// get the uaa token record
+	hcfTokenRecord, ok := p.getCNSITokenRecord(cnsiGUID, userGUID)
+	if !ok {
+		msg := "Unable to retrieve CNSI token record."
+		log.Println(msg)
+		return nil, false
+	}
+
+	// get the scope out of the JWT token data
+	userTokenInfo, err := getUserTokenInfo(hcfTokenRecord.AuthToken)
+	if err != nil {
+		msg := "Unable to find scope information in the UAA Auth Token: %s"
+		log.Printf(msg, err)
+		return nil, false
+	}
+
+	// add the uaa entry to the output
+	cnsiUser := &ConnectedUser{
+		GUID: userTokenInfo.UserGUID,
+		Name: userTokenInfo.UserName,
+	}
+
+	// is the user an HCF admin?
+	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
+	if !ok {
+		msg := "Unable to load CNSI record"
+		log.Printf(msg)
+		return nil, false
+	}
+	if cnsiRecord.CNSIType == cnsis.CNSIHCF {
+		cnsiAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), HCFAdminIdentifier)
+		cnsiUser.Admin = cnsiAdmin
+	}
+
+	return cnsiUser, true
 }

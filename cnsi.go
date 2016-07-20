@@ -175,17 +175,26 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) listCNSIs(c echo.Context) error {
+func (p *portalProxy) buildCNSIList(c echo.Context) ([]*cnsis.CNSIRecord, error) {
+	var cnsiList []*cnsis.CNSIRecord
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		return fmt.Errorf("listRegisteredCNSIs: %s", err)
+		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
 
-	var jsonString []byte
-	var cnsiList []*cnsis.CNSIRecord
-
 	cnsiList, err = cnsiRepo.List()
+	if err != nil {
+		return cnsiList, err
+
+	}
+
+	return cnsiList, nil
+}
+
+func (p *portalProxy) listCNSIs(c echo.Context) error {
+
+	cnsiList, err := p.buildCNSIList(c)
 	if err != nil {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
@@ -194,7 +203,7 @@ func (p *portalProxy) listCNSIs(c echo.Context) error {
 		)
 	}
 
-	jsonString, err = marshalCNSIlist(cnsiList)
+	jsonString, err := marshalCNSIlist(cnsiList)
 	if err != nil {
 		return err
 	}
