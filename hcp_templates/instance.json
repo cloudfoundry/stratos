@@ -11,11 +11,11 @@
   "parameters": [
     {
       "name": "GITHUB_OAUTH_CLIENT_ID",
-      "value": "ee705f4035c4acb6e6a9"
+      "value": "__REPLACE__"
     },
     {
       "name": "GITHUB_OAUTH_CLIENT_SECRET",
-      "value": "8514cc2a36904022fae3d0939af4909c1a8bd392"
+      "value": "__REPLACE__"
     },
     {
       "name": "GITHUB_OAUTH_STATE",
