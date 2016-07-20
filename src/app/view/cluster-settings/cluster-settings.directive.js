@@ -43,7 +43,7 @@
    * @param {app.api.apiManager} apiManager - the application API manager
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
-   * @property {array} serviceInstances - the service instances available to user
+   * @property {Array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
   function ClusterSettingsController($scope, modelManager, apiManager) {
@@ -125,9 +125,9 @@
           that.cfModel.all();
         }).catch(function () {
         // Failed
-      }).finally(function () {
-        delete userServiceInstance._busy;
-      });
+        }).finally(function () {
+          delete userServiceInstance._busy;
+        });
     },
 
     /**

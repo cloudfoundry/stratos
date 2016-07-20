@@ -105,10 +105,9 @@
 
 }
 
-// A common way to structure internal gallery cards, plus gallery card like cards;
-.panel .panel-body {
-
-  padding: 20px 24px;
+// A common way to structure internal gallery cards PLUS gallery card like cards;
+.card.panel .panel-body {
+  padding: $hpe-unit-space / 2 $hpe-unit-space;
 
   .dl-horizontal > dd {
     text-transform: none;
@@ -122,6 +121,6 @@
   }
 
   dt, dd {
-    padding: 4px 0;
+    padding: 2px 0;
   }
 }

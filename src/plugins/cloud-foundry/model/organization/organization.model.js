@@ -31,7 +31,6 @@
    * @property {object} apiManager - the API manager
    * @param {object} utils - the utils service
    * @property {object} utils - the utils service
-   * @param {object} stackatoInfoModel - the stackatoInfoModel model
    * @property {object} stackatoInfoModel - the stackatoInfoModel model
    * @param {object} $q - angular $q service
    * @property {object} $q - angular $q service

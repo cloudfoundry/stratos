@@ -13,6 +13,7 @@
    * @namespace app.utils.utilsService
    * @memberof app.utils
    * @name utilsService
+   * @param {object} $log - the angular $log service
    * @description Various utility functions
    * @returns {object} the utils service
    */
