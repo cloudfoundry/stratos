@@ -124,10 +124,10 @@
           that.userCnsiModel.numValid -= 1;
           that.cfModel.all();
         }).catch(function () {
-        // Failed
-      }).finally(function () {
-        delete userServiceInstance._busy;
-      });
+          // Failed
+        }).finally(function () {
+          delete userServiceInstance._busy;
+        });
     },
 
     /**
