@@ -205,9 +205,6 @@ func start(p *portalProxy) error {
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
-	// TODO(wchrisjohnson): remove prior to shipping  https://jira.hpcloud.net/browse/TEAMFOUR-633
-	e.Static("/*", "demo")
-
 	e.POST("/v1/auth/login/uaa", p.loginToUAA)
 	e.POST("/v1/auth/logout", p.logout)
 
