@@ -1,0 +1,735 @@
+{
+  "name": "helion-stackato-console",
+  "product_version": "4.0",
+  "sdl_version": "{{TAG}}",
+  "vendor": "HPE",
+  "components": [
+    {
+      "name": "hsc-console",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "Console",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "capabilities": [],
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-console:{{TAG}}",
+      "workload_type": "container",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "CONSOLE_CERT"
+        },
+        {
+          "name": "CONSOLE_CERT_KEY"
+        }
+      ],
+      "affinity": [],
+      "labels": [],
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "http",
+          "protocol": "TCP",
+          "source_port": 80,
+          "target_port": 80,
+          "public": true
+        },
+        {
+          "name": "https",
+          "protocol": "TCP",
+          "source_port": 443,
+          "target_port": 443,
+          "public": true
+        }
+      ],
+      "volume_mounts": []
+    },
+    {
+      "name": "hsc-proxy",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "Console - Proxy",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "capabilities": [],
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-proxy:{{TAG}}",
+      "workload_type": "container",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "PGSQL_USER"
+        },
+        {
+          "name": "PGSQL_PASSWORD"
+        },
+        {
+          "name": "PGSQL_DATABASE"
+        },
+        {
+          "name": "PGSQL_HOST"
+        },
+        {
+          "name": "PGSQL_PORT"
+        },
+        {
+          "name": "PGSQL_CONNECT_TIMEOUT_IN_SECS"
+        },
+        {
+          "name": "PGSQL_SSL_MODE"
+        },
+        {
+          "name": "CONSOLE_PROXY_CERT"
+        },
+        {
+          "name": "CONSOLE_PROXY_CERT_KEY"
+        },
+        {
+          "name": "HTTP_CLIENT_TIMEOUT_IN_SECS"
+        },
+        {
+          "name": "SKIP_TLS_VERIFICATION"
+        },
+        {
+          "name": "CONSOLE_PROXY_TLS_ADDRESS"
+        },
+        {
+          "name": "CONSOLE_CLIENT"
+        },
+        {
+          "name": "HCF_CLIENT"
+        },
+        {
+          "name": "ALLOWED_ORIGINS"
+        },
+        {
+          "name": "SESSION_STORE_SECRET"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_ID"
+        },
+        {
+          "name": "GITHUB_OAUTH_CLIENT_SECRET"
+        },
+        {
+          "name": "GITHUB_OAUTH_STATE"
+        }
+      ],
+      "affinity": [],
+      "labels": [],
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "proxy",
+          "protocol": "TCP",
+          "source_port": 3003,
+          "target_port": 3003,
+          "public": false
+        }
+      ],
+      "volume_mounts": [
+        {
+          "volume_name": "hsc-migration-volume",
+          "mountpoint": "/hsc-migration-volume"
+        },
+        {
+          "volume_name": "hsc-encryption-key-volume",
+          "mountpoint": "/hsc-encryption-key-volume"
+        }
+      ]
+    },
+    {
+      "name": "hsc-db",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "Console - Database",
+      "min_RAM_mb": 256,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "capabilities": [],
+      "repository": "docker.io",
+      "image": "postgres:9.5",
+      "workload_type": "container",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "POSTGRES_PASSWORD"
+        },
+        {
+          "name": "PGDATA"
+        },
+        {
+          "name": "CONSOLE_DB_CERT"
+        },
+        {
+          "name": "CONSOLE_DB_CERT_KEY"
+        }
+      ],
+      "affinity": [],
+      "labels": [],
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "postgres",
+          "protocol": "TCP",
+          "source_port": 5432,
+          "target_port": 5432,
+          "public": false
+        }
+      ],
+      "volume_mounts": []
+    }
+  ],
+  "features": {
+    "auth": [
+      {
+        "auth_zone": "default",
+        "clients": [
+          {
+            "id": "console",
+            "name": "Console Client",
+            "scopes": [
+                "hcp.admin",
+                "hcp.user",
+                "uaa.user",
+                "hcp.publisher"
+            ],
+            "authorized_grant_types": [
+                "implicit",
+                "password",
+                "refresh_token"
+            ],
+            "access_token_validity": 3600,
+            "refresh_token_validity": 2592000
+          }
+        ]
+      }
+    ]
+  },
+  "preflight": [],
+  "postflight": [
+    {
+      "name": "hsc-create-database-job",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "Console - Create Database Job",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "capabilities": [],
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-database-creation:{{TAG}}",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "DB_HOST"
+        },
+        {
+          "name": "POSTGRES_DB"
+        },
+        {
+          "name": "CFGDB_PORT"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "PGSQL_DATABASE"
+        },
+        {
+          "name": "PGSQL_USER"
+        },
+        {
+          "name": "PGSQL_PASSWORD"
+        },
+        {
+          "name": "SQL"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "POSTGRES_PASSWORD"
+        }
+      ],
+      "affinity": [],
+      "labels": [],
+      "min_instances": 1,
+      "max_instances": 1,
+      "retry_count": 100,
+      "service_ports": [],
+      "volume_mounts": [
+        {
+          "volume_name": "hsc-migration-volume",
+          "mountpoint": "/hsc-migration-volume"
+        }
+      ]
+    }
+  ],
+  "volumes": [
+    {
+      "name": "stolon-data",
+      "size_gb": 10,
+      "filesystem": "ext4",
+      "shared": false
+    },
+    {
+      "name": "hsc-migration-volume",
+      "size_gb": 1,
+      "shared": true
+    },
+    {
+      "name": "hsc-encryption-key-volume",
+      "size_gb": 1,
+      "shared": true
+    }
+  ],
+  "labels": [],
+  "parameters": [
+    {
+      "name": "CONSOLE_VERSION",
+      "description": "The current version of the Helion Stackato Console. This param will be automatically incremented with each release of the Console so as to allow HCP to properly restart each component at the time of upgrade. This should not be changed manually.",
+      "default": "{{TAG}}",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "CONSOLE_CA_CERT",
+      "description": "CA Cert that is used to sign other SSL Certificates",
+      "required": true,
+      "secret": false,
+      "generator":
+        {
+          "id": "ca_cert",
+          "generate": {
+            "type": "CACertificate",
+            "value_type": "certificate"
+          }
+        }
+    },
+    {
+      "name": "CONSOLE_CA_CERT_KEY_FILE",
+      "description": "The Console CA Key file on disk",
+      "default": "/etc/secrets/console-ca-cert-key"
+    },
+    {
+      "name": "console-ca-cert-key",
+      "description": "CA Key that is used to sign other SSL Certificates",
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "ca_cert",
+          "generate": {
+            "type": "CACertificate",
+            "value_type": "private_key"
+          }
+        }
+    },
+    {
+      "name": "PGSQL_USER",
+      "description": "Postgres username",
+      "default": "stratos",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PGSQL_PASSWORD",
+      "description": "The password for the Stackato DB"
+    },
+    {
+      "name": "PGSQL_PASSWORD_FILE",
+      "description": "The Stackato DB password file on disk",
+      "default": "/etc/secrets/pgsql-password"
+    },
+    {
+      "name": "pgsql-password",
+      "description": "Stackato DB password",
+      "data_type": "string",
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "pgsql_password",
+          "generate": {
+            "type": "Password"
+          }
+        }
+    },
+    {
+      "name": "PGSQL_DATABASE",
+      "description": "Postgres database name",
+      "default": "stratos-db",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PGSQL_HOST",
+      "description": "Postgres hostname",
+      "default": "hsc-db-int",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PGSQL_PORT",
+      "description": "Postgres port",
+      "default": "5432",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PGSQL_CONNECT_TIMEOUT_IN_SECS",
+      "description": "Postgres connection timeout",
+      "default": "100",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PGSQL_SSL_MODE",
+      "description": "Postgres SSL mode",
+      "default": "disable",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "POSTGRES_DB",
+      "description": "Postgres database name",
+      "default": "postgres",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "POSTGRES_PASSWORD",
+      "description": "The Postgresql password"
+    },
+    {
+      "name": "POSTGRES_PASSWORD_FILE",
+      "description": "The Postgres password file on disk",
+      "default": "/etc/secrets/postgres-password"
+    },
+    {
+      "name": "postgres-password",
+      "description": "Postgres password",
+      "data_type": "string",
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "postgres_password",
+          "generate": {
+            "type": "Password"
+          }
+        }
+    },
+    {
+      "name": "POSTGRES_USER",
+      "description": "Postgres username",
+      "default": "stolon",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "PGDATA",
+      "description": "placeholder",
+      "default": "/database",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "DB_HOST",
+      "description": "PostgreSQL host address",
+      "default": "hsc-db-int",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "CFGDB_PORT",
+      "description": "PostgreSQL port",
+      "default": "5432",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "CONSOLE_CERT",
+      "description": "The Console TLS Certificate"
+    },
+    {
+      "name": "CONSOLE_CERT_FILE",
+      "description": "The Console TLS Certificate file on disk",
+      "default": "/etc/secrets/console-cert"
+    },
+    {
+      "name": "console-cert",
+      "description": "TLS certificate for the Console",
+      "default": null,
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "console_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "certificate"
+          }
+        }
+    },
+    {
+      "name": "CONSOLE_CERT_KEY",
+      "description": "The Console TLS Key"
+    },
+    {
+      "name": "CONSOLE_CERT_KEY_FILE",
+      "description": "The Console TLS Key file on disk",
+      "default": "/etc/secrets/console-cert-key"
+    },
+    {
+      "name": "console-cert-key",
+      "description": "TLS private key for the Console",
+      "default": null,
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "console_cert",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "private_key"
+          }
+        }
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT",
+      "description": "The Console Proxy TLS Certificate"
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT_FILE",
+      "description": "The Console Proxy TLS Certificate file on disk",
+      "default": "/etc/secrets/console-proxy-cert"
+    },
+    {
+      "name": "console-proxy-cert",
+      "description": "TLS certificate for the Console Proxy",
+      "default": null,
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "console_proxy_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "certificate"
+          }
+        }
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT_KEY",
+      "description": "The Console Proxy TLS Key"
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT_KEY_FILE",
+      "description": "The Console Proxy TLS Key file on disk",
+      "default": "/etc/secrets/console-proxy-cert-key"
+    },
+    {
+      "name": "console-proxy-cert-key",
+      "description": "TLS private key for the Console Proxy",
+      "default": null,
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "console_proxy_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "private_key"
+          }
+        }
+    },
+    {
+      "name": "CONSOLE_DB_CERT",
+      "description": "The Console Database TLS Certificate"
+    },
+    {
+      "name": "CONSOLE_DB_CERT_FILE",
+      "description": "The Console Database TLS Certificate file on disk",
+      "default": "/etc/secrets/console-db-cert"
+    },
+    {
+      "name": "console-db-cert",
+      "description": "TLS certificate for the Console Database",
+      "default": null,
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "console_db_certificate",
+          "generate": {
+              "type": "Certificate",
+              "value_type": "certificate"
+          }
+        }
+    },
+    {
+      "name": "CONSOLE_DB_CERT_KEY",
+      "description": "The Console Database TLS Key"
+    },
+    {
+      "name": "CONSOLE_DB_CERT_KEY_FILE",
+      "description": "The Console Database TLS Key file on disk",
+      "default": "/etc/secrets/console-db-cert-key"
+    },
+    {
+      "name": "console-db-cert-key",
+      "description": "TLS private key for the Console Database",
+      "default": null,
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "console_db_certificate",
+          "generate": {
+            "type": "Certificate",
+            "value_type": "private_key"
+          }
+        }
+    },
+    {
+      "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
+      "description": "HTTP client timeoout",
+      "default": "100",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "SKIP_TLS_VERIFICATION",
+      "description": "To skip TLS or now?",
+      "default": "true",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "CONSOLE_PROXY_TLS_ADDRESS",
+      "description": "TLS Address",
+      "default": ":3003",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "CONSOLE_CLIENT",
+      "description": "Console client",
+      "default": "console",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "HCF_CLIENT",
+      "description": "HCF client",
+      "default": "cf",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ALLOWED_ORIGINS",
+      "description": "Allowed origins - WHAT DOES THIS NEED TO BE SET TO ?!?!?!?!?!?!??",
+      "default": "https://localhost,https://127.0.0.1,http://192.168.200.2,https://192.168.200.2,http://192.168.200.3,https://192.168.200.3,http://172.17.27.1,https://172.17.27.1",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "SESSION_STORE_SECRET",
+      "description": "The Console Proxy session store secret"
+    },
+    {
+      "name": "SESSION_STORE_SECRET_FILE",
+      "description": "The Console Proxy session store secret file on disk",
+      "default": "/etc/secrets/session-store-secret"
+    },
+    {
+      "name": "session-store-secret",
+      "description": "Console Proxy session store secret",
+      "data_type": "string",
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "session_store_secret",
+          "generate": {
+            "type": "Password"
+          }
+        }
+    },
+    {
+      "name": "SQL",
+      "description": "Initial Stackato database schema used by the Console Proxy",
+      "default": "./InitialSchema.sql",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_ID",
+      "description": "GitHub client ID for OAuth - see https://github.com/settings/applications/new",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "GITHUB_OAUTH_CLIENT_SECRET",
+      "description": "GitHub client secret for OAuth - see https://github.com/settings/applications/new",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "GITHUB_OAUTH_STATE",
+      "description": "** DEPRECATED ** will be removed as a part of TEAMFOUR-561",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    }
+  ]
+}

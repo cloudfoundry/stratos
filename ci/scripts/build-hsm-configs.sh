@@ -7,7 +7,7 @@ OUT_REGISTRY=$3
 OUT_TAG=$4
 
 cd $SRC
-for FILE in ./ucp_templates/* ; do
+for FILE in ./hcp_templates/* ; do
   ofile=$DST/$(basename $FILE)
   cat $FILE | sed s/{{TAG}}/$OUT_TAG/g | sed s/{{REGISTRY}}/$OUT_REGISTRY/g > $ofile
 done

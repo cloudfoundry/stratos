@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: docker-registry.helion.space:443/helioncf/proxy-builder
+    repository: docker-registry.helion.space:443/hsc/console-proxy-builder
 inputs:
 - name: portal-proxy
 - name: stratos-deploy

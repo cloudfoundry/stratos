@@ -42,18 +42,18 @@ resources:
       private_key: {{github-private-key}}
 
   # docker images
-  - name: stratos-server-image
+  - name: hsc-console-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/helioncf/cnap-console-server
-  - name: portal-proxy-image
+      repository: docker-registry.helion.space:443/hsc/hsc-console
+  - name: hsc-proxy-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/helioncf/cnap-console-proxy
-  - name: database-config-image
+      repository: docker-registry.helion.space:443/hsc/hsc-proxy
+  - name: hsc-database-creation-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/helioncf/cnap-console-database-configuration
+      repository: docker-registry.helion.space:443/hsc/hsc-database-creation
 
   # HSM assets
   - name: hsm-sdl-bucket
@@ -109,23 +109,23 @@ jobs:
     # Build the Portal Proxy image, push to registry
     - task: build-proxy-image
       file: stratos-deploy/ci/tasks/build-proxy-image.yml
-    - put: portal-proxy-image
+    - put: hsc-proxy-image
       params:
-        dockerfile: portal-proxy-output/Dockerfile.UCP
+        dockerfile: portal-proxy-output/Dockerfile.HCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 
     # Build the database configuration image, push to registry
-    - put: database-config-image
+    - put: hsc-database-creation-image
       params:
-        dockerfile: portal-proxy-output/Dockerfile.database.UCP
+        dockerfile: portal-proxy-output/Dockerfile.database.HCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 
     # Build the Stackato UI image, push to registry
     - task: build-ui-image
       file: stratos-deploy/ci/tasks/build-ui-image.yml
-    - put: stratos-server-image
+    - put: hsc-console-image
       params:
         dockerfile: stratos-server-output/Dockerfile.HCP
         build: stratos-server-output
