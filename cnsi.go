@@ -28,6 +28,7 @@ type hceInfo struct {
 
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
+	log.Println("registerHCFCluster")
 	cnsiName := c.FormValue("cnsi_name")
 	apiEndpoint := c.FormValue("api_endpoint")
 
@@ -89,6 +90,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 func (p *portalProxy) registerHCECluster(c echo.Context) error {
 
+	log.Println("registerHCECluster")
 	cnsiName := c.FormValue("cnsi_name")
 	apiEndpoint := c.FormValue("api_endpoint")
 
@@ -143,8 +145,7 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 // TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls.  https://jira.hpcloud.net/browse/TEAMFOUR-631
 func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
-	log.Println("unregisterCluster start")
-
+	log.Println("unregisterCluster")
 	cnsiGUID := c.FormValue("cnsi_guid")
 
 	log.Printf("CNSI: %s", cnsiGUID)
@@ -176,6 +177,8 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 }
 
 func (p *portalProxy) buildCNSIList(c echo.Context) ([]*cnsis.CNSIRecord, error) {
+
+	log.Println("buildCNSIList")
 	var cnsiList []*cnsis.CNSIRecord
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
@@ -193,6 +196,7 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*cnsis.CNSIRecord, error)
 
 func (p *portalProxy) listCNSIs(c echo.Context) error {
 
+	log.Println("listCNSIs")
 	cnsiList, err := p.buildCNSIList(c)
 	if err != nil {
 		return newHTTPShadowError(
@@ -214,6 +218,7 @@ func (p *portalProxy) listCNSIs(c echo.Context) error {
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 
+	log.Println("listRegisteredCNSIs")
 	userGUIDIntf, ok := p.getSessionValue(c, "user_id")
 	if !ok {
 		return newHTTPShadowError(
@@ -252,6 +257,8 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 }
 
 func marshalCNSIlist(cnsiList []*cnsis.CNSIRecord) ([]byte, error) {
+
+	log.Println("marshalCNSIlist")
 	jsonString, err := json.Marshal(cnsiList)
 	if err != nil {
 		return nil, newHTTPShadowError(
@@ -264,6 +271,8 @@ func marshalCNSIlist(cnsiList []*cnsis.CNSIRecord) ([]byte, error) {
 }
 
 func marshalClusterList(clusterList []*cnsis.RegisteredCluster) ([]byte, error) {
+
+	log.Println("marshalClusterList")
 	jsonString, err := json.Marshal(clusterList)
 	if err != nil {
 		return nil, newHTTPShadowError(
@@ -276,6 +285,8 @@ func marshalClusterList(clusterList []*cnsis.RegisteredCluster) ([]byte, error) 
 }
 
 func getHCFv2Info(apiEndpoint string) (v2Info, error) {
+
+	log.Println("getHCFv2Info")
 	var v2InfoReponse v2Info
 
 	uri, err := url.Parse(apiEndpoint)
@@ -306,6 +317,8 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 }
 
 func getHCEInfo(apiEndpoint string) (hceInfo, error) {
+
+	log.Println("getHCEInfo")
 	var infoReponse hceInfo
 
 	uri, err := url.Parse(apiEndpoint)
@@ -337,6 +350,7 @@ func getHCEInfo(apiEndpoint string) (hceInfo, error) {
 
 func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
+	log.Println("getCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return cnsis.CNSIRecord{}, false
@@ -352,6 +366,7 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 
 func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 
+	log.Println("setCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
@@ -367,6 +382,7 @@ func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 
 func (p *portalProxy) unsetCNSIRecord(guid string) error {
 
+	log.Println("unsetCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
@@ -382,6 +398,7 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 
 func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (tokens.TokenRecord, bool) {
 
+	log.Println("getCNSITokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return tokens.TokenRecord{}, false
@@ -397,6 +414,7 @@ func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (toke
 
 func (p *portalProxy) listCNSITokenRecordsForUser(userGUID string) ([]*tokens.TokenRecord, error) {
 
+	log.Println("listCNSITokenRecordsForUser")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return nil, err
@@ -412,6 +430,7 @@ func (p *portalProxy) listCNSITokenRecordsForUser(userGUID string) ([]*tokens.To
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tokens.TokenRecord) error {
 
+	log.Println("setCNSITokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
@@ -427,6 +446,7 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tok
 
 func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) error {
 
+	log.Println("unsetCNSITokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Printf("Unable to establish a database reference: '%v'", err)
