@@ -20,8 +20,7 @@
             </div>
             <div class="cluster-property">
               <div translate>Type</div>
-              <div ng-if="cnsi.cnsi_type==='hcf'" translate>Cloud Foundry Cluster</div>
-              <div ng-if="cnsi.cnsi_type==='hce'" translate>Code Engine</div>
+              <div >{{ clusterSettingsCtrl.getCnsiTypeText(cnsi) }}</div>
             </div>
           </div>
         </div>
@@ -38,7 +37,7 @@
           <div class="cluster-properties">
             <div class="cluster-property">
               <div translate>User Name</div>
-              <div>{{ clusterSettingsCtrl.stackatoInfo.info.endpoints[cnsi.cnsi_type][cnsi.guid].user.name }}</div>
+              <div>{{ clusterSettingsCtrl.getClusterUserName(cnsi) }}</div>
             </div>
             <!--<div class="cluster-property">-->
             <!--<div translate>Token Expiration</div>-->
