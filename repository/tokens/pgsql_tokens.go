@@ -358,7 +358,8 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 		tokenRecordList = append(tokenRecordList, tr)
 	}
 
-	rows.Close()
+	// TODO (wchrisjohnson) - https://jira.hpcloud.net/browse/TEAMFOUR-817
+	// rows.Close()
 
 	return tokenRecordList, nil
 }
