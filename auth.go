@@ -49,7 +49,7 @@ type ConnectedUser struct {
 }
 
 // UAAAdminIdentifier - The identifier that the Cloud Foundry UAA Service uses to convey administrative level perms
-const UAAAdminIdentifier = "uaa.admin"
+const UAAAdminIdentifier = "hcp.admin"
 
 // HCFAdminIdentifier - The identifier that the Cloud Foundry HCF Service uses to convey administrative level perms
 const HCFAdminIdentifier = "cloud_controller.admin"
