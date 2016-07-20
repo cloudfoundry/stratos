@@ -30,8 +30,8 @@
 
       // property definitions
 
-      it('should have properties `model` defined', function () {
-        expect(accountActionsCtrl.model).toBeDefined();
+      it('should have properties `stackatoInfo` defined', function () {
+        expect(accountActionsCtrl.stackatoInfo).toBeDefined();
       });
 
     });

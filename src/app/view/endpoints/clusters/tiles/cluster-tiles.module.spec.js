@@ -3,7 +3,7 @@
 
   describe('endpoint clusters', function () {
     var $q, $state, $scope, modelManager, confirmModal, clusterTilesCtrl, hcfRegistration, serviceInstanceModel,
-      userServiceInstanceModel, $uibModal;
+      userServiceInstanceModel, $uibModal, stackatoInfo;
 
     var hceService = {
       guid: '817ef115-7ae6-4591-a883-8f1c3447e012',
@@ -71,6 +71,7 @@
 
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
       var $httpBackend = $injector.get('$httpBackend');
       // Something other than the controller is calling these.
@@ -217,6 +218,8 @@
       it('Call succeeds', function () {
         spyOn(serviceInstanceModel, 'list').and.returnValue($q.when([]));
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.when([]));
+        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.when({}));
+
         createCluster();
         $scope.$digest();
 

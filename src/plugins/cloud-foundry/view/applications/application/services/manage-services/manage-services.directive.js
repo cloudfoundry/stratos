@@ -84,7 +84,8 @@
       this.serviceBindings = {};
 
       var serviceInstances = _.filter(this.data.app.summary.services, function (o) {
-        return o.service_plan.service.guid === that.data.service.metadata.guid;
+        return angular.isDefined(o.service_plan) &&
+          o.service_plan.service.guid === that.data.service.metadata.guid;
       });
       if (serviceInstances.length > 0) {
         [].push.apply(this.serviceInstances, serviceInstances);
