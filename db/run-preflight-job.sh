@@ -3,37 +3,46 @@ set -e
 
 execStatement() {
     stmt=$1
-    PGPASSFILE=/tmp/pgpass psql -U $POSTGRES_USER -h $DB_HOST -p $CFGDB_PORT -d $DB -w -tc "$stmt"
+    PGPASSFILE=/tmp/pgpass psql -U $POSTGRES_USER -h $DB_HOST -p $CFGDB_PORT -d $POSTGRES_DB -w -tc "$stmt"
 }
 
-echo "$DB_HOST:$CFGDB_PORT:$DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > /tmp/pgpass
+# Step 1 - Set the lock file on the shared volume
+MIGRATION_VOLUME=hsc-migration-volume
+UPGRADE_LOCK_FILE=upgrade.lock
+echo "Adding $UPGRADE_LOCK_FILE file to the shared migration volume $MIGRATION_VOLUME."
+touch /$MIGRATION_VOLUME/$UPGRADE_LOCK_FILE
+
+echo "Created the upgrade lock file."
+
+# Step 2 - Migrate the database if necessary
+echo "$DB_HOST:$CFGDB_PORT:$POSTGRES_DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > /tmp/pgpass
 chmod 0600 /tmp/pgpass
 
-stratosExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$STRATOS_DB';")
-if [ -z "$stratosExists" ] ; then
-	echo "Database not found. Ok to exit normally as postflight job will create database."
-	exit 0
+stackatoDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
+if [ -z "$stackatoDbExists" ] ; then
+  echo "Database not found. Ok to exit normally as postflight job will create database."
+  exit 0
 else
-    echo "Database found - ready to migrate."
+  echo "Database found - ready to migrate."
 
-    # Check the version
-	/go/bin/goose dbversion
+  # Check the version
+  /go/bin/goose dbversion
 
-    # Check the status
-    /go/bin/goose status
+  # Check the status
+  /go/bin/goose status
 
-    # Run migrations
-	/go/bin/goose --env=default up
+  # Run migrations
+  /go/bin/goose --env=default up
 
-    # CHeck the status
-    /go/bin/goose status
+  # CHeck the status
+  /go/bin/goose status
 
-    # Check the version
-	/go/bin/goose dbversion
+  # Check the version
+  /go/bin/goose dbversion
 
-	exit 0
+  exit 0
 fi
 
-echo "Success!"
+echo "Database operation(s) complete."
 
 exit 0

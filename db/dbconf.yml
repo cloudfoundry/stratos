@@ -1,3 +1,3 @@
 default:
     driver: postgres
-    open: host='$DB_HOST' port=$CFGDB_PORT user='$STRATOS_USER' password='$STRATOS_PWD' dbname='$STRATOS_DB' sslmode='$PGSQL_SSL_MODE'
+    open: host='$DB_HOST' port=$CFGDB_PORT user='$PGSQL_USER' password='$PGSQL_PASSWORD' dbname='$PGSQL_DATABASE' sslmode='$PGSQL_SSL_MODE'
