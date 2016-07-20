@@ -81,7 +81,7 @@ rm -rf ${__DIRNAME}/../stratos-ui/containers/nginx/dist
 echo "Building the Console Proxy executable"
 PORTAL_PROXY_PATH=$GOPATH/src/github.com/hpcloud/portal-proxy
 pushd ${PORTAL_PROXY_PATH}
--./tools/build_portal_proxy.sh
+./tools/build_portal_proxy.sh
 popd
 
 # Build and publish the container image for the portal proxy
