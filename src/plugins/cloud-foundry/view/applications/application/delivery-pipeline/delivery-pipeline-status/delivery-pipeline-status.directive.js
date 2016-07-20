@@ -15,9 +15,9 @@
    */
   function deliveryPipelineStatus() {
     return {
-			scope: {
-				'pipeline': '='
-			},
+      scope: {
+        pipeline: '='
+      },
       templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-pipeline/delivery-pipeline-status/delivery-pipeline-status.html'
     };
   }

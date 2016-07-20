@@ -2,7 +2,7 @@
   'use strict';
 
   describe('cloud-foundry.model.user-provided-service-instance', function () {
-    var $httpBackend, model, mockInstancesApi;
+    var $httpBackend, model;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -20,7 +20,6 @@
 
     it('is defined', function () {
       expect(model).toBeDefined();
-
     });
     /*
 

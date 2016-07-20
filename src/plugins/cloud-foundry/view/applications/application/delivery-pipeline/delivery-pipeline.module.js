@@ -30,6 +30,7 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
+   * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
@@ -81,8 +82,10 @@
     /* eslint-enable */
 
     this.$scope.$watch(function () {
-      return that.model.application.pipeline.valid && that.model.application.pipeline.hce_api_url;
-    }, function(v) {
+      return !that.model.application.pipeline.fetching &&
+        that.model.application.pipeline.valid &&
+        that.model.application.pipeline.hce_api_url;
+    }, function () {
       if (that.model.application.pipeline.valid && that.model.application.pipeline.hceCnsi) {
         that.busy = true;
         that.hceCnsi = that.model.application.pipeline.hceCnsi;

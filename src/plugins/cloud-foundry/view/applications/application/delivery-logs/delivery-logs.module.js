@@ -72,8 +72,10 @@
     var that = this;
 
     this.$scope.$watch(function () {
-      return that.model.application.pipeline.valid && that.model.application.pipeline.hce_api_url;
-    }, function(v) {
+      return !that.model.application.pipeline.fetching &&
+        that.model.application.pipeline.valid &&
+        that.model.application.pipeline.hce_api_url;
+    }, function () {
       var pipeline = that.model.application.pipeline;
       if (pipeline.valid && pipeline.hceCnsi) {
         that.busy = true;
@@ -88,7 +90,7 @@
             }
           }).finally(function () {
             that.busy = false;
-          })
+          });
       }
     });
 
@@ -173,7 +175,7 @@
       var pipeline = that.model.application.pipeline;
       // Fetch pipeline executions
       var project = this.hceModel.getProject(this.model.application.summary.name);
-      this.hceModel.getPipelineExecutions(this.pipeline.hceCnsi.guid, project.id)
+      this.hceModel.getPipelineExecutions(pipeline.hceCnsi.guid, project.id)
         .then(function () {
           // The ux will need to show additional properties. In order to not muddy the original model make a copy
           that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
@@ -198,7 +200,7 @@
     fetchEvents: function (eventsPerExecution, executionId) {
       var that = this;
       var pipeline = that.model.application.pipeline;
-      
+
       // Reset the last successful build/test/deploy events
       this.last = {};
 

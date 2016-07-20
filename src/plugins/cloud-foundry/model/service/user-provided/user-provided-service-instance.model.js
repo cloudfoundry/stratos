@@ -42,7 +42,7 @@
      * @param {string} guid - the user provided service instance guid
      * @returns {promise} A promise object
      */
-     getUserProvidedServiceInstance: function(cnsiGuid, guid) {
+    getUserProvidedServiceInstance: function (cnsiGuid, guid) {
       var httpConfig = {
         headers: {
           'x-cnap-cnsi-list': cnsiGuid,

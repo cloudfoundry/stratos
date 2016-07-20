@@ -421,53 +421,33 @@
     },
 
     /**
-     * @function _getHceApiEndpoint
-     * @memberof cloud-foundry.model.application
-     * @description Try and hget the API endpoint url for a given HCE service from the /info metadata.
-     * @param {object} cnsi - cnsi metadata for the specified HCE service
-     * @returns {promise} A promise object
-     * @private
-     */
-    _getHceApiEndpoint: function (cnsi) {
-      // Retrieve dynamicllay as this model may load before the one we need
-      var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-      var endpoint = cnsi.api_endpoint.Scheme + '://' + cnsi.api_endpoint.Host;
-      endpoint += (cnsi.api_endpoint.Path) ? '/' + cnsi.api_endpoint.Path : '';
-      return hceModel.info(cnsi.guid).then(function (data) {
-        cnsi.info = _.clone(data);
-        return cnsi;
-      }).catch(function () {
-        // Swallow errors - don't fail if an info call failes to an HCE instance
-        return cnsi;
-      })
-    },
-
-    /**
-     * @function _listHceCnsis
+     * @function listHceCnsis
      * @memberof cloud-foundry.model.application
      * @description Invoke the /info endpoint of all HCE instances available to the user, in order to get their public API url.
      * The url we have registeed can be different to the API url returned by the /info endpoint.
      * @returns {promise} A promise object
      * @private
      */
-    _listHceCnsis: function () {
+    listHceCnsis: function () {
       var that = this;
       // We cache on the application - so if you add an HCE while on the app, we won't detect that
       // Saves making lots of calls
       if (this.hceServiceInfo) {
         return this.$q.when(this.hceServiceInfo);
       } else {
-        var promise = (this.serviceInstanceModel.serviceInstances && _.keys(this.serviceInstanceModel.serviceInstances).length) ?
-          this.$q.when(this.serviceInstanceModel.serviceInstances) : this.serviceInstanceModel.list();
+        var promise = this.serviceInstanceModel.serviceInstances && _.keys(this.serviceInstanceModel.serviceInstances).length
+          ? this.$q.when(this.serviceInstanceModel.serviceInstances) : this.serviceInstanceModel.list();
         return promise.then(function () {
+          // Retrieve dynamicllay as this model may load before the one we need
+          var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
           var hceCnsis = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'}) || [];
-          var tasks = [];
-          _.each(hceCnsis, function (cnsi) {
-            tasks.push(that._getHceApiEndpoint(cnsi));
-          });
-          return that.$q.all(tasks).then(function (data) {
-            that.hceServiceInfo = data;
-            return data;
+          var hceCnsisGuids = _.chain(hceCnsis).map('guid').value();
+          return hceModel.infos(hceCnsisGuids.join(',')).then(function (infos) {
+            _.each(hceCnsis, function (cnsi) {
+              cnsi.info = infos[cnsi.guid];
+            });
+            that.hceServiceInfo = hceCnsis;
+            return hceCnsis;
           });
         });
       }
@@ -492,7 +472,7 @@
       // Async: work out if this application has a delivery pipeline
       // Look at the services for one named 'hce-<APP_GUID>'
       var hceServiceLink = 'hce-' + that.application.summary.guid;
-      var hceServiceData = _.find(that.application.summary.services, function(svc) {
+      var hceServiceData = _.find(that.application.summary.services, function (svc) {
         return svc.name === hceServiceLink;
       });
 
@@ -507,9 +487,9 @@
           if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
             // HCE API Endpoint
             pipeline.hce_api_url = data.entity.credentials.hce_api_url;
-            return that._listHceCnsis().then(function (hceEndpoints) {
+            return that.listHceCnsis().then(function (hceEndpoints) {
               var hceInstance = _.find(hceEndpoints, function (hce) {
-                var url = hce.info ? hce.info.api_public_uri : (hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host);
+                var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
                 return pipeline.hce_api_url.indexOf(url) === 0;
               });
               pipeline.hceCnsi = hceInstance;
