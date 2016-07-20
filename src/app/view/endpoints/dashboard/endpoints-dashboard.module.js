@@ -38,7 +38,7 @@
    * @constructor
    */
   function EndpointsDashboardController(modelManager, $state, hceRegistration, hcfRegistration, $q) {
-
+    var that = this;
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -53,18 +53,14 @@
       // serviceInstanceModel has previously been updated
       // to decrease load time, we will use that data.
       this.listPromiseResolved = true;
-      this._updateLocalServiceInstances();
+      _updateLocalServiceInstances();
     }
     // Show welcome message only if no endpoints are registered
     this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
     this.serviceInstanceModel.list();
     this.$q = $q;
 
-    this._updateEndpoints();
-
-  }
-
-  angular.extend(EndpointsDashboardController.prototype, {
+    _updateEndpoints();
 
     /**
      * @namespace app.view.endpoints.dashboard
@@ -73,7 +69,7 @@
      * @description Show cluster add form
      * @param {boolean} isHcf  when true show cluster add form for HCF
      */
-    showClusterAddForm: function (isHcf) {
+    this.showClusterAddForm = function (isHcf) {
       var that = this;
       if (isHcf) {
         this.hcfRegistration.add()
@@ -86,7 +82,7 @@
             return that._updateEndpoints;
           });
       }
-    },
+    };
 
     /**
      * @namespace app.view.endpoints.dashboard
@@ -94,9 +90,9 @@
      * @name hideWelcomeMessage
      * @description Hide Welcome message
      */
-    hideWelcomeMessage: function () {
+    this.hideWelcomeMessage = function () {
       this.showWelcomeMessage = false;
-    },
+    };
 
     /**
      * @function isUserAdmin
@@ -104,9 +100,9 @@
      * @description Is current user an admin?
      * @returns {Boolean}
      */
-    isUserAdmin: function () {
-      return this.currentUserAccount.isAdmin();
-    },
+    this.isUserAdmin = function () {
+      return that.currentUserAccount.isAdmin();
+    };
 
     /**
      * @function _updateLocalServiceInstances
@@ -114,12 +110,11 @@
      * @description Updates local service instances
      * @private
      */
-    _updateLocalServiceInstances: function () {
-      var that = this;
-      if (this.showWelcomeMessage && this.serviceInstanceModel.serviceInstances.length > 0) {
-        this.showWelcomeMessage = false;
+    function _updateLocalServiceInstances() {
+      if (that.showWelcomeMessage && that.serviceInstanceModel.serviceInstances.length > 0) {
+        that.showWelcomeMessage = false;
       }
-      _.forEach(this.serviceInstanceModel.serviceInstances, function (serviceInstance) {
+      _.forEach(that.serviceInstanceModel.serviceInstances, function (serviceInstance) {
         var guid = serviceInstance.guid;
         if (angular.isUndefined(that.serviceInstances[guid])) {
           that.serviceInstances[guid] = serviceInstance;
@@ -127,23 +122,23 @@
           angular.extend(that.serviceInstances[guid], serviceInstance);
         }
       });
-    }, /**
+    }
+
+    /**
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard
      * @description Is current user an admin?
      * @returns {*}
      * @private
      */
-    _updateEndpoints: function () {
-
-      var that = this;
-      return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
+    function _updateEndpoints() {
+      return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
         .then(function () {
-          that._updateLocalServiceInstances();
+          _updateLocalServiceInstances();
         }).then(function () {
           that.listPromiseResolved = true;
         });
     }
-  });
+  }
 
 })();

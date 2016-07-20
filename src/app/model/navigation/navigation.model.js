@@ -15,15 +15,16 @@
     'app.model.modelManager',
     'app.event.eventService',
     '$state',
-    '$rootScope'
+    '$rootScope',
+    '$log'
   ];
 
-  function registerModel(modelManager, eventService, $state, $rootScope) {
+  function registerModel(modelManager, eventService, $state, $rootScope, $log) {
     /**
      * Register 'app.model.navigation' with the model manager service.
      * This model hosts the application's navigation tree.
      */
-    modelManager.register('app.model.navigation', new NavigationModel(eventService, $state, $rootScope));
+    modelManager.register('app.model.navigation', new NavigationModel(eventService, $state, $rootScope, $log));
   }
 
   /**
@@ -34,15 +35,16 @@
    * @param {app.event.eventService} eventService - the event bus service
    * @param {object} $state - ui-router $state service
    * @param {object} $rootScope - Angular rootScope object
+   * @param {object} $log - angular log service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {object} $state - ui-router $state service
    * @property {app.model.navigation} menu - the navigation model
    */
-  function NavigationModel(eventService, $state, $rootScope) {
+  function NavigationModel(eventService, $state, $rootScope, $log) {
     var that = this;
     this.eventService = eventService;
     this.$state = $state;
-    this.menu = new Menu();
+    this.menu = new Menu($log);
     this.eventService.$on(this.eventService.events.LOGIN, function () {
       that.onLogin();
     });
@@ -109,10 +111,12 @@
    * @namespace app.model.navigation.Menu
    * @memberof app.model.navigation
    * @name app.model.navigation.Menu
+   * @param {object} $log - angular log service
    * @property {string} currentState - current ui-router state
    */
-  function Menu() {
+  function Menu($log) {
     this.currentState = null;
+    this.$log = $log;
   }
 
   // Using an array as the prototype
@@ -128,13 +132,13 @@
      * @param {string} href - the href / ng-router state we go to when clicking the entry.
      *                        e.g. cf.applications.list.gallery-view
      * @param {string} text - the displayed text of the menu item
-     * @param {string} icon - the icon of the menu item
+     * @param {number=} pos - optional position in the menu to insert at
+     * @param {string=} icon - the icon of the menu item
      * @param {string=} baseState - optional href / ng-router top-level base state e.g. cf.applications or cf.workspaces
      *                              (defaults to name)
-     * @param {number} pos - optional position in the menu to insert at
      * @returns {app.model.navigation.Menu} The navigation's Menu object
      */
-    addMenuItem: function (name, href, text, icon, baseState, pos) {
+    addMenuItem: function (name, href, text, pos, icon, baseState) {
       var item = {
         name: name,
         href: href,
@@ -145,7 +149,16 @@
         items: new Menu()   // sub-menu
       };
       if (angular.isNumber(pos)) {
-        this.splice(pos, 0, item);
+        // Fill in the array to have the required number of items
+        // This allows out of order addMenuItem calls to work as expected
+        while (this.length <= pos) {
+          this.push(null);
+        }
+        if (this[pos] !== null) {
+          this.$log.error('addMenuItem: items named ' + "'" + item.name + "' and '" + this[pos].name +
+            "' have the same position '" + pos + "'");
+        }
+        this.splice(pos, 1, item);
       } else {
         this.push(item);
       }

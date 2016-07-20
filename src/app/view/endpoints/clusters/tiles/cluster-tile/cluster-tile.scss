@@ -1,7 +1,7 @@
 .cluster-tile {
 
   &.unlink {
-    // Override some extreme oddness in gallary-card with undefined on-card-click
+    // Override some extreme oddness in gallery-card with undefined on-card-click
     .panel-heading.linked, .panel-body.linked {
       cursor: default;
     }
