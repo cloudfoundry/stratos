@@ -4,4 +4,15 @@
     text-transform: uppercase;
   }
 
+  .dl-horizontal {
+
+    dd.cluster-tile-endpoint {
+      text-transform: lowercase;
+    }
+
+    dd.cluster-tile-account {
+      text-transform: capitalize;
+    }
+  }
+
 }
