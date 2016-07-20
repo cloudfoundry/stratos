@@ -14,6 +14,7 @@
    * @memberof app.utils
    * @name utilsService
    * @description Various utility functions
+   * @param {object} $log - the Angular $log service
    * @returns {object} the utils service
    */
   function utilsServiceFactory($log) {
