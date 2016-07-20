@@ -19,15 +19,19 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+// TimeoutBoundary represents the amount of time we'll wait for the database
+// server to come online before we bail out.
+const TimeoutBoundary = 10
+
 var (
 	httpClient = http.Client{}
 )
 
 func main() {
 	log.SetOutput(os.Stdout)
-
 	log.Println("Proxy initialization started.")
 
+	// Load the portal configuration from env vars via ucpconfig
 	var portalConfig portalConfig
 	portalConfig, err := loadPortalConfig(portalConfig)
 	if err != nil {
@@ -36,10 +40,12 @@ func main() {
 	}
 	log.Println("Proxy configuration loaded.")
 
+	// Initialize the HTTP client
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
 	log.Println("HTTP client initialized.")
 
+	// Get the encryption key we need for tokens in the database
 	portalConfig.EncryptionKeyInBytes, err = setEncryptionKey(portalConfig)
 	if err != nil {
 		log.Println(err)
@@ -47,45 +53,36 @@ func main() {
 	}
 	log.Println("Encryption key set.")
 
+	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = initConnPool()
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-
-	// defer databaseConnectionPool.Close()
 	defer func() {
 		log.Println(`--- Closing databaseConnectionPool`)
 		databaseConnectionPool.Close()
 	}()
 	log.Println("Proxy database connection pool created.")
 
-	err = datastore.Ping(databaseConnectionPool)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Database connection pool appears to be working.")
-
+	// Initialize the Postgres backed session store for Gorilla sessions
 	sessionStore := initSessionStore(databaseConnectionPool, portalConfig)
-
-	// defer sessionStore.Close()
 	defer func() {
 		log.Println(`--- Closing sessionStore`)
 		sessionStore.Close()
 	}()
-
-	// defer sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
 	defer func() {
-		log.Println(`--- Performing sessionStore cleanup`)
+		log.Println(`--- Setting up sessionStore cleanup`)
 		sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
 	}()
-
 	log.Println("Proxy session store initialized.")
 
+	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
 	log.Println("Proxy initialization complete.")
 
+	// Start the proxy
 	log.Println("Proxy config at startup")
 	log.Printf("%+v\n", portalConfig)
 	if err := start(portalProxy); err != nil {
@@ -114,6 +111,7 @@ func setEncryptionKey(pc portalConfig) ([]byte, error) {
 
 func initConnPool() (*sql.DB, error) {
 	log.Println("initConnPool")
+
 	// load up postgresql database configuration
 	var dc datastore.DatabaseConfig
 	dc, err := loadDatabaseConfig(dc)
@@ -128,12 +126,28 @@ func initConnPool() (*sql.DB, error) {
 		return nil, err
 	}
 
-	err = datastore.Ping(pool)
-	if err != nil {
-		log.Printf("initConnPool: %+v\n", err)
-		return nil, err
+	// Ensure Postgres is responsive
+	for {
+
+		// establish an outer timeout boundary
+		timeout := time.Now().Add(time.Minute * TimeoutBoundary)
+
+		// Ping Postgres
+		err = datastore.Ping(pool)
+		if err == nil {
+			log.Println("Database appears to now be available.")
+			break
+		}
+
+		// If our timeout boundary has been exceeded, bail out
+		if timeout.Sub(time.Now()) < 0 {
+			return nil, fmt.Errorf("Timeout boundary of %d minutes has been exceeded. Exiting.", TimeoutBoundary)
+		}
+
+		// Circle back and try again
+		log.Printf("Waiting for Postgres to be responsive: %+v\n", err)
+		time.Sleep(time.Second)
 	}
-	log.Println("initConnPool: Database connection pool appears to be working.")
 
 	return pool, nil
 }
