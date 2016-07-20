@@ -27,8 +27,12 @@
       font-weight: 500;
     }
 
-    dd:first-of-type {
+    dd.cluster-tile-endpoint {
       text-transform: lowercase;
+    }
+
+    dd.cluster-tile-account {
+      text-transform: capitalize;
     }
   }
 }

@@ -35,7 +35,6 @@
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
-   * @property {string} accountStatus - connected user's account status
    * @property {number} orgCount - organisation count
    * @property {number} userCount - user count
    * @property {object} cardData - gallery-card directive data object
@@ -45,9 +44,9 @@
     this.cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
     this.cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.actions = [];
-    this.accountStatus = null;
     this.orgCount = null;
     this.userCount = null;
     this.cardData = {
@@ -67,7 +66,6 @@
         return;
       }
       that.setActions();
-      that.setAccountStatus();
       that.setOrganisationCount();
       that.setUserCount();
     });
@@ -109,19 +107,6 @@
           }
         });
       }
-    },
-
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name setAccountStatus
-     * @description Determine the account status for the connected user
-     */
-    setAccountStatus: function () {
-      /* eslint-disable no-warning-comments */
-      //TODO (RC): See TEAMFOUR-723. Need to fetch account info from scope. Dependent on TEAMFOUR-205 + TEAMFOUR-617.
-      /* eslint-enable no-warning-comments */
-      this.accountStatus = null;
     },
 
     /**

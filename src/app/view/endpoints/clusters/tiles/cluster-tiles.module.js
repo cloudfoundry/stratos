@@ -40,7 +40,7 @@
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
-    this.loading = false;
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.boundUnregister = angular.bind(this, this.unregister);
     this.boundConnect = angular.bind(this, this.connect);
@@ -61,7 +61,7 @@
     refreshClusterModel: function () {
       var that = this;
       this.updateState(true, false);
-      this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
+      this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
         .then(function () {
           that.updateState(false, false);
           that.createClusterList();
