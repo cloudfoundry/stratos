@@ -67,7 +67,9 @@ func TestLoadPortalConfig(t *testing.T) {
 	os.Setenv("CONSOLE_CLIENT_SECRET", "ohsosecret!")
 	os.Setenv("HCF_CLIENT", "portal-proxy")
 	os.Setenv("HCF_CLIENT_SECRET", "ohsosecret!")
-	os.Setenv("UAA_ENDPOINT", "https://login.hcf.helion.lol/oauth/token")
+	os.Setenv("HCP_IDENTITY_SCHEME", "https")
+	os.Setenv("HCP_IDENTITY_HOST", "login.hcf.helion.lol")
+	os.Setenv("HCP_IDENTITY_PORT", "443")
 	os.Setenv("ALLOWED_ORIGINS", "https://localhost,https://127.0.0.1")
 	os.Setenv("COOKIE_STORE_SECRET", "cookiesecret")
 
@@ -138,7 +140,7 @@ func TestLoadDatabaseConfig(t *testing.T) {
 	os.Setenv("PGSQL_DATABASE", "stratos-db")
 	os.Setenv("PGSQL_HOST", "localhost")
 	os.Setenv("PGSQL_PORT", "5432")
-	os.Setenv("PGSQL_CONNECT_TIMEOOUT_IN_SECS", "5")
+	os.Setenv("PGSQL_CONNECT_TIMEOUT_IN_SECS", "5")
 	os.Setenv("PGSQL_SSL_MODE", "disable")
 
 	var dc datastore.DatabaseConfig

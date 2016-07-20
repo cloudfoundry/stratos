@@ -7,9 +7,10 @@ RUN apt-get update && \
 WORKDIR /srv
 
 COPY portal-proxy portal-proxy
+COPY tools/wait/wait-for-it.sh tools/wait-for-it.sh
 
 RUN chmod +x portal-proxy
 
 EXPOSE 443
 
-ENTRYPOINT ["/srv/portal-proxy"]
+ENTRYPOINT ["bash", "tools/wait-for-it.sh", "hsc-db-int:5432", "--", "./portal-proxy"]
