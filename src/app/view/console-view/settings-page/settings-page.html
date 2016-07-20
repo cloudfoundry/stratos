@@ -5,12 +5,16 @@
 <div class="container registration-content col-sm-12">
   <div class="cluster-settings user-summary">
     <div class="cluster row">
-      <div class="col-md-12">User Summary</div>
+      <div class="col-md-12">Stackato Summary</div>
     </div>
     <div class="cluster row">
       <div class="col-md-6">
         <div class="cluster-info">
           <div class="cluster-properties">
+            <div class="cluster-property">
+              <div translate>Console Version</div>
+              <div>{{settingsCtrl.stackatoInfo.info.version.proxy_version}}</div>
+            </div>
             <div class="cluster-property">
               <div translate>User</div>
               <div>{{settingsCtrl.stackatoInfo.info.user.name}}</div>
