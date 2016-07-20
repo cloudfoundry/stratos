@@ -32,7 +32,8 @@
     'app.event.eventService',
     'app.model.modelManager',
     '$state',
-    '$window'
+    '$window',
+    'app.view.upgradeCheck'
   ];
 
   /**
@@ -44,6 +45,7 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {$state} $state - Angular ui-router $state service
    * @param {$window} $window - Angular $window service
+   * @param {app.view.upgradeCheck} upgradeCheck - the upgrade check service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {boolean} loggedIn - a flag indicating if user logged in
@@ -52,12 +54,13 @@
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController($timeout, eventService, modelManager, $state, $window) {
+  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$window = $window;
+    this.upgradeCheck = upgradeCheck;
     this.loggedIn = false;
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
@@ -199,6 +202,12 @@
         this.serverErrorOnLogin = false;
         this.failedLogin = false;
       } else if (response.status >= 500 && response.status < 600) {
+        // Check for upgrade - the upgrade handler will show the error - but we need to hide the login panel
+        if (this.upgradeCheck.isUpgrading(response)) {
+          this.loggedIn = true;
+          return;
+        }
+
         // handle 5xx errors when attempting to login
         this.eventService.$emit(this.eventService.events.HTTP_5XX_ON_LOGIN);
         this.serverFailedToRespond = false;

@@ -26,7 +26,7 @@
   }
 
   NavBarController.$inject = [
-    '$stateParams'
+    '$rootScope', '$stateParams'
   ];
 
   /**
@@ -35,10 +35,19 @@
    * @name NavBarController
    * @description Controller for the navbar - navigation menu items can be hidden based on ui routerstate params
    * @constructor
-   * @param  {$stateParams} $stateParams - UI Router state params
+   * @param {object} $rootScope - the $rootScope
+   * @param {$stateParams} $stateParams - UI Router state params
    */
-  function NavBarController($stateParams) {
+  function NavBarController($rootScope, $stateParams) {
+    var that = this;
+    // Initial state
     this.hideNavigation = $stateParams.hideNavigation;
+    this.hideAccount = $stateParams.hideAccount;
+
+    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
+      that.hideNavigation = toParams.hideNavigation;
+      that.hideAccount = toParams.hideAccount;
+    });
   }
 
 })();

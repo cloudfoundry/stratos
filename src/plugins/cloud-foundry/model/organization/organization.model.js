@@ -18,29 +18,29 @@
     '$log'
   ];
 
-  function registerOrgModel(modelManager, apiManager, utils, userInfoService, $q, $log) {
+  function registerOrgModel(modelManager, apiManager, utils, $q, $log) {
     modelManager.register('cloud-foundry.model.organization',
-      new Organization(apiManager, modelManager, utils, userInfoService, $q, $log));
+      new Organization(modelManager, apiManager, utils, $q, $log));
   }
 
   /**
    * @memberof cloud-foundry.model
    * @name Organization
+   * @param {object} modelManager - the model manager
+* @property {object} modelManager - the app's model manager
    * @param {object} apiManager - the API manager
    * @property {object} apiManager - the API manager
-   * @param {object} modelManager - the app's model manager
-   * @property {object} modelManager - the app's model manager
    * @param {object} utils - the utils service
    * @property {object} utils - the utils service
-   * @param {object} userInfoService - the userInfoService service
-   * @property {object} userInfoService - the userInfoService service
+   * @param {object} stackatoInfoModel - the stackatoInfoModel model
+   * @property {object} stackatoInfoModel - the stackatoInfoModel model
    * @param {object} $q - angular $q service
    * @property {object} $q - angular $q service
    * @param {object} $log - angular $log service
    * @property {object} $log - angular $log service
    * @class
    */
-  function Organization(apiManager, modelManager, utils, userInfoService, $q, $log) {
+  function Organization(modelManager, apiManager, utils, $q, $log) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.$q = $q;
@@ -167,6 +167,24 @@
       }
     },
 
+    initOrganizationCache: function (cnsiGuid, orgGuid) {
+      this.organizations[cnsiGuid] = this.organizations[cnsiGuid] || {};
+      this.organizations[cnsiGuid][orgGuid] = this.organizations[cnsiGuid][orgGuid] || {details: {}, roles: {}};
+    },
+
+    cacheOrganizationDetails: function (cnsiGuid, orgGuid, details) {
+      this.initOrganizationCache(cnsiGuid, orgGuid);
+      this.organizations[cnsiGuid][orgGuid].details = details;
+    },
+
+    cacheOrganizationUsersRoles: function (cnsiGuid, orgGuid, roles) {
+      var that = this;
+      this.initOrganizationCache(cnsiGuid, orgGuid);
+      _.forEach(roles, function (user) {
+        that.organizations[cnsiGuid][orgGuid].roles[user.metadata.guid] = user.entity.organization_roles;
+      });
+    },
+
     /**
      * @function  getOrganizationDetails
      * @memberof cloud-foundry.model.organization
@@ -193,22 +211,13 @@
       var quotaP = orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig);
 
       var rolesP = orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig);
-      var userInfoP = that.userInfoService.userInfo();
+      var stackatoInfoP = that.stackatoInfoModel.getStackatoInfo();
 
-      var orgRolesP = that.$q.all({roles: rolesP, userInfo: userInfoP}).then(function (values) {
+      var orgRolesP = that.$q.all({roles: rolesP, stackatoInfo: stackatoInfoP}).then(function (values) {
         var i, userGuid, myRoles;
 
         // Find our user's GUID
-        for (i = 0; i < values.userInfo.data.length; i++) {
-          var userPerms = values.userInfo.data[i];
-          if (userPerms.type === 'hcf' && userPerms.cnsi_guid === cnsiGuid) {
-            userGuid = userPerms.user_guid;
-            break;
-          }
-        }
-        if (!userGuid) {
-          throw new Error('Failed to get HCF user GUID');
-        }
+        userGuid = values.stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
 
         // Find my user's roles
         for (i = 0; i < values.roles.data.resources.length; i++) {
@@ -312,10 +321,7 @@
         details.totalRoutes = vals.routes;
         details.spaces = _.keyBy(vals.spaces, 'metadata.guid');
 
-        if (_.isUndefined(that.organizations[cnsiGuid])) {
-          that.organizations[cnsiGuid] = {};
-        }
-        that.organizations[cnsiGuid][orgGuid] = details;
+        that.cacheOrganizationDetails(cnsiGuid, orgGuid, details);
         return details;
       });
     }

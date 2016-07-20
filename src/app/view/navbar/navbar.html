@@ -17,7 +17,7 @@
     <div id="navbar" class="collapse navbar-collapse">
       <navigation ng-if="!navBarCtrl.hideNavigation"></navigation>
       <icons class="pull-right">
-        <avatar></avatar>
+        <avatar ng-if="!navBarCtrl.hideAccount"></avatar>
       </icons>
     </div><!--/.nav-collapse -->
   </div>

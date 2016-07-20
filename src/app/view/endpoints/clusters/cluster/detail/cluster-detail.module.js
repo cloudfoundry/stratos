@@ -93,25 +93,7 @@
       });
     });
 
-    // this.organizationModel.listAllOrganizations(this.guid, {}).then(function (orgs) {
-    //   that.organizations = [];
-    //   that.updateTotalApps();
-    //   _.forEach(orgs, function (org) {
-    //     that.organizationModel.getOrganizationDetails(that.guid, org).then(function (orgDetails) {
-    //       that.organizations.push(orgDetails);
-    //
-    //       that.updateTotalApps();
-    //
-    //       // Sort organizations by created date
-    //       that.organizations.sort(function (o1, o2) {
-    //         return o1.created_at - o2.created_at;
-    //       });
-    //     });
-    //
-    //   });
-    // }).catch(function (error) {
-    //   $log.error('Error while listing organizations', error);
-    // });
+
 
   }
 

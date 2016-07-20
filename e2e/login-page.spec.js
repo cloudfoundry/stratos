@@ -3,7 +3,7 @@
 var helpers = require('./po/helpers.po');
 var loginPage = require('./po/login-page.po');
 
-describe('Login Page', function () {
+fdescribe('Login Page', function () {
   beforeAll(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();
@@ -106,7 +106,7 @@ describe('Login Page', function () {
     });
 
     it('should allow log in with correct credentials', function () {
-      loginPage.enterLogin('dev', 'dev');
+      loginPage.enterLogin('admin@cnap.local', 'cnapadmin');
 
       expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 

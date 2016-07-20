@@ -1,1 +1,45 @@
 @import 'organization-tile/organization-tile';
+
+.cluster-detail {
+
+  .cluster-users-table {
+    > div {
+      padding-top: 60px;
+    }
+
+    .select-all-checkbox {
+      .checkbox-input {
+        margin-bottom: -5px;
+      }
+    }
+
+    th {
+      text-transform: none;
+    }
+
+    .user-name {
+      white-space: nowrap;
+      min-width: 200px;
+    }
+
+    .roles-list {
+
+      .role-pill {
+        cursor: default;
+        float: left;
+        margin: 0 8px 8px 0;
+        padding: 0 4px 4px 4px;
+        border: solid 2px #ccc;
+        border-radius: 5px;
+      }
+
+      i.helion-icon.close-icon {
+        font-size: 12px;
+        font-weight: bolder;
+        color: #aaa;
+        margin-left: 10px;
+      }
+    }
+
+  }
+}

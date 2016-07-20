@@ -103,6 +103,14 @@
     });
 
     $scope.$watch(function () {
+      return that.userInput.searchCategory;
+    }, function (newSearchCategory) {
+      if (angular.isDefined(that.userInput.search)) {
+        that.userInput.search.entity.extra = newSearchCategory === 'all' ? undefined : newSearchCategory;
+      }
+    });
+
+    $scope.$watch(function () {
       return that.options.subflow;
     }, function (subflow) {
       if (subflow) {
@@ -131,12 +139,18 @@
         domain: null,
         application: null,
         hceCnsi: null,
-        source: 'github',
+        source: null,
         repo: null,
         branch: null,
         buildContainer: null,
         imageRegistry: null,
-        projectId: null
+        projectId: null,
+        searchCategory: 'all',
+        search: {
+          entity: {
+            extra: undefined
+          }
+        }
       };
 
       this.data.workflow = {
@@ -162,6 +176,19 @@
                   ).then(function (services) {
                     that.options.services.length = 0;
                     [].push.apply(that.options.services, services);
+
+                    // retrieve categories that user can filter services by
+                    var categories = [];
+                    angular.forEach(services, function (service) {
+                      if (angular.isObject(service.entity.extra) && angular.isDefined(service.entity.extra.categories)) {
+                        var serviceCategories = _.map(service.entity.extra.categories,
+                                                      function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
+                        categories = _.unionBy(categories, serviceCategories, 'lower');
+                      }
+                    });
+                    categories = _.sortBy(categories, 'lower');
+                    that.options.serviceCategories.length = 1;
+                    [].push.apply(that.options.serviceCategories, categories);
                   });
                 });
               });
@@ -181,7 +208,13 @@
             title: gettext('Delivery'),
             formName: 'application-delivery-form',
             templateUrl: path + 'delivery.html',
-            nextBtnText: gettext('Next')
+            nextBtnText: gettext('Next'),
+            onNext: function () {
+              if (that.options.subflow === 'pipeline') {
+                that.options.sources.length = 0;
+                return that.getVcsInstances();
+              }
+            }
           }
         ]
       };
@@ -197,22 +230,8 @@
             formName: 'application-source-form',
             nextBtnText: gettext('Next'),
             onNext: function () {
-              try {
-                /* eslint-disable */
-                // TODO (kdomico): Get or create fake HCE user until HCE API is complete https://jira.hpcloud.net/browse/TEAMFOUR-623
-                /* eslint-enable */
-                that.hceModel.getUserByGithubId(that.userInput.hceCnsi.guid, '123456')
-                  .then(angular.noop, function (response) {
-                    if (response.status === 404) {
-                      that.hceModel.createUser(that.userInput.hceCnsi.guid, '123456', 'login', 'token');
-                    }
-                  });
-              } catch (err) {
-                this.errors.getUserByGithubId = true;
-              }
-
               var oauth;
-              if (that.userInput.source === 'github') {
+              if (that.userInput.source.vcs_type === 'GITHUB') {
                 oauth = that.githubOauthService.start();
               } else {
                 oauth = that.$q.defer();
@@ -324,6 +343,9 @@
         subflow: null,
         serviceInstances: [],
         services: [],
+        serviceCategories: [
+          { label: gettext('All Services'), value: 'all' }
+        ],
         organizations: [],
         spaces: [],
         apps: [],
@@ -346,26 +368,7 @@
             img: 'flowdock_logo.png'
           }
         ],
-        sources: [
-          {
-            img: 'github_octocat.png',
-            label: 'Github',
-            description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
-            value: 'github'
-          },
-          {
-            img: 'GitHub-Mark-120px-plus.png',
-            label: 'Github Enterprise',
-            description: gettext('Connect to a repository hosted on an on-premise Github Enterprise instance that you own or have admin rights to.'),
-            value: 'github-enterprise'
-          },
-          {
-            img: 'git.png',
-            label: 'Git',
-            description: gettext('Connect to a repository hosted locally. You will need to provide the name of the repo and the clone URL.'),
-            value: 'git'
-          }
-        ],
+        sources: [],
         repos: [],
         branches: [],
         buildContainers: [],
@@ -544,6 +547,28 @@
       });
     },
 
+    getVcsInstances: function () {
+      var that = this;
+      var vcsTypesPromise = that.hceModel.listVcsTypes(that.userInput.hceCnsi.guid);
+      var vcsInstancesPromise = that.hceModel.getVcses(that.userInput.hceCnsi.guid);
+      return that.$q.all([vcsTypesPromise, vcsInstancesPromise])
+        .then(function () {
+          var sources = _.map(that.hceModel.data.vcsInstances, function (o) {
+            var vcsType = that.hceModel.data.vcsTypes[o.vcs_type];
+            return {
+              img: vcsType.icon_url,
+              label: vcsType.vcs_type_label,
+              description: vcsType.description,
+              value: o
+            };
+          }) || [];
+          if (sources.length > 0) {
+            [].push.apply(that.options.sources, sources);
+            that.userInput.source = sources[0].value;
+          }
+        });
+    },
+
     getPipelineDetailsData: function () {
       var that = this;
 
@@ -628,13 +653,11 @@
     },
 
     createPipeline: function (targetId) {
-      var projectType = this.userInput.buildContainer.build_container_label.split(' ')[0];
       return this.hceModel.createProject(this.userInput.hceCnsi.guid,
                                          this.userInput.name,
                                          this.userInput.source,
                                          this.githubModel.getToken(),
                                          targetId,
-                                         projectType.toLowerCase(),
                                          this.userInput.buildContainer.build_container_id,
                                          this.userInput.repo,
                                          this.userInput.branch);
@@ -660,7 +683,7 @@
       this.serviceInstanceModel.list()
         .then(function (serviceInstances) {
           var validServiceInstances = _.chain(_.values(serviceInstances))
-                                       .filter('valid')
+                                       .filter({ cnsi_type: 'hcf', valid: true })
                                        .map(function (o) {
                                          return { label: o.api_endpoint.Host, value: o };
                                        })

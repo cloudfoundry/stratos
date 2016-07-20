@@ -40,12 +40,19 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
     this.hasApps = false;
+    this.clusterCount = 0;
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userCnsiModel.list().then(function () {
+      that.clusterCount = _.chain(that.userCnsiModel.serviceInstances)
+                            .values()
+                            .filter({cnsi_type: 'hcf'})
+                            .size()
+                            .value();
+
       that.model.all().finally(function () {
         // Check the data we have and determine if we have any applications
         that.hasApps = false;
-        if (that.model.data && that.model.data.applications) {
+        if (that.clusterCount > 0 && that.model.data && that.model.data.applications) {
           var appCount = _.reduce(that.model.data.applications, function (sum, app) {
             if (!app.error && app.resources) {
               return sum + app.resources.length;

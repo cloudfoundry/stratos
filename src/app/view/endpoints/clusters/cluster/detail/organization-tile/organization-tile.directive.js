@@ -62,19 +62,19 @@
 
     setActions: function () {
       this.actions.push({
-        name: 'Edit Organization',
+        name: gettext('Edit Organization'),
         disabled: true,
         execute: function () {
         }
       });
       this.actions.push({
-        name: 'Delete Organization',
+        name: gettext('Delete Organization'),
         disabled: true,
         execute: function () {
         }
       });
       this.actions.push({
-        name: 'Assign User(s)',
+        name: gettext('Assign User(s)'),
         disabled: true,
         execute: function () {
         }

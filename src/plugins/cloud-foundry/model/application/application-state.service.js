@@ -28,6 +28,9 @@
      *   - 0 - must be 0
      *   - N - must be >0
      *   - ? - matches when the value is not known
+     *
+     * To determine the incompelete state, we also need to look at the package_updated_at field
+     *
      */
     var stateMetadata = {
       '?': {
@@ -114,7 +117,7 @@
      */
     function get(summary, appInstances) {
       var appState = summary ? summary.state : 'UNKNOWN';
-      var pkgState = (summary ? summary.package_state : '') || '*NONE*';
+      var pkgState = getPackageState(appState, summary);
       var wildcard = stateMetadata['?'];
 
       // App state wildcard match, just match on package state
@@ -131,29 +134,11 @@
           if (appStateMatch['?']) {
             return appStateMatch['?'];
           } else {
-            // Need to check based on additional state
-            // Note that the app summary returned when we are getting all apps does not report running_instances
-            var running = getCount(summary.running_instances, appInstances, 'RUNNING');
-            var crashed, flapping;
-            // If we know how many aer running and this is the same as the total # instances then
-            // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
-            if (running === summary.instances) {
-              crashed = 0;
-              flapping = 0;
-            } else {
-              crashed = getCount(undefined, appInstances, 'CRASHED');
-              if (crashed >= 0) {
-                flapping = summary.instances - crashed - running;
-              } else {
-                // If we couldn't determine #crashed, then we can't calculate #flapping
-                flapping = -1;
-              }
-            }
-
+            var counts = getCounts(summary, appInstances);
             var extState = pkgState + '(' +
-              formatCount(running) + ',' +
-              formatCount(crashed) + ',' +
-              formatCount(flapping) + ')';
+              formatCount(counts.running) + ',' +
+              formatCount(counts.crashed) + ',' +
+              formatCount(counts.flapping) + ')';
             if (appStateMatch[extState]) {
               return appStateMatch[extState];
             }
@@ -166,6 +151,53 @@
         label: gettext('Unknown'),
         indicator: 'error'
       };
+    }
+
+    /**
+     * @function getPackageState
+     * @memberof cloud-foundry.model.application.stateService
+     * @description Gets the package state based on the application summary metadata
+     * @param {string} appState - the application state
+     * @param {object} summary - the application summary
+     * @returns {string} Package summary state
+     */
+    function getPackageState(appState, summary) {
+      var pkgState = (summary ? summary.package_state : '') || '*NONE*';
+      // Tweak package state based on extra info in package_updated_at if needed (for now, only if stopped)
+      if (appState === 'STOPPED' && pkgState === 'PENDING') {
+        pkgState = summary.package_updated_at && summary.package_updated_at.length > 0 ? 'PENDING' : '*NONE*';
+      }
+      return pkgState;
+    }
+
+    /**
+     * @function getCounts
+     * @memberof cloud-foundry.model.application.stateService
+     * @description Get an object with the instance counts for running, crashed and failing
+     * @param {object} summary - the application summary
+     * @param {object} appInstances - the application instances metadata (from the app stats API call)
+     * @returns {object} Object with instance count metadata
+     */
+    function getCounts(summary, appInstances) {
+      var counts = {};
+      // Need to check based on additional state
+      // Note that the app summary returned when we are getting all apps does not report running_instances
+      counts.running = getCount(summary.running_instances, appInstances, 'RUNNING');
+      // If we know how many aer running and this is the same as the total # instances then
+      // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
+      if (counts.running === summary.instances) {
+        counts.crashed = 0;
+        counts.flapping = 0;
+      } else {
+        counts.crashed = getCount(undefined, appInstances, 'CRASHED');
+        if (counts.crashed >= 0) {
+          counts.flapping = summary.instances - counts.crashed - counts.running;
+        } else {
+          // If we couldn't determine #crashed, then we can't calculate #flapping
+          counts.flapping = -1;
+        }
+      }
+      return counts;
     }
 
     /**
