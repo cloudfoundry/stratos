@@ -28,8 +28,8 @@
     this.organizationGuid = $stateParams.organization;
     this.spaceGuid = $stateParams.space;
 
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.spacePath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces.' + this.spaceGuid;
+    this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
 
     this.spaceActions = [
       {
@@ -58,7 +58,7 @@
 
   angular.extend(ClusterSpaceController.prototype, {
     space: function () {
-      return _.get(this.organizationModel, this.spacePath);
+      return _.get(this.spaceModel, this.spacePath);
     }
 
   });

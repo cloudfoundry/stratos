@@ -85,7 +85,7 @@
      * @memberof  cloud-foundry.model.serviceBinding
      * @description list all service bindings
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-     * @param {object} params - params for url building
+     * @param {object=} params - params for url building
      * @returns {promise} A promise object
      * @public
      */

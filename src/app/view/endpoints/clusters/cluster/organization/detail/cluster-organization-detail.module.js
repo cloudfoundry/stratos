@@ -31,7 +31,7 @@
     this.organizationGuid = $stateParams.organization;
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.orgPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid;
+    this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
 
     this.actions = [
       {

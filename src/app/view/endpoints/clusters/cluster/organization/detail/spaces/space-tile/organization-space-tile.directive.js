@@ -22,7 +22,7 @@
     '$state',
     '$stateParams',
     'app.model.modelManager',
-    '$scope'
+    '$q'
   ];
 
   /**
@@ -31,19 +31,19 @@
    * @param {object} $state - the angular $state service
    * @param {object} $stateParams - the angular $stateParams service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {object} $scope - the angular $scope service
+   * @param {object} $q - the angular $q service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationSpaceTileController($state, $stateParams, modelManager, $scope) {
+  function OrganizationSpaceTileController($state, $stateParams, modelManager, $q) {
     var that = this;
 
     this.$state = $state;
     this.clusterGuid = $stateParams.guid;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = 'spaces.' + this.clusterGuid + '.' + this.space.metadata.guid;
+    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.space.metadata.guid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.orgPath = 'organizations.' + that.clusterGuid + '.' + that.space.entity.organization_guid;
+    this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, that.space.entity.organization_guid);
 
     this.cardData = {
       title: this.space.entity.name
@@ -68,19 +68,15 @@
       }
     ];
 
-    $scope.$watch(function () {
-      return that.spaceDetail();
-    }, function (spaceDetail) {
-      if (!spaceDetail) {
-        return;
-      }
+    var initPromise = _.get($state.current, 'data.initialized', $q.when());
+    initPromise.then(function () {
       // Present memory usage
       // var usedMemHuman = that.utils.mbToHumanSize(orgDetail.memUsed);
       // var memQuotaHuman = that.utils.mbToHumanSize(orgDetail.memQuota);
       // that.memory = usedMemHuman + ' / ' + memQuotaHuman;
 
       // Present the user's roles
-      that.roles = that.spaceModel.spaceRolesToString(spaceDetail.roles);
+      that.roles = that.spaceModel.spaceRolesToString(that.spaceDetail().details.roles);
     });
   }
 

@@ -34,25 +34,29 @@
   $card-max-width: 420px;
   $card-layout-steps: 5;
 
+  width: 100%;
+  display: flex;
+  flex-flow: row wrap;
+
   .cluster-gallery-card-parent {
-    padding-left: 0;
+    padding-right: 10px;
+    padding-left: 10px;
 
     position: relative;
     float: left;
-    padding-right: 15px;
     min-height: 1px;
 
-    // Set width in percentages for all layout steps
-    width: 100%;
+    // Set flex-base in percentages for all layout steps
+    flex: 1 1 100%;
 
     // Many columns
     @for $i from 2 through $card-layout-steps {
       @media (min-width: $i * $card-max-width) {
-        width: percentage(1/$i);
+        flex: 1 1 percentage(1/$i)
       }
     }
 
-    // Give more room to the value than the label
+    // Inside the cards, give more room to the value than the label
     @media (min-width: 2 * $card-max-width) {
       gallery-card {
         .card .dl-horizontal dd {
@@ -75,12 +79,28 @@
   }
 
   // Ensure the last card in every row doesn't have right-padding
-  @for $i from $card-layout-steps through 1 {
+  @for $i from $card-layout-steps - 1 through 1 {
     @media (min-width: $i * $card-max-width) and (max-width: $card-max-width + $i * $card-max-width - 1) {
       >:nth-child(#{$i}n) {
-        padding-right: 0
+        padding-right: 0;
+      }
+      >:nth-child(#{$i}n+1) {
+        padding-left: 0;
       }
     }
+  }
+
+  @media (min-width: $card-layout-steps * $card-max-width) {
+    >:nth-child(#{$card-layout-steps}n) {
+      padding-right: 0;
+    }
+    >:nth-child(#{$card-layout-steps}n+1) {
+      padding-left: 0;
+    }
+  }
+
+  >:last-child {
+    padding-right: 0;
   }
 
 }

@@ -26,10 +26,12 @@
     'app.model.modelManager',
     '$stateParams',
     '$scope',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    '$state',
+    '$q'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, $q) {
     var that = this;
     this.guid = $stateParams.guid;
 
@@ -67,22 +69,19 @@
     this.updateTotalApps = function () {
       that.totalApps = 0;
       var totalMemoryMb = 0;
-      _.forEach(that.organizationModel.organizations[that.guid], function (org) {
-        that.totalApps += org.totalApps;
-        totalMemoryMb += org.memUsed;
+      _.forEach(that.organizations, function (orgDetails) {
+        that.totalApps += orgDetails.totalApps;
+        totalMemoryMb += orgDetails.memUsed;
       });
       that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
     };
 
-    $scope.$watch(function () {
-      return _.keys(_.get(that.organizationModel, 'organizations.' + that.guid, {})).length;
-    }, function (orgDetails) {
-      if (!orgDetails) {
-        return;
-      }
+    var initPromise = _.get($state.current, 'data.initialized', $q.when());
+
+    initPromise.then(function () {
       that.organizations = [];
       _.forEach(that.organizationModel.organizations[that.guid], function (orgDetail) {
-        that.organizations.push(orgDetail);
+        that.organizations.push(orgDetail.details);
 
         that.updateTotalApps();
 
@@ -92,9 +91,6 @@
         });
       });
     });
-
-
-
   }
 
   angular.extend(ClusterDetailController.prototype, {});

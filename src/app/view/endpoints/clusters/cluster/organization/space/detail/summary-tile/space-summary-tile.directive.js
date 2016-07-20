@@ -45,9 +45,8 @@
     this.$state = $state;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = 'spaces.' + this.clusterGuid + '.' + this.spaceGuid;
+    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.orgPath = 'organizations.' + this.clusterGuid;
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.cardData = {
@@ -70,7 +69,7 @@
     ];
 
     $scope.$watch(function () {
-      return that.spaceDetail();
+      return that.spaceDetail().details;
     }, function (spaceDetail) {
       if (!spaceDetail) {
         return;
@@ -90,11 +89,8 @@
 
     spaceDetail: function () {
       return _.get(this.spaceModel, this.spacePath);
-    },
-
-    orgDetails: function () {
-      return _.get(this.organizationModel, this.orgPath + '.' + _.get(this.space, 'entity.organization_guid'));
     }
+
   });
 
 })();

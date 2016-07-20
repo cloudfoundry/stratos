@@ -64,23 +64,25 @@
     ];
 
     $scope.$watch(function () {
-      return _.get(that.organizationModel, 'organizations.' + that.clusterGuid + '.' + that.organizationGuid);
-    }, function (orgDetail) {
-      if (!orgDetail) {
+      return _.get(that.organization, 'details');
+    }, function () {
+      if (!that.organization.details) {
         return;
       }
-
       // Present memory usage
-      var usedMemHuman = that.utils.mbToHumanSize(orgDetail.memUsed);
-      var memQuotaHuman = that.utils.mbToHumanSize(orgDetail.memQuota);
+      var usedMemHuman = that.utils.mbToHumanSize(that.organization.details.memUsed);
+      var memQuotaHuman = that.utils.mbToHumanSize(that.organization.details.memQuota);
       that.memory = usedMemHuman + ' / ' + memQuotaHuman;
 
       // Present the user's roles
-      that.roles = that.organizationModel.organizationRolesToString(orgDetail.roles);
+      that.roles = that.organizationModel.organizationRolesToString(that.organization.details.roles);
     });
   }
 
   angular.extend(OrganizationSummaryTileController.prototype, {
+    keys: function (obj) {
+      return _.keys(obj);
+    }
   });
 
 })();

@@ -26,47 +26,58 @@
   ClusterController.$inject = [
     'app.model.modelManager',
     '$stateParams',
-    '$log'
+    '$log',
+    'app.utils.utilsService',
+    '$state',
+    '$q'
   ];
 
-  function ClusterController(modelManager, $stateParams, $log) {
+  function ClusterController(modelManager, $stateParams, $log, utils, $state, $q) {
     var that = this;
 
     this.guid = $stateParams.guid;
 
-    // Cache all organizations associated with this cluster
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.organizationModel.listAllOrganizations(this.guid, {}).then(function (orgs) {
-      _.forEach(orgs, function (org) {
-        that.organizationModel.getOrganizationDetails(that.guid, org);
+    function init() {
+
+      // Cache all organizations associated with this cluster
+      that.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      var orgPromise = that.organizationModel.listAllOrganizations(that.guid, {}).then(function (orgs) {
+        var detailsPromises = [];
+        _.forEach(orgs, function (org) {
+          detailsPromises.push(that.organizationModel.getOrganizationDetails(that.guid, org));
+        });
+        return $q.all(detailsPromises);
+      }).catch(function (error) {
+        $log.error('Error while listing organizations', error);
       });
-    }).catch(function (error) {
-      $log.error('Error while listing organizations', error);
-    });
 
-    /* eslint-disable no-warning-comments */
-    // TODO (TEAMFOUR-780): There's a few places we call this for the core endpoints screens (before we hit a specific
-    // clusters page). Need to reduce all these calls to one and watch cache.
-    // Cache all user service instance data. Also used by child states to determine cluster name in breadcrumbs
-    /* eslint-enable no-warning-comments */
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.userServiceInstanceModel.list();
+      /* eslint-disable no-warning-comments */
+      // TODO (TEAMFOUR-780): There's a few places we call this for the core endpoints screens (before we hit a specific
+      // clusters page). Need to reduce all these calls to one and watch cache.
+      // Cache all user service instance data. Also used by child states to determine cluster name in breadcrumbs
+      /* eslint-enable no-warning-comments */
+      that.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var servicesPromise = that.userServiceInstanceModel.list();
 
-    // Needed to show a Space's list of service instances (requires app name, from app guid, from service binding)
-    var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
-    serviceBindingModel.listAllServiceBindings(this.guid);
+      // Needed to show a Space's list of service instances (requires app name, from app guid, from service binding)
+      var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+      var serviceBindingPromise = serviceBindingModel.listAllServiceBindings(that.guid);
 
-    // Needed to show the domain part of a route's url (which is not included when listing routes via space)
-    // This can either be private or shared, we have to check both.
-    var privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
-    var sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
-    privateDomains.listAllPrivateDomains(this.guid);
-    sharedDomains.listAllSharedDomains(this.guid);
+      // Needed to show the domain part of a route's url (which is not included when listing routes via space)
+      // This can either be private or shared, we have to check both.
+      var privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
+      var sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
+      var privateDomainsPromise = privateDomains.listAllPrivateDomains(that.guid);
+      var sharedDomainsPromise = sharedDomains.listAllSharedDomains(that.guid);
 
-    // Reset any cache we may be interested in
-    var appModel = modelManager.retrieve('cloud-foundry.model.application');
-    delete appModel.appSummary;
+      // Reset any cache we may be interested in
+      var appModel = modelManager.retrieve('cloud-foundry.model.application');
+      delete appModel.appSummary;
 
+      return $q.all([orgPromise, servicesPromise, serviceBindingPromise, privateDomainsPromise, sharedDomainsPromise]);
+    }
+
+    utils.chainStateResolve($state, init);
   }
 
   angular.extend(ClusterController.prototype, {});

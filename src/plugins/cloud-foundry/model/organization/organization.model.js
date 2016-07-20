@@ -13,7 +13,6 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'app.utils.utilsService',
-    'userInfoService',
     '$q',
     '$log'
   ];
@@ -27,7 +26,7 @@
    * @memberof cloud-foundry.model
    * @name Organization
    * @param {object} modelManager - the model manager
-* @property {object} modelManager - the app's model manager
+   * @property {object} modelManager - the app's model manager
    * @param {object} apiManager - the API manager
    * @property {object} apiManager - the API manager
    * @param {object} utils - the utils service
@@ -46,7 +45,7 @@
     this.$q = $q;
     this.$log = $log;
     this.utils = utils;
-    this.userInfoService = userInfoService;
+    this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.organizations = {};
 
     var passThroughHeader = {
@@ -151,7 +150,7 @@
     organizationRolesToString: function (roles) {
       var that = this;
 
-      if (roles.length === 0) {
+      if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the org
         return gettext('none');
       } else {
@@ -169,7 +168,16 @@
 
     initOrganizationCache: function (cnsiGuid, orgGuid) {
       this.organizations[cnsiGuid] = this.organizations[cnsiGuid] || {};
-      this.organizations[cnsiGuid][orgGuid] = this.organizations[cnsiGuid][orgGuid] || {details: {}, roles: {}};
+      this.organizations[cnsiGuid][orgGuid] = this.organizations[cnsiGuid][orgGuid] || {
+        details: {},
+        roles: {},
+        services: {},
+        spaces: {}
+      };
+    },
+
+    fetchOrganizationPath: function (cnsiGuid, orgGuid) {
+      return 'organizations.' + cnsiGuid + '.' + orgGuid;
     },
 
     cacheOrganizationDetails: function (cnsiGuid, orgGuid, details) {
@@ -182,6 +190,22 @@
       this.initOrganizationCache(cnsiGuid, orgGuid);
       _.forEach(roles, function (user) {
         that.organizations[cnsiGuid][orgGuid].roles[user.metadata.guid] = user.entity.organization_roles;
+      });
+    },
+
+    cacheOrganizationServices: function (cnsiGuid, orgGuid, services) {
+      var that = this;
+      this.initOrganizationCache(cnsiGuid, orgGuid);
+      _.forEach(services, function (service) {
+        that.organizations[cnsiGuid][orgGuid].services[service.metadata.guid] = service;
+      });
+    },
+
+    cacheOrganizationSpaces: function (cnsiGuid, orgGuid, spaces) {
+      var that = this;
+      this.initOrganizationCache(cnsiGuid, orgGuid);
+      _.forEach(spaces, function (space) {
+        that.organizations[cnsiGuid][orgGuid].spaces[space.metadata.guid] = space;
       });
     },
 
@@ -216,6 +240,9 @@
       var orgRolesP = that.$q.all({roles: rolesP, stackatoInfo: stackatoInfoP}).then(function (values) {
         var i, userGuid, myRoles;
 
+        // TODO: there may be many pages of Users!
+        that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, values.roles.data.resources);
+
         // Find our user's GUID
         userGuid = values.stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
 
@@ -235,6 +262,7 @@
 
       var allSpacesP = this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
+          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, res.data.resources);
           return res.data.resources;
         });
 
@@ -261,7 +289,10 @@
         throw error;
       });
 
-      var servicesP = this.listAllServicesForOrganization(cnsiGuid, orgGuid);
+      var servicesP = this.listAllServicesForOrganization(cnsiGuid, orgGuid).then(function (services) {
+        that.cacheOrganizationServices(cnsiGuid, orgGuid, services);
+        return services;
+      });
       var spaceModel = this.modelManager.retrieve('cloud-foundry.model.space');
       var routesCountP = allSpacesP.then(function (spaces) {
         var promises = [];
@@ -317,9 +348,7 @@
 
         details.roles = vals.roles;
 
-        details.services = vals.services;
         details.totalRoutes = vals.routes;
-        details.spaces = _.keyBy(vals.spaces, 'metadata.guid');
 
         that.cacheOrganizationDetails(cnsiGuid, orgGuid, details);
         return details;

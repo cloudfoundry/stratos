@@ -16,7 +16,7 @@
       controller: SpaceRoutesController,
       controllerAs: 'spaceRoutesCtrl',
       ncyBreadcrumb: {
-        label: '{{ clusterSpaceController.space().entity.name || "..." }}',
+        label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
         parent: function () {
           return 'endpoint.clusters.cluster.organization.detail.spaces';
         }
@@ -40,7 +40,7 @@
     this.modelManager = modelManager;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = 'spaces.' + this.clusterGuid + '.' + this.spaceGuid;
+    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
 

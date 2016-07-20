@@ -25,10 +25,12 @@
   ClusterOrgController.$inject = [
     'app.model.modelManager',
     '$stateParams',
-    '$scope'
+    '$state',
+    'app.utils.utilsService',
+    '$q'
   ];
 
-  function ClusterOrgController(modelManager, $stateParams, $scope) {
+  function ClusterOrgController(modelManager, $stateParams, $state, utils, $q) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -38,13 +40,15 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spacesPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces';
 
-    $scope.$watch(function () {
-      return _.get(that.organizationModel, that.spacesPath);
-    }, function (spaces) {
-      _.forEach(spaces, function (space) {
-        that.spaceModel.getSpaceDetails(that.clusterGuid, space);
+    function init() {
+      var promises = [];
+      _.forEach(_.get(that.organizationModel, that.spacesPath), function (space) {
+        promises.push(that.spaceModel.getSpaceDetails(that.clusterGuid, space));
       });
-    });
+      return $q.all(promises);
+    }
+
+    utils.chainStateResolve($state, init);
   }
 
   angular.extend(ClusterOrgController.prototype, {});

@@ -3,21 +3,21 @@
               card-actions="spaceSummaryTileCtrl.actions"
               card-actions-icon="helion-icon helion-icon-More"
               card-actions-position="actions-menu-right">
-  <div class="col-md-5" ng-if="spaceSummaryTileCtrl.spaceDetail()">
+  <div class="col-md-5" ng-if="spaceSummaryTileCtrl.spaceDetail().details">
     <dl class="dl-horizontal">
       <dt translate>APPLICATIONS</dt>
-      <dd>{{ spaceSummaryTileCtrl.spaceDetail().totalApps }}</dd>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalApps }}</dd>
       <dt translate>SERVICES</dt>
-      <dd>{{ spaceSummaryTileCtrl.spaceDetail().totalServices }}</dd>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalServices }}</dd>
       <dt translate>ROUTES</dt>
-      <dd>{{ spaceSummaryTileCtrl.spaceDetail().totalRoutes }}</dd>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalRoutes }}</dd>
       <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>DISK</dt>-->
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
       <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>MEMORY</dt>-->
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
     </dl>
   </div>
-  <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail() && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
+  <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail().details && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
     <dl class="dl-horizontal">
       <dt translate>CF SPACE ROLE</dt>
       <dd>{{ spaceSummaryTileCtrl.roles }}</dd>
