@@ -186,7 +186,6 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*cnsis.CNSIRecord, error)
 	cnsiList, err = cnsiRepo.List()
 	if err != nil {
 		return cnsiList, err
-
 	}
 
 	return cnsiList, nil
