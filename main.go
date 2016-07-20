@@ -248,6 +248,7 @@ func start(p *portalProxy) error {
 		AllowCredentials: true,
 	}))
 	e.Use(errorLoggingMiddleware)
+	e.Use(retryAfterUpgradeMiddleware)
 
 	p.registerRoutes(e)
 
