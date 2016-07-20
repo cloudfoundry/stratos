@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"io"
+	"log"
 )
 
 // This file is based on the following direction on how to AES encrypt/decrypt
@@ -14,7 +15,7 @@ import (
 
 // Encrypt - <TBD>
 func Encrypt(key, text []byte) (ciphertext []byte, err error) {
-
+	log.Println("Encrypt")
 	var block cipher.Block
 
 	if block, err = aes.NewCipher(key); err != nil {
@@ -35,8 +36,9 @@ func Encrypt(key, text []byte) (ciphertext []byte, err error) {
 	return
 }
 
-// Derypt - <TBD>
+// Decrypt - <TBD>
 func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
+	log.Println("Decrypt")
 
 	var block cipher.Block
 

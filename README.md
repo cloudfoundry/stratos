@@ -32,7 +32,7 @@ development, we need to store the full source within the vendor folder structure
 
 Add the entry to the `glide.yaml` file and then:
 ```
- glide up -u -s
+glide up -u -s
 ```
 This will update dependencies in the vendor folder, and strip all VCS info,
 including .git folders, from each dependent package.
@@ -65,7 +65,7 @@ The portal proxy is run using a series of environment variables. The best approa
 
 ### Set up developer certs
 
-The proxy requires certs to run. When running in production or in the dev harness, the cert will come from environment variables, but since docker-compose can't handle multi-line variables in it's env_files, the proxy will first look for pproxy.crt and pproxy.key files in a dev-certs directory.  You can set the CERT and CERT_KEY variables in your .rc file to be random short strings. They won't be used, but must be present for the proxy to run.
+The proxy requires certs to run. When running in production or in the dev harness, the cert will come from environment variables, but since docker-compose can't handle multi-line variables in it's env_files, the proxy will first look for pproxy.crt and pproxy.key files in a dev-certs directory.  You can set the CONSOLE_PROXY_CERT and CONSOLE_PROXY_CERT_KEY variables in your .rc file to be random short strings. They won't be used, but must be present for the proxy to run.
 
 ### Run in a container
 See the section below entitled `Running portal-proxy in a container`.

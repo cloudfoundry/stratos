@@ -23,6 +23,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func (p *portalProxy) appStream(c echo.Context) error {
+	log.Println("appStream")
 	var userGUID, dopplerAddress, authToken string
 
 	// Get the CNSI and app IDs from route parameters
@@ -132,6 +133,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 
 // Attempts to get the recent logs, if we get an unauthorized error we attempt to refresh our auth token
 func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGUID, appGUID, authToken string, refreshTokenRecord func() error) ([]*events.LogMessage, error) {
+	log.Println("getRecentLogs")
 	messages, err := noaaConsumer.RecentLogs(appGUID, authToken)
 	if err != nil {
 		if ua, ok := err.(*noaa_errors.UnauthorizedError); ok {
@@ -154,6 +156,7 @@ func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGUID, appGUID, authToken
 }
 
 func drainErrChan(errorChan <-chan error) {
+	log.Println("drainErrChan")
 	for err := range errorChan {
 		// Note: we receive a nil error before the channel is closed so check here...
 		if err != nil {
@@ -163,6 +166,7 @@ func drainErrChan(errorChan <-chan error) {
 }
 
 func drainMsgChan(msgChan <-chan *events.LogMessage, callback func(msg *events.LogMessage)) {
+	log.Println("drainMsgChan")
 	for msg := range msgChan {
 		callback(msg)
 	}

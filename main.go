@@ -19,15 +19,19 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+// TimeoutBoundary represents the amount of time we'll wait for the database
+// server to come online before we bail out.
+const TimeoutBoundary = 10
+
 var (
 	httpClient = http.Client{}
 )
 
 func main() {
 	log.SetOutput(os.Stdout)
-
 	log.Println("Proxy initialization started.")
 
+	// Load the portal configuration from env vars via ucpconfig
 	var portalConfig portalConfig
 	portalConfig, err := loadPortalConfig(portalConfig)
 	if err != nil {
@@ -36,10 +40,12 @@ func main() {
 	}
 	log.Println("Proxy configuration loaded.")
 
+	// Initialize the HTTP client
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
 	log.Println("HTTP client initialized.")
 
+	// Get the encryption key we need for tokens in the database
 	portalConfig.EncryptionKeyInBytes, err = setEncryptionKey(portalConfig)
 	if err != nil {
 		log.Println(err)
@@ -47,24 +53,38 @@ func main() {
 	}
 	log.Println("Encryption key set.")
 
+	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = initConnPool()
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	defer databaseConnectionPool.Close()
+	defer func() {
+		log.Println(`--- Closing databaseConnectionPool`)
+		databaseConnectionPool.Close()
+	}()
 	log.Println("Proxy database connection pool created.")
 
+	// Initialize the Postgres backed session store for Gorilla sessions
 	sessionStore := initSessionStore(databaseConnectionPool, portalConfig)
-	defer sessionStore.Close()
-	defer sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
+	defer func() {
+		log.Println(`--- Closing sessionStore`)
+		sessionStore.Close()
+	}()
+	defer func() {
+		log.Println(`--- Setting up sessionStore cleanup`)
+		sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
+	}()
 	log.Println("Proxy session store initialized.")
 
+	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
-	log.Println("Proxy waiting for requests.")
+	log.Println("Proxy initialization complete.")
 
-	log.Printf("%v", portalConfig)
+	// Start the proxy
+	log.Println("Proxy config at startup")
+	log.Printf("%+v\n", portalConfig)
 	if err := start(portalProxy); err != nil {
 		log.Printf("Unable to start the proxy: %v", err)
 		os.Exit(1)
@@ -75,6 +95,7 @@ func main() {
 // For the time being, I am just generating a 256 bit / 32 byte / AES-256 encryption key
 // here. By  the time I am done with this PR, this will come in via the env var.
 func setEncryptionKey(pc portalConfig) ([]byte, error) {
+	log.Println("setEncryptionKey")
 	key := make([]byte, 32)
 	_, err := rand.Read(key)
 
@@ -89,30 +110,58 @@ func setEncryptionKey(pc portalConfig) ([]byte, error) {
 }
 
 func initConnPool() (*sql.DB, error) {
+	log.Println("initConnPool")
+
 	// load up postgresql database configuration
-	var databaseConfig datastore.DatabaseConfig
-	databaseConfig, err := loadDatabaseConfig(databaseConfig)
+	var dc datastore.DatabaseConfig
+	dc, err := loadDatabaseConfig(dc)
 	if err != nil {
 		return nil, err
 	}
 
 	// initialize the database connection pool
-	var databaseConnectionPool *sql.DB
-	databaseConnectionPool, err = datastore.GetConnection(databaseConfig)
+	var pool *sql.DB
+	pool, err = datastore.GetConnection(dc)
 	if err != nil {
 		return nil, err
 	}
 
-	return databaseConnectionPool, nil
+	// Ensure Postgres is responsive
+	for {
+
+		// establish an outer timeout boundary
+		timeout := time.Now().Add(time.Minute * TimeoutBoundary)
+
+		// Ping Postgres
+		err = datastore.Ping(pool)
+		if err == nil {
+			log.Println("Database appears to now be available.")
+			break
+		}
+
+		// If our timeout boundary has been exceeded, bail out
+		if timeout.Sub(time.Now()) < 0 {
+			return nil, fmt.Errorf("Timeout boundary of %d minutes has been exceeded. Exiting.", TimeoutBoundary)
+		}
+
+		// Circle back and try again
+		log.Printf("Waiting for Postgres to be responsive: %+v\n", err)
+		time.Sleep(time.Second)
+	}
+
+	return pool, nil
 }
 
 func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {
+	log.Println("initSessionStore")
+	log.Printf("db %+v\n", db)
 	store := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 
 	return store
 }
 
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {
+	log.Println("loadPortalConfig")
 	if err := ucpconfig.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
 	}
@@ -120,18 +169,25 @@ func loadPortalConfig(pc portalConfig) (portalConfig, error) {
 }
 
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
+	log.Println("loadDatabaseConfig")
 	if err := ucpconfig.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
+
+	log.Printf("Database Config: %+v\n", dc)
 
 	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
+
+	log.Printf("Database Config: %+v\n", dc)
+
 	return dc, nil
 }
 
 func createTempCertFiles(pc portalConfig) (string, string, error) {
+	log.Println("createTempCertFiles")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
 
@@ -158,6 +214,7 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 }
 
 func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalProxy {
+	log.Println("newPortalProxy")
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
@@ -168,6 +225,7 @@ func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalPr
 }
 
 func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Duration) {
+	log.Println("initializeHTTPClient")
 	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
 	if skipCertVerification {
 		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -177,6 +235,7 @@ func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Durat
 }
 
 func start(p *portalProxy) error {
+	log.Println("start")
 	e := echo.New()
 
 	// Root level middleware
@@ -204,6 +263,7 @@ func start(p *portalProxy) error {
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
+	log.Println("registerRoutes")
 
 	e.POST("/v1/auth/login/uaa", p.loginToUAA)
 	e.POST("/v1/auth/logout", p.logout)

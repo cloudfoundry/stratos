@@ -49,14 +49,17 @@ type ConnectedUser struct {
 }
 
 // UAAAdminIdentifier - The identifier that the Cloud Foundry UAA Service uses to convey administrative level perms
-const UAAAdminIdentifier = "uaa.admin"
+const UAAAdminIdentifier = "hcp.admin"
 
 // HCFAdminIdentifier - The identifier that the Cloud Foundry HCF Service uses to convey administrative level perms
 const HCFAdminIdentifier = "cloud_controller.admin"
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
+	log.Println("loginToUAA")
 
-	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.Config.UAAEndpoint)
+	var HCPIdentityEndpoint = fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
+
+	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
 	if err != nil {
 		err = newHTTPShadowError(
 			http.StatusUnauthorized,
@@ -100,7 +103,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 }
 
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
-
+	log.Println("loginToCNSI")
 	// TODO(woodnt): Remove most of the log.Print statements in this file.  We really need to not display a lot of this data.
 	//               TEAMFOUR-619
 	log.Println("loginToCNSI start")
@@ -182,8 +185,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 }
 
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
-
-	log.Println("logoutOfCNSI start")
+	log.Println("logoutOfCNSI")
 
 	cnsiGUID := c.FormValue("cnsi_guid")
 
@@ -212,6 +214,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 }
 
 func (p *portalProxy) login(c echo.Context, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
+	log.Println("login")
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
@@ -233,7 +236,7 @@ func (p *portalProxy) login(c echo.Context, client string, clientSecret string, 
 }
 
 func (p *portalProxy) logout(c echo.Context) error {
-
+	log.Println("logout")
 	res := c.Response().(*standard.Response).ResponseWriter
 	cookie := &http.Cookie{
 		Name:   portalSessionName,
@@ -248,6 +251,7 @@ func (p *portalProxy) logout(c echo.Context) error {
 }
 
 func (p *portalProxy) getUAATokenWithCreds(username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+	log.Println("getUAATokenWithCreds")
 	body := url.Values{}
 	body.Set("grant_type", "password")
 	body.Set("username", username)
@@ -258,6 +262,7 @@ func (p *portalProxy) getUAATokenWithCreds(username, password, client, clientSec
 }
 
 func (p *portalProxy) getUAATokenWithRefreshToken(refreshToken, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+	log.Println("getUAATokenWithRefreshToken")
 	body := url.Values{}
 	body.Set("grant_type", "refresh_token")
 	body.Set("refresh_token", refreshToken)
@@ -267,10 +272,13 @@ func (p *portalProxy) getUAATokenWithRefreshToken(refreshToken, client, clientSe
 }
 
 func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
-
+	log.Println("getUAAToken")
+	log.Printf("authEndpoint: %s", authEndpoint)
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create request for UAA: %v", err)
+		msg := "Failed to create request for UAA: %v"
+		log.Printf(msg, err)
+		return nil, fmt.Errorf(msg, err)
 	}
 
 	req.SetBasicAuth(client, clientSecret)
@@ -278,6 +286,7 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 
 	res, err := httpClient.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
+		log.Printf("Error performing http request - status: %d, error: %v", res.StatusCode, err)
 		return nil, logHTTPError(res, err)
 	}
 
@@ -286,6 +295,7 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 	var response UAAResponse
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&response); err != nil {
+		log.Printf("Error decoding response: %v", err)
 		return nil, fmt.Errorf("getUAAToken Decode: %s", err)
 	}
 
@@ -293,6 +303,7 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 }
 
 func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) error {
+	log.Println("saveUAAToken")
 	key := u.UserGUID
 	tokenRecord := tokens.TokenRecord{
 		AuthToken:    authTok,
@@ -309,6 +320,7 @@ func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok s
 }
 
 func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string) (tokens.TokenRecord, error) {
+	log.Println("saveCNSIToken")
 	tokenRecord := tokens.TokenRecord{
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
@@ -325,7 +337,7 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 }
 
 func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
-
+	log.Println("deleteCNSIToken")
 	err := p.unsetCNSITokenRecord(cnsiID, userGUID)
 	if err != nil {
 		log.Printf("%v", err)
@@ -336,7 +348,7 @@ func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
 }
 
 func (p *portalProxy) getUAATokenRecord(userGUID string) (tokens.TokenRecord, error) {
-
+	log.Println("getUAATokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		fmt.Printf("Database error getting repo for UAA token: %v", err)
@@ -353,7 +365,7 @@ func (p *portalProxy) getUAATokenRecord(userGUID string) (tokens.TokenRecord, er
 }
 
 func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error {
-
+	log.Println("setUAATokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
@@ -368,7 +380,7 @@ func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error 
 }
 
 func (p *portalProxy) verifySession(c echo.Context) error {
-
+	log.Println("verifySession")
 	sessionExpireTime, ok := p.getSessionInt64Value(c, "exp")
 	if !ok {
 		msg := "Could not find session date"
@@ -422,6 +434,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 }
 
 func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
+	log.Println("getUAAUser")
 	// get the uaa token record
 	uaaTokenRecord, err := p.getUAATokenRecord(userGUID)
 	if err != nil {
@@ -452,6 +465,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*ConnectedUser, error) {
 }
 
 func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool) {
+	log.Println("getCNSIUser")
 	// get the uaa token record
 	hcfTokenRecord, ok := p.getCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
