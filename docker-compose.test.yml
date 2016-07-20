@@ -17,7 +17,9 @@ services:
       service: proxy
     environment:
       CONSOLE_CLIENT: console
-      UAA_ENDPOINT: http://ident.helion.space:8080/oauth/token
+      HCP_IDENTITY_SCHEME: http
+      HCP_IDENTITY_HOST: ident.helion.space
+      HCP_IDENTITY_PORT: 8080
     links:
       - postgres:postgres
 

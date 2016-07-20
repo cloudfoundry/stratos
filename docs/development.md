@@ -70,7 +70,9 @@ export GITHUB_OAUTH_CLIENT_SECRET=<CLIENT SECRET>
   - `curl -Ss http://192.168.200.2:8080/api/v1/namespaces/hcp/services/ident-api | jq '.spec.ports[0].nodePort'`
   - In `proxy.env`, set the following variables:
     - `CONSOLE_CLIENT=console`
-    - `UAA_ENDPOINT=https://192.168.200.3:<IDENT-API-PORT>/oauth/token`
+    - `HCP_IDENTITY_SCHEME=https`
+    - `HCP_IDENTITY_HOST=login.hcf.helion.lol`
+    - `HCP_IDENTITY_PORT=<IDENT-API-PORT>`
 * Generate portal-proxy binary (or use the `stand-up-dev-env.sh` script). Follow the directions in the repo's README.
   - `cd $GOPATH/src/github.com/hpcloud/portal-proxy`
   - `./tools/build_portal_proxy.sh`
