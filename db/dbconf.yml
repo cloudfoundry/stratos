@@ -1,4 +1,4 @@
-default:
+hcp:
     driver: postgres
     open: host='$DB_HOST' port=$CFGDB_PORT user='$PGSQL_USER' password='$PGSQL_PASSWORD' dbname='$PGSQL_DATABASE' sslmode='$PGSQL_SSL_MODE'
 development:

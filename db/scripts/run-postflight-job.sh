@@ -27,23 +27,23 @@ echo "Checking database to see if migration is necessary."
 
 # Check the version
 echo "Checking database version."
-$GOPATH/bin/goose --env=default dbversion
+$GOPATH/bin/goose --env=hcp dbversion
 
 # Check the status
 echo "Checking database status."
-$GOPATH/bin/goose --env=default status
+$GOPATH/bin/goose --env=hcp status
 
 # Run migrations
 echo "Attempting database migrations."
-$GOPATH/bin/goose --env=default up
+$GOPATH/bin/goose --env=hcp up
 
 # CHeck the status
 echo "Checking database status."
-$GOPATH/bin/goose --env=default status
+$GOPATH/bin/goose --env=hcp status
 
 # Check the version
 echo "Checking database version."
-$GOPATH/bin/goose --env=default dbversion
+$GOPATH/bin/goose --env=hcp dbversion
 
 echo "Database operation(s) complete."
 
