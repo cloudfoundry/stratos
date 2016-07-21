@@ -56,7 +56,7 @@
      * @memberof cloud-foundry.model.space
      * @description lists all spaces
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-     * @param {object} params - optional parameters
+     * @param {object=} params - optional parameters
      * @returns {promise} A resolved/rejected promise
      * @public
      */

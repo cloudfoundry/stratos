@@ -27,10 +27,11 @@
     '$stateParams',
     '$scope',
     'app.utils.utilsService',
-    '$state'
+    '$state',
+    'app.view.endpoints.clusters.cluster.assignUsers'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, assignUsers) {
     var that = this;
     this.guid = $stateParams.guid;
 
@@ -38,6 +39,7 @@
 
     this.organizations = [];
     this.totalApps = 0;
+    this.selectedUsers = {};
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
 
@@ -58,8 +60,8 @@
       },
       {
         name: gettext('Assign User(s)'),
-        disabled: true,
         execute: function () {
+          assignUsers.assign(that.guid, null, null, that.selectedUsers);
         },
         icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
       }

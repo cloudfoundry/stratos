@@ -1,0 +1,26 @@
+@import 'select/select-users';
+
+.assign-users {
+  padding: 25px 50px;
+
+  .wizard-body {
+    &.row {
+      margin-left: 0px;
+      margin-right: 0px;
+    }
+
+    .wizard-nav {
+      padding-left: 0px;
+      padding-right: 0px;
+    }
+  }
+  .wizard-foot {
+    border-top: 1px solid $gray-light;
+    text-align: right;
+    padding-top: $hpe-unit-space / 2;
+
+    .btn {
+      margin-left: $hpe-unit-space / 2;
+    }
+  }
+}
