@@ -232,10 +232,10 @@
   },
   "preflight": [
     {
-      "name": "hsc-migrate-database-job",
+      "name": "hsc-initiate-migration-job",
       "version": "1.0.0",
       "vendor": "HPE",
-      "external_name": "Console - Migrate Database Job",
+      "external_name": "Console - Initiate Service Migration Job",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -243,7 +243,7 @@
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-database-migration:{{TAG}}",
+      "image": "hsc/hsc-initiate-migration-job:{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
@@ -290,10 +290,10 @@
   ],
   "postflight": [
     {
-      "name": "hsc-create-database-job",
+      "name": "hsc-finalize-migration-job",
       "version": "1.0.0",
       "vendor": "HPE",
-      "external_name": "Console - Create Database Job",
+      "external_name": "Console - Finalize Service Migration Job",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -301,7 +301,7 @@
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-database-creation:{{TAG}}",
+      "image": "hsc/hsc-finalize-migration-job:{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
@@ -313,7 +313,6 @@
         {
           "name": "CFGDB_PORT"
         },
-
         {
           "name": "POSTGRES_DB"
         },
