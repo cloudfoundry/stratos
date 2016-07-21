@@ -32,7 +32,7 @@ echo "Database operation(s) complete."
 MIGRATION_VOLUME=hsc-migration-volume
 UPGRADE_LOCK_FILE=upgrade.lock
 echo "Removing the $UPGRADE_LOCK_FILE file from the shared migration volume $MIGRATION_VOLUME."
-rm /$MIGRATION_VOLUME/$UPGRADE_LOCK_FILE
+rm /$MIGRATION_VOLUME/$UPGRADE_LOCK_FILE || true
 
 echo "Removed the upgrade lock file."
 
