@@ -51,11 +51,15 @@
 
       // Cache all organizations associated with this cluster
       var orgPromise = organizationModel.listAllOrganizations(that.guid, {}).then(function (orgs) {
-        var detailsPromises = [];
+        var promises = [];
         _.forEach(orgs, function (org) {
-          detailsPromises.push(organizationModel.getOrganizationDetails(that.guid, org));
+          var promise = organizationModel.getOrganizationDetails(that.guid, org).catch(function () {
+            //Swallow errors for individual orgs
+            $log.error('Failed to fetch details for org - ' + org.entity.name);
+          });
+          promises.push(promise);
         });
-        return $q.all(detailsPromises);
+        return $q.all(promises);
       }).catch(function (error) {
         $log.error('Error while listing organizations', error);
       });

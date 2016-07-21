@@ -27,10 +27,11 @@
     '$stateParams',
     '$state',
     'app.utils.utilsService',
-    '$q'
+    '$q',
+    '$log'
   ];
 
-  function ClusterOrgController(modelManager, $stateParams, $state, utils, $q) {
+  function ClusterOrgController(modelManager, $stateParams, $state, utils, $q, $log) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -43,7 +44,11 @@
     function init() {
       var promises = [];
       _.forEach(_.get(that.organizationModel, that.spacesPath), function (space) {
-        promises.push(that.spaceModel.getSpaceDetails(that.clusterGuid, space));
+        var promise = that.spaceModel.getSpaceDetails(that.clusterGuid, space).catch(function () {
+          //Swallow errors for individual spaces
+          $log.error('Failed to fetch details for space - ' + space.entity.name);
+        });
+        promises.push(promise);
       });
       return $q.all(promises);
     }

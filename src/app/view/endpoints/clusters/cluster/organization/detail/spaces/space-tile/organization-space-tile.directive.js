@@ -61,7 +61,7 @@
         }
       },
       {
-        name: gettext('Assign User(sa)'),
+        name: gettext('Assign User(s)'),
         disabled: true,
         execute: function () {
         }
