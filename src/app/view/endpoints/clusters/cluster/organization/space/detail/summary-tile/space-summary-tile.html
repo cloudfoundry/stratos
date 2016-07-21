@@ -23,7 +23,7 @@
       <dd>{{ spaceSummaryTileCtrl.roles }}</dd>
       <dt translate>CF ENDPOINT URL</dt>
       <dd>
-        {{ spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint.Scheme }}://{{ spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint.Host }}
+        {{ spaceSummaryTileCtrl.getEndpoint() }}
       </dd>
       <dt translate>CR INTERACTIONS</dt>
       <dd><a class="btn btn-link"><span translate>CLI Commands</span></a></dd>

@@ -48,6 +48,15 @@
     this.cardData = {
       title: gettext('Summary')
     };
+
+    this.getEndpoint = function () {
+      return utils.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
+    };
+
+    this.keys = function (obj) {
+      return _.keys(obj);
+    };
+
     this.actions = [
       {
         name: gettext('Edit Organization'),
@@ -78,11 +87,5 @@
       that.roles = that.organizationModel.organizationRolesToString(that.organization.details.roles);
     });
   }
-
-  angular.extend(OrganizationSummaryTileController.prototype, {
-    keys: function (obj) {
-      return _.keys(obj);
-    }
-  });
 
 })();

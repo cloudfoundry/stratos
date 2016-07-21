@@ -54,7 +54,7 @@
 
         <dt translate>CLUSTER</dt>
         <dd class="pull-right">
-          {{ applicationSummaryCtrl.userCnsiModel.serviceInstances[appCtrl.cnsiGuid].api_endpoint.Scheme }}://{{ applicationSummaryCtrl.userCnsiModel.serviceInstances[appCtrl.cnsiGuid].api_endpoint.Host }}
+          {{ applicationSummaryCtrl.getEndpoint() }}
         </dd>
       </dl>
     </div>

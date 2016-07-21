@@ -15,19 +15,19 @@
         <dl class="dl-horizontal">
           <dt translate>Total Applications</dt>
           <dd>
-            {{ clusterController.totalApps }}
+            {{ clusterDetailController.totalApps }}
           </dd>
           <dt translate>Total Memory</dt>
           <dd>
-            {{ clusterController.totalMemoryUsed }}
+            {{ clusterDetailController.totalMemoryUsed }}
           </dd>
         </dl>
         </div>
       <div class="col-md-7">
         <dl class="dl-horizontal">
-          <dt ng-if="clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].api_endpoint" translate>CF Endpoint URL</dt>
-          <dd ng-if="clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].api_endpoint">
-            {{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].api_endpoint.Scheme }}://{{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].api_endpoint.Host }}
+          <dt ng-if="clusterController.getEndpoint()" translate>CF Endpoint URL</dt>
+          <dd ng-if="clusterController.getEndpoint()">
+            {{ clusterController.getEndpoint() }}
           </dd>
           <dt translate>CF Interactions</dt>
           <dd>
@@ -57,7 +57,7 @@
 </div>
 
 <ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
-  <li ng-repeat="clusterAction in clusterController.clusterActions">
+  <li ng-repeat="clusterAction in clusterDetailController.clusterActions">
     <button class="btn btn-link btn-border-less"
             ng-disabled="clusterAction.disabled"
             ng-hide="clusterAction.hidden"

@@ -36,15 +36,24 @@
     var that = this;
 
     this.guid = $stateParams.guid;
+    var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+    var privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
+    var sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
+    var appModel = modelManager.retrieve('cloud-foundry.model.application');
+
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.getEndpoint = function () {
+      return utils.getClusterEndpoint(that.userServiceInstanceModel.serviceInstances[that.guid]);
+    };
 
     function init() {
 
       // Cache all organizations associated with this cluster
-      that.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-      var orgPromise = that.organizationModel.listAllOrganizations(that.guid, {}).then(function (orgs) {
+      var orgPromise = organizationModel.listAllOrganizations(that.guid, {}).then(function (orgs) {
         var detailsPromises = [];
         _.forEach(orgs, function (org) {
-          detailsPromises.push(that.organizationModel.getOrganizationDetails(that.guid, org));
+          detailsPromises.push(organizationModel.getOrganizationDetails(that.guid, org));
         });
         return $q.all(detailsPromises);
       }).catch(function (error) {
@@ -56,29 +65,23 @@
       // clusters page). Need to reduce all these calls to one and watch cache.
       // Cache all user service instance data. Also used by child states to determine cluster name in breadcrumbs
       /* eslint-enable no-warning-comments */
-      that.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       var servicesPromise = that.userServiceInstanceModel.list();
 
       // Needed to show a Space's list of service instances (requires app name, from app guid, from service binding)
-      var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
       var serviceBindingPromise = serviceBindingModel.listAllServiceBindings(that.guid);
 
       // Needed to show the domain part of a route's url (which is not included when listing routes via space)
       // This can either be private or shared, we have to check both.
-      var privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
-      var sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
       var privateDomainsPromise = privateDomains.listAllPrivateDomains(that.guid);
       var sharedDomainsPromise = sharedDomains.listAllSharedDomains(that.guid);
 
       // Reset any cache we may be interested in
-      var appModel = modelManager.retrieve('cloud-foundry.model.application');
       delete appModel.appSummary;
 
       return $q.all([orgPromise, servicesPromise, serviceBindingPromise, privateDomainsPromise, sharedDomainsPromise]);
     }
 
-    utils.chainStateResolve($state, init);
+    utils.startStateResolve('endpoint.clusters.cluster', $state, init);
   }
 
-  angular.extend(ClusterController.prototype, {});
 })();

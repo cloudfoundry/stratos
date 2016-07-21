@@ -110,7 +110,7 @@
     };
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve($state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.detail.users', $state, init);
   }
 
 })();

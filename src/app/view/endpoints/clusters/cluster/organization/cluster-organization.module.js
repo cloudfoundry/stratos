@@ -48,7 +48,7 @@
       return $q.all(promises);
     }
 
-    utils.chainStateResolve($state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.organization', $state, init);
   }
 
   angular.extend(ClusterOrgController.prototype, {});

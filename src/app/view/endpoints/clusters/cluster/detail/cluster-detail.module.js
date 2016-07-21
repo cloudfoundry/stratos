@@ -18,7 +18,7 @@
       abstract: true,
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail.html',
       controller: ClusterDetailController,
-      controllerAs: 'clusterController'
+      controllerAs: 'clusterDetailController'
     });
   }
 
@@ -27,20 +27,19 @@
     '$stateParams',
     '$scope',
     'app.utils.utilsService',
-    '$state',
-    '$q'
+    '$state'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, $q) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state) {
     var that = this;
     this.guid = $stateParams.guid;
 
     this.$scope = $scope;
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+
     this.organizations = [];
     this.totalApps = 0;
 
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+    var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
 
     this.clusterActions = [
       {
@@ -76,11 +75,9 @@
       that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
     };
 
-    var initPromise = _.get($state.current, 'data.initialized', $q.when());
-
-    initPromise.then(function () {
+    function init() {
       that.organizations = [];
-      _.forEach(that.organizationModel.organizations[that.guid], function (orgDetail) {
+      _.forEach(organizationModel.organizations[that.guid], function (orgDetail) {
         that.organizations.push(orgDetail.details);
 
         that.updateTotalApps();
@@ -90,8 +87,8 @@
           return o1.created_at - o2.created_at;
         });
       });
-    });
+    }
+    utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
   }
 
-  angular.extend(ClusterDetailController.prototype, {});
 })();

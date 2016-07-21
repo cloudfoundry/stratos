@@ -21,7 +21,7 @@
       <dd>{{ orgSummaryTileCtrl.roles }}</dd>
       <dt translate>CF ENDPOINT URL</dt>
       <dd>
-        {{ orgSummaryTileCtrl.userServiceInstance.serviceInstances[orgSummaryTileCtrl.clusterGuid].api_endpoint.Scheme }}://{{ orgSummaryTileCtrl.userServiceInstance.serviceInstances[orgSummaryTileCtrl.clusterGuid].api_endpoint.Host }}
+        {{ orgSummaryTileCtrl.getEndpoint() }}
       </dd>
       <dt translate>CR INTERACTIONS</dt>
       <dd>

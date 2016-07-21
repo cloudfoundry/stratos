@@ -23,7 +23,8 @@
     '$stateParams',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'app.utils.utilsService'
   ];
 
   /**
@@ -39,8 +40,10 @@
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
+   * @param {app.model.utilsService} utils - the utils service
+   * @property {app.model.utilsService} utils - the utils service
    */
-  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, editAppService, confirmDialog) {
+  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, editAppService, confirmDialog, utils) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
@@ -50,6 +53,7 @@
     this.confirmDialog = confirmDialog;
     this.editAppService = editAppService;
     this.userCnsiModel.list();
+    this.utils = utils;
 
     var that = this;
     this.routesActionMenu = [
@@ -148,6 +152,10 @@
      */
     editApp: function () {
       this.editAppService.display(this.cnsiGuid, this.id);
+    },
+
+    getEndpoint: function () {
+      return this.utils.getClusterEndpoint(this.userCnsiModel.serviceInstances[this.cnsiGuid]);
     }
   });
 
