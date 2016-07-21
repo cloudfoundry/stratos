@@ -6,29 +6,49 @@ execStatement() {
     PGPASSFILE=/tmp/pgpass psql -U $POSTGRES_USER -h $DB_HOST -p $CFGDB_PORT -d $POSTGRES_DB -w -tc "$stmt"
 }
 
-execStatementsFromFile() {
-    file=$1
-    PGPASSFILE=/tmp/pgpass psql -U $PGSQL_USER -h $DB_HOST -p $CFGDB_PORT -d $PGSQL_DATABASE -w -f "$file"
-}
-
 # Step 1 - Create the database if necessary
 echo "$DB_HOST:$CFGDB_PORT:$POSTGRES_DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > /tmp/pgpass
-echo "$DB_HOST:$CFGDB_PORT:$PGSQL_DATABASE:$PGSQL_USER:$PGSQL_PASSWORD" >> /tmp/pgpass
 chmod 0600 /tmp/pgpass
 
 stackatoDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
 if [ -z "$stackatoDbExists" ] ; then
+    echo "Creating database $PGSQL_DATABASE"
     execStatement "CREATE DATABASE \"$PGSQL_DATABASE\";"
+    echo "Creating user $PGSQL_USER"
     execStatement "CREATE USER $PGSQL_USER WITH ENCRYPTED PASSWORD '$PGSQL_PASSWORD';"
+    echo "Granting privs for $PGSQL_DATABASE to $PGSQL_USER"
     execStatement "GRANT ALL PRIVILEGES ON DATABASE \"$PGSQL_DATABASE\" TO $PGSQL_USER;"
-    execStatementsFromFile "$SQL"
 else
     echo "$PGSQL_DATABASE already exists"
 fi
 
+# Step 2 - Migrate the database if necessary
+echo "Checking database to see if migration is necessary."
+
+# Check the version
+echo "Checking database version."
+$GOPATH/bin/goose --env=default dbversion
+
+# Check the status
+echo "Checking database status."
+$GOPATH/bin/goose --env=default status
+
+# Run migrations
+echo "Attempting database migrations."
+$GOPATH/bin/goose --env=default up
+
+# CHeck the status
+echo "Checking database status."
+$GOPATH/bin/goose --env=default status
+
+# Check the version
+echo "Checking database version."
+$GOPATH/bin/goose --env=default dbversion
+
 echo "Database operation(s) complete."
 
-# Step 2 - Set the lock file on the shared volume
+
+# Step 3 - Remove the lock file on the shared volume
 MIGRATION_VOLUME=hsc-migration-volume
 UPGRADE_LOCK_FILE=upgrade.lock
 echo "Removing the $UPGRADE_LOCK_FILE file from the shared migration volume $MIGRATION_VOLUME."

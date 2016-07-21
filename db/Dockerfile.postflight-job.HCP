@@ -1,13 +1,21 @@
 FROM ubuntu:14.04
 
-ENV DB_HOST="hsc-db-int" CFGDB_PORT=5432 \
+ENV GOPATH=$HOME/go PATH=$PATH:/usr/local/go/bin \
+  DB_HOST="hsc-db-int" CFGDB_PORT=5432 \
   POSTGRES_DB="postgres" POSTGRES_USER="stolon" POSTGRES_PASSWORD="stolon" \
-  PGSQL_DATABASE="stratos-db" PGSQL_USER="stratos" PGSQL_PASSWORD="stratos" \
-  SQL="InitialSchema.sql"
+  PGSQL_DATABASE="stratos-db" PGSQL_USER="stratos" PGSQL_PASSWORD="stratos"\
+  PGSQL_SSL_MODE="disable"
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql
+RUN apt-get update && \
+  apt-get -y upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --reinstall ca-certificates gcc git curl postgresql
+RUN curl -O https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz && \
+  tar -xvf go1.6.linux-amd64.tar.gz && mv go /usr/local
+RUN go get 'bitbucket.org/liamstask/goose/cmd/goose'
+RUN chmod +x /go/bin/goose
 
-COPY /db/initial/InitialSchema.sql /
-COPY /db/run-postflight-job.sh /
+COPY db/dbconf.yml db/dbconf.yml
+COPY db/migrations db/migrations
+COPY db/scripts/run-postflight-job.sh /
 
 CMD ["/run-postflight-job.sh"]
