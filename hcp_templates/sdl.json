@@ -109,6 +109,9 @@
           "name": "CONSOLE_CLIENT"
         },
         {
+          "name": "HCE_CLIENT"
+        },
+        {
           "name": "HCF_CLIENT"
         },
         {
@@ -658,6 +661,14 @@
     {
       "name": "CONSOLE_CLIENT",
       "description": "Console client",
+      "default": "console",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "HCE_CLIENT",
+      "description": "HCE client",
       "default": "console",
       "data_type": "string",
       "required": true,
