@@ -88,9 +88,13 @@ popd
 echo "Building/publishing the container image for the Console Proxy"
 buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
-# Build the postgres configuration container
+# Build the postflight container - handle database creation
 echo "Building/publishing the container image for the Database Creator"
-buildAndPublishImage hsc-database-creation Dockerfile.database.HCP ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-database-creation ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
+
+# Build the preflight container - handle database migration
+echo "Building/publishing the container image for the Database Migrator"
+buildAndPublishImage hsc-database-migration ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
 echo "Provision the UI"

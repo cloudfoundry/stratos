@@ -23,10 +23,10 @@
           "name": "CONSOLE_VERSION"
         },
         {
-          "name": "console-cert"
+          "name": "CONSOLE_CERT"
         },
         {
-          "name": "console-cert-key"
+          "name": "CONSOLE_CERT_KEY"
         }
       ],
       "affinity": [],
@@ -73,7 +73,7 @@
           "name": "PGSQL_USER"
         },
         {
-          "name": "pgsql-password"
+          "name": "PGSQL_PASSWORD"
         },
         {
           "name": "PGSQL_DATABASE"
@@ -91,10 +91,10 @@
           "name": "PGSQL_SSL_MODE"
         },
         {
-          "name": "console-proxy-cert"
+          "name": "CONSOLE_PROXY_CERT"
         },
         {
-          "name": "console-proxy-cert-key"
+          "name": "CONSOLE_PROXY_CERT_KEY"
         },
         {
           "name": "HTTP_CLIENT_TIMEOUT_IN_SECS"
@@ -118,7 +118,7 @@
           "name": "ALLOWED_ORIGINS"
         },
         {
-          "name": "session-store-secret"
+          "name": "SESSION_STORE_SECRET"
         },
         {
           "name": "GITHUB_OAUTH_CLIENT_ID"
@@ -176,16 +176,16 @@
           "name": "POSTGRES_USER"
         },
         {
-          "name": "postgres-password"
+          "name": "POSTGRES_PASSWORD"
         },
         {
           "name": "PGDATA"
         },
         {
-          "name": "console-db-cert"
+          "name": "CONSOLE_DB_CERT"
         },
         {
-          "name": "console-db-cert-key"
+          "name": "CONSOLE_DB_CERT_KEY"
         }
       ],
       "affinity": [],
@@ -230,7 +230,64 @@
       }
     ]
   },
-  "preflight": [],
+  "preflight": [
+    {
+      "name": "hsc-migrate-database-job",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "Console - Migrate Database Job",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "capabilities": [],
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-database-migration:{{TAG}}",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "DB_HOST"
+        },
+        {
+          "name": "CFGDB_PORT"
+        },
+        {
+          "name": "POSTGRES_DB"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "POSTGRES_PASSWORD"
+        },
+        {
+          "name": "PGSQL_DATABASE"
+        },
+        {
+          "name": "PGSQL_USER"
+        },
+        {
+          "name": "PGSQL_PASSWORD"
+        }
+      ],
+      "affinity": [],
+      "labels": [],
+      "min_instances": 1,
+      "max_instances": 1,
+      "retry_count": 100,
+      "service_ports": [],
+      "volume_mounts": [
+        {
+          "volume_name": "hsc-migration-volume",
+          "mountpoint": "/hsc-migration-volume"
+        }
+      ]
+    }
+  ],
   "postflight": [
     {
       "name": "hsc-create-database-job",
@@ -254,13 +311,17 @@
           "name": "DB_HOST"
         },
         {
+          "name": "CFGDB_PORT"
+        },
+
+        {
           "name": "POSTGRES_DB"
         },
         {
-          "name": "CFGDB_PORT"
+          "name": "POSTGRES_USER"
         },
         {
-          "name": "POSTGRES_USER"
+          "name": "POSTGRES_PASSWORD"
         },
         {
           "name": "PGSQL_DATABASE"
@@ -269,16 +330,10 @@
           "name": "PGSQL_USER"
         },
         {
-          "name": "pgsql-password"
+          "name": "PGSQL_PASSWORD"
         },
         {
           "name": "SQL"
-        },
-        {
-          "name": "POSTGRES_USER"
-        },
-        {
-          "name": "postgres-password"
         }
       ],
       "affinity": [],
@@ -365,6 +420,10 @@
       "secret": false
     },
     {
+      "name": "PGSQL_PASSWORD",
+      "description": "The password for the Stackato DB"
+    },
+    {
       "name": "PGSQL_PASSWORD_FILE",
       "description": "The Stackato DB password file on disk",
       "default": "/etc/secrets/pgsql-password"
@@ -432,6 +491,10 @@
       "secret": false
     },
     {
+      "name": "POSTGRES_PASSWORD",
+      "description": "The Postgresql password"
+    },
+    {
       "name": "POSTGRES_PASSWORD_FILE",
       "description": "The Postgres password file on disk",
       "default": "/etc/secrets/postgres-password"
@@ -483,6 +546,15 @@
       "secret": false
     },
     {
+      "name": "CONSOLE_CERT",
+      "description": "The Console TLS Certificate"
+    },
+    {
+      "name": "CONSOLE_CERT_FILE",
+      "description": "The Console TLS Certificate file on disk",
+      "default": "/etc/secrets/console-cert"
+    },
+    {
       "name": "console-cert",
       "description": "TLS certificate for the Console",
       "default": null,
@@ -496,6 +568,15 @@
             "value_type": "certificate"
           }
         }
+    },
+    {
+      "name": "CONSOLE_CERT_KEY",
+      "description": "The Console TLS Key"
+    },
+    {
+      "name": "CONSOLE_CERT_KEY_FILE",
+      "description": "The Console TLS Key file on disk",
+      "default": "/etc/secrets/console-cert-key"
     },
     {
       "name": "console-cert-key",
@@ -513,6 +594,15 @@
         }
     },
     {
+      "name": "CONSOLE_PROXY_CERT",
+      "description": "The Console Proxy TLS Certificate"
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT_FILE",
+      "description": "The Console Proxy TLS Certificate file on disk",
+      "default": "/etc/secrets/console-proxy-cert"
+    },
+    {
       "name": "console-proxy-cert",
       "description": "TLS certificate for the Console Proxy",
       "default": null,
@@ -526,6 +616,15 @@
             "value_type": "certificate"
           }
         }
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT_KEY",
+      "description": "The Console Proxy TLS Key"
+    },
+    {
+      "name": "CONSOLE_PROXY_CERT_KEY_FILE",
+      "description": "The Console Proxy TLS Key file on disk",
+      "default": "/etc/secrets/console-proxy-cert-key"
     },
     {
       "name": "console-proxy-cert-key",
@@ -543,6 +642,15 @@
         }
     },
     {
+      "name": "CONSOLE_DB_CERT",
+      "description": "The Console Database TLS Certificate"
+    },
+    {
+      "name": "CONSOLE_DB_CERT_FILE",
+      "description": "The Console Database TLS Certificate file on disk",
+      "default": "/etc/secrets/console-db-cert"
+    },
+    {
       "name": "console-db-cert",
       "description": "TLS certificate for the Console Database",
       "default": null,
@@ -556,6 +664,15 @@
               "value_type": "certificate"
           }
         }
+    },
+    {
+      "name": "CONSOLE_DB_CERT_KEY",
+      "description": "The Console Database TLS Key"
+    },
+    {
+      "name": "CONSOLE_DB_CERT_KEY_FILE",
+      "description": "The Console Database TLS Key file on disk",
+      "default": "/etc/secrets/console-db-cert-key"
     },
     {
       "name": "console-db-cert-key",
@@ -627,6 +744,15 @@
       "data_type": "string",
       "required": true,
       "secret": false
+    },
+    {
+      "name": "SESSION_STORE_SECRET",
+      "description": "The Console Proxy session store secret"
+    },
+    {
+      "name": "SESSION_STORE_SECRET_FILE",
+      "description": "The Console Proxy session store secret file on disk",
+      "default": "/etc/secrets/session-store-secret"
     },
     {
       "name": "session-store-secret",
