@@ -67,7 +67,7 @@
             _.forEach(orgRoles, function (role) {
               that.userRoles[aUser.metadata.guid].push({
                 name: orgName,
-                role: role // TODO: use role name mapping from organizations-model
+                role: that.organizationModel.organizationRoleToString(role)
               });
             });
           });
