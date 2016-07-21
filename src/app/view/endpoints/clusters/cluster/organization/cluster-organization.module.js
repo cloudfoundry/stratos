@@ -51,5 +51,4 @@
     utils.chainStateResolve('endpoint.clusters.cluster.organization', $state, init);
   }
 
-  angular.extend(ClusterOrgController.prototype, {});
 })();

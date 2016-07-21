@@ -68,7 +68,13 @@
       }
     ];
 
-    var initPromise = _.get($state.current, 'data.initialized', $q.when());
+    var initPromise;
+    var promiseStack = _.get($state.current, 'data.initialized');
+    if (promiseStack && promiseStack.length > 1) {
+      initPromise = promiseStack[promiseStack.length - 1];
+    } else {
+      initPromise = $q.when();
+    }
     initPromise.then(function () {
       // Present memory usage
       // var usedMemHuman = that.utils.mbToHumanSize(orgDetail.memUsed);

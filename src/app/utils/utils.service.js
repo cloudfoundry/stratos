@@ -20,7 +20,6 @@
   function utilsServiceFactory($log) {
     return {
       mbToHumanSize: mbToHumanSize,
-      startStateResolve: startStateResolve,
       chainStateResolve: chainStateResolve,
       getClusterEndpoint: getClusterEndpoint
     };
@@ -52,32 +51,30 @@
      * */
     function chainStateResolve(stateName, $state, initFunc) {
       var aState = $state.get(stateName);
-      var previousPromise = _.get($state.current, 'data.initialized');
+      var promiseStack = _.get($state.current, 'data.initialized');
+
       var thisPromise;
-      if (_.isUndefined(previousPromise)) {
-        $log.warn('Whoops! Init promise chain started instead of chaining by state: ' + aState.name);
+      if (_.isUndefined(promiseStack)) {
+        $log.debug('Promise stack undefined, initialized by state: ' + aState.name);
+        aState.data.initialized = [];
+        thisPromise = initFunc();
+      } else if (promiseStack.length < 1) {
+        $log.debug('Promise stack empty, initialized by state: ' + aState.name);
         thisPromise = initFunc();
       } else {
-        // Note: we may chain on ourselves when re-entering, this is ok
+        var previousPromise = promiseStack[promiseStack.length - 1];
         $log.debug('Init promise chain continued from state: ' + previousPromise._state + ' by: ' + aState.name);
         thisPromise = previousPromise.then(initFunc);
       }
-      thisPromise._state = aState.name;
-      aState.data.initialized = thisPromise;
-    }
 
-    /**
-     * Begin a state resolve promise chain which can then be used in chainStateResolve
-     * @param {string} stateName - the name of the state chaining its initialization
-     * @param {Object} $state - The ui-router $state service
-     * @param {function} initFunc - The promise returning init function for setting up the current state
-     * */
-    function startStateResolve(stateName, $state, initFunc) {
-      var aState = $state.get(stateName);
-      $log.debug('Init promise chain started by: ' + aState.name);
-      var p = initFunc();
-      p._state = aState.name;
-      _.set(aState, 'data.initialized', p);
+      thisPromise._state = aState.name;
+      aState.data.initialized.push(thisPromise);
+
+      aState.onExit = function () {
+        $log.debug('Cleaning up obsolete promise from state: ' + aState.name);
+        var index = aState.data.initialized.indexOf(aState);
+        aState.data.initialized.splice(index, 1);
+      };
     }
 
     function getClusterEndpoint(cluster) {
