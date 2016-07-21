@@ -29,6 +29,11 @@
    * @property {object} modelManager - the app's model manager
    * @param {object} apiManager - the API manager
    * @param {object} utils - the utils service
+<<<<<<< HEAD
+   * @property {object} utils - the utils service
+   * @property {object} stackatoInfoModel - the stackatoInfoModel model
+=======
+>>>>>>> master
    * @param {object} $q - angular $q service
    * @param {object} $log - angular $log service
    * @property {object} modelManager - the model manager
@@ -239,9 +244,7 @@
       var orgRolesP = that.$q.all({roles: rolesP, stackatoInfo: stackatoInfoP}).then(function (values) {
         var i, userGuid, myRoles;
 
-        /* eslint-disable no-warning-comments */
-        // TODO[TEAMFOUR-780]: there may be many pages of Users!
-        /* eslint-enable no-warning-comments */
+        // TODO: there may be many pages of Users!
         that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, values.roles.data.resources);
 
         // Find our user's GUID
