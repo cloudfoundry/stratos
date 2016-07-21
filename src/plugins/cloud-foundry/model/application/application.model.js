@@ -117,6 +117,12 @@
         });
     },
 
+    /**
+     * @function _buildFilter
+     * @description Build filter from org or space GUID
+     * @returns {object} The CF q filter
+     * @private
+     */
     _buildFilter: function () {
       if (this.filterParams.spaceGuid !== 'all') {
         return {q: 'space_guid:' + this.filterParams.spaceGuid};

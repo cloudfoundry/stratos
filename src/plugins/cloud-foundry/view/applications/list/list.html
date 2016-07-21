@@ -17,36 +17,36 @@
           <label class="control-label" translate>Cluster</label>
           <select-input
             arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-            ng-model="applicationsListCtrl.model.filterParams.cnsiGuid"
+            ng-model="applicationsListCtrl.filter.cnsiGuid"
             input-options="applicationsListCtrl.clusters"
             tabindex="0"
-            ng-change="applicationsListCtrl.setClusterOrganizations()">
+            ng-change="applicationsListCtrl.setCluster()">
           </select-input>
         </div>
-        <div class="form-group" ng-if="applicationsListCtrl.model.filterParams.cnsiGuid !== 'all'">
+        <div class="form-group" ng-if="applicationsListCtrl.filter.cnsiGuid !== 'all'">
           <label class="control-label" translate>Organization</label>
           <select-input
             arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-            ng-model="applicationsListCtrl.model.filterParams.orgGuid"
+            ng-model="applicationsListCtrl.filter.orgGuid"
             input-options="applicationsListCtrl.organizations"
             tabindex="0"
-            ng-change="applicationsListCtrl.setOrganizationSpaces()">
+            ng-change="applicationsListCtrl.setOrganization()">
           </select-input>
         </div>
-        <div class="form-group" ng-if="applicationsListCtrl.model.filterParams.orgGuid !== 'all'">
+        <div class="form-group" ng-if="applicationsListCtrl.filter.orgGuid !== 'all'">
           <label class="control-label" translate>Space</label>
           <select-input
             arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-            ng-model="applicationsListCtrl.model.filterParams.spaceGuid"
+            ng-model="applicationsListCtrl.filter.spaceGuid"
             input-options="applicationsListCtrl.spaces"
             tabindex="0"
-            ng-change="applicationsListCtrl.getApps()">
+            ng-change="applicationsListCtrl.setSpace()">
           </select-input>
         </div>
         <div class="reset-link">
           <a class="btn-link"
             ng-click="applicationsListCtrl.resetFilter()"
-            ng-if="applicationsListCtrl.model.filterParams.cnsiGuid !== 'all'"
+            ng-if="applicationsListCtrl.filter.cnsiGuid !== 'all'"
             translate>Reset</a>
         </div>
       </form>
