@@ -14,7 +14,13 @@
       url: '/users',
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail-users.html',
       controller: ClusterUsersController,
-      controllerAs: 'clusterUsersController'
+      controllerAs: 'clusterUsersController',
+      ncyBreadcrumb: {
+        label: '{{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name ||"..." }}',
+        parent: function () {
+          return 'endpoint.clusters.tiles';
+        }
+      }
     });
   }
 
@@ -61,7 +67,7 @@
             _.forEach(orgRoles, function (role) {
               that.userRoles[aUser.metadata.guid].push({
                 name: orgName,
-                role: role // TODO: use role name mapping from organizations-model
+                role: that.organizationModel.organizationRoleToString(role)
               });
             });
           });
@@ -104,7 +110,7 @@
     };
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve($state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.detail.users', $state, init);
   }
 
 })();

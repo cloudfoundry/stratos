@@ -71,6 +71,25 @@
     },
 
     /**
+     * @function listAllServiceBindingsForServiceInstance
+     * @memberof cloud-foundry.model.service-instance.ServiceInstance
+     * @description List all service bindings for a service instance
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {object} guid - the service instance guid
+     * @returns {promise} A promise object
+     * @public
+     */
+    listAllServiceBindingsForServiceInstance: function (cnsiGuid, guid) {
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsiGuid }
+      };
+      return this.serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid, {}, httpConfig)
+        .then(function (response) {
+          return response.data[cnsiGuid].resources;
+        });
+    },
+
+    /**
      * @function onAll
      * @memberof cloud-foundry.model.service-instance.ServiceInstance
      * @description onAll handler at model layer

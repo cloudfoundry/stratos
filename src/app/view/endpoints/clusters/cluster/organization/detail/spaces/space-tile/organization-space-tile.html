@@ -1,0 +1,21 @@
+<gallery-card class="cluster-gallery-card"
+              card-data="orgSpaceTileCtrl.cardData"
+              card-actions="orgSpaceTileCtrl.actions"
+              card-actions-icon="helion-icon helion-icon-More"
+              card-actions-position="actions-menu-right"
+              on-card-click="orgSpaceTileCtrl.summary()">
+  <dl class="dl-horizontal" ng-if="orgSpaceTileCtrl.spaceDetail().details">
+    <dt translate>ROLE</dt>
+    <dd>{{ orgSpaceTileCtrl.roles }}</dd>
+    <dt translate>TOTAL APPS</dt>
+    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalApps }}</dd>
+    <dt translate>INSTANCES</dt>
+    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalInstances }} / {{ orgSpaceTileCtrl.orgDetails().details.instancesQuota === -1 ? '∞' : orgSpaceTileCtrl.orgDetails().details.instancesQuota}}</dd>
+    <!--<dt ng-if="true" translate>DISK</dt>-->
+    <!--<dd ng-if="true">{{'1'}}</dd>-->
+    <!--<dt ng-if="true" translate>MEMORY UTILIZATION</dt>-->
+    <!--<dd ng-if="true">{{'1'}}</dd>-->
+  </dl>
+
+</gallery-card>
+

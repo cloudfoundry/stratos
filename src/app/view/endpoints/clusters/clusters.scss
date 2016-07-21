@@ -1,2 +1,126 @@
 @import 'tiles/cluster-tiles',
-        'cluster/detail/cluster-detail';
+        'cluster/cluster';
+
+// Provide a uniform gallery card across all cluster pages. We should consider moving this to cover all gallery cards
+.cluster-gallery-card {
+  &.unlink {
+    // Override some extreme oddness in gallery-card with undefined on-card-click
+    .panel-heading.linked, .panel-body.linked {
+      cursor: default;
+    }
+  }
+
+  .panel-body {
+    .col-md-5 {
+      padding-left: 0;
+    }
+  }
+
+  .panel-footer {
+    background: $gallery-card-status-danger;
+    .gallery-card-status, .gallery-card-status-text {
+      padding: 4px;
+      color: white;
+    }
+    .gallery-card-status-text {
+      padding-bottom: 6px;
+    }
+  }
+}
+
+// Provide a uniform gallery card layout
+.cluster-gallery-card-container {
+
+  $card-max-width: 420px;
+  $card-layout-steps: 5;
+
+  width: 100%;
+  display: flex;
+  flex-flow: row wrap;
+
+  .cluster-gallery-card-parent {
+    padding-right: 10px;
+    padding-left: 10px;
+
+    position: relative;
+    float: left;
+    min-height: 1px;
+
+    // Set flex-base in percentages for all layout steps
+    flex: 1 1 100%;
+
+    // Many columns
+    @for $i from 2 through $card-layout-steps {
+      @media (min-width: $i * $card-max-width) {
+        flex: 1 1 percentage(1/$i)
+      }
+    }
+
+    // Inside the cards, give more room to the value than the label
+    @media (min-width: 2 * $card-max-width) {
+      gallery-card {
+        .card .dl-horizontal dd {
+          margin-left: 100px;
+          text-align: right;
+        }
+        .dl-horizontal dt {
+          width: 140px;
+        }
+      }
+    }
+
+    // Pull the percent-gauge up
+    .percent-gauge {
+      padding-top: 0;
+      .percent-gauge-quota-bar {
+        margin-top: 0;
+      }
+    }
+  }
+
+  // Ensure the last card in every row doesn't have right-padding
+  @for $i from $card-layout-steps - 1 through 1 {
+    @media (min-width: $i * $card-max-width) and (max-width: $card-max-width + $i * $card-max-width - 1) {
+      >:nth-child(#{$i}n) {
+        padding-right: 0;
+      }
+      >:nth-child(#{$i}n+1) {
+        padding-left: 0;
+      }
+    }
+  }
+
+  @media (min-width: $card-layout-steps * $card-max-width) {
+    >:nth-child(#{$card-layout-steps}n) {
+      padding-right: 0;
+    }
+    >:nth-child(#{$card-layout-steps}n+1) {
+      padding-left: 0;
+    }
+  }
+
+  >:last-child {
+    padding-right: 0;
+  }
+
+}
+
+// A common way to structure internal gallery cards PLUS gallery card like cards;
+.card.panel .panel-body {
+  padding: $hpe-unit-space / 2 $hpe-unit-space;
+
+  .dl-horizontal > dd {
+    text-transform: none;
+    font-weight: 500;
+    .btn {
+      padding: 0;
+      font-size: inherit;
+      text-transform: none;
+      height: inherit;
+    }
+  }
+
+  dt, dd {
+    padding: 2px 0;
+  }
+}

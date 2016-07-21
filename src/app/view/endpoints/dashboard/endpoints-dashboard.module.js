@@ -14,7 +14,10 @@
       url: '',
       templateUrl: 'app/view/endpoints/dashboard/endpoints-dashboard.html',
       controller: EndpointsDashboardController,
-      controllerAs: 'endpointsDashboardCtrl'
+      controllerAs: 'endpointsDashboardCtrl',
+      ncyBreadcrumb: {
+        label: gettext('Endpoints')
+      }
     });
   }
 

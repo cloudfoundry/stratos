@@ -13,19 +13,18 @@
 
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.organization.space', {
-      url: '/:space',
+      url: '/space/:space',
       abstract: true,
-      template: '<ui-view/>'
+      template: '<ui-view/>',
+      controller: ClusterSpaceController,
+      controllerAs: 'clusterSpaceController'
     });
   }
 
-  ClusterSpaceController.$inject = [
-    'app.model.modelManager',
-    '$stateParams'
-  ];
+  ClusterSpaceController.$inject = [ ];
 
-  function ClusterSpaceController(modelManager, $stateParams) {
-    this.guid = $stateParams.guid;
+  function ClusterSpaceController() {
+
   }
 
   angular.extend(ClusterSpaceController.prototype, {});

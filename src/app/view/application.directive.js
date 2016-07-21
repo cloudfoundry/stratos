@@ -252,7 +252,9 @@
      * @public
      */
     reload: function () {
+      /* eslint-disable no-warning-comments */
       // FIXME: Can we clean the model and all current state instead? (reload the app for now)
+      /* eslint-disable no-warning-comments */
       // Hard reload of the app in the browser ensures all state is cleared
       this.$window.location = '/';
     },

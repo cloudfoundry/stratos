@@ -18,71 +18,28 @@
       abstract: true,
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail.html',
       controller: ClusterDetailController,
-      controllerAs: 'clusterController',
-      data: {}
+      controllerAs: 'clusterDetailController'
     });
   }
 
   ClusterDetailController.$inject = [
     'app.model.modelManager',
     '$stateParams',
-    '$state',
     '$scope',
-    '$q',
-    '$log',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    '$state'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $state, $scope, $q, $log, utils) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state) {
     var that = this;
     this.guid = $stateParams.guid;
 
     this.$scope = $scope;
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
 
-    // TODO: use model cache instead
     this.organizations = [];
     this.totalApps = 0;
 
-    // Get the cluster info
-    this.cluster = {
-      name: '',
-      api_endpoint: ''
-    };
-
-    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-
-    function init() {
-      var listCnsisP = that.cnsiModel.list().then(function (registeredInstances) {
-        that.cluster = registeredInstances[that.guid];
-      });
-
-      var listOrgsDetailsP = that.organizationModel.listAllOrganizations(that.guid, {}).then(function (orgs) {
-        that.organizations = [];
-        that.updateTotalApps();
-        var promises = [];
-        _.forEach(orgs, function (org) {
-          var promise = that.organizationModel.getOrganizationDetails(that.guid, org).then(function (orgDetails) {
-            that.organizations.push(orgDetails);
-
-            that.updateTotalApps();
-
-            // Sort organizations by created date
-            that.organizations.sort(function (o1, o2) {
-              return o1.created_at - o2.created_at;
-            });
-          });
-          promises.push(promise);
-        });
-        return $q.all(promises);
-      }).catch(function (error) {
-        $log.error('Error while listing organizations', error);
-      });
-
-      return $q.all([listCnsisP, listOrgsDetailsP]).then(function () {
-        $log.debug('ClusterUsersController finished init');
-      });
-    }
+    var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
 
     this.clusterActions = [
       {
@@ -118,8 +75,20 @@
       that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
     };
 
-    utils.chainStateResolve($state, init);
+    function init() {
+      that.organizations = [];
+      _.forEach(organizationModel.organizations[that.guid], function (orgDetail) {
+        that.organizations.push(orgDetail.details);
 
+        that.updateTotalApps();
+
+        // Sort organizations by created date
+        that.organizations.sort(function (o1, o2) {
+          return o1.created_at - o2.created_at;
+        });
+      });
+    }
+    utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
   }
 
 })();

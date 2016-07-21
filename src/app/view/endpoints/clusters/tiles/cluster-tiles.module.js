@@ -14,7 +14,13 @@
       url: '',
       templateUrl: 'app/view/endpoints/clusters/tiles/cluster-tiles.html',
       controller: ClusterTilesController,
-      controllerAs: 'clustersCtrl'
+      controllerAs: 'clustersCtrl',
+      ncyBreadcrumb: {
+        label: gettext('Cloud Foundry Clusters'),
+        parent: function () {
+          return 'endpoint.dashboard';
+        }
+      }
     });
   }
 

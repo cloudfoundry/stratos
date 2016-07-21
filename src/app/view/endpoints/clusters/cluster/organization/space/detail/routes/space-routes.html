@@ -1,0 +1,43 @@
+<div class="space-services-table"
+     st-table="spaceRoutesCtrl.visibleRoutes"
+     st-safe-src="spaceRoutesCtrl.spaceDetail().routes">
+  <div>
+    <div class="panel panel-default">
+      <table class="table table-actionable" >
+        <thead>
+        <tr>
+          <th st-sort="entity.host" st-sort-default="true" translate>ROUTE</th>
+          <th translate>APPLICATION ATTACHED</th>
+          <th translate>ACTION</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr
+          ng-repeat="route in spaceRoutesCtrl.visibleRoutes">
+          <td>http://{{ route.entity.host + '.' + (spaceRoutesCtrl.privateDomains.domains[spaceRoutesCtrl.clusterGuid][route.entity.domain_guid].entity.name || spaceRoutesCtrl.sharedDomains.domains[spaceRoutesCtrl.clusterGuid][route.entity.domain_guid].entity.name) + (route.entity.port ? ':' + route.entity.port : '') + route.entity.path }}</td>
+          <td>{{ spaceRoutesCtrl.apps[route.metadata.guid].join(',')}}</td>
+          <td>
+            <actions-menu actions="spaceRoutesCtrl.actions"
+                          action-target="route"
+                          menu-icon="helion-icon helion-icon-More"
+                          menu-position="actions-menu-right">
+            </actions-menu>
+          </td>
+        </tr>
+        </tbody>
+        <tfoot ng-init="spaceRoutesCtrl.showRoutes = 5"
+               ng-show="spaceRoutesCtrl.showRoutes < spaceRoutesCtrl.spaceDetail().routes.length">
+        <tr>
+          <td colspan="5" class="text-center">
+            <a ng-click="spaceRoutesCtrl.showRoutes = spaceRoutesCtrl.spaceDetail().routes.length">
+              <span translate>Show All</span> ({{spaceRoutesCtrl.spaceDetail().routes.length}})
+            </a>
+            <div ng-show="false" st-pagination="" st-items-by-page="spaceRoutesCtrl.showRoutes"></div>
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+
+  </div>
+</div>

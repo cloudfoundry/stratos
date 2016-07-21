@@ -2,7 +2,9 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.clusters.cluster.organization')
+    .module('app.view.endpoints.clusters.cluster.organization.detail', [
+      'app.view.endpoints.clusters.cluster.organization.spaces'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [
@@ -13,20 +15,52 @@
     $stateProvider.state('endpoint.clusters.cluster.organization.detail', {
       url: '',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/cluster-organization-detail.html',
-      controller: ClusterOrgController,
-      controllerAs: 'clusterController'
+      controller: ClusterOrgDetailController,
+      controllerAs: 'clusterOrgDetailController',
+      abstract: true
     });
   }
 
-  ClusterOrgController.$inject = [
+  ClusterOrgDetailController.$inject = [
     'app.model.modelManager',
     '$stateParams'
   ];
 
-  function ClusterOrgController(modelManager, $stateParams) {
-    this.guid = $stateParams.guid;
-    this.organization = $stateParams.organization;
+  function ClusterOrgDetailController(modelManager, $stateParams) {
+    this.clusterGuid = $stateParams.guid;
+    this.organizationGuid = $stateParams.organization;
+
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
+
+    this.actions = [
+      {
+        name: gettext('Create Organization'),
+        icon: 'helion-icon-lg helion-icon helion-icon-Tree',
+        disabled: true,
+        execute: function () {
+        }
+      },
+      {
+        name: gettext('Create Space'),
+        icon: 'helion-icon-lg helion-icon helion-icon-Tree',
+        disabled: true,
+        execute: function () {
+        }
+      },
+      {
+        name: gettext('Assign User(s)'),
+        icon: 'helion-icon-lg helion-icon helion-icon-Add_user',
+        disabled: true,
+        execute: function () {
+        }
+      }
+    ];
   }
 
-  angular.extend(ClusterOrgController.prototype, {});
+  angular.extend(ClusterOrgDetailController.prototype, {
+    organization: function () {
+      return _.get(this.organizationModel, this.orgPath);
+    }
+  });
 })();

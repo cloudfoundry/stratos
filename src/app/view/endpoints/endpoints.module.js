@@ -21,6 +21,9 @@
       template : '<ui-view/>',
       data: {
         activeMenuState: 'endpoints'
+      },
+      ncyBreadcrumb: {
+        label: gettext('Endpoints')
       }
     });
   }

@@ -146,7 +146,7 @@
      * @description get summary of an application at the model layer
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
-     * @param {booelan} includeStats - whether to also go and fetch the application stats if the app is RUNNING
+     * @param {boolean=} includeStats - whether to also go and fetch the application stats if the app is RUNNING
      * @returns {promise} a promise object
      * @public
      */
@@ -160,12 +160,12 @@
         .GetAppSummary(guid, {}, config)
         .then(function (response) {
           if (!includeStats || response.data[cnsiGuid].state !== 'STARTED') {
-            that.onSummary(response.data[cnsiGuid]);
+            that.onSummary(cnsiGuid, guid, response.data[cnsiGuid]);
             return response;
           } else {
             // We were asked for stats and this app is RUNNING, so go and get them
             return that.getAppStats(cnsiGuid, guid).then(function () {
-              that.onSummary(response.data[cnsiGuid]);
+              that.onSummary(cnsiGuid, guid, response.data[cnsiGuid]);
             });
           }
         });
@@ -452,10 +452,17 @@
      * @function onSummary
      * @memberof  cloud-foundry.model.application
      * @description onSummary handler at model layer
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the space guid
      * @param {object} response - the json return from the api call
      * @private
      */
-    onSummary: function (response) {
+    onSummary: function (cnsiGuid, guid, response) {
+      _.set(this, 'appSummary.' + cnsiGuid + '.' + guid, response);
+
+      /* eslint-disable no-warning-comments */
+      // FIXME (TEAMFOUR-779): This is application specific and should be kept separate from a generic appSummary call
+      /* eslint-enable no-warning-comments */
       this.application.summary = response;
       this.onAppStateChange();
     },
