@@ -28,13 +28,13 @@
    * @param {object} modelManager - the model manager
    * @property {object} modelManager - the app's model manager
    * @param {object} apiManager - the API manager
-   * @property {object} apiManager - the API manager
    * @param {object} utils - the utils service
-   * @property {object} utils - the utils service
-   * @property {object} stackatoInfoModel - the stackatoInfoModel model
    * @param {object} $q - angular $q service
-   * @property {object} $q - angular $q service
    * @param {object} $log - angular $log service
+   * @property {object} modelManager - the model manager
+   * @property {object} apiManager - the API manager
+   * @property {object} utils - the utils service
+   * @property {object} $q - angular $q service
    * @property {object} $log - angular $log service
    * @class
    */

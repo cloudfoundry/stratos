@@ -124,7 +124,7 @@
           that.userCnsiModel.numValid -= 1;
           that.cfModel.all();
         }).catch(function () {
-        // Failed
+          // Failed
         }).finally(function () {
           delete userServiceInstance._busy;
         });

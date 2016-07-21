@@ -71,8 +71,9 @@
             // retrieve categories and attachment data for service filtering
             var categories = [];
             var attachedServices = _.chain(summary.services)
-                                    .filter(function () { return angular.isDefined(o.service_plan); })
-                                    .map(function (o) { return o.service_plan.service.guid; });
+                                    .filter(function (o) { return angular.isDefined(o.service_plan); })
+                                    .map(function (o) { return o.service_plan.service.guid; })
+                                    .value();
             angular.forEach(services, function (service) {
               if (attachedServices.length > 0) {
                 if (_.includes(attachedServices, service.metadata.guid)) {

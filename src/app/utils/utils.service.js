@@ -15,6 +15,7 @@
    * @name utilsService
    * @param {object} $log - the angular $log service
    * @description Various utility functions
+   * @param {object} $log - the Angular $log service
    * @returns {object} the utils service
    */
   function utilsServiceFactory($log) {
