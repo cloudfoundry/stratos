@@ -50,10 +50,14 @@ resources:
     type: docker-image
     source:
       repository: docker-registry.helion.space:443/hsc/hsc-proxy
-  - name: hsc-database-creation-image
+  - name: hsc-initiate-migration-job-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/hsc/hsc-database-creation
+      repository: docker-registry.helion.space:443/hsc/hsc-initiate-migration-job
+  - name: hsc-finalize-migration-job-image
+    type: docker-image
+    source:
+      repository: docker-registry.helion.space:443/hsc/hsc-finalize-migration-job
 
   # HSM assets
   - name: hsm-sdl-bucket
@@ -115,10 +119,17 @@ jobs:
         build: portal-proxy-output
         tag: tag-files/version_tag
 
-    # Build the database configuration image, push to registry
-    - put: hsc-database-creation-image
+    # Build the initiate migration image, push to registry
+    - put: hsc-initiate-migration-job-image
       params:
-        dockerfile: portal-proxy-output/Dockerfile.database.HCP
+        dockerfile: portal-proxy-output/db/Dockerfile.preflight-job.HCP
+        build: portal-proxy-output
+        tag: tag-files/version_tag
+
+    # Build the finalize migration image, push to registry
+    - put: hsc-finalize-migration-job-image
+      params:
+        dockerfile: portal-proxy-output/db/Dockerfile.postflight-job.HCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 
