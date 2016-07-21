@@ -24,15 +24,9 @@
     });
   }
 
-  ClusterOrganizationsController.$inject = [
-    '$stateParams',
-    'app.model.modelManager'
-  ];
+  ClusterOrganizationsController.$inject = [];
 
-  function ClusterOrganizationsController($stateParams, modelManager) {
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.clusterGuid = $stateParams.guid;
+  function ClusterOrganizationsController() {
   }
 
-  angular.extend(ClusterOrganizationsController.prototype, {});
 })();
