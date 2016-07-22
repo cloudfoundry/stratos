@@ -64,6 +64,11 @@
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var isAdmin = stackatoInfo.info.endpoints.hcf[that.organization.cnsiGuid].user.admin;
+    var canDelete = false;
+    if (isAdmin) {
+      var spacesInOrg = that.organizationModel.organizations[that.organization.cnsiGuid][that.organization.guid].spaces;
+      canDelete = _.keys(spacesInOrg).length === 0;
+    }
 
     setActions();
 
@@ -76,7 +81,7 @@
       });
       that.actions.push({
         name: gettext('Delete Organization'),
-        disabled: !isAdmin,
+        disabled: !canDelete,
         execute: function () {
           confirmDialog({
             title: gettext('Delete Organization'),
