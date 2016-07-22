@@ -39,8 +39,6 @@ services:
     build:
       context: $GOPATH/src/github.com/hpcloud/portal-proxy
       dockerfile: db/Dockerfile.goose.dev
-    # volumes:
-    #   - $GOPATH/src/github.com/hpcloud/portal-proxy:/goose
 
 
   proxy:
@@ -69,9 +67,6 @@ services:
       - "80:80"
     volumes:
       - ../stratos-ui/dist:/usr/share/nginx/html:ro
-    # NOTE: links field must be included individually if extending this file.
-    #links:
-    #  - proxy:proxy
 
 
   ui:
