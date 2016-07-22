@@ -37,7 +37,6 @@
     var that = this;
     this.$state = $state;
     this.actions = [];
-    this.setActions();
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
 
@@ -56,35 +55,35 @@
 
     // Present the user's roles
     this.roles = that.organizationModel.organizationRolesToString(this.organization.roles);
-  }
 
-  angular.extend(OrganizationTileController.prototype, {
-
-    setActions: function () {
-      this.actions.push({
+    this.setActions = function () {
+      that.actions.push({
         name: gettext('Edit Organization'),
         disabled: true,
         execute: function () {
         }
       });
-      this.actions.push({
+      that.actions.push({
         name: gettext('Delete Organization'),
-        disabled: true,
+        disabled: false,
         execute: function () {
+          return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid);
         }
       });
-      this.actions.push({
+      that.actions.push({
         name: gettext('Assign User(s)'),
         disabled: true,
         execute: function () {
         }
       });
-    },
+    };
 
-    summary: function () {
-      this.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: this.organization.guid});
-    }
+    this.setActions();
 
-  });
+    this.summary = function () {
+      that.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
+    };
+
+  }
 
 })();
