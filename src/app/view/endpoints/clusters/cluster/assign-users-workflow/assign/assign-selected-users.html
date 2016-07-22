@@ -5,9 +5,9 @@
       {{ step.actions.selectedUserCount() === 1 ? 'SELECTED USER' : 'SELECTED USER(S)' }}
     </span>
     <span ng-repeat="user in step.userInput.selectedUsers | limitTo:step.ctrl.selectedUsersVisible | orderBy:'entity.username'">
-      {{user.entity.username}}<span ng-if="$index < step.ctrl.selectedUsersVisible- 1">,</span>
+      {{user.entity.username}}<span ng-if="$index < step.ctrl.selectedUsersVisible - 1">,</span>
     </span>
-    <span ng-if="step.actions.selectedUserCount() > step.ctrl.selectedUsersVisible - 1">
+    <span ng-if="step.actions.selectedUserCount() > step.ctrl.selectedUsersVisible ">
       <a ng-click="step.ctrl.selectedUsersVisible = step.data.numberMaxValue">View All</a>
     </span>
   </div>
@@ -25,11 +25,11 @@
       </select-input>
     </div>
     <div class="assign-selected-users-orgs-roles">
-        <checkbox-input ng-model="step.userInput.roles.organization[0]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][0]"></checkbox-input>
         <span translate>Org Manager</span>
-        <checkbox-input ng-model="step.userInput.roles.organization[1]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][1]"></checkbox-input>
         <span translate>Org Auditor</span>
-        <checkbox-input ng-model="step.userInput.roles.organization[2]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][2]"></checkbox-input>
         <span translate>Billing Manager</span>
     </div>
   </div>
@@ -68,8 +68,8 @@
       </tfoot>
     </table>
   </div>
-
-
-
-
+  <div class="alert alert-danger alert-with-icon" ng-show="step.errors.length > 0">
+    <div translate>There was a problem assigning roles. If the problem persists please contact an administrator</div>
+  </div>
 </div>
+

@@ -75,6 +75,7 @@
     var that = this;
 
     this.$uibModalInstance = $uibModalInstance;
+    this.$q = $q;
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var usersModel = modelManager.retrieve('cloud-foundry.model.users');
@@ -85,7 +86,6 @@
     this.userInput = { };
 
     function initialise() {
-
       that.data.numberMaxValue = Number.MAX_SAFE_INTEGER;
       that.data.clusterGuid = context.clusterGuid;
       that.data.organizationGuid = context.organizationGuid;
@@ -94,11 +94,14 @@
       that.data.users = {};
       that.data.usersByGuid = [];
 
-      that.errors = {};
+      that.errors = [];
 
       that.userInput.selectedUsersByGuid = JSON.parse(JSON.stringify(context.selectedUsers)) || {};
       that.userInput.selectedUsers = [];
       that.userInput.selectedUsersVisible = 2;
+    }
+
+    function initialiseSelect() {
 
       return (context.initPromise || that.$q.when()).then(function () {
         that.data.organizations = _.map(organizationModel.organizations[context.clusterGuid], function (obj) {
@@ -119,12 +122,24 @@
       });
     }
 
+    function initialiseAssign() {
+      return usersModel.listAllUsers(context.clusterGuid).then(function (res) {
+        that.data.users = res;
+        //Smart table struggles with an object, so keep two versions
+        that.data.usersByGuid = _.keyBy(res, 'metadata.guid');
+      }).catch(function () {
+        console.log('todo');
+      });
+    }
+
     function organizationChanged(org) {
-      that.data.spaces = _.map(org.spaces, function(value, key) {
+      that.data.spaces = _.map(org.spaces, function(value) {
         return value;
       });
       return $q.when();
     }
+
+    initialise();
 
     this.options = {
       workflow: {
@@ -140,8 +155,9 @@
             title: gettext('Select User(s)'),
             templateUrl: path + 'select/select-users.html',
             formName: 'select-user-form',
+            showBusyOnEnter: 'Fetching Users...',
             checkReadiness: function () {
-              return initialise();
+              return initialiseSelect();
             },
             onNext: function () {
               // Update into a format we can easily iterate over/manipulate in html
@@ -176,17 +192,7 @@
             templateUrl: path + 'assign/assign-selected-users.html',
             nextBtnText: gettext('Assign'),
             checkReadiness: function () {
-              var usersModel = modelManager.retrieve('cloud-foundry.model.users');
-              return usersModel.listAllUsers(context.clusterGuid).then(function (res) {
-                that.data.users = res;
-                //Smart table struggles with an object, so keep two versions
-                that.data.usersByGuid = _.keyBy(res, 'metadata.guid');
-              }).catch(function () {
-                console.log('todo');
-              });
-            },
-            onNext: function () {
-              console.log('assign roles next');
+              return initialiseAssign();
             },
             isLastStep: true,
             data: that.data,
@@ -201,7 +207,8 @@
               changeOrganization: function (org) {
                 organizationChanged(org);
               }
-            }
+            },
+            errors: that.errors
           }
         ]
       },
@@ -215,44 +222,17 @@
       },
 
       finish: function () {
-        that.finishWorkflow();
+        that.errors.push('poop');
+
+        if (!that.errors.length > 0) {
+          that.finishWorkflow();
+        }
       }
     };
-
-    // $scope.$watch(function () {
-    //   return that.userInput.serviceInstance;
-    // }, function (serviceInstance) {
-    //   if (serviceInstance) {
-    //     that.getOrganizations();
-    //     that.getDomains().then(function () {
-    //       that.userInput.domain = that.options.domains[0].value;
-    //     });
-    //   }
-    // });
 
   }
 
   angular.extend(AssignUsersWorkflowController.prototype, {
-
-
-    // startWorkflow: function () {
-    //   var that = this;
-    //   // this.addingApplication = true;
-    //   this.reset();
-    //   // this.appModel.all();
-    //   // this.getHceInstances();
-    //   // this.serviceInstanceModel.list()
-    //   //   .then(function (serviceInstances) {
-    //   //     var validServiceInstances = _.chain(_.values(serviceInstances))
-    //   //       .filter('valid')
-    //   //       .map(function (o) {
-    //   //         return { label: o.api_endpoint.Host, value: o };
-    //   //       })
-    //   //       .value();
-    //   //     [].push.apply(that.options.serviceInstances, validServiceInstances);
-    //   //   });
-    //   console.log('Start workflow');
-    // },
 
     stopWorkflow: function () {
       // this.addingApplication = false;
