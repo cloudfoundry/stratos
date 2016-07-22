@@ -93,7 +93,7 @@ echo "Build & publish the container image for the preflight job"
 buildAndPublishImage hsc-initiate-migration-job ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
 
 # Build the postflight container - finalize service migration
-echo "Build & publish the container image for the postfligt job"
+echo "Build & publish the container image for the postflight job"
 buildAndPublishImage hsc-finalize-migration-job ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
