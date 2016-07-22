@@ -3,4 +3,4 @@ hcp:
     open: host='$DB_HOST' port=$CFGDB_PORT user='$PGSQL_USER' password='$PGSQL_PASSWORD' dbname='$PGSQL_DATABASE' sslmode='$PGSQL_SSL_MODE'
 development:
     driver: postgres
-    open: host='localhost' port=5432 user='stratos' password='stratos' dbname='stratos-db' sslmode='disable'
+    open: host='postgres' port=5432 user='stratos' password='stratos' dbname='stratos-db' sslmode='disable'

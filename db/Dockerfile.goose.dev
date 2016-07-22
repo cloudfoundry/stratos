@@ -1,0 +1,9 @@
+FROM golang:1.6
+
+RUN go get bitbucket.org/liamstask/goose/cmd/goose
+
+COPY db/dbconf.yml db/dbconf.yml
+COPY db/migrations db/migrations
+COPY db/scripts/development.sh /
+
+CMD ["/development.sh"]
