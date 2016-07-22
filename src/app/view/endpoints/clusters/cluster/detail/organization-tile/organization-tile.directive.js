@@ -22,7 +22,8 @@
   OrganizationTileController.$inject = [
     'app.model.modelManager',
     '$state',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'helion.framework.widgets.dialog.confirm'
   ];
 
   /**
@@ -33,7 +34,7 @@
    * @param {object} utils - our utils service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, utils) {
+  function OrganizationTileController(modelManager, $state, utils, confirmDialog) {
     var that = this;
     this.$state = $state;
     this.actions = [];
@@ -76,7 +77,18 @@
         name: gettext('Delete Organization'),
         disabled: !isAdmin,
         execute: function () {
-          return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid);
+          confirmDialog({
+            title: gettext('Delete Organization'),
+            description: gettext('Are you sure you want to delete organization') +
+            " '" + that.organization.name + "' ?",
+            buttonText: {
+              yes: gettext('Delete'),
+              no: gettext('Cancel')
+            }
+          }).result.then(function () {
+            return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid);
+          });
+
         }
       });
       that.actions.push({
