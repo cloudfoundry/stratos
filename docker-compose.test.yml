@@ -4,11 +4,27 @@ services:
   # The development docker-compose file.
   # Use this to have things like "gulp watch" running in the UI.
 
+  ui:
+    extends:
+      file: common.yml
+      service: ui
+    build:
+      context: ../stratos-ui
+      dockerfile: Dockerfile.test
+
 
   postgres:
     extends:
       file: common.yml
       service: postgres
+
+
+  goose:
+    extends:
+      file: common.yml
+      service: goose
+    links:
+      - postgres:postgres
 
 
   proxy:
@@ -30,12 +46,3 @@ services:
       service: nginx
     links:
       - proxy:proxy
-
-
-  ui:
-    extends:
-      file: common.yml
-      service: ui
-    build:
-      context: ../stratos-ui
-      dockerfile: Dockerfile.test
