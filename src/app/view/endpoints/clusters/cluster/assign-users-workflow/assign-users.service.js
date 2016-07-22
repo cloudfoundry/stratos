@@ -15,6 +15,7 @@
           scope.$watch(function () {
             return ctrl.tableState().search;
           }, function (newValue, oldValue) {
+            //TODO: filter out all, pagination still exists + count on pagination shows all not filtered
             scope.onFilter(ctrl);
           }, true);
         }
@@ -34,7 +35,7 @@
     var that = this;
 
     return {
-      assign: function (clusterGuid, orgGuid, spaceGuid, selectedUsers) {
+      assign: function (initPromise, clusterGuid, orgGuid, spaceGuid, selectedUsers) {
         // config should contain level?
         return detailView(
           {
@@ -44,8 +45,9 @@
             controllerAs: 'assignUsers'
           },
           {
+            initPromise: initPromise,
             clusterGuid: clusterGuid,
-            orgGuid: orgGuid,
+            organizationGuid: orgGuid,
             spaceGuid: spaceGuid,
             selectedUsers: selectedUsers
           }
@@ -74,26 +76,55 @@
 
     this.$uibModalInstance = $uibModalInstance;
 
-    this.$scope = $scope;
-    this.$q = $q;
-    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
+    var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    var usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
     var path = 'app/view/endpoints/clusters/cluster/assign-users-workflow/';
 
-    this.data = {};
-    this.errors = {};
+    this.data = { };
+    this.userInput = { };
 
-    this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
-    this.usersModel.listAllUsers(context.clusterGuid).then(function (res) {
-      that.data.users = res;
-    }).catch(function () {
-      console.log('todo');
-    });
+    function initialise() {
 
-    console.log(context.selectedUsers);
-    this.userInput = {
-      selectedUsers: JSON.parse(JSON.stringify(context.selectedUsers)) || {}
-    };
+      that.data.numberMaxValue = Number.MAX_SAFE_INTEGER;
+      that.data.clusterGuid = context.clusterGuid;
+      that.data.organizationGuid = context.organizationGuid;
+      that.data.spaceGuid = context.spaceGuid;
+      that.data.organizations = [];
+      that.data.users = {};
+      that.data.usersByGuid = [];
+
+      that.errors = {};
+
+      that.userInput.selectedUsersByGuid = JSON.parse(JSON.stringify(context.selectedUsers)) || {};
+      that.userInput.selectedUsers = [];
+      that.userInput.selectedUsersVisible = 2;
+
+      return (context.initPromise || that.$q.when()).then(function () {
+        that.data.organizations = _.map(organizationModel.organizations[context.clusterGuid], function (obj) {
+          return {
+            label: obj.details.name,
+            value: obj
+          };
+        });
+
+        return usersModel.listAllUsers(context.clusterGuid).then(function (res) {
+          that.data.users = res;
+          //Smart table struggles with an object, so keep two versions
+          that.data.usersByGuid = _.keyBy(res, 'metadata.guid');
+        }).catch(function (err) {
+          console.log('todo');
+          throw err;
+        });
+      });
+    }
+
+    function organizationChanged(org) {
+      that.data.spaces = _.map(org.spaces, function(value, key) {
+        return value;
+      });
+      return $q.when();
+    }
 
     this.options = {
       workflow: {
@@ -109,31 +140,74 @@
             title: gettext('Select User(s)'),
             templateUrl: path + 'select/select-users.html',
             formName: 'select-user-form',
+            checkReadiness: function () {
+              return initialise();
+            },
             onNext: function () {
-              console.log('select usersnext');
-              return $q.when('selected users');
+              // Update into a format we can easily iterate over/manipulate in html
+              that.userInput.selectedUsers = _
+                .chain(that.userInput.selectedUsersByGuid)
+                .reduce(function (result, value, key) {
+                  // Filter out any entries not selected (user has toggled checkbox)
+                  if (value) {
+                    result.push(key);
+                  }
+                  return result;
+                }, [])
+                .map(function (guid) {
+                  // Convert guid array into array of users
+                  return that.data.usersByGuid[guid];
+                })
+                .value();
+              that.userInput.org = that.data.organizations[0].value;
+              return organizationChanged(that.userInput.org);
             },
             data: that.data,
-            userInput: this.userInput
+            userInput: that.userInput,
+            actions: {
+              keys: function (obj) {
+                return _.keys(obj);
+              }
+            }
           },
           {
             title: gettext('Assign Roles'),
             formName: 'assign-selected-form',
             templateUrl: path + 'assign/assign-selected-users.html',
             nextBtnText: gettext('Assign'),
+            checkReadiness: function () {
+              var usersModel = modelManager.retrieve('cloud-foundry.model.users');
+              return usersModel.listAllUsers(context.clusterGuid).then(function (res) {
+                that.data.users = res;
+                //Smart table struggles with an object, so keep two versions
+                that.data.usersByGuid = _.keyBy(res, 'metadata.guid');
+              }).catch(function () {
+                console.log('todo');
+              });
+            },
             onNext: function () {
               console.log('assign roles next');
             },
             isLastStep: true,
             data: that.data,
-            userInput: this.userInput
+            userInput: that.userInput,
+            actions: {
+              keys: function (obj) {
+                return _.keys(obj);
+              },
+              selectedUserCount: function () {
+                return _.keys(that.userInput.selectedUsers).length;
+              },
+              changeOrganization: function (org) {
+                organizationChanged(org);
+              }
+            }
           }
         ]
       },
       userInput: this.userInput,
       errors: this.errors
     };
-    console.log(this.options.workflow.steps[0].selectedUsers);
 
     this.actions = {
       stop: function () {

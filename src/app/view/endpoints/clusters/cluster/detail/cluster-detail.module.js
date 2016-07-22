@@ -26,12 +26,13 @@
     'app.model.modelManager',
     '$stateParams',
     '$scope',
+    '$q',
     'app.utils.utilsService',
     '$state',
     'app.view.endpoints.clusters.cluster.assignUsers'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, assignUsers) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, $q, utils, $state, assignUsers) {
     var that = this;
     this.guid = $stateParams.guid;
 
@@ -61,7 +62,7 @@
       {
         name: gettext('Assign User(s)'),
         execute: function () {
-          assignUsers.assign(that.guid, null, null, that.selectedUsers);
+          assignUsers.assign(initDefered.promise, that.guid, null, null, that.selectedUsers);
         },
         icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
       }
@@ -77,6 +78,7 @@
       that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
     };
 
+    var initDefered = $q.defer();
     function init() {
       that.organizations = [];
       _.forEach(organizationModel.organizations[that.guid], function (orgDetail) {
@@ -89,6 +91,8 @@
           return o1.created_at - o2.created_at;
         });
       });
+      initDefered.resolve();
+      console.log('init');
     }
     utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
   }

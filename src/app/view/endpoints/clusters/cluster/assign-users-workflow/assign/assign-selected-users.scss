@@ -1,0 +1,33 @@
+.assign-selected-users {
+  h4 {
+    margin-top: 0;
+  }
+  .assign-selected-users-title {
+    //font-weight: 500;
+    //font-size: 20px;
+  }
+  .assign-selected-users-selected-label {
+    padding-right: 10px;
+  }
+
+  .assign-selected-users-orgs {
+    .assign-selected-users-orgs-roles {
+      display: flex;
+      padding: $hpe-unit-space 0;
+      & > * {
+        align-self: center;
+      }
+
+      & > span {
+        padding: 0 10px 0 5px;
+      }
+
+    }
+  }
+
+  .assign-selected-users-spaces {
+    td {
+      vertical-align: middle;
+    }
+  }
+}
