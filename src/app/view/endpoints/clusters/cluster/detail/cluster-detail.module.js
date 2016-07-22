@@ -56,7 +56,14 @@
                 submit: gettext('Create')
               }
             },
-            { data: {} },
+            {
+              data: {
+                // Make the form invalid if the name is already taken
+                organizationNames: _.map(that.organizations, function (org) {
+                  return org.org.entity.name;
+                })
+              }
+            },
             function (orgData) {
               if (orgData.name && orgData.name.length > 0) {
                 return organizationModel.createOrganization(that.guid, orgData.name);
