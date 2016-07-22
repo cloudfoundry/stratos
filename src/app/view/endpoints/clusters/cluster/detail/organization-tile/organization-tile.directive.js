@@ -32,6 +32,7 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $state - the angular $state service
    * @param {object} utils - our utils service
+   * @param {object} confirmDialog - our confirmation dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationTileController(modelManager, $state, utils, confirmDialog) {

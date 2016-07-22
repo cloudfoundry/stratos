@@ -9,6 +9,8 @@
 
   /**
    * A simple attribute directive to set focus on an element when linked
+   * @param {Object} $timeout - the Angular $timeout service
+   * @returns {Object} the auto-focus directive
    * */
   function AutoFocus($timeout) {
     return {
