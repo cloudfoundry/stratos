@@ -51,6 +51,11 @@
       stats: {}
     };
     this.appStateSwitchTo = '';
+    this.filterParams = {
+      cnsiGuid: 'all',
+      orgGuid: 'all',
+      spaceGuid: 'all'
+    };
   }
 
   angular.extend(Application.prototype, {
@@ -58,7 +63,7 @@
      * @function all
      * @memberof  cloud-foundry.model.application
      * @description List all applications at the model layer
-     * @param {string} guid - application guid
+     * @param {string} guid - CNSI guid
      * @param {object} options - options for url building
      * @param {boolean} sync - whether the response should wait for all app stats or just the app metadata
      * @returns {promise} A promise object
@@ -67,11 +72,20 @@
     all: function (guid, options, sync) {
       var that = this;
       this.data.applications = [];
-      var cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
-        .values()
-        .filter({cnsi_type: 'hcf'})
-        .map('guid')
-        .value();
+
+      var cnsis = [];
+      if (this.filterParams.cnsiGuid === 'all') {
+        cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
+                  .values()
+                  .filter({cnsi_type: 'hcf'})
+                  .map('guid')
+                  .value();
+      } else {
+        cnsis = [this.filterParams.cnsiGuid];
+      }
+
+      options = angular.extend(options || {}, this._buildFilter());
+
       return this.applicationApi.ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
           // For all of the apps in the running state, we may need to get stats in order to be able to
@@ -101,6 +115,22 @@
             });
           }
         });
+    },
+
+    /**
+     * @function _buildFilter
+     * @description Build filter from org or space GUID
+     * @returns {object} The CF q filter
+     * @private
+     */
+    _buildFilter: function () {
+      if (this.filterParams.spaceGuid !== 'all') {
+        return {q: 'space_guid:' + this.filterParams.spaceGuid};
+      } else if (this.filterParams.orgGuid !== 'all') {
+        return {q: 'organization_guid:' + this.filterParams.orgGuid};
+      }
+
+      return {};
     },
 
     /**

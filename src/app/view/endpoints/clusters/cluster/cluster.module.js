@@ -85,7 +85,7 @@
       return $q.all([orgPromise, servicesPromise, serviceBindingPromise, privateDomainsPromise, sharedDomainsPromise]);
     }
 
-    utils.startStateResolve('endpoint.clusters.cluster', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster', $state, init);
   }
 
 })();

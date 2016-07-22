@@ -34,7 +34,6 @@
 
   angular.extend(ApplicationGalleryCardController.prototype, {
     goToApp: function () {
-
       var guids = {
         cnsiGuid: this.cnsiGuid,
         guid: this.app.metadata.guid
