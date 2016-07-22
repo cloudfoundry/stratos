@@ -2,12 +2,25 @@
 We use [Goose](https://bitbucket.org/liamstask/goose/) for database migrations, both in our development workflow via docker compose and when we deploy to HCP.
 
 ### Development (Docker Compose)
-TBD
+
+#### Creating a new migrations
+Check out the [main Goose Page](https://bitbucket.org/liamstask/goose/) for details on creating database migrations.
+
+One note: you'll want to choose SQL based migrations vs Golang based migrations. This choice requires the `sql` keyword at the end of the `goose create` command. Ex:
+```
+$ goose create AddSomeColumns sql
+$ goose: created db/migrations/20130106093224_AddSomeColumns.sql
+```
+
+#### Testing the new migration
+Our development workflow now uses Goose to migrate the database each time Compose is run. The `goose` container runs *after* the Postgres container is up (thanks to the link in the `docker-compose.development.yml` file) and migrates the database.
+
+Look at the logs for the `goose-<blah>` container after compose finishes to be sure your migration was applied successfully.
 
 ### Production (HCP)
 Our production deployment architecture should be familiar if you have experience with HCP.
 
-It shouldn't matter whether you manually use the `build_and_tag.sh` script to build and tag images and generate the necessary SDL/IDL to deploy the Console or depend on the Concourse pipeline to do the same. At the end of the day, you have Docker images on the shared internal registry and a SDL that tells HCP how to stand up the Console.
+It shouldn't matter whether you manually use the `build_and_tag.sh` script to build and tag images and generate the necessary SDL/IDL, or depend on the Concourse pipeline to do the same. At the end of the day, you have Docker images on the shared internal registry and a SDL that tells HCP how to stand up the Console.
 
 There are three sections of the SDL that are of interest here:
 - the `components` section
