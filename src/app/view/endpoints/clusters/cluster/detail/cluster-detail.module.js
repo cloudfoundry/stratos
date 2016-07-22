@@ -53,7 +53,7 @@
               title: gettext('Create Organization'),
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-organization.html',
               buttonTitles: {
-                submit: 'Create'
+                submit: gettext('Create')
               }
             },
             { data: {} },
