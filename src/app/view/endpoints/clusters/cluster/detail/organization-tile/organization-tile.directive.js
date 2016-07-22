@@ -60,6 +60,9 @@
       that.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
     };
 
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var isAdmin = stackatoInfo.info.endpoints.hcf[that.organization.cnsiGuid].user.admin;
+
     setActions();
 
     function setActions() {
@@ -71,7 +74,7 @@
       });
       that.actions.push({
         name: gettext('Delete Organization'),
-        disabled: false,
+        disabled: !isAdmin,
         execute: function () {
           return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid);
         }
