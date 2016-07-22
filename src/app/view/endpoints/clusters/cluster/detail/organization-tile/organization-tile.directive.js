@@ -56,7 +56,13 @@
     // Present the user's roles
     this.roles = that.organizationModel.organizationRolesToString(this.organization.roles);
 
-    this.setActions = function () {
+    this.summary = function () {
+      that.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
+    };
+
+    setActions();
+
+    function setActions() {
       that.actions.push({
         name: gettext('Edit Organization'),
         disabled: true,
@@ -76,13 +82,7 @@
         execute: function () {
         }
       });
-    };
-
-    this.setActions();
-
-    this.summary = function () {
-      that.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
-    };
+    }
 
   }
 
