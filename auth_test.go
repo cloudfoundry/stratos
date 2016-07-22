@@ -32,7 +32,11 @@ func TestLoginToUAA(t *testing.T) {
 		msBody(jsonMust(mockUAAResponse)))
 
 	defer mockUAA.Close()
-	pp.Config.UAAEndpoint = mockUAA.URL + "/oauth/token"
+	mockURL, _ := url.Parse(mockUAA.URL)
+	s := strings.Split(mockURL.Host, ":")
+	pp.Config.HCPIdentityScheme = mockURL.Scheme
+	pp.Config.HCPIdentityHost = s[0]
+	pp.Config.HCPIdentityPort = s[1]
 
 	var tokenExpiration = time.Now().AddDate(0, 0, 1).Unix()
 	var mockTokenRecord = tokens.TokenRecord{
@@ -93,7 +97,11 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 	)
 
 	defer mockUAA.Close()
-	pp.Config.UAAEndpoint = mockUAA.URL + "/oauth/token"
+	mockURL, _ := url.Parse(mockUAA.URL)
+	s := strings.Split(mockURL.Host, ":")
+	pp.Config.HCPIdentityScheme = mockURL.Scheme
+	pp.Config.HCPIdentityHost = s[0]
+	pp.Config.HCPIdentityPort = s[1]
 
 	err := pp.loginToUAA(ctx)
 	if err == nil {
@@ -130,7 +138,11 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 		msBody(jsonMust(mockUAAResponse)))
 
 	defer mockUAA.Close()
-	pp.Config.UAAEndpoint = mockUAA.URL + "/oauth/token"
+	mockURL, _ := url.Parse(mockUAA.URL)
+	s := strings.Split(mockURL.Host, ":")
+	pp.Config.HCPIdentityScheme = mockURL.Scheme
+	pp.Config.HCPIdentityHost = s[0]
+	pp.Config.HCPIdentityPort = s[1]
 
 	// setup database mocks
 	db, mock, dberr := sqlmock.New()

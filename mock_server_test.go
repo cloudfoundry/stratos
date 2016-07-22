@@ -68,7 +68,8 @@ func setupPortalProxy() *portalProxy {
 	pc := portalConfig{
 		ConsoleClient:        "console",
 		ConsoleClientSecret:  "",
-		UAAEndpoint:          "https://login.52.38.188.107.nip.io/oauth/token",
+		HCPIdentityHost:      "login.52.38.188.107.nip.io",
+		HCPIdentityScheme:    "https",
 		SessionStoreSecret:   "hiddenraisinsohno!",
 		EncryptionKeyInBytes: key,
 	}
