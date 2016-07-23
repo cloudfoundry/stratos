@@ -201,7 +201,12 @@
           "public": false
         }
       ],
-      "volume_mounts": []
+      "volume_mounts": [
+        {
+          "volume_name": "pgsql-data",
+          "mountpoint": "/database"
+        }
+      ]
     }
   ],
   "features": {
@@ -351,7 +356,7 @@
   ],
   "volumes": [
     {
-      "name": "stolon-data",
+      "name": "pgsql-data",
       "size_gb": 10,
       "filesystem": "ext4",
       "shared": false
