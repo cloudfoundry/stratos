@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/antonlindstrom/pgstore"
 	"github.com/hpcloud/portal-proxy/datastore"
+	"github.com/hpcloud/portal-proxy/repository/tokens"
 	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -46,7 +46,7 @@ func main() {
 	log.Println("HTTP client initialized.")
 
 	// Get the encryption key we need for tokens in the database
-	portalConfig.EncryptionKeyInBytes, err = setEncryptionKey(portalConfig)
+	portalConfig.EncryptionKeyInBytes, err = getEncryptionKey(portalConfig)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
@@ -91,20 +91,33 @@ func main() {
 	}
 }
 
-// TODO (wchrisjohnson): This should be changed to pull in the encryption key from the env.
-// For the time being, I am just generating a 256 bit / 32 byte / AES-256 encryption key
-// here. By  the time I am done with this PR, this will come in via the env var.
-func setEncryptionKey(pc portalConfig) ([]byte, error) {
-	log.Println("setEncryptionKey")
-	key := make([]byte, 32)
-	_, err := rand.Read(key)
+func getEncryptionKey(pc portalConfig) ([]byte, error) {
+	fmt.Println("getEncryptionKey")
 
-	if err != nil {
-		return nil, err
+	// If it exists in "EncryptionKey" we must be in compose; use it.
+	if len(pc.EncryptionKey) > 0 {
+		return []byte(pc.EncryptionKey), nil
 	}
 
-	// b64.StdEncoding.DecodeString(p.Config.EncryptionKey)
-	// portalConfig.EncryptionKey = b64.StdEncoding.EncodeToString(key)
+	// TODO (wchrisjohnson) - discuss with Tara, Aaron
+	// If we are unable to read the encryption key, should we just assume it hasn't
+	// been created yet and create it? There are (potentially) numerous reasons why
+	// the key can't be read. If we (re)create the key due to one of these reasons,
+	// it basically invalidates the entire database of tokens ... risky.
+	key, err := tokens.ReadKey(pc.EncryptionKeyVolume)
+	if err != nil {
+		key, err = tokens.CreateKey()
+		if err != nil {
+			log.Printf("Unable to read the encryption key from the shared volume: %v", err)
+			return nil, err
+		}
+
+		err = tokens.WriteKey(pc.EncryptionKeyVolume, key)
+		if err != nil {
+			log.Printf("Unable to write the encryption key to the shared volume: %v", err)
+			return nil, err
+		}
+	}
 
 	return key, nil
 }
