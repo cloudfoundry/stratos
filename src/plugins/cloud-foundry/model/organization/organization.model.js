@@ -349,8 +349,6 @@
         // Set total apps count
         details.totalApps = vals.apps;
 
-        details.name = org.entity.name;
-
         details.roles = vals.roles;
 
         details.totalRoutes = vals.routes;
@@ -385,6 +383,18 @@
       var orgsApi = this.apiManager.retrieve('cloud-foundry.api.Organizations');
       return orgsApi.DeleteOrganization(orgGuid, {}, this.makeHttpConfig(cnsiGuid)).then(function (val) {
         that.unCacheOrganization(cnsiGuid, orgGuid);
+        return val;
+      });
+    },
+
+    /**
+     * For v1 this only refreshes the cached name, when we allow updating quota we will need to refresh the cache
+     * */
+    updateOrganization: function (cnsiGuid, orgGuid, orgData) {
+      var that = this;
+      var orgsApi = this.apiManager.retrieve('cloud-foundry.api.Organizations');
+      return orgsApi.UpdateOrganization(orgGuid, orgData, {}, this.makeHttpConfig(cnsiGuid)).then(function (val) {
+        that.organizations[cnsiGuid][orgGuid].details.org = val.data;
         return val;
       });
     }

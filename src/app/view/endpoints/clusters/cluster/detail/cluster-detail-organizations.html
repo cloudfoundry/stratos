@@ -5,8 +5,8 @@
   <div translate>An error occurred retrieving organizations</div>
 </div>
 <div class="cluster-gallery-card-container" ng-if="clusterDetailController.organizations">
-  <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterDetailController.organizations">
-    <organization-tile organization="organization"></organization-tile>
+  <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterDetailController.organizations track by organization.guid">
+    <organization-tile organization="organization" organization-names="clusterDetailController.organizationNames"></organization-tile>
   </div>
 </div>
 

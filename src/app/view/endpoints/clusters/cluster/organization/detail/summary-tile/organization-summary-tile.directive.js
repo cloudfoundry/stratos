@@ -22,9 +22,11 @@
 
   OrganizationSummaryTileController.$inject = [
     '$scope',
+    '$state',
     '$stateParams',
     'app.model.modelManager',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'helion.framework.widgets.dialog.confirm'
   ];
 
   /**
@@ -34,8 +36,9 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.utilsService} utils - the console utils service
+   * @param {object} confirmDialog - our confirmation dialog service
    */
-  function OrganizationSummaryTileController($scope, $stateParams, modelManager, utils) {
+  function OrganizationSummaryTileController($scope, $state, $stateParams, modelManager, utils, confirmDialog) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -43,6 +46,7 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
+    this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];
     this.utils = utils;
 
     this.cardData = {
@@ -57,6 +61,14 @@
       return _.keys(obj);
     };
 
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var isAdmin = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user.admin;
+    var canDelete = false;
+    if (isAdmin) {
+      var spacesInOrg = that.organization.spaces;
+      canDelete = _.keys(spacesInOrg).length === 0;
+    }
+
     this.actions = [
       {
         name: gettext('Edit Organization'),
@@ -66,8 +78,22 @@
       },
       {
         name: gettext('Delete Organization'),
-        disabled: true,
+        disabled: !canDelete,
         execute: function () {
+          confirmDialog({
+            title: gettext('Delete Organization'),
+            description: gettext('Are you sure you want to delete organization') +
+            " '" + that.organization.details.org.entity.name + "' ?",
+            buttonText: {
+              yes: gettext('Delete'),
+              no: gettext('Cancel')
+            }
+          }).result.then(function () {
+            return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid).then(function () {
+              // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
+              return $state.go($state.current.ncyBreadcrumb.parent());
+            });
+          });
         }
       }
     ];

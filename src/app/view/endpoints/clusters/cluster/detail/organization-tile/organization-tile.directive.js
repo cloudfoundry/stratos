@@ -13,7 +13,8 @@
       controller: OrganizationTileController,
       controllerAs: 'organizationTileCtrl',
       scope: {
-        organization: '='
+        organization: '=',
+        organizationNames: '='
       },
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/organization-tile/organization-tile.html'
     };
@@ -22,8 +23,10 @@
   OrganizationTileController.$inject = [
     'app.model.modelManager',
     '$state',
+    '$q',
     'app.utils.utilsService',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'helion.framework.widgets.asyncTaskDialog'
   ];
 
   /**
@@ -31,11 +34,13 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $state - the angular $state service
+   * @param {object} $q - the angular $q service
    * @param {object} utils - our utils service
    * @param {object} confirmDialog - our confirmation dialog service
+   * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, utils, confirmDialog) {
+  function OrganizationTileController(modelManager, $state, $q, utils, confirmDialog, asyncTaskDialog) {
     var that = this;
     this.$state = $state;
     this.actions = [];
@@ -62,6 +67,12 @@
       that.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
     };
 
+    var cardData = {};
+    this.getCardData = function () {
+      cardData.title = that.organization.org.entity.name;
+      return cardData;
+    };
+
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var isAdmin = stackatoInfo.info.endpoints.hcf[that.organization.cnsiGuid].user.admin;
     var canDelete = false;
@@ -75,8 +86,32 @@
     function setActions() {
       that.actions.push({
         name: gettext('Edit Organization'),
-        disabled: true,
+        disabled: !isAdmin,
         execute: function () {
+          return asyncTaskDialog(
+            {
+              title: gettext('Edit Organization'),
+              templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
+              buttonTitles: {
+                submit: gettext('Save')
+              }
+            },
+            {
+              data: {
+                name: that.organization.org.entity.name,
+                organizationNames: that.organizationNames
+              }
+            },
+            function (orgData) {
+              if (orgData.name && orgData.name.length > 0) {
+                return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
+                  {name: orgData.name});
+              } else {
+                return $q.reject('Invalid Name!');
+              }
+
+            }
+          );
         }
       });
       that.actions.push({
@@ -86,7 +121,7 @@
           confirmDialog({
             title: gettext('Delete Organization'),
             description: gettext('Are you sure you want to delete organization') +
-            " '" + that.organization.name + "' ?",
+            " '" + that.organization.org.entity.name + "' ?",
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
