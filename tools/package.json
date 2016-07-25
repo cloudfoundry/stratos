@@ -54,7 +54,6 @@
     "proxy-middleware": "^0.15.0",
     "q": "^1.4.1",
     "request": "2.69.0",
-    "shelljs": "^0.5.3",
-    "vinyl-fs": "^0.3.0"
+    "shelljs": "^0.5.3"
   }
 }
