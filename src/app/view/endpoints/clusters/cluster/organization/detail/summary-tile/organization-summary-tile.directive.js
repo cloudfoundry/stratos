@@ -36,6 +36,7 @@
    * @name OrganizationSummaryTileController
    * @constructor
    * @param {object} $scope - the angular $scope service
+   * @param {object} $state - the angular $scope service
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
