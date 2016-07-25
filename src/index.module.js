@@ -13,7 +13,8 @@
     'smoothScroll',
     'ui.bootstrap',
     'ui.router',
-    'smart-table'
+    'smart-table',
+    'http-etag'
   ];
 
   var pluginModules = _.chain(env.plugins).map('moduleName').value();
@@ -26,10 +27,11 @@
     .module('green-box-console', angularModules.concat(otherModules, ['app'], pluginModules), config);
 
   config.$inject = [
-    '$compileProvider'
+    '$compileProvider',
+    'httpEtagProvider'
   ];
 
-  function config($compileProvider) {
+  function config($compileProvider, httpEtagProvider) {
 
     /**
      * Disabling Debug Data
@@ -44,6 +46,9 @@
      * https://docs.angularjs.org/guide/production
      */
     $compileProvider.debugInfoEnabled(false);
+
+    // Use Etags to resolve caching issues on application upgrade
+    httpEtagProvider.cache('default');
   }
 
 })();

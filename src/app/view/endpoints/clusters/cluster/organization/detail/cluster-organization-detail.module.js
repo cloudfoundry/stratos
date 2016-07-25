@@ -37,34 +37,8 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
 
-    this.actions = [
-      {
-        name: gettext('Create Organization'),
-        icon: 'helion-icon-lg helion-icon helion-icon-Tree',
-        disabled: true,
-        execute: function () {
-        }
-      },
-      {
-        name: gettext('Create Space'),
-        icon: 'helion-icon-lg helion-icon helion-icon-Tree',
-        disabled: true,
-        execute: function () {
-        }
-      },
-      {
-        name: gettext('Assign User(s)'),
-        icon: 'helion-icon-lg helion-icon helion-icon-Add_user',
-        disabled: true,
-        execute: function () {
-        }
-      }
-    ];
-
     function init() {
-      that.organizationNames = _.map(that.organizationModel.organizations[that.clusterGuid], function (org) {
-        return org.details.org.entity.name;
-      });
+      that.organizationNames = that.organizationModel.organizationNames[that.clusterGuid];
       return $q.resolve();
     }
 

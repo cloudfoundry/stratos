@@ -1,5 +1,15 @@
 <div class="cluster">
   <span class="cluster-breadcrumb" ncy-breadcrumb></span>
-  <ui-view/>
+  <ui-view></ui-view>
+  <ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
+    <li ng-repeat="clusterAction in clusterController.clusterActions">
+      <button class="btn btn-link btn-border-less"
+              ng-disabled="clusterAction.disabled"
+              ng-hide="clusterAction.hidden"
+              ng-click="clusterAction.execute()">
+        <i ng-class="clusterAction.icon"></i> {{ clusterAction.name }}
+      </button>
+    </li>
+  </ul>
 </div>
 

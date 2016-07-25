@@ -28,69 +28,20 @@
     '$scope',
     'app.utils.utilsService',
     '$state',
-    '$q',
-    'helion.framework.widgets.asyncTaskDialog'
+    '$q'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, $q, asyncTaskDialog) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, $q) {
     var that = this;
     this.guid = $stateParams.guid;
 
     this.$scope = $scope;
 
     this.organizations = [];
-    this.organizationNames = [];
+
     this.totalApps = 0;
-    this.selectedUsers = {};
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-
-    this.clusterActions = [
-      {
-        name: gettext('Create Organization'),
-        disabled: true,
-        execute: function () {
-          return asyncTaskDialog(
-            {
-              title: gettext('Create Organization'),
-              templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-organization.html',
-              buttonTitles: {
-                submit: gettext('Create')
-              }
-            },
-            {
-              data: {
-                // Make the form invalid if the name is already taken
-                organizationNames: that.organizationNames
-              }
-            },
-            function (orgData) {
-              if (orgData.name && orgData.name.length > 0) {
-                return organizationModel.createOrganization(that.guid, orgData.name);
-              } else {
-                return $q.reject('Invalid Name!');
-              }
-
-            }
-          );
-        },
-        icon: 'helion-icon-lg helion-icon helion-icon-Tree'
-      },
-      {
-        name: gettext('Create Space'),
-        disabled: true,
-        execute: function () {
-        },
-        icon: 'helion-icon-lg helion-icon helion-icon-Tree'
-      },
-      {
-        name: gettext('Assign User(s)'),
-        execute: function () {
-          assignUsers.assign(initDefered.promise, that.guid, null, null, that.selectedUsers);
-        },
-        icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
-      }
-    ];
 
     this.updateTotalApps = function () {
       that.totalApps = 0;
@@ -111,29 +62,9 @@
         return o1.created_at - o2.created_at;
       });
       that.updateTotalApps();
-      that.organizationNames = _.map(that.organizations, function (org) {
-        return org.org.entity.name;
-      });
     }
 
-    /**
-     * Enable actions based on admin status
-     * N.B. when finer grain ACLs are wired in this should be updated
-     * */
-    function enableActions() {
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      if (stackatoInfo.info.endpoints.hcf[that.guid].user.admin) {
-        _.forEach(that.clusterActions, function (action) {
-          action.disabled = false;
-        });
-        // Disable these until implemented!
-        that.clusterActions[1].disabled = that.clusterActions[2].disabled = true;
-      }
-    }
-
-    var initDefered = $q.defer();
     function init() {
-      enableActions();
 
       // Start watching for further model changes after parent init chain completes
       $scope.$watchCollection(function () {
@@ -141,7 +72,7 @@
       }, function () {
         updateFromModel();
       });
-      initDefered.resolve();
+
       // init functions should return a promise
       return $q.resolve(that.organizations);
     }
