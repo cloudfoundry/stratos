@@ -125,6 +125,7 @@
           allDetailsP.push(orgDetailsP);
         });
         return $q.all(allDetailsP).then(function (val) {
+          enableActions();
           that.organizationNames = organizationModel.organizationNames[that.guid];
           return val;
         });
@@ -151,9 +152,7 @@
       delete appModel.appSummary;
 
       return $q.all([orgPromise, servicesPromise, serviceBindingPromise, privateDomainsPromise, sharedDomainsPromise])
-        .then(function () {
-          enableActions();
-        }).finally(function () {
+        .finally(function () {
           that.initialized = true;
         });
     }
