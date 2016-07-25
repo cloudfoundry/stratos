@@ -26,7 +26,8 @@
     '$q',
     'app.utils.utilsService',
     'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.asyncTaskDialog'
+    'helion.framework.widgets.asyncTaskDialog',
+    'app.view.endpoints.clusters.cluster.assignUsers'
   ];
 
   /**
@@ -38,9 +39,10 @@
    * @param {object} utils - our utils service
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} assignUsers - our assign users slide out service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, $q, utils, confirmDialog, asyncTaskDialog) {
+  function OrganizationTileController(modelManager, $state, $q, utils, confirmDialog, asyncTaskDialog, assignUsers) {
     var that = this;
     this.$state = $state;
     this.actions = [];
@@ -133,8 +135,11 @@
       });
       that.actions.push({
         name: gettext('Assign User(s)'),
-        disabled: true,
+        disabled: !isAdmin,
         execute: function () {
+          assignUsers.assign({
+            organizationGuid: that.organization.guid
+          });
         }
       });
     }

@@ -59,13 +59,13 @@
     }
 
     .select-users-bordered {
-      border: 1px solid #ccc;
+      border: 2px solid $gray-light;
     }
   }
 
   .select-users-table {
     .table-outlined {
-      border-width: 1px;
+      //border-width: 1px;
     }
   }
 }

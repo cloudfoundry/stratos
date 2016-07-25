@@ -22,7 +22,8 @@
     '$state',
     '$stateParams',
     'app.model.modelManager',
-    '$q'
+    '$q',
+    'app.view.endpoints.clusters.cluster.assignUsers'
   ];
 
   /**
@@ -32,18 +33,24 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $q - the angular $q service
+   * @param {object} assignUsers - our assign users slide out service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationSpaceTileController($state, $stateParams, modelManager, $q) {
+  function OrganizationSpaceTileController($state, $stateParams, modelManager, $q, assignUsers) {
     var that = this;
 
     this.$state = $state;
     this.clusterGuid = $stateParams.guid;
+    this.organizationGuid = $stateParams.organization;
+    this.spaceGuid = this.space.metadata.guid;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.space.metadata.guid);
+    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, that.space.entity.organization_guid);
+    this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
+
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var isAdmin = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user.admin;
 
     this.cardData = {
       title: this.space.entity.name
@@ -62,8 +69,12 @@
       },
       {
         name: gettext('Assign User(s)'),
-        disabled: true,
+        disabled: !isAdmin,
         execute: function () {
+          assignUsers.assign({
+            organizationGuid: that.organizationGuid,
+            spaceGuid: that.spaceGuid
+          });
         }
       }
     ];

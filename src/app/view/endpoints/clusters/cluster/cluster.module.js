@@ -30,10 +30,11 @@
     '$state',
     '$q',
     'app.model.modelManager',
-    'helion.framework.widgets.asyncTaskDialog'
+    'helion.framework.widgets.asyncTaskDialog',
+    'app.view.endpoints.clusters.cluster.assignUsers'
   ];
 
-  function ClusterController($stateParams, $log, utils, $state, $q, modelManager, asyncTaskDialog) {
+  function ClusterController($stateParams, $log, utils, $state, $q, modelManager, asyncTaskDialog, assignUsers) {
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -92,6 +93,9 @@
         name: gettext('Assign User(s)'),
         disabled: true,
         execute: function () {
+          assignUsers.assign({
+            selectedUsers: {}
+          });
         },
         icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
       }
@@ -107,8 +111,10 @@
           action.disabled = false;
         });
         // Disable these until implemented!
-        that.clusterActions[1].disabled = that.clusterActions[2].disabled = true;
+        that.clusterActions[1].disabled = true;
       }
+      that.clusterActions[2].disabled =
+        that.clusterActions[2].disabled && _.keys(organizationModel.organizations).length > 0;
     }
 
     function init() {
