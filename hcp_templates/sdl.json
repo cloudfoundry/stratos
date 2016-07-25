@@ -128,6 +128,9 @@
         },
         {
           "name": "GITHUB_OAUTH_STATE"
+        },
+        {
+          "name": "ENCRYPTION_KEY_VOLUME"
         }
       ],
       "affinity": [],
@@ -686,6 +689,14 @@
       "name": "GITHUB_OAUTH_STATE",
       "description": "** DEPRECATED ** will be removed as a part of TEAMFOUR-561",
       "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ENCRYPTION_KEY_VOLUME",
+      "description": "The local shared volume mount for the encryption key.",
+      "data_type": "string",
+      "default": "/hsc-encryption-key-volume",
       "required": true,
       "secret": false
     }
