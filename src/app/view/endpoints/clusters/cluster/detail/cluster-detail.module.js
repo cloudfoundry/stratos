@@ -39,6 +39,7 @@
     this.$scope = $scope;
 
     this.organizations = [];
+    this.organizationNames = [];
     this.totalApps = 0;
     this.selectedUsers = {};
 
@@ -60,9 +61,7 @@
             {
               data: {
                 // Make the form invalid if the name is already taken
-                organizationNames: _.map(that.organizations, function (org) {
-                  return org.org.entity.name;
-                })
+                organizationNames: that.organizationNames
               }
             },
             function (orgData) {
@@ -107,10 +106,13 @@
       that.organizations.length = 0;
       _.forEach(organizationModel.organizations[that.guid], function (orgDetail) {
         that.organizations.push(orgDetail.details);
-        that.organizations.sort(function (o1, o2) { // Sort organizations by created date
-          return o1.created_at - o2.created_at;
-        });
-        that.updateTotalApps();
+      });
+      that.organizations.sort(function (o1, o2) { // Sort organizations by created date
+        return o1.created_at - o2.created_at;
+      });
+      that.updateTotalApps();
+      that.organizationNames = _.map(that.organizations, function (org) {
+        return org.org.entity.name;
       });
     }
 
