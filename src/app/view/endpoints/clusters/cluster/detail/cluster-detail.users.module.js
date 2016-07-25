@@ -57,7 +57,7 @@
           _.forEach(that.organizationModel.organizations[that.guid], function (org) {
             var roles = org.roles[aUser.metadata.guid];
             if (!_.isUndefined(roles)) {
-              myRoles[org.details.name] = roles;
+              myRoles[org.details.org.entity.name] = roles;
             }
           });
           that.userRoles[aUser.metadata.guid] = [];

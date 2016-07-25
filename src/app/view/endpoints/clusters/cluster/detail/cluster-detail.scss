@@ -28,7 +28,7 @@
         cursor: default;
         float: left;
         margin: 0 8px 8px 0;
-        padding: 0 4px 4px 4px;
+        padding: 1px 4px 4px 4px;
         border: solid 2px $gray-light;
         border-radius: 5px;
       }
@@ -38,6 +38,7 @@
         font-weight: bolder;
         color: #aaa;
         margin-left: 10px;
+        cursor: pointer;
       }
     }
 
