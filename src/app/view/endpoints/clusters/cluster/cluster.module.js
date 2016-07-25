@@ -97,7 +97,6 @@
       }
     ];
 
-
     /**
      * Enable actions based on admin status
      * N.B. when finer grain ACLs are wired in this should be updated
