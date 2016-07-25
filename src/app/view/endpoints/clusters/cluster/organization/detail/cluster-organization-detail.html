@@ -25,14 +25,3 @@
   <ui-view></ui-view>
 
 </div>
-
-<ul ng-if="clusterOrgDetailController.organization().details" class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
-  <li ng-repeat="action in clusterOrgDetailController.actions">
-    <button class="btn btn-link btn-border-less"
-            ng-disabled="action.disabled"
-            ng-hide="action.hidden"
-            ng-click="action.execute()">
-      <i ng-class="action.icon"></i> {{ action.name }}
-    </button>
-  </li>
-</ul>

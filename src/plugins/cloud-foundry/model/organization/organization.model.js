@@ -46,6 +46,7 @@
     this.utils = utils;
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.organizations = {};
+    this.organizationNames = {};
 
     var passThroughHeader = {
       'x-cnap-passthrough': 'true'
@@ -71,6 +72,7 @@
      * @public
      */
     listAllOrganizations: function (cnsiGuid, params) {
+      this.unCacheOrganization(cnsiGuid);
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllOrganizations(params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
@@ -167,6 +169,7 @@
 
     initOrganizationCache: function (cnsiGuid, orgGuid) {
       this.organizations[cnsiGuid] = this.organizations[cnsiGuid] || {};
+      this.organizationNames[cnsiGuid] = this.organizationNames[cnsiGuid] || [];
       this.organizations[cnsiGuid][orgGuid] = this.organizations[cnsiGuid][orgGuid] || {
         details: {},
         roles: {},
@@ -182,6 +185,7 @@
     cacheOrganizationDetails: function (cnsiGuid, orgGuid, details) {
       this.initOrganizationCache(cnsiGuid, orgGuid);
       this.organizations[cnsiGuid][orgGuid].details = details;
+      this.organizationNames[cnsiGuid].push(details.org.entity.name);
     },
 
     cacheOrganizationUsersRoles: function (cnsiGuid, orgGuid, roles) {
@@ -209,6 +213,17 @@
     },
 
     unCacheOrganization: function (cnsiGuid, orgGuid) {
+      // If no org is specified uncache the entire cluster
+      if (angular.isUndefined(orgGuid)) {
+        delete this.organizations[cnsiGuid];
+        delete this.organizationNames[cnsiGuid];
+        return;
+      }
+      var orgName = _.get(this.organizations, [cnsiGuid, orgGuid, 'details', 'org', 'entity', 'name']);
+      var idx = this.organizationNames[cnsiGuid].indexOf(orgName);
+      if (idx > -1) {
+        this.organizationNames[cnsiGuid].splice(idx, 1);
+      }
       delete this.organizations[cnsiGuid][orgGuid];
     },
 

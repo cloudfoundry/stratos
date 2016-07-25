@@ -55,16 +55,3 @@
   <ui-view></ui-view>
 
 </div>
-
-<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
-  <li ng-repeat="clusterAction in clusterDetailController.clusterActions">
-    <button class="btn btn-link btn-border-less"
-            ng-disabled="clusterAction.disabled"
-            ng-hide="clusterAction.hidden"
-            ng-click="clusterAction.execute()">
-      <i ng-class="clusterAction.icon"></i> {{ clusterAction.name }}
-    </button>
-  </li>
-</ul>
-
-
