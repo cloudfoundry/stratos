@@ -27,10 +27,12 @@
     '$stateParams',
     '$scope',
     'app.utils.utilsService',
-    '$state'
+    '$state',
+    '$q',
+    'helion.framework.widgets.asyncTaskDialog'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, $q, asyncTaskDialog) {
     var that = this;
     this.guid = $stateParams.guid;
 
@@ -46,6 +48,31 @@
         name: gettext('Create Organization'),
         disabled: true,
         execute: function () {
+          return asyncTaskDialog(
+            {
+              title: gettext('Create Organization'),
+              templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-organization.html',
+              buttonTitles: {
+                submit: gettext('Create')
+              }
+            },
+            {
+              data: {
+                // Make the form invalid if the name is already taken
+                organizationNames: _.map(that.organizations, function (org) {
+                  return org.org.entity.name;
+                })
+              }
+            },
+            function (orgData) {
+              if (orgData.name && orgData.name.length > 0) {
+                return organizationModel.createOrganization(that.guid, orgData.name);
+              } else {
+                return $q.reject('Invalid Name!');
+              }
+
+            }
+          );
         },
         icon: 'helion-icon-lg helion-icon helion-icon-Tree'
       },
@@ -75,19 +102,46 @@
       that.totalMemoryUsed = utils.mbToHumanSize(totalMemoryMb);
     };
 
-    function init() {
-      that.organizations = [];
+    function updateFromModel() {
+      that.organizations.length = 0;
       _.forEach(organizationModel.organizations[that.guid], function (orgDetail) {
         that.organizations.push(orgDetail.details);
-
-        that.updateTotalApps();
-
-        // Sort organizations by created date
-        that.organizations.sort(function (o1, o2) {
+        that.organizations.sort(function (o1, o2) { // Sort organizations by created date
           return o1.created_at - o2.created_at;
         });
+        that.updateTotalApps();
       });
     }
+
+    /**
+     * Enable actions based on admin status
+     * N.B. when finer grain ACLs are wired in this should be updated
+     * */
+    function enableActions() {
+      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      if (stackatoInfo.info.endpoints.hcf[that.guid].user.admin) {
+        _.forEach(that.clusterActions, function (action) {
+          action.disabled = false;
+        });
+        // Disable these until implemented!
+        that.clusterActions[1].disabled = that.clusterActions[2].disabled = true;
+      }
+    }
+
+    function init() {
+      enableActions();
+
+      // Start watching for further model changes after parent init chain completes
+      $scope.$watchCollection(function () {
+        return organizationModel.organizations[that.guid];
+      }, function () {
+        updateFromModel();
+      });
+
+      // init functions should return a promise
+      return $q.resolve(that.organizations);
+    }
+
     utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
   }
 

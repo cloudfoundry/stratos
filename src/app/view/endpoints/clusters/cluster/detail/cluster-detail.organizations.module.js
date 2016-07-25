@@ -24,9 +24,6 @@
     });
   }
 
-  ClusterOrganizationsController.$inject = [];
-
-  function ClusterOrganizationsController() {
-  }
+  function ClusterOrganizationsController() {}
 
 })();

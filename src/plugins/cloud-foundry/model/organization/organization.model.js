@@ -208,6 +208,10 @@
       });
     },
 
+    unCacheOrganization: function (cnsiGuid, orgGuid) {
+      delete this.organizations[cnsiGuid][orgGuid];
+    },
+
     /**
      * @function  getOrganizationDetails
      * @memberof cloud-foundry.model.organization
@@ -234,6 +238,7 @@
       var quotaP = orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig);
 
       var rolesP = orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig);
+      var rolesValue;
       var stackatoInfoP = that.stackatoInfoModel.getStackatoInfo();
 
       var orgRolesP = that.$q.all({roles: rolesP, stackatoInfo: stackatoInfoP}).then(function (values) {
@@ -242,7 +247,7 @@
         /* eslint-disable no-warning-comments */
         // TODO[TEAMFOUR-780]: there may be many pages of Users!
         /* eslint-enable no-warning-comments */
-        that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, values.roles.data.resources);
+        rolesValue = values.roles.data.resources;
 
         // Find our user's GUID
         userGuid = values.stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
@@ -263,7 +268,6 @@
 
       var allSpacesP = this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
-          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, res.data.resources);
           return res.data.resources;
         });
 
@@ -291,7 +295,6 @@
       });
 
       var servicesP = this.listAllServicesForOrganization(cnsiGuid, orgGuid).then(function (services) {
-        that.cacheOrganizationServices(cnsiGuid, orgGuid, services);
         return services;
       });
       var spaceModel = this.modelManager.retrieve('cloud-foundry.model.space');
@@ -328,6 +331,7 @@
       }).then(function (vals) {
         var details = {};
 
+        details.cnsiGuid = cnsiGuid;
         details.guid = orgGuid;
 
         details.org = org;
@@ -352,7 +356,36 @@
         details.totalRoutes = vals.routes;
 
         that.cacheOrganizationDetails(cnsiGuid, orgGuid, details);
+        that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, rolesValue);
+        that.cacheOrganizationSpaces(cnsiGuid, orgGuid, vals.spaces);
+        that.cacheOrganizationServices(cnsiGuid, orgGuid, vals.services);
+
         return details;
+      });
+    },
+
+    createOrganization: function (cnsiGuid, orgName) {
+      var that = this;
+      var httpConfig = this.makeHttpConfig(cnsiGuid);
+      var orgsApi = this.apiManager.retrieve('cloud-foundry.api.Organizations');
+      return orgsApi.CreateOrganization({name: orgName}, {}, httpConfig).then(function (res) {
+        var org = res.data;
+        var newOrgGuid = org.metadata.guid;
+        return that.stackatoInfoModel.getStackatoInfo().then(function (stackatoInfo) {
+          var userGuid = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
+          return orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig).then(function () {
+            that.getOrganizationDetails(cnsiGuid, org);
+          });
+        });
+      });
+    },
+
+    deleteOrganization: function (cnsiGuid, orgGuid) {
+      var that = this;
+      var orgsApi = this.apiManager.retrieve('cloud-foundry.api.Organizations');
+      return orgsApi.DeleteOrganization(orgGuid, {}, this.makeHttpConfig(cnsiGuid)).then(function (val) {
+        that.unCacheOrganization(cnsiGuid, orgGuid);
+        return val;
       });
     }
 
