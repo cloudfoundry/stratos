@@ -23,10 +23,14 @@
 
   ClusterOrgDetailController.$inject = [
     'app.model.modelManager',
-    '$stateParams'
+    '$state',
+    '$stateParams',
+    '$q',
+    'app.utils.utilsService'
   ];
 
-  function ClusterOrgDetailController(modelManager, $stateParams) {
+  function ClusterOrgDetailController(modelManager, $state, $stateParams, $q, utils) {
+    var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
@@ -56,6 +60,16 @@
         }
       }
     ];
+
+    function init() {
+      that.organizationNames = _.map(that.organizationModel.organizations[that.clusterGuid], function (org) {
+        return org.details.org.entity.name;
+      });
+      return $q.resolve();
+    }
+
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
   }
 
   angular.extend(ClusterOrgDetailController.prototype, {
