@@ -387,9 +387,6 @@
       });
     },
 
-    /**
-     * For v1 this only refreshes the cached name, when we allow updating quota we will need to refresh the cache
-     * */
     updateOrganization: function (cnsiGuid, orgGuid, orgData) {
       var that = this;
       var orgsApi = this.apiManager.retrieve('cloud-foundry.api.Organizations');

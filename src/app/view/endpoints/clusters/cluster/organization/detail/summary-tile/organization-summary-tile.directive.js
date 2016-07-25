@@ -11,7 +11,8 @@
     return {
       bindToController: {
         clusterGuid: '=',
-        organization: '='
+        organization: '=',
+        organizationNames: '='
       },
       controller: OrganizationSummaryTileController,
       controllerAs: 'orgSummaryTileCtrl',
@@ -24,9 +25,11 @@
     '$scope',
     '$state',
     '$stateParams',
+    '$q',
     'app.model.modelManager',
     'app.utils.utilsService',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'helion.framework.widgets.asyncTaskDialog'
   ];
 
   /**
@@ -34,11 +37,14 @@
    * @constructor
    * @param {object} $scope - the angular $scope service
    * @param {object} $stateParams - the angular $stateParams service
+   * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.utilsService} utils - the console utils service
    * @param {object} confirmDialog - our confirmation dialog service
+   * @param {object} asyncTaskDialog - our async dialog service
    */
-  function OrganizationSummaryTileController($scope, $state, $stateParams, modelManager, utils, confirmDialog) {
+  function OrganizationSummaryTileController($scope, $state, $stateParams, $q,
+                                             modelManager, utils, confirmDialog, asyncTaskDialog) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -47,6 +53,7 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];
+
     this.utils = utils;
 
     this.cardData = {
@@ -72,8 +79,31 @@
     this.actions = [
       {
         name: gettext('Edit Organization'),
-        disabled: true,
+        disabled: !isAdmin,
         execute: function () {
+          return asyncTaskDialog(
+            {
+              title: gettext('Edit Organization'),
+              templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
+              buttonTitles: {
+                submit: gettext('Save')
+              }
+            },
+            {
+              data: {
+                name: that.organization.details.org.entity.name,
+                organizationNames: that.organizationNames
+              }
+            },
+            function (orgData) {
+              if (orgData.name && orgData.name.length > 0) {
+                return that.organizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
+                  {name: orgData.name});
+              } else {
+                return $q.reject('Invalid Name!');
+              }
+            }
+          );
         }
       },
       {

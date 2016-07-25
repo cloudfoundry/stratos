@@ -109,7 +109,6 @@
               } else {
                 return $q.reject('Invalid Name!');
               }
-
             }
           );
         }
