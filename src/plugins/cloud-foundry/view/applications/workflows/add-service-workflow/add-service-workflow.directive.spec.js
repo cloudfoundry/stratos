@@ -24,6 +24,7 @@
       spyOn(addServiceWorkflowCtrl, 'startWorkflow').and.callThrough();
 
       mockService = {
+        entity: { extra: '{"displayName":"Service","longDescription":"Service description"}' },
         metadata: { guid: 'b2728c78-1057-4021-9c84-d2158f8f20df' }
       };
 

@@ -89,6 +89,12 @@
      */
     reset: function (config) {
       var that = this;
+
+      // Parse service entity extra data JSON string
+      if (!_.isNil(config.service.entity.extra) && angular.isString(config.service.entity.extra)) {
+        config.service.entity.extra = angular.fromJson(config.service.entity.extra);
+      }
+
       this.data = {
         app: config.app,
         service: config.service,
@@ -143,6 +149,7 @@
       this.options = {
         errors: this.errors,
         userInput: this.userInput,
+        service: this.data.service,
         workflow: this.data.workflow,
 
         instances: [],
