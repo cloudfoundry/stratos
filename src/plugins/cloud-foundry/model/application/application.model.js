@@ -486,8 +486,8 @@
     /**
      * @function updateDeliveryPipelineMetadata
      * @memberof cloud-foundry.model.application
-     * @description Update the pipeline metadatf for the application
-     * @param {boolea} refresh - indictaes if cached hce metadata should be refershed
+     * @description Update the pipeline metadata for the application
+     * @param {boolean} refresh - indicates if cached hce metadata should be refreshed
      * @returns {promise} A promise object
      * @public
      */
