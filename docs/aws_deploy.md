@@ -183,7 +183,7 @@ If you don't do this, you will need to update the callback URL with each and eve
 
 * [Download](https://helion-service-manager.s3.amazonaws.com/release/master/instance-definition/hcf/instance.json) the HCE instance definition file.
 
-* Set the `DOMAIN` parameter with an alias (ex. helioncf.stacktest.io).
+* Set the `DOMAIN` parameter with an alias (ex. helioncf.stacktest.io). You'll need to add this alias in Route53 when the install is finished.
 
 * (Optional) Set the `instance_id` parameter (ex. my-hcf-latest). This will also be the namespace.
 
@@ -197,4 +197,4 @@ If you don't do this, you will need to update the callback URL with each and eve
   - `ssh <master private IP>`
   - `watch kubectl get pods --all-namespaces`
 
-* Add the alias (ex `*.helioncf.helion.io`) in Route53 using the HCF load balancer endpoint. You can find this by filtering the list by your VPC ID. Then, locate the load balancer with a security group having the HCF service instance ID within its description (ex. my-hcf-cluster/ha-proxy).
+* Add the alias (ex `*.helioncf.stacktest.io`) in Route53 using the HCF load balancer endpoint. You can find this by filtering the list by your VPC ID. Then, locate the load balancer with a security group having the HCF service instance ID within its description (ex. my-hcf-cluster/ha-proxy).
