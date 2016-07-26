@@ -115,7 +115,8 @@
       var that = this;
       var serviceInstances = _.chain(this.app.summary.services)
                               .filter(function (o) {
-                                return o.service_plan.service.guid === that.service.metadata.guid;
+                                return angular.isDefined(o.service_plan) &&
+                                  o.service_plan.service.guid === that.service.metadata.guid;
                               })
                               .map('guid')
                               .value();

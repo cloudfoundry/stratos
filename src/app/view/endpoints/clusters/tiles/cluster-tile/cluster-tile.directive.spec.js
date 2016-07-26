@@ -71,7 +71,6 @@
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
 
-        expect(clusterTileCtrl.accountStatus).toBeNull();
         expect(clusterTileCtrl.orgCount).toBeNull();
         expect(clusterTileCtrl.userCount).toBeNull();
         expect(clusterTileCtrl.cardData).toBeDefined();
@@ -84,7 +83,6 @@
         spyOn(cfModelOrg, 'listAllOrganizations').and.returnValue($q.when([1]));
         createCtrl();
 
-        expect(clusterTileCtrl.accountStatus).toBeNull();
         expect(clusterTileCtrl.orgCount).toEqual(1);
         expect(clusterTileCtrl.userCount).toEqual(1);
       });
@@ -132,20 +130,6 @@
         expect(clusterTileCtrl.actions[1].name).toEqual('Unregister');
       });
 
-    });
-
-    describe('setAccountStatus', function () {
-      beforeEach(function () {
-        createCtrl();
-      });
-
-      it('Still null after call', function () {
-        // To update once functionality added
-        expect(clusterTileCtrl.accountStatus).toBeNull();
-        clusterTileCtrl.setAccountStatus();
-        $scope.$digest();
-        expect(clusterTileCtrl.accountStatus).toBeNull();
-      });
     });
 
     describe('setUserCount', function () {
@@ -296,7 +280,7 @@
 
         spyOn($state, 'go');
         clusterTileCtrl.summary();
-        expect($state.go.calls.argsFor(0)).toEqual(['endpoint.clusters.cluster.detail', {guid: initialService.guid}]);
+        expect($state.go.calls.argsFor(0)).toEqual(['endpoint.clusters.cluster.detail.organizations', {guid: initialService.guid}]);
         expect($state.go.calls.count()).toEqual(1);
 
       });

@@ -17,7 +17,10 @@
     $stateProvider.state('endpoint.clusters', {
       url: '/cluster',
       abstract: true,
-      template: '<ui-view/>'
+      template: '<ui-view/>',
+      ncyBreadcrumb: {
+        label: gettext('Cloud Foundry Clusters')
+      }
     });
   }
 

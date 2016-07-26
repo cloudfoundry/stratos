@@ -8,6 +8,10 @@ module.exports = function (config) {
 
     basePath: '../src/',
 
+    browserDisconnectTimeout: 10000,
+
+    browserNoActivityTimeout: 20000,
+
     browsers: ['PhantomJS'],
 
     coverageReporter: {

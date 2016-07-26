@@ -60,10 +60,10 @@
         var colour;
         switch (messageObj.source_type) {
           case 'APP':
-            colour = 'green';
+            colour = 'red';
             break;
           default:
-            colour = 'red';
+            colour = 'yellow';
         }
         var messageSource = coloredLog('[' + messageObj.source_type + '.' + messageObj.source_instance + ']', colour);
 

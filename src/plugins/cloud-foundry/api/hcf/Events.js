@@ -34,7 +34,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -50,7 +51,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -66,7 +68,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -82,7 +85,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -98,7 +102,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -114,7 +119,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -130,7 +136,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -146,7 +153,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -162,7 +170,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -178,7 +187,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -194,7 +204,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -210,7 +221,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -226,7 +238,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -242,7 +255,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -258,7 +272,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -274,7 +289,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -290,7 +306,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -306,7 +323,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -322,7 +340,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -338,7 +357,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -354,7 +374,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -370,7 +391,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -386,7 +408,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -402,7 +425,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -418,7 +442,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -434,7 +459,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -450,7 +476,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -466,7 +493,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -482,7 +510,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -498,7 +527,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -514,7 +544,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -530,7 +561,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -546,7 +578,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -562,7 +595,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -578,7 +612,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -594,7 +629,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -610,7 +646,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -626,7 +663,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -642,7 +680,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -658,7 +697,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -674,7 +714,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -690,7 +731,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     },
@@ -706,7 +748,8 @@
       config.method = 'GET';
 
       for (var option in httpConfigOptions) {
-        config[option] = httpConfigOptions[option]
+        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
+        config[option] = httpConfigOptions[option];
       }
       return this.$http(config);
     }

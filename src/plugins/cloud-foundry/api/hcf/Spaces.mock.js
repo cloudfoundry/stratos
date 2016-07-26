@@ -73,7 +73,7 @@
           },
 
           500: {
-            body: { guid: {} }
+            body: {guid: {}}
           }
         }
       };
@@ -88,44 +88,42 @@
           200: {
 
             body: {
-              "guid": {
-                "total_results": 1,
-                "total_pages": 1,
-                "prev_url": null,
-                "next_url": null,
-                "resources": [
-                  {
-                    "metadata": {
-                      "guid": "c414defe-a42a-424f-b7a3-01ef237202dc",
-                      "url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc",
-                      "created_at": "2016-02-19T02:04:03Z",
-                      "updated_at": null
-                    },
-                    "entity": {
-                      "name": "name-2435",
-                      "organization_guid": "43cae62a-9a5e-4e45-a11b-5cfc4fa59604",
-                      "space_quota_definition_guid": null,
-                      "allow_ssh": true,
-                      "organization_url": "/v2/organizations/43cae62a-9a5e-4e45-a11b-5cfc4fa59604",
-                      "developers_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/developers",
-                      "managers_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/managers",
-                      "auditors_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/auditors",
-                      "apps_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/apps",
-                      "routes_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/routes",
-                      "domains_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/domains",
-                      "service_instances_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/service_instances",
-                      "app_events_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/app_events",
-                      "events_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/events",
-                      "security_groups_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/security_groups"
-                    }
+              "total_results": 1,
+              "total_pages": 1,
+              "prev_url": null,
+              "next_url": null,
+              "resources": [
+                {
+                  "metadata": {
+                    "guid": "c414defe-a42a-424f-b7a3-01ef237202dc",
+                    "url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc",
+                    "created_at": "2016-02-19T02:04:03Z",
+                    "updated_at": null
+                  },
+                  "entity": {
+                    "name": "name-2435",
+                    "organization_guid": "43cae62a-9a5e-4e45-a11b-5cfc4fa59604",
+                    "space_quota_definition_guid": null,
+                    "allow_ssh": true,
+                    "organization_url": "/v2/organizations/43cae62a-9a5e-4e45-a11b-5cfc4fa59604",
+                    "developers_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/developers",
+                    "managers_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/managers",
+                    "auditors_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/auditors",
+                    "apps_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/apps",
+                    "routes_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/routes",
+                    "domains_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/domains",
+                    "service_instances_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/service_instances",
+                    "app_events_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/app_events",
+                    "events_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/events",
+                    "security_groups_url": "/v2/spaces/c414defe-a42a-424f-b7a3-01ef237202dc/security_groups"
                   }
-                ]
-              }
+                }
+              ]
             }
           },
 
           500: {
-            body: { guid: {} }
+            body: {}
           }
         }
       };
@@ -137,87 +135,83 @@
         response: {
           200: {
             body: {
-              guid: {
-                "total_results": 1,
-                "total_pages": 1,
-                "prev_url": null,
-                "next_url": null,
-                "resources": [
-                  {
-                    "metadata": {
-                      "guid": "4986ba9d-f537-4e37-9479-0abb8da7b216",
-                      "url": "/v2/service_instances/4986ba9d-f537-4e37-9479-0abb8da7b216",
-                      "created_at": "2016-05-12T00:45:18Z",
-                      "updated_at": null
+              "total_results": 1,
+              "total_pages": 1,
+              "prev_url": null,
+              "next_url": null,
+              "resources": [
+                {
+                  "metadata": {
+                    "guid": "4986ba9d-f537-4e37-9479-0abb8da7b216",
+                    "url": "/v2/service_instances/4986ba9d-f537-4e37-9479-0abb8da7b216",
+                    "created_at": "2016-05-12T00:45:18Z",
+                    "updated_at": null
+                  },
+                  "entity": {
+                    "name": "name-1621",
+                    "credentials": {
+                      "creds-key-41": "creds-val-41"
                     },
-                    "entity": {
-                      "name": "name-1621",
-                      "credentials": {
-                        "creds-key-41": "creds-val-41"
-                      },
-                      "service_plan_guid": "d22b3754-d093-42a2-a294-5fda6c6db44c",
-                      "space_guid": guid,
-                      "gateway_data": null,
-                      "dashboard_url": null,
-                      "type": "managed_service_instance",
-                      "last_operation": null,
-                      "tags": [],
-                      "space_url": "/v2/spaces/" + guid,
-                      "service_plan_url": "/v2/service_plans/d22b3754-d093-42a2-a294-5fda6c6db44c",
-                      "service_bindings_url": "/v2/service_instances/4986ba9d-f537-4e37-9479-0abb8da7b216/service_bindings",
-                      "service_keys_url": "/v2/service_instances/4986ba9d-f537-4e37-9479-0abb8da7b216/service_keys",
-                      "routes_url": "/v2/service_instances/4986ba9d-f537-4e37-9479-0abb8da7b216/routes"
-                    }
+                    "service_plan_guid": "d22b3754-d093-42a2-a294-5fda6c6db44c",
+                    "space_guid": guid,
+                    "gateway_data": null,
+                    "dashboard_url": null,
+                    "type": "managed_service_instance",
+                    "last_operation": null,
+                    "tags": [],
+                    "space_url": "/v2/spaces/" + guid,
+                    "service_plan_url": "/v2/service_plans/d22b3754-d093-42a2-a294-5fda6c6db44c",
+                    "service_bindings_url": "/v2/service_instances/4986ba9d-f537-4e37-9479-0abb8da7b216/service_bindings",
+                    "service_keys_url": "/v2/service_instances/4986ba9d-f537-4e37-9479-0abb8da7b216/service_keys",
+                    "routes_url": "/v2/service_instances/4986ba9d-f537-4e37-9479-0abb8da7b216/routes"
                   }
-                ]
-              }
+                }
+              ]
             }
           }
         }
       };
     },
 
-    ListAllServicesForSpace: function (guid) {
+    ListAllServicesForSpace: function(guid) {
       return {
         url: '/pp/v1/proxy/v2/spaces/' + guid + '/services',
         response: {
           200: {
             body: {
-              guid: {
-                "total_results": 1,
-                "total_pages": 1,
-                "prev_url": null,
-                "next_url": null,
-                "resources": [
-                  {
-                    "metadata": {
-                      "guid": "bb90f482-4b6b-4baf-8a5a-265b8d7e115e",
-                      "url": "/v2/services/bb90f482-4b6b-4baf-8a5a-265b8d7e115e",
-                      "created_at": "2016-05-12T00:45:17Z",
-                      "updated_at": null
-                    },
-                    "entity": {
-                      "label": "label-44",
-                      "provider": null,
-                      "url": null,
-                      "description": "desc-90",
-                      "long_description": null,
-                      "version": null,
-                      "info_url": null,
-                      "active": true,
-                      "bindable": true,
-                      "unique_id": "ebb0d295-82f5-435d-85ed-aa38068c4582",
-                      "extra": null,
-                      "tags": [],
-                      "requires": [],
-                      "documentation_url": null,
-                      "service_broker_guid": "f7f4280c-c7df-4010-ba54-96786e0326f1",
-                      "plan_updateable": false,
-                      "service_plans_url": "/v2/services/bb90f482-4b6b-4baf-8a5a-265b8d7e115e/service_plans"
-                    }
+              "total_results": 1,
+              "total_pages": 1,
+              "prev_url": null,
+              "next_url": null,
+              "resources": [
+                {
+                  "metadata": {
+                    "guid": "bb90f482-4b6b-4baf-8a5a-265b8d7e115e",
+                    "url": "/v2/services/bb90f482-4b6b-4baf-8a5a-265b8d7e115e",
+                    "created_at": "2016-05-12T00:45:17Z",
+                    "updated_at": null
+                  },
+                  "entity": {
+                    "label": "label-44",
+                    "provider": null,
+                    "url": null,
+                    "description": "desc-90",
+                    "long_description": null,
+                    "version": null,
+                    "info_url": null,
+                    "active": true,
+                    "bindable": true,
+                    "unique_id": "ebb0d295-82f5-435d-85ed-aa38068c4582",
+                    "extra": null,
+                    "tags": [],
+                    "requires": [],
+                    "documentation_url": null,
+                    "service_broker_guid": "f7f4280c-c7df-4010-ba54-96786e0326f1",
+                    "plan_updateable": false,
+                    "service_plans_url": "/v2/services/bb90f482-4b6b-4baf-8a5a-265b8d7e115e/service_plans"
                   }
-                ]
-              }
+                }
+              ]
             }
           }
         }

@@ -1,1 +1,57 @@
-<h1>Cluster Summary: {{ clusterController.guid }}</h1>
+<div class="cluster-detail col-md-9 col-sm-12">
+  <h3>{{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name }}</h3>
+
+  <div class="card panel panel-default">
+    <div class="panel-heading action-header">
+      <span translate>Summary</span>
+      <a class="btn btn-link">
+        <i class="helion-icon helion-icon-Right_Arrow"></i>
+        <span translate>Edit</span>
+      </a>
+    </div>
+
+    <div class="panel-body cluster-summary-panel row">
+      <div class="col-md-5">
+        <dl class="dl-horizontal">
+          <dt translate>Total Applications</dt>
+          <dd>
+            {{ clusterDetailController.totalApps }}
+          </dd>
+          <dt translate>Total Memory</dt>
+          <dd>
+            {{ clusterDetailController.totalMemoryUsed }}
+          </dd>
+        </dl>
+        </div>
+      <div class="col-md-7">
+        <dl class="dl-horizontal">
+          <dt ng-if="clusterController.getEndpoint()" translate>CF Endpoint URL</dt>
+          <dd ng-if="clusterController.getEndpoint()">
+            {{ clusterController.getEndpoint() }}
+          </dd>
+          <dt translate>CF Interactions</dt>
+          <dd>
+            <a class="btn btn-link">
+              <span translate>CLI Commands</span>
+            </a>
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <ul class="application-nav nav nav-tabs col-sm-12">
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.organizations" translate>
+        Organizations
+      </a>
+    </li>
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.detail.users" translate>
+        Users
+      </a>
+    </li>
+  </ul>
+  <ui-view></ui-view>
+
+</div>

@@ -1,2 +1,27 @@
-<h1>Cluster: {{ clusterController.guid }}</h1>
-<h1>Org: {{ clusterController.organization }}</h1>
+<div ng-if="!clusterOrgDetailController.organization().details" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+
+<div ng-if="clusterOrgDetailController.organization().details" class="cluster-detail col-md-9 col-sm-12">
+  <h3>Organization : {{ clusterOrgDetailController.organization().details.org.entity.name }}</h3>
+  <organization-summary-tile
+    cluster-guid="clusterOrgDetailController.clusterGuid"
+    organization="clusterOrgDetailController.organization()"
+    organization-names="clusterOrgDetailController.organizationNames">
+  </organization-summary-tile>
+
+  <ul class="application-nav nav nav-tabs col-sm-12">
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.detail.spaces" translate>
+        Spaces
+      </a>
+    </li>
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="sdfdsf" translate>
+        Users
+      </a>
+    </li>
+  </ul>
+  <ui-view></ui-view>
+
+</div>

@@ -1,4 +1,4 @@
-<gallery-card class="cluster-tile"
+<gallery-card class="cluster-gallery-card cluster-tile"
               ng-class="{'unlink': !clusterTile.service.isConnected }"
               card-data="clusterTile.cardData"
               card-actions="clusterTile.actions"
@@ -8,9 +8,10 @@
 
   <dl class="dl-horizontal" ng-if="clusterTile.service.isConnected">
     <dt translate>ENDPOINT URL</dt>
-    <dd>{{clusterTile.service.api_endpoint.Host}}</dd>
-    <dt ng-if="clusterTile.accountStatus" translate>CF ACCOUNT STATUS</dt>
-    <dd ng-if="clusterTile.accountStatus">{{clusterTile.accountStatus}}</dd>
+    <dd class="cluster-tile-endpoint">{{clusterTile.service.api_endpoint.Host}}</dd>
+    <dt ng-if="clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>CF ACCOUNT STATUS</dt>
+    <dd class="cluster-tile-account" ng-if="clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>
+      {{ clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid].user.admin ? 'Admin' : 'User'}}</dd>
     <dt ng-if="clusterTile.orgCount" translate>TOTAL ORGS</dt>
     <dd ng-if="clusterTile.orgCount" >{{clusterTile.orgCount}}</dd>
     <dt ng-if="clusterTile.userCount" translate>TOTAL USERS</dt>
