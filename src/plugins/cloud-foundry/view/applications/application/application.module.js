@@ -168,7 +168,6 @@
         that.startUpdate();
       });
 
-
       /*
       this.cnsiModel.list().then(function () {
         var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
@@ -226,7 +225,7 @@
         .then(function () {
           that.updateSummary().then(function () {
             that.model.updateDeliveryPipelineMetadata();
-          })
+          });
         })
         .finally(function () {
           that.updating = false;
