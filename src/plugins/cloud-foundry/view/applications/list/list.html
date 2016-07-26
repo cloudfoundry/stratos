@@ -9,7 +9,7 @@
   </div>
 </div>
 
-<div class="applications-filter" ng-if="applicationsListCtrl.ready && applicationsListCtrl.clusterCount > 0">
+<div class="applications-filter" ng-if="applicationsListCtrl.ready && applicationsListCtrl.model.clusterCount > 0">
   <div class="panel panel-default">
     <div class="panel-body">
       <form class="form-horizontal">
@@ -54,15 +54,15 @@
   </div>
 </div>
 
-<div class="applications-empty" ng-if="applicationsListCtrl.ready && !applicationsListCtrl.hasApps">
-  <div ng-if="applicationsListCtrl.clusterCount === 0">
+<div class="applications-empty" ng-if="applicationsListCtrl.ready && !applicationsListCtrl.model.hasApps">
+  <div ng-if="applicationsListCtrl.model.clusterCount === 0">
     <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
     <div class="applications-msg" translate>You cannot view any applications.</div>
     <div class="applications-cta" ><a class="btn-link" href="#/endpoint" translate>
       Use the Endpoints Dashboard</a> <span translate>to fix your connections or connect to new clusters.</span>
     </div>
   </div>
-  <div ng-if="applicationsListCtrl.clusterCount > 0">
+  <div ng-if="applicationsListCtrl.model.clusterCount > 0">
     <div class="helion-icon helion-icon-3x helion-icon-Application"></div>
     <div class="applications-msg" translate>You have no applications.</div>
     <div class="applications-cta">

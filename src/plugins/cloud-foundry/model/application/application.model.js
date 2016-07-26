@@ -61,6 +61,10 @@
       orgGuid: 'all',
       spaceGuid: 'all'
     };
+
+    // This state should be in the model
+    this.clusterCount = 0;
+    this.hasApps = false;
   }
 
   angular.extend(Application.prototype, {
@@ -546,6 +550,19 @@
      */
     onAll: function (response) {
       this.data.applications = response.data;
+
+      // Check the data we have and determine if we have any applications
+      this.hasApps = false;
+      if (this.clusterCount > 0 && this.data && this.data.applications) {
+        var appCount = _.reduce(this.data.applications, function (sum, app) {
+          if (!app.error && app.resources) {
+            return sum + app.resources.length;
+          } else {
+            return sum;
+          }
+        }, 0);
+        this.hasApps = appCount > 0;
+      }
     },
 
     /**

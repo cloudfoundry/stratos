@@ -41,7 +41,6 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
     this.ready = false;
-    this.hasApps = false;
     this.clusters = [{label: 'All Clusters', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
@@ -50,7 +49,6 @@
       orgGuid: 'all',
       spaceGuid: 'all'
     };
-    this.clusterCount = 0;
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.userCnsiModel.list().then(function () {
       that._setClusters();
@@ -78,7 +76,7 @@
                       })
                       .value();
       [].push.apply(this.clusters, clusters);
-      this.clusterCount = clusters.length;
+      this.model.clusterCount = clusters.length;
 
       if (this.model.filterParams.cnsiGuid !== 'all') {
         this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
@@ -142,18 +140,6 @@
     _getApps: function () {
       var that = this;
       this.model.all().finally(function () {
-        // Check the data we have and determine if we have any applications
-        that.hasApps = false;
-        if (that.clusterCount > 0 && that.model.data && that.model.data.applications) {
-          var appCount = _.reduce(that.model.data.applications, function (sum, app) {
-            if (!app.error && app.resources) {
-              return sum + app.resources.length;
-            } else {
-              return sum;
-            }
-          }, 0);
-          that.hasApps = appCount > 0;
-        }
         that.ready = true;
       });
     },
