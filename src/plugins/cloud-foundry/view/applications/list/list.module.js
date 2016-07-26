@@ -134,6 +134,18 @@
     },
 
     /**
+     * @function _setFilter
+     * @description Set filter in application model and this module
+     * @param {object} updatedFilter - the updated filter
+     * @returns {void}
+     * @private
+     */
+    _setFilter: function (updatedFilter) {
+      angular.extend(this.model.filterParams, updatedFilter);
+      angular.extend(this.filter, updatedFilter);
+    },
+
+    /**
      * @function _getApps
      * @description Retrieve apps
      * @returns {void}
@@ -167,8 +179,7 @@
     setCluster: function () {
       this.organizations.length = 1;
       this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
-      this.model.filterParams.orgGuid = 'all';
-      this.model.filterParams.spaceGuid = 'all';
+      this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
       this._getApps();
       this._setOrgs();
     },
@@ -182,7 +193,7 @@
     setOrganization: function () {
       this.spaces.length = 1;
       this.model.filterParams.orgGuid = this.filter.orgGuid;
-      this.model.filterParams.spaceGuid = 'all';
+      this._setFilter({spaceGuid: 'all'});
       this._getApps();
       this._setSpaces();
     },
@@ -199,7 +210,7 @@
      * @public
      */
     resetFilter: function () {
-      this.model.filterParams.cnsiGuid = 'all';
+      this._setFilter({cnsiGuid: 'all'});
       this.setCluster();
     },
 
