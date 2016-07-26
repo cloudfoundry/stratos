@@ -27,7 +27,7 @@
         result = resources;
       });
       $httpBackend.flush();
-      expect(ListAllOrganizations.response['200'].body.guid).toBeDefined();
+      expect(ListAllOrganizations.response['200'].body).toBeDefined();
       expect(result).toBeDefined();
       expect(result.length).toBe(1);
     });
@@ -42,7 +42,7 @@
         result = resources;
       });
       $httpBackend.flush();
-      expect(ListAllSpacesForOrganization.response['200'].body.guid).toBeDefined();
+      expect(ListAllSpacesForOrganization.response['200'].body).toBeDefined();
       expect(result).toBeDefined();
       expect(result.length).toBe(1);
     });

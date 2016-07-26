@@ -36,6 +36,7 @@
     this.modelManager = modelManager;
 
     this.model = modelManager.retrieve('app.model.account');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
   }
 
   angular.extend(SettingsController.prototype, {});

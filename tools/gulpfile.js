@@ -17,7 +17,7 @@ var concat = require('gulp-concat-util'),
   browserSyncProxy = require('proxy-middleware'),
   gutil = require('gulp-util'),
   node_url = require('url'),
-  vfs = require('vinyl-fs'),
+  utils = require('./gulp.utils'),
   wiredep = require('wiredep').stream;
 
 var config = require('./gulp.config')();
@@ -53,6 +53,12 @@ gulp.task('copy:index', function () {
     .pipe(gulp.dest(paths.dist));
 });
 
+// Copy 'lib' folder to 'dist'
+gulp.task('copy:lib', function (done) {
+	utils.copyBowerFolder(paths.src + 'lib', paths.dist + 'lib');
+	done();
+});
+
 // Copy JavaScript source files to 'dist'
 gulp.task('copy:js', function () {
   return gulp
@@ -64,31 +70,6 @@ gulp.task('copy:assets', function () {
   return gulp
     .src(assetFiles, { base: paths.src })
     .pipe(gulp.dest(paths.dist));
-});
-
-// Copy 'lib' folder to 'dist'
-// Note: gulp.src does not support symlinks, so use vinyl-fs.
-// Even with vinyl-fs, when copying symlink dirs, it only copies 1 level deep of folder
-// so, we copy explicitly our helion-framework repo' dist folder - this is the repository that you
-// might be using 'bower link' with
-gulp.task('copy:lib', function () {
-  return vfs.src([
-    paths.src + 'lib/helion-ui-framework/dist/**/*'
-  ]).pipe(vfs.dest(paths.dist + 'lib/helion-ui-framework/dist'));
-});
-
-gulp.task('copy:lib-ui', ['copy:lib'], function () {
-  return vfs.src([paths.src + 'lib/**/*']).pipe(vfs.dest(paths.dist + 'lib'));
-});
-
-
-// Copy the ui-framework font files to dist
-gulp.task('copy:fonts', function () {
-  return vfs.src([
-    paths.src + 'lib/helion-ui-framework/dist/**/*.{ttf,woff,woff2,eot}'
-  ])
-    .pipe(rename({dirname: ''}))
-    .pipe(vfs.dest(paths.dist + 'fonts/'));
 });
 
 // Copy 'translations' folder to 'dist'
@@ -232,8 +213,7 @@ gulp.task('default', function (next) {
     'plugin',
     'translate:compile',
     'copy:js',
-    'copy:lib-ui',
-    'copy:fonts',
+    'copy:lib',
     'css',
     'copy:html',
     'copy:assets',

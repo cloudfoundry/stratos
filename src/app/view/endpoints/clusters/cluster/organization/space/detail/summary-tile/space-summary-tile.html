@@ -1,0 +1,33 @@
+<gallery-card class="cluster-gallery-card space-summary-tile"
+              card-data="spaceSummaryTileCtrl.cardData"
+              card-actions="spaceSummaryTileCtrl.actions"
+              card-actions-icon="helion-icon helion-icon-More"
+              card-actions-position="actions-menu-right">
+  <div class="col-md-5" ng-if="spaceSummaryTileCtrl.spaceDetail().details">
+    <dl class="dl-horizontal">
+      <dt translate>APPLICATIONS</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalApps }}</dd>
+      <dt translate>SERVICES</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalServices }}</dd>
+      <dt translate>ROUTES</dt>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalRoutes }}</dd>
+      <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>DISK</dt>-->
+      <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
+      <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>MEMORY</dt>-->
+      <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
+    </dl>
+  </div>
+  <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail().details && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
+    <dl class="dl-horizontal">
+      <dt translate>CF SPACE ROLE</dt>
+      <dd>{{ spaceSummaryTileCtrl.roles }}</dd>
+      <dt translate>CF ENDPOINT URL</dt>
+      <dd>
+        {{ spaceSummaryTileCtrl.getEndpoint() }}
+      </dd>
+      <dt translate>CR INTERACTIONS</dt>
+      <dd><a class="btn btn-link"><span translate>CLI Commands</span></a></dd>
+    </dl>
+  </div>
+</gallery-card>
+

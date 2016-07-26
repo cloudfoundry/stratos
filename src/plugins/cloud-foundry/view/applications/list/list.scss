@@ -6,6 +6,25 @@ $applications-msg-height: 50px;
   font-size: $hpe-unit-space;
 }
 
+.applications-filter {
+  padding-left: 16px;
+  padding-right: 16px;
+
+  .form-horizontal {
+    flex-wrap: wrap;
+
+    .form-group:not(:last-child) {
+      margin-right: $hpe-unit-space / 2;
+    }
+
+    .reset-link {
+      align-self: center;
+      flex-grow: 1;
+      text-align: right;
+    }
+  }
+}
+
 .applications-empty {
   clear: both;
   text-align: center;
@@ -21,6 +40,7 @@ $applications-msg-height: 50px;
       font-weight: $hpe-font-weight-semibold;
     }
   }
+
   .applications-msg {
     font-size: $font-size-h1;
     //height: $applications-msg-height;

@@ -14,6 +14,7 @@
     'ui.bootstrap',
     'ui.router',
     'smart-table',
+    'http-etag',
     'ig.linkHeaderParser'
   ];
 
@@ -28,10 +29,11 @@
 
   config.$inject = [
     '$compileProvider',
-    '$logProvider'
+    '$logProvider',
+    'httpEtagProvider'
   ];
 
-  function config($compileProvider, $logProvider) {
+  function config($compileProvider, $logProvider, httpEtagProvider) {
 
     /**
      * Disabling Debug Data
@@ -47,6 +49,9 @@
      */
     $compileProvider.debugInfoEnabled(false);
 
+    // Use Etags to resolve caching issues on application upgrade
+    httpEtagProvider.cache('default');
+    
     // Disbale debug logging
     $logProvider.debugEnabled(false);
 

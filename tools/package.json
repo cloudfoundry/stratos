@@ -30,6 +30,7 @@
     "browser-sync": "^2.8.2",
     "eslint": "^1.10.3",
     "eslint-plugin-angular": "^0.15.0",
+    "fs-extra": "^0.30.0",
     "gulp-angular-gettext": "^2.1.0",
     "gulp-eslint": "^1.1.1",
     "gulp-if": "^2.0.0",
@@ -38,6 +39,7 @@
     "gulp-util": "^3.0.7",
     "jasmine-core": "^2.4.1",
     "jsdoc": "^3.4.0",
+    "lodash": "^4.13.1",
     "karma": "^0.13.19",
     "karma-cli": "^0.1.2",
     "karma-coverage": "^0.5.3",
@@ -45,13 +47,13 @@
     "karma-ng-html2js-preprocessor": "^0.2.0",
     "karma-phantomjs-launcher": "^0.2.3",
     "karma-wiredep": "1.0.1",
+    "minimatch": "^3.0.2",
     "phantomjs": "^1.9.19",
     "prompt": "^0.2.14",
     "protractor": "^3.0.0",
     "proxy-middleware": "^0.15.0",
     "q": "^1.4.1",
     "request": "2.69.0",
-    "shelljs": "^0.5.3",
-    "vinyl-fs": "^0.3.0"
+    "shelljs": "^0.5.3"
   }
 }
