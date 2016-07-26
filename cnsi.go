@@ -47,6 +47,17 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 			"Failed to get API Endpoint: %v", err)
 	}
 
+	// check if we've already got this endpoint in the DB
+	_, ok := p.getCNSIRecordByAPIEndpoint(apiEndpoint)
+	if ok {
+		// a record with the same api endpoint was found
+		return newHTTPShadowError(
+			http.StatusBadRequest,
+			"Can not register same endpoint multiple times",
+			"Can not register same endpoint multiple times",
+		)
+	}
+
 	v2InfoResponse, err := getHCFv2Info(apiEndpoint)
 	if err != nil {
 		return newHTTPShadowError(
@@ -357,6 +368,21 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 	}
 
 	rec, err := cnsiRepo.Find(guid)
+	if err != nil {
+		return cnsis.CNSIRecord{}, false
+	}
+
+	return rec, true
+}
+
+func (p *portalProxy) getCNSIRecordByAPIEndpoint(endpoint string) (cnsis.CNSIRecord, bool) {
+	log.Println("getCNSIRecordByAPIEndpoint")
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return cnsis.CNSIRecord{}, false
+	}
+
+	rec, err := cnsiRepo.FindByAPIEndpoint(endpoint)
 	if err != nil {
 		return cnsis.CNSIRecord{}, false
 	}
