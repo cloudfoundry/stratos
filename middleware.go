@@ -39,12 +39,12 @@ func (p *portalProxy) stackatoAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 		// get the user guid
 		if userID, ok := p.getSessionValue(c, "user_id"); ok {
 			// check their admin status in UAA
-			u, err := p.getUAAPerms(userID.(string))
+			u, err := p.getUAAUser(userID.(string))
 			if err != nil {
 				return c.NoContent(http.StatusUnauthorized)
 			}
 
-			if u.Admin == "true" {
+			if u.Admin == true {
 				return h(c)
 			}
 		}
