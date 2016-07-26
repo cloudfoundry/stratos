@@ -14,6 +14,15 @@ export GITHUB_OAUTH_CLIENT_SECRET=
 export GITHUB_OAUTH_STATE=
 
 
+######################################
+# Local HCP Identity for development #
+######################################
+#export CONSOLE_CLIENT=console
+#export HCP_IDENTITY_SCHEME=http
+#export HCP_IDENTITY_HOST=192.168.200.3
+#export HCP_IDENTITY_PORT=
+
+
 ###################
 # Corporate Proxy #
 ###################
