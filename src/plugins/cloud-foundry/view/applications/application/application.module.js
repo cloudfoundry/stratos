@@ -154,13 +154,21 @@
     init: function () {
       var that = this;
       this.ready = false;
-      this.model.getAppSummary(this.cnsiGuid, this.id, true)
-        .finally(function () {
-          that.ready = true;
-        });
-
       this.model.application.project = null;
+      // Fetching flag onlt set initially - subsequent calls update the data, so we don't want to show a busy indicator
+      // in those cases
+      this.model.application.pipeline.fetching = true;
+      this.model.getAppSummary(this.cnsiGuid, this.id, true)
+      .then(function () {
+        that.model.updateDeliveryPipelineMetadata(true);
+      })
+      .finally(function () {
+        that.ready = true;
+        // Don't start updating until we have compelted the first init
+        that.startUpdate();
+      });
 
+      /*
       this.cnsiModel.list().then(function () {
         var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
         if (hceCnsis.length > 0) {
@@ -171,8 +179,7 @@
             });
         }
       });
-
-      return this.startUpdate();
+      */
     },
 
     /**
@@ -216,7 +223,9 @@
       this.updating = true;
       this.$q.when()
         .then(function () {
-          that.updateSummary();
+          that.updateSummary().then(function () {
+            that.model.updateDeliveryPipelineMetadata();
+          });
         })
         .finally(function () {
           that.updating = false;
