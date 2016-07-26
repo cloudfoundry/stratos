@@ -205,6 +205,44 @@
     },
 
     /**
+     * @function listRolesOfAllUsersInSpace
+     * @memberof cloud-foundry.model.space
+     * @description lists all roles of all users in space
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {object=} params - optional parameters
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .RetrievingRolesOfAllUsersInSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          return that.onListRolesOfAllUsersInSpace(cnsiGuid, guid, response.data.resources);
+        });
+    },
+
+    /**
+     * @function onListRolesOfAllUsersInSpace
+     * @memberof cloud-foundry.model.space
+     * @description Cache response
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {object} roles - list of apps
+     * @returns {object} roles
+     * @public
+     */
+    onListRolesOfAllUsersInSpace: function (cnsiGuid, guid, roles) {
+      var rolesByUserGuid = {};
+      _.forEach(roles, function (role) {
+        _.set(rolesByUserGuid, role.metadata.guid, role.entity.space_roles);
+      });
+      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.roles', rolesByUserGuid);
+      return roles;
+    },
+
+    /**
      * @function spaceRoleToString
      * @memberof cloud-foundry.model.space
      * @description Converts a space role to a localized string. The list of all organization
@@ -277,8 +315,6 @@
       var httpConfig = this.makeHttpConfig(cnsiGuid);
       var createdDate = moment(space.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
 
-      var spaceApi = that.apiManager.retrieve('cloud-foundry.api.Spaces');
-      // var orgsApi = that.apiManager.retrieve('cloud-foundry.api.Organizations');
       var spaceQuotaApi = that.apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
 
       // var usedMemP = orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig);
@@ -287,23 +323,17 @@
         ? spaceQuotaApi.RetrieveSpaceQuotaDefinition(spaceQuotaGuid, params, httpConfig)
         : this.$q.when();
 
-      var rolesP = spaceApi.RetrievingRolesOfAllUsersInSpace(spaceGuid, params, httpConfig);
+      var rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
       var stackatoInfoP = that.stackatoInfoModel.getStackatoInfo();
 
       var spaceRolesP = that.$q.all({roles: rolesP, stackatoInfo: stackatoInfoP}).then(function (values) {
-        var i, userGuid, myRoles;
+        var userGuid, myRoles;
 
         // Find our user's GUID
         userGuid = values.stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
 
         // Find my user's roles
-        for (i = 0; i < values.roles.data.resources.length; i++) {
-          var roles = values.roles.data.resources[i];
-          if (roles.metadata.guid === userGuid) {
-            myRoles = roles.entity.space_roles;
-            break;
-          }
-        }
+        myRoles = that.spaces[cnsiGuid][spaceGuid].roles[userGuid];
         if (!myRoles) {
           throw new Error('Failed to find my roles in this space');
         }

@@ -7,9 +7,9 @@
 
   /**
    * @namespace app.view.endpoints.clusters.cluster
-   * @memberof app.view.endpoints.clusters.cluster.selectedUsersValidator
-   * @name selected-users-validator
+   * @name selectedUsers
    * @description A validator that checks an object for properties who's values are truthies
+   * @returns {object} directive configuration
    */
   function selectedUsers() {
     return {

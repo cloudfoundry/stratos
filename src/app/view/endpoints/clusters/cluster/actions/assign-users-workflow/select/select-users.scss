@@ -17,6 +17,7 @@
 
         > div {
           padding: $hpe-unit-space / 4 $hpe-unit-space / 2;
+          border-width: 1px;
           div:nth-of-type(2) {
             color: #ccc;
           }
@@ -64,8 +65,10 @@
   }
 
   .select-users-table {
-    .table-outlined {
-      //border-width: 1px;
+    table {
+      // Remove default border-collapse due to odd clipping of right side border when 'show all' is visible
+      border-spacing: 0;
+      border-collapse: separate;
     }
   }
 }

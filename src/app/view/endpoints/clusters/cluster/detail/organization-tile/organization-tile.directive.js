@@ -24,6 +24,7 @@
     'app.model.modelManager',
     '$state',
     '$q',
+    '$scope',
     'app.utils.utilsService',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog',
@@ -36,13 +37,15 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
+   * @param {object} $scope - the angular $scope service
    * @param {object} utils - our utils service
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} assignUsers - our assign users slide out service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, $q, utils, confirmDialog, asyncTaskDialog, assignUsers) {
+  function OrganizationTileController(modelManager, $state, $q, $scope, utils, confirmDialog, asyncTaskDialog,
+                                      assignUsers) {
     var that = this;
     this.$state = $state;
     this.actions = [];
@@ -62,9 +65,6 @@
     }
     this.instances = instancesUsed + ' / ' + appInstanceQuota;
 
-    // Present the user's roles
-    this.roles = that.organizationModel.organizationRolesToString(this.organization.roles);
-
     this.summary = function () {
       that.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
     };
@@ -76,12 +76,21 @@
     };
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    var isAdmin = stackatoInfo.info.endpoints.hcf[that.organization.cnsiGuid].user.admin;
+    this.user = stackatoInfo.info.endpoints.hcf[that.organization.cnsiGuid].user;
+    var isAdmin = this.user.admin;
     var canDelete = false;
     if (isAdmin) {
       var spacesInOrg = that.organizationModel.organizations[that.organization.cnsiGuid][that.organization.guid].spaces;
       canDelete = _.keys(spacesInOrg).length === 0;
     }
+
+    var orgPath = that.organizationModel.fetchOrganizationPath(that.organization.cnsiGuid, that.organization.guid);
+    $scope.$watch(function () {
+      return _.get(that.organizationModel, orgPath + '.roles.' + that.user.guid);
+    }, function (roles) {
+      // Present the user's roles
+      that.roles = that.organizationModel.organizationRolesToString(roles);
+    });
 
     setActions();
 

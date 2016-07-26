@@ -2,48 +2,27 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.clusters.cluster').directive('onFilter', function () {
-      return {
-        require: '^stTable',
-        scope: {
-          onFilter: '='
-        },
-        link: function (scope, element, attr, ctrl) {
-          if (!scope.onfilter) {
-            return;
-          }
-          scope.$watch(function () {
-            return ctrl.tableState().search;
-          }, function (newValue, oldValue) {
-            //TODO: filter out all, pagination still exists + count on pagination shows all not filtered
-            scope.onFilter(ctrl);
-          }, true);
-        }
-      };
-    })
+    .module('app.view.endpoints.clusters.cluster')
     .factory('app.view.endpoints.clusters.cluster.assignUsers', AssignUserFactory);
 
   AssignUserFactory.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
     'helion.framework.widgets.detailView'
   ];
 
-  function AssignUserFactory(modelManager, apiManager, detailView) {
-
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    var that = this;
-
+  function AssignUserFactory(detailView) {
     return {
-    // {
-    //   initPromise: initPromise,
-    //   selectedUsers: selectedUsers
-    // }
+      /**
+       * @memberof app.view.endpoints.clusters.cluster.assignUsers
+       * @name assign
+       * @constructor
+       * @param {object} context - the context for the modal. Used to pass in data, specifically selectedUsers and
+       * initPromise.
+       */
       assign: function (context) {
-        // config should contain level?
         return detailView(
           {
-            detailViewTemplateUrl: 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
+            detailViewTemplateUrl:
+              'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
             title: gettext('Register Code Engine Endpoint'),
             controller: AssignUsersWorkflowController,
             controllerAs: 'assignUsers'
@@ -58,19 +37,21 @@
     'app.model.modelManager',
     'context',
     '$stateParams',
-    '$scope',
     '$q',
     '$uibModalInstance'
   ];
 
   /**
-   * @memberof cloud-foundry.view
+   * @memberof app.view.endpoints.clusters.cluster
    * @name AssignUsersWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @property {object} $scope - angular $scope
+   * @param {object} context - the context for the modal. Used to pass in data
+   * @param {object} $stateParams - the angular $stateParams service
+   * @param {object} $q - the angular $q service
+   * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController(modelManager, context, $stateParams, $scope, $q, $uibModalInstance) {
+  function AssignUsersWorkflowController(modelManager, context, $stateParams, $q, $uibModalInstance) {
     var that = this;
 
     this.$uibModalInstance = $uibModalInstance;
@@ -90,7 +71,7 @@
     function initialise() {
       that.data.numberMaxValue = Number.MAX_SAFE_INTEGER;
 
-      that.data.clusterGuid = context.clusterGuid || $stateParams.guid;// Required
+      that.data.clusterGuid = context.clusterGuid || $stateParams.guid;
       that.data.organizationGuid = context.organizationGuid || $stateParams.organization;
       that.data.spaceGuid = context.spaceGuid || $stateParams.spaceGuid;
       that.data.organizations = [];
@@ -102,18 +83,22 @@
         that.userInput.selectedUsersByGuid = angular.fromJson(angular.toJson(context.selectedUsers));
       }
       that.userInput.selectedUsers = [];
-      that.userInput.selectedUsersVisible = 2;
     }
 
     function initialiseSelect() {
       return (context.initPromise || that.$q.when()).then(function () {
-        that.data.organizations = _.map(that.organizationModel.organizations[that.data.clusterGuid], function (obj) {
-          return {
-            label: obj.details.org.entity.name,
-            value: obj
-          };
-        });
+        // Create a collection to support the organization drop down
+        that.data.organizations = _.chain(that.organizationModel.organizations[that.data.clusterGuid])
+          .map(function (obj) {
+            return {
+              label: obj.details.org.entity.name,
+              value: obj
+            };
+          })
+          .sortBy('label')
+          .value();
 
+        // Fetch a list of all users for this cluster
         return that.usersModel.listAllUsers(that.data.clusterGuid).then(function (res) {
           that.data.users = res;
           //Smart table struggles with an object, so keep two versions
@@ -131,6 +116,7 @@
 
     initialise();
 
+    // Options for the wizard controller
     this.options = {
       workflow: {
         allowJump: false,
@@ -138,13 +124,16 @@
         allowCancelAtLastStep: true,
         title: gettext('Assign User(s)'),
         btnText: {
-          cancel: gettext('Cancel')
+          cancel: gettext('Cancel'),
+          back: gettext('Previous')
         },
         steps: [
           {
             title: gettext('Select User(s)'),
             templateUrl: path + 'select/select-users.html',
             formName: 'select-user-form',
+            data: that.data,
+            userInput: that.userInput,
             showBusyOnEnter: gettext('Fetching Users...'),
             checkReadiness: function () {
               return initialiseSelect();
@@ -176,35 +165,25 @@
                 that.userInput.org = that.data.organizations[0].value;
               }
               return organizationChanged(that.userInput.org);
-            },
-            data: that.data,
-            userInput: that.userInput
-            // ,
-            // actions: {
-            //   keys: function (obj) {
-            //     return _.keys(obj);
-            //   }
-            // }
+            }
           },
           {
             title: gettext('Assign Roles'),
-            formName: 'assign-selected-form',
             templateUrl: path + 'assign/assign-selected-users.html',
-            nextBtnText: gettext('Assign'),
-            isLastStep: true,
+            formName: 'assign-selected-form',
             data: that.data,
             userInput: that.userInput,
+            nextBtnText: gettext('Assign'),
+            isLastStep: true,
             actions: {
-              // keys: function (obj) {
-              //   return _.keys(obj);
-              // },
               selectedUserCount: function () {
                 return _.keys(that.userInput.selectedUsers).length;
               },
               changeOrganization: function (org) {
                 organizationChanged(org);
               }
-            }
+            },
+            selectedUserListLimit: 10
           }
         ]
       }
@@ -212,15 +191,28 @@
       // userInput: this.userInput
     };
 
+    // Simple mechanism to stop double click on 'assign'. Ideally it would be better to do this via the wizard
+    // controller
+    this.assigning = false;
+
+    // Actions for the wizard controller
     this.actions = {
       stop: function () {
         that.$uibModalInstance.dismiss();
       },
 
       finish: function () {
-        that.assignUsers().then(function () {
-          that.$uibModalInstance.close(that.changes);
-        });
+        if (that.assigning) {
+          return;
+        }
+        that.assigning = true;
+        that.assignUsers()
+          .then(function () {
+            that.$uibModalInstance.close(that.changes);
+          })
+          .finally(function () {
+            that.assigning = false;
+          });
       }
     };
 
@@ -228,11 +220,17 @@
 
   angular.extend(AssignUsersWorkflowController.prototype, {
 
+    /**
+     * @name AssignUsersWorkflowController.assignUsers
+     * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
+     * the affected organizations and spaces
+     * @returns {promise}
+     */
     assignUsers: function () {
       var that = this;
       that.data.failedAssignForUsers = [];
 
-      // TODO: START ASYNC + DISABLE BUTTONS
+      // For each user assign their new roles. Do this asynchronously
       var promises = [];
       _.forEach(this.userInput.selectedUsers, function (user) {
         var promise = that.assignUser(user).catch(function (error) {
@@ -242,25 +240,33 @@
         promises.push(promise);
       });
 
+      // If all async requests have finished invalidate any cache associated with roles
       return this.$q.all(promises).then(function () {
         // Refresh org cache
         if (that.changes.organization) {
-          var orgPath = that.organizationModel.fetchOrganizationPath(that.guid, that.changes.organization);
+          var orgPath = that.organizationModel.fetchOrganizationPath(that.data.clusterGuid, that.changes.organization);
           var org = _.get(that.organizationModel, orgPath);
-          that.organizationModel.getOrganizationDetails(that.guid, org.details.org);
+          that.organizationModel.getOrganizationDetails(that.data.clusterGuid, org.details.org);
         }
 
         // Refresh space caches
         if (that.changes.spaces) {
           _.forEach(that.changes.spaces, function (spaceGuid) {
-            var spacePath = that.spaceModel.fetchSpacePath(that.guid, spaceGuid);
+            var spacePath = that.spaceModel.fetchSpacePath(that.data.clusterGuid, spaceGuid);
             var space = _.get(that.spaceModel, spacePath);
-            that.spaceModel.getSpaceDetails(that.guid, space.details.space);
+            that.spaceModel.getSpaceDetails(that.data.clusterGuid, space.details.space);
           });
         }
       });
     },
 
+    /**
+     * @name AssignUsersWorkflowController.assignUser
+     * @description Assign the user's selected roles. If successful refresh the cache of the affected organizations and
+     * spaces
+     * @param {object} user - the HCF user object of the user to assign roles to
+     * @returns {promise}
+     */
     assignUser: function (user) {
       var that = this;
       var promises = [];
@@ -268,6 +274,7 @@
       var orgGuid = this.userInput.org.details.guid;
       var userGuid = user.metadata.guid;
 
+      // Track which orgs and spaces were affected
       that.changes = {
         organization: false,
         spaces: []

@@ -1,7 +1,6 @@
 <div class="select-user"
      st-table="step.ctrl.displayedUsers"
-     st-safe-src="step.data.users"
-     on-filter="step.ctrl.onFilter">
+     st-safe-src="step.data.users">
   <input ng-model="step.userInput.selectedUsersByGuid" type="hidden"
          selected-users-validator="{{step.userInput.selectedUsersByGuid}}" >
   <div class="select-users-filter">
@@ -41,8 +40,7 @@
         <td>{{ user.entity.username }}</td>
       </tr>
       </tbody>
-      <!--TODO filter out all, this still shows. See http://stackoverflow.com/questions/29194548/angular-js-smart-table-filtered-collection-->
-      <tfoot ng-init="step.ctrl.pagedUserCount = 3"
+      <tfoot ng-init="step.ctrl.pagedUserCount = 6"
              ng-show="step.ctrl.pagedUserCount < step.data.users.length">
       <tr>
         <td colspan="5" class="text-center">

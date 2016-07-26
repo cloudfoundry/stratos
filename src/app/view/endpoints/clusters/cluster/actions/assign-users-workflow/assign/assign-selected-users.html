@@ -1,17 +1,19 @@
 <div class="assign-selected-users">
   <h4 translate>Select an organization to assign roles to.</h4>
-  <div ng-init="step.ctrl.selectedUsersVisible=2">
+  <div class="assign-selected-users-selected" ng-init="step.ctrl.selectedUserListCount=step.selectedUserListLimit">
     <span class="assign-selected-users-selected-label" translate>
       {{ step.actions.selectedUserCount() === 1 ? 'SELECTED USER' : 'SELECTED USER(S)' }}
     </span>
-    <span ng-repeat="user in step.userInput.selectedUsers | limitTo:step.ctrl.selectedUsersVisible | orderBy:'entity.username'">
+    <span ng-repeat="user in step.userInput.selectedUsers | limitTo:step.ctrl.selectedUserListCount | orderBy:'entity.username'">
       {{user.entity.username}}<span ng-if="!$last">,</span>
     </span>
-    <span ng-if="step.actions.selectedUserCount() > step.ctrl.selectedUsersVisible ">
-      <a ng-click="step.ctrl.selectedUsersVisible = step.data.numberMaxValue">View All</a>
+    <span ng-if="step.actions.selectedUserCount() > step.ctrl.selectedUserListCount">
+      <a ng-click="step.ctrl.selectedUserListCount = step.data.numberMaxValue">View All</a>
+    </span>
+    <span ng-if="step.actions.selectedUserCount() <= step.ctrl.selectedUserListCount && step.actions.selectedUserCount() > step.selectedUserListLimit ">
+      <a ng-click="step.ctrl.selectedUserListCount = step.selectedUserListLimit">View Less</a>
     </span>
   </div>
-  <br>
   <div class="assign-selected-users-orgs">
     <div class="form-group">
       <label class="control-label" translate>Organization</label>
