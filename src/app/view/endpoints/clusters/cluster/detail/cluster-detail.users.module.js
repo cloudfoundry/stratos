@@ -29,10 +29,11 @@
     '$stateParams',
     '$state',
     '$log',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'app.view.endpoints.clusters.cluster.manangeUsers'
   ];
 
-  function ClusterUsersController(modelManager, $stateParams, $state, $log, utils) {
+  function ClusterUsersController(modelManager, $stateParams, $state, $log, utils, manangeUsers) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -81,9 +82,8 @@
     this.userActions = [
       {
         name: gettext('Manage Roles'),
-        disabled: true,
         execute: function (aUser) {
-          $log.info('TODO: implement manage roles', aUser);
+          return manangeUsers.show(that.guid, aUser);
         }
       },
       {

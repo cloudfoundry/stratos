@@ -1,0 +1,56 @@
+.manage-users {
+  .manage-users-filter {
+    padding-bottom: $hpe-unit-space;
+
+    .filter-container {
+      //margin-left: 0;
+      //margin-right: 0;
+      padding: $hpe-unit-space / 2  20px;
+
+      display: flex;
+      align-self: stretch;
+
+      .select-users-input {
+
+        flex: 1 1 auto;
+        padding-left: $hpe-unit-space / 2;
+
+        form {
+          height: 100%;
+          .form-group {
+            height: 100%;
+            //display: flex;
+            //align-self: stretch;
+            //.control-label {
+            //  flex: 0 1 auto;
+            //  height: 100%;
+            //  padding: 16px 16px 0 0;
+            //}
+            .control-input {
+              margin-bottom: 0;
+              //flex: 1 1 auto;
+              > input {
+                height: 100%;
+                margin-bottom: 0;
+              }
+            }
+            width: 100%;
+          }
+        }
+
+      }
+
+      > div:first-of-type {
+        padding-right: 0;
+      }
+    }
+
+    .manage-users-clear {
+      flex: 0.5 1 auto;
+    }
+
+    .manage-users-bordered {
+      border: 2px solid $gray-light;
+    }
+  }
+}
