@@ -26,7 +26,8 @@
     '$scope',
     'app.model.modelManager',
     'app.event.eventService',
-    'helion.framework.widgets.detailView'
+    'helion.framework.widgets.detailView',
+    'helion.framework.widgets.dialog.confirm'
   ];
 
   /**
@@ -38,18 +39,21 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.event.eventService} eventService - the event management service
    * @param {helion.framework.widgets.detailView} detailView - the detail view service
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog
    * @property {object} $q - the Angular $q service
    * @property {helion.framework.widgets.detailView} detailView - the detail view service
+   * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog
    * @property {cloud-foundry.model.application} appModel - the CF application model
    * @property {cloud-foundry.model.service-binding} bindingModel - the CF service binding model
    * @property {object} modal - the detail view modal instance
    * @property {array} serviceInstances - service instances associated with this service
    * @property {object} serviceBindings - service bindings associated with this app
    */
-  function ManageServicesController($q, $scope, modelManager, eventService, detailView) {
+  function ManageServicesController($q, $scope, modelManager, eventService, detailView, confirmDialog) {
     var that = this;
     this.$q = $q;
     this.detailView = detailView;
+    this.confirmDialog = confirmDialog;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.modal = null;
@@ -121,17 +125,27 @@
     detach: function (instance) {
       var that = this;
       var binding = this.serviceBindings[instance.guid];
-      return this.bindingModel.deleteServiceBinding(this.data.cnsiGuid, binding.metadata.guid)
-        .then(function (response) {
-          if (response.data[that.data.cnsiGuid] === null) {
-            _.pull(that.serviceInstances, instance);
-            that.appModel.getAppSummary(that.data.cnsiGuid, that.data.app.summary.guid);
+      return this.confirmDialog({
+        title: gettext('Detach Service'),
+        description: gettext('Are you sure you want to detach ') + instance.name + '?',
+        buttonText: {
+          yes: gettext('Detach'),
+          no: gettext('Cancel')
+        },
+        callback: function () {
+          return that.bindingModel.deleteServiceBinding(that.data.cnsiGuid, binding.metadata.guid)
+            .then(function (response) {
+              if (response.data[that.data.cnsiGuid] === null) {
+                _.pull(that.serviceInstances, instance);
+                that.appModel.getAppSummary(that.data.cnsiGuid, that.data.app.summary.guid);
 
-            if (that.serviceInstances.length === 0) {
-              that.modal.dismiss('close');
-            }
-          }
-        });
+                if (that.serviceInstances.length === 0) {
+                  that.modal.dismiss('close');
+                }
+              }
+            });
+        }
+      });
     },
 
     /**
