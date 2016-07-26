@@ -14,8 +14,13 @@ module.exports = function () {
     bower: {
       bowerJson: require('./bower.json'),
       directory: '../src/lib/',
-      ignorePath: '../src/'
-    },
+      ignorePath: '../src/',
+  	  overrides: {
+  	    "angular-link-header-parser": {
+		  "main": [ "release/angular-link-header-parser.min.js" ]
+        }
+      }
+	},
 
 	bowerDev: {
       bowerJson: require('./bower.json'),

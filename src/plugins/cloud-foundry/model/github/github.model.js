@@ -13,23 +13,29 @@
 
   registerGithubModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'linkHeaderParser',
+    '$q'
   ];
 
-  function registerGithubModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.github', new GithubModel(apiManager));
+  function registerGithubModel(modelManager, apiManager, linkHeaderParser, $q) {
+    modelManager.register('cloud-foundry.model.github', new GithubModel(apiManager, linkHeaderParser, $q));
   }
 
   /**
    * @memberof cloud-foundry.model.github
    * @name GithubModel
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {object} linkHeaderParser - github link header parser library
+   * @param {object} $q - the Angular Promise service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {object} data - the Github data
    * @class
    */
-  function GithubModel(apiManager) {
+  function GithubModel(apiManager, linkHeaderParser, $q) {
     this.apiManager = apiManager;
+    this.linkHeaderParser = linkHeaderParser;
+    this.$q = $q;
     this.data = {
       repos: [],
       branches: [],
@@ -47,15 +53,56 @@
      * @function repos
      * @memberof cloud-foundry.model.github.GithubModel
      * @description Get repos user owns or has admin rights to
+     * @param {int} maxPages - the maxiumum number of pages to retrieve
      * @returns {promise} A promise object
      * @public
      */
-    repos: function () {
+    repos: function (maxPages) {
       var that = this;
-      var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
-      return githubApi.repos({per_page: 100})
+      var fetchPages = maxPages ? maxPages : 5;
+      var deferred = that.$q.defer();
+      var pages = 0;
+      that.data.repos = [];
+
+      function fetchNext() {
+        that.reposPage(pages + 1).then(function (response) {
+          var links = response.links;
+          that.data.repos = _.concat(that.data.repos, response.data);
+          pages++;
+          if (links.next && pages <= fetchPages) {
+            fetchNext();
+          } else {
+            deferred.resolve(that.data.repos);
+          }
+        }).catch(function (e) {
+          deferred.reject(e);
+        });
+      }
+
+      fetchNext();
+
+      return deferred.promise;
+    },
+
+    /**
+     * @function reposPage
+     * @memberof cloud-foundry.model.github.GithubModel
+     * @description Get a page of repost
+     * @param {int} page - the page number to retrieve
+     * @returns {promise} A promise object
+     * @public
+     */
+    reposPage: function (page) {
+      var that = this;
+      var githubApi = that.apiManager.retrieve('cloud-foundry.api.github');
+      return githubApi.repos({per_page: 100, page: page})
         .then(function (response) {
-          that.onRepos(response);
+          // Parse out the links
+          var linkHeaderText = response.headers('Link');
+          if (linkHeaderText) {
+            response.links = that.linkHeaderParser.parse(linkHeaderText);
+          }
+          return response;
         })
         .catch(function (err) {
           that.onReposError();

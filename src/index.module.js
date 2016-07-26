@@ -13,7 +13,8 @@
     'smoothScroll',
     'ui.bootstrap',
     'ui.router',
-    'smart-table'
+    'smart-table',
+    'ig.linkHeaderParser'
   ];
 
   var pluginModules = _.chain(env.plugins).map('moduleName').value();
@@ -26,10 +27,11 @@
     .module('green-box-console', angularModules.concat(otherModules, ['app'], pluginModules), config);
 
   config.$inject = [
-    '$compileProvider'
+    '$compileProvider',
+    '$logProvider'
   ];
 
-  function config($compileProvider) {
+  function config($compileProvider, $logProvider) {
 
     /**
      * Disabling Debug Data
@@ -44,6 +46,10 @@
      * https://docs.angularjs.org/guide/production
      */
     $compileProvider.debugInfoEnabled(false);
+
+    // Disbale debug logging
+    $logProvider.debugEnabled(false);
+
   }
 
 })();
