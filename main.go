@@ -281,15 +281,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Verify Session
 	sessionGroup.GET("/auth/session/verify", p.verifySession)
 
-	// Initiate OAuth flow against GitHub on behalf of a user
-	sessionGroup.GET("/github/oauth/auth", p.handleGitHubAuth)
-
-	// GitHub OAuth callback/response
-	sessionGroup.GET("/github/oauth/callback", p.handleGitHubCallback)
-
-	// Verify existence of GitHub token in Session
-	sessionGroup.GET("/github/oauth/verify", p.verifyGitHubAuthToken)
-
 	// CNSI operations
 	sessionGroup.GET("/cnsis", p.listCNSIs)
 	sessionGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
@@ -303,6 +294,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Version info
 	sessionGroup.GET("/version", p.getVersions)
 
+	//
 	adminGroup := sessionGroup
 	adminGroup.Use(p.stackatoAdminMiddleware)
 	// Register clusters
@@ -313,11 +305,22 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
+	// GitHub Requests
+	ghGroup := sessionGroup.Group("/github")
+
+	// Initiate OAuth flow against GitHub on behalf of a user
+	ghGroup.GET("/oauth/auth", p.handleGitHubAuth)
+
+	// GitHub OAuth callback/response
+	ghGroup.GET("/oauth/callback", p.handleGitHubCallback)
+
+	// Verify existence of GitHub token in Session
+	ghGroup.GET("/oauth/verify", p.verifyGitHubAuthToken)
+
+	// Proxy the rest to Github API
+	ghGroup.Any("/*", p.github)
+
 	// This is used for passthru of HCF/HCE requests
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
-
-	// This used for passthru of GitHub requests
-	group = sessionGroup.Group("/github")
-	group.Any("/*", p.github)
 }

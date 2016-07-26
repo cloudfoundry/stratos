@@ -108,6 +108,14 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
     <body id="github-auth-callback-page">
     <h1 class="text-center">GitHub authorization is done.</h1>
     <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
+    <script>
+      (function () {
+        window.opener.postMessage(JSON.stringify({
+          name: 'GitHub Oauth - token',
+          data: %s
+        }), window.location.origin);
+      })();
+    </script>
     </body>
     </html>`
 
@@ -134,7 +142,7 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 
 	// stuff the token into the user's session
 	sessionValues := make(map[string]interface{})
-	sessionValues[githubOAuthTokenKey] = token
+	sessionValues[githubOAuthTokenKey] = token.AccessToken
 
 	log.Println("Storing token in session")
 	if err = p.setSessionValues(c, sessionValues); err != nil {
@@ -148,7 +156,7 @@ func (p *portalProxy) verifyGitHubAuthToken(c echo.Context) error {
 
 	log.Println("Entering verifyGitHubToken")
 
-	var GitHubOAuthTokenExists = false
+	var tokenExists = false
 
 	// We check for the existence of the oauth token in the session
 	// we dont care about the token itself at this point.
@@ -156,12 +164,12 @@ func (p *portalProxy) verifyGitHubAuthToken(c echo.Context) error {
 	_, ok := p.getSessionStringValue(c, githubOAuthTokenKey)
 	if ok {
 		log.Println("GitHub OAuth token found in the session.")
-		GitHubOAuthTokenExists = true
+		tokenExists = true
 	}
 
 	log.Println("Preparing response")
 	authResp := &GitHubAuthCheckResp{
-		Authorized: GitHubOAuthTokenExists,
+		Authorized: tokenExists,
 	}
 
 	jsonString, err := json.Marshal(authResp)
