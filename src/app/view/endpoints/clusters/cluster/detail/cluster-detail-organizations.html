@@ -1,7 +1,7 @@
-<div ng-if="clusterDetailController.organizations === null" class="message-box message-box-no-bg">
+<div ng-if="clusterDetailController.organizations === null" class="cluster-loading col-md-9 col-sm-12">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
-<div ng-if="clusterDetailController.organizations === false" class="message-box message-box-no-bg">
+<div ng-if="clusterDetailController.organizations === false" class="cluster-loading col-md-9 col-sm-12">
   <div translate>An error occurred retrieving organizations</div>
 </div>
 <div class="cluster-gallery-card-container" ng-if="clusterDetailController.organizations">
