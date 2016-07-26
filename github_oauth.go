@@ -111,8 +111,7 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
     <script>
       (function () {
         window.opener.postMessage(JSON.stringify({
-          name: 'GitHub Oauth - token',
-          data: %s
+          name: 'GitHub Oauth - token'
         }), window.location.origin);
       })();
     </script>
