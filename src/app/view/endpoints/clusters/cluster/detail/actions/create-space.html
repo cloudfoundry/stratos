@@ -11,17 +11,17 @@
   </div>
 
   <div ng-repeat="space in asyncTaskDialogCtrl.context.data.spaces track by $index" class="form-group" focusable-input
-       ng-class="{'has-error': createSpaceForm.name.$invalid && createSpaceForm.name.$dirty}">
-    <label class="control-label" translate>Space Name</label>
-    <input type="text" name="name" auto-focus class="form-control"
-           helion-unique items="asyncTaskDialogCtrl.context.data.spaceNames"
+       ng-class="{'has-error': createSpaceForm['name' + $index].$invalid && createSpaceForm['name' + $index].$dirty}">
+    <label class="control-label" translate>Space Name{{ $index > 0 ? ' ' + ($index + 1) : ''}}</label>
+    <input type="text" name="name{{ $index }}" auto-focus class="form-control"
+           helion-unique items="asyncTaskDialogCtrl.context.data.existingSpaceNames"
            ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]" required/>
   </div>
 
   <div style="float: left">
   <a class="btn btn-link"
      style="padding-left: 0; font-size: 16px; text-transform: none"
-     ng-disabled="asyncTaskDialogCtrl.context.data.spaces.length >= 10"
+     ng-disabled="asyncTaskDialogCtrl.context.data.createSpaceDisabled()"
      ng-click="asyncTaskDialogCtrl.context.data.addSpace()">
     <i class="helion-icon helion-icon-Add"></i>
     <span  translate>Create Another Space</span>
