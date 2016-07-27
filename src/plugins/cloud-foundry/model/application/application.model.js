@@ -45,6 +45,7 @@
     this.$q = $q;
     this.data = {};
     this.application = {
+      instanceCount: 0,
       summary: {
         state: 'LOADING'
       },
@@ -106,6 +107,7 @@
                 // We need more information
                 tasks.push(that.returnAppStats(cnsi, app.metadata.guid).then(function (stats) {
                   app.instances = stats.data[cnsi];
+                  app.instanceCount = _.keys(app.instances).length;
                   app.state = that.appStateService.get(app.entity, app.instances);
                   return stats.data[cnsi];
                 }));
