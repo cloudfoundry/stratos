@@ -87,6 +87,11 @@
                                               function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
                 categories = _.unionBy(categories, serviceCategories, 'lower');
               }
+
+              // Parse service entity extra data JSON string
+              if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
+                service.entity.extra = angular.fromJson(service.entity.extra);
+              }
             });
 
             that.services.length = 0;

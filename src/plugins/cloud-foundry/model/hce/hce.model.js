@@ -61,6 +61,32 @@
   angular.extend(HceModel.prototype, {
 
     /**
+     * @function infos
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get service info for one or more HCE instances
+     * @param {string} guid - the HCE instance GUID
+     * @returns {promise} A promise object
+     * @public
+     */
+    infos: function (guid) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceInfoApi')
+        .info(guid, {});
+    },
+
+    /**
+     * @function info
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get service info for an HCE instance
+     * @param {string} guid - the HCE instance GUID
+     * @returns {promise} A promise object
+     * @public
+     */
+    info: function (guid) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceInfoApi')
+        .info(guid, this.hceProxyPassthroughConfig);
+    },
+
+    /**
      * @function getBuildContainer
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get build container by ID
