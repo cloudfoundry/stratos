@@ -36,28 +36,58 @@
      * @param {object} user ????
      * @returns {promise} ??
      */
-    this.show = function (clusterGuid, user) {
-      var that = this;
+    this.show = function (clusterGuid, users, refreshOrgRoles, refreshSpaceRoles) {
 
-      // spaces: spacesForTable,
-      //   user: user,
+      selectedRoles = {};
 
-      var selectedOrgRoles = ['org_user', 'org_manager', 'billing_manager'];
-      var selectedSpaceRoles = { };
+      var initPromises = [];
+      if (refreshOrgRoles || refreshSpaceRoles) {
+        _.forEach(organizationModel.organizations[clusterGuid], function(organization) {
+          selectedRoles[organization.details.org.metadata.guid] = {};
+
+          if (refreshOrgRoles) {
+            //TODO:
+          }
+
+          if (refreshSpaceRoles) {
+            _.forEach(organization.spaces, function (space) {
+              initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid));
+            });
+          }
+        });
+      }
+
+      var state = {};
+      var initPromise = $q.all(initPromises)
+        .then(function () {
+          state.initialised = true;
+        })
+        .catch(function () {
+          state.initialised = false;
+        });
+
       return asyncTaskDialog(
         {
-          title: gettext('Manager User: ') + user.entity.username,
+          title: users.length === 1 ? gettext('Manager User: ') + users[0].entity.username : 'TEAMFOUR-708',
           templateUrl: 'app/view/endpoints/clusters/cluster/actions/manage-user/manage-user.html',
           buttonTitles: {
             submit: gettext('Save Changes')
           }
         },
         {
-          orgRoles: orgRoles,
-          spaceRoles: spaceRoles,
-          organizations: organizationModel.organizations[clusterGuid],
+          removeFromOrg: that.removeFromOrg,
+          data: {
+            organizations: organizationModel.organizations[clusterGuid]
+          },
           selectedRoles: selectedRoles,
-          removeFromOrg: that.removeFromOrg
+          tableConfig: {
+            clusterGuid: clusterGuid,
+            orgRoles: orgRoles,
+            spaceRoles: spaceRoles,
+            users: users,
+            initPromise: initPromise
+          },
+          state: state
         },
         that.assignUsers
       );

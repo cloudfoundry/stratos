@@ -1,38 +1,44 @@
 <div class="manage-users">
-
-  <div class="manage-users-filter">
-    <div class="filter-container manage-users-bordered">
-      <div class="manage-users-input">
-        <form>
-          <div class="form-group search-field" focusable-input>
-            <label class="control-label" for="users-search">
-              <i class="helion-icon helion-icon-lg helion-icon-Search"></i>
-            </label>
-            <div class="control-input">
-              <!--st-search-->
-              <input ng-model="asyncTaskDialogCtrl.ctrl.filter" type="text" class="form-control" id="users-search" >
+  <!--ng-if="asyncTaskDialogCtrl.context.tableConfig.state.initialised === undefined"-->
+  <div class="manage-users-loading" class="message-box message-box-no-bg">
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+  <div class="manage-users-load-failed" ng-if="asyncTaskDialogCtrl.context.state.initialised === false">
+    <span translate>Failed to update list of user/s roles</span>
+  </div>
+  <div class="manage-users-loaded" ng-if="asyncTaskDialogCtrl.context.state.initialised === true">
+    <div class="manage-users-filter">
+      <div class="filter-container manage-users-bordered">
+        <div class="manage-users-input">
+          <form>
+            <div class="form-group search-field" focusable-input>
+              <label class="control-label" for="users-search">
+                <i class="helion-icon helion-icon-lg helion-icon-Search"></i>
+              </label>
+              <div class="control-input">
+                <!--st-search-->
+                <input ng-model="asyncTaskDialogCtrl.ctrl.filter" type="text" class="form-control" id="users-search" >
+              </div>
             </div>
-          </div>
-        </form>
-      </div>
-      <div class="manage-users-clear">
-        <a>Clear All User's Roles</a>
+          </form>
+        </div>
+        <div class="manage-users-clear">
+          <a>Clear All User's Roles</a>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="manage-users-values">
-    <div class="manage-users-org" ng-repeat="(guid, org) in asyncTaskDialogCtrl.context.organizations">
-      <roles-tables
-        org-roles="asyncTaskDialogCtrl.context.orgRoles"
-        space-roles="asyncTaskDialogCtrl.context.spaceRoles"
-        organization="org"
-        selection="asyncTaskDialogCtrl.context.selectedRoles[guid]"
-        filter="asyncTaskDialogCtrl.ctrl.filter"
-      ></roles-tables>
+    <div class="manage-users-values">
+      <div class="manage-users-org" ng-repeat="(guid, org) in asyncTaskDialogCtrl.context.data.organizations">
+        <roles-tables
+          config="asyncTaskDialogCtrl.context.tableConfig"
+          data="asyncTaskDialogCtrl.context.data"
+          organization="org"
+          selection="asyncTaskDialogCtrl.context.selectedRoles[guid]"
+          filter="asyncTaskDialogCtrl.ctrl.filter"
+        ></roles-tables>
+      </div>
+
     </div>
-
   </div>
-
-
 </div>

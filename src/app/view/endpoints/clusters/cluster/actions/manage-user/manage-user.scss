@@ -1,50 +1,58 @@
 .manage-users {
-  .manage-users-filter {
-    padding-bottom: $hpe-unit-space;
+  .manage-users-loading, .manage-users-load-failed {
+    display: flex;
+    justify-content: center;
+    margin-top: $hpe-unit-space * 3;
+  }
+  .manage-users-loaded {
+    .manage-users-filter {
+      padding-bottom: $hpe-unit-space;
 
-    .filter-container {
-      padding: $hpe-unit-space / 2  20px;
+      .filter-container {
+        padding: $hpe-unit-space / 2  20px;
 
-      display: flex;
+        display: flex;
 
-      .manage-users-input {
-        flex: 1 1 auto;
-        form {
-          .form-group {
-            //height: 100%;
-            display: flex;
-            align-self: stretch;
-            .control-label {
-              flex: 0 1 auto;
-              height: 100%;
-              padding: 16px 16px 0 0;
-            }
-            .control-input {
-              margin-bottom: 0;
-              flex: 1 1 auto;
-              > input {
+        .manage-users-input {
+          flex: 1 1 auto;
+          form {
+            .form-group {
+              //height: 100%;
+              display: flex;
+              align-self: stretch;
+              .control-label {
+                flex: 0 1 auto;
                 height: 100%;
-                margin-bottom: 0;
+                padding: 16px 16px 0 0;
               }
+              .control-input {
+                margin-bottom: 0;
+                flex: 1 1 auto;
+                > input {
+                  height: 100%;
+                  margin-bottom: 0;
+                }
+              }
+              width: 100%;
             }
-            width: 100%;
           }
+
         }
-
+        .manage-users-clear {
+          flex: 0 1 auto;
+          // Height relates to height of input box
+          padding: 15px;
+        }
       }
+
       .manage-users-clear {
-        flex: 0 1 auto;
-        // Height relates to height of input box
-        padding: 15px;
+        flex: 0.5 1 auto;
       }
-    }
 
-    .manage-users-clear {
-      flex: 0.5 1 auto;
-    }
-
-    .manage-users-bordered {
-      border: 2px solid $gray-light;
+      .manage-users-bordered {
+        border: 2px solid $gray-light;
+      }
     }
   }
+
 }

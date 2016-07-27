@@ -83,7 +83,7 @@
       {
         name: gettext('Manage Roles'),
         execute: function (aUser) {
-          return manangeUsers.show(that.guid, aUser);
+          return manangeUsers.show(that.guid, [aUser], false, true);
         }
       },
       {

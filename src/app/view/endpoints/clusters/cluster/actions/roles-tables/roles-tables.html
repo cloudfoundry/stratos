@@ -10,15 +10,17 @@
         <thead>
         <tr>
           <th st-sort="details.org.entity.name" st-sort-default="true" translate>ORGANIZATION</th>
-          <th ng-repeat="(key, role) in rolesTablesCtrl.orgRoles" translate>Org {{role}}</th>
+          <th ng-repeat="(key, role) in rolesTablesCtrl.config.orgRoles" translate>Org {{role}}</th>
           <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="org in rolesTablesCtrl.ctrl.displayedOrgs">
           <td>{{ org.details.org.entity.name }}</td>
-          <td ng-repeat="(roleKey, role) in rolesTablesCtrl.orgRoles"><checkbox-input ng-model="selection.organization[group.key][roleKey]"></checkbox-input></td>
-          <td><a ng-click="rolesTablesCtrl.removeFromOrg">Remove from Org</a></td>
+          <td ng-repeat="(roleKey, role) in rolesTablesCtrl.config.orgRoles">
+            <checkbox-input ng-model="rolesTablesCtrl.selection.organization[roleKey]"></checkbox-input>
+          </td>
+          <td><a ng-click="rolesTablesCtrl.config.removeFromOrg()">Remove from Org</a></td>
         </tr>
       </table>
     </div>
@@ -34,19 +36,21 @@
         <thead>
         <tr>
           <th st-sort="label" st-sort-default="true" translate>SPACE</th>
-          <th ng-repeat="(key, role) in rolesTablesCtrl.spaceRoles" translate>Space {{role}}</th>
+          <th ng-repeat="(key, role) in rolesTablesCtrl.config.spaceRoles" translate>Space {{role}}</th>
           <th>&nbsp;</th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="space in rolesTablesCtrl.ctrl.displayedSpaces">
           <td>{{ space.label }}</td>
-          <td ng-repeat="(roleKey, role) in rolesTablesCtrl.spaceRoles"><checkbox-input ng-model="selection.spaces[space.key][roleKey]"></checkbox-input></td>
+          <td ng-repeat="(roleKey, role) in rolesTablesCtrl.config.spaceRoles">
+            <checkbox-input ng-model="rolesTablesCtrl.selection.spaces[space.key][roleKey]"></checkbox-input>
+          </td>
           <td></td>
         </tr>
         </tbody>
         <tfoot ng-init="rolesTablesCtrl.ctrl.pagesSpaceCount = 5"
-               ng-show="false">
+               ng-show="rolesTablesCtrl.ctrl.pagesSpaceCount < rolesTablesCtrl.spaces.length">
         <tr>
           <td colspan="5" class="text-center">
             <a ng-click="rolesTablesCtrl.ctrl.pagesSpaceCount = rolesTablesCtrl.spaces.length">

@@ -24,8 +24,8 @@
   function RolesTables() {
     return {
       bindToController: {
-        orgRoles: '=',
-        spaceRoles: '=',
+        config: '=',
+        data: '=',
         organization: '=',
         selection: '=',
         filter: '=?'
@@ -62,14 +62,31 @@
    */
   function RolesTablesController($scope, $state, $stateParams, $q,
                                  modelManager, utils, confirmDialog, asyncTaskDialog) {
+    var that = this;
 
-    this.org = [this.organization];
-    // this.spaces = [];
-    this.spaces = _.map(this.organization.spaces, function (space) {
-      return {
-        label: space.entity.name,
-        key: space.metadata.guid
-      };
+    var initPromise = this.config.initPromise || $q.when();
+    initPromise.then(function () {
+      // Convert the cached organization roles into a keyed object of truthies required to run the check boxes
+      var orgRolesByUser = that.organization.roles;
+      // At the moment we're only dealing with one user. See TEAMFOUR-708 for bulk users
+      var userRoles = orgRolesByUser[that.config.users[0].metadata.guid];
+      that.selection.organization = _.keyBy(userRoles);
+
+      // Convert the cached space roles into a keyed object of truthies required to run the check boxes
+      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+      _.forEach(that.organization.spaces, function (space) {
+        var spaceRoles = spaceModel.spaces[that.config.clusterGuid][space.metadata.guid].roles[that.config.users[0].metadata.guid];
+        _.set(that.selection, 'selection.spaces.' + space.metadata.guid, _.keyBy(spaceRoles));
+      });
+
+      that.org = [that.organization];
+      // that.spaces = [];
+      that.spaces = _.map(that.organization.spaces, function (space) {
+        return {
+          label: space.entity.name,
+          key: space.metadata.guid
+        };
+      });
     });
   }
 
