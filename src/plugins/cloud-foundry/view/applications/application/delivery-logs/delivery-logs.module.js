@@ -134,7 +134,7 @@
     },
 
     viewExecution: function (execution) {
-      var that= this;
+      var that = this;
       var rawExecution = _.find(this.hceModel.data.pipelineExecutions, function (o) {
         return o.id === execution.id;
       });
