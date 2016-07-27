@@ -167,32 +167,50 @@ func fwdCNSIStandardHeaders(cnsiRequest CNSIRequest, req *http.Request) {
 
 func (p *portalProxy) proxy(c echo.Context) error {
 	log.Println("proxy")
-	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
-	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
+	cnsiList := strings.Split(c.Request().Header().Get(strings.ToLower("x-cnap-cnsi-list")), ",")
+	shouldPassthrough := "true" == c.Request().Header().Get(strings.ToLower("x-cnap-passthrough"))
+
+	log.Printf("shouldPassthru is: %t", shouldPassthrough)
+	log.Printf("shouldPassthru header value is: %s", c.Request().Header().Get(strings.ToLower("x-cnap-passthrough")))
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	uri := makeRequestURI(c)
+
+	log.Printf("URI: %+v\n", uri)
+
 	header := getEchoHeaders(c)
 	header.Del("Cookie")
 
-	// TODO (wchrisjohnson): Temporarily copy this header over to allow us to skip
-	// auth for HCE calls until it has authentcation set up. It'll be used in
-	// doOauthFlowRequest later
-	// [julbra] Is this not already copied by getEchoHeaders(c)?
-	// https://jira.hpcloud.net/browse/TEAMFOUR-693
-	header.Add("x-cnap-skip-token-auth", c.Request().Header().Get("x-cnap-skip-token-auth"))
+	log.Printf("--- Headers: %+v\n", header)
 
 	portalUserGUID, err := getPortalUserGUID(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	req, body, err := getRequestParts(c)
+	log.Printf("portalUserGUID: %s", portalUserGUID)
 
+	req, body, err := getRequestParts(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	log.Println("--- Request")
+	log.Printf("%+v\n", req)
+	log.Println("--- BODY")
+	log.Printf("%+v\n", string(body))
+	log.Println(" ")
+
+	// if the following header is found, add the GH Oauth code to the body
+	if header.Get(strings.ToLower("x-cnap-github-token-required")) != "" {
+		log.Println("--- x-cnap-github-token-required HEADER FOUND.....")
+		body, err = p.addTokenToPayload(c, body)
+		if err != nil {
+			log.Printf("Unable to add token to HCE payload: %+v\n", err)
+			return err
+		}
 	}
 
 	if shouldPassthrough {
@@ -249,6 +267,29 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	return err
 }
 
+func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, error) {
+	log.Println("addTokenToPayload")
+
+	token := p.getGitHubAuthToken(c)
+
+	log.Printf("Token: %+v\n", token)
+
+	var projData map[string]interface{}
+	if err := json.Unmarshal(body, &projData); err != nil {
+		log.Printf("Unable to add Authorization token to project data: %+v\n", err)
+		return nil, err
+	}
+
+	log.Println("--- Unmarshal data in projData map")
+	log.Printf("%+v\n", projData)
+
+	log.Println("--- Adding token to map")
+	projData["token"] = token
+	b, _ := json.Marshal(projData)
+
+	return b, nil
+}
+
 func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest, kill <-chan struct{}) {
 	log.Println("doRequest")
 	var body io.Reader
@@ -295,85 +336,48 @@ End:
 func (p *portalProxy) github(c echo.Context) error {
 
 	log.Println("github passthru ...")
-
 	log.Printf("GitHub API URL: %s", gitHubAPIURL)
 
 	var (
-		uri    *url.URL
-		header http.Header
-		// body   io.Reader
-		// res    *http.Response
-		// req    *http.Request
-		// err error
+		uri     *url.URL
+		headers http.Header
 	)
 
 	uri = makeRequestURI(c)
 	log.Printf("URI: %+v\n", uri)
 
-	header = getEchoHeaders(c)
-	log.Printf("Headers: %+v\n", header)
+	headers = getEchoHeaders(c)
+	log.Printf("Headers: %+v\n", headers)
 
-	// req, body, err = getRequestParts(c)
-	// if err != nil {
-	// 	return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	// }
-	// log.Printf("Request: %+v\n", req)
-	// log.Printf("Body: %+v\n", body)
+	url := fmt.Sprintf("%s%s", gitHubAPIURL, uri)
+	log.Printf("URL: %s", url)
 
-	url := fmt.Sprintf("%s/%s", gitHubAPIURL, "test")
+	token := p.getGitHubAuthToken(c)
+	tokenHeader := fmt.Sprintf("token %s", token)
 
-	return c.Redirect(302, url)
+	// set the token in the header
+	log.Printf("Headers before GH call: %+v\n", headers)
 
-	// if len(reqBody) > 0 {
-	// 	body = bytes.NewReader(reqBody)
-	// }
-	// req, err = http.NewRequest(cnsiRequest.Method, cnsiRequest.URL.String(), body)
-	// if err != nil {
-	// 	cnsiRequest.Error = err
-	// 	goto End
-	// }
+	// Perform the request against GitHub
+	client := &http.Client{
+		Timeout: time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second,
+	}
+	req, err := http.NewRequest("GET", url, nil)
+	log.Printf("Request: %+v\n", req)
+	req.Header.Add("Authorization", tokenHeader)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Response from GitHub contained an error: %v", err)
+	}
 
-	// // send the request to each CNSI
-	// done := make(chan CNSIRequest)
-	// kill := make(chan struct{})
-	// for _, cnsi := range cnsiList {
-	// 	cnsiRequest := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
-	// 	go p.doRequest(cnsiRequest, done, kill)
-	// }
-	//
-	// timeout := time.After(time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second)
-	// responses := make(map[string]CNSIRequest)
-	// for range cnsiList {
-	// 	select {
-	// 	case res := <-done:
-	// 		responses[res.GUID] = res
-	// 	case <-timeout:
-	// 	}
-	// }
-	//
-	// if shouldPassthrough {
-	// 	cnsiGUID := cnsiList[0]
-	// 	res, ok := responses[cnsiGUID]
-	// 	if !ok {
-	// 		return echo.NewHTTPError(http.StatusRequestTimeout, "Request timed out")
-	// 	}
-	//
-	// 	// in passthrough mode, set the status code to that of the single response
-	// 	c.Response().WriteHeader(res.StatusCode)
-	//
-	// 	// we don't care if this fails
-	// 	_, _ = c.Response().Write(res.Response)
-	//
-	// 	return nil
-	// }
+	log.Printf("Response from GitHub: %+v\n", resp)
+	body, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 
-	// jsonResponse := buildJSONResponse(cnsiList, responses)
-	// e := json.NewEncoder(c.Response())
-	// err = e.Encode(jsonResponse)
-	// if err != nil {
-	// 	log.Printf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
-	// }
-	// return err
+	c.Response().WriteHeader(resp.StatusCode)
 
-	// return nil
+	// we don't care if this fails
+	_, _ = c.Response().Write(body)
+
+	return nil
 }

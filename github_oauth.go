@@ -153,7 +153,7 @@ func (p *portalProxy) handleGitHubCallback(c echo.Context) error {
 
 func (p *portalProxy) verifyGitHubAuthToken(c echo.Context) error {
 
-	log.Println("Entering verifyGitHubToken")
+	log.Println("verifyGitHubToken")
 
 	var tokenExists = false
 
@@ -180,4 +180,15 @@ func (p *portalProxy) verifyGitHubAuthToken(c echo.Context) error {
 	c.Response().Write(jsonString)
 
 	return nil
+}
+
+func (p *portalProxy) getGitHubAuthToken(c echo.Context) string {
+
+	log.Println("getGitHubAuthToken")
+	token, ok := p.getSessionStringValue(c, githubOAuthTokenKey)
+	if ok {
+		return token
+	}
+
+	return ""
 }
