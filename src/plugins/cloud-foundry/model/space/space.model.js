@@ -357,8 +357,8 @@
 
     createSpaces: function(cnsiGuid, orgGuid, spaceNames, params) {
       var that = this;
-      var managerGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
+      var managerGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
       var spaceModel = this.apiManager.retrieve('cloud-foundry.api.Spaces');
 
       var createPromises = [];
@@ -376,6 +376,7 @@
           });
         createPromises.push(createP);
       }
+
       return that.$q.all(createPromises).then(function () {
         // Refresh the org!
         var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
