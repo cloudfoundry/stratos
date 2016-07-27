@@ -174,18 +174,17 @@
             data: contextData
           },
           function () {
-            var createPromises = [];
+            var toCreate = [];
             for (var i = 0; i < contextData.spaces.length; i++) {
               var name = contextData.spaces[i];
               if (!angular.isUndefined(name) && name.length > 0) {
-                var createP = spaceModel.createSpace(that.clusterGuid, contextData.organization.details.guid, name);
-                createPromises.push(createP);
+                toCreate.push(name);
               }
             }
-            if (createPromises.length < 1) {
+            if (toCreate.length < 1) {
               return $q.reject('Nothing to create!');
             }
-            return $q.all(createPromises);
+            return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate);
           }
         );
       },

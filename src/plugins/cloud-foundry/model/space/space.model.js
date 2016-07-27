@@ -355,24 +355,35 @@
       });
     },
 
-    createSpace: function(cnsiGuid, orgGuid, spaceName, params) {
+    createSpaces: function(cnsiGuid, orgGuid, spaceNames, params) {
       var that = this;
       var managerGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
-      console.log('managerGuid ' + managerGuid);
-      var newSpace = {
-        organization_guid: orgGuid,
-        name: spaceName,
-        manager_guids: [managerGuid]
-      };
-      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .CreateSpace(newSpace, params, this.makeHttpConfig(cnsiGuid))
-        .then(function(response) {
-          // Refresh the caches
-          var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
-          var refreshedOrg = that.organizationModel.getOrganizationDetails(cnsiGuid, org);
-          var refreshedSpace = that.getSpaceDetails(cnsiGuid, response.data);
-          return that.$q.all([refreshedOrg, refreshedSpace]);
-        });
+
+      var spaceModel = this.apiManager.retrieve('cloud-foundry.api.Spaces');
+
+      var createPromises = [];
+      for (var i = 0; i < spaceNames.length; i++) {
+        var spaceName = spaceNames[i];
+        var newSpace = {
+          organization_guid: orgGuid,
+          name: spaceName,
+          manager_guids: [managerGuid]
+        };
+        var createP = spaceModel.CreateSpace(newSpace, params, this.makeHttpConfig(cnsiGuid))
+          .then(function(response) {
+            // Cache the space details
+            return that.getSpaceDetails(cnsiGuid, response.data);
+          });
+        createPromises.push(createP);
+      }
+      return that.$q.all(createPromises).then(function () {
+        // Refresh the org!
+        var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
+        return that.organizationModel.getOrganizationDetails(cnsiGuid, org);
+      });
+
+
+
     }
 
   });
