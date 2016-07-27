@@ -43,21 +43,11 @@
     this.project = this.hceModel.getProject(this.model.application.summary.name);
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.$uibModalInstance = $uibModalInstance;
-    this.hceCnsi = null;
+    this.hceCnsi = that.model.application.pipeline.hceCnsi;
     this.indications = {
       busy: false,
       error: false
     };
-    this.cnsiModel.list().then(function () {
-      var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
-      if (hceCnsis.length > 0) {
-        /* eslint-disable */
-        // FIXME: We are getting the first hce CNSI, this is implicitly assuming that we only have 1 HCE instance (TEAMFOUR-823)
-        // This will break as more HCE instances are being added
-        /* eslint-disable */
-        that.hceCnsi = hceCnsis[0];
-      }
-    });
 
     this.userInput = {
       notificationTargetType: null,

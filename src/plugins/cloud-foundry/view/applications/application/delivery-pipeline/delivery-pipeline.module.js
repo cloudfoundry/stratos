@@ -120,8 +120,8 @@
           .then(function () {
             that.getProject();
           }).finally(function () {
-            that.busy = false;
-          });
+          that.busy = false;
+        });
         that.hceModel.getImageRegistries(that.hceCnsi.guid);
         that.modelUpdated = true;
       }
@@ -184,9 +184,10 @@
     addNotificationTarget: function () {
       var that = this;
       this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
-        .closed.then(function () {
-        that.getProject();
-      });
+        .closed
+        .then(function () {
+          that.getProject();
+        });
     }
   });
 
