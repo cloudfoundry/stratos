@@ -551,7 +551,7 @@ func TestLoginToCNSIWithBadCreds(t *testing.T) {
 	// }
 }
 
-func TestVerifyUAAPerms(t *testing.T) {
+func TestVerifySession(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", map[string]string{
@@ -587,7 +587,7 @@ func TestVerifyUAAPerms(t *testing.T) {
 
 }
 
-func TestVerifyUAAPermsNoDate(t *testing.T) {
+func TestVerifySessionNoDate(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", map[string]string{
@@ -621,7 +621,7 @@ func TestVerifyUAAPermsNoDate(t *testing.T) {
 
 }
 
-func TestVerifyUAAPermsExpired(t *testing.T) {
+func TestVerifySessionExpired(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", map[string]string{
