@@ -14,7 +14,8 @@
     'ui.bootstrap',
     'ui.router',
     'smart-table',
-    'http-etag'
+    'http-etag',
+    'ig.linkHeaderParser'
   ];
 
   var pluginModules = _.chain(env.plugins).map('moduleName').value();
@@ -28,10 +29,11 @@
 
   config.$inject = [
     '$compileProvider',
+    '$logProvider',
     'httpEtagProvider'
   ];
 
-  function config($compileProvider, httpEtagProvider) {
+  function config($compileProvider, $logProvider, httpEtagProvider) {
 
     /**
      * Disabling Debug Data
@@ -49,6 +51,8 @@
 
     // Use Etags to resolve caching issues on application upgrade
     httpEtagProvider.cache('default');
+
+    $logProvider.debugEnabled(false);
   }
 
 })();
