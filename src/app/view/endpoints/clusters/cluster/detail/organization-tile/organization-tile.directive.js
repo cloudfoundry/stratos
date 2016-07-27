@@ -85,7 +85,7 @@
     }
 
     var orgPath = that.organizationModel.fetchOrganizationPath(that.organization.cnsiGuid, that.organization.guid);
-    $scope.$watch(function () {
+    $scope.$watchCollection(function () {
       return _.get(that.organizationModel, orgPath + '.roles.' + that.user.guid);
     }, function (roles) {
       // Present the user's roles

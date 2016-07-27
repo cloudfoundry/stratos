@@ -114,7 +114,7 @@
         that.clusterActions[1].disabled = true;
       }
       that.clusterActions[2].disabled =
-        that.clusterActions[2].disabled && _.keys(organizationModel.organizations).length > 0;
+        that.clusterActions[2].disabled || _.keys(organizationModel.organizations).length < 1;
     }
 
     function init() {

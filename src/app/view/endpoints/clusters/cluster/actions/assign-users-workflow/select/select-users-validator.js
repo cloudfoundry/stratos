@@ -8,7 +8,7 @@
   /**
    * @namespace app.view.endpoints.clusters.cluster
    * @name selectedUsers
-   * @description A validator that checks an object for properties who's values are truthies
+   * @description A validator that checks the model has at least one truthy property
    * @returns {object} directive configuration
    */
   function selectedUsers() {
