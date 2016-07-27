@@ -73,7 +73,6 @@
     this.id = $stateParams.guid;
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
-    this.isPending = this.model.application.summary.state === 'PENDING';
     this.UPDATE_INTERVAL = 1000; // milliseconds
 
     this.init();
@@ -90,45 +89,52 @@
             that.$window.open(url, '_blank');
           }
         },
-        disabled: this.isPending,
+        disabled: true,
+        id: 'launch',
         icon: 'helion-icon helion-icon-lg helion-icon-Launch'
       },
       {
         name: gettext('Stop'),
+        id: 'stop',
         execute: function () {
           that.model.stopApp(that.cnsiGuid, that.id);
         },
-        disabled: this.isPending,
+        disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Halt-stop'
       },
       {
         name: gettext('Restart'),
+        id: 'restart',
         execute: function () {
           that.model.restartApp(that.cnsiGuid, that.id);
         },
-        disabled: this.isPending,
+        disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Refresh'
       },
       {
         name: gettext('Delete'),
+        id: 'delete',
         execute: function () {
           that.deleteApp();
         },
-        disabled: this.isPending,
+        disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Trash'
       },
       {
         name: gettext('Start'),
+        id: 'start',
         execute: function () {
           that.model.startApp(that.cnsiGuid, that.id);
         },
-        disabled: this.isPending,
+        disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Play'
       },
       {
         name: gettext('CLI Instructions'),
+        id: 'cli',
         execute: function () {
         },
+        disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
       }
     ];
@@ -292,36 +298,47 @@
       });
     },
 
-    onAppStateChange: function (newState) {
+    /**
+     * @function isActionHidden
+     * @description determines if an application action should be hidden
+     * @param {string} id - the id of the action
+     * @returns {boolean} whether or not the action should be hidden
+     */
+    isActionHidden: function (id) {
+      if (!this.model.application.state || !this.model.application.state.actions) {
+        return true;
+      } else {
+        return this.model.application.state.actions[id] !== true;
+      }
+    },
+
+    /**
+     * @function onAppStateChange
+     * @description invoked when the application state changes, so we can update action visibility
+     */
+    onAppStateChange: function () {
       var that = this;
-
-      this.isPending = newState === 'PENDING';
       angular.forEach(this.appActions, function (appAction) {
-        appAction.disabled = that.isPending;
+        appAction.disabled = false;
+        appAction.hidden = that.isActionHidden(appAction.id);
       });
-
-      /* eslint-disable */
-      // TODO(woodnt): This list-index mechanism is WAY fragile. Now we can't reorder the actions without re-counting indexes. https://jira.hpcloud.net/browse/TEAMFOUR-621
-      // TODO(woodnt): Why are we both conditionally hiding and conditionally disabling these appActions?  That seems ... odd. https://jira.hpcloud.net/browse/TEAMFOUR-622
-      /* eslint-enable */
-      this.showOrHideLaunchApp(newState, null);
-      // Index 0 is Launch App though it's handled in it's own special method because it requires route info.
-      this.appActions[1].hidden = newState !== 'STARTED';  // Stop
-      this.appActions[2].hidden = newState !== 'STARTED';  // Restart
-      this.appActions[3].hidden = newState !== 'STOPPED';  // Delete
-      this.appActions[4].hidden = newState !== 'STOPPED';  // Start
-      // Index 5 is CLI Instructions
+      this.onAppRoutesChange();
     },
 
+    /**
+     * @function onAppStateChange
+     * @description invoked when the application routes change, so we can update action visibility
+     * @param {object} newRoutes - application route metadata
+     */
     onAppRoutesChange: function (newRoutes) {
-      // Launch App requires state info, so it's handled in it's own process.
-      this.showOrHideLaunchApp(null, newRoutes);
-    },
-
-    showOrHideLaunchApp: function (newState, newRoutes) {
-      var state = _.isNil(newState) ? this.model.application.summary.state : newState;
-      var routes = _.isNil(newRoutes) ? this.model.application.summary.routes : newRoutes;
-      this.appActions[0].hidden = _.isNil(routes) || routes.length === 0 || state !== 'STARTED';
+      // Must have a route to be able to view an application
+      var viewAction = _.find(this.appActions, {id: 'launch'});
+      var hidden = this.isActionHidden(viewAction.id);
+      if (!hidden) {
+        var routes = _.isNil(newRoutes) ? this.model.application.summary.routes : newRoutes;
+        hidden = _.isNil(routes) || routes.length === 0;
+      }
+      viewAction.hidden = hidden;
     }
   });
 
