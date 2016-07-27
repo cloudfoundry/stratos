@@ -45,8 +45,6 @@
     this.initialized = false;
     this.guid = $stateParams.guid;
 
-    $state.current.data.clusterGuid = this.guid;
-
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.getEndpoint = function () {
