@@ -50,6 +50,8 @@
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
 
     this.cardData = {
       title: gettext('Summary')
@@ -74,20 +76,11 @@
       return utils.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
     };
 
-    $scope.$watch(function () {
-      return that.spaceDetail().details;
-    }, function (spaceDetail) {
-      if (!spaceDetail) {
-        return;
-      }
-
-      // Present memory usage
-      // var usedMemHuman = that.utils.mbToHumanSize(orgDetail.memUsed);
-      // var memQuotaHuman = that.utils.mbToHumanSize(orgDetail.memQuota);
-      // that.memory = usedMemHuman + ' / ' + memQuotaHuman;
-
+    $scope.$watchCollection(function () {
+      return _.get(that.spaceModel, that.spacePath + '.roles.' + user.guid);
+    }, function (roles) {
       // Present the user's roles
-      that.roles = that.spaceModel.spaceRolesToString(spaceDetail.roles);
+      that.roles = that.spaceModel.spaceRolesToString(roles);
     });
   }
 
