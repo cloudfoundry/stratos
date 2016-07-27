@@ -12,10 +12,10 @@
     </p>
     <div ng-if="allowSetup && hce && !hce.fetching">
       <button ng-if="hce.valid > 0" ng-click="applicationSetupPipelineCtrl.setupPipeline()" class="btn btn-primary" translate>set up delivery pipeline</button>
-      <h4 ng-if="hce.available > 0 && hce.valid === 0" translate>Connect one or more Code Engine Endpoints in order to set up a delivery pipeline.</h3>
+      <h4 ng-if="hce.available > 0 && hce.valid === 0" translate>Connect one or more Code Engine Endpoints in order to set up a delivery pipeline.</h4>
       <div ng-if="hce.available === 0 && hce.valid === 0">
-        <h4 ng-if="hce.isAdmin" translate>Register and connect one or more Code Engine Endpoints in order to set up a delivery pipeline.</h3>
-        <h4 ng-if="!hce.isAdmin" translate>Please contact your Administrator to register Code Engine Endpoints so that you can set up a delivery pipeline.</h3>
+        <h4 ng-if="hce.isAdmin" translate>Register and connect one or more Code Engine Endpoints in order to set up a delivery pipeline.</h4>
+        <h4 ng-if="!hce.isAdmin" translate>Please contact your Administrator to register Code Engine Endpoints so that you can set up a delivery pipeline.</h4>
       </div>
     </div>
   </div>
