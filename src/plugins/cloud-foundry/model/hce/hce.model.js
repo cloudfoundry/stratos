@@ -49,6 +49,7 @@
       notificationTargetTypes: []
     };
 
+    // This will be provided by HCE in future
     this.staticNotificationData = {
       hipchat: {
         title: 'HipChat',
@@ -72,7 +73,7 @@
         title: 'GitHub',
         description: gettext('Send pipeline events (build, test, deploy) as statuses to Github'),
         endpointLabel: gettext('Target URL'),
-        img: 'GitHub-Mark-64px.png'
+        img: 'github_octocat.png'
       },
       slack: {
         title: 'Slack',

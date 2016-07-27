@@ -154,6 +154,7 @@
       });
     },
 
+
     getProject: function () {
       if (this.hceCnsi) {
         var that = this;
@@ -172,14 +173,20 @@
           this.hceModel.getNotificationTargets(this.hceCnsi.guid, this.project.id)
             .then(function (response) {
               that.notificationTargets.length = 0;
-              [].push.apply(that.notificationTargets, response.data[that.hceCnsi.guid]);
+              [].push.apply(that.notificationTargets, response.data);
             });
+
+          this.hceModel.listNotificationTargetTypes(this.hceCnsi.guid);
         }
       }
     },
 
     addNotificationTarget: function () {
-        this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid);
+      var that = this;
+      this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
+        .closed.then(function () {
+        that.getProject();
+      });
     }
   });
 

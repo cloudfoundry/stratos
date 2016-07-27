@@ -3,10 +3,31 @@
   .wizard {
     padding-top: $hpe-unit-space * 2;
     padding-left: $hpe-unit-space * 4;
+    padding-right: $hpe-unit-space * 4;
+
   }
 
   .wizard-body {
-    padding-right: $hpe-unit-space * 8;
+
+    padding-bottom: $hpe-unit-space * 2;
+    .wizard-nav {
+      padding-right: 0;
+    }
+    .title-img {
+      height: $hpe-unit-space * 2;
+    }
+
+    .title-bar {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .desc{
+      padding-bottom: $hpe-unit-space * 2;
+    }
+    h4 {
+      margin-top: 0;
+    }
   }
 
   .wizard-foot {

@@ -6,27 +6,22 @@
     .factory('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService', AddNotificationTargetServiceFactory);
 
   AddNotificationTargetServiceFactory.$inject = [
-    'app.model.modelManager',
     'helion.framework.widgets.detailView'
   ];
 
-  function AddNotificationTargetServiceFactory(modelManager, detailView) {
-
-    var hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+  function AddNotificationTargetServiceFactory(detailView) {
 
     return {
-      add: function (hceCnsi) {
-        return hceModel.listNotificationTargetTypes(hceCnsi).then(function () {
-          return detailView(
-            {
-              controller: AddNotificationTargetController,
-              controllerAs: 'addNotificationTargetCtrl',
-              detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/' +
-              'application/delivery-pipeline/notifications/add-notification-target.html'
-            },
-            {}
-          );
-        });
+      add: function () {
+        return detailView(
+          {
+            controller: AddNotificationTargetController,
+            controllerAs: 'addNotificationTargetCtrl',
+            detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/' +
+            'application/delivery-pipeline/notifications/add-notification-target.html'
+          },
+          {}
+        );
       }
     };
   }
