@@ -74,7 +74,7 @@
     branches: function (repo) {
       var that = this;
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
-      return githubApi.branches(repo)
+      return githubApi.branches(repo, {per_page: 100})
         .then(function (response) {
           that.onBranches(response);
         })

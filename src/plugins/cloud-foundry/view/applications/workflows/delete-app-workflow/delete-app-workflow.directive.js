@@ -156,7 +156,8 @@
 
       this.$q.all([
         tryDeleteEachRoute.promise,
-        this.deleteServiceBindings()
+        this.deleteServiceBindings(),
+        this.deleteProject()
       ]).then(function () {
         that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid).then(function () {
           deleteApp.resolve();
@@ -265,6 +266,22 @@
     },
 
     /**
+     * @function deleteProject
+     * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
+     * @description Delete HCE project
+     * @returns {promise} A promise
+     */
+    deleteProject: function () {
+      if (this.appModel.application.project) {
+        return this.hceModel.removeProject(this.hceCnsiGuid, this.appModel.application.project.id);
+      } else {
+        var deferred = this.$q.defer();
+        deferred.resolve();
+        return deferred.promise;
+      }
+    },
+
+    /**
      * @function startWorkflow
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @param {object} data - cnsiGuid and hceCnsiGuid
@@ -294,9 +311,6 @@
     finishWorkflow: function () {
       var that = this;
       this.deleteApp().then(function () {
-        if (that.appModel.application.project) {
-          that.hceModel.removeProject(that.hceCnsiGuid, that.appModel.application.project.id);
-        }
         that.deletingApplication = false;
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
       });
