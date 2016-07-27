@@ -31,6 +31,7 @@
         }
       };
       $scope.service = {
+        entity: { label: 'Service' },
         metadata: { guid: '67229bc6-8fc9-4fe1-b8bc-8790cdae5334' }
       };
 
@@ -130,32 +131,17 @@
       });
 
       describe('detach', function () {
-        it('should delete service binding if only one attached', function () {
-          spyOn(serviceCardCtrl.appModel, 'getAppSummary').and.callThrough();
-
-          var guid = '571b283b-97f9-41e3-abc7-81792ee34e40';
-          var DeleteServiceBinding = mockBindingsApi.DeleteServiceBinding(guid);
-          $httpBackend.whenDELETE(DeleteServiceBinding.url)
-            .respond(200, DeleteServiceBinding.response['200'].body);
-
-          var appGuid = '6e23689c-2844-4ebf-ab69-e52ab3439f6b';
-          var mockAppsApi = mock.cloudFoundryAPI.Apps;
-          var GetAppSummary = mockAppsApi.GetAppSummary(appGuid);
-          $httpBackend.whenGET(GetAppSummary.url)
-            .respond(200, GetAppSummary.response['200'].body);
-
-          serviceCardCtrl.detach().then(function () {
-            expect(serviceCardCtrl.appModel.getAppSummary).toHaveBeenCalled();
-          });
-
-          $httpBackend.flush();
+        it('should show detach confirmation dialog on click', function () {
+          spyOn(serviceCardCtrl, 'confirmDialog');
+          serviceCardCtrl.detach();
+          expect(serviceCardCtrl.confirmDialog).toHaveBeenCalled();
         });
 
-        it('should not delete service binding if none attached', function () {
-          spyOn(serviceCardCtrl.appModel, 'getAppSummary').and.callThrough();
+        it('should not show detach confirmation dialog on click if no services attached', function () {
+          spyOn(serviceCardCtrl, 'confirmDialog');
           serviceCardCtrl.serviceBindings.length = 0;
           serviceCardCtrl.detach();
-          expect(serviceCardCtrl.appModel.getAppSummary).not.toHaveBeenCalled();
+          expect(serviceCardCtrl.confirmDialog).not.toHaveBeenCalled();
         });
       });
 

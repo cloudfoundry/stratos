@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('Deliver Logs', function () {
+  describe('Delivery Logs', function () {
 
     var controller, $stateParams, $q, $log, moment, $state, $rootScope, hceModel, cnsiModel, modelManager,
       $httpBackend, viewEvent, viewExecution, triggerBuild;
@@ -13,10 +13,18 @@
     var application = {
       summary: {
         name: 'appName'
+      },
+      pipeline: {
+        fetching: false,
+        valid: true,
+        hce_api_url: 'test',
+        hceCnsi: {
+          guid: 1234
+        }
       }
     };
+
     var cnsi = {guid: 1234, name: 'appName', url: ' cluster2_url', cnsi_type: 'hce'};
-    var cnsiList = [cnsi];
     var project = {name: application.summary.name, id: '4321'};
     var projects = {};
     projects[project.name] = [project];
@@ -81,81 +89,71 @@
     });
 
     describe('Ctor', function () {
-      it('Initial state', function () {
-        fakeModelCall(cnsiModel, 'list', true, 'serviceInstances');
+      describe('Constructor test, pipeline metadata not fetched', function () {
+        beforeEach(function () {
+          var app = {
+            summary: {
+              name: 'appName'
+            },
+            pipeline: {
+              fetching: true
+            }
+          };
+          var model = modelManager.retrieve('cloud-foundry.model.application');
+          _.set(model, 'application', app);
+        });
 
-        createController();
+        it('Initial state', function () {
+          fakeModelCall(cnsiModel, 'list', true, 'serviceInstances');
 
-        expect(controller.model).not.toBeNull();
-        expect(controller.hceModel).not.toBeNull();
-        expect(controller.cnsiModel).not.toBeNull();
-        expect(controller.hceCnsi).not.toBeNull();
-        expect(controller.hasProject).toBeNull();
-        expect(controller.last).not.toBeNull();
-        expect(controller.id).not.toBeNull();
+          createController();
+
+          expect(controller.model).not.toBeNull();
+          expect(controller.hceModel).not.toBeNull();
+          expect(controller.cnsiModel).not.toBeNull();
+          expect(controller.hceCnsi).not.toBeNull();
+          expect(controller.hasProject).toBeNull();
+          expect(controller.last).not.toBeNull();
+          expect(controller.id).not.toBeNull();
+        });
+
+        it('Constructor test, pipeline metadata not fetched', function () {
+          createController();
+          $rootScope.$apply();
+          expect(controller.hasProject).toEqual(null);
+          expect(controller.project).toBeUndefined();
+        });
       });
 
-      it('Ctor fails, CNIS request fails', function () {
-        fakeModelCall(cnsiModel, 'list', 500);
+      describe('Constructor test, pipeline metadata fetched', function () {
+        it('no project', function () {
+          fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+          createController();
+          $rootScope.$apply();
+          expect(hceModel.getProjects).toHaveBeenCalled();
+          expect(controller.hasProject).toEqual(false);
+          expect(controller.project).toBeUndefined();
+        });
 
-        createController();
-        $rootScope.$apply();
-
-        expect(cnsiModel.list).toHaveBeenCalled();
-        expect(controller.hasProject).toEqual('error');
+        it('has project', function () {
+          fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+          fakeModelCall(hceModel, 'getProject', false, { testData: true });
+          fakeModelCall(hceModel, 'getPipelineExecutions', 500);
+          createController();
+          $rootScope.$apply();
+          expect(hceModel.getProjects).toHaveBeenCalled();
+          expect(hceModel.getProject).toHaveBeenCalled();
+          expect(controller.hasProject).toEqual(true);
+          expect(controller.project).not.toBeUndefined();
+          expect(controller.project.testData).toBe(true);
+        });
       });
-
-      it('Ctor fails at no CNSI List', function () {
-        fakeModelCall(cnsiModel, 'list', false, [], 'serviceInstances');
-
-        createController();
-        $rootScope.$apply();
-
-        expect(cnsiModel.list).toHaveBeenCalled();
-        expect(controller.hasProject).toEqual('error');
-      });
-
-      it('Ctor fails at get projects', function () {
-        fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
-        fakeModelCall(hceModel, 'getProjects', 500);
-
-        createController();
-        $rootScope.$apply();
-
-        expect(hceModel.getProjects).toHaveBeenCalled();
-        expect(controller.hasProject).toEqual('error');
-      });
-
-      it('Ctor fails at no projects', function () {
-        fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
-
-        createController();
-        $rootScope.$apply();
-
-        expect(hceModel.getProjects).toHaveBeenCalled();
-        expect(controller.hasProject).toBe(false);
-      });
-
-      it('Ctor succeeds!', function () {
-        fakeModelCall(cnsiModel, 'list', false, cnsiList, 'serviceInstances');
-        fakeModelCall(hceModel, 'getProjects', false, projects, 'data.projects');
-        // Not part of ctor, fail to avoid http requests
-        fakeModelCall(hceModel, 'getPipelineExecutions', 500);
-
-        createController();
-
-        $rootScope.$apply();
-
-        expect(controller.hasProject).toBe(true);
-      });
-
     });
 
     describe('Trigger Build', function () {
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
-        _.set(controller, 'hceCnsi.guid', cnsi.guid);
         _.set(controller, 'project', project);
       });
 
@@ -213,8 +211,8 @@
       };
 
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
-        _.set(controller, 'hceCnsi.guid', cnsi.guid);
         _.set(controller, 'hceModel.data.pipelineExecutions', executions);
         _.set(controller, 'eventsPerExecution', eventsPerExecution);
       });
@@ -247,8 +245,8 @@
       var executionId = '1';
 
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
-        _.set(controller, 'hceCnsi.guid', cnsi.guid);
       });
 
       afterEach(function () {
@@ -299,6 +297,7 @@
 
     describe('parse event', function () {
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
         spyOn(controller, 'determineLatestEvent');
       });
@@ -362,6 +361,7 @@
       var eventType = 'type';
 
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
         controller.last = {};
       });
@@ -428,6 +428,7 @@
 
     describe('parse execution', function () {
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
       });
 
@@ -482,6 +483,7 @@
     describe('determine execution result', function () {
 
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
       });
 
@@ -564,6 +566,7 @@
 
     describe('dynamic loading of events when execution visible - updateVisibleExecutions', function () {
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
         // Call updateModel to set up watch, we'll test if this watch is correctly called
         spyOn(hceModel, 'getProject').and.callFake(function () {
@@ -717,9 +720,8 @@
       var execution;
 
       beforeEach(function () {
+        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
         createController(true);
-
-        _.set(controller, 'hceCnsi.guid', cnsi.guid);
 
         execution = {
           reason: {
