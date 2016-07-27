@@ -2,15 +2,15 @@
 
   <div class="manage-users-filter">
     <div class="filter-container manage-users-bordered">
-      <div class="select-users-input">
+      <div class="manage-users-input">
         <form>
           <div class="form-group search-field" focusable-input>
-            <!--<label class="control-label" for="users-search">-->
-              <!--<i class="helion-icon helion-icon-lg helion-icon-Search"></i>-->
-            <!--</label>-->
+            <label class="control-label" for="users-search">
+              <i class="helion-icon helion-icon-lg helion-icon-Search"></i>
+            </label>
             <div class="control-input">
               <!--st-search-->
-              <input ng-model="ctrl.filter" type="text" class="form-control" id="users-search" >
+              <input ng-model="asyncTaskDialogCtrl.ctrl.filter" type="text" class="form-control" id="users-search" >
             </div>
           </div>
         </form>
@@ -22,24 +22,14 @@
   </div>
 
   <div class="manage-users-values">
-    <div class="manage-users-org" ng-repeat="org in asyncTaskDialogCtrl.context.organizations">
-      <roles-table
-        roles="asyncTaskDialogCtrl.context.orgRoles"
-        groupType="{{'Organization' | translate}}"
-        groups="[ org ]"
-        groupsVisible="10"
-        groupAction="asyncTaskDialogCtrl.context.removeFromOrg"
-        selection="asyncTaskDialogCtrl.context.selectedRoles"
-        noGroupsMessage=""
-      ></roles-table>
-      <roles-table
-        roles="asyncTaskDialogCtrl.context.spaceRoles"
-        groupType="{{'Space' | translate}}"
-        groups="asyncTaskDialogCtrl.context.spaces[org.key]"
-        groupsVisible="10"
-        selection="asyncTaskDialogCtrl.context.selectedRoles"
-        noGroupsMessage="There are no spaces associated with this organization"
-      ></roles-table>
+    <div class="manage-users-org" ng-repeat="(guid, org) in asyncTaskDialogCtrl.context.organizations">
+      <roles-tables
+        org-roles="asyncTaskDialogCtrl.context.orgRoles"
+        space-roles="asyncTaskDialogCtrl.context.spaceRoles"
+        organization="org"
+        selection="asyncTaskDialogCtrl.context.selectedRoles[guid]"
+        filter="asyncTaskDialogCtrl.ctrl.filter"
+      ></roles-tables>
     </div>
 
   </div>

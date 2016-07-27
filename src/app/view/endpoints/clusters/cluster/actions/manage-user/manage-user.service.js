@@ -39,39 +39,8 @@
     this.show = function (clusterGuid, user) {
       var that = this;
 
-      var organizations = organizationModel.organizations[clusterGuid];
-
-      var orgsForTable = _.chain(organizations)
-        .map(function (obj) {
-          return {
-            label: obj.details.org.entity.name,
-            key: obj.details.org.metadata.guid
-          };
-        })
-        .sortBy('label')
-        .value();
-      var spaces = spaceModel.spaces[clusterGuid];
-      // keyed by cluster
-      var spacesForTable = {};
-      _.forEach(organizations, function (organization) {
-        spacesForTable[organization.details.org.metadata.guid] = _.map(organization.spaces, function(space) {
-          return {
-            label: space.entity.name,
-            key: space.metadata.guid
-          };
-        });
-      });
-
-      // spacesForTable = _.chain(spacesForTable)
-      //   .map(function (organization) {
-      //     return {
-      //       label: obj.details.space.entity.name,
-      //       key: obj.details.space.metadata.guid
-      //     };
-      //   })
-      //   .sortBy('label')
-      //   .value();
-
+      // spaces: spacesForTable,
+      //   user: user,
 
       var selectedOrgRoles = ['org_user', 'org_manager', 'billing_manager'];
       var selectedSpaceRoles = { };
@@ -86,9 +55,7 @@
         {
           orgRoles: orgRoles,
           spaceRoles: spaceRoles,
-          organizations: orgsForTable,
-          spaces: spacesForTable,
-          user: user,
+          organizations: organizationModel.organizations[clusterGuid],
           selectedRoles: selectedRoles,
           removeFromOrg: that.removeFromOrg
         },
