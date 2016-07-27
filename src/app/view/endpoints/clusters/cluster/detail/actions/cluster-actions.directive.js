@@ -28,10 +28,9 @@
     'app.model.modelManager',
     '$state',
     '$q',
+    '$stateParams',
     'app.utils.utilsService',
-    'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.asyncTaskDialog',
-    '$stateParams'
+    'helion.framework.widgets.asyncTaskDialog'
   ];
 
   /**
@@ -40,12 +39,12 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $state - the angular $state service
    * @param {object} $q - the angular $q service
+   * @param {object} $stateParams - the ui-router $stateParams service
    * @param {object} utils - our utils service
-   * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function ClusterActionsController(modelManager, $state, $q, utils, confirmDialog, asyncTaskDialog, $stateParams) {
+  function ClusterActionsController(modelManager, $state, $q, $stateParams, utils, asyncTaskDialog) {
     var that = this;
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -101,10 +100,9 @@
       disabled: true,
       execute: function () {
 
-        var existingSpaceNames;
+        var existingSpaceNames, selectedOrg;
 
         // Context-sensitively pre-select the correct organization
-        var selectedOrg;
         if ($stateParams.organization) {
           selectedOrg = organizationModel.organizations[that.clusterGuid][$stateParams.organization];
         } else {
@@ -177,7 +175,7 @@
             var toCreate = [];
             for (var i = 0; i < contextData.spaces.length; i++) {
               var name = contextData.spaces[i];
-              if (!angular.isUndefined(name) && name.length > 0) {
+              if (angular.isDefined(name) && name.length > 0) {
                 toCreate.push(name);
               }
             }
@@ -233,9 +231,8 @@
   function UniqueSpaceName() {
     return {
       require: 'ngModel',
-      link: function(scope, elm, attrs, ctrl) {
-
-        ctrl.$validators.dupeName = function(modelValue) {
+      link: function (scope, elm, attrs, ctrl) {
+        ctrl.$validators.dupeName = function (modelValue) {
           if (ctrl.$isEmpty(modelValue)) {
             return true;
           }

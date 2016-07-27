@@ -29,18 +29,16 @@
     'app.utils.utilsService',
     '$state',
     '$q',
-    'app.model.modelManager',
-    'helion.framework.widgets.asyncTaskDialog'
+    'app.model.modelManager'
   ];
 
-  function ClusterController($stateParams, $log, utils, $state, $q, modelManager, asyncTaskDialog) {
+  function ClusterController($stateParams, $log, utils, $state, $q, modelManager) {
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
     var sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.initialized = false;
     this.guid = $stateParams.guid;
