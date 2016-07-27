@@ -1,17 +1,18 @@
 package main
 
 import (
-	"testing"
-	"net/http/httptest"
-	"github.com/labstack/echo"
 	"encoding/json"
-	"reflect"
+	"net/http/httptest"
 	"os"
+	"reflect"
+	"testing"
+
+	"github.com/labstack/echo"
 )
 
 type VersionJSON struct {
-	Proxy_version    string
-	Database_version string
+	ProxyVersion    string
+	DatabaseVersion string
 }
 
 // Test helpers
@@ -39,7 +40,7 @@ func VersionTestSetupWithErrorCheck(t *testing.T) (*httptest.ResponseRecorder, *
 	return res, e, ctx, pp
 }
 
-func VersionTestJSON(t *testing.T) (*VersionJSON) {
+func VersionTestJSON(t *testing.T) *VersionJSON {
 	res, _, _, _ := VersionTestSetupWithErrorCheck(t)
 
 	receivedJSON := new(VersionJSON)
@@ -82,16 +83,16 @@ func TestVersionDefault(t *testing.T) {
 	t.Parallel()
 
 	expectedJSON := &VersionJSON{
-		Proxy_version: "dev",
-		Database_version: "dev",
+		ProxyVersion:    "dev",
+		DatabaseVersion: "dev",
 	}
 
-    // Mock out the os.getenv call.
+	// Mock out the os.getenv call.
 	oldOsGetEnv := osGetEnv
 
-	defer func () { osGetEnv = oldOsGetEnv } ()
+	defer func() { osGetEnv = oldOsGetEnv }()
 
-	osGetEnv = func (key string) (string) {
+	osGetEnv = func(key string) string {
 		if key == "CONSOLE_VERSION" {
 			return ""
 		} else if key == "DATABASE_VERSION" {
@@ -109,16 +110,16 @@ func TestVersionDefault(t *testing.T) {
 func TestVersionProxyEnvVar(t *testing.T) {
 
 	expectedJSON := &VersionJSON{
-		Proxy_version: "1.2.3",
-		Database_version: "1.2.3",
+		ProxyVersion:    "1.2.3",
+		DatabaseVersion: "1.2.3",
 	}
 
-    // Mock out the os.getenv call.
+	// Mock out the os.getenv call.
 	oldOsGetEnv := osGetEnv
 
-	defer func () { osGetEnv = oldOsGetEnv } ()
+	defer func() { osGetEnv = oldOsGetEnv }()
 
-	osGetEnv = func (key string) (string) {
+	osGetEnv = func(key string) string {
 		if key == "CONSOLE_VERSION" {
 			return "1.2.3"
 		} else if key == "DATABASE_VERSION" {
@@ -137,16 +138,16 @@ func TestVersionProxyEnvVar(t *testing.T) {
 func TestVersionProxyAndDatabaseEnvVar(t *testing.T) {
 
 	expectedJSON := &VersionJSON{
-		Proxy_version: "1.2.3",
-		Database_version: "4.5.6",
+		ProxyVersion:    "1.2.3",
+		DatabaseVersion: "4.5.6",
 	}
 
-    // Mock out the os.getenv call.
+	// Mock out the os.getenv call.
 	oldOsGetEnv := osGetEnv
 
-	defer func () { osGetEnv = oldOsGetEnv } ()
+	defer func() { osGetEnv = oldOsGetEnv }()
 
-	osGetEnv = func (key string) (string) {
+	osGetEnv = func(key string) string {
 		if key == "CONSOLE_VERSION" {
 			return "1.2.3"
 		} else if key == "DATABASE_VERSION" {
@@ -165,16 +166,16 @@ func TestVersionProxyAndDatabaseEnvVar(t *testing.T) {
 func TestVersionDatabaseEnvVar(t *testing.T) {
 
 	expectedJSON := &VersionJSON{
-		Proxy_version: "dev",
-		Database_version: "4.5.6",
+		ProxyVersion:    "dev",
+		DatabaseVersion: "4.5.6",
 	}
 
-    // Mock out the os.getenv call.
+	// Mock out the os.getenv call.
 	oldOsGetEnv := osGetEnv
 
-	defer func () { osGetEnv = oldOsGetEnv } ()
+	defer func() { osGetEnv = oldOsGetEnv }()
 
-	osGetEnv = func (key string) (string) {
+	osGetEnv = func(key string) string {
 		if key == "CONSOLE_VERSION" {
 			return ""
 		} else if key == "DATABASE_VERSION" {

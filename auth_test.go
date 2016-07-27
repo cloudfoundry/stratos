@@ -569,7 +569,7 @@ func TestVerifyUAAPerms(t *testing.T) {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	if err := pp.verifyUAAPerms(ctx); err != nil {
+	if err := pp.verifySession(ctx); err != nil {
 		t.Error(err)
 	}
 
@@ -605,7 +605,7 @@ func TestVerifyUAAPermsNoDate(t *testing.T) {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	err := pp.verifyUAAPerms(ctx)
+	err := pp.verifySession(ctx)
 	if err == nil {
 		t.Errorf("Expected an 403 error with 'Could not find session date' string. got %s", err)
 	}
@@ -639,7 +639,7 @@ func TestVerifyUAAPermsExpired(t *testing.T) {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	err := pp.verifyUAAPerms(ctx)
+	err := pp.verifySession(ctx)
 	if err == nil {
 		t.Error("Expected an 403 error with 'Session has expired' string.")
 	}
