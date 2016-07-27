@@ -21,10 +21,13 @@
     });
   }
 
-  ClusterSpaceController.$inject = [ ];
+  ClusterSpaceController.$inject = [
+    '$state',
+    '$stateParams'
+  ];
 
-  function ClusterSpaceController() {
-
+  function ClusterSpaceController($state, $stateParams) {
+    $state.current.data.spaceGuid = $stateParams.space;
   }
 
   angular.extend(ClusterSpaceController.prototype, {});

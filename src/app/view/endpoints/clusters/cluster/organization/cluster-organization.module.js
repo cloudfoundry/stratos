@@ -37,6 +37,8 @@
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
+    $state.current.data.organizationGuid = this.organizationGuid;
+
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spacesPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces';

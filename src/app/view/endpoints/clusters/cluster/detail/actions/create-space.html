@@ -1,0 +1,38 @@
+<form name="createSpaceForm">
+  <div style="margin-bottom: 30px" class="form-group" focusable-input
+       ng-class="{'has-error': createSpaceForm.name.$invalid && createSpaceForm.name.$dirty}">
+    <label class="control-label" translate>Organization</label>
+    <select-input
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+      ng-model="asyncTaskDialogCtrl.context.data.organization"
+      input-options="asyncTaskDialogCtrl.context.data.organizations"
+      ng-change="asyncTaskDialogCtrl.context.data.setOrganization()">
+    </select-input>
+  </div>
+
+  <div ng-repeat="space in asyncTaskDialogCtrl.context.data.spaces track by $index" class="form-group" focusable-input
+       ng-class="{'has-error': createSpaceForm.name.$invalid && createSpaceForm.name.$dirty}">
+    <label class="control-label" translate>Space Name</label>
+    <input type="text" name="name" auto-focus class="form-control"
+           helion-unique items="asyncTaskDialogCtrl.context.data.spaceNames"
+           ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]" required/>
+  </div>
+
+  <div style="float: left">
+  <a class="btn btn-link"
+     style="padding-left: 0; font-size: 16px; text-transform: none"
+     ng-disabled="asyncTaskDialogCtrl.context.data.spaces.length >= 10"
+     ng-click="asyncTaskDialogCtrl.context.data.addSpace()">
+    <i class="helion-icon helion-icon-Add"></i>
+    <span  translate>Create Another Space</span>
+  </a>
+  <a class="btn btn-link"
+     ng-if="asyncTaskDialogCtrl.context.data.spaces.length > 1"
+     style="padding-left: 0; font-size: 16px; text-transform: none"
+     ng-click="asyncTaskDialogCtrl.context.data.removeSpace()">
+    <i class="helion-icon helion-icon-Minus"></i>
+    <span  translate>Remove Space</span>
+  </a>
+  </div>
+
+</form>
