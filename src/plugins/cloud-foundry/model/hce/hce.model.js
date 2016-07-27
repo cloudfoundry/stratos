@@ -349,12 +349,12 @@
 
       // Special header to insert Github token
       var headers = angular.extend(
-        {headers: {'x-cnap-github-token-required': true}},
-        this.hceProxyPassthroughConfig
+        {'x-cnap-github-token-required': true},
+        this.hceProxyPassthroughConfig.headers
       );
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .createProject(guid, newProject, {}, headers);
+        .createProject(guid, newProject, {}, {headers: headers});
     },
 
     /**
