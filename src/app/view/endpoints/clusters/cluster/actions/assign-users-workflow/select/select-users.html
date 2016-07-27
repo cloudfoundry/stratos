@@ -1,0 +1,58 @@
+<div class="select-user"
+     st-table="step.ctrl.displayedUsers"
+     st-safe-src="step.data.users">
+  <input ng-model="step.userInput.selectedUsersByGuid" type="hidden"
+         selected-users-validator="{{step.userInput.selectedUsersByGuid}}" >
+  <div class="select-users-filter">
+    <div class="filter-container select-users-bordered">
+      <div class="select-users-count">
+        <div class="select-users-bordered">
+          <div translate>Users</div>
+          <div>{{ step.data.users.length }}</div>
+        </div>
+      </div>
+      <div class="select-users-input">
+        <form>
+          <div class="form-group search-field" focusable-input>
+            <label class="control-label" for="users-search">
+              <i class="helion-icon helion-icon-lg helion-icon-Search"></i>
+            </label>
+            <div class="control-input">
+              <input ng-model="step.ctrl.filter" type="text" class="form-control" id="users-search" st-search>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="select-users-table">
+    <table class="table table-outlined table-selectable">
+      <thead>
+      <tr>
+        <th></th>
+        <th st-sort="name" st-sort-default="true" translate>USER</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr
+        ng-repeat="user in step.ctrl.displayedUsers">
+        <td><checkbox-input ng-model="step.userInput.selectedUsersByGuid[user.metadata.guid]"></checkbox-input></td>
+        <td>{{ user.entity.username }}</td>
+      </tr>
+      </tbody>
+      <tfoot ng-init="step.ctrl.pagedUserCount = 6"
+             ng-show="step.ctrl.pagedUserCount < step.data.users.length">
+      <tr>
+        <td colspan="5" class="text-center">
+          <a ng-click="step.ctrl.pagedUserCount = step.data.users.length">
+            <span translate>Show All</span> ({{step.data.users.length}})
+          </a>
+          <div ng-show="false" st-pagination="" st-items-by-page="step.ctrl.pagedUserCount"></div>
+        </td>
+      </tr>
+      </tfoot>
+    </table>
+
+  </div>
+</div>
+
