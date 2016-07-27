@@ -180,10 +180,15 @@
                     // retrieve categories that user can filter services by
                     var categories = [];
                     angular.forEach(services, function (service) {
-                      if (angular.isObject(service.entity.extra) && angular.isDefined(service.entity.extra.categories)) {
-                        var serviceCategories = _.map(service.entity.extra.categories,
-                                                      function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
-                        categories = _.unionBy(categories, serviceCategories, 'lower');
+                      // Parse service entity extra data JSON string
+                      if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
+                        service.entity.extra = angular.fromJson(service.entity.extra);
+
+                        if (angular.isDefined(service.entity.extra.categories)) {
+                          var serviceCategories = _.map(service.entity.extra.categories,
+                                                        function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
+                          categories = _.unionBy(categories, serviceCategories, 'lower');
+                        }
                       }
                     });
                     categories = _.sortBy(categories, 'lower');
