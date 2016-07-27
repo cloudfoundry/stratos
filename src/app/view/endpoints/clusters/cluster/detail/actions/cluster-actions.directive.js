@@ -3,7 +3,11 @@
 
   angular
     .module('app.view.endpoints')
-    .directive('clusterActions', ClusterActions);
+    .directive('clusterActions', ClusterActions)
+    .directive('uniqueSpaceName', UniqueSpaceName);
+
+  // Define contextData here so it's available to both directives
+  var contextData;
 
   ClusterActions.$inject = [];
 
@@ -45,12 +49,20 @@
     var that = this;
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
 
     function getOrgName(org) {
       return _.get(org, 'details.org.entity.name');
+    }
+
+    function getExistingSpaceNames(orgGuid) {
+      var orgSpaces = organizationModel.organizations[that.clusterGuid][orgGuid].spaces;
+      return _.map(orgSpaces, function (space) {
+        return space.entity.name;
+      });
     }
 
     var createOrg = {
@@ -89,10 +101,9 @@
       disabled: true,
       execute: function () {
 
-        var contextData;
         var existingSpaceNames;
 
-        // Create organization is context sensitive!
+        // Context-sensitively pre-select the correct organization
         var selectedOrg;
         if ($stateParams.organization) {
           selectedOrg = organizationModel.organizations[that.clusterGuid][$stateParams.organization];
@@ -104,13 +115,10 @@
           selectedOrg = sortedOrgs[0];
         }
 
-        var orgSpaces = organizationModel.organizations[that.clusterGuid][selectedOrg.details.guid].spaces;
-        existingSpaceNames = _.map(orgSpaces, function (space) {
-          return space.entity.name;
-        });
+        existingSpaceNames = getExistingSpaceNames(selectedOrg.details.guid);
 
         function setOrganization() {
-          console.log('Org changed to: ' + contextData.organization);
+          contextData.existingSpaceNames = getExistingSpaceNames(contextData.organization.details.guid);
         }
 
         function createSpaceDisabled() {
@@ -153,6 +161,7 @@
           addSpace: addSpace,
           removeSpace: removeSpace
         };
+
         return asyncTaskDialog(
           {
             title: gettext('Create Space'),
@@ -164,12 +173,19 @@
           {
             data: contextData
           },
-          function (spaceData) {
-            if (spaceData.name && spaceData.name.length > 0) {
-              return $q.resolve('Valid Name!');
-            } else {
-              return $q.reject('Invalid Name!');
+          function () {
+            var createPromises = [];
+            for (var i = 0; i < contextData.spaces.length; i++) {
+              var name = contextData.spaces[i];
+              if (!angular.isUndefined(name) && name.length > 0) {
+                var createP = spaceModel.createSpace(that.clusterGuid, contextData.organization.details.guid, name);
+                createPromises.push(createP);
+              }
             }
+            if (createPromises.length < 1) {
+              return $q.reject('Nothing to create!');
+            }
+            return $q.all(createPromises);
           }
         );
       },
@@ -210,7 +226,29 @@
     }
 
     utils.chainStateResolve(this.stateName, $state, init);
-
   }
 
+  UniqueSpaceName.$inject = [];
+
+  // private validator to ensure there are no duplicates within the list of new names
+  function UniqueSpaceName() {
+    return {
+      require: 'ngModel',
+      link: function(scope, elm, attrs, ctrl) {
+
+        ctrl.$validators.dupeName = function(modelValue) {
+          if (ctrl.$isEmpty(modelValue)) {
+            return true;
+          }
+          for (var i = 0; i < contextData.spaces.length; i++) {
+            var name = contextData.spaces[i];
+            if (modelValue === name) {
+              return false;
+            }
+          }
+          return true;
+        };
+      }
+    };
+  }
 })();

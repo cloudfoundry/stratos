@@ -14,8 +14,10 @@
        ng-class="{'has-error': createSpaceForm['name' + $index].$invalid && createSpaceForm['name' + $index].$dirty}">
     <label class="control-label" translate>Space Name{{ $index > 0 ? ' ' + ($index + 1) : ''}}</label>
     <input type="text" name="name{{ $index }}" auto-focus class="form-control"
+           ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]"
            helion-unique items="asyncTaskDialogCtrl.context.data.existingSpaceNames"
-           ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]" required/>
+           unique-space-name
+           required/>
   </div>
 
   <div style="float: left">

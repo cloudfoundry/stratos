@@ -33,6 +33,7 @@
   function Space(apiManager, modelManager, $q) {
     this.apiManager = apiManager;
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.$q = $q;
     this.data = {
     };
@@ -352,7 +353,28 @@
 
         return details;
       });
+    },
+
+    createSpace: function(cnsiGuid, orgGuid, spaceName, params) {
+      var that = this;
+      var managerGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      console.log('managerGuid ' + managerGuid);
+      var newSpace = {
+        organization_guid: orgGuid,
+        name: spaceName,
+        manager_guids: [managerGuid]
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .CreateSpace(newSpace, params, this.makeHttpConfig(cnsiGuid))
+        .then(function(response) {
+          // Refresh the caches
+          var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
+          var refreshedOrg = that.organizationModel.getOrganizationDetails(cnsiGuid, org);
+          var refreshedSpace = that.getSpaceDetails(cnsiGuid, response.data);
+          return that.$q.all([refreshedOrg, refreshedSpace]);
+        });
     }
+
   });
 
 })();
