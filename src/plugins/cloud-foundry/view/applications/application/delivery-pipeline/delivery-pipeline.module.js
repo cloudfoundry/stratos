@@ -20,6 +20,7 @@
 
   ApplicationDeliveryPipelineController.$inject = [
     'app.model.modelManager',
+    'app.event.eventService',
     '$stateParams',
     '$scope',
     'helion.framework.widgets.dialog.confirm'
@@ -29,15 +30,18 @@
    * @name ApplicationDeliveryPipelineController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.event.eventService} eventService - the Event management service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @property {object} model - the Cloud Foundry Applications Model
+   * @property {app.event.eventService} eventService - the Event management service
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog) {
+  function ApplicationDeliveryPipelineController(modelManager, eventService, $stateParams, $scope, confirmDialog) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.eventService = eventService;
     this.id = $stateParams.guid;
     this.$scope = $scope;
     this.confirmDialog = confirmDialog;
