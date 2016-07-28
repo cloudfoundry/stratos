@@ -167,11 +167,11 @@ func fwdCNSIStandardHeaders(cnsiRequest CNSIRequest, req *http.Request) {
 
 func (p *portalProxy) proxy(c echo.Context) error {
 	log.Println("proxy")
-	cnsiList := strings.Split(c.Request().Header().Get(strings.ToLower("x-cnap-cnsi-list")), ",")
-	shouldPassthrough := "true" == c.Request().Header().Get(strings.ToLower("x-cnap-passthrough"))
+	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
+	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
 
 	log.Printf("shouldPassthru is: %t", shouldPassthrough)
-	log.Printf("shouldPassthru header value is: %s", c.Request().Header().Get(strings.ToLower("x-cnap-passthrough")))
+	log.Printf("shouldPassthru header value is: %s", c.Request().Header().Get("x-cnap-passthrough"))
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -204,7 +204,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	log.Println(" ")
 
 	// if the following header is found, add the GH Oauth code to the body
-	if header.Get(strings.ToLower("x-cnap-github-token-required")) != "" {
+	if header.Get("x-cnap-github-token-required") != "" {
 		log.Println("--- x-cnap-github-token-required HEADER FOUND.....")
 		body, err = p.addTokenToPayload(c, body)
 		if err != nil {
