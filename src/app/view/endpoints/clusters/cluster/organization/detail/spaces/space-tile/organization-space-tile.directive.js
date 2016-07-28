@@ -95,14 +95,13 @@
               data: {
                 name: that.spaceDetail().details.space.entity.name,
                 spaceNames: _.map(that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
-                  return space.entity.name
+                  return space.entity.name;
                 })
               }
             },
             function (spaceData) {
               if (spaceData.name && spaceData.name.length > 0) {
-                return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
-                  {name: spaceData.name}).then(function () {
+                return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid, {name: spaceData.name}).then(function () {
                   cardData.title = spaceData.name;
                 });
               } else {

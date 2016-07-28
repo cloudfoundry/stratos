@@ -76,7 +76,7 @@
               data: {
                 name: that.spaceDetail().details.space.entity.name,
                 spaceNames: _.map(that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
-                  return space.entity.name
+                  return space.entity.name;
                 })
               }
             },
