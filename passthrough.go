@@ -314,17 +314,11 @@ func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest
 		cnsiRequest.StatusCode = 500
 		cnsiRequest.Response = []byte(err.Error())
 		cnsiRequest.Error = err
+	} else if res.Body != nil {
+		cnsiRequest.StatusCode = res.StatusCode
+		cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
+		defer res.Body.Close()
 	}
-
-	if res.Body == nil {
-		cnsiRequest.StatusCode = 500
-		cnsiRequest.Response = []byte(err.Error())
-		cnsiRequest.Error = err
-	}
-
-	cnsiRequest.StatusCode = res.StatusCode
-	cnsiRequest.Response, cnsiRequest.Error = ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
 
 End:
 	select {
