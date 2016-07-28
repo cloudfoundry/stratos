@@ -203,7 +203,7 @@
       ],
       "volume_mounts": [
         {
-          "volume_name": "pgsql-data",
+          "volume_name": "pgsql-data-volume",
           "mountpoint": "/database"
         }
       ]
@@ -356,7 +356,7 @@
   ],
   "volumes": [
     {
-      "name": "pgsql-data",
+      "name": "pgsql-data-volume",
       "size_gb": 10,
       "filesystem": "ext4",
       "shared": false
