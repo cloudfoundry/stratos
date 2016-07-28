@@ -165,8 +165,8 @@
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
               that.hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
-                var target = _.find(that.hceModel.data.deploymentTargets,
-                                    { name: that.userInput.serviceInstance.name });
+                var name = that._getDeploymentTargetName();
+                var target = _.find(that.hceModel.data.deploymentTargets, {name: name});
                 if (target) {
                   that.createPipeline(target.deployment_target_id)
                     .then(function (response) {
@@ -310,15 +310,24 @@
     },
 
     createDeploymentTarget: function () {
+      var name = this._getDeploymentTargetName();
       var endpoint = this.userInput.serviceInstance.api_endpoint;
       var url = endpoint.Scheme + '://' + endpoint.Host;
       return this.hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
-                                                  this.userInput.serviceInstance.name,
+                                                  name,
                                                   url,
                                                   this.userInput.clusterUsername,
                                                   this.userInput.clusterPassword,
                                                   this.userInput.organization.entity.name,
                                                   this.userInput.space.entity.name);
+    },
+
+    _getDeploymentTargetName: function () {
+      return [
+        this.userInput.serviceInstance.name,
+        this.userInput.organization.entity.name,
+        this.userInput.space.entity.name
+      ].join('_');
     },
 
     createPipeline: function (targetId) {
