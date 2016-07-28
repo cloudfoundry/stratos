@@ -154,25 +154,22 @@
     init: function () {
       var that = this;
       this.ready = false;
+      this.model.application.project = null;
+      // Fetching flag onlt set initially - subsequent calls update the data, so we don't want to show a busy indicator
+      // in those cases
+      this.model.application.pipeline.fetching = true;
       this.model.getAppSummary(this.cnsiGuid, this.id, true)
+        .then(function () {
+          that.model.updateDeliveryPipelineMetadata(true)
+            .then(function (response) {
+              that.onUpdateDeliveryPipelineMetadata(response);
+            });
+        })
         .finally(function () {
           that.ready = true;
+          // Don't start updating until we have compelted the first init
+          that.startUpdate();
         });
-
-      this.model.application.project = null;
-
-      this.cnsiModel.list().then(function () {
-        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
-        if (hceCnsis.length > 0) {
-          that.hceCnsi = hceCnsis[0];
-          that.hceModel.getProjects(that.hceCnsi.guid)
-            .then(function () {
-              that.model.application.project = that.hceModel.getProject(that.model.application.summary.name);
-            });
-        }
-      });
-
-      return this.startUpdate();
     },
 
     /**
@@ -216,7 +213,12 @@
       this.updating = true;
       this.$q.when()
         .then(function () {
-          that.updateSummary();
+          that.updateSummary().then(function () {
+            that.model.updateDeliveryPipelineMetadata()
+              .then(function (response) {
+                that.onUpdateDeliveryPipelineMetadata(response);
+              });
+          });
         })
         .finally(function () {
           that.updating = false;
@@ -238,6 +240,24 @@
         that.appBuildPack = that.model.application.summary.buildpack ||
           that.model.application.summary.detected_buildpack;
       });
+    },
+
+    /**
+     * @function onUpdateDeliveryPipelineMetadata
+     * @description Set project when delivery pipeline metadata is updated
+     * @param {object} pipeline - the delivery pipeline data
+     * @returns {void}
+     * @private
+     */
+    onUpdateDeliveryPipelineMetadata: function (pipeline) {
+      var that = this;
+      if (pipeline.valid) {
+        this.hceCnsi = pipeline.hceCnsi;
+        this.hceModel.getProjects(pipeline.hceCnsi.guid)
+          .then(function () {
+            that.model.application.project = that.hceModel.getProject(that.model.application.summary.name);
+          });
+      }
     },
 
     /**
@@ -273,10 +293,6 @@
         },
         callback: function () {
           that.model.deleteApp(that.cnsiGuid, that.id).then(function () {
-            // delete project from HCE if it exists
-            if (that.model.application.project) {
-              that.hceModel.removeProject(that.hceCnsi.guid, that.model.application.project.id);
-            }
             that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
           });
         }

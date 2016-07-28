@@ -60,12 +60,12 @@
     var that = this;
     that.context = context;
     that.content = content;
-    that.hasToken = false;
     that.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     that.githubModel = modelManager.retrieve('cloud-foundry.model.github');
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
     that.githubOauthService = githubOauthService;
+    that.isAuthenticated = false;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -91,8 +91,8 @@
     fetchCommits: function () {
       var that = this;
 
-      this.hasToken = that.githubModel.getToken();
-      if (!this.hasToken) {
+      this.isAuthenticated = this.githubModel.isAuthenticated();
+      if (!this.isAuthenticated) {
         return;
       }
 

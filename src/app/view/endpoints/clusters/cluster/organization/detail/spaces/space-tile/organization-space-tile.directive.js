@@ -80,7 +80,7 @@
       }
     ];
 
-    $scope.$watch(function () {
+    $scope.$watchCollection(function () {
       return _.get(that.spaceModel, that.spacePath + '.roles.' + that.user.guid);
     }, function (roles) {
       // Present the user's roles

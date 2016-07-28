@@ -23,7 +23,6 @@
           {
             detailViewTemplateUrl:
               'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
-            title: gettext('Register Code Engine Endpoint'),
             controller: AssignUsersWorkflowController,
             controllerAs: 'assignUsers'
           },
@@ -38,6 +37,7 @@
     'context',
     '$stateParams',
     '$q',
+    '$timeout',
     '$uibModalInstance'
   ];
 
@@ -49,13 +49,15 @@
    * @param {object} context - the context for the modal. Used to pass in data
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
+   * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController(modelManager, context, $stateParams, $q, $uibModalInstance) {
+  function AssignUsersWorkflowController(modelManager, context, $stateParams, $q, $timeout, $uibModalInstance) {
     var that = this;
 
     this.$uibModalInstance = $uibModalInstance;
     this.$q = $q;
+    this.$timeout = $timeout;
 
     context = context || {};
 
@@ -227,7 +229,37 @@
      * @returns {promise}
      */
     assignUsers: function () {
-      
+      var that = this;
+      that.data.failedAssignForUsers = [];
+
+      // For each user assign their new roles. Do this asynchronously
+      var promises = [];
+      _.forEach(this.userInput.selectedUsers, function (user) {
+        var promise = that.assignUser(user).catch(function (error) {
+          that.data.failedAssignForUsers.push(user.entity.username);
+          throw error;
+        });
+        promises.push(promise);
+      });
+
+      // If all async requests have finished invalidate any cache associated with roles
+      return this.$q.all(promises).then(function () {
+        // Refresh org cache
+        if (that.changes.organization) {
+          var orgPath = that.organizationModel.fetchOrganizationPath(that.data.clusterGuid, that.changes.organization);
+          var org = _.get(that.organizationModel, orgPath);
+          that.organizationModel.getOrganizationDetails(that.data.clusterGuid, org.details.org);
+        }
+
+        // Refresh space caches
+        if (that.changes.spaces) {
+          _.forEach(that.changes.spaces, function (spaceGuid) {
+            var spacePath = that.spaceModel.fetchSpacePath(that.data.clusterGuid, spaceGuid);
+            var space = _.get(that.spaceModel, spacePath);
+            that.spaceModel.getSpaceDetails(that.data.clusterGuid, space.details.space);
+          });
+        }
+      });
     },
 
     /**
@@ -289,6 +321,10 @@
           promises.push(that.usersModel.associateAuditedSpaceWithUser(that.data.clusterGuid, spaceGuid, userGuid));
         }
       });
+
+      // Return a promise when we've 'finished'. This includes some grace between returning from these put requests and
+      // the result being available in get requests
+      promises.push(that.$timeout(_.noop, 750));
 
       return this.$q.all(promises);
     }

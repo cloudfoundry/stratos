@@ -153,7 +153,7 @@
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the org
-        return gettext('none');
+        return gettext('none assigned');
       } else {
         // If there are more than one role, don't show the user role
         if (roles.length > 1) {
@@ -276,7 +276,7 @@
           }
         }
         if (!myRoles) {
-          throw new Error('Failed to find my roles in this organization');
+          return [];
         }
         return myRoles;
       });
@@ -386,7 +386,9 @@
         var newOrgGuid = org.metadata.guid;
         return that.stackatoInfoModel.getStackatoInfo().then(function (stackatoInfo) {
           var userGuid = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
-          return orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig).then(function () {
+          var makeUserP = orgsApi.AssociateUserWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
+          var makeManagerP = orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
+          return that.$q.all([makeUserP, makeManagerP]).then(function () {
             that.getOrganizationDetails(cnsiGuid, org);
           });
         });

@@ -27,19 +27,20 @@
    * @param {object} $http - the Angular $http service
    * @param {object} $window - the Angular $window service
    * @property {object} $http - the Angular $http service
-   * @property {object} token - the object
+   * @property {string} githubApiUrl - the Github API endpoint
+   * @property {boolean} authenticated - user has authenticated with Github
    * @class
    */
   function GithubApi($http, $window) {
     this.$http = $http;
-    this.githubApiUrl = 'https://api.github.com/';
-    this.token = null;
+    this.githubApiUrl = '/pp/v1/github/';
+    this.authenticated = false;
 
     var that = this;
     $window.addEventListener('message', function (event) {
       var message = angular.fromJson(event.data);
       if (message.name === 'GitHub Oauth - token') {
-        that.token = message.data;
+        that.authenticated = true;
       }
     });
   }
@@ -58,8 +59,7 @@
       var config = {
         params: params || {},
         headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token.access_token
+          Accept: 'application/vnd.github.v3+json'
         }
       };
 
@@ -80,8 +80,7 @@
       var config = {
         params: params || {},
         headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token.access_token
+          Accept: 'application/vnd.github.v3+json'
         }
       };
 
@@ -103,8 +102,7 @@
       var config = {
         params: params || {},
         headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token.access_token
+          Accept: 'application/vnd.github.v3+json'
         }
       };
 
@@ -125,8 +123,7 @@
       var config = {
         params: params || {},
         headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token.access_token
+          Accept: 'application/vnd.github.v3+json'
         }
       };
       return this.$http.get(url, config);

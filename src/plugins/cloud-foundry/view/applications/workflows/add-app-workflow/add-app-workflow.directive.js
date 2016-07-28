@@ -40,14 +40,21 @@
    * @param {object} $q - angular $q service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
+   * @property {boolean} addingApplication - flag for adding app
+   * @property {app.event.eventService} eventService - the Event management service
+   * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {object} appModel - the Cloud Foundry applications model
+   * @property {object} cnsiModel - the CNSI model
    * @property {object} serviceInstanceModel - the application service instance model
+   * @property {object} spaceModel - the Cloud Foundry space model
+   * @property {object} routeModel - the Cloud Foundry route model
    * @property {object} githubModel - the Github model
+   * @property {object} hceModel - the HCE model
    * @property {object} privateDomainModel - the private domain model
    * @property {object} sharedDomainModel - the shared domain model
    * @property {object} organizationModel - the organization model
-   * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
+   * @property {object} options - workflow options
    */
   function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q) {
     var that = this;
@@ -60,7 +67,6 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    // Adding a service model for the demo.
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
@@ -180,10 +186,15 @@
                     // retrieve categories that user can filter services by
                     var categories = [];
                     angular.forEach(services, function (service) {
-                      if (angular.isObject(service.entity.extra) && angular.isDefined(service.entity.extra.categories)) {
-                        var serviceCategories = _.map(service.entity.extra.categories,
-                                                      function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
-                        categories = _.unionBy(categories, serviceCategories, 'lower');
+                      // Parse service entity extra data JSON string
+                      if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
+                        service.entity.extra = angular.fromJson(service.entity.extra);
+
+                        if (angular.isDefined(service.entity.extra.categories)) {
+                          var serviceCategories = _.map(service.entity.extra.categories,
+                                                        function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
+                          categories = _.unionBy(categories, serviceCategories, 'lower');
+                        }
                       }
                     });
                     categories = _.sortBy(categories, 'lower');
@@ -290,8 +301,8 @@
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
               that.hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
-                var target = _.find(that.hceModel.data.deploymentTargets,
-                                    { name: that.userInput.serviceInstance.name });
+                var name = that._getDeploymentTargetName();
+                var target = _.find(that.hceModel.data.deploymentTargets, {name: name});
                 if (target) {
                   that.createPipeline(target.deployment_target_id)
                     .then(function (response) {
@@ -641,10 +652,11 @@
     },
 
     createDeploymentTarget: function () {
+      var name = this._getDeploymentTargetName();
       var endpoint = this.userInput.serviceInstance.api_endpoint;
       var url = endpoint.Scheme + '://' + endpoint.Host;
       return this.hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
-                                                  this.userInput.serviceInstance.name,
+                                                  name,
                                                   url,
                                                   this.userInput.clusterUsername,
                                                   this.userInput.clusterPassword,
@@ -652,11 +664,18 @@
                                                   this.userInput.space.entity.name);
     },
 
+    _getDeploymentTargetName: function () {
+      return [
+        this.userInput.serviceInstance.name,
+        this.userInput.organization.entity.name,
+        this.userInput.space.entity.name
+      ].join('_');
+    },
+
     createPipeline: function (targetId) {
       return this.hceModel.createProject(this.userInput.hceCnsi.guid,
                                          this.userInput.name,
                                          this.userInput.source,
-                                         this.githubModel.getToken(),
                                          targetId,
                                          this.userInput.buildContainer.build_container_id,
                                          this.userInput.repo,

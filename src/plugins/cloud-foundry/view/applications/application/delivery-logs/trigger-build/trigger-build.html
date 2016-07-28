@@ -1,6 +1,6 @@
 <div class="delivery-log-trigger-build delivery-log-flex">
   <!-- User has no github token -->
-  <div ng-if="!detailViewCtrl.hasToken">
+  <div ng-if="!detailViewCtrl.isAuthenticated">
     <button translate class="btn btn-primary" type="button" ng-click="detailViewCtrl.githubAuth()">
       Authenticate with Github</button>
     <div class="alert alert-warning" ng-if="!detailViewCtrl.githubAuthFailed">
@@ -12,7 +12,7 @@
   </div>
 
   <!-- User has a github token -->
-  <div ng-if="detailViewCtrl.hasToken" class="delivery-log-flex">
+  <div ng-if="detailViewCtrl.isAuthenticated" class="delivery-log-flex">
 
     <!-- Commits are being fetched -->
     <div ng-if="detailViewCtrl.fetchError === undefined" class="message-box message-box-no-bg">

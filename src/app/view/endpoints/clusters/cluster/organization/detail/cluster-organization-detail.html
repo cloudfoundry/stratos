@@ -1,4 +1,4 @@
-<div ng-if="!clusterOrgDetailController.organization().details" class="message-box message-box-no-bg">
+<div ng-if="!clusterOrgDetailController.organization().details" class="cluster-loading col-md-9 col-sm-12">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 
@@ -23,5 +23,5 @@
     </li>
   </ul>
   <ui-view></ui-view>
-
 </div>
+<cluster-actions></cluster-actions>
