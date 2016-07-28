@@ -153,7 +153,7 @@
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the org
-        return gettext('none');
+        return gettext('none assigned');
       } else {
         // If there are more than one role, don't show the user role
         if (roles.length > 1) {
@@ -276,7 +276,7 @@
           }
         }
         if (!myRoles) {
-          throw new Error('Failed to find my roles in this organization');
+          return [];
         }
         return myRoles;
       });
