@@ -26,7 +26,8 @@
     'app.event.eventService',
     'github.view.githubOauthService',
     '$scope',
-    '$q'
+    '$q',
+    '$timeout'
   ];
 
   /**
@@ -36,10 +37,12 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
-   * @param {object} $scope - angular $scope
-   * @param {object} $q - angular $q service
+   * @param {object} $scope - Angular $scope
+   * @param {object} $q - Angular $q service
+   * @param {object} $timeout - the Angular $timeout service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
+   * @property {object} $timeout - the Angular $timeout service
    * @property {boolean} addingApplication - flag for adding app
    * @property {app.event.eventService} eventService - the Event management service
    * @property {github.view.githubOauthService} githubOauthService - github oauth service
@@ -56,11 +59,12 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q) {
+  function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q, $timeout) {
     var that = this;
 
     this.$scope = $scope;
     this.$q = $q;
+    this.$timeout = $timeout;
     this.addingApplication = false;
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
@@ -80,6 +84,7 @@
 
     this.userInput = {};
     this.options = {};
+    this.filterTimeout = null;
 
     $scope.$watch(function () {
       return that.userInput.serviceInstance;
@@ -123,6 +128,22 @@
         that.appendSubflow(that.data.subflows[subflow]);
       }
     });
+
+    $scope.$watch(function () {
+      return that.userInput.repoFilterTerm;
+    }, function (newFilterTerm) {
+      if (that.filterTimeout !== null) {
+        that.$timeout.cancel(that.filterTimeout);
+      }
+
+      that.filterTimeout = that.$timeout(function () {
+        return that.filterRepos(newFilterTerm);
+      }, 500);
+    });
+
+    this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
+      that.loadMoreRepos();
+    });
   }
 
   angular.extend(AddAppWorkflowController.prototype, {
@@ -147,6 +168,7 @@
         hceCnsi: null,
         source: null,
         repo: null,
+        repoFilterTerm: null,
         branch: null,
         buildContainer: null,
         imageRegistry: null,
@@ -252,11 +274,7 @@
 
               return oauth
                 .then(function () {
-                  return that.githubModel.repos();
-                })
-                .then(function () {
-                  var repos = _.filter(that.githubModel.data.repos || [], function (o) { return o.permissions.admin; });
-                  [].push.apply(that.options.repos, repos);
+                  return that.getRepos();
                 });
             }
           },
@@ -350,6 +368,7 @@
       this.options = {
         workflow: that.data.workflow,
         userInput: this.userInput,
+        eventService: this.eventService,
         errors: this.errors,
         subflow: null,
         serviceInstances: [],
@@ -380,7 +399,10 @@
           }
         ],
         sources: [],
+        displayedRepos: [],
         repos: [],
+        hasMoreRepos: false,
+        loadingRepos: false,
         branches: [],
         buildContainers: [],
         imageRegistries: []
@@ -577,6 +599,46 @@
             [].push.apply(that.options.sources, sources);
             that.userInput.source = sources[0].value;
           }
+        });
+    },
+
+    getRepos: function () {
+      var that = this;
+      this.options.loadingRepos = true;
+      return this.githubModel.repos()
+        .then(function (response) {
+          that.options.hasMoreRepos = angular.isDefined(response.links.next);
+          [].push.apply(that.options.repos, response.repos);
+        })
+        .finally(function () {
+          that.options.loadingRepos = false;
+        });
+    },
+
+    loadMoreRepos: function () {
+      var that = this;
+      this.options.loadingRepos = true;
+      return this.githubModel.nextRepos()
+        .then(function (response) {
+          that.options.hasMoreRepos = angular.isDefined(response.links.next);
+          [].push.apply(that.options.repos, response.newRepos);
+        })
+        .finally(function () {
+          that.options.loadingRepos = false;
+        });
+    },
+
+    filterRepos: function (newFilterTerm) {
+      var that = this;
+      this.options.loadingRepos = true;
+      return this.$q.when(this.githubModel.filterRepos(newFilterTerm))
+        .then(function (response) {
+          if (angular.isDefined(response)) {
+            that.options.hasMoreRepos = angular.isDefined(response.links.next);
+            [].push.apply(that.options.repos, response.newRepos);
+          }
+        }).finally(function () {
+          that.options.loadingRepos = false;
         });
     },
 

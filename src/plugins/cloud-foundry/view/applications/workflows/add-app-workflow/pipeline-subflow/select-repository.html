@@ -8,19 +8,21 @@
   st-safe-src="wizardCtrl.options.repos">
   <thead>
     <tr>
-      <th colspan="3" class="filter-header text-left">
+      <th colspan="2" class="filter-header">
         <form class="form-horizontal">
-          <div class="form-group col-md-3">
+          <div class="form-group repo-count">
             <label class="control-label" translate>Repositories</label>
             <input type="text" class="form-control text-right"
-              ng-value="wizardCtrl.options.repos.length" readonly/>
+              ng-value="wizardCtrl.options.displayedRepos.length" readonly/>
           </div>
-          <div class="form-group addon-form-group col-md-9">
+          <div class="form-group addon-form-group repo-filter">
             <div class="input-group">
               <span class="input-group-addon">
                 <i class="helion-icon helion-icon-lg helion-icon-Filter"></i>
               </span>
-              <input type="search" class="form-control" st-search="full_name"/>
+              <input type="text" class="form-control"
+                ng-model="wizardCtrl.options.userInput.repoFilterTerm"
+                st-search="full_name"/>
             </div>
           </div>
         </form>
@@ -29,7 +31,6 @@
     <tr>
       <th class="select-col"></th>
       <th translate>Repository Name</th>
-      <th class="text-left" translate>Description</th>
     </tr>
   </thead>
   <tbody>
@@ -39,7 +40,17 @@
         </radio-input>
       </td>
       <td>{{ ::repo.full_name }}</td>
-      <td class="text-left">{{ ::repo.description }}</td>
     </tr>
   </tbody>
+  <tfoot>
+    <tr>
+      <td class="text-center text-uppercase" colspan="2">
+        <bounce-spinner classes="bounce-spinner-sm" ng-if="wizardCtrl.options.loadingRepos"></bounce-spinner>
+        <a class="btn-link font-semi-bold"
+            ng-click="wizardCtrl.options.eventService.$emit('cf.events.LOAD_MORE_REPOS')"
+            ng-if="wizardCtrl.options.hasMoreRepos && !wizardCtrl.options.loadingRepos"
+            translate>Load More Repositories</a>
+      </td>
+    </tr>
+  </tfoot>
 </table>
