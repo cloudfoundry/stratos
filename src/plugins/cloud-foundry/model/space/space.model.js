@@ -388,7 +388,7 @@
     createSpaces: function (cnsiGuid, orgGuid, spaceNames, params) {
       var that = this;
 
-      var managerGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      var userGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
       var spaceModel = this.apiManager.retrieve('cloud-foundry.api.Spaces');
 
       var createPromises = [];
@@ -402,7 +402,8 @@
         var newSpace = {
           organization_guid: orgGuid,
           name: spaceName,
-          manager_guids: [managerGuid]
+          manager_guids: [userGuid],
+          developer_guids: [userGuid]
         };
 
         var createP = spaceModel.CreateSpace(newSpace, params, this.makeHttpConfig(cnsiGuid))
