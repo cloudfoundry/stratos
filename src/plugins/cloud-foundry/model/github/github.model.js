@@ -38,9 +38,14 @@
   }
 
   angular.extend(GithubModel.prototype, {
-
-    getToken: function () {
-      return _.get(this.apiManager.retrieve('cloud-foundry.api.github'), 'token.access_token');
+    /**
+     * @function isAuthenticated
+     * @memberof cloud-foundry.model.github.GithubModel
+     * @description Whether the user has authenticated against Github
+     * @returns {boolean} True if user has authenticated against Github     *
+     */
+    isAuthenticated: function () {
+      return _.get(this.apiManager.retrieve('cloud-foundry.api.github'), 'authenticated');
     },
 
     /**

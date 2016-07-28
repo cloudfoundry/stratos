@@ -40,14 +40,21 @@
    * @param {object} $q - angular $q service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
+   * @property {boolean} addingApplication - flag for adding app
+   * @property {app.event.eventService} eventService - the Event management service
+   * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {object} appModel - the Cloud Foundry applications model
+   * @property {object} cnsiModel - the CNSI model
    * @property {object} serviceInstanceModel - the application service instance model
+   * @property {object} spaceModel - the Cloud Foundry space model
+   * @property {object} routeModel - the Cloud Foundry route model
    * @property {object} githubModel - the Github model
+   * @property {object} hceModel - the HCE model
    * @property {object} privateDomainModel - the private domain model
    * @property {object} sharedDomainModel - the shared domain model
    * @property {object} organizationModel - the organization model
-   * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
+   * @property {object} options - workflow options
    */
   function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q) {
     var that = this;
@@ -60,7 +67,6 @@
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    // Adding a service model for the demo.
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
@@ -670,7 +676,6 @@
       return this.hceModel.createProject(this.userInput.hceCnsi.guid,
                                          this.userInput.name,
                                          this.userInput.source,
-                                         this.githubModel.getToken(),
                                          targetId,
                                          this.userInput.buildContainer.build_container_id,
                                          this.userInput.repo,

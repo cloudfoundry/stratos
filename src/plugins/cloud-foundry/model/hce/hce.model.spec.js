@@ -111,12 +111,12 @@
         httpUrl: 'https://github.com/test_owner/test_repo'
       };
       var createProject = mock.hceApi.HceProjectApi
-        .createProject('name', 'GithubToken', 1, 2, repo, 'master');
+        .createProject('name', 1, 2, repo, 'master');
 
       $httpBackend.when('POST', createProject.url).respond(201, createProject.response['201'].body);
       $httpBackend.expectPOST(createProject.url);
       var vcs = { vcs_id: 1, vcs_type: 'github' };
-      hceModel.createProject('cnsi_guid', 'name', vcs, 'GithubToken', 1, 2, repo, 'master');
+      hceModel.createProject('cnsi_guid', 'name', vcs, 1, 2, repo, 'master');
       $httpBackend.flush();
     });
   });
