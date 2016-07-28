@@ -65,6 +65,7 @@
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
     that.githubOauthService = githubOauthService;
+    that.isAuthenticated = false;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -90,7 +91,8 @@
     fetchCommits: function () {
       var that = this;
 
-      if (!this.githubModel.isAuthenticated()) {
+      this.isAuthenticated = this.githubModel.isAuthenticated();
+      if (!this.isAuthenticated) {
         return;
       }
 
