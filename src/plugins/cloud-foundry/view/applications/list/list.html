@@ -2,6 +2,7 @@
   <div class="applications-header font-semi-bold pull-left" translate>Applications</div>
   <div class="pull-right">
     <button class="btn btn-primary"
+      ng-if="applicationsListCtrl.ready && applicationsListCtrl.clusterCount > 0"
       translate
       ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')">
       add application
