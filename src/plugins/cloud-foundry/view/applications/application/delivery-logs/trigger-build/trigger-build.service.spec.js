@@ -2,7 +2,7 @@
   'use strict';
 
   describe('variables manager service', function () {
-    var promise, dialogContext, $controller, $q, modelManager, $httpBackend, $scope, $uibModalInstance, githubModel,
+    var promise, dialogContext, $controller, $q, modelManager, $httpBackend, $uibModalInstance, githubModel,
       githubOauthService, $timeout;
 
     var cnsi = 1234;
@@ -12,12 +12,9 @@
       }
     };
     var defaultCommitCount = 20;
-    var defaultCommitsRequest = 'https://api.github.com/repos/' + project.repo.full_name + '/commits?per_page=' +
+    var defaultCommitsRequest = '/pp/v1/github/repos/' + project.repo.full_name + '/commits?per_page=' +
       defaultCommitCount;
     var defaultTriggerRequest = '/pp/v1/proxy/v2/pipelines/triggers';
-    var defaultToken = {
-      access_token: 1234
-    };
     var defaultCommit = {
       sha: '1234'
     };
@@ -43,7 +40,6 @@
 
     beforeEach(inject(function ($injector, $rootScope, _$httpBackend_, _$q_, _$timeout_) {
       $httpBackend = _$httpBackend_;
-      $scope = $rootScope.$new();
       $q = _$q_;
       $timeout = _$timeout_;
 
@@ -97,9 +93,8 @@
 
         function setGithubToken() {
           // Calls to githubModel will fail before the http request if token.access_token is missing
-          _.set(githubModel.apiManager.retrieve('cloud-foundry.api.github'), 'token', defaultToken);
-          expect(githubModel.getToken()).toEqual(defaultToken.access_token);
-          $scope.$digest();
+          _.set(githubModel.apiManager.retrieve('cloud-foundry.api.github'), 'authenticated', true);
+          expect(githubModel.isAuthenticated()).toBe(true);
         }
 
         it('Don\'t fetch if no token present', function () {

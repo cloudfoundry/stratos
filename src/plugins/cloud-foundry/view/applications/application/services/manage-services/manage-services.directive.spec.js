@@ -151,12 +151,8 @@
       });
 
       describe('detach', function () {
-        var DeleteServiceBinding;
-
         beforeEach(function () {
           var bindingGuid = 'binding_123';
-          var mockBindingsApi = mock.cloudFoundryAPI.ServiceBindings;
-          DeleteServiceBinding = mockBindingsApi.DeleteServiceBinding(bindingGuid);
 
           manageServicesCtrl.modal = {
             dismiss: angular.noop
@@ -183,54 +179,12 @@
           spyOn(manageServicesCtrl.appModel, 'getAppSummary');
         });
 
-        it('should remove serving binding on success', function () {
-          spyOn(manageServicesCtrl.modal, 'dismiss');
-
-          $httpBackend.whenDELETE(DeleteServiceBinding.url)
-            .respond(200, DeleteServiceBinding.response['200'].body);
+        it('should show detach confirmation dialog', function () {
+          spyOn(manageServicesCtrl, 'confirmDialog');
 
           var instance = manageServicesCtrl.serviceInstances[0];
-          manageServicesCtrl.detach(instance).then(function () {
-            expect(manageServicesCtrl.serviceInstances.length).toBe(1);
-            expect(manageServicesCtrl.appModel.getAppSummary).toHaveBeenCalled();
-            expect(manageServicesCtrl.modal.dismiss).not.toHaveBeenCalled();
-          });
-
-          $httpBackend.flush();
-        });
-
-        it('should dismiss modal if no bindings left', function () {
-          manageServicesCtrl.serviceInstances.pop();
-
-          spyOn(manageServicesCtrl.modal, 'dismiss');
-
-          $httpBackend.whenDELETE(DeleteServiceBinding.url)
-            .respond(200, DeleteServiceBinding.response['200'].body);
-
-          var instance = manageServicesCtrl.serviceInstances[0];
-          manageServicesCtrl.detach(instance).then(function () {
-            expect(manageServicesCtrl.serviceInstances.length).toBe(0);
-            expect(manageServicesCtrl.appModel.getAppSummary).toHaveBeenCalled();
-            expect(manageServicesCtrl.modal.dismiss).toHaveBeenCalled();
-          });
-
-          $httpBackend.flush();
-        });
-
-        it('should not remove serving binding on failure', function () {
-          spyOn(manageServicesCtrl.modal, 'dismiss');
-
-          $httpBackend.whenDELETE(DeleteServiceBinding.url)
-            .respond(200, DeleteServiceBinding.response['500'].body);
-
-          var instance = manageServicesCtrl.serviceInstances[0];
-          manageServicesCtrl.detach(instance).then(function () {
-            expect(manageServicesCtrl.serviceInstances.length).toBe(2);
-            expect(manageServicesCtrl.appModel.getAppSummary).not.toHaveBeenCalled();
-            expect(manageServicesCtrl.modal.dismiss).not.toHaveBeenCalled();
-          });
-
-          $httpBackend.flush();
+          manageServicesCtrl.detach(instance);
+          expect(manageServicesCtrl.confirmDialog).toHaveBeenCalled();
         });
       });
 
