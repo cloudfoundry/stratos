@@ -68,6 +68,10 @@
         name: gettext('Delete Space'),
         disabled: true,
         execute: function () {
+          return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid).then(function () {
+            // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
+            return $state.go($state.current.ncyBreadcrumb.parent());
+          });
         }
       }
     ];
@@ -82,6 +86,24 @@
       // Present the user's roles
       that.roles = that.spaceModel.spaceRolesToString(roles);
     });
+
+    function init() {
+      var canDelete = false;
+      var isAdmin = user.admin;
+      if (isAdmin) {
+        var spaceDetail = that.spaceDetail();
+        canDelete = spaceDetail.routes.length === 0 &&
+          spaceDetail.instances.length === 0 &&
+          spaceDetail.apps.length === 0 &&
+          spaceDetail.services.length === 0;
+      }
+      that.actions[1].disabled = !canDelete;
+      that.actions[2].disabled = !isAdmin;
+    }
+
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
+
   }
 
   angular.extend(SpaceSummaryTileController.prototype, {
