@@ -181,7 +181,7 @@
       var seconds = uptime % 60;
 
       function formatPart(count, single, plural) {
-        if(count === 0) {
+        if (count === 0) {
           return '';
         } else if (count === 1) {
           return count + ' ' + single + ' ';
