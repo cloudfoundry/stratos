@@ -368,6 +368,11 @@ func (p *portalProxy) github(c echo.Context) error {
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
+	// Forward all response headers
+	for k, v := range resp.Header {
+		c.Response().Header().Set(k, strings.Join(v, " "))
+	}
+
 	c.Response().WriteHeader(resp.StatusCode)
 
 	// we don't care if this fails
