@@ -9,13 +9,10 @@
     '$q',
     'app.model.modelManager',
     'helion.framework.widgets.asyncTaskDialog',
-    '$stateParams',
-    '$rootScope',
     'app.view.endpoints.clusters.cluster.rolesService'
   ];
 
-  function ManageUsersFactory($q, modelManager, asyncTaskDialog, $stateParams, $rootScope, rolesService) {
-    // var that = this;
+  function ManageUsersFactory($q, modelManager, asyncTaskDialog, rolesService) {
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -56,6 +53,11 @@
       return false;
     };
 
+    var clearSelections = function () {
+      _.forEach(selectedRoles, function (org, orgGuid) {
+        removeFromOrg(orgGuid);
+      });
+    };
 
     /**
      * @name ManageUsersFactory.show
@@ -123,7 +125,8 @@
             removeFromOrg: removeFromOrg,
             containsRoles: containsRoles
           },
-          state: state
+          state: state,
+          clearSelections: clearSelections
         },
         updateUsers
       );

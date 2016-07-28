@@ -46,34 +46,41 @@
     this.selectAllUsers = false;
     this.selectedUsers = {};
 
+    function refreshUsers() {
+      that.userRoles = {};
+
+      // For each user, get its roles in all organization
+      _.forEach(that.users, function (aUser) {
+        var myRoles = {};
+        _.forEach(that.organizationModel.organizations[that.guid], function (org) {
+          var roles = org.roles[aUser.metadata.guid];
+          if (!_.isUndefined(roles)) {
+            myRoles[org.details.org.entity.name] = roles;
+          }
+        });
+        that.userRoles[aUser.metadata.guid] = [];
+
+        // Format that in an array of pairs for direct use in the template
+        _.forEach(myRoles, function (orgRoles, orgName) {
+          _.forEach(orgRoles, function (role) {
+            that.userRoles[aUser.metadata.guid].push({
+              name: orgName,
+              role: that.organizationModel.organizationRoleToString(role)
+            });
+          });
+        });
+
+      });
+    }
+
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
 
         $log.debug('Received list of Users: ', res);
         that.users = res;
 
-        // For each user, get its roles in all organization
-        _.forEach(that.users, function (aUser) {
-          var myRoles = {};
-          _.forEach(that.organizationModel.organizations[that.guid], function (org) {
-            var roles = org.roles[aUser.metadata.guid];
-            if (!_.isUndefined(roles)) {
-              myRoles[org.details.org.entity.name] = roles;
-            }
-          });
-          that.userRoles[aUser.metadata.guid] = [];
+        refreshUsers();
 
-          // Format that in an array of pairs for direct use in the template
-          _.forEach(myRoles, function (orgRoles, orgName) {
-            _.forEach(orgRoles, function (role) {
-              that.userRoles[aUser.metadata.guid].push({
-                name: orgName,
-                role: that.organizationModel.organizationRoleToString(role)
-              });
-            });
-          });
-
-        });
       }).then(function () {
         $log.debug('ClusterUsersController finished init');
       });
@@ -83,7 +90,9 @@
       {
         name: gettext('Manage Roles'),
         execute: function (aUser) {
-          return manageUsers.show(that.guid, [aUser], false, true);
+          manageUsers.show(that.guid, [aUser], false, true).result.then(function () {
+            refreshUsers();
+          });
         }
       },
       {

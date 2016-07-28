@@ -115,7 +115,7 @@
         spaces: []
       };
 
-      var promises = [];
+      var updatePromises = [];
       var associatedWithOrg = $q.when();
 
       // Assign/Remove Organization Roles
@@ -135,10 +135,10 @@
           var assignPromise = associatedWithOrg.then(function () {
             return rolesToFunctions.org.add[roleKey](clusterGuid, orgGuid, userGuid);
           });
-          promises.push(assignPromise);
+          updatePromises.push(assignPromise);
         } else {
           // ... Remove
-          promises.push(rolesToFunctions.org.remove[roleKey](clusterGuid, orgGuid, userGuid));
+          updatePromises.push(rolesToFunctions.org.remove[roleKey](clusterGuid, orgGuid, userGuid));
         }
         changes.organization = true;
 
@@ -161,29 +161,30 @@
 
           if (selected) {
             // Assign role
-            promises.push(rolesToFunctions.space.add[roleKey](clusterGuid, spaceGuid, userGuid));
+            updatePromises.push(rolesToFunctions.space.add[roleKey](clusterGuid, spaceGuid, userGuid));
           } else {
             // Remove role
-            promises.push(rolesToFunctions.space.remove[roleKey](clusterGuid, spaceGuid, userGuid));
+            updatePromises.push(rolesToFunctions.space.remove[roleKey](clusterGuid, spaceGuid, userGuid));
           }
 
         });
       });
 
-      return $q.all(promises).then(function () {
+      return $q.all(updatePromises).then(function () {
+        var cachePromises = [];
         // Refresh org cache
         if (changes.organization) {
           var org = _.get(organizationModel, organizationModel.fetchOrganizationPath(clusterGuid, orgGuid));
-          organizationModel.getOrganizationDetails(clusterGuid, org.details.org);
+          cachePromises.push(organizationModel.getOrganizationDetails(clusterGuid, org.details.org));
         }
 
         // Refresh space caches
         if (changes.spaces && changes.spaces.length > 0) {
           _.forEach(changes.spaces, function (spaceGuid) {
-            var space = _.get(spaceModel, spaceModel.fetchSpacePath(clusterGuid, spaceGuid));
-            spaceModel.getSpaceDetails(clusterGuid, space.details.space);
+            cachePromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, spaceGuid));
           });
         }
+        return $q.all(cachePromises);
       });
 
     }
