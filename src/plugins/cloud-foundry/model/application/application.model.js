@@ -459,6 +459,7 @@
         //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
         // Stats for all instances
         that.application.instances = data;
+        that.application.instanceCount = _.keys(data).length;
         return response;
       });
     },
