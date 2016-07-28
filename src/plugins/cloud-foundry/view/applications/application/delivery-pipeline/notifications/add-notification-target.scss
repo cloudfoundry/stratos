@@ -20,9 +20,17 @@
     .title-bar {
       display: flex;
       flex-direction: row;
+      position: relative;
+
+      .vert-center {
+        position: absolute;
+        top: 50%;
+        height: $hpe-unit-space * 2;
+        margin-top:-$hpe-unit-space;
+      }
     }
 
-    .desc{
+    .desc {
       padding-bottom: $hpe-unit-space * 2;
     }
     h4 {

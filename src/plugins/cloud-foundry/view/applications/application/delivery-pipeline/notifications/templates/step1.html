@@ -4,17 +4,9 @@
 </div>
 <ul class="media-list hpe-add-option-list">
   <li class="media" ng-repeat="notificationTargetType in wizardCtrl.options.notificationTargetTypes">
-    <div class="media-left media-middle">
-      <radio-input ng-model="wizardCtrl.options.userInput.notificationTargetType"
-      input-value="notificationTargetType"
-      ></radio-input>
-    </div>
-    <div class="media-left media-middle">
-      <img class="media-object" ng-src="/plugins/cloud-foundry/view/assets/hce/{{notificationTargetType.img }}"/>
-    </div>
-    <div class="media-body">
-      <h4 class="media-heading">{{ ::notificationTargetType.title }}</h4>
-      <p>{{ ::notificationTargetType.description }}</p>
-    </div>
+    <notification-target
+      target-type="notificationTargetType"
+      user-input-target-type="wizardCtrl.options.userInput.notificationTargetType"
+      add-app-mode=false/>
   </li>
 </ul>
