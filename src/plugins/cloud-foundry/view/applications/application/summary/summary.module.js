@@ -55,6 +55,8 @@
     this.userCnsiModel.list();
     this.utils = utils;
 
+    this.instanceViewLimit = 5;
+
     var that = this;
     this.routesActionMenu = [
       {
@@ -156,6 +158,42 @@
 
     getEndpoint: function () {
       return this.utils.getClusterEndpoint(this.userCnsiModel.serviceInstances[this.cnsiGuid]);
+    },
+
+    /**
+     * @function formatUptime
+     * @description format an uptime in seconds into a days, hours, minutes, seconds string
+     * @param {number} uptime in seconsd
+     * @returns {string} formatted uptime string
+     */
+    formatUptime: function (uptime) {
+      if (angular.isUndefined(uptime) || uptime === null) {
+        return '-';
+      }
+      if (uptime === 0) {
+        return '0 ' + gettext('seconds');
+      }
+      var days = Math.floor(uptime / 86400);
+      uptime = uptime % 86400;
+      var hours = Math.floor(uptime / 3600);
+      uptime = uptime % 3600;
+      var minutes = Math.floor(uptime / 60);
+      var seconds = uptime % 60;
+
+      function formatPart(count, single, plural) {
+        if (count === 0) {
+          return '';
+        } else if (count === 1) {
+          return count + ' ' + single + ' ';
+        } else {
+          return count + ' ' + plural + ' ';
+        }
+      }
+
+      return (formatPart(days, gettext('day'), gettext('days')) +
+        formatPart(hours, gettext('hour'), gettext('hours')) +
+        formatPart(minutes, gettext('minute'), gettext('minutes')) +
+        formatPart(seconds, gettext('second'), gettext('seconds'))).trim();
     }
   });
 
