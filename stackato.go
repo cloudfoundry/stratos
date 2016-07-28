@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo"
 )
 
+// Endpoint - This represents the CNSI endpoint
 type Endpoint struct {
 	GUID     string         `json:"guid"`
 	Name     string         `json:"name"`
@@ -16,6 +17,7 @@ type Endpoint struct {
 	CNSIType string         `json:"type"`
 }
 
+// StackatoInfo - this represents user specific Stackato info
 type StackatoInfo struct {
 	Versions  *Versions                               `json:"version"`
 	User      *ConnectedUser                          `json:"user"`
@@ -52,7 +54,7 @@ func (p *portalProxy) stackatoInfo(c echo.Context) error {
 	s.Endpoints[cnsis.CNSIHCE] = make(map[string]*Endpoint)
 
 	// get the CNSI Endpoints
-	cnsiList, err := p.buildCNSIList(c)
+	cnsiList, _ := p.buildCNSIList(c)
 	for _, cnsi := range cnsiList {
 		endpoint := &Endpoint{
 			GUID: cnsi.GUID,
