@@ -33,6 +33,7 @@
   function Space(apiManager, modelManager, $q) {
     this.apiManager = apiManager;
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.$q = $q;
     this.data = {
     };
@@ -279,7 +280,7 @@
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the org
-        return gettext('none');
+        return gettext('none assigned');
       } else {
         // If there are more than one role, don't show the user role
         if (roles.length > 1) {
@@ -335,7 +336,7 @@
         // Find my user's roles
         myRoles = that.spaces[cnsiGuid][spaceGuid].roles[userGuid];
         if (!myRoles) {
-          throw new Error('Failed to find my roles in this space');
+          return [];
         }
         return myRoles;
       });
@@ -382,7 +383,43 @@
 
         return details;
       });
+    },
+
+    createSpaces: function (cnsiGuid, orgGuid, spaceNames, params) {
+      var that = this;
+
+      var userGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      var spaceModel = this.apiManager.retrieve('cloud-foundry.api.Spaces');
+
+      var createPromises = [];
+
+      function getSpaceDetails(response) {
+        return that.getSpaceDetails(cnsiGuid, response.data);
+      }
+
+      for (var i = 0; i < spaceNames.length; i++) {
+        var spaceName = spaceNames[i];
+        var newSpace = {
+          organization_guid: orgGuid,
+          name: spaceName,
+          manager_guids: [userGuid],
+          developer_guids: [userGuid]
+        };
+
+        var createP = spaceModel.CreateSpace(newSpace, params, this.makeHttpConfig(cnsiGuid))
+          .then(getSpaceDetails); // Cache the space details
+
+        createPromises.push(createP);
+      }
+
+      return that.$q.all(createPromises).then(function () {
+        // Refresh the org!
+        var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
+        return that.organizationModel.getOrganizationDetails(cnsiGuid, org);
+      });
+
     }
+
   });
 
 })();

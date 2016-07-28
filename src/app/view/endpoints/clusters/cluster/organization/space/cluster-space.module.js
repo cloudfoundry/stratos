@@ -21,11 +21,9 @@
     });
   }
 
-  ClusterSpaceController.$inject = [ ];
+  ClusterSpaceController.$inject = [];
 
-  function ClusterSpaceController() {
-
-  }
+  function ClusterSpaceController() {}
 
   angular.extend(ClusterSpaceController.prototype, {});
 })();

@@ -40,6 +40,11 @@
     text-align: center;
   }
 
+  .cluster-actions-menu {
+    position: absolute;
+    right: 24px; // ok with scroll bar on, no time find a way to satisfy both with and without the scrollbar
+  }
+
   .cluster-detail {
 
     padding-left: $hpe-unit-space;
