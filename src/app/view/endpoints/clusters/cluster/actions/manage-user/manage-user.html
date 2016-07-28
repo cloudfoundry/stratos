@@ -1,12 +1,14 @@
 <div class="manage-users">
-  <!--ng-if="asyncTaskDialogCtrl.context.tableConfig.state.initialised === undefined"-->
-  <div class="manage-users-loading" class="message-box message-box-no-bg">
+  <div class="manage-users-loading message-box message-box-no-bg"
+       ng-if="asyncTaskDialogCtrl.context.state.initialised === undefined">
     <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
-  <div class="manage-users-load-failed" ng-if="asyncTaskDialogCtrl.context.state.initialised === false">
+  <div class="manage-users-load-failed"
+       ng-if="asyncTaskDialogCtrl.context.state.initialised === false">
     <span translate>Failed to update list of user/s roles</span>
   </div>
-  <div class="manage-users-loaded" ng-if="asyncTaskDialogCtrl.context.state.initialised === true">
+  <div class="manage-users-loaded"
+       ng-if="asyncTaskDialogCtrl.context.state.initialised === true">
     <div class="manage-users-filter">
       <div class="filter-container manage-users-bordered">
         <div class="manage-users-input">
@@ -35,6 +37,7 @@
           data="asyncTaskDialogCtrl.context.data"
           organization="org"
           selection="asyncTaskDialogCtrl.context.selectedRoles[guid]"
+          original-selection="asyncTaskDialogCtrl.context.originalSelectedRoles[guid]"
           filter="asyncTaskDialogCtrl.ctrl.filter"
         ></roles-tables>
       </div>

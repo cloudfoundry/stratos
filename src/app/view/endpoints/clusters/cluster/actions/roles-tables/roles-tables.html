@@ -20,7 +20,11 @@
           <td ng-repeat="(roleKey, role) in rolesTablesCtrl.config.orgRoles">
             <checkbox-input ng-model="rolesTablesCtrl.selection.organization[roleKey]"></checkbox-input>
           </td>
-          <td><a ng-click="rolesTablesCtrl.config.removeFromOrg()">Remove from Org</a></td>
+          <td>
+            <a ng-if="rolesTablesCtrl.config.containsRoles(org.details.org.metadata.guid)"
+               ng-click="rolesTablesCtrl.config.removeFromOrg(org.details.org.metadata.guid)">
+              Remove from Org</a>
+          </td>
         </tr>
       </table>
     </div>

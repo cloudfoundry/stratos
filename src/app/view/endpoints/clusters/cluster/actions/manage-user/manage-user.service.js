@@ -3,32 +3,59 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster')
-    .factory('app.view.endpoints.clusters.cluster.manangeUsers', ManageUsersFactory);
+    .factory('app.view.endpoints.clusters.cluster.manageUsers', ManageUsersFactory);
 
   ManageUsersFactory.$inject = [
     '$q',
     'app.model.modelManager',
     'helion.framework.widgets.asyncTaskDialog',
     '$stateParams',
-    '$rootScope'
+    '$rootScope',
+    'app.view.endpoints.clusters.cluster.rolesService'
   ];
 
-  function ManageUsersFactory($q, modelManager, asyncTaskDialog, $stateParams, $rootScope) {
-    var that = this;
+  function ManageUsersFactory($q, modelManager, asyncTaskDialog, $stateParams, $rootScope, rolesService) {
+    // var that = this;
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
-    var orgRoles = {};
-    _.forEach(['org_manager', 'org_auditor', 'billing_manager'], function (role) {
-      orgRoles[role] = organizationModel.organizationRoleToString(role);
-    });
-    var spaceRoles = {};
-    _.forEach(['space_manager', 'space_auditor', 'space_developer'], function (role) {
-      spaceRoles[role] = spaceModel.spaceRoleToString(role);
-    });
-
     var selectedRoles = {};
+    var originalSelectedRoles = {};
+
+    var removeFromOrg = function (orgGuid) {
+      selectedRoles[orgGuid].organization = {};
+      _.forEach(selectedRoles[orgGuid].spaces, function (space, key) {
+        selectedRoles[orgGuid].spaces[key] = {};
+      });
+    };
+
+    var containsRoles = function (orgGuid) {
+      var orgContainsRoles = _.find(selectedRoles[orgGuid].organization, function (role, key) {
+        if (key === 'org_user') {
+          return false;
+        }
+        return role;
+      });
+      if (orgContainsRoles) {
+        return true;
+      }
+
+      var spaces = selectedRoles[orgGuid].spaces;
+      if (!spaces) {
+        return false;
+      }
+      for (var spaceGuid in spaces) {
+        if (!spaces.hasOwnProperty(spaceGuid)) {
+          continue;
+        }
+        if (_.find(spaces[spaceGuid])) {
+          return true;
+        }
+      }
+      return false;
+    };
+
 
     /**
      * @name ManageUsersFactory.show
@@ -39,11 +66,14 @@
     this.show = function (clusterGuid, users, refreshOrgRoles, refreshSpaceRoles) {
 
       selectedRoles = {};
+      var organization = organizationModel.organizations[clusterGuid];
 
       var initPromises = [];
       if (refreshOrgRoles || refreshSpaceRoles) {
-        _.forEach(organizationModel.organizations[clusterGuid], function(organization) {
+        _.forEach(organization, function(organization) {
           selectedRoles[organization.details.org.metadata.guid] = {};
+          originalSelectedRoles[organization.details.org.metadata.guid] = {};
+
 
           if (refreshOrgRoles) {
             //TODO:
@@ -66,6 +96,10 @@
           state.initialised = false;
         });
 
+      var updateUsers = function () {
+        return rolesService.updateUsers(clusterGuid, users, originalSelectedRoles, selectedRoles);
+      };
+
       return asyncTaskDialog(
         {
           title: users.length === 1 ? gettext('Manager User: ') + users[0].entity.username : 'TEAMFOUR-708',
@@ -75,48 +109,24 @@
           }
         },
         {
-          removeFromOrg: that.removeFromOrg,
           data: {
-            organizations: organizationModel.organizations[clusterGuid]
+            organizations: organization
           },
           selectedRoles: selectedRoles,
+          originalSelectedRoles: originalSelectedRoles,
           tableConfig: {
             clusterGuid: clusterGuid,
-            orgRoles: orgRoles,
-            spaceRoles: spaceRoles,
+            orgRoles: rolesService.organizationRoles,
+            spaceRoles: rolesService.spaceRoles,
             users: users,
-            initPromise: initPromise
+            initPromise: initPromise,
+            removeFromOrg: removeFromOrg,
+            containsRoles: containsRoles
           },
           state: state
         },
-        that.assignUsers
+        updateUsers
       );
-    };
-
-    this.removeFromOrg = function (arg) {
-      console.log('removeFromOrg: ', arg);
-    };
-
-    /**
-     * @name ManageUsersFactory.assignUsers
-     * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
-     * the affected organizations and spaces
-     * @returns {promise}
-     */
-    this.assignUsers = function () {
-      console.log('selectedRoles: ', selectedRoles);
-      return $q.reject('poop butt');
-    };
-
-    /**
-     * @name ManageUsersFactory.assignUser
-     * @description Assign the user's selected roles. If successful refresh the cache of the affected organizations and
-     * spaces
-     * @param {object} user - the HCF user object of the user to assign roles to
-     * @returns {promise}
-     */
-    this.assignUser = function (user) {
-
     };
 
     return this;

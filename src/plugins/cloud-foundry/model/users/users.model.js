@@ -91,6 +91,11 @@
         });
     },
 
+    removeAuditedOrganizationFromUser: function (cnsiGuid, orgGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .RemoveAuditedOrganizationFromUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
     associateBillingManagedOrganizationWithUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .AssociateBillingManagedOrganizationWithUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid))
@@ -99,12 +104,22 @@
         });
     },
 
+    removeBillingManagedOrganizationFromUser: function (cnsiGuid, orgGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .RemoveBillingManagedOrganizationFromUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
     associateManagedOrganizationWithUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .AssociateManagedOrganizationWithUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
+    },
+
+    removeManagedOrganizationFromUser: function (cnsiGuid, orgGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .RemoveManagedOrganizationFromUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid));
     },
 
     associateOrganizationWithUser: function (cnsiGuid, orgGuid, userGuid, params) {
@@ -123,6 +138,11 @@
         });
     },
 
+    removeAuditedSpaceFromUser: function (cnsiGuid, spaceGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .RemoveAuditedSpaceFromUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
     associateManagedSpaceWithUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .AssociateManagedSpaceWithUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid))
@@ -131,12 +151,22 @@
         });
     },
 
+    removeManagedSpaceFromUser: function (cnsiGuid, spaceGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .RemoveManagedSpaceFromUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
     associateSpaceWithUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .AssociateSpaceWithUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
+    },
+
+    removeSpaceFromUser: function (cnsiGuid, spaceGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .RemoveSpaceFromUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid));
     }
   });
 
