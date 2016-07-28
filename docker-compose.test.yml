@@ -37,7 +37,7 @@ services:
       HCP_IDENTITY_HOST: ident.helion.space
       HCP_IDENTITY_PORT: 443
     links:
-      - postgres:postgres
+      - goose:goose
 
 
   nginx:

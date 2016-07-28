@@ -29,7 +29,7 @@ services:
       file: common.yml
       service: proxy
     links:
-      - postgres:postgres
+      - goose:goose
 
 
   nginx:
