@@ -236,7 +236,7 @@
       require: 'ngModel',
       link: function (scope, elm, attrs, ctrl) {
         var index = parseInt(attrs.uniqueSpaceName, 10);
-        ctrl.$validators.dupeName = function (modelValue, viewValue) {
+        ctrl.$validators.dupeName = function (modelValue) {
           if (ctrl.$isEmpty(modelValue)) {
             return true;
           }
