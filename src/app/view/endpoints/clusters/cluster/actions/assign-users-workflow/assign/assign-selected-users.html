@@ -27,53 +27,23 @@
       </select-input>
     </div>
     <div class="assign-selected-users-orgs-roles">
-        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][0]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles.current[step.userInput.org.details.guid].organization['org_manager']"></checkbox-input>
         <span translate>Org Manager</span>
-        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][1]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles.current[step.userInput.org.details.guid].organization['org_auditor']"></checkbox-input>
         <span translate>Org Auditor</span>
-        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][2]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles.current[step.userInput.org.details.guid].organization['billing_manager']"></checkbox-input>
         <span translate>Billing Manager</span>
     </div>
   </div>
-  <div class="assign-selected-users-spaces"
-       st-table="step.ctrl.displayedSpaces"
-       st-safe-src="step.data.spaces">
+  <div class="assign-selected-users-spaces">
     <h4>Assign space roles.</h4>
-    <table class="table table-outlined table-selectable">
-      <thead>
-      <tr>
-        <th st-sort="name" st-sort-default="true" translate>SPACE</th>
-        <th translate>Space Manager</th>
-        <th translate>Space Developer</th>
-        <th translate>Space Auditor</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr ng-if="step.data.spaces.length > 0"
-        ng-repeat="space in step.ctrl.displayedSpaces">
-        <td>{{ space.entity.name }}</td>
-        <td><checkbox-input ng-model="step.userInput.roles.space[step.userInput.org.details.guid][space.metadata.guid][0]"></checkbox-input></td>
-        <td><checkbox-input ng-model="step.userInput.roles.space[step.userInput.org.details.guid][space.metadata.guid][1]"></checkbox-input></td>
-        <td><checkbox-input ng-model="step.userInput.roles.space[step.userInput.org.details.guid][space.metadata.guid][2]"></checkbox-input></td>
-      </tr>
-      <tr ng-if="step.data.spaces.length === 0">
-        <td colspan="4">
-          <span translate>There are no spaces associated with this organization</span>
-        </td>
-      </tr>
-      </tbody>
-      <tfoot ng-init="step.ctrl.pagedSpaceCount = 2"
-             ng-show="step.ctrl.pagedSpaceCount < step.data.spaces.length">
-      <tr>
-        <td colspan="5" class="text-center">
-          <a ng-click="step.ctrl.pagedSpaceCount = step.data.spaces.length">
-            <span translate>Show All</span> ({{step.data.spaces.length}})
-          </a>
-          <div ng-show="false" st-pagination="" st-items-by-page="step.ctrl.pagedSpaceCount"></div>
-        </td>
-      </tr>
-      </tfoot>
-    </table>
+    <roles-tables
+      config="step.table.config"
+      data="step.table.data"
+      organization="step.userInput.org"
+      selection="step.userInput.roles.current[step.userInput.org.details.guid]"
+      original-selection="step.userInput.roles.original[step.userInput.org.details.guid]"
+    ></roles-tables>
   </div>
   <div class="alert alert-danger alert-with-icon" ng-if="step.data.failedAssignForUsers.length > 0">
     <span translate>There was a problem assigning roles for user/s {{ step.data.failedAssignForUsers.join(',') }}. If the problem persists please contact an administrator</span>

@@ -25,7 +25,6 @@
     return {
       bindToController: {
         config: '=',
-        data: '=',
         organization: '=',
         selection: '=',
         originalSelection: '=',
@@ -65,14 +64,17 @@
                                  modelManager, utils, confirmDialog, asyncTaskDialog) {
     var that = this;
 
-    var initPromise = this.config.initPromise || $q.when();
-    initPromise.then(function () {
+    $scope.$watch(function () {
+      return that.organization;
+    }, refresh);
+
+    function refresh() {
       // Convert the cached organization roles into a keyed object of truthies required to run the check boxes
       var orgRolesByUser = that.organization.roles;
       // At the moment we're only dealing with one user. See TEAMFOUR-708 for bulk users
       var user = that.config.users[0];
       var userRoles = orgRolesByUser[user.metadata.guid];
-      that.selection.organization = _.keyBy(userRoles);
+      _.set(that.selection, 'organization', _.keyBy(userRoles));
 
       // Convert the cached space roles into a keyed object of truthies required to run the check boxes
       var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -91,6 +93,11 @@
           key: space.metadata.guid
         };
       });
+    }
+
+    var initPromise = this.config.initPromise || $q.when();
+    initPromise.then(function () {
+      refresh();
     });
   }
 

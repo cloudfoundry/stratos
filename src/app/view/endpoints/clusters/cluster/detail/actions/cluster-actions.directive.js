@@ -196,6 +196,7 @@
       disabled: true,
       execute: function () {
         assignUsersService.assign({
+          clusterGuid: that.clusterGuid,
           selectedUsers: {}
         });
       },

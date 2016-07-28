@@ -34,7 +34,6 @@
       <div class="manage-users-org" ng-repeat="(guid, org) in asyncTaskDialogCtrl.context.data.organizations">
         <roles-tables
           config="asyncTaskDialogCtrl.context.tableConfig"
-          data="asyncTaskDialogCtrl.context.data"
           organization="org"
           selection="asyncTaskDialogCtrl.context.selectedRoles[guid]"
           original-selection="asyncTaskDialogCtrl.context.originalSelectedRoles[guid]"

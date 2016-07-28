@@ -58,6 +58,26 @@
       }
     };
 
+    this.refreshRoles = function (clusterGuid, refreshOrgRoles, refreshSpaceRoles) {
+      var initPromises = [];
+      if (!refreshOrgRoles && !refreshSpaceRoles) {
+        return $q.when();
+      }
+
+      _.forEach(organizationModel.organizations[clusterGuid], function(organization) {
+        if (refreshOrgRoles) {
+          //TODO:
+        }
+
+        if (refreshSpaceRoles) {
+          _.forEach(organization.spaces, function(space) {
+            initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid));
+          });
+        }
+      });
+      return $q.all(initPromises);
+    };
+
     /**
      * @name app.view.endpoints.clusters.cluster.rolesService.updateUsers
      * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
@@ -88,6 +108,46 @@
       });
     };
 
+    this.clearOrg = function (org) {
+      org.organization = {};
+      _.forEach(org.spaces, function (space, key) {
+        org.spaces[key] = {};
+      });
+    };
+
+    this.clearOrgs = function (orgs) {
+      var that = this;
+      _.forEach(orgs, function (org) {
+        that.clearOrg(org);
+      });
+    };
+
+    this.orgContainsRoles = function (org) {
+      var orgContainsRoles = _.find(org.organization, function (role, key) {
+        if (key === 'org_user') {
+          return false;
+        }
+        return role;
+      });
+      if (orgContainsRoles) {
+        return true;
+      }
+
+      var spaces = org.spaces;
+      if (!spaces) {
+        return false;
+      }
+      for (var spaceGuid in spaces) {
+        if (!spaces.hasOwnProperty(spaceGuid)) {
+          continue;
+        }
+        if (_.find(spaces[spaceGuid])) {
+          return true;
+        }
+      }
+      return false;
+    };
+
     /**
      * @name ManageUsersFactory.updateUser
      * @description Assign the user's selected roles. If successful refresh the cache of the affected organizations and
@@ -105,7 +165,6 @@
       return $q.all(promises);
     }
 
-
     function updateOrgAndSpaces(clusterGuid, user, orgGuid, oldOrgRoles, newOrgRoles) {
       var userGuid = user.metadata.guid;
 
@@ -121,7 +180,7 @@
       // Assign/Remove Organization Roles
       _.forEach(newOrgRoles.organization, function (selected, roleKey) {
         // Has there been a change in the org role?
-        var oldRoleSelected = oldOrgRoles.organization[roleKey];
+        var oldRoleSelected = _.get(oldOrgRoles, 'organization.' + roleKey);
         if (oldRoleSelected === selected) {
           return;
         }
@@ -149,7 +208,7 @@
 
         _.forEach(spaceRoles, function (selected, roleKey) {
           // Has there been a change in the space role?
-          var oldRoleSelected = oldOrgRoles.spaces[spaceGuid][roleKey];
+          var oldRoleSelected = _.get(oldOrgRoles, 'spaces.' + spaceGuid + '.' + roleKey);
           if (oldRoleSelected === selected) {
             return;
           }

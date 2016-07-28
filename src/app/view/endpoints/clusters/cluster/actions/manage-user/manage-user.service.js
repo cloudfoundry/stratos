@@ -12,6 +12,19 @@
     'app.view.endpoints.clusters.cluster.rolesService'
   ];
 
+  /**
+   * @memberof app.view.endpoints.clusters.cluster
+   * @name AssignUsersWorkflowController
+   * @constructor
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} context - the context for the modal. Used to pass in data
+   * @param {object} rolesService - the console roles service. Aids in selecting, assigning and removing roles with the
+   * roles table.
+   * @param {object} $stateParams - the angular $stateParams service
+   * @param {object} $q - the angular $q service
+   * @param {object} $timeout - the angular $timeout service
+   * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
+   */
   function ManageUsersFactory($q, modelManager, asyncTaskDialog, rolesService) {
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -21,42 +34,15 @@
     var originalSelectedRoles = {};
 
     var removeFromOrg = function (orgGuid) {
-      selectedRoles[orgGuid].organization = {};
-      _.forEach(selectedRoles[orgGuid].spaces, function (space, key) {
-        selectedRoles[orgGuid].spaces[key] = {};
-      });
+      rolesService.clearOrg(selectedRoles[orgGuid]);
     };
 
     var containsRoles = function (orgGuid) {
-      var orgContainsRoles = _.find(selectedRoles[orgGuid].organization, function (role, key) {
-        if (key === 'org_user') {
-          return false;
-        }
-        return role;
-      });
-      if (orgContainsRoles) {
-        return true;
-      }
-
-      var spaces = selectedRoles[orgGuid].spaces;
-      if (!spaces) {
-        return false;
-      }
-      for (var spaceGuid in spaces) {
-        if (!spaces.hasOwnProperty(spaceGuid)) {
-          continue;
-        }
-        if (_.find(spaces[spaceGuid])) {
-          return true;
-        }
-      }
-      return false;
+      return rolesService.orgContainsRoles(selectedRoles[orgGuid]);
     };
 
-    var clearSelections = function () {
-      _.forEach(selectedRoles, function (org, orgGuid) {
-        removeFromOrg(orgGuid);
-      });
+    var clearAllOrgs = function () {
+      rolesService.clearOrgs(selectedRoles);
     };
 
     /**
@@ -68,29 +54,15 @@
     this.show = function (clusterGuid, users, refreshOrgRoles, refreshSpaceRoles) {
 
       selectedRoles = {};
-      var organization = organizationModel.organizations[clusterGuid];
+      var organizations = organizationModel.organizations[clusterGuid];
 
-      var initPromises = [];
-      if (refreshOrgRoles || refreshSpaceRoles) {
-        _.forEach(organization, function(organization) {
-          selectedRoles[organization.details.org.metadata.guid] = {};
-          originalSelectedRoles[organization.details.org.metadata.guid] = {};
-
-
-          if (refreshOrgRoles) {
-            //TODO:
-          }
-
-          if (refreshSpaceRoles) {
-            _.forEach(organization.spaces, function (space) {
-              initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid));
-            });
-          }
-        });
-      }
+      _.forEach(organizations, function (organization) {
+        selectedRoles[organization.details.org.metadata.guid] = {};
+        originalSelectedRoles[organization.details.org.metadata.guid] = {};
+      });
 
       var state = {};
-      var initPromise = $q.all(initPromises)
+      var initPromise = rolesService.refreshRoles(clusterGuid, refreshOrgRoles, refreshSpaceRoles)
         .then(function () {
           state.initialised = true;
         })
@@ -112,7 +84,7 @@
         },
         {
           data: {
-            organizations: organization
+            organizations: organizations
           },
           selectedRoles: selectedRoles,
           originalSelectedRoles: originalSelectedRoles,
@@ -126,7 +98,7 @@
             containsRoles: containsRoles
           },
           state: state,
-          clearSelections: clearSelections
+          clearSelections: clearAllOrgs
         },
         updateUsers
       );

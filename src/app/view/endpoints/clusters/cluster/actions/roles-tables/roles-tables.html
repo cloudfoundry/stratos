@@ -1,5 +1,7 @@
 <div class="roles-tables">
-  <div class="roles-table-org" ng-class="{'roles-table-org-with-space': (rolesTablesCtrl.ctrl.displayedSpaces.length > 0)}">
+  <div class="roles-table-org"
+       ng-if="!rolesTablesCtrl.config.disableOrg"
+       ng-class="{'roles-table-org-with-space': (rolesTablesCtrl.ctrl.displayedSpaces.length > 0)}">
     <div class="roles-table"
          st-table="rolesTablesCtrl.ctrl.displayedOrgs"
          st-safe-src="rolesTablesCtrl.org"

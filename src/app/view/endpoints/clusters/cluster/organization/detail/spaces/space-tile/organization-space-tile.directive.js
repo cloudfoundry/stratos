@@ -73,6 +73,7 @@
         disabled: !isAdmin,
         execute: function () {
           assignUsers.assign({
+            clusterGuid: that.clusterGuid,
             organizationGuid: that.organizationGuid,
             spaceGuid: that.spaceGuid
           });
