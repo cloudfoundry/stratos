@@ -165,13 +165,8 @@
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
               that.hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
-<<<<<<< HEAD
                 var name = that._getDeploymentTargetName();
                 var target = _.find(that.hceModel.data.deploymentTargets, {name: name});
-=======
-                var target = _.find(that.hceModel.data.deploymentTargets,
-                                    { name: that.userInput.serviceInstance.name });
->>>>>>> TEAMFOUR-695 - create add-pipeline workflow
                 if (target) {
                   that.createPipeline(target.deployment_target_id)
                     .then(function (response) {
@@ -315,18 +310,11 @@
     },
 
     createDeploymentTarget: function () {
-<<<<<<< HEAD
       var name = this._getDeploymentTargetName();
       var endpoint = this.userInput.serviceInstance.api_endpoint;
       var url = endpoint.Scheme + '://' + endpoint.Host;
       return this.hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
                                                   name,
-=======
-      var endpoint = this.userInput.serviceInstance.api_endpoint;
-      var url = endpoint.Scheme + '://' + endpoint.Host;
-      return this.hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
-                                                  this.userInput.serviceInstance.name,
->>>>>>> TEAMFOUR-695 - create add-pipeline workflow
                                                   url,
                                                   this.userInput.clusterUsername,
                                                   this.userInput.clusterPassword,
@@ -334,7 +322,6 @@
                                                   this.userInput.space.entity.name);
     },
 
-<<<<<<< HEAD
     _getDeploymentTargetName: function () {
       return [
         this.userInput.serviceInstance.name,
@@ -343,13 +330,10 @@
       ].join('_');
     },
 
-=======
->>>>>>> TEAMFOUR-695 - create add-pipeline workflow
     createPipeline: function (targetId) {
       return this.hceModel.createProject(this.userInput.hceCnsi.guid,
                                          this.userInput.name,
                                          this.userInput.source,
-                                         this.githubModel.getToken(),
                                          targetId,
                                          this.userInput.buildContainer.build_container_id,
                                          this.userInput.repo,
