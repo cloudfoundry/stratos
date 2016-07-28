@@ -19,4 +19,8 @@ console-view {
       flex: 1 0 auto;
     }
   }
+
+  > .container-fluid {
+    overflow-y: auto;
+  }
 }
