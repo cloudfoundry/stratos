@@ -16,22 +16,25 @@ module.exports = function () {
       directory: '../src/lib/',
       ignorePath: '../src/',
   	  overrides: {
+        "angular-link-header-parser": {
+		      "main": [ "release/angular-link-header-parser.min.js" ]
+        },
   	    "angular-toastr": {
-		  "main": [ "./dist/angular-toastr.tpls.js" ]
+		      "main": [ "./dist/angular-toastr.tpls.js" ]
         }
-      }	  
+      }
     },
 
-	bowerDev: {
-      bowerJson: require('./bower.json'),
-      directory: '../src/lib/',
-      ignorePath: '../src/',
-      devDependencies: false
-	},
+    bowerDev: {
+        bowerJson: require('./bower.json'),
+        directory: '../src/lib/',
+        ignorePath: '../src/',
+        devDependencies: false
+    },
 
-  assetFiles: [
-    paths.src + 'plugins/**/assets/**/*'
-  ],
+    assetFiles: [
+      paths.src + 'plugins/**/assets/**/*'
+    ],
 
     cssFiles: [
       paths.dist + 'index.css'
