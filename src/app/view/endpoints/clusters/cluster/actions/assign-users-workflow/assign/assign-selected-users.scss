@@ -1,0 +1,40 @@
+.assign-selected-users {
+  h4 {
+    margin-top: 0;
+    margin-bottom: $hpe-unit-space / 2;
+  }
+
+  .assign-selected-users-selected {
+    padding-bottom: $hpe-unit-space / 2;
+
+    .assign-selected-users-selected-label {
+      padding-right: 10px;
+    }
+  }
+
+  .assign-selected-users-orgs {
+    .assign-selected-users-orgs-roles {
+      padding-top: $hpe-unit-space / 2;
+      padding-bottom: $hpe-unit-space;
+
+      display: flex;
+      & > * {
+        align-self: center;
+      }
+
+      & > span {
+        padding: 0 10px 0 5px;
+      }
+    }
+  }
+
+  .assign-selected-users-spaces {
+    td {
+      vertical-align: middle;
+    }
+  }
+
+  .alert {
+    margin-bottom: $hpe-unit-space;
+  }
+}

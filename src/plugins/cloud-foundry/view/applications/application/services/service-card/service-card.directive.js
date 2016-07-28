@@ -32,7 +32,8 @@
   ServiceCardController.$inject = [
     '$scope',
     'app.model.modelManager',
-    'app.event.eventService'
+    'app.event.eventService',
+    'helion.framework.widgets.dialog.confirm'
   ];
 
   /**
@@ -43,7 +44,9 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.event.eventService} eventService - the event management service
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog
    * @property {app.event.eventService} eventService - the event management service
+   * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog
    * @property {cloud-foundry.model.application} appModel - the Cloud Foundry application model
    * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model
    * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)
@@ -51,9 +54,10 @@
    * @property {number} numAttached - the number of service instances bound to specified app
    * @property {array} actions - the actions that can be performed from this service card
    */
-  function ServiceCardController($scope, modelManager, eventService) {
+  function ServiceCardController($scope, modelManager, eventService, confirmDialog) {
     var that = this;
     this.eventService = eventService;
+    this.confirmDialog = confirmDialog;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.allowAddOnly = angular.isDefined(this.addOnly) ? this.addOnly : false;
@@ -164,15 +168,25 @@
      * @function detach
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
      * @description Detach service instance from app
-     * @returns {void}
+     * @returns {promise} A promise
      */
     detach: function () {
       var that = this;
       if (this.serviceBindings.length === 1) {
-        return this.bindingModel.deleteServiceBinding(this.cnsiGuid, this.serviceBindings[0].metadata.guid)
-          .then(function () {
-            that.appModel.getAppSummary(that.cnsiGuid, that.app.summary.guid);
-          });
+        return this.confirmDialog({
+          title: gettext('Detach Service'),
+          description: gettext('Are you sure you want to detach ') + this.service.entity.label + '?',
+          buttonText: {
+            yes: gettext('Detach'),
+            no: gettext('Cancel')
+          },
+          callback: function () {
+            return that.bindingModel.deleteServiceBinding(that.cnsiGuid, that.serviceBindings[0].metadata.guid)
+              .then(function () {
+                that.appModel.getAppSummary(that.cnsiGuid, that.app.summary.guid);
+              });
+          }
+        });
       }
     },
 

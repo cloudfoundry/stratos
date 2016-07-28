@@ -1,5 +1,6 @@
 @import 'detail/cluster-detail';
 @import 'organization/space/detail/services/space-services';
+@import 'actions/assign-users-workflow/assign-users';
 
 .cluster {
   .cluster-breadcrumb {
@@ -32,6 +33,11 @@
   h3 {
     margin: $hpe-unit-space 0;
     height: $hpe-unit-space;
+  }
+
+  .cluster-loading {
+    margin: 72px auto;
+    text-align: center;
   }
 
   .cluster-detail {
