@@ -58,7 +58,7 @@
         img: 'hipchat_logo.png'
       },
       httpPost: {
-        title: gettexT('Http'),
+        title: gettext('Http'),
         description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
         endpointLabel: gettext('Server URL'),
         img: 'httppost_logo.png'
