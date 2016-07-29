@@ -107,13 +107,13 @@
       return that.userRoles[aUser.metadata.guid];
     };
 
-    this.selectAllChanged = function (selectedUsers) {
+    this.selectAllChanged = function () {
       if (that.selectAllUsers) {
         _.forEach(that.visibleUsers, function (user) {
-          selectedUsers[user.metadata.guid] = true;
+          that.selectedUsers[user.metadata.guid] = true;
         });
       } else {
-        selectedUsers = {};
+        that.selectedUsers = {};
       }
     };
 
