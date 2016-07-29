@@ -101,7 +101,7 @@
           return confirmDialog({
             title: gettext('Delete Space'),
             description: gettext('Are you sure you want to delete space') +
-            " '" + that.spaceDetail().details.space.entity.name + "' ?",
+            " '" + that.spaceDetail().details.space.entity.name + "'?",
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
