@@ -91,7 +91,7 @@
         steps: [
           {
             ready: true,
-            title: gettext('Select Endpint'),
+            title: gettext('Select Endpoint'),
             templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/select-endpoint.html',
             formName: 'application-endpoint-form',
             onNext: function () {
