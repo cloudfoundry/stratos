@@ -145,8 +145,8 @@
       ],
       "volume_mounts": [
         {
-          "volume_name": "hsc-migration-volume",
-          "mountpoint": "/hsc-migration-volume"
+          "volume_name": "hsc-upgrade-volume",
+          "mountpoint": "/hsc-upgrade-volume"
         },
         {
           "volume_name": "hsc-encryption-key-volume",
@@ -237,10 +237,10 @@
   },
   "preflight": [
     {
-      "name": "hsc-initiate-migration-job",
+      "name": "hsc-initiate-upgrade-job",
       "version": "1.0.0",
       "vendor": "HPE",
-      "external_name": "Console - Initiate Service Migration Job",
+      "external_name": "Console - Initiate Service Upgrade Job",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -248,35 +248,11 @@
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-initiate-migration-job:{{TAG}}",
+      "image": "hsc/hsc-initiate-upgrade-job:{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
           "name": "CONSOLE_VERSION"
-        },
-        {
-          "name": "DB_HOST"
-        },
-        {
-          "name": "CFGDB_PORT"
-        },
-        {
-          "name": "POSTGRES_DB"
-        },
-        {
-          "name": "POSTGRES_USER"
-        },
-        {
-          "name": "POSTGRES_PASSWORD"
-        },
-        {
-          "name": "PGSQL_DATABASE"
-        },
-        {
-          "name": "PGSQL_USER"
-        },
-        {
-          "name": "PGSQL_PASSWORD"
         }
       ],
       "affinity": [],
@@ -287,18 +263,18 @@
       "service_ports": [],
       "volume_mounts": [
         {
-          "volume_name": "hsc-migration-volume",
-          "mountpoint": "/hsc-migration-volume"
+          "volume_name": "hsc-upgrade-volume",
+          "mountpoint": "/hsc-upgrade-volume"
         }
       ]
     }
   ],
   "postflight": [
     {
-      "name": "hsc-finalize-migration-job",
+      "name": "hsc-finalize-upgrade-job",
       "version": "1.0.0",
       "vendor": "HPE",
-      "external_name": "Console - Finalize Service Migration Job",
+      "external_name": "Console - Finalize Service Upgrade Job",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -306,7 +282,7 @@
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-finalize-migration-job:{{TAG}}",
+      "image": "hsc/hsc-finalize-upgrade-job:{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
@@ -335,9 +311,6 @@
         },
         {
           "name": "PGSQL_PASSWORD"
-        },
-        {
-          "name": "SQL"
         }
       ],
       "affinity": [],
@@ -348,8 +321,8 @@
       "service_ports": [],
       "volume_mounts": [
         {
-          "volume_name": "hsc-migration-volume",
-          "mountpoint": "/hsc-migration-volume"
+          "volume_name": "hsc-upgrade-volume",
+          "mountpoint": "/hsc-upgrade-volume"
         }
       ]
     }
@@ -362,7 +335,7 @@
       "shared": false
     },
     {
-      "name": "hsc-migration-volume",
+      "name": "hsc-upgrade-volume",
       "size_gb": 1,
       "shared": true
     },
