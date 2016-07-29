@@ -88,13 +88,13 @@ popd
 echo "Build & publish the container image for the Console Proxy"
 buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
-# Build the preflight container - initiate service migration
+# Build the preflight container - initiate service upgrade
 echo "Build & publish the container image for the preflight job"
-buildAndPublishImage hsc-initiate-migration-job ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-initiate-upgrade-job ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
 
-# Build the postflight container - finalize service migration
+# Build the postflight container - finalize service upgrade
 echo "Build & publish the container image for the postflight job"
-buildAndPublishImage hsc-finalize-migration-job ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-finalize-upgrade-job ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
 echo "Provision the UI"
