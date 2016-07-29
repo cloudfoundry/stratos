@@ -27,7 +27,7 @@
    * @name HceModel
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.event.eventService} eventService - the application event service
-   * @param $log
+   * @param {object} $log - Angular $log service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.event.eventService} eventService - the application event service
    * @property {object} data - the Helion Code Engine data
@@ -615,7 +615,8 @@
      * @function onListNotificationTargetTypes
      * @memberof cloud-foundry.model.hce.HceModel
      * @description store current notification target types
-     * @returns {void}
+     * @param {string} response - the JSON response from the API call
+     * @returns {void} Notification Target content
      * @private
      */
     onListNotificationTargetTypes: function (response) {

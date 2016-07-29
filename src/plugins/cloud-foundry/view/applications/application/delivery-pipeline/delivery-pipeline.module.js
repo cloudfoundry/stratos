@@ -33,6 +33,7 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {object} addNotificationService - the addNotificationS dialog service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
@@ -120,8 +121,8 @@
           .then(function () {
             that.getProject();
           }).finally(function () {
-          that.busy = false;
-        });
+            that.busy = false;
+          });
         that.hceModel.getImageRegistries(that.hceCnsi.guid);
         that.modelUpdated = true;
       }
