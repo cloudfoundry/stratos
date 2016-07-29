@@ -1,0 +1,10 @@
+<form name="editSpaceForm">
+  <div class="form-group" focusable-input
+       ng-class="{'has-error': editSpaceForm.name.$invalid && editSpaceForm.name.$dirty}">
+    <label class="control-label" translate>Space Name</label>
+    <input type="text" name="name" auto-focus class="form-control"
+           helion-unique items="asyncTaskDialogCtrl.context.data.spaceNames"
+           ng-model="asyncTaskDialogCtrl.context.data.name" required/>
+    <br><br>
+  </div>
+</form>
