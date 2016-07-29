@@ -90,7 +90,7 @@
       {
         name: gettext('Manage Roles'),
         execute: function (aUser) {
-          manageUsers.show(that.guid, [aUser], false, true).result.then(function () {
+          manageUsers.show(that.guid, [aUser], true).result.then(function () {
             refreshUsers();
           });
         }

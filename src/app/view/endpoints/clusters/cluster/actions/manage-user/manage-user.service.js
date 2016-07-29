@@ -6,7 +6,6 @@
     .factory('app.view.endpoints.clusters.cluster.manageUsers', ManageUsersFactory);
 
   ManageUsersFactory.$inject = [
-    '$q',
     'app.model.modelManager',
     'helion.framework.widgets.asyncTaskDialog',
     'app.view.endpoints.clusters.cluster.rolesService'
@@ -17,18 +16,12 @@
    * @name AssignUsersWorkflowController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} context - the context for the modal. Used to pass in data
-   * @param {object} rolesService - the console roles service. Aids in selecting, assigning and removing roles with the
-   * roles table.
-   * @param {object} $stateParams - the angular $stateParams service
-   * @param {object} $q - the angular $q service
-   * @param {object} $timeout - the angular $timeout service
-   * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
+   * @param {object} asyncTaskDialog - our async dialog service
+   * @param {object} rolesService - our roles service, used to create/handle data from roles tables
    */
-  function ManageUsersFactory($q, modelManager, asyncTaskDialog, rolesService) {
+  function ManageUsersFactory(modelManager, asyncTaskDialog, rolesService) {
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
 
     var selectedRoles = {};
     var originalSelectedRoles = {};
@@ -47,22 +40,26 @@
 
     /**
      * @name ManageUsersFactory.show
-     * @description ???
-     * @param {object} user ????
-     * @returns {promise} ??
+     * @description Show the manage users slide out
+     * @param {object} clusterGuid guid of the HCF cluster
+     * @param {object} users collection of users to pre-select
+     * @param {boolean} refreshSpaceRoles true if the space roles should be updated
+     * @returns {promise} promise fulfilled when dialogue has closed
      */
-    this.show = function (clusterGuid, users, refreshOrgRoles, refreshSpaceRoles) {
+    this.show = function (clusterGuid, users, refreshSpaceRoles) {
 
       selectedRoles = {};
       var organizations = organizationModel.organizations[clusterGuid];
 
+      // Ensure that the selected roles objects are initialised correctly. The roles table will then fiddle inside these
       _.forEach(organizations, function (organization) {
         selectedRoles[organization.details.org.metadata.guid] = {};
         originalSelectedRoles[organization.details.org.metadata.guid] = {};
       });
 
+      // Async refresh roles
       var state = {};
-      var initPromise = rolesService.refreshRoles(clusterGuid, refreshOrgRoles, refreshSpaceRoles)
+      var initPromise = rolesService.refreshRoles(clusterGuid, refreshSpaceRoles)
         .then(function () {
           state.initialised = true;
         })
@@ -70,6 +67,7 @@
           state.initialised = false;
         });
 
+      // Make the actual user role changes
       var updateUsers = function () {
         return rolesService.updateUsers(clusterGuid, users, originalSelectedRoles, selectedRoles);
       };
@@ -107,6 +105,4 @@
 
     return this;
   }
-
-
 })();

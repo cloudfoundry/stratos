@@ -15,8 +15,7 @@
        * @memberof app.view.endpoints.clusters.cluster.assignUsers
        * @name assign
        * @constructor
-       * @param {object} context - the context for the modal. Used to pass in data, specifically selectedUsers and
-       * initPromise.
+       * @param {object} context - the context for the modal. Used to pass in data
        */
       assign: function (context) {
         return detailView(
@@ -115,9 +114,9 @@
       });
     }
 
-    function initialiseAssign() {
-      return rolesService.refreshRoles(that.data.clusterGuid, false, true);
-    }
+    // function initialiseAssign() {
+    //   return rolesService.refreshRoles(that.data.clusterGuid, false, true);
+    // }
 
     function organizationChanged(org) {
       that.data.spaces = _.map(org.spaces, function (value) {
@@ -127,7 +126,11 @@
     }
 
     function createOriginalRoles(newRoles) {
-      // set all true to false;
+      // The role service updateUser function expects a collection of previously selected roles. The diff of which
+      // will be used to make assign/remove calls to HCF. For the assign users case we only want additive calls to
+      // be made. To do this the previously selected roles object needs to exactly match except contain false for any
+      // true role
+
       var oldRoles = angular.fromJson(angular.toJson(newRoles));
 
       function flopTrueToFalse(obj) {
@@ -144,6 +147,7 @@
           flopTrueToFalse(space);
         });
       });
+
       return oldRoles;
     }
 
@@ -200,12 +204,12 @@
 
               that.options.workflow.steps[1].table.config.users = that.userInput.selectedUsers;
 
-              //TODO: RC To be removed during TEAMFOUR-709
-              if (that.userInput.selectedUsers.length > 1) {
-                that.$timeout(function () {
-                  rolesService.clearOrgs(that.userInput.roles);
-                },2000);
-              }
+              // //TODO: RC To be removed during TEAMFOUR-709
+              // if (that.userInput.selectedUsers.length > 1) {
+              //   that.$timeout(function () {
+              //     rolesService.clearOrgs(that.userInput.roles);
+              //   },2000);
+              // }
 
               return organizationChanged(that.userInput.org);
             }
@@ -216,9 +220,9 @@
             formName: 'assign-selected-form',
             data: that.data,
             userInput: that.userInput,
-            checkReadiness: function () {
-              return initialiseAssign();
-            },
+            // checkReadiness: function () {
+            //   return initialiseAssign();
+            // },
             nextBtnText: gettext('Assign'),
             isLastStep: true,
             actions: {
@@ -238,8 +242,6 @@
                 disableOrg: true
               },
               roles: that.userInput.roles
-              // roles: that.userInput.roles.original,
-              // originalRoles: that.userInput.roles.current
             }
           }
         ]
@@ -264,12 +266,18 @@
         }
         that.assigning = true;
 
+        // Make the call to the role service to assign new roles. To do this we need to create the params in the
+        // required format.
+
+        // The service expects an object of type obj[orgGuid] = <org roles>
         var selectedOrgGuid = that.userInput.org.details.org.metadata.guid;
         var selectedOrgRoles = _.set({}, selectedOrgGuid, that.userInput.roles[selectedOrgGuid]);
 
+        // The service expects an object of HCF user objects keyed by their guid
         var usersByGuid = _.keyBy(that.userInput.selectedUsers, function (user) {
           return user.metadata.guid;
         });
+
         rolesService.updateUsers(context.clusterGuid, usersByGuid, createOriginalRoles(selectedOrgRoles), selectedOrgRoles)
           .then(function () {
             that.$uibModalInstance.close();
@@ -285,7 +293,6 @@
           });
       }
     };
-
   }
 
 })();

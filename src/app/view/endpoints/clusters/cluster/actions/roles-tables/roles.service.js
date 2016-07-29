@@ -11,26 +11,42 @@
     'app.model.modelManager'
   ];
 
-  // Makes requests, refreshes caches
-  // @params
+  /**
+   * @name RolesService
+   * @description Service to handle the data required/created by roles tables. This includes the ability to reach out
+   * and update HCF roles
+   * @constructor
+   * @param {object} $log - the angular $log service
+   * @param {object} $q - the angular $q service
+   * @param {app.model.modelManager} modelManager - the model management service
+   * @property {object} organizationRoles - Lists org roles and their translations
+   * @property {object} spaceRoles - Lists space roles and their translations
+   * @property {function} refreshRoles - Conditionally refresh the space roles cache
+   * @property {function} updateUsers - Update the organization and space roles for the users supplied
+   * @property {function} clearOrg - Clear the organisation + space roles of the organization provided
+   * @property {function} clearOrgs - Clear all organisation and their space roles from the selection provided
+   * @property {function} orgContainsRoles - Determine if the organisation provided and it's spaces has any roles
+   * selected
+   */
   function RolesService($log, $q, modelManager) {
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
+    // Some helper functions which list all org/space roles and also links them to their labels translations.
     this.organizationRoles = {
       org_manager: organizationModel.organizationRoleToString('org_manager'),
       org_auditor: organizationModel.organizationRoleToString('org_auditor'),
       billing_manager: organizationModel.organizationRoleToString('billing_manager')
     };
-
     this.spaceRoles = {
       space_manager: spaceModel.spaceRoleToString('space_manager'),
       space_auditor: spaceModel.spaceRoleToString('space_auditor'),
       space_developer: spaceModel.spaceRoleToString('space_developer')
     };
 
+    // Helper function to link org/space operation to a function
     var rolesToFunctions = {
       org: {
         add: {
@@ -58,23 +74,25 @@
       }
     };
 
-    this.refreshRoles = function (clusterGuid, refreshOrgRoles, refreshSpaceRoles) {
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.refreshRoles
+     * @description Conditionally refresh the space roles cache
+     * @param {string} clusterGuid - HCF service guid
+     * @param {object} refreshSpaceRoles - True if the space roles cache should be updated
+     * @returns {promise}
+     */
+    this.refreshRoles = function (clusterGuid, refreshSpaceRoles) {
       var initPromises = [];
-      if (!refreshOrgRoles && !refreshSpaceRoles) {
+      if (!refreshSpaceRoles) {
         return $q.when();
       }
 
-      _.forEach(organizationModel.organizations[clusterGuid], function(organization) {
-        if (refreshOrgRoles) {
-          //TODO:
-        }
-
-        if (refreshSpaceRoles) {
-          _.forEach(organization.spaces, function(space) {
-            initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid));
-          });
-        }
+      _.forEach(organizationModel.organizations[clusterGuid], function (organization) {
+        _.forEach(organization.spaces, function (space) {
+          initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid));
+        });
       });
+
       return $q.all(initPromises);
     };
 
@@ -82,9 +100,14 @@
      * @name app.view.endpoints.clusters.cluster.rolesService.updateUsers
      * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
      * the affected organizations and spaces
-     * @param {object} oldRoles - Object containing the previously selected roles, or the initial state.
+     * @param {string} clusterGuid - HCF service guid
+     * @param {object} selectedUsers - collection of users to apply roles to
+     * @param {object} oldRoles - Object containing the previously selected roles, or the initial state. The diff
+     * between this and newRoles will be applied (assign/remove). Format must match newRoles.
      *  Organizations... [userGuid][orgGuid].organization[roleKey] = truthy
      *  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
+     * @param {object} newRoles - Object containing the new roles to apply. The diff of this and oldRoles will be
+     * applied (assign/remove). Format must match oldRoles.
      * @returns {promise}
      */
     this.updateUsers = function (clusterGuid, selectedUsers, oldRoles, newRoles) {
@@ -108,6 +131,13 @@
       });
     };
 
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.clearOrg
+     * @description Clear the organisation + space roles of the organization provided
+     * @param {object} org - organization to clear. Format as below.
+     *  organization[roleKey] = truthy
+     *  spaces[spaceGuid][roleKey] = truthy
+     */
     this.clearOrg = function (org) {
       org.organization = {};
       _.forEach(org.spaces, function (space, key) {
@@ -115,6 +145,13 @@
       });
     };
 
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.clearOrg
+     * @description clearOrgs Clear all organisation and their space roles from the selection provided
+     * @param {object} orgs - object organization to clear. Format as below.
+     *  [orgGuid]organization[roleKey] = truthy
+     *  [orgGuid]spaces[spaceGuid][roleKey] = truthy
+     */
     this.clearOrgs = function (orgs) {
       var that = this;
       _.forEach(orgs, function (org) {
@@ -122,6 +159,14 @@
       });
     };
 
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.updateUsers
+     * @description Determine if the organisation provided and it's spaces has any roles selected
+     * @param {object} org - organization to clear. Format as below.
+     *  organization[roleKey] = truthy
+     *  spaces[spaceGuid][roleKey] = truthy
+     * @returns {boolean}
+     */
     this.orgContainsRoles = function (org) {
       var orgContainsRoles = _.find(org.organization, function (role, key) {
         if (key === 'org_user') {
@@ -148,24 +193,17 @@
       return false;
     };
 
-    /**
-     * @name ManageUsersFactory.updateUser
-     * @description Assign the user's selected roles. If successful refresh the cache of the affected organizations and
-     * spaces
-     * @param {object} user - the HCF user object of the user to assign roles to
-     * @returns {promise}
-     */
     function updateUser(clusterGuid, user, oldRolesPerOrg, newRolesPerOrg) {
       var promises = [];
 
       _.forEach(newRolesPerOrg, function (orgRoles, orgGuid) {
-        promises.push(updateOrgAndSpaces(clusterGuid, user, orgGuid, oldRolesPerOrg[orgGuid], orgRoles));
+        promises.push(updateRolesAndCache(clusterGuid, user, orgGuid, oldRolesPerOrg[orgGuid], orgRoles));
       });
 
       return $q.all(promises);
     }
 
-    function updateOrgAndSpaces(clusterGuid, user, orgGuid, oldOrgRoles, newOrgRoles) {
+    function updateRolesAndCache(clusterGuid, user, orgGuid, oldOrgRoles, newOrgRoles) {
       var userGuid = user.metadata.guid;
 
       // Track which orgs and spaces were affected. We'll update the cache for these afterwards

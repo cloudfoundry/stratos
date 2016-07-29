@@ -5,8 +5,8 @@
     <div class="roles-table"
          st-table="rolesTablesCtrl.ctrl.displayedOrgs"
          st-safe-src="rolesTablesCtrl.org"
-         roles-tables-search="rolesTablesCtrl.filter"
-         roles-tables-search-by="details.org.entity.name"
+         roles-smart-search="rolesTablesCtrl.filter"
+         roles-smart-search-by="details.org.entity.name"
          ng-show="rolesTablesCtrl.ctrl.displayedOrgs.length > 0">
       <table class="table table-outlined table-selectable">
         <thead>
@@ -35,8 +35,8 @@
     <div class="roles-table"
          st-table="rolesTablesCtrl.ctrl.displayedSpaces"
          st-safe-src="rolesTablesCtrl.spaces"
-         roles-tables-search="rolesTablesCtrl.filter"
-         roles-tables-search-by="label"
+         roles-smart-search="rolesTablesCtrl.filter"
+         roles-smart-search-by="label"
          ng-show="rolesTablesCtrl.ctrl.displayedSpaces.length > 0" >
       <table class="table table-outlined table-selectable">
         <thead>

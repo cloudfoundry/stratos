@@ -3,20 +3,6 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster')
-    .directive('rolesTablesSearch',function () {
-      return {
-        require:'^stTable',
-        restrict: 'A',
-        scope:{
-          rolesTablesSearch:'='
-        },
-        link:function (scope, ele, attr, ctrl) {
-          scope.$watch('rolesTablesSearch',function (val) {
-            ctrl.search(val, attr.rolesTablesSearchBy);
-          });
-        }
-      };
-    })
     .directive('rolesTables', RolesTables);
 
   RolesTables.$inject = [];
@@ -39,8 +25,6 @@
 
   RolesTablesController.$inject = [
     '$scope',
-    '$state',
-    '$stateParams',
     '$q',
     'app.model.modelManager',
     'app.utils.utilsService',
@@ -49,27 +33,23 @@
   ];
 
   /**
-   * @name OrganizationSummaryTileController
+   * @name RolesTablesController
+   * @description Controller for a roles tables directive. Will optionally update the model cache
    * @constructor
    * @param {object} $scope - the angular $scope service
-   * @param {object} $state - the angular $scope service
-   * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {app.utils.utilsService} utils - the console utils service
-   * @param {object} confirmDialog - our confirmation dialog service
-   * @param {object} asyncTaskDialog - our async dialog service
    */
-  function RolesTablesController($scope, $state, $stateParams, $q,
-                                 modelManager, utils, confirmDialog, asyncTaskDialog) {
+  function RolesTablesController($scope, $q, modelManager) {
     var that = this;
 
+    // If the organization changes, ensure we respond
     $scope.$watch(function () {
       return that.organization;
     }, refresh);
 
     function refresh() {
-
+      // Optionally update the cache
       if (_.get(that, 'config.showExistingRoles')) {
         // Convert the cached organization roles into a keyed object of truthies required to run the check boxes
         var orgRolesByUser = that.organization.roles;
@@ -88,6 +68,7 @@
         that.originalSelection = angular.fromJson(angular.toJson(that.selection));
       }
 
+      // Set the current org and spaces collections
       that.org = [that.organization];
       that.spaces = _.map(that.organization.spaces, function (space) {
         return {
