@@ -23,10 +23,10 @@
           "name": "CONSOLE_VERSION"
         },
         {
-          "name": "CONSOLE_CERT"
+          "name": "console-cert"
         },
         {
-          "name": "CONSOLE_CERT_KEY"
+          "name": "console-cert-key"
         }
       ],
       "affinity": [],
@@ -73,7 +73,7 @@
           "name": "PGSQL_USER"
         },
         {
-          "name": "PGSQL_PASSWORD"
+          "name": "pgsql-password"
         },
         {
           "name": "PGSQL_DATABASE"
@@ -91,10 +91,10 @@
           "name": "PGSQL_SSL_MODE"
         },
         {
-          "name": "CONSOLE_PROXY_CERT"
+          "name": "console-proxy-cert"
         },
         {
-          "name": "CONSOLE_PROXY_CERT_KEY"
+          "name": "console-proxy-cert-key"
         },
         {
           "name": "HTTP_CLIENT_TIMEOUT_IN_SECS"
@@ -118,7 +118,7 @@
           "name": "ALLOWED_ORIGINS"
         },
         {
-          "name": "SESSION_STORE_SECRET"
+          "name": "session-store-secret"
         },
         {
           "name": "GITHUB_OAUTH_CLIENT_ID"
@@ -176,16 +176,16 @@
           "name": "POSTGRES_USER"
         },
         {
-          "name": "POSTGRES_PASSWORD"
+          "name": "postgres-password"
         },
         {
           "name": "PGDATA"
         },
         {
-          "name": "CONSOLE_DB_CERT"
+          "name": "console-db-cert"
         },
         {
-          "name": "CONSOLE_DB_CERT_KEY"
+          "name": "console-db-cert-key"
         }
       ],
       "affinity": [],
@@ -204,7 +204,7 @@
       "volume_mounts": [
         {
           "volume_name": "pgsql-data-volume",
-          "mountpoint": "/database"
+          "mountpoint": "/database/postgres"
         }
       ]
     }
@@ -301,7 +301,7 @@
           "name": "POSTGRES_USER"
         },
         {
-          "name": "POSTGRES_PASSWORD"
+          "name": "postgres-password"
         },
         {
           "name": "PGSQL_DATABASE"
@@ -310,7 +310,7 @@
           "name": "PGSQL_USER"
         },
         {
-          "name": "PGSQL_PASSWORD"
+          "name": "pgsql-password"
         }
       ],
       "affinity": [],
@@ -397,10 +397,6 @@
       "secret": false
     },
     {
-      "name": "PGSQL_PASSWORD",
-      "description": "The password for the Stackato DB"
-    },
-    {
       "name": "PGSQL_PASSWORD_FILE",
       "description": "The Stackato DB password file on disk",
       "default": "/etc/secrets/pgsql-password"
@@ -468,10 +464,6 @@
       "secret": false
     },
     {
-      "name": "POSTGRES_PASSWORD",
-      "description": "The Postgresql password"
-    },
-    {
       "name": "POSTGRES_PASSWORD_FILE",
       "description": "The Postgres password file on disk",
       "default": "/etc/secrets/postgres-password"
@@ -501,7 +493,7 @@
     {
       "name": "PGDATA",
       "description": "placeholder",
-      "default": "/database",
+      "default": "/database/postgres",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -523,18 +515,8 @@
       "secret": false
     },
     {
-      "name": "CONSOLE_CERT",
-      "description": "The Console TLS Certificate"
-    },
-    {
-      "name": "CONSOLE_CERT_FILE",
-      "description": "The Console TLS Certificate file on disk",
-      "default": "/etc/secrets/console-cert"
-    },
-    {
       "name": "console-cert",
       "description": "TLS certificate for the Console",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -547,18 +529,8 @@
         }
     },
     {
-      "name": "CONSOLE_CERT_KEY",
-      "description": "The Console TLS Key"
-    },
-    {
-      "name": "CONSOLE_CERT_KEY_FILE",
-      "description": "The Console TLS Key file on disk",
-      "default": "/etc/secrets/console-cert-key"
-    },
-    {
       "name": "console-cert-key",
       "description": "TLS private key for the Console",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -571,18 +543,8 @@
         }
     },
     {
-      "name": "CONSOLE_PROXY_CERT",
-      "description": "The Console Proxy TLS Certificate"
-    },
-    {
-      "name": "CONSOLE_PROXY_CERT_FILE",
-      "description": "The Console Proxy TLS Certificate file on disk",
-      "default": "/etc/secrets/console-proxy-cert"
-    },
-    {
       "name": "console-proxy-cert",
       "description": "TLS certificate for the Console Proxy",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -595,18 +557,8 @@
         }
     },
     {
-      "name": "CONSOLE_PROXY_CERT_KEY",
-      "description": "The Console Proxy TLS Key"
-    },
-    {
-      "name": "CONSOLE_PROXY_CERT_KEY_FILE",
-      "description": "The Console Proxy TLS Key file on disk",
-      "default": "/etc/secrets/console-proxy-cert-key"
-    },
-    {
       "name": "console-proxy-cert-key",
       "description": "TLS private key for the Console Proxy",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -619,18 +571,8 @@
         }
     },
     {
-      "name": "CONSOLE_DB_CERT",
-      "description": "The Console Database TLS Certificate"
-    },
-    {
-      "name": "CONSOLE_DB_CERT_FILE",
-      "description": "The Console Database TLS Certificate file on disk",
-      "default": "/etc/secrets/console-db-cert"
-    },
-    {
       "name": "console-db-cert",
       "description": "TLS certificate for the Console Database",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -643,18 +585,8 @@
         }
     },
     {
-      "name": "CONSOLE_DB_CERT_KEY",
-      "description": "The Console Database TLS Key"
-    },
-    {
-      "name": "CONSOLE_DB_CERT_KEY_FILE",
-      "description": "The Console Database TLS Key file on disk",
-      "default": "/etc/secrets/console-db-cert-key"
-    },
-    {
       "name": "console-db-cert-key",
       "description": "TLS private key for the Console Database",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -723,15 +655,6 @@
       "secret": false
     },
     {
-      "name": "SESSION_STORE_SECRET",
-      "description": "The Console Proxy session store secret"
-    },
-    {
-      "name": "SESSION_STORE_SECRET_FILE",
-      "description": "The Console Proxy session store secret file on disk",
-      "default": "/etc/secrets/session-store-secret"
-    },
-    {
       "name": "session-store-secret",
       "description": "Console Proxy session store secret",
       "data_type": "string",
@@ -744,14 +667,6 @@
             "type": "Password"
           }
         }
-    },
-    {
-      "name": "SQL",
-      "description": "Initial Stackato database schema used by the Console Proxy",
-      "default": "./InitialSchema.sql",
-      "data_type": "string",
-      "required": true,
-      "secret": false
     },
     {
       "name": "GITHUB_OAUTH_CLIENT_ID",
