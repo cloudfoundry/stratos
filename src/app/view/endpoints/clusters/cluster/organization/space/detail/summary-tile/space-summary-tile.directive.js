@@ -25,6 +25,7 @@
     '$stateParams',
     'app.model.modelManager',
     'app.utils.utilsService',
+    'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
   ];
 
@@ -36,10 +37,12 @@
    * @param {object} $stateParams - the angular $stateParams service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.model.utilsService} utils - the utils service
+   * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function SpaceSummaryTileController($state, $scope, $stateParams, modelManager, utils, asyncTaskDialog) {
+  function SpaceSummaryTileController($state, $scope, $stateParams,
+                                      modelManager, utils, confirmDialog, asyncTaskDialog) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -95,9 +98,19 @@
         name: gettext('Delete Space'),
         disabled: true,
         execute: function () {
-          return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid).then(function () {
-            // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
-            return $state.go($state.current.ncyBreadcrumb.parent());
+          return confirmDialog({
+            title: gettext('Delete Space'),
+            description: gettext('Are you sure you want to delete space') +
+            " '" + that.spaceDetail().details.space.entity.name + "' ?",
+            buttonText: {
+              yes: gettext('Delete'),
+              no: gettext('Cancel')
+            }
+          }).result.then(function () {
+            return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid).then(function () {
+              // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
+              return $state.go($state.current.ncyBreadcrumb.parent());
+            });
           });
         }
       }

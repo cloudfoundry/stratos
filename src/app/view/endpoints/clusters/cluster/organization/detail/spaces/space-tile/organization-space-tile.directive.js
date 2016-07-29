@@ -25,6 +25,7 @@
     'app.model.modelManager',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.utils.utilsService',
+    'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
   ];
 
@@ -37,11 +38,12 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} assignUsers - our assign users slide out service
    * @param {object} utils - our utils service
+   * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function OrganizationSpaceTileController($state, $stateParams, $scope,
-                                           modelManager, assignUsers, utils, asyncTaskDialog) {
+                                           modelManager, assignUsers, utils, confirmDialog, asyncTaskDialog) {
     var that = this;
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -115,7 +117,17 @@
         name: gettext('Delete Space'),
         disabled: true,
         execute: function () {
-          return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid);
+          return confirmDialog({
+            title: gettext('Delete Space'),
+            description: gettext('Are you sure you want to delete space') +
+            " '" + that.spaceDetail().details.space.entity.name + "' ?",
+            buttonText: {
+              yes: gettext('Delete'),
+              no: gettext('Cancel')
+            }
+          }).result.then(function () {
+            return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid);
+          });
         }
       },
       {

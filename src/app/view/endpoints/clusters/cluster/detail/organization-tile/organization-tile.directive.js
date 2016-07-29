@@ -128,7 +128,7 @@
         name: gettext('Delete Organization'),
         disabled: !canDelete,
         execute: function () {
-          confirmDialog({
+          return confirmDialog({
             title: gettext('Delete Organization'),
             description: gettext('Are you sure you want to delete organization') +
             " '" + that.organization.org.entity.name + "' ?",
