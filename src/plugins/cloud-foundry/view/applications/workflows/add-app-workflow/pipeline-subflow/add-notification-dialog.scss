@@ -1,0 +1,20 @@
+.add-notification-dialog {
+
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+
+  .side-bar {
+    height: $hpe-unit-space *8;
+    width: 50%;
+    margin-right: $hpe-unit-space *4;
+    display: inline-block;
+    img {
+      max-height: 100%;
+    }
+  }
+
+  .body {
+    display: inline-block;
+  }
+}
