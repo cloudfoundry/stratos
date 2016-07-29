@@ -43,7 +43,9 @@
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.$q = $q;
-    this.data = {};
+    this.data = {
+      applications: []
+    };
     this.application = {
       instanceCount: 0,
       summary: {
@@ -81,7 +83,6 @@
      **/
     all: function (guid, options, sync) {
       var that = this;
-      this.data.applications = [];
 
       var cnsis = [];
       if (this.filterParams.cnsiGuid === 'all') {
