@@ -27,11 +27,11 @@
       </select-input>
     </div>
     <div class="assign-selected-users-orgs-roles">
-        <checkbox-input ng-model="step.userInput.roles.current[step.userInput.org.details.guid].organization['org_manager']"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_manager']"></checkbox-input>
         <span translate>Org Manager</span>
-        <checkbox-input ng-model="step.userInput.roles.current[step.userInput.org.details.guid].organization['org_auditor']"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_auditor']"></checkbox-input>
         <span translate>Org Auditor</span>
-        <checkbox-input ng-model="step.userInput.roles.current[step.userInput.org.details.guid].organization['billing_manager']"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['billing_manager']"></checkbox-input>
         <span translate>Billing Manager</span>
     </div>
   </div>
@@ -41,8 +41,7 @@
       config="step.table.config"
       data="step.table.data"
       organization="step.userInput.org"
-      selection="step.userInput.roles.current[step.userInput.org.details.guid]"
-      original-selection="step.userInput.roles.original[step.userInput.org.details.guid]"
+      selection="step.userInput.roles[step.userInput.org.details.guid]"
     ></roles-tables>
   </div>
   <div class="alert alert-danger alert-with-icon" ng-if="step.data.failedAssignForUsers.length > 0">

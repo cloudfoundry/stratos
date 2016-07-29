@@ -1,24 +1,13 @@
 .roles-tables {
 
-  .roles-table-org {
-
-    &.roles-table-org-with-space {
-      table {
-        margin-bottom: 0;
-        border-bottom-width: 0;
-      }
-    }
-
-
+  .roles-table-org.roles-table-org-with-space table {
+    margin-bottom: 0;
+    border-bottom-width: 0;
   }
 
   table.table {
     & > thead > tr > th, & > tbody > tr > td {
       padding-right: 0;
-    }
-
-    th {
-
     }
 
     th {
@@ -41,5 +30,4 @@
       }
     }
   }
-
 }

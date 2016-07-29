@@ -85,10 +85,7 @@
       that.data.usersByGuid = [];
 
       that.userInput.selectedUsersByGuid = {};
-      that.userInput.roles = {
-        original: {},
-        current: {}
-      };
+      that.userInput.roles = { };
       if (context.selectedUsers) {
         that.userInput.selectedUsersByGuid = angular.fromJson(angular.toJson(context.selectedUsers));
       }
@@ -100,7 +97,7 @@
         // Create a collection to support the organization drop down
         that.data.organizations = _.chain(that.organizationModel.organizations[that.data.clusterGuid])
           .map(function (obj) {
-            that.userInput.roles.current[obj.details.org.metadata.guid] = {};
+            that.userInput.roles[obj.details.org.metadata.guid] = {};
             return {
               label: obj.details.org.entity.name,
               value: obj
@@ -127,6 +124,27 @@
         return value;
       });
       return $q.when();
+    }
+
+    function createOriginalRoles(newRoles) {
+      // set all true to false;
+      var oldRoles = angular.fromJson(angular.toJson(newRoles));
+
+      function flopTrueToFalse(obj) {
+        _.forEach(obj, function (val, key) {
+          if (val === true) {
+            obj[key] = false;
+          }
+        });
+      }
+
+      _.forEach(oldRoles, function (oldRole) {
+        flopTrueToFalse(oldRole.organization);
+        _.forEach(oldRole.spaces, function (space) {
+          flopTrueToFalse(space);
+        });
+      });
+      return oldRoles;
     }
 
     initialise();
@@ -185,8 +203,7 @@
               //TODO: RC To be removed during TEAMFOUR-709
               if (that.userInput.selectedUsers.length > 1) {
                 that.$timeout(function () {
-                  rolesService.clearOrgs(that.userInput.roles.original);
-                  rolesService.clearOrgs(that.userInput.roles.current);
+                  rolesService.clearOrgs(that.userInput.roles);
                 },2000);
               }
 
@@ -220,8 +237,9 @@
                 spaceRoles: rolesService.spaceRoles,
                 disableOrg: true
               },
-              roles: that.userInput.roles.original,
-              originalRoles: that.userInput.roles.current
+              roles: that.userInput.roles
+              // roles: that.userInput.roles.original,
+              // originalRoles: that.userInput.roles.current
             }
           }
         ]
@@ -245,22 +263,14 @@
           return;
         }
         that.assigning = true;
-        function findOrg(org, guid) {
-          return guid === that.userInput.org.details.org.metadata.guid;
-        }
 
-        var origOrgToSave = _.find(that.userInput.roles.original, findOrg);
-        var origToSave = {};
-        origToSave[that.userInput.org.details.org.metadata.guid] = origOrgToSave;
-
-        var currentOrgToSave = _.find(that.userInput.roles.current, findOrg);
-        var currentToSave = {};
-        currentToSave[that.userInput.org.details.org.metadata.guid] = currentOrgToSave;
+        var selectedOrgGuid = that.userInput.org.details.org.metadata.guid;
+        var selectedOrgRoles = _.set({}, selectedOrgGuid, that.userInput.roles[selectedOrgGuid]);
 
         var usersByGuid = _.keyBy(that.userInput.selectedUsers, function (user) {
           return user.metadata.guid;
         });
-        rolesService.updateUsers(context.clusterGuid, usersByGuid, origToSave, currentToSave)
+        rolesService.updateUsers(context.clusterGuid, usersByGuid, createOriginalRoles(selectedOrgRoles), selectedOrgRoles)
           .then(function () {
             that.$uibModalInstance.close();
           })

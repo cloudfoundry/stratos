@@ -95,7 +95,8 @@
             users: users,
             initPromise: initPromise,
             removeFromOrg: removeFromOrg,
-            containsRoles: containsRoles
+            containsRoles: containsRoles,
+            showExistingRoles: true
           },
           state: state,
           clearSelections: clearAllOrgs

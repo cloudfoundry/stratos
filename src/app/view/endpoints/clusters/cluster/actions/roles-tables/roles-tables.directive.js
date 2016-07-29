@@ -69,24 +69,26 @@
     }, refresh);
 
     function refresh() {
-      // Convert the cached organization roles into a keyed object of truthies required to run the check boxes
-      var orgRolesByUser = that.organization.roles;
-      // At the moment we're only dealing with one user. See TEAMFOUR-708 for bulk users
-      var user = that.config.users[0];
-      var userRoles = orgRolesByUser[user.metadata.guid];
-      _.set(that.selection, 'organization', _.keyBy(userRoles));
 
-      // Convert the cached space roles into a keyed object of truthies required to run the check boxes
-      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-      _.forEach(that.organization.spaces, function (space) {
-        var spaceRoles = spaceModel.spaces[that.config.clusterGuid][space.metadata.guid].roles[user.metadata.guid];
-        _.set(that.selection, 'spaces.' + space.metadata.guid, _.keyBy(spaceRoles));
-      });
+      if (_.get(that, 'config.showExistingRoles')) {
+        // Convert the cached organization roles into a keyed object of truthies required to run the check boxes
+        var orgRolesByUser = that.organization.roles;
+        // At the moment we're only dealing with one user. See TEAMFOUR-708 for bulk users
+        var user = that.config.users[0];
+        var userRoles = orgRolesByUser[user.metadata.guid];
+        _.set(that.selection, 'organization', _.keyBy(userRoles));
 
-      that.originalSelection = angular.fromJson(angular.toJson(that.selection));
+        // Convert the cached space roles into a keyed object of truthies required to run the check boxes
+        var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+        _.forEach(that.organization.spaces, function (space) {
+          var spaceRoles = spaceModel.spaces[that.config.clusterGuid][space.metadata.guid].roles[user.metadata.guid];
+          _.set(that.selection, 'spaces.' + space.metadata.guid, _.keyBy(spaceRoles));
+        });
+
+        that.originalSelection = angular.fromJson(angular.toJson(that.selection));
+      }
 
       that.org = [that.organization];
-      // that.spaces = [];
       that.spaces = _.map(that.organization.spaces, function (space) {
         return {
           label: space.entity.name,
