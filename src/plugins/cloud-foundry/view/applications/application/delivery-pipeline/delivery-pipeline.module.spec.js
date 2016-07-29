@@ -80,6 +80,9 @@
           }
         ]);
         $httpBackend.expectGET('/pp/v1/cnsis/registered');
+        $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, []);
+        $httpBackend.expectGET('/pp/v1/proxy/info');
+
         account.data = {isAdmin: true};
         createController();
         $httpBackend.flush();
@@ -109,6 +112,8 @@
           }
         ]);
         $httpBackend.expectGET('/pp/v1/cnsis/registered');
+        $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, []);
+        $httpBackend.expectGET('/pp/v1/proxy/info');
         account.data = {isAdmin: true};
         createController();
         $httpBackend.flush();
