@@ -160,6 +160,9 @@
       this.model.application.pipeline.fetching = true;
       this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
+          return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);
+        })
+        .then(function () {
           that.model.updateDeliveryPipelineMetadata(true)
             .then(function (response) {
               that.onUpdateDeliveryPipelineMetadata(response);
