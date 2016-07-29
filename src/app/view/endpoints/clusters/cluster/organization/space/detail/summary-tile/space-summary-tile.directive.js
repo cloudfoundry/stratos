@@ -98,7 +98,6 @@
           spaceDetail.services.length === 0;
       }
       that.actions[1].disabled = !canDelete;
-      that.actions[2].disabled = !isAdmin;
     }
 
     // Ensure the parent state is fully initialised before we start our own init
