@@ -114,10 +114,6 @@
       });
     }
 
-    // function initialiseAssign() {
-    //   return rolesService.refreshRoles(that.data.clusterGuid, false, true);
-    // }
-
     function organizationChanged(org) {
       that.data.spaces = _.map(org.spaces, function (value) {
         return value;
@@ -204,13 +200,6 @@
 
               that.options.workflow.steps[1].table.config.users = that.userInput.selectedUsers;
 
-              // //TODO: RC To be removed during TEAMFOUR-709
-              // if (that.userInput.selectedUsers.length > 1) {
-              //   that.$timeout(function () {
-              //     rolesService.clearOrgs(that.userInput.roles);
-              //   },2000);
-              // }
-
               return organizationChanged(that.userInput.org);
             }
           },
@@ -220,9 +209,6 @@
             formName: 'assign-selected-form',
             data: that.data,
             userInput: that.userInput,
-            // checkReadiness: function () {
-            //   return initialiseAssign();
-            // },
             nextBtnText: gettext('Assign'),
             isLastStep: true,
             actions: {
@@ -231,6 +217,9 @@
               },
               changeOrganization: function (org) {
                 organizationChanged(org);
+              },
+              keys: function (obj) {
+                return _.keys(obj);
               }
             },
             selectedUserListLimit: 10,
@@ -246,8 +235,6 @@
           }
         ]
       }
-      // ,
-      // userInput: this.userInput
     };
 
     // Simple mechanism to stop double click on 'assign'. Ideally it would be better to do this via the wizard

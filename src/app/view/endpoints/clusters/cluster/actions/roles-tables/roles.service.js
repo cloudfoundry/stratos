@@ -131,6 +131,17 @@
       });
     };
 
+    function clearRoleArray(roleObject) {
+      // Ensure that we flip any selected role. Do this instead of null/undefined/delete to ensure that the diff
+      // between previous and current roles acts correctly (removed val from roles object would just be ignored and thus
+      // not removed)
+      _.forEach(roleObject, function (selected, roleKey) {
+        if (selected) {
+          roleObject[roleKey] = false;
+        }
+      });
+    }
+
     /**
      * @name app.view.endpoints.clusters.cluster.rolesService.clearOrg
      * @description Clear the organisation + space roles of the organization provided
@@ -139,9 +150,9 @@
      *  spaces[spaceGuid][roleKey] = truthy
      */
     this.clearOrg = function (org) {
-      org.organization = {};
-      _.forEach(org.spaces, function (space, key) {
-        org.spaces[key] = {};
+      clearRoleArray(org.organization);
+      _.forEach(org.spaces, function (space) {
+        clearRoleArray(space);
       });
     };
 
@@ -217,6 +228,10 @@
 
       // Assign/Remove Organization Roles
       _.forEach(newOrgRoles.organization, function (selected, roleKey) {
+        if (roleKey === 'org_user') {
+          return;
+        }
+
         // Has there been a change in the org role?
         var oldRoleSelected = _.get(oldOrgRoles, 'organization.' + roleKey);
         if (oldRoleSelected === selected) {
