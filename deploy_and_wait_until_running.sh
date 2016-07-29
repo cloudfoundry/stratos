@@ -105,6 +105,11 @@ main() {
   fi
 
   echo "======"
+  echo "Deleting the Console UAA client..."
+  CLIENT_DELETE=$($SSH_COMMAND "curl -s -k -i -H \"$AUTHORIZATION_HEADER\" -H \"Content-Type: application/json\" -XDELETE ${IDENTITY_ENDPOINT}/oauth/clients/console || true")
+  echo "deletion task: $CLIENT_DELETE"
+
+  echo "======"
   echo "Deploying service definition and instance..."
   echo "    Uploading Service definition to HCP..."
   cat output/sdl.json
