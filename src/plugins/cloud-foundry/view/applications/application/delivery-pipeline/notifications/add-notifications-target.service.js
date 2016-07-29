@@ -33,6 +33,16 @@
     '$uibModalInstance'
   ];
 
+  /**
+   * @memberof cloud-foundry.view.applications.application.delivery-pipeline
+   * @name AddNotificationTargetController
+   * @constructor
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.api.apiManager} apiManager - the API management service
+   * @param {object} $q - angular $q service
+   * @param {object} $uibModalInstance - Bootstrap $uibModalService
+   * @constructor
+   */
   function AddNotificationTargetController(modelManager, apiManager, $q, $uibModalInstance) {
     var that = this;
 
@@ -87,9 +97,20 @@
     };
 
     this.actions = {
+
+      /**
+       * @function stop
+       * @description Stop the add notification workflow
+       */
       stop: function () {
         that.$uibModalInstance.dismiss();
       },
+
+      /**
+       * @function finish
+       * @description Complete the add notification workflow
+       * @returns {promise}
+       */
       finish: function () {
         that.indications.busy = true;
         var request = that.userInput.notificationTargetDetails;

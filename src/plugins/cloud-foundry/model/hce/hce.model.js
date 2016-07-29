@@ -52,37 +52,37 @@
     // This will be provided by HCE in future
     this.staticNotificationData = {
       hipchat: {
-        title: 'HipChat',
+        title: gettext('HipChat'),
         description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
         endpointLabel: gettext('Server URL with Room Number or Name'),
         img: 'hipchat_logo.png'
       },
       httpPost: {
-        title: 'Http',
+        title: gettexT('Http'),
         description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
         endpointLabel: gettext('Server URL'),
         img: 'httppost_logo.png'
       },
       flowdock: {
-        title: 'Flow Dock',
+        title: gettext('Flow Dock'),
         description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
         endpointLabel: gettext('API Endpoint'),
         img: 'flowdock_logo.png'
       },
       githubpullrequest: {
-        title: 'GitHub',
+        title: gettext('GitHub'),
         description: gettext('Send pipeline events (build, test, deploy) as statuses to Github'),
         endpointLabel: gettext('Target URL'),
         img: 'github_octocat.png'
       },
       slack: {
-        title: 'Slack',
+        title: gettext('Slack'),
         description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack room.'),
         endpointLabel: gettext('URL with optional Channel or User name'),
         img: 'slack_logo.png'
       },
       bitbucketpullrequest: {
-        title: 'BitBucket',
+        title: gettext('BitBucket'),
         description: gettext('Send pipeline events (build, test, deploy) as statuses to BitBucket'),
         endpointLabel: gettext('Target URL'),
         img: 'bitbucket_logo.png'
