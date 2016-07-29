@@ -23,7 +23,8 @@
     '$stateParams',
     'app.model.modelManager',
     '$scope',
-    'app.view.endpoints.clusters.cluster.assignUsers'
+    'app.view.endpoints.clusters.cluster.assignUsers',
+    'app.utils.utilsService'
   ];
 
   /**
@@ -34,10 +35,13 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} $scope - the angular $scope service
    * @param {object} assignUsers - our assign users slide out service
+   * @param {object} utils - our utils service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationSpaceTileController($state, $stateParams, modelManager, $scope, assignUsers) {
+  function OrganizationSpaceTileController($state, $stateParams, modelManager, $scope, assignUsers, utils) {
     var that = this;
+
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.$state = $state;
     this.clusterGuid = $stateParams.guid;
@@ -48,10 +52,21 @@
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
-
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
-    var isAdmin = this.user.admin;
+
+    function init() {
+      var canDelete = false;
+      var isAdmin = that.user.admin;
+      if (isAdmin) {
+        var spaceDetail = that.spaceDetail();
+        canDelete = spaceDetail.routes.length === 0 &&
+          spaceDetail.instances.length === 0 &&
+          spaceDetail.apps.length === 0 &&
+          spaceDetail.services.length === 0;
+      }
+      that.actions[1].disabled = !canDelete;
+      that.actions[2].disabled = !isAdmin;
+    }
 
     this.cardData = {
       title: this.space.entity.name
@@ -66,11 +81,12 @@
         name: gettext('Delete Space'),
         disabled: true,
         execute: function () {
+          return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid);
         }
       },
       {
         name: gettext('Assign User(s)'),
-        disabled: !isAdmin,
+        disabled: true,
         execute: function () {
           assignUsers.assign({
             organizationGuid: that.organizationGuid,
@@ -86,6 +102,10 @@
       // Present the user's roles
       that.roles = that.spaceModel.spaceRolesToString(roles);
     });
+
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
+
   }
 
   angular.extend(OrganizationSpaceTileController.prototype, {

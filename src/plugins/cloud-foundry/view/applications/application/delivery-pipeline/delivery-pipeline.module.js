@@ -45,7 +45,9 @@
     this.id = $stateParams.guid;
     this.$scope = $scope;
     this.confirmDialog = confirmDialog;
-
+    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
+    this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.hceCnsi = null;
 
@@ -56,6 +58,20 @@
     this.isDeleting = false;
     this.deleteError = false;
     this.busy = false;
+
+    this.hceServices = {
+      fetching: true,
+      available: 0,
+      valid: 0,
+      isAdmin: this.account.isAdmin()
+    };
+
+    // Fetch HCE service metadata so that we can show the appropriate message
+    this.userCnsiModel.list().finally(function () {
+      that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
+      that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
+      that.hceServices.fetching = false;
+    });
 
     this.notificationTargetActions = [
       {
@@ -105,6 +121,7 @@
   }
 
   angular.extend(ApplicationDeliveryPipelineController.prototype, {
+
     deletePipeline: function () {
       var that = this;
       this.confirmDialog({
