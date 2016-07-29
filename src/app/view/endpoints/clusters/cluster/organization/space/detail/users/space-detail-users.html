@@ -1,0 +1,36 @@
+<div class="cluster-users-table"
+     st-table="spaceUsersController.visibleUsers"
+     st-safe-src="spaceUsersController.users">
+  <div>
+    <div class="panel panel-default">
+      <table class="table table-actionable" >
+        <thead>
+        <tr>
+          <th><checkbox-input class="select-all-checkbox" ng-change="spaceUsersController.selectAllChanged(clusterDetailController.selectedUsers)" ng-model="spaceUsersController.selectAllUsers"></checkbox-input></th>
+          <th st-sort-default="true" st-sort="entity.username">USERS({{ spaceUsersController.users.length }})</th>
+          <th translate>Space Roles</th>
+          <th translate>ACTION</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="" ng-repeat="user in spaceUsersController.visibleUsers">
+          <td ><checkbox-input ng-model="clusterDetailController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
+          <td class="user-name">{{ user.entity.username }}</td>
+          <td class="roles-list">
+            <div class="role-pill" ng-repeat="orgRole in spaceUsersController.getSpaceRoles(user)">{{ orgRole.name }}: {{ orgRole.role }}<i class="close-icon helion-icon helion-icon-Close"></i></div>
+            <div ng-if="spaceUsersController.getSpaceRoles(user).length === 0" translate>None assigned</div>
+          </td>
+          <td>
+            <actions-menu actions="spaceUsersController.userActions"
+                          action-target="user"
+                          menu-icon="helion-icon helion-icon-More"
+                          menu-position="actions-menu-right">
+            </actions-menu>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
