@@ -206,9 +206,18 @@
 
     cacheOrganizationSpaces: function (cnsiGuid, orgGuid, spaces) {
       var that = this;
+
       this.initOrganizationCache(cnsiGuid, orgGuid);
+
+      // Empty the cache without changing the Object reference
+      var spaceCache = that.organizations[cnsiGuid][orgGuid].spaces;
+      for (var space in spaceCache) {
+        if (spaceCache.hasOwnProperty(space)) {
+          delete spaceCache[space];
+        }
+      }
       _.forEach(spaces, function (space) {
-        that.organizations[cnsiGuid][orgGuid].spaces[space.metadata.guid] = space;
+        spaceCache[space.metadata.guid] = space;
       });
     },
 

@@ -389,7 +389,7 @@
       var that = this;
 
       var userGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
-      var spaceModel = this.apiManager.retrieve('cloud-foundry.api.Spaces');
+      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
 
       var createPromises = [];
 
@@ -406,7 +406,7 @@
           developer_guids: [userGuid]
         };
 
-        var createP = spaceModel.CreateSpace(newSpace, params, this.makeHttpConfig(cnsiGuid))
+        var createP = spaceApi.CreateSpace(newSpace, params, this.makeHttpConfig(cnsiGuid))
           .then(getSpaceDetails); // Cache the space details
 
         createPromises.push(createP);
@@ -418,6 +418,33 @@
         return that.organizationModel.getOrganizationDetails(cnsiGuid, org);
       });
 
+    },
+
+    deleteSpace: function (cnsiGuid, orgGuid, spaceGuid) {
+      var that = this;
+      var params = {
+        recursive: false,
+        async: false
+      };
+      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
+      return spaceApi.DeleteSpace(spaceGuid, params, this.makeHttpConfig(cnsiGuid)).then(function () {
+        // Refresh the org!
+        var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
+        return that.organizationModel.getOrganizationDetails(cnsiGuid, org);
+      });
+    },
+
+    updateSpace: function (cnsiGuid, orgGuid, spaceGuid, spaceData) {
+      var that = this;
+      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
+      return spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.makeHttpConfig(cnsiGuid)).then(function (val) {
+        // Refresh the org!
+        var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
+        var orgRefreshedP = that.organizationModel.getOrganizationDetails(cnsiGuid, org);
+        // Refresh the space!
+        var spaceRefreshedP = that.getSpaceDetails(cnsiGuid, val.data, {});
+        return that.$q.all([orgRefreshedP, spaceRefreshedP]);
+      });
     }
 
   });

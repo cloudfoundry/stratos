@@ -22,6 +22,7 @@ module.exports = function (config) {
     files: [
       'lib/jquery/dist/jquery.js',
       'lib/angular-mocks/angular-mocks.js',
+      'lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
 
       'config.js',
       'plugins/*/plugin.config.js',

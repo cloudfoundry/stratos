@@ -30,30 +30,6 @@
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
-
-    this.spaceActions = [
-      {
-        name: gettext('Create Organization'),
-        disabled: true,
-        icon: 'helion-icon-lg helion-icon helion-icon-Tree',
-        execute: function () {
-        }
-      },
-      {
-        name: gettext('Create Space'),
-        disabled: true,
-        icon: 'helion-icon-lg helion-icon helion-icon-Tree',
-        execute: function () {
-        }
-      },
-      {
-        name: gettext('Assign User(s)'),
-        disabled: true,
-        icon: 'helion-icon-lg helion-icon helion-icon-Add_user',
-        execute: function () {
-        }
-      }
-    ];
   }
 
   angular.extend(ClusterSpaceController.prototype, {

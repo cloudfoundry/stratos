@@ -46,13 +46,13 @@
   }
 
   angular.extend(GithubApi.prototype, {
-   /**
-    * @function repos
-    * @memberof cloud-foundry.api.github.GithubApi
-    * @description Get repos user owns or has admin rights to
-    * @param {object} params - additional params to send
-    * @returns {promise}
-    * @public
+    /**
+     * @function repos
+     * @memberof cloud-foundry.api.github.GithubApi
+     * @description Get repos user owns or has admin rights to
+     * @param {object} params - additional params to send
+     * @returns {promise} A promise object
+     * @public
     */
     repos: function (params) {
       var url = this.githubApiUrl + 'user/repos';
@@ -67,14 +67,14 @@
     },
 
     /**
-    * @function branches
-    * @memberof cloud-foundry.api.github.GithubApi
-    * @description Get branches a repo
-    * @param {string} repo - the repo full name
-    * @param {object} params - additional params to send
-    * @returns {promise}
-    * @public
-    */
+     * @function branches
+     * @memberof cloud-foundry.api.github.GithubApi
+     * @description Get branches a repo
+     * @param {string} repo - the repo full name
+     * @param {object} params - additional params to send
+     * @returns {promise} A promise object
+     * @public
+     */
     branches: function (repo, params) {
       var url = this.githubApiUrl + 'repos/' + repo + '/branches';
       var config = {
@@ -94,7 +94,7 @@
      * @param {string} repo - the repo full name
      * @param {string} branch - the branch name
      * @param {object} params - additional params to send
-     * @returns {promise}
+     * @returns {promise} A promise object
      * @public
      */
     getBranch: function (repo, branch, params) {
@@ -110,14 +110,14 @@
     },
 
     /**
-    * @function commits
-    * @memberof cloud-foundry.api.github.GithubApi
-    * @description Get commits for a repo
-    * @param {string} repo - the repo full name
-    * @param {object} params - additional params to send
-    * @returns {promise}
-    * @public
-    */
+     * @function commits
+     * @memberof cloud-foundry.api.github.GithubApi
+     * @description Get commits for a repo
+     * @param {string} repo - the repo full name
+     * @param {object} params - additional params to send
+     * @returns {promise} A promise object
+     * @public
+     */
     commits: function (repo, params) {
       var url = this.githubApiUrl + 'repos/' + repo + '/commits';
       var config = {
