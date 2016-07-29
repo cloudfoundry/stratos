@@ -294,17 +294,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Version info
 	sessionGroup.GET("/version", p.getVersions)
 
-	//
-	adminGroup := sessionGroup
-	adminGroup.Use(p.stackatoAdminMiddleware)
-	// Register clusters
-	adminGroup.POST("/register/hcf", p.registerHCFCluster)
-	adminGroup.POST("/register/hce", p.registerHCECluster)
-
-	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
-	adminGroup.POST("/unregister", p.unregisterCluster)
-	// sessionGroup.DELETE("/cnsis", p.removeCluster)
-
 	// GitHub Requests
 	ghGroup := sessionGroup.Group("/github")
 
@@ -323,4 +312,16 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// This is used for passthru of HCF/HCE requests
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
+
+	// The admin-only routes need to be last as the admin middleware will be
+	// applied to any routes below it's instantiation
+	adminGroup := sessionGroup
+	adminGroup.Use(p.stackatoAdminMiddleware)
+	// Register clusters
+	adminGroup.POST("/register/hcf", p.registerHCFCluster)
+	adminGroup.POST("/register/hce", p.registerHCECluster)
+
+	// TODO(wchrisjohnson): revisit the API and fix these wonky calls.  https://jira.hpcloud.net/browse/TEAMFOUR-620
+	adminGroup.POST("/unregister", p.unregisterCluster)
+	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 }
