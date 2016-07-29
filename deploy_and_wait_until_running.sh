@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
 if [ -z "$SSH_COMMAND" ]; then
-    echo "An env var needs to be set for SSH_COMMAND. This works:"
+    echo "You seem to be missing an env var needed for the SSH_COMMAND to work. Replace"
+    echo "the __HCP_DEV_FOLDER__ placeholder with the path to your hcp-developer folder"
+    echo "and export the SSH_COMMAND env var below prior to running this script."
     echo " "
-    echo '  export SSH_COMMAND="ssh -i $HOME/src/stackato/hcp-developer-1.2.18/.vagrant/machines/node/vmware_fusion/private_key vagrant@192.168.200.3"'
+    echo '  export SSH_COMMAND="ssh -i __HCP_DEV_FOLDER__/.vagrant/machines/node/vmware_fusion/private_key vagrant@192.168.200.3" '
     echo " "
     echo "Details here: https://github.com/hpcloud/code-engine/tree/master/ucp#deploy-with-a-script"
     exit 1
