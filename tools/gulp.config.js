@@ -21,8 +21,7 @@ module.exports = function () {
         },
   	    "angular-toastr": {
 		      "main": [
-            "./dist/angular-toastr.tpls.js",
-            "./dist/angular-toastr.css"
+            "./dist/angular-toastr.tpls.js"
           ]
         }
       }
