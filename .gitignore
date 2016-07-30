@@ -1,4 +1,5 @@
 *.rc
+.nfs*
 demo/*
 dev-certs/*
 portal-proxy
