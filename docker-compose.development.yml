@@ -16,12 +16,20 @@ services:
       service: postgres
 
 
+  goose:
+    extends:
+      file: common.yml
+      service: goose
+    links:
+      - postgres:postgres
+
+
   proxy:
     extends:
       file: common.yml
       service: proxy
     links:
-      - postgres:postgres
+      - goose:goose
 
 
   nginx:

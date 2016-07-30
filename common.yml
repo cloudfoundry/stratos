@@ -32,8 +32,13 @@ services:
       ./postgres.env
     ports:
       - "5432:5432"
-    volumes:
-      - $GOPATH/src/github.com/hpcloud/portal-proxy/db/initial:/docker-entrypoint-initdb.d
+
+
+  goose:
+    extends: buildCommon
+    build:
+      context: $GOPATH/src/github.com/hpcloud/portal-proxy
+      dockerfile: db/Dockerfile.goose.dev
 
 
   proxy:
@@ -62,9 +67,6 @@ services:
       - "80:80"
     volumes:
       - ../stratos-ui/dist:/usr/share/nginx/html:ro
-    # NOTE: links field must be included individually if extending this file.
-    #links:
-    #  - proxy:proxy
 
 
   ui:

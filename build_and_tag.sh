@@ -85,12 +85,16 @@ pushd ${PORTAL_PROXY_PATH}
 popd
 
 # Build and publish the container image for the portal proxy
-echo "Building/publishing the container image for the Console Proxy"
+echo "Build & publish the container image for the Console Proxy"
 buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
-# Build the postgres configuration container
-echo "Building/publishing the container image for the Database Creator"
-buildAndPublishImage hsc-database-creation Dockerfile.database.HCP ${PORTAL_PROXY_PATH}
+# Build the preflight container - initiate service upgrade
+echo "Build & publish the container image for the preflight job"
+buildAndPublishImage hsc-initiate-upgrade-job ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
+
+# Build the postflight container - finalize service upgrade
+echo "Build & publish the container image for the postflight job"
+buildAndPublishImage hsc-finalize-upgrade-job ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
 echo "Provision the UI"

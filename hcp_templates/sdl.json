@@ -145,8 +145,8 @@
       ],
       "volume_mounts": [
         {
-          "volume_name": "hsc-migration-volume",
-          "mountpoint": "/hsc-migration-volume"
+          "volume_name": "hsc-upgrade-volume",
+          "mountpoint": "/hsc-upgrade-volume"
         },
         {
           "volume_name": "hsc-encryption-key-volume",
@@ -201,7 +201,12 @@
           "public": false
         }
       ],
-      "volume_mounts": []
+      "volume_mounts": [
+        {
+          "volume_name": "pgsql-data-volume",
+          "mountpoint": "/var/lib/postgresql"
+        }
+      ]
     }
   ],
   "features": {
@@ -230,13 +235,12 @@
       }
     ]
   },
-  "preflight": [],
-  "postflight": [
+  "preflight": [
     {
-      "name": "hsc-create-database-job",
+      "name": "hsc-initiate-upgrade-job",
       "version": "1.0.0",
       "vendor": "HPE",
-      "external_name": "Console - Create Database Job",
+      "external_name": "Console - Initiate Service Upgrade Job",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
       "min_VCPU": 1,
@@ -244,41 +248,11 @@
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-database-creation:{{TAG}}",
+      "image": "hsc/hsc-initiate-upgrade-job:{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
           "name": "CONSOLE_VERSION"
-        },
-        {
-          "name": "DB_HOST"
-        },
-        {
-          "name": "POSTGRES_DB"
-        },
-        {
-          "name": "CFGDB_PORT"
-        },
-        {
-          "name": "POSTGRES_USER"
-        },
-        {
-          "name": "PGSQL_DATABASE"
-        },
-        {
-          "name": "PGSQL_USER"
-        },
-        {
-          "name": "pgsql-password"
-        },
-        {
-          "name": "SQL"
-        },
-        {
-          "name": "POSTGRES_USER"
-        },
-        {
-          "name": "postgres-password"
         }
       ],
       "affinity": [],
@@ -289,21 +263,79 @@
       "service_ports": [],
       "volume_mounts": [
         {
-          "volume_name": "hsc-migration-volume",
-          "mountpoint": "/hsc-migration-volume"
+          "volume_name": "hsc-upgrade-volume",
+          "mountpoint": "/hsc-upgrade-volume"
+        }
+      ]
+    }
+  ],
+  "postflight": [
+    {
+      "name": "hsc-finalize-upgrade-job",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "Console - Finalize Service Upgrade Job",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "workload_type": "container",
+      "capabilities": [],
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-finalize-upgrade-job:{{TAG}}",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "DB_HOST"
+        },
+        {
+          "name": "CFGDB_PORT"
+        },
+        {
+          "name": "POSTGRES_DB"
+        },
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "postgres-password"
+        },
+        {
+          "name": "PGSQL_DATABASE"
+        },
+        {
+          "name": "PGSQL_USER"
+        },
+        {
+          "name": "pgsql-password"
+        }
+      ],
+      "affinity": [],
+      "labels": [],
+      "min_instances": 1,
+      "max_instances": 1,
+      "retry_count": 100,
+      "service_ports": [],
+      "volume_mounts": [
+        {
+          "volume_name": "hsc-upgrade-volume",
+          "mountpoint": "/hsc-upgrade-volume"
         }
       ]
     }
   ],
   "volumes": [
     {
-      "name": "stolon-data",
+      "name": "pgsql-data-volume",
       "size_gb": 10,
       "filesystem": "ext4",
       "shared": false
     },
     {
-      "name": "hsc-migration-volume",
+      "name": "hsc-upgrade-volume",
       "size_gb": 1,
       "shared": true
     },
@@ -461,7 +493,7 @@
     {
       "name": "PGDATA",
       "description": "placeholder",
-      "default": "/database",
+      "default": "/var/lib/postgresql/data",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -485,7 +517,6 @@
     {
       "name": "console-cert",
       "description": "TLS certificate for the Console",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -500,7 +531,6 @@
     {
       "name": "console-cert-key",
       "description": "TLS private key for the Console",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -515,7 +545,6 @@
     {
       "name": "console-proxy-cert",
       "description": "TLS certificate for the Console Proxy",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -530,7 +559,6 @@
     {
       "name": "console-proxy-cert-key",
       "description": "TLS private key for the Console Proxy",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -545,7 +573,6 @@
     {
       "name": "console-db-cert",
       "description": "TLS certificate for the Console Database",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -560,7 +587,6 @@
     {
       "name": "console-db-cert-key",
       "description": "TLS private key for the Console Database",
-      "default": null,
       "required": true,
       "secret": true,
       "generator":
@@ -641,14 +667,6 @@
             "type": "Password"
           }
         }
-    },
-    {
-      "name": "SQL",
-      "description": "Initial Stackato database schema used by the Console Proxy",
-      "default": "./InitialSchema.sql",
-      "data_type": "string",
-      "required": true,
-      "secret": false
     },
     {
       "name": "GITHUB_OAUTH_CLIENT_ID",
