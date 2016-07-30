@@ -493,7 +493,7 @@
     {
       "name": "PGDATA",
       "description": "placeholder",
-      "default": "/data",
+      "default": "/var/lib/postgresql/data",
       "data_type": "string",
       "required": true,
       "secret": false
