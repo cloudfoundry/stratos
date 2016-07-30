@@ -244,8 +244,8 @@ func (p *portalProxy) logout(c echo.Context) error {
 		MaxAge: -1,
 	}
 
-	// TODO(wchrisjohnson): Explicitly clear out session  https://jira.hpcloud.net/browse/TEAMFOUR-630
 	http.SetCookie(res, cookie)
+	p.clearSession(c)
 
 	return nil
 }

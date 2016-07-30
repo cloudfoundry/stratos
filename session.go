@@ -47,6 +47,7 @@ func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string,
 
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {
 	log.Println("setSessionValues")
+
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter
 	session, _ := p.SessionStore.Get(req, portalSessionName)
@@ -55,5 +56,16 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 		session.Values[k] = v
 	}
 
+	return p.SessionStore.Save(req, res, session)
+}
+
+func (p *portalProxy) clearSession(c echo.Context) error {
+	log.Println("clearSession")
+
+	req := c.Request().(*standard.Request).Request
+	res := c.Response().(*standard.Response).ResponseWriter
+	session, _ := p.SessionStore.Get(req, portalSessionName)
+
+	session.Options.MaxAge = -1
 	return p.SessionStore.Save(req, res, session)
 }
