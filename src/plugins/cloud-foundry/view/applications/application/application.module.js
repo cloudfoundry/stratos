@@ -140,7 +140,6 @@
     ];
 
     $scope.$watch(function () {
-
       return that.model.application.summary.state;
     }, function (newState) {
       that.onAppStateChange(newState);
@@ -149,7 +148,6 @@
     $scope.$watch(function () {
       return that.model.application.summary.routes;
     }, function (newRoutes) {
-
       that.onAppRoutesChange(newRoutes);
     });
 
@@ -195,13 +193,9 @@
     startUpdate: function () {
       var that = this;
       if (!this.scheduledUpdate) {
-        console.log('Starting Update for', that.id);
         this.scheduledUpdate = this.$interval(function () {
           that.update();
-          console.log('Running Update for', that.id);
         }, this.UPDATE_INTERVAL);
-        console.log('Starting Update for', that.id, this.scheduledUpdate);
-
       }
     },
 
@@ -211,14 +205,9 @@
      * @public
      */
     stopUpdate: function () {
-      console.log('Cancelling for: ', this.id);
       if (this.scheduledUpdate) {
-        console.log('About to cancel: ', this.id);
         this.$interval.cancel(this.scheduledUpdate);
-        console.log('Cancelled for: ', this.id);
         delete this.scheduledUpdate;
-      }  else {
-        console.log('nothing to do', this.id);
       }
     },
 

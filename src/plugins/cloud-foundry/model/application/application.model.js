@@ -84,22 +84,6 @@
     all: function (guid, options, sync) {
       var that = this;
 
-      /* Reset application data
-       so that Summary page doesn't
-       show stale information */
-      this.application = {
-        instanceCount: 0,
-        summary: {
-          state: 'LOADING'
-        },
-        stats: {},
-        pipeline: {
-          fetching: false,
-          valid: false,
-          hceCnsi: undefined
-        }
-      };
-
       var cnsis = [];
       if (this.filterParams.cnsiGuid === 'all') {
         cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
