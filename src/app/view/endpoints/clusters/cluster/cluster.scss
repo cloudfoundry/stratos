@@ -1,5 +1,6 @@
 @import 'detail/cluster-detail';
 @import 'organization/space/detail/services/space-services';
+@import 'actions/assign-users-workflow/assign-users';
 
 .cluster {
   .cluster-breadcrumb {
@@ -37,6 +38,11 @@
   .cluster-loading {
     margin: 72px auto;
     text-align: center;
+  }
+
+  .cluster-actions-menu {
+    position: absolute;
+    right: 24px; // ok with scroll bar on, no time find a way to satisfy both with and without the scrollbar
   }
 
   .cluster-detail {

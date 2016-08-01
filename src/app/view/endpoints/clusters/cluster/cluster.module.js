@@ -29,18 +29,16 @@
     'app.utils.utilsService',
     '$state',
     '$q',
-    'app.model.modelManager',
-    'helion.framework.widgets.asyncTaskDialog'
+    'app.model.modelManager'
   ];
 
-  function ClusterController($stateParams, $log, utils, $state, $q, modelManager, asyncTaskDialog) {
+  function ClusterController($stateParams, $log, utils, $state, $q, modelManager) {
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
     var sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.initialized = false;
     this.guid = $stateParams.guid;
@@ -49,67 +47,6 @@
     this.getEndpoint = function () {
       return utils.getClusterEndpoint(that.userServiceInstanceModel.serviceInstances[that.guid]);
     };
-
-    this.clusterActions = [
-      {
-        name: gettext('Create Organization'),
-        disabled: true,
-        execute: function () {
-          return asyncTaskDialog(
-            {
-              title: gettext('Create Organization'),
-              templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-organization.html',
-              buttonTitles: {
-                submit: gettext('Create')
-              }
-            },
-            {
-              data: {
-                // Make the form invalid if the name is already taken
-                organizationNames: organizationModel.organizationNames[that.guid]
-              }
-            },
-            function (orgData) {
-              if (orgData.name && orgData.name.length > 0) {
-                return organizationModel.createOrganization(that.guid, orgData.name);
-              } else {
-                return $q.reject('Invalid Name!');
-              }
-
-            }
-          );
-        },
-        icon: 'helion-icon-lg helion-icon helion-icon-Tree'
-      },
-      {
-        name: gettext('Create Space'),
-        disabled: true,
-        execute: function () {
-        },
-        icon: 'helion-icon-lg helion-icon helion-icon-Tree'
-      },
-      {
-        name: gettext('Assign User(s)'),
-        disabled: true,
-        execute: function () {
-        },
-        icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
-      }
-    ];
-
-    /**
-     * Enable actions based on admin status
-     * N.B. when finer grain ACLs are wired in this should be updated
-     * */
-    function enableActions() {
-      if (stackatoInfo.info.endpoints.hcf[that.guid].user.admin) {
-        _.forEach(that.clusterActions, function (action) {
-          action.disabled = false;
-        });
-        // Disable these until implemented!
-        that.clusterActions[1].disabled = that.clusterActions[2].disabled = true;
-      }
-    }
 
     function init() {
 
@@ -124,7 +61,6 @@
           allDetailsP.push(orgDetailsP);
         });
         return $q.all(allDetailsP).then(function (val) {
-          enableActions();
           that.organizationNames = organizationModel.organizationNames[that.guid];
           return val;
         });

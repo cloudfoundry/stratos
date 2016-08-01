@@ -13,54 +13,170 @@
 
   registerGithubModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    '$q',
+    '$filter',
+    'linkHeaderParser'
   ];
 
-  function registerGithubModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.github', new GithubModel(apiManager));
+  function registerGithubModel(modelManager, apiManager, $q, $filter, linkHeaderParser) {
+    modelManager.register('cloud-foundry.model.github', new GithubModel(apiManager, $q, $filter, linkHeaderParser));
   }
 
   /**
    * @memberof cloud-foundry.model.github
    * @name GithubModel
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {object} $q - the Angular $q service
+   * @param {object} $filter - the Angular $filter service
+   * @param {linkHeaderParser} linkHeaderParser - the linkHeaderParser service
    * @property {app.api.apiManager} apiManager - the application API manager
+   * @property {object} $q - the Angular $q service
+   * @property {object} $filter - the Angular $filter service
+   * @property {linkHeaderParser} linkHeaderParser - the linkHeaderParser service
    * @property {object} data - the Github data
    * @class
    */
-  function GithubModel(apiManager) {
+  function GithubModel(apiManager, $q, $filter, linkHeaderParser) {
     this.apiManager = apiManager;
+    this.$q = $q;
+    this.$filter = $filter;
+    this.linkHeaderParser = linkHeaderParser;
+    this.repo = {
+      filterTerm: null,
+      page: 0,
+      pageSize: 50,
+      links: {}
+    };
     this.data = {
+      repoLinks: {},
       repos: [],
+      filteredRepos: [],
       branches: [],
       commits: []
     };
   }
 
   angular.extend(GithubModel.prototype, {
-
-    getToken: function () {
-      return _.get(this.apiManager.retrieve('cloud-foundry.api.github'), 'token.access_token');
+    /**
+     * @function isAuthenticated
+     * @memberof cloud-foundry.model.github.GithubModel
+     * @description Whether the user has authenticated against Github
+     * @returns {boolean} True if user has authenticated against Github
+     */
+    isAuthenticated: function () {
+      return _.get(this.apiManager.retrieve('cloud-foundry.api.github'), 'authenticated');
     },
 
     /**
      * @function repos
      * @memberof cloud-foundry.model.github.GithubModel
      * @description Get repos user owns or has admin rights to
+     * @param {boolean} ignoreReset - flag to ignore reset of repos array
      * @returns {promise} A promise object
      * @public
      */
-    repos: function () {
+    repos: function (ignoreReset) {
       var that = this;
-      var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
-      return githubApi.repos({per_page: 100})
+      if (!ignoreReset) {
+        this._resetRepos();
+      }
+
+      return this.nextRepos()
         .then(function (response) {
-          that.onRepos(response);
-        })
-        .catch(function (err) {
+          return response;
+        }, function (err) {
           that.onReposError();
-          throw err;
+          return err;
         });
+    },
+
+    filterRepos: function (filterTerm) {
+      this.repo.filterTerm = filterTerm || null;
+      if (this.repo.filterTerm !== null) {
+        this.data.filteredRepos = this.$filter('filter')(this.data.repos, this.repo.filterTerm);
+        var filteredCnt = this.data.filteredRepos.length;
+        var maxCnt = this.repo.page * this.repo.pageSize;
+        if (filteredCnt < maxCnt) {
+          return this.repos(true);
+        }
+      } else {
+        this.data.filteredRepos.length = 0;
+      }
+    },
+
+    /**
+     * @function nextRepos
+     * @memberof cloud-foundry.model.github.GithubModel
+     * @description Get next set of repos
+     * @returns {promise} A promise object
+     * @public
+     */
+    nextRepos: function () {
+      var that = this;
+      var deferred = this.$q.defer();
+      var config = {per_page: 50};
+      var numFetched = 0;
+      var fetchedRepos = [];
+
+      function next() {
+        if (that.repo.links.next) {
+          config.page = _.toInteger(that.repo.links.next.page);
+        }
+
+        that.apiManager.retrieve('cloud-foundry.api.github')
+          .repos(config)
+          .then(function (response) {
+            // Parse out the Link header
+            var linkHeaderText = response.headers('Link');
+            var links = linkHeaderText ? that.linkHeaderParser.parse(linkHeaderText) : {};
+            that.repo.links = links;
+
+            var repos = response.data || [];
+            var adminRepos = _.filter(repos, function (o) { return o.permissions.admin; });
+
+            if (that.repo.filterTerm) {
+              var filteredAdminRepos = that.$filter('filter')(adminRepos, that.repo.filterTerm);
+              numFetched += filteredAdminRepos.length;
+              [].push.apply(that.data.filteredRepos, filteredAdminRepos);
+            } else {
+              numFetched += adminRepos.length;
+            }
+
+            [].push.apply(fetchedRepos, adminRepos);
+            [].push.apply(that.data.repos, adminRepos);
+
+            if (numFetched < that.repo.pageSize && links.next) {
+              next();   // eslint-disable-line callback-return
+            } else {
+              that.repo.page++;
+              deferred.resolve({newRepos: fetchedRepos, repos: that.data.repos, links: that.repo.links, page: that.repo.page});
+            }
+          }, function (err) {
+            deferred.reject(err);
+          });
+      }
+
+      if (this.repo.page === 0 || this.repo.links.next) {
+        next();   // eslint-disable-line callback-return
+      } else {
+        deferred.resolve({newRepos: fetchedRepos, repos: this.data.repos, links: this.repo.links, page: this.repo.page});
+      }
+
+      return deferred.promise;
+    },
+
+    /**
+     * @function _resetRepos
+     * @memberof cloud-foundry.model.github.GithubModel
+     * @description Reset repos
+     * @returns {void}
+     * @private
+     */
+    _resetRepos: function () {
+      this.data.repos.length = 0;
+      this.repo.page = 0;
+      this.repo.links = {};
     },
 
     /**
@@ -74,7 +190,7 @@
     branches: function (repo) {
       var that = this;
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
-      return githubApi.branches(repo)
+      return githubApi.branches(repo, {per_page: 100})
         .then(function (response) {
           that.onBranches(response);
         })
@@ -129,18 +245,6 @@
     },
 
     /**
-     * @function onRepos
-     * @memberof cloud-foundry.model.github.GithubModel
-     * @description onRepos handler
-     * @param {string} response - the JSON response from API call
-     * @private
-     */
-    onRepos: function (response) {
-      this.data.repos.length = 0;
-      [].push.apply(this.data.repos, response.data || []);
-    },
-
-    /**
      * @function onBranches
      * @memberof cloud-foundry.model.github.GithubModel
      * @description onBranches handler
@@ -171,7 +275,7 @@
      * @private
      */
     onReposError: function () {
-      this.data.repos.length = 0;
+      this._resetRepos();
     },
 
     /**

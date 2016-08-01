@@ -90,25 +90,36 @@
       var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
       var cfInfoApi = this.apiManager.retrieve('cloud-foundry.api.Info');
+      var hceInfoApi = this.apiManager.retrieve('cloud-foundry.api.HceInfoApi');
       var deferred = this.$q.defer();
 
       serviceInstanceApi.list()
         .then(function (response) {
           var items = response.data;
-          var guids = _.map(_.filter(items, {cnsi_type: 'hcf'}) || [], 'guid') || [];
 
           that.serviceInstances = {};
           that.numValid = 0;
 
-          if (_.isEmpty(guids)) {
+          var hcfGuids = _.map(_.filter(items, {cnsi_type: 'hcf'}) || [], 'guid') || [];
+          var hcfCfg = { headers: { 'x-cnap-cnsi-list': hcfGuids.join(',') } };
+          var hceGuids = _.map(_.filter(items, {cnsi_type: 'hce'}) || [], 'guid') || [];
+
+          var tasks = [];
+          // call /v2/info to refresh tokens, then list
+          if (hcfGuids.length > 0) {
+            tasks.push(cfInfoApi.GetInfo({}, hcfCfg));
+          }
+          if (hceGuids.length > 0) {
+            tasks.push(hceInfoApi.info(hceGuids.join(',')));
+          }
+
+          if (tasks.length === 0) {
             if (items.length > 0) {
               that.onList(response);
             }
-            deferred.resolve(that.serviceInstances);
+            return deferred.resolve(that.serviceInstances);
           } else {
-            var cfg = { headers: { 'x-cnap-cnsi-list': guids.join(',') } };
-            // call /v2/info to refresh tokens, then list
-            cfInfoApi.GetInfo({}, cfg).then(function () {
+            that.$q.all(tasks).then(function () {
               serviceInstanceApi.list().then(function (listResponse) {
                 that.onList(listResponse);
                 deferred.resolve(that.serviceInstances);

@@ -65,13 +65,19 @@
     }
 
     function init() {
-
+      var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      var user = stackatoInfo.info.endpoints.hcf[that.guid].user;
+      that.isAdmin = user.admin;
+      that.userName = user.name;
       // Start watching for further model changes after parent init chain completes
       $scope.$watchCollection(function () {
         return organizationModel.organizations[that.guid];
       }, function () {
         updateFromModel();
       });
+
+      that.initialized = true;
 
       // init functions should return a promise
       return $q.resolve(that.organizations);

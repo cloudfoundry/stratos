@@ -45,6 +45,7 @@
     this.$q = $q;
     this.data = {};
     this.application = {
+      instanceCount: 0,
       summary: {
         state: 'LOADING'
       },
@@ -61,6 +62,10 @@
       orgGuid: 'all',
       spaceGuid: 'all'
     };
+
+    // This state should be in the model
+    this.clusterCount = 0;
+    this.hasApps = false;
   }
 
   angular.extend(Application.prototype, {
@@ -102,6 +107,7 @@
                 // We need more information
                 tasks.push(that.returnAppStats(cnsi, app.metadata.guid).then(function (stats) {
                   app.instances = stats.data[cnsi];
+                  app.instanceCount = _.keys(app.instances).length;
                   app.state = that.appStateService.get(app.entity, app.instances);
                   return stats.data[cnsi];
                 }));
@@ -204,6 +210,45 @@
             });
           }
         });
+    },
+
+    /**
+     * @function _getAppDetails
+     * @memberof cloud-foundry.model.application
+     * @description get details of an application at the model layer
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - the application id
+     * @param {object} params - parameter mapping
+     * @returns {promise} a promise object
+     * @private
+     */
+    _getAppDetails: function (cnsiGuid, guid, params) {
+      var that = this;
+      var config = {
+        headers: {'x-cnap-cnsi-list': cnsiGuid}
+      };
+
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .RetrieveApp(guid, params, config)
+        .then(function (response) {
+          that.onGetAppOrgAndSpace(response.data[cnsiGuid].entity);
+        });
+    },
+
+    /**
+     * @function getAppDetailsOnOrgAndSpace
+     * @memberof cloud-foundry.model.application
+     * @description get details of an application at the model layer
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - the application id
+     * @returns {promise} a promise object
+     * @public
+     */
+    getAppDetailsOnOrgAndSpace: function (cnsiGuid, guid) {
+      return this._getAppDetails(cnsiGuid, guid, {
+        'inline-relations-depth': 2,
+        'include-relations': 'organization,space'
+      });
     },
 
     /**
@@ -414,6 +459,7 @@
         //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
         // Stats for all instances
         that.application.instances = data;
+        that.application.instanceCount = _.keys(data).length;
         return response;
       });
     },
@@ -546,6 +592,19 @@
      */
     onAll: function (response) {
       this.data.applications = response.data;
+
+      // Check the data we have and determine if we have any applications
+      this.hasApps = false;
+      if (this.clusterCount > 0 && this.data && this.data.applications) {
+        var appCount = _.reduce(this.data.applications, function (sum, app) {
+          if (!app.error && app.resources) {
+            return sum + app.resources.length;
+          } else {
+            return sum;
+          }
+        }, 0);
+        this.hasApps = appCount > 0;
+      }
     },
 
     /**
@@ -587,6 +646,18 @@
       /* eslint-enable no-warning-comments */
       this.application.summary = response;
       this.onAppStateChange();
+    },
+
+    /**
+     * @function onGetAppOrgAndSpace
+     * @memberof  cloud-foundry.model.application
+     * @description onGetAppOrgAndSpace handler at model layer
+     * @param {object} entity - response entity
+     * @private
+     */
+    onGetAppOrgAndSpace: function (entity) {
+      this.application.organization = entity.space.entity.organization.entity;
+      this.application.space = entity.space.entity;
     },
 
     /**

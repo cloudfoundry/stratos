@@ -70,7 +70,8 @@
     };
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    var isAdmin = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user.admin;
+    var user = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user;
+    var isAdmin = user.admin;
     var canDelete = false;
     if (isAdmin) {
       var spacesInOrg = that.organization.spaces;
@@ -114,7 +115,7 @@
           confirmDialog({
             title: gettext('Delete Organization'),
             description: gettext('Are you sure you want to delete organization') +
-            " '" + that.organization.details.org.entity.name + "' ?",
+            " '" + that.organization.details.org.entity.name + "'?",
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
@@ -140,8 +141,13 @@
       var memQuotaHuman = that.utils.mbToHumanSize(that.organization.details.memQuota);
       that.memory = usedMemHuman + ' / ' + memQuotaHuman;
 
+    });
+
+    $scope.$watchCollection(function () {
+      return _.get(that.organization, '.roles.' + user.guid);
+    }, function (roles) {
       // Present the user's roles
-      that.roles = that.organizationModel.organizationRolesToString(that.organization.details.roles);
+      that.roles = that.organizationModel.organizationRolesToString(roles);
     });
   }
 

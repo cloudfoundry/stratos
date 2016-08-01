@@ -56,6 +56,16 @@
         <dd class="pull-right">
           {{ applicationSummaryCtrl.getEndpoint() }}
         </dd>
+
+        <dt translate>ORGANIZATION</dt>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.organization.name }}
+        </dd>
+
+        <dt translate>SPACE</dt>
+        <dd class="pull-right">
+          {{ appCtrl.model.application.space.name }}
+        </dd>
       </dl>
     </div>
   </div>
@@ -81,7 +91,9 @@
           <th translate>Name</th>
           <th translate>Service</th>
           <th translate>Plan</th>
+          <!--
           <th translate>ENV.VARIABLES</th>
+          -->
         </tr>
       </thead>
       <tbody>
@@ -89,9 +101,11 @@
           <td>{{ service.name }}</td>
           <td>{{ service.service_plan.service.label }}</td>
           <td>{{ service.service_plan.name }}</td>
+          <!--
           <td>
-            <a class="icon-link" href="http://yahoo.com" target="_blank"><i class="helion-icon helion-icon-Share"></i></a>
+            <a class="icon-link" href="#" target="_blank"><i class="helion-icon helion-icon-Share"></i></a>
           </td>
+          -->
         </tr>
       </tbody>
     </table>
@@ -137,33 +151,44 @@
 <div>
   <div class="action-header">
     <span translate>Instances</span>
+    <!--
     <a class="btn btn-link">
       <i class="helion-icon helion-icon-Right_Arrow"></i>
       <span translate>Add instances</span>
     </a>
+    -->
   </div>
   <div class="panel panel-default">
-    <div class="panel-body"
-      ng-if="!appCtrl.model.application.summary.running_instances.length" translate>
-      You have no instances.
+    <div class="panel-body" ng-if="appCtrl.model.application.summary.running_instances === 0" translate>
+      This application has no running instances.
     </div>
-    <table class="table"
-      ng-if="appCtrl.model.application.summary.running_instances.length" >
+    <table class="table" ng-if="appCtrl.model.application.summary.running_instances > 0" >
       <thead>
         <tr>
           <th translate>Index</th>
           <th translate>Status</th>
+          <th translate>Uptime</th>
           <th></th>
         </tr>
       </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="instance in appCtrl.model.application.summary.running_instances">
+        <tr ng-repeat="instance in appCtrl.model.application.instances" ng-show="$index < applicationSummaryCtrl.instanceViewLimit">
           <td>{{ $index }}</td>
-          <td>{{ instance.name }}</td>
+          <td>{{ instance.state }}</td>
+          <td>{{ applicationSummaryCtrl.formatUptime(instance.stats.uptime) }}</td>
           <td></td>
         </tr>
       </tbody>
+      <tfoot ng-show="applicationSummaryCtrl.instanceViewLimit < appCtrl.model.application.instanceCount">
+      <tr>
+        <td colspan="4" class="text-center">
+          <a ng-click="applicationSummaryCtrl.instanceViewLimit = appCtrl.model.application.instanceCount">
+            <span translate>Show All</span> ({{appCtrl.model.application.instanceCount}})
+          </a>
+        </td>
+      </tr>
+      </tfoot>
     </table>
   </div>
 </div>

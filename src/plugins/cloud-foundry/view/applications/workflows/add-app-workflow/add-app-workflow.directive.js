@@ -26,7 +26,8 @@
     'app.event.eventService',
     'github.view.githubOauthService',
     '$scope',
-    '$q'
+    '$q',
+    '$timeout'
   ];
 
   /**
@@ -36,31 +37,40 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
-   * @param {object} $scope - angular $scope
-   * @param {object} $q - angular $q service
+   * @param {object} $scope - Angular $scope
+   * @param {object} $q - Angular $q service
+   * @param {object} $timeout - the Angular $timeout service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
+   * @property {object} $timeout - the Angular $timeout service
+   * @property {boolean} addingApplication - flag for adding app
+   * @property {app.event.eventService} eventService - the Event management service
+   * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {object} appModel - the Cloud Foundry applications model
+   * @property {object} cnsiModel - the CNSI model
    * @property {object} serviceInstanceModel - the application service instance model
+   * @property {object} spaceModel - the Cloud Foundry space model
+   * @property {object} routeModel - the Cloud Foundry route model
    * @property {object} githubModel - the Github model
+   * @property {object} hceModel - the HCE model
    * @property {object} privateDomainModel - the private domain model
    * @property {object} sharedDomainModel - the shared domain model
    * @property {object} organizationModel - the organization model
-   * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
+   * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q) {
+  function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q, $timeout) {
     var that = this;
 
     this.$scope = $scope;
     this.$q = $q;
+    this.$timeout = $timeout;
     this.addingApplication = false;
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    // Adding a service model for the demo.
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.githubModel = modelManager.retrieve('cloud-foundry.model.github');
@@ -74,6 +84,7 @@
 
     this.userInput = {};
     this.options = {};
+    this.filterTimeout = null;
 
     $scope.$watch(function () {
       return that.userInput.serviceInstance;
@@ -117,6 +128,22 @@
         that.appendSubflow(that.data.subflows[subflow]);
       }
     });
+
+    $scope.$watch(function () {
+      return that.userInput.repoFilterTerm;
+    }, function (newFilterTerm) {
+      if (that.filterTimeout !== null) {
+        that.$timeout.cancel(that.filterTimeout);
+      }
+
+      that.filterTimeout = that.$timeout(function () {
+        return that.filterRepos(newFilterTerm);
+      }, 500);
+    });
+
+    this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
+      that.loadMoreRepos();
+    });
   }
 
   angular.extend(AddAppWorkflowController.prototype, {
@@ -141,6 +168,7 @@
         hceCnsi: null,
         source: null,
         repo: null,
+        repoFilterTerm: null,
         branch: null,
         buildContainer: null,
         imageRegistry: null,
@@ -246,11 +274,7 @@
 
               return oauth
                 .then(function () {
-                  return that.githubModel.repos();
-                })
-                .then(function () {
-                  var repos = _.filter(that.githubModel.data.repos || [], function (o) { return o.permissions.admin; });
-                  [].push.apply(that.options.repos, repos);
+                  return that.getRepos();
                 });
             }
           },
@@ -295,8 +319,8 @@
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
               that.hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
-                var target = _.find(that.hceModel.data.deploymentTargets,
-                                    { name: that.userInput.serviceInstance.name });
+                var name = that._getDeploymentTargetName();
+                var target = _.find(that.hceModel.data.deploymentTargets, {name: name});
                 if (target) {
                   that.createPipeline(target.deployment_target_id)
                     .then(function (response) {
@@ -344,6 +368,7 @@
       this.options = {
         workflow: that.data.workflow,
         userInput: this.userInput,
+        eventService: this.eventService,
         errors: this.errors,
         subflow: null,
         serviceInstances: [],
@@ -374,7 +399,10 @@
           }
         ],
         sources: [],
+        displayedRepos: [],
         repos: [],
+        hasMoreRepos: false,
+        loadingRepos: false,
         branches: [],
         buildContainers: [],
         imageRegistries: []
@@ -574,6 +602,46 @@
         });
     },
 
+    getRepos: function () {
+      var that = this;
+      this.options.loadingRepos = true;
+      return this.githubModel.repos()
+        .then(function (response) {
+          that.options.hasMoreRepos = angular.isDefined(response.links.next);
+          [].push.apply(that.options.repos, response.repos);
+        })
+        .finally(function () {
+          that.options.loadingRepos = false;
+        });
+    },
+
+    loadMoreRepos: function () {
+      var that = this;
+      this.options.loadingRepos = true;
+      return this.githubModel.nextRepos()
+        .then(function (response) {
+          that.options.hasMoreRepos = angular.isDefined(response.links.next);
+          [].push.apply(that.options.repos, response.newRepos);
+        })
+        .finally(function () {
+          that.options.loadingRepos = false;
+        });
+    },
+
+    filterRepos: function (newFilterTerm) {
+      var that = this;
+      this.options.loadingRepos = true;
+      return this.$q.when(this.githubModel.filterRepos(newFilterTerm))
+        .then(function (response) {
+          if (angular.isDefined(response)) {
+            that.options.hasMoreRepos = angular.isDefined(response.links.next);
+            [].push.apply(that.options.repos, response.newRepos);
+          }
+        }).finally(function () {
+          that.options.loadingRepos = false;
+        });
+    },
+
     getPipelineDetailsData: function () {
       var that = this;
 
@@ -646,10 +714,11 @@
     },
 
     createDeploymentTarget: function () {
+      var name = this._getDeploymentTargetName();
       var endpoint = this.userInput.serviceInstance.api_endpoint;
       var url = endpoint.Scheme + '://' + endpoint.Host;
       return this.hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
-                                                  this.userInput.serviceInstance.name,
+                                                  name,
                                                   url,
                                                   this.userInput.clusterUsername,
                                                   this.userInput.clusterPassword,
@@ -657,11 +726,18 @@
                                                   this.userInput.space.entity.name);
     },
 
+    _getDeploymentTargetName: function () {
+      return [
+        this.userInput.serviceInstance.name,
+        this.userInput.organization.entity.name,
+        this.userInput.space.entity.name
+      ].join('_');
+    },
+
     createPipeline: function (targetId) {
       return this.hceModel.createProject(this.userInput.hceCnsi.guid,
                                          this.userInput.name,
                                          this.userInput.source,
-                                         this.githubModel.getToken(),
                                          targetId,
                                          this.userInput.buildContainer.build_container_id,
                                          this.userInput.repo,

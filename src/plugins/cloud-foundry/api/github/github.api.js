@@ -27,39 +27,39 @@
    * @param {object} $http - the Angular $http service
    * @param {object} $window - the Angular $window service
    * @property {object} $http - the Angular $http service
-   * @property {object} token - the object
+   * @property {string} githubApiUrl - the Github API endpoint
+   * @property {boolean} authenticated - user has authenticated with Github
    * @class
    */
   function GithubApi($http, $window) {
     this.$http = $http;
-    this.githubApiUrl = 'https://api.github.com/';
-    this.token = null;
+    this.githubApiUrl = '/pp/v1/github/';
+    this.authenticated = false;
 
     var that = this;
     $window.addEventListener('message', function (event) {
       var message = angular.fromJson(event.data);
       if (message.name === 'GitHub Oauth - token') {
-        that.token = message.data;
+        that.authenticated = true;
       }
     });
   }
 
   angular.extend(GithubApi.prototype, {
-   /**
-    * @function repos
-    * @memberof cloud-foundry.api.github.GithubApi
-    * @description Get repos user owns or has admin rights to
-    * @param {object} params - additional params to send
-    * @returns {promise}
-    * @public
+    /**
+     * @function repos
+     * @memberof cloud-foundry.api.github.GithubApi
+     * @description Get repos user owns or has admin rights to
+     * @param {object} params - additional params to send
+     * @returns {promise} A promise object
+     * @public
     */
     repos: function (params) {
       var url = this.githubApiUrl + 'user/repos';
       var config = {
         params: params || {},
         headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token.access_token
+          Accept: 'application/vnd.github.v3+json'
         }
       };
 
@@ -67,21 +67,20 @@
     },
 
     /**
-    * @function branches
-    * @memberof cloud-foundry.api.github.GithubApi
-    * @description Get branches a repo
-    * @param {string} repo - the repo full name
-    * @param {object} params - additional params to send
-    * @returns {promise}
-    * @public
-    */
+     * @function branches
+     * @memberof cloud-foundry.api.github.GithubApi
+     * @description Get branches a repo
+     * @param {string} repo - the repo full name
+     * @param {object} params - additional params to send
+     * @returns {promise} A promise object
+     * @public
+     */
     branches: function (repo, params) {
       var url = this.githubApiUrl + 'repos/' + repo + '/branches';
       var config = {
         params: params || {},
         headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token.access_token
+          Accept: 'application/vnd.github.v3+json'
         }
       };
 
@@ -95,7 +94,7 @@
      * @param {string} repo - the repo full name
      * @param {string} branch - the branch name
      * @param {object} params - additional params to send
-     * @returns {promise}
+     * @returns {promise} A promise object
      * @public
      */
     getBranch: function (repo, branch, params) {
@@ -103,8 +102,7 @@
       var config = {
         params: params || {},
         headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token.access_token
+          Accept: 'application/vnd.github.v3+json'
         }
       };
 
@@ -112,21 +110,20 @@
     },
 
     /**
-    * @function commits
-    * @memberof cloud-foundry.api.github.GithubApi
-    * @description Get commits for a repo
-    * @param {string} repo - the repo full name
-    * @param {object} params - additional params to send
-    * @returns {promise}
-    * @public
-    */
+     * @function commits
+     * @memberof cloud-foundry.api.github.GithubApi
+     * @description Get commits for a repo
+     * @param {string} repo - the repo full name
+     * @param {object} params - additional params to send
+     * @returns {promise} A promise object
+     * @public
+     */
     commits: function (repo, params) {
       var url = this.githubApiUrl + 'repos/' + repo + '/commits';
       var config = {
         params: params || {},
         headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: 'token ' + this.token.access_token
+          Accept: 'application/vnd.github.v3+json'
         }
       };
       return this.$http.get(url, config);
