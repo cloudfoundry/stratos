@@ -15,11 +15,6 @@ services:
     extends:
       file: common.yml
       service: proxy
-    environment:
-      CONSOLE_CLIENT: console
-      HCP_IDENTITY_SCHEME: https
-      HCP_IDENTITY_HOST: ident.helion.space
-      HCP_IDENTITY_PORT: 443
     links:
       - postgres:postgres
 
