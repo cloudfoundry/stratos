@@ -569,9 +569,13 @@
         return svc.name === hceServiceLink;
       });
 
-      pipeline.valid = false;
-      pipeline.hceCnsi = undefined;
-      pipeline.hce_api_url = undefined;
+      function clearDeliveryPipelineMetadata(metadata) {
+        metadata.fetching = false;
+        metadata.valid = false;
+        metadata.hceCnsi = undefined;
+        metadata.hce_api_url = undefined;
+      }
+
       if (hceServiceData) {
         // Go fetch the service metadata
         return hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
@@ -587,15 +591,18 @@
               });
               pipeline.hceCnsi = hceInstance;
               pipeline.valid = angular.isDefined(hceInstance);
+              pipeline.fetching = false;
               return pipeline;
             });
+          } else {
+            clearDeliveryPipelineMetadata(pipeline);
           }
         })
-        .finally(function () {
-          pipeline.fetching = false;
+        .catch(function () {
+          clearDeliveryPipelineMetadata(pipeline);
         });
       } else {
-        pipeline.fetching = false;
+        clearDeliveryPipelineMetadata(pipeline);
         return that.$q.when(pipeline);
       }
     },
