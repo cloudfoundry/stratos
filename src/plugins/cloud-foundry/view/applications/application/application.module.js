@@ -140,6 +140,7 @@
     ];
 
     $scope.$watch(function () {
+
       return that.model.application.summary.state;
     }, function (newState) {
       that.onAppStateChange(newState);
@@ -148,10 +149,12 @@
     $scope.$watch(function () {
       return that.model.application.summary.routes;
     }, function (newRoutes) {
+
       that.onAppRoutesChange(newRoutes);
     });
 
     $scope.$on('$destroy', function () {
+      that.scopeDestroyed = true;
       that.stopUpdate();
     });
   }
@@ -176,8 +179,11 @@
         })
         .finally(function () {
           that.ready = true;
-          // Don't start updating until we have compelted the first init
-          that.startUpdate();
+          // Don't start updating until we have completed the first init
+          // Don't create timer when scope has been destroyed
+          if (!that.scopeDestroyed) {
+            that.startUpdate();
+          }
         });
     },
 
@@ -189,9 +195,13 @@
     startUpdate: function () {
       var that = this;
       if (!this.scheduledUpdate) {
+        console.log('Starting Update for', that.id);
         this.scheduledUpdate = this.$interval(function () {
           that.update();
+          console.log('Running Update for', that.id);
         }, this.UPDATE_INTERVAL);
+        console.log('Starting Update for', that.id, this.scheduledUpdate);
+
       }
     },
 
@@ -201,9 +211,14 @@
      * @public
      */
     stopUpdate: function () {
+      console.log('Cancelling for: ', this.id);
       if (this.scheduledUpdate) {
+        console.log('About to cancel: ', this.id);
         this.$interval.cancel(this.scheduledUpdate);
+        console.log('Cancelled for: ', this.id);
         delete this.scheduledUpdate;
+      }  else {
+        console.log('nothing to do', this.id);
       }
     },
 
