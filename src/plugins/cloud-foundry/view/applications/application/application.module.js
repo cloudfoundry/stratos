@@ -152,6 +152,7 @@
     });
 
     $scope.$on('$destroy', function () {
+      that.scopeDestroyed = true;
       that.stopUpdate();
     });
   }
@@ -176,8 +177,11 @@
         })
         .finally(function () {
           that.ready = true;
-          // Don't start updating until we have compelted the first init
-          that.startUpdate();
+          // Don't start updating until we have completed the first init
+          // Don't create timer when scope has been destroyed
+          if (!that.scopeDestroyed) {
+            that.startUpdate();
+          }
         });
     },
 
