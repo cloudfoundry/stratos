@@ -58,7 +58,7 @@
         // For each user, get its roles in all spaces
         _.forEach(that.users, function (aUser) {
           var myRoles = {};
-          _.forEach(that.spaceModel.spaces[that.guid], function (space, key) {
+          _.forEach(that.spaceModel.spaces[that.guid], function (space) {
             if (_.isUndefined(space.roles)) {
               // Prob means this is a space for another org!
               return;
