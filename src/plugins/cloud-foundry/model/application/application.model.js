@@ -466,14 +466,14 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
      * @param {object} params - options for getting the stats of an app
-     * @param {boolean} noUpdate - Do not update application model with fetched data
+     * @param {boolean} noCache - Do not cache fetched data
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    getAppStats: function (cnsiGuid, guid, params, noUpdate) {
+    getAppStats: function (cnsiGuid, guid, params, noCache) {
       var that = this;
-      return that.returnAppStats(cnsiGuid, guid, params, noUpdate).then(function (response) {
-        if (!noUpdate) {
+      return that.returnAppStats(cnsiGuid, guid, params, noCache).then(function (response) {
+        if (!noCache) {
           var data = response.data[cnsiGuid];
           //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           // Stats for all instances
@@ -491,11 +491,11 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
      * @param {object} params - options for getting the stats of an app
-     * @param {boolean} noUpdate - Do not update application model with fetched data
-     * @returns {promise} A resolved/rejected promise
+     * @param {boolean} noCache - Do not cache fetched data
+     * @returns {promise} A promise object
      * @public
      */
-    returnAppStats: function (cnsiGuid, guid, params, noUpdate) {
+    returnAppStats: function (cnsiGuid, guid, params, noCache) {
       var that = this;
       var config = {
         headers: {'x-cnap-cnsi-list': cnsiGuid}
@@ -503,7 +503,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetDetailedStatsForStartedApp(guid, params, config)
         .then(function (response) {
-          if (!noUpdate) {
+          if (!noCache) {
             var data = response.data[cnsiGuid];
             that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           }
