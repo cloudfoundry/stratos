@@ -204,7 +204,7 @@
       "volume_mounts": [
         {
           "volume_name": "pgsql-data-volume",
-          "mountpoint": "/var/lib/postgresql"
+          "mountpoint": "/database"
         }
       ]
     }
@@ -493,7 +493,7 @@
     {
       "name": "PGDATA",
       "description": "placeholder",
-      "default": "/var/lib/postgresql/data",
+      "default": "/database/postgres",
       "data_type": "string",
       "required": true,
       "secret": false
