@@ -36,13 +36,15 @@
       '?': {
         FAILED: {
           label: gettext('Staging Failed'),
-          indicator: 'error'
+          indicator: 'error',
+          actions: 'delete'
         }
       },
       PENDING: {
         '?': {
           label: gettext('Pending'),
-          indicator: 'busy'
+          indicator: 'busy',
+          actions: 'delete'
         }
       },
       LOADING: {
@@ -54,52 +56,82 @@
       STOPPED: {
         PENDING: {
           label: gettext('Offline while Updating'),
-          indicator: 'warning'
+          indicator: 'warning',
+          actions: 'delete'
         },
         STAGED: {
           label: gettext('Offline'),
-          indicator: 'warning'
+          indicator: 'warning',
+          actions: 'start,delete'
         },
         '*NONE*': {
           label: gettext('Incomplete'),
-          indicator: 'warning'
+          indicator: 'warning',
+          actions: 'delete'
         }
       },
       STARTED: {
         PENDING: {
           label: gettext('Staging App'),
-          indicator: 'busy'
+          indicator: 'busy',
+          actions: 'delete'
         },
         'STAGED(0,0,0)': {
           label: gettext('Starting App'),
-          indicator: 'busy'
+          indicator: 'busy',
+          actions: 'stop,restart'
         },
         'STAGED(N,0,0)': {
           label: gettext('Online'),
-          indicator: 'ok'
+          indicator: 'ok',
+          actions: 'stop,restart,launch'
         },
         'STAGED(0,N,0)': {
           label: gettext('Crashed'),
-          indicator: 'error'
+          indicator: 'error',
+          actions: 'stop,restart'
         },
         'STAGED(0,0,N)': {
           label: gettext('Crashing'),
-          indicator: 'error'
+          indicator: 'error',
+          actions: 'stop,restart'
         },
         'STAGED(0,N,N)': {
           label: gettext('Crashing'),
-          indicator: 'error'
+          indicator: 'error',
+          actions: 'stop,restart'
         },
         'STAGED(N,N,0)': {
           label: gettext('Partially Online'),
-          indicator: 'warning'
+          indicator: 'warning',
+          actions: 'stop,restart,launch'
         },
         'STAGED(N,0,N)': {
           label: gettext('Partially Online'),
-          indicator: 'warning'
+          indicator: 'warning',
+          actions: 'stop,restart,launch'
         }
       }
     };
+
+    /**
+     * @function mapActions
+     * @description Translates string list of action names into a map for easier checking if an action is supported
+     * @param {object} obj - object to traverse to replace 'actions' kets with maps
+     */
+    function mapActions(obj) {
+      _.each(obj, function (v, k) {
+        if (angular.isObject(v)) {
+          mapActions(v);
+        } else if (k === 'actions') {
+          var map = {};
+          _.each(v.split(','), function (a) { map[a.trim()] = true; });
+          obj.actions = map;
+        }
+      });
+    }
+
+    mapActions(stateMetadata);
 
     // This service supports a single 'get' method
     return {
@@ -149,7 +181,8 @@
       // No match against the state table, so return unknown
       return {
         label: gettext('Unknown'),
-        indicator: 'error'
+        indicator: 'error',
+        actions: {}
       };
     }
 

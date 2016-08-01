@@ -47,6 +47,8 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Staging Failed');
+        expect(_.keys(res.actions).length).toBe(1);
+        expect(res.actions.delete).toBe(true);
       });
 
       it('Updating app', function () {
@@ -55,6 +57,8 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Offline while Updating');
+        expect(_.keys(res.actions).length).toBe(1);
+        expect(res.actions.delete).toBe(true);
       });
 
       it('Incomplete app', function () {
@@ -62,6 +66,8 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Incomplete');
+        expect(_.keys(res.actions).length).toBe(1);
+        expect(res.actions.delete).toBe(true);
       });
 
       it('User stopped app', function () {
@@ -69,6 +75,9 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Offline');
+        expect(_.keys(res.actions).length).toBe(2);
+        expect(res.actions.start).toBe(true);
+        expect(res.actions.delete).toBe(true);
       });
 
       it('Incomplete', function () {
@@ -76,6 +85,8 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Incomplete');
+        expect(_.keys(res.actions).length).toBe(1);
+        expect(res.actions.delete).toBe(true);
       });
 
       it('During push', function () {
@@ -83,6 +94,8 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('busy');
         expect(res.label).toBe('Staging App');
+        expect(_.keys(res.actions).length).toBe(1);
+        expect(res.actions.delete).toBe(true);
       });
 
       it('After successful push', function () {
@@ -90,6 +103,9 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('busy');
         expect(res.label).toBe('Starting App');
+        expect(_.keys(res.actions).length).toBe(2);
+        expect(res.actions.stop).toBe(true);
+        expect(res.actions.restart).toBe(true);
       });
 
       it('Running!', function () {
@@ -102,6 +118,10 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('ok');
         expect(res.label).toBe('Online');
+        expect(_.keys(res.actions).length).toBe(3);
+        expect(res.actions.restart).toBe(true);
+        expect(res.actions.stop).toBe(true);
+        expect(res.actions.launch).toBe(true);
       });
 
       it('Borked, usually due to app code', function () {
@@ -114,6 +134,9 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Crashed');
+        expect(_.keys(res.actions).length).toBe(2);
+        expect(res.actions.restart).toBe(true);
+        expect(res.actions.stop).toBe(true);
       });
 
       it('Borked, usually due to starting timeouts', function () {
@@ -126,6 +149,9 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Crashing');
+        expect(_.keys(res.actions).length).toBe(2);
+        expect(res.actions.restart).toBe(true);
+        expect(res.actions.stop).toBe(true);
       });
 
       it('Borked, usually due to starting timeouts', function () {
@@ -138,6 +164,9 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Crashing');
+        expect(_.keys(res.actions).length).toBe(2);
+        expect(res.actions.restart).toBe(true);
+        expect(res.actions.stop).toBe(true);
       });
 
       it('Borked, usually due to platform issues', function () {
@@ -150,6 +179,10 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Partially Online');
+        expect(_.keys(res.actions).length).toBe(3);
+        expect(res.actions.restart).toBe(true);
+        expect(res.actions.stop).toBe(true);
+        expect(res.actions.launch).toBe(true);
       });
 
       it('Borked, usually due to platform issues (2)', function () {
@@ -162,6 +195,10 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Partially Online');
+        expect(_.keys(res.actions).length).toBe(3);
+        expect(res.actions.restart).toBe(true);
+        expect(res.actions.stop).toBe(true);
+        expect(res.actions.launch).toBe(true);
       });
     });
 
