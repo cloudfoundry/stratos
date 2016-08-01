@@ -53,9 +53,7 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
 
     // Present memory usage
-    var usedMemHuman = utils.mbToHumanSize(this.organization.memUsed);
-    var memQuotaHuman = utils.mbToHumanSize(this.organization.memQuota);
-    this.memory = usedMemHuman + ' / ' + memQuotaHuman;
+    this.memory = utils.sizeUtilization(this.organization.memUsed, this.organization.memQuota);
 
     // Present instances utilisation
     var instancesUsed = this.organization.instances;
