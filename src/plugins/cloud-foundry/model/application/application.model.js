@@ -84,6 +84,22 @@
     all: function (guid, options, sync) {
       var that = this;
 
+      /* Reset application data
+       so that Summary page doesn't
+       show stale information */
+      this.application = {
+        instanceCount: 0,
+        summary: {
+          state: 'LOADING'
+        },
+        stats: {},
+        pipeline: {
+          fetching: false,
+          valid: false,
+          hceCnsi: undefined
+        }
+      };
+
       var cnsis = [];
       if (this.filterParams.cnsiGuid === 'all') {
         cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
@@ -106,7 +122,7 @@
             _.each(appsResponse.resources, function (app) {
               if (app.entity.state === 'STARTED') {
                 // We need more information
-                tasks.push(that.returnAppStats(cnsi, app.metadata.guid).then(function (stats) {
+                tasks.push(that.returnAppStats(cnsi, app.metadata.guid, null, true).then(function (stats) {
                   app.instances = stats.data[cnsi];
                   app.instanceCount = _.keys(app.instances).length;
                   app.state = that.appStateService.get(app.entity, app.instances);
@@ -450,22 +466,36 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
      * @param {object} params - options for getting the stats of an app
+     * @param {boolean} noUpdate - Do not update application model with fetched data
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    getAppStats: function (cnsiGuid, guid, params) {
+    getAppStats: function (cnsiGuid, guid, params, noUpdate) {
       var that = this;
-      return that.returnAppStats(cnsiGuid, guid, params).then(function (response) {
-        var data = response.data[cnsiGuid];
-        //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
-        // Stats for all instances
-        that.application.instances = data;
-        that.application.instanceCount = _.keys(data).length;
+      return that.returnAppStats(cnsiGuid, guid, params, noUpdate).then(function (response) {
+        if (!noUpdate) {
+          var data = response.data[cnsiGuid];
+          //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
+          // Stats for all instances
+          that.application.instances = data;
+          that.application.instanceCount = _.keys(data).length;
+        }
         return response;
       });
     },
 
-    returnAppStats: function (cnsiGuid, guid, params) {
+    /**
+     * @function returnAppStats
+     * @memberof cloud-foundry.model.application
+     * @description Fetch application stats
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - the app guid
+     * @param {object} params - options for getting the stats of an app
+     * @param {boolean} noUpdate - Do not update application model with fetched data
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    returnAppStats: function (cnsiGuid, guid, params, noUpdate) {
       var that = this;
       var config = {
         headers: {'x-cnap-cnsi-list': cnsiGuid}
@@ -473,8 +503,10 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetDetailedStatsForStartedApp(guid, params, config)
         .then(function (response) {
-          var data = response.data[cnsiGuid];
-          that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
+          if (!noUpdate) {
+            var data = response.data[cnsiGuid];
+            that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
+          }
           return response;
         });
     },
