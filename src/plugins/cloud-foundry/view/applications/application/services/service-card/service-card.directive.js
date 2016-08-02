@@ -99,12 +99,11 @@
      * @returns {promise} A promise object
      */
     init: function () {
-      this.serviceBindings.length = 0;
-
       var serviceInstances = this.getServiceInstanceGuids();
       if (serviceInstances.length > 0) {
         return this.getServiceBindings(serviceInstances);
       } else {
+        this.serviceBindings = [];
         this.updateActions();
       }
     },
@@ -142,7 +141,7 @@
         .then(function (bindings) {
           var appGuid = that.app.summary.guid;
           var appBindings = _.filter(bindings, function (o) { return o.entity.app_guid === appGuid; });
-          [].push.apply(that.serviceBindings, appBindings);
+          that.serviceBindings = appBindings;
           that.updateActions();
         });
     },
