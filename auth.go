@@ -286,7 +286,7 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 
 	res, err := httpClient.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
-		log.Printf("Error performing http request - status: %d, error: %v", res.StatusCode, err)
+		log.Printf("Error performing http request - response: %v, error: %v", res, err)
 		return nil, logHTTPError(res, err)
 	}
 
