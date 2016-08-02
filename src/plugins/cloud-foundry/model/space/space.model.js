@@ -183,8 +183,14 @@
      */
     listAllRoutesForSpace: function (cnsiGuid, guid, options) {
       var that = this;
+      //
+      var params = {
+        'inline-relations-depth': 2,
+        'include-relations': 'domain,apps'
+      };
+      _.apply(params, options);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(guid, options, this.makeHttpConfig(cnsiGuid))
+        .ListAllRoutesForSpace(guid, params, this.makeHttpConfig(cnsiGuid), params)
         .then(function (response) {
           return that.onListAllRoutesForSpace(cnsiGuid, guid, response.data.resources);
         });

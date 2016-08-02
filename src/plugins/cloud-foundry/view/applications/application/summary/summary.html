@@ -134,7 +134,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.getRouteId(route)">
+        <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.routesService.getRouteId(route)">
           <td>{{ route.host + '.' + route.domain.name + route.path }}</td>
           <td>
             <actions-menu actions="applicationSummaryCtrl.routesActionMenu"

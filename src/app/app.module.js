@@ -11,7 +11,8 @@
       'app.event',
       'app.model',
       'app.view',
-      'app.utils'
+      'app.utils',
+      'app.service'
     ])
     .constant('app.basePath', 'app/')
     .run(setTranslationLanguage);

@@ -28,38 +28,26 @@
     '$scope',
     '$stateParams',
     '$q',
-    'app.model.modelManager'
+    '$log',
+    'app.model.modelManager',
+    'app.service.serviceManager'
   ];
 
-  function SpaceRoutesController($scope, $stateParams, $q, modelManager) {
+  function SpaceRoutesController($scope, $stateParams, $q, $log, modelManager, serviceManager) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
     this.spaceGuid = $stateParams.space;
     this.$q = $q;
+    this.$log = $log;
     this.modelManager = modelManager;
+    this.routesService = serviceManager.retrieve('cloud-foundry.service.route');
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
-    this.privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
-    this.sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
 
     this.apps = {};
-
-    this.actions = [
-      {
-        name: gettext('Delete Route'),
-        disabled: true,
-        execute: function () {
-        }
-      },
-      {
-        name: gettext('Unmap Route'),
-        disabled: true,
-        execute: function () {
-        }
-      }
-    ];
+    this.actionsPerRoute = {};
 
     $scope.$watch(function () {
       return that.visibleRoutes;
@@ -67,39 +55,68 @@
       if (!routes) {
         return;
       }
-      that.updateMappings(routes);
+      that.updateActions(routes);
     });
   }
 
   angular.extend(SpaceRoutesController.prototype, {
 
-    updateMappings: function (routes) {
+    getInitialActions: function () {
       var that = this;
-      var routeModel = this.modelManager.retrieve('cloud-foundry.model.route');
-      var appModel = this.modelManager.retrieve('cloud-foundry.model.application');
-      _.forEach(routes, function (route) {
-        if (that.apps[route.metadata.guid]) {
-          return;
-        }
-        that.apps[route.metadata.guid] = [];
-        // Route 1:M Route Mapping.
-        routeModel.listAllRouteMappingsForRoute(that.clusterGuid, route.metadata.guid)
-          .then(function (routeMappings) {
-            // Mapping 1:1 Application
-            _.forEach(routeMappings, function (routeMapping) {
-              // Get the application names, either from cash or refreshed cash
-              var summary = _.get(appModel, 'appSummary.' + that.clusterGuid + '.' + routeMapping.entity.app_guid);
-              var promise = summary
-                ? that.$q.when(summary)
-                : appModel.getAppSummary(that.clusterGuid, routeMapping.entity.app_guid).then(function (response) {
-                  return response.data[that.clusterGuid];
+      return [
+        {
+          name: gettext('Delete Route'),
+          disabled: false,
+          execute: function (route) {
+            that.routesService.deleteRoute(that.clusterGuid, route.entity, route.metadata.guid)
+              .then(function () {
+                return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid);
+              })
+              .then(function () {
+                that.updateActions([route]);
+              });
+          }
+        },
+        {
+          name: gettext('Unmap Route'),
+          disabled: true,
+          execute: function (route) {
+            var promises = [];
+            _.forEach(route.entity.apps, function (app) {
+              var promise = that.routesService.unmapRoute(that.clusterGuid, route.entity, route.metadata.guid,
+                app.metadata.guid)
+                .catch(function () {
+                  that.$log.error('Unable to update map for route ', route.metadata.guid);
                 });
-              // Track the application names per route
-              promise.then(function (summary) {
-                that.apps[route.metadata.guid].push(summary.name);
+              promises.push(promise);
+            });
+            if (promises.length === 0) {
+              return;
+            }
+            that.$q.all(promises).then(function () {
+              that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid).then(function () {
+                that.updateActions([route]);
               });
             });
-          });
+
+          }
+        }
+      ];
+    },
+
+    appsToNames: function (apps) {
+      return _.map(apps, function (app) {
+        return app.entity.name;
+      });
+    },
+
+    updateActions: function (routes) {
+      var that = this;
+      _.forEach(routes, function (route) {
+        that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
+        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1;
+        console.log(route);
+
       });
     },
 
