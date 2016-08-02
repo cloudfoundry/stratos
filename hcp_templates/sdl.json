@@ -131,6 +131,9 @@
         },
         {
           "name": "ENCRYPTION_KEY_VOLUME"
+        },
+        {
+          "name": "ENCRYPTION_KEY_FILENAME"
         }
       ],
       "affinity": [],
