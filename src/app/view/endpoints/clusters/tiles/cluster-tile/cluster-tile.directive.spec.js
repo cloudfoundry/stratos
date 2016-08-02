@@ -73,8 +73,8 @@
 
         expect(clusterTileCtrl.orgCount).toBeNull();
         expect(clusterTileCtrl.userCount).toBeNull();
-        expect(clusterTileCtrl.cardData).toBeDefined();
-        expect(clusterTileCtrl.cardData.title).toEqual(initialService.name);
+        expect(clusterTileCtrl.getCardData()).toBeDefined();
+        expect(clusterTileCtrl.getCardData().title).toEqual(initialService.name);
       });
 
       it('check initial state - not null', function () {
