@@ -256,6 +256,18 @@
       "parameters": [
         {
           "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "UPGRADE_VOLUME"
+        },
+        {
+          "name": "UPGRADE_LOCK_FILENAME"
+        },
+        {
+          "name": "ENCRYPTION_KEY_VOLUME"
+        },
+        {
+          "name": "ENCRYPTION_KEY_FILENAME"
         }
       ],
       "affinity": [],
@@ -268,6 +280,10 @@
         {
           "volume_name": "hsc-upgrade-volume",
           "mountpoint": "/hsc-upgrade-volume"
+        },
+        {
+          "volume_name": "hsc-encryption-key-volume",
+          "mountpoint": "/hsc-encryption-key-volume"
         }
       ]
     }
@@ -314,6 +330,12 @@
         },
         {
           "name": "pgsql-password"
+        },
+        {
+          "name": "UPGRADE_VOLUME"
+        },
+        {
+          "name": "UPGRADE_LOCK_FILENAME"
         }
       ],
       "affinity": [],
@@ -693,10 +715,34 @@
       "secret": false
     },
     {
+      "name": "UPGRADE_VOLUME",
+      "description": "The local shared volume mount for the upgrade lock file.",
+      "data_type": "string",
+      "default": "hsc-upgrade-volume",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "UPGRADE_LOCK_FILENAME",
+      "description": "The filename of the lockfile used to coordinate a Console upgrade.",
+      "data_type": "string",
+      "default": "upgrade.lock",
+      "required": true,
+      "secret": false
+    },
+    {
       "name": "ENCRYPTION_KEY_VOLUME",
       "description": "The local shared volume mount for the encryption key.",
       "data_type": "string",
-      "default": "/hsc-encryption-key-volume",
+      "default": "hsc-encryption-key-volume",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ENCRYPTION_KEY_FILENAME",
+      "description": "The filename of the encryption key used to encrypt sensitive data before it gets saved to Postgresql.",
+      "data_type": "string",
+      "default": "key",
       "required": true,
       "secret": false
     }
