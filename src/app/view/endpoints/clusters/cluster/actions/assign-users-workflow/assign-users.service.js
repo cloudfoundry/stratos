@@ -15,8 +15,7 @@
        * @memberof app.view.endpoints.clusters.cluster.assignUsers
        * @name assign
        * @constructor
-       * @param {object} context - the context for the modal. Used to pass in data, specifically selectedUsers and
-       * initPromise.
+       * @param {object} context - the context for the modal. Used to pass in data
        */
       assign: function (context) {
         return detailView(
@@ -35,6 +34,7 @@
   AssignUsersWorkflowController.$inject = [
     'app.model.modelManager',
     'context',
+    'app.view.endpoints.clusters.cluster.rolesService',
     '$stateParams',
     '$q',
     '$timeout',
@@ -47,12 +47,15 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} context - the context for the modal. Used to pass in data
+   * @param {object} rolesService - the console roles service. Aids in selecting, assigning and removing roles with the
+   * roles table.
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $q - the angular $q service
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController(modelManager, context, $stateParams, $q, $timeout, $uibModalInstance) {
+  function AssignUsersWorkflowController(modelManager, context, rolesService, $stateParams, $q, $timeout,
+                                         $uibModalInstance) {
     var that = this;
 
     this.$uibModalInstance = $uibModalInstance;
@@ -81,6 +84,7 @@
       that.data.usersByGuid = [];
 
       that.userInput.selectedUsersByGuid = {};
+      that.userInput.roles = { };
       if (context.selectedUsers) {
         that.userInput.selectedUsersByGuid = angular.fromJson(angular.toJson(context.selectedUsers));
       }
@@ -92,6 +96,7 @@
         // Create a collection to support the organization drop down
         that.data.organizations = _.chain(that.organizationModel.organizations[that.data.clusterGuid])
           .map(function (obj) {
+            that.userInput.roles[obj.details.org.metadata.guid] = {};
             return {
               label: obj.details.org.entity.name,
               value: obj
@@ -114,6 +119,32 @@
         return value;
       });
       return $q.when();
+    }
+
+    function createOriginalRoles(newRoles) {
+      // The role service updateUser function expects a collection of previously selected roles. The diff of which
+      // will be used to make assign/remove calls to HCF. For the assign users case we only want additive calls to
+      // be made. To do this the previously selected roles object needs to exactly match except contain false for any
+      // true role
+
+      var oldRoles = angular.fromJson(angular.toJson(newRoles));
+
+      function flopTrueToFalse(obj) {
+        _.forEach(obj, function (val, key) {
+          if (val === true) {
+            obj[key] = false;
+          }
+        });
+      }
+
+      _.forEach(oldRoles, function (oldRole) {
+        flopTrueToFalse(oldRole.organization);
+        _.forEach(oldRole.spaces, function (space) {
+          flopTrueToFalse(space);
+        });
+      });
+
+      return oldRoles;
     }
 
     initialise();
@@ -166,6 +197,9 @@
               if (!that.userInput.org) {
                 that.userInput.org = that.data.organizations[0].value;
               }
+
+              that.options.workflow.steps[1].table.config.users = that.userInput.selectedUsers;
+
               return organizationChanged(that.userInput.org);
             }
           },
@@ -183,14 +217,24 @@
               },
               changeOrganization: function (org) {
                 organizationChanged(org);
+              },
+              keys: function (obj) {
+                return _.keys(obj);
               }
             },
-            selectedUserListLimit: 10
+            selectedUserListLimit: 10,
+            table: {
+              config: {
+                clusterGuid: context.clusterGuid,
+                orgRoles: rolesService.organizationRoles,
+                spaceRoles: rolesService.spaceRoles,
+                disableOrg: true
+              },
+              roles: that.userInput.roles
+            }
           }
         ]
       }
-      // ,
-      // userInput: this.userInput
     };
 
     // Simple mechanism to stop double click on 'assign'. Ideally it would be better to do this via the wizard
@@ -208,126 +252,34 @@
           return;
         }
         that.assigning = true;
-        that.assignUsers()
+
+        // Make the call to the role service to assign new roles. To do this we need to create the params in the
+        // required format.
+
+        // The service expects an object of type obj[orgGuid] = <org roles>
+        var selectedOrgGuid = that.userInput.org.details.org.metadata.guid;
+        var selectedOrgRoles = _.set({}, selectedOrgGuid, that.userInput.roles[selectedOrgGuid]);
+
+        // The service expects an object of HCF user objects keyed by their guid
+        var usersByGuid = _.keyBy(that.userInput.selectedUsers, function (user) {
+          return user.metadata.guid;
+        });
+
+        rolesService.updateUsers(context.clusterGuid, usersByGuid, createOriginalRoles(selectedOrgRoles), selectedOrgRoles)
           .then(function () {
-            that.$uibModalInstance.close(that.changes);
+            that.$uibModalInstance.close();
+          })
+          .catch(function (error) {
+            if (_.isArray(error)) {
+              that.data.failedAssignForUsers = error;
+            }
+            throw error;
           })
           .finally(function () {
             that.assigning = false;
           });
       }
     };
-
   }
-
-  angular.extend(AssignUsersWorkflowController.prototype, {
-
-    /**
-     * @name AssignUsersWorkflowController.assignUsers
-     * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
-     * the affected organizations and spaces
-     * @returns {promise}
-     */
-    assignUsers: function () {
-      var that = this;
-      that.data.failedAssignForUsers = [];
-
-      // For each user assign their new roles. Do this asynchronously
-      var promises = [];
-      _.forEach(this.userInput.selectedUsers, function (user) {
-        var promise = that.assignUser(user).catch(function (error) {
-          that.data.failedAssignForUsers.push(user.entity.username);
-          throw error;
-        });
-        promises.push(promise);
-      });
-
-      // If all async requests have finished invalidate any cache associated with roles
-      return this.$q.all(promises).then(function () {
-        // Refresh org cache
-        if (that.changes.organization) {
-          var orgPath = that.organizationModel.fetchOrganizationPath(that.data.clusterGuid, that.changes.organization);
-          var org = _.get(that.organizationModel, orgPath);
-          that.organizationModel.getOrganizationDetails(that.data.clusterGuid, org.details.org);
-        }
-
-        // Refresh space caches
-        if (that.changes.spaces) {
-          _.forEach(that.changes.spaces, function (spaceGuid) {
-            var spacePath = that.spaceModel.fetchSpacePath(that.data.clusterGuid, spaceGuid);
-            var space = _.get(that.spaceModel, spacePath);
-            that.spaceModel.getSpaceDetails(that.data.clusterGuid, space.details.space);
-          });
-        }
-      });
-    },
-
-    /**
-     * @name AssignUsersWorkflowController.assignUser
-     * @description Assign the user's selected roles. If successful refresh the cache of the affected organizations and
-     * spaces
-     * @param {object} user - the HCF user object of the user to assign roles to
-     * @returns {promise}
-     */
-    assignUser: function (user) {
-      var that = this;
-      var promises = [];
-
-      var orgGuid = this.userInput.org.details.guid;
-      var userGuid = user.metadata.guid;
-
-      // Track which orgs and spaces were affected
-      that.changes = {
-        organization: false,
-        spaces: []
-      };
-
-      // Organization roles
-      var orgRoles = _.get(this.userInput, 'roles.organization[' + orgGuid + ']', {});
-      if (orgRoles[0] || orgRoles[1] || orgRoles[2]) {
-        // Track the single org that's changed
-        that.changes.organization = orgGuid;
-        // Attempt to assign roles in parallel
-        var promise = this.usersModel.associateOrganizationWithUser(that.data.clusterGuid, orgGuid, userGuid)
-          .then(function () {
-            if (orgRoles[0]) {
-              promises.push(that.usersModel.associateManagedOrganizationWithUser(that.data.clusterGuid, orgGuid, userGuid));
-            }
-            if (orgRoles[1]) {
-              promises.push(that.usersModel.associateAuditedOrganizationWithUser(that.data.clusterGuid, orgGuid, userGuid));
-            }
-            if (orgRoles[2]) {
-              promises.push(that.usersModel.associateBillingManagedOrganizationWithUser(that.data.clusterGuid, orgGuid, userGuid));
-            }
-          });
-        promises.push(promise);
-      }
-
-      // Space roles
-      var orgSpaceRoles = _.get(this.userInput, 'roles.space[' + orgGuid + ']', {});
-      _.forEach(orgSpaceRoles, function (roles, spaceGuid) {
-        // Track which spaces have changed
-        if (roles[0] || roles[1] || roles[2]) {
-          that.changes.spaces.push(spaceGuid);
-        }
-        // Attempt to assign roles in parallel
-        if (roles[0]) {
-          promises.push(that.usersModel.associateManagedSpaceWithUser(that.data.clusterGuid, spaceGuid, userGuid));
-        }
-        if (roles[1]) {
-          promises.push(that.usersModel.associateSpaceWithUser(that.data.clusterGuid, spaceGuid, userGuid));
-        }
-        if (roles[2]) {
-          promises.push(that.usersModel.associateAuditedSpaceWithUser(that.data.clusterGuid, spaceGuid, userGuid));
-        }
-      });
-
-      // Return a promise when we've 'finished'. This includes some grace between returning from these put requests and
-      // the result being available in get requests
-      promises.push(that.$timeout(_.noop, 750));
-
-      return this.$q.all(promises);
-    }
-  });
 
 })();

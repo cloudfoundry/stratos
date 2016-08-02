@@ -236,8 +236,8 @@
      */
     onListRolesOfAllUsersInSpace: function (cnsiGuid, guid, roles) {
       var rolesByUserGuid = {};
-      _.forEach(roles, function (role) {
-        _.set(rolesByUserGuid, role.metadata.guid, role.entity.space_roles);
+      _.forEach(roles, function (user) {
+        _.set(rolesByUserGuid, user.metadata.guid, user.entity.space_roles);
       });
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.roles', rolesByUserGuid);
       return roles;

@@ -145,6 +145,7 @@
         disabled: !isAdmin,
         execute: function () {
           assignUsers.assign({
+            clusterGuid: that.organization.cnsiGuid,
             organizationGuid: that.organization.guid
           });
         }
