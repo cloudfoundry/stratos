@@ -18,8 +18,11 @@
    * @returns {object} the utils service
    */
   function utilsServiceFactory($log) {
+    var UNIT_GRABBER = /([0-9]+)( .*)/;
+
     return {
       mbToHumanSize: mbToHumanSize,
+      sizeUtilization: sizeUtilization,
       chainStateResolve: chainStateResolve,
       getClusterEndpoint: getClusterEndpoint
     };
@@ -38,6 +41,19 @@
         return (sizeMb / 1024).toFixed(1) + ' GB';
       }
       return sizeMb + ' MB';
+    }
+
+    function sizeUtilization(sizeMbUsed, sizeMbTotal) {
+      var usedMemHuman = this.mbToHumanSize(sizeMbUsed);
+      var totalMemHuman = this.mbToHumanSize(sizeMbTotal);
+
+      var usedUnit = UNIT_GRABBER.exec(usedMemHuman);
+      var totalUnit = UNIT_GRABBER.exec(totalMemHuman);
+      if (usedUnit[2] === totalUnit[2] || usedUnit[1] === '0') {
+        usedMemHuman = usedUnit[1];
+      }
+
+      return usedMemHuman + ' / ' + totalMemHuman;
     }
 
     /**
