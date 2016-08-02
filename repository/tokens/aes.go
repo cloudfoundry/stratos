@@ -71,6 +71,8 @@ func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 // ReadKey - Read the encryption key from the shared volume
 func ReadKey(v, f string) ([]byte, error) {
 	log.Println("ReadKey")
+	log.Printf("Volume: %s", v)
+	log.Printf("Filename: %s", f)
 
 	fname := fmt.Sprintf("/%s/%s", v, f)
 	log.Printf("Filename: %s", fname)
