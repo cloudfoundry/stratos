@@ -4,6 +4,10 @@ $applications-msg-height: 50px;
 
 .applications-header {
   font-size: $hpe-unit-space;
+
+  .bounce-spinner-sm {
+    margin-left: $hpe-unit-space;
+  }
 }
 
 .applications-filter {

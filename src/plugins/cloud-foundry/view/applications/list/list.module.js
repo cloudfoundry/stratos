@@ -41,6 +41,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
     this.ready = false;
+    this.loading = false;
     this.clusters = [{label: 'All Clusters', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
@@ -151,8 +152,10 @@
      */
     _getApps: function () {
       var that = this;
+      this.loading = true;
       this.model.all().finally(function () {
         that.ready = true;
+        that.loading = false;
       });
     },
 
