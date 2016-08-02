@@ -53,13 +53,10 @@
      * @public
      */
     GetUserSummary: function (cnsiGuid, userGuid, params) {
-      var httpConfig = {
-        headers: {'x-cnap-cnsi-list': cnsiGuid}
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .GetUserSummary(userGuid, params, httpConfig)
+        .GetUserSummary(userGuid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid].resources;
+          return response.data.resources;
         });
     },
 
@@ -73,13 +70,10 @@
      * @public
      */
     listAllUsers: function (cnsiGuid, params) {
-      var httpConfig = {
-        headers: {'x-cnap-cnsi-list': cnsiGuid}
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllUsers(params, httpConfig)
+        .ListAllUsers(params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid].resources;
+          return response.data.resources;
         });
     },
 

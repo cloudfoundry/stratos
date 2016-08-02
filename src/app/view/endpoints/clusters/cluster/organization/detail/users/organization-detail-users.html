@@ -7,14 +7,14 @@
         <thead>
         <tr>
           <th><checkbox-input class="select-all-checkbox" ng-change="organizationUsersController.selectAllChanged()" ng-model="organizationUsersController.selectAllUsers"></checkbox-input></th>
-          <th st-sort-default="true" st-sort="entity.username">USERS({{ organizationUsersController.users.length }})</th>
+          <th translate st-sort-default="true" st-sort="entity.username">USERS({{ organizationUsersController.users.length }})</th>
           <th translate>Space Roles</th>
           <th translate>ACTION</th>
         </tr>
         </thead>
         <tbody>
         <tr class="" ng-repeat="user in organizationUsersController.visibleUsers">
-          <td ><checkbox-input ng-model="organizationUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
+          <td><checkbox-input ng-model="organizationUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
           <td class="user-name">{{ user.entity.username }}</td>
           <td class="roles-list">
             <div class="role-pill" ng-repeat="orgRole in organizationUsersController.getSpaceRoles(user)">{{ orgRole.name }}: {{ orgRole.role }}<i class="close-icon helion-icon helion-icon-Close"></i></div>

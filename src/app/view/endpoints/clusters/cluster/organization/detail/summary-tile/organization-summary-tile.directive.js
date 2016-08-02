@@ -137,9 +137,7 @@
         return;
       }
       // Present memory usage
-      var usedMemHuman = that.utils.mbToHumanSize(that.organization.details.memUsed);
-      var memQuotaHuman = that.utils.mbToHumanSize(that.organization.details.memQuota);
-      that.memory = usedMemHuman + ' / ' + memQuotaHuman;
+      that.memory = that.utils.sizeUtilization(that.organization.details.memUsed, that.organization.details.memQuota);
 
     });
 
