@@ -33,7 +33,9 @@
     '$window',
     '$q',
     '$interval',
-    'helion.framework.widgets.dialog.confirm'
+    '$interpolate',
+    'helion.framework.widgets.dialog.confirm',
+    'helion.framework.widgets.toaster'
   ];
 
   /**
@@ -46,25 +48,31 @@
    * @param {object} $window - the Angular $window service
    * @param {object} $q - the Angular $q service
    * @param {object} $interval - the Angular $interval service
+   * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} confirmDialog - the confirm dialog service
+   * @param {helion.framework.widgets.toaster} toaster - the toast service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
    * @property {object} $interval - the Angular $interval service
+   * @property {object} $interpolate - the Angular $interpolate service
    * @property {app.event.eventService} eventService - the event bus service
+   * @property {helion.framework.widgets.toaster} toaster - the toast service
    * @property {string} id - the application GUID
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
    */
-  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, confirmDialog) {
+  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, confirmDialog, toaster) {
     var that = this;
 
     this.$window = $window;
     this.$q = $q;
     this.$interval = $interval;
+    this.$interpolate = $interpolate;
     this.eventService = eventService;
     this.confirmDialog = confirmDialog;
+    this.toaster = toaster;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
@@ -305,7 +313,12 @@
           no: gettext('Cancel')
         },
         callback: function () {
+          var appName = that.model.application.summary.name;
           that.model.deleteApp(that.cnsiGuid, that.id).then(function () {
+            // show notification for successful binding
+            var successMsg = gettext('"{{appName}}" has been deleted.');
+            var context = {appName: appName};
+            that.toaster.success(that.$interpolate(successMsg)(context));
             that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
           });
         }
