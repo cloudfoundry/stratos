@@ -92,7 +92,7 @@ func main() {
 }
 
 func getEncryptionKey(pc portalConfig) ([]byte, error) {
-	fmt.Println("getEncryptionKey")
+	log.Println("getEncryptionKey")
 
 	// If it exists in "EncryptionKey" we must be in compose; use it.
 	if len(pc.EncryptionKey) > 0 {
