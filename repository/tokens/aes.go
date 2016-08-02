@@ -11,9 +11,6 @@ import (
 	"log"
 )
 
-// EncryptionKeyName - the filename of the encryption key
-const EncryptionKeyName = "aes-key"
-
 // Encrypt - Encrypt a token based on an encryption key
 // The approach used here is based on the following direction on how to AES
 // encrypt/decrypt our secret information, in this case tokens (normal, refresh
@@ -71,37 +68,17 @@ func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 	return
 }
 
-// CreateKey - Create an AES encryption key
-func CreateKey() ([]byte, error) {
-	log.Println("CreateKey")
-	key := make([]byte, 32)
-	_, err := rand.Read(key)
-
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
-}
-
 // ReadKey - Read the encryption key from the shared volume
-func ReadKey(v string) ([]byte, error) {
+func ReadKey(v, f string) ([]byte, error) {
 	log.Println("ReadKey")
-	f := fmt.Sprintf("%s/%s", v, EncryptionKeyName)
-	key, err := ioutil.ReadFile(f)
+
+	fname := fmt.Sprintf("/%s/%s", v, f)
+	log.Printf("Filename: %s", fname)
+	key, err := ioutil.ReadFile(fname)
 	if err != nil {
+		log.Printf("Unable to read encryption key file: %+v\n", err)
 		return nil, err
 	}
 
 	return key, nil
-}
-
-// WriteKey - Write the encryption key to the shared volume
-func WriteKey(v string, key []byte) error {
-	log.Println("WriteKey")
-	f := fmt.Sprintf("%s/%s", v, EncryptionKeyName)
-	err := ioutil.WriteFile(f, key, 0777)
-	if err != nil {
-		return err
-	}
-	return nil
 }

@@ -104,22 +104,13 @@ func getEncryptionKey(pc portalConfig) ([]byte, error) {
 	// been created yet and create it? There are (potentially) numerous reasons why
 	// the key can't be read. If we (re)create the key due to one of these reasons,
 	// it basically invalidates the entire database of tokens ... risky.
-	key, err := tokens.ReadKey(pc.EncryptionKeyVolume)
+	key, err := tokens.ReadKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
 	if err != nil {
-		key, err = tokens.CreateKey()
-		if err != nil {
-			log.Printf("Unable to read the encryption key from the shared volume: %v", err)
-			return nil, err
-		}
-
-		err = tokens.WriteKey(pc.EncryptionKeyVolume, key)
-		if err != nil {
-			log.Printf("Unable to write the encryption key to the shared volume: %v", err)
-			return nil, err
-		}
+		log.Printf("Unable to read the encryption key from the shared volume: %v", err)
+		return nil, err
 	}
 
-	return key, nil
+	return []byte(key), nil
 }
 
 func initConnPool() (*sql.DB, error) {
