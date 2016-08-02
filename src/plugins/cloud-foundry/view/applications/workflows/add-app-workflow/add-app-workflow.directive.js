@@ -300,8 +300,10 @@
                     .then(function () {
                       var branches = _.map(that.githubModel.data.branches,
                                           function (o) {
+                                            var used = _.indexOf(usedBranches, o.name) >= 0;
                                             return {
-                                              label: o.name + (_.indexOf(usedBranches, o.name) >= 0 ? gettext(' (used by other project)') : ''),
+                                              disabled: used,
+                                              label: o.name + used ? gettext(' (used by other project)') : '',
                                               value: o.name
                                             };
                                           });
