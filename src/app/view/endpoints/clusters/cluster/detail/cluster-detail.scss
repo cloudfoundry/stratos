@@ -5,16 +5,8 @@
 
   .cluster-users-table {
     > div {
-      padding-top: 54px;
+      padding-top: 60px;
     }
-
-    .change-roles-buttons {
-      display: flex;
-      button {
-        margin: 0 $hpe-unit-space / 2 $hpe-unit-space / 2 0;
-      }
-    }
-
 
     .select-all-checkbox {
       .checkbox-input {

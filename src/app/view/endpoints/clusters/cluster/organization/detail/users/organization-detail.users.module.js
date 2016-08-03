@@ -146,25 +146,6 @@
         });
     };
 
-    this.selectedUsersCount = function () {
-      return (_.invert(this.selectedUsers, true).true || []).length;
-    };
-
-    this.manageSelectedUsers = function () {
-      var selectedUsersGuids = _.invert(this.selectedUsers, true).true;
-      var selectedUsers = _.filter(that.users, function (user) {
-        return _.indexOf(selectedUsersGuids, user.metadata.guid) >= 0;
-      });
-
-      manageUsers.show(that.guid, selectedUsers, true).result.then(function () {
-        refreshUsers();
-      });
-    };
-
-    this.removeFromOrganization = function () {
-
-    };
-
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.users', $state, init);
   }
