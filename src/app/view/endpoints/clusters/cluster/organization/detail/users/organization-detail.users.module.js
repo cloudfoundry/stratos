@@ -31,10 +31,11 @@
     '$stateParams',
     '$state',
     '$log',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'app.view.endpoints.clusters.cluster.manageUsers'
   ];
 
-  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils) {
+  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -43,43 +44,53 @@
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.userRoles = {};
 
     this.selectAllUsers = false;
     this.selectedUsers = {};
 
+    function refreshUsers() {
+      that.userRoles = {};
+
+      // For each user, get its roles in all spaces
+      _.forEach(that.users, function (aUser) {
+        var myRoles = {};
+        _.forEach(that.spaceModel.spaces[that.guid], function (space) {
+          if (_.isUndefined(space.roles) || _.isUndefined(space.details)) {
+            // Prob means this is a space for another org!
+            return;
+          }
+          var roles = space.roles[aUser.metadata.guid];
+          if (!_.isUndefined(roles)) {
+            myRoles[space.details.space.entity.name] = roles;
+          }
+        });
+        that.userRoles[aUser.metadata.guid] = [];
+
+        // Format that in an array of pairs for direct use in the template
+        _.forEach(myRoles, function (spaceRoles, spaceName) {
+          _.forEach(spaceRoles, function (role) {
+            that.userRoles[aUser.metadata.guid].push({
+              name: spaceName,
+              role: that.spaceModel.spaceRoleToString(role)
+            });
+          });
+        });
+
+      });
+    }
+
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
 
+        that.userActions[0].disabled = !stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
+
         that.users = res;
 
-        // For each user, get its roles in all spaces
-        _.forEach(that.users, function (aUser) {
-          var myRoles = {};
-          _.forEach(that.spaceModel.spaces[that.guid], function (space) {
-            if (_.isUndefined(space.roles) || _.isUndefined(space.details)) {
-              // Prob means this is a space for another org!
-              return;
-            }
-            var roles = space.roles[aUser.metadata.guid];
-            if (!_.isUndefined(roles)) {
-              myRoles[space.details.space.entity.name] = roles;
-            }
-          });
-          that.userRoles[aUser.metadata.guid] = [];
+        return refreshUsers();
 
-          // Format that in an array of pairs for direct use in the template
-          _.forEach(myRoles, function (spaceRoles, spaceName) {
-            _.forEach(spaceRoles, function (role) {
-              that.userRoles[aUser.metadata.guid].push({
-                name: spaceName,
-                role: that.spaceModel.spaceRoleToString(role)
-              });
-            });
-          });
-
-        });
       }).then(function () {
         $log.debug('OrganizationUsersController finished init');
       });
@@ -90,7 +101,9 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          $log.info('TODO: implement manage roles', aUser);
+          manageUsers.show(that.guid, [aUser], false).result.then(function () {
+            refreshUsers();
+          });
         }
       },
       {
