@@ -1,0 +1,39 @@
+<div class="hce-select">
+  <h4 translate>Select a Delivery Pipeline Endpoint</h4>
+  <div class="table-content">
+    <table class="table"
+           st-table="HceSelectCtrl.hceCnsis">
+      <thead>
+      <tr>
+        <th></th>
+        <th st-sort="name" translate>Endpoint Name</th>
+        <th st-sort="endpoint" translate>Endpoint URL</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-class="{selected: hceCnsi === HceSelectCtrl.selected}"
+          ng-repeat="hceCnsi in HceSelectCtrl.context.hceCnsis">
+        <td>
+          <radio-input ng-model="HceSelectCtrl.hceCnsi"
+                       input-value="hceCnsi"
+                       required
+                       ng-change="HceSelectCtrl.selectionChanged(hceCnsi)">
+          </radio-input>
+        </td>
+        <td>{{ HceSelectCtrl.getName(hceCnsi) }}</td>
+        <td>{{ HceSelectCtrl.getEndpoint(hceCnsi) }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default"
+            ng-click="HceSelectCtrl.cancel()" translate>
+      Back To delivery method
+    </button>
+    <button class="btn btn-primary"
+            ng-click="HceSelectCtrl.selectHce()" translate>
+      save
+    </button>
+  </div>
+</div>

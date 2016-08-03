@@ -571,9 +571,8 @@
         that.options.hceCnsis.length = 0;
         var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
         if (hceCnsis.length > 0) {
-          var hceOptions = _.map(hceCnsis, function (o) { return { label: o.api_endpoint.Host, value: o }; });
-          [].push.apply(that.options.hceCnsis, hceOptions);
-          that.userInput.hceCnsi = hceOptions[0].value;
+          [].push.apply(that.options.hceCnsis, hceCnsis);
+          that.userInput.hceCnsi = hceCnsis[0];
         } else {
           that.redefineWorkflowWithoutHce();
         }
