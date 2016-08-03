@@ -2,7 +2,11 @@
   'use strict';
 
   angular
-    .module('app.view.endpoints.clusters.cluster.organization.space.detail', [])
+    .module('app.view.endpoints.clusters.cluster.organization.space.detail', [
+      'app.view.endpoints.clusters.cluster.organization.space.detail.services',
+      'app.view.endpoints.clusters.cluster.organization.space.detail.routes',
+      'app.view.endpoints.clusters.cluster.organization.space.detail.users'
+    ])
     .config(registerRoute);
 
   registerRoute.$inject = [

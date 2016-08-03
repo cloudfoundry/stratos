@@ -52,7 +52,6 @@
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
 
-        $log.debug('Received list of Users: ', res);
         that.users = res;
 
         // For each user, get its roles in all spaces
