@@ -46,8 +46,6 @@
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
-    var isAdmin = stackatoInfo.info.endpoints.hcf[this.guid].user.admin;
-
     this.userRoles = {};
 
     this.selectAllUsers = false;
@@ -87,6 +85,8 @@
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
 
+        that.userActions[0].disabled = !stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
+
         that.users = res;
 
         return refreshUsers();
@@ -99,7 +99,7 @@
     this.userActions = [
       {
         name: gettext('Manage Roles'),
-        disabled: !isAdmin,
+        disabled: true,
         execute: function (aUser) {
           manageUsers.show(that.guid, [aUser], false).result.then(function () {
             refreshUsers();
