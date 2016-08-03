@@ -59,7 +59,7 @@
         _.forEach(that.users, function (aUser) {
           var myRoles = {};
           _.forEach(that.spaceModel.spaces[that.guid], function (space) {
-            if (_.isUndefined(space.roles)) {
+            if (_.isUndefined(space.roles) || _.isUndefined(space.details)) {
               // Prob means this is a space for another org!
               return;
             }

@@ -1,0 +1,51 @@
+.add-notification-target {
+
+  .wizard {
+    padding-top: $hpe-unit-space * 2;
+    padding-left: $hpe-unit-space * 4;
+    padding-right: $hpe-unit-space * 4;
+
+  }
+
+  .wizard-body {
+
+    padding-bottom: $hpe-unit-space * 2;
+    .wizard-nav {
+      padding-right: 0;
+    }
+    .title-img {
+      height: $hpe-unit-space * 2;
+    }
+
+    .title-bar {
+      display: flex;
+      flex-direction: row;
+      position: relative;
+
+      .vert-center {
+        position: absolute;
+        top: 50%;
+        height: $hpe-unit-space * 2;
+        margin-top:-$hpe-unit-space;
+      }
+    }
+
+    .desc {
+      padding-bottom: $hpe-unit-space * 2;
+    }
+    h4 {
+      margin-top: 0;
+    }
+  }
+
+  .wizard-foot {
+    border-top: 1px solid $gray-light;
+    text-align: right;
+    padding-top: $hpe-unit-space / 2;
+
+    .btn {
+      margin-left: $hpe-unit-space / 2;
+    }
+  }
+
+}

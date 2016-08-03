@@ -140,21 +140,25 @@
     },
 
     /**
-     * @function organizationRoleToString
+     * @function organizationRoleToStrings
      * @memberof cloud-foundry.model.organization
-     * @description Converts a list of cloud-foundry organization roles to a localized list. The list of all
-     * organization roles is: org_user, org_manager, org_auditor, billing_manager
+     * @description Converts a list of cloud-foundry organization roles to a sorted localized list.
+     * The list of all organization roles is: org_user, org_manager, org_auditor, billing_manager
      * @param {Array} roles - A list of cloud-foundry organization roles
-     * @returns {string} A localised version of the role
+     * @returns {string} An array of localised versions of the roles
      * @public
      */
-    organizationRolesToString: function (roles) {
+    organizationRolesToStrings: function (roles) {
       var that = this;
+      var rolesOrder = ['org_manager', 'org_auditor', 'billing_manager', 'org_user'];
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the org
-        return gettext('none assigned');
+        return [gettext('none assigned')];
       } else {
+        roles.sort(function (r1, r2) {
+          return rolesOrder.indexOf(r1) - rolesOrder.indexOf(r2);
+        });
         // If there are more than one role, don't show the user role
         if (roles.length > 1) {
           _.remove(roles, function (role) {
@@ -163,7 +167,7 @@
         }
         return _.map(roles, function (role) {
           return that.organizationRoleToString(role);
-        }).join(', ');
+        });
       }
     },
 
@@ -261,26 +265,22 @@
       var instancesP = orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig);
       var quotaP = orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig);
 
+      // Find our user's GUID
+      var userGuid = that.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+
       var rolesP = orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig);
-      var rolesValue;
-      var stackatoInfoP = that.stackatoInfoModel.getStackatoInfo();
 
-      var orgRolesP = that.$q.all({roles: rolesP, stackatoInfo: stackatoInfoP}).then(function (values) {
-        var i, userGuid, myRoles;
+      var allUsersRoles;
+      var orgRolesP = rolesP.then(function (allUsersRolesRes) {
+        var i, myRoles;
 
-        /* eslint-disable no-warning-comments */
-        // TODO[TEAMFOUR-780]: there may be many pages of Users!
-        /* eslint-enable no-warning-comments */
-        rolesValue = values.roles.data.resources;
-
-        // Find our user's GUID
-        userGuid = values.stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
+        allUsersRoles = allUsersRolesRes.data.resources;
 
         // Find my user's roles
-        for (i = 0; i < values.roles.data.resources.length; i++) {
-          var roles = values.roles.data.resources[i];
-          if (roles.metadata.guid === userGuid) {
-            myRoles = roles.entity.organization_roles;
+        for (i = 0; i < allUsersRoles.length; i++) {
+          var user = allUsersRoles[i];
+          if (user.metadata.guid === userGuid) {
+            myRoles = user.entity.organization_roles;
             break;
           }
         }
@@ -378,7 +378,7 @@
         details.totalRoutes = vals.routes;
 
         that.cacheOrganizationDetails(cnsiGuid, orgGuid, details);
-        that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, rolesValue);
+        that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, allUsersRoles);
         that.cacheOrganizationSpaces(cnsiGuid, orgGuid, vals.spaces);
         that.cacheOrganizationServices(cnsiGuid, orgGuid, vals.services);
 
@@ -393,13 +393,11 @@
       return orgsApi.CreateOrganization({name: orgName}, {}, httpConfig).then(function (res) {
         var org = res.data;
         var newOrgGuid = org.metadata.guid;
-        return that.stackatoInfoModel.getStackatoInfo().then(function (stackatoInfo) {
-          var userGuid = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
-          var makeUserP = orgsApi.AssociateUserWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
-          var makeManagerP = orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
-          return that.$q.all([makeUserP, makeManagerP]).then(function () {
-            that.getOrganizationDetails(cnsiGuid, org);
-          });
+        var userGuid = that.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+        var makeUserP = orgsApi.AssociateUserWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
+        var makeManagerP = orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
+        return that.$q.all([makeUserP, makeManagerP]).then(function () {
+          that.getOrganizationDetails(cnsiGuid, org);
         });
       });
     },

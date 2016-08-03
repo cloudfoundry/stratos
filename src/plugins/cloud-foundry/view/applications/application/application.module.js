@@ -8,7 +8,8 @@
       'cloud-foundry.view.applications.application.services',
       'cloud-foundry.view.applications.application.delivery-logs',
       'cloud-foundry.view.applications.application.delivery-pipeline',
-      'cloud-foundry.view.applications.application.variables'
+      'cloud-foundry.view.applications.application.variables',
+      'cloud-foundry.view.applications.application.notification-target'
     ])
     .config(registerRoute);
 
@@ -73,7 +74,7 @@
     this.id = $stateParams.guid;
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
-    this.UPDATE_INTERVAL = 1000; // milliseconds
+    this.UPDATE_INTERVAL = 5000; // milliseconds
 
     this.init();
 

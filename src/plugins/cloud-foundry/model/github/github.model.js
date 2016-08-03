@@ -188,16 +188,33 @@
      * @public
      */
     branches: function (repo) {
+      this.data.branches.length = 0;
+
+      var deferred = this.$q.defer();
       var that = this;
       var githubApi = this.apiManager.retrieve('cloud-foundry.api.github');
-      return githubApi.branches(repo, {per_page: 100})
-        .then(function (response) {
-          that.onBranches(response);
-        })
-        .catch(function (err) {
-          that.onBranchesError();
-          throw err;
-        });
+      var size = 100;
+
+      _branches(1);
+
+      function _branches(page) {
+        githubApi.branches(repo, {page: page, per_page: size})
+          .then(function (response) {
+            that.onBranches(response);
+            if (response.data && response.data.length === size) {
+              _branches(page + 1);
+            } else {
+              deferred.resolve();
+            }
+          })
+          .catch(function (err) {
+            that.onBranchesError();
+            deferred.reject();
+            throw err;
+          });
+      }
+
+      return deferred.promise;
     },
 
     /**
@@ -252,7 +269,6 @@
      * @private
      */
     onBranches: function (response) {
-      this.data.branches.length = 0;
       [].push.apply(this.data.branches, response.data || []);
     },
 
@@ -285,7 +301,6 @@
      * @private
      */
     onBranchesError: function () {
-      this.data.branches.length = 0;
     },
 
     /**

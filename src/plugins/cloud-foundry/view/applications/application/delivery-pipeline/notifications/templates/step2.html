@@ -1,0 +1,38 @@
+<div class="title-bar">
+  <img class="title-img"
+       ng-src="/plugins/cloud-foundry/view/assets/hce/{{wizardCtrl.options.userInput.notificationTargetType.img }}"/>
+  <h2 class="vert-center">{{wizardCtrl.options.userInput.notificationTargetType.title}}</h2>
+</div>
+<div class="desc">{{wizardCtrl.options.userInput.notificationTargetType.description}}</div>
+<div class="form-group " focusable-input>
+  <label class="control-label" translate>Notification Target Name</label>
+  <input type="text" name="name" class="form-control"
+         ng-model="wizardCtrl.options.userInput.notificationTargetDetails.name"
+         required
+  />
+</div>
+<div class="form-group " focusable-input>
+  <label class="control-label" translate>{{wizardCtrl.options.userInput.notificationTargetType.endpointLabel}}</label>
+  <input type="text" name="location" class="form-control"
+         ng-model="wizardCtrl.options.userInput.notificationTargetDetails.location"
+         required
+  />
+</div>
+<div class="form-group " focusable-input>
+  <label class="control-label" translate>Token</label>
+  <input type="text" name="token" class="form-control"
+         ng-model="wizardCtrl.options.userInput.notificationTargetDetails.token"
+         required
+  />
+</div>
+</div>
+<div class="async-indicator">
+  <div class="spinner" ng-show="wizardCtrl.options.indications.busy">
+  </div>
+  <div ng-show="wizardCtrl.options.indications.error" class="alert alert-danger">
+    <p translate>
+      There was a problem carrying out the action. Please try again. If this error persists,
+      please contact the administrator.
+    </p>
+  </div>
+</div>

@@ -24,9 +24,11 @@
   AddServiceWorkflowController.$inject = [
     '$q',
     '$scope',
+    '$interpolate',
     'app.model.modelManager',
     'app.event.eventService',
-    'helion.framework.widgets.detailView'
+    'helion.framework.widgets.detailView',
+    'helion.framework.widgets.toaster'
   ];
 
   /**
@@ -35,11 +37,15 @@
    * @constructor
    * @param {object} $q - the Angular $q service
    * @param {object} $scope - the Angular $scope service
+   * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.event.eventService} eventService - the event management service
    * @param {helion.framework.widgets.detailView} detailView - the detail view widget
+   * @param {helion.framework.widgets.toaster} toaster - the toast notification service
    * @property {object} $q - the Angular $q service
+   * @property {object} $interpolate - the Angular $interpolate service
    * @property {helion.framework.widgets.detailView} detailView - the detail view widget
+   * @property {helion.framework.widgets.toaster} toaster - the toast notification service
    * @property {cloud-foundry.model.application} appModel - the CF application model
    * @property {cloud-foundry.model.service-binding} bindingModel - the CF service binding model
    * @property {cloud-foundry.model.service-instance} instanceModel - the CF service instance model
@@ -49,10 +55,12 @@
    * @property {string} path - the path to this add-service-workflow folder
    * @property {object} addServiceActions - the stop and finish workflow actions
    */
-  function AddServiceWorkflowController($q, $scope, modelManager, eventService, detailView) {
+  function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, eventService, detailView, toaster) {
     var that = this;
     this.$q = $q;
+    this.$interpolate = $interpolate;
     this.detailView = detailView;
+    this.toaster = toaster;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
@@ -324,6 +332,13 @@
       if (!this.data.confirm) {
         this.addService().then(function () {
           that.addBinding().then(function () {
+            // show notification for successful binding
+            var successMsg = gettext('The {{service}} service has been attached to your {{appName}} application');
+            var context = {
+              service: that.options.serviceInstance.entity.name,
+              appName: that.data.app.summary.name
+            };
+            that.toaster.success(that.$interpolate(successMsg)(context), {positionClass: 'toast-top-right'});
             that.modal.close();
           });
         });

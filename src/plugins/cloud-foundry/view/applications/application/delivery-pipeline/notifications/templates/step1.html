@@ -1,0 +1,12 @@
+<h4 translate>Notifications</h4>
+<div ng-show="wizardCtrl.options.notificationTargetTypes.length === 0">
+  <bounce-spinner classes="bounce-spinner-md"></bounce-spinner>
+</div>
+<ul class="media-list hpe-add-option-list">
+  <li class="media" ng-repeat="notificationTargetType in wizardCtrl.options.notificationTargetTypes">
+    <notification-target
+      target-type="notificationTargetType"
+      user-input-target-type="wizardCtrl.options.userInput.notificationTargetType"
+      add-app-mode=false/>
+  </li>
+</ul>

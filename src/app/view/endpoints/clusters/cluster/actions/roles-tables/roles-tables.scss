@@ -1,0 +1,33 @@
+.roles-tables {
+
+  .roles-table-org.roles-table-org-with-space table {
+    margin-bottom: 0;
+    border-bottom-width: 0;
+  }
+
+  table.table {
+    & > thead > tr > th, & > tbody > tr > td {
+      padding-right: 0;
+    }
+
+    th {
+      &:first-of-type {
+        width: 25%
+      }
+      &:last-of-type {
+        width: 22%;
+      }
+
+      text-transform: capitalize;
+      th:first-of-type{
+        text-transform: uppercase;
+      }
+    }
+
+    td {
+      &:last-of-type {
+        font-size: 15px
+      }
+    }
+  }
+}

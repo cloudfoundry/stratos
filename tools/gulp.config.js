@@ -20,7 +20,9 @@ module.exports = function () {
 		      "main": [ "release/angular-link-header-parser.min.js" ]
         },
   	    "angular-toastr": {
-		      "main": [ "./dist/angular-toastr.tpls.js" ]
+		      "main": [
+            "./dist/angular-toastr.tpls.js"
+          ]
         }
       }
     },

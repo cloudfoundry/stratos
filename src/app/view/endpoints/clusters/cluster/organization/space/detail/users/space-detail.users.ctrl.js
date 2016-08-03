@@ -58,7 +58,7 @@
         _.forEach(that.users, function (aUser) {
           var myRoles = {};
           var space = that.spaceModel.spaces[that.guid][that.spaceGuid];
-          if (_.isUndefined(space.roles)) {
+          if (_.isUndefined(space.roles) || _.isUndefined(space.details)) {
             $log.warn('Space Roles not cached yet!', space);
             return;
           }

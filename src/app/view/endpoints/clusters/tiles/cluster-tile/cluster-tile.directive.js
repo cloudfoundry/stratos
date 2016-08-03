@@ -40,6 +40,8 @@
    * @property {object} cardData - gallery-card directive data object
    */
   function ClusterTileController($scope, $state, modelManager) {
+    var that = this;
+
     this.$state = $state;
     this.cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
     this.cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
@@ -49,18 +51,24 @@
     this.actions = [];
     this.orgCount = null;
     this.userCount = null;
-    this.cardData = {
-      title: this.service.name
-    };
-    if (this.service.hasExpired) {
-      this.cardData.status = {
-        classes: 'danger',
-        icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
-        description: gettext('Token has expired')
-      };
-    }
 
-    var that = this;
+    var cardData = {};
+    var expiredStatus = {
+      classes: 'danger',
+      icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
+      description: gettext('Token has expired')
+    };
+
+    cardData.title = this.service.name;
+    this.getCardData = function () {
+      if (that.service.hasExpired) {
+        cardData.status = expiredStatus;
+      } else {
+        delete cardData.status;
+      }
+      return cardData;
+    };
+
     $scope.$watch(function () { return that.service; }, function (newVal) {
       if (!newVal) {
         return;

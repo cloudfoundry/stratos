@@ -2,7 +2,7 @@
   <h4 translate>Select an organization to assign roles to.</h4>
   <div class="assign-selected-users-selected" ng-init="step.ctrl.selectedUserListCount=step.selectedUserListLimit">
     <span class="assign-selected-users-selected-label" translate>
-      {{ step.actions.selectedUserCount() === 1 ? 'SELECTED USER' : 'SELECTED USER(S)' }}
+      {{ step.actions.selectedUserCount() === 1 ? 'SELECTED USER' : 'SELECTED USERS' }}
     </span>
     <span ng-repeat="user in step.userInput.selectedUsers | limitTo:step.ctrl.selectedUserListCount | orderBy:'entity.username'">
       {{user.entity.username}}<span ng-if="!$last">,</span>
@@ -27,53 +27,22 @@
       </select-input>
     </div>
     <div class="assign-selected-users-orgs-roles">
-        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][0]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_manager']"></checkbox-input>
         <span translate>Org Manager</span>
-        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][1]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_auditor']"></checkbox-input>
         <span translate>Org Auditor</span>
-        <checkbox-input ng-model="step.userInput.roles.organization[step.userInput.org.details.guid][2]"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['billing_manager']"></checkbox-input>
         <span translate>Billing Manager</span>
     </div>
   </div>
-  <div class="assign-selected-users-spaces"
-       st-table="step.ctrl.displayedSpaces"
-       st-safe-src="step.data.spaces">
+  <div class="assign-selected-users-spaces" ng-if="step.actions.keys(step.userInput.org.spaces).length > 0">
     <h4>Assign space roles.</h4>
-    <table class="table table-outlined table-selectable">
-      <thead>
-      <tr>
-        <th st-sort="name" st-sort-default="true" translate>SPACE</th>
-        <th translate>Space Manager</th>
-        <th translate>Space Developer</th>
-        <th translate>Space Auditor</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr ng-if="step.data.spaces.length > 0"
-        ng-repeat="space in step.ctrl.displayedSpaces">
-        <td>{{ space.entity.name }}</td>
-        <td><checkbox-input ng-model="step.userInput.roles.space[step.userInput.org.details.guid][space.metadata.guid][0]"></checkbox-input></td>
-        <td><checkbox-input ng-model="step.userInput.roles.space[step.userInput.org.details.guid][space.metadata.guid][1]"></checkbox-input></td>
-        <td><checkbox-input ng-model="step.userInput.roles.space[step.userInput.org.details.guid][space.metadata.guid][2]"></checkbox-input></td>
-      </tr>
-      <tr ng-if="step.data.spaces.length === 0">
-        <td colspan="4">
-          <span translate>There are no spaces associated with this organization</span>
-        </td>
-      </tr>
-      </tbody>
-      <tfoot ng-init="step.ctrl.pagedSpaceCount = 2"
-             ng-show="step.ctrl.pagedSpaceCount < step.data.spaces.length">
-      <tr>
-        <td colspan="5" class="text-center">
-          <a ng-click="step.ctrl.pagedSpaceCount = step.data.spaces.length">
-            <span translate>Show All</span> ({{step.data.spaces.length}})
-          </a>
-          <div ng-show="false" st-pagination="" st-items-by-page="step.ctrl.pagedSpaceCount"></div>
-        </td>
-      </tr>
-      </tfoot>
-    </table>
+    <roles-tables
+      config="step.table.config"
+      data="step.table.data"
+      organization="step.userInput.org"
+      selection="step.userInput.roles[step.userInput.org.details.guid]"
+    ></roles-tables>
   </div>
   <div class="alert alert-danger alert-with-icon" ng-if="step.data.failedAssignForUsers.length > 0">
     <span translate>There was a problem assigning roles for user/s {{ step.data.failedAssignForUsers.join(',') }}. If the problem persists please contact an administrator</span>
