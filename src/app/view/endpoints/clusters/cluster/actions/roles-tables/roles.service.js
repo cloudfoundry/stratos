@@ -29,6 +29,7 @@
    * selected
    */
   function RolesService($log, $q, modelManager) {
+    var that = this;
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -90,6 +91,80 @@
       var origRoles = _.set({}, orgGuid + '.spaces.' + spaceGuid + '.' + spaceRole, true);
       var newRoles = _.set({}, orgGuid + '.spaces.' + spaceGuid + '.' + spaceRole, false);
       return this.updateUsers(clusterGuid, [user], origRoles, newRoles);
+    };
+
+    function createCurrentRoles(users, clusterGuid, singleOrgGuid, singleSpaceGuid) {
+      // [user][orgGuid].organization[roleKey] = truthy
+      // [user][orgGuid].spaces[spaceGuid][roleKey] = truthy
+      var rolesByUser = {};
+      _.forEach(organizationModel.organizations[clusterGuid], function (org, orgGuid) {
+        if (!singleOrgGuid || singleOrgGuid === orgGuid) {
+          _.forEach(org.roles, function (roles, userGuid) {
+            if (_.find(users, { metadata: { guid: userGuid }})) {
+              _.set(rolesByUser, userGuid + '.' + orgGuid + '.organization', _.keyBy(roles));
+            }
+          });
+        }
+
+        _.forEach(org.spaces, function (space) {
+          space = _.get(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, {});
+          _.forEach(space.roles, function (roles, userGuid) {
+            if (!singleSpaceGuid || singleSpaceGuid === space.details.space.metadata.guid) {
+
+              if (_.find(users, { metadata: { guid: userGuid }})) {
+                _.set(rolesByUser, userGuid + '.' + orgGuid + '.spaces.' + space.details.space.metadata.guid, _.keyBy(roles));
+              }
+            }
+          });
+        });
+      });
+      return rolesByUser;
+    }
+
+    this.removeAllRoles = function (clusterGuid, users) {
+      return this.refreshRoles(users, clusterGuid, true).then(function () {
+        var rolesByUser = createCurrentRoles(users, clusterGuid);
+
+        // TODO: RC See TEAMFOUR-708. At the moment we only cater for one user
+        var roles = rolesByUser[users[0].metadata.guid];
+
+        var newRoles = _.cloneDeep(roles, true);
+        that.clearOrgs(newRoles);
+
+        return that.updateUsers(clusterGuid, [ users[0] ], roles, newRoles);
+      });
+    };
+
+    this.removeFromOrganization = function (clusterGuid, orgGuid, users) {
+      return this.refreshRoles(users, clusterGuid, true).then(function () {
+        var rolesByUser = createCurrentRoles(users, clusterGuid, orgGuid);
+
+        // TODO: RC See TEAMFOUR-708. At the moment we only cater for one user
+        var roles = rolesByUser[users[0].metadata.guid];
+
+        var newRoles = _.cloneDeep(roles, true);
+        that.clearOrgs(newRoles);
+
+        return that.updateUsers(clusterGuid, [ users[0] ], roles, newRoles);
+      });
+    };
+
+    this.removeFromSpace = function (clusterGuid, orgGuid, spaceGuid, users) {
+      var rolesByUser = createCurrentRoles(users, clusterGuid, orgGuid, spaceGuid);
+      _.forEach(rolesByUser, function (userRoles) {
+        _.forEach(userRoles, function (org) {
+          org.organization = null;
+        });
+      });
+
+      // TODO: RC See TEAMFOUR-708. At the moment we only cater for one user
+      var roles = rolesByUser[users[0].metadata.guid];
+
+      var newRoles = _.cloneDeep(roles, true);
+      this.clearOrgs(newRoles);
+
+      return this.updateUsers(clusterGuid, [ users[0] ], roles, newRoles);
+
     };
 
     /**

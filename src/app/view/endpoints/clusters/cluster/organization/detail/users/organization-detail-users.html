@@ -2,6 +2,21 @@
      st-table="organizationUsersController.visibleUsers"
      st-safe-src="organizationUsersController.users">
   <div>
+    <div class="change-roles-buttons">
+      <button class="btn btn-default"
+              ng-if="organizationUsersController.selectedUsersCount() < 2"
+              ng-disabled="organizationUsersController.selectedUsersCount() !== 1"
+              ng-click="organizationUsersController.manageSelectedUsers()"
+              translate>Manage Roles</button>
+      <button class="btn btn-default"
+              ng-if="organizationUsersController.selectedUsersCount() > 1"
+              ng-click="organizationUsersController.manageSelectedUsers()"
+              translate>Change Roles</button>
+      <button class="btn btn-default"
+              ng-disabled="organizationUsersController.selectedUsersCount() < 1"
+              ng-click="organizationUsersController.removeFromOrganization()"
+              translate>Remove From Organization</button>
+    </div>
     <div class="panel panel-default">
       <table class="table table-actionable" >
         <thead>
