@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -96,21 +97,22 @@ func getEncryptionKey(pc portalConfig) ([]byte, error) {
 
 	// If it exists in "EncryptionKey" we must be in compose; use it.
 	if len(pc.EncryptionKey) > 0 {
-		return []byte(pc.EncryptionKey), nil
+		key32bytes, err := hex.DecodeString(string(pc.EncryptionKey))
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		return key32bytes, nil
 	}
 
-	// TODO (wchrisjohnson) - discuss with Tara, Aaron
-	// If we are unable to read the encryption key, should we just assume it hasn't
-	// been created yet and create it? There are (potentially) numerous reasons why
-	// the key can't be read. If we (re)create the key due to one of these reasons,
-	// it basically invalidates the entire database of tokens ... risky.
+	// Read the key from the shared volume
 	key, err := tokens.ReadKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
 	if err != nil {
 		log.Printf("Unable to read the encryption key from the shared volume: %v", err)
 		return nil, err
 	}
 
-	return []byte(key), nil
+	return key, nil
 }
 
 func initConnPool() (*sql.DB, error) {
