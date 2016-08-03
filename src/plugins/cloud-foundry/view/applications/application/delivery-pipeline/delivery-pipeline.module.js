@@ -22,7 +22,8 @@
     'app.model.modelManager',
     '$stateParams',
     '$scope',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService'
   ];
 
   /**
@@ -32,15 +33,17 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {object} addNotificationService - the addNotificationS dialog service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog) {
+  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog, addNotificationService) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
     this.$scope = $scope;
     this.confirmDialog = confirmDialog;
+    this.addNotificationService = addNotificationService;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
@@ -54,6 +57,7 @@
     this.isDeleting = false;
     this.deleteError = false;
     this.busy = false;
+    this.modelUpdated = false;
 
     this.hceServices = {
       fetching: true,
@@ -75,7 +79,7 @@
         execute: function (target) {
           this.hceModel.removeNotificationTarget(that.hceCnsi.guid, target.id)
             .then(function () {
-              _.remove(that.notificationTargets, { id: target.id });
+              _.remove(that.notificationTargets, {id: target.id});
             });
         }
       }
@@ -83,19 +87,28 @@
 
     /* eslint-disable */
     this.postDeployActionActions = [
-      { name: gettext('Delete'), execute: function (target) { alert('Delete ' + target); } }
+      {
+        name: gettext('Delete'),
+        execute: function (target) {
+          alert('Delete ' + target);
+        }
+      }
     ];
     this.containerRegistryActions = [
       {
         name: gettext('Designate to Pipeline'),
-        execute: function (target) { alert('Designate ' + target.registry_label); }
+        execute: function (target) {
+          alert('Designate ' + target.registry_label);
+        }
       },
       {
         name: gettext('Delete Registry'),
-        execute: function (target) { alert('Delete ' + target.registry_label); }
+        execute: function (target) {
+          alert('Delete ' + target.registry_label);
+        }
       }
     ];
-    /* eslint-enable */
+    /* eslint-disable */
 
     this.$scope.$watch(function () {
       return !that.model.application.pipeline.fetching &&
@@ -112,6 +125,7 @@
             that.busy = false;
           });
         that.hceModel.getImageRegistries(that.hceCnsi.guid);
+        that.modelUpdated = true;
       }
     });
   }
@@ -142,6 +156,7 @@
       });
     },
 
+
     getProject: function () {
       if (this.hceCnsi) {
         var that = this;
@@ -160,10 +175,21 @@
           this.hceModel.getNotificationTargets(this.hceCnsi.guid, this.project.id)
             .then(function (response) {
               that.notificationTargets.length = 0;
-              [].push.apply(that.notificationTargets, response.data[that.hceCnsi.guid]);
+              [].push.apply(that.notificationTargets, response.data);
             });
+
+          this.hceModel.listNotificationTargetTypes(this.hceCnsi.guid);
         }
       }
+    },
+
+    addNotificationTarget: function () {
+      var that = this;
+      this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
+        .closed
+        .then(function () {
+          that.getProject();
+        });
     }
   });
 

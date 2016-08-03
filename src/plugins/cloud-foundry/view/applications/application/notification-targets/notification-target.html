@@ -1,0 +1,25 @@
+<div class="notification-target-card">
+  <div class="media-left media-middle">
+    <radio-input ng-model="notificationTargetCtrl.userInputTargetType"
+                 input-value="notificationTargetCtrl.targetType"
+                 ng-show="!notificationTargetCtrl.addAppMode"
+    ></radio-input>
+  </div>
+  <div class="media-left media-middle">
+    <img class="media-object"
+         ng-src="/plugins/cloud-foundry/view/assets/hce/{{ notificationTargetCtrl.targetType.img }}"/>
+  </div>
+  <div class="media-body">
+    <h4 class="media-heading">{{ notificationTargetCtrl.targetType.title }}</h4>
+    <p>{{ notificationTargetCtrl.targetType.description }}</p>
+  </div>
+  <div class="hpe-media-actions-col">
+    <button type="text"
+            class="btn btn-sm btn-link hpe-media-add-link"
+            ng-show="notificationTargetCtrl.addAppMode"
+            ng-click="">
+      <i class="helion-icon helion-icon-Next_link"></i>
+      <span translate>Add Notification</span>
+    </button>
+  </div>
+</div>

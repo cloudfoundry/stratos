@@ -14,11 +14,12 @@
   registerHceModel.$inject = [
     'app.model.modelManager',
     'app.api.apiManager',
-    'app.event.eventService'
+    'app.event.eventService',
+    '$log'
   ];
 
-  function registerHceModel(modelManager, apiManager, eventService) {
-    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager, eventService));
+  function registerHceModel(modelManager, apiManager, eventService, $log) {
+    modelManager.register('cloud-foundry.model.hce', new HceModel(apiManager, eventService, $log));
   }
 
   /**
@@ -26,15 +27,17 @@
    * @name HceModel
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.event.eventService} eventService - the application event service
+   * @param {object} $log - Angular $log service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.event.eventService} eventService - the application event service
    * @property {object} data - the Helion Code Engine data
    * @class
    */
-  function HceModel(apiManager, eventService) {
+  function HceModel(apiManager, eventService, $log) {
     var that = this;
     this.apiManager = apiManager;
     this.eventService = eventService;
+    this.$log = $log;
     this.data = {
       buildContainers: [],
       deploymentTargets: [],
@@ -42,7 +45,48 @@
       projects: {},
       pipelineExecutions: [],
       vcsInstances: [],
-      vcsTypes: []
+      vcsTypes: [],
+      notificationTargetTypes: []
+    };
+
+    // This will be provided by HCE in future
+    this.staticNotificationData = {
+      hipchat: {
+        title: gettext('HipChat'),
+        description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
+        endpointLabel: gettext('Server URL with Room Number or Name'),
+        img: 'hipchat_logo.png'
+      },
+      httpPost: {
+        title: gettext('Http'),
+        description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
+        endpointLabel: gettext('Server URL'),
+        img: 'httppost_logo.png'
+      },
+      flowdock: {
+        title: gettext('Flow Dock'),
+        description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
+        endpointLabel: gettext('API Endpoint'),
+        img: 'flowdock_logo.png'
+      },
+      githubpullrequest: {
+        title: gettext('GitHub'),
+        description: gettext('Send pipeline events (build, test, deploy) as statuses to Github'),
+        endpointLabel: gettext('Target URL'),
+        img: 'github_octocat.png'
+      },
+      slack: {
+        title: gettext('Slack'),
+        description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack room.'),
+        endpointLabel: gettext('URL with optional Channel or User name'),
+        img: 'slack_logo.png'
+      },
+      bitbucketpullrequest: {
+        title: gettext('BitBucket'),
+        description: gettext('Send pipeline events (build, test, deploy) as statuses to BitBucket'),
+        endpointLabel: gettext('Target URL'),
+        img: 'bitbucket_logo.png'
+      }
     };
 
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
@@ -176,7 +220,24 @@
      */
     getNotificationTargets: function (guid, projectId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
-        .getNotificationTargets(guid, { project_id: projectId }, this.hceProxyPassthroughConfig);
+        .getNotificationTargets(guid, {project_id: projectId}, this.hceProxyPassthroughConfig);
+    },
+
+    /**
+     * @function listNotificationTargetTypes
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get notification targets for project
+     * @param {string} guid - the HCE instance GUID
+     * @returns {promise} A promise object
+     * @public
+     */
+    listNotificationTargetTypes: function (guid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceNotificationApi')
+        .listNotificationTargetTypes(guid, null, this.hceProxyPassthroughConfig)
+        .then(function (response) {
+          that.onListNotificationTargetTypes(response);
+        });
     },
 
     /**
@@ -220,7 +281,7 @@
     getPipelineExecutions: function (guid, projectId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .getPipelineExecutions(guid, { project_id: projectId }, this.hceProxyPassthroughConfig)
+        .getPipelineExecutions(guid, {project_id: projectId}, this.hceProxyPassthroughConfig)
         .then(function (response) {
           that.onGetPipelineExecutions(response);
         });
@@ -238,7 +299,7 @@
     getPipelineEvents: function (guid, executionId) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.HcePipelineApi')
-        .getPipelineEvents(guid, { execution_id: executionId }, this.hceProxyPassthroughConfig)
+        .getPipelineEvents(guid, {execution_id: executionId}, this.hceProxyPassthroughConfig)
         .then(function (response) {
           return that.onGetPipelineEvents(response);
         });
@@ -548,6 +609,29 @@
         projects: {},
         pipelineExecutions: []
       };
+    },
+
+    /**
+     * @function onListNotificationTargetTypes
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description store current notification target types
+     * @param {string} response - the JSON response from the API call
+     * @returns {void} Notification Target content
+     * @private
+     */
+    onListNotificationTargetTypes: function (response) {
+      var notificationTypes = response.data;
+      var that = this;
+      angular.forEach(notificationTypes, function (notificationType) {
+        if (that.staticNotificationData[notificationType.item_value]) {
+          var typeData = _.assign(notificationType, that.staticNotificationData[notificationType.item_value]);
+          if (!_.find(that.data.notificationTargetTypes, {item_value: notificationType.item_value})) {
+            that.data.notificationTargetTypes.push(typeData);
+          }
+        } else {
+          that.$log('Static metadata about type not present: ' + angular.toJson(notificationType));
+        }
+      });
     }
 
   });
