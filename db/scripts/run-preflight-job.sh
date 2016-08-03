@@ -17,7 +17,8 @@ echo "Created the upgrade lock file."
 echo "Checking to see if we need to generate the encryption key $ENCRYPTION_KEY_FILENAME file:"
 if [ ! -e /$ENCRYPTION_KEY_VOLUME/$ENCRYPTION_KEY_FILENAME ]; then
   echo "-- Adding $ENCRYPTION_KEY_FILENAME file to the shared volume $ENCRYPTION_KEY_VOLUME."
-  openssl enc -aes-256-cbc -k secret -P -md sha1 | grep key | cut -d '=' -f2 > /$ENCRYPTION_KEY_VOLUME/$ENCRYPTION_KEY_FILENAME
+  keyfile=$(openssl enc -aes-256-cbc -k secret -P -md sha1 | grep key | cut -d '=' -f2)
+  printf "%s" "$keyfile" > /$ENCRYPTION_KEY_VOLUME/$ENCRYPTION_KEY_FILENAME
   chmod 440 /$ENCRYPTION_KEY_VOLUME/$ENCRYPTION_KEY_FILENAME
   echo "-- Done."
 fi
