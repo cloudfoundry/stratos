@@ -340,9 +340,16 @@
           {
             ready: true,
             title: gettext('Notifications'),
-            templateUrl: path + 'pipeline-subflow/notifications.html',
+            templateUrl: 'plugins/cloud-foundry/view/applications/application/' +
+            'notification-targets/notification-target-list.html',
             formName: 'application-pipeline-notification-form',
-            nextBtnText: gettext('Skip')
+            nextBtnText: gettext('Next'),
+            onEnter: function () {
+              return that.hceModel.listNotificationTargetTypes(that.userInput.hceCnsi.guid)
+                .then(function () {
+                  that.options.notificationTargetTypes = that.hceModel.data.notificationTargetTypes;
+                });
+            }
           },
           {
             ready: true,
@@ -381,23 +388,8 @@
         apps: [],
         domains: [],
         hceCnsis: [],
-        notificationTargets: [
-          {
-            title: 'HipChat',
-            description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
-            img: 'hipchat_logo.png'
-          },
-          {
-            title: 'Http',
-            description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
-            img: 'httppost_logo.png'
-          },
-          {
-            title: 'Flow Dock',
-            description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
-            img: 'flowdock_logo.png'
-          }
-        ],
+        notificationTargetTypes: [],
+        notificationTargets: [],
         sources: [],
         displayedRepos: [],
         repos: [],
@@ -405,7 +397,8 @@
         loadingRepos: false,
         branches: [],
         buildContainers: [],
-        imageRegistries: []
+        imageRegistries: [],
+        notificationFormAppMode: true
       };
 
       this.addApplicationActions = {
