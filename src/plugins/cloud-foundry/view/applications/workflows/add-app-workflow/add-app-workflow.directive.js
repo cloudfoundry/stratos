@@ -303,7 +303,7 @@
                                             var used = _.indexOf(usedBranches, o.name) >= 0;
                                             return {
                                               disabled: used,
-                                              label: o.name + used ? gettext(' (used by other project)') : '',
+                                              label: o.name + (used ? gettext(' (used by other project)') : ''),
                                               value: o.name
                                             };
                                           });
