@@ -6,7 +6,7 @@
               on-card-click="orgSpaceTileCtrl.summary()">
   <dl class="dl-horizontal" ng-if="orgSpaceTileCtrl.spaceDetail().details">
     <dt translate>ROLE</dt>
-    <dd>{{ orgSpaceTileCtrl.roles }}</dd>
+    <dd><div ng-repeat="role in orgSpaceTileCtrl.roles">{{ role }}</div></dd>
     <dt translate>TOTAL APPS</dt>
     <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalApps }}</dd>
     <dt translate>INSTANCES</dt>

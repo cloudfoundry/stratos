@@ -124,7 +124,7 @@
       return _.get(that.spaceModel, that.spacePath + '.roles.' + user.guid);
     }, function (roles) {
       // Present the user's roles
-      that.roles = that.spaceModel.spaceRolesToString(roles);
+      that.roles = that.spaceModel.spaceRolesToStrings(roles);
     });
 
     function init() {

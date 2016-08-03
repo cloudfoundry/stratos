@@ -140,21 +140,25 @@
     },
 
     /**
-     * @function organizationRoleToString
+     * @function organizationRoleToStrings
      * @memberof cloud-foundry.model.organization
-     * @description Converts a list of cloud-foundry organization roles to a localized list. The list of all
-     * organization roles is: org_user, org_manager, org_auditor, billing_manager
+     * @description Converts a list of cloud-foundry organization roles to a sorted localized list.
+     * The list of all organization roles is: org_user, org_manager, org_auditor, billing_manager
      * @param {Array} roles - A list of cloud-foundry organization roles
-     * @returns {string} A localised version of the role
+     * @returns {string} An array of localised versions of the roles
      * @public
      */
-    organizationRolesToString: function (roles) {
+    organizationRolesToStrings: function (roles) {
       var that = this;
+      var rolesOrder = ['org_manager', 'org_auditor', 'billing_manager', 'org_user'];
 
       if (!roles || roles.length === 0) {
         // Shouldn't happen as we should at least be a user of the org
-        return gettext('none assigned');
+        return [gettext('none assigned')];
       } else {
+        roles.sort(function (r1, r2) {
+          return rolesOrder.indexOf(r1) - rolesOrder.indexOf(r2);
+        });
         // If there are more than one role, don't show the user role
         if (roles.length > 1) {
           _.remove(roles, function (role) {
@@ -163,7 +167,7 @@
         }
         return _.map(roles, function (role) {
           return that.organizationRoleToString(role);
-        }).join(', ');
+        });
       }
     },
 

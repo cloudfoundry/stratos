@@ -87,7 +87,7 @@
       return _.get(that.organizationModel, orgPath + '.roles.' + that.user.guid);
     }, function (roles) {
       // Present the user's roles
-      that.roles = that.organizationModel.organizationRolesToString(roles);
+      that.roles = that.organizationModel.organizationRolesToStrings(roles);
     });
 
     setActions();
