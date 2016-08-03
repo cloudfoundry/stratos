@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -76,11 +77,16 @@ func ReadKey(v, f string) ([]byte, error) {
 
 	fname := fmt.Sprintf("/%s/%s", v, f)
 	log.Printf("Filename: %s", fname)
-	key, err := ioutil.ReadFile(fname)
+	key64chars, err := ioutil.ReadFile(fname)
 	if err != nil {
 		log.Printf("Unable to read encryption key file: %+v\n", err)
 		return nil, err
 	}
 
-	return key, nil
+	key32bytes, err := hex.DecodeString(string(key64chars))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return key32bytes, nil
 }
