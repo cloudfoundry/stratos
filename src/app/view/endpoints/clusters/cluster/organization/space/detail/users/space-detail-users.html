@@ -17,7 +17,13 @@
           <td><checkbox-input ng-model="spaceUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
           <td class="user-name">{{ user.entity.username }}</td>
           <td class="roles-list">
-            <div class="role-pill" ng-repeat="orgRole in spaceUsersController.getSpaceRoles(user)">{{ orgRole.name }}: {{ orgRole.role }}<i class="close-icon helion-icon helion-icon-Close"></i></div>
+            <div class="role-pill"
+                 ng-class="{ 'progress-cursor' : spaceUsersController.removingSpace }"
+                 ng-repeat="spaceRole in spaceUsersController.getSpaceRoles(user)">
+              {{ spaceUsersController.space.details.space.entity.name }}: {{ spaceRole.roleLabel }}
+              <i class="close-icon helion-icon helion-icon-Close"
+                 ng-click="spaceUsersController.removeSpaceRole(user, spaceRole)"></i>
+            </div>
             <div ng-if="spaceUsersController.getSpaceRoles(user).length === 0" translate>None assigned</div>
           </td>
           <td>

@@ -32,10 +32,11 @@
     '$state',
     '$log',
     'app.utils.utilsService',
-    'app.view.endpoints.clusters.cluster.manageUsers'
+    'app.view.endpoints.clusters.cluster.manageUsers',
+    'app.view.endpoints.clusters.cluster.rolesService'
   ];
 
-  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers) {
+  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -64,17 +65,18 @@
           }
           var roles = space.roles[aUser.metadata.guid];
           if (!_.isUndefined(roles)) {
-            myRoles[space.details.space.entity.name] = roles;
+            myRoles[space.details.space.metadata.guid] = roles;
           }
         });
         that.userRoles[aUser.metadata.guid] = [];
 
         // Format that in an array of pairs for direct use in the template
-        _.forEach(myRoles, function (spaceRoles, spaceName) {
+        _.forEach(myRoles, function (spaceRoles, spaceGuid) {
           _.forEach(spaceRoles, function (role) {
             that.userRoles[aUser.metadata.guid].push({
-              name: spaceName,
-              role: that.spaceModel.spaceRoleToString(role)
+              space: that.spaceModel.spaces[that.guid][spaceGuid],
+              role: role,
+              roleLabel: that.spaceModel.spaceRoleToString(role)
             });
           });
         });
@@ -127,6 +129,21 @@
       } else {
         that.selectedUsers = {};
       }
+    };
+
+    this.removeSpaceRole = function (user, spaceRole) {
+      var space = spaceRole.space.details.space;
+      this.removingSpace = true;
+      rolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
+        .then(function () {
+          return refreshUsers();
+        })
+        .catch(function () {
+          $log.error('Failed to remove role \'' + spaceRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
+        })
+        .finally(function () {
+          that.removingSpace = false;
+        });
     };
 
     // Ensure the parent state is fully initialised before we start our own init

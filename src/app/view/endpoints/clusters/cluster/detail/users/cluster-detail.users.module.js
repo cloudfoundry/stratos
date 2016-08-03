@@ -30,10 +30,11 @@
     '$state',
     '$log',
     'app.utils.utilsService',
-    'app.view.endpoints.clusters.cluster.manageUsers'
+    'app.view.endpoints.clusters.cluster.manageUsers',
+    'app.view.endpoints.clusters.cluster.rolesService'
   ];
 
-  function ClusterUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers) {
+  function ClusterUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -56,17 +57,18 @@
         _.forEach(that.organizationModel.organizations[that.guid], function (org) {
           var roles = org.roles[aUser.metadata.guid];
           if (!_.isUndefined(roles)) {
-            myRoles[org.details.org.entity.name] = roles;
+            myRoles[org.details.org.metadata.guid] = roles;
           }
         });
         that.userRoles[aUser.metadata.guid] = [];
 
         // Format that in an array of pairs for direct use in the template
-        _.forEach(myRoles, function (orgRoles, orgName) {
+        _.forEach(myRoles, function (orgRoles, orgGuid) {
           _.forEach(orgRoles, function (role) {
             that.userRoles[aUser.metadata.guid].push({
-              name: orgName,
-              role: that.organizationModel.organizationRoleToString(role)
+              org: that.organizationModel.organizations[that.guid][orgGuid],
+              role: role,
+              roleLabel: that.organizationModel.organizationRoleToString(role)
             });
           });
         });
@@ -119,6 +121,20 @@
       } else {
         selectedUsers = {};
       }
+    };
+
+    this.removeOrgRole = function (user, orgRole) {
+      this.removingOrg = true;
+      rolesService.removeOrgRole(that.guid, orgRole.org.details.org.metadata.guid, user, orgRole.role)
+        .then(function () {
+          return refreshUsers();
+        })
+        .catch(function () {
+          $log.error('Failed to remove role \'' + orgRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
+        })
+        .finally(function () {
+          that.removingOrg = false;
+        });
     };
 
     // Ensure the parent state is fully initialised before we start our own init
