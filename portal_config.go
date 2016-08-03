@@ -19,6 +19,8 @@ type portalConfig struct {
 	GitHubOauthClientID     string   `ucp:"GITHUB_OAUTH_CLIENT_ID"`
 	GitHubOAuthClientSecret string   `ucp:"GITHUB_OAUTH_CLIENT_SECRET"`
 	GitHubOAuthState        string   `ucp:"GITHUB_OAUTH_STATE"`
+	EncryptionKeyVolume     string   `ucp:"ENCRYPTION_KEY_VOLUME"`
+	EncryptionKeyFilename   string   `ucp:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey           string   `ucp:"ENCRYPTION_KEY"`
 	EncryptionKeyInBytes    []byte
 }

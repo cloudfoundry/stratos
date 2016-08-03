@@ -73,7 +73,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	request := c.Request().(*standard.Request).Request
 
 	// Open a Noaa consumer to the doppler endpoint
-	fmt.Println("Opening Noaa consumer to Doppler endpoint", dopplerAddress)
+	log.Println("Opening Noaa consumer to Doppler endpoint", dopplerAddress)
 	noaaConsumer := consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, nil)
 	defer noaaConsumer.Close()
 
@@ -86,10 +86,10 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	log.Println("Upgrading request to the WebSocket protocol...")
 	clientWebSocket, err := upgrader.Upgrade(responseWriter, request, nil)
 	if err != nil {
-		fmt.Println("Oops Upgrade to a WebSocket connection failed:", err)
+		log.Printf("Oops Upgrade to a WebSocket connection failed: %+v\n", err)
 		return err
 	}
-	fmt.Println("Successfully upgraded to a WebSocket connection")
+	log.Println("Successfully upgraded to a WebSocket connection")
 	defer clientWebSocket.Close()
 	// Graceful close of WebSocket, not really needed
 	//defer clientWebSocket.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Time{})
@@ -139,7 +139,7 @@ func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGUID, appGUID, authToken
 		if ua, ok := err.(*noaa_errors.UnauthorizedError); ok {
 			// Annoyingly, CF also sends back "401 - Unauthorized" when the app doesn't exist...
 			// So we may end up here even when our token is legit
-			fmt.Println("Unauthorized error! Trying to refresh our token!", ua)
+			log.Printf("Unauthorized error! Trying to refresh our token! %+v\n", ua)
 			if err := refreshTokenRecord(); err != nil {
 				return messages, err
 			}

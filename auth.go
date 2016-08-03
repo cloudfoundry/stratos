@@ -351,13 +351,13 @@ func (p *portalProxy) getUAATokenRecord(userGUID string) (tokens.TokenRecord, er
 	log.Println("getUAATokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		fmt.Printf("Database error getting repo for UAA token: %v", err)
+		log.Printf("Database error getting repo for UAA token: %v", err)
 		return tokens.TokenRecord{}, err
 	}
 
 	tr, err := tokenRepo.FindUAAToken(userGUID, p.Config.EncryptionKeyInBytes)
 	if err != nil {
-		fmt.Printf("Database error finding UAA token: %v", err)
+		log.Printf("Database error finding UAA token: %v", err)
 		return tokens.TokenRecord{}, err
 	}
 

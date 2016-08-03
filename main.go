@@ -3,16 +3,17 @@ package main
 import (
 	"crypto/tls"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/antonlindstrom/pgstore"
 	"github.com/hpcloud/portal-proxy/datastore"
+	"github.com/hpcloud/portal-proxy/repository/tokens"
 	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -46,7 +47,7 @@ func main() {
 	log.Println("HTTP client initialized.")
 
 	// Get the encryption key we need for tokens in the database
-	portalConfig.EncryptionKeyInBytes, err = setEncryptionKey(portalConfig)
+	portalConfig.EncryptionKeyInBytes, err = getEncryptionKey(portalConfig)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
@@ -91,20 +92,25 @@ func main() {
 	}
 }
 
-// TODO (wchrisjohnson): This should be changed to pull in the encryption key from the env.
-// For the time being, I am just generating a 256 bit / 32 byte / AES-256 encryption key
-// here. By  the time I am done with this PR, this will come in via the env var.
-func setEncryptionKey(pc portalConfig) ([]byte, error) {
-	log.Println("setEncryptionKey")
-	key := make([]byte, 32)
-	_, err := rand.Read(key)
+func getEncryptionKey(pc portalConfig) ([]byte, error) {
+	log.Println("getEncryptionKey")
 
-	if err != nil {
-		return nil, err
+	// If it exists in "EncryptionKey" we must be in compose; use it.
+	if len(pc.EncryptionKey) > 0 {
+		key32bytes, err := hex.DecodeString(string(pc.EncryptionKey))
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		return key32bytes, nil
 	}
 
-	// b64.StdEncoding.DecodeString(p.Config.EncryptionKey)
-	// portalConfig.EncryptionKey = b64.StdEncoding.EncodeToString(key)
+	// Read the key from the shared volume
+	key, err := tokens.ReadKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
+	if err != nil {
+		log.Printf("Unable to read the encryption key from the shared volume: %v", err)
+		return nil, err
+	}
 
 	return key, nil
 }
