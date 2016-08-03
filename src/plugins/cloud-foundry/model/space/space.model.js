@@ -326,10 +326,8 @@
       var rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
 
       var spaceRolesP = rolesP.then(function () {
-        var userGuid, myRoles;
-
         // Find my user's roles
-        myRoles = that.spaces[cnsiGuid][spaceGuid].roles[userGuid];
+        var myRoles = that.spaces[cnsiGuid][spaceGuid].roles[userGuid];
         if (!myRoles) {
           return [];
         }

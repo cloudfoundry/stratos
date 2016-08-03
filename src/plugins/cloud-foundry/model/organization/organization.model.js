@@ -272,7 +272,7 @@
 
       var allUsersRoles;
       var orgRolesP = rolesP.then(function (allUsersRolesRes) {
-        var i, userGuid, myRoles;
+        var i, myRoles;
 
         allUsersRoles = allUsersRolesRes.data.resources;
 
