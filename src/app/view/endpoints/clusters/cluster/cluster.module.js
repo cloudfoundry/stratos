@@ -39,6 +39,7 @@
     var privateDomains = modelManager.retrieve('cloud-foundry.model.private-domain');
     var sharedDomains = modelManager.retrieve('cloud-foundry.model.shared-domain');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
+    var stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
 
     this.initialized = false;
     this.guid = $stateParams.guid;
@@ -83,10 +84,18 @@
       var privateDomainsPromise = privateDomains.listAllPrivateDomains(that.guid);
       var sharedDomainsPromise = sharedDomains.listAllSharedDomains(that.guid);
 
+      var stackatoInfoPromise = stackatoInfoModel.getStackatoInfo();
+
       // Reset any cache we may be interested in
       delete appModel.appSummary;
 
-      return $q.all([orgPromise, servicesPromise, serviceBindingPromise, privateDomainsPromise, sharedDomainsPromise])
+      return $q.all([
+        orgPromise,
+        servicesPromise,
+        serviceBindingPromise,
+        privateDomainsPromise,
+        sharedDomainsPromise,
+        stackatoInfoPromise])
         .finally(function () {
           that.initialized = true;
         });

@@ -321,14 +321,12 @@
         ? spaceQuotaApi.RetrieveSpaceQuotaDefinition(spaceQuotaGuid, params, httpConfig)
         : this.$q.when();
 
+      // Find our user's GUID
+      var userGuid = that.stackatoInfoModel.info;
       var rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
-      var stackatoInfoP = that.stackatoInfoModel.getStackatoInfo();
 
-      var spaceRolesP = that.$q.all({roles: rolesP, stackatoInfo: stackatoInfoP}).then(function (values) {
+      var spaceRolesP = rolesP.then(function () {
         var userGuid, myRoles;
-
-        // Find our user's GUID
-        userGuid = values.stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
 
         // Find my user's roles
         myRoles = that.spaces[cnsiGuid][spaceGuid].roles[userGuid];
