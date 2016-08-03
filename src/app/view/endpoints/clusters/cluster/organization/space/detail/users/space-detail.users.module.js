@@ -143,6 +143,53 @@
         });
     };
 
+    this.selectedUsersCount = function () {
+      return (_.invert(this.selectedUsers, true).true || []).length;
+    };
+
+    function selectedUsersArray() {
+      var selectedUsersGuids = _.invert(that.selectedUsers, true).true;
+      return _.filter(that.users, function (user) {
+        return _.indexOf(selectedUsersGuids, user.metadata.guid) >= 0;
+      });
+    }
+
+    this.manageSelectedUsers = function () {
+      manageUsers.show(that.guid, selectedUsersArray(), true).result.then(function () {
+        refreshUsers();
+      });
+    };
+
+    this.removeFromOrganization = function () {
+      var space = that.space.details.space;
+      this.removingSpace = true;
+      rolesService.removeFromOrganization(that.guid, space.entity.organization_guid, selectedUsersArray())
+        .then(function () {
+          return refreshUsers();
+        })
+        .catch(function () {
+          $log.error('Failed to remove users from organization and space');
+        })
+        .finally(function () {
+          that.removingSpace = false;
+        });
+    };
+
+    this.removeFromSpace = function () {
+      var space = that.space.details.space;
+      this.removingSpace = true;
+      rolesService.removeFromSpace(that.guid, space.entity.organization_guid, space.metadata.guid, selectedUsersArray())
+        .then(function () {
+          return refreshUsers();
+        })
+        .catch(function () {
+          $log.error('Failed to remove users from space');
+        })
+        .finally(function () {
+          that.removingSpace = false;
+        });
+    };
+
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.users', $state, init);
   }
