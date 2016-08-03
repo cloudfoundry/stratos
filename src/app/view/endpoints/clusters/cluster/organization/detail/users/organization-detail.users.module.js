@@ -87,7 +87,6 @@
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
 
-        $log.debug('Received list of Users: ', res);
         that.users = res;
 
         return refreshUsers();

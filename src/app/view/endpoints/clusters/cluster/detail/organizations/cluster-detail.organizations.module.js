@@ -12,7 +12,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.organizations', {
       url: '/organizations',
-      templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail-organizations.html',
+      templateUrl: 'app/view/endpoints/clusters/cluster/detail/organizations/cluster-detail-organizations.html',
       controller: ClusterOrganizationsController,
       controllerAs: 'clusterOrganizationsController',
       ncyBreadcrumb: {

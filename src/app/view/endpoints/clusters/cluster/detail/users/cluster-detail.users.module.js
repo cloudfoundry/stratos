@@ -12,7 +12,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.users', {
       url: '/users',
-      templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail-users.html',
+      templateUrl: 'app/view/endpoints/clusters/cluster/detail/users/cluster-detail-users.html',
       controller: ClusterUsersController,
       controllerAs: 'clusterUsersController',
       ncyBreadcrumb: {
@@ -79,7 +79,6 @@
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
 
-        $log.debug('Received list of Users: ', res);
         that.users = res;
 
         return refreshUsers();
