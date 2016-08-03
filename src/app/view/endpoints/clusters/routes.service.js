@@ -2,30 +2,28 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.service')
-    .run(register);
+    .module('app.view.endpoints.clusters')
+    .factory('app.view.endpoints.clusters.routesService', RoutesServiceFactory);
 
-  register.$inject = [
-    'app.service.serviceManager',
+  RoutesServiceFactory.$inject = [
+    '$log',
     'app.model.modelManager',
     'helion.framework.widgets.dialog.confirm'
   ];
 
-  function register(serviceManager, modelManager, confirmDialog) {
-    serviceManager.register('cloud-foundry.service.route',
-      new RoutesService(modelManager, confirmDialog));
+  function RoutesServiceFactory($log, modelManager, confirmDialog) {
+    return new RoutesService($log, modelManager, confirmDialog);
   }
 
   /**
    * @name RoutesService
    * @constructor
+   * @param {object} $log - the angular $log service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
-   * @property {object} routesModel - the HCF routes model management service
-   * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
-   * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    */
-  function RoutesService(modelManager, confirmDialog) {
+  function RoutesService($log, modelManager, confirmDialog) {
+    this.$log = $log;
     this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
     this.confirmDialog = confirmDialog;
   }
@@ -53,9 +51,9 @@
      * @description Unmap route from application
      * @param {string} cnsiGuid the cnsi guid of the HCF cluster
      * @param {object} route route metadata
-     * @param {object} routeGuid route guid
-     * @param {object} appGuid the app guid to unmap this route from
-     * @return {promise} confirmation dialogue promise
+     * @param {string} routeGuid route guid
+     * @param {string} appGuid the app guid to unmap this route from
+     * @returns {promise} promise once execution completed. This could mean confirm dialog was cancelled OR unmap failed
      */
     unmapRoute: function (cnsiGuid, route, routeGuid, appGuid) {
       var that = this;
@@ -65,12 +63,14 @@
         buttonText: {
           yes: gettext('Unmap'),
           no: gettext('Cancel')
-        },
-        callback: function () {
-          return that.routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid);
         }
       });
-      return dialog.result;
+      return dialog.result.then(function () {
+        return that.routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid).catch(function (error) {
+          that.$log.error('Failed to unmap route: ', routeGuid);
+          throw error;
+        });
+      });
     },
 
     /**
@@ -78,8 +78,9 @@
      * @description Unmap and delete route
      * @param {string} cnsiGuid the cnsi guid of the HCF cluster
      * @param {object} route route metadata
-     * @param {object} routeGuid route guid
-     * @return {promise} confirmation dialogue promise
+     * @param {string} routeGuid route guid
+     * @returns {promise} promise once execution completed. This could mean confirm dialog was cancelled OR delete
+     * failed
      */
     deleteRoute: function (cnsiGuid, route, routeGuid) {
       var that = this;
@@ -89,12 +90,14 @@
         buttonText: {
           yes: gettext('Delete'),
           no: gettext('Cancel')
-        },
-        callback: function () {
-          return that.routesModel.deleteRoute(cnsiGuid, routeGuid);
         }
       });
-      return dialog.result;
+      return dialog.result.then(function () {
+        return that.routesModel.deleteRoute(cnsiGuid, routeGuid).catch(function (error) {
+          that.$log.error('Failed to delete route: ', routeGuid);
+          throw error;
+        });
+      });
     }
   });
 

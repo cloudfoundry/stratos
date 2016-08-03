@@ -30,10 +30,10 @@
     '$q',
     '$log',
     'app.model.modelManager',
-    'app.service.serviceManager'
+    'app.view.endpoints.clusters.routesService'
   ];
 
-  function SpaceRoutesController($scope, $stateParams, $q, $log, modelManager, serviceManager) {
+  function SpaceRoutesController($scope, $stateParams, $q, $log, modelManager, routesService) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -41,7 +41,7 @@
     this.$q = $q;
     this.$log = $log;
     this.modelManager = modelManager;
-    this.routesService = serviceManager.retrieve('cloud-foundry.service.route');
+    this.routesService = routesService;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
@@ -115,8 +115,6 @@
       _.forEach(routes, function (route) {
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
         that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1;
-        console.log(route);
-
       });
     },
 

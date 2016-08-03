@@ -20,33 +20,34 @@
 
   ApplicationSummaryController.$inject = [
     'app.model.modelManager',
-    'app.service.serviceManager',
     '$stateParams',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'app.view.endpoints.clusters.routesService'
   ];
 
   /**
    * @name ApplicationSummaryController
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.service.serviceManager} serviceManager - the Service management service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
+   * @param {app.model.utilsService} utils - the utils service
+   * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
-   * @param {app.model.utilsService} utils - the utils service
    * @property {app.model.utilsService} utils - the utils service
    */
-  function ApplicationSummaryController(modelManager, serviceManager, $stateParams, addRoutesService, editAppService, utils) {
+  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, editAppService, utils,
+                                        routesService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.routesService = serviceManager.retrieve('cloud-foundry.service.route');
+    this.routesService = routesService;
     this.id = $stateParams.guid;
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.addRoutesService = addRoutesService;
@@ -61,13 +62,13 @@
       {
         name: gettext('Unmap from App'),
         execute: function (route) {
-          that.routesService.unmapRoute(that.cnsiGuid, route, route.guid, that.id);
+          routesService.unmapRoute(that.cnsiGuid, route, route.guid, that.id);
         }
       },
       {
         name: gettext('Delete Route'),
         execute: function (route) {
-          that.routesService.deleteRoute(that.cnsiGuid, route, route.guid);
+          routesService.deleteRoute(that.cnsiGuid, route, route.guid);
         }
       }
     ];

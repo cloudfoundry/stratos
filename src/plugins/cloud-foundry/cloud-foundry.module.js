@@ -6,8 +6,7 @@
       'cloud-foundry.api',
       'cloud-foundry.event',
       'cloud-foundry.model',
-      'cloud-foundry.view',
-      'cloud-foundry.service'
+      'cloud-foundry.view'
     ])
     .run(register);
 
