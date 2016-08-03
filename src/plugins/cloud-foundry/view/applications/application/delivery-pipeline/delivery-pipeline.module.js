@@ -88,9 +88,10 @@
     /* eslint-disable */
     this.postDeployActionActions = [
       {
-        name: gettext('Delete'), execute: function (target) {
-        alert('Delete ' + target);
-      }
+        name: gettext('Delete'),
+        execute: function (target) {
+          alert('Delete ' + target);
+        }
       }
     ];
     this.containerRegistryActions = [

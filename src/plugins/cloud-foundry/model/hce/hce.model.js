@@ -248,7 +248,7 @@
      * @returns {promise} A promise object
      * @public
      */
-    getProject: function () {
+    getProject: function (name) {
       return this.data.projects[name];
     },
 
