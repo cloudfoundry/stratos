@@ -51,7 +51,7 @@
       if (sizeMb > 1024) {
         return precisionIfUseful(sizeMb / 1024) + ' GB';
       }
-      return sizeMb + ' MB';
+      return precisionIfUseful(sizeMb) + ' MB';
     }
 
     function sizeUtilization(sizeMbUsed, sizeMbTotal) {
