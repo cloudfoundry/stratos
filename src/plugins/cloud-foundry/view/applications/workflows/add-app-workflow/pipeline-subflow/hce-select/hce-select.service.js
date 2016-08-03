@@ -19,7 +19,16 @@
    */
   function hceSelectFactory(detailView) {
     return {
-      show: function (hceCnsis) {
+
+      /**
+       * @function show
+       * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+       * @description Show HCE Selection modal dialog
+       * @param {Array} hceCnsis - List of HCE CNSIs
+       * @param {Object} selectedHceCnsi - Default selected HCE CNSI
+       * @constructor
+       */
+      show: function (hceCnsis, selectedHceCnsi) {
 
         return detailView(
           {
@@ -29,7 +38,8 @@
             'add-app-workflow/pipeline-subflow/hce-select/hce-select.html'
           },
           {
-            hceCnsis: hceCnsis
+            hceCnsis: hceCnsis,
+            selectedHceCnsi: selectedHceCnsi
           }
         );
       }
@@ -55,10 +65,7 @@
     that.$uibModalInstance = $uibModalInstance;
     that.context = context;
 
-    this.hceCnsi = null;
-    this.selectionChanged = function (hceCnsi) {
-      that.selected = hceCnsi;
-    };
+    this.hceCnsi = this.context.selectedHceCnsi;
 
   }
 

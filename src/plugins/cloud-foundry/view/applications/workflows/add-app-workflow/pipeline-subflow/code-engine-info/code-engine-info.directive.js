@@ -70,7 +70,7 @@
      */
     showHceEndpointForm: function () {
       var that = this;
-      this.hceSelect.show(this.hceCnsis).result.then(function (selectedHce) {
+      this.hceSelect.show(this.hceCnsis, this.hce).result.then(function (selectedHce) {
         that.hce = selectedHce;
       });
     }
