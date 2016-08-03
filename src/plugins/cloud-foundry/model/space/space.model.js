@@ -267,31 +267,28 @@
     },
 
     /**
-     * @function spaceRolesToString
+     * @function spaceRolesToStrings
      * @memberof cloud-foundry.model.space
-     * @description Converts a list of cloud-foundry organization roles to a localized list. The list of all
-     * organization roles is: space_user, space_manager, space_auditor, space_developer
+     * @description Converts a list of cloud-foundry organization roles to a sorted localized list.
+     * The list of all organization roles is: space_manager, space_auditor, space_developer
      * @param {Array} roles - A list of cloud-foundry space roles
-     * @returns {string} A localised version of the role
+     * @returns {string} An array of localised versions of the roles
      * @public
      */
-    spaceRolesToString: function (roles) {
+    spaceRolesToStrings: function (roles) {
       var that = this;
+      var rolesOrder = ['space_manager', 'space_auditor', 'space_developer'];
 
       if (!roles || roles.length === 0) {
-        // Shouldn't happen as we should at least be a user of the org
-        return gettext('none assigned');
-      } else {
-        // If there are more than one role, don't show the user role
-        if (roles.length > 1) {
-          _.remove(roles, function (role) {
-            return role === 'space_user';
-          });
-        }
-        return _.map(roles, function (role) {
-          return that.spaceRoleToString(role);
-        }).join(', ');
+        // Shouldn't happen as we should at least be a user of the space
+        return [gettext('none assigned')];
       }
+      roles.sort(function (r1, r2) {
+        return rolesOrder.indexOf(r1) - rolesOrder.indexOf(r2);
+      });
+      return _.map(roles, function (role) {
+        return that.spaceRoleToString(role);
+      });
     },
 
     fetchSpacePath: function (cnsiGuid, guid) {

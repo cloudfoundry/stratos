@@ -147,7 +147,7 @@
       return _.get(that.spaceModel, that.spacePath + '.roles.' + that.user.guid);
     }, function (roles) {
       // Present the user's roles
-      that.roles = that.spaceModel.spaceRolesToString(roles);
+      that.roles = that.spaceModel.spaceRolesToStrings(roles);
     });
 
     // Ensure the parent state is fully initialised before we start our own init
