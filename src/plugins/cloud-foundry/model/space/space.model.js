@@ -190,7 +190,7 @@
       };
       _.apply(params, options);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(guid, params, this.makeHttpConfig(cnsiGuid), params)
+        .ListAllRoutesForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return that.onListAllRoutesForSpace(cnsiGuid, guid, response.data.resources);
         });
