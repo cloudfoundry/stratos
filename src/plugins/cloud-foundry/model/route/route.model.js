@@ -100,7 +100,7 @@
     */
     removeAppFromRoute: function (cnsiGuid, guid, appGuid) {
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .RemoveAppFromRoute(guid, appGuid);
+        .RemoveAppFromRoute(guid, appGuid, {}, this.makeHttpConfig(cnsiGuid));
     },
 
     createRoute: function (cnsiGuid, routeSpec) {
@@ -126,7 +126,7 @@
     */
     deleteRoute: function (cnsiGuid, guid, recursive) {
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .DeleteRoute(guid, recursive);
+        .DeleteRoute(guid, recursive, {}, this.makeHttpConfig(cnsiGuid));
     },
 
    /**
