@@ -41,6 +41,7 @@
 
     this.guid = $stateParams.guid;
     this.users = [];
+    this.removingSpace = {};
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -133,7 +134,11 @@
 
     this.removeSpaceRole = function (user, spaceRole) {
       var space = spaceRole.space.details.space;
-      this.removingSpace = true;
+      var pillKey = space.entity.name + spaceRole.roleLabel;
+      if (this.removingSpace[pillKey]) {
+        return;
+      }
+      this.removingSpace[pillKey] = true;
       rolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
         .then(function () {
           return refreshUsers();
@@ -142,7 +147,7 @@
           $log.error('Failed to remove role \'' + spaceRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
         })
         .finally(function () {
-          that.removingSpace = false;
+          that.removingSpace[pillKey] = false;
         });
     };
 

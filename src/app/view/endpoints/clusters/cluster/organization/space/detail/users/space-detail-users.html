@@ -18,8 +18,8 @@
           <td class="user-name">{{ user.entity.username }}</td>
           <td class="roles-list">
             <div class="role-pill"
-                 ng-class="{ 'progress-cursor' : spaceUsersController.removingSpace }"
-                 ng-repeat="spaceRole in spaceUsersController.getSpaceRoles(user)">
+                 ng-repeat="spaceRole in spaceUsersController.getSpaceRoles(user)"
+                 ng-class="{ 'progress-cursor' : spaceUsersController.removingSpace[spaceUsersController.space.details.space.entity.name + spaceRole.roleLabel] }">
               {{ spaceUsersController.space.details.space.entity.name }}: {{ spaceRole.roleLabel }}
               <i class="close-icon helion-icon helion-icon-Close"
                  ng-click="spaceUsersController.removeSpaceRole(user, spaceRole)"></i>

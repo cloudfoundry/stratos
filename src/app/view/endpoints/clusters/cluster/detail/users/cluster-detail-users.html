@@ -18,8 +18,8 @@
           <td class="user-name">{{ user.entity.username }}</td>
           <td class="roles-list">
             <div class="role-pill"
-                 ng-class="{ 'progress-cursor' : clusterUsersController.removingOrg }"
-                 ng-repeat="orgRole in clusterUsersController.getOrganizationsRoles(user)">
+                 ng-repeat="orgRole in clusterUsersController.getOrganizationsRoles(user)"
+                 ng-class="{ 'progress-cursor' : clusterUsersController.removingOrg[orgRole.org.details.org.entity.name + orgRole.roleLabel] }">
               {{ orgRole.org.details.org.entity.name }}: {{ orgRole.roleLabel }}
               <i class="close-icon helion-icon helion-icon-Close"
                  ng-click="clusterUsersController.removeOrgRole(user, orgRole)"></i>

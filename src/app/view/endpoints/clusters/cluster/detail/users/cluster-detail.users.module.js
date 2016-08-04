@@ -39,6 +39,7 @@
 
     this.guid = $stateParams.guid;
     this.users = [];
+    this.removingOrg = {};
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -124,7 +125,11 @@
     };
 
     this.removeOrgRole = function (user, orgRole) {
-      this.removingOrg = true;
+      var pillKey = orgRole.org.details.org.entity.name + orgRole.roleLabel;
+      if (this.removingOrg[pillKey]) {
+        return;
+      }
+      this.removingOrg[pillKey] = true;
       rolesService.removeOrgRole(that.guid, orgRole.org.details.org.metadata.guid, user, orgRole.role)
         .then(function () {
           return refreshUsers();
@@ -133,7 +138,7 @@
           $log.error('Failed to remove role \'' + orgRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
         })
         .finally(function () {
-          that.removingOrg = false;
+          that.removingOrg[pillKey] = false;
         });
     };
 
