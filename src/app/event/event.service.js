@@ -12,7 +12,8 @@
     HTTP_502            : 'HTTP_502', // Bad gateway, node server is down
     HTTP_5XX_ON_LOGIN   : 'HTTP_5XX_ON_LOGIN',
     REDIRECT            : 'REDIRECT',
-    TRANSFER            : 'TRANSFER'
+    TRANSFER            : 'TRANSFER',
+    ROLES_UPDATED       : 'ROLES_UPDATED'
   };
 
   angular

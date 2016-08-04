@@ -33,10 +33,11 @@
     '$log',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
-    'app.view.endpoints.clusters.cluster.rolesService'
+    'app.view.endpoints.clusters.cluster.rolesService',
+    'app.event.eventService'
   ];
 
-  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService) {
+  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -104,9 +105,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          manageUsers.show(that.guid, [aUser], false).result.then(function () {
-            refreshUsers();
-          });
+          return manageUsers.show(that.guid, [aUser], false).result;
         }
       },
       {
@@ -140,9 +139,6 @@
       }
       this.removingSpace[pillKey] = true;
       rolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
-        .then(function () {
-          return refreshUsers();
-        })
         .catch(function () {
           $log.error('Failed to remove role \'' + spaceRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
         })
@@ -150,6 +146,10 @@
           that.removingSpace[pillKey] = false;
         });
     };
+
+    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+      refreshUsers();
+    });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.users', $state, init);

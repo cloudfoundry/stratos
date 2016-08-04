@@ -8,7 +8,8 @@
   RolesService.$inject = [
     '$log',
     '$q',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.event.eventService'
   ];
 
   /**
@@ -19,6 +20,7 @@
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
+   * @param {app.event.eventService} eventService - the event bus service
    * @property {object} organizationRoles - Lists org roles and their translations
    * @property {object} spaceRoles - Lists space roles and their translations
    * @property {function} refreshRoles - Conditionally refresh the space roles cache
@@ -28,7 +30,7 @@
    * @property {function} orgContainsRoles - Determine if the organisation provided and it's spaces has any roles
    * selected
    */
-  function RolesService($log, $q, modelManager) {
+  function RolesService($log, $q, modelManager, eventService) {
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -143,7 +145,9 @@
       });
 
       // If all async requests have finished invalidate any cache associated with roles
-      return $q.all(promises).catch(function () {
+      return $q.all(promises).then(function () {
+        eventService.$emit(eventService.events.ROLES_UPDATED);
+      }).catch(function () {
         $log.error('Failed to update users: ', failedAssignForUsers.join('.'));
         throw failedAssignForUsers;
       });
