@@ -13,7 +13,6 @@
         config: '=',
         organization: '=',
         selection: '=',
-        originalSelection: '=',
         filter: '=?'
       },
       controller: RolesTablesController,
@@ -66,7 +65,6 @@
           _.set(that.selection, 'spaces.' + space.metadata.guid, _.keyBy(spaceRoles));
         });
 
-        that.originalSelection = angular.fromJson(angular.toJson(that.selection));
       }
 
       // Set the current org and spaces collections

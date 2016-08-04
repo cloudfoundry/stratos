@@ -24,7 +24,6 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
 
     var selectedRoles = {};
-    var originalSelectedRoles = {};
 
     var removeFromOrg = function (orgGuid) {
       rolesService.clearOrg(selectedRoles[orgGuid]);
@@ -54,7 +53,6 @@
       // Ensure that the selected roles objects are initialised correctly. The roles table will then fiddle inside these
       _.forEach(organizations, function (organization) {
         selectedRoles[organization.details.org.metadata.guid] = {};
-        originalSelectedRoles[organization.details.org.metadata.guid] = {};
       });
 
       // Async refresh roles
@@ -69,7 +67,7 @@
 
       // Make the actual user role changes
       var updateUsers = function () {
-        return rolesService.updateUsers(clusterGuid, users, originalSelectedRoles, selectedRoles);
+        return rolesService.updateUsers(clusterGuid, users, selectedRoles);
       };
 
       return asyncTaskDialog(
@@ -85,7 +83,6 @@
             organizations: organizations
           },
           selectedRoles: selectedRoles,
-          originalSelectedRoles: originalSelectedRoles,
           tableConfig: {
             clusterGuid: clusterGuid,
             orgRoles: rolesService.organizationRoles,
