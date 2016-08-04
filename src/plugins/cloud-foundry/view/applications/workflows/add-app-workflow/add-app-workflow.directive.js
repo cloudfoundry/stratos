@@ -214,9 +214,7 @@
 
                         if (angular.isDefined(service.entity.extra.categories)) {
                           var serviceCategories = _.map(service.entity.extra.categories,
-                            function (o) {
-                              return {label: o, value: {categories: o}, lower: o.toLowerCase()};
-                            });
+                                                        function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
                           categories = _.unionBy(categories, serviceCategories, 'lower');
                         }
                       }
@@ -292,25 +290,23 @@
               if (that.userInput.repo) {
                 that.hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
                   var usedBranches = _.chain(projects)
-                    .filter(function (p) {
-                      return p.repo.full_name === that.userInput.repo.full_name;
-                    })
-                    .map(function (p) {
-                      return p.repo.branch;
-                    })
-                    .value();
+                                      .filter(function (p) {
+                                        return p.repo.full_name === that.userInput.repo.full_name;
+                                      })
+                                      .map(function (p) { return p.repo.branch; })
+                                      .value();
 
                   return that.githubModel.branches(that.userInput.repo.full_name)
                     .then(function () {
                       var branches = _.map(that.githubModel.data.branches,
-                        function (o) {
-                          var used = _.indexOf(usedBranches, o.name) >= 0;
-                          return {
-                            disabled: used,
-                            label: o.name + (used ? gettext(' (used by other project)') : ''),
-                            value: o.name
-                          };
-                        });
+                                          function (o) {
+                                            var used = _.indexOf(usedBranches, o.name) >= 0;
+                                            return {
+                                              disabled: used,
+                                              label: o.name + (used ? gettext(' (used by other project)') : ''),
+                                              value: o.name
+                                            };
+                                          });
                       [].push.apply(that.options.branches, branches);
                     });
                 });
@@ -393,7 +389,7 @@
         serviceInstances: [],
         services: [],
         serviceCategories: [
-          {label: gettext('All Services'), value: 'all'}
+          { label: gettext('All Services'), value: 'all' }
         ],
         organizations: [],
         spaces: [],
@@ -438,15 +434,15 @@
           that.userInput.domain.metadata.guid,
           that.userInput.host
         )
-          .then(function (data) {
-            if (data && data.code === 10000) {
-              that.errors.invalidRoute = false;
-              resolve();
-            } else {
-              that.errors.invalidRoute = true;
-              reject();
-            }
-          });
+        .then(function (data) {
+          if (data && data.code === 10000) {
+            that.errors.invalidRoute = false;
+            resolve();
+          } else {
+            that.errors.invalidRoute = true;
+            reject();
+          }
+        });
       });
     },
 
@@ -574,11 +570,9 @@
       var that = this;
       this.cnsiModel.list().then(function () {
         that.options.hceCnsis.length = 0;
-        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
+        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
         if (hceCnsis.length > 0) {
-          var hceOptions = _.map(hceCnsis, function (o) {
-            return {label: o.api_endpoint.Host, value: o};
-          });
+          var hceOptions = _.map(hceCnsis, function (o) { return { label: o.api_endpoint.Host, value: o }; });
           [].push.apply(that.options.hceCnsis, hceOptions);
           that.userInput.hceCnsi = hceOptions[0].value;
         } else {
@@ -594,14 +588,14 @@
       return that.$q.all([vcsTypesPromise, vcsInstancesPromise])
         .then(function () {
           var sources = _.map(that.hceModel.data.vcsInstances, function (o) {
-              var vcsType = that.hceModel.data.vcsTypes[o.vcs_type];
-              return {
-                img: vcsType.icon_url,
-                label: vcsType.vcs_type_label,
-                description: vcsType.description,
-                value: o
-              };
-            }) || [];
+            var vcsType = that.hceModel.data.vcsTypes[o.vcs_type];
+            return {
+              img: vcsType.icon_url,
+              label: vcsType.vcs_type_label,
+              description: vcsType.description,
+              value: o
+            };
+          }) || [];
           if (sources.length > 0) {
             [].push.apply(that.options.sources, sources);
             that.userInput.source = sources[0].value;
@@ -655,18 +649,14 @@
       this.hceModel.getBuildContainers(this.userInput.hceCnsi.guid)
         .then(function () {
           var buildContainers = _.map(that.hceModel.data.buildContainers,
-            function (o) {
-              return {label: o.build_container_label, value: o};
-            });
+                                      function (o) { return { label: o.build_container_label, value: o }; });
           [].push.apply(that.options.buildContainers, buildContainers);
         });
 
       this.hceModel.getImageRegistries(this.userInput.hceCnsi.guid)
         .then(function () {
           var imageRegistries = _.map(that.hceModel.data.imageRegistries,
-            function (o) {
-              return {label: o.registry_label, value: o};
-            });
+                                      function (o) { return { label: o.registry_label, value: o }; });
           [].push.apply(that.options.imageRegistries, imageRegistries);
         });
     },
@@ -729,12 +719,12 @@
       var endpoint = this.userInput.serviceInstance.api_endpoint;
       var url = endpoint.Scheme + '://' + endpoint.Host;
       return this.hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
-        name,
-        url,
-        this.userInput.clusterUsername,
-        this.userInput.clusterPassword,
-        this.userInput.organization.entity.name,
-        this.userInput.space.entity.name);
+                                                  name,
+                                                  url,
+                                                  this.userInput.clusterUsername,
+                                                  this.userInput.clusterPassword,
+                                                  this.userInput.organization.entity.name,
+                                                  this.userInput.space.entity.name);
     },
 
     _getDeploymentTargetName: function () {
@@ -747,12 +737,12 @@
 
     createPipeline: function (targetId) {
       return this.hceModel.createProject(this.userInput.hceCnsi.guid,
-        this.userInput.name,
-        this.userInput.source,
-        targetId,
-        this.userInput.buildContainer.build_container_id,
-        this.userInput.repo,
-        this.userInput.branch);
+                                         this.userInput.name,
+                                         this.userInput.source,
+                                         targetId,
+                                         this.userInput.buildContainer.build_container_id,
+                                         this.userInput.repo,
+                                         this.userInput.branch);
     },
 
     triggerPipeline: function () {
@@ -761,8 +751,8 @@
         .then(function (response) {
           var branch = response.data;
           that.hceModel.triggerPipelineExecution(that.userInput.hceCnsi.guid,
-            that.userInput.projectId,
-            branch.commit.sha);
+                                                 that.userInput.projectId,
+                                                 branch.commit.sha);
         });
     },
 
@@ -775,11 +765,11 @@
       this.serviceInstanceModel.list()
         .then(function (serviceInstances) {
           var validServiceInstances = _.chain(_.values(serviceInstances))
-            .filter({cnsi_type: 'hcf', valid: true})
-            .map(function (o) {
-              return {label: o.api_endpoint.Host, value: o};
-            })
-            .value();
+                                       .filter({ cnsi_type: 'hcf', valid: true })
+                                       .map(function (o) {
+                                         return { label: o.api_endpoint.Host, value: o };
+                                       })
+                                       .value();
           [].push.apply(that.options.serviceInstances, validServiceInstances);
         });
     },
