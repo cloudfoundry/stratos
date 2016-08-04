@@ -8,17 +8,19 @@
   RolesService.$inject = [
     '$log',
     '$q',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.event.eventService'
   ];
 
   /**
    * @name RolesService
    * @description Service to handle the data required/created by roles tables. This includes the ability to reach out
-   * and update HCF roles
+   * and update HCF roles. Covers functionality used by Assign/Manage/Change users slide outs and Users tables.
    * @constructor
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
+   * @param {app.event.eventService} eventService - the event bus service
    * @property {object} organizationRoles - Lists org roles and their translations
    * @property {object} spaceRoles - Lists space roles and their translations
    * @property {function} refreshRoles - Conditionally refresh the space roles cache
@@ -28,7 +30,7 @@
    * @property {function} orgContainsRoles - Determine if the organisation provided and it's spaces has any roles
    * selected
    */
-  function RolesService($log, $q, modelManager) {
+  function RolesService($log, $q, modelManager, eventService) {
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -74,6 +76,24 @@
       }
     };
 
+    this.removeOrgRole = function (clusterGuid, orgGuid, user, orgRole) {
+      if (_.indexOf(_.keys(this.organizationRoles), orgRole) < 0) {
+        return $q.reject('Cannot remove unknown role: ', orgRole);
+      }
+      var origRoles = _.set({}, orgGuid + '.organization.' + orgRole, true);
+      var newRoles = _.set({}, orgGuid + '.organization.' + orgRole, false);
+      return this.updateUsers(clusterGuid, [user], origRoles, newRoles);
+    };
+
+    this.removeSpaceRole = function (clusterGuid, orgGuid, spaceGuid, user, spaceRole) {
+      if (!_.indexOf(_.keys(this.spaceRoles), spaceRole) < 0) {
+        return $q.reject('Cannot remove unknown role: ', spaceRole);
+      }
+      var origRoles = _.set({}, orgGuid + '.spaces.' + spaceGuid + '.' + spaceRole, true);
+      var newRoles = _.set({}, orgGuid + '.spaces.' + spaceGuid + '.' + spaceRole, false);
+      return this.updateUsers(clusterGuid, [user], origRoles, newRoles);
+    };
+
     /**
      * @name app.view.endpoints.clusters.cluster.rolesService.refreshRoles
      * @description Conditionally refresh the space roles cache
@@ -104,8 +124,8 @@
      * @param {object} selectedUsers - collection of users to apply roles to
      * @param {object} oldRoles - Object containing the previously selected roles, or the initial state. The diff
      * between this and newRoles will be applied (assign/remove). Format must match newRoles.
-     *  Organizations... [userGuid][orgGuid].organization[roleKey] = truthy
-     *  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
+     *  Organizations... [orgGuid].organization[roleKey] = truthy
+     *  Spaces...        [orgGuid].spaces[spaceGuid][roleKey] = truthy
      * @param {object} newRoles - Object containing the new roles to apply. The diff of this and oldRoles will be
      * applied (assign/remove). Format must match oldRoles.
      * @returns {promise}
@@ -125,7 +145,9 @@
       });
 
       // If all async requests have finished invalidate any cache associated with roles
-      return $q.all(promises).catch(function () {
+      return $q.all(promises).then(function () {
+        eventService.$emit(eventService.events.ROLES_UPDATED);
+      }).catch(function () {
         $log.error('Failed to update users: ', failedAssignForUsers.join('.'));
         throw failedAssignForUsers;
       });

@@ -32,14 +32,17 @@
     '$state',
     '$log',
     'app.utils.utilsService',
-    'app.view.endpoints.clusters.cluster.manageUsers'
+    'app.view.endpoints.clusters.cluster.manageUsers',
+    'app.view.endpoints.clusters.cluster.rolesService',
+    'app.event.eventService'
   ];
 
-  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers) {
+  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
     this.users = [];
+    this.removingSpace = {};
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -64,17 +67,18 @@
           }
           var roles = space.roles[aUser.metadata.guid];
           if (!_.isUndefined(roles)) {
-            myRoles[space.details.space.entity.name] = roles;
+            myRoles[space.details.space.metadata.guid] = roles;
           }
         });
         that.userRoles[aUser.metadata.guid] = [];
 
         // Format that in an array of pairs for direct use in the template
-        _.forEach(myRoles, function (spaceRoles, spaceName) {
+        _.forEach(myRoles, function (spaceRoles, spaceGuid) {
           _.forEach(spaceRoles, function (role) {
             that.userRoles[aUser.metadata.guid].push({
-              name: spaceName,
-              role: that.spaceModel.spaceRoleToString(role)
+              space: that.spaceModel.spaces[that.guid][spaceGuid],
+              role: role,
+              roleLabel: that.spaceModel.spaceRoleToString(role)
             });
           });
         });
@@ -101,9 +105,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          manageUsers.show(that.guid, [aUser], false).result.then(function () {
-            refreshUsers();
-          });
+          return manageUsers.show(that.guid, [aUser], false).result;
         }
       },
       {
@@ -128,6 +130,26 @@
         that.selectedUsers = {};
       }
     };
+
+    this.removeSpaceRole = function (user, spaceRole) {
+      var space = spaceRole.space.details.space;
+      var pillKey = space.entity.name + spaceRole.roleLabel;
+      if (this.removingSpace[pillKey]) {
+        return;
+      }
+      this.removingSpace[pillKey] = true;
+      rolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
+        .catch(function () {
+          $log.error('Failed to remove role \'' + spaceRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
+        })
+        .finally(function () {
+          that.removingSpace[pillKey] = false;
+        });
+    };
+
+    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+      refreshUsers();
+    });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.users', $state, init);

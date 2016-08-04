@@ -30,15 +30,18 @@
     '$state',
     '$log',
     'app.utils.utilsService',
-    'app.view.endpoints.clusters.cluster.manageUsers'
+    'app.view.endpoints.clusters.cluster.manageUsers',
+    'app.view.endpoints.clusters.cluster.rolesService',
+    'app.event.eventService'
   ];
 
-  function SpaceUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers) {
+  function SpaceUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
     this.spaceGuid = $stateParams.space;
     this.users = [];
+    this.removingSpace = {};
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -50,30 +53,24 @@
     this.selectAllUsers = false;
     this.selectedUsers = {};
 
+    this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
+
     function refreshUsers() {
       that.userRoles = {};
 
       // For each user, get its roles in this space
       _.forEach(that.users, function (aUser) {
-        var myRoles = {};
-        var space = that.spaceModel.spaces[that.guid][that.spaceGuid];
-        if (_.isUndefined(space.roles) || _.isUndefined(space.details)) {
-          $log.warn('Space Roles not cached yet!', space);
+        if (_.isUndefined(that.space.roles) || _.isUndefined(that.space.details)) {
+          $log.warn('Space Roles not cached yet!', that.space);
           return;
-        }
-        var roles = space.roles[aUser.metadata.guid];
-        if (!_.isUndefined(roles)) {
-          myRoles[space.details.space.entity.name] = roles;
         }
         that.userRoles[aUser.metadata.guid] = [];
 
         // Format that in an array of pairs for direct use in the template
-        _.forEach(myRoles, function (spaceRoles, spaceName) {
-          _.forEach(spaceRoles, function (role) {
-            that.userRoles[aUser.metadata.guid].push({
-              name: spaceName,
-              role: that.spaceModel.spaceRoleToString(role)
-            });
+        _.forEach(that.space.roles[aUser.metadata.guid] || [], function (role) {
+          that.userRoles[aUser.metadata.guid].push({
+            role: role,
+            roleLabel: that.spaceModel.spaceRoleToString(role)
           });
         });
 
@@ -98,9 +95,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          manageUsers.show(that.guid, [aUser], false).result.then(function () {
-            refreshUsers();
-          });
+          return manageUsers.show(that.guid, [aUser], false).result;
         }
       },
       {
@@ -132,6 +127,26 @@
         that.selectedUsers = {};
       }
     };
+
+    this.removeSpaceRole = function (user, spaceRole) {
+      var space = that.space.details.space;
+      var pillKey = space.entity.name + spaceRole.roleLabel;
+      if (this.removingSpace[pillKey]) {
+        return;
+      }
+      this.removingSpace[pillKey] = true;
+      rolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
+        .catch(function () {
+          $log.error('Failed to remove role \'' + spaceRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
+        })
+        .finally(function () {
+          that.removingSpace[pillKey] = false;
+        });
+    };
+
+    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+      refreshUsers();
+    });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.users', $state, init);

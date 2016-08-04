@@ -30,14 +30,17 @@
     '$state',
     '$log',
     'app.utils.utilsService',
-    'app.view.endpoints.clusters.cluster.manageUsers'
+    'app.view.endpoints.clusters.cluster.manageUsers',
+    'app.view.endpoints.clusters.cluster.rolesService',
+    'app.event.eventService'
   ];
 
-  function ClusterUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers) {
+  function ClusterUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
     this.users = [];
+    this.removingOrg = {};
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -56,17 +59,18 @@
         _.forEach(that.organizationModel.organizations[that.guid], function (org) {
           var roles = org.roles[aUser.metadata.guid];
           if (!_.isUndefined(roles)) {
-            myRoles[org.details.org.entity.name] = roles;
+            myRoles[org.details.org.metadata.guid] = roles;
           }
         });
         that.userRoles[aUser.metadata.guid] = [];
 
         // Format that in an array of pairs for direct use in the template
-        _.forEach(myRoles, function (orgRoles, orgName) {
+        _.forEach(myRoles, function (orgRoles, orgGuid) {
           _.forEach(orgRoles, function (role) {
             that.userRoles[aUser.metadata.guid].push({
-              name: orgName,
-              role: that.organizationModel.organizationRoleToString(role)
+              org: that.organizationModel.organizations[that.guid][orgGuid],
+              role: role,
+              roleLabel: that.organizationModel.organizationRoleToString(role)
             });
           });
         });
@@ -93,9 +97,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          manageUsers.show(that.guid, [aUser], true).result.then(function () {
-            refreshUsers();
-          });
+          return manageUsers.show(that.guid, [aUser], true).result;
         }
       },
       {
@@ -120,6 +122,25 @@
         selectedUsers = {};
       }
     };
+
+    this.removeOrgRole = function (user, orgRole) {
+      var pillKey = orgRole.org.details.org.entity.name + orgRole.roleLabel;
+      if (this.removingOrg[pillKey]) {
+        return;
+      }
+      this.removingOrg[pillKey] = true;
+      rolesService.removeOrgRole(that.guid, orgRole.org.details.org.metadata.guid, user, orgRole.role)
+        .catch(function () {
+          $log.error('Failed to remove role \'' + orgRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
+        })
+        .finally(function () {
+          that.removingOrg[pillKey] = false;
+        });
+    };
+
+    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+      refreshUsers();
+    });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.detail.users', $state, init);

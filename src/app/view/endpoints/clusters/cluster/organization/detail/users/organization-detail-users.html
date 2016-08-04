@@ -3,7 +3,7 @@
      st-safe-src="organizationUsersController.users">
   <div>
     <div class="panel panel-default">
-      <table class="table table-actionable" >
+      <table class="table table-actionable table-selectable" >
         <thead>
         <tr>
           <th><checkbox-input class="select-all-checkbox" ng-change="organizationUsersController.selectAllChanged()" ng-model="organizationUsersController.selectAllUsers"></checkbox-input></th>
@@ -17,7 +17,13 @@
           <td><checkbox-input ng-model="organizationUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
           <td class="user-name">{{ user.entity.username }}</td>
           <td class="roles-list">
-            <div class="role-pill" ng-repeat="orgRole in organizationUsersController.getSpaceRoles(user)">{{ orgRole.name }}: {{ orgRole.role }}<i class="close-icon helion-icon helion-icon-Close"></i></div>
+            <div class="role-pill"
+                 ng-repeat="spaceRole in organizationUsersController.getSpaceRoles(user)"
+                 ng-class="{ 'progress-cursor' : organizationUsersController.removingSpace[spaceRole.space.details.space.entity.name + spaceRole.roleLabel] }">
+              {{ spaceRole.space.details.space.entity.name }}: {{ spaceRole.roleLabel }}
+              <i class="close-icon helion-icon helion-icon-Close"
+                 ng-click="organizationUsersController.removeSpaceRole(user, spaceRole)"></i>
+            </div>
             <div ng-if="organizationUsersController.getSpaceRoles(user).length === 0" translate>None assigned</div>
           </td>
           <td>
