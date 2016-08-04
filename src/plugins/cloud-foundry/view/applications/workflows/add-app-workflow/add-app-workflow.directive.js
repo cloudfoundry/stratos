@@ -147,7 +147,6 @@
     });
   }
 
-
   function run() {
     angular.extend(AddAppWorkflowController.prototype, {
 
@@ -205,29 +204,29 @@
                       that.userInput.serviceInstance.guid,
                       that.userInput.space.metadata.guid
                     ).then(function (services) {
-                        that.options.services.length = 0;
-                        [].push.apply(that.options.services, services);
+                      that.options.services.length = 0;
+                      [].push.apply(that.options.services, services);
 
-                        // retrieve categories that user can filter services by
-                        var categories = [];
-                        angular.forEach(services, function (service) {
-                          // Parse service entity extra data JSON string
-                          if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
-                            service.entity.extra = angular.fromJson(service.entity.extra);
+                      // retrieve categories that user can filter services by
+                      var categories = [];
+                      angular.forEach(services, function (service) {
+                        // Parse service entity extra data JSON string
+                        if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
+                          service.entity.extra = angular.fromJson(service.entity.extra);
 
-                            if (angular.isDefined(service.entity.extra.categories)) {
-                              var serviceCategories = _.map(service.entity.extra.categories,
-                                function (o) {
-                                  return {label: o, value: {categories: o}, lower: o.toLowerCase()};
-                                });
-                              categories = _.unionBy(categories, serviceCategories, 'lower');
-                            }
+                          if (angular.isDefined(service.entity.extra.categories)) {
+                            var serviceCategories = _.map(service.entity.extra.categories,
+                              function (o) {
+                                return {label: o, value: {categories: o}, lower: o.toLowerCase()};
+                              });
+                            categories = _.unionBy(categories, serviceCategories, 'lower');
                           }
-                        });
-                        categories = _.sortBy(categories, 'lower');
-                        that.options.serviceCategories.length = 1;
-                        [].push.apply(that.options.serviceCategories, categories);
+                        }
                       });
+                      categories = _.sortBy(categories, 'lower');
+                      that.options.serviceCategories.length = 1;
+                      [].push.apply(that.options.serviceCategories, categories);
+                    });
                   });
                 });
               }
@@ -591,14 +590,14 @@
         return that.$q.all([vcsTypesPromise, vcsInstancesPromise])
           .then(function () {
             var sources = _.map(that.hceModel.data.vcsInstances, function (o) {
-                var vcsType = that.hceModel.data.vcsTypes[o.vcs_type];
-                return {
-                  img: vcsType.icon_url,
-                  label: vcsType.vcs_type_label,
-                  description: vcsType.description,
-                  value: o
-                };
-              }) || [];
+              var vcsType = that.hceModel.data.vcsTypes[o.vcs_type];
+              return {
+                img: vcsType.icon_url,
+                label: vcsType.vcs_type_label,
+                description: vcsType.description,
+                value: o
+              };
+            }) || [];
             if (sources.length > 0) {
               [].push.apply(that.options.sources, sources);
               that.userInput.source = sources[0].value;
