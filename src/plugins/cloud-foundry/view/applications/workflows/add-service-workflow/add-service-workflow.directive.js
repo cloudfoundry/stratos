@@ -67,6 +67,7 @@
     this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.modal = null;
+    this.loadingServiceInstances = false;
 
     this.path = 'plugins/cloud-foundry/view/applications/workflows/add-service-workflow/';
     this.addServiceActions = {
@@ -80,9 +81,9 @@
     };
 
     var startWorkflowEvent = eventService.$on('cf.events.START_ADD_SERVICE_WORKFLOW', function (event, config) {
-      that.reset(config).then(function () {
-        that.modal = that.startWorkflow();
-      });
+      that.reset(config);
+      that.modal = that.startWorkflow();
+      that._loadServiceInstances();
     });
     $scope.$on('$destroy', startWorkflowEvent);
   }
@@ -93,7 +94,7 @@
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Reset the workflow to an initial state
      * @param {object} config - data containing app, service, etc.
-     * @returns {promise} A promise object
+     * @returns {void}
      */
     reset: function (config) {
       var that = this;
@@ -111,6 +112,7 @@
         spaceGuid: config.app.summary.space_guid
       };
       this.errors = {};
+      this.spinners = {};
 
       this.userInput = {
         name: null,
@@ -131,9 +133,16 @@
             templateUrl: this.path + 'instance.html',
             formName: 'addInstanceForm',
             nextBtnText: gettext('Add Service Instance'),
+            showBusyOnNext: true,
             onNext: function () {
               return that.addService().then(function () {
-                that.addBinding();
+                return that.addBinding().then(function () {
+                  return that.$q.resolve();
+                }, function () {
+                  return that._onServiceBindingError();
+                });
+              }, function () {
+                return that._onCreateServiceError();
               });
             }
           }
@@ -156,44 +165,56 @@
 
       this.options = {
         errors: this.errors,
+        spinners: this.spinners,
         userInput: this.userInput,
         service: this.data.service,
         workflow: this.data.workflow,
+        activeTab: 0,
 
         instances: [],
         instanceNames: [],
         servicePlans: [],
         servicePlanMap: {},
 
-        isCreateNew: true,
-        createNew: function (createNewInstance) {
-          that.options.isCreateNew = createNewInstance;
-        },
-
         serviceInstance: null,
         servicePlan: null
       };
+    },
 
-      return this.getServicePlans(config.service.metadata.guid)
+    /**
+     * @function _loadServiceInstances
+     * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
+     * @description Retrieve service plans and existing service
+     * instances for this service.
+     * @returns {promise} A promise object
+     * @private
+     */
+    _loadServiceInstances: function () {
+      var that = this;
+      this.spinners.loadingServiceInstances = true;
+      return this._getServicePlans(this.data.service.metadata.guid)
         .then(function () {
-          var boundInstances = _.keyBy(config.app.summary.services, 'guid');
+          var boundInstances = _.keyBy(that.data.app.summary.services, 'guid');
           var servicePlanGuids = _.keys(that.options.servicePlanMap);
 
           if (servicePlanGuids.length > 0) {
-            return that.getServiceInstances(servicePlanGuids, boundInstances);
+            return that._getServiceInstances(servicePlanGuids, boundInstances);
           }
+        })
+        .finally(function () {
+          that.spinners.loadingServiceInstances = false;
         });
     },
 
     /**
-     * @function getServicePlans
+     * @function _getServicePlans
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Retrieve service plans for this service
      * @param {string} serviceGuid - the service GUID to get plans for
      * @returns {promise} A promise object
      * @private
      */
-    getServicePlans: function (serviceGuid) {
+    _getServicePlans: function (serviceGuid) {
       var that = this;
       this.options.servicePlans.length = 0;
       this.options.servicePlanMap = {};
@@ -209,7 +230,7 @@
     },
 
     /**
-     * @function getServiceInstances
+     * @function _getServiceInstances
      * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
      * @description Retrieve service instances for this service
      * @param {array} servicePlanGuids - service plan GUIDs to get bindings for
@@ -217,13 +238,13 @@
      * @returns {promise} A promise object
      * @private
      */
-    getServiceInstances: function (servicePlanGuids, boundInstances) {
+    _getServiceInstances: function (servicePlanGuids, boundInstances) {
       var that = this;
       this.options.instances.length = 0;
       this.options.instanceNames.length = 0;
 
       var q = 'service_plan_guid IN ' + servicePlanGuids.join(',');
-      var params = { q: q, 'inline-relations-depth': 2 };
+      var params = { q: q, 'inline-relations-depth': 2, 'include-relations': 'service_plan,service_bindings' };
       return this.spaceModel.listAllServiceInstancesForSpace(this.data.cnsiGuid, this.data.spaceGuid, params)
         .then(function (serviceInstances) {
           var instances = _.sortBy(serviceInstances, function (o) { return o.entity.name; });
@@ -245,7 +266,7 @@
       var that = this;
       var deferred = this.$q.defer();
 
-      if (this.options.isCreateNew) {
+      if (this.options.activeTab === 0) {
         var newInstance = {
           name: this.options.userInput.name,
           service_plan_guid: this.options.userInput.plan.metadata.guid,
@@ -338,13 +359,52 @@
               service: that.options.serviceInstance.entity.name,
               appName: that.data.app.summary.name
             };
-            that.toaster.success(that.$interpolate(successMsg)(context), {positionClass: 'toast-top-right'});
+            that.toaster.success(that.$interpolate(successMsg)(context));
             that.modal.close();
+          }, function () {
+            return that._onServiceBindingError();
           });
+        }, function () {
+          that._onCreateServiceError();
         });
       } else {
         this.modal.close();
       }
+    },
+
+    /**
+     * @function _onCreateServiceError
+     * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
+     * @description Error handler for create service instance
+     * @returns {promise} A promise object
+     * @private
+     */
+    _onCreateServiceError: function () {
+      var message = gettext('There was a problem creating the instance. Please try again. If this error persists, please contact the administrator.');
+      return this.$q.reject(message);
+    },
+
+    /**
+     * @function _onServiceBindingError
+     * @memberof cloud-foundry.view.applications.AddServiceWorkflowController
+     * @description Error handler for binding service instance
+     * @returns {promise} A promise object
+     * @private
+     */
+    _onServiceBindingError: function () {
+      var that = this;
+
+      if (this.options.activeTab === 0) {
+        this._loadServiceInstances().then(function () {
+          that.options.activeTab = 1;
+          var guid = that.options.serviceInstance.metadata.guid;
+          that.userInput.existingServiceInstance = _.find(that.options.instances,
+                                                          function (o) { return o.metadata.guid === guid; });
+        });
+      }
+
+      var message = gettext('There was a problem binding the service instance to the application. Please try again. If this error persists, please contact the administrator.');
+      return this.$q.reject(message);
     }
   });
 

@@ -7,10 +7,14 @@
     </div>
   </div>
 
-  <uib-tabset class="select-instance-tabs col-sm-12" active="active">
-    <uib-tab index="0" heading="{{ 'Create New Instance' | translate }}" active="true"
-      select="wizardCtrl.options.createNew(true)">
-      <form name="createNewForm" ng-if="wizardCtrl.options.isCreateNew">
+  <div class="loading-services-spinner" ng-if="wizardCtrl.options.spinners.loadingServiceInstances">
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+
+  <uib-tabset class="select-instance-tabs col-sm-12"
+    active="wizardCtrl.options.activeTab" ng-if="!wizardCtrl.options.spinners.loadingServiceInstances">
+    <uib-tab index="0" heading="{{ 'Create New Instance' | translate }}">
+      <form name="createNewForm" ng-if="wizardCtrl.options.activeTab === 0">
         <div class="form-group" focusable-input
           ng-class="{'has-error': addInstanceForm.createNewForm.name.$invalid && addInstanceForm.createNewForm.name.$dirty}">
           <label class="control-label" required translate>
@@ -35,8 +39,8 @@
       </form>
     </uib-tab>
     <uib-tab index="1" heading="{{ 'Choose Existing Instance' | translate }}"
-      select="wizardCtrl.options.createNew(false)" disable="wizardCtrl.options.instances.length === 0">
-      <form ng-if="!wizardCtrl.options.isCreateNew">
+      disable="wizardCtrl.options.instances.length === 0">
+      <form ng-if="wizardCtrl.options.activeTab === 1">
         <table class="table table-outlined existing-instances-table">
           <thead>
             <tr>

@@ -42,7 +42,8 @@
       // mock CF spaces model
       var mockSpacesApi = mock.cloudFoundryAPI.Spaces;
       var ListAllServiceInstancesForSpace = mockSpacesApi.ListAllServiceInstancesForSpace(mockApp.space_guid);
-      var params = '?inline-relations-depth=2&q=service_plan_guid+IN+a5ac915f-b746-42c5-8506-6d318bf21107';
+      var params = '?include-relations=service_plan,service_bindings' +
+        '&inline-relations-depth=2&q=service_plan_guid+IN+a5ac915f-b746-42c5-8506-6d318bf21107';
       $httpBackend.whenGET(ListAllServiceInstancesForSpace.url + params)
         .respond(200, ListAllServiceInstancesForSpace.response['200'].body);
     }));
@@ -76,10 +77,7 @@
     });
 
     describe('reset', function () {
-      it('should reset workflow two steps', function () {
-        spyOn(addServiceWorkflowCtrl, 'getServicePlans').and.callThrough();
-        spyOn(addServiceWorkflowCtrl, 'getServiceInstances').and.callThrough();
-
+      it('should reset workflow with two steps', function () {
         var config = {
           app: {
             summary: mockApp
@@ -90,27 +88,15 @@
         };
         addServiceWorkflowCtrl.reset(config);
 
-        $httpBackend.flush();
-
-        expect(addServiceWorkflowCtrl.getServicePlans).toHaveBeenCalled();
-        expect(addServiceWorkflowCtrl.getServiceInstances).toHaveBeenCalled();
-
         // Workflow data should be defined
         expect(addServiceWorkflowCtrl.data).toBeDefined();
         expect(addServiceWorkflowCtrl.data.workflow).toBeDefined();
         expect(addServiceWorkflowCtrl.data.workflow.steps.length).toBe(2);
         expect(addServiceWorkflowCtrl.data.workflow.steps[0].onNext).toBeDefined();
         expect(addServiceWorkflowCtrl.options).toBeDefined();
-        expect(addServiceWorkflowCtrl.options.instances.length).toBeGreaterThan(0);
-        expect(addServiceWorkflowCtrl.options.instanceNames.length).toBeGreaterThan(0);
-        expect(addServiceWorkflowCtrl.options.servicePlans.length).toBeGreaterThan(0);
-        expect(addServiceWorkflowCtrl.options.servicePlanMap).toBeDefined();
       });
 
       it('should reset workflow with one step', function () {
-        spyOn(addServiceWorkflowCtrl, 'getServicePlans').and.callThrough();
-        spyOn(addServiceWorkflowCtrl, 'getServiceInstances').and.callThrough();
-
         var config = {
           app: {
             summary: mockApp
@@ -120,8 +106,6 @@
           service: mockService
         };
         addServiceWorkflowCtrl.reset(config);
-
-        $httpBackend.flush();
 
         // Workflow data should be defined
         expect(addServiceWorkflowCtrl.data.workflow.steps.length).toBe(1);
@@ -141,7 +125,7 @@
           cnsiGuid: 'guid',
           service: mockService
         };
-        addServiceWorkflowCtrl.reset(config);
+        eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
       });
 
       it('should add new service instance', function () {
@@ -186,7 +170,7 @@
       });
 
       it('should set existing service instance', function () {
-        addServiceWorkflowCtrl.options.isCreateNew = false;
+        addServiceWorkflowCtrl.options.activeTab = 1;
 
         $httpBackend.flush();
 
@@ -277,17 +261,7 @@
     });
 
     describe('finishWorkflow', function () {
-      it('should add service instance and binding if confirm', function () {
-        var newInstanceSpec = {
-          name: 'New Instance',
-          service_plan_guid: 'a5ac915f-b746-42c5-8506-6d318bf21107',
-          space_guid: mockApp.space_guid
-        };
-        var mockInstancesApi = mock.cloudFoundryAPI.ServiceInstances;
-        var CreateServiceInstance = mockInstancesApi.CreateServiceInstance(newInstanceSpec);
-        $httpBackend.whenPOST(CreateServiceInstance.url)
-          .respond(200, CreateServiceInstance.response['200'].body);
-
+      it('should set service instance and bind to app on confirm', function () {
         var newBindingSpec = {
           app_guid: 'app_123',
           service_instance_guid: 'instance_123'
@@ -305,8 +279,8 @@
           cnsiGuid: 'guid',
           service: mockService
         };
-        addServiceWorkflowCtrl.reset(config);
-        addServiceWorkflowCtrl.options.isCreateNew = false;
+        eventService.$emit('cf.events.START_ADD_SERVICE_WORKFLOW', config);
+        addServiceWorkflowCtrl.options.activeTab = 1;
         addServiceWorkflowCtrl.modal = {
           close: angular.noop
         };
