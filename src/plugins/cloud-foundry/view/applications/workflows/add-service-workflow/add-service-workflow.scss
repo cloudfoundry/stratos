@@ -2,6 +2,15 @@
 
   .select-instance {
     padding: $hpe-unit-space 0;
+
+    .loading-services-spinner {
+      text-align: center;
+      margin-top: $hpe-unit-space / 2;
+
+      span {
+        margin-right: $hpe-unit-space / 2;
+      }
+    }
   }
 
   .service-confirm {
