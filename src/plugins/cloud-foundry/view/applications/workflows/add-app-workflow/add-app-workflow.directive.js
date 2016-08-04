@@ -320,17 +320,17 @@
             formName: 'application-pipeline-details-form',
             nextBtnText: gettext('Create pipeline'),
             onNext: function () {
-              that.hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
+              return that.hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
                 var name = that._getDeploymentTargetName();
                 var target = _.find(that.hceModel.data.deploymentTargets, {name: name});
                 if (target) {
-                  that.createPipeline(target.deployment_target_id)
+                  return that.createPipeline(target.deployment_target_id)
                     .then(function (response) {
                       that.userInput.projectId = response.data.id;
                     });
                 } else {
-                  that.createDeploymentTarget().then(function (newTarget) {
-                    that.createPipeline(newTarget.deployment_target_id)
+                  return that.createDeploymentTarget().then(function (newTarget) {
+                    return that.createPipeline(newTarget.deployment_target_id)
                       .then(function (response) {
                         that.userInput.projectId = response.data.id;
                       });
@@ -350,6 +350,12 @@
               return that.hceModel.listNotificationTargetTypes(that.userInput.hceCnsi.guid)
                 .then(function () {
                   that.options.notificationTargetTypes = that.hceModel.data.notificationTargetTypes;
+                }).then(function () {
+                  // Fetch automatically associated notification targets (i.e. GitHub pull request)
+                  return that.hceModel.getNotificationTargets(that.userInput.hceCnsi.guid, that.userInput.projectId)
+                    .then(function (response) {
+                      that.userInput.notificationTargets = response.data;
+                    });
                 });
             }
           },
