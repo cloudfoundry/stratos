@@ -27,6 +27,17 @@
       getClusterEndpoint: getClusterEndpoint
     };
 
+    function precisionIfUseful(size, precision) {
+      if (angular.isUndefined(precision)) {
+        precision = 1;
+      }
+      var floored = Math.floor(size);
+      if (floored === size) {
+        return floored;
+      }
+      return size.toFixed(precision);
+    }
+
     function mbToHumanSize(sizeMb) {
       if (angular.isUndefined(sizeMb)) {
         return '';
@@ -35,12 +46,12 @@
         return '∞';
       }
       if (sizeMb > 1048576) {
-        return (sizeMb / 1048576).toFixed(1) + ' TB';
+        return precisionIfUseful(sizeMb / 1048576) + ' TB';
       }
       if (sizeMb > 1024) {
-        return (sizeMb / 1024).toFixed(1) + ' GB';
+        return precisionIfUseful(sizeMb / 1024) + ' GB';
       }
-      return sizeMb + ' MB';
+      return precisionIfUseful(sizeMb) + ' MB';
     }
 
     function sizeUtilization(sizeMbUsed, sizeMbTotal) {

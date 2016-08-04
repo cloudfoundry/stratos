@@ -61,7 +61,8 @@
         // Convert the cached space roles into a keyed object of truthies required to run the check boxes
         var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
         _.forEach(that.organization.spaces, function (space) {
-          var spaceRoles = spaceModel.spaces[that.config.clusterGuid][space.metadata.guid].roles[user.metadata.guid];
+          var spaceRoles = spaceModel.spaces[that.config.clusterGuid][space.metadata.guid].roles;
+          spaceRoles = _.get(spaceRoles, user.metadata.guid, []);
           _.set(that.selection, 'spaces.' + space.metadata.guid, _.keyBy(spaceRoles));
         });
 

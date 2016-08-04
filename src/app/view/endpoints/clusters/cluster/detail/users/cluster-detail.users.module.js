@@ -40,6 +40,7 @@
     this.users = [];
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.userRoles = {};
 
@@ -76,9 +77,11 @@
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
 
+        that.userActions[0].disabled = !stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
+
         that.users = res;
 
-        refreshUsers();
+        return refreshUsers();
 
       }).then(function () {
         $log.debug('ClusterUsersController finished init');
@@ -88,6 +91,7 @@
     this.userActions = [
       {
         name: gettext('Manage Roles'),
+        disabled: true,
         execute: function (aUser) {
           manageUsers.show(that.guid, [aUser], true).result.then(function () {
             refreshUsers();
