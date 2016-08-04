@@ -10,7 +10,8 @@
 
   <div class="row">
     <a class="ce-data-btn btn-link"
-       ng-click="codeEngineInfoCtrl.showHceEndpointForm()">
+       ng-click="codeEngineInfoCtrl.showHceEndpointForm()"
+       ng-show="codeEngineInfoCtrl.hasMultipleHces()">
       <span translate>Change endpoint</span>
     </a>
   </div>

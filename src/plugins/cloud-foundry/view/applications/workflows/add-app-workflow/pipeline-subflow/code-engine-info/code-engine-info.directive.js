@@ -73,6 +73,16 @@
       this.hceSelect.show(this.hceCnsis, this.hce).result.then(function (selectedHce) {
         that.hce = selectedHce;
       });
+    },
+
+    /**
+     * @function hasMultipleHces
+     * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+     * @description Helper for determining if there more HCE instances
+     * @returns {boolean}
+     */
+    hasMultipleHces: function () {
+      return this.hceCnsis.length > 1;
     }
 
   });
