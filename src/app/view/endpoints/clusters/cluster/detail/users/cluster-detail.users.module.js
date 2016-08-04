@@ -12,7 +12,7 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('endpoint.clusters.cluster.detail.users', {
       url: '/users',
-      templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail-users.html',
+      templateUrl: 'app/view/endpoints/clusters/cluster/detail/users/cluster-detail-users.html',
       controller: ClusterUsersController,
       controllerAs: 'clusterUsersController',
       ncyBreadcrumb: {
@@ -40,6 +40,7 @@
     this.users = [];
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     this.userRoles = {};
 
@@ -76,10 +77,11 @@
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
 
-        $log.debug('Received list of Users: ', res);
+        that.userActions[0].disabled = !stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
+
         that.users = res;
 
-        refreshUsers();
+        return refreshUsers();
 
       }).then(function () {
         $log.debug('ClusterUsersController finished init');
@@ -89,6 +91,7 @@
     this.userActions = [
       {
         name: gettext('Manage Roles'),
+        disabled: true,
         execute: function (aUser) {
           manageUsers.show(that.guid, [aUser], true).result.then(function () {
             refreshUsers();

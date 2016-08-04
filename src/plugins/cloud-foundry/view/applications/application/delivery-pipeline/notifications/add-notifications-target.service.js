@@ -81,7 +81,7 @@
           title: 'Select Notification',
           formName: 'form1',
           templateUrl: 'plugins/cloud-foundry/view/applications/application/' +
-          'delivery-pipeline/notifications/templates/step1.html',
+          'notification-targets/notification-target-list.html',
           nextBtnText: 'Next',
           cancelBtnText: 'Cancel'
         },

@@ -615,8 +615,8 @@
      * @function onListNotificationTargetTypes
      * @memberof cloud-foundry.model.hce.HceModel
      * @description store current notification target types
-     * @param {string} response - the JSON response from the API call
-     * @returns {void} Notification Target content
+     * @param {object} response - HCE listNotificationTargetTypes response
+     * @returns {void}
      * @private
      */
     onListNotificationTargetTypes: function (response) {
