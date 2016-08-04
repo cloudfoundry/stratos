@@ -76,7 +76,7 @@
 
       // Needed to show a Space's list of service instances (requires app name, from app guid, from service binding)
       var serviceBindingPromise = serviceBindingModel.listAllServiceBindings(that.guid);
-      
+
       var stackatoInfoPromise = stackatoInfoModel.getStackatoInfo();
 
       // Reset any cache we may be interested in
