@@ -23,7 +23,8 @@
     '$stateParams',
     '$scope',
     'helion.framework.widgets.dialog.confirm',
-    'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService'
+    'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
+    'cloud-foundry.view.applications.application.delivery-pipeline.postDeployAction'
   ];
 
   /**
@@ -34,10 +35,11 @@
    * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @param {object} addNotificationService - Service for adding new notifications
+   * @param {object} postDeployAction - Service for adding a new post-deploy action
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog, addNotificationService) {
+  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog, addNotificationService, postDeployAction) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
@@ -48,6 +50,7 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.postDeployActionService = postDeployAction;
     this.hceCnsi = null;
 
     this.project = null;
@@ -180,6 +183,12 @@
             });
 
           this.hceModel.listNotificationTargetTypes(this.hceCnsi.guid);
+
+          this.hceModel.getPipelineTasks(this.hceCnsi.guid, this.project.id)
+            .then(function (response) {
+              that.postDeployActions.length = 0;
+              [].push.apply(that.postDeployActions, response.data);
+            });
         }
       }
     },
@@ -187,6 +196,15 @@
     addNotificationTarget: function () {
       var that = this;
       this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
+        .closed
+        .then(function () {
+          that.getProject();
+        });
+    },
+
+    addPostDeployAction: function () {
+      var that = this;
+      this.postDeployActionService.add(this.hceCnsi.guid, this.project.id)
         .closed
         .then(function () {
           that.getProject();
