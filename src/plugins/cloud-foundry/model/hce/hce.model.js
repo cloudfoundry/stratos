@@ -78,7 +78,7 @@
       slack: {
         title: gettext('Slack'),
         description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack room.'),
-        endpointLabel: gettext('URL with optional Channel or User name'),
+        endpointLabel: gettext('URL with optional Channel or User name')
       },
       bitbucketpullrequest: {
         title: gettext('BitBucket'),
