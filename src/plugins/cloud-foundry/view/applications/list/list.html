@@ -1,5 +1,8 @@
 <div class="action-bar app-actions-bar panel-less">
-  <div class="applications-header font-semi-bold pull-left" translate>Applications</div>
+  <div class="applications-header font-semi-bold pull-left" translate>
+    Applications
+    <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
+  </div>
   <div class="pull-right">
     <button class="btn btn-primary"
       ng-if="applicationsListCtrl.ready && applicationsListCtrl.model.clusterCount > 0"
@@ -10,7 +13,7 @@
   </div>
 </div>
 
-<div class="applications-filter" ng-if="applicationsListCtrl.ready && applicationsListCtrl.model.clusterCount > 0">
+<div class="applications-filter" ng-if="applicationsListCtrl.model.clusterCount > 0">
   <div class="panel panel-default">
     <div class="panel-body">
       <form class="form-horizontal">

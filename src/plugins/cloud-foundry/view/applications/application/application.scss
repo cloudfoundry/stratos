@@ -3,7 +3,8 @@
         'services/services',
         'summary/summary',
         'log-stream/log-stream',
-        'variables/variables';
+        'variables/variables',
+        'notification-targets/notification-target';
 
 .application-action-col {
   padding-top: $hpe-unit-space * 2;

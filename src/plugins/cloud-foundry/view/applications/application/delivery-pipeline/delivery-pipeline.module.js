@@ -33,7 +33,7 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
-   * @param {object} addNotificationService - the addNotificationS dialog service
+   * @param {object} addNotificationService - Service for adding new notifications
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
@@ -77,7 +77,7 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          this.hceModel.removeNotificationTarget(that.hceCnsi.guid, target.id)
+          that.hceModel.removeNotificationTarget(that.hceCnsi.guid, target.id)
             .then(function () {
               _.remove(that.notificationTargets, {id: target.id});
             });
@@ -121,7 +121,8 @@
         that.hceModel.getProjects(that.hceCnsi.guid)
           .then(function () {
             that.getProject();
-          }).finally(function () {
+          })
+          .finally(function () {
             that.busy = false;
           });
         that.hceModel.getImageRegistries(that.hceCnsi.guid);

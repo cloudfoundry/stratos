@@ -1,6 +1,6 @@
 <div class="notification-target-card">
   <div class="media-left media-middle">
-    <radio-input ng-model="notificationTargetCtrl.userInputTargetType"
+    <radio-input ng-model="notificationTargetCtrl.userInput.notificationTargetType"
                  input-value="notificationTargetCtrl.targetType"
                  ng-show="!notificationTargetCtrl.addAppMode"
     ></radio-input>
@@ -13,13 +13,18 @@
     <h4 class="media-heading">{{ notificationTargetCtrl.targetType.title }}</h4>
     <p>{{ notificationTargetCtrl.targetType.description }}</p>
   </div>
-  <div class="hpe-media-actions-col">
-    <button type="text"
-            class="btn btn-sm btn-link hpe-media-add-link"
+  <div class="hpe-media-actions-col notification-actions">
+    <div class="link-info" ng-show="notificationTargetCtrl.getCountForType() > 0">
+      <span>{{ notificationTargetCtrl.getCountForType() }}</span>
+      <span translate>Linked</span>
+      <i class="helion-icon helion-icon-Link"></i>
+    </div>
+    <button class="btn btn-sm btn-link"
             ng-show="notificationTargetCtrl.addAppMode"
-            ng-click="">
-      <i class="helion-icon helion-icon-Next_link"></i>
-      <span translate>Add Notification</span>
+            ng-click="notificationTargetCtrl.addTarget()" translate>
+      Add Notification
+      <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+
     </button>
   </div>
 </div>

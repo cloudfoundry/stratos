@@ -6,7 +6,7 @@
   <li class="media" ng-repeat="notificationTargetType in wizardCtrl.options.notificationTargetTypes">
     <notification-target
       target-type="notificationTargetType"
-      user-input-target-type="wizardCtrl.options.userInput.notificationTargetType"
-      add-app-mode=false/>
+      user-input="wizardCtrl.options.userInput"
+      add-app-mode="wizardCtrl.options.notificationFormAppMode" />
   </li>
 </ul>
