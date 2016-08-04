@@ -1,0 +1,32 @@
+<div class="add-notification-dialog">
+  <div class="side-bar">
+    <img class="title-img"
+         ng-src="/plugins/cloud-foundry/view/assets/hce/{{ asyncTaskDialogCtrl.context.targetType.img }}"/>
+    <div class="desc">{{ asyncTaskDialogCtrl.context.targetType.description }}</div>
+  </div>
+  <div class="body">
+    <form>
+      <div class="form-group " focusable-input>
+        <label class="control-label" translate>Notification Target Name</label>
+        <input type="text" name="name" class="form-control"
+               ng-model="asyncTaskDialogCtrl.context.data.name"
+               required
+        />
+      </div>
+      <div class="form-group " focusable-input>
+        <label class="control-label" translate>{{asyncTaskDialogCtrl.context.targetType.endpointLabel}}</label>
+        <input type="text" name="location" class="form-control"
+               ng-model="asyncTaskDialogCtrl.context.data.location"
+               required
+        />
+      </div>
+      <div class="form-group " focusable-input>
+        <label class="control-label" translate>Token</label>
+        <input type="text" name="token" class="form-control"
+               ng-model="asyncTaskDialogCtrl.context.data.token"
+               required
+        />
+      </div>
+    </form>
+  </div>
+</div>

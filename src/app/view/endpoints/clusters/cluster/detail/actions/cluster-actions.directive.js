@@ -195,7 +195,7 @@
       name: gettext('Assign User(s)'),
       disabled: true,
       execute: function () {
-        assignUsersService.assign({
+        return assignUsersService.assign({
           clusterGuid: that.clusterGuid,
           selectedUsers: {}
         });

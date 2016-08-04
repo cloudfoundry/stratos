@@ -24,7 +24,9 @@
   DeleteAppWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
-    '$q'
+    '$q',
+    '$interpolate',
+    'helion.framework.widgets.toaster'
   ];
 
   /**
@@ -34,8 +36,12 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} $q - angular $q service
+   * @param {object} $interpolate - the Angular $interpolate service
+   * @param {helion.framework.widgets.toaster} toaster - the toast service
    * @property {app.event.eventService} eventService - the Event management service
    * @property {object} $q - angular $q service
+   * @property {object} $interpolate - the Angular $interpolate service
+   * @property {helion.framework.widgets.toaster} toaster - the toast service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} routeModel - the Cloud Foundry route model
    * @property {object} serviceBindingModel - the Cloud Foundry service binding model
@@ -43,11 +49,13 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController(modelManager, eventService, $q) {
+  function DeleteAppWorkflowController(modelManager, eventService, $q, $interpolate, toaster) {
     var that = this;
 
     this.eventService = eventService;
     this.$q = $q;
+    this.$interpolate = $interpolate;
+    this.toaster = toaster;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -310,8 +318,13 @@
      */
     finishWorkflow: function () {
       var that = this;
+      var appName = this.appModel.application.summary.name;
       this.deleteApp().then(function () {
         that.deletingApplication = false;
+        // show notification for successful binding
+        var successMsg = gettext('"{{appName}}" has been deleted.');
+        var context = {appName: appName};
+        that.toaster.success(that.$interpolate(successMsg)(context));
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
       });
     }

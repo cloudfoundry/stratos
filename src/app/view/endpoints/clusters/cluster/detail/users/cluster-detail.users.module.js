@@ -31,14 +31,16 @@
     '$log',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
-    'app.view.endpoints.clusters.cluster.rolesService'
+    'app.view.endpoints.clusters.cluster.rolesService',
+    'app.event.eventService'
   ];
 
-  function ClusterUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService) {
+  function ClusterUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
     this.users = [];
+    this.removingOrg = {};
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -95,9 +97,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          manageUsers.show(that.guid, [aUser], true).result.then(function () {
-            refreshUsers();
-          });
+          return manageUsers.show(that.guid, [aUser], true).result;
         }
       },
       {
@@ -124,16 +124,17 @@
     };
 
     this.removeOrgRole = function (user, orgRole) {
-      this.removingOrg = true;
+      var pillKey = orgRole.org.details.org.entity.name + orgRole.roleLabel;
+      if (this.removingOrg[pillKey]) {
+        return;
+      }
+      this.removingOrg[pillKey] = true;
       rolesService.removeOrgRole(that.guid, orgRole.org.details.org.metadata.guid, user, orgRole.role)
-        .then(function () {
-          return refreshUsers();
-        })
         .catch(function () {
           $log.error('Failed to remove role \'' + orgRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
         })
         .finally(function () {
-          that.removingOrg = false;
+          that.removingOrg[pillKey] = false;
         });
     };
 
@@ -155,6 +156,10 @@
     this.removeAllRoles = function () {
 
     };
+
+    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+      refreshUsers();
+    });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.detail.users', $state, init);

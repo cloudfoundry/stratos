@@ -23,8 +23,8 @@
     '$stateParams',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
-    'helion.framework.widgets.dialog.confirm',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'app.view.endpoints.clusters.routesService'
   ];
 
   /**
@@ -34,23 +34,23 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
+   * @param {app.model.utilsService} utils - the utils service
+   * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
-   * @param {app.model.utilsService} utils - the utils service
    * @property {app.model.utilsService} utils - the utils service
    */
-  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, editAppService, confirmDialog, utils) {
+  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, editAppService, utils,
+                                        routesService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
+    this.routesService = routesService;
     this.id = $stateParams.guid;
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.addRoutesService = addRoutesService;
-    this.confirmDialog = confirmDialog;
     this.editAppService = editAppService;
     this.userCnsiModel.list();
     this.utils = utils;
@@ -62,13 +62,13 @@
       {
         name: gettext('Unmap from App'),
         execute: function (route) {
-          that.unmapRoute(route);
+          routesService.unmapRoute(that.cnsiGuid, route, route.guid, that.id);
         }
       },
       {
         name: gettext('Delete Route'),
         execute: function (route) {
-          that.deleteRoute(route);
+          routesService.deleteRoute(that.cnsiGuid, route, route.guid);
         }
       }
     ];
@@ -95,56 +95,6 @@
      **/
     showAddRouteForm: function () {
       this.addRoutesService.add();
-    },
-
-    /**
-     * @function unmapRoute
-     * @description Unmap route from application
-     * @param {object} route route metadata
-     */
-    unmapRoute: function (route) {
-      var that = this;
-      this.confirmDialog({
-        title: gettext('Unmap Route from Application'),
-        description: gettext('Are you sure you want to unmap ') + this.getRouteId(route) + '?',
-        buttonText: {
-          yes: gettext('Delete'),
-          no: gettext('Cancel')
-        },
-        callback: function () {
-          that.routesModel.removeAppFromRoute(that.cnsiGuid, route.guid, that.id);
-        }
-      });
-    },
-
-    /**
-     * @function deleteRoute
-     * @description Unmap and delete route
-     * @param {object} route route metadata
-     */
-    deleteRoute: function (route) {
-      var that = this;
-      this.confirmDialog({
-        title: gettext('Delete Route'),
-        description: gettext('Are you sure you want to delete ') + this.getRouteId(route) + '?',
-        buttonText: {
-          yes: gettext('Delete'),
-          no: gettext('Cancel')
-        },
-        callback: function () {
-          that.routesModel.deleteRoute(that.cnsiGuid, route.guid);
-        }
-      });
-    },
-
-    /**
-     * @function getRouteId
-     * @description tracking function for routes
-     * @param {object} route route metadata
-     * @returns {string} route ID
-     */
-    getRouteId: function (route) {
-      return route.host + '.' + route.domain.name + route.path;
     },
 
     /**
