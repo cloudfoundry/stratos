@@ -322,7 +322,7 @@
       var spaceQuotaApi = that.apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
 
       // var usedMemP = orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig);
-      var serviceInstancesP, appInstancesP = this.$q.resolve();
+      var serviceInstancesP;
       if (space.entity.service_instances) {
         var spaces = space.entity.service_instances;
         serviceInstancesP = this.$q.resolve(spaces);
