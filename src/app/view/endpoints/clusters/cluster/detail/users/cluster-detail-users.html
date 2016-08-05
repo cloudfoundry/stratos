@@ -39,7 +39,8 @@
                  ng-class="{ 'progress-cursor' : clusterUsersController.removingOrg[orgRole.org.details.org.entity.name + orgRole.roleLabel] }">
               {{ orgRole.org.details.org.entity.name }}: {{ orgRole.roleLabel }}
               <i class="close-icon helion-icon helion-icon-Close"
-                 ng-click="clusterUsersController.removeOrgRole(user, orgRole)"></i>
+                 ng-click="clusterUsersController.removeOrgRole(user, orgRole)"
+                 ng-if="clusterUsersController.canRemoveOrgRole(user, orgRole)"></i>
             </div>
             <div ng-if="clusterUsersController.getOrganizationsRoles(user).length === 0" translate>None assigned</div>
           </td>

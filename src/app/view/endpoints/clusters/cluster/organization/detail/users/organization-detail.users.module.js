@@ -114,7 +114,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          return manageUsers.show(that.guid, [aUser], false).result;
+          return manageUsers.show(that.guid, that.organizatioGuid, [aUser], false).result;
         }
       },
       {
@@ -165,7 +165,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, guidsToUsers(), true).result;
+      return manageUsers.show(that.guid, that.organizatioGuid, guidsToUsers(), true).result;
     };
 
     this.removeFromOrganization = function () {

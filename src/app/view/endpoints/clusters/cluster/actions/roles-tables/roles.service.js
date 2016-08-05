@@ -51,14 +51,16 @@
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
     this.organizationRoles = {
-      org_manager: organizationModel.organizationRoleToString('org_manager'),
-      org_auditor: organizationModel.organizationRoleToString('org_auditor'),
-      billing_manager: organizationModel.organizationRoleToString('billing_manager')
+      org_manager: gettext('Org ') + organizationModel.organizationRoleToString('org_manager'),
+      org_auditor: gettext('Org ') + organizationModel.organizationRoleToString('org_auditor'),
+      billing_manager: organizationModel.organizationRoleToString('billing_manager'),
+      org_user: gettext('Org ') + organizationModel.organizationRoleToString('org_user')
     };
     this.spaceRoles = {
-      space_manager: spaceModel.spaceRoleToString('space_manager'),
-      space_auditor: spaceModel.spaceRoleToString('space_auditor'),
-      space_developer: spaceModel.spaceRoleToString('space_developer')
+      space_manager: gettext('Space ') + spaceModel.spaceRoleToString('space_manager'),
+      space_auditor: gettext('Space ') + spaceModel.spaceRoleToString('space_auditor'),
+      space_developer: gettext('Space ') + spaceModel.spaceRoleToString('space_developer'),
+      org_user_filler: ''
     };
 
     // Helper function to link org/space operation to a function
@@ -67,12 +69,15 @@
         add: {
           org_manager: _.bind(usersModel.associateManagedOrganizationWithUser, usersModel),
           org_auditor: _.bind(usersModel.associateAuditedOrganizationWithUser, usersModel),
-          billing_manager: _.bind(usersModel.associateBillingManagedOrganizationWithUser, usersModel)
+          billing_manager: _.bind(usersModel.associateBillingManagedOrganizationWithUser, usersModel),
+          org_user: _.bind(usersModel.associateOrganizationWithUser, usersModel)
+
         },
         remove: {
           org_manager: _.bind(usersModel.removeManagedOrganizationFromUser, usersModel),
           org_auditor: _.bind(usersModel.removeAuditedOrganizationFromUser, usersModel),
-          billing_manager: _.bind(usersModel.removeBillingManagedOrganizationFromUser, usersModel)
+          billing_manager: _.bind(usersModel.removeBillingManagedOrganizationFromUser, usersModel),
+          org_user: _.bind(usersModel.removeOrganizationFromUser, usersModel)
         }
       },
       space: {
@@ -87,6 +92,13 @@
           space_developer: _.bind(usersModel.removeSpaceFromUser, usersModel)
         }
       }
+    };
+
+    this.canRemoveOrgRole = function (role, orgRoles) {
+      var hasOtherRoles = _.find(orgRoles, function (role) {
+        return role !== 'org_user';
+      });
+      return role === 'org_user' ? !hasOtherRoles : true;
     };
 
     /**
@@ -154,7 +166,7 @@
         /* eslint-disable no-warning-comments */
         // TODO: RC See TEAMFOUR-708. At the moment we only cater for one user
         /* eslint-enable no-warning-comments */
-        var roles = rolesByUser[users[0].metadata.guid];
+        var roles = rolesByUser[users[0].metadata.guid] || {};
         var singleUser = [ users[0] ];
 
         var newRoles = _.cloneDeep(roles, true);
@@ -180,7 +192,7 @@
         // TODO: RC See TEAMFOUR-708. At the moment we only cater for one user
         /* eslint-enable no-warning-comments */
 
-        var roles = rolesByUser[users[0].metadata.guid];
+        var roles = rolesByUser[users[0].metadata.guid] || {};
         var singleUser = [ users[0] ];
 
         var newRoles = _.cloneDeep(roles, true);
@@ -210,7 +222,7 @@
       /* eslint-disable no-warning-comments */
       // TODO: RC See TEAMFOUR-708. At the moment we only cater for one user
       /* eslint-enable no-warning-comments */
-      var roles = rolesByUser[users[0].metadata.guid];
+      var roles = rolesByUser[users[0].metadata.guid] || {};
       var singleUser = [ users[0] ];
 
       var newRoles = _.cloneDeep(roles, true);
@@ -294,7 +306,12 @@
      */
     this.updateUsers = function (clusterGuid, selectedUsers, newRoles) {
       var oldRoles = createCurrentRoles(selectedUsers, clusterGuid);
-      return updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRoles, newRoles);
+      /* eslint-disable no-warning-comments */
+      // TODO: RC See TEAMFOUR-708. At the moment we only cater for one user
+      /* eslint-enable no-warning-comments */
+      oldRoles = oldRoles[selectedUsers[0].metadata.guid] || {};
+      var singleUser = [ selectedUsers[0] ];
+      return updateUsersOrgsAndSpaces(clusterGuid, singleUser, oldRoles, newRoles);
     };
 
     /**
@@ -335,9 +352,9 @@
      */
     this.orgContainsRoles = function (org) {
       var orgContainsRoles = _.find(org.organization, function (role, key) {
-        if (key === 'org_user') {
-          return false;
-        }
+        // if (key === 'org_user') {
+        //   return false;
+        // }
         return role;
       });
       if (orgContainsRoles) {
@@ -357,6 +374,23 @@
         }
       }
       return false;
+    };
+
+    this.updateOrgUser = function (orgRoles) {
+      var hasOtherRoles = false;
+      for (var role in orgRoles) {
+        if (!orgRoles.hasOwnProperty(role)) {
+          return;
+        }
+        if (role === 'org_user') {
+          continue;
+        }
+        if (orgRoles[role]) {
+          hasOtherRoles = true;
+          break;
+        }
+      }
+      orgRoles.org_user = hasOtherRoles;
     };
 
     function clearRoleArray(roleObject) {
@@ -438,29 +472,31 @@
         buttonText: {
           yes: overrideVerb || gettext('Change'),
           no: gettext('Cancel')
+        },
+        callback: function () {
+          var failedAssignForUsers = [];
+
+          // For each user assign their new roles. Do this asynchronously
+          var promises = [];
+          _.forEach(selectedUsers, function (user) {
+            var promise = updateUserOrgsAndSpaces(clusterGuid, user, oldRoles, newRoles)
+              .catch(function (error) {
+                // Swallow promise chain error and track by number of failed users
+                failedAssignForUsers.push(user.entity.username);
+                $log.error('Failed to update user ' + user.entity.username, error);
+              });
+            promises.push(promise);
+          });
+
+          // If all async requests have finished invalidate any cache associated with roles
+          return $q.all(promises).then(function () {
+            eventService.$emit(eventService.events.ROLES_UPDATED);
+            if (failedAssignForUsers.length > 0) {
+              return $q.reject(gettext('Failed to update user(s) ') + failedAssignForUsers.join(','));
+            }
+          });
         }
-      }).result.then(function () {
-        var failedAssignForUsers = [];
-
-        // For each user assign their new roles. Do this asynchronously
-        var promises = [];
-        _.forEach(selectedUsers, function (user) {
-          var promise = updateUserOrgsAndSpaces(clusterGuid, user, oldRoles, newRoles)
-            .catch(function (error) {
-              failedAssignForUsers.push(user.entity.username);
-              throw error;
-            });
-          promises.push(promise);
-        });
-
-        // If all async requests have finished invalidate any cache associated with roles
-        return $q.all(promises).then(function () {
-          eventService.$emit(eventService.events.ROLES_UPDATED);
-        }).catch(function () {
-          $log.error('Failed to update users: ', failedAssignForUsers.join('.'));
-          throw failedAssignForUsers;
-        });
-      }).finally(function () {
+      }).result.finally(function () {
         that.changingRoles = false;
       });
     }
@@ -481,84 +517,104 @@
       // Track which orgs and spaces were affected. We'll update the cache for these afterwards
       var changes = {
         organization: false,
-        spaces: []
+        spaces: {}
       };
 
-      var updatePromises = [];
-      var associatedWithOrg = $q.when();
+      // Need to ensure that we execute the change in organization roles in a specific order
+      // If we're ADDING non-org_user roles we need to first ensure that we complete the add for org_user
+      // If we're REMOVING org_user we need to first ensure that we complete the remove of non-org_user roles
 
-      // Assign/Remove Organization Roles
-      _.forEach(newOrgRoles.organization, function (selected, roleKey) {
-        if (roleKey === 'org_user') {
-          return;
-        }
-
-        // Has there been a change in the org role?
-        var oldRoleSelected = _.get(oldOrgRoles, 'organization.' + roleKey);
-        if (oldRoleSelected === selected) {
-          return;
-        }
-
-        // We're either assigning a new role or removing an old role....
-        if (selected) {
-          // ... Assign role. First we need to ensure that they're associated
-          if (!changes.organization) {
-            associatedWithOrg = usersModel.associateOrganizationWithUser(clusterGuid, orgGuid, userGuid);
-          }
-          var assignPromise = associatedWithOrg.then(function () {
-            return rolesToFunctions.org.add[roleKey](clusterGuid, orgGuid, userGuid);
-          });
-          updatePromises.push(assignPromise);
-        } else {
-          // ... Remove
-          updatePromises.push(rolesToFunctions.org.remove[roleKey](clusterGuid, orgGuid, userGuid));
-        }
-        changes.organization = true;
-
-      });
-
-      // Assign/Remove Spaces Roles
-      _.forEach(newOrgRoles.spaces, function (spaceRoles, spaceGuid) {
-
-        _.forEach(spaceRoles, function (selected, roleKey) {
-          // Has there been a change in the space role?
-          var oldRoleSelected = _.get(oldOrgRoles, 'spaces.' + spaceGuid + '.' + roleKey);
+      function createOrgRoleRequests(roles) {
+        var orgPromises = [];
+        // Assign/Remove Organization Roles
+        _.forEach(roles, function (selected, roleKey) {
+          // Has there been a change in the org role?
+          var oldRoleSelected = _.get(oldOrgRoles, 'organization.' + roleKey) || false;
           if (oldRoleSelected === selected) {
             return;
           }
 
-          // Track changes
-          if (_.findIndex(changes.spaces, spaceGuid) < 0) {
-            changes.spaces.push(spaceGuid);
-          }
-
+          // We're either assigning a new role or removing an old role....
           if (selected) {
-            // Assign role
-            updatePromises.push(rolesToFunctions.space.add[roleKey](clusterGuid, spaceGuid, userGuid));
+            // ... Assign role.
+            orgPromises.push(rolesToFunctions.org.add[roleKey](clusterGuid, orgGuid, userGuid));
           } else {
-            // Remove role
-            updatePromises.push(rolesToFunctions.space.remove[roleKey](clusterGuid, spaceGuid, userGuid));
+            // ... Remove role.
+            orgPromises.push(rolesToFunctions.org.remove[roleKey](clusterGuid, orgGuid, userGuid));
+          }
+          changes.organization = true;
+        });
+        return $q.all(orgPromises);
+      }
+
+      var prereqPromise = $q.when();
+      var orgRoles = _.clone(newOrgRoles.organization);
+      var newOrgUser = orgRoles.org_user || false;
+      var oldOrgUser = _.get(oldOrgRoles, 'organization.org_user') || false;
+
+      if (oldOrgUser !== newOrgUser) {
+        delete orgRoles.org_user;
+
+        if (newOrgUser) {
+          // Ensure the add finishes first
+          prereqPromise = rolesToFunctions.org.add.org_user(clusterGuid, orgGuid, userGuid);
+        } else {
+          // Ensure the other changes finish first
+          prereqPromise = createOrgRoleRequests(orgRoles);
+          orgRoles = {
+            org_user: false
+          };
+        }
+        changes.organization = true;
+      }
+
+      return prereqPromise
+        .then(function () {
+          return createOrgRoleRequests(orgRoles);
+        })
+        .then(function () {
+          var updatePromises = [];
+
+          // Assign/Remove Spaces Roles
+          _.forEach(newOrgRoles.spaces, function (spaceRoles, spaceGuid) {
+
+            _.forEach(spaceRoles, function (selected, roleKey) {
+              // Has there been a change in the space role?
+              var oldRoleSelected = _.get(oldOrgRoles, 'spaces.' + spaceGuid + '.' + roleKey) || false;
+              if (oldRoleSelected === selected) {
+                return;
+              }
+
+              // Track changes
+              changes.spaces[spaceGuid] = true;
+
+              if (selected) {
+                // Assign role
+                updatePromises.push(rolesToFunctions.space.add[roleKey](clusterGuid, spaceGuid, userGuid));
+              } else {
+                // Remove role
+                updatePromises.push(rolesToFunctions.space.remove[roleKey](clusterGuid, spaceGuid, userGuid));
+              }
+
+            });
+          });
+          return $q.all(updatePromises);
+        })
+        .then(function () {
+          var cachePromises = [];
+          // Refresh org cache
+          if (changes.organization) {
+            var org = _.get(organizationModel, organizationModel.fetchOrganizationPath(clusterGuid, orgGuid));
+            cachePromises.push(organizationModel.getOrganizationDetails(clusterGuid, org.details.org));
           }
 
-        });
-      });
-
-      return $q.all(updatePromises).then(function () {
-        var cachePromises = [];
-        // Refresh org cache
-        if (changes.organization) {
-          var org = _.get(organizationModel, organizationModel.fetchOrganizationPath(clusterGuid, orgGuid));
-          cachePromises.push(organizationModel.getOrganizationDetails(clusterGuid, org.details.org));
-        }
-
-        // Refresh space caches
-        if (changes.spaces && changes.spaces.length > 0) {
-          _.forEach(changes.spaces, function (spaceGuid) {
+          // Refresh space caches
+          _.forEach(changes.spaces, function (changed, spaceGuid) {
             cachePromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, spaceGuid));
           });
-        }
-        return $q.all(cachePromises);
-      });
+
+          return $q.all(cachePromises);
+        });
 
     }
 

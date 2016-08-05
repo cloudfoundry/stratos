@@ -104,7 +104,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          return manageUsers.show(that.guid, [aUser], true).result;
+          return manageUsers.show(that.guid, false, [aUser], true).result;
         }
       },
       {
@@ -128,6 +128,10 @@
       } else {
         that.selectedUsers = {};
       }
+    };
+
+    this.canRemoveOrgRole = function (user, orgRole) {
+      return rolesService.canRemoveOrgRole(orgRole.role, orgRole.org.roles[user.metadata.guid]);
     };
 
     this.removeOrgRole = function (user, orgRole) {
@@ -154,7 +158,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, guidsToUsers(that.selectedUsers), true);
+      return manageUsers.show(that.guid, false, guidsToUsers(that.selectedUsers), true);
     };
 
     this.removeAllRoles = function () {
