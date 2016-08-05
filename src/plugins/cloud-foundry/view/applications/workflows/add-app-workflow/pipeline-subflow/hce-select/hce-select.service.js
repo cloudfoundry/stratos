@@ -12,7 +12,7 @@
 
   /**
    * @function hceSelectFactory
-   * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+   * @memberof cloud-foundry.view.applications.application.delivery-pipeline
    * @description HCE Selection modal dialog factory
    * @param {helion.framework.widgets.detailView} detailView - the detail view service
    * @constructor
@@ -22,7 +22,7 @@
 
       /**
        * @function show
-       * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+       * @memberof cloud-foundry.view.applications.application.delivery-pipeline
        * @description Show HCE Selection modal dialog
        * @param {Array} hceCnsis - List of HCE CNSIs
        * @param {Object} selectedHceCnsi - Default selected HCE CNSI
@@ -53,7 +53,7 @@
 
   /**
    * @function HceSelectController
-   * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+   * @memberof cloud-foundry.view.applications.application.delivery-pipeline
    * @description Controller for the HCE Selection dialog
    * @param {Object} $uibModalInstance - the Angular UI Bootstrap $uibModalInstance service
    * @param {Object} context - the uibModal context
@@ -73,7 +73,7 @@
 
     /**
      * @function getEndpoint
-     * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+     * @memberof cloud-foundry.view.applications.application.delivery-pipeline
      * @description get URL of selected HCE instance
      * @param {object} hceCnsi HCE CNSI information
      * @returns {string}
@@ -84,7 +84,7 @@
 
     /**
      * @function getName
-     * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+     * @memberof cloud-foundry.view.applications.application.delivery-pipeline
      * @description get name of selected HCE instance
      * @param {object} hceCnsi HCE CNSI information
      * @returns {string}
@@ -95,7 +95,7 @@
 
     /**
      * @function selectHce
-     * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+     * @memberof cloud-foundry.view.applications.application.delivery-pipeline
      * @description Closes the dialog and resolve the `result`
      * promise with the selected HCE CNSI
      */
@@ -105,7 +105,7 @@
 
     /**
      * @function cancel
-     * @memberOf cloud-foundry.view.applications.application.delivery-pipeline
+     * @memberof cloud-foundry.view.applications.application.delivery-pipeline
      * @description dimiss dialog
      */
     cancel: function () {
