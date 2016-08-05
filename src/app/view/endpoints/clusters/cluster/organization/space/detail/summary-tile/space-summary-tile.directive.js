@@ -36,6 +36,7 @@
    * @param {object} $state - the angular $state service
    * @param {object} $scope - the angular $scope service
    * @param {object} $stateParams - the angular $stateParams service
+   * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.model.utilsService} utils - the utils service
    * @param {object} confirmDialog - our confirmation dialog service

@@ -285,7 +285,7 @@
       var userGuid = that.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
       // Memory and instance usages are never returned inline but we are able to derive from inline apps
-      var usedMemP, instancesP;
+      var usedMemP, instancesP, quotaP, rolesP, allSpacesP, allUsersRoles;
       if (org.entity.spaces) {
         if (org.entity.spaces.length === 0) {
           usedMemP = that.$q.resolve(0);
@@ -318,7 +318,6 @@
       }
 
       // The quota may be returned inline
-      var quotaP, rolesP, allSpacesP, allUsersRoles;
       if (org.entity.quota_definition) {
         quotaP = that.$q.resolve(org.entity.quota_definition);
       } else {
