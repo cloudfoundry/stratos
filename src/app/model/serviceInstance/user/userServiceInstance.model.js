@@ -91,44 +91,41 @@
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
       var cfInfoApi = this.apiManager.retrieve('cloud-foundry.api.Info');
       var hceInfoApi = this.apiManager.retrieve('cloud-foundry.api.HceInfoApi');
-      var deferred = this.$q.defer();
 
-      serviceInstanceApi.list()
-        .then(function (response) {
-          var items = response.data;
+      return serviceInstanceApi.list().then(function (response) {
+        var items = response.data;
 
-          that.serviceInstances = {};
-          that.numValid = 0;
+        that.serviceInstances = {};
+        that.numValid = 0;
 
-          var hcfGuids = _.map(_.filter(items, {cnsi_type: 'hcf'}) || [], 'guid') || [];
-          var hcfCfg = { headers: { 'x-cnap-cnsi-list': hcfGuids.join(',') } };
-          var hceGuids = _.map(_.filter(items, {cnsi_type: 'hce'}) || [], 'guid') || [];
+        var hcfGuids = _.map(_.filter(items, {cnsi_type: 'hcf'}) || [], 'guid') || [];
+        var hcfCfg = {headers: {'x-cnap-cnsi-list': hcfGuids.join(',')}};
+        var hceGuids = _.map(_.filter(items, {cnsi_type: 'hce'}) || [], 'guid') || [];
 
-          var tasks = [];
-          // call /v2/info to refresh tokens, then list
-          if (hcfGuids.length > 0) {
-            tasks.push(cfInfoApi.GetInfo({}, hcfCfg));
+        var tasks = [];
+        // call /v2/info to refresh tokens, then list
+        if (hcfGuids.length > 0) {
+          tasks.push(cfInfoApi.GetInfo({}, hcfCfg));
+        }
+        if (hceGuids.length > 0) {
+          tasks.push(hceInfoApi.infos(hceGuids.join(',')));
+        }
+
+        if (tasks.length === 0) {
+          if (items.length > 0) {
+            that.onList(response);
           }
-          if (hceGuids.length > 0) {
-            tasks.push(hceInfoApi.info(hceGuids.join(',')));
-          }
-
-          if (tasks.length === 0) {
-            if (items.length > 0) {
-              that.onList(response);
-            }
-            return deferred.resolve(that.serviceInstances);
-          } else {
-            that.$q.all(tasks).then(function () {
-              serviceInstanceApi.list().then(function (listResponse) {
-                that.onList(listResponse);
-                deferred.resolve(that.serviceInstances);
-              });
+          return that.serviceInstances;
+        } else {
+          return that.$q.all(tasks).then(function () {
+            return serviceInstanceApi.list().then(function (listResponse) {
+              that.onList(listResponse);
+              return that.serviceInstances;
             });
-          }
-        });
+          });
+        }
+      });
 
-      return deferred.promise;
     },
 
     /**

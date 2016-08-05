@@ -50,7 +50,11 @@
     function init() {
 
       // Cache all organizations associated with this cluster
-      var orgPromise = organizationModel.listAllOrganizations(that.guid, {}).then(function (orgs) {
+      var inDepthParams = {
+        'inline-relations-depth': 2,
+        'exclude-relations': 'domains,private_domains,space_quota_definitions'
+      };
+      var orgPromise = organizationModel.listAllOrganizations(that.guid, inDepthParams).then(function (orgs) {
         var allDetailsP = [];
         _.forEach(orgs, function (org) {
           var orgDetailsP = organizationModel.getOrganizationDetails(that.guid, org).catch(function () {

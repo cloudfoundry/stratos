@@ -185,7 +185,7 @@
       var that = this;
       //
       var params = {
-        'inline-relations-depth': 2,
+        'inline-relations-depth': 1,
         'include-relations': 'domain,apps'
       };
       _.apply(params, options);
@@ -322,7 +322,17 @@
       var spaceQuotaApi = that.apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
 
       // var usedMemP = orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig);
-      var instancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid);
+      var serviceInstancesP, appInstancesP = this.$q.resolve();
+      if (space.entity.service_instances) {
+        var spaces = space.entity.service_instances;
+        serviceInstancesP = this.$q.resolve(spaces);
+        that.onListAllServiceInstancesForSpace(cnsiGuid, spaceGuid, spaces);
+      } else {
+        serviceInstancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid).then(function (val) {
+          return val;
+        });
+      }
+
       var quotaP = spaceQuotaGuid
         ? spaceQuotaApi.RetrieveSpaceQuotaDefinition(spaceQuotaGuid, params, httpConfig)
         : this.$q.when();
@@ -342,18 +352,26 @@
 
       var appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid);
       var servicesP = this.listAllServicesForSpace(cnsiGuid, spaceGuid);
-      var routesCountP = this.listAllRoutesForSpace(cnsiGuid, spaceGuid);
+
+      var routesP = this.listAllRoutesForSpace(cnsiGuid, spaceGuid);
 
       return this.$q.all({
         // memory: usedMemP,
         quota: quotaP,
-        instances: instancesP,
+        serviceInstances: serviceInstancesP,
         apps: appP,
         roles: spaceRolesP,
         services: servicesP,
-        routes: routesCountP
+        routes: routesP
       }).then(function (vals) {
         var details = {};
+
+        var appInstances = 0;
+        _.forEach(vals.apps, function (app) {
+          if (app.entity.state === 'STARTED') {
+            appInstances += parseInt(app.entity.instances, 10);
+          }
+        });
 
         details.guid = spaceGuid;
 
@@ -366,17 +384,19 @@
         // details.memUsed = vals.memory.data.memory_usage_in_mb;
         // details.memQuota = vals.quota.data.entity.memory_limit;
 
-        // Set total apps count
+        // Set total apps and app instances count
         details.totalApps = (vals.apps || []).length;
+        details.totalAppInstances = appInstances;
+        details.appInstancesQuota = _.get(vals.quota, 'app_instance_limit', -1);
 
         details.totalRoles = (vals.roles || []).length;
         details.roles = vals.roles;
 
         details.totalServices = (vals.services || []).length;
-
         details.totalRoutes = (vals.routes || []).length;
 
-        details.totalInstances = (vals.instances || []).length;
+        details.totalServiceInstances = (vals.serviceInstances || []).length;
+        details.serviceInstancesQuota = _.get(vals.quota, 'total_services', -1);
 
         _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details', details);
 

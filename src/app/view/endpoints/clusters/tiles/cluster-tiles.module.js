@@ -69,7 +69,6 @@
       this.updateState(true, false);
       this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
         .then(function () {
-          that.updateState(false, false);
           that.createClusterList();
         })
         .catch(function () {

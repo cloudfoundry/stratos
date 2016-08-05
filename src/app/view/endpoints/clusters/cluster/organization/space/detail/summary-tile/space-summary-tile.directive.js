@@ -23,6 +23,7 @@
     '$state',
     '$scope',
     '$stateParams',
+    '$q',
     'app.model.modelManager',
     'app.utils.utilsService',
     'helion.framework.widgets.dialog.confirm',
@@ -41,7 +42,7 @@
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function SpaceSummaryTileController($state, $scope, $stateParams,
+  function SpaceSummaryTileController($state, $scope, $stateParams, $q,
                                       modelManager, utils, confirmDialog, asyncTaskDialog) {
     var that = this;
 
@@ -139,6 +140,8 @@
       }
       that.actions[0].disabled = !isAdmin;
       that.actions[1].disabled = !canDelete;
+
+      return $q.resolve();
     }
 
     // Ensure the parent state is fully initialised before we start our own init

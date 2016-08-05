@@ -31,13 +31,14 @@
     '$stateParams',
     '$state',
     '$log',
+    '$q',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.event.eventService'
   ];
 
-  function OrganizationUsersController(modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService, eventService) {
+  function OrganizationUsersController(modelManager, $stateParams, $state, $log, $q, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -84,6 +85,7 @@
         });
 
       });
+      return $q.resolve();
     }
 
     function init() {
