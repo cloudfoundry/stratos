@@ -47,7 +47,6 @@
    * @property {app.event.eventService} eventService - the Event management service
    * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {object} appModel - the Cloud Foundry applications model
-   * @property {object} cnsiModel - the CNSI model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model
    * @property {object} routeModel - the Cloud Foundry route model
@@ -69,7 +68,6 @@
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
@@ -568,13 +566,12 @@
 
     getHceInstances: function () {
       var that = this;
-      this.cnsiModel.list().then(function () {
+      this.serviceInstanceModel.list().then(function () {
         that.options.hceCnsis.length = 0;
-        var hceCnsis = _.filter(that.cnsiModel.serviceInstances, { cnsi_type: 'hce' }) || [];
+        var hceCnsis = _.filter(that.serviceInstanceModel.serviceInstances, { cnsi_type: 'hce' }) || [];
         if (hceCnsis.length > 0) {
-          var hceOptions = _.map(hceCnsis, function (o) { return { label: o.api_endpoint.Host, value: o }; });
-          [].push.apply(that.options.hceCnsis, hceOptions);
-          that.userInput.hceCnsi = hceOptions[0].value;
+          [].push.apply(that.options.hceCnsis, hceCnsis);
+          that.userInput.hceCnsi = hceCnsis[0];
         } else {
           that.redefineWorkflowWithoutHce();
         }
