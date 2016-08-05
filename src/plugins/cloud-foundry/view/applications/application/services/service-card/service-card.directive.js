@@ -175,6 +175,7 @@
         return this.confirmDialog({
           title: gettext('Detach Service'),
           description: gettext('Are you sure you want to detach ') + this.service.entity.label + '?',
+          errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
           buttonText: {
             yes: gettext('Detach'),
             no: gettext('Cancel')
@@ -182,7 +183,7 @@
           callback: function () {
             return that.bindingModel.deleteServiceBinding(that.cnsiGuid, that.serviceBindings[0].metadata.guid)
               .then(function () {
-                that.appModel.getAppSummary(that.cnsiGuid, that.app.summary.guid);
+                return that.appModel.getAppSummary(that.cnsiGuid, that.app.summary.guid);
               });
           }
         });

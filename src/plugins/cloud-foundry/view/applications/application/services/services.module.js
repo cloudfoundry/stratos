@@ -60,6 +60,7 @@
         extra: undefined
       }
     };
+    this.ready = false;
 
     $scope.$watch(function () {
       return that.appModel.application.summary;
@@ -100,6 +101,9 @@
             categories = _.sortBy(categories, 'lower');
             that.serviceCategories.length = 2;
             [].push.apply(that.serviceCategories, categories);
+          })
+          .finally(function () {
+            that.ready = true;
           });
       }
     });

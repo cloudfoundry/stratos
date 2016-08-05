@@ -1,8 +1,15 @@
 <h4 class="step-title" translate>Select services</h4>
 
-<p ng-if="wizardCtrl.options.services.length === 0" translate>
-  No services were found. Please contact your administrator.
-</p>
+<div class="message-box message-box-no-bg"
+  ng-if="wizardCtrl.options.servicesReady && wizardCtrl.options.services.length === 0">
+  <p>
+    <div class="helion-icon helion-icon-2x helion-icon-Service_business"></div>
+    <h4 translate>There are no services available for this cluster. Please contact your Administrator to add services so you can bind them to your applications.</h4>
+  </p>
+</div>
+<div class="step-spinner text-center" ng-if="!wizardCtrl.options.servicesReady">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
 
 <form class="services-filter-form" ng-if="wizardCtrl.options.services.length">
   <div class="form-group">
@@ -16,7 +23,7 @@
   </div>
 </form>
 
-<ul class="media-list hpe-add-option-list">
+<ul class="media-list hpe-add-option-list" ng-if="wizardCtrl.options.services.length">
   <li class="media service-panel"
     ng-repeat="service in wizardCtrl.options.services | filter:wizardCtrl.options.userInput.search:true track by service.metadata.guid">
     <service-card service="service" app="wizardCtrl.options.userInput.application" add-only="true"

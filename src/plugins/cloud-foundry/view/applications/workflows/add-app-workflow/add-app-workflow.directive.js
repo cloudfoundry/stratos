@@ -201,7 +201,8 @@
                     that.spaceModel.listAllServicesForSpace(
                       that.userInput.serviceInstance.guid,
                       that.userInput.space.metadata.guid
-                    ).then(function (services) {
+                    )
+                    .then(function (services) {
                       that.options.services.length = 0;
                       [].push.apply(that.options.services, services);
 
@@ -222,6 +223,9 @@
                       categories = _.sortBy(categories, 'lower');
                       that.options.serviceCategories.length = 1;
                       [].push.apply(that.options.serviceCategories, categories);
+                    })
+                    .finally(function () {
+                      that.options.servicesReady = true;
                     });
                   });
                 });
@@ -391,6 +395,7 @@
           serviceCategories: [
             { label: gettext('All Services'), value: 'all' }
           ],
+          servicesReady: false,
           organizations: [],
           spaces: [],
           apps: [],

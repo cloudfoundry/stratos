@@ -128,6 +128,7 @@
       return this.confirmDialog({
         title: gettext('Detach Service'),
         description: gettext('Are you sure you want to detach ') + instance.name + '?',
+        errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
         buttonText: {
           yes: gettext('Detach'),
           no: gettext('Cancel')
@@ -137,11 +138,12 @@
             .then(function (response) {
               if (response.data[that.data.cnsiGuid] === null) {
                 _.pull(that.serviceInstances, instance);
-                that.appModel.getAppSummary(that.data.cnsiGuid, that.data.app.summary.guid);
 
                 if (that.serviceInstances.length === 0) {
                   that.modal.dismiss('close');
                 }
+
+                return that.appModel.getAppSummary(that.data.cnsiGuid, that.data.app.summary.guid);
               }
             });
         }
