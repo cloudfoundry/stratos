@@ -37,7 +37,9 @@
 
       mockBindingsApi = mock.cloudFoundryAPI.ServiceBindings;
       var ListAllServiceBindings = mockBindingsApi.ListAllServiceBindings();
-      var params = '?q=service_instance_guid+IN+01430cca-2592-4396-ac79-b1405a488b3e';
+      var params = '?include-relations=service_instance' +
+        '&inline-relations-depth=1' +
+        '&q=service_instance_guid+IN+01430cca-2592-4396-ac79-b1405a488b3e';
       $httpBackend.whenGET(ListAllServiceBindings.url + params)
         .respond(200, ListAllServiceBindings.response['200'].body);
     }));
@@ -131,17 +133,24 @@
       });
 
       describe('detach', function () {
-        it('should show detach confirmation dialog on click', function () {
-          spyOn(serviceCardCtrl, 'confirmDialog');
+        it('should call unbindServiceFromApp', function () {
+          spyOn(serviceCardCtrl.serviceInstanceService, 'unbindServiceFromApp');
           serviceCardCtrl.detach();
-          expect(serviceCardCtrl.confirmDialog).toHaveBeenCalled();
+          expect(serviceCardCtrl.serviceInstanceService.unbindServiceFromApp)
+            .toHaveBeenCalled();
+          var args = serviceCardCtrl.serviceInstanceService.unbindServiceFromApp.calls.argsFor(0);
+          expect(args[0]).toBe('guid');
+          expect(args[1]).toBe('6e23689c-2844-4ebf-ab69-e52ab3439f6b');
+          expect(args[2]).toBe('571b283b-97f9-41e3-abc7-81792ee34e40');
+          expect(args[3]).toBe('instance_123');
         });
 
-        it('should not show detach confirmation dialog on click if no services attached', function () {
-          spyOn(serviceCardCtrl, 'confirmDialog');
+        it('should not call unbindServiceFromApp if no services attached', function () {
+          spyOn(serviceCardCtrl.serviceInstanceService, 'unbindServiceFromApp');
           serviceCardCtrl.serviceBindings.length = 0;
           serviceCardCtrl.detach();
-          expect(serviceCardCtrl.confirmDialog).not.toHaveBeenCalled();
+          expect(serviceCardCtrl.serviceInstanceService.unbindServiceFromApp)
+            .not.toHaveBeenCalled();
         });
       });
 

@@ -33,7 +33,7 @@
     '$scope',
     'app.model.modelManager',
     'app.event.eventService',
-    'helion.framework.widgets.dialog.confirm'
+    'cloud-foundry.view.applications.services.serviceInstanceService'
   ];
 
   /**
@@ -44,21 +44,19 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.event.eventService} eventService - the event management service
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog
+   * @param {object} serviceInstanceService - the service instance service
    * @property {app.event.eventService} eventService - the event management service
-   * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog
-   * @property {cloud-foundry.model.application} appModel - the Cloud Foundry application model
+   * @property {object} serviceInstanceService - the service instance service
    * @property {cloud-foundry.model.service-binding} bindingModel - the Cloud Foundry service binding model
    * @property {boolean} allowAddOnly - allow adding services only (no manage or detach)
    * @property {array} serviceBindings - the service instances bound to specified app
    * @property {number} numAttached - the number of service instances bound to specified app
    * @property {array} actions - the actions that can be performed from this service card
    */
-  function ServiceCardController($scope, modelManager, eventService, confirmDialog) {
+  function ServiceCardController($scope, modelManager, eventService, serviceInstanceService) {
     var that = this;
     this.eventService = eventService;
-    this.confirmDialog = confirmDialog;
-    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
+    this.serviceInstanceService = serviceInstanceService;
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.allowAddOnly = angular.isDefined(this.addOnly) ? this.addOnly : false;
     this.serviceBindings = [];
@@ -137,7 +135,8 @@
       var that = this;
 
       var q = 'service_instance_guid IN ' + serviceInstanceGuids.join(',');
-      return this.bindingModel.listAllServiceBindings(this.cnsiGuid, { q: q })
+      var options = { q: q, 'inline-relations-depth': 1, 'include-relations': 'service_instance' };
+      return this.bindingModel.listAllServiceBindings(this.cnsiGuid, options)
         .then(function (bindings) {
           var appGuid = that.app.summary.guid;
           var appBindings = _.filter(bindings, function (o) { return o.entity.app_guid === appGuid; });
@@ -170,23 +169,14 @@
      * @returns {promise} A promise
      */
     detach: function () {
-      var that = this;
       if (this.serviceBindings.length === 1) {
-        return this.confirmDialog({
-          title: gettext('Detach Service'),
-          description: gettext('Are you sure you want to detach ') + this.service.entity.label + '?',
-          errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
-          buttonText: {
-            yes: gettext('Detach'),
-            no: gettext('Cancel')
-          },
-          callback: function () {
-            return that.bindingModel.deleteServiceBinding(that.cnsiGuid, that.serviceBindings[0].metadata.guid)
-              .then(function () {
-                return that.appModel.getAppSummary(that.cnsiGuid, that.app.summary.guid);
-              });
-          }
-        });
+        var serviceBinding = this.serviceBindings[0];
+        return this.serviceInstanceService.unbindServiceFromApp(
+          this.cnsiGuid,
+          this.app.summary.guid,
+          serviceBinding.metadata.guid,
+          serviceBinding.entity.service_instance.entity.name
+        );
       }
     },
 

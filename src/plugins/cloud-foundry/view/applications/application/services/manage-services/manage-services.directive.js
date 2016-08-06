@@ -27,7 +27,7 @@
     'app.model.modelManager',
     'app.event.eventService',
     'helion.framework.widgets.detailView',
-    'helion.framework.widgets.dialog.confirm'
+    'cloud-foundry.view.applications.services.serviceInstanceService'
   ];
 
   /**
@@ -39,23 +39,21 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.event.eventService} eventService - the event management service
    * @param {helion.framework.widgets.detailView} detailView - the detail view service
-   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog
+   * @param {object} serviceInstanceService - the service instance service
    * @property {object} $q - the Angular $q service
    * @property {helion.framework.widgets.detailView} detailView - the detail view service
-   * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog
+   * @property {object} serviceInstanceService - the service instance service
    * @property {cloud-foundry.model.application} appModel - the CF application model
-   * @property {cloud-foundry.model.service-binding} bindingModel - the CF service binding model
    * @property {object} modal - the detail view modal instance
    * @property {array} serviceInstances - service instances associated with this service
    * @property {object} serviceBindings - service bindings associated with this app
    */
-  function ManageServicesController($q, $scope, modelManager, eventService, detailView, confirmDialog) {
+  function ManageServicesController($q, $scope, modelManager, eventService, detailView, serviceInstanceService) {
     var that = this;
     this.$q = $q;
     this.detailView = detailView;
-    this.confirmDialog = confirmDialog;
+    this.serviceInstanceService = serviceInstanceService;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.modal = null;
 
     this.serviceInstances = [];
@@ -125,29 +123,18 @@
     detach: function (instance) {
       var that = this;
       var binding = this.serviceBindings[instance.guid];
-      return this.confirmDialog({
-        title: gettext('Detach Service'),
-        description: gettext('Are you sure you want to detach ') + instance.name + '?',
-        errorMessage: gettext('There was a problem detaching this service. Please try again. If this error persists, please contact the Administrator.'),
-        buttonText: {
-          yes: gettext('Detach'),
-          no: gettext('Cancel')
-        },
-        callback: function () {
-          return that.bindingModel.deleteServiceBinding(that.data.cnsiGuid, binding.metadata.guid)
-            .then(function (response) {
-              if (response.data[that.data.cnsiGuid] === null) {
-                _.pull(that.serviceInstances, instance);
-
-                if (that.serviceInstances.length === 0) {
-                  that.modal.dismiss('close');
-                }
-
-                return that.appModel.getAppSummary(that.data.cnsiGuid, that.data.app.summary.guid);
-              }
-            });
+      return this.serviceInstanceService.unbindServiceFromApp(
+        this.data.cnsiGuid,
+        this.data.app.summary.guid,
+        binding.metadata.guid,
+        instance.name,
+        function closeOnEmpty() {
+          _.pull(that.serviceInstances, instance);
+          if (that.serviceInstances.length === 0) {
+            that.modal.dismiss('close');
+          }
         }
-      });
+      );
     },
 
     /**
@@ -158,23 +145,12 @@
      * @returns {promise} A promise object
      */
     viewEnvVariables: function (instance) {
-      var that = this;
-      var serviceLabel = this.data.service.entity.label;
-      return this.appModel.getEnv(this.data.cnsiGuid, this.data.app.summary.guid)
-        .then(function (variables) {
-          var vcap = variables.system_env_json.VCAP_SERVICES;
-          if (angular.isDefined(vcap) && vcap[serviceLabel]) {
-            var instanceVars = _.find(vcap[serviceLabel], { name: instance.name });
-            var config = {
-              templateUrl: 'plugins/cloud-foundry/view/applications/application/services/manage-services/env-variables.html',
-              title: that.data.app.summary.name + ': ' + gettext('Environmental Variables')
-            };
-            var context = {
-              variables: instanceVars
-            };
-            that.detailView(config, context);
-          }
-        });
+      return this.serviceInstanceService.viewEnvVariables(
+        this.data.cnsiGuid,
+        this.data.app.summary,
+        this.data.service.entity.label,
+        instance
+      );
     },
 
      /**
