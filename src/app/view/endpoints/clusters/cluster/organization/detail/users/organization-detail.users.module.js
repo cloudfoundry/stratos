@@ -28,17 +28,17 @@
 
   OrganizationUsersController.$inject = [
     '$scope',
-    'app.model.modelManager',
     '$stateParams',
     '$state',
     '$log',
+    'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.event.eventService'
   ];
 
-  function OrganizationUsersController($scope, modelManager, $stateParams, $state, $log, utils, manageUsers,
+  function OrganizationUsersController($scope, $stateParams, $state, $log, modelManager, utils, manageUsers,
                                        rolesService, eventService) {
     var that = this;
 
