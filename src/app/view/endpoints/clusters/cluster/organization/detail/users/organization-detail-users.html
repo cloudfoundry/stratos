@@ -10,11 +10,11 @@
               translate>Manage Roles</button>
       <button class="btn btn-default"
               ng-if="organizationUsersController.selectedUsersCount() > 1"
-              ng-disabled="true || organizationUsersController.rolesService.changingRoles"
+              ng-disabled="organizationUsersController.rolesService.changingRoles"
               ng-click="organizationUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
-              ng-disabled="organizationUsersController.selectedUsersCount() > 1 || organizationUsersController.rolesService.changingRoles || organizationUsersController.selectedUsersCount() < 1"
+              ng-disabled="organizationUsersController.rolesService.changingRoles || organizationUsersController.selectedUsersCount() < 1"
               ng-click="organizationUsersController.removeFromOrganization()"
               translate>Remove From Organization</button>
     </div>

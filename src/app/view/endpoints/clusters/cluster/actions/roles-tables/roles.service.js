@@ -329,7 +329,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.clearOrg
+     * @name app.view.endpoints.clusters.cluster.rolesService.clearOrgs
      * @description clearOrgs Clear all organisation and their space roles from the selection provided
      * @param {object} orgs - object organization to clear. Format as below.
      *  [orgGuid]organization[roleKey] = truthy
@@ -343,7 +343,7 @@
     };
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.updateUsers
+     * @name app.view.endpoints.clusters.cluster.rolesService.orgContainsRoles
      * @description Determine if the organisation provided and it's spaces has any roles selected
      * @param {object} org - organization to clear. Format as below.
      *  organization[roleKey] = truthy
@@ -433,7 +433,7 @@
     }
 
     /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.updateUsers
+     * @name app.view.endpoints.clusters.cluster.rolesService.updateUsersOrgsAndSpaces
      * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
      * the affected organizations and spaces.
      * IMPORTANT!!! This is the conduit for changes that all external calls should flow through. It gates the process
@@ -529,7 +529,7 @@
         _.forEach(roles, function (selected, roleKey) {
           // Has there been a change in the org role?
           var oldRoleSelected = _.get(oldOrgRoles, 'organization.' + roleKey) || false;
-          if (oldRoleSelected === selected) {
+          if (!!oldRoleSelected === !!selected) {
             return;
           }
 
@@ -556,7 +556,7 @@
       var oldOrgUser = _.get(oldOrgRoles, 'organization.org_user') || false;
 
       // Has it changed?
-      if (oldOrgUser !== newOrgUser) {
+      if (!!oldOrgUser !== !!newOrgUser) {
         delete orgRoles.org_user;
 
         if (newOrgUser) {
