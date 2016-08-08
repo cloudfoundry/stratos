@@ -18,7 +18,7 @@
       ncyBreadcrumb: {
         label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
         parent: function () {
-          return 'endpoint.clusters.cluster.organization.detail.spaces';
+          return 'endpoint.clusters.cluster.organization.detail.users';
         }
       }
     });

@@ -20,7 +20,7 @@
         'clusterOrgController.organizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
         '"..." }}',
         parent: function () {
-          return 'endpoint.clusters.cluster.detail.organizations';
+          return 'endpoint.clusters.cluster.detail.users';
         }
       }
     });
