@@ -26,17 +26,17 @@
 
   SpaceUsersController.$inject = [
     '$scope',
-    'app.model.modelManager',
     '$stateParams',
     '$state',
     '$log',
+    'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.event.eventService'
   ];
 
-  function SpaceUsersController($scope, modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService, eventService) {
+  function SpaceUsersController($scope, $stateParams, $state, $log, modelManager, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
