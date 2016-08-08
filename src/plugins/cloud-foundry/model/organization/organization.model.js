@@ -335,7 +335,6 @@
           return res.data.resources;
         });
 
-      routesCountP = false;
       routesCountP = routesCountP || allSpacesP.then(function (spaces) {
         var promises = [];
         var spaceModel = that.modelManager.retrieve('cloud-foundry.model.space');
