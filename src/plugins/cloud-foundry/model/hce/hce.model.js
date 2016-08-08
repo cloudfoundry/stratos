@@ -79,13 +79,13 @@
         title: gettext('Slack'),
         description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack room.'),
         endpointLabel: gettext('URL with optional Channel or User name'),
-        img: 'slack_logo.png'
+        img: 'slack.png'
       },
       bitbucketpullrequest: {
         title: gettext('BitBucket'),
         description: gettext('Send pipeline events (build, test, deploy) as statuses to BitBucket'),
         endpointLabel: gettext('Target URL'),
-        img: 'bitbucket_logo.png'
+        img: 'bitbucket.png'
       }
     };
 

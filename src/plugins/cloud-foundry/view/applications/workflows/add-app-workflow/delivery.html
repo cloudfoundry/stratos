@@ -13,9 +13,16 @@
       <i class="helion-icon helion-icon-Deployment helion-icon-2dot5x"></i>
     </div>
     <div class="media-body">
-      <h4 class="media-heading" translate>Delivery pipeline</h4>
-      <p translate>Create a delivery pipeline that will automate build, test and deploy cycles for every commit.</p>
+      <div class="col-md-6">
+        <h4 class="media-heading" translate>Delivery pipeline</h4>
+        <p translate>Create a delivery pipeline that will automate build, test and deploy cycles for every commit.</p>
+      </div>
+      <code-engine-info class="col-md-4 pull-right"
+                        hce="wizardCtrl.options.userInput.hceCnsi"
+                        hce-cnsis="wizardCtrl.options.hceCnsis">
+      </code-engine-info>
     </div>
+
   </li>
 
   <li class="media">
@@ -35,16 +42,3 @@
     </div>
   </li>
 </ul>
-
-<div ng-if="wizardCtrl.options.subflow === 'pipeline'">
-  <div class="form-group">
-    <label class="control-label" translate>HCE Cluster</label>
-    <select-input
-      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-      ng-model="wizardCtrl.options.userInput.hceCnsi"
-      input-options="wizardCtrl.options.hceCnsis"
-      placeholder="{{'Select HCE Cluster' | translate}}"
-      tabindex="0" required>
-    </select-input>
-  </div>
-</div>

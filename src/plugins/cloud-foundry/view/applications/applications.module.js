@@ -4,7 +4,8 @@
   angular
     .module('cloud-foundry.view.applications', [
       'cloud-foundry.view.applications.application',
-      'cloud-foundry.view.applications.list'
+      'cloud-foundry.view.applications.list',
+      'cloud-foundry.view.applications.workflows'
     ])
     .config(registerRoute);
 

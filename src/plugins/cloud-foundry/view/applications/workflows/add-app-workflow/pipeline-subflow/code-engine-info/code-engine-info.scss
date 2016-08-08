@@ -1,0 +1,11 @@
+@import "../hce-select/hce-select";
+.ce-data {
+  .ce-data-row {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: $hpe-unit-space / 2;
+  }
+  .ce-data-btn {
+    font-weight: $hpe-font-weight-semibold;
+  }
+}

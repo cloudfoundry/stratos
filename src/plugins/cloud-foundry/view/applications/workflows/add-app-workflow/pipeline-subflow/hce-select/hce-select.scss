@@ -1,0 +1,33 @@
+.hce-select {
+
+  position: relative;
+  margin-top: $hpe-unit-space *2;
+  margin-right: $hpe-unit-space * 4;
+  margin-left: $hpe-unit-space * 4;
+  height: 100%;
+
+  h4 {
+    font-weight: $hpe-font-weight-semibold;
+  }
+
+  .table-content{
+    padding-top: $hpe-unit-space;
+  }
+
+  .table {
+    border: 1px solid $gray-light;
+
+    tr.selected{
+      background-color: $gray-lighter;
+    }
+  }
+
+  .modal-footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    padding-bottom: $hpe-unit-space *4;
+  }
+
+}
