@@ -258,16 +258,14 @@
       var data = {
         // NOTE: Currently `stormrunner` is the only pos-deploy action supported
         task_type: "stormrunner",
-        task_label: actionName,
+        task_label: taskLabel,
         project_id: projectId,
         credential_id: credentialId,
         metadata: angular.toJson(metadata)
       };
 
-      var params = {project_id: projectId};
-
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
-        .addPipelineTask(guid, data, params, this.hceProxyPassthroughConfig);
+        .addPipelineTask(guid, data, {}, this.hceProxyPassthroughConfig);
     },
 
     /**

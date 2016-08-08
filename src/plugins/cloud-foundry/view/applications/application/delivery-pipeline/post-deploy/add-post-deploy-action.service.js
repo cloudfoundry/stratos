@@ -49,20 +49,20 @@
 
           return that.hceSecurityApi.storeCredential(cnsiGuid, credentialData, {}, that.hceModel.hceProxyPassthroughConfig)
             .then(function (response) {
-              if (response.credential_id) {
-                return response.credential_id;
+              if (response.data.credential_id) {
+                return response.data.credential_id;
               }
               throw new Error('Request to create credentials failed! Response was: ' + angular.toJson(response));
             })
             .then(function (credentialId) {
               // Create Storm runner
               var metadata = {
-                tenantId: that.context.data.tenantId,
-                testId: that.context.data.testId,
-                projectId: that.context.data.projectId
+                tenantId: data.tenantId,
+                testId: data.testId,
+                projectId: data.projectId
               };
 
-              var actionName = that.context.data.actionName;
+              var actionName = data.actionName;
               return that.hceModel.addPipelineTask(cnsiGuid, hceProjectId, actionName, credentialId, metadata);
             });
         };
