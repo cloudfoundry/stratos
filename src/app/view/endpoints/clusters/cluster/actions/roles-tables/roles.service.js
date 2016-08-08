@@ -374,20 +374,22 @@
     };
 
     this.updateOrgUser = function (orgRoles) {
-      var hasOtherRoles = false;
+      if (!orgRoles) {
+        return;
+      }
       for (var role in orgRoles) {
         if (!orgRoles.hasOwnProperty(role)) {
-          return;
+          continue;
         }
         if (role === 'org_user') {
           continue;
         }
         if (orgRoles[role]) {
-          hasOtherRoles = true;
-          break;
+          // Org has role other than org_user, so it MUST also have org_user
+          orgRoles.org_user = true;
+          return;
         }
       }
-      orgRoles.org_user = hasOtherRoles;
     };
 
     function clearRoleArray(roleObject) {
