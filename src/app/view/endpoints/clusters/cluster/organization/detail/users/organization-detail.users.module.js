@@ -58,14 +58,6 @@
     this.selectAllUsers = false;
     this.selectedUsers = {};
 
-    $scope.$watch(function () {
-      return rolesService.changingRoles;
-    }, function () {
-      var isAdmin = that.stackatoInfo.info.endpoints ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin : false;
-      that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
-      that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
-    });
-
     function refreshUsers() {
       that.userRoles = {};
 
@@ -99,6 +91,16 @@
     }
 
     function init() {
+      $scope.$watch(function () {
+        return rolesService.changingRoles;
+      }, function () {
+        var isAdmin = that.stackatoInfo.info.endpoints
+          ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin
+          : false;
+        that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
+        that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
+      });
+
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
         that.users = res;
 

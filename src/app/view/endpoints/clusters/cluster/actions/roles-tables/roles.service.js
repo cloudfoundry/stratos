@@ -550,7 +550,7 @@
       // Clone the new org roles. This will be the 'to do' list of changes that are executed after preReqPromise.
       var orgRoles = _.clone(newOrgRoles.organization);
       // Understand what the old org_user value was which will be compared to the new org_user value;
-      var newOrgUser = orgRoles.org_user || false;
+      var newOrgUser = _.get(orgRoles, 'org_user') || false;
       var oldOrgUser = _.get(oldOrgRoles, 'organization.org_user') || false;
 
       // Has it changed?
