@@ -121,32 +121,6 @@
       return $q.when();
     }
 
-    function createOriginalRoles(newRoles) {
-      // The role service updateUser function expects a collection of previously selected roles. The diff of which
-      // will be used to make assign/remove calls to HCF. For the assign users case we only want additive calls to
-      // be made. To do this the previously selected roles object needs to exactly match except contain false for any
-      // true role
-
-      var oldRoles = angular.fromJson(angular.toJson(newRoles));
-
-      function flopTrueToFalse(obj) {
-        _.forEach(obj, function (val, key) {
-          if (val === true) {
-            obj[key] = false;
-          }
-        });
-      }
-
-      _.forEach(oldRoles, function (oldRole) {
-        flopTrueToFalse(oldRole.organization);
-        _.forEach(oldRole.spaces, function (space) {
-          flopTrueToFalse(space);
-        });
-      });
-
-      return oldRoles;
-    }
-
     initialise();
 
     // Options for the wizard controller
@@ -265,7 +239,7 @@
           return user.metadata.guid;
         });
 
-        rolesService.updateUsers(context.clusterGuid, usersByGuid, createOriginalRoles(selectedOrgRoles), selectedOrgRoles)
+        rolesService.assignUsers(context.clusterGuid, usersByGuid, selectedOrgRoles)
           .then(function () {
             that.$uibModalInstance.close();
           })

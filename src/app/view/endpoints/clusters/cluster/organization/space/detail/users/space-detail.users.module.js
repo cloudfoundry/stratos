@@ -25,29 +25,32 @@
   }
 
   SpaceUsersController.$inject = [
-    'app.model.modelManager',
-    '$stateParams',
+    '$scope',
     '$state',
+    '$stateParams',
     '$log',
     '$q',
+    'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.event.eventService'
   ];
 
-  function SpaceUsersController(modelManager, $stateParams, $state, $log, $q, utils, manageUsers, rolesService, eventService) {
+  function SpaceUsersController($scope, $state, $stateParams, $log, $q,
+                                modelManager, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
     this.spaceGuid = $stateParams.space;
     this.users = [];
     this.removingSpace = {};
-    this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
+    this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.rolesService = rolesService;
 
     this.userRoles = {};
 
@@ -55,6 +58,15 @@
     this.selectedUsers = {};
 
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
+
+    $scope.$watch(function () {
+      return rolesService.changingRoles;
+    }, function () {
+      var isAdmin = that.stackatoInfo.info.endpoints ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin : false;
+      that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
+      that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
+      that.userActions[2].disabled = rolesService.changingRoles || !isAdmin;
+    });
 
     function refreshUsers() {
       that.userRoles = {};
@@ -81,9 +93,6 @@
 
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
-
-        that.userActions[0].disabled = !stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
-
         that.users = res;
 
         return refreshUsers();
@@ -104,14 +113,16 @@
         name: gettext('Remove from Organization'),
         disabled: true,
         execute: function (aUser) {
-          $log.info('TODO: implement remove from Organization', aUser);
+          return rolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
+            [aUser]);
         }
       },
       {
         name: gettext('Remove from Space'),
         disabled: true,
         execute: function (aUser) {
-          $log.info('TODO: implement remove from Space', aUser);
+          return rolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,
+            that.space.details.space.metadata.guid, [aUser]);
         }
       }
     ];
@@ -138,12 +149,35 @@
       }
       this.removingSpace[pillKey] = true;
       rolesService.removeSpaceRole(that.guid, space.entity.organization_guid, space.metadata.guid, user, spaceRole.role)
-        .catch(function () {
-          $log.error('Failed to remove role \'' + spaceRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
-        })
         .finally(function () {
           that.removingSpace[pillKey] = false;
         });
+    };
+
+    this.selectedUsersCount = function () {
+      return (_.invert(that.selectedUsers, true).true || []).length;
+    };
+
+    function guidsToUsers() {
+      var selectedUsersGuids = _.invert(that.selectedUsers, true).true;
+      return _.filter(that.users, function (user) {
+        return _.indexOf(selectedUsersGuids, user.metadata.guid) >= 0;
+      });
+    }
+
+    this.manageSelectedUsers = function () {
+      return manageUsers.show(that.guid, guidsToUsers(), true).result;
+    };
+
+    this.removeFromOrganization = function () {
+      var space = that.space.details.space;
+      return rolesService.removeFromOrganization(that.guid, space.entity.organization_guid, guidsToUsers());
+    };
+
+    this.removeFromSpace = function () {
+      var space = that.space.details.space;
+      return rolesService.removeFromSpace(that.guid, space.entity.organization_guid, space.metadata.guid,
+        guidsToUsers());
     };
 
     eventService.$on(eventService.events.ROLES_UPDATED, function () {

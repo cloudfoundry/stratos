@@ -25,18 +25,20 @@
   }
 
   ClusterUsersController.$inject = [
-    'app.model.modelManager',
-    '$stateParams',
+    '$scope',
     '$state',
+    '$stateParams',
     '$log',
     '$q',
+    'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.event.eventService'
   ];
 
-  function ClusterUsersController(modelManager, $stateParams, $state, $log, $q, utils, manageUsers, rolesService, eventService) {
+  function ClusterUsersController($scope, $state, $stateParams, $log, $q,
+                                  modelManager, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -44,12 +46,21 @@
     this.removingOrg = {};
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.rolesService = rolesService;
 
     this.userRoles = {};
 
     this.selectAllUsers = false;
     this.selectedUsers = {};
+
+    $scope.$watch(function () {
+      return rolesService.changingRoles;
+    }, function () {
+      var isAdmin = that.stackatoInfo.info.endpoints ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin : false;
+      that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
+      that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
+    });
 
     function refreshUsers() {
       that.userRoles = {};
@@ -82,13 +93,9 @@
 
     function init() {
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
-
-        that.userActions[0].disabled = !stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
-
         that.users = res;
 
         return refreshUsers();
-
       }).then(function () {
         $log.debug('ClusterUsersController finished init');
       });
@@ -106,7 +113,7 @@
         name: gettext('Remove all roles'),
         disabled: true,
         execute: function (aUser) {
-          $log.info('TODO: implement remove all roles', aUser);
+          return rolesService.removeAllRoles(that.guid, [aUser]);
         }
       }
     ];
@@ -115,13 +122,13 @@
       return that.userRoles[aUser.metadata.guid];
     };
 
-    this.selectAllChanged = function (selectedUsers) {
+    this.selectAllChanged = function () {
       if (that.selectAllUsers) {
         _.forEach(that.visibleUsers, function (user) {
-          selectedUsers[user.metadata.guid] = true;
+          that.selectedUsers[user.metadata.guid] = true;
         });
       } else {
-        selectedUsers = {};
+        that.selectedUsers = {};
       }
     };
 
@@ -132,12 +139,28 @@
       }
       this.removingOrg[pillKey] = true;
       rolesService.removeOrgRole(that.guid, orgRole.org.details.org.metadata.guid, user, orgRole.role)
-        .catch(function () {
-          $log.error('Failed to remove role \'' + orgRole.roleLabel + '\' for user \'' + user.entity.username + '\'');
-        })
         .finally(function () {
           that.removingOrg[pillKey] = false;
         });
+    };
+
+    this.selectedUsersCount = function () {
+      return (_.invert(this.selectedUsers, true).true || []).length;
+    };
+
+    function guidsToUsers(users) {
+      var selectedUsersGuids = _.invert(users, true).true;
+      return _.filter(that.users, function (user) {
+        return _.indexOf(selectedUsersGuids, user.metadata.guid) >= 0;
+      });
+    }
+
+    this.manageSelectedUsers = function () {
+      return manageUsers.show(that.guid, guidsToUsers(that.selectedUsers), true);
+    };
+
+    this.removeAllRoles = function () {
+      return rolesService.removeAllRoles(that.guid, guidsToUsers(that.selectedUsers));
     };
 
     eventService.$on(eventService.events.ROLES_UPDATED, function () {
