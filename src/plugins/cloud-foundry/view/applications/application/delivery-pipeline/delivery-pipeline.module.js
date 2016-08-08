@@ -24,7 +24,7 @@
     '$scope',
     'helion.framework.widgets.dialog.confirm',
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
-    'cloud-foundry.view.applications.application.delivery-pipeline.postDeployAction'
+    'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService'
   ];
 
   /**
@@ -35,11 +35,11 @@
    * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @param {object} addNotificationService - Service for adding new notifications
-   * @param {object} postDeployAction - Service for adding a new post-deploy action
+   * @param {object} postDeployActionService - Service for adding a new post-deploy action
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog, addNotificationService, postDeployAction) {
+  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog, addNotificationService, postDeployActionService) {
     var that = this;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.id = $stateParams.guid;
@@ -50,7 +50,7 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.postDeployActionService = postDeployAction;
+    this.postDeployActionService = postDeployActionService;
     this.hceCnsi = null;
 
     this.project = null;

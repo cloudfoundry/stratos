@@ -3,7 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline')
-    .factory('cloud-foundry.view.applications.application.delivery-pipeline.postDeployAction', postDeployAction);
+    .factory('cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService', postDeployAction);
 
   postDeployAction.$inject = [
     'app.model.modelManager',
@@ -32,8 +32,8 @@
       /**
        * @name add
        * @description Display Edit App Dialog
-       * @param {String} cnsiGuid CNSI GUID
-       * @param {String} hceProjectId  HCE Project ID
+       * @param {String} cnsiGuid - CNSI GUID
+       * @param {String} hceProjectId - HCE Project ID
        * @returns {*} asyncTaskDialog
        */
       add: function (cnsiGuid, hceProjectId) {
@@ -78,7 +78,7 @@
 
         return asyncTaskDialog(
           {
-            title: 'Add Post Deploy Action',
+            title: gettext('Add Post Deploy Action'),
             templateUrl: 'plugins/cloud-foundry/view/applications/' +
             'application/delivery-pipeline/post-deploy/add-post-deploy-action.html',
             buttonTitles: {
