@@ -14,19 +14,21 @@
     'app.event.eventService',
     'app.model.modelManager',
     '$state',
-    '$location'
+    '$location',
+    'cloud-foundry.view.applications.services.notifications'
   ];
 
-  function register(eventService, modelManager, $state, $location) {
-    return new CloudFoundry(eventService, modelManager, $state, $location);
+  function register(eventService, modelManager, $state, $location, notificationService) {
+    return new CloudFoundry(eventService, modelManager, $state, $location, notificationService);
   }
 
-  function CloudFoundry(eventService, modelManager, $state, $location) {
+  function CloudFoundry(eventService, modelManager, $state, $location, notificationService) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$location = $location;
+    this.notificationService = notificationService;
     this.eventService.$on(this.eventService.events.LOGIN, function (ev, preventRedirect) {
       that.onLoggedIn(preventRedirect);
     });

@@ -25,8 +25,7 @@
     'app.model.modelManager',
     'app.event.eventService',
     '$q',
-    '$interpolate',
-    'helion.framework.widgets.toaster'
+    '$interpolate'
   ];
 
   /**
@@ -37,11 +36,9 @@
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} $q - angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
-   * @param {helion.framework.widgets.toaster} toaster - the toast service
    * @property {app.event.eventService} eventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
-   * @property {helion.framework.widgets.toaster} toaster - the toast service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} routeModel - the Cloud Foundry route model
    * @property {object} serviceBindingModel - the Cloud Foundry service binding model
@@ -49,13 +46,12 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController(modelManager, eventService, $q, $interpolate, toaster) {
+  function DeleteAppWorkflowController(modelManager, eventService, $q, $interpolate) {
     var that = this;
 
     this.eventService = eventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
-    this.toaster = toaster;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -323,8 +319,8 @@
         that.deletingApplication = false;
         // show notification for successful binding
         var successMsg = gettext('"{{appName}}" has been deleted.');
-        var context = {appName: appName};
-        that.toaster.success(that.$interpolate(successMsg)(context));
+        var message = that.$interpolate(successMsg)({appName: appName});
+        that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
       });
     }
