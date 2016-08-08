@@ -1,5 +1,5 @@
 {
-  "name": "helion-stackato-console",
+  "name": "hsc",
   "product_version": "4.0",
   "sdl_version": "{{TAG}}",
   "vendor": "HPE",
@@ -30,7 +30,6 @@
         }
       ],
       "affinity": [],
-      "labels": [],
       "min_instances": 1,
       "max_instances": 1,
       "service_ports": [
@@ -137,7 +136,6 @@
         }
       ],
       "affinity": [],
-      "labels": [],
       "min_instances": 1,
       "max_instances": 1,
       "service_ports": [
@@ -195,7 +193,6 @@
         }
       ],
       "affinity": [],
-      "labels": [],
       "min_instances": 1,
       "max_instances": 1,
       "service_ports": [
@@ -274,7 +271,6 @@
         }
       ],
       "affinity": [],
-      "labels": [],
       "min_instances": 1,
       "max_instances": 1,
       "retry_count": 100,
@@ -342,7 +338,6 @@
         }
       ],
       "affinity": [],
-      "labels": [],
       "min_instances": 1,
       "max_instances": 1,
       "retry_count": 100,
@@ -373,7 +368,6 @@
       "shared": true
     }
   ],
-  "labels": [],
   "parameters": [
     {
       "name": "CONSOLE_VERSION",
@@ -398,11 +392,6 @@
         }
     },
     {
-      "name": "CONSOLE_CA_CERT_KEY_FILE",
-      "description": "The Console CA Key file on disk",
-      "default": "/etc/secrets/console-ca-cert-key"
-    },
-    {
       "name": "console-ca-cert-key",
       "description": "CA Key that is used to sign other SSL Certificates",
       "required": true,
@@ -423,11 +412,6 @@
       "data_type": "string",
       "required": true,
       "secret": false
-    },
-    {
-      "name": "PGSQL_PASSWORD_FILE",
-      "description": "The Stackato DB password file on disk",
-      "default": "/etc/secrets/pgsql-password"
     },
     {
       "name": "pgsql-password",
@@ -490,11 +474,6 @@
       "data_type": "string",
       "required": true,
       "secret": false
-    },
-    {
-      "name": "POSTGRES_PASSWORD_FILE",
-      "description": "The Postgres password file on disk",
-      "default": "/etc/secrets/postgres-password"
     },
     {
       "name": "postgres-password",
@@ -563,7 +542,7 @@
       "secret": true,
       "generator":
         {
-          "id": "console_cert",
+          "id": "console_certificate",
           "generate": {
             "type": "Certificate",
             "value_type": "private_key"
