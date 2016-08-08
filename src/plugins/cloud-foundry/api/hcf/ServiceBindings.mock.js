@@ -95,7 +95,12 @@
                     "gateway_name": "",
                     "syslog_drain_url": null,
                     "app_url": "/v2/apps/6e23689c-2844-4ebf-ab69-e52ab3439f6b",
-                    "service_instance_url": "/v2/service_instances/01430cca-2592-4396-ac79-b1405a488b3e"
+                    "service_instance_url": "/v2/service_instances/01430cca-2592-4396-ac79-b1405a488b3e",
+                    "service_instance": {
+                      "entity": {
+                        "name": "instance_123"
+                      }
+                    }
                   }
                 }
               ]

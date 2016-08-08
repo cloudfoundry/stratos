@@ -27,8 +27,7 @@
     '$interpolate',
     'app.model.modelManager',
     'app.event.eventService',
-    'helion.framework.widgets.detailView',
-    'helion.framework.widgets.toaster'
+    'helion.framework.widgets.detailView'
   ];
 
   /**
@@ -41,11 +40,9 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.event.eventService} eventService - the event management service
    * @param {helion.framework.widgets.detailView} detailView - the detail view widget
-   * @param {helion.framework.widgets.toaster} toaster - the toast notification service
    * @property {object} $q - the Angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {helion.framework.widgets.detailView} detailView - the detail view widget
-   * @property {helion.framework.widgets.toaster} toaster - the toast notification service
    * @property {cloud-foundry.model.application} appModel - the CF application model
    * @property {cloud-foundry.model.service-binding} bindingModel - the CF service binding model
    * @property {cloud-foundry.model.service-instance} instanceModel - the CF service instance model
@@ -55,12 +52,12 @@
    * @property {string} path - the path to this add-service-workflow folder
    * @property {object} addServiceActions - the stop and finish workflow actions
    */
-  function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, eventService, detailView, toaster) {
+  function AddServiceWorkflowController($q, $scope, $interpolate, modelManager, eventService, detailView) {
     var that = this;
     this.$q = $q;
     this.$interpolate = $interpolate;
+    this.eventService = eventService;
     this.detailView = detailView;
-    this.toaster = toaster;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
@@ -80,7 +77,7 @@
       }
     };
 
-    var startWorkflowEvent = eventService.$on('cf.events.START_ADD_SERVICE_WORKFLOW', function (event, config) {
+    var startWorkflowEvent = this.eventService.$on('cf.events.START_ADD_SERVICE_WORKFLOW', function (event, config) {
       that.reset(config);
       that.modal = that.startWorkflow();
       that._loadServiceInstances();
@@ -359,7 +356,8 @@
               service: that.options.serviceInstance.entity.name,
               appName: that.data.app.summary.name
             };
-            that.toaster.success(that.$interpolate(successMsg)(context));
+            var message = that.$interpolate(successMsg)(context);
+            that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
             that.modal.close();
           }, function () {
             return that._onServiceBindingError();

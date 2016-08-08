@@ -1,6 +1,13 @@
-<p ng-if="applicationServicesCtrl.services.length === 0" translate>
-  No services were found. Please contact your administrator.
-</p>
+<div ng-if="applicationServicesCtrl.ready && applicationServicesCtrl.services.length === 0"
+  class="message-box message-box-no-bg">
+  <p>
+    <div class="helion-icon helion-icon-3x helion-icon-Service_business"></div>
+    <h3 translate>There are no services available for this cluster. Please contact your Administrator to add services so you can bind them to your applications.</h3>
+  </p>
+</div>
+<div ng-if="!applicationServicesCtrl.ready" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
 
 <div class="panel panel-default" ng-if="applicationServicesCtrl.services.length">
   <div class="panel-body service-filter-panel">

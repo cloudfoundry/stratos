@@ -57,9 +57,10 @@
     describe('ManageServicesController', function () {
       it('should be defined and initialized', function () {
         expect(manageServicesCtrl).toBeDefined();
+        expect(manageServicesCtrl.$q).toBeDefined();
         expect(manageServicesCtrl.detailView).toBeDefined();
+        expect(manageServicesCtrl.serviceInstanceService).toBeDefined();
         expect(manageServicesCtrl.appModel).toBeDefined();
-        expect(manageServicesCtrl.bindingModel).toBeDefined();
         expect(manageServicesCtrl.modal).toBe(null);
         expect(manageServicesCtrl.serviceInstances).toEqual([]);
         expect(manageServicesCtrl.serviceBindings).toEqual({});
@@ -164,7 +165,7 @@
             cnsiGuid: 'guid'
           };
           manageServicesCtrl.serviceInstances = [
-            { guid: 'instance_123' },
+            { guid: 'instance_123', name: 'instance_123' },
             { guid: 'instance_456' }
           ];
           manageServicesCtrl.serviceBindings = {
@@ -176,24 +177,24 @@
             }
           };
 
-          spyOn(manageServicesCtrl.appModel, 'getAppSummary');
+          spyOn(manageServicesCtrl.serviceInstanceService, 'unbindServiceFromApp');
         });
 
-        it('should show detach confirmation dialog', function () {
-          spyOn(manageServicesCtrl, 'confirmDialog');
-
+        it('should call unbindServiceFromApp', function () {
           var instance = manageServicesCtrl.serviceInstances[0];
           manageServicesCtrl.detach(instance);
-          expect(manageServicesCtrl.confirmDialog).toHaveBeenCalled();
+          expect(manageServicesCtrl.serviceInstanceService.unbindServiceFromApp)
+            .toHaveBeenCalled();
+          var args = manageServicesCtrl.serviceInstanceService.unbindServiceFromApp.calls.argsFor(0);
+          expect(args[0]).toBe('guid');
+          expect(args[1]).toBe('app_123');
+          expect(args[2]).toBe('binding_123');
+          expect(args[3]).toBe('instance_123');
         });
       });
 
       describe('viewEnvVariables', function () {
-        var GetEnvForApp;
-
         beforeEach(function () {
-          GetEnvForApp = mockAppsApi.GetEnvForApp('app_123');
-
           manageServicesCtrl.data = {
             app: {
               summary: mockApp
@@ -202,38 +203,13 @@
             service: mockService
           };
 
-          spyOn(manageServicesCtrl, 'detailView');
+          spyOn(manageServicesCtrl.serviceInstanceService, 'viewEnvVariables');
         });
 
         it('should show env variables in detail view', function () {
-          $httpBackend.whenGET(GetEnvForApp.url)
-            .respond(200, GetEnvForApp.response['200'].body);
-
-          manageServicesCtrl.viewEnvVariables({ name: 'instance_123' })
-            .then(function () {
-              var config = {
-                templateUrl: 'plugins/cloud-foundry/view/applications/application/services/manage-services/env-variables.html',
-                title: 'name-2342: Environmental Variables'
-              };
-              var context = {
-                variables: { name: 'instance_123' }
-              };
-              expect(manageServicesCtrl.detailView).toHaveBeenCalledWith(config, context);
-            });
-
-          $httpBackend.flush();
-        });
-
-        it('should not show env variables in detail view if no variables found', function () {
-          $httpBackend.whenGET(GetEnvForApp.url)
-            .respond(200, GetEnvForApp.response['200'].body);
-
-          manageServicesCtrl.viewEnvVariables({ name: 'instance_789' })
-            .then(function () {
-              expect(manageServicesCtrl.detailView).not.toHaveBeenCalledWith();
-            });
-
-          $httpBackend.flush();
+          manageServicesCtrl.viewEnvVariables({ name: 'instance_123' });
+          expect(manageServicesCtrl.serviceInstanceService.viewEnvVariables)
+            .toHaveBeenCalledWith('guid', mockApp, 'label-19', {name: 'instance_123'});
         });
       });
     });

@@ -13,6 +13,10 @@ add-app-workflow {
   .services-filter-form {
     margin-bottom: $hpe-unit-space / 2;
   }
+
+  .step-spinner {
+    padding: $hpe-unit-space 0;
+  }
 }
 
 .offline-route-value {
