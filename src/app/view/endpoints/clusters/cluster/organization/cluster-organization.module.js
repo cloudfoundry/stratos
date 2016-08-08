@@ -42,15 +42,28 @@
     this.spacesPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces';
 
     function init() {
-      var promises = [];
+      var initPromises = [];
+
+      // Fetch details for every space
       _.forEach(_.get(that.organizationModel, that.spacesPath), function (space) {
-        var promise = that.spaceModel.getSpaceDetails(that.clusterGuid, space).catch(function () {
+        var promiseForDetails = that.spaceModel.getSpaceDetails(that.clusterGuid, space).catch(function () {
           //Swallow errors for individual spaces
           $log.error('Failed to fetch details for space - ' + space.entity.name);
         });
-        promises.push(promise);
+        initPromises.push(promiseForDetails);
       });
-      return $q.all(promises);
+
+      // List all services for the org
+      var promiseForServices = that.organizationModel
+        .listAllServicesForOrganization(that.clusterGuid, that.organizationGuid, {})
+        .then(function (services) {
+          that.organizationModel.cacheOrganizationServices(that.clusterGuid, that.organizationGuid, services);
+          return services;
+        });
+
+      initPromises.push(promiseForServices);
+
+      return $q.all(initPromises);
     }
 
     utils.chainStateResolve('endpoint.clusters.cluster.organization', $state, init);

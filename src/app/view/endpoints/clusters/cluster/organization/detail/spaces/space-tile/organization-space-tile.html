@@ -9,8 +9,10 @@
     <dd><div ng-repeat="role in orgSpaceTileCtrl.roles">{{ role }}</div></dd>
     <dt translate>TOTAL APPS</dt>
     <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalApps }}</dd>
-    <dt translate>INSTANCES</dt>
-    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalInstances }} / {{ orgSpaceTileCtrl.orgDetails().details.instancesQuota === -1 ? '∞' : orgSpaceTileCtrl.orgDetails().details.instancesQuota}}</dd>
+    <dt translate>APP INSTANCES</dt>
+    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalAppInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.appInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.orgDetails().details.appInstancesQuota }}</dd>
+    <dt translate>SERVICE INSTANCES</dt>
+    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalServiceInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.serviceInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.orgDetails().details.serviceInstancesQuota }}</dd>
     <!--<dt ng-if="true" translate>DISK</dt>-->
     <!--<dd ng-if="true">{{'1'}}</dd>-->
     <!--<dt ng-if="true" translate>MEMORY UTILIZATION</dt>-->

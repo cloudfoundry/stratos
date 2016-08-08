@@ -18,7 +18,7 @@
    * @returns {object} the utils service
    */
   function utilsServiceFactory($log) {
-    var UNIT_GRABBER = /([0-9]+)( .*)/;
+    var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     return {
       mbToHumanSize: mbToHumanSize,

@@ -26,18 +26,19 @@
 
   ClusterUsersController.$inject = [
     '$scope',
-    'app.model.modelManager',
-    '$stateParams',
     '$state',
+    '$stateParams',
     '$log',
+    '$q',
+    'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
     'app.event.eventService'
   ];
 
-  function ClusterUsersController($scope, modelManager, $stateParams, $state, $log, utils, manageUsers, rolesService,
-                                  eventService) {
+  function ClusterUsersController($scope, $state, $stateParams, $log, $q,
+                                  modelManager, utils, manageUsers, rolesService, eventService) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -79,6 +80,7 @@
         });
 
       });
+      return $q.resolve();
     }
 
     function init() {

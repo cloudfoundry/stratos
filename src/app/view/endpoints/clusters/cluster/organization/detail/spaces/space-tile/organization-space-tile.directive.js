@@ -22,6 +22,7 @@
     '$state',
     '$stateParams',
     '$scope',
+    '$q',
     'app.model.modelManager',
     'app.view.endpoints.clusters.cluster.assignUsers',
     'app.utils.utilsService',
@@ -35,6 +36,7 @@
    * @param {object} $state - the angular $state service
    * @param {object} $stateParams - the angular $stateParams service
    * @param {object} $scope - the angular $scope service
+   * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {object} assignUsers - our assign users slide out service
    * @param {object} utils - our utils service
@@ -42,7 +44,7 @@
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationSpaceTileController($state, $stateParams, $scope,
+  function OrganizationSpaceTileController($state, $stateParams, $scope, $q,
                                            modelManager, assignUsers, utils, confirmDialog, asyncTaskDialog) {
     var that = this;
 
@@ -72,6 +74,8 @@
       that.actions[0].disabled = !isAdmin;
       that.actions[1].disabled = !canDelete;
       that.actions[2].disabled = !isAdmin;
+
+      return $q.resolve();
     }
 
     var cardData = {};
