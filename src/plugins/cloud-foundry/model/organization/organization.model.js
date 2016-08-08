@@ -195,16 +195,35 @@
     cacheOrganizationUsersRoles: function (cnsiGuid, orgGuid, roles) {
       var that = this;
       this.initOrganizationCache(cnsiGuid, orgGuid);
+
+      // Empty the cache without changing the Object reference
+      var rolesCache = that.organizations[cnsiGuid][orgGuid].roles;
+      for (var role in rolesCache) {
+        if (rolesCache.hasOwnProperty(role)) {
+          delete rolesCache[role];
+        }
+      }
+
       _.forEach(roles, function (user) {
-        that.organizations[cnsiGuid][orgGuid].roles[user.metadata.guid] = user.entity.organization_roles;
+        rolesCache[user.metadata.guid] = user.entity.organization_roles;
       });
     },
 
     cacheOrganizationServices: function (cnsiGuid, orgGuid, services) {
       var that = this;
+
       this.initOrganizationCache(cnsiGuid, orgGuid);
+
+      // Empty the cache without changing the Object reference
+      var servicesCache = that.organizations[cnsiGuid][orgGuid].services;
+      for (var service in servicesCache) {
+        if (servicesCache.hasOwnProperty(service)) {
+          delete servicesCache[service];
+        }
+      }
+
       _.forEach(services, function (service) {
-        that.organizations[cnsiGuid][orgGuid].services[service.metadata.guid] = service;
+        servicesCache[service.metadata.guid] = service;
       });
     },
 

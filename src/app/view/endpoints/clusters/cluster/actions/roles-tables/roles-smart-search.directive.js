@@ -17,11 +17,18 @@
       require: '^stTable',
       restrict: 'A',
       scope: {
-        rolesSmartSearch: '='
+        rolesSmartSearch: '=',
+        rolesSmartSearchBy: '@',
+        rolesSmartSearchDisable: '='
       },
       link: function (scope, ele, attr, ctrl) {
         scope.$watch('rolesSmartSearch', function (val) {
-          ctrl.search(val, attr.rolesSmartSearchBy);
+          if (!scope.rolesSmartSearchDisable) {
+            ctrl.search(val, attr.rolesSmartSearchBy);
+          } else {
+            // Clear any previous search term
+            ctrl.search('', attr.rolesSmartSearchBy);
+          }
         });
       }
     };

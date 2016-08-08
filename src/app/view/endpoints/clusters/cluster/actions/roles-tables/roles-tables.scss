@@ -11,11 +11,15 @@
     }
 
     th {
+      min-width: 145px;
       &:first-of-type {
-        width: 25%
+        min-width: 150px;
       }
-      &:last-of-type {
-        width: 22%;
+      &:nth-of-type(2), &:nth-of-type(3) {
+        min-width: 125px;
+      }
+      &:nth-of-type(5) {
+        min-width: 115px;
       }
 
       text-transform: capitalize;

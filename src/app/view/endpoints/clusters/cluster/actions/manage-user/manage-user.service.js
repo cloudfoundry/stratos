@@ -40,15 +40,18 @@
     /**
      * @name ManageUsersFactory.show
      * @description Show the manage users slide out
-     * @param {object} clusterGuid guid of the HCF cluster
+     * @param {string} clusterGuid guid of the HCF cluster
+     * @param {string} organizationGuid guid of the organization to show
      * @param {object} users collection of users to pre-select
      * @param {boolean} refreshSpaceRoles true if the space roles should be updated
      * @returns {promise} promise fulfilled when dialogue has closed
      */
-    this.show = function (clusterGuid, users, refreshSpaceRoles) {
+    this.show = function (clusterGuid, organizationGuid, users, refreshSpaceRoles) {
 
       selectedRoles = {};
-      var organizations = organizationModel.organizations[clusterGuid];
+      var organizations = _.omitBy(organizationModel.organizations[clusterGuid], function (org, orgGuid) {
+        return organizationGuid ? organizationGuid !== orgGuid : false;
+      });
 
       // Ensure that the selected roles objects are initialised correctly. The roles table will then fiddle inside these
       _.forEach(organizations, function (organization) {
@@ -94,7 +97,8 @@
             showExistingRoles: true
           },
           state: state,
-          clearSelections: clearAllOrgs
+          clearSelections: clearAllOrgs,
+          disableAsyncIndicator: true
         },
         updateUsers
       );

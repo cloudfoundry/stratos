@@ -32,6 +32,7 @@
   }
 
   AssignUsersWorkflowController.$inject = [
+    '$scope',
     'app.model.modelManager',
     'context',
     'app.view.endpoints.clusters.cluster.rolesService',
@@ -45,6 +46,7 @@
    * @memberof app.view.endpoints.clusters.cluster
    * @name AssignUsersWorkflowController
    * @constructor
+   * @param {object} $scope - the angular $scope service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} context - the context for the modal. Used to pass in data
    * @param {object} rolesService - the console roles service. Aids in selecting, assigning and removing roles with the
@@ -54,7 +56,7 @@
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    */
-  function AssignUsersWorkflowController(modelManager, context, rolesService, $stateParams, $q, $timeout,
+  function AssignUsersWorkflowController($scope, modelManager, context, rolesService, $stateParams, $q, $timeout,
                                          $uibModalInstance) {
     var that = this;
 
@@ -72,6 +74,19 @@
 
     this.data = { };
     this.userInput = { };
+
+    // Ensure that the org_user is correctly updated given any changes in other org roles
+    _.forEach(rolesService.organizationRoles, function (val, roleKey) {
+      $scope.$watch(function () {
+        var orgGuid = _.get(that.userInput, 'org.details.guid');
+        return orgGuid ? _.get(that.userInput.roles, orgGuid + '.organization.' + roleKey) : null;
+      }, function () {
+        var orgGuid = _.get(that.userInput, 'org.details.guid');
+        if (orgGuid) {
+          rolesService.updateOrgUser(that.userInput.roles[orgGuid].organization);
+        }
+      });
+    });
 
     function initialise() {
       that.data.numberMaxValue = Number.MAX_SAFE_INTEGER;
@@ -242,12 +257,6 @@
         rolesService.assignUsers(context.clusterGuid, usersByGuid, selectedOrgRoles)
           .then(function () {
             that.$uibModalInstance.close();
-          })
-          .catch(function (error) {
-            if (_.isArray(error)) {
-              that.data.failedAssignForUsers = error;
-            }
-            throw error;
           })
           .finally(function () {
             that.assigning = false;

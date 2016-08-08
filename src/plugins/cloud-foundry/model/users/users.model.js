@@ -124,6 +124,14 @@
         });
     },
 
+    removeOrganizationFromUser: function (cnsiGuid, orgGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .RemoveOrganizationFromUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          return response.data.resources;
+        });
+    },
+
     associateAuditedSpaceWithUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .AssociateAuditedSpaceWithUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid))

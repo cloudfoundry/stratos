@@ -18,7 +18,7 @@
       ncyBreadcrumb: {
         label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
         parent: function () {
-          return 'endpoint.clusters.cluster.organization.detail.spaces';
+          return 'endpoint.clusters.cluster.organization.detail.users';
         }
       }
     });
@@ -57,15 +57,6 @@
 
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
-    $scope.$watch(function () {
-      return rolesService.changingRoles;
-    }, function () {
-      var isAdmin = that.stackatoInfo.info.endpoints ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin : false;
-      that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
-      that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
-      that.userActions[2].disabled = rolesService.changingRoles || !isAdmin;
-    });
-
     function refreshUsers() {
       that.userRoles = {};
 
@@ -89,6 +80,17 @@
     }
 
     function init() {
+      $scope.$watch(function () {
+        return rolesService.changingRoles;
+      }, function () {
+        var isAdmin = that.stackatoInfo.info.endpoints
+          ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin
+          : false;
+        that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
+        that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
+        that.userActions[2].disabled = rolesService.changingRoles || !isAdmin;
+      });
+
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
         that.users = res;
 
@@ -103,7 +105,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          return manageUsers.show(that.guid, [aUser], false).result;
+          return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser], false).result;
         }
       },
       {
@@ -163,7 +165,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, guidsToUsers(), true).result;
+      return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, guidsToUsers(), true).result;
     };
 
     this.removeFromOrganization = function () {

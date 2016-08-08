@@ -6,13 +6,14 @@
          st-table="rolesTablesCtrl.ctrl.displayedOrgs"
          st-safe-src="rolesTablesCtrl.org"
          roles-smart-search="rolesTablesCtrl.filter"
-         roles-smart-search-by="details.org.entity.name"
-         ng-show="rolesTablesCtrl.ctrl.displayedOrgs.length > 0">
+         roles-smart-search-by="{{ 'details.org.entity.name' }}"
+         roles-smart-search-disable="rolesTablesCtrl.ctrl.displayedSpaces.length"
+         ng-show="rolesTablesCtrl.ctrl.displayedOrgs.length > 0 || rolesTablesCtrl.ctrl.displayedSpaces.length > 0">
       <table class="table table-outlined table-selectable">
         <thead>
         <tr>
           <th st-sort="details.org.entity.name" st-sort-default="true" translate>ORGANIZATION</th>
-          <th ng-repeat="(key, role) in rolesTablesCtrl.config.orgRoles" translate>Org {{role}}</th>
+          <th ng-repeat="(key, role) in rolesTablesCtrl.config.orgRoles">{{role}}</th>
           <th></th>
         </tr>
         </thead>
@@ -42,23 +43,30 @@
         <thead>
         <tr>
           <th st-sort="label" st-sort-default="true" translate>SPACE</th>
-          <th ng-repeat="(key, role) in rolesTablesCtrl.config.spaceRoles" translate>Space {{role}}</th>
-          <th>&nbsp;</th>
+          <th
+            ng-repeat="(roleKey, role) in rolesTablesCtrl.config.spaceRoles"
+            ng-if="role || !rolesTablesCtrl.config.disableOrg">{{role}}</th>
+          <th ng-if="!rolesTablesCtrl.config.disableOrg">&nbsp;</th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="space in rolesTablesCtrl.ctrl.displayedSpaces">
           <td>{{ space.label }}</td>
-          <td ng-repeat="(roleKey, role) in rolesTablesCtrl.config.spaceRoles">
-            <checkbox-input ng-model="rolesTablesCtrl.selection.spaces[space.key][roleKey]"></checkbox-input>
+          <td
+            ng-repeat="(roleKey, role) in rolesTablesCtrl.config.spaceRoles"
+            ng-if="role || !rolesTablesCtrl.config.disableOrg">
+            <checkbox-input
+              ng-if="role"
+              ng-model="rolesTablesCtrl.selection.spaces[space.key][roleKey]"></checkbox-input>
+            <span ng-if="!role">&nbsp;</span>
           </td>
-          <td></td>
+          <td ng-if="!rolesTablesCtrl.config.disableOrg"></td>
         </tr>
         </tbody>
         <tfoot ng-init="rolesTablesCtrl.ctrl.pagesSpaceCount = 5"
                ng-show="rolesTablesCtrl.ctrl.pagesSpaceCount < rolesTablesCtrl.spaces.length">
         <tr>
-          <td colspan="5" class="text-center">
+          <td colspan="6" class="text-center">
             <a ng-click="rolesTablesCtrl.ctrl.pagesSpaceCount = rolesTablesCtrl.spaces.length">
               <span translate>Show All</span> ({{rolesTablesCtrl.spaces.length}})
             </a>

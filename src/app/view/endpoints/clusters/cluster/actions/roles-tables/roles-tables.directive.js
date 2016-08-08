@@ -26,9 +26,7 @@
     '$scope',
     '$q',
     'app.model.modelManager',
-    'app.utils.utilsService',
-    'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.asyncTaskDialog'
+    'app.view.endpoints.clusters.cluster.rolesService'
   ];
 
   /**
@@ -38,14 +36,29 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
+   * @param {app.view.endpoints.clusters.cluster.rolesService} rolesService - the console roles service. Aids in
+   * selecting, assigning and removing roles with the roles table.
    */
-  function RolesTablesController($scope, $q, modelManager) {
+  function RolesTablesController($scope, $q, modelManager, rolesService) {
     var that = this;
+
+    this.rolesService = rolesService;
 
     // If the organization changes, ensure we respond
     $scope.$watch(function () {
       return that.organization;
     }, refresh);
+
+    if (!this.config.disableOrg) {
+      // Ensure that the org_user is correctly updated given any changes in other org roles
+      _.forEach(this.config.orgRoles, function (val, roleKey) {
+        $scope.$watch(function () {
+          return that.selection.organization[roleKey];
+        }, function () {
+          that.rolesService.updateOrgUser(that.selection.organization);
+        });
+      });
+    }
 
     function refresh() {
       // Optionally update the cache
