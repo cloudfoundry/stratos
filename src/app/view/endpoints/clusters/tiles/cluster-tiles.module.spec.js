@@ -224,7 +224,7 @@
         $scope.$digest();
 
         spyOn(clusterTilesCtrl, 'refreshClusterModel').and.callThrough();
-        spyOn(clusterTilesCtrl, 'createClusterList');
+        spyOn(clusterTilesCtrl, 'createClusterList').and.callThrough();
 
         expect(clusterTilesCtrl.state).toEqual('noClusters');
         clusterTilesCtrl.refreshClusterModel();

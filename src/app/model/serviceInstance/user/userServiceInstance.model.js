@@ -108,7 +108,7 @@
           tasks.push(cfInfoApi.GetInfo({}, hcfCfg));
         }
         if (hceGuids.length > 0) {
-          tasks.push(hceInfoApi.infos(hceGuids.join(',')));
+          tasks.push(hceInfoApi.info(hceGuids.join(',')));
         }
 
         if (tasks.length === 0) {
