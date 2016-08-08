@@ -46,6 +46,7 @@
    * @memberof app.view.endpoints.clusters.cluster
    * @name AssignUsersWorkflowController
    * @constructor
+   * @param {object} $scope - the angular $scope service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} context - the context for the modal. Used to pass in data
    * @param {object} rolesService - the console roles service. Aids in selecting, assigning and removing roles with the
@@ -74,7 +75,7 @@
     this.data = { };
     this.userInput = { };
 
-    // Ensure that the org_user is correctly updated
+    // Ensure that the org_user is correctly updated given any changes in other org roles
     _.forEach(rolesService.organizationRoles, function (val, roleKey) {
       $scope.$watch(function () {
         var orgGuid = _.get(that.userInput, 'org.details.guid');

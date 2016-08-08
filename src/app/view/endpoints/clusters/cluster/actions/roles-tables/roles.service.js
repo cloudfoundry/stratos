@@ -351,10 +351,7 @@
      * @returns {boolean}
      */
     this.orgContainsRoles = function (org) {
-      var orgContainsRoles = _.find(org.organization, function (role, key) {
-        // if (key === 'org_user') {
-        //   return false;
-        // }
+      var orgContainsRoles = _.find(org.organization, function (role) {
         return role;
       });
       if (orgContainsRoles) {
@@ -520,7 +517,7 @@
         spaces: {}
       };
 
-      // Need to ensure that we execute the change in organization roles in a specific order
+      // Need to ensure that we execute organization role changes in a specific order
       // If we're ADDING non-org_user roles we need to first ensure that we complete the add for org_user
       // If we're REMOVING org_user we need to first ensure that we complete the remove of non-org_user roles
 
@@ -547,32 +544,41 @@
         return $q.all(orgPromises);
       }
 
-      var prereqPromise = $q.when();
+      // preReqPromise will either be a promise that's resolved once the org_user has updated or all non-org_user rolls
+      // have changed.
+      var preReqPromise = $q.when();
+      // Clone the new org roles. This will be the 'to do' list of changes that are executed after preReqPromise.
       var orgRoles = _.clone(newOrgRoles.organization);
+      // Understand what the old org_user value was which will be compared to the new org_user value;
       var newOrgUser = orgRoles.org_user || false;
       var oldOrgUser = _.get(oldOrgRoles, 'organization.org_user') || false;
 
+      // Has it changed?
       if (oldOrgUser !== newOrgUser) {
         delete orgRoles.org_user;
 
         if (newOrgUser) {
-          // Ensure the add finishes first
-          prereqPromise = rolesToFunctions.org.add.org_user(clusterGuid, orgGuid, userGuid);
+          // We're ADDING the org_user, ensure this occurs BEFORE any other change/s
+          preReqPromise = rolesToFunctions.org.add.org_user(clusterGuid, orgGuid, userGuid);
         } else {
-          // Ensure the other changes finish first
-          prereqPromise = createOrgRoleRequests(orgRoles);
+          // We're REMOVING the org_user, ensure this occurs AFTER any other change/s
+          preReqPromise = createOrgRoleRequests(orgRoles);
           orgRoles = {
             org_user: false
           };
         }
+        // By this stage the orgRoles object should contain a set of changes to make after the initial promise is
+        // resolved.
+        // Track that we've made changes to this org.
         changes.organization = true;
       }
 
-      return prereqPromise
+      return preReqPromise
         .then(function () {
           return createOrgRoleRequests(orgRoles);
         })
         .then(function () {
+          // All organization changes have been made. Continue to space changes
           var updatePromises = [];
 
           // Assign/Remove Spaces Roles
@@ -601,6 +607,7 @@
           return $q.all(updatePromises);
         })
         .then(function () {
+          // All changes have been made, refresh the local cache of all affected orgs/spaces
           var cachePromises = [];
           // Refresh org cache
           if (changes.organization) {

@@ -36,6 +36,8 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
+   * @param {app.view.endpoints.clusters.cluster.rolesService} rolesService - the console roles service. Aids in
+   * selecting, assigning and removing roles with the roles table.
    */
   function RolesTablesController($scope, $q, modelManager, rolesService) {
     var that = this;
@@ -48,7 +50,7 @@
     }, refresh);
 
     if (!this.config.disableOrg) {
-      // Ensure that the org_user is correctly updated
+      // Ensure that the org_user is correctly updated given any changes in other org roles
       _.forEach(this.config.orgRoles, function (val, roleKey) {
         $scope.$watch(function () {
           return that.selection.organization[roleKey];
@@ -57,7 +59,6 @@
         });
       });
     }
-
 
     function refresh() {
       // Optionally update the cache
