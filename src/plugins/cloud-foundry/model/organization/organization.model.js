@@ -45,10 +45,10 @@
     this.$log = $log;
     this.utils = utils;
 
-    this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.orgsApi = apiManager.retrieve('cloud-foundry.api.Organizations');
     this.orgsQuotaApi = apiManager.retrieve('cloud-foundry.api.OrganizationQuotaDefinitions');
+    this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
 
     this.organizations = {};
     this.organizationNames = {};
@@ -285,11 +285,13 @@
       var userGuid = that.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
       // Memory and instance usages are never returned inline but we are able to derive from inline apps
-      var usedMemP, instancesP, quotaP, rolesP, allSpacesP, allUsersRoles;
+      var usedMemP, instancesP, quotaP, rolesP, routesCountP, allSpacesP, allUsersRoles;
       if (org.entity.spaces) {
+
         if (org.entity.spaces.length === 0) {
           usedMemP = that.$q.resolve(0);
           instancesP = that.$q.resolve(0);
+          routesCountP = that.$q.resolve(0);
         } else {
           if (org.entity.spaces[0].entity.apps) { // check if apps were inlined in the spaces
             var totalMem = 0;
@@ -307,15 +309,53 @@
             usedMemP = that.$q.resolve(totalMem);
             instancesP = that.$q.resolve(totalInstances);
           }
+          if (org.entity.spaces[0].entity.routes) { // check if routes were inlined in the spaces
+            var totalRoutes = 0;
+            _.forEach(org.entity.spaces, function (space) {
+              totalRoutes += space.entity.routes.length;
+            });
+            routesCountP = that.$q.resolve(totalRoutes);
+          }
         }
-      } else {
-        instancesP = that.orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig).then(function (res) {
-          return res.data.instance_usage;
-        });
-        usedMemP = that.orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
-          return res.data.memory_usage_in_mb;
-        });
+
+        allSpacesP = that.$q.resolve(org.entity.spaces);
+
       }
+
+      instancesP = instancesP || that.orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig).then(function (res) {
+        return res.data.instance_usage;
+      });
+
+      usedMemP = usedMemP || that.orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
+        return res.data.memory_usage_in_mb;
+      });
+
+      allSpacesP = allSpacesP || this.apiManager.retrieve('cloud-foundry.api.Organizations')
+        .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
+          return res.data.resources;
+        });
+
+      routesCountP = false;
+      routesCountP = routesCountP || allSpacesP.then(function (spaces) {
+        var promises = [];
+        var spaceModel = that.modelManager.retrieve('cloud-foundry.model.space');
+        _.forEach(spaces, function (space) {
+          var promise = spaceModel.listAllRoutesForSpace(cnsiGuid, space.metadata.guid).then(function (res) {
+            return res.length;
+          }).catch(function (error) {
+            that.$log.error('Failed to listAllRoutesForSpace', error);
+            throw error;
+          });
+          promises.push(promise);
+        });
+        return that.$q.all(promises).then(function (appCounts) {
+          var total = 0;
+          _.forEach(appCounts, function (count) {
+            total += count;
+          });
+          return total;
+        });
+      });
 
       // The quota may be returned inline
       if (org.entity.quota_definition) {
@@ -352,16 +392,6 @@
         return myRoles || [];
       });
 
-      // The spaces may be returned inline
-      if (org.entity.spaces) {
-        allSpacesP = that.$q.resolve(org.entity.spaces);
-      } else {
-        allSpacesP = this.apiManager.retrieve('cloud-foundry.api.Organizations')
-          .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
-            return res.data.resources;
-          });
-      }
-
       // Count apps in each space
       var appCountsP = allSpacesP.then(function (spaces) {
         var appsCountPromises = [];
@@ -396,6 +426,7 @@
         quota: quotaP,
         instances: instancesP,
         appCounts: appCountsP,
+        routesCountP: routesCountP,
         roles: orgRolesP,
         spaces: allSpacesP
       }).then(function (vals) {
@@ -418,6 +449,7 @@
 
         // Set total counts
         details.totalApps = vals.appCounts;
+        details.totalRoutes = vals.routesCountP;
 
         details.roles = vals.roles;
 
