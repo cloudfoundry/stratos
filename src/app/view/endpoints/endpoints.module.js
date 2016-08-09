@@ -29,22 +29,33 @@
   }
 
   register.$inject = [
+    '$q',
+    '$state',
     'app.model.modelManager',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.utils.utilsService'
   ];
 
-  function register(modelManager, eventService) {
-    return new Endpoints(modelManager, eventService);
+  function register($q, $state, modelManager, eventService, utils) {
+    return new Endpoints($q, $state, modelManager, eventService, utils);
   }
 
-  function Endpoints(modelManager, eventService) {
+  function Endpoints($q, $state, modelManager, eventService, utils) {
     var that = this;
 
+    this.initialized = $q.defer();
+
     this.modelManager = modelManager;
+
+    function init() {
+      return that.initialized.promise;
+    }
 
     eventService.$on(eventService.events.LOGIN, function () {
       that.onLoggedIn();
     });
+
+    utils.chainStateResolve('endpoint', $state, init);
   }
 
   angular.extend(Endpoints.prototype, {
@@ -52,6 +63,7 @@
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
       menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'), 1);
+      this.initialized.resolve();
     }
 
   });
