@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('Add-post-deploy-action directive', function () {
+  describe('Add-post-deploy-action', function () {
     var hceCnsi, hceProjectId, postDeployActionFactory, data, $httpBackend;
 
     beforeEach(module('templates'));
@@ -17,7 +17,7 @@
     }));
 
     beforeEach(inject(function ($injector) {
-      postDeployActionFactory = $injector.get('cloud-foundry.view.applications.application.delivery-pipeline.postDeployAction');
+      postDeployActionFactory = $injector.get('cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService');
       $httpBackend = $injector.get('$httpBackend');
 
       data = {
