@@ -62,8 +62,7 @@
                 projectId: data.projectId
               };
 
-              var actionName = data.actionName;
-              return that.hceModel.addPipelineTask(cnsiGuid, hceProjectId, actionName, credentialId, metadata);
+              return that.hceModel.addPipelineTask(cnsiGuid, hceProjectId, data.actionName, credentialId, metadata);
             });
         };
 
