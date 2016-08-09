@@ -613,8 +613,7 @@
           var cachePromises = [];
           // Refresh org cache
           if (changes.organization) {
-            var org = _.get(organizationModel, organizationModel.fetchOrganizationPath(clusterGuid, orgGuid));
-            cachePromises.push(organizationModel.getOrganizationDetails(clusterGuid, org.details.org));
+            cachePromises.push(organizationModel.refreshOrganizationUserRoles(clusterGuid, orgGuid));
           }
 
           // Refresh space caches

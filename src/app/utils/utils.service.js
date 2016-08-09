@@ -32,10 +32,11 @@
         precision = 1;
       }
       var floored = Math.floor(size);
-      if (floored === size) {
+      var fixed = Number(size.toFixed(precision));
+      if (floored === fixed) {
         return floored;
       }
-      return size.toFixed(precision);
+      return fixed;
     }
 
     function mbToHumanSize(sizeMb) {

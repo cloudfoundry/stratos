@@ -197,30 +197,25 @@
       this.organizationNames[cnsiGuid].push(details.org.entity.name);
     },
 
-    cacheOrganizationUsersRoles: function (cnsiGuid, orgGuid, roles) {
+    cacheOrganizationUsersRoles: function (cnsiGuid, orgGuid, allUsersRoles) {
       var that = this;
+
       this.initOrganizationCache(cnsiGuid, orgGuid);
 
       // Empty the cache without changing the Object reference
-      var rolesCache = that.organizations[cnsiGuid][orgGuid].roles;
-      for (var role in rolesCache) {
-        if (rolesCache.hasOwnProperty(role)) {
-          delete rolesCache[role];
-        }
-      }
+      this.uncacheOrganizationUserRoles(cnsiGuid, orgGuid);
 
-      _.forEach(roles, function (user) {
-        rolesCache[user.metadata.guid] = user.entity.organization_roles;
+      _.forEach(allUsersRoles, function (user) {
+        that.organizations[cnsiGuid][orgGuid].roles[user.metadata.guid] = user.entity.organization_roles;
       });
     },
 
     cacheOrganizationServices: function (cnsiGuid, orgGuid, services) {
-      var that = this;
 
       this.initOrganizationCache(cnsiGuid, orgGuid);
 
       // Empty the cache without changing the Object reference
-      var servicesCache = that.organizations[cnsiGuid][orgGuid].services;
+      var servicesCache = this.organizations[cnsiGuid][orgGuid].services;
       for (var service in servicesCache) {
         if (servicesCache.hasOwnProperty(service)) {
           delete servicesCache[service];
@@ -233,12 +228,11 @@
     },
 
     cacheOrganizationSpaces: function (cnsiGuid, orgGuid, spaces) {
-      var that = this;
 
       this.initOrganizationCache(cnsiGuid, orgGuid);
 
       // Empty the cache without changing the Object reference
-      var spaceCache = that.organizations[cnsiGuid][orgGuid].spaces;
+      var spaceCache = this.organizations[cnsiGuid][orgGuid].spaces;
       for (var space in spaceCache) {
         if (spaceCache.hasOwnProperty(space)) {
           delete spaceCache[space];
@@ -264,6 +258,15 @@
       delete this.organizations[cnsiGuid][orgGuid];
     },
 
+    uncacheOrganizationUserRoles: function (cnsiGuid, orgGuid) {
+      var rolesCache = this.organizations[cnsiGuid][orgGuid].roles;
+      for (var role in rolesCache) {
+        if (rolesCache.hasOwnProperty(role)) {
+          delete rolesCache[role];
+        }
+      }
+    },
+
     /**
      * @function  getOrganizationDetails
      * @memberof cloud-foundry.model.organization
@@ -277,77 +280,106 @@
 
       var that = this;
 
-      function assembleOrgRoles(users, role, usersHash) {
-        _.forEach(users, function (orgUser) {
-          var userKey = orgUser.metadata.guid;
-          if (!usersHash.hasOwnProperty(userKey)) {
-            usersHash[userKey] = orgUser;
-          }
-          usersHash[userKey].entity.organization_roles = usersHash[userKey].entity.organization_roles || [];
-          usersHash[userKey].entity.organization_roles.push(role);
-        });
-      }
-
-      function unsplitOrgRoles(anOrg) {
-        var usersHash = {};
-        assembleOrgRoles(anOrg.entity.users, 'org_user', usersHash);
-        assembleOrgRoles(anOrg.entity.managers, 'org_manager', usersHash);
-        assembleOrgRoles(anOrg.entity.billing_managers, 'billing_manager', usersHash);
-        assembleOrgRoles(anOrg.entity.auditors, 'org_auditor', usersHash);
-        return _.values(usersHash);
-      }
-
       var httpConfig = this.makeHttpConfig(cnsiGuid);
       var orgGuid = org.metadata.guid;
       var orgQuotaGuid = org.entity.quota_definition_guid;
       var createdDate = moment(org.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
       var userGuid = that.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
-      // Memory and instance usages are never returned inline but we are able to derive from inline apps
-      var usedMemP, instancesP, quotaP, rolesP, routesCountP, allSpacesP, allUsersRoles;
-      if (org.entity.spaces) {
+      function getRoles(org) {
+        // The users roles may be returned inline
+        if (org.entity.users) {
+          // Reconstruct all user roles from inline data
+          return that.$q.resolve(_unsplitOrgRoles(org));
+        }
+        return that.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig).then(function (val) {
+          return val.data.resources;
+        });
+      }
 
-        if (org.entity.spaces.length === 0) {
-          usedMemP = that.$q.resolve(0);
-          instancesP = that.$q.resolve(0);
-          routesCountP = that.$q.resolve(0);
-        } else {
+      function getUsedMem(org) {
+        if (org.entity.spaces) {
+          if (org.entity.spaces.length === 0) {
+            return that.$q.resolve(0);
+          }
           if (org.entity.spaces[0].entity.apps) { // check if apps were inlined in the spaces
             var totalMem = 0;
-            var totalInstances = 0;
             _.forEach(org.entity.spaces, function (space) {
               var apps = space.entity.apps;
               _.forEach(apps, function (app) {
                 // Only count running apps, like the CF API would do
                 if (app.entity.state === 'STARTED') {
                   totalMem += parseInt(app.entity.memory, 10);
+                }
+              });
+            });
+            return that.$q.resolve(totalMem);
+          }
+        }
+        return that.orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
+          return res.data.memory_usage_in_mb;
+        });
+      }
+
+      function getInstances(org) {
+        if (org.entity.spaces) {
+          if (org.entity.spaces.length === 0) {
+            return that.$q.resolve(0);
+          }
+          if (org.entity.spaces[0].entity.apps) { // check if apps were inlined in the spaces
+            var totalInstances = 0;
+            _.forEach(org.entity.spaces, function (space) {
+              var apps = space.entity.apps;
+              _.forEach(apps, function (app) {
+                // Only count running apps, like the CF API would do
+                if (app.entity.state === 'STARTED') {
                   totalInstances += parseInt(app.entity.instances, 10);
                 }
               });
             });
-            usedMemP = that.$q.resolve(totalMem);
-            instancesP = that.$q.resolve(totalInstances);
-          }
-          if (org.entity.spaces[0].entity.routes) { // check if routes were inlined in the spaces
-            var totalRoutes = 0;
-            _.forEach(org.entity.spaces, function (space) {
-              totalRoutes += space.entity.routes.length;
-            });
-            routesCountP = that.$q.resolve(totalRoutes);
+            return that.$q.resolve(totalInstances);
           }
         }
-
-        allSpacesP = that.$q.resolve(org.entity.spaces);
-
+        return that.orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig).then(function (res) {
+          return res.data.instance_usage;
+        });
       }
 
-      instancesP = instancesP || that.orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig).then(function (res) {
-        return res.data.instance_usage;
-      });
+      function getRouteCount(org) {
+        if (org.entity.spaces) {
+          if (org.entity.spaces.length === 0) {
+            return that.$q.resolve(0);
+          } else {
+            if (org.entity.spaces[0].entity.routes) { // check if routes were inlined in the spaces
+              var totalRoutes = 0;
+              _.forEach(org.entity.spaces, function (space) {
+                totalRoutes += space.entity.routes.length;
+              });
+              return that.$q.resolve(totalRoutes);
+            }
+          }
+        }
+      }
 
-      usedMemP = usedMemP || that.orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
-        return res.data.memory_usage_in_mb;
-      });
+      function getQuota(org) {
+        if (org.entity.quota_definition) {
+          return that.$q.resolve(org.entity.quota_definition);
+        }
+        return that.orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig).then(function (val) {
+          return val.data;
+        });
+      }
+
+      var rolesP = getRoles(org); // Roles can be returned inline
+      var usedMemP = getUsedMem(org); // Memory usage can be inferred from inlined apps
+      var instancesP = getInstances(org); // Instance usage can be inferred from inlined apps
+      var routesCountP = getRouteCount(org); // Routes can be returned inline
+      var quotaP = getQuota(org); // The quota can be returned inline
+
+      var allSpacesP, allUsersRoles;
+      if (org.entity.spaces) {
+        allSpacesP = that.$q.resolve(org.entity.spaces);
+      }
 
       allSpacesP = allSpacesP || this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
@@ -375,33 +407,14 @@
         });
       });
 
-      // The quota may be returned inline
-      if (org.entity.quota_definition) {
-        quotaP = that.$q.resolve(org.entity.quota_definition);
-      } else {
-        quotaP = that.orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig).then(function (val) {
-          return val.data;
-        });
-      }
-
-      // The users roles may be returned inline
-      if (org.entity.users) {
-        // Reconstruct all user roles from inline data
-        rolesP = that.$q.resolve(unsplitOrgRoles(org));
-      } else {
-        rolesP = that.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig).then(function (val) {
-          return val.data.resources;
-        });
-      }
-
       var orgRolesP = rolesP.then(function (usersRoles) {
         var i, myRoles;
 
         allUsersRoles = usersRoles; // Cached later!
 
         // Find the connected user's roles in each org
-        for (i = 0; i < allUsersRoles.length; i++) {
-          var user = allUsersRoles[i];
+        for (i = 0; i < usersRoles.length; i++) {
+          var user = usersRoles[i];
           if (user.metadata.guid === userGuid) {
             myRoles = user.entity.organization_roles;
             break;
@@ -508,8 +521,82 @@
         that.organizations[cnsiGuid][orgGuid].details.org = val.data;
         return val;
       });
-    }
+    },
 
+    refreshOrganizationUserRoles: function (cnsiGuid, orgGuid) {
+      var that = this;
+      return this.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, null, this.makeHttpConfig(cnsiGuid))
+        .then(function (val) {
+          var allUsersRoles = val.data.resources;
+          that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, allUsersRoles);
+          // Ensures we also update inlined data for getDetails to pick up
+          _splitOrgRoles(that.organizations[cnsiGuid][orgGuid].details.org, allUsersRoles);
+          return allUsersRoles;
+        });
+    }
   });
+
+  var ORG_ROLE_TO_KEY = {
+    org_user: 'users',
+    org_manager: 'managers',
+    billing_manager: 'billing_managers',
+    org_auditor: 'auditors'
+  };
+
+  function _shallowCloneUser(user) {
+    var clone = {
+      entity: _.clone(user.entity),
+      metadata: _.clone(user.metadata)
+    };
+    if (clone.entity.organization_roles) {
+      delete clone.entity.organization_roles;
+    }
+    return clone;
+  }
+
+  function _hasRole(user, role) {
+    return user.entity.organization_roles.indexOf(role) > -1;
+  }
+
+  function _assembleOrgRoles(users, role, usersHash) {
+    _.forEach(users, function (user) {
+      var userKey = user.metadata.guid;
+      if (!usersHash.hasOwnProperty(userKey)) {
+        usersHash[userKey] = _shallowCloneUser(user);
+      }
+      usersHash[userKey].entity.organization_roles = usersHash[userKey].entity.organization_roles || [];
+      usersHash[userKey].entity.organization_roles.push(role);
+    });
+  }
+
+  /**
+   * Transform split organization role properties into an array of users with an organization_roles property such as
+   * returned by the: RetrievingRolesOfAllUsersInOrganization() cloud foundry API
+   * @param {Object} anOrg organization object containing inlined managers etc.
+   * @returns {Array} a list of Users of the organization with their organization_roles property populated
+   * */
+  function _unsplitOrgRoles(anOrg) {
+    var usersHash = {};
+    _.forEach(ORG_ROLE_TO_KEY, function (key, role) {
+      _assembleOrgRoles(anOrg.entity[key], role, usersHash);
+    });
+    return _.values(usersHash);
+  }
+
+  function _splitOrgRoles(anOrg, usersRoles) {
+    _.forEach(ORG_ROLE_TO_KEY, function (key, role) {
+      // Clean while preserving ref in case directives are bound to it
+      if (angular.isDefined(anOrg.entity[key])) {
+        anOrg.entity[key].length = 0;
+      } else {
+        anOrg.entity[key] = [];
+      }
+      _.forEach(usersRoles, function (user) {
+        if (_hasRole(user, role)) {
+          anOrg.entity[key].push(user);
+        }
+      });
+    });
+  }
 
 })();
