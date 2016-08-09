@@ -37,7 +37,6 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
-    var stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
 
     this.initialized = false;
     this.guid = $stateParams.guid;
