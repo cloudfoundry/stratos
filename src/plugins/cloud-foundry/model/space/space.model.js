@@ -10,31 +10,31 @@
     .run(registerSpaceModel);
 
   registerSpaceModel.$inject = [
+    '$q',
     'app.model.modelManager',
-    'app.api.apiManager',
-    '$q'
+    'app.api.apiManager'
   ];
 
-  function registerSpaceModel(modelManager, apiManager, $q) {
-    modelManager.register('cloud-foundry.model.space', new Space(apiManager, modelManager, $q));
+  function registerSpaceModel($q, modelManager, apiManager) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager));
   }
 
   /**
    * @memberof cloud-foundry.model
    * @name Space
+   * @param {object} $q - angular $q service
+   * @property {object} $q - angular $q service
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
    * @property {object} stackatoInfoModel - the stackatoInfoModel service
-   * @param {object} $q - angular $q service
-   * @property {object} $q - angular $q service
    * @class
    */
-  function Space(apiManager, modelManager, $q) {
+  function Space($q, apiManager, modelManager) {
+    this.$q = $q;
     this.apiManager = apiManager;
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.$q = $q;
     this.data = {
     };
 
@@ -83,6 +83,13 @@
      */
     onListAllAppsForSpace: function (cnsiGuid, guid, apps) {
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.apps', apps);
+
+      // Ensures we also update inlined data for getDetails to pick up
+      var cachedSpace = _.get(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.space');
+      if (angular.isDefined(cachedSpace)) {
+        cachedSpace.entity.apps = apps;
+      }
+
       return apps;
     },
 
@@ -236,17 +243,24 @@
      * @description Cache response
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
-     * @param {object} roles - list of apps
+     * @param {object} allUsersRoles - list of apps
      * @returns {object} roles
      * @public
      */
-    onListRolesOfAllUsersInSpace: function (cnsiGuid, guid, roles) {
+    onListRolesOfAllUsersInSpace: function (cnsiGuid, guid, allUsersRoles) {
       var rolesByUserGuid = {};
-      _.forEach(roles, function (user) {
+      _.forEach(allUsersRoles, function (user) {
         _.set(rolesByUserGuid, user.metadata.guid, user.entity.space_roles);
       });
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.roles', rolesByUserGuid);
-      return roles;
+
+      // Ensures we also update inlined data for getDetails to pick up
+      var cachedSpace = _.get(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.space');
+      if (angular.isDefined(cachedSpace)) {
+        _splitSpaceRoles(cachedSpace, allUsersRoles);
+      }
+
+      return allUsersRoles;
     },
 
     /**
@@ -322,13 +336,19 @@
       var spaceQuotaApi = that.apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
 
       // var usedMemP = orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig);
-      var serviceInstancesP;
+      var serviceInstancesP, rolesP, appP;
       if (space.entity.service_instances) {
-        var spaces = space.entity.service_instances;
-        serviceInstancesP = this.$q.resolve(spaces);
-        that.onListAllServiceInstancesForSpace(cnsiGuid, spaceGuid, spaces);
+        var serviceInstances = space.entity.service_instances;
+        // For now filter out user_service_instances to get the same list as before
+        serviceInstances = _.filter(serviceInstances, function (si) {
+          return si.entity.type === 'managed_service_instance';
+        });
+        serviceInstancesP = this.$q.resolve(serviceInstances);
+        that.onListAllServiceInstancesForSpace(cnsiGuid, spaceGuid, serviceInstances);
       } else {
-        serviceInstancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid).then(function (val) {
+        serviceInstancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid, {
+          return_user_provided_service_instances: false
+        }).then(function (val) {
           return val;
         });
       }
@@ -339,7 +359,15 @@
 
       // Find our user's GUID
       var userGuid = that.stackatoInfoModel.info;
-      var rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
+
+      // Space roles can be inlined
+      if (space.entity.managers) {
+        var unsplitRoles = _unsplitSpaceRoles(space);
+        rolesP = that.$q.resolve(unsplitRoles);
+        that.onListRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, unsplitRoles);
+      } else {
+        rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
+      }
 
       var spaceRolesP = rolesP.then(function () {
         // Find my user's roles
@@ -350,9 +378,17 @@
         return myRoles;
       });
 
-      var appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid);
+      if (space.entity.apps) {
+        appP = that.$q.resolve(space.entity.apps);
+        that.onListAllAppsForSpace(cnsiGuid, spaceGuid, space.entity.apps);
+      } else {
+        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid);
+      }
+
+      // Services are never inlined
       var servicesP = this.listAllServicesForSpace(cnsiGuid, spaceGuid);
 
+      // We cannot rely on inline routes as they lack the depth we need later on
       var routesP = this.listAllRoutesForSpace(cnsiGuid, spaceGuid);
 
       return this.$q.all({
@@ -467,5 +503,65 @@
     }
 
   });
+
+  var SPACE_ROLE_TO_KEY = {
+    space_developer: 'developers',
+    space_manager: 'managers',
+    space_auditor: 'auditors'
+  };
+
+  function _shallowCloneUser(user) {
+    var clone = {
+      entity: _.clone(user.entity),
+      metadata: _.clone(user.metadata)
+    };
+    if (clone.entity.space_roles) {
+      delete clone.entity.space_roles;
+    }
+    return clone;
+  }
+
+  function _hasRole(user, role) {
+    return user.entity.space_roles.indexOf(role) > -1;
+  }
+
+  function assembleSpaceRoles(users, role, usersHash) {
+    _.forEach(users, function (user) {
+      var userKey = user.metadata.guid;
+      if (!usersHash.hasOwnProperty(userKey)) {
+        usersHash[userKey] = _shallowCloneUser(user);
+      }
+      usersHash[userKey].entity.space_roles = usersHash[userKey].entity.space_roles || [];
+      usersHash[userKey].entity.space_roles.push(role);
+    });
+  }
+
+  /**
+   * Transform split space role properties into an array of users with a space_roles property such as
+   * returned by the: RetrievingRolesOfAllUsersInSpace() cloud foundry API
+   * @param {Object} aSpace space object containing inlined managers etc.
+   * @returns {Array} a list of Users of the space with their space_roles property populated
+   * */
+  function _unsplitSpaceRoles(aSpace) {
+    var usersHash = {};
+    _.forEach(SPACE_ROLE_TO_KEY, function (key, role) {
+      assembleSpaceRoles(aSpace.entity[key], role, usersHash);
+    });
+    return _.values(usersHash);
+  }
+
+  function _splitSpaceRoles(aSpace, usersRoles) {
+    _.forEach(SPACE_ROLE_TO_KEY, function (key, role) {
+      // Clean while preserving ref in case directives are bound to it
+      if (angular.isDefined(aSpace.entity[key])) {
+        aSpace.entity[key].length = 0;
+      } else {
+        aSpace.entity[key] = [];
+      }
+      _.forEach(usersRoles, function (user) {
+        if (_hasRole(user, role)) { aSpace.entity[key].push(user); }
+      });
+    });
+  }
 
 })();
