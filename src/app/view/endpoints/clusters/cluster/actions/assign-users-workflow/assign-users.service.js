@@ -200,9 +200,6 @@
             nextBtnText: gettext('Assign'),
             isLastStep: true,
             actions: {
-              // selectedUserCount: function () {
-              //   return _.keys(that.userInput.selectedUsers).length;
-              // },
               changeOrganization: function (org) {
                 organizationChanged(org);
               },
@@ -210,7 +207,6 @@
                 return _.keys(obj);
               }
             },
-            // selectedUserListLimit: 10,
             table: {
               config: {
                 clusterGuid: context.clusterGuid,

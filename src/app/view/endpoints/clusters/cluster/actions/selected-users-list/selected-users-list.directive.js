@@ -20,9 +20,6 @@
     };
   }
 
-  // SelectedUsersListController.$inject = [
-  // ];
-
   /**
    * @name SelectedUsersListController
    * @description Shows list of users up to maxVisibleUsers. User can toggle all visible.
@@ -31,7 +28,7 @@
   function SelectedUsersListController() {
     var that = this;
 
-    this.maxVisibleUsers = this.maxVisibleUsers || 2;
+    this.maxVisibleUsers = this.maxVisibleUsers || 10;
     this.numberMaxValue = Number.MAX_SAFE_INTEGER;
 
     this.selectedUserCount = function () {

@@ -53,19 +53,37 @@
       // Ensure that the org_user is correctly updated given any changes in other org roles
       _.forEach(this.config.orgRoles, function (val, roleKey) {
         $scope.$watch(function () {
-          return that.selection.organization[roleKey];
+          return _.get(that.selection, 'organization.' + roleKey);
         }, function () {
           that.rolesService.updateOrgUser(that.selection.organization);
         });
       });
     }
 
+    function rolesToSelection(roles) {
+      return _.chain(roles)
+        .clone()
+        .omitBy(function (value) {
+          return !value;
+        })
+        .mapValues(function () {
+          return false;
+        })
+        .value();
+    }
+
     function refresh() {
-      // Optionally update the cache
+      // Show either the currently selected roles OR set all roles to false (such that they can be removed later)
       if (_.get(that, 'config.showExistingRoles')) {
+        // We only cater for a single user when showing existing rows. Anything more and the current UX would be
+        // misleading, so be brutish and throw and exception here
+        if (that.config.users.length > 1) {
+          throw new Error('roles-table does not support showing existing roles for more than one user');
+        }
+
         // Convert the cached organization roles into a keyed object of truthies required to run the check boxes
         var orgRolesByUser = that.organization.roles;
-        // At the moment we're only dealing with one user. See TEAMFOUR-708 for bulk users
+        // We only support showing existing roles for a single user
         var user = that.config.users[0];
         var userRoles = orgRolesByUser[user.metadata.guid];
         _.set(that.selection, 'organization', _.keyBy(userRoles));
@@ -77,7 +95,11 @@
           spaceRoles = _.get(spaceRoles, user.metadata.guid, []);
           _.set(that.selection, 'spaces.' + space.metadata.guid, _.keyBy(spaceRoles));
         });
-
+      } else {
+        _.set(that.selection, 'organization', rolesToSelection(that.config.orgRoles));
+        _.forEach(that.organization.spaces, function (space) {
+          _.set(that.selection, 'spaces.' + space.metadata.guid, rolesToSelection(that.config.spaceRoles));
+        });
       }
 
       // Set the current org and spaces collections

@@ -12,7 +12,9 @@
     <div class="manager-users-info"
       ng-if="asyncTaskDialogCtrl.context.tableConfig.users.length > 1">
       <div class="manager-users-info-message"
-        translate>Change roles for the following users. All previously assign roles will be removed.(????)</div>
+        translate>Change roles for the following users.
+        <span class="manager-users-warning">All previously assigned roles will be updated.</span>
+      </div>
       <div>
         <selected-users-list selected-users="asyncTaskDialogCtrl.context.tableConfig.users"></selected-users-list>
       </div>
