@@ -1,10 +1,9 @@
 <div class="add-route">
-  <h4 translate>Add a Route</h4>
   <form name="addRouteForm">
-    <div class="form-group " ng-class="{'has-error':addRouteCtrl.routeExists}" focusable-input>
+    <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists()}" focusable-input>
       <label class="control-label" translate>Host</label>
       <span class="control-message" translate>A route with this name already exists. Choose a new one</span>
-      <input type="text" name="host" class="form-control" ng-model="addRouteCtrl.context.data.host"
+      <input type="text" name="host" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.host"
              required
              placeholder="{{'a unique identifier for this app' | translate}}"
       />
@@ -13,27 +12,11 @@
       <label class="control-label" translate>Domain</label>
       <select-input
         class="form-control"
-        ng-model="addRouteCtrl.context.data.domain_guid"
+        ng-model="asyncTaskDialogCtrl.context.data.domain_guid"
         arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-        input-options="addRouteCtrl.context.options.domains"
+        input-options="asyncTaskDialogCtrl.context.options.domains"
         required
       />
-    </div>
-    <div ng-show="addRouteCtrl.addRouteError" class="alert alert-danger">
-      <p translate>
-        There was a problem adding or associating this route with your app. Please try again. If this error persists,
-        please contact the administrator.
-      </p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-default"
-              ng-click="addRouteCtrl.cancel()" translate>
-        Cancel
-      </button>
-      <button class="btn btn-primary"
-              ng-click="addRouteCtrl.addRoute()" translate>
-        Create Route
-      </button>
     </div>
   </form>
 </div>
