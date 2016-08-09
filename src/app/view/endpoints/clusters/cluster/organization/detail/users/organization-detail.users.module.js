@@ -65,11 +65,20 @@
       // For each user, get its roles in all spaces
       _.forEach(that.users, function (aUser) {
         var myRoles = {};
+        if (angular.isUndefined(that.spaceModel.spaces)) {
+          // Happens if there are no spaces in the org
+          return;
+        }
         _.forEach(that.spaceModel.spaces[that.guid], function (space) {
           if (_.isUndefined(space.roles) || _.isUndefined(space.details)) {
-            // Prob means this is a space for another org!
+            // Means this is a space from another org for which we never fetched the details
             return;
           }
+          // Skip space from other organizations
+          if (space.details.space.entity.organization_guid !== that.organizatioGuid) {
+            return;
+          }
+          // Space is in current org, check roles!
           var roles = space.roles[aUser.metadata.guid];
           if (!_.isUndefined(roles)) {
             myRoles[space.details.space.metadata.guid] = roles;
