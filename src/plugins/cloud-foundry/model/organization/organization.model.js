@@ -286,51 +286,100 @@
       var createdDate = moment(org.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
       var userGuid = that.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
-      // Memory and instance usages are never returned inline but we are able to derive from inline apps
-      var usedMemP, instancesP, quotaP, rolesP, routesCountP, allSpacesP, allUsersRoles;
-      if (org.entity.spaces) {
+      function getRoles(org) {
+        // The users roles may be returned inline
+        if (org.entity.users) {
+          // Reconstruct all user roles from inline data
+          return that.$q.resolve(_unsplitOrgRoles(org));
+        }
+        return that.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig).then(function (val) {
+          return val.data.resources;
+        });
+      }
 
-        if (org.entity.spaces.length === 0) {
-          usedMemP = that.$q.resolve(0);
-          instancesP = that.$q.resolve(0);
-          routesCountP = that.$q.resolve(0);
-        } else {
+      function getUsedMem(org) {
+        if (org.entity.spaces) {
+          if (org.entity.spaces.length === 0) {
+            return that.$q.resolve(0);
+          }
           if (org.entity.spaces[0].entity.apps) { // check if apps were inlined in the spaces
             var totalMem = 0;
-            var totalInstances = 0;
             _.forEach(org.entity.spaces, function (space) {
               var apps = space.entity.apps;
               _.forEach(apps, function (app) {
                 // Only count running apps, like the CF API would do
                 if (app.entity.state === 'STARTED') {
                   totalMem += parseInt(app.entity.memory, 10);
+                }
+              });
+            });
+            return that.$q.resolve(totalMem);
+          }
+        }
+        return that.orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
+          return res.data.memory_usage_in_mb;
+        });
+      }
+
+      function getInstances(org) {
+        if (org.entity.spaces) {
+          if (org.entity.spaces.length === 0) {
+            return that.$q.resolve(0);
+          }
+          if (org.entity.spaces[0].entity.apps) { // check if apps were inlined in the spaces
+            var totalInstances = 0;
+            _.forEach(org.entity.spaces, function (space) {
+              var apps = space.entity.apps;
+              _.forEach(apps, function (app) {
+                // Only count running apps, like the CF API would do
+                if (app.entity.state === 'STARTED') {
                   totalInstances += parseInt(app.entity.instances, 10);
                 }
               });
             });
-            usedMemP = that.$q.resolve(totalMem);
-            instancesP = that.$q.resolve(totalInstances);
-          }
-          if (org.entity.spaces[0].entity.routes) { // check if routes were inlined in the spaces
-            var totalRoutes = 0;
-            _.forEach(org.entity.spaces, function (space) {
-              totalRoutes += space.entity.routes.length;
-            });
-            routesCountP = that.$q.resolve(totalRoutes);
+            return that.$q.resolve(totalInstances);
           }
         }
-
-        allSpacesP = that.$q.resolve(org.entity.spaces);
-
+        return that.orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig).then(function (res) {
+          return res.data.instance_usage;
+        });
       }
 
-      instancesP = instancesP || that.orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig).then(function (res) {
-        return res.data.instance_usage;
-      });
+      function getRouteCount(org) {
+        if (org.entity.spaces) {
+          if (org.entity.spaces.length === 0) {
+            return that.$q.resolve(0);
+          } else {
+            if (org.entity.spaces[0].entity.routes) { // check if routes were inlined in the spaces
+              var totalRoutes = 0;
+              _.forEach(org.entity.spaces, function (space) {
+                totalRoutes += space.entity.routes.length;
+              });
+              return that.$q.resolve(totalRoutes);
+            }
+          }
+        }
+      }
 
-      usedMemP = usedMemP || that.orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
-        return res.data.memory_usage_in_mb;
-      });
+      function getQuota(org) {
+        if (org.entity.quota_definition) {
+          return that.$q.resolve(org.entity.quota_definition);
+        }
+        return that.orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig).then(function (val) {
+          return val.data;
+        });
+      }
+
+      var rolesP = getRoles(org); // Roles can be returned inline
+      var usedMemP = getUsedMem(org); // Memory usage can be inferred from inlined apps
+      var instancesP = getInstances(org); // Instance usage can be inferred from inlined apps
+      var routesCountP = getRouteCount(org); // Routes can be returned inline
+      var quotaP = getQuota(org); // The quota can be returned inline
+
+      var allSpacesP, allUsersRoles;
+      if (org.entity.spaces) {
+        allSpacesP = that.$q.resolve(org.entity.spaces);
+      }
 
       allSpacesP = allSpacesP || this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
@@ -358,33 +407,14 @@
         });
       });
 
-      // The quota may be returned inline
-      if (org.entity.quota_definition) {
-        quotaP = that.$q.resolve(org.entity.quota_definition);
-      } else {
-        quotaP = that.orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig).then(function (val) {
-          return val.data;
-        });
-      }
-
-      // The users roles may be returned inline
-      if (org.entity.users) {
-        // Reconstruct all user roles from inline data
-        rolesP = that.$q.resolve(_unsplitOrgRoles(org));
-      } else {
-        rolesP = that.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig).then(function (val) {
-          return val.data.resources;
-        });
-      }
-
       var orgRolesP = rolesP.then(function (usersRoles) {
         var i, myRoles;
 
         allUsersRoles = usersRoles; // Cached later!
 
         // Find the connected user's roles in each org
-        for (i = 0; i < allUsersRoles.length; i++) {
-          var user = allUsersRoles[i];
+        for (i = 0; i < usersRoles.length; i++) {
+          var user = usersRoles[i];
           if (user.metadata.guid === userGuid) {
             myRoles = user.entity.organization_roles;
             break;
