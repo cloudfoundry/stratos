@@ -3,20 +3,44 @@
 
   angular
     .module('cloud-foundry.view.applications.application.summary')
-    .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory)
-    .controller('addRouteController', AddRouteController);
+    .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory);
 
   AddRouteServiceFactory.$inject = [
     'app.model.modelManager',
-    'helion.framework.widgets.detailView'
+    'helion.framework.widgets.asyncTaskDialog'
   ];
 
-  function AddRouteServiceFactory(modelManager, detailView) {
+  /**
+   * @name AddRouteServiceFactory
+   * @description Factory for getting the Add Route Dialog
+   * @memberof cloud-foundry.view.applications.application.summary
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} asyncTaskDialog - async dialog service
+   * @constructor
+   */
+  function AddRouteServiceFactory(modelManager, asyncTaskDialog) {
+
+    this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
+
+    var that = this;
+
     return {
-      add: function () {
-        var model = modelManager.retrieve('cloud-foundry.model.application');
+
+      /**
+       * @name add
+       * @description Display Add Route Dialog
+       * @param {String} cnsiGuid - CNSI GUID
+       * @param {String} applicationId - Application GUID
+       * @returns {*} asyncTaskDialog
+       */
+      add: function (cnsiGuid, applicationId) {
         // Create a map of domain names -> domain guids
+        var model = modelManager.retrieve('cloud-foundry.model.application');
+
         var domains = [];
+        var routeExists = false;
+        var hideAsyncIndicatorContent = false;
+
         model.application.summary.available_domains.forEach(function (domain) {
           domains.push({
             label: domain.name,
@@ -31,120 +55,70 @@
           space_guid: spaceGuid,
           domain_guid: domains[0].value
         };
-        return detailView(
+
+        var addRoute = function (contextData) {
+
+          hideAsyncIndicatorContent = false;
+          routeExists = false;
+
+          var data = {
+            space_guid: contextData.space_guid,
+            domain_guid: contextData.domain_guid,
+            host: contextData.host
+          };
+
+          return that.routeModel.createRoute(cnsiGuid, data)
+            .then(function (response) {
+              if (!(response.metadata && response.metadata.guid)) {
+                /* eslint-disable no-throw-literal */
+                throw response;
+                /* eslint-enable no-throw-literal */
+              }
+              var routeId = response.metadata.guid;
+              return that.routeModel.associateAppWithRoute(cnsiGuid, routeId, applicationId);
+            })
+
+            .then(function () {
+              // Update application summary model
+              return model.getAppSummary(cnsiGuid, applicationId);
+            })
+            .catch(function (error) {
+              // check if error is CF-RouteHostTaken indicating that the route has already been created
+              if (_.isPlainObject(error) &&
+                error.error_code &&
+                error.error_code === 'CF-RouteHostTaken') {
+                routeExists = true;
+                hideAsyncIndicatorContent = true;
+              }
+              throw error;
+            });
+        };
+
+        return asyncTaskDialog(
           {
-            controller: AddRouteController,
-            controllerAs: 'addRouteCtrl',
-            detailViewTemplateUrl: 'plugins/cloud-foundry/view/applications/' +
-            'application/summary/add-route/add-route.html'
+            title: gettext('Add a Route'),
+            templateUrl: 'plugins/cloud-foundry/view/applications/' +
+            'application/summary/add-route/add-route.html',
+            buttonTitles: {
+              submit: 'Create route'
+            }
           },
           {
             data: data,
             options: {
               domains: domains
+            },
+            routeExists: function () {
+              return routeExists;
+            },
+            hideAsyncIndicatorContent: function () {
+              return hideAsyncIndicatorContent;
             }
-          }
-        ).result;
+          },
+          addRoute
+        );
       }
     };
   }
-
-  AddRouteController.$inject = [
-    '$scope',
-    '$stateParams',
-    'app.model.modelManager',
-    '$uibModalInstance',
-    'context'
-  ];
-
-  /**
-   * @name AddRouteController
-   * @constructor
-   * @param {Object} $scope - Angular $scope
-   * @param {Object} $stateParams - the UI router $stateParams service
-   * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {Object} $uibModalInstance - the Angular UI Bootstrap $uibModalInstance service
-   * @param {Object} context - the uibModal context
-   */
-  function AddRouteController($scope, $stateParams, modelManager, $uibModalInstance, context) {
-    var that = this;
-    that.addRouteError = false;
-    that.applicationId = $stateParams.guid;
-    that.cnsiGuid = $stateParams.cnsiGuid;
-    that.model = modelManager.retrieve('cloud-foundry.model.application');
-    that.routeModel = modelManager.retrieve('cloud-foundry.model.route');
-    that.uibModelInstance = $uibModalInstance;
-    that.context = context;
-
-    that.addRouteError = false;
-    that.routeExists = false;
-
-    $scope.$watch(function () {
-      return that.context.data.host;
-    }, function () {
-      if (that.routeExists) {
-        that.routeExists = false;
-      }
-    });
-  }
-
-  angular.extend(AddRouteController.prototype, {
-
-    addRoute: function () {
-      var that = this;
-      var data = {
-        space_guid: that.context.data.space_guid,
-        domain_guid: that.context.data.domain_guid,
-        host: that.context.data.host
-      };
-
-      this.routeModel.createRoute(that.cnsiGuid, data)
-        .then(function (response) {
-          if (!(response.metadata && response.metadata.guid)) {
-            /* eslint-disable no-throw-literal */
-            throw response;
-            /* eslint-enable no-throw-literal */
-          }
-          var routeId = response.metadata.guid;
-          return that.routeModel.associateAppWithRoute(that.cnsiGuid, routeId, that.applicationId);
-        })
-
-        .then(function () {
-          // Update application summary model
-          return that.model.getAppSummary(that.cnsiGuid, that.applicationId);
-        })
-
-        .then(function () {
-          that.uibModelInstance.close();
-        })
-
-        .catch(function (error) {
-          // check if error is CF-RouteHostTaken indicating that the route has already been created
-          if (_.isPlainObject(error) &&
-            error.error_code &&
-            error.error_code === 'CF-RouteHostTaken') {
-            that.routeExists = true;
-            return;
-          }
-          that.onAddRouteError();
-        });
-    },
-
-    /**
-     * @function cancel
-     * @description Cancel adding a route. Clear the form and dismiss this form.
-     */
-    cancel: function () {
-      this.uibModelInstance.dismiss();
-    },
-
-    /**
-     * @function onAddRouteError
-     * @description Display error when adding a route
-     */
-    onAddRouteError: function () {
-      this.addRouteError = true;
-    }
-  });
 
 })();

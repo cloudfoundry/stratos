@@ -94,7 +94,7 @@
      * @public
      **/
     showAddRouteForm: function () {
-      this.addRoutesService.add();
+      this.addRoutesService.add(this.cnsiGuid, this.id);
     },
 
     /**
