@@ -156,8 +156,14 @@
      */
     listAllServiceInstancesForSpace: function (cnsiGuid, guid, params) {
       var that = this;
+      var combinedParams = params || {};
+      var inlineParams = {
+        'inline-relations-depth': 2,
+        'include-relations': 'service_bindings,service_plan,service,app'
+      };
+      _.assign(combinedParams, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServiceInstancesForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllServiceInstancesForSpace(guid, combinedParams, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return that.onListAllServiceInstancesForSpace(cnsiGuid, guid, response.data.resources);
         });
@@ -184,20 +190,20 @@
      * @description Lost all routes for service
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
-     * @param {object=} options - additional parameters for request
+     * @param {object=} params - additional parameters for request
      * @returns {promise} A promise object
      * @public
      */
-    listAllRoutesForSpace: function (cnsiGuid, guid, options) {
+    listAllRoutesForSpace: function (cnsiGuid, guid, params) {
       var that = this;
-      //
-      var params = {
+      var combinedParams = params || {};
+      var inlineParams = {
         'inline-relations-depth': 1,
         'include-relations': 'domain,apps'
       };
-      _.apply(params, options);
+      _.assign(combinedParams, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllRoutesForSpace(guid, combinedParams, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return that.onListAllRoutesForSpace(cnsiGuid, guid, response.data.resources);
         });
@@ -335,23 +341,12 @@
 
       var spaceQuotaApi = that.apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
 
-      // var usedMemP = orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig);
-      var serviceInstancesP, rolesP, appP;
-      if (space.entity.service_instances) {
-        var serviceInstances = space.entity.service_instances;
-        // For now filter out user_service_instances to get the same list as before
-        serviceInstances = _.filter(serviceInstances, function (si) {
-          return si.entity.type === 'managed_service_instance';
-        });
-        serviceInstancesP = this.$q.resolve(serviceInstances);
-        that.onListAllServiceInstancesForSpace(cnsiGuid, spaceGuid, serviceInstances);
-      } else {
-        serviceInstancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid, {
-          return_user_provided_service_instances: false
-        }).then(function (val) {
-          return val;
-        });
-      }
+      var rolesP, appP;
+
+      // We cannot rely on inline routes as they lack the depth we need later on
+      var serviceInstancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid, {
+        return_user_provided_service_instances: false
+      });
 
       var quotaP = spaceQuotaGuid
         ? spaceQuotaApi.RetrieveSpaceQuotaDefinition(spaceQuotaGuid, params, httpConfig)

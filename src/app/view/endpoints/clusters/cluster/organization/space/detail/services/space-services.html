@@ -18,9 +18,9 @@
         <tr
           ng-repeat="instance in spaceSrvsCtrl.visibleServiceInstances">
           <td>{{ instance.entity.name }}</td>
-          <td>{{ spaceSrvsCtrl.service[instance.metadata.guid].entity.label }}</td>
-          <td>{{ spaceSrvsCtrl.servicePlan[instance.metadata.guid].entity.name }}</td>
-          <td>{{ spaceSrvsCtrl.appModel.appSummary[spaceSrvsCtrl.clusterGuid][spaceSrvsCtrl.serviceBindingModel.allServiceBindings[spaceSrvsCtrl.clusterGuid][instance.metadata.guid].entity.app_guid].name }}</td>
+          <td>{{ instance.entity.service_plan.entity.service.entity.label }}</td>
+          <td>{{ instance.entity.service_plan.entity.name }}</td>
+          <td>{{ spaceSrvsCtrl.createApplicationList(instance.entity.service_bindings) }}</td>
           <td>
             <actions-menu actions="spaceSrvsCtrl.actions"
                           action-target="instance"
