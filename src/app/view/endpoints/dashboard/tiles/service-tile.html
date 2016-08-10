@@ -8,6 +8,9 @@
       <span translate>Register {{serviceTileCtrl.isHcf() ? 'a Cluster' : 'an Endpoint'}}</span>
     </a>
   </div>
+  <div class="panel-body service-tile-loading" ng-if="!serviceTileCtrl.resolvedPromise">
+    <bounce-spinner  classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
   <div class="panel-body no-instances" ng-if="serviceTileCtrl.serviceInstancesCount()===0
    && serviceTileCtrl.resolvedPromise">
     <span ng-show="serviceTileCtrl.isHcf()" class="helion-icon helion-icon-lg helion-icon-Cluster"></span>

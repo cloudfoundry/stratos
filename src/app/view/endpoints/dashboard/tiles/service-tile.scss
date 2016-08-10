@@ -13,6 +13,14 @@
     margin: 0 auto;
   }
 
+  .service-tile-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 194px;
+  }
+
   .panel-body {
     text-align: center;
     th {
@@ -37,7 +45,7 @@
       color: #00b388;
     }
   }
-  
+
   ring-chart > svg {
     margin-right: $hpe-unit-space * .5;
   }
