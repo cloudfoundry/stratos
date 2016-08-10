@@ -60,8 +60,6 @@
    * @property {object} options - workflow options
    */
   function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q, $timeout) {
-    var that = this;
-
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -77,76 +75,83 @@
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
-      that.startWorkflow();
-    });
-
     this.userInput = {};
     this.options = {};
     this.filterTimeout = null;
 
-    $scope.$watch(function () {
-      return that.userInput.serviceInstance;
-    }, function (serviceInstance) {
-      if (serviceInstance) {
-        that.getOrganizations();
-        that.getDomains().then(function () {
-          that.userInput.domain = that.options.domains[0].value;
-        });
-      }
-    });
-
-    $scope.$watch(function () {
-      return that.userInput.organization;
-    }, function (organization) {
-      if (organization) {
-        that.getSpacesForOrganization(organization.metadata.guid);
-      }
-    });
-
-    $scope.$watch(function () {
-      return that.userInput.space;
-    }, function (space) {
-      if (space) {
-        that.getAppsForSpace(space.metadata.guid);
-      }
-    });
-
-    $scope.$watch(function () {
-      return that.userInput.searchCategory;
-    }, function (newSearchCategory) {
-      if (angular.isDefined(that.userInput.search)) {
-        that.userInput.search.entity.extra = newSearchCategory === 'all' ? undefined : newSearchCategory;
-      }
-    });
-
-    $scope.$watch(function () {
-      return that.options.subflow;
-    }, function (subflow) {
-      if (subflow) {
-        that.appendSubflow(that.data.subflows[subflow]);
-      }
-    });
-
-    $scope.$watch(function () {
-      return that.userInput.repoFilterTerm;
-    }, function (newFilterTerm) {
-      if (that.filterTimeout !== null) {
-        that.$timeout.cancel(that.filterTimeout);
-      }
-
-      that.filterTimeout = that.$timeout(function () {
-        return that.filterRepos(newFilterTerm);
-      }, 500);
-    });
-
-    this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
-      that.loadMoreRepos();
-    });
+    this.init();
   }
 
   function run() {
     angular.extend(AddAppWorkflowController.prototype, {
+
+      init: function () {
+        var that = this;
+        var $scope = this.$scope;
+
+        this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
+          that.startWorkflow();
+        });
+
+        this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
+          that.loadMoreRepos();
+        });
+
+        $scope.$watch(function () {
+          return that.userInput.serviceInstance;
+        }, function (serviceInstance) {
+          if (serviceInstance) {
+            that.getOrganizations();
+            that.getDomains().then(function () {
+              that.userInput.domain = that.options.domains[0].value;
+            });
+          }
+        });
+
+        $scope.$watch(function () {
+          return that.userInput.organization;
+        }, function (organization) {
+          if (organization) {
+            that.getSpacesForOrganization(organization.metadata.guid);
+          }
+        });
+
+        $scope.$watch(function () {
+          return that.userInput.space;
+        }, function (space) {
+          if (space) {
+            that.getAppsForSpace(space.metadata.guid);
+          }
+        });
+
+        $scope.$watch(function () {
+          return that.userInput.searchCategory;
+        }, function (newSearchCategory) {
+          if (angular.isDefined(that.userInput.search)) {
+            that.userInput.search.entity.extra = newSearchCategory === 'all' ? undefined : newSearchCategory;
+          }
+        });
+
+        $scope.$watch(function () {
+          return that.options.subflow;
+        }, function (subflow) {
+          if (subflow) {
+            that.appendSubflow(that.data.subflows[subflow]);
+          }
+        });
+
+        $scope.$watch(function () {
+          return that.userInput.repoFilterTerm;
+        }, function (newFilterTerm) {
+          if (that.filterTimeout !== null) {
+            that.$timeout.cancel(that.filterTimeout);
+          }
+
+          that.filterTimeout = that.$timeout(function () {
+            return that.filterRepos(newFilterTerm);
+          }, 500);
+        });
+      },
 
       reset: function () {
         var that = this;
