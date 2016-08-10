@@ -10,13 +10,16 @@
     <dt translate>TOTAL APPS</dt>
     <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalApps }}</dd>
     <dt translate>APP INSTANCES</dt>
-    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalAppInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.appInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.orgDetails().details.appInstancesQuota }}</dd>
+    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalAppInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.appInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.spaceDetail().details.appInstancesQuota }}</dd>
     <dt translate>SERVICE INSTANCES</dt>
-    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalServiceInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.serviceInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.orgDetails().details.serviceInstancesQuota }}</dd>
+    <dd>{{ orgSpaceTileCtrl.spaceDetail().details.totalServiceInstances }} / {{ orgSpaceTileCtrl.spaceDetail().details.serviceInstancesQuota === -1 ? '∞' : orgSpaceTileCtrl.spaceDetail().details.serviceInstancesQuota }}</dd>
     <!--<dt ng-if="true" translate>DISK</dt>-->
     <!--<dd ng-if="true">{{'1'}}</dd>-->
-    <!--<dt ng-if="true" translate>MEMORY UTILIZATION</dt>-->
-    <!--<dd ng-if="true">{{'1'}}</dd>-->
+    <dt translate>MEMORY UTILIZATION</dt>
+    <dd>{{ orgSpaceTileCtrl.memory }}</dd>
+    <percent-gauge title=""
+                   value="{{ orgSpaceTileCtrl.spaceDetail().details.memUsed / orgSpaceTileCtrl.spaceDetail().details.memQuota }}"
+                   bar-only="true"/>
   </dl>
 
 </gallery-card>

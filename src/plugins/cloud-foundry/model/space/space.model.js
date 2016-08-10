@@ -417,22 +417,32 @@
         details.created_at = createdDate.unix();
 
         // Set memory utilisation
-        // details.memUsed = vals.memory.data.memory_usage_in_mb;
-        // details.memQuota = vals.quota.data.entity.memory_limit;
+        details.memUsed = 0;
+        _.forEach(space.entity.apps, function (app) {
+          // Only count running apps, like the CF API would do
+          if (app.entity.state === 'STARTED') {
+            details.memUsed += parseInt(app.entity.memory, 10);
+          }
+        });
+        details.memQuota = _.get(vals.quota, 'data.entity.memory_limit', -1);
 
         // Set total apps and app instances count
         details.totalApps = (vals.apps || []).length;
+
         details.totalAppInstances = appInstances;
-        details.appInstancesQuota = _.get(vals.quota, 'app_instance_limit', -1);
+        details.appInstancesQuota = _.get(vals.quota, 'data.entity.app_instance_limit', -1);
 
         details.totalRoles = (vals.roles || []).length;
         details.roles = vals.roles;
 
         details.totalServices = (vals.services || []).length;
+        details.servicesQuota = _.get(vals.quota, 'data.entity.total_services', -1);
+
         details.totalRoutes = (vals.routes || []).length;
+        details.routesQuota = _.get(vals.quota, 'data.entity.total_routes', -1);
 
         details.totalServiceInstances = (vals.serviceInstances || []).length;
-        details.serviceInstancesQuota = _.get(vals.quota, 'total_services', -1);
+        details.serviceInstancesQuota = _.get(vals.quota, 'data.entity.total_services', -1);
 
         _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details', details);
 

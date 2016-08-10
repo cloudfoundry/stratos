@@ -61,7 +61,7 @@
 
       var usedUnit = UNIT_GRABBER.exec(usedMemHuman);
       var totalUnit = UNIT_GRABBER.exec(totalMemHuman);
-      if (usedUnit[2] === totalUnit[2] || usedUnit[1] === '0') {
+      if (_.get(usedUnit, 2) === _.get(totalUnit, 2) || _.get(usedUnit, 1) === '0') {
         usedMemHuman = usedUnit[1];
       }
 
