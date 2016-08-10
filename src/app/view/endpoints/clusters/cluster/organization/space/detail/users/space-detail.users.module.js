@@ -30,15 +30,17 @@
     '$stateParams',
     '$log',
     '$q',
+    '$timeout',
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.view.userSelection'
   ];
 
-  function SpaceUsersController($scope, $state, $stateParams, $log, $q,
-                                modelManager, utils, manageUsers, rolesService, eventService) {
+  function SpaceUsersController($scope, $state, $stateParams, $log, $q, $timeout,
+                                modelManager, utils, manageUsers, rolesService, eventService, userSelection) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -54,8 +56,7 @@
 
     this.userRoles = {};
 
-    this.selectAllUsers = false;
-    this.selectedUsers = {};
+    this.selectedUsers = userSelection.getSelectedUsers(this.guid);
 
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
@@ -65,7 +66,7 @@
       // For each user, get its roles in this space
       _.forEach(that.users, function (aUser) {
         if (_.isUndefined(that.space.roles) || _.isUndefined(that.space.details)) {
-          $log.warn('Space Roles not cached yet!', that.space);
+          $log.debug('Space Roles not cached yet?', that.space);
           return;
         }
         that.userRoles[aUser.metadata.guid] = [];
@@ -99,7 +100,10 @@
 
         return refreshUsers();
       }).then(function () {
-        $log.debug('SpaceUsersController finished init');
+        // Wait for the smart-table to populate visible-users before checking the all-selected state
+        $timeout(function () {
+          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+        });
       });
     }
 
@@ -135,11 +139,9 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        _.forEach(that.visibleUsers, function (user) {
-          that.selectedUsers[user.metadata.guid] = true;
-        });
+        userSelection.selectUsers(that.guid, that.visibleUsers);
       } else {
-        that.selectedUsers = {};
+        userSelection.deselectAllUsers(that.guid);
       }
     };
 

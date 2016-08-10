@@ -30,17 +30,18 @@
     '$scope',
     '$state',
     '$stateParams',
-    '$log',
     '$q',
+    '$timeout',
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.view.userSelection'
   ];
 
-  function OrganizationUsersController($scope, $state, $stateParams, $log, $q,
-                                       modelManager, utils, manageUsers, rolesService, eventService) {
+  function OrganizationUsersController($scope, $state, $stateParams, $q, $timeout,
+                                       modelManager, utils, manageUsers, rolesService, eventService, userSelection) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -56,8 +57,7 @@
 
     this.userRoles = {};
 
-    this.selectAllUsers = false;
-    this.selectedUsers = {};
+    this.selectedUsers = userSelection.getSelectedUsers(this.guid);
 
     function refreshUsers() {
       that.userRoles = {};
@@ -109,7 +109,10 @@
         return refreshUsers();
 
       }).then(function () {
-        $log.debug('OrganizationUsersController finished init');
+        // Wait for the smart-table to populate visible-users before checking the all-selected state
+        $timeout(function () {
+          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+        });
       });
     }
 
@@ -136,11 +139,9 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        _.forEach(that.visibleUsers, function (user) {
-          that.selectedUsers[user.metadata.guid] = true;
-        });
+        userSelection.selectUsers(that.guid, that.visibleUsers);
       } else {
-        that.selectedUsers = {};
+        userSelection.deselectAllUsers(that.guid);
       }
     };
 
