@@ -25,7 +25,8 @@
       selectUsers: selectUsers,
       deselectUsers: deselectUsers,
       deselectAllUsers: deselectAllUsers,
-      isAllSelected: isAllSelected
+      isAllSelected: isAllSelected,
+      deselectInvisibleUsers: deselectInvisibleUsers
     };
 
     function _initSelection(cnsiGuid) {
@@ -50,7 +51,13 @@
 
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
-        var userKey = user.metadata.guid;
+        var userKey;
+        // Support selecting by guid or Object
+        if (_.isString(user)) {
+          userKey = user;
+        } else {
+          userKey = user.metadata.guid;
+        }
         that.selectedUsers[cnsiGuid][userKey] = true;
       }
     }
@@ -66,7 +73,13 @@
 
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
-        var userKey = user.metadata.guid;
+        var userKey;
+        // Support checking by guid or Object
+        if (_.isString(user)) {
+          userKey = user;
+        } else {
+          userKey = user.metadata.guid;
+        }
         if (!that.selectedUsers[cnsiGuid][userKey]) {
           return false;
         }
@@ -85,7 +98,13 @@
 
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
-        var userKey = user.metadata.guid;
+        var userKey;
+        // Support deselecting by guid or Object
+        if (_.isString(user)) {
+          userKey = user;
+        } else {
+          userKey = user.metadata.guid;
+        }
         delete that.selectedUsers[cnsiGuid][userKey];
       }
     }
@@ -96,6 +115,16 @@
         if (!that.selectedUsers[cnsiGuid].hasOwnProperty(userGuid)) { continue; }
         delete that.selectedUsers[cnsiGuid][userGuid];
       }
+    }
+
+    function deselectInvisibleUsers(cnsiGuid, visibleUsers) {
+      _initSelection(cnsiGuid);
+      var selectUsersGuids = _.invert(that.selectedUsers[cnsiGuid], true).true;
+      var visibleUsersGuids = _.map(visibleUsers, function (user) {
+        return user.metadata.guid;
+      });
+      var invisibleUsers = _.differenceBy(selectUsersGuids, visibleUsersGuids);
+      deselectUsers(cnsiGuid, invisibleUsers);
     }
 
   }

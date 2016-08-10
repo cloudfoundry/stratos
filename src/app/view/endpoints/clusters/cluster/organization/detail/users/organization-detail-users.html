@@ -19,11 +19,11 @@
               translate>Remove From Organization</button>
     </div>
     <div class="panel panel-default">
-      <table class="table table-actionable table-selectable" >
+      <table class="table table-actionable table-selectable">
         <thead>
         <tr>
           <th><checkbox-input class="select-all-checkbox" ng-change="organizationUsersController.selectAllChanged()" ng-model="organizationUsersController.selectAllUsers"></checkbox-input></th>
-          <th translate st-sort-default="true" st-sort="entity.username">USERS({{ organizationUsersController.users.length }})</th>
+          <th class="sortable" translate st-sort-default="true" st-sort="entity.username">USERS({{ organizationUsersController.users.length }})</th>
           <th translate>Space Roles</th>
           <th translate>ACTION</th>
         </tr>
@@ -33,7 +33,7 @@
           <td><checkbox-input ng-model="organizationUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
           <td class="user-name">{{ user.entity.username }}</td>
           <td class="roles-list">
-            <div class="role-pill"
+            <div class="role-pill closable-pill"
                  ng-repeat="spaceRole in organizationUsersController.getSpaceRoles(user)"
                  ng-class="{ 'progress-cursor' : organizationUsersController.removingSpace[spaceRole.space.details.space.entity.name + spaceRole.roleLabel] }">
               {{ spaceRole.space.details.space.entity.name }}: {{ spaceRole.roleLabel }}
@@ -51,6 +51,17 @@
           </td>
         </tr>
         </tbody>
+        <tfoot ng-init="organizationUsersController.showUsers = 6"
+               ng-show="organizationUsersController.showUsers < organizationUsersController.users.length">
+        <tr>
+          <td colspan="4" class="text-center">
+            <a ng-click="organizationUsersController.showUsers = organizationUsersController.users.length">
+              <span translate>Show All</span> ({{ organizationUsersController.users.length }})
+            </a>
+            <div ng-show="false" st-pagination="" st-items-by-page="organizationUsersController.showUsers"></div>
+          </td>
+        </tr>
+        </tfoot>
       </table>
     </div>
 

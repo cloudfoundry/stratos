@@ -30,7 +30,6 @@
     '$stateParams',
     '$log',
     '$q',
-    '$timeout',
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
@@ -39,7 +38,7 @@
     'app.view.userSelection'
   ];
 
-  function SpaceUsersController($scope, $state, $stateParams, $log, $q, $timeout,
+  function SpaceUsersController($scope, $state, $stateParams, $log, $q,
                                 modelManager, utils, manageUsers, rolesService, eventService, userSelection) {
     var that = this;
 
@@ -83,6 +82,11 @@
       return $q.resolve();
     }
 
+    var debouncedUpdateSelection = _.debounce(function () {
+      userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
+      $scope.$apply();
+    }, 100);
+
     function init() {
       $scope.$watch(function () {
         return rolesService.changingRoles;
@@ -95,15 +99,18 @@
         that.userActions[2].disabled = rolesService.changingRoles || !isAdmin;
       });
 
+      $scope.$watchCollection(function () {
+        return that.visibleUsers;
+      }, function () {
+        if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
+          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+          debouncedUpdateSelection();
+        }
+      });
+
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
         that.users = res;
-
         return refreshUsers();
-      }).then(function () {
-        // Wait for the smart-table to populate visible-users before checking the all-selected state
-        $timeout(function () {
-          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
-        });
       });
     }
 

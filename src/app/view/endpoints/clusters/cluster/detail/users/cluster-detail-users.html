@@ -23,7 +23,7 @@
         <thead>
         <tr>
           <th><checkbox-input class="select-all-checkbox" ng-change="clusterUsersController.selectAllChanged(clusterDetailController.selectedUsers)" ng-model="clusterUsersController.selectAllUsers"></checkbox-input></th>
-          <th st-sort-default="true" st-sort="entity.username">USERS({{ clusterUsersController.users.length }})</th>
+          <th class="sortable" st-sort-default="true" st-sort="entity.username">USERS({{ clusterUsersController.users.length }})</th>
           <th translate>Organization Roles</th>
           <th translate>ACTION</th>
         </tr>
@@ -34,7 +34,7 @@
           </td>
           <td class="user-name">{{ user.entity.username }}</td>
           <td class="roles-list">
-            <div class="role-pill"
+            <div class="role-pill" ng-class="{'closable-pill': clusterUsersController.canRemoveOrgRole(user, orgRole)}"
                  ng-repeat="orgRole in clusterUsersController.getOrganizationsRoles(user)"
                  ng-class="{ 'progress-cursor' : clusterUsersController.removingOrg[orgRole.org.details.org.entity.name + orgRole.roleLabel] }">
               {{ orgRole.org.details.org.entity.name }}: {{ orgRole.roleLabel }}
@@ -53,6 +53,17 @@
           </td>
         </tr>
         </tbody>
+        <tfoot ng-init="clusterUsersController.showUsers = 6"
+               ng-show="clusterUsersController.showUsers < clusterUsersController.users.length">
+        <tr>
+          <td colspan="4" class="text-center">
+            <a ng-click="clusterUsersController.showUsers = clusterUsersController.users.length">
+              <span translate>Show All</span> ({{ clusterUsersController.users.length }})
+            </a>
+            <div ng-show="false" st-pagination="" st-items-by-page="clusterUsersController.showUsers"></div>
+          </td>
+        </tr>
+        </tfoot>
       </table>
     </div>
 

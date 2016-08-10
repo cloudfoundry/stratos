@@ -30,7 +30,11 @@
       text-transform: none;
     }
 
-    .user-name {
+    th.sortable {
+      cursor: pointer;
+    }
+
+  .user-name {
       white-space: nowrap;
       min-width: 200px;
     }
@@ -43,18 +47,24 @@
             cursor: progress;
           }
         }
+        color: #555555;
+        font-weight: 500;
         cursor: default;
         float: left;
-        margin: 0 8px 8px 0;
-        padding: 1px 4px 4px 4px;
-        border: solid 2px $gray-light;
-        border-radius: 5px;
+        margin: 0 12px 12px 0;
+        padding: 2px 4px 2px 4px;
+        border: solid 2px #ccc;
+        border-radius: 7px;
+      }
+
+      .closable-pill:hover {
+        border-color: #01A982;
       }
 
       i.helion-icon.close-icon {
-        font-size: 12px;
+        font-size: 14px;
         font-weight: bolder;
-        color: #aaa;
+        color: black;
         margin-left: 10px;
         cursor: pointer;
       }
