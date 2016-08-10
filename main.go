@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/antonlindstrom/pgstore"
@@ -27,6 +29,17 @@ const TimeoutBoundary = 10
 var (
 	httpClient = http.Client{}
 )
+
+func cleanup(dbc *sql.DB, ss *pgstore.PGStore) {
+	log.Println("Attempting to shut down gracefully...")
+	log.Println(`--- Closing databaseConnectionPool`)
+	dbc.Close()
+	log.Println(`--- Closing sessionStore`)
+	ss.Close()
+	log.Println(`--- Stopping sessionStore cleanup`)
+	ss.StopCleanup(ss.Cleanup(time.Minute * 5))
+	log.Println("Graceful shut down complete")
+}
 
 func main() {
 	log.SetOutput(os.Stdout)
@@ -82,6 +95,14 @@ func main() {
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
 	log.Println("Proxy initialization complete.")
+
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		cleanup(databaseConnectionPool, sessionStore)
+		os.Exit(1)
+	}()
 
 	// Start the proxy
 	log.Println("Proxy config at startup")
