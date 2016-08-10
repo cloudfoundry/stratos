@@ -2,7 +2,6 @@
   <div class="panel-heading action-header">
     <span ng-if="serviceTileCtrl.isHcf()" translate> Cloud Foundry Clusters</span>
     <span ng-if="!serviceTileCtrl.isHcf()" translate> Code Engine Endpoints</span>
-
     <a class="btn btn-link tile-btn" ng-click="serviceTileCtrl.showClusterAddForm()"
        ng-if="serviceTileCtrl.serviceInstancesCount()>0 && serviceTileCtrl.isUserAdmin() && serviceTileCtrl.resolvedPromise">
       <i class="helion-icon helion-icon-Right_Arrow"></i>
