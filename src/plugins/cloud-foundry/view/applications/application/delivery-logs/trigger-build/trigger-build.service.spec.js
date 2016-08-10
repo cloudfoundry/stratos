@@ -8,16 +8,18 @@
     var cnsi = 1234;
     var project = {
       repo: {
-        full_name: 'test_full_name'
+        full_name: 'test_full_name',
+        http_url: 'https://github.com'
       }
     };
     var defaultCommitCount = 20;
-    var defaultCommitsRequest = '/pp/v1/github/repos/' + project.repo.full_name + '/commits?per_page=' +
+    var defaultCommitsRequest = '/pp/v1/vcs/repos/' + project.repo.full_name + '/commits?per_page=' +
       defaultCommitCount;
     var defaultTriggerRequest = '/pp/v1/proxy/v2/pipelines/triggers';
     var defaultCommit = {
       sha: '1234'
     };
+    var defaultVcsInstancesRequest = '/pp/v1/proxy/v2/vcs';
 
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
@@ -46,7 +48,7 @@
       modelManager = $injector.get('app.model.modelManager');
 
       $uibModalInstance = jasmine.createSpyObj('$uibModalInstance', ['close', 'dismiss']);
-      githubModel = modelManager.retrieve('cloud-foundry.model.github');
+      githubModel = modelManager.retrieve('github.model');
       githubOauthService = $injector.get('github.view.githubOauthService');
 
       var triggerBuild = $injector.get('triggerBuildDetailView');
@@ -93,7 +95,7 @@
 
         function setGithubToken() {
           // Calls to githubModel will fail before the http request if token.access_token is missing
-          _.set(githubModel.apiManager.retrieve('cloud-foundry.api.github'), 'authenticated', true);
+          _.set(githubModel.apiManager.retrieve('github.api'), 'authenticated', true);
           expect(githubModel.isAuthenticated()).toBe(true);
         }
 
@@ -108,6 +110,8 @@
 
           setGithubToken();
 
+          var vcsInstance = {api_url: 'https://api.github.com', browse_url: 'https://github.com'};
+          $httpBackend.expectGET(defaultVcsInstancesRequest).respond([vcsInstance]);
           $httpBackend.expectGET(defaultCommitsRequest).respond([]);
           controller.fetchCommits();
           $httpBackend.flush();
@@ -122,6 +126,8 @@
 
           setGithubToken();
 
+          var vcsInstance = {api_url: 'https://api.github.com', browse_url: 'https://github.com'};
+          $httpBackend.expectGET(defaultVcsInstancesRequest).respond([vcsInstance]);
           $httpBackend.expectGET(defaultCommitsRequest).respond([defaultCommit, {}, {}, {}]);
 
           controller.fetchCommits();
@@ -137,6 +143,8 @@
 
           setGithubToken();
 
+          var vcsInstance = {api_url: 'https://api.github.com', browse_url: 'https://github.com'};
+          $httpBackend.expectGET(defaultVcsInstancesRequest).respond([vcsInstance]);
           $httpBackend.expectGET(defaultCommitsRequest).respond(500);
 
           controller.fetchCommits();

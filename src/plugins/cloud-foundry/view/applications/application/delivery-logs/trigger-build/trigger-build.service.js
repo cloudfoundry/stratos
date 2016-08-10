@@ -61,7 +61,7 @@
     that.context = context;
     that.content = content;
     that.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    that.githubModel = modelManager.retrieve('cloud-foundry.model.github');
+    that.githubModel = modelManager.retrieve('github.model');
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
     that.githubOauthService = githubOauthService;
@@ -98,25 +98,46 @@
 
       that.fetchError = undefined;
 
-      this.githubModel.commits(this.context.project.repo.full_name, this.context.project.repo.branch, 20)
-        .then(function () {
-          that.fetchError = false;
-          that.selectedCommit =
-            _.get(that, 'githubModel.data.commits.length') ? that.githubModel.data.commits[0] : null;
-        })
-        .catch(function () {
-          that.fetchError = true;
-        });
+      // TODO (kdomico): Fix once vcs_id is returned - TEAMFOUR-946
+      this._getVcsInstance().then(function (vcsInstance) {
+        var githubOptions = {
+          headers: {
+            'x-cnap-vcs-url': vcsInstance.browse_url,
+            'x-cnap-vcs-api-url': vcsInstance.api_url
+          }
+        };
+        that.githubModel.commits(that.context.project.repo.full_name, that.context.project.repo.branch, 20, githubOptions)
+          .then(function () {
+            that.fetchError = false;
+            that.selectedCommit =
+              _.get(that, 'githubModel.data.commits.length') ? that.githubModel.data.commits[0] : null;
+          })
+          .catch(function () {
+            that.fetchError = true;
+          });
+      });
     },
 
     githubAuth: function () {
       var that = this;
-      that.githubOauthService.start()
-        .then(function () {
-          that.fetchCommits();
-        })
-        .catch(function () {
-          that.githubAuthFailed = true;
+      this._getVcsInstance().then(function (vcsInstance) {
+        that.githubOauthService.start(vcsInstance.browse_url)
+          .then(function () {
+            that.fetchCommits();
+          })
+          .catch(function () {
+            that.githubAuthFailed = true;
+          });
+      });
+    },
+
+    _getVcsInstance: function () {
+      var repoUrl = this.context.project.repo.http_url;
+      return this.hceModel.getVcses(this.context.guid)
+        .then(function (vcsInstances) {
+          return _.find(vcsInstances, function (o) {
+            return _.startsWith(repoUrl, o.browse_url);
+          });
         });
     }
   });
