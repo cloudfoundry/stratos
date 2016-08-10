@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,8 +34,6 @@ type CNSIRequest struct {
 	Response []byte
 	Error    error
 }
-
-const gitHubAPIURL = "https://api.github.com/"
 
 func getEchoURL(c echo.Context) url.URL {
 	log.Println("getEchoURL")
@@ -204,8 +203,8 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	log.Println(" ")
 
 	// if the following header is found, add the GH Oauth code to the body
-	if header.Get("x-cnap-github-token-required") != "" {
-		log.Println("--- x-cnap-github-token-required HEADER FOUND.....")
+	if header.Get("x-cnap-vcs-token-required") != "" {
+		log.Println("--- x-cnap-vcs-token-required HEADER FOUND.....")
 		body, err = p.addTokenToPayload(c, body)
 		if err != nil {
 			log.Printf("Unable to add token to HCE payload: %+v\n", err)
@@ -270,7 +269,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, error) {
 	log.Println("addTokenToPayload")
 
-	token := p.getGitHubAuthToken(c)
+	token := p.getVCSAuthToken(c)
 
 	log.Printf("Token: %+v\n", token)
 
@@ -327,14 +326,13 @@ End:
 	}
 }
 
-func (p *portalProxy) github(c echo.Context) error {
-
-	log.Println("github passthru ...")
-	log.Printf("GitHub API URL: %s", gitHubAPIURL)
+func (p *portalProxy) vcsProxy(c echo.Context) error {
+	log.Println("VCS proxy passthru ...")
 
 	var (
-		uri     *url.URL
-		headers http.Header
+		uri         *url.URL
+		headers     http.Header
+		vcsEndpoint string
 	)
 
 	uri = makeRequestURI(c)
@@ -343,28 +341,35 @@ func (p *portalProxy) github(c echo.Context) error {
 	headers = getEchoHeaders(c)
 	log.Printf("Headers: %+v\n", headers)
 
-	url := fmt.Sprintf("%s%s", gitHubAPIURL, uri)
+	vcsEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
+
+	url := fmt.Sprintf("%s/%s", vcsEndpoint, uri)
 	log.Printf("URL: %s", url)
 
-	token := p.getGitHubAuthToken(c)
+	token := p.getVCSAuthToken(c)
 	tokenHeader := fmt.Sprintf("token %s", token)
-
+	log.Printf("token - %s", token)
 	// set the token in the header
 	log.Printf("Headers before GH call: %+v\n", headers)
 
-	// Perform the request against GitHub
+	// Perform the request against the VCS endpoint
+	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
+	if p.Config.SkipTLSVerification {
+		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
 	client := &http.Client{
-		Timeout: time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second,
+		Timeout:   time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second,
+		Transport: tr,
 	}
 	req, err := http.NewRequest("GET", url, nil)
 	log.Printf("Request: %+v\n", req)
 	req.Header.Add("Authorization", tokenHeader)
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Response from GitHub contained an error: %v", err)
+		log.Printf("Response from VCS contained an error: %v", err)
 	}
 
-	log.Printf("Response from GitHub: %+v\n", resp)
+	log.Printf("Response from VCS: %+v\n", resp)
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
