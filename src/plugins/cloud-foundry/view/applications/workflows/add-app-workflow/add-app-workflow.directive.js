@@ -93,10 +93,6 @@
           that.startWorkflow();
         });
 
-        this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
-          that.loadMoreRepos();
-        });
-
         $scope.$watch(function () {
           return that.userInput.serviceInstance;
         }, function (serviceInstance) {
@@ -150,6 +146,10 @@
           that.filterTimeout = that.$timeout(function () {
             return that.filterRepos(newFilterTerm);
           }, 500);
+        });
+
+        this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
+          that.loadMoreRepos();
         });
       },
 
