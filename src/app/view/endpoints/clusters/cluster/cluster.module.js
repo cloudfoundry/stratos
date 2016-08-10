@@ -37,7 +37,6 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
-    var stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
 
     this.initialized = false;
     this.guid = $stateParams.guid;
@@ -81,16 +80,13 @@
       // Needed to show a Space's list of service instances (requires app name, from app guid, from service binding)
       var serviceBindingPromise = serviceBindingModel.listAllServiceBindings(that.guid);
 
-      var stackatoInfoPromise = stackatoInfoModel.getStackatoInfo();
-
       // Reset any cache we may be interested in
       delete appModel.appSummary;
 
       return $q.all([
         orgPromise,
         servicesPromise,
-        serviceBindingPromise,
-        stackatoInfoPromise])
+        serviceBindingPromise])
         .finally(function () {
           that.initialized = true;
         });
