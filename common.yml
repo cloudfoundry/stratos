@@ -64,7 +64,8 @@ services:
       context: ../stratos-ui/containers/nginx
       dockerfile: Dockerfile.dev
     ports:
-      - "80:80"
+      - 80:80
+      - 443:443
     volumes:
       - ../stratos-ui/dist:/usr/share/nginx/html:ro
 
