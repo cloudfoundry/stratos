@@ -16,6 +16,12 @@ $gallery-card-layout-steps: 4;
 }
 
 .app-gallery-card {
+  // Gives a heading of 60px with minimal changes
+  .card.panel .panel-heading {
+    color: $dove-gray2;
+    padding-top: 19px;
+    padding-bottom: 18px;
+  }
   .dl-horizontal dt.app-status-wrapper {
     font-size: 18px;
     font-weight: 500;
