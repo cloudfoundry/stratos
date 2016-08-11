@@ -1,0 +1,14 @@
+<div class="selected-users-list" ng-init="usersListCtrl.ctrl.selectedUserListCount=usersListCtrl.maxVisibleUsers">
+    <span class="selected-users-list-label" translate>
+      {{ usersListCtrl.selectedUserCount() === 1 ? 'SELECTED USER' : 'SELECTED USERS' }}
+    </span>
+    <span ng-repeat="user in usersListCtrl.selectedUsers | limitTo:usersListCtrl.ctrl.selectedUserListCount | orderBy:'entity.username'">
+      {{user.entity.username}}<span ng-if="!$last">,</span>
+    </span>
+    <span ng-if="usersListCtrl.selectedUserCount() > usersListCtrl.ctrl.selectedUserListCount">
+      <a ng-click="usersListCtrl.ctrl.selectedUserListCount = usersListCtrl.numberMaxValue">View All</a>
+    </span>
+    <span ng-if="usersListCtrl.selectedUserCount() <= usersListCtrl.ctrl.selectedUserListCount && usersListCtrl.selectedUserCount() > usersListCtrl.maxVisibleUsers">
+      <a ng-click="usersListCtrl.ctrl.selectedUserListCount = usersListCtrl.maxVisibleUsers">View Less</a>
+    </span>
+</div>

@@ -5,6 +5,23 @@
     margin-top: $hpe-unit-space * 3;
   }
   .manage-users-loaded {
+
+    .manager-users-info {
+      padding-bottom: $hpe-unit-space;
+
+      .manager-users-info-message {
+        padding-bottom: 5px;
+
+        .manager-users-warning {
+          font-weight: 600;
+        }
+      }
+
+      .selected-users-list {
+        padding-bottom: 0;
+      }
+    }
+
     .manage-users-filter {
       padding-bottom: $hpe-unit-space;
 

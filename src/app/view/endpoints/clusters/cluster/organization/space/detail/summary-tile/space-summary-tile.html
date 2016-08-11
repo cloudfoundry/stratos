@@ -8,25 +8,30 @@
       <dt translate>APPLICATIONS</dt>
       <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalApps }}</dd>
       <dt translate>SERVICES</dt>
-      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalServices }}</dd>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalServices }} / {{ spaceSummaryTileCtrl.spaceDetail().details.servicesQuota === -1 ? '∞' : spaceSummaryTileCtrl.spaceDetail().details.servicesQuota}}</dd>
       <dt translate>ROUTES</dt>
-      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalRoutes }}</dd>
+      <dd>{{ spaceSummaryTileCtrl.spaceDetail().details.totalRoutes }} / {{ spaceSummaryTileCtrl.spaceDetail().details.routesQuota === -1 ? '∞' : spaceSummaryTileCtrl.spaceDetail().details.routesQuota}}</dd>
       <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>DISK</dt>-->
       <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
-      <!--<dt ng-if="spaceSummaryTileCtrl.spaceDetail()" translate>MEMORY</dt>-->
-      <!--<dd ng-if="spaceSummaryTileCtrl.spaceDetail()" >{{'1'}}</dd>-->
+      <dt translate>MEMORY</dt>
+      <dd>{{ spaceSummaryTileCtrl.memory }}</dd>
     </dl>
   </div>
   <div class="col-md-7" ng-if="spaceSummaryTileCtrl.spaceDetail().details && spaceSummaryTileCtrl.userServiceInstance.serviceInstances[spaceSummaryTileCtrl.clusterGuid].api_endpoint">
     <dl class="dl-horizontal">
       <dt translate>CF SPACE ROLE</dt>
       <dd>{{ spaceSummaryTileCtrl.roles.join(', ') }}</dd>
-      <dt translate>CF ENDPOINT URL</dt>
+      <dt translate>INSTANCE ADDRESS</dt>
       <dd>
         {{ spaceSummaryTileCtrl.getEndpoint() }}
       </dd>
-      <dt translate>CR INTERACTIONS</dt>
-      <dd><a class="btn btn-link"><span translate>CLI Commands</span></a></dd>
+      <!-- TODO: TEAMFOUR-805 Handle CLI Commands links-->
+      <!--<dt translate>CR INTERACTIONS</dt>-->
+      <!--<dd><a class="btn btn-link"><span translate>CLI Commands</span></a></dd>-->
+      <dt translate>Account Username</dt>
+      <dd>{{ spaceSummaryTileCtrl.userName }}</dd>
+      <dt translate>Account Status</dt>
+      <dd translate>{{ spaceSummaryTileCtrl.isAdmin ? 'administrator' : 'user' }}</dd>
     </dl>
   </div>
 </gallery-card>

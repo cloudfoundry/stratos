@@ -75,7 +75,9 @@
 
       return asyncTaskDialog(
         {
-          title: users.length === 1 ? gettext('Manager User: ') + users[0].entity.username : 'TEAMFOUR-708',
+          title: users.length < 2
+            ? gettext('Manager User: ') + users[0].entity.username
+            : gettext('Change User\'s Roles'),
           templateUrl: 'app/view/endpoints/clusters/cluster/actions/manage-user/manage-user.html',
           buttonTitles: {
             submit: gettext('Save Changes')
@@ -94,7 +96,7 @@
             initPromise: initPromise,
             removeFromOrg: removeFromOrg,
             containsRoles: containsRoles,
-            showExistingRoles: true
+            showExistingRoles: users.length < 2
           },
           state: state,
           clearSelections: clearAllOrgs,

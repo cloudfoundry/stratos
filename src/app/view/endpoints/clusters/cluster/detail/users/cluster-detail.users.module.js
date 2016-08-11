@@ -28,17 +28,17 @@
     '$scope',
     '$state',
     '$stateParams',
-    '$log',
     '$q',
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.view.userSelection'
   ];
 
-  function ClusterUsersController($scope, $state, $stateParams, $log, $q,
-                                  modelManager, utils, manageUsers, rolesService, eventService) {
+  function ClusterUsersController($scope, $state, $stateParams, $q,
+                                  modelManager, utils, manageUsers, rolesService, eventService, userSelection) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -51,8 +51,7 @@
 
     this.userRoles = {};
 
-    this.selectAllUsers = false;
-    this.selectedUsers = {};
+    this.selectedUsers = userSelection.getSelectedUsers(this.guid);
 
     function refreshUsers() {
       that.userRoles = {};
@@ -83,6 +82,11 @@
       return $q.resolve();
     }
 
+    var debouncedUpdateSelection = _.debounce(function () {
+      userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
+      $scope.$apply();
+    }, 100);
+
     function init() {
       $scope.$watch(function () {
         return rolesService.changingRoles;
@@ -94,12 +98,18 @@
         that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
       });
 
+      $scope.$watchCollection(function () {
+        return that.visibleUsers;
+      }, function () {
+        if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
+          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+          debouncedUpdateSelection();
+        }
+      });
+
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
         that.users = res;
-
         return refreshUsers();
-      }).then(function () {
-        $log.debug('ClusterUsersController finished init');
       });
     }
 
@@ -126,11 +136,9 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        _.forEach(that.visibleUsers, function (user) {
-          that.selectedUsers[user.metadata.guid] = true;
-        });
+        userSelection.selectUsers(that.guid, that.visibleUsers);
       } else {
-        that.selectedUsers = {};
+        userSelection.deselectAllUsers(that.guid);
       }
     };
 

@@ -10,15 +10,15 @@
               translate>Manage Roles</button>
       <button class="btn btn-default"
               ng-if="spaceUsersController.selectedUsersCount() > 1"
-              ng-disabled="true || spaceUsersController.changingRoles"
+              ng-disabled="spaceUsersController.changingRoles"
               ng-click="spaceUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
-              ng-disabled="spaceUsersController.selectedUsersCount() > 1 || spaceUsersController.rolesService.changingRoles || spaceUsersController.selectedUsersCount() < 1"
+              ng-disabled="spaceUsersController.rolesService.changingRoles || spaceUsersController.selectedUsersCount() < 1"
               ng-click="spaceUsersController.removeFromSpace()"
               translate>Remove From Space</button>
       <button class="btn btn-default"
-              ng-disabled="spaceUsersController.selectedUsersCount() > 1 || spaceUsersController.rolesService.changingRoles || spaceUsersController.selectedUsersCount() < 1"
+              ng-disabled="spaceUsersController.rolesService.changingRoles || spaceUsersController.selectedUsersCount() < 1"
               ng-click="spaceUsersController.removeFromOrganization()"
               translate>Remove From Organization</button>
     </div>
@@ -27,7 +27,7 @@
         <thead>
         <tr>
           <th><checkbox-input class="select-all-checkbox" ng-change="spaceUsersController.selectAllChanged()" ng-model="spaceUsersController.selectAllUsers"></checkbox-input></th>
-          <th translate st-sort-default="true" st-sort="entity.username">USERS({{ spaceUsersController.users.length }})</th>
+          <th class="sortable" translate st-sort-default="true" st-sort="entity.username">USERS({{ spaceUsersController.users.length }})</th>
           <th translate>Space Roles</th>
           <th translate>ACTION</th>
         </tr>
@@ -37,7 +37,7 @@
           <td><checkbox-input ng-model="spaceUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
           <td class="user-name">{{ user.entity.username }}</td>
           <td class="roles-list">
-            <div class="role-pill"
+            <div class="role-pill closable-pill"
                  ng-repeat="spaceRole in spaceUsersController.getSpaceRoles(user)"
                  ng-class="{ 'progress-cursor' : spaceUsersController.removingSpace[spaceUsersController.space.details.space.entity.name + spaceRole.roleLabel] }">
               {{ spaceUsersController.space.details.space.entity.name }}: {{ spaceRole.roleLabel }}
@@ -55,6 +55,17 @@
           </td>
         </tr>
         </tbody>
+        <tfoot ng-init="spaceUsersController.showUsers = 6"
+               ng-show="spaceUsersController.showUsers < spaceUsersController.users.length">
+        <tr>
+          <td colspan="4" class="text-center">
+            <a ng-click="spaceUsersController.showUsers = spaceUsersController.users.length">
+              <span translate>Show All</span> ({{ spaceUsersController.users.length }})
+            </a>
+            <div ng-show="false" st-pagination="" st-items-by-page="spaceUsersController.showUsers"></div>
+          </td>
+        </tr>
+        </tfoot>
       </table>
     </div>
 

@@ -481,6 +481,9 @@
         // Set total counts
         details.totalApps = vals.appCounts;
         details.totalRoutes = vals.routesCountP;
+        details.routesQuota = _.get(vals.quota, 'entity.total_routes', -1);
+
+        details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
 
         details.roles = vals.roles;
 

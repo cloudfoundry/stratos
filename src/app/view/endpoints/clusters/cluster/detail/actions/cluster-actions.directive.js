@@ -31,7 +31,8 @@
     '$stateParams',
     'app.utils.utilsService',
     'helion.framework.widgets.asyncTaskDialog',
-    'app.view.endpoints.clusters.cluster.assignUsers'
+    'app.view.endpoints.clusters.cluster.assignUsers',
+    'app.view.userSelection'
   ];
 
   /**
@@ -44,9 +45,11 @@
    * @param {object} utils - our utils service
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} assignUsersService - service that allows assigning roles to users
+   * @param {object} userSelection - service centralizing user selection
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function ClusterActionsController(modelManager, $state, $q, $stateParams, utils, asyncTaskDialog, assignUsersService) {
+  function ClusterActionsController(modelManager, $state, $q, $stateParams,
+                                    utils, asyncTaskDialog, assignUsersService, userSelection) {
     var that = this;
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -197,7 +200,7 @@
       execute: function () {
         return assignUsersService.assign({
           clusterGuid: that.clusterGuid,
-          selectedUsers: {}
+          selectedUsers: userSelection.getSelectedUsers(that.clusterGuid)
         });
       },
       icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
