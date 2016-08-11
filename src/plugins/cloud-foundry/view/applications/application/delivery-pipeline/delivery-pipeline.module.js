@@ -88,15 +88,19 @@
       }
     ];
 
-    /* eslint-disable */
     this.postDeployActionActions = [
       {
         name: gettext('Delete'),
         execute: function (target) {
-          alert('Delete ' + target);
+          that.hceModel.removePipelineTask(that.hceCnsi.guid, target.pipeline_task_id)
+            .then(function () {
+              _.remove(that.postDeployActions, {pipeline_task_id: target.pipeline_task_id});
+            });
         }
       }
     ];
+
+    /* eslint-disable */
     this.containerRegistryActions = [
       {
         name: gettext('Designate to Pipeline'),

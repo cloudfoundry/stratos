@@ -269,6 +269,21 @@
     },
 
     /**
+     * @function removePipelineTask
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Remove a post-deploy pipeline task to a project
+     * @param {string} guid - the HCE instance GUID
+     * @param {!number} taskId - The PipelineTask id to remove.
+     * @returns {promise} A promise object
+     * @public
+     */
+    removePipelineTask: function (guid, taskId) {
+
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .removePipelineTask(guid, taskId, {}, this.hceProxyPassthroughConfig);
+    },
+
+    /**
      * @function listNotificationTargetTypes
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get notification targets for project

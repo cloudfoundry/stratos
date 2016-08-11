@@ -57,9 +57,9 @@
             .then(function (credentialId) {
               // Create Storm runner
               var metadata = {
-                tenantId: data.tenantId,
-                testId: data.testId,
-                projectId: data.projectId
+                storm_runner_tenant_id: data.tenantId,
+                storm_runner_test_id: data.testId,
+                storm_runner_project_id: data.projectId
               };
 
               return that.hceModel.addPipelineTask(cnsiGuid, hceProjectId, data.actionName, credentialId, metadata);
