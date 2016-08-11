@@ -23,18 +23,43 @@
   }
 
   AddPipelineWorkflowController.$inject = [
-    'app.event.eventService'
+    'app.model.modelManager',
+    'app.event.eventService',
+    'github.view.githubOauthService',
+    '$scope',
+    '$q',
+    '$timeout'
   ];
 
   /**
    * @memberof cloud-foundry.view.applications
    * @name AddAppWorkflowController
    * @constructor
+   * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
-   * @property {app.event.eventService} eventService - the event bus service
+   * @param {object} githubOauthService - github oauth service
+   * @param {object} $scope - Angular $scope
+   * @param {object} $q - Angular $q service
+   * @param {object} $timeout - the Angular $timeout service
+   * @property {app.model.modelManager} modelManager - the Model management service
+   * @property {app.event.eventService} eventService - the Event management service
+   * @property {github.view.githubOauthService} githubOauthService - github oauth service
+   * @property {object} $scope - angular $scope
+   * @property {object} $q - angular $q service
+   * @property {object} $timeout - the Angular $timeout service
+   * @property {object} userInput - user's input about new application
+   * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(eventService) {
+  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, $scope, $q, $timeout) {
+    this.modelManager = modelManager;
     this.eventService = eventService;
+    this.githubOauthService = githubOauthService;
+    this.$scope = $scope;
+    this.$q = $q;
+    this.$timeout = $timeout;
+    this.userInput = {};
+    this.options = {};
+
     this.init();
   }
 
@@ -44,6 +69,81 @@
 
   function run(addPipelineWorkflowPrototype) {
     angular.extend(AddPipelineWorkflowController.prototype, addPipelineWorkflowPrototype, {
+      reset: function () {
+        var that = this;
+
+        var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
+        this.data = {};
+        this.errors = {};
+
+        this.userInput = {
+          application: null,
+          hceCnsi: null,
+          source: null,
+          repo: null,
+          branch: null,
+          buildContainer: null,
+          imageRegistry: null,
+          projectId: null
+        };
+
+        this.data.workflow = {
+          allowJump: false,
+          allowBack: false,
+          title: gettext('Add Pipeline'),
+          steps: [
+            {
+              ready: true,
+              title: gettext('Select Endpoint'),
+              templateUrl: path + 'select-endpoint.html',
+              formName: 'application-endpoint-form',
+              onNext: function () {
+                return that.getVcsInstances();
+              }
+            }
+          ].concat(this.getWorkflowDefinition().steps)
+        };
+
+        this.options = {
+          workflow: that.data.workflow,
+          userInput: this.userInput,
+          errors: this.errors,
+          apps: [],
+          hceCnsis: [],
+          notificationTargets: [
+            {
+              title: 'HipChat',
+              description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
+              img: 'hipchat_logo.png'
+            },
+            {
+              title: 'Http',
+              description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
+              img: 'httppost_logo.png'
+            },
+            {
+              title: 'Flow Dock',
+              description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
+              img: 'flowdock_logo.png'
+            }
+          ],
+          sources: [],
+          repos: [],
+          branches: [],
+          buildContainers: [],
+          imageRegistries: []
+        };
+
+        this.addPipelineActions = {
+          stop: function () {
+            that.stopWorkflow();
+          },
+
+          finish: function () {
+            that.finishWorkflow();
+          }
+        };
+      }
     });
   }
 
