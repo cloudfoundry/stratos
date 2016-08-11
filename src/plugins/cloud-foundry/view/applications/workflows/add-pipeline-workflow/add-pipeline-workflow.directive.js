@@ -26,9 +26,11 @@
     'app.model.modelManager',
     'app.event.eventService',
     'github.view.githubOauthService',
+    'app.utils.utilsService',
     '$scope',
     '$q',
-    '$timeout'
+    '$timeout',
+    '$stateParams',
   ];
 
   /**
@@ -38,27 +40,32 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
+   * @param {app.model.utilsService} utils - the utils service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
+   * @param {object} $stateParams - the UI router $stateParams service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
    * @property {github.view.githubOauthService} githubOauthService - github oauth service
+   * @property {app.model.utilsService} utils - the utils service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
    * @property {object} $timeout - the Angular $timeout service
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, $scope, $q, $timeout) {
+  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, utils, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
+    this.utils = utils;
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
     this.userInput = {};
     this.options = {};
+    this.cnsiGuid = $stateParams.cnsiGuid;
 
     this.init();
   }
@@ -69,6 +76,13 @@
 
   function run(addPipelineWorkflowPrototype) {
     angular.extend(AddPipelineWorkflowController.prototype, addPipelineWorkflowPrototype, {
+
+      getEndpoint: function () {
+        return this.utils.getClusterEndpoint(
+          this.modelManager.retrieve('app.model.serviceInstance.user').serviceInstances[this.cnsiGuid]
+        );
+      },
+
       reset: function () {
         var that = this;
 
