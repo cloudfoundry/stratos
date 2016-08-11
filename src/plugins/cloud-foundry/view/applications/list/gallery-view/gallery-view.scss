@@ -15,6 +15,23 @@ $gallery-card-layout-steps: 4;
   vertical-align: middle;
 }
 
+.app-gallery-card {
+  .dl-horizontal dt.app-status-wrapper {
+    font-size: 18px;
+    font-weight: 500;
+    color: $dove-gray2;
+    &>span {
+      text-transform: capitalize;
+    }
+    app-state-icon {
+      .app-status {
+        margin-left: 0;
+      }
+      margin-right: 6px;
+    }
+  }
+}
+
 // Tweak the card width slightly when samller to stop application state name over-running
 @media (min-width: 768px) {
   gallery-card {
