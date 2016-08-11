@@ -1,11 +1,21 @@
 <h4 translate>Select a Delivery Pipeline Endpoint</h4>
 
-<div class="form-group">
-  <select-input
-    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-    ng-model="wizardCtrl.options.userInput.hceCnsi"
-    input-options="wizardCtrl.options.hceCnsis"
-    placeholder="{{'Select HCE Cluster' | translate}}"
-    tabindex="0" required>
-  </select-input>
-</div>
+<table class="table">
+  <thead>
+    <tr>
+      <th class="hpe-media-select-col"></th>
+      <th translate>Endpoint Name</th>
+      <th translate>Endpoint URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="row-vertical-middle" ng-repeat="hceCnsi in wizardCtrl.options.hceCnsis">
+      <td>
+        <radio-input ng-model="wizardCtrl.options.userInput.hceCnsi" input-value="hceCnsi" required>
+        </radio-input>
+      </td>
+      <td>{{ ::hceCnsi.name }}</td>
+      <td>{{ ::hceCnsi.api_endpoint.Host }}</td>
+    </tr>
+  </tbody>
+</table>
