@@ -15,25 +15,25 @@
       <dt translate>LAST BUILD</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.building" class="" href=""
-           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.building, appDelLogsCtrl.hceCnsi.guid)">
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.building, appDelLogsCtrl.model.application.pipeline.hceCnsi.guid)">
           {{ appDelLogsCtrl.last.building.id }}</a>
-        <span ng-if="appDelLogsCtrl.last.building" am-time-ago="appDelLogsCtrl.last.building.endDate"></span>
+        <span ng-if="appDelLogsCtrl.last.building" am-time-ago="appDelLogsCtrl.last.building.end_date"></span>
         <span ng-if="!appDelLogsCtrl.last.building" translate>None</span>
       </dd>
       <dt translate>LAST TEST</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.testing" class="" href=""
-           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.testing, appDelLogsCtrl.hceCnsi.guid)">
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.testing, appDelLogsCtrl.model.application.pipeline.hceCnsi.guid)">
           {{ appDelLogsCtrl.last.testing.id }}</a>
-        <span ng-if="appDelLogsCtrl.last.testing" am-time-ago="appDelLogsCtrl.last.testing.endDate"></span>
+        <span ng-if="appDelLogsCtrl.last.testing" am-time-ago="appDelLogsCtrl.last.testing.end_date"></span>
         <span ng-if="!appDelLogsCtrl.last.testing" translate>None</span>
       </dd>
       <dt translate>LAST DEPLOYMENT</dt>
       <dd>
         <a ng-if="appDelLogsCtrl.last.deploying" class="" href=""
-           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.deploying, appDelLogsCtrl.hceCnsi.guid)">
+           ng-click="appDelLogsCtrl.views.viewEvent.open(appDelLogsCtrl.last.deploying, appDelLogsCtrl.model.application.pipeline.hceCnsi.guid)">
           {{ appDelLogsCtrl.last.deploying.id }}</a>
-        <span ng-if="appDelLogsCtrl.last.deploying" am-time-ago="appDelLogsCtrl.last.deploying.endDate"></span>
+        <span ng-if="appDelLogsCtrl.last.deploying" am-time-ago="appDelLogsCtrl.last.deploying.end_date"></span>
         <span ng-if="!appDelLogsCtrl.last.deploying" translate>None</span>
       </dd>
     </dl>
@@ -96,7 +96,7 @@
                  ng-init="route=appCtrl.model.application.summary.routes[0]"
                  ng-href="http://{{ route.host + '.' + route.domain.name + (route.port ? ':' + route.port : '') + route.path }}">view</a>
             </td>
-            <td>{{ execution.reason.createdDate | amDateFormat:'L - LTS' }}</td>
+            <td>{{ execution.reason.created_date | amDateFormat:'L - LTS' }}</td>
             <td>{{ execution.reason.author }}</td>
             <td>{{ execution.reason.type }}</td>
           </tr>
