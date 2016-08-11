@@ -1,0 +1,76 @@
+<div class="postdeploy">
+  <div class="desc-box">
+    <div class="desc-header">
+      <h4>StormRunner Load Test</h4>
+    </div>
+    <div class="desc-text">
+    <p>Simulate usage on your application to understand the resources consumed during scaling events.</p>
+    <p>If you don't have an account already:</p>
+    <p>Create a new <a href="https://www.saas.hpe.com/signup/try/stormrunner-load">Storm Runner Account</a></p>
+    <p>Note Tenant ID, Project ID and credentials</p>
+    <p>Create a load test and note your Test ID</p>
+    <p>Come back and enter your details in this form</p>
+
+    <p>After set-up, every deploy will trigger a load test to help you measure their effect on the scaling behavior of
+      your app.</p>
+    </div>
+  </div>
+
+  <form name="postdeploy-form" class="postdeploy-form">
+    <div class="form-group">
+      <div class="input-control " focusable-input>
+        <label class="control-label" translate>Action Name</label>
+        <input type="text" name="actionName" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.actionName"
+               required
+        />
+      </div>
+    </div>
+
+    <div class="form-separator">
+      <span>Connect to StormRunner</span>
+    </div>
+    <div class="form-group">
+      <div class="input-control " focusable-input>
+        <label class="control-label" translate>Username</label>
+        <input type="text" name="userName" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.userName"
+               required
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="input-control " focusable-input>
+        <label class="control-label" translate>Password</label>
+        <input type="password" name="password" class="form-control"
+               ng-model="asyncTaskDialogCtrl.context.data.password"
+               required password-reveal password-reveal-icon="'helion-icon helion-icon-View'"
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="input-control " focusable-input>
+        <label class="control-label" translate>Tenant ID</label>
+        <input type="text" name="tenantId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.tenantId"
+               required
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="input-control " focusable-input>
+        <label class="control-label" translate>StormRunner Project ID</label>
+        <input type="text" name="projectId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.projectId"
+               required
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="input-control " focusable-input>
+        <label class="control-label" translate>Test ID</label>
+        <input type="text" name="testId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.testId"
+               required
+        />
+      </div>
+    </div>
+  </form>
+
+</div>
+

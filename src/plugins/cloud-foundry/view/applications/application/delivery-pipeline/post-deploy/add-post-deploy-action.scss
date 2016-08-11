@@ -1,0 +1,33 @@
+.postdeploy {
+
+  width: 100%;
+  margin: 0 auto;
+  height: 100%;
+  overflow:hidden;
+
+  .desc-box {
+    float:left;
+    width: 50%;
+
+    .desc-header{
+     img{
+       float: left;
+       width: $hpe-unit-space * 2;
+     }
+      padding-bottom: $hpe-unit-space;
+    }
+
+    .desc-text{
+      width:90%;
+    }
+  }
+
+  .postdeploy-form {
+    float:right;
+    padding-bottom: $hpe-unit-space;
+    .form-separator{
+      margin-top: $hpe-unit-space;
+    }
+  }
+
+}

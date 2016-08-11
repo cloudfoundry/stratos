@@ -89,7 +89,9 @@
   <div id="post-deploy-actions">
     <div class="action-header">
       <span translate>Post Deploy Actions</span>
-      <button class="btn btn-link">
+      <button
+        class="btn btn-link"
+        ng-click="applicationDeliveryPipelineCtrl.addPostDeployAction()">
         <i class="helion-icon helion-icon-Right_Arrow"></i>
         <span translate>Add Action</span>
       </button>
@@ -101,23 +103,23 @@
       <table ng-if="applicationDeliveryPipelineCtrl.postDeployActions.length"
         class="table table-actionable">
         <thead>
-          <tr>
-            <th translate>Name</th>
-            <th translate>Type</th>
-            <th translate>Created</th>
-            <th translate>Action</th>
-          </tr>
+        <tr>
+          <th translate>Name</th>
+          <th translate>Type</th>
+          <th translate>Created</th>
+          <th translate>Action</th>
+        </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="postDeployAction in applicationDeliveryPipelineCtrl.postDeployActions">
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-              <actions-menu actions="applicationDeliveryPipelineCtrl.postDeployActionActions"
-                action-target="postDeployAction" menu-icon="helion-icon helion-icon-More"></actions-menu>
-            </td>
-          </tr>
+        <tr ng-repeat="postDeployAction in applicationDeliveryPipelineCtrl.postDeployActions">
+          <td>{{ postDeployAction.task_label }}</td>
+          <td>{{ postDeployAction.task_type }}</td>
+          <td>{{ postDeployAction.created }}</td>
+          <td>
+            <actions-menu actions="applicationDeliveryPipelineCtrl.postDeployActionActions"
+                          action-target="postDeployAction" menu-icon="helion-icon helion-icon-More"></actions-menu>
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>

@@ -224,6 +224,66 @@
     },
 
     /**
+     * @function getPipelineTasks
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get post-deploy pipeline tasks for project
+     * @param {string} guid - the HCE instance GUID
+     * @param {number} projectId - the project ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getPipelineTasks: function (guid, projectId) {
+      var params = {};
+      if (projectId) {
+        params = {project_id: projectId};
+      }
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .getPipelineTasks(guid, params, this.hceProxyPassthroughConfig);
+    },
+
+    /**
+     * @function addPipelineTask
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Add a post-deploy pipeline task to a project
+     * @param {string} guid - the HCE instance GUID
+     * @param {string} projectId - the project ID
+     * @param {string} taskLabel - label for the task
+     * @param {number} credentialId - Credential ID for task
+     * @param {object} metadata - metadata for post-deploy task
+     * @returns {promise} A promise object
+     * @public
+     */
+    addPipelineTask: function (guid, projectId, taskLabel, credentialId, metadata) {
+
+      var data = {
+        // NOTE: Currently `stormrunner` is the only post-deploy action supported
+        task_type: "stormrunner",
+        task_label: taskLabel,
+        project_id: projectId,
+        credential_id: credentialId,
+        metadata: angular.toJson(metadata)
+      };
+
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .addPipelineTask(guid, data, {}, this.hceProxyPassthroughConfig);
+    },
+
+    /**
+     * @function removePipelineTask
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Remove a post-deploy pipeline task to a project
+     * @param {string} guid - the HCE instance GUID
+     * @param {!number} taskId - The PipelineTask id to remove.
+     * @returns {promise} A promise object
+     * @public
+     */
+    removePipelineTask: function (guid, taskId) {
+
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .removePipelineTask(guid, taskId, {}, this.hceProxyPassthroughConfig);
+    },
+
+    /**
      * @function listNotificationTargetTypes
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get notification targets for project

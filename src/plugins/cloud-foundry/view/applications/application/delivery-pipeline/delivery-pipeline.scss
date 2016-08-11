@@ -1,4 +1,6 @@
 @import "notifications/add-notification-target";
+@import "post-deploy/add-post-deploy-action";
+
 .card.panel {
   .delivery-pipeline-summary {
     &.panel-body {
