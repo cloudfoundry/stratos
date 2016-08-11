@@ -120,13 +120,7 @@
           "name": "session-store-secret"
         },
         {
-          "name": "GITHUB_OAUTH_CLIENT_ID"
-        },
-        {
-          "name": "GITHUB_OAUTH_CLIENT_SECRET"
-        },
-        {
-          "name": "GITHUB_OAUTH_STATE"
+          "name": "VCS_CLIENTS"
         },
         {
           "name": "ENCRYPTION_KEY_VOLUME"
@@ -676,22 +670,8 @@
         }
     },
     {
-      "name": "GITHUB_OAUTH_CLIENT_ID",
-      "description": "GitHub client ID for OAuth - see https://github.com/settings/applications/new",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "GITHUB_OAUTH_CLIENT_SECRET",
-      "description": "GitHub client secret for OAuth - see https://github.com/settings/applications/new",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "GITHUB_OAUTH_STATE",
-      "description": "** DEPRECATED ** will be removed as a part of TEAMFOUR-561",
+      "name": "VCS_CLIENTS",
+      "description": "VCS Clients for OAuth",
       "data_type": "string",
       "required": true,
       "secret": false
