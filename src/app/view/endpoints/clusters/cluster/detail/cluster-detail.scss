@@ -47,7 +47,7 @@
             cursor: progress;
           }
         }
-        color: #555555;
+        color: $dove-gray2;
         font-weight: 500;
         cursor: default;
         float: left;
@@ -58,7 +58,7 @@
       }
 
       .closable-pill:hover {
-        border-color: #01A982;
+        border-color: $hpe-primary;
       }
 
       i.helion-icon.close-icon {
