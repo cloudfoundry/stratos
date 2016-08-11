@@ -56,6 +56,7 @@
      * @public
      */
     all: function (cnsiGuid, options) {
+      var that = this;
       return this.serviceInstanceApi.ListAllServiceInstances(options, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return that.onAll(response.data);

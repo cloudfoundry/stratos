@@ -42,8 +42,8 @@
       // mock CF spaces model
       var mockSpacesApi = mock.cloudFoundryAPI.Spaces;
       var ListAllServiceInstancesForSpace = mockSpacesApi.ListAllServiceInstancesForSpace(mockApp.space_guid);
-      var params = '?include-relations=service_plan,service_bindings' +
-        '&inline-relations-depth=2&q=service_plan_guid+IN+a5ac915f-b746-42c5-8506-6d318bf21107';
+      var params = '?include-relations=service_bindings,service_plan,service,app&inline-relations-depth=2&' +
+        'q=service_plan_guid+IN+a5ac915f-b746-42c5-8506-6d318bf21107';
       $httpBackend.whenGET(ListAllServiceInstancesForSpace.url + params)
         .respond(200, ListAllServiceInstancesForSpace.response['200'].body);
     }));

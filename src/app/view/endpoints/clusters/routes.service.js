@@ -165,19 +165,19 @@
         },
         callback: function () {
           return that.routesModel.deleteRoute(cnsiGuid, routeGuid, {
-              recursive: true,
-              async: false
-            })
-            .then(function () {
-              deferred.resolve();
-            })
-            .catch(function (error) {
-              // Deferred is only required for this error case (failure to execute callback).
-              deferred.reject(error);
-              // Also swallow error in rejected promise (most likely a failed http response) to ensure default error msg
-              // is used
-              return that.$q.reject();
-            });
+            recursive: true,
+            async: false
+          })
+          .then(function () {
+            deferred.resolve();
+          })
+          .catch(function (error) {
+            // Deferred is only required for this error case (failure to execute callback).
+            deferred.reject(error);
+            // Also swallow error in rejected promise (most likely a failed http response) to ensure default error msg
+            // is used
+            return that.$q.reject();
+          });
         }
       });
       return dialog.result.catch(function () {
