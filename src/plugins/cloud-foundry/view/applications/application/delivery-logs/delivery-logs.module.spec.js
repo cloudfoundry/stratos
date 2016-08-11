@@ -368,6 +368,7 @@
 
       it('no previous event of this type used', function () {
         var event = {
+          id: 1,
           type: eventType
         };
         controller.determineLatestEvent(event);
@@ -376,14 +377,14 @@
 
       it('later event but not succeeded', function () {
         var event = {
-          type: eventType,
-          mEndDate: moment()
+          id: 1,
+          type: eventType
         };
         controller.last[eventType] = event;
 
         var laterEvent = {
-          type: eventType,
-          mEndDate: moment(event.mEndDate).add(100, 's')
+          id: 2,
+          type: eventType
         };
 
         controller.determineLatestEvent(laterEvent);
@@ -392,15 +393,15 @@
 
       it('succeeded event but not later', function () {
         var event = {
+          id: 1,
           type: eventType,
-          mEndDate: moment()
+          state: controller.eventStates.SUCCEEDED
         };
         controller.last[eventType] = event;
 
         var laterEvent = {
-          type: eventType,
-          mEndDate: moment(event.mEndDate).subtract(100, 's'),
-          state: controller.eventStates.SUCCEEDED
+          id: 2,
+          type: eventType
         };
 
         controller.determineLatestEvent(laterEvent);
@@ -409,14 +410,14 @@
 
       it('succeeded and later event', function () {
         var event = {
-          type: eventType,
-          mEndDate: moment()
+          id: 1,
+          type: eventType
         };
         controller.last[eventType] = event;
 
         var laterEvent = {
+          id: 2,
           type: eventType,
-          mEndDate: moment(event.mEndDate).add(100, 's'),
           state: controller.eventStates.SUCCEEDED
         };
 
