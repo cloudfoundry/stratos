@@ -22,7 +22,7 @@ func NewPostgresGooseDBVersionRepository(dcp *sql.DB) (Repository, error) {
 	return &PostgresGooseDBVersionRepository{db: dcp}, nil
 }
 
-// Find - Returns a single CNSI Record
+// GetCurrentVersion - Returns the latest GooseDBVersionRecord
 func (p *PostgresGooseDBVersionRepository) GetCurrentVersion() (GooseDBVersionRecord, error) {
 	log.Println("GetCurrentVersion")
 
