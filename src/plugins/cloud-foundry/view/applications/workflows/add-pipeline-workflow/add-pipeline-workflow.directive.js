@@ -30,7 +30,7 @@
     '$scope',
     '$q',
     '$timeout',
-    '$stateParams',
+    '$stateParams'
   ];
 
   /**
