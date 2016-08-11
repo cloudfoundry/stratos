@@ -1,15 +1,18 @@
 .delivery-log-event {
   color: $gray-darker;
-  height: calc(100% - 128px);
-}
-.delivery-log-event-log-view.temp-log-size {
-  height: calc(100% - 128px);
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 1 1 0;
 
-  > pre {
-    background-color: rgba(0,0,0,0.75);
-    color: #fff;
-    height: 100%;
-    margin: 0 0 50px 0;
-    padding: 10px;
+  .delivery-log-event-summary {
+    margin-bottom: $padding-large-vertical;
   }
+
+  .delivery-log-event-log-view {
+    margin-bottom: $hpe-unit-space;
+  }
+}
+
+.modal.detail-view .detail-view-content ng-include {
+  flex: 1 1 100%;
 }
