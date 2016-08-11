@@ -65,28 +65,6 @@
             },
             {
               ready: true,
-              title: gettext('Select Source'),
-              templateUrl: path + 'pipeline-subflow/select-source.html',
-              formName: 'application-source-form',
-              nextBtnText: gettext('Next'),
-              onNext: function () {
-                var oauth;
-                if (that.userInput.source.vcs_type === 'GITHUB') {
-                  oauth = that.githubOauthService.start();
-                } else {
-                  oauth = that.$q.defer();
-                  oauth.resolve();
-                  oauth = oauth.promise;
-                }
-
-                return oauth
-                  .then(function () {
-                    return that.getRepos();
-                  });
-              }
-            },
-            {
-              ready: true,
               title: gettext('Select Repository'),
               templateUrl: path + 'pipeline-subflow/select-repository.html',
               formName: 'application-repo-form',
@@ -220,6 +198,7 @@
 
         var vcsTypesPromise = hceModel.listVcsTypes(that.userInput.hceCnsi.guid);
         var vcsInstancesPromise = hceModel.getVcses(that.userInput.hceCnsi.guid);
+
         return that.$q.all([vcsTypesPromise, vcsInstancesPromise])
           .then(function () {
             var sources = _.map(hceModel.data.vcsInstances, function (o) {
