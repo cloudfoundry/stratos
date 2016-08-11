@@ -55,13 +55,11 @@
      * @public
      */
     createServiceBinding: function (cnsiGuid, bindingSpec) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .CreateServiceBinding(bindingSpec, {}, httpConfig)
+        .CreateServiceBinding(bindingSpec, {}, that.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid];
+          return response.data;
         });
     },
 
@@ -76,8 +74,9 @@
      * @public
      */
     deleteServiceBinding: function (cnsiGuid, guid, params) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .DeleteServiceBinding(guid, params);
+        .DeleteServiceBinding(guid, params, that.makeHttpConfig(cnsiGuid));
     },
 
     /**

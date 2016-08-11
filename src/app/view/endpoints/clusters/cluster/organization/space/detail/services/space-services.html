@@ -22,7 +22,7 @@
           <td>{{ instance.entity.service_plan.entity.name }}</td>
           <td>{{ spaceSrvsCtrl.createApplicationList(instance.entity.service_bindings) }}</td>
           <td>
-            <actions-menu actions="spaceSrvsCtrl.actions"
+            <actions-menu actions="spaceSrvsCtrl.actionsPerSI[instance.metadata.guid]"
                           action-target="instance"
                           menu-icon="helion-icon helion-icon-More"
                           menu-position="actions-menu-right">

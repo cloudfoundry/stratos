@@ -31,6 +31,18 @@
   function ServiceInstance(apiManager) {
     this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
     this.data = {};
+
+    var passThroughHeader = {
+      'x-cnap-passthrough': 'true'
+    };
+
+    this.makeHttpConfig = function (cnsiGuid) {
+      var headers = {'x-cnap-cnsi-list': cnsiGuid};
+      angular.extend(headers, passThroughHeader);
+      return {
+        headers: headers
+      };
+    };
   }
 
   angular.extend(ServiceInstance.prototype, {
@@ -44,10 +56,9 @@
      * @public
      */
     all: function (cnsiGuid, options) {
-      var that = this;
-      return this.serviceInstanceApi.ListAllServiceInstances(options)
+      return this.serviceInstanceApi.ListAllServiceInstances(options, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onAll(response.data[cnsiGuid]);
+          return that.onAll(response.data);
         });
     },
 
@@ -61,12 +72,30 @@
      * @public
      */
     createServiceInstance: function (cnsiGuid, newInstanceSpec) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
-      return this.serviceInstanceApi.CreateServiceInstance(newInstanceSpec, {}, httpConfig)
+      return this.serviceInstanceApi.CreateServiceInstance(newInstanceSpec, {}, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid];
+          return response.data;
+        });
+    },
+
+    /**
+     * @function deleteServiceInstance
+     * @memberof cloud-foundry.model.service-instance.ServiceInstance
+     * @description Delete a service instance. This includes all service bindings, service keys and routes associated
+     * with the service instance
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {object} serviceInstanceGuid - the service instance guid of the service instance to delete
+     * @returns {promise} A promise object
+     * @public
+     */
+    deleteServiceInstance: function (cnsiGuid, serviceInstanceGuid) {
+      var params = {
+        recursive: true,
+        async: false
+      };
+      return this.serviceInstanceApi.DeleteServiceInstance(serviceInstanceGuid, params, this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          return response.data;
         });
     },
 
@@ -80,12 +109,9 @@
      * @public
      */
     listAllServiceBindingsForServiceInstance: function (cnsiGuid, guid) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
-      return this.serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid, {}, httpConfig)
+      return this.serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid, {}, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid].resources;
+          return response.data.resources;
         });
     },
 
