@@ -26,7 +26,12 @@ type StackatoInfo struct {
 
 func (p *portalProxy) stackatoInfo(c echo.Context) error {
 	// get the version
-	versions := p.getVersionsData()
+	versions, err := p.getVersionsData()
+	if err != nil {
+		msg := "Could not find database version"
+		log.Println(msg)
+		return echo.NewHTTPError(http.StatusInternalServerError, msg)
+	}
 
 	// get the user
 	userGUID, ok := p.getSessionStringValue(c, "user_id")
