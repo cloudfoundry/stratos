@@ -54,7 +54,7 @@
 
         <dt translate>CLUSTER</dt>
         <dd class="pull-right">
-          {{ applicationSummaryCtrl.getEndpoint() }}
+          {{ [appCtrl.model.application.cluster.api_endpoint.Scheme, appCtrl.model.application.cluster.api_endpoint.Host].join('://') }}
         </dd>
 
         <dt translate>ORGANIZATION</dt>
