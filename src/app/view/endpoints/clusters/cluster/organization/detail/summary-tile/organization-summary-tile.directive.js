@@ -71,9 +71,10 @@
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user;
-    var isAdmin = user.admin;
+    that.isAdmin = user.admin;
+    that.userName = user.name;
     var canDelete = false;
-    if (isAdmin) {
+    if (that.isAdmin) {
       var spacesInOrg = that.organization.spaces;
       canDelete = _.keys(spacesInOrg).length === 0;
     }
@@ -81,7 +82,7 @@
     this.actions = [
       {
         name: gettext('Edit Organization'),
-        disabled: !isAdmin,
+        disabled: !that.isAdmin,
         execute: function () {
           return asyncTaskDialog(
             {

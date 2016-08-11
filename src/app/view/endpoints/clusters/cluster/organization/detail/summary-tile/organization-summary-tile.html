@@ -8,9 +8,9 @@
       <dt translate>APPLICATIONS</dt>
       <dd>{{ orgSummaryTileCtrl.organization.details.totalApps}}</dd>
       <dt translate>SERVICES</dt>
-      <dd>{{ orgSummaryTileCtrl.keys(orgSummaryTileCtrl.organization.services).length}}</dd>
+      <dd>{{ orgSummaryTileCtrl.keys(orgSummaryTileCtrl.organization.services).length}} / {{ orgSummaryTileCtrl.organization.details.servicesQuota === -1 ? '∞' : orgSummaryTileCtrl.organization.details.servicesQuota}}</dd>
       <dt translate>ROUTES</dt>
-      <dd>{{ orgSummaryTileCtrl.organization.details.totalRoutes}}</dd>
+      <dd>{{ orgSummaryTileCtrl.organization.details.totalRoutes}} / {{ orgSummaryTileCtrl.organization.details.routesQuota === -1 ? '∞' : orgSummaryTileCtrl.organization.details.routesQuota}}</dd>
       <dt translate>MEMORY UTILIZATION</dt>
       <dd>{{ orgSummaryTileCtrl.memory }}</dd>
     </dl>
@@ -19,14 +19,19 @@
     <dl class="dl-horizontal" ng-if="orgSummaryTileCtrl.roles">
       <dt translate>CF ORG ROLE</dt>
       <dd>{{ orgSummaryTileCtrl.roles.join(', ') }}</dd>
-      <dt translate>CF ENDPOINT URL</dt>
+      <dt translate>INSTANCE ADDRESS</dt>
       <dd>
         {{ orgSummaryTileCtrl.getEndpoint() }}
       </dd>
-      <dt translate>CR INTERACTIONS</dt>
-      <dd>
-        <a class="btn btn-link"><span translate>CLI Commands</span></a>
-      </dd>
+      <!-- TODO: TEAMFOUR-805 Handle CLI Commands links-->
+      <!--<dt translate>CR INTERACTIONS</dt>-->
+      <!--<dd>-->
+        <!--<a class="btn btn-link"><span translate>CLI Commands</span></a>-->
+      <!--</dd>-->
+      <dt translate>Account Username</dt>
+      <dd>{{ orgSummaryTileCtrl.userName }}</dd>
+      <dt translate>Account Status</dt>
+      <dd translate>{{ orgSummaryTileCtrl.isAdmin ? 'administrator' : 'user' }}</dd>
     </dl>
   </div>
 </gallery-card>

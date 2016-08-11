@@ -64,8 +64,8 @@
     function init() {
       var canDelete = false;
       var isAdmin = that.user.admin;
+      var spaceDetail = that.spaceDetail();
       if (isAdmin) {
-        var spaceDetail = that.spaceDetail();
         canDelete = spaceDetail.routes.length === 0 &&
           spaceDetail.instances.length === 0 &&
           spaceDetail.apps.length === 0 &&
@@ -74,6 +74,8 @@
       that.actions[0].disabled = !isAdmin;
       that.actions[1].disabled = !canDelete;
       that.actions[2].disabled = !isAdmin;
+
+      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
 
       return $q.resolve();
     }

@@ -131,16 +131,19 @@
 
     function init() {
       var canDelete = false;
-      var isAdmin = user.admin;
-      if (isAdmin) {
-        var spaceDetail = that.spaceDetail();
+      that.isAdmin = user.admin;
+      that.userName = user.name;
+      var spaceDetail = that.spaceDetail();
+      if (that.isAdmin) {
         canDelete = spaceDetail.routes.length === 0 &&
           spaceDetail.instances.length === 0 &&
           spaceDetail.apps.length === 0 &&
           spaceDetail.services.length === 0;
       }
-      that.actions[0].disabled = !isAdmin;
+      that.actions[0].disabled = !that.isAdmin;
       that.actions[1].disabled = !canDelete;
+
+      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
 
       return $q.resolve();
     }
