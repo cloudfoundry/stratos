@@ -23,6 +23,9 @@ $gallery-card-layout-steps: 4;
     padding-bottom: 18px;
   }
   .dl-horizontal dt.app-status-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
     font-size: 18px;
     font-weight: 500;
     color: $dove-gray2;
@@ -30,6 +33,7 @@ $gallery-card-layout-steps: 4;
       text-transform: capitalize;
     }
     app-state-icon {
+      display: flex;
       .app-status {
         margin-left: 0;
       }
