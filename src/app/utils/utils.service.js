@@ -3,7 +3,8 @@
 
   angular
     .module('app.utils')
-    .factory('app.utils.utilsService', utilsServiceFactory);
+    .factory('app.utils.utilsService', utilsServiceFactory)
+    .filter('mbToHumanSize', mbToHumanSizeFilter);
 
   utilsServiceFactory.$inject = [
     '$log'
@@ -46,10 +47,10 @@
       if (sizeMb === -1) {
         return '∞';
       }
-      if (sizeMb > 1048576) {
+      if (sizeMb >= 1048576) {
         return precisionIfUseful(sizeMb / 1048576) + ' TB';
       }
-      if (sizeMb > 1024) {
+      if (sizeMb >= 1024) {
         return precisionIfUseful(sizeMb / 1024) + ' GB';
       }
       return precisionIfUseful(sizeMb) + ' MB';
@@ -112,6 +113,16 @@
       return cluster.api_endpoint.Scheme + '://' + cluster.api_endpoint.Host;
     }
 
+  }
+
+  mbToHumanSizeFilter.$inject = [
+    'app.utils.utilsService'
+  ];
+
+  function mbToHumanSizeFilter(utilsService) {
+    return function (input) {
+      return utilsService.mbToHumanSize(input);
+    };
   }
 
 })();

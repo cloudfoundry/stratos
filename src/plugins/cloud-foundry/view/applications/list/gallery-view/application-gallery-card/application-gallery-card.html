@@ -1,16 +1,16 @@
 <gallery-card card-data="applicationGalleryCardCtrl.cardData"
   on-card-click="applicationGalleryCardCtrl.goToApp()">
   <dl class="dl-horizontal">
-    <dt translate>App State</dt>
-    <dd class="text-capitalize">
+    <dt translate class="app-status-wrapper">
+      <app-state-icon state="applicationGalleryCardCtrl.app.state.indicator"></app-state-icon>
       {{applicationGalleryCardCtrl.app.state.label | lowercase}}
-      <app-state-icon class="app-status" state="applicationGalleryCardCtrl.app.state.indicator"></app-state-icon>
-    </dd>
-    <dt translate>Instance Quota</dt>
-    <dd>{{applicationGalleryCardCtrl.app.entity.instances}}</dd>
+    </dt>
+    <dd></dd>
+    <dt translate>Instances</dt>
+    <dd>{{ applicationGalleryCardCtrl.app.entity.instances }}</dd>
     <dt translate>Disk Quota</dt>
-    <dd>{{applicationGalleryCardCtrl.app.entity.disk_quota}}</dd>
-    <dt translate>Memory Quota</dt>
-    <dd>{{applicationGalleryCardCtrl.app.entity.memory}} MB</dd>
+    <dd>{{ applicationGalleryCardCtrl.app.entity.disk_quota | mbToHumanSize }}</dd>
+    <dt translate>Memory</dt>
+    <dd>{{ applicationGalleryCardCtrl.app.entity.memory | mbToHumanSize }}</dd>
   </dl>
 </gallery-card>

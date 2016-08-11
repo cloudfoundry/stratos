@@ -15,6 +15,33 @@ $gallery-card-layout-steps: 4;
   vertical-align: middle;
 }
 
+.app-gallery-card {
+  // Gives a heading of 60px with minimal changes
+  .card.panel .panel-heading {
+    color: $dove-gray2;
+    padding-top: 19px;
+    padding-bottom: 18px;
+  }
+  .dl-horizontal dt.app-status-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 500;
+    color: $dove-gray2;
+    &>span {
+      text-transform: capitalize;
+    }
+    app-state-icon {
+      display: flex;
+      .app-status {
+        margin-left: 0;
+      }
+      margin-right: 6px;
+    }
+  }
+}
+
 // Tweak the card width slightly when samller to stop application state name over-running
 @media (min-width: 768px) {
   gallery-card {
