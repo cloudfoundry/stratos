@@ -34,11 +34,12 @@
     'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.manageUsers',
     'app.view.endpoints.clusters.cluster.rolesService',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.view.userSelection'
   ];
 
   function SpaceUsersController($scope, $state, $stateParams, $log, $q,
-                                modelManager, utils, manageUsers, rolesService, eventService) {
+                                modelManager, utils, manageUsers, rolesService, eventService, userSelection) {
     var that = this;
 
     this.guid = $stateParams.guid;
@@ -54,8 +55,7 @@
 
     this.userRoles = {};
 
-    this.selectAllUsers = false;
-    this.selectedUsers = {};
+    this.selectedUsers = userSelection.getSelectedUsers(this.guid);
 
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
@@ -65,7 +65,7 @@
       // For each user, get its roles in this space
       _.forEach(that.users, function (aUser) {
         if (_.isUndefined(that.space.roles) || _.isUndefined(that.space.details)) {
-          $log.warn('Space Roles not cached yet!', that.space);
+          $log.debug('Space Roles not cached yet?', that.space);
           return;
         }
         that.userRoles[aUser.metadata.guid] = [];
@@ -82,6 +82,11 @@
       return $q.resolve();
     }
 
+    var debouncedUpdateSelection = _.debounce(function () {
+      userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
+      $scope.$apply();
+    }, 100);
+
     function init() {
       $scope.$watch(function () {
         return rolesService.changingRoles;
@@ -94,12 +99,18 @@
         that.userActions[2].disabled = rolesService.changingRoles || !isAdmin;
       });
 
+      $scope.$watchCollection(function () {
+        return that.visibleUsers;
+      }, function () {
+        if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
+          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+          debouncedUpdateSelection();
+        }
+      });
+
       return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
         that.users = res;
-
         return refreshUsers();
-      }).then(function () {
-        $log.debug('SpaceUsersController finished init');
       });
     }
 
@@ -135,11 +146,9 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        _.forEach(that.visibleUsers, function (user) {
-          that.selectedUsers[user.metadata.guid] = true;
-        });
+        userSelection.selectUsers(that.guid, that.visibleUsers);
       } else {
-        that.selectedUsers = {};
+        userSelection.deselectAllUsers(that.guid);
       }
     };
 

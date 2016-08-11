@@ -29,10 +29,11 @@
     'app.utils.utilsService',
     '$state',
     '$q',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.view.userSelection'
   ];
 
-  function ClusterController($stateParams, $log, utils, $state, $q, modelManager) {
+  function ClusterController($stateParams, $log, utils, $state, $q, modelManager, userSelection) {
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -41,6 +42,8 @@
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+
+    userSelection.deselectAllUsers(this.guid);
 
     this.getEndpoint = function () {
       return utils.getClusterEndpoint(that.userServiceInstanceModel.serviceInstances[that.guid]);
