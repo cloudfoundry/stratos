@@ -100,23 +100,6 @@
       }
     ];
 
-    /* eslint-disable */
-    this.containerRegistryActions = [
-      {
-        name: gettext('Designate to Pipeline'),
-        execute: function (target) {
-          alert('Designate ' + target.registry_label);
-        }
-      },
-      {
-        name: gettext('Delete Registry'),
-        execute: function (target) {
-          alert('Delete ' + target.registry_label);
-        }
-      }
-    ];
-    /* eslint-disable */
-
     this.$scope.$watch(function () {
       return !that.model.application.pipeline.fetching &&
         that.model.application.pipeline.valid &&
@@ -132,7 +115,6 @@
           .finally(function () {
             that.busy = false;
           });
-        that.hceModel.getImageRegistries(that.hceCnsi.guid);
         that.modelUpdated = true;
       }
     });
@@ -163,7 +145,6 @@
           });
       });
     },
-
 
     getProject: function () {
       if (this.hceCnsi) {

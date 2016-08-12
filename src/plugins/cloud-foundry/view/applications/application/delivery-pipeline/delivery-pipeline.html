@@ -124,41 +124,4 @@
       </table>
     </div>
   </div>
-
-  <div id="container-registries">
-    <div class="action-header">
-      <span translate>Container Registries</span>
-      <button class="btn btn-link">
-        <i class="helion-icon helion-icon-Right_Arrow"></i>
-        <span translate>Add Container Registry</span>
-      </button>
-    </div>
-    <div class="panel panel-default">
-      <div class="panel-body" ng-if="!applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries.length">
-        <span translate>You have no container registries.</span>
-      </div>
-      <table ng-if="applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries.length"
-        class="table table-actionable">
-        <thead>
-          <tr>
-            <th translate>Registry Name</th>
-            <th translate>Designated</th>
-            <th translate>URL</th>
-            <th translate>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="registry in applicationDeliveryPipelineCtrl.hceModel.data.imageRegistries">
-            <td>{{ registry.registry_label }}</td>
-            <td></td>
-            <td>{{ registry.registry_url }}</td>
-            <td>
-              <actions-menu actions="applicationDeliveryPipelineCtrl.containerRegistryActions"
-                action-target="registry" menu-icon="helion-icon helion-icon-More"></actions-menu>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 </div>
