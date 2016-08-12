@@ -202,9 +202,6 @@
       var that = this;
       var pipeline = that.model.application.pipeline;
 
-      // Reset the last successful build/test/deploy events
-      //this.last = {};
-
       // Fetch events
       return that.hceModel.getPipelineEvents(pipeline.hceCnsi.guid, executionId)
         .then(function (events) {
