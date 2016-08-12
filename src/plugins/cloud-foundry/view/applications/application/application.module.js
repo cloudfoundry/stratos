@@ -172,6 +172,7 @@
       this.model.application.pipeline.fetching = true;
 
       this.model.getClusterWithId(this.cnsiGuid);
+      this.model.getAppDetailsOnOrgAndSpace(this.cnsiGuid, this.id);
 
       this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
