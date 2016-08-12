@@ -96,7 +96,7 @@
       applicationModel.createApp('guid', newAppSpec);
       applicationModel.getAppSummary('guid', guid);
       $httpBackend.flush();
-      expect(CreateApp.response['201'].body.guid.entity.name).toBe(newAppSpec.name);
+      expect(CreateApp.response['201'].body.entity.name).toBe(newAppSpec.name);
     });
 
     it('updateApp', function () {

@@ -68,6 +68,19 @@
     // This state should be in the model
     this.clusterCount = 0;
     this.hasApps = false;
+
+    var passThroughHeader = {
+      'x-cnap-passthrough': 'true'
+    };
+
+    this.makeHttpConfig = function (cnsiGuid) {
+      var headers = {'x-cnap-cnsi-list': cnsiGuid};
+      angular.extend(headers, passThroughHeader);
+      return {
+        headers: headers
+      };
+    };
+
   }
 
   angular.extend(Application.prototype, {
@@ -389,13 +402,10 @@
      */
     createApp: function (cnsiGuid, newAppSpec) {
       var that = this;
-      var config = {
-        headers: {'x-cnap-cnsi-list': cnsiGuid}
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .CreateApp(newAppSpec, {}, config)
+        .CreateApp(newAppSpec, {}, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.getAppSummary(cnsiGuid, response.data[cnsiGuid].metadata.guid);
+          that.getAppSummary(cnsiGuid, response.data.metadata.guid);
           that.all();
           return response.data;
         });
