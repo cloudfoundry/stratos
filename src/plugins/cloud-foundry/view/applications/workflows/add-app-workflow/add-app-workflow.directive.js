@@ -682,35 +682,27 @@
       createApp: function () {
         var that = this;
         var cnsiGuid = this.userInput.serviceInstance.guid;
-        return this.$q(function (resolve, reject) {
-          that.appModel.createApp(cnsiGuid, {
-            name: that.userInput.name,
+
+        return that.appModel.createApp(cnsiGuid, {
+          name: that.userInput.name,
+          space_guid: that.userInput.space.metadata.guid
+        }).then(function (app) {
+          var summaryPromise = that.appModel.getAppSummary(cnsiGuid, app.metadata.guid);
+
+          // Add route
+          var routeSpec = {
+            host: that.userInput.host,
+            domain_guid: that.userInput.domain.metadata.guid,
             space_guid: that.userInput.space.metadata.guid
-          }).then(function (response) {
-            var deferred = that.$q.defer();
-            var app = response[cnsiGuid];
-            var summaryPromise = that.appModel.getAppSummary(cnsiGuid, app.metadata.guid);
+          };
 
-            // Add route
-            var routeSpec = {
-              host: that.userInput.host,
-              domain_guid: that.userInput.domain.metadata.guid,
-              space_guid: that.userInput.space.metadata.guid
-            };
+          var routePromise = that.routeModel.createRoute(cnsiGuid, routeSpec)
+            .then(function (route) {
+              return that.routeModel.associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid);
+            });
 
-            var routePromise = that.routeModel.createRoute(cnsiGuid, routeSpec)
-              .then(function (route) {
-                that.routeModel
-                  .associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid)
-                  .then(resolve, reject);
-              });
-
-            var promises = [summaryPromise, routePromise];
-            that.$q.all(promises).then(function () {
-              that.userInput.application = that.appModel.application;
-            }, deferred.reject);
-
-            return deferred.promise;
+          return that.$q.all([summaryPromise, routePromise]).then(function () {
+            that.userInput.application = that.appModel.application;
           });
         });
       },

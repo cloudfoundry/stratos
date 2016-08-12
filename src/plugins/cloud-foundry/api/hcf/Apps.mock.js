@@ -182,62 +182,58 @@
           201: {
 
             body: {
-              "guid": {
-                "metadata": {
-                  "guid": "67eff332-a6e9-4b74-8ee3-608a6fd152b7",
-                  "url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7",
-                  "created_at": "2016-02-19T02:03:43Z",
-                  "updated_at": null
+              "metadata": {
+                "guid": "67eff332-a6e9-4b74-8ee3-608a6fd152b7",
+                "url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7",
+                "created_at": "2016-02-19T02:03:43Z",
+                "updated_at": null
+              },
+              "entity": {
+                "name": newAppSpec.name,
+                "production": false,
+                "space_guid": newAppSpec.space_guid,
+                "stack_guid": "db232beb-9a37-47e1-983b-299770b150ce",
+                "buildpack": null,
+                "detected_buildpack": null,
+                "environment_json": {},
+                "memory": 1024,
+                "instances": 1,
+                "disk_quota": 1024,
+                "state": "STOPPED",
+                "version": "105ad15b-e286-48cd-a0a7-d3dd423cac4d",
+                "command": null,
+                "console": false,
+                "debug": null,
+                "staging_task_id": null,
+                "package_state": "PENDING",
+                "health_check_type": "port",
+                "health_check_timeout": null,
+                "staging_failed_reason": null,
+                "staging_failed_description": null,
+                "diego": true,
+                "docker_image": null,
+                "package_updated_at": null,
+                "detected_start_command": "",
+                "enable_ssh": true,
+                "docker_credentials_json": {
+                  "redacted_message": "[PRIVATE DATA HIDDEN]"
                 },
-                "entity": {
-                  "name": newAppSpec.name,
-                  "production": false,
-                  "space_guid": newAppSpec.space_guid,
-                  "stack_guid": "db232beb-9a37-47e1-983b-299770b150ce",
-                  "buildpack": null,
-                  "detected_buildpack": null,
-                  "environment_json": {
-
-                  },
-                  "memory": 1024,
-                  "instances": 1,
-                  "disk_quota": 1024,
-                  "state": "STOPPED",
-                  "version": "105ad15b-e286-48cd-a0a7-d3dd423cac4d",
-                  "command": null,
-                  "console": false,
-                  "debug": null,
-                  "staging_task_id": null,
-                  "package_state": "PENDING",
-                  "health_check_type": "port",
-                  "health_check_timeout": null,
-                  "staging_failed_reason": null,
-                  "staging_failed_description": null,
-                  "diego": true,
-                  "docker_image": null,
-                  "package_updated_at": null,
-                  "detected_start_command": "",
-                  "enable_ssh": true,
-                  "docker_credentials_json": {
-                    "redacted_message": "[PRIVATE DATA HIDDEN]"
-                  },
-                  "ports": [
-                    1024,
-                    2000
-                  ],
-                  "space_url": "/v2/spaces/306ba038-4cd6-412a-bbd2-6d659924d785",
-                  "stack_url": "/v2/stacks/db232beb-9a37-47e1-983b-299770b150ce",
-                  "events_url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7/events",
-                  "service_bindings_url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7/service_bindings",
-                  "routes_url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7/routes",
-                  "route_mappings_url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7/route_mappings"
-                }
+                "ports": [
+                  1024,
+                  2000
+                ],
+                "space_url": "/v2/spaces/306ba038-4cd6-412a-bbd2-6d659924d785",
+                "stack_url": "/v2/stacks/db232beb-9a37-47e1-983b-299770b150ce",
+                "events_url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7/events",
+                "service_bindings_url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7/service_bindings",
+                "routes_url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7/routes",
+                "route_mappings_url": "/v2/apps/67eff332-a6e9-4b74-8ee3-608a6fd152b7/route_mappings"
               }
             }
           },
 
           500: {
-            body: { guid: {} }
+            body: {}
           }
         }
       };
