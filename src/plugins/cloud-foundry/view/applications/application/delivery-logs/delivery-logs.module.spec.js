@@ -318,7 +318,7 @@
 
       it('Populated event', function () {
         var event = {
-          endDate: moment().format(),
+          end_date: moment().format(),
           duration: 400,
           type: 'Building'
         };
@@ -332,8 +332,8 @@
 
       it('Populated event - calculate duration', function () {
         var event = {
-          startDate: moment().subtract(100, 's').format(),
-          endDate: moment().format()
+          start_date: moment().subtract(100, 's').format(),
+          end_date: moment().format()
         };
         controller.parseEvent(event);
         expect(event.mEndDate).toBeDefined();
@@ -368,6 +368,7 @@
 
       it('no previous event of this type used', function () {
         var event = {
+          id: 1,
           type: eventType
         };
         controller.determineLatestEvent(event);
@@ -376,14 +377,14 @@
 
       it('later event but not succeeded', function () {
         var event = {
-          type: eventType,
-          mEndDate: moment()
+          id: 1,
+          type: eventType
         };
         controller.last[eventType] = event;
 
         var laterEvent = {
-          type: eventType,
-          mEndDate: moment(event.mEndDate).add(100, 's')
+          id: 2,
+          type: eventType
         };
 
         controller.determineLatestEvent(laterEvent);
@@ -392,15 +393,15 @@
 
       it('succeeded event but not later', function () {
         var event = {
+          id: 1,
           type: eventType,
-          mEndDate: moment()
+          state: controller.eventStates.SUCCEEDED
         };
         controller.last[eventType] = event;
 
         var laterEvent = {
-          type: eventType,
-          mEndDate: moment(event.mEndDate).subtract(100, 's'),
-          state: controller.eventStates.SUCCEEDED
+          id: 2,
+          type: eventType
         };
 
         controller.determineLatestEvent(laterEvent);
@@ -409,14 +410,14 @@
 
       it('succeeded and later event', function () {
         var event = {
-          type: eventType,
-          mEndDate: moment()
+          id: 1,
+          type: eventType
         };
         controller.last[eventType] = event;
 
         var laterEvent = {
+          id: 2,
           type: eventType,
-          mEndDate: moment(event.mEndDate).add(100, 's'),
           state: controller.eventStates.SUCCEEDED
         };
 
@@ -435,7 +436,7 @@
       it('no events obj', function () {
         var execution = {
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
         controller.parseExecution(execution);
@@ -445,7 +446,7 @@
       it('empty events obj', function () {
         var execution = {
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
         controller.parseExecution(execution, []);
@@ -455,7 +456,7 @@
       it('sets moment created date', function () {
         var execution = {
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
         controller.parseExecution(execution);
@@ -465,7 +466,7 @@
       it('sets correct \'result\' property', function () {
         var execution = {
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
         var event = {
@@ -610,7 +611,7 @@
         var execution = {
           id: 'one',
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
         var eventsPerExecution = {};
@@ -631,7 +632,7 @@
         var execution = {
           id: 'one',
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
         var events = [
@@ -674,13 +675,13 @@
         var execution1 = {
           id: 'one',
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
         var execution2 = {
           id: 'two',
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
         var events = [
@@ -725,7 +726,7 @@
 
         execution = {
           reason: {
-            createdDate: moment().format()
+            created_date: moment().format()
           }
         };
       });

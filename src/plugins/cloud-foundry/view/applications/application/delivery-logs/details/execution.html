@@ -2,9 +2,9 @@
   <div class="delivery-log-execution-detail">
     <dl class="dl-horizontal col-sm-9">
       <dt translate>COMMIT ID</dt>
-      <dd class="text-right">{{ detailViewCtrl.context.execution.reason.commitSha }}</dd>
+      <dd class="text-right">{{ detailViewCtrl.context.execution.reason.commit_sha }}</dd>
       <dt translate>CREATED</dt>
-      <dd class="text-right">{{ detailViewCtrl.context.execution.reason.createdDate | amDateFormat:'L - LTS' }}</dd>
+      <dd class="text-right">{{ detailViewCtrl.context.execution.reason.created_date | amDateFormat:'L - LTS' }}</dd>
       <dt translate>COMMIT AUTHOR</dt>
       <dd class="text-right">{{ detailViewCtrl.context.execution.reason.author }}</dd>
     </dl>
@@ -29,12 +29,14 @@
         </td>
         <td class="row result-col">
           <span translate>Started: </span>
-          {{ event.startDate | amDateFormat:'L - LTS'}}
+          <span ng-if="event.start_date">{{ event.start_date | amDateFormat:'L - LTS'}}</span>
+          <span ng-if="!event.start_date" translate>Unknown</span>
         </td>
         <td></td>
         <td class="row result-col" ng-if="typeof(event.durationString) !== 'undefined'">
           <span translate>Duration: </span>
-          {{ event.durationString }}
+          <span ng-if="event.duration < 1000" translate>Less than a second</span>
+          <span ng-if="event.duration >= 1000"> {{ event.durationString }}</span>
         </td>
         <td class="row result-col" ng-if="typeof(event.durationString) === 'undefined'"></td>
         <td ng-switch="event.state == 'succeeded' || event.state == 'failed'" class="event-view">

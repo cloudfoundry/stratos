@@ -202,18 +202,13 @@
       var that = this;
       var pipeline = that.model.application.pipeline;
 
-      // Reset the last successful build/test/deploy events
-      this.last = {};
-
       // Fetch events
       return that.hceModel.getPipelineEvents(pipeline.hceCnsi.guid, executionId)
         .then(function (events) {
           for (var i = 0; i < events.length; i++) {
             that.parseEvent(events[i]);
           }
-          events = _.orderBy(events, function (event) {
-            return event.mEndDate ? event.mEndDate.unix() : Number.MAX_VALUE;
-          }, 'asc');
+          events = _.orderBy(events, 'id', 'asc');
           eventsPerExecution[executionId] = events;
         });
     },
@@ -226,10 +221,10 @@
      * @param {object} event - event to parse
      */
     parseEvent: function (event) {
-      event.mEndDate = event.endDate ? moment(event.endDate) : undefined;
+      event.mEndDate = event.end_date ? moment(event.end_date) : undefined;
 
-      if (!event.duration && (event.startDate && event.endDate)) {
-        event.duration = moment(event.startDate).diff(event.endDate);
+      if (!event.duration && (event.start_date && event.end_date)) {
+        event.duration = moment(event.start_date).diff(event.end_date);
       }
 
       if (angular.isDefined(event.duration)) {
@@ -270,7 +265,7 @@
     determineLatestEvent: function (event) {
       var type = event.type.toLowerCase();
       if (!this.last[type] ||
-        event.state === this.eventStates.SUCCEEDED && this.last[type].mEndDate.diff(event.mEndDate) < 0) {
+        event.state === this.eventStates.SUCCEEDED && event.id > this.last[type].id) {
         this.last[type] = event;
       }
     },
@@ -284,7 +279,7 @@
      */
     parseExecution: function (execution, events) {
       // Used to sort items in table
-      execution.reason.mCreatedDate = this.moment(execution.reason.createdDate);
+      execution.reason.mCreatedDate = this.moment(execution.reason.created_date);
 
       //The execution result is actually junk, need to look at the latest execution event and use that
       // as the execution result. Also required to update the result with translated text, which makes is searchable.
