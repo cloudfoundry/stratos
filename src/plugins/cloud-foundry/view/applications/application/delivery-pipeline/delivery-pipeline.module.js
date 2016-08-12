@@ -80,10 +80,20 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          that.hceModel.removeNotificationTarget(that.hceCnsi.guid, target.id)
-            .then(function () {
-              _.remove(that.notificationTargets, {id: target.id});
-            });
+          that.confirmDialog({
+            title: gettext('Delete Notification Target'),
+            description: gettext('Are you sure you want to delete this notification target?'),
+            buttonText: {
+              yes: gettext('Delete'),
+              no: gettext('Cancel')
+            }
+          }).result.then(function () {
+            that.hceModel.removeNotificationTarget(that.hceCnsi.guid, target.id)
+              .then(function () {
+                _.remove(that.notificationTargets, {id: target.id});
+              });
+          });
+
         }
       }
     ];
@@ -92,10 +102,19 @@
       {
         name: gettext('Delete'),
         execute: function (target) {
-          that.hceModel.removePipelineTask(that.hceCnsi.guid, target.pipeline_task_id)
-            .then(function () {
-              _.remove(that.postDeployActions, {pipeline_task_id: target.pipeline_task_id});
-            });
+          that.confirmDialog({
+            title: gettext('Delete Post Deploy Task'),
+            description: gettext('Are you sure you want to delete this post deploy task?'),
+            buttonText: {
+              yes: gettext('Delete'),
+              no: gettext('Cancel')
+            }
+          }).result.then(function () {
+            that.hceModel.removePipelineTask(that.hceCnsi.guid, target.pipeline_task_id)
+              .then(function () {
+                _.remove(that.postDeployActions, {pipeline_task_id: target.pipeline_task_id});
+              });
+          });
         }
       }
     ];
