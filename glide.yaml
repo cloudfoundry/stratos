@@ -1,25 +1,103 @@
 package: github.com/hpcloud/portal-proxy
 import:
-- package: github.com/coopernurse/gorp
 - package: github.com/antonlindstrom/pgstore
+  version: 646ee398524f0eb81ad90aa8f40cbd74045c99b2
 - package: github.com/cloudfoundry/noaa
+  version: a4c517a96b01b568e0670f1682c5a19869eb12d9
   subpackages:
   - consumer
   - errors
-- package: github.com/cloudfoundry/sonde-go/events
+  - consumer/internal
+- package: github.com/cloudfoundry/sonde-go
+  version: 64ff74a60c9558e7fcb55c9d22eff49412ec5826
+  subpackages:
+  - events
+- package: github.com/coopernurse/gorp
+  version: 9cd2b5ef5b82fde4e7c51776ac3f94398b8af076
+- package: github.com/dgrijalva/jwt-go
+  version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
+- package: github.com/gogo/protobuf
+  version: 2752d97bbd91927dd1c43296dbf8700e50e2708c
+  subpackages:
+  - proto
+  - gogoproto
+  - protoc-gen-gogo/descriptor
+- package: github.com/golang/protobuf
+  version: 3852dcfda249c2097355a6aabb199a28d97b30df
+  subpackages:
+  - proto
 - package: github.com/gorilla/context
   version: a8d44e7d8e4d532b6a27a02dd82abb31cc1b01bd
+- package: github.com/gorilla/securecookie
+  version: ff356348f74133a59d3e93aa24b5b4551b6fe90d
 - package: github.com/gorilla/sessions
-- package: github.com/hpcloud/ucpconfig
+  version: 56ba4b0a11da87516629a57408a5f7e4c8ea7b0b
 - package: github.com/gorilla/websocket
+  version: 54f9decdbfb3fe254c5df3d5aa234480989f4af0
+- package: github.com/hpcloud/ucpconfig
+  version: 0eace611cfcb89291849724f4704b390b436fe71
 - package: github.com/kat-co/vala
+  version: 43c3f19f86f47a7a83ce5656a1dd8fee3da5d12b
 - package: github.com/labstack/echo
+  version: 451b2ccc9ffda7fd7fad2027b75d93b18ff87cbe
   subpackages:
   - engine
   - engine/standard
   - middleware
+  - log
+- package: github.com/labstack/gommon
+  version: 722aa12d41c236ce78ff48eac1cafe0107ecdc9d
+  subpackages:
+  - log
+  - bytes
+  - color
 - package: github.com/lib/pq
+  version: 4dd446efc17690bc53e154025146f73203b18309
+  subpackages:
+  - oid
+- package: github.com/mattn/go-colorable
+  version: 9056b7a9f2d1f2d96498d6d146acd1f9d5ed3d59
+- package: github.com/mattn/go-isatty
+  version: 56b76bdf51f7708750eac80fa38b952bb9f32639
 - package: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+- package: github.com/valyala/fasttemplate
+  version: 3b874956e03f1636d171bda64b130f9135f42cff
+- package: golang.org/x/net
+  version: b400c2eff1badec7022a8c8f5bea058b6315eed7
+  subpackages:
+  - context
 - package: golang.org/x/oauth2
+  version: 7357e96168422ba1e6e7f21075713b72d58764e7
   subpackages:
   - github
+  - internal
+- package: golang.org/x/sys
+  version: a408501be4d17ee978c04a618e7a1b22af058c0e
+  subpackages:
+  - unix
+- package: google.golang.org/appengine
+  version: 267c27e7492265b84fc6719503b14a1e17975d79
+  subpackages:
+  - urlfetch
+  - internal
+  - internal/urlfetch
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+testImports:
+- package: github.com/davecgh/go-spew
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  subpackages:
+  - spew
+- package: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- package: github.com/stretchr/testify
+  version: d77da356e56a7428ad25149ca77381849a6a5232
+  subpackages:
+  - assert
+- package: gopkg.in/DATA-DOG/go-sqlmock.v1
+  version: 9958e5c69de03e97ec215b23f6fcae1f600c3fb6
