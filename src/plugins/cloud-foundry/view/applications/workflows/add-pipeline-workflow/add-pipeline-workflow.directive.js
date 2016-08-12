@@ -76,12 +76,6 @@
 
   function run(addPipelineWorkflowPrototype) {
     angular.extend(AddPipelineWorkflowController.prototype, addPipelineWorkflowPrototype, {
-      getEndpoint: function () {
-        return this.utils.getClusterEndpoint(
-          this.modelManager.retrieve('app.model.serviceInstance.user').serviceInstances[this.cnsiGuid]
-        );
-      },
-
       reset: function () {
         var that = this;
         var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
@@ -89,6 +83,7 @@
         this.errors = {};
 
         this.userInput = {
+          serviceInstance: this.modelManager.retrieve('cloud-foundry.model.application').application.cluster,
           application: null,
           hceCnsi: null,
           source: null,
