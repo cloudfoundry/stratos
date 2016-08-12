@@ -176,7 +176,6 @@
           repoFilterTerm: null,
           branch: null,
           buildContainer: null,
-          imageRegistry: null,
           projectId: null,
           searchCategory: 'all',
           search: {
@@ -415,7 +414,6 @@
           loadingRepos: false,
           branches: [],
           buildContainers: [],
-          imageRegistries: [],
           notificationFormAppMode: true
         };
 
@@ -662,12 +660,6 @@
             [].push.apply(that.options.buildContainers, buildContainers);
           });
 
-        this.hceModel.getImageRegistries(this.userInput.hceCnsi.guid)
-          .then(function () {
-            var imageRegistries = _.map(that.hceModel.data.imageRegistries,
-                                        function (o) { return { label: o.registry_label, value: o }; });
-            [].push.apply(that.options.imageRegistries, imageRegistries);
-          });
       },
 
       /**
