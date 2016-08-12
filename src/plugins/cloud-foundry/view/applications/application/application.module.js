@@ -170,6 +170,10 @@
       // Fetching flag onlt set initially - subsequent calls update the data, so we don't want to show a busy indicator
       // in those cases
       this.model.application.pipeline.fetching = true;
+
+      this.model.getClusterWithId(this.cnsiGuid);
+      this.model.getAppDetailsOnOrgAndSpace(this.cnsiGuid, this.id);
+
       this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
           return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);

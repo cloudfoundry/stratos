@@ -196,6 +196,22 @@
     },
 
     /**
+     * @function getClusterWithId
+     * @memberof cloud-foundry.model.application
+     * @description get cluster with cluster ID
+     * @param {string} cnsiGuid - cluster ID.
+     * @returns {promise} a promise object
+     * @public
+     */
+    getClusterWithId: function (cnsiGuid) {
+      var that = this;
+      return this.serviceInstanceModel.list()
+        .then(function () {
+          that.application.cluster = that.serviceInstanceModel.serviceInstances[cnsiGuid];
+        });
+    },
+
+    /**
      * @function getAppSummary
      * @memberof cloud-foundry.model.application
      * @description get summary of an application at the model layer
