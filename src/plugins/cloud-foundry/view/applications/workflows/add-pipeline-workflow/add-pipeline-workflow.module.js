@@ -293,40 +293,6 @@
         [].push.apply(this.data.workflow.steps, subflow);
       },
 
-      /**
-       * @function createApp
-       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
-       * @description create an application
-       * @returns {promise} A resolved/rejected promise
-       */
-      createApp: function () {
-        var that = this;
-        var cnsiGuid = this.userInput.serviceInstance.guid;
-
-        return that.appModel.createApp(cnsiGuid, {
-          name: that.userInput.name,
-          space_guid: that.userInput.space.metadata.guid
-        }).then(function (app) {
-          var summaryPromise = that.appModel.getAppSummary(cnsiGuid, app.metadata.guid);
-
-          // Add route
-          var routeSpec = {
-            host: that.userInput.host,
-            domain_guid: that.userInput.domain.metadata.guid,
-            space_guid: that.userInput.space.metadata.guid
-          };
-
-          var routePromise = that.routeModel.createRoute(cnsiGuid, routeSpec)
-            .then(function (route) {
-              return that.routeModel.associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid);
-            });
-
-          return that.$q.all([summaryPromise, routePromise]).then(function () {
-            that.userInput.application = that.appModel.application;
-          });
-        });
-      },
-
       createDeploymentTarget: function () {
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
         var name = this._getDeploymentTargetName();
