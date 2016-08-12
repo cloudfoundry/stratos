@@ -85,6 +85,7 @@
         var application = this.modelManager.retrieve('cloud-foundry.model.application').application;
 
         this.userInput = {
+          name: application.summary.name,
           serviceInstance: application.cluster,
           organization: { entity: application.organization },
           space: { entity: application.space },
