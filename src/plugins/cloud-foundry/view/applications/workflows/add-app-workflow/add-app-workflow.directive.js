@@ -295,7 +295,8 @@
           loadingRepos: false,
           branches: [],
           buildContainers: [],
-          notificationFormAppMode: true
+          notificationFormAppMode: true,
+          imageRegistries: []
         };
 
         this.addApplicationActions = {

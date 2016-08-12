@@ -30,7 +30,7 @@
       },
 
       getWorkflowDefinition: function () {
-        var path = 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/';
+        var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
         var that = this;
 
         return {
@@ -44,7 +44,7 @@
             {
               ready: true,
               title: gettext('Select Source'),
-              templateUrl: path + 'pipeline-subflow/select-source.html',
+              templateUrl: path + 'select-source.html',
               formName: 'application-source-form',
               nextBtnText: gettext('Next'),
               onNext: function () {
@@ -66,7 +66,7 @@
             {
               ready: true,
               title: gettext('Select Repository'),
-              templateUrl: path + 'pipeline-subflow/select-repository.html',
+              templateUrl: path + 'select-repository.html',
               formName: 'application-repo-form',
               nextBtnText: gettext('Next'),
               onNext: function () {
@@ -103,7 +103,7 @@
             {
               ready: true,
               title: gettext('Pipeline Details'),
-              templateUrl: path + 'pipeline-subflow/pipeline-details.html',
+              templateUrl: path + 'pipeline-details.html',
               formName: 'application-pipeline-details-form',
               nextBtnText: gettext('Create pipeline'),
               onNext: function () {
@@ -153,7 +153,7 @@
             {
               ready: true,
               title: gettext('Deploy App'),
-              templateUrl: path + 'pipeline-subflow/deploy.html',
+              templateUrl: path + 'deploy.html',
               formName: 'application-pipeline-deploy-form',
               nextBtnText: gettext('Finished code change'),
               isLastStep: true
