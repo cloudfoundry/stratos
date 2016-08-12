@@ -1,5 +1,5 @@
 {
-  "name": "helion-stackato-console",
+  "name": "hsc",
   "product_version": "4.0",
   "sdl_version": "{{TAG}}",
   "vendor": "HPE",
