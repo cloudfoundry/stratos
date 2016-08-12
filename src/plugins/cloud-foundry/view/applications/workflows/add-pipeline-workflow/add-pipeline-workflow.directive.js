@@ -82,9 +82,13 @@
         this.data = {};
         this.errors = {};
 
+        var application = this.modelManager.retrieve('cloud-foundry.model.application').application;
+
         this.userInput = {
-          serviceInstance: this.modelManager.retrieve('cloud-foundry.model.application').application.cluster,
-          application: null,
+          serviceInstance: application.cluster,
+          organization: { entity: application.organization },
+          space: { entity: application.space },
+          application: application,
           hceCnsi: null,
           source: null,
           repo: null,
