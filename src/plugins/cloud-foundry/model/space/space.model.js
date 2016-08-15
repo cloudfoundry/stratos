@@ -483,6 +483,7 @@
 
       return that.$q.all(createPromises).then(function () {
         // Refresh the org!
+        that.organizationModel.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
         var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
         return that.organizationModel.getOrganizationDetails(cnsiGuid, org);
       });
@@ -498,6 +499,7 @@
       var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
       return spaceApi.DeleteSpace(spaceGuid, params, this.makeHttpConfig(cnsiGuid)).then(function () {
         // Refresh the org!
+        that.organizationModel.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
         var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
         return that.organizationModel.getOrganizationDetails(cnsiGuid, org);
       });
