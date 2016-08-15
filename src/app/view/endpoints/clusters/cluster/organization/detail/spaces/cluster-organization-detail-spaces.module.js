@@ -42,7 +42,9 @@
   angular.extend(ClusterDetailSpacesController.prototype, {
     spaces: function () {
       return _.get(this.organizationModel, this.spacesPath);
-    }
+    },
+
+    keys: _.keys
 
   });
 })();

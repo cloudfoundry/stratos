@@ -1,5 +1,5 @@
 @import 'detail/cluster-detail';
-@import 'organization/space/detail/services/space-services';
+@import 'organization/space/detail/space-detail';
 @import 'actions/actions';
 
 .cluster {
@@ -53,5 +53,9 @@
     .application-nav {
       margin-bottom: 15px;
     }
+  }
+
+  .cluster-empty-list {
+    width: 100%;
   }
 }

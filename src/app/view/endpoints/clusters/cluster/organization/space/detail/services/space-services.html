@@ -1,48 +1,57 @@
-<div class="space-services-table"
-     st-table="spaceSrvsCtrl.visibleServiceInstances"
-     st-safe-src="spaceSrvsCtrl.spaceDetail().instances">
-
-  <div>
-    <div class="panel panel-default">
-      <table class="table table-actionable" >
-        <thead>
-        <tr>
-          <th st-sort="entity.name" st-sort-default="true" translate>SERVICE INSTANCES</th>
-          <th st-sort="entity.type" translate>TYPE</th>
-          <th translate>PLAN</th>
-          <th translate>APPLICATION ATTACHED</th>
-          <th translate>ACTION</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr
-          ng-repeat="instance in spaceSrvsCtrl.visibleServiceInstances">
-          <td>{{ instance.entity.name }}</td>
-          <td>{{ instance.entity.service_plan.entity.service.entity.label }}</td>
-          <td>{{ instance.entity.service_plan.entity.name }}</td>
-          <td>{{ spaceSrvsCtrl.createApplicationList(instance.entity.service_bindings) }}</td>
-          <td>
-            <actions-menu actions="spaceSrvsCtrl.actionsPerSI[instance.metadata.guid]"
-                          action-target="instance"
-                          menu-icon="helion-icon helion-icon-More"
-                          menu-position="actions-menu-right">
-            </actions-menu>
-          </td>
-        </tr>
-        </tbody>
-        <tfoot ng-init="spaceSrvsCtrl.showInstances = 5"
-               ng-show="spaceSrvsCtrl.showInstances < spaceSrvsCtrl.spaceDetail().instances.length">
-        <tr>
-          <td colspan="5" class="text-center">
-            <a ng-click="spaceSrvsCtrl.showInstances = spaceSrvsCtrl.spaceDetail().instances.length">
-              <span translate>Show All</span> ({{spaceSrvsCtrl.spaceDetail().instances.length}})
-            </a>
-            <div ng-show="false" st-pagination="" st-items-by-page="spaceSrvsCtrl.showInstances"></div>
-          </td>
-        </tr>
-        </tfoot>
-      </table>
+<div class="space-services-table">
+  <div ng-if="spaceSrvsCtrl.spaceDetail().instances.length < 1"
+       class="panel panel-default cluster-empty-list">
+    <div class="panel-body" translate>
+      You have no service instances
     </div>
+  </div>
 
+  <div ng-if="spaceSrvsCtrl.spaceDetail().instances.length > 0"
+       st-table="spaceSrvsCtrl.visibleServiceInstances"
+       st-safe-src="spaceSrvsCtrl.spaceDetail().instances">
+
+    <div>
+      <div class="panel panel-default">
+        <table class="table table-actionable" >
+          <thead>
+          <tr>
+            <th st-sort="entity.name" st-sort-default="true" translate>SERVICE INSTANCES</th>
+            <th st-sort="entity.type" translate>TYPE</th>
+            <th translate>PLAN</th>
+            <th translate>APPLICATION ATTACHED</th>
+            <th translate>ACTION</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr
+            ng-repeat="instance in spaceSrvsCtrl.visibleServiceInstances">
+            <td>{{ instance.entity.name }}</td>
+            <td>{{ instance.entity.service_plan.entity.service.entity.label }}</td>
+            <td>{{ instance.entity.service_plan.entity.name }}</td>
+            <td>{{ spaceSrvsCtrl.createApplicationList(instance.entity.service_bindings) }}</td>
+            <td>
+              <actions-menu actions="spaceSrvsCtrl.actionsPerSI[instance.metadata.guid]"
+                            action-target="instance"
+                            menu-icon="helion-icon helion-icon-More"
+                            menu-position="actions-menu-right">
+              </actions-menu>
+            </td>
+          </tr>
+          </tbody>
+          <tfoot ng-init="spaceSrvsCtrl.showInstances = 5"
+                 ng-show="spaceSrvsCtrl.showInstances < spaceSrvsCtrl.spaceDetail().instances.length">
+          <tr>
+            <td colspan="5" class="text-center">
+              <a ng-click="spaceSrvsCtrl.showInstances = spaceSrvsCtrl.spaceDetail().instances.length">
+                <span translate>Show All</span> ({{spaceSrvsCtrl.spaceDetail().instances.length}})
+              </a>
+              <div ng-show="false" st-pagination="" st-items-by-page="spaceSrvsCtrl.showInstances"></div>
+            </td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+
+    </div>
   </div>
 </div>
