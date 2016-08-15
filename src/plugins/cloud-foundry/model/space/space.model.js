@@ -482,9 +482,8 @@
       }
 
       return that.$q.all(createPromises).then(function () {
-        // Refresh the org!
-        var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
-        return that.organizationModel.getOrganizationDetails(cnsiGuid, org);
+        // Refresh the spaces
+        return that.organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
       });
 
     },
@@ -497,9 +496,8 @@
       };
       var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
       return spaceApi.DeleteSpace(spaceGuid, params, this.makeHttpConfig(cnsiGuid)).then(function () {
-        // Refresh the org!
-        var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
-        return that.organizationModel.getOrganizationDetails(cnsiGuid, org);
+        // Refresh the spaces
+        return that.organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
       });
     },
 
@@ -507,12 +505,10 @@
       var that = this;
       var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
       return spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.makeHttpConfig(cnsiGuid)).then(function (val) {
-        // Refresh the org!
-        that.organizationModel.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
-        var org = that.organizationModel.organizations[cnsiGuid][orgGuid].details.org;
-        var orgRefreshedP = that.organizationModel.getOrganizationDetails(cnsiGuid, org);
+        // Refresh the org spaces
+        var orgRefreshedP = that.organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
 
-        // Refresh the space!
+        // Refresh the space itself
         var spaceRefreshedP = that.getSpaceDetails(cnsiGuid, val.data, {});
 
         return that.$q.all([orgRefreshedP, spaceRefreshedP]);

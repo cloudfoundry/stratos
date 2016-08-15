@@ -37,8 +37,6 @@
 
     this.$scope = $scope;
 
-    this.organizations = [];
-
     this.totalApps = 0;
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -65,6 +63,8 @@
     }
 
     function init() {
+      that.organizations = [];
+
       var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       var user = stackatoInfo.info.endpoints.hcf[that.guid].user;

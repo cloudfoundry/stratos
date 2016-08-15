@@ -275,6 +275,21 @@
       delete details.org.entity.spaces;
     },
 
+    refreshOrganizationSpaces: function (cnsiGuid, orgGuid) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Organizations')
+        .ListAllSpacesForOrganization(orgGuid, {
+          'inline-relations-depth': 1
+        }, this.makeHttpConfig(cnsiGuid)).then(function (res) {
+          var depthOneSpaces = res.data.resources;
+          that.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
+          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces);
+          return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org).then(function () {
+            return depthOneSpaces;
+          });
+        });
+    },
+
     /**
      * @function  getOrganizationDetails
      * @memberof cloud-foundry.model.organization
