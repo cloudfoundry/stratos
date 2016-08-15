@@ -228,19 +228,14 @@
     },
 
     cacheOrganizationSpaces: function (cnsiGuid, orgGuid, spaces) {
-
       this.initOrganizationCache(cnsiGuid, orgGuid);
+      this.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
 
-      // Empty the cache without changing the Object reference
       var spaceCache = this.organizations[cnsiGuid][orgGuid].spaces;
-      for (var space in spaceCache) {
-        if (spaceCache.hasOwnProperty(space)) {
-          delete spaceCache[space];
-        }
-      }
       _.forEach(spaces, function (space) {
         spaceCache[space.metadata.guid] = space;
       });
+      this.organizations[cnsiGuid][orgGuid].details.org.entity.spaces = spaces;
     },
 
     unCacheOrganization: function (cnsiGuid, orgGuid) {
@@ -265,6 +260,19 @@
           delete rolesCache[role];
         }
       }
+    },
+
+    uncacheOrganizationSpaces: function (cnsiGuid, orgGuid) {
+      this.initOrganizationCache(cnsiGuid, orgGuid);
+      // Empty the cache without changing the Object reference
+      var spaceCache = this.organizations[cnsiGuid][orgGuid].spaces;
+      for (var space in spaceCache) {
+        if (spaceCache.hasOwnProperty(space)) {
+          delete spaceCache[space];
+        }
+      }
+      var details = this.organizations[cnsiGuid][orgGuid].details;
+      delete details.org.entity.spaces;
     },
 
     /**
@@ -520,8 +528,17 @@
 
     updateOrganization: function (cnsiGuid, orgGuid, orgData) {
       var that = this;
-      return that.orgsApi.UpdateOrganization(orgGuid, orgData, {}, this.makeHttpConfig(cnsiGuid)).then(function (val) {
+      var oldName = _.get(that.organizations[cnsiGuid][orgGuid], 'details.org.entity.name');
+      return that.orgsApi.UpdateOrganization(orgGuid, orgData, {}, that.makeHttpConfig(cnsiGuid)).then(function (val) {
         that.organizations[cnsiGuid][orgGuid].details.org = val.data;
+        var newName = _.get(val.data, 'entity.name');
+        if (oldName !== newName) {
+          var idx = that.organizationNames[cnsiGuid].indexOf(oldName);
+          if (idx > -1) {
+            that.organizationNames[cnsiGuid].splice(idx, 1);
+          }
+          that.organizationNames[cnsiGuid].push(newName);
+        }
         return val;
       });
     },
