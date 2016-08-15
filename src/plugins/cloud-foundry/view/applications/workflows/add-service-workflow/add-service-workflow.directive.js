@@ -241,7 +241,7 @@
       this.options.instanceNames.length = 0;
 
       var q = 'service_plan_guid IN ' + servicePlanGuids.join(',');
-      var params = { q: q, 'inline-relations-depth': 2, 'include-relations': 'service_plan,service_bindings' };
+      var params = { q: q };
       return this.spaceModel.listAllServiceInstancesForSpace(this.data.cnsiGuid, this.data.spaceGuid, params)
         .then(function (serviceInstances) {
           var instances = _.sortBy(serviceInstances, function (o) { return o.entity.name; });

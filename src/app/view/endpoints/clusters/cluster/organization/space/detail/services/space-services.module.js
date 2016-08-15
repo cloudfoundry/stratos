@@ -27,10 +27,11 @@
   SpaceServicesController.$inject = [
     '$scope',
     '$stateParams',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'cloud-foundry.view.applications.services.serviceInstanceService'
   ];
 
-  function SpaceServicesController($scope, $stateParams, modelManager) {
+  function SpaceServicesController($scope, $stateParams, modelManager, serviceInstanceService) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -38,83 +39,71 @@
     this.spaceGuid = $stateParams.space;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
-    this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
-    this.appModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.servicePlanModel = modelManager.retrieve('cloud-foundry.model.service-plan');
-    this.serviceModel = modelManager.retrieve('cloud-foundry.model.service');
-    this.serviceInstance = modelManager.retrieve('cloud-foundry.model.service-instance');
+    this.serviceInstanceService = serviceInstanceService;
 
-    this.actions = [
-      {
-        name: gettext('Delete Service'),
-        disabled: true,
-        execute: function () {
-        }
-      },
-      {
-        name: gettext('Detach Service'),
-        disabled: true,
-        execute: function () {
-        }
-      }
-    ];
-
-    this.appSummary = {};
-    this.servicePlan = {};
-    this.service = {};
-
-    this.visibleServiceInstances = [];
-
-    // Try to avoid some thrash by tracking which have been updated this time around.
-    this.processed = {};
+    this.actionsPerSI = {};
 
     $scope.$watch(function () {
       return that.visibleServiceInstances;
     }, function (serviceInstances) {
-      that.serviceInstanceChanged(serviceInstances);
+      if (!serviceInstances) {
+        return;
+      }
+      that.updateActions(serviceInstances);
     });
 
   }
 
   angular.extend(SpaceServicesController.prototype, {
-
-    serviceInstanceChanged: function (serviceInstances) {
-      if (!serviceInstances) {
-        return;
-      }
+    update: function (serviceInstance) {
       var that = this;
-
-      _.forEach(serviceInstances, function (serviceInstance) {
-        if (that.processed[serviceInstance.metadata.guid]) {
-          return;
-        }
-        that.processed[serviceInstance.metadata.guid] = true;
-        // Discover the application associated with this service instance
-        that.serviceInstance.listAllServiceBindingsForServiceInstance(that.clusterGuid, serviceInstance.metadata.guid)
-          .then(function (serviceBindings) {
-            _.forEach(serviceBindings, function (serviceBinding) {
-              if (_.get(that.appModel, 'appSummary.' + that.clusterGuid + '.' + serviceBinding.entity.app_guid)) {
-                return;
-              }
-              that.appModel.getAppSummary(that.clusterGuid, serviceBinding.entity.app_guid);
-            });
-          });
-
-        // Discover the associated service and service plan of this instance
-        that.servicePlanModel.retrieveServicePlan(that.clusterGuid, serviceInstance.entity.service_plan_guid)
-          .then(function (servicePlan) {
-            that.servicePlan[serviceInstance.metadata.guid] = servicePlan;
-            that.serviceModel.retrieveService(that.clusterGuid, servicePlan.entity.service_guid)
-              .then(function (response) {
-                that.service[serviceInstance.metadata.guid] = response;
-              });
-          });
-
+      this.spaceModel.listAllServiceInstancesForSpace(this.clusterGuid, this.spaceGuid).then(function () {
+        that.updateActions([serviceInstance]);
       });
+    },
+
+    getInitialActions: function () {
+      var that = this;
+      return [
+        {
+          name: gettext('Delete Service'),
+          disabled: false,
+          execute: function (serviceInstance) {
+            that.serviceInstanceService.deleteService(that.clusterGuid, serviceInstance.metadata.guid,
+              serviceInstance.entity.name, _.bind(that.update, that, serviceInstance));
+          }
+        },
+        {
+          name: gettext('Detach Service'),
+          disabled: true,
+          execute: function (serviceInstance) {
+            that.serviceInstanceService.unbindServiceFromApps(that.clusterGuid, serviceInstance.entity.service_bindings,
+              serviceInstance.entity.name, _.bind(that.update, that, serviceInstance));
+          }
+        }
+      ];
+    },
+
+    createApplicationList: function (serviceBindings) {
+      return _.chain(serviceBindings)
+        .map(function (serviceBinding) {
+          return serviceBinding.entity.app.entity.name;
+        })
+        .sortBy()
+        .value()
+        .join(', ');
     },
 
     spaceDetail: function () {
       return _.get(this.spaceModel, this.spacePath);
+    },
+
+    updateActions: function (serviceInstances) {
+      var that = this;
+      _.forEach(serviceInstances, function (si) {
+        that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
+        that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1;
+      });
     }
 
   });

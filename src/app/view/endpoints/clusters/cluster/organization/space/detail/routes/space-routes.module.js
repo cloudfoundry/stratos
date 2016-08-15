@@ -81,19 +81,18 @@
           name: gettext('Unmap Route'),
           disabled: true,
           execute: function (route) {
-            var promises = [];
-            _.forEach(route.entity.apps, function (app) {
-              var promise = that.routesService.unmapRoute(that.clusterGuid, route.entity, route.metadata.guid,
-                app.metadata.guid)
-                .catch(function () {
-                  that.$log.error('Unable to update map for route ', route.metadata.guid);
-                });
-              promises.push(promise);
-            });
-            if (promises.length === 0) {
-              return;
+            var promise;
+            if (route.entity.apps.length > 1) {
+              promise = that.routesService.unmapAppsRoute(that.clusterGuid, route.entity, route.metadata.guid,
+                _.map(route.entity.apps, 'metadata.guid'));
+            } else {
+              promise = that.routesService.unmapAppRoute(that.clusterGuid, route.entity, route.metadata.guid,
+                route.entity.apps[0].metadata.guid);
             }
-            that.$q.all(promises).then(function () {
+            promise.then(function (changeCount) {
+              if (changeCount < 1) {
+                return;
+              }
               that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid).then(function () {
                 that.updateActions([route]);
               });

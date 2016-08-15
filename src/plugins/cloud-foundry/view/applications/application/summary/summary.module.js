@@ -62,7 +62,7 @@
       {
         name: gettext('Unmap from App'),
         execute: function (route) {
-          routesService.unmapRoute(that.cnsiGuid, route, route.guid, that.id);
+          routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id);
         }
       },
       {
