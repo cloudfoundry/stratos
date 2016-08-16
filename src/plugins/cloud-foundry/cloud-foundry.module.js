@@ -11,18 +11,18 @@
     .run(register);
 
   register.$inject = [
-    'app.event.eventService',
-    'app.model.modelManager',
     '$state',
     '$location',
-    'cloud-foundry.view.applications.services.notifications'
+    'app.event.eventService',
+    'app.model.modelManager',
+    'app.view.notificationsService'
   ];
 
-  function register(eventService, modelManager, $state, $location, notificationService) {
-    return new CloudFoundry(eventService, modelManager, $state, $location, notificationService);
+  function register($state, $location, eventService, modelManager, notificationService) {
+    return new CloudFoundry($state, $location, eventService, modelManager, notificationService);
   }
 
-  function CloudFoundry(eventService, modelManager, $state, $location, notificationService) {
+  function CloudFoundry($state, $location, eventService, modelManager, notificationService) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;

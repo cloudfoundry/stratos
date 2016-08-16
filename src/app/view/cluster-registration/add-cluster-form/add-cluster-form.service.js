@@ -40,16 +40,18 @@
   }
 
   AddClusterFormController.$inject = [
-    'app.model.modelManager',
-    'context',
     '$scope',
-    '$uibModalInstance'
+    '$uibModalInstance',
+    'app.model.modelManager',
+    'app.view.notificationsService',
+    'context'
   ];
 
-  function AddClusterFormController(modelManager, context, $scope, $uibModalInstance) {
+  function AddClusterFormController($scope, $uibModalInstance, modelManager, notificationsService, context) {
     var that = this;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.$uibModalInstance = $uibModalInstance;
+    this.notificationsService = notificationsService;
     this.url = null;
     this.name = null;
     this.context = context;
@@ -77,6 +79,7 @@
       var that = this;
       this.serviceInstanceModel.create(this.url, this.name)
         .then(function () {
+          that.notificationsService.notify('success', gettext('Cluster successfully registered'));
           that.clearForm();
           that.$uibModalInstance.close();
           // that.onSubmit();

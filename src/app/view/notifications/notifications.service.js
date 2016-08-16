@@ -2,8 +2,8 @@
   'use strict';
 
   angular
-    .module('cloud-foundry.view.applications.services')
-    .factory('cloud-foundry.view.applications.services.notifications', notificationsFactory);
+    .module('app.view')
+    .factory('app.view.notificationsService', notificationsFactory);
 
   notificationsFactory.$inject = [
     'app.event.eventService',
@@ -22,11 +22,11 @@
     var service = {
       /**
        * @function notify
-       * @memberof cloud-foundry.view.applications.services.notifications
+       * @memberof app.view.notificationsService
        * @description Show a toast notification
        * @param {string} toastType - the toast notification type (i.e. success, warning)
        * @param {string} message - the toast message
-       * @param {object} options - optional override options for toast
+       * @param {object=} options - optional override options for toast
        * @returns {object} The toast object
        * @public
        */

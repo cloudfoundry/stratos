@@ -38,7 +38,8 @@
 
   CredentialsFormController.$inject = [
     'app.event.eventService',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.view.notificationsService'
   ];
 
   /**
@@ -50,6 +51,7 @@
    * @constructor
    * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @property {app.event.eventService} eventService - the application event bus
    * @property {boolean} authenticating - a flag that authentication is in process
    * @property {boolean} failedRegister - an error flag for bad credentials
@@ -57,9 +59,10 @@
    * @property {boolean} serverFailedToRespond - an error flag for no server response
    * @property {object} _data - the view data (copy of service)
    */
-  function CredentialsFormController(eventService, modelManager) {
+  function CredentialsFormController(eventService, modelManager, notificationsService) {
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.eventService = eventService;
+    this.notificationsService = notificationsService;
     this.authenticating = false;
     this.failedRegister = false;
     this.serverErrorOnRegister = false;
@@ -85,7 +88,6 @@
      * @function connect
      * @memberOf app.view.credentialsForm.CredentialsFormController
      * @description Connect service instance for user
-     * @param {object} serviceInstance - the service instance to connect
      * @returns {void}
      */
     connect: function () {
@@ -93,11 +95,13 @@
       this.authenticating = true;
       this.userServiceInstanceModel.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password)
         .then(function success(response) {
+          that.notificationsService.notify('success', gettext('Credentials validated'));
           that.reset();
           if (angular.isDefined(that.onSubmit)) {
             that.onSubmit({ serviceInstance: response.data });
           }
         }, function (err) {
+          //TODO: We need to differentiate between failed request and unauthorised creds. For the former need suitable message
           if (err.status >= 400) {
             that.failedRegister = true;
             that.authenticating = false;

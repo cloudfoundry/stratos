@@ -32,7 +32,8 @@
     'app.utils.utilsService',
     'helion.framework.widgets.asyncTaskDialog',
     'app.view.endpoints.clusters.cluster.assignUsers',
-    'app.view.userSelection'
+    'app.view.userSelection',
+    'app.view.notificationsService'
   ];
 
   /**
@@ -46,10 +47,11 @@
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} assignUsersService - service that allows assigning roles to users
    * @param {object} userSelection - service centralizing user selection
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function ClusterActionsController(modelManager, $state, $q, $stateParams,
-                                    utils, asyncTaskDialog, assignUsersService, userSelection) {
+                                    utils, asyncTaskDialog, assignUsersService, userSelection, notificationsService) {
     var that = this;
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -95,7 +97,9 @@
             }
 
           }
-        );
+        ).result.then(function () {
+          notificationsService.notify('success', gettext('Organisation successfully created'));
+        });
       },
       icon: 'helion-icon-lg helion-icon helion-icon-Tree'
     };
@@ -189,7 +193,9 @@
             }
             return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate);
           }
-        );
+        ).result.then(function () {
+          notificationsService.notify('success', gettext('Space successfully created'));
+        });
       },
       icon: 'helion-icon-lg helion-icon helion-icon-Tree'
     };
