@@ -18,9 +18,6 @@ type portalConfig struct {
 	HCPIdentityPort         string   `ucp:"HCP_IDENTITY_PORT"`
 	AllowedOrigins          []string `ucp:"ALLOWED_ORIGINS"`
 	SessionStoreSecret      string   `ucp:"SESSION_STORE_SECRET"`
-	GitHubOauthClientID     string   `ucp:"GITHUB_OAUTH_CLIENT_ID"`
-	GitHubOAuthClientSecret string   `ucp:"GITHUB_OAUTH_CLIENT_SECRET"`
-	GitHubOAuthState        string   `ucp:"GITHUB_OAUTH_STATE"`
 	VCSClients              string   `ucp:"VCS_CLIENTS"`
 	EncryptionKeyVolume     string   `ucp:"ENCRYPTION_KEY_VOLUME"`
 	EncryptionKeyFilename   string   `ucp:"ENCRYPTION_KEY_FILENAME"`

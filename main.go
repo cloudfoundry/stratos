@@ -68,8 +68,9 @@ func main() {
 	log.Println("Encryption key set.")
 
 	portalConfig.VCSClientMap, err = getVCSClients(portalConfig)
-	if err != nil {
-		log.Println(err)
+	if err != nil || len(portalConfig.VCSClientMap) == 0 {
+		log.Printf("Exiting. No VCS clients found: %v", err)
+		os.Exit(1)
 	}
 	log.Printf("VCSClientMap: %v\n", portalConfig.VCSClientMap)
 
@@ -337,7 +338,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	vcsGroup.GET("/oauth/callback", p.handleVCSAuthCallback)
 
 	// Verify existence of VCS token in Session
-	vcsGroup.GET("/oauth/verify", p.verifyVCSAuthToken)
+	vcsGroup.GET("/oauth/verify", p.verifyVCSOAuthToken)
 
 	// Proxy the rest to VCS API
 	vcsGroup.Any("/*", p.vcsProxy)

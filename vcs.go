@@ -26,11 +26,6 @@ const (
 	VCSBITBUCKETAUTHPATHPREFIX VCSAuthPathPrefix = "/site"
 )
 
-// TODO (wchrisjohnson): Make configurable w/a default.
-//    https://jira.hpcloud.net/browse/TEAMFOUR-632
-// AarondL: These scopes should probably be configurable with a default.
-//    https://jira.hpcloud.net/browse/TEAMFOUR-632
-
 // Define the necessary OAuth scopes needed by the application
 // For now, Github only. Using default for BitBucket.
 var githubScopes = []string{"admin:repo_hook", "repo", "user"}
@@ -52,30 +47,32 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, error) {
 		for _, client := range strings.Split(pc.VCSClients, ";") {
 			clientData := strings.Split(client, ",")
 			vcsType := strings.ToLower(clientData[0])
-			if vcsClientType, err := getVCSType(vcsType); err != nil {
+			vcsClientType, err := getVCSType(vcsType)
+			if err != nil {
 				log.Printf("Unable to get VCS type for client %v: %v", clientData, err)
-			} else {
-				pathPrefix := getAuthPathPrefix(vcsType)
-				baseEndpoint := strings.TrimSpace(clientData[1])
-				baseEndpointURL, _ := url.Parse(baseEndpoint)
-				authEndpoint := fmt.Sprintf("%s://%s%s/oauth/authorize", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-				tokenEndpoint := fmt.Sprintf("%s://%s%s/oauth/access_token", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-
-				vcsConfig := oauth2.Config{
-					Endpoint: oauth2.Endpoint{
-						AuthURL:  authEndpoint,
-						TokenURL: tokenEndpoint,
-					},
-					ClientID:     clientData[2],
-					ClientSecret: clientData[3],
-				}
-
-				if vcsClientType == VCSGITHUB {
-					vcsConfig.Scopes = githubScopes
-				}
-
-				vcsClientMap[VCSClientMapKey{baseEndpoint}] = vcsConfig
+				continue
 			}
+
+			pathPrefix := getAuthPathPrefix(vcsType)
+			baseEndpoint := strings.TrimSpace(clientData[1])
+			baseEndpointURL, _ := url.Parse(baseEndpoint)
+			authEndpoint := fmt.Sprintf("%s://%s%s/oauth/authorize", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
+			tokenEndpoint := fmt.Sprintf("%s://%s%s/oauth/access_token", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
+
+			vcsConfig := oauth2.Config{
+				Endpoint: oauth2.Endpoint{
+					AuthURL:  authEndpoint,
+					TokenURL: tokenEndpoint,
+				},
+				ClientID:     clientData[2],
+				ClientSecret: clientData[3],
+			}
+
+			if vcsClientType == VCSGITHUB {
+				vcsConfig.Scopes = githubScopes
+			}
+
+			vcsClientMap[VCSClientMapKey{baseEndpoint}] = vcsConfig
 		}
 	}
 

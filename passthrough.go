@@ -269,7 +269,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, error) {
 	log.Println("addTokenToPayload")
 
-	token := p.getVCSAuthToken(c)
+	token := p.getVCSOAuthToken(c)
 
 	log.Printf("Token: %+v\n", token)
 
@@ -346,7 +346,7 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	url := fmt.Sprintf("%s/%s", vcsEndpoint, uri)
 	log.Printf("URL: %s", url)
 
-	token := p.getVCSAuthToken(c)
+	token := p.getVCSOAuthToken(c)
 	tokenHeader := fmt.Sprintf("token %s", token)
 	log.Printf("token - %s", token)
 	// set the token in the header

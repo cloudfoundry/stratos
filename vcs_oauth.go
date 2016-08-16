@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -23,13 +22,13 @@ func (p *portalProxy) handleVCSAuth(c echo.Context) error {
 	endpoint := c.QueryParam("endpoint")
 	vcsClientKey := VCSClientMapKey{endpoint}
 	if vcsConfig, ok := p.Config.VCSClientMap[vcsClientKey]; ok {
-		oauthStateString := uuid.NewV4().String() + ";" + endpoint
+		oauthStateString := uuid.NewV4().String()
 		oauthConf := &vcsConfig
 
 		url := oauthConf.AuthCodeURL(oauthStateString, oauth2.AccessTypeOnline)
 
-		sessionKey := getSessionKey(endpoint)
-		setVCSSession(p, c, sessionKey, oauthStateString)
+		// save to endpoint to session using OAuth state string
+		setVCSSession(p, c, oauthStateString, endpoint)
 
 		log.Printf("oauthConf: %+v", oauthConf)
 		log.Printf("OAuth url: %s", url)
@@ -66,29 +65,23 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
     </body>
     </html>`
 
+	// retrieve endpoint from session using OAuth state string
 	state := c.FormValue("state")
-	endpoint := strings.Split(state, ";")[1]
+	endpoint, ok := p.getSessionStringValue(c, state)
+	if !ok {
+		msg := fmt.Sprintf("Invalid OAuth state - %s not found in session\n", state)
+		return c.HTML(http.StatusBadRequest, msg)
+	}
+
+	// clean up session
+	if err := p.unsetSessionValue(c, state); err != nil {
+		log.Printf("Unable to delete session value for key %s", state)
+	}
+
 	vcsClientKey := VCSClientMapKey{endpoint}
 	if vcsConfig, ok := p.Config.VCSClientMap[vcsClientKey]; ok {
 		oauthConf := &vcsConfig
 		log.Printf("Github callback config: %v", oauthConf)
-
-		sessionKey := getSessionKey(endpoint)
-
-		oauthStateString, ok := p.getSessionStringValue(c, sessionKey)
-		if !ok {
-			log.Println("GitHub OAuth token found in the session.")
-			return c.HTML(http.StatusBadRequest, "OAuth state string not found")
-		}
-
-		if state != oauthStateString {
-			msg := fmt.Sprintf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
-			log.Printf(msg)
-			return c.HTML(http.StatusBadRequest, msg)
-		}
-
-		// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
-		log.Printf("Got state: %s", state)
 
 		tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
 		if p.Config.SkipTLSVerification {
@@ -110,6 +103,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		log.Printf("Got token: %+v\n", token)
 
 		// stuff the token into the user's session
+		sessionKey := newSessionKey(endpoint)
 		if err = setVCSSession(p, c, sessionKey, token.AccessToken); err != nil {
 			return c.HTML(http.StatusBadRequest, "Unable to update user session with token")
 		}
@@ -121,13 +115,13 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	return c.HTML(http.StatusBadRequest, "VCS Client not found")
 }
 
-func (p *portalProxy) verifyVCSAuthToken(c echo.Context) error {
+func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
 	log.Println("verifyVCSAuthToken")
 
 	var tokenExists = false
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
-	tokenKey, ok := p.getSessionStringValue(c, getSessionKey(endpoint))
+	tokenKey, ok := p.getSessionStringValue(c, newSessionKey(endpoint))
 	if ok {
 		// We check for the existence of the oauth token in the session
 		// we dont care about the token itself at this point.
@@ -155,18 +149,18 @@ func (p *portalProxy) verifyVCSAuthToken(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) getVCSAuthToken(c echo.Context) string {
-	log.Println("getVCSAuthToken")
+func (p *portalProxy) getVCSOAuthToken(c echo.Context) string {
+	log.Println("getVCSOAuthToken")
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
-	if token, ok := p.getSessionStringValue(c, getSessionKey(endpoint)); ok {
+	if token, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
 		return token
 	}
 
 	return ""
 }
 
-func getSessionKey(endpoint string) string {
+func newSessionKey(endpoint string) string {
 	shaHash := sha256.New()
 	return fmt.Sprintf("%x", shaHash.Sum([]byte(endpoint)))
 }
