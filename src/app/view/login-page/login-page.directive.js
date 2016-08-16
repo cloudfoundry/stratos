@@ -91,6 +91,7 @@
    * @name LoginPageController
    * @constructor
    * @param {object} $window - the Angular $window service
+   * @param {object} $q - the Angular $q service
    * @param {object} smoothScroll - the ngSmoothScroll service
    * @property {object} $window - the Angular $window service
    * @property {object} smoothScroll - the ngSmoothScroll service
