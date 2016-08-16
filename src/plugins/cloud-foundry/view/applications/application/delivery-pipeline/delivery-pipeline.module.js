@@ -172,12 +172,12 @@
         if (angular.isDefined(this.project)) {
           this.hceModel.getDeploymentTarget(this.hceCnsi.guid, this.project.deployment_target_id)
             .then(function (response) {
-              that.project.deploymentTarget = response.data[that.hceCnsi.guid];
+              that.project.deploymentTarget = response.data;
             });
 
           this.hceModel.getBuildContainer(this.hceCnsi.guid, this.project.build_container_id)
             .then(function (response) {
-              that.project.buildContainer = response.data[that.hceCnsi.guid];
+              that.project.buildContainer = response.data;
             });
 
           this.hceModel.getNotificationTargets(this.hceCnsi.guid, this.project.id)
@@ -200,20 +200,30 @@
     addNotificationTarget: function () {
       var that = this;
       this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
-        .closed
-        .then(function () {
-          that.getProject();
+        .result
+        .then(function (notificationTargetData) {
+          that.notificationTargets.push(notificationTargetData);
         });
     },
 
     addPostDeployAction: function () {
       var that = this;
       this.postDeployActionService.add(this.hceCnsi.guid, this.project.id)
-        .closed
-        .then(function () {
-          that.getProject();
+        .result
+        .then(function (postDeployAction) {
+          that.postDeployActions.push(postDeployAction.data);
         });
+    },
+
+    /**
+     * @function getBuildContainerLabel
+     * @description Helper to return container label
+     * @returns {String}
+     */
+    getBuildContainerLabel: function () {
+      return this.project.buildContainer && this.project.buildContainer.build_container_label;
     }
+
   });
 
 })();
