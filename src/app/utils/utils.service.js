@@ -8,6 +8,7 @@
 
   utilsServiceFactory.$inject = [
     '$q',
+    '$timeout',
     '$log',
     'helion.framework.widgets.toaster'
   ];
@@ -18,11 +19,12 @@
    * @name utilsService
    * @description Various utility functions
    * @param {object} $q - the Angular $q service
+   * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
    * @param {helion.framework.widgets.toaster} toaster - the helion framework toaster service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($q, $log, toaster) {
+  function utilsServiceFactory($q, $timeout, $log, toaster) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     return {
@@ -86,8 +88,10 @@
       var aState = $state.get(stateName);
       var promiseStack = _.get($state.current, 'data.initialized');
 
+      var toast, thisPromise;
+
       var wrappedCatch = function (error) {
-        toaster.warning(gettext('Failed to initialise state. This may result in missing or incorrect data. Please refresh this page to try again.'), {
+        toast = toaster.warning(gettext('Failed to initialise state. This may result in missing or incorrect data. Please refresh your browser to try again.'), {
           timeOut: 0,
           extendedTimeOut: 0,
           closeButton: false
@@ -95,7 +99,6 @@
         return $q.reject(error);
       };
 
-      var thisPromise;
       if (_.isUndefined(promiseStack)) {
         $log.debug('Promise stack undefined, initialized by state: ' + aState.name);
         aState.data.initialized = [];
@@ -118,6 +121,11 @@
         $log.debug('Cleaning up obsolete promise from state: ' + aState.name);
         var index = aState.data.initialized.indexOf(aState);
         aState.data.initialized.splice(index, 1);
+        if (toast) {
+          $timeout(function () {
+            toaster.clear(toast);
+          }, 15000);
+        }
       };
     }
 
