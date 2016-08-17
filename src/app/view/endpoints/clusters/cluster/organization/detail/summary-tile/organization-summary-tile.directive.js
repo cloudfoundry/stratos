@@ -105,7 +105,8 @@
                 return that.organizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
                   {name: orgData.name})
                   .then(function () {
-                    notificationsService.notify('success', gettext('Organization successfully updated'));
+                    notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                      {name: orgData.name});
                   });
               } else {
                 return $q.reject('Invalid Name!');
@@ -130,7 +131,8 @@
             callback: function () {
               return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
                 .then(function () {
-                  notificationsService.notify('success', gettext('Organization successfully deleted'));
+                  notificationsService.notify('success', gettext('Organization \'{{name}\'} successfully deleted'),
+                    {name: that.organization.details.org.entity.name});
                   // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                   return $state.go($state.current.ncyBreadcrumb.parent());
                 });

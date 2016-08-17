@@ -114,7 +114,8 @@
                 return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
                   {name: spaceData.name})
                   .then(function () {
-                    notificationsService.notify('success', gettext('Space successfully updated'));
+                    notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
+                      {name: spaceData.name});
                     cardData.title = spaceData.name;
                   });
               } else {
@@ -140,7 +141,8 @@
             callback: function () {
               return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
                 .then(function () {
-                  notificationsService.notify('success', gettext('Space successfully deleted'));
+                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
+                    {name: that.spaceDetail().details.space.entity.name});
                 });
             }
           });

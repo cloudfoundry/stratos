@@ -92,7 +92,8 @@
           function (orgData) {
             if (orgData.name && orgData.name.length > 0) {
               return organizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
-                notificationsService.notify('success', gettext('Organisation successfully created'));
+                notificationsService.notify('success', gettext('Organisation \'{{name}}\' successfully created'),
+                  { name: orgData.name });
               });
             } else {
               return $q.reject('Invalid Name!');
@@ -194,8 +195,8 @@
             return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate)
               .then(function () {
                 notificationsService.notify('success', toCreate.length > 1
-                  ? gettext('Spaces successfully created')
-                  : gettext('Space successfully created'));
+                  ? gettext('Spaces \'{{names}}\' successfully created')
+                  : gettext('Space \'{{name}}\' successfully created'), { name: toCreate[0], names: toCreate.join(',')});
               });
           }
         );

@@ -79,7 +79,8 @@
       var that = this;
       this.serviceInstanceModel.create(this.url, this.name)
         .then(function () {
-          that.notificationsService.notify('success', gettext('Cluster successfully registered'));
+          that.notificationsService.notify('success', gettext('Cluster \'{{name}}\' successfully registered'),
+            {name: that.name});
           that.clearForm();
           that.$uibModalInstance.close();
           // that.onSubmit();

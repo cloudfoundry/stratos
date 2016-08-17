@@ -92,7 +92,8 @@
                 return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
                   {name: spaceData.name})
                   .then(function () {
-                    notificationsService.notify('success', gettext('Space successfully updated'));
+                    notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
+                      {name: spaceData.name});
                   });
               } else {
                 return $q.reject('Invalid Name!');
@@ -117,7 +118,8 @@
             callback: function () {
               return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
                 .then(function () {
-                  notificationsService.notify('success', gettext('Space successfully deleted'));
+                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
+                    {name: that.spaceDetail().details.space.entity.name});
                   // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                   return $state.go($state.current.ncyBreadcrumb.parent());
                 });

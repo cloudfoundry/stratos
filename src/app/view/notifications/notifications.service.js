@@ -6,6 +6,7 @@
     .factory('app.view.notificationsService', notificationsFactory);
 
   notificationsFactory.$inject = [
+    '$interpolate',
     'app.event.eventService',
     'helion.framework.widgets.toaster'
   ];
@@ -14,11 +15,12 @@
    * @memberof cloud-foundry.view.applications.services
    * @name notifications
    * @description A notifications service
+   * @param {object} $interpolate - the angular $interpolate service
    * @param {app.event.eventService} eventService - the application event bus service
    * @param {helion.framework.widgets.toaster} toaster - the toast service
    * @returns {object} A service instance factory
    */
-  function notificationsFactory(eventService, toaster) {
+  function notificationsFactory($interpolate, eventService, toaster) {
     var service = {
       /**
        * @function notify
@@ -26,22 +28,24 @@
        * @description Show a toast notification
        * @param {string} toastType - the toast notification type (i.e. success, warning)
        * @param {string} message - the toast message
-       * @param {object=} options - optional override options for toast
+       * @param {object=} messageInterpolate - optional object used in interpolation
+       * @param {object=} toastOptions - optional override options for toast
        * @returns {object} The toast object
        * @public
        */
-      notify: function (toastType, message, options) {
+      notify: function (toastType, message, messageInterpolate, toastOptions) {
+        var interpolatedMessage = messageInterpolate ? $interpolate(message)(messageInterpolate) : message;
         switch (toastType) {
           case 'busy':
-            return toaster.busy(message, options);
+            return toaster.busy(interpolatedMessage, toastOptions);
           case 'error':
-            return toaster.error(message, options);
+            return toaster.error(interpolatedMessage, toastOptions);
           case 'success':
-            return toaster.success(message, options);
+            return toaster.success(interpolatedMessage, toastOptions);
           case 'warning':
-            return toaster.warning(message, options);
+            return toaster.warning(interpolatedMessage, toastOptions);
           default:
-            return toaster.show(message, toastType, options);
+            return toaster.show(interpolatedMessage, toastType, toastOptions);
         }
       }
     };

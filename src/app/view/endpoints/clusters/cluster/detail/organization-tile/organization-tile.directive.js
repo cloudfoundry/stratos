@@ -118,7 +118,8 @@
                 return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
                   {name: orgData.name})
                   .then(function () {
-                    notificationsService.notify('success', gettext('Organization successfully updated'));
+                    notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                      {name: orgData.name});
                   });
               } else {
                 return $q.reject('Invalid Name!');
@@ -143,7 +144,8 @@
             callback: function () {
               return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
                 .then(function () {
-                  notificationsService.notify('success', gettext('Organization successfully deleted'));
+                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
+                    {name: that.organization.org.entity.name});
                 });
             }
           });
