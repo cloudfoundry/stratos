@@ -37,8 +37,8 @@
    * @constructor
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} hcfRegistration - hcfRegistration - HCF Registration detail view service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    */
   function ClusterTilesController($q, modelManager, hcfRegistration, notificationsService, confirmDialog) {

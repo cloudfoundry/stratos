@@ -101,7 +101,6 @@
             that.onSubmit({ serviceInstance: response.data });
           }
         }, function (err) {
-          //TODO: We need to differentiate between failed request and unauthorised creds. For the former need suitable message
           if (err.status >= 400) {
             that.failedRegister = true;
             that.authenticating = false;
