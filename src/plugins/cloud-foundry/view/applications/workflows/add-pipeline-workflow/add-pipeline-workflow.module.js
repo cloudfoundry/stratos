@@ -76,12 +76,7 @@
 
                 if (that.userInput.repo) {
                   hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
-                    var githubOptions = {
-                      headers: {
-                        'x-cnap-vcs-url': that.userInput.source.browse_url,
-                        'x-cnap-vcs-api-url': that.userInput.source.api_url
-                      }
-                    };
+                    var githubOptions = that._getVcsHeaders();
                     var usedBranches = _.chain(projects)
                                         .filter(function (p) {
                                           return p.repo.full_name === that.userInput.repo.full_name;
@@ -226,12 +221,7 @@
       getRepos: function () {
         var that = this;
         var githubModel = this.modelManager.retrieve('github.model');
-        var githubOptions = {
-          headers: {
-            'x-cnap-vcs-url': that.userInput.source.browse_url,
-            'x-cnap-vcs-api-url': that.userInput.source.api_url
-          }
-        };
+        var githubOptions = this._getVcsHeaders();
 
         this.options.loadingRepos = true;
         return githubModel.repos(false, githubOptions)
@@ -247,12 +237,7 @@
       loadMoreRepos: function () {
         var that = this;
         var githubModel = this.modelManager.retrieve('github.model');
-        var githubOptions = {
-          headers: {
-            'x-cnap-vcs-url': that.userInput.source.browse_url,
-            'x-cnap-vcs-api-url': that.userInput.source.api_url
-          }
-        };
+        var githubOptions = this._getVcsHeaders();
 
         this.options.loadingRepos = true;
         return githubModel.nextRepos(githubOptions)
@@ -268,13 +253,7 @@
       filterRepos: function (newFilterTerm) {
         var that = this;
         var githubModel = this.modelManager.retrieve('github.model');
-        var githubOptions = {};
-        if (that.userInput.source) {
-          githubOptions.headers = {
-            'x-cnap-vcs-url': that.userInput.source.browse_url,
-            'x-cnap-vcs-api-url': that.userInput.source.api_url
-          };
-        }
+        var githubOptions = this._getVcsHeaders();
 
         this.options.loadingRepos = true;
         return this.$q.when(githubModel.filterRepos(newFilterTerm, githubOptions))
@@ -356,12 +335,7 @@
         var that = this;
         var githubModel = this.modelManager.retrieve('github.model');
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-        var githubOptions = {
-          headers: {
-            'x-cnap-vcs-url': that.userInput.source.browse_url,
-            'x-cnap-vcs-api-url': that.userInput.source.api_url
-          }
-        };
+        var githubOptions = this._getVcsHeaders();
 
         githubModel.getBranch(this.userInput.repo.full_name, this.userInput.branch, githubOptions)
           .then(function (response) {
@@ -370,6 +344,18 @@
                                               that.userInput.projectId,
                                               branch.commit.sha);
           });
+      },
+
+      _getVcsHeaders: function () {
+        var githubOptions = {};
+        if (this.userInput.source) {
+          githubOptions.headers = {
+            'x-cnap-vcs-url': this.userInput.source.browse_url,
+            'x-cnap-vcs-api-url': this.userInput.source.api_url
+          };
+        }
+
+        return githubOptions;
       },
 
       startWorkflow: function () {

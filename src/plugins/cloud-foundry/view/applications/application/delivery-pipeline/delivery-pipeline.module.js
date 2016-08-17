@@ -133,18 +133,14 @@
     this.$scope.$watch(function () {
       return !that.model.application.pipeline.fetching &&
         that.model.application.pipeline.valid &&
-        that.model.application.pipeline.hce_api_url;
+        that.model.application.pipeline.hce_api_url &&
+        that.model.application.project !== null;
     }, function () {
-      if (that.model.application.pipeline.valid && that.model.application.pipeline.hceCnsi) {
-        that.busy = true;
+      var pipeline = that.model.application.pipeline;
+      if (pipeline.valid && pipeline.hceCnsi && that.model.application.project) {
         that.hceCnsi = that.model.application.pipeline.hceCnsi;
-        that.hceModel.getProjects(that.hceCnsi.guid)
-          .then(function () {
-            that.getProject();
-          })
-          .finally(function () {
-            that.busy = false;
-          });
+        that.project = that.model.application.project;
+        that.getPipelineData();
         that.modelUpdated = true;
       }
     });
@@ -173,7 +169,7 @@
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
             that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
 
-            that.getProject();
+            that.getPipelineData();
           })
           .catch(function () {
             that.deleteError = true;
@@ -197,35 +193,27 @@
         });
     },
 
-    getProject: function () {
-      if (this.hceCnsi) {
+    getPipelineData: function () {
+      if (this.hceCnsi && this.project) {
         var that = this;
-        this.project = this.hceModel.getProject(this.model.application.summary.name);
-        if (angular.isDefined(this.project)) {
-          this.hceModel.getDeploymentTarget(this.hceCnsi.guid, this.project.deployment_target_id)
-            .then(function (response) {
-              that.project.deploymentTarget = response.data[that.hceCnsi.guid];
-            });
+        this.hceModel.getBuildContainer(this.hceCnsi.guid, this.project.build_container_id)
+          .then(function (response) {
+            that.project.buildContainer = response.data;
+          });
 
-          this.hceModel.getBuildContainer(this.hceCnsi.guid, this.project.build_container_id)
-            .then(function (response) {
-              that.project.buildContainer = response.data[that.hceCnsi.guid];
-            });
+        this.hceModel.getNotificationTargets(this.hceCnsi.guid, this.project.id)
+          .then(function (response) {
+            that.notificationTargets.length = 0;
+            [].push.apply(that.notificationTargets, response.data);
+          });
 
-          this.hceModel.getNotificationTargets(this.hceCnsi.guid, this.project.id)
-            .then(function (response) {
-              that.notificationTargets.length = 0;
-              [].push.apply(that.notificationTargets, response.data);
-            });
+        this.hceModel.listNotificationTargetTypes(this.hceCnsi.guid);
 
-          this.hceModel.listNotificationTargetTypes(this.hceCnsi.guid);
-
-          this.hceModel.getPipelineTasks(this.hceCnsi.guid, this.project.id)
-            .then(function (response) {
-              that.postDeployActions.length = 0;
-              [].push.apply(that.postDeployActions, response.data);
-            });
-        }
+        this.hceModel.getPipelineTasks(this.hceCnsi.guid, this.project.id)
+          .then(function (response) {
+            that.postDeployActions.length = 0;
+            [].push.apply(that.postDeployActions, response.data);
+          });
       }
     },
 
@@ -234,7 +222,7 @@
       this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
         .closed
         .then(function () {
-          that.getProject();
+          that.getPipelineData();
         });
     },
 
@@ -243,7 +231,7 @@
       this.postDeployActionService.add(this.hceCnsi.guid, this.project.id)
         .closed
         .then(function () {
-          that.getProject();
+          that.getPipelineData();
         });
     }
   });

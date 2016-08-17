@@ -60,16 +60,6 @@
 
   angular.extend(GithubModel.prototype, {
     /**
-     * @function isAuthenticated
-     * @memberof github.model.GithubModel
-     * @description Whether the user has authenticated against Github
-     * @returns {boolean} True if user has authenticated against Github
-     */
-    isAuthenticated: function () {
-      return _.get(this.apiManager.retrieve('github.api'), 'authenticated');
-    },
-
-    /**
      * @function repos
      * @memberof github.model.GithubModel
      * @description Get repos user owns or has admin rights to

@@ -25,22 +25,12 @@
    * @property {object} $http - the Angular $http service
    * @property {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
    * @property {string} githubApiUrl - the Github API endpoint
-   * @property {boolean} authenticated - user has authenticated with Github
    * @class
    */
   function GithubApi($http, $window, GITHUB_ENDPOINTS) {
     this.$http = $http;
     this.GITHUB_ENDPOINTS = GITHUB_ENDPOINTS;
     this.githubApiUrl = '/pp/v1/vcs/';
-    this.authenticated = false;
-
-    var that = this;
-    $window.addEventListener('message', function (event) {
-      var message = angular.fromJson(event.data);
-      if (message.name === 'GitHub Oauth - token') {
-        that.authenticated = true;
-      }
-    });
   }
 
   angular.extend(GithubApi.prototype, {

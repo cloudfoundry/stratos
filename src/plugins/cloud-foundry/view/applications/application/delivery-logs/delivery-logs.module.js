@@ -53,7 +53,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.hasProject = null;
+    this.hasProject = false;
     this.last = {};
     this.id = $stateParams.guid;
     // Pass through anything needed by prototype extend
@@ -66,31 +66,19 @@
     this.moment = moment;
     this.$log = $log;
     this.$scope = $scope;
-    this.busy = false;
-    this.project = undefined;
 
     var that = this;
 
     this.$scope.$watch(function () {
       return !that.model.application.pipeline.fetching &&
         that.model.application.pipeline.valid &&
-        that.model.application.pipeline.hce_api_url;
+        that.model.application.pipeline.hce_api_url &&
+        that.model.application.project !== null;
     }, function () {
       var pipeline = that.model.application.pipeline;
-      if (pipeline.valid && pipeline.hceCnsi) {
-        that.busy = true;
-        that.hceModel.getProjects(pipeline.hceCnsi.guid)
-          .then(function () {
-            return that.hceModel.getProject(that.model.application.summary.name);
-          }).then(function (project) {
-            that.project = project;
-            that.hasProject = !(angular.isUndefined(project) || project === null);
-            if (that.hasProject) {
-              return that.updateData();
-            }
-          }).finally(function () {
-            that.busy = false;
-          });
+      if (pipeline.valid && pipeline.hceCnsi && that.model.application.project) {
+        that.hasProject = true;
+        that.updateData();
       }
     });
 
@@ -128,7 +116,7 @@
     triggerBuild: function () {
       var that = this;
       var pipeline = that.model.application.pipeline;
-      this.views.viewTriggerBuild.open(this.project, pipeline.hceCnsi.guid).then(function () {
+      this.views.viewTriggerBuild.open(this.model.application.project, pipeline.hceCnsi.guid).then(function () {
         that.updateData();
       });
     },
@@ -175,8 +163,8 @@
 
       var pipeline = that.model.application.pipeline;
       // Fetch pipeline executions
-      var project = this.hceModel.getProject(this.model.application.summary.name);
-      this.hceModel.getPipelineExecutions(pipeline.hceCnsi.guid, project.id)
+      var projectId = this.model.application.project.id;
+      this.hceModel.getPipelineExecutions(pipeline.hceCnsi.guid, projectId)
         .then(function () {
           // The ux will need to show additional properties. In order to not muddy the original model make a copy
           that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
