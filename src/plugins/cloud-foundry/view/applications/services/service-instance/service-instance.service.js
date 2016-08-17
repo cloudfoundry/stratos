@@ -178,7 +178,7 @@
             var vcap = variables.system_env_json.VCAP_SERVICES;
             if (angular.isDefined(vcap) && vcap[serviceKey]) {
               var instanceVars = _.find(vcap[serviceKey], { name: instance.name });
-              var titleStr = gettext('{{appName}}: Environmental Variables');
+              var titleStr = instance.name + ': ' + gettext('Variables');
               var config = {
                 templateUrl: 'plugins/cloud-foundry/view/applications/services/service-instance/env-variables.html',
                 title: $interpolate(titleStr)({appName: appSummary.name})
