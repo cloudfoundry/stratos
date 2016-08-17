@@ -1,6 +1,6 @@
 <form name="loginForm" role="form" class="form-stacked login-form center-block"
   ng-class="applicationCtrl.failedLogin ? 'failed-login' : ''">
-  <h1 class="text-center" translate>Helion Stackato v4.0</h1>
+  <h1 class="text-center" translate>Helion Stackato 4.0</h1>
   <div class="form-group" focusable-input ng-class="applicationCtrl.failedLogin ? 'has-error' : ''">
     <label class="control-label required" for="login-form-username" translate>
       Username
@@ -18,11 +18,13 @@
       password-reveal password-reveal-icon="'helion-icon helion-icon-View'"/>
   </div>
 
-  <button type="submit" class="btn btn-commit center-block"
+  <button type="submit" class="btn btn-commit center-block login-button"
     ng-disabled="loginForm.$invalid || loginFormCtrl.loggingIn"
     ng-click="loginFormCtrl.login() && applicationCtrl.login(loginFormCtrl.username,loginFormCtrl.password)" translate>
     Login
   </button>
+
+  <div class="login-clear-both"></div>
 
   <div class="login-form-spinner" ng-show="loginFormCtrl.loggingIn">
     <span class="spinner-notification" translate>
