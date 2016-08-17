@@ -91,8 +91,10 @@
    * @name LoginPageController
    * @constructor
    * @param {object} $window - the Angular $window service
+   * @param {object} $q - the Angular Promise service
    * @param {object} smoothScroll - the ngSmoothScroll service
    * @property {object} $window - the Angular $window service
+   * @property {object} $q - the Angular Promise service
    * @property {object} smoothScroll - the ngSmoothScroll service
    * @property {boolean} prevArrowVisible - show/hide previous arrow
    * @property {boolean} nextArrowVisible - show/hide next arrow
