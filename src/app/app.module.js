@@ -14,6 +14,11 @@
       'app.utils'
     ])
     .constant('app.basePath', 'app/')
+    .constant('app.config', {
+      pagination: {
+        pageSize: 4
+      }
+    })
     .run(setTranslationLanguage);
 
   setTranslationLanguage.$inject = [

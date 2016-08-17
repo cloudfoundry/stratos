@@ -42,6 +42,7 @@
     this.eventService = eventService;
     this.ready = false;
     this.loading = false;
+    this.currentPage = 1;
     this.clusters = [{label: 'All Clusters', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
@@ -55,7 +56,22 @@
       that._setClusters();
       that._setOrgs();
       that._setSpaces();
-      that._getApps();
+      that._loadPage(1);
+    });
+
+    this.paginationProperties = {
+      callback: function (page) {
+        return that._loadPage(page);
+      },
+      total: 0,
+      text: {
+        nextBtn: 'Next',
+        prevBtn: 'Previous'
+      }
+    };
+
+    this.eventService.$on('cf.events.NEW_APP_CREATED', function () {
+      that.reloadPage();
     });
   }
 
@@ -145,18 +161,38 @@
     },
 
     /**
-     * @function _getApps
-     * @description Retrieve apps
-     * @returns {void}
-     * @public
+     * @function _loadPage
+     * @description Retrieve apps with given page number
+     * @param {number} page - page number
+     * @returns {promise} A promise
+     * @private
      */
-    _getApps: function () {
+    _loadPage: function (page) {
       var that = this;
       this.loading = true;
-      this.model.all().finally(function () {
-        that.ready = true;
-        that.loading = false;
-      });
+      this.currentPage = page;
+
+      return this.model
+        .all(null, {
+          page: page
+        })
+        .then(function () {
+          that.paginationProperties.total = that.model.data.totalPageNumber;
+        })
+        .finally(function () {
+          that.ready = true;
+          that.loading = false;
+        });
+    },
+
+    /**
+     * @function reloadPage
+     * @description Reload current page
+     * @returns {promise} A promise
+     * @public
+     */
+    reloadPage: function () {
+      return this._loadPage(this.currentPage);
     },
 
     /**
@@ -169,7 +205,7 @@
       this.organizations.length = 1;
       this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
       this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
-      this._getApps();
+      this._loadPage(1);
       this._setOrgs();
     },
 
@@ -183,13 +219,13 @@
       this.spaces.length = 1;
       this.model.filterParams.orgGuid = this.filter.orgGuid;
       this._setFilter({spaceGuid: 'all'});
-      this._getApps();
+      this.loadPage(1);
       this._setSpaces();
     },
 
     setSpace: function () {
       this.model.filterParams.spaceGuid = this.filter.spaceGuid;
-      this._getApps();
+      this._loadPage(1);
     },
 
     /**
