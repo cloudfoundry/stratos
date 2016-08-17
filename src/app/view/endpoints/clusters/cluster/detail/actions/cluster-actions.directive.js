@@ -91,15 +91,15 @@
           },
           function (orgData) {
             if (orgData.name && orgData.name.length > 0) {
-              return organizationModel.createOrganization(that.clusterGuid, orgData.name);
+              return organizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
+                notificationsService.notify('success', gettext('Organisation successfully created'));
+              });
             } else {
               return $q.reject('Invalid Name!');
             }
 
           }
-        ).result.then(function () {
-          notificationsService.notify('success', gettext('Organisation successfully created'));
-        });
+        );
       },
       icon: 'helion-icon-lg helion-icon helion-icon-Tree'
     };
@@ -191,11 +191,14 @@
             if (toCreate.length < 1) {
               return $q.reject('Nothing to create!');
             }
-            return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate);
+            return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate)
+              .then(function () {
+                notificationsService.notify('success', toCreate.length > 1
+                  ? gettext('Spaces successfully created')
+                  : gettext('Space successfully created'));
+              });
           }
-        ).result.then(function () {
-          notificationsService.notify('success', gettext('Space successfully created'));
-        });
+        );
       },
       icon: 'helion-icon-lg helion-icon helion-icon-Tree'
     };

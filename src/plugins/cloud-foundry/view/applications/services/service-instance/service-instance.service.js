@@ -10,6 +10,7 @@
     '$interpolate',
     '$q',
     'app.model.modelManager',
+    'app.view.notificationsService',
     'helion.framework.widgets.detailView',
     'helion.framework.widgets.dialog.confirm'
   ];
@@ -22,11 +23,13 @@
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.detailView} detailView - the detail view service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog
    * @returns {object} A service instance factory
    */
-  function serviceInstanceFactory($log, $interpolate, $q, modelManager, detailView, confirmDialog) {
+  function serviceInstanceFactory($log, $interpolate, $q, modelManager, notificationsService, detailView,
+                                  confirmDialog) {
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
     var bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var instanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
@@ -80,7 +83,8 @@
        * should descend as far as app.
        * @param {string} serviceInstanceName - the service instance name
        * @param {function=} callbackFunc - an optional callback function
-       * @returns {promise} The confirm dialog promise object
+       * @returns {promise} promise once execution completed. Returns count of successful unbinds. If rejected this could
+       * mean confirm dialog was cancelled or ALL service instances failed to unbind
        * @public
        */
       unbindServiceFromApps: function (cnsiGuid, serviceBindings, serviceInstanceName, callbackFunc) {
@@ -96,14 +100,26 @@
           callback: function () {
             var promises = [];
             var refreshAppGuids = [];
+            var failedCount = 0;
             _.forEach(serviceBindings, function (serviceBinding) {
-              var promise = bindingModel.deleteServiceBinding(cnsiGuid, serviceBinding.metadata.guid).then(function () {
-                refreshAppGuids.push(serviceBinding.entity.app.metadata.guid);
-              });
+              var promise = bindingModel.deleteServiceBinding(cnsiGuid, serviceBinding.metadata.guid)
+                .then(function () {
+                  refreshAppGuids.push(serviceBinding.entity.app.metadata.guid);
+                })
+                .catch(function () {
+                  failedCount++;
+                  // Don't 'rethrow' error
+                });
               promises.push(promise);
             });
             return $q.all(promises)
               .then(function () {
+                if (failedCount > 0) {
+                  notificationsService.notify('warning', gettext('Some applications failed to detach from the service instance'));
+                } else {
+                  notificationsService.notify('success', gettext('Service instance successfully detached'));
+                }
+
                 if (angular.isDefined(callbackFunc)) {
                   callbackFunc();
                 }
@@ -113,6 +129,9 @@
                   promises.push(appModel.getAppSummary(cnsiGuid, appGuid));
                 });
                 return $q.all(promises);
+              })
+              .then(function () {
+                return serviceBindings.length - failedCount;
               })
               .catch(function (error) {
                 $log.error('Failed to delete service binding: ', error);
@@ -147,6 +166,7 @@
           callback: function () {
             return instanceModel.deleteServiceInstance(cnsiGuid, serviceInstanceGuid)
               .then(function () {
+                notificationsService.notify('success', gettext('Service instance successfully deleted'));
                 if (angular.isDefined(callbackFunc)) {
                   callbackFunc();
                 }
