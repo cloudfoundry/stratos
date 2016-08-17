@@ -58,35 +58,35 @@
     this.credentialsFormOpen = false;
     //this.warningMsg = gettext('Authentication failed, please try reconnect.');
 
-    /* eslint-disable */
-    // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
-    /* eslint-enable */
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
 
     $scope.$watchCollection(function () {
-      return that.cnsiModel.serviceInstances;
-    }, function (newCnsis) {
-      _.forEach(newCnsis, function (cnsi) {
-        var guid = cnsi.guid;
-        if (angular.isUndefined(that.serviceInstances[guid])) {
-          that.serviceInstances[guid] = cnsi;
-        } else {
-          angular.extend(that.serviceInstances[guid], cnsi);
-        }
+      return that.stackatoInfo.info.endpoints;
+    }, function (endpoints) {
+      _.forEach(endpoints, function (obj, type) {
+        _.forEach(obj, function (ep) {
+          var guid = ep.guid;
+          ep.type = ep.cnsi_type = type;
+          /* eslint-disable */
+          // TODO(nwm): The cnsi list should have already been fetched - we meed this as Stackato Info does not return the URL
+          /* eslint-enable */
+          var svc = _.find(that.cnsiModel.serviceInstances, {guid: guid});
+          ep.api_endpoint = svc ? svc.api_endpoint : 'Unknown';
+          if (angular.isUndefined(that.serviceInstances[guid])) {
+            that.serviceInstances[guid] = ep;
+          } else {
+            angular.extend(that.serviceInstances[guid], ep);
+          }
+        });
       });
     });
 
-    this.userCnsiModel.list().then(function () {
-      angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
-      that.cnsiModel.list();
-    });
+    // The watch above will trigger when the info has loaded and updated the model
+    this.stackatoInfo.getStackatoInfo();
   }
 
   angular.extend(ClusterSettingsController.prototype, {
 
-    /* eslint-disable */
-    // FIXME: When HCE support authentication, update this
-    /* eslint-enable */
     /**
      * @function isValid
      * @memberof app.view.ServiceRegistrationController
@@ -95,11 +95,7 @@
      * @returns {boolean} indicating if the specified cnsi is valid
      */
     isValid: function (cnsi) {
-      if (cnsi.cnsi_type === 'hce') {
-        return true;
-      } else {
-        return cnsi.valid;
-      }
+      return cnsi.user !== null;
     },
 
     /**
@@ -122,6 +118,7 @@
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
           that.userCnsiModel.numValid -= 1;
+          that.stackatoInfo.getStackatoInfo();
           that.cfModel.all();
         }).catch(function () {
           // Failed
