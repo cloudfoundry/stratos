@@ -65,8 +65,8 @@
       },
       total: 0,
       text: {
-        nextBtn: 'Next',
-        prevBtn: 'Previous'
+        nextBtn: gettext('Next'),
+        prevBtn: gettext('Previous')
       }
     };
 
