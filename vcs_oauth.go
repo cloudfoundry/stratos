@@ -121,30 +121,23 @@ func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
 	var tokenExists = false
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
-	tokenKey, ok := p.getSessionStringValue(c, newSessionKey(endpoint))
-	if ok {
-		// We check for the existence of the oauth token in the session
-		// we dont care about the token itself at this point.
-		log.Println("Checking session for token")
-		_, ok := p.getSessionStringValue(c, tokenKey)
-		if ok {
-			log.Println("GitHub OAuth token found in the session.")
-			tokenExists = true
-		}
-
-		log.Println("Preparing response")
-		authResp := &VCSAuthCheckResp{
-			Authorized: tokenExists,
-		}
-
-		jsonString, err := json.Marshal(authResp)
-		if err != nil {
-			return err
-		}
-
-		c.Response().Header().Set("Content-Type", "application/json")
-		c.Response().Write(jsonString)
+	if _, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
+		log.Println("GitHub OAuth token found in the session.")
+		tokenExists = true
 	}
+
+	log.Println("Preparing response")
+	authResp := &VCSAuthCheckResp{
+		Authorized: tokenExists,
+	}
+
+	jsonString, err := json.Marshal(authResp)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
 
 	return nil
 }
