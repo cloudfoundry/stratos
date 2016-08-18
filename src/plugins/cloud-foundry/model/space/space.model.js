@@ -116,7 +116,7 @@
      * @description List all services available for space
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
-     * @param {object} params - extra params to pass to request
+     * @param {object=} params - extra params to pass to request
      * @returns {promise} A resolved/rejected promise
      * @public
      */

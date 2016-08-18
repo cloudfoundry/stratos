@@ -14,12 +14,13 @@
     'app.api.apiManager',
     'app.utils.utilsService',
     '$q',
-    '$log'
+    '$log',
+    'cloud-foundry.api.hcfPagination'
   ];
 
-  function registerOrgModel(modelManager, apiManager, utils, $q, $log) {
+  function registerOrgModel(modelManager, apiManager, utils, $q, $log, hcfPagination) {
     modelManager.register('cloud-foundry.model.organization',
-      new Organization(modelManager, apiManager, utils, $q, $log));
+      new Organization(modelManager, apiManager, utils, $q, $log, hcfPagination));
   }
 
   /**
@@ -38,12 +39,13 @@
    * @property {object} $log - angular $log service
    * @class
    */
-  function Organization(modelManager, apiManager, utils, $q, $log) {
+  function Organization(modelManager, apiManager, utils, $q, $log, hcfPagination) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.$q = $q;
     this.$log = $log;
     this.utils = utils;
+    this.hcfPagination = hcfPagination;
 
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.orgsApi = apiManager.retrieve('cloud-foundry.api.Organizations');
@@ -76,11 +78,16 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllOrganizations: function (cnsiGuid, params) {
+    listAllOrganizations: function (cnsiGuid, params, dePaginate) {
+      var that = this;
       this.unCacheOrganization(cnsiGuid);
+      var httpConfig = this.makeHttpConfig(cnsiGuid);
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllOrganizations(params, this.makeHttpConfig(cnsiGuid))
+        .ListAllOrganizations(params, httpConfig)
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, httpConfig);
+          }
           return response.data.resources;
         });
     },
@@ -471,7 +478,7 @@
           return total;
         });
       }).catch(function (error) {
-        that.$log.error('Failed to ListAllSpacesForOrganization', error);
+        that.$log.error('Failed to ListAllAppsForSpace', error);
         throw error;
       });
 

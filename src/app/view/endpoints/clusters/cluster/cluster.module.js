@@ -36,7 +36,6 @@
   function ClusterController($stateParams, $log, utils, $state, $q, modelManager, userSelection) {
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    var serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
 
     this.initialized = false;
@@ -56,7 +55,7 @@
         'inline-relations-depth': 2,
         'exclude-relations': 'domains,private_domains,space_quota_definitions'
       };
-      var orgPromise = organizationModel.listAllOrganizations(that.guid, inDepthParams).then(function (orgs) {
+      var orgPromise = organizationModel.listAllOrganizations(that.guid, inDepthParams, true).then(function (orgs) {
         var allDetailsP = [];
         _.forEach(orgs, function (org) {
           var orgDetailsP = organizationModel.getOrganizationDetails(that.guid, org).catch(function () {
@@ -80,16 +79,12 @@
       /* eslint-enable no-warning-comments */
       var servicesPromise = that.userServiceInstanceModel.list();
 
-      // Needed to show a Space's list of service instances (requires app name, from app guid, from service binding)
-      var serviceBindingPromise = serviceBindingModel.listAllServiceBindings(that.guid);
-
       // Reset any cache we may be interested in
       delete appModel.appSummary;
 
       return $q.all([
         orgPromise,
-        servicesPromise,
-        serviceBindingPromise])
+        servicesPromise])
         .finally(function () {
           that.initialized = true;
         });
