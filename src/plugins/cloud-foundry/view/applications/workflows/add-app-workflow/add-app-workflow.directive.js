@@ -495,7 +495,7 @@
         ].join('/');
 
         this.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
-          message: gettext('A new app has been created: <a href="' + href + '">' + this.userInput.name + '</a>')
+          message: gettext('A new app has been created: ') + '<a href="' + href + '">' + this.userInput.name + '</a>'
         });
       },
 
