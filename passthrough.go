@@ -317,7 +317,6 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	)
 
 	uri = makeRequestURI(c)
-
 	vcsEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
 	url := fmt.Sprintf("%s/%s", vcsEndpoint, uri)
 	logger.Debug("VCS Endpoint URL: %s", url)
