@@ -9,11 +9,12 @@
     '$q',
     '$log',
     'app.model.modelManager',
+    'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm'
   ];
 
-  function RoutesServiceFactory($q, $log, modelManager, confirmDialog) {
-    return new RoutesService($q, $log, modelManager, confirmDialog);
+  function RoutesServiceFactory($q, $log, modelManager, notificationsService, confirmDialog) {
+    return new RoutesService($q, $log, modelManager, notificationsService, confirmDialog);
   }
 
   /**
@@ -22,12 +23,14 @@
    * @param {object} $q - the angular $log service
    * @param {object} $log - the angular $log service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    */
-  function RoutesService($q, $log, modelManager, confirmDialog) {
+  function RoutesService($q, $log, modelManager, notificationsService, confirmDialog) {
     this.$q = $q;
     this.$log = $log;
     this.routesModel = modelManager.retrieve('cloud-foundry.model.route');
+    this.notificationsService = notificationsService;
     this.confirmDialog = confirmDialog;
   }
 
@@ -74,6 +77,7 @@
         callback: function () {
           return that.routesModel.removeAppFromRoute(cnsiGuid, routeGuid, appGuid)
             .then(function () {
+              that.notificationsService.notify('success', gettext('Route successfully unmapped'));
               deferred.resolve(1);
             })
             .catch(function (error) {
@@ -97,7 +101,7 @@
      * @param {string} routeGuid route guid
      * @param {Array} appGuids array of application guids to unmap
      * @returns {promise} promise once execution completed. Returns count of successful unmaps. If rejected this could
-     * mean confirm dialog was cancelled OR unmap failed
+     * mean confirm dialog was cancelled or ALL apps failed to unmap
      */
     unmapAppsRoute: function (cnsiGuid, route, routeGuid, appGuids) {
       var that = this;
@@ -126,8 +130,9 @@
           return that.$q.all(promises)
             .then(function () {
               if (failures > 0) {
-                deferred.reject();
-                return that.$q.reject();
+                that.notificationsService.notify('warning', gettext('Some applications failed to unmap from route'));
+              } else {
+                that.notificationsService.notify('success', gettext('Route successfully unmapped'));
               }
               deferred.resolve(appGuids.length - failures);
             }).catch(function (error) {
@@ -169,6 +174,7 @@
             async: false
           })
           .then(function () {
+            that.notificationsService.notify('success', gettext('Route successfully deleted'));
             deferred.resolve();
           })
           .catch(function (error) {

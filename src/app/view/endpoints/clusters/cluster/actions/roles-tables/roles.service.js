@@ -11,6 +11,7 @@
     '$interpolate',
     'app.model.modelManager',
     'app.event.eventService',
+    'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm'
   ];
 
@@ -24,6 +25,7 @@
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the framework confirm dialog service
    * @property {boolean} changingRoles - True if roles are currently being changed and cache updated
    * @property {object} organizationRoles - Lists org roles and their translations
@@ -42,7 +44,7 @@
    * @property {function} orgContainsRoles - Determine if the organisation provided and it's spaces has any roles
    * selected
    */
-  function RolesService($log, $q, $interpolate, modelManager, eventService, confirmDialog) {
+  function RolesService($log, $q, $interpolate, modelManager, eventService, notificationsService, confirmDialog) {
     var that = this;
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -548,7 +550,7 @@
      * @name app.view.endpoints.clusters.cluster.rolesService.updateUsersOrgsAndSpaces
      * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
      * the affected organizations and spaces.
-     * IMPORTANT!!! This is the conduit for changes that all external calls should flow through. It gates the process
+     * IMPORTANT!!!!!! This is the conduit for changes that all external calls should flow through. It gates the process
      * on a confirmation model and also handles the global 'changingRoles' flag.
      * @param {string} clusterGuid - HCF service guid
      * @param {object} selectedUsers - collection of users to apply roles to
@@ -596,8 +598,7 @@
         });
       };
 
-      return confirmDialog(confirmationConfig).result
-        .finally(function () {
+      return confirmDialog(confirmationConfig).result.finally(function () {
           that.changingRoles = false;
         });
     }
