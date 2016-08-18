@@ -328,8 +328,8 @@
       /**
        * @function _createProjectName
        * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
-       * @description create a project name
-       * @returns {string} a unique object name
+       * @description create a unique project name
+       * @returns {string} a unique project name
        * @private
        */
       _createProjectName: function () {
