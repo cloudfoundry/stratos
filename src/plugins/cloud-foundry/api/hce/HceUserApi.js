@@ -31,49 +31,15 @@
 
   angular.extend(HceUserApi.prototype, {
     /**
-     * @name getAuthenticatedUser
+     * @name getUser
      * @description Get the HCE currently authenticated user.
      * @param {string} guid - the HCE instance GUID
      * @param {object} params - the query parameters
      * @param {object} httpConfigOptions - additional config options
      * @returns {promise} A resolved/rejected promise
      */
-    getAuthenticatedUser: function (guid, params, httpConfigOptions) {
+    getUser: function (guid, params, httpConfigOptions) {
       var path = this.baseUrl + '/users';
-      var headers = {
-        'x-cnap-cnsi-list': guid
-      };
-
-      var config = {
-        method: 'GET',
-        url: path,
-        params: params || {},
-        headers: headers
-      };
-
-      angular.forEach(httpConfigOptions, function (optionConfig, option) {
-        if (option === 'headers') {
-          angular.extend(config[option], optionConfig);
-        } else {
-          config[option] = optionConfig;
-        }
-      });
-
-      return this.$http(config);
-    },
-
-    /**
-     * @name getUser
-     * @description Get the specified user.
-     * @param {string} guid - the HCE instance GUID
-     * @param {!number} userId - User id.
-     * @param {object} params - the query parameters
-     * @param {object} httpConfigOptions - additional config options
-     * @returns {promise} A resolved/rejected promise
-     */
-    getUser: function (guid, userId, params, httpConfigOptions) {
-      var path = this.baseUrl + '/users/{user_id}'
-        .replace('{' + 'user_id' + '}', userId);
       var headers = {
         'x-cnap-cnsi-list': guid
       };
@@ -108,6 +74,40 @@
     getUserByUaaId: function (guid, uaaId, params, httpConfigOptions) {
       var path = this.baseUrl + '/users/uaa/{uaa_id}'
         .replace('{' + 'uaa_id' + '}', uaaId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
+
+      var config = {
+        method: 'GET',
+        url: path,
+        params: params || {},
+        headers: headers
+      };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
+      return this.$http(config);
+    },
+
+    /**
+     * @name getUser_1
+     * @description Get the specified user.
+     * @param {string} guid - the HCE instance GUID
+     * @param {!number} userId - User id.
+     * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
+     * @returns {promise} A resolved/rejected promise
+     */
+    getUser_1: function (guid, userId, params, httpConfigOptions) {
+      var path = this.baseUrl + '/users/{user_id}'
+        .replace('{' + 'user_id' + '}', userId);
       var headers = {
         'x-cnap-cnsi-list': guid
       };
