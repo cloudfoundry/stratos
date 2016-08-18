@@ -1,5 +1,5 @@
-hash: 9a8fb06e603f04b2fe9917219c27fa8e497b39e818f940464120877cbb320d02
-updated: 2016-07-06T22:21:51.440379667-04:00
+hash: 579c231b35594662ed3b2f65579b80308139944f439631eb1de560ff7e6a13d1
+updated: 2016-08-12T16:32:37.060590598-04:00
 imports:
 - name: github.com/antonlindstrom/pgstore
   version: 646ee398524f0eb81ad90aa8f40cbd74045c99b2
@@ -87,4 +87,18 @@ imports:
   - internal/datastore
   - internal/log
   - internal/remote_api
-devImports: []
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: d77da356e56a7428ad25149ca77381849a6a5232
+  subpackages:
+  - assert
+- name: gopkg.in/DATA-DOG/go-sqlmock.v1
+  version: 9958e5c69de03e97ec215b23f6fcae1f600c3fb6
