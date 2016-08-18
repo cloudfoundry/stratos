@@ -71,7 +71,7 @@
           // TODO(nwm): The cnsi list should have already been fetched - we meed this as Stackato Info does not return the URL
           /* eslint-enable */
           var svc = _.find(that.cnsiModel.serviceInstances, {guid: guid});
-          ep.api_endpoint = svc ? svc.api_endpoint : 'Unknown';
+          ep.api_endpoint = svc ? svc.api_endpoint : undefined;
           if (angular.isUndefined(that.serviceInstances[guid])) {
             that.serviceInstances[guid] = ep;
           } else {
