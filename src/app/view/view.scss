@@ -47,3 +47,9 @@
   font-size: $font-size-large;
   margin-bottom: $hpe-unit-space / 2;
 }
+
+paginator {
+  display: block;
+  clear: both;
+  padding: $hpe-unit-space / 4 $hpe-unit-space * 2 / 3;
+}
