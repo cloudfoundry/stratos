@@ -35,6 +35,7 @@ module.exports = function () {
     },
 
     assetFiles: [
+      paths.src + 'app/**/assets/**/*',
       paths.src + 'plugins/**/assets/**/*'
     ],
 

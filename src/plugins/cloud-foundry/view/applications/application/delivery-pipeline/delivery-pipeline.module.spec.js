@@ -3,7 +3,7 @@
 
   describe('Delivery Pipeline', function () {
 
-    var controller, $state, $stateParams, $rootScope, cnsiModel, modelManager, $httpBackend, account;
+    var controller, eventService, $interpolate, $state, $stateParams, $rootScope, cnsiModel, modelManager, $httpBackend, account;
 
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-pipeline'));
@@ -20,6 +20,8 @@
 
     beforeEach(inject(function ($injector) {
       // Create the parameters required by the ctor
+      eventService = $injector.get('app.event.eventService');
+      $interpolate = $injector.get('$interpolate');
       $state = $injector.get('$state');
       $stateParams = $injector.get('$stateParams');
       modelManager = $injector.get('app.model.modelManager');
@@ -37,7 +39,7 @@
 
     function createController() {
       var ApplicationDeliveryPipelineController = $state.get('cf.applications.application.delivery-pipeline').controller;
-      controller = new ApplicationDeliveryPipelineController(modelManager, $stateParams, $rootScope.$new(), null);
+      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, $interpolate, $stateParams, $rootScope.$new(), null);
       expect(controller).toBeDefined();
     }
 

@@ -55,7 +55,8 @@
       pipeline: {
         fetching: false,
         valid: false,
-        hceCnsi: undefined
+        hceCnsi: undefined,
+        hceServiceGuid: undefined
       }
     };
     this.appStateSwitchTo = '';
@@ -600,6 +601,7 @@
         metadata.valid = false;
         metadata.hceCnsi = undefined;
         metadata.hce_api_url = undefined;
+        metadata.hceServiceGuid = undefined;
       }
 
       if (hceServiceData) {
@@ -609,6 +611,7 @@
           // Now we need to see if the CNSI is known
           if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
             // HCE API Endpoint
+            pipeline.hceServiceGuid = hceServiceData.guid;
             pipeline.hce_api_url = data.entity.credentials.hce_api_url;
             return that.listHceCnsis().then(function (hceEndpoints) {
               var hceInstance = _.find(hceEndpoints, function (hce) {

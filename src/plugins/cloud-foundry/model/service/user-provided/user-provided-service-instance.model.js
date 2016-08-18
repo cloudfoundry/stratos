@@ -54,6 +54,44 @@
         .then(function (response) {
           return response.data;
         });
+    },
+
+    /**
+     * @function listAllServiceBindings
+     * @memberof cloud-foundry.model.user-provided-service-instance.UserProvidedServiceInstance
+     * @description List all service bindings
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the user provided service instance guid
+     * @returns {promise} A promise object
+     */
+    listAllServiceBindings: function (cnsiGuid, guid) {
+      var httpConfig = {
+        headers: {
+          'x-cnap-cnsi-list': cnsiGuid,
+          'x-cnap-passthrough': 'true'
+        }
+      };
+
+      return this.userProvidedServiceInstance.ListAllServiceBindingsForUserProvidedServiceInstance(guid, {}, httpConfig);
+    },
+
+    /**
+     * @function deleteUserProvidedServiceInstance
+     * @memberof cloud-foundry.model.user-provided-service-instance.UserProvidedServiceInstance
+     * @description Delete user provided service instance
+     * @param {string} cnsiGuid - the CNSI guid
+     * @param {string} guid - the user provided service instance guid
+     * @returns {promise} A promise object
+     */
+    deleteUserProvidedServiceInstance: function (cnsiGuid, guid) {
+      var httpConfig = {
+        headers: {
+          'x-cnap-cnsi-list': cnsiGuid,
+          'x-cnap-passthrough': 'true'
+        }
+      };
+
+      return this.userProvidedServiceInstance.DeleteUserProvidedServiceInstance(guid, {}, httpConfig);
     }
   });
 

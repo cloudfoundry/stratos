@@ -34,12 +34,20 @@ login-form, [login-form] {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-top: 10px;
+      margin-top: $hpe-unit-space;
 
       .spinner-notification {
         margin-right: 20px;
         text-transform: uppercase;
       }
+    }
+
+    .login-button {
+      float: left;
+    }
+
+    .login-clear-both {
+      clear: both;
     }
   }
 }

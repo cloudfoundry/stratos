@@ -19,7 +19,9 @@
   }
 
   ApplicationDeliveryPipelineController.$inject = [
+    'app.event.eventService',
     'app.model.modelManager',
+    '$interpolate',
     '$stateParams',
     '$scope',
     'helion.framework.widgets.dialog.confirm',
@@ -30,7 +32,9 @@
   /**
    * @name ApplicationDeliveryPipelineController
    * @constructor
+   * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
@@ -39,17 +43,24 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(modelManager, $stateParams, $scope, confirmDialog, addNotificationService, postDeployActionService) {
+  function ApplicationDeliveryPipelineController(eventService, modelManager, $interpolate, $stateParams, $scope, confirmDialog, addNotificationService, postDeployActionService) {
     var that = this;
+
     this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.id = $stateParams.guid;
-    this.$scope = $scope;
-    this.confirmDialog = confirmDialog;
-    this.addNotificationService = addNotificationService;
+    this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+    this.userProvidedInstanceModel = modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+
+    this.cnsiGuid = $stateParams.cnsiGuid;
+    this.id = $stateParams.guid;
+    this.eventService = eventService;
+    this.$interpolate = $interpolate;
+    this.$scope = $scope;
+    this.confirmDialog = confirmDialog;
+    this.addNotificationService = addNotificationService;
     this.postDeployActionService = postDeployActionService;
     this.hceCnsi = null;
 
@@ -154,6 +165,14 @@
         that.isDeleting = true;
         return that.hceModel.removeProject(that.hceCnsi.guid, that.project.id)
           .then(function () {
+            return that._deleteHCEServiceInstance();
+          })
+          .then(function () {
+            // show notification for successful binding
+            var successMsg = gettext('The pipeline for "{{appName}}" has been deleted.');
+            var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
+            that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
+
             that.getProject();
           })
           .catch(function () {
@@ -163,6 +182,19 @@
             that.isDeleting = false;
           });
       });
+    },
+
+    _deleteHCEServiceInstance: function () {
+      var that = this;
+      var serviceInstanceGuid = this.model.application.pipeline.hceServiceGuid;
+      return this.userProvidedInstanceModel.listAllServiceBindings(this.cnsiGuid, serviceInstanceGuid)
+        .then(function (response) {
+          var bindingGuid = response.data.resources[0].metadata.guid;
+          return that.bindingModel.deleteServiceBinding(that.cnsiGuid, bindingGuid)
+            .then(function () {
+              return that.userProvidedInstanceModel.deleteUserProvidedServiceInstance(that.cnsiGuid, serviceInstanceGuid);
+            });
+        });
     },
 
     getProject: function () {

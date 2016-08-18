@@ -202,6 +202,7 @@
     onLoginFailed: function (response) {
       if (response.status === -1) {
         // handle the case when the server never responds
+        this.eventService.$emit(this.eventService.events.LOGIN_TIMEOUT);
         this.serverFailedToRespond = true;
         this.serverErrorOnLogin = false;
         this.failedLogin = false;
