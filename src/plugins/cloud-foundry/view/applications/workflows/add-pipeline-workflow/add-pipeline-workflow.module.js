@@ -196,25 +196,13 @@
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
 
-        var vcsTypesPromise = hceModel.listVcsTypes(that.userInput.hceCnsi.guid);
-        var vcsInstancesPromise = hceModel.getVcses(that.userInput.hceCnsi.guid);
-
-        return that.$q.all([vcsTypesPromise, vcsInstancesPromise])
-          .then(function () {
-            var sources = _.map(hceModel.data.vcsInstances, function (o) {
-              var vcsType = hceModel.data.vcsTypes[o.vcs_type];
-              return {
-                img: vcsType.icon_url,
-                label: vcsType.vcs_type_label,
-                description: vcsType.description,
-                value: o
-              };
-            }) || [];
-            if (sources.length > 0) {
-              [].push.apply(that.options.sources, sources);
-              that.userInput.source = sources[0].value;
-            }
-          });
+        hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
+          var sources = that.hceSupport.getSupportedVcsInstances(hceModel.data.vcsInstances);
+          if (sources.length > 0) {
+            [].push.apply(that.options.sources, sources);
+            that.userInput.source = sources[0].value;
+          }
+        });
       },
 
       getRepos: function () {
