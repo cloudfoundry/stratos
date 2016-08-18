@@ -10,7 +10,7 @@ import (
 )
 
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Request) (*http.Response, error) {
-	logger.Println("doOauthFlowRequest")
+	logger.Debug("doOauthFlowRequest")
 	// TODO (wchrisjohnson): Temporary measure until HCE has authentication; REMOVE befoe we ship
 	shouldSkipTokenAuth := "true" == cnsiRequest.Header.Get("x-cnap-skip-token-auth")
 	if shouldSkipTokenAuth {
@@ -66,7 +66,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 }
 
 func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsis.CNSIRecord, err error) {
-	logger.Println("getCNSIRequestRecords")
+	logger.Debug("getCNSIRequestRecords")
 	// look up token
 	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
 	if !ok {
@@ -82,7 +82,7 @@ func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord
 }
 
 func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokens.TokenRecord, err error) {
-	logger.Println("refreshToken")
+	logger.Debug("refreshToken")
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 
 	// TODO (wchrisjohnson): this call is unnecessary. The cnsi token record was retrieved

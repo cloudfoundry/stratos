@@ -10,7 +10,7 @@ const (
 )
 
 func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, bool) {
-	logger.Println("getSessionValue")
+	logger.Debug("getSessionValue")
 	req := c.Request().(*standard.Request).Request
 	session, _ := p.SessionStore.Get(req, portalSessionName)
 
@@ -24,7 +24,7 @@ func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, 
 }
 
 func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, bool) {
-	logger.Println("getSessionInt64Value")
+	logger.Debug("getSessionInt64Value")
 	intf, ok := p.getSessionValue(c, key)
 	if !ok {
 		return 0, false
@@ -34,7 +34,7 @@ func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, b
 }
 
 func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string, bool) {
-	logger.Println("getSessionStringValue")
+	logger.Debug("getSessionStringValue")
 	intf, ok := p.getSessionValue(c, key)
 	if !ok {
 		return "", false
@@ -44,7 +44,7 @@ func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string,
 }
 
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {
-	logger.Println("setSessionValues")
+	logger.Debug("setSessionValues")
 
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter
@@ -70,7 +70,7 @@ func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error
 }
 
 func (p *portalProxy) clearSession(c echo.Context) error {
-	logger.Println("clearSession")
+	logger.Debug("clearSession")
 
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter

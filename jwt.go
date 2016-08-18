@@ -15,7 +15,7 @@ type userTokenInfo struct {
 }
 
 func getUserTokenInfo(tok string) (u *userTokenInfo, err error) {
-	logger.Println("getUserTokenInfo")
+	logger.Debug("getUserTokenInfo")
 	accessToken := strings.TrimPrefix(tok, "bearer ")
 	splits := strings.Split(accessToken, ".")
 

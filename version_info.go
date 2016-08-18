@@ -49,6 +49,7 @@ func (p *portalProxy) getVersionsData() (*Versions, error) {
 func (p *portalProxy) getVersions(c echo.Context) error {
 	v, err := p.getVersionsData()
 	if err != nil {
+		logger.Error(err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, v)
