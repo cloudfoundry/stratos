@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('hce-support-service', function () {
+  fdescribe('hce-support-service', function () {
     var hceSupport;
 
     beforeEach(module('templates'));
@@ -54,7 +54,7 @@
         {
           vcs_type: 'GITHUB',
           vcs_id: 'test_id_3',
-          browse_url: 'github_url'
+          browse_url: 'https://github.com'
         }
       ];
       var supported = hceSupport.getSupportedVcsInstances(hceInstanceData);
@@ -64,8 +64,26 @@
       expect(supported[0].value).toBeDefined();
       expect(supported[0].value.vcs_type).toBe('GITHUB');
       expect(supported[0].value.vcs_id).toBe('test_id_3');
-      expect(supported[0].value.browse_url).toBe('github_url');
-      expect(supported[0].browse_url).toBe('github_url');
+      expect(supported[0].value.browse_url).toBe('https://github.com');
+      expect(supported[0].browse_url).toBe('https://github.com');
+    });
+
+    it('should filter out unsupported VCS type - github enterprise not supported', function () {
+      var hceInstanceData = [
+        {
+          vcs_type: 'BITBUCKET',
+          vcs_id: 'test_id_2',
+          browse_url: 'bitbucket_url'
+        },
+        {
+          vcs_type: 'GITHUB',
+          vcs_id: 'test_id_3',
+          browse_url: 'https://my.github.enterprise'
+        }
+      ];
+      var supported = hceSupport.getSupportedVcsInstances(hceInstanceData);
+      expect(angular.isArray(supported)).toBe(true);
+      expect(supported.length).toBe(0);
     });
 
     it('should not have browse_url', function () {

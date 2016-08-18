@@ -25,14 +25,32 @@
       GITHUB: {
         label: gettext('GitHub'),
         description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
-        img: 'github_octocat.png'
+        img: 'github_octocat.png',
+        supported: true
       },
       GITHUB_ENTERPRISE: {
         label: gettext('Github Enterprise'),
-        description: gettext('Connect to a repository hosted on an on-premise Github Enterprise instance that you own or have admin rights to.'),
-        img: 'GitHub-Mark-120px-plus.png'
+        description: gettext('Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.'),
+        img: 'github_octocat.png',
+        supported: false
       }
     };
+
+    /**
+     * @function _expandVcsType
+     * @memberof cloud-foundry.view.applications.services.hceSupport
+     * @description Returns more detailed CS type name from VCS instance metadata
+     * @param {object} vcs - VCS Instance Metadata
+     * @returns {string} VCS type - expanded to split types like GitHub to GitHub and GitHub Enterprise
+     * @private
+     */
+    function _expandVcsType(vcs) {
+      var expType = vcs.vcs_type;
+      if (expType === 'GITHUB' && vcs.browse_url && vcs.browse_url.indexOf('https://github.com') === -1) {
+        expType = 'GITHUB_ENTERPRISE';
+      }
+      return expType;
+    }
 
     return {
 
@@ -49,10 +67,11 @@
           return [];
         } else {
           var supported = _.filter(hceVcsInstances, function (vcs) {
-            return _.has(vcsTypes, vcs.vcs_type);
+            var vcsInfo = vcsTypes[_expandVcsType(vcs)];
+            return vcsInfo && vcsInfo.supported;
           });
           return _.map(supported, function (supportedVcs) {
-            var vcs = _.clone(vcsTypes[supportedVcs.vcs_type]);
+            var vcs = _.clone(vcsTypes[_expandVcsType(supportedVcs)]);
             vcs.browse_url = supportedVcs.browse_url;
             vcs.value = supportedVcs;
             return vcs;
