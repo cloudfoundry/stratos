@@ -6,12 +6,15 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"log/syslog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus/hooks/syslog"
 
 	"github.com/antonlindstrom/pgstore"
 	"github.com/hpcloud/portal-proxy/datastore"
@@ -24,48 +27,69 @@ import (
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
-const TimeoutBoundary = 10
+const (
+	TimeoutBoundary = 10
+	DEBUG           = "debug"
+	INFO            = "info"
+	WARN            = "warn"
+	ERROR           = "error"
+	FATAL           = "fatal"
+)
 
 var (
 	httpClient = http.Client{}
+	logger     = logrus.New()
 )
 
 func cleanup(dbc *sql.DB, ss *pgstore.PGStore) {
-	log.Println("Attempting to shut down gracefully...")
-	log.Println(`--- Closing databaseConnectionPool`)
+	logger.Println("Attempting to shut down gracefully...")
+	logger.Println(`--- Closing databaseConnectionPool`)
 	dbc.Close()
-	log.Println(`--- Closing sessionStore`)
+	logger.Println(`--- Closing sessionStore`)
 	ss.Close()
-	log.Println(`--- Stopping sessionStore cleanup`)
+	logger.Println(`--- Stopping sessionStore cleanup`)
 	ss.StopCleanup(ss.Cleanup(time.Minute * 5))
-	log.Println("Graceful shut down complete")
+	logger.Println("Graceful shut down complete")
 }
 
 func main() {
-	log.SetOutput(os.Stdout)
-	log.Println("Proxy initialization started.")
+	// initially set log output to stdout to capture errors with loading portalconfig
+	logger.Out = os.Stdout
+	logger.Println("Proxy initialization started.")
 
 	// Load the portal configuration from env vars via ucpconfig
 	var portalConfig portalConfig
 	portalConfig, err := loadPortalConfig(portalConfig)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		os.Exit(1)
 	}
-	log.Println("Proxy configuration loaded.")
+	logger.Println("Proxy configuration loaded.")
 
 	// Initialize the HTTP client
 	initializeHTTPClient(portalConfig.SkipTLSVerification,
 		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
-	log.Println("HTTP client initialized.")
+	logger.Println("HTTP client initialized.")
 
 	// Get the encryption key we need for tokens in the database
 	portalConfig.EncryptionKeyInBytes, err = getEncryptionKey(portalConfig)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		os.Exit(1)
 	}
-	log.Println("Encryption key set.")
+	logger.Println("Encryption key set.")
+
+	if portalConfig.HCPFlightRecorderHost != "" && portalConfig.HCPFlightRecorderPort != "" {
+		hook, err := logrus_syslog.NewSyslogHook("tcp", portalConfig.HCPFlightRecorderHost+":"+portalConfig.HCPFlightRecorderPort, syslog.LOG_INFO, "portal-proxy")
+		if err != nil {
+			logger.Error("Unable to connect to Flight Recorder")
+		} else {
+			logger.Hooks.Add(hook)
+			logger.Println("Connected to Flight Recorder")
+		}
+	} else {
+		logger.Info("Flight recorder endpoint not set.")
+	}
 
 	portalConfig.VCSClientMap, err = getVCSClients(portalConfig)
 	if err != nil {
@@ -76,14 +100,14 @@ func main() {
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = initConnPool()
 	if err != nil {
-		log.Println(err)
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 	defer func() {
-		log.Println(`--- Closing databaseConnectionPool`)
+		logger.Println(`--- Closing databaseConnectionPool`)
 		databaseConnectionPool.Close()
 	}()
-	log.Println("Proxy database connection pool created.")
+	logger.Println("Proxy database connection pool created.")
 
 	// Initialize the Postgres backed session store for Gorilla sessions
 	sessionStore, err := initSessionStore(databaseConnectionPool, portalConfig)
@@ -92,18 +116,18 @@ func main() {
 		os.Exit(1)
 	}
 	defer func() {
-		log.Println(`--- Closing sessionStore`)
+		logger.Println(`--- Closing sessionStore`)
 		sessionStore.Close()
 	}()
 	defer func() {
-		log.Println(`--- Setting up sessionStore cleanup`)
+		logger.Println(`--- Setting up sessionStore cleanup`)
 		sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
 	}()
-	log.Println("Proxy session store initialized.")
+	logger.Println("Proxy session store initialized.")
 
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
-	log.Println("Proxy initialization complete.")
+	logger.Println("Proxy initialization complete.")
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -114,16 +138,16 @@ func main() {
 	}()
 
 	// Start the proxy
-	log.Println("Proxy config at startup")
-	log.Printf("%+v\n", portalConfig)
+	logger.Println("Proxy config at startup")
+	logger.Printf("%+v\n", portalConfig)
 	if err := start(portalProxy); err != nil {
-		log.Printf("Unable to start the proxy: %v", err)
+		logger.Error(fmt.Sprintf("Unable to start the proxy: %v", err))
 		os.Exit(1)
 	}
 }
 
 func getEncryptionKey(pc portalConfig) ([]byte, error) {
-	log.Println("getEncryptionKey")
+	logger.Println("getEncryptionKey")
 
 	// If it exists in "EncryptionKey" we must be in compose; use it.
 	if len(pc.EncryptionKey) > 0 {
@@ -138,7 +162,7 @@ func getEncryptionKey(pc portalConfig) ([]byte, error) {
 	// Read the key from the shared volume
 	key, err := tokens.ReadKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
 	if err != nil {
-		log.Printf("Unable to read the encryption key from the shared volume: %v", err)
+		logger.Printf("Unable to read the encryption key from the shared volume: %v", err)
 		return nil, err
 	}
 
@@ -146,7 +170,7 @@ func getEncryptionKey(pc portalConfig) ([]byte, error) {
 }
 
 func initConnPool() (*sql.DB, error) {
-	log.Println("initConnPool")
+	logger.Println("initConnPool")
 
 	// load up postgresql database configuration
 	var dc datastore.DatabaseConfig
@@ -171,7 +195,7 @@ func initConnPool() (*sql.DB, error) {
 		// Ping Postgres
 		err = datastore.Ping(pool)
 		if err == nil {
-			log.Println("Database appears to now be available.")
+			logger.Println("Database appears to now be available.")
 			break
 		}
 
@@ -181,7 +205,7 @@ func initConnPool() (*sql.DB, error) {
 		}
 
 		// Circle back and try again
-		log.Printf("Waiting for Postgres to be responsive: %+v\n", err)
+		logger.Printf("Waiting for Postgres to be responsive: %+v\n", err)
 		time.Sleep(time.Second)
 	}
 
@@ -189,7 +213,7 @@ func initConnPool() (*sql.DB, error) {
 }
 
 func initSessionStore(db *sql.DB, pc portalConfig) (*pgstore.PGStore, error) {
-	log.Println("initSessionStore")
+	logger.Println("initSessionStore")
 	store, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
 	if err != nil {
 		return nil, err
@@ -199,7 +223,7 @@ func initSessionStore(db *sql.DB, pc portalConfig) (*pgstore.PGStore, error) {
 }
 
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {
-	log.Println("loadPortalConfig")
+	logger.Println("loadPortalConfig")
 	if err := ucpconfig.Load(&pc); err != nil {
 		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
 	}
@@ -207,25 +231,25 @@ func loadPortalConfig(pc portalConfig) (portalConfig, error) {
 }
 
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
-	log.Println("loadDatabaseConfig")
+	logger.Println("loadDatabaseConfig")
 	if err := ucpconfig.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	log.Printf("Database Config: %+v\n", dc)
+	logger.Printf("Database Config: %+v\n", dc)
 
 	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	log.Printf("Database Config: %+v\n", dc)
+	logger.Printf("Database Config: %+v\n", dc)
 
 	return dc, nil
 }
 
 func createTempCertFiles(pc portalConfig) (string, string, error) {
-	log.Println("createTempCertFiles")
+	logger.Println("createTempCertFiles")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
 
@@ -252,7 +276,7 @@ func createTempCertFiles(pc portalConfig) (string, string, error) {
 }
 
 func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalProxy {
-	log.Println("newPortalProxy")
+	logger.Println("newPortalProxy")
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
@@ -263,7 +287,7 @@ func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalPr
 }
 
 func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Duration) {
-	log.Println("initializeHTTPClient")
+	logger.Println("initializeHTTPClient")
 	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
 	if skipCertVerification {
 		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -273,7 +297,7 @@ func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Durat
 }
 
 func start(p *portalProxy) error {
-	log.Println("start")
+	logger.Println("start")
 	e := echo.New()
 
 	// Root level middleware
@@ -302,7 +326,7 @@ func start(p *portalProxy) error {
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo) {
-	log.Println("registerRoutes")
+	logger.Println("registerRoutes")
 
 	e.POST("/v1/auth/login/uaa", p.loginToUAA)
 	e.POST("/v1/auth/logout", p.logout)

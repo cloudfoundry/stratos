@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -12,7 +11,7 @@ import (
 
 func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Println("sessionMiddleware")
+		logger.Println("sessionMiddleware")
 		if userID, ok := p.getSessionValue(c, "user_id"); ok {
 			c.Set("user_id", userID)
 			return h(c)
@@ -24,7 +23,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Println("sessionCleanupMiddleware")
+		logger.Println("sessionCleanupMiddleware")
 		err := h(c)
 		req := c.Request().(*standard.Request).Request
 		context.Clear(req)
@@ -55,10 +54,10 @@ func (p *portalProxy) stackatoAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 
 func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Println("errorLoggingMiddleware")
+		logger.Println("errorLoggingMiddleware")
 		err := h(c)
 		if shadowError, ok := err.(errHTTPShadow); ok {
-			log.Println(shadowError.LogMessage)
+			logger.Println(shadowError.LogMessage)
 			return shadowError.HTTPError
 		}
 

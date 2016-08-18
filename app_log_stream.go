@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -23,14 +22,14 @@ var upgrader = websocket.Upgrader{
 }
 
 func (p *portalProxy) appStream(c echo.Context) error {
-	log.Println("appStream")
+	logger.Println("appStream")
 	var userGUID, dopplerAddress, authToken string
 
 	// Get the CNSI and app IDs from route parameters
 	cnsiGUID := c.Param("cnsiGuid")
 	appGUID := c.Param("appGuid")
 
-	log.Printf("Received request for log stream for App ID: %s - from CNSI: %s\n", appGUID, cnsiGUID)
+	logger.Printf("Received request for log stream for App ID: %s - from CNSI: %s\n", appGUID, cnsiGUID)
 
 	// The session middleware will have populated c."user_id" for us
 	userGUID = c.Get("user_id").(string)
@@ -42,7 +41,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	}
 
 	dopplerAddress = cnsiRecord.DopplerLoggingEndpoint
-	log.Printf("CNSI record Obtained! Using Doppler Logging Endpoint: %s", dopplerAddress)
+	logger.Printf("CNSI record Obtained! Using Doppler Logging Endpoint: %s", dopplerAddress)
 
 	// Reusable closure to refresh the authToken
 	refreshTokenRecord := func() error {
@@ -59,7 +58,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 		authToken = "bearer " + tokenRecord.AuthToken
 		expTime := time.Unix(tokenRecord.TokenExpiry, 0)
 		if expTime.Before(time.Now()) {
-			log.Println("Token obtained has expired, refreshing!")
+			logger.Println("Token obtained has expired, refreshing!")
 			if err := refreshTokenRecord(); err != nil {
 				return err
 			}
@@ -73,7 +72,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	request := c.Request().(*standard.Request).Request
 
 	// Open a Noaa consumer to the doppler endpoint
-	log.Println("Opening Noaa consumer to Doppler endpoint", dopplerAddress)
+	logger.Println("Opening Noaa consumer to Doppler endpoint", dopplerAddress)
 	noaaConsumer := consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, nil)
 	defer noaaConsumer.Close()
 
@@ -83,13 +82,13 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	}
 
 	// We're now ok talking to HCF, time to upgrade the request to a WebSocket connection
-	log.Println("Upgrading request to the WebSocket protocol...")
+	logger.Println("Upgrading request to the WebSocket protocol...")
 	clientWebSocket, err := upgrader.Upgrade(responseWriter, request, nil)
 	if err != nil {
-		log.Printf("Oops Upgrade to a WebSocket connection failed: %+v\n", err)
+		logger.Printf("Oops Upgrade to a WebSocket connection failed: %+v\n", err)
 		return err
 	}
-	log.Println("Successfully upgraded to a WebSocket connection")
+	logger.Println("Successfully upgraded to a WebSocket connection")
 	defer clientWebSocket.Close()
 	// Graceful close of WebSocket, not really needed
 	//defer clientWebSocket.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Time{})
@@ -98,11 +97,11 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	// N.B. We parse the messages as JSON for ease of use in the frontend
 	relayLogMsg := func(msg *events.LogMessage) {
 		if jsonMsg, err := json.Marshal(msg); err != nil {
-			log.Printf("Received unparsable message from Doppler %v, %v\n", jsonMsg, err)
+			logger.Printf("Received unparsable message from Doppler %v, %v\n", jsonMsg, err)
 		} else {
 			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
 			if err != nil {
-				log.Println("Ooops Error writing data to WebSocket", err)
+				logger.Println("Ooops Error writing data to WebSocket", err)
 			}
 		}
 	}
@@ -112,7 +111,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 		relayLogMsg(msg)
 	}
 
-	log.Printf("Now streaming log from App ID: %s - on CNSI: %s\n", appGUID, cnsiGUID)
+	logger.Printf("Now streaming log from App ID: %s - on CNSI: %s\n", appGUID, cnsiGUID)
 	msgChan, errorChan := noaaConsumer.TailingLogs(appGUID, authToken)
 
 	// Process the app stream
@@ -133,13 +132,13 @@ func (p *portalProxy) appStream(c echo.Context) error {
 
 // Attempts to get the recent logs, if we get an unauthorized error we attempt to refresh our auth token
 func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGUID, appGUID, authToken string, refreshTokenRecord func() error) ([]*events.LogMessage, error) {
-	log.Println("getRecentLogs")
+	logger.Println("getRecentLogs")
 	messages, err := noaaConsumer.RecentLogs(appGUID, authToken)
 	if err != nil {
 		if ua, ok := err.(*noaa_errors.UnauthorizedError); ok {
 			// Annoyingly, CF also sends back "401 - Unauthorized" when the app doesn't exist...
 			// So we may end up here even when our token is legit
-			log.Printf("Unauthorized error! Trying to refresh our token! %+v\n", ua)
+			logger.Printf("Unauthorized error! Trying to refresh our token! %+v\n", ua)
 			if err := refreshTokenRecord(); err != nil {
 				return messages, err
 			}
@@ -156,17 +155,17 @@ func getRecentLogs(noaaConsumer *consumer.Consumer, cnsiGUID, appGUID, authToken
 }
 
 func drainErrChan(errorChan <-chan error) {
-	log.Println("drainErrChan")
+	logger.Println("drainErrChan")
 	for err := range errorChan {
 		// Note: we receive a nil error before the channel is closed so check here...
 		if err != nil {
-			log.Printf("Received error from Doppler %v\n", err.Error())
+			logger.Printf("Received error from Doppler %v\n", err.Error())
 		}
 	}
 }
 
 func drainMsgChan(msgChan <-chan *events.LogMessage, callback func(msg *events.LogMessage)) {
-	log.Println("drainMsgChan")
+	logger.Println("drainMsgChan")
 	for msg := range msgChan {
 		callback(msg)
 	}

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -35,7 +34,7 @@ type CNSIRequest struct {
 }
 
 func getEchoURL(c echo.Context) url.URL {
-	log.Println("getEchoURL")
+	logger.Println("getEchoURL")
 	u := c.Request().URL().(*standard.URL).URL
 
 	// dereference so we get a copy
@@ -43,7 +42,7 @@ func getEchoURL(c echo.Context) url.URL {
 }
 
 func getEchoHeaders(c echo.Context) http.Header {
-	log.Println("getEchoHeaders")
+	logger.Println("getEchoHeaders")
 	h := make(http.Header)
 	originalHeader := c.Request().Header().(*standard.Header).Header
 	for k, v := range originalHeader {
@@ -59,7 +58,7 @@ func getEchoHeaders(c echo.Context) http.Header {
 }
 
 func makeRequestURI(c echo.Context) *url.URL {
-	log.Println("makeRequestURI")
+	logger.Println("makeRequestURI")
 	uri := getEchoURL(c)
 	prefix := strings.TrimSuffix(c.Path(), "*")
 	uri.Path = strings.TrimPrefix(uri.Path, prefix)
@@ -68,7 +67,7 @@ func makeRequestURI(c echo.Context) *url.URL {
 }
 
 func getPortalUserGUID(c echo.Context) (string, error) {
-	log.Println("getPortalUserGUID")
+	logger.Println("getPortalUserGUID")
 	portalUserGUIDIntf := c.Get("user_id")
 	if portalUserGUIDIntf == nil {
 		return "", errors.New("Corrupted session")
@@ -77,7 +76,7 @@ func getPortalUserGUID(c echo.Context) (string, error) {
 }
 
 func getRequestParts(c echo.Context) (engine.Request, []byte, error) {
-	log.Println("getRequestParts")
+	logger.Println("getRequestParts")
 	var body []byte
 	var err error
 	req := c.Request()
@@ -90,7 +89,7 @@ func getRequestParts(c echo.Context) (engine.Request, []byte, error) {
 }
 
 func buildJSONResponse(cnsiList []string, responses map[string]CNSIRequest) map[string]*json.RawMessage {
-	log.Println("buildJSONResponse")
+	logger.Println("buildJSONResponse")
 	jsonResponse := make(map[string]*json.RawMessage)
 	for _, guid := range cnsiList {
 		var response []byte
@@ -114,7 +113,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]CNSIRequest) map[
 }
 
 func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req engine.Request, uri *url.URL, body []byte, header http.Header, passThrough bool) CNSIRequest {
-	log.Println("buildCNSIRequest")
+	logger.Println("buildCNSIRequest")
 	cnsiRequest := CNSIRequest{
 		GUID:     cnsiGUID,
 		UserGUID: userGUID,
@@ -140,7 +139,7 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req eng
 }
 
 func (p *portalProxy) validateCNSIList(cnsiList []string) error {
-	log.Println("validateCNSIList")
+	logger.Println("validateCNSIList")
 	for _, cnsiGUID := range cnsiList {
 		if _, ok := p.getCNSIRecord(cnsiGUID); !ok {
 			return errors.New("Invalid CNSI GUID")
@@ -151,7 +150,7 @@ func (p *portalProxy) validateCNSIList(cnsiList []string) error {
 }
 
 func fwdCNSIStandardHeaders(cnsiRequest CNSIRequest, req *http.Request) {
-	log.Println("fwdCNSIStandardHeaders")
+	logger.Println("fwdCNSIStandardHeaders")
 	for k, v := range cnsiRequest.Header {
 		switch {
 		case k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cnap-"):
@@ -164,49 +163,49 @@ func fwdCNSIStandardHeaders(cnsiRequest CNSIRequest, req *http.Request) {
 }
 
 func (p *portalProxy) proxy(c echo.Context) error {
-	log.Println("proxy")
+	logger.Println("proxy")
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
 
-	log.Printf("shouldPassthru is: %t", shouldPassthrough)
-	log.Printf("shouldPassthru header value is: %s", c.Request().Header().Get("x-cnap-passthrough"))
+	logger.Printf("shouldPassthru is: %t", shouldPassthrough)
+	logger.Printf("shouldPassthru header value is: %s", c.Request().Header().Get("x-cnap-passthrough"))
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	uri := makeRequestURI(c)
 
-	log.Printf("URI: %+v\n", uri)
+	logger.Printf("URI: %+v\n", uri)
 
 	header := getEchoHeaders(c)
 	header.Del("Cookie")
 
-	log.Printf("--- Headers: %+v\n", header)
+	logger.Printf("--- Headers: %+v\n", header)
 
 	portalUserGUID, err := getPortalUserGUID(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	log.Printf("portalUserGUID: %s", portalUserGUID)
+	logger.Printf("portalUserGUID: %s", portalUserGUID)
 
 	req, body, err := getRequestParts(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	log.Println("--- Request")
-	log.Printf("%+v\n", req)
-	log.Println("--- BODY")
-	log.Printf("%+v\n", string(body))
-	log.Println(" ")
+	logger.Println("--- Request")
+	logger.Printf("%+v\n", req)
+	logger.Println("--- BODY")
+	logger.Printf("%+v\n", string(body))
+	logger.Println(" ")
 
 	// if the following header is found, add the GH Oauth code to the body
 	if header.Get("x-cnap-vcs-token-required") != "" {
-		log.Println("--- x-cnap-vcs-token-required HEADER FOUND.....")
+		logger.Println("--- x-cnap-vcs-token-required HEADER FOUND.....")
 		body, err = p.addTokenToPayload(c, body)
 		if err != nil {
-			log.Printf("Unable to add token to HCE payload: %+v\n", err)
+			logger.Printf("Unable to add token to HCE payload: %+v\n", err)
 			return err
 		}
 	}
@@ -260,31 +259,31 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	e := json.NewEncoder(c.Response())
 	err = e.Encode(jsonResponse)
 	if err != nil {
-		log.Printf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
+		logger.Printf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
 	}
 	return err
 }
 
 func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, error) {
-	log.Println("addTokenToPayload")
+	logger.Println("addTokenToPayload")
 
 	token, ok := p.getVCSOAuthToken(c)
 	if !ok {
 		msg := "Unable to retrieve VCS OAuth token to add to payload"
-		log.Println(msg)
+		logger.Println(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
 	var projData map[string]interface{}
 	if err := json.Unmarshal(body, &projData); err != nil {
-		log.Printf("Unable to add Authorization token to project data: %+v\n", err)
+		logger.Printf("Unable to add Authorization token to project data: %+v\n", err)
 		return nil, err
 	}
 
-	log.Println("--- Unmarshal data in projData map")
-	log.Printf("%+v\n", projData)
+	logger.Println("--- Unmarshal data in projData map")
+	logger.Printf("%+v\n", projData)
 
-	log.Println("--- Adding token to map")
+	logger.Println("--- Adding token to map")
 	projData["token"] = token
 	b, _ := json.Marshal(projData)
 
@@ -292,7 +291,7 @@ func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, er
 }
 
 func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest, kill <-chan struct{}) {
-	log.Println("doRequest")
+	logger.Println("doRequest")
 	var body io.Reader
 	var res *http.Response
 	var req *http.Request
@@ -329,7 +328,7 @@ End:
 }
 
 func (p *portalProxy) vcsProxy(c echo.Context) error {
-	log.Println("VCS proxy passthru ...")
+	logger.Println("VCS proxy passthru ...")
 
 	var (
 		uri         *url.URL
@@ -337,11 +336,9 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	)
 
 	uri = makeRequestURI(c)
-
 	vcsEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
-
 	url := fmt.Sprintf("%s/%s", vcsEndpoint, uri)
-	log.Printf("VCS Endpoint URL: %s", url)
+	logger.Printf("VCS Endpoint URL: %s", url)
 
 	token, ok := p.getVCSOAuthToken(c)
 	if !ok {
@@ -353,11 +350,11 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 
 	// Perform the request against the VCS endpoint
 	req, err := http.NewRequest("GET", url, nil)
-	log.Printf("Request: %+v\n", req)
+	logger.Printf("Request: %+v\n", req)
 	req.Header.Add("Authorization", tokenHeader)
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		log.Printf("Response from VCS contained an error: %v", err)
+		logger.Printf("Response from VCS contained an error: %v", err)
 	}
 
 	body, _ := ioutil.ReadAll(resp.Body)
