@@ -68,11 +68,10 @@ login-page {
   }
 
   .login-background {
-    background: url('app/view/assets/login-page-bg.jpg') no-repeat center center fixed;
-    background-size: cover;
 
     .introduction {
-      background-color: transparent;
+      background: url('app/view/assets/login-page-bg.jpg') no-repeat center center;
+      background-size: cover;
     }
   }
 
