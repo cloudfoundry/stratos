@@ -219,7 +219,7 @@
       this.spaces.length = 1;
       this.model.filterParams.orgGuid = this.filter.orgGuid;
       this._setFilter({spaceGuid: 'all'});
-      this.loadPage(1);
+      this._loadPage(1);
       this._setSpaces();
     },
 
