@@ -142,6 +142,8 @@
         that.project = that.model.application.project;
         that.getPipelineData();
         that.modelUpdated = true;
+      } else {
+        that.project = null;
       }
     });
   }
@@ -169,7 +171,7 @@
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
             that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
 
-            that.getPipelineData();
+            return that.model.updateDeliveryPipelineMetadata();
           })
           .catch(function () {
             that.deleteError = true;

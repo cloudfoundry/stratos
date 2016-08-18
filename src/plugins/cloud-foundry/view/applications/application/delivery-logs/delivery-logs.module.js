@@ -79,6 +79,8 @@
       if (pipeline.valid && pipeline.hceCnsi && that.model.application.project) {
         that.hasProject = true;
         that.updateData();
+      } else {
+        that.hasProject = false;
       }
     });
 
