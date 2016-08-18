@@ -245,8 +245,7 @@
      * removing roles. If successful refresh the cache of the affected organizations and spaces
      * @param {string} clusterGuid - HCF service guid
      * @param {object} selectedUsers - collection of users to apply roles to
-     * @param {object} newRoles - Object containing the new roles to apply. The diff of this and oldRoles will be
-     * applied (assign/remove). Format is...
+     * @param {object} newRoles - Object containing the new roles to apply. Format is...
      *  Organizations... [orgGuid].organization[roleKey] = truthy
      *  Spaces...        [orgGuid].spaces[spaceGuid][roleKey] = truthy
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
@@ -288,8 +287,7 @@
      * @description Update (assign or remove) organization and space roles for the users supplied
      * @param {string} clusterGuid - HCF service guid
      * @param {Array} selectedUsers - collection of users to apply roles to
-     * @param {object} newRoles - Object containing the new roles to apply. The diff of this and oldRoles will be
-     * applied (assign/remove). Format is...
+     * @param {object} newRoles - Object containing the new roles to apply. Format is...
      *  Organizations... [orgGuid].organization[roleKey] = truthy
      *  Spaces...        [orgGuid].spaces[spaceGuid][roleKey] = truthy
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
@@ -436,12 +434,23 @@
       return newRolesByUser;
     }
 
+    /* eslint-disable complexity */
+    // NOTE - Complexity of 13, left in to improve readability.
+    /**
+     * @name createConfirmationConfig
+     * @description Create a standard confirmation dialog configuration containing call specific text (sensitive to
+     * user/s, role/s, assign, remove, etc)
+     * @param {Array} users - array of HCF user objects
+     * @param {object} delta - actual set of roles to assign or unassign
+     * @returns {object} confirmation dialog configuration
+     */
     function createConfirmationConfig(users, delta) {
-
       var usernames = _.map(users, 'entity.username');
       var assigns = [];
       var removes = [];
 
+      // Discover the number of assignments and removes, including their human readable string
+      // (the lookup for these could be factored out to the end for speed, but for code clarrity doing them inline)
       _.forEach(delta, function (orgsRolesPerUser) {
         _.forEach(orgsRolesPerUser, function (orgRolesPerUser) {
 
@@ -467,9 +476,12 @@
         });
       });
 
-      var multipleRoles = assigns.length > 1 || removes.length > 1 || assigns.length === 1 && removes.length === 1;
+      // Determine the title, description, success message and error message of the confirmation model.
+      // These are verbose to allow better localization
 
-      // Determine the Title of the confirmation modal
+      var multipleRoles = assigns.length + removes.length > 1;
+
+      // Determine the title
       var title = multipleRoles ? gettext('Update Roles') : gettext('Update Role');
       if (assigns.length === 0) {
         title = multipleRoles ? gettext('Remove Roles') : gettext('Remove Role');
@@ -477,15 +489,15 @@
         title = multipleRoles ? gettext('Assign Roles') : gettext('Assign Role');
       }
 
-      // Determine the Description of the confirmation modal
+      // Determine the description
       var line1 = usernames.length > 1
-        ? gettext('You are about to make the following changes for users {{users}}')
-        : gettext('You are about to make the following changes to user {{user}}');
+        ? gettext('You are about to make the following changes for users {{users}}.')
+        : gettext('You are about to make the following changes to user \'{{user}}\'.');
       var line2 = assigns.length > 1 ? gettext('Assign {{count}} roles') : gettext('Assign role \'{{role}}\'');
       var line3 = removes.length > 1 ? gettext('Remove {{count}} roles') : gettext('Remove role \'{{role}}\'');
       var line4 = gettext('Are you sure you wish to continue?');
 
-      line1 = $interpolate(line1)({user: usernames[0], users: usernames.join(',')});
+      line1 = $interpolate(line1)({user: usernames[0], users: usernames.join(', ')});
       line2 = $interpolate(line2)({count: assigns.length, role: assigns[0]});
       line3 = $interpolate(line3)({count: removes.length, role: removes[0]});
 
@@ -495,29 +507,56 @@
         (removes.length > 0 ? line3 + '<br>' : '') +
         '<br>' + line4;
 
+      // Success and error messages
+      var successMessage = multipleRoles ? gettext('Successfully updated user roles')
+        : gettext('Successfully updated user role');
+      var errorMessage = multipleRoles ? gettext('Failed to update user roles')
+        : gettext('Failed to update user role');
+      if (usernames.length > 1) {
+        successMessage = multipleRoles ? gettext('Successfully updated users roles')
+          : gettext('Successfully updated users role');
+        errorMessage = multipleRoles ? gettext('Failed to update users roles')
+          : gettext('Failed to update users role');
+      }
+
       return {
         title: title,
         description: description,
+        successMessage: successMessage,
+        errorMessage: errorMessage,
         buttonText: {
           yes: gettext('Yes'),
           no: gettext('No')
-        }
+        },
+        windowClass: 'roles-conf-dialog'
       };
     }
+    /* eslint-enable complexity */
 
+    /**
+     * @name rolesDelta
+     * @description Determine the difference between the old/current roles and the new roles to be applied
+     * @param {object} oldRoles - Object containing the previously selected roles, or the initial state. Format matches
+     * newRoles.
+     *  Organizations... [userGuid][orgGuid].organization[roleKey] = truthy
+     *  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
+     * @param {object} newRoles - Object containing the new roles to apply. Format matches oldRoles.
+     *  Organizations... [userGuid][orgGuid].organization[roleKey] = truthy
+     *  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
+     * @returns {object} confirmation dialog configuration
+     */
     function rolesDelta(oldRoles, newRoles) {
       var delta = angular.fromJson(angular.toJson(newRoles));
       var changes = false;
 
-      //  Organizations... [userGuid][orgGuid].organization[roleKey] = truthy
-      //  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
-
+      // For each user
       _.forEach(delta, function (orgsRolesPerUser, userGuid) {
+        // For each org
         _.forEach(orgsRolesPerUser, function (orgRolesPerUser, orgGuid) {
 
           var oldOrgRolesPerUser = _.get(oldRoles, userGuid + '.' + orgGuid);
 
-          // Determine organization roles delta
+          // For each organization role
           _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
             // Has there been a change in the org role?
             var oldRoleSelected = _.get(oldOrgRolesPerUser, 'organization.' + roleKey) || false;
@@ -528,8 +567,9 @@
             }
           });
 
-          // Determine spaces roles delta
+          // For each space
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
+            // For each space role
             _.forEach(spaceRoles, function (selected, roleKey) {
               // Has there been a change in the space role?
               var oldRoleSelected = _.get(oldOrgRolesPerUser, 'spaces.' + spaceGuid + '.' + roleKey) || false;
@@ -568,8 +608,8 @@
       var delta = rolesDelta(oldRolesByUser, newRolesByUser);
 
       if (!delta) {
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //TODO: Need to catch this much earlier? Show an alert? Show an error notification?
+        notificationsService.notify('warning', gettext('There are no changes to make. User(s) roles have not changed'));
+        that.changingRoles = false;
         return $q.reject();
       }
 
@@ -589,18 +629,24 @@
           promises.push(promise);
         });
 
-        // If all async requests have finished invalidate any cache associated with roles
-        return $q.all(promises).then(function () {
-          eventService.$emit(eventService.events.ROLES_UPDATED);
-          if (failedAssignForUsers.length > 0) {
-            return $q.reject(gettext('Failed to update user(s) ') + failedAssignForUsers.join(','));
-          }
-        });
+        return $q.all(promises)
+          .then(function () {
+            // If all async requests have finished invalidate any cache associated with roles
+            eventService.$emit(eventService.events.ROLES_UPDATED);
+
+            // If something has failed return an failed promise
+            if (failedAssignForUsers.length > 0) {
+              return $q.reject(gettext('Failed to update roles for user(s) ') + failedAssignForUsers.join(', '));
+            } else {
+              // Otherwise notify success, hurrah
+              notificationsService.notify('success', confirmationConfig.successMessage);
+            }
+          });
       };
 
       return confirmDialog(confirmationConfig).result.finally(function () {
-          that.changingRoles = false;
-        });
+        that.changingRoles = false;
+      });
     }
 
     function updateUserOrgsAndSpaces(clusterGuid, user, newRolesPerOrg) {
@@ -642,10 +688,10 @@
       var preReqPromise = $q.when();
       // Clone the new org roles. This will be the 'to do' list of changes that are executed after preReqPromise.
       var orgRoles = _.clone(newOrgRoles.organization);
-      // Understand what the old org_user value was which will be compared to the new org_user value;
-      var newOrgUser = _.get(orgRoles, 'org_user') || false;
+      // What are we attempting to set for the org user role?
+      var newOrgUser = _.get(orgRoles, 'org_user');
 
-      // Has it changed?
+      // Has it changed? Undefined means no change
       if (angular.isDefined(newOrgUser)) {
         delete orgRoles.org_user;
 
