@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -353,18 +352,10 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	log.Printf("Headers before GH call: %+v\n", headers)
 
 	// Perform the request against the VCS endpoint
-	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
-	if p.Config.SkipTLSVerification {
-		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-	client := &http.Client{
-		Timeout:   time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second,
-		Transport: tr,
-	}
 	req, err := http.NewRequest("GET", url, nil)
 	log.Printf("Request: %+v\n", req)
 	req.Header.Add("Authorization", tokenHeader)
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		log.Printf("Response from VCS contained an error: %v", err)
 	}

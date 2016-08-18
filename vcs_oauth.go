@@ -88,8 +88,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 			tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		}
 		client := &http.Client{Transport: tr}
-		ctx := context.TODO()
-		ctx = context.WithValue(ctx, oauth2.HTTPClient, client)
+		ctx := context.WithValue(oauth2.NoContext, oauth2.HTTPClient, client)
 
 		code := c.FormValue("code")
 		token, err := oauthConf.Exchange(ctx, code)
