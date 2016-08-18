@@ -115,6 +115,8 @@
     this.lastSectionIdx = 0;
 
     this.scrolling = $q.resolve();
+
+    this.debouncedOnMouseWheel = _.debounce(this.onMouseWheel, 150);
   }
 
   angular.extend(LoginPageController.prototype, {
