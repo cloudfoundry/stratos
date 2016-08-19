@@ -50,14 +50,28 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	var successHTML = `
     <!doctype html>
     <html>
+    <body>
+    <script>
+      (function () {
+        window.opener.postMessage(JSON.stringify({
+          name: 'GitHub Oauth - success'
+        }), window.location.origin);
+      })();
+    </script>
+    </body>
+    </html>`
+
+	var failureHTML = `
+    <!doctype html>
+    <html>
     <head><link rel="stylesheet" href="/index.css"></head>
     <body id="github-auth-callback-page">
-    <h1 class="text-center">VCS authorization is done.</h1>
+    <h1 class="text-center">GitHub authorization is failed.</h1>
     <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
     <script>
       (function () {
         window.opener.postMessage(JSON.stringify({
-          name: 'GitHub Oauth - token'
+          name: 'GitHub Oauth - failure'
         }), window.location.origin);
       })();
     </script>
@@ -69,7 +83,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	endpoint, ok := p.getSessionStringValue(c, state)
 	if !ok {
 		msg := fmt.Sprintf("Invalid OAuth state - %s not found in session\n", state)
-		return c.HTML(http.StatusBadRequest, msg)
+		return return c.HTML(http.StatusOK, failureHTML)
 	}
 
 	// clean up session
@@ -93,7 +107,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		if err != nil {
 			msg := fmt.Sprintf("oauthConf.Exchange() failed with '%s'\n", err)
 			log.Println(msg)
-			return c.HTML(http.StatusBadRequest, msg)
+			return return c.HTML(http.StatusOK, failureHTML)
 		}
 
 		// stuff the token into the user's session
