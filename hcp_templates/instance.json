@@ -10,16 +10,8 @@
   "volumes": [],
   "parameters": [
     {
-      "name": "GITHUB_OAUTH_CLIENT_ID",
-      "value": "__REPLACE__"
-    },
-    {
-      "name": "GITHUB_OAUTH_CLIENT_SECRET",
-      "value": "__REPLACE__"
-    },
-    {
-      "name": "GITHUB_OAUTH_STATE",
-      "value": "abc123"
+      "name": "VCS_CLIENTS",
+      "value": "github,https://github.com,__REPLACE__,__REPLACE__"
     },
     {
       "name": "console-cert",

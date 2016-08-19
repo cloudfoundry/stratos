@@ -51,8 +51,7 @@ jobs:
   - task: build-proxy-image
     file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
     params:
-      GITHUB_OAUTH_CLIENT_ID: {{github-oauth-client-id}}
-      GITHUB_OAUTH_CLIENT_SECRET: {{github-oauth-client-secret}}
+      VCS_CLIENTS: {{vcs-clients}}
 
   # install libraries and run tests
   - task: run-tests
@@ -60,8 +59,7 @@ jobs:
     timeout: 45m
     file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml
     params:
-      GITHUB_OAUTH_CLIENT_ID: {{github-oauth-client-id}}
-      GITHUB_OAUTH_CLIENT_SECRET: {{github-oauth-client-secret}}
+      VCS_CLIENTS: {{vcs-clients}}
     on_success:
       put: stratos-ui
       params:

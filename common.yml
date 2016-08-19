@@ -51,9 +51,7 @@ services:
     env_file:
       ./proxy.env
     environment:
-      - GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID}
-      - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET}
-      - GITHUB_OAUTH_STATE=${GITHUB_OAUTH_STATE}
+      - VCS_CLIENTS=${VCS_CLIENTS}
     volumes:
       - $GOPATH/src/github.com/hpcloud/portal-proxy:/srv
 

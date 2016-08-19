@@ -35,6 +35,7 @@ s3-hsm-hcp-version | The full path within the `s3-hsm-bucket` to the `hcp_versio
 registry | The registry used to store the tagged docker images required to install the Console within HCP. Generally this is one of two values: 1) `docker-registry.helion.space:443`, the shared internal HPE registry. 2) the registry url for DockerHub | console-ci-master
 github-access-token | This should be a Github access token with `repo:status` (public repos) or `repo` access (private repos). | console-ui-tests
 github-private-key | This should be a private SSH key properly authorized to interact against the GitHub repos your pipeline with operate against. | console-ci-master, console-ui-tests
+vcs-clients | This should be a list of VCS clients. | console-ui-tests
 
 ### Concourse related commands (examples)
 
