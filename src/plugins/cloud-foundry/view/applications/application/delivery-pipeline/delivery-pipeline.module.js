@@ -137,8 +137,8 @@
         that.model.application.project !== null;
     }, function () {
       var pipeline = that.model.application.pipeline;
-      if (pipeline.valid && pipeline.hceCnsi && that.model.application.project) {
-        that.hceCnsi = that.model.application.pipeline.hceCnsi;
+      if (pipeline && pipeline.valid && pipeline.hceCnsi && that.model.application.project) {
+        that.hceCnsi = pipeline.hceCnsi;
         that.project = that.model.application.project;
         that.getPipelineData();
         that.modelUpdated = true;

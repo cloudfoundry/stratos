@@ -76,11 +76,9 @@
         that.model.application.project !== null;
     }, function () {
       var pipeline = that.model.application.pipeline;
-      if (pipeline.valid && pipeline.hceCnsi && that.model.application.project) {
-        that.hasProject = true;
+      that.hasProject = !!(pipeline && pipeline.valid && pipeline.hceCnsi && that.model.application.project);
+      if (that.hasProject) {
         that.updateData();
-      } else {
-        that.hasProject = false;
       }
     });
 
