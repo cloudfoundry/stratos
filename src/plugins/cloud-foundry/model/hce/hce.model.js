@@ -444,10 +444,11 @@
      * @param {number} buildContainerId - the build container ID
      * @param {object} repo - the repo to use
      * @param {string} branch - the branch to use
+     * @param {string} vcsUrl - the VCS browse URL
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch) {
+    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch, vcsUrl) {
       var newProject = {
         name: name,
         vcs_id: vcs.vcs_id,
@@ -470,7 +471,10 @@
 
       // Special header to insert Github token
       var headers = angular.extend(
-        {'x-cnap-github-token-required': true},
+        {
+          'x-cnap-vcs-url': vcsUrl,
+          'x-cnap-vcs-token-required': true
+        },
         this.hceProxyPassthroughConfig.headers
       );
 

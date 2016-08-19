@@ -62,7 +62,8 @@
         valid: false,
         hceCnsi: undefined,
         hceServiceGuid: undefined
-      }
+      },
+      project: null
     };
     this.appStateSwitchTo = '';
     this.filterParams = {
@@ -614,29 +615,29 @@
       if (hceServiceData) {
         // Go fetch the service metadata
         return hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
-        .then(function (data) {
-          // Now we need to see if the CNSI is known
-          if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
-            // HCE API Endpoint
-            pipeline.hceServiceGuid = hceServiceData.guid;
-            pipeline.hce_api_url = data.entity.credentials.hce_api_url;
-            return that.listHceCnsis().then(function (hceEndpoints) {
-              var hceInstance = _.find(hceEndpoints, function (hce) {
-                var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
-                return pipeline.hce_api_url.indexOf(url) === 0;
+          .then(function (data) {
+            // Now we need to see if the CNSI is known
+            if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
+              // HCE API Endpoint
+              pipeline.hceServiceGuid = hceServiceData.guid;
+              pipeline.hce_api_url = data.entity.credentials.hce_api_url;
+              return that.listHceCnsis().then(function (hceEndpoints) {
+                var hceInstance = _.find(hceEndpoints, function (hce) {
+                  var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
+                  return pipeline.hce_api_url.indexOf(url) === 0;
+                });
+                pipeline.hceCnsi = hceInstance;
+                pipeline.valid = angular.isDefined(hceInstance);
+                pipeline.fetching = false;
+                return pipeline;
               });
-              pipeline.hceCnsi = hceInstance;
-              pipeline.valid = angular.isDefined(hceInstance);
-              pipeline.fetching = false;
-              return pipeline;
-            });
-          } else {
+            } else {
+              clearDeliveryPipelineMetadata(pipeline);
+            }
+          })
+          .catch(function () {
             clearDeliveryPipelineMetadata(pipeline);
-          }
-        })
-        .catch(function () {
-          clearDeliveryPipelineMetadata(pipeline);
-        });
+          });
       } else {
         clearDeliveryPipelineMetadata(pipeline);
         return that.$q.when(pipeline);

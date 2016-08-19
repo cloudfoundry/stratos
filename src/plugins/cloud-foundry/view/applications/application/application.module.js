@@ -273,12 +273,26 @@
      */
     onUpdateDeliveryPipelineMetadata: function (pipeline) {
       var that = this;
-      if (pipeline.valid) {
+      if (pipeline && pipeline.valid) {
         this.hceCnsi = pipeline.hceCnsi;
-        this.hceModel.getProjects(pipeline.hceCnsi.guid)
+        this.hceModel.getProjects(this.hceCnsi.guid)
           .then(function () {
             that.model.application.project = that.hceModel.getProject(that.model.application.summary.name);
+
+            if (angular.isDefined(that.model.application.project)) {
+              // TODO (kdomico): Fix once vcs_id is returned - TEAMFOUR-946
+              // get VCS instance data
+              var repoUrl = that.model.application.project.repo.http_url;
+              return that.hceModel.getVcses(that.hceCnsi.guid)
+                .then(function (vcsInstances) {
+                  that.model.application.project.vcsInstance = _.find(vcsInstances, function (o) {
+                    return _.startsWith(repoUrl, o.browse_url);
+                  });
+                });
+            }
           });
+      } else {
+        this.model.application.project = null;
       }
     },
 

@@ -2,17 +2,22 @@
   'use strict';
 
   describe('variables manager service', function () {
-    var promise, dialogContext, $controller, $q, modelManager, $httpBackend, $uibModalInstance, githubModel,
+    var promise, dialogContext, $controller, $q, modelManager, $httpBackend, $uibModalInstance,
       githubOauthService, $timeout;
 
     var cnsi = 1234;
     var project = {
       repo: {
-        full_name: 'test_full_name'
+        full_name: 'test_full_name',
+        http_url: 'https://github.com'
+      },
+      vcsInstance: {
+        browse_url: 'https://github.com',
+        api_url: 'https://api.github.com'
       }
     };
     var defaultCommitCount = 20;
-    var defaultCommitsRequest = '/pp/v1/github/repos/' + project.repo.full_name + '/commits?per_page=' +
+    var defaultCommitsRequest = '/pp/v1/vcs/repos/' + project.repo.full_name + '/commits?per_page=' +
       defaultCommitCount;
     var defaultTriggerRequest = '/pp/v1/proxy/v2/pipelines/triggers';
     var defaultCommit = {
@@ -46,7 +51,6 @@
       modelManager = $injector.get('app.model.modelManager');
 
       $uibModalInstance = jasmine.createSpyObj('$uibModalInstance', ['close', 'dismiss']);
-      githubModel = modelManager.retrieve('cloud-foundry.model.github');
       githubOauthService = $injector.get('github.view.githubOauthService');
 
       var triggerBuild = $injector.get('triggerBuildDetailView');
@@ -90,24 +94,7 @@
       });
 
       describe('list commits', function () {
-
-        function setGithubToken() {
-          // Calls to githubModel will fail before the http request if token.access_token is missing
-          _.set(githubModel.apiManager.retrieve('cloud-foundry.api.github'), 'authenticated', true);
-          expect(githubModel.isAuthenticated()).toBe(true);
-        }
-
-        it('Don\'t fetch if no token present', function () {
-          spyOn(githubModel, 'commits').and.callThrough();
-          controller.fetchCommits();
-          expect(githubModel.commits).not.toHaveBeenCalled();
-          // No requests should ha
-        });
-
         it('Fetch empty commit list', function () {
-
-          setGithubToken();
-
           $httpBackend.expectGET(defaultCommitsRequest).respond([]);
           controller.fetchCommits();
           $httpBackend.flush();
@@ -119,9 +106,6 @@
         });
 
         it('Fetch populated commit list', function () {
-
-          setGithubToken();
-
           $httpBackend.expectGET(defaultCommitsRequest).respond([defaultCommit, {}, {}, {}]);
 
           controller.fetchCommits();
@@ -134,9 +118,6 @@
         });
 
         it('Fetch error', function () {
-
-          setGithubToken();
-
           $httpBackend.expectGET(defaultCommitsRequest).respond(500);
 
           controller.fetchCommits();
@@ -163,7 +144,6 @@
           $httpBackend.flush();
           expect($uibModalInstance.close).toHaveBeenCalled();
           expect($uibModalInstance.dismiss).not.toHaveBeenCalled();
-          expect(controller.fetchError).toBeFalsy();
           expect(controller.triggerError).toBeFalsy();
         });
 
@@ -173,7 +153,6 @@
           $httpBackend.flush();
           expect($uibModalInstance.close).not.toHaveBeenCalled();
           expect($uibModalInstance.dismiss).not.toHaveBeenCalled();
-          expect(controller.fetchError).toBeFalsy();
           expect(controller.triggerError).toBeTruthy();
         });
 
