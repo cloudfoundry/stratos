@@ -54,7 +54,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
     <script>
       (function () {
         window.opener.postMessage(JSON.stringify({
-          name: 'GitHub Oauth - success'
+          name: 'VCS OAuth - success'
         }), window.location.origin);
       })();
     </script>
@@ -66,12 +66,12 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
     <html>
     <head><link rel="stylesheet" href="/index.css"></head>
     <body id="github-auth-callback-page">
-    <h1 class="text-center">GitHub authorization is failed.</h1>
+    <h1 class="text-center">VCS authorization is failed.</h1>
     <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
     <script>
       (function () {
         window.opener.postMessage(JSON.stringify({
-          name: 'GitHub Oauth - failure'
+          name: 'VCS OAuth - failure'
         }), window.location.origin);
       })();
     </script>
