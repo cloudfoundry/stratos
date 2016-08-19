@@ -82,7 +82,6 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	state := c.FormValue("state")
 	endpoint, ok := p.getSessionStringValue(c, state)
 	if !ok {
-		msg := fmt.Sprintf("Invalid OAuth state - %s not found in session\n", state)
 		return c.HTML(http.StatusOK, failureHTML)
 	}
 
