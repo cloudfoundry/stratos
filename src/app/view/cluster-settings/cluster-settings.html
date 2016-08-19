@@ -16,7 +16,8 @@
           <div class="cluster-properties">
             <div class="cluster-property">
               <div translate>URL</div>
-              <div>{{cnsi.api_endpoint.Host}}</div>
+              <div ng-if="cnsi.api_endpoint">{{cnsi.api_endpoint.Host}}</div>
+              <div ng-if="!cnsi.api_endpoint" translate>Unknown</div>
             </div>
             <div class="cluster-property">
               <div translate>Type</div>

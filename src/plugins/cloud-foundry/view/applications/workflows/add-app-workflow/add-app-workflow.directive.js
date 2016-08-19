@@ -338,6 +338,8 @@
               return that.routeModel.associateAppWithRoute(cnsiGuid, route.metadata.guid, app.metadata.guid);
             });
 
+          that.eventService.$emit('cf.events.NEW_APP_CREATED');
+
           return that.$q.all([summaryPromise, routePromise]).then(function () {
             that.userInput.application = that.appModel.application;
           });

@@ -404,7 +404,7 @@
       _.forEach(organizationModel.organizations[clusterGuid], function (org, orgGuid) {
         if (!singleOrgGuid || singleOrgGuid === orgGuid) {
           _.forEach(org.roles, function (roles, userGuid) {
-            if (_.find(users, {metadata: {guid: userGuid}})) {
+            if (_.find(users, { metadata: { guid: userGuid }})) {
               _.set(rolesByUser, userGuid + '.' + orgGuid + '.organization', _.keyBy(roles));
             }
           });
@@ -416,7 +416,7 @@
           _.forEach(space.roles, function (roles, userGuid) {
             if (!singleSpaceGuid || singleSpaceGuid === spaceGuid) {
 
-              if (_.find(users, {metadata: {guid: userGuid}})) {
+              if (_.find(users, { metadata: { guid: userGuid }})) {
                 _.set(rolesByUser, userGuid + '.' + orgGuid + '.spaces.' + spaceGuid, _.keyBy(roles));
               }
             }
