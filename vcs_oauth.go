@@ -80,7 +80,6 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	vcsClientKey := VCSClientMapKey{endpoint}
 	if vcsConfig, ok := p.Config.VCSClientMap[vcsClientKey]; ok {
 		oauthConf := &vcsConfig
-		log.Printf("Github callback config: %v", oauthConf)
 
 		tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
 		if p.Config.SkipTLSVerification {
@@ -117,7 +116,7 @@ func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
 	if _, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
-		log.Println("GitHub OAuth token found in the session.")
+		log.Println("VCS OAuth token found in the session.")
 		tokenExists = true
 	}
 
