@@ -318,6 +318,28 @@
     },
 
     /**
+     * @function unbindServiceFromApp
+     * @memberof cloud-foundry.model.application
+     * @description Unbind service instance from application
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - the application id
+     * @param {string} bindingGuid - the service binding id
+     * @param {object} params - optional params
+     * @returns {promise} a promise object
+     * @public
+     */
+    unbindServiceFromApp: function (cnsiGuid, guid, bindingGuid, params) {
+      var config = {
+        headers: {
+          'x-cnap-passthrough': 'true',
+          'x-cnap-cnsi-list': cnsiGuid
+        }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .RemoveServiceBindingFromApp(guid, bindingGuid, params, config);
+    },
+
+    /**
      * @function listServiceBindings
      * @memberof cloud-foundry.model.application
      * @description List service bindings for application

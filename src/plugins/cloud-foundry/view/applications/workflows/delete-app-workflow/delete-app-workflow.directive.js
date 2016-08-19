@@ -44,7 +44,6 @@
    * @property {app.utils.utilsService} utils - the utils service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} routeModel - the Cloud Foundry route model
-   * @property {object} serviceBindingModel - the Cloud Foundry service binding model
    * @property {boolean} deletingApplication - a flag indicating if the workflow in progress
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
@@ -58,7 +57,7 @@
     this.utils = utils;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
-    this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+    this.serviceInstanceModel = modelManager.retrieve('cloud-foundry.model.service-instance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.deletingApplication = false;
     this.cnsiGuid = null;
@@ -205,31 +204,67 @@
      * @returns {promise} A resolved/rejected promise
      */
     deleteServiceBindings: function () {
-      var that = this;
-      var deferred = this.$q.defer();
       var checkedServiceValue = this.userInput.checkedServiceValue;
-
-      var bindingGuids = _.chain(checkedServiceValue)
-        .filter(function (o) {
-          return o;
-        })
+      var checkedServices = _.filter(checkedServiceValue, function (o) { return o; });
+      var bindingGuids = _.chain(checkedServices)
+        .filter(function (o) { return o.bound_app_count > 1; })
         .map('guid')
         .value();
+      var safeServiceInstances = _.chain(checkedServices)
+        .filter(function (o) { return o.bound_app_count === 1; })
+        .map('guid')
+        .value();
+
+      var promises = [];
       if (bindingGuids.length > 0) {
-        var q = 'service_instance_guid IN ' + bindingGuids.join(',');
-        this.serviceBindingModel.listAllServiceBindings(this.cnsiGuid, {q: q})
-          .then(function (bindings) {
-            var tasks = [];
-            angular.forEach(bindings, function (binding) {
-              tasks.push(that.serviceBindingModel.deleteServiceBinding(that.cnsiGuid, binding.metadata.guid, {async: false}));
-            });
-            that.$q.all(tasks).then(deferred.resolve, deferred.reject);
-          });
-      } else {
-        deferred.resolve();
+        promises.push(this._unbindServiceInstances(bindingGuids));
       }
 
-      return deferred.promise;
+      if (safeServiceInstances.length > 0) {
+        promises.push(this._deleteServiceInstances(safeServiceInstances));
+      }
+
+      return this.$q.all(promises);
+    },
+
+    /**
+     * @function _unbindServiceInstances
+     * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
+     * @description Unbind service instance from app
+     * @param {array} bindingGuids - the service binding GUIDs
+     * @returns {promise} A resolved/rejected promise
+     */
+    _unbindServiceInstances: function (bindingGuids) {
+      var that = this;
+      var appGuid = this.appModel.application.summary.guid;
+      var q = 'service_instance_guid IN ' + bindingGuids.join(',');
+      return this.appModel.listServiceBindings(this.cnsiGuid, appGuid, {q: q})
+        .then(function (bindings) {
+          // service bindings can't be delete async, so chain the requests
+          var chain = that.$q.when();
+          angular.forEach(bindings, function (binding) {
+            chain = chain.then(function () {
+              return that.appModel.unbindServiceFromApp(that.cnsiGuid, appGuid, binding.metadata.guid);
+            });
+          });
+          return chain;
+        });
+    },
+
+    /**
+     * @function _deleteServiceInstances
+     * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
+     * @description Delete service instances
+     * @param {array} safeServiceInstances - the service instance GUIDs
+     * @returns {promise} A resolved/rejected promise
+     */
+    _deleteServiceInstances: function (safeServiceInstances) {
+      var that = this;
+      var tasks = [];
+      angular.forEach(safeServiceInstances, function (serviceInstanceGuid) {
+        tasks.push(that.serviceInstanceModel.deleteServiceInstance(that.cnsiGuid, serviceInstanceGuid, {recursive: true}));
+      });
+      return this.$q.all(tasks);
     },
 
     /**
