@@ -478,6 +478,29 @@
         [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
       },
 
+      /**
+       * @function notify
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description notify success
+       */
+      notify: function () {
+        if (!this.userInput.application) {
+          return;
+        }
+
+        var href = [
+          '#/cf/applications',
+          this.userInput.serviceInstance.guid,
+          'app',
+          this.userInput.application.summary.guid,
+          'summary'
+        ].join('/');
+
+        this.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
+          message: gettext('A new app has been created: ') + '<a href="' + href + '">' + this.userInput.name + '</a>'
+        });
+      },
+
       startWorkflow: function () {
         var that = this;
         this.addingApplication = true;
@@ -497,6 +520,7 @@
       },
 
       stopWorkflow: function () {
+        this.notify();
         this.addingApplication = false;
       },
 
@@ -504,6 +528,7 @@
         if (this.options.subflow === 'pipeline') {
           this.triggerPipeline();
         }
+        this.notify();
         this.addingApplication = false;
       }
     });
