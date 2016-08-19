@@ -83,7 +83,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	endpoint, ok := p.getSessionStringValue(c, state)
 	if !ok {
 		msg := fmt.Sprintf("Invalid OAuth state - %s not found in session\n", state)
-		return return c.HTML(http.StatusOK, failureHTML)
+		return c.HTML(http.StatusOK, failureHTML)
 	}
 
 	// clean up session
@@ -107,7 +107,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		if err != nil {
 			msg := fmt.Sprintf("oauthConf.Exchange() failed with '%s'\n", err)
 			log.Println(msg)
-			return return c.HTML(http.StatusOK, failureHTML)
+			return c.HTML(http.StatusOK, failureHTML)
 		}
 
 		// stuff the token into the user's session
