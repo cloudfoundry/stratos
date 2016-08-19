@@ -51,11 +51,11 @@
         that.$window.addEventListener('message', function (event) {
           var message = angular.fromJson(event.data);
 
-          if (message.name === 'GitHub Oauth - success') {
+          if (message.name === 'VCS OAuth - success') {
             resolve();
             win.close();
 
-          } else if (message.name === 'GitHub Oauth - failure') {
+          } else if (message.name === 'VCS OAuth - failure') {
             reject();
           }
         });
