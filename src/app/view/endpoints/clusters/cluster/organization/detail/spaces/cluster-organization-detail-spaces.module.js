@@ -27,16 +27,28 @@
   }
 
   ClusterDetailSpacesController.$inject = [
+    '$stateParams',
+    '$state',
     'app.model.modelManager',
-    '$stateParams'
+    'app.utils.utilsService'
   ];
 
-  function ClusterDetailSpacesController(modelManager, $stateParams) {
+  function ClusterDetailSpacesController($stateParams, $state, modelManager, utils) {
+    var that = this;
+
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.spacesPath = 'organizations.' + this.clusterGuid + '.' + this.organizationGuid + '.spaces';
+    this.spacesPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid) + '.spaces';
+
+    this.stateInitialised = false;
+
+    function init() {
+      that.stateInitialised = true;
+    }
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
   }
 
   angular.extend(ClusterDetailSpacesController.prototype, {

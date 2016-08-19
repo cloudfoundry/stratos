@@ -40,7 +40,7 @@
         return $q.when(list);
       }
 
-      return $http.get('/pp/v1/proxy/' + nextUrl, httpConfigOptions).then(function (response) {
+      return $http.get('/pp/v1/proxy' + nextUrl, httpConfigOptions).then(function (response) {
         return dePaginate(list.concat(response.data.resources), response.data.next_url, httpConfigOptions);
       });
     }

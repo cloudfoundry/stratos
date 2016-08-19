@@ -12,11 +12,12 @@
   registerSpaceModel.$inject = [
     '$q',
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.api.hcfPagination'
   ];
 
-  function registerSpaceModel($q, modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager));
+  function registerSpaceModel($q, modelManager, apiManager, hcfPagination) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, hcfPagination));
   }
 
   /**
@@ -30,11 +31,12 @@
    * @property {object} stackatoInfoModel - the stackatoInfoModel service
    * @class
    */
-  function Space($q, apiManager, modelManager) {
+  function Space($q, apiManager, modelManager, hcfPagination) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.hcfPagination = hcfPagination;
     this.data = {
     };
 
@@ -62,12 +64,18 @@
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllAppsForSpace: function (cnsiGuid, guid, params) {
+    listAllAppsForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllAppsForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllAppsForSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (apps) {
+          return that.onListAllAppsForSpace(cnsiGuid, guid, apps);
         });
     },
 
@@ -120,12 +128,18 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServicesForSpace: function (cnsiGuid, guid, params) {
+    listAllServicesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllServicesForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllServicesForSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (services) {
+          return that.onListAllServicesForSpace(cnsiGuid, guid, services);
         });
     },
 
@@ -154,7 +168,7 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServiceInstancesForSpace: function (cnsiGuid, guid, params) {
+    listAllServiceInstancesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       var combinedParams = params || {};
       var inlineParams = {
@@ -165,7 +179,13 @@
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllServiceInstancesForSpace(guid, combinedParams, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllServiceInstancesForSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (serviceInstances) {
+          return that.onListAllServiceInstancesForSpace(cnsiGuid, guid, serviceInstances);
         });
     },
 
@@ -194,18 +214,23 @@
      * @returns {promise} A promise object
      * @public
      */
-    listAllRoutesForSpace: function (cnsiGuid, guid, params) {
+    listAllRoutesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       var combinedParams = params || {};
       var inlineParams = {
         'inline-relations-depth': 1,
         'include-relations': 'domain,apps'
       };
-      _.assign(combinedParams, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(guid, combinedParams, this.makeHttpConfig(cnsiGuid))
+        .ListAllRoutesForSpace(guid, _.defaults(combinedParams, inlineParams), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllRoutesForSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (routes) {
+          return that.onListAllRoutesForSpace(cnsiGuid, guid, routes);
         });
     },
 
@@ -234,12 +259,18 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params) {
+    listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .RetrievingRolesOfAllUsersInSpace(guid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListRolesOfAllUsersInSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (roles) {
+          return that.onListRolesOfAllUsersInSpace(cnsiGuid, guid, roles);
         });
     },
 
@@ -346,7 +377,7 @@
       // We cannot rely on inline routes as they lack the depth we need later on
       var serviceInstancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid, {
         return_user_provided_service_instances: false
-      });
+      }, true);
 
       if (spaceQuotaGuid) {
         // Check for inline quota!
@@ -370,7 +401,7 @@
         rolesP = that.$q.resolve(unsplitRoles);
         that.onListRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, unsplitRoles);
       } else {
-        rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
+        rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params, true);
       }
 
       var spaceRolesP = rolesP.then(function () {
@@ -386,14 +417,14 @@
         appP = that.$q.resolve(space.entity.apps);
         that.onListAllAppsForSpace(cnsiGuid, spaceGuid, space.entity.apps);
       } else {
-        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid);
+        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid, true);
       }
 
       // Services are never inlined
-      var servicesP = this.listAllServicesForSpace(cnsiGuid, spaceGuid);
+      var servicesP = this.listAllServicesForSpace(cnsiGuid, spaceGuid, true);
 
       // We cannot rely on inline routes as they lack the depth we need later on
-      var routesP = this.listAllRoutesForSpace(cnsiGuid, spaceGuid);
+      var routesP = this.listAllRoutesForSpace(cnsiGuid, spaceGuid, true);
 
       return this.$q.all({
         // memory: usedMemP,
@@ -432,19 +463,22 @@
 
         // Set total apps and app instances count
         details.totalApps = (vals.apps || []).length;
-
         details.totalAppInstances = appInstances;
         details.appInstancesQuota = _.get(vals.quota, 'entity.app_instance_limit', -1);
 
-        details.totalRoles = (vals.roles || []).length;
+        //TODO: SCRAP totalRoles?
+        //details.totalRoles = (vals.roles || []).length;
         details.roles = vals.roles;
 
+        //TODO: CHANGE totalServices TO total_results
         details.totalServices = (vals.services || []).length;
         details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
 
+        //TODO: CHANGE totalRoutes TO total_results, move routes fetch to space details module. conditionally get
         details.totalRoutes = (vals.routes || []).length;
         details.routesQuota = _.get(vals.quota, 'entity.total_routes', -1);
 
+        //TODO: CHANGE move serviceInstances fetch to space details module. conditionally get
         details.totalServiceInstances = (vals.serviceInstances || []).length;
         details.serviceInstancesQuota = _.get(vals.quota, 'entity.total_services', -1);
 

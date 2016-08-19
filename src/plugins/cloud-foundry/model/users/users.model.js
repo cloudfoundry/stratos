@@ -11,11 +11,12 @@
 
   registerUsersModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.api.hcfPagination'
   ];
 
-  function registerUsersModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.users', new Users(apiManager));
+  function registerUsersModel(modelManager, apiManager, hcfPagination) {
+    modelManager.register('cloud-foundry.model.users', new Users(apiManager, hcfPagination));
   }
 
   /**
@@ -25,8 +26,9 @@
    * @property {app.api.apiManager} apiManager - the API manager
    * @class
    */
-  function Users(apiManager) {
+  function Users(apiManager, hcfPagination) {
     this.apiManager = apiManager;
+    this.hcfPagination = hcfPagination;
 
     var passThroughHeader = {
       'x-cnap-passthrough': 'true'
@@ -69,10 +71,14 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllUsers: function (cnsiGuid, params) {
+    listAllUsers: function (cnsiGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllUsers(params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },

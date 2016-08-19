@@ -50,6 +50,8 @@
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.orgsApi = apiManager.retrieve('cloud-foundry.api.Organizations');
     this.orgsQuotaApi = apiManager.retrieve('cloud-foundry.api.OrganizationQuotaDefinitions');
+    this.appsApi = apiManager.retrieve('cloud-foundry.api.Apps');
+    this.routesApi = apiManager.retrieve('cloud-foundry.api.Routes');
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
 
     this.organizations = {};
@@ -74,19 +76,20 @@
      * @memberof cloud-foundry.model.organization
      * @description lists all organizations
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-     * @param {object} params - optional parameters
+     * @param {object=} params - optional parameters
+     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
+     * and return the entire collection
      * @returns {promise} A resolved/rejected promise
      * @public
      */
     listAllOrganizations: function (cnsiGuid, params, dePaginate) {
       var that = this;
       this.unCacheOrganization(cnsiGuid);
-      var httpConfig = this.makeHttpConfig(cnsiGuid);
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllOrganizations(params, httpConfig)
+        .ListAllOrganizations(params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, httpConfig);
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -117,13 +120,19 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} orgGuid - organization id
      * @param {object} params - optional parameters
+     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
+     * and return the entire collection
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServicesForOrganization: function (cnsiGuid, orgGuid, params) {
+    listAllServicesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllServicesForOrganization(orgGuid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -287,8 +296,11 @@
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, {
           'inline-relations-depth': 1
-        }, this.makeHttpConfig(cnsiGuid)).then(function (res) {
-          var depthOneSpaces = res.data.resources;
+        }, this.makeHttpConfig(cnsiGuid))
+        .then(function (res) {
+          return that.hcfPagination.dePaginate(res.data, that.makeHttpConfig(cnsiGuid));
+        })
+        .then(function (depthOneSpaces) {
           that.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
           that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces);
           return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org).then(function () {
@@ -322,8 +334,10 @@
           // Reconstruct all user roles from inline data
           return that.$q.resolve(_unsplitOrgRoles(org));
         }
+        // TODO: If the organization users is missing due to users paginating then this will be called once per org
+        // with the issue. Think this might be bearable. Users is a list of users with any kind of org or space role.
         return that.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig).then(function (val) {
-          return val.data.resources;
+          return that.hcfPagination.dePaginate(val.data, httpConfig);
         });
       }
 
@@ -346,6 +360,8 @@
             return that.$q.resolve(totalMem);
           }
         }
+        // TODO: If the organization spaces is missing due to spaces paginated then this will be called once per org
+        // with the issue. Think this might be bearable.
         return that.orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
           return res.data.memory_usage_in_mb;
         });
@@ -413,27 +429,17 @@
 
       allSpacesP = allSpacesP || this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
-          return res.data.resources;
+          return that.hcfPagination.dePaginate(res.data, httpConfig);
         });
 
-      routesCountP = routesCountP || allSpacesP.then(function (spaces) {
-        var promises = [];
-        var spaceModel = that.modelManager.retrieve('cloud-foundry.model.space');
-        _.forEach(spaces, function (space) {
-          var promise = spaceModel.listAllRoutesForSpace(cnsiGuid, space.metadata.guid).then(function (res) {
-            return res.length;
-          }).catch(function (error) {
-            that.$log.error('Failed to listAllRoutesForSpace', error);
-            throw error;
-          });
-          promises.push(promise);
-        });
-        return that.$q.all(promises).then(function (appCounts) {
-          var total = 0;
-          _.forEach(appCounts, function (count) {
-            total += count;
-          });
-          return total;
+      routesCountP = routesCountP || that.$q.resolve().then(function () {
+        var q = 'organization_guid:' + orgGuid;
+        var routesParams = {
+          q: q,
+          results_per_page: 1
+        };
+        return that.routesApi.ListAllRoutes(_.defaults(routesParams, params), httpConfig).then(function (response) {
+          return response.data.total_results;
         });
       });
 
@@ -456,20 +462,34 @@
       // Count apps in each space
       var appCountsP = allSpacesP.then(function (spaces) {
         var appsCountPromises = [];
+        var missingSpaces = [];
+
         _.forEach(spaces, function (space) {
-          var appsCountPromise;
           if (space.entity.apps) {
-            appsCountPromise = that.$q.resolve(space.entity.apps.length);
+            // If we have the space's apps, great, use that
+            appsCountPromises.push(that.$q.resolve(space.entity.apps.length));
           } else {
-            appsCountPromise = that.spaceApi.ListAllAppsForSpace(space.metadata.guid, params, httpConfig).then(function (res) {
-              return res.data.resources.length;
-            }).catch(function (error) {
-              that.$log.error('Failed to ListAllAppsForSpace', error);
-              throw error;
-            });
+            // If we don't have the space's apps (most probably due to the number of apps exceeding results_per_page)
+            // then create a single request for the end. This avoids making a request per space.
+            missingSpaces.push(space.metadata.guid);
           }
-          appsCountPromises.push(appsCountPromise);
         });
+
+        // Instead of making one request per space (this could be lots) only make one and use total_results
+        if (missingSpaces.length > 0) {
+          // We shouldn't have to worry about the length of the query string, this only affects browsers.
+          var q = 'space_guid IN ' + missingSpaces.join(',');
+          var missingAppParams = {
+            q: q,
+            results_per_page: 1
+          };
+          missingAppParams = _.defaults(missingAppParams, params);
+          var promise = that.appsApi.ListAllApps(missingAppParams, httpConfig).then(function (response) {
+            return response.data.total_results;
+          });
+          appsCountPromises.push(promise);
+        }
+
         return that.$q.all(appsCountPromises).then(function (appCounts) {
           var total = 0;
           _.forEach(appCounts, function (count) {
@@ -569,7 +589,9 @@
       var that = this;
       return this.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, null, this.makeHttpConfig(cnsiGuid))
         .then(function (val) {
-          var allUsersRoles = val.data.resources;
+          return that.hcfPagination.dePaginate(val.data, that.makeHttpConfig(cnsiGuid));
+        })
+        .then(function (allUsersRoles) {
           that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, allUsersRoles);
           // Ensures we also update inlined data for getDetails to pick up
           _splitOrgRoles(that.organizations[cnsiGuid][orgGuid].details.org, allUsersRoles);
