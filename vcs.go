@@ -49,7 +49,7 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, error) {
 			vcsType := strings.ToLower(clientData[0])
 			vcsClientType, err := getVCSType(vcsType)
 			if err != nil {
-				log.Printf("Unable to get VCS type for client %v: %v", clientData, err)
+				log.Printf("Unable to get VCS type %s: %v", vcsType, err)
 				continue
 			}
 
@@ -75,8 +75,6 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, error) {
 			vcsClientMap[VCSClientMapKey{baseEndpoint}] = vcsConfig
 		}
 	}
-
-	log.Printf("VCS Clients: %v", vcsClientMap)
 
 	return vcsClientMap, nil
 }

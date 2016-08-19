@@ -30,7 +30,6 @@ func (p *portalProxy) handleVCSAuth(c echo.Context) error {
 		// save to endpoint to session using OAuth state string
 		setVCSSession(p, c, oauthStateString, endpoint)
 
-		log.Printf("oauthConf: %+v", oauthConf)
 		log.Printf("OAuth url: %s", url)
 
 		return c.Redirect(302, url)
@@ -94,12 +93,9 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		token, err := oauthConf.Exchange(ctx, code)
 		if err != nil {
 			msg := fmt.Sprintf("oauthConf.Exchange() failed with '%s'\n", err)
-			log.Printf(msg)
+			log.Println(msg)
 			return c.HTML(http.StatusBadRequest, msg)
 		}
-
-		// TODO (wchrisjohnson): SECURITY RISK - TEAMFOUR-561 - remove this log statement
-		log.Printf("Got token: %+v\n", token)
 
 		// stuff the token into the user's session
 		sessionKey := newSessionKey(endpoint)
@@ -141,15 +137,15 @@ func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) getVCSOAuthToken(c echo.Context) string {
+func (p *portalProxy) getVCSOAuthToken(c echo.Context) (string, bool) {
 	log.Println("getVCSOAuthToken")
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
 	if token, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
-		return token
+		return token, true
 	}
 
-	return ""
+	return "", false
 }
 
 func newSessionKey(endpoint string) string {

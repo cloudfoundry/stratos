@@ -268,9 +268,12 @@ func (p *portalProxy) proxy(c echo.Context) error {
 func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, error) {
 	log.Println("addTokenToPayload")
 
-	token := p.getVCSOAuthToken(c)
-
-	log.Printf("Token: %+v\n", token)
+	token, ok := p.getVCSOAuthToken(c)
+	if !ok {
+		msg := "Unable to retrieve VCS OAuth token to add to payload"
+		log.Println(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
 	var projData map[string]interface{}
 	if err := json.Unmarshal(body, &projData); err != nil {
@@ -330,26 +333,23 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 
 	var (
 		uri         *url.URL
-		headers     http.Header
 		vcsEndpoint string
 	)
 
 	uri = makeRequestURI(c)
-	log.Printf("URI: %+v\n", uri)
-
-	headers = getEchoHeaders(c)
-	log.Printf("Headers: %+v\n", headers)
 
 	vcsEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
 
 	url := fmt.Sprintf("%s/%s", vcsEndpoint, uri)
-	log.Printf("URL: %s", url)
+	log.Printf("VCS Endpoint URL: %s", url)
 
-	token := p.getVCSOAuthToken(c)
+	token, ok := p.getVCSOAuthToken(c)
+	if !ok {
+		msg := fmt.Sprintf("Token not found for endpoint %s", vcsEndpoint)
+		return echo.NewHTTPError(http.StatusBadRequest, msg)
+	}
+
 	tokenHeader := fmt.Sprintf("token %s", token)
-	log.Printf("token - %s", token)
-	// set the token in the header
-	log.Printf("Headers before GH call: %+v\n", headers)
 
 	// Perform the request against the VCS endpoint
 	req, err := http.NewRequest("GET", url, nil)
@@ -360,7 +360,6 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 		log.Printf("Response from VCS contained an error: %v", err)
 	}
 
-	log.Printf("Response from VCS: %+v\n", resp)
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
