@@ -330,7 +330,7 @@
     /**
      * @name app.view.endpoints.clusters.cluster.rolesService.orgContainsRoles
      * @description Determine if the organisation provided and it's spaces has any roles selected
-     * @param {object} org - organization to clear. Format as below.
+     * @param {object} org - organization to test. Format as below.
      *  organization[roleKey] = truthy
      *  spaces[spaceGuid][roleKey] = truthy
      * @returns {boolean}
@@ -649,6 +649,17 @@
       });
     }
 
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.updateUserOrgsAndSpaces
+     * @description As per updateUsersOrgsAndSpaces, except for a single user. This should not be called separately only
+     * via updateUsersOrgsAndSpaces.
+     * @param {string} clusterGuid - HCF service guid
+     * @param {object} user - user to apply roles to
+     * @param {object} newRolesPerOrg - Object containing the new roles to apply. Format is...
+     *  Organizations... [orgGuid].organization[roleKey] = truthy
+     *  Spaces...        [orgGuid].spaces[spaceGuid][roleKey] = truthy
+     * @returns {promise}
+     */
     function updateUserOrgsAndSpaces(clusterGuid, user, newRolesPerOrg) {
       var promises = [];
 
@@ -659,6 +670,18 @@
       return $q.all(promises);
     }
 
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.updateUserOrgAndSpaces
+     * @description As per updateUserOrgsAndSpaces, except for a single org. This should not be called separately only
+     * via updateUsersOrgsAndSpaces.
+     * @param {string} clusterGuid - HCF service guid
+     * @param {object} user - user to apply roles to
+     * @param {object} orgGuid - guid of organization
+     * @param {object} newOrgRoles - Object containing the new roles to apply. Format is...
+     *  Organizations... organization[roleKey] = truthy
+     *  Spaces...        spaces[spaceGuid][roleKey] = truthy
+     * @returns {promise}
+     */
     function updateUserOrgAndSpaces(clusterGuid, user, orgGuid, newOrgRoles) {
 
       var userGuid = user.metadata.guid;
