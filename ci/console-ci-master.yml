@@ -76,11 +76,11 @@ resources:
       access_key_id: {{s3-access-key}}
       secret_access_key: {{s3-secret}}
       region_name: {{s3-region-name}}
-  - name: hsm-hcp-version-bucket
+  - name: hsm-config-bucket
     type: s3
     source:
       bucket: {{s3-hsm-bucket}}
-      versioned_file: {{s3-hsm-hcp-version}}
+      versioned_file: {{s3-hsm-config}}
       access_key_id: {{s3-access-key}}
       secret_access_key: {{s3-secret}}
       region_name: {{s3-region-name}}
@@ -155,9 +155,9 @@ jobs:
       params:
         file: stratos-deploy-output/instance.json
         acl: public-read
-    - put: hsm-hcp-version-bucket
+    - put: hsm-config-bucket
       params:
-        file: stratos-deploy-output/hcp_version
+        file: stratos-deploy-output/config.json
         acl: public-read
 
     # Tag all repos with the current version
