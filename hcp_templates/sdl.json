@@ -201,6 +201,82 @@
           "mountpoint": "/database"
         }
       ]
+    },
+    {
+      "name": "hsc-etcd",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "external_name": "Console - etcd",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "capabilities": [],
+      "repository": "quay.io/coreos",
+      "image": "etcd:2.3.7",
+      "workload_type": "container",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "ETCD_DATA_DIR"
+        },
+        {
+          "name": "ETCD_WAL_DIR"
+        },
+        {
+          "name": "ETCD_LISTEN_PEER_URLS"
+        },
+        {
+          "name": "ETCD_LISTEN_CLIENT_URLS"
+        },
+        {
+          "name": "ETCD_INITIAL_ADVERTISE_PEER_URLS"
+        },
+        {
+          "name": "ETCD_INITIAL_CLUSTER"
+        },
+        {
+          "name": "ETCD_INITIAL_CLUSTER_STATE"
+        },
+        {
+          "name": "ETCD_INITIAL_CLUSTER_TOKEN"
+        },
+        {
+          "name": "ETCD_ADVERTISE_CLIENT_URLS"
+        }
+      ],
+      "affinity": [],
+      "min_instances": 2,
+      "max_instances": 3,
+      "service_ports": [
+        {
+          "name": "etcd-2379",
+          "protocol": "TCP",
+          "source_port": 2379,
+          "target_port": 2379,
+          "public": false
+        },
+        {
+          "name": "etcd-2380",
+          "protocol": "TCP",
+          "source_port": 2380,
+          "target_port": 2380,
+          "public": false
+        }
+      ],
+      "volume_mounts": [
+        {
+          "volume_name": "hsc-etcd-data-volume",
+          "mountpoint": "/etcd/data"
+        },
+        {
+          "volume_name": "hsc-etcd-wal-volume",
+          "mountpoint": "/etcd/wal"
+        }
+      ]
     }
   ],
   "features": {
@@ -344,7 +420,7 @@
       "name": "pgsql-data-volume",
       "size_gb": 10,
       "filesystem": "ext4",
-      "shared": false
+      "shared": true
     },
     {
       "name": "hsc-upgrade-volume",
@@ -354,6 +430,18 @@
     {
       "name": "hsc-encryption-key-volume",
       "size_gb": 1,
+      "shared": true
+    },
+    {
+      "name": "hsc-etcd-data-volume",
+      "size_gb": 10,
+      "filesystem": "ext4",
+      "shared": true
+    },
+    {
+      "name": "hsc-etcd-wal-volume",
+      "size_gb": 1,
+      "filesystem": "ext4",
       "shared": true
     }
   ],
@@ -700,6 +788,78 @@
       "description": "The filename of the encryption key used to encrypt sensitive data before it gets saved to Postgresql.",
       "data_type": "string",
       "default": "key",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_DATA_DIR",
+      "description": "Path to the etcd data directory (shared volume).",
+      "data_type": "string",
+      "default": "/etcd/data",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_WAL_DIR",
+      "description": "Path to the dedicated wal directory (shared volume).",
+      "data_type": "string",
+      "default": "/etcd/wal",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_LISTEN_PEER_URLS",
+      "description": "List of etcd URLs to listen on for peer traffic.",
+      "data_type": "string",
+      "default": "http://0.0.0.0:2380",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_LISTEN_CLIENT_URLS",
+      "description": "List of etcd URLs to listen on for client traffic.",
+      "data_type": "string",
+      "default": "http://0.0.0.0:2379",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_INITIAL_ADVERTISE_PEER_URLS",
+      "description": "List of this member’s peer URLs to advertise to the rest of the cluster.",
+      "data_type": "string",
+      "default": "http://hsc-etcd-0-int:2380,http://hsc-etcd-1-int:2380,http://hsc-etcd-2-int:2380",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_INITIAL_CLUSTER",
+      "description": "Initial etcd cluster configuration for bootstrapping.",
+      "data_type": "string",
+      "default": "hsc-etcd-0=http://hsc-etcd-0-int:2380,hsc-etcd-1=http://hsc-etcd-1-int:2380,hsc-etcd-2=http://hsc-etcd-2-int:2380",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_INITIAL_CLUSTER_STATE",
+      "description": "Initial cluster state (“new” or “existing”).",
+      "data_type": "string",
+      "default": "new",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_INITIAL_CLUSTER_TOKEN",
+      "description": "Initial cluster token for the etcd cluster during bootstrap.",
+      "data_type": "string",
+      "default": "hsc-etcd-cluster",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_ADVERTISE_CLIENT_URLS",
+      "description": "List of this etc member’s client URLs to advertise to the rest of the cluster.",
+      "data_type": "string",
+      "default": "http://hsc-etcd-0-int:2379,http://hsc-etcd-1-int:2379,http://hsc-etcd-2-int:2379",
       "required": true,
       "secret": false
     }
