@@ -317,12 +317,28 @@
       createPipeline: function (targetId) {
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
         return hceModel.createProject(this.userInput.hceCnsi.guid,
-                                      this.userInput.name,
+                                      this._createProjectName(),
                                       this.userInput.source,
                                       targetId,
                                       this.userInput.buildContainer.build_container_id,
                                       this.userInput.repo,
                                       this.userInput.branch);
+      },
+
+      /**
+       * @function _createProjectName
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description create a unique project name
+       * @returns {string} a unique project name
+       * @private
+       */
+      _createProjectName: function () {
+        var name = [
+          this.userInput.name,
+          this.userInput.application.summary.guid
+        ].join('-');
+
+        return name;
       },
 
       triggerPipeline: function () {
