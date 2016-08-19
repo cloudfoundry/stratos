@@ -72,7 +72,6 @@ func main() {
 		log.Printf("Exiting. No VCS clients found: %v", err)
 		os.Exit(1)
 	}
-	log.Printf("VCSClientMap: %v\n", portalConfig.VCSClientMap)
 
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB

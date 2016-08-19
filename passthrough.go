@@ -346,7 +346,7 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	token, ok := p.getVCSOAuthToken(c)
 	if !ok {
 		msg := fmt.Sprintf("Token not found for endpoint %s", vcsEndpoint)
-		return echo.NewHTTPError(http.StatusBadRequest, msg)
+		return echo.NewHTTPError(http.StatusUnauthorized, msg)
 	}
 
 	tokenHeader := fmt.Sprintf("token %s", token)
