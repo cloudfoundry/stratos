@@ -34,8 +34,6 @@ type CNSIRequest struct {
 	Error    error
 }
 
-const gitHubAPIURL = "https://api.github.com/"
-
 func getEchoURL(c echo.Context) url.URL {
 	log.Println("getEchoURL")
 	u := c.Request().URL().(*standard.URL).URL
@@ -204,8 +202,8 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	log.Println(" ")
 
 	// if the following header is found, add the GH Oauth code to the body
-	if header.Get("x-cnap-github-token-required") != "" {
-		log.Println("--- x-cnap-github-token-required HEADER FOUND.....")
+	if header.Get("x-cnap-vcs-token-required") != "" {
+		log.Println("--- x-cnap-vcs-token-required HEADER FOUND.....")
 		body, err = p.addTokenToPayload(c, body)
 		if err != nil {
 			log.Printf("Unable to add token to HCE payload: %+v\n", err)
@@ -270,9 +268,12 @@ func (p *portalProxy) proxy(c echo.Context) error {
 func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, error) {
 	log.Println("addTokenToPayload")
 
-	token := p.getGitHubAuthToken(c)
-
-	log.Printf("Token: %+v\n", token)
+	token, ok := p.getVCSOAuthToken(c)
+	if !ok {
+		msg := "Unable to retrieve VCS OAuth token to add to payload"
+		log.Println(msg)
+		return nil, fmt.Errorf(msg)
+	}
 
 	var projData map[string]interface{}
 	if err := json.Unmarshal(body, &projData); err != nil {
@@ -327,44 +328,38 @@ End:
 	}
 }
 
-func (p *portalProxy) github(c echo.Context) error {
-
-	log.Println("github passthru ...")
-	log.Printf("GitHub API URL: %s", gitHubAPIURL)
+func (p *portalProxy) vcsProxy(c echo.Context) error {
+	log.Println("VCS proxy passthru ...")
 
 	var (
-		uri     *url.URL
-		headers http.Header
+		uri         *url.URL
+		vcsEndpoint string
 	)
 
 	uri = makeRequestURI(c)
-	log.Printf("URI: %+v\n", uri)
 
-	headers = getEchoHeaders(c)
-	log.Printf("Headers: %+v\n", headers)
+	vcsEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
 
-	url := fmt.Sprintf("%s%s", gitHubAPIURL, uri)
-	log.Printf("URL: %s", url)
+	url := fmt.Sprintf("%s/%s", vcsEndpoint, uri)
+	log.Printf("VCS Endpoint URL: %s", url)
 
-	token := p.getGitHubAuthToken(c)
+	token, ok := p.getVCSOAuthToken(c)
+	if !ok {
+		msg := fmt.Sprintf("Token not found for endpoint %s", vcsEndpoint)
+		return echo.NewHTTPError(http.StatusBadRequest, msg)
+	}
+
 	tokenHeader := fmt.Sprintf("token %s", token)
 
-	// set the token in the header
-	log.Printf("Headers before GH call: %+v\n", headers)
-
-	// Perform the request against GitHub
-	client := &http.Client{
-		Timeout: time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second,
-	}
+	// Perform the request against the VCS endpoint
 	req, err := http.NewRequest("GET", url, nil)
 	log.Printf("Request: %+v\n", req)
 	req.Header.Add("Authorization", tokenHeader)
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
-		log.Printf("Response from GitHub contained an error: %v", err)
+		log.Printf("Response from VCS contained an error: %v", err)
 	}
 
-	log.Printf("Response from GitHub: %+v\n", resp)
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 

@@ -59,6 +59,18 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 	return p.SessionStore.Save(req, res, session)
 }
 
+func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error {
+	log.Println("unsetSessionValues")
+
+	req := c.Request().(*standard.Request).Request
+	res := c.Response().(*standard.Response).ResponseWriter
+	session, _ := p.SessionStore.Get(req, portalSessionName)
+
+	delete(session.Values, sessionKey)
+
+	return p.SessionStore.Save(req, res, session)
+}
+
 func (p *portalProxy) clearSession(c echo.Context) error {
 	log.Println("clearSession")
 

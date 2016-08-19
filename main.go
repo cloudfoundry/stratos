@@ -67,6 +67,13 @@ func main() {
 	}
 	log.Println("Encryption key set.")
 
+	portalConfig.VCSClientMap, err = getVCSClients(portalConfig)
+	if err != nil || len(portalConfig.VCSClientMap) == 0 {
+		log.Printf("Exiting. No VCS clients found: %v", err)
+		os.Exit(1)
+	}
+	log.Printf("VCSClientMap: %v\n", portalConfig.VCSClientMap)
+
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = initConnPool()
@@ -321,20 +328,20 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Version info
 	sessionGroup.GET("/version", p.getVersions)
 
-	// GitHub Requests
-	ghGroup := sessionGroup.Group("/github")
+	// VCS Requests
+	vcsGroup := sessionGroup.Group("/vcs")
 
-	// Initiate OAuth flow against GitHub on behalf of a user
-	ghGroup.GET("/oauth/auth", p.handleGitHubAuth)
+	// Initiate OAuth flow against VCS on behalf of a user
+	vcsGroup.GET("/oauth/auth", p.handleVCSAuth)
 
-	// GitHub OAuth callback/response
-	ghGroup.GET("/oauth/callback", p.handleGitHubCallback)
+	// VCS OAuth callback/response
+	vcsGroup.GET("/oauth/callback", p.handleVCSAuthCallback)
 
-	// Verify existence of GitHub token in Session
-	ghGroup.GET("/oauth/verify", p.verifyGitHubAuthToken)
+	// Verify existence of VCS token in Session
+	vcsGroup.GET("/oauth/verify", p.verifyVCSOAuthToken)
 
-	// Proxy the rest to Github API
-	ghGroup.Any("/*", p.github)
+	// Proxy the rest to VCS API
+	vcsGroup.Any("/*", p.vcsProxy)
 
 	// This is used for passthru of HCF/HCE requests
 	group := sessionGroup.Group("/proxy")
