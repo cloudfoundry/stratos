@@ -10,6 +10,7 @@
     '$q',
     'app.model.modelManager',
     'app.event.eventService',
+    'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm'
   ];
 
@@ -22,6 +23,7 @@
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the framework confirm dialog service
    * @property {boolean} changingRoles - True if roles are currently being changed and cache updated
    * @property {object} organizationRoles - Lists org roles and their translations
@@ -40,7 +42,7 @@
    * @property {function} orgContainsRoles - Determine if the organisation provided and it's spaces has any roles
    * selected
    */
-  function RolesService($log, $q, modelManager, eventService, confirmDialog) {
+  function RolesService($log, $q, modelManager, eventService, notificationsService, confirmDialog) {
     var that = this;
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -461,13 +463,17 @@
       /* eslint-enable no-warning-comments */
       var usernames = _.map(users, 'entity.username');
       return _.assign({
-        title: usernames.length > 1 ? gettext('Remove Users') : gettext('Remove User'),
+        title: usernames.length > 1 ? gettext('Remove Users Roles') : gettext('Remove User Roles'),
         description: usernames.length > 1
           ? gettext('Are you sure you want to remove role/s for the following users? ') + usernames.join(', ')
           : gettext('Are you sure you want to remove role/s for the following user? ') + usernames.join(', '),
         buttonText: {
           yes: gettext('Remove')
-        }
+        },
+        errorMessage: usernames.length > 1 ? gettext('Failed to remove users role(s)')
+          : gettext('Failed to remove user role(s)'),
+        successMessage: usernames.length > 1 ? gettext('Successfully removed users role(s)')
+          : gettext('Successfully removed user role(s)')
       }, config);
 
     }
@@ -478,13 +484,17 @@
       /* eslint-enable no-warning-comments */
       var usernames = _.map(users, 'entity.username');
       return _.assign({
-        title: usernames.length > 1 ? gettext('Assign Users') : gettext('Assign User'),
+        title: usernames.length > 1 ? gettext('Assign Roles to Users') : gettext('Assign Roles to User'),
         description: usernames.length > 1
           ? gettext('Are you sure you want to assign role/s for the following users? ') + usernames.join(', ')
           : gettext('Are you sure you want to assign role/s for the following user? ') + usernames.join(', '),
         buttonText: {
           yes: gettext('Assign')
-        }
+        },
+        errorMessage: usernames.length > 1 ? gettext('Failed to assign users role(s)')
+          : gettext('Failed to assign user role(s)'),
+        successMessage: usernames.length > 1 ? gettext('Successfully assigned users role(s)')
+          : gettext('Successfully assigned user role(s)')
       }, config);
     }
 
@@ -494,13 +504,17 @@
       /* eslint-enable no-warning-comments */
       var usernames = _.map(users, 'entity.username');
       return _.assign({
-        title: usernames.length > 1 ? gettext('Update Users') : gettext('Update User'),
+        title: usernames.length > 1 ? gettext('Update Users Roles') : gettext('Update User Roles'),
         description: usernames.length > 1
           ? gettext('Are you sure you want to update role/s for the following users? ') + usernames.join(', ')
           : gettext('Are you sure you want to update role/s for the following user? ') + usernames.join(', '),
         buttonText: {
           yes: gettext('Update')
-        }
+        },
+        errorMessage: usernames.length > 1 ? gettext('Failed to update users roles')
+          : gettext('Failed to update user roles'),
+        successMessage: usernames.length > 1 ? gettext('Successfully updated users roles')
+          : gettext('Successfully update user roles')
       }, config);
     }
 
@@ -508,7 +522,7 @@
      * @name app.view.endpoints.clusters.cluster.rolesService.updateUsersOrgsAndSpaces
      * @description Assign the controllers selected users with the selected roles. If successful refresh the cache of
      * the affected organizations and spaces.
-     * IMPORTANT!!! This is the conduit for changes that all external calls should flow through. It gates the process
+     * IMPORTANT!!!!!! This is the conduit for changes that all external calls should flow through. It gates the process
      * on a confirmation model and also handles the global 'changingRoles' flag.
      * @param {string} clusterGuid - HCF service guid
      * @param {object} selectedUsers - collection of users to apply roles to
@@ -524,9 +538,12 @@
     function updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRolesByUser, newRolesByUser, overrideConfConfig) {
       that.changingRoles = true;
 
+      var combinedConfig;
+
       var defaultConfirmationDialogConfig = {
         title: gettext('Change Roles'),
         description: gettext('Are you sure you want to change user roles?'),
+        errorMessage: gettext('Failed to update roles.'),
         buttonText: {
           yes: gettext('Change'),
           no: gettext('Cancel')
@@ -547,20 +564,24 @@
             promises.push(promise);
           });
 
-          // If all async requests have finished invalidate any cache associated with roles
-          return $q.all(promises).then(function () {
-            eventService.$emit(eventService.events.ROLES_UPDATED);
-            if (failedAssignForUsers.length > 0) {
-              return $q.reject(gettext('Failed to update user(s) ') + failedAssignForUsers.join(','));
-            }
-          });
+          return $q.all(promises)
+            .then(function () {
+              notificationsService.notify('success', combinedConfig.successMessage);
+            })
+            .then(function () {
+              // If all async requests have finished invalidate any cache associated with roles
+              eventService.$emit(eventService.events.ROLES_UPDATED);
+              if (failedAssignForUsers.length > 0) {
+                return $q.reject(gettext('Failed to update user(s) ') + failedAssignForUsers.join(','));
+              }
+            });
         }
       };
+      combinedConfig = _.assign(defaultConfirmationDialogConfig, overrideConfConfig);
 
-      return confirmDialog(_.assign(defaultConfirmationDialogConfig, overrideConfConfig)).result
-        .finally(function () {
-          that.changingRoles = false;
-        });
+      return confirmDialog(combinedConfig).result.finally(function () {
+        that.changingRoles = false;
+      });
     }
 
     function updateUserOrgsAndSpaces(clusterGuid, user, oldRolesPerOrg, newRolesPerOrg) {
