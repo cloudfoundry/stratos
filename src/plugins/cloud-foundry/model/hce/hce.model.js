@@ -42,7 +42,7 @@
       buildContainers: [],
       deploymentTargets: [],
       imageRegistries: [],
-      projects: {},
+      projects: [],
       pipelineExecutions: [],
       vcsInstances: [],
       vcsTypes: [],
@@ -304,12 +304,14 @@
      * @function getProject
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get project by name
-     * @param {string} name - the project name
+     * @param {string} guid - the HCE instance GUID
+     * @param {number} projectId - the HCE project ID
      * @returns {promise} A promise object
      * @public
      */
-    getProject: function (name) {
-      return this.data.projects[name];
+    getProject: function (guid, projectId) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .getProject(guid, projectId, {}, this.hceProxyPassthroughConfig);
     },
 
     /**
@@ -590,7 +592,7 @@
      */
     onGetProjects: function (response) {
       var projects = response.data;
-      this.data.projects = _.keyBy(projects, 'name') || {};
+      this.data.projects = projects;
       return projects;
     },
 

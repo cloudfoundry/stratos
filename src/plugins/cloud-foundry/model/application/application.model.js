@@ -61,7 +61,8 @@
         fetching: false,
         valid: false,
         hceCnsi: undefined,
-        hceServiceGuid: undefined
+        hceServiceGuid: undefined,
+        projectId: undefined
       },
       project: null
     };
@@ -610,6 +611,7 @@
         metadata.hceCnsi = undefined;
         metadata.hce_api_url = undefined;
         metadata.hceServiceGuid = undefined;
+        metadata.projectId = undefined;
       }
 
       if (hceServiceData) {
@@ -621,6 +623,7 @@
               // HCE API Endpoint
               pipeline.hceServiceGuid = hceServiceData.guid;
               pipeline.hce_api_url = data.entity.credentials.hce_api_url;
+              pipeline.projectId = _.toNumber(data.entity.credentials.hce_pipeline_id);
               return that.listHceCnsis().then(function (hceEndpoints) {
                 var hceInstance = _.find(hceEndpoints, function (hce) {
                   var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
