@@ -50,7 +50,7 @@
               onNext: function () {
                 var oauth;
                 if (that.userInput.source.vcs_type === 'GITHUB') {
-                  oauth = that.githubOauthService.start();
+                  oauth = that.githubOauthService.start(that.userInput.source.browse_url);
                 } else {
                   oauth = that.$q.defer();
                   oauth.resolve();
@@ -71,11 +71,12 @@
               nextBtnText: gettext('Next'),
               onNext: function () {
                 that.getPipelineDetailsData();
-                var githubModel = that.modelManager.retrieve('cloud-foundry.model.github');
+                var githubModel = that.modelManager.retrieve('github.model');
                 var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
 
                 if (that.userInput.repo) {
                   hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
+                    var githubOptions = that._getVcsHeaders();
                     var usedBranches = _.chain(projects)
                                         .filter(function (p) {
                                           return p.repo.full_name === that.userInput.repo.full_name;
@@ -83,7 +84,7 @@
                                         .map(function (p) { return p.repo.branch; })
                                         .value();
 
-                    return githubModel.branches(that.userInput.repo.full_name)
+                    return githubModel.branches(that.userInput.repo.full_name, githubOptions)
                       .then(function () {
                         var branches = _.map(githubModel.data.branches,
                                             function (o) {
@@ -207,10 +208,11 @@
 
       getRepos: function () {
         var that = this;
-        var githubModel = this.modelManager.retrieve('cloud-foundry.model.github');
+        var githubModel = this.modelManager.retrieve('github.model');
+        var githubOptions = this._getVcsHeaders();
 
         this.options.loadingRepos = true;
-        return githubModel.repos()
+        return githubModel.repos(false, githubOptions)
           .then(function (response) {
             that.options.hasMoreRepos = angular.isDefined(response.links.next);
             [].push.apply(that.options.repos, response.repos);
@@ -222,10 +224,11 @@
 
       loadMoreRepos: function () {
         var that = this;
-        var githubModel = this.modelManager.retrieve('cloud-foundry.model.github');
+        var githubModel = this.modelManager.retrieve('github.model');
+        var githubOptions = this._getVcsHeaders();
 
         this.options.loadingRepos = true;
-        return githubModel.nextRepos()
+        return githubModel.nextRepos(githubOptions)
           .then(function (response) {
             that.options.hasMoreRepos = angular.isDefined(response.links.next);
             [].push.apply(that.options.repos, response.newRepos);
@@ -237,10 +240,11 @@
 
       filterRepos: function (newFilterTerm) {
         var that = this;
-        var githubModel = this.modelManager.retrieve('cloud-foundry.model.github');
+        var githubModel = this.modelManager.retrieve('github.model');
+        var githubOptions = this._getVcsHeaders();
 
         this.options.loadingRepos = true;
-        return this.$q.when(githubModel.filterRepos(newFilterTerm))
+        return this.$q.when(githubModel.filterRepos(newFilterTerm, githubOptions))
           .then(function (response) {
             if (angular.isDefined(response)) {
               that.options.hasMoreRepos = angular.isDefined(response.links.next);
@@ -304,27 +308,58 @@
 
       createPipeline: function (targetId) {
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var githubUrl = this.userInput.source.browse_url;
         return hceModel.createProject(this.userInput.hceCnsi.guid,
-                                      this.userInput.name,
+                                      this._createProjectName(),
                                       this.userInput.source,
                                       targetId,
                                       this.userInput.buildContainer.build_container_id,
                                       this.userInput.repo,
-                                      this.userInput.branch);
+                                      this.userInput.branch,
+                                      githubUrl);
+      },
+
+      /**
+       * @function _createProjectName
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description create a unique project name
+       * @returns {string} a unique project name
+       * @private
+       */
+      _createProjectName: function () {
+        var name = [
+          this.userInput.name,
+          this.userInput.application.summary.guid
+        ].join('-');
+
+        return name;
       },
 
       triggerPipeline: function () {
         var that = this;
-        var githubModel = this.modelManager.retrieve('cloud-foundry.model.github');
+        var githubModel = this.modelManager.retrieve('github.model');
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var githubOptions = this._getVcsHeaders();
 
-        githubModel.getBranch(this.userInput.repo.full_name, this.userInput.branch)
+        githubModel.getBranch(this.userInput.repo.full_name, this.userInput.branch, githubOptions)
           .then(function (response) {
             var branch = response.data;
             hceModel.triggerPipelineExecution(that.userInput.hceCnsi.guid,
                                               that.userInput.projectId,
                                               branch.commit.sha);
           });
+      },
+
+      _getVcsHeaders: function () {
+        var githubOptions = {};
+        if (this.userInput.source) {
+          githubOptions.headers = {
+            'x-cnap-vcs-url': this.userInput.source.browse_url,
+            'x-cnap-vcs-api-url': this.userInput.source.api_url
+          };
+        }
+
+        return githubOptions;
       },
 
       startWorkflow: function () {

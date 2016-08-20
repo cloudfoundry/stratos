@@ -90,7 +90,7 @@
       var GetAppSummary = mock.cloudFoundryAPI.Apps.GetAppSummary(guid);
       $httpBackend.whenGET(GetAppSummary.url).respond(200, GetAppSummary.response['200'].body);
       $httpBackend.whenPOST(CreateApp.url).respond(201, CreateApp.response['201'].body);
-      $httpBackend.whenGET('/pp/v1/proxy/v2/apps').respond(200, {guid: {}});
+      $httpBackend.whenGET('/pp/v1/proxy/v2/apps?results-per-page=48').respond(200, {guid: {}});
       $httpBackend.expectPOST(CreateApp.url);
       $httpBackend.expectGET(GetAppSummary.url);
       applicationModel.createApp('guid', newAppSpec);

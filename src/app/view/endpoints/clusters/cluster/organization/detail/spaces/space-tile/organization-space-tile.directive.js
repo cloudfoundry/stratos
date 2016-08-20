@@ -25,6 +25,7 @@
     '$q',
     'app.model.modelManager',
     'app.view.endpoints.clusters.cluster.assignUsers',
+    'app.view.notificationsService',
     'app.utils.utilsService',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
@@ -38,14 +39,15 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
-   * @param {object} assignUsers - our assign users slide out service
+   * @param {app.view.endpoints.clusters.cluster.assignUsers} assignUsers - our assign users slide out service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} utils - our utils service
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationSpaceTileController($state, $stateParams, $scope, $q,
-                                           modelManager, assignUsers, utils, confirmDialog, asyncTaskDialog) {
+  function OrganizationSpaceTileController($state, $stateParams, $scope, $q, modelManager, assignUsers,
+                                           notificationsService, utils, confirmDialog, asyncTaskDialog) {
     var that = this;
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -109,9 +111,13 @@
             },
             function (spaceData) {
               if (spaceData.name && spaceData.name.length > 0) {
-                return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid, {name: spaceData.name}).then(function () {
-                  cardData.title = spaceData.name;
-                });
+                return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
+                  {name: spaceData.name})
+                  .then(function () {
+                    notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
+                      {name: spaceData.name});
+                    cardData.title = spaceData.name;
+                  });
               } else {
                 return $q.reject('Invalid Name!');
               }
@@ -130,9 +136,15 @@
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
+            },
+            errorMessage: gettext('Failed to delete space'),
+            callback: function () {
+              return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
+                .then(function () {
+                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
+                    {name: that.spaceDetail().details.space.entity.name});
+                });
             }
-          }).result.then(function () {
-            return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid);
           });
         }
       },

@@ -61,11 +61,11 @@
     that.context = context;
     that.content = content;
     that.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    that.githubModel = modelManager.retrieve('cloud-foundry.model.github');
+    that.githubModel = modelManager.retrieve('github.model');
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
     that.githubOauthService = githubOauthService;
-    that.isAuthenticated = false;
+    that.isAuthenticated = true;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -90,29 +90,34 @@
 
     fetchCommits: function () {
       var that = this;
+      this.fetchError = undefined;
 
-      this.isAuthenticated = this.githubModel.isAuthenticated();
-      if (!this.isAuthenticated) {
-        return;
-      }
-
-      that.fetchError = undefined;
-
-      this.githubModel.commits(this.context.project.repo.full_name, this.context.project.repo.branch, 20)
+      var githubOptions = {
+        headers: {
+          'x-cnap-vcs-url': this.context.project.vcsInstance.browse_url,
+          'x-cnap-vcs-api-url': this.context.project.vcsInstance.api_url
+        }
+      };
+      that.githubModel.commits(that.context.project.repo.full_name, that.context.project.repo.branch, 20, githubOptions)
         .then(function () {
           that.fetchError = false;
           that.selectedCommit =
             _.get(that, 'githubModel.data.commits.length') ? that.githubModel.data.commits[0] : null;
         })
-        .catch(function () {
-          that.fetchError = true;
+        .catch(function (response) {
+          if (response.status === 401) {
+            that.isAuthenticated = false;
+          } else {
+            that.fetchError = true;
+          }
         });
     },
 
     githubAuth: function () {
       var that = this;
-      that.githubOauthService.start()
+      this.githubOauthService.start(this.context.project.vcsInstance.browse_url)
         .then(function () {
+          that.isAuthenticated = true;
           that.fetchCommits();
         })
         .catch(function () {

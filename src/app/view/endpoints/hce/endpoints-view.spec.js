@@ -23,11 +23,12 @@
 
       modelManager = $injector.get('app.model.modelManager');
       apiManager = $injector.get('app.api.apiManager');
+      var notificationService = $injector.get('app.view.notificationsService');
       var hceReg = $injector.get('app.view.hceRegistration');
       var log = $injector.get('$log');
 
       var EndpointsViewController = $state.get('endpoint.hce').controller;
-      controller = new EndpointsViewController(modelManager, apiManager, hceReg, log, $q);
+      controller = new EndpointsViewController(log, $q, modelManager, apiManager, hceReg, notificationService);
 
       items = [{
         guid: 1,

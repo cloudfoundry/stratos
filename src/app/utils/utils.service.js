@@ -7,7 +7,10 @@
     .filter('mbToHumanSize', mbToHumanSizeFilter);
 
   utilsServiceFactory.$inject = [
-    '$log'
+    '$q',
+    '$timeout',
+    '$log',
+    'helion.framework.widgets.toaster'
   ];
 
   /**
@@ -15,10 +18,13 @@
    * @memberof app.utils
    * @name utilsService
    * @description Various utility functions
+   * @param {object} $q - the Angular $q service
+   * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
+   * @param {helion.framework.widgets.toaster} toaster - the helion framework toaster service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($log) {
+  function utilsServiceFactory($q, $timeout, $log, toaster) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     return {
@@ -82,18 +88,30 @@
       var aState = $state.get(stateName);
       var promiseStack = _.get($state.current, 'data.initialized');
 
-      var thisPromise;
+      var toast, thisPromise;
+
+      var wrappedCatch = function (error) {
+        toast = toaster.warning(gettext('Failed to initialise state. This may result in missing or incorrect data. Please refresh your browser to try again.'), {
+          timeOut: 0,
+          extendedTimeOut: 0,
+          closeButton: false
+        });
+        return $q.reject(error);
+      };
+
       if (_.isUndefined(promiseStack)) {
         $log.debug('Promise stack undefined, initialized by state: ' + aState.name);
         aState.data.initialized = [];
-        thisPromise = initFunc();
+        thisPromise = initFunc().catch(wrappedCatch);
       } else if (promiseStack.length < 1) {
         $log.debug('Promise stack empty, initialized by state: ' + aState.name);
-        thisPromise = initFunc();
+        thisPromise = initFunc().catch(wrappedCatch);
       } else {
         var previousPromise = promiseStack[promiseStack.length - 1];
         $log.debug('Init promise chain continued from state: ' + previousPromise._state + ' by: ' + aState.name);
-        thisPromise = previousPromise.then(initFunc);
+        thisPromise = previousPromise.then(function () {
+          return initFunc().catch(wrappedCatch);
+        });
       }
 
       thisPromise._state = aState.name;
@@ -103,6 +121,11 @@
         $log.debug('Cleaning up obsolete promise from state: ' + aState.name);
         var index = aState.data.initialized.indexOf(aState);
         aState.data.initialized.splice(index, 1);
+        if (toast) {
+          $timeout(function () {
+            toaster.clear(toast);
+          }, 15000);
+        }
       };
     }
 
