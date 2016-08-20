@@ -181,17 +181,23 @@
      */
     removeAppFromRoutes: function () {
       var that = this;
-      var tasks = [];
       var checkedRouteValue = this.userInput.checkedRouteValue;
       var appGuid = this.appModel.application.summary.guid;
+      var list = Object.keys(checkedRouteValue);
 
-      Object.keys(checkedRouteValue).forEach(function (guid) {
-        if (checkedRouteValue[guid]) {
-          tasks.push(that.routeModel.removeAppFromRoute(that.cnsiGuid, guid, appGuid));
-        }
+      return this.$q(function(resolve, reject) {
+        (function _doIt() {
+          if (!list.length) {
+            resolve();
+            return;
+          }
+          var guid = list.pop();
+          that.routeModel.removeAppFromRoute(that.cnsiGuid, guid, appGuid)
+            .then(function () {
+              _doIt();
+            }, reject);
+        })();
       });
-
-      return this.$q.all(tasks);
     },
 
     /**
@@ -257,16 +263,22 @@
      */
     tryDeleteEachRoute: function () {
       var that = this;
-      var tasks = [];
       var checkedRouteValue = this.userInput.checkedRouteValue;
+      var list = Object.keys(checkedRouteValue);
 
-      Object.keys(checkedRouteValue).forEach(function (routeId) {
-        if (checkedRouteValue[routeId]) {
-          tasks.push(that.deleteRouteIfPossible(routeId));
-        }
+      return this.$q(function(resolve, reject) {
+        (function _doIt() {
+          if (!list.length) {
+            resolve();
+            return;
+          }
+          var routeId = list.pop();
+          that.deleteRouteIfPossible(routeId)
+            .then(function () {
+              _doIt();
+            }, reject);
+        })();
       });
-
-      return this.$q.all(tasks);
     },
 
     /**
