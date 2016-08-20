@@ -185,7 +185,7 @@
       var appGuid = this.appModel.application.summary.guid;
       var list = Object.keys(checkedRouteValue);
 
-      return this.$q(function(resolve, reject) {
+      return this.$q(function (resolve, reject) {
         (function _doIt() {
           if (!list.length) {
             resolve();
@@ -266,7 +266,7 @@
       var checkedRouteValue = this.userInput.checkedRouteValue;
       var list = Object.keys(checkedRouteValue);
 
-      return this.$q(function(resolve, reject) {
+      return this.$q(function (resolve, reject) {
         (function _doIt() {
           if (!list.length) {
             resolve();
