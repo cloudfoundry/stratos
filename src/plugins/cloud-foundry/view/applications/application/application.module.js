@@ -275,9 +275,9 @@
       var that = this;
       if (pipeline && pipeline.valid) {
         this.hceCnsi = pipeline.hceCnsi;
-        this.hceModel.getProjects(this.hceCnsi.guid)
-          .then(function () {
-            that.model.application.project = that.hceModel.getProject(that.model.application.summary.name);
+        this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
+          .then(function (response) {
+            that.model.application.project = response.data;
 
             if (angular.isDefined(that.model.application.project)) {
               // TODO (kdomico): Fix once vcs_id is returned - TEAMFOUR-946
