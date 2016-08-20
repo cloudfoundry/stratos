@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  fdescribe('hce-support-service', function () {
+  describe('hce-support-service', function () {
     var hceSupport;
 
     beforeEach(module('templates'));
