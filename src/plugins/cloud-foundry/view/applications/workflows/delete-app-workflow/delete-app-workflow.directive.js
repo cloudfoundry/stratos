@@ -192,10 +192,7 @@
             return;
           }
           var guid = list.pop();
-          that.routeModel.removeAppFromRoute(that.cnsiGuid, guid, appGuid)
-            .then(function () {
-              _doIt();
-            }, reject);
+          that.routeModel.removeAppFromRoute(that.cnsiGuid, guid, appGuid).then(_doIt, reject);
         })();
       });
     },
@@ -273,10 +270,7 @@
             return;
           }
           var routeId = list.pop();
-          that.deleteRouteIfPossible(routeId)
-            .then(function () {
-              _doIt();
-            }, reject);
+          that.deleteRouteIfPossible(routeId).then(_doIt, reject);
         })();
       });
     },
