@@ -5,7 +5,6 @@
   "vendor": "HPE",
   "instance_id": "hsc",
   "description": "An instance of the Helion Stackato Console",
-  "labels": [],
   "scaling": [],
   "volumes": [],
   "parameters": [
