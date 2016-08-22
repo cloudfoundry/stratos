@@ -27,10 +27,14 @@ func (ho headerOnlyResponseWriter) WriteHeader(int) {
 var secret = "EyaC2BPcJtNqU3tjEHy+c+Wmqc1yihYIbUWEl/jk0Ga73kWBclmuSFd9HuJKwJw/Wdsh1XnjY2Bw1HBVph6WOw=="
 
 func TestPGStore(t *testing.T) {
-	ss := NewPGStore(os.Getenv("PGSTORE_TEST_CONN"), []byte(secret))
+	dsn := os.Getenv("PGSTORE_TEST_CONN")
+	if dsn == "" {
+		t.Skip("This test requires a real database.")
+	}
 
-	if ss == nil {
-		t.Skip("This test requires a real database")
+	ss, err := NewPGStore(dsn, []byte(secret))
+	if err != nil {
+		t.Fatal("Failed to get store", err)
 	}
 
 	defer ss.Close()
@@ -121,10 +125,14 @@ func TestPGStore(t *testing.T) {
 }
 
 func TestSessionOptionsAreUniquePerSession(t *testing.T) {
-	ss := NewPGStore(os.Getenv("PGSTORE_TEST_CONN"), []byte(secret))
+	dsn := os.Getenv("PGSTORE_TEST_CONN")
+	if dsn == "" {
+		t.Skip("This test requires a real database.")
+	}
 
-	if ss == nil {
-		t.Skip("This test requires a real database")
+	ss, err := NewPGStore(dsn, []byte(secret))
+	if err != nil {
+		t.Fatal("Failed to get store", err)
 	}
 
 	defer ss.Close()

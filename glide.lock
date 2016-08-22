@@ -1,8 +1,8 @@
-hash: 579c231b35594662ed3b2f65579b80308139944f439631eb1de560ff7e6a13d1
-updated: 2016-08-12T16:32:37.060590598-04:00
+hash: b3661a0ab97c8757be6fbae9ecdb045e1cb8e2a2afd49c24cd2c0ddd7fe9f8e5
+updated: 2016-08-22T12:58:17.135656349-04:00
 imports:
 - name: github.com/antonlindstrom/pgstore
-  version: 646ee398524f0eb81ad90aa8f40cbd74045c99b2
+  version: 68b36d681acbc3cb0d511f65a02877ae3050cc2e
 - name: github.com/cloudfoundry/noaa
   version: a4c517a96b01b568e0670f1682c5a19869eb12d9
   subpackages:
@@ -13,8 +13,6 @@ imports:
   version: 64ff74a60c9558e7fcb55c9d22eff49412ec5826
   subpackages:
   - events
-- name: github.com/coopernurse/gorp
-  version: 9cd2b5ef5b82fde4e7c51776ac3f94398b8af076
 - name: github.com/dgrijalva/jwt-go
   version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
 - name: github.com/gogo/protobuf
@@ -93,7 +91,7 @@ testImports:
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
 - name: github.com/stretchr/testify

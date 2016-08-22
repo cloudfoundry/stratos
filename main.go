@@ -87,7 +87,11 @@ func main() {
 	log.Println("Proxy database connection pool created.")
 
 	// Initialize the Postgres backed session store for Gorilla sessions
-	sessionStore := initSessionStore(databaseConnectionPool, portalConfig)
+	sessionStore, err := initSessionStore(databaseConnectionPool, portalConfig)
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
 	defer func() {
 		log.Println(`--- Closing sessionStore`)
 		sessionStore.Close()
@@ -185,12 +189,14 @@ func initConnPool() (*sql.DB, error) {
 	return pool, nil
 }
 
-func initSessionStore(db *sql.DB, pc portalConfig) *pgstore.PGStore {
+func initSessionStore(db *sql.DB, pc portalConfig) (*pgstore.PGStore, error) {
 	log.Println("initSessionStore")
-	log.Printf("db %+v\n", db)
-	store := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+	store, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+	if err != nil {
+		return nil, err
+	}
 
-	return store
+	return store, nil
 }
 
 func loadPortalConfig(pc portalConfig) (portalConfig, error) {

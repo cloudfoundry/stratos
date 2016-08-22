@@ -245,9 +245,12 @@ func (p *portalProxy) logout(c echo.Context) error {
 	}
 
 	http.SetCookie(res, cookie)
-	p.clearSession(c)
+	err := p.clearSession(c)
+	if err != nil {
+		log.Printf("Unable to clear session: %v", err)
+	}
 
-	return nil
+	return err
 }
 
 func (p *portalProxy) getUAATokenWithCreds(username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
