@@ -835,7 +835,7 @@
       "name": "ETCD_INITIAL_CLUSTER",
       "description": "Initial etcd cluster configuration for bootstrapping.",
       "data_type": "string",
-      "default": "hsc-etcd-0=http://hsc-etcd-0-int:2380,hsc-etcd-1=http://hsc-etcd-1-int:2380,hsc-etcd-2=http://hsc-etcd-2-int:2380",
+      "default": "hsc-etcd-0-int=http://hsc-etcd-0-int:2380,hsc-etcd-1-int=http://hsc-etcd-1-int:2380,hsc-etcd-2-int=http://hsc-etcd-2-int:2380",
       "required": true,
       "secret": false
     },
