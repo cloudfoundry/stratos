@@ -68,9 +68,8 @@ func main() {
 	log.Println("Encryption key set.")
 
 	portalConfig.VCSClientMap, err = getVCSClients(portalConfig)
-	if err != nil || len(portalConfig.VCSClientMap) == 0 {
-		log.Printf("Exiting. No VCS clients found: %v", err)
-		os.Exit(1)
+	if err != nil {
+		log.Println("Error parsing VCS clients")
 	}
 
 	// Establish a Postgresql connection pool
