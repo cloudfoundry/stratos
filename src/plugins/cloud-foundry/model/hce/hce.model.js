@@ -42,7 +42,7 @@
       buildContainers: [],
       deploymentTargets: [],
       imageRegistries: [],
-      projects: {},
+      projects: [],
       pipelineExecutions: [],
       vcsInstances: [],
       vcsTypes: [],
@@ -304,12 +304,14 @@
      * @function getProject
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get project by name
-     * @param {string} name - the project name
+     * @param {string} guid - the HCE instance GUID
+     * @param {number} projectId - the HCE project ID
      * @returns {promise} A promise object
      * @public
      */
-    getProject: function (name) {
-      return this.data.projects[name];
+    getProject: function (guid, projectId) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .getProject(guid, projectId, {}, this.hceProxyPassthroughConfig);
     },
 
     /**
@@ -444,10 +446,11 @@
      * @param {number} buildContainerId - the build container ID
      * @param {object} repo - the repo to use
      * @param {string} branch - the branch to use
+     * @param {string} vcsUrl - the VCS browse URL
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch) {
+    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch, vcsUrl) {
       var newProject = {
         name: name,
         vcs_id: vcs.vcs_id,
@@ -470,7 +473,10 @@
 
       // Special header to insert Github token
       var headers = angular.extend(
-        {'x-cnap-github-token-required': true},
+        {
+          'x-cnap-vcs-url': vcsUrl,
+          'x-cnap-vcs-token-required': true
+        },
         this.hceProxyPassthroughConfig.headers
       );
 
@@ -586,7 +592,7 @@
      */
     onGetProjects: function (response) {
       var projects = response.data;
-      this.data.projects = _.keyBy(projects, 'name') || {};
+      this.data.projects = projects;
       return projects;
     },
 

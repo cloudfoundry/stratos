@@ -25,7 +25,7 @@
       }];
 
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
-      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps').respond(200, { guid: {} });
+      $httpBackend.when('GET', '/pp/v1/proxy/v2/apps?results-per-page=48').respond(200, { guid: {} });
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
     }));
