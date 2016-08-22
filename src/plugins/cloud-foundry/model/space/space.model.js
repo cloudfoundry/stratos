@@ -29,6 +29,8 @@
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
    * @property {object} stackatoInfoModel - the stackatoInfoModel service
+   * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
+   * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @class
    */
   function Space($q, apiManager, modelManager, hcfPagination) {
@@ -60,7 +62,8 @@
     * @description lists all spaces
     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - space GUID.
-    * @param {object} params - optional parameters
+    * @param {object=} params - optional parameters
+    * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
     * @returns {promise} A resolved/rejected promise
     * @public
     */
@@ -125,6 +128,7 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object=} params - extra params to pass to request
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */
@@ -165,6 +169,7 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object=} params - extra params to pass to request
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */
@@ -211,6 +216,7 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object=} params - additional parameters for request
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A promise object
      * @public
      */
@@ -256,6 +262,7 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
      * @param {object=} params - optional parameters
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */

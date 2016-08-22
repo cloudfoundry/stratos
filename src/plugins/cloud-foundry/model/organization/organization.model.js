@@ -32,11 +32,13 @@
    * @param {object} utils - the utils service
    * @param {object} $q - angular $q service
    * @param {object} $log - angular $log service
+   * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @property {object} modelManager - the model manager
    * @property {object} apiManager - the API manager
    * @property {object} utils - the utils service
    * @property {object} $q - angular $q service
    * @property {object} $log - angular $log service
+   * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @class
    */
   function Organization(modelManager, apiManager, utils, $q, $log, hcfPagination) {

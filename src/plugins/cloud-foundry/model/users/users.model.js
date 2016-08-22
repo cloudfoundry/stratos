@@ -24,6 +24,8 @@
    * @name Users
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
+   * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
+   * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @class
    */
   function Users(apiManager, hcfPagination) {
@@ -68,6 +70,7 @@
      * @description lists all spaces
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object=} params - optional parameters
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */

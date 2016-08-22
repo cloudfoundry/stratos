@@ -55,7 +55,7 @@
 
       // List all services for the org
       var promiseForServices = that.organizationModel
-        .listAllServicesForOrganization(that.clusterGuid, that.organizationGuid, {})
+        .listAllServicesForOrganization(that.clusterGuid, that.organizationGuid, {}, true)
         .then(function (services) {
           that.organizationModel.cacheOrganizationServices(that.clusterGuid, that.organizationGuid, services);
           return services;

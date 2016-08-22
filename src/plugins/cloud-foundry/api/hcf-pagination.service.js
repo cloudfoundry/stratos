@@ -13,22 +13,21 @@
   /**
    * @memberof cloud-foundry.api
    * @name hcfPagination
-   * @description ??????????????????
+   * @description Handle general pagination helpers for HCF pagination
    * @param {object} $http - the Angular $http service
    * @param {object} $q - the Angular $q service
+   * @returns {cloud-foundry.api.hcfPagination} the hcfPagination service
    */
   function hcfPagination($http, $q) {
-
-    var that = this;
 
     /**
      * @function unbindServiceFromApp
      * @memberof cloud-foundry.view.applications.services.serviceInstanceService
-     * @description Unbind service instance from application
-     * @param {Array} list - ??????
-     * @param {object} responseData - ??????
-     * @param {object} httpConfigOptions - ??????
-     * @returns {promise} The confirm dialog promise object
+     * @description Given a HCF response from a 'list' style call return a collection containing all results, not just
+     * for the page in the response (the page in the response should be the first)
+     * @param {Array} responseData - Response from a HCF 'list' request. This will contain pagination data
+     * @param {object} httpConfigOptions - Any special http configuration options
+     * @returns {promise} promise containing the entire array
      * @public
      */
     this.dePaginate = function (responseData, httpConfigOptions) {

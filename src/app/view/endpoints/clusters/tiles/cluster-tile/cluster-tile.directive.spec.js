@@ -2,7 +2,7 @@
   'use strict';
 
   describe('endpoints clusters cluster-tile directive', function () {
-    var $scope, $q, $state, element, clusterTileCtrl, $compile, cfModelUsers, cfModelOrg;
+    var $scope, $q, $state, element, clusterTileCtrl, $compile, cfAPIUsers, cfAPIOrg;
 
     var initialService = {
       guid: "f7fbd0c7-1ce9-4e74-a891-7ffb16453af2",
@@ -35,9 +35,9 @@
       $scope.disconnect = angular.noop;
       $scope.unregister = angular.noop;
 
-      var modelManager = $injector.get('app.model.modelManager');
-      cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
-      cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
+      var apiManager = $injector.get('app.api.apiManager');
+      cfAPIUsers = apiManager.retrieve('cloud-foundry.api.Users');
+      cfAPIOrg = apiManager.retrieve('cloud-foundry.api.Organizations');
 
     }));
 
@@ -79,8 +79,8 @@
 
       it('check initial state - not null', function () {
         $scope.service.isConnected = true;
-        spyOn(cfModelUsers, 'listAllUsers').and.returnValue($q.when([1]));
-        spyOn(cfModelOrg, 'listAllOrganizations').and.returnValue($q.when([1]));
+        spyOn(cfAPIUsers, 'ListAllUsers').and.returnValue($q.when({ data: { total_results: 1 }}));
+        spyOn(cfAPIOrg, 'ListAllOrganizations').and.returnValue($q.when({ data: { total_results: 1 }}));
         createCtrl();
 
         expect(clusterTileCtrl.orgCount).toEqual(1);
@@ -134,15 +134,15 @@
 
     describe('setUserCount', function () {
       beforeEach(function () {
-        spyOn(cfModelOrg, 'listAllOrganizations');
+        spyOn(cfAPIOrg, 'ListAllOrganizations');
       });
 
       afterEach(function () {
-        expect(cfModelOrg.listAllOrganizations).not.toHaveBeenCalled();
+        expect(cfAPIOrg.ListAllOrganizations).not.toHaveBeenCalled();
       });
 
       it('Not connected, so no call to backend', function () {
-        spyOn(cfModelUsers, 'listAllUsers');
+        spyOn(cfAPIUsers, 'ListAllUsers');
         createCtrl();
 
         expect(clusterTileCtrl.userCount).toBeNull();
@@ -151,13 +151,13 @@
         $scope.$digest();
 
         expect(clusterTileCtrl.userCount).toBeNull();
-        expect(cfModelUsers.listAllUsers).not.toHaveBeenCalled();
+        expect(cfAPIUsers.ListAllUsers).not.toHaveBeenCalled();
       });
 
       it('Call succeeds', function () {
-        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function (cnsiGuid) {
-          expect(cnsiGuid).toEqual(initialService.guid);
-          return $q.when(['1', '2']);
+        spyOn(cfAPIUsers, 'ListAllUsers').and.callFake(function (params, httpConfig) {
+          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          return $q.when({ data: { total_results: 2 }});
         });
         createCtrl();
 
@@ -167,13 +167,13 @@
         $scope.$digest();
 
         expect(clusterTileCtrl.userCount).toEqual(2);
-        expect(cfModelUsers.listAllUsers).toHaveBeenCalled();
+        expect(cfAPIUsers.ListAllUsers).toHaveBeenCalled();
       });
 
-      it('Call succeeds - no array', function () {
-        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function (cnsiGuid) {
-          expect(cnsiGuid).toEqual(initialService.guid);
-          return $q.when();
+      it('Call succeeds - empty list', function () {
+        spyOn(cfAPIUsers, 'ListAllUsers').and.callFake(function (params, httpConfig) {
+          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          return $q.when({ data: { total_results: 0 }});
         });
         createCtrl();
 
@@ -182,13 +182,13 @@
         clusterTileCtrl.setUserCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.userCount).toBeNull();
-        expect(cfModelUsers.listAllUsers).toHaveBeenCalled();
+        expect(clusterTileCtrl.userCount).toBe(0);
+        expect(cfAPIUsers.ListAllUsers).toHaveBeenCalled();
       });
 
       it('Call fails', function () {
-        spyOn(cfModelUsers, 'listAllUsers').and.callFake(function (cnsiGuid) {
-          expect(cnsiGuid).toEqual(initialService.guid);
+        spyOn(cfAPIUsers, 'ListAllUsers').and.callFake(function (params, httpConfig) {
+          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
           return $q.reject();
         });
         createCtrl();
@@ -199,21 +199,21 @@
         $scope.$digest();
 
         expect(clusterTileCtrl.userCount).toBeNull();
-        expect(cfModelUsers.listAllUsers).toHaveBeenCalled();
+        expect(cfAPIUsers.ListAllUsers).toHaveBeenCalled();
       });
     });
 
     describe('setOrganisationCount', function () {
       beforeEach(function () {
-        spyOn(cfModelUsers, 'listAllUsers');
+        spyOn(cfAPIUsers, 'ListAllUsers');
       });
 
       afterEach(function () {
-        expect(cfModelUsers.listAllUsers).not.toHaveBeenCalled();
+        expect(cfAPIUsers.ListAllUsers).not.toHaveBeenCalled();
       });
 
       it('Not connected, so no call to backend', function () {
-        spyOn(cfModelOrg, 'listAllOrganizations');
+        spyOn(cfAPIOrg, 'ListAllOrganizations');
         createCtrl();
 
         expect(clusterTileCtrl.orgCount).toBeNull();
@@ -222,13 +222,13 @@
         $scope.$digest();
 
         expect(clusterTileCtrl.orgCount).toBeNull();
-        expect(cfModelOrg.listAllOrganizations).not.toHaveBeenCalled();
+        expect(cfAPIOrg.ListAllOrganizations).not.toHaveBeenCalled();
       });
 
       it('Call succeeds', function () {
-        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function (cnsiGuid) {
-          expect(cnsiGuid).toEqual(initialService.guid);
-          return $q.when(['1', '2']);
+        spyOn(cfAPIOrg, 'ListAllOrganizations').and.callFake(function (params, httpConfig) {
+          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          return $q.when({ data: { total_results: 2 }});
         });
         createCtrl();
 
@@ -238,13 +238,13 @@
         $scope.$digest();
 
         expect(clusterTileCtrl.orgCount).toEqual(2);
-        expect(cfModelOrg.listAllOrganizations).toHaveBeenCalled();
+        expect(cfAPIOrg.ListAllOrganizations).toHaveBeenCalled();
       });
 
-      it('Call succeeds - no array', function () {
-        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function (cnsiGuid) {
-          expect(cnsiGuid).toEqual(initialService.guid);
-          return $q.when();
+      it('Call succeeds - empty list', function () {
+        spyOn(cfAPIOrg, 'ListAllOrganizations').and.callFake(function (params, httpConfig) {
+          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
+          return $q.when({ data: { total_results: 0 }});
         });
         createCtrl();
 
@@ -253,13 +253,13 @@
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
-        expect(cfModelOrg.listAllOrganizations).toHaveBeenCalled();
+        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(cfAPIOrg.ListAllOrganizations).toHaveBeenCalled();
       });
 
       it('Call fails', function () {
-        spyOn(cfModelOrg, 'listAllOrganizations').and.callFake(function (cnsiGuid) {
-          expect(cnsiGuid).toEqual(initialService.guid);
+        spyOn(cfAPIOrg, 'ListAllOrganizations').and.callFake(function (params, httpConfig) {
+          expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
           return $q.reject();
         });
         createCtrl();
@@ -270,7 +270,7 @@
         $scope.$digest();
 
         expect(clusterTileCtrl.orgCount).toBeNull();
-        expect(cfModelOrg.listAllOrganizations).toHaveBeenCalled();
+        expect(cfAPIOrg.ListAllOrganizations).toHaveBeenCalled();
       });
     });
 
