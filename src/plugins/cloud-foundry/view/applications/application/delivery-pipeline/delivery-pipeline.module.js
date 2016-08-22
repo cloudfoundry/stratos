@@ -61,10 +61,6 @@
     this.$scope = $scope;
     this.confirmDialog = confirmDialog;
     this.addNotificationService = addNotificationService;
-    this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
-    this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.account = modelManager.retrieve('app.model.account');
-    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.postDeployActionService = postDeployActionService;
     this.hceCnsi = null;
 
