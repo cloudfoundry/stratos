@@ -1,8 +1,8 @@
-<div ng-if="!clusterSpaceController.space()" class="cluster-loading col-md-9 col-sm-12">
+<div ng-if="!clusterSpaceController.stateInitialised" class="cluster-loading col-md-9 col-sm-12">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 
-<div ng-if="clusterSpaceController.space()" class="cluster-detail col-md-9 col-sm-12">
+<div ng-if="clusterSpaceController.stateInitialised" class="cluster-detail col-md-9 col-sm-12">
   <h3>Space : {{ clusterSpaceController.space().details.space.entity.name }}</h3>
   <space-summary-tile ng-if="clusterSpaceController.space()"
                       cluster-guid="clusterSpaceController.clusterGuid"

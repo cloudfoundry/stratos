@@ -26,12 +26,15 @@
 
   SpaceServicesController.$inject = [
     '$scope',
+    '$state',
     '$stateParams',
+    '$q',
     'app.model.modelManager',
-    'cloud-foundry.view.applications.services.serviceInstanceService'
+    'cloud-foundry.view.applications.services.serviceInstanceService',
+    'app.utils.utilsService'
   ];
 
-  function SpaceServicesController($scope, $stateParams, modelManager, serviceInstanceService) {
+  function SpaceServicesController($scope, $state, $stateParams, $q, modelManager, serviceInstanceService, utils) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -52,13 +55,26 @@
       that.updateActions(serviceInstances);
     });
 
+    function init() {
+      if (angular.isUndefined(that.spaceDetail().instances)) {
+        return that.update();
+      }
+
+      return $q.resolve();
+    }
+
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.routes', $state, init);
   }
 
   angular.extend(SpaceServicesController.prototype, {
     update: function (serviceInstance) {
       var that = this;
-      this.spaceModel.listAllServiceInstancesForSpace(this.clusterGuid, this.spaceGuid).then(function () {
-        that.updateActions([serviceInstance]);
+      return this.spaceModel.listAllServiceInstancesForSpace(this.clusterGuid, this.spaceGuid, {
+        return_user_provided_service_instances: false
+      }, true).then(function () {
+        if (serviceInstance) {
+          that.updateActions([serviceInstance]);
+        }
       });
     },
 

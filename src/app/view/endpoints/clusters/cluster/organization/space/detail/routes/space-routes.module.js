@@ -29,11 +29,13 @@
     '$stateParams',
     '$q',
     '$log',
+    '$state',
     'app.model.modelManager',
-    'app.view.endpoints.clusters.routesService'
+    'app.view.endpoints.clusters.routesService',
+    'app.utils.utilsService'
   ];
 
-  function SpaceRoutesController($scope, $stateParams, $q, $log, modelManager, routesService) {
+  function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, utils) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -57,9 +59,31 @@
       }
       that.updateActions(routes);
     });
+
+    function init() {
+      if (angular.isUndefined(that.spaceDetail().routes)) {
+        return that.update();
+      }
+
+      return $q.resolve();
+    }
+
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.routes', $state, init);
   }
 
   angular.extend(SpaceRoutesController.prototype, {
+
+    update: function (route) {
+      var that = this;
+      return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid, {
+        return_user_provided_service_instances: false
+      }, true)
+        .then(function () {
+          if (route) {
+            that.updateActions([route]);
+          }
+        });
+    },
 
     getInitialActions: function () {
       var that = this;
@@ -68,13 +92,9 @@
           name: gettext('Delete Route'),
           disabled: false,
           execute: function (route) {
-            that.routesService.deleteRoute(that.clusterGuid, route.entity, route.metadata.guid)
-              .then(function () {
-                return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid);
-              })
-              .then(function () {
-                that.updateActions([route]);
-              });
+            that.routesService.deleteRoute(that.clusterGuid, route.entity, route.metadata.guid).then(function () {
+              that.update(route);
+            });
           }
         },
         {
@@ -93,9 +113,7 @@
               if (changeCount < 1) {
                 return;
               }
-              that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid).then(function () {
-                that.updateActions([route]);
-              });
+              that.update(route);
             });
 
           }

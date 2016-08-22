@@ -85,7 +85,7 @@
       return cardData;
     };
 
-    $scope.$watch(function () { return that.service; }, function (newVal) {
+    $scope.$watch(function () { return _.get(that.service, 'guid'); }, function (newVal) {
       if (!newVal) {
         return;
       }

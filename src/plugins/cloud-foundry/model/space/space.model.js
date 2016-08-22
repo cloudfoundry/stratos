@@ -374,10 +374,14 @@
 
       var rolesP, appP, quotaP;
 
-      // We cannot rely on inline routes as they lack the depth we need later on
-      var serviceInstancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid, {
-        return_user_provided_service_instances: false
-      }, true);
+      // The full service instance collection (with depth) is possibly required later on. Rather than fetching them all
+      // here just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
+      // should be super quick.
+      var serviceInstancesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllServiceInstancesForSpace(spaceGuid, { results_per_page: 1 }, httpConfig)
+        .then(function (response) {
+          return response.data.total_results;
+        });
 
       if (spaceQuotaGuid) {
         // Check for inline quota!
@@ -417,23 +421,32 @@
         appP = that.$q.resolve(space.entity.apps);
         that.onListAllAppsForSpace(cnsiGuid, spaceGuid, space.entity.apps);
       } else {
-        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid, true);
+        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid, {}, true);
       }
 
       // Services are never inlined
-      var servicesP = this.listAllServicesForSpace(cnsiGuid, spaceGuid, true);
+      var servicesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllServicesForSpace(spaceGuid, { results_per_page: 1 }, httpConfig)
+        .then(function (response) {
+          return response.data.total_results;
+        });
 
-      // We cannot rely on inline routes as they lack the depth we need later on
-      var routesP = this.listAllRoutesForSpace(cnsiGuid, spaceGuid, true);
+      // The full routes collection (with depth) is possibly required later on. Rather than fetching them all here
+      // just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
+      // should be super quick.
+      var routesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+        .ListAllRoutesForSpace(spaceGuid, { results_per_page: 1 }, httpConfig)
+        .then(function (response) {
+          return response.data.total_results;
+        });
 
       return this.$q.all({
-        // memory: usedMemP,
         quota: quotaP,
-        serviceInstances: serviceInstancesP,
+        serviceInstancesCount: serviceInstancesCountP,
         apps: appP,
         roles: spaceRolesP,
-        services: servicesP,
-        routes: routesP
+        servicesCount: servicesCountP,
+        routesCount: routesCountP
       }).then(function (vals) {
         var details = {};
 
@@ -466,20 +479,15 @@
         details.totalAppInstances = appInstances;
         details.appInstancesQuota = _.get(vals.quota, 'entity.app_instance_limit', -1);
 
-        //TODO: SCRAP totalRoles?
-        //details.totalRoles = (vals.roles || []).length;
         details.roles = vals.roles;
 
-        //TODO: CHANGE totalServices TO total_results
-        details.totalServices = (vals.services || []).length;
+        details.totalServices = vals.servicesCount;
         details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
 
-        //TODO: CHANGE totalRoutes TO total_results, move routes fetch to space details module. conditionally get
-        details.totalRoutes = (vals.routes || []).length;
+        details.totalRoutes = vals.routesCount;
         details.routesQuota = _.get(vals.quota, 'entity.total_routes', -1);
 
-        //TODO: CHANGE move serviceInstances fetch to space details module. conditionally get
-        details.totalServiceInstances = (vals.serviceInstances || []).length;
+        details.totalServiceInstances = vals.serviceInstancesCount;
         details.serviceInstancesQuota = _.get(vals.quota, 'entity.total_services', -1);
 
         _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details', details);

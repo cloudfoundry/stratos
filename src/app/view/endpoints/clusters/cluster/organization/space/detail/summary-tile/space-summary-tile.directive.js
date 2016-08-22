@@ -146,10 +146,10 @@
       that.userName = user.name;
       var spaceDetail = that.spaceDetail();
       if (that.isAdmin) {
-        canDelete = spaceDetail.routes.length === 0 &&
-          spaceDetail.instances.length === 0 &&
-          spaceDetail.apps.length === 0 &&
-          spaceDetail.services.length === 0;
+        canDelete = spaceDetail.details.totalRoutes === 0 &&
+          spaceDetail.details.totalServiceInstances === 0 &&
+          spaceDetail.details.totalApps === 0 &&
+          spaceDetail.details.totalServices === 0;
       }
       that.actions[0].disabled = !that.isAdmin;
       that.actions[1].disabled = !canDelete;

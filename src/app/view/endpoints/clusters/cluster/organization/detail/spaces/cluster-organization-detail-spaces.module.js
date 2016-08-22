@@ -27,13 +27,14 @@
   }
 
   ClusterDetailSpacesController.$inject = [
+    '$q',
     '$stateParams',
     '$state',
     'app.model.modelManager',
     'app.utils.utilsService'
   ];
 
-  function ClusterDetailSpacesController($stateParams, $state, modelManager, utils) {
+  function ClusterDetailSpacesController($q, $stateParams, $state, modelManager, utils) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -46,6 +47,7 @@
 
     function init() {
       that.stateInitialised = true;
+      return $q.resolve();
     }
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
