@@ -422,7 +422,7 @@
         var q = 'organization_guid:' + orgGuid;
         var routesParams = {
           q: q,
-          results_per_page: 1
+          'results-per-page': 1
         };
         return that.routesApi.ListAllRoutes(_.defaults(routesParams, params), httpConfig).then(function (response) {
           return response.data.total_results;
@@ -454,7 +454,7 @@
             // If we have the space's apps, great, use that
             appsCountPromises.push(that.$q.resolve(space.entity.apps.length));
           } else {
-            // If we don't have the space's apps (most probably due to the number of apps exceeding results_per_page)
+            // If we don't have the space's apps (most probably due to the number of apps exceeding 'results-per-page')
             // then create a single request for the end. This avoids making a request per space.
             missingSpaces.push(space.metadata.guid);
           }
@@ -466,7 +466,7 @@
           var q = 'space_guid IN ' + missingSpaces.join(',');
           var missingAppParams = {
             q: q,
-            results_per_page: 1
+            'results-per-page': 1
           };
           missingAppParams = _.defaults(missingAppParams, params);
           var promise = that.appsApi.ListAllApps(missingAppParams, httpConfig).then(function (response) {

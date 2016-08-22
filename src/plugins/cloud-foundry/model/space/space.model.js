@@ -385,7 +385,7 @@
       // here just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
       // should be super quick.
       var serviceInstancesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServiceInstancesForSpace(spaceGuid, { results_per_page: 1 }, httpConfig)
+        .ListAllServiceInstancesForSpace(spaceGuid, { 'results-per-page': 1 }, httpConfig)
         .then(function (response) {
           return response.data.total_results;
         });
@@ -433,7 +433,7 @@
 
       // Services are never inlined
       var servicesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServicesForSpace(spaceGuid, { results_per_page: 1 }, httpConfig)
+        .ListAllServicesForSpace(spaceGuid, { 'results-per-page': 1 }, httpConfig)
         .then(function (response) {
           return response.data.total_results;
         });
@@ -442,7 +442,7 @@
       // just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
       // should be super quick.
       var routesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(spaceGuid, { results_per_page: 1 }, httpConfig)
+        .ListAllRoutesForSpace(spaceGuid, { 'results-per-page': 1 }, httpConfig)
         .then(function (response) {
           return response.data.total_results;
         });
