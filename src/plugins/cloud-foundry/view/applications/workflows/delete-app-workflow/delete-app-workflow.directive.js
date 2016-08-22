@@ -86,6 +86,7 @@
           wizard.postInitTask.promise.then(function () {
             that.options.isBusy = true;
             that.wizard.nextBtnDisabled = true;
+            that.checkAppServices();
             that.checkAppRoutes().finally(function () {
               that.wizard.nextBtnDisabled = false;
               that.options.isBusy = false;
@@ -109,7 +110,8 @@
         userInput: this.userInput,
         appModel: this.appModel,
         isBusy: true,
-        safeRoutes: []
+        safeRoutes: [],
+        safeServices: []
       };
 
       this.deleteApplicationActions = {
@@ -139,6 +141,15 @@
           }
         });
       });
+    },
+
+    checkAppServices: function () {
+      this.options.safeServices = _.filter(
+        this.appModel.application.summary.services,
+        function (o) {
+          return o.bound_app_count === 1;
+        }
+      );
     },
 
     /**
@@ -204,20 +215,26 @@
      * @returns {promise} A resolved/rejected promise
      */
     deleteServiceBindings: function () {
+      var promises = [];
       var checkedServiceValue = this.userInput.checkedServiceValue;
-      var checkedServices = _.filter(checkedServiceValue, function (o) { return o; });
-      var bindingGuids = _.chain(checkedServices)
-        .filter(function (o) { return o.bound_app_count > 1; })
-        .map('guid')
-        .value();
-      var safeServiceInstances = _.chain(checkedServices)
-        .filter(function (o) { return o.bound_app_count === 1; })
+
+      // checked service instances that are safe to delete
+      var safeServiceInstances = _.chain(checkedServiceValue)
+        .filter(function (o) { return o && o.bound_app_count === 1; })
         .map('guid')
         .value();
 
-      var promises = [];
-      if (bindingGuids.length > 0) {
-        promises.push(this._unbindServiceInstances(bindingGuids));
+      /**
+       * service instances that aren't bound to only this app
+       * should not be deleted, only unbound
+       */
+      var serviceInstanceGuids = _.chain(checkedServiceValue)
+        .keys()
+        .difference(safeServiceInstances)
+        .value();
+
+      if (serviceInstanceGuids.length > 0) {
+        promises.push(this._unbindServiceInstances(serviceInstanceGuids));
       }
 
       if (safeServiceInstances.length > 0) {
@@ -240,7 +257,7 @@
       var q = 'service_instance_guid IN ' + bindingGuids.join(',');
       return this.appModel.listServiceBindings(this.cnsiGuid, appGuid, {q: q})
         .then(function (bindings) {
-          // service bindings can't be delete async, so chain the requests
+          // service bindings can't be deleted async, so chain the requests
           var chain = that.$q.when();
           angular.forEach(bindings, function (binding) {
             chain = chain.then(function () {
@@ -260,11 +277,15 @@
      */
     _deleteServiceInstances: function (safeServiceInstances) {
       var that = this;
-      var tasks = [];
+      // service instances can't be deleted async, so chain the requests
+      var chain = that.$q.when();
       angular.forEach(safeServiceInstances, function (serviceInstanceGuid) {
-        tasks.push(that.serviceInstanceModel.deleteServiceInstance(that.cnsiGuid, serviceInstanceGuid, {recursive: true}));
+        chain = chain.then(function () {
+          return that.serviceInstanceModel.deleteServiceInstance(that.cnsiGuid, serviceInstanceGuid, {recursive: true});
+        });
       });
-      return this.$q.all(tasks);
+
+      return chain;
     },
 
     /**
