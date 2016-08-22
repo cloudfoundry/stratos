@@ -110,6 +110,8 @@
         userInput: this.userInput,
         appModel: this.appModel,
         isBusy: true,
+        isDeleting: false,
+        hasError: false,
         safeRoutes: [],
         safeServices: []
       };
@@ -182,6 +184,8 @@
         }, function () {
           deleteApp.reject();
         });
+      }, function () {
+        deleteApp.reject();
       });
 
       return deleteApp.promise;
@@ -371,6 +375,8 @@
     finishWorkflow: function () {
       var that = this;
       var appName = this.appModel.application.summary.name;
+      this.options.isDeleting = true;
+      this.options.hasError = false;
       this.deleteApp().then(function () {
         that.deletingApplication = false;
         // show notification for successful binding
@@ -378,6 +384,11 @@
         var message = that.$interpolate(successMsg)({appName: appName});
         that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+      }, function () {
+        that.options.hasError = true;
+      })
+      .finally(function () {
+        that.options.isDeleting = false;
       });
     }
   });
