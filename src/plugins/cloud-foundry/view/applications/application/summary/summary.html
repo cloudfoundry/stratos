@@ -18,7 +18,8 @@
         </dd>
 
         <dd>
-          <percent-gauge title="{{ 'Instances' | translate }}"
+          <percent-gauge mode="instance"
+                         title="{{ 'Instances' | translate }}"
                          value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
                          value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}" />
         </dd>

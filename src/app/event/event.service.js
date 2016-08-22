@@ -4,6 +4,7 @@
   var events = {
     LOGIN               : 'LOGIN',
     LOGIN_FAILED        : 'LOGIN_FAILED',
+    LOGIN_TIMEOUT       : 'LOGIN_TIMEOUT',
     LOGOUT              : 'LOGOUT',
     HTTP_401            : 'HTTP_401',
     HTTP_403            : 'HTTP_403',

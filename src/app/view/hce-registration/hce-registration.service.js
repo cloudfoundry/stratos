@@ -31,10 +31,11 @@
   }
 
   HceRegistrationController.$inject = [
-    'app.model.modelManager',
-    'context',
     '$scope',
-    '$uibModalInstance'
+    '$uibModalInstance',
+    'app.model.modelManager',
+    'app.view.notificationsService',
+    'context'
   ];
 
   /**
@@ -43,12 +44,13 @@
    * @name HceRegistrationController
    * @description Controller for HCE Registration detail view
    * @constructor
-   * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {object} context - context object
    * @param {object} $scope - angular $scope
    * @param {$uibModalInstance} $uibModalInstance - the UIB modal instance service
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {object} context - context object
    */
-  function HceRegistrationController(modelManager, context, $scope, $uibModalInstance) {
+  function HceRegistrationController($scope, $uibModalInstance, modelManager, notificationsService, context) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.context = context;
 
@@ -59,6 +61,8 @@
     this.currentEndpoints = {};
     this.$scope = $scope;
     this.$uibModalInstance = $uibModalInstance;
+    this.notificationsService = notificationsService;
+
     var that = this;
 
     this.addHceError = false;
@@ -90,13 +94,13 @@
      * @function addCluster
      * @memberof app.view.AddClusterFormController
      * @description Add a cluster and dismiss this form after clearing it
-     * @param {object} data - the form data
      * @returns {promise} A promise object
      */
     addHce: function () {
       var that = this;
       return this.serviceInstanceModel.createHce(this.context.data.url, this.context.data.name)
         .then(function () {
+          that.notificationsService.notify('success', gettext('HCE endpoint successfully registered'));
           that.$uibModalInstance.close();
         }, function () {
           that.onAddHceError();

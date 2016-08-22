@@ -83,7 +83,7 @@
     }
   }
 
-  LoginPageController.$inject = ['$window', 'smoothScroll'];
+  LoginPageController.$inject = ['$window', '$q', 'smoothScroll'];
 
   /**
    * @namespace app.view.LoginPageController
@@ -91,8 +91,10 @@
    * @name LoginPageController
    * @constructor
    * @param {object} $window - the Angular $window service
+   * @param {object} $q - the Angular Promise service
    * @param {object} smoothScroll - the ngSmoothScroll service
    * @property {object} $window - the Angular $window service
+   * @property {object} $q - the Angular Promise service
    * @property {object} smoothScroll - the ngSmoothScroll service
    * @property {boolean} prevArrowVisible - show/hide previous arrow
    * @property {boolean} nextArrowVisible - show/hide next arrow
@@ -100,7 +102,8 @@
    * @property {number} currentSectionIdx - the index of the current section
    * @property {number} lastSectionIdx - the index of the last section
    */
-  function LoginPageController($window, smoothScroll) {
+  function LoginPageController($window, $q, smoothScroll) {
+    this.$q = $q;
     this.$window = $window;
     this.smoothScroll = smoothScroll;
 
@@ -110,6 +113,8 @@
     this.sections = [];
     this.currentSectionIdx = 0;
     this.lastSectionIdx = 0;
+
+    this.scrolling = $q.resolve();
   }
 
   angular.extend(LoginPageController.prototype, {
@@ -120,11 +125,22 @@
      * @public
      */
     goToNextSection: function () {
-      if (this.currentSectionIdx < this.lastSectionIdx) {
-        this.currentSectionIdx += 1;
-        var id = this.sections[this.currentSectionIdx].id;
-        this.smoothScroll(this.$window.document.getElementById(id));
-      }
+      var that = this;
+      that.scrolling = that.scrolling.then(function () {
+        if (that.currentSectionIdx < that.lastSectionIdx) {
+          that.currentSectionIdx += 1;
+          var id = that.sections[that.currentSectionIdx].id;
+
+          var scrollDeferred = that.$q.defer();
+          var scrollOptions = {
+            callbackAfter: function () {
+              scrollDeferred.resolve();
+            }
+          };
+          that.smoothScroll(that.$window.document.getElementById(id), scrollOptions);
+          return scrollDeferred.promise;
+        }
+      });
     },
     /**
      * @function goToPrevSection
@@ -133,15 +149,25 @@
      * @public
      */
     goToPrevSection: function () {
-      var y = Math.floor(this.$window.scrollY || this.$window.pageYOffset) - 5;
+      var that = this;
+      that.scrolling = that.scrolling.then(function () {
+        var y = Math.floor(that.$window.scrollY || that.$window.pageYOffset) - 5;
+        if (that.currentSectionIdx > 0 || y > 0) {
+          var sectionTop = that.sections[that.currentSectionIdx].top;
+          var diff = y <= sectionTop ? -1 : 0;
+          that.currentSectionIdx += diff;
+          var id = that.sections[that.currentSectionIdx].id;
 
-      if (this.currentSectionIdx > 0 || y > 0) {
-        var sectionTop = this.sections[this.currentSectionIdx].top;
-        var diff = y <= sectionTop ? -1 : 0;
-        this.currentSectionIdx += diff;
-        var id = this.sections[this.currentSectionIdx].id;
-        this.smoothScroll(this.$window.document.getElementById(id));
-      }
+          var scrollDeferred = that.$q.defer();
+          var scrollOptions = {
+            callbackAfter: function () {
+              scrollDeferred.resolve();
+            }
+          };
+          that.smoothScroll(that.$window.document.getElementById(id), scrollOptions);
+          return scrollDeferred.promise;
+        }
+      });
     },
     /**
      * @function setCurrentSection
@@ -159,6 +185,20 @@
           ctrl.currentSectionIdx = idx;
         }
       });
+    },
+    /**
+     * @function onMouseWheel
+     * @memberof app.view.LoginPageController
+     * @description Handle mouse wheel events
+     * @param {number} delta - the scroll event delta (amount + direction)
+     * @public
+     */
+    onMouseWheel: function (delta) {
+      if (delta < 0) {
+        this.goToNextSection();
+      } else {
+        this.goToPrevSection();
+      }
     }
   });
 

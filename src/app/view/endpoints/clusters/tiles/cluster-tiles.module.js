@@ -25,23 +25,26 @@
   }
 
   ClusterTilesController.$inject = [
-    'app.model.modelManager',
     '$q',
+    'app.model.modelManager',
     'app.view.hcfRegistration',
+    'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm'
   ];
 
   /**
    * @name ClusterTilesController
    * @constructor
-   * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $q - the angular $q service
+   * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} hcfRegistration - hcfRegistration - HCF Registration detail view service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    */
-  function ClusterTilesController(modelManager, $q, hcfRegistration, confirmDialog) {
+  function ClusterTilesController($q, modelManager, hcfRegistration, notificationsService, confirmDialog) {
     this.$q = $q;
     this.hcfRegistration = hcfRegistration;
+    this.notificationsService = notificationsService;
     this.confirmDialog = confirmDialog;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -143,9 +146,17 @@
      */
     disconnect: function (cnsiGUID) {
       var that = this;
-      this.userServiceInstanceModel.disconnect(cnsiGUID).then(function () {
-        that.refreshClusterModel();
-      });
+      this.userServiceInstanceModel.disconnect(cnsiGUID)
+        .catch(function (error) {
+          that.notificationsService.notify('error', gettext('Failed to disconnect HCF cluster'), {
+            timeOut: 10000
+          });
+          return that.$q.reject(error);
+        })
+        .then(function () {
+          that.notificationsService.notify('success', gettext('HCF cluster successfully disconnected'));
+          that.refreshClusterModel();
+        });
     },
 
     /**
@@ -174,13 +185,18 @@
       this.confirmDialog({
         title: gettext('Unregister Cluster'),
         description: gettext('Are you sure you want to unregister cluster \'' + serviceInstance.name + '\''),
+        errorMessage: gettext('Failed to unregister cluster'),
         buttonText: {
           yes: gettext('Unregister'),
           no: gettext('Cancel')
+        },
+        callback: function () {
+          return that.serviceInstanceModel.remove(serviceInstance).then(function () {
+            that.notificationsService.notify('success', gettext('HCF cluster successfully unregistered'));
+            that.refreshClusterModel();
+          });
         }
-      }).result
-        .then(angular.bind(that.serviceInstanceModel, that.serviceInstanceModel.remove, serviceInstance))
-        .then(angular.bind(that, that.refreshClusterModel));
+      });
     },
 
     /**

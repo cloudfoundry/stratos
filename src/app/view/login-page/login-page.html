@@ -1,19 +1,25 @@
 <div class="scroll scroll-up col-sm-8 col-xs-12 text-center"
+	ng-class="{'scroll-has-bg' : loginPageCtrl.currentSectionIdx === 0}"
   ng-show="loginPageCtrl.prevArrowVisible" ng-click="loginPageCtrl.goToPrevSection()">
   <span class="helion-icon helion-icon-Up helion-icon-lg scroll-arrow"></span>
 </div>
 <div id="section-login-panel" class="col-sm-4 login-panel">
   <login-form></login-form>
-  <img class="hpe-logo" ng-src="/lib/helion-ui-framework/dist/images/hpe_helion_grn_pos_rgb.png"/>
+	<div class="login-panel-helion-logo">
+		<img class="hpe-logo" ng-src="/lib/helion-ui-framework/dist/images/hpe_helion_grn_pos_rgb.png"/>
+	</div>
 </div>
-<article class="col-sm-8 content">
+<article wheel-handler="loginPageCtrl.onMouseWheel(delta)" class="col-sm-8 content login-background">
   <section id="section-introduction" class="clearfix introduction">
     <div>
-      <h1 class="text-center" translate>Helion Stackato v4.0</h1>
+      <h1 class="text-center" translate>Helion Stackato 4.0</h1>
       <p class="text-center" translate>
         Helion Stackato: discovering, composing, developing and managing Cloud Native workloads which are hosted in a myriad of: public, managed and private cloud/compute providers.
       </p>
     </div>
+		<div class="login-panel-hpe-logo">
+			<img ng-src="/lib/helion-ui-framework/dist/images/hpe_pri_grn_rev_rgb@2x.png"/>
+		</div>
   </section>
   <section id="section-learning" class="clearfix">
     <div>
@@ -53,10 +59,12 @@
   </section>
 </article>
 <div class="scroll scroll-down col-sm-8 col-xs-12 text-center"
+	ng-class="{'scroll-has-bg' : loginPageCtrl.currentSectionIdx === 0}"
   ng-show="loginPageCtrl.nextArrowVisible" ng-click="loginPageCtrl.goToNextSection()">
   <span class="helion-icon helion-icon-Down helion-icon-lg scroll-arrow"></span>
 </div>
-<div class="section-status col-sm-8 col-xs-12">
+<div class="section-status col-sm-8 col-xs-12"
+	ng-class="{'scroll-has-bg' : loginPageCtrl.currentSectionIdx === 0}">
   <ul>
     <li ng-repeat="section in loginPageCtrl.sections track by section.id"
       ng-class="{'selected': loginPageCtrl.currentSectionIdx === $index}"

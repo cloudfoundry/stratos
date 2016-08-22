@@ -5,6 +5,12 @@
   <div translate>An error occurred retrieving organizations</div>
 </div>
 <div class="cluster-gallery-card-container" ng-if="clusterDetailController.organizations">
+  <div ng-if="clusterDetailController.organizations.length < 1"
+       class="panel panel-default cluster-empty-list">
+    <div class="panel-body" translate>
+      You have no organizations
+    </div>
+  </div>
   <div class="cluster-gallery-card-parent" ng-repeat="organization in clusterDetailController.organizations track by organization.guid">
     <organization-tile organization="organization" organization-names="clusterController.organizationNames"></organization-tile>
   </div>

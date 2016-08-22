@@ -3,7 +3,7 @@
 
   // Fix me test
   describe('login-page directive', function () {
-    var $element, $controller;
+    var $element, $controller, $scope;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -31,12 +31,14 @@
           }
         }
       });
-      $provide.value('smoothScroll', angular.noop);
+      $provide.value('smoothScroll', function (element, scrollOptions) {
+        scrollOptions.callbackAfter();
+      });
     }));
 
     beforeEach(inject(function ($injector) {
       var $compile = $injector.get('$compile');
-      var $scope = $injector.get('$rootScope').$new();
+      $scope = $injector.get('$rootScope').$new();
 
       var markup = '<login-page><login-page/>';
 
@@ -64,7 +66,7 @@
         $controller.currentSectionIdx = 0;
         $controller.lastSectionIdx = 2;
 
-        spyOn($controller, 'smoothScroll');
+        spyOn($controller, 'smoothScroll').and.callThrough();
       });
 
       it('should be defined', function () {
@@ -74,20 +76,27 @@
       describe('goToPrevSection', function () {
         it('should go to previous section', function () {
           $controller.goToNextSection();
+          $scope.$apply();
 
           expect($controller.currentSectionIdx).toBe(1);
           expect($controller.smoothScroll).toHaveBeenCalled();
 
           $controller.$window.scrollY = 100;
           $controller.goToPrevSection();
+          $scope.$apply();
 
-          expect($controller.currentSectionIdx).toBe(0);
-          expect($controller.smoothScroll).toHaveBeenCalled();
+          $controller.scrolling.then(function () {
+            expect($controller.currentSectionIdx).toBe(0);
+            expect($controller.smoothScroll).toHaveBeenCalled();
+            done();
+          });
+
         });
 
         it('should go to previous section if at first section but not top of page', function () {
           $controller.$window.scrollY = 10;
           $controller.goToPrevSection();
+          $scope.$apply();
 
           expect($controller.currentSectionIdx).toBe(0);
           expect($controller.smoothScroll).toHaveBeenCalled();
@@ -95,6 +104,7 @@
 
         it('should not go to previous section if not at top of page', function () {
           $controller.goToPrevSection();
+          $scope.$apply();
 
           expect($controller.currentSectionIdx).toBe(0);
           expect($controller.smoothScroll).not.toHaveBeenCalled();
@@ -104,6 +114,7 @@
       describe('goToNextSection', function () {
         it('should go to next section', function () {
           $controller.goToNextSection();
+          $scope.$apply();
 
           expect($controller.currentSectionIdx).toBe(1);
           expect($controller.smoothScroll).toHaveBeenCalled();
@@ -113,6 +124,7 @@
           var lastSection = $controller.lastSectionIdx;
           $controller.currentSectionIdx = lastSection;
           $controller.goToNextSection();
+          $scope.$apply();
 
           expect($controller.currentSectionIdx).toBe(lastSection);
           expect($controller.smoothScroll).not.toHaveBeenCalled();

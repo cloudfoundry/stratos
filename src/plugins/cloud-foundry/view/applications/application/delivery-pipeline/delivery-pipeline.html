@@ -24,11 +24,11 @@
         <dl class="dl-horizontal col-md-6">
           <dt translate>source</dt>
           <dd>
-           {{ applicationDeliveryPipelineCtrl.getVcs() }}</a>
+            {{ applicationDeliveryPipelineCtrl.project.vcsInstance.label | uppercase}}
           </dd>
           <dt translate>repo</dt>
           <dd>
-           {{ applicationDeliveryPipelineCtrl.project.repo.name }}
+            <a href="{{ applicationDeliveryPipelineCtrl.project.repo.http_url }}" target="_blank">{{ applicationDeliveryPipelineCtrl.project.repo.full_name }}</a>
           </dd>
           <dt translate>branch</dt>
           <dd>
@@ -36,7 +36,7 @@
           </dd>
           <dt translate>build container</dt>
           <dd>
-            {{ applicationDeliveryPipelineCtrl.getBuildContainerLabel() }}
+            {{ applicationDeliveryPipelineCtrl.project.buildContainer.build_container_label }}
           </dd>
         </dl>
         <dl class="dl-horizontal col-md-6">

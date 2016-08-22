@@ -12,19 +12,21 @@
     .run(registerApplicationModel);
 
   registerApplicationModel.$inject = [
+    'app.config',
     'app.model.modelManager',
     'app.api.apiManager',
     'cloud-foundry.model.application.stateService',
     '$q'
   ];
 
-  function registerApplicationModel(modelManager, apiManager, appStateService, $q) {
-    modelManager.register('cloud-foundry.model.application', new Application(apiManager, modelManager, appStateService, $q));
+  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q) {
+    modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager, appStateService, $q));
   }
 
   /**
    * @memberOf cloud-foundry.model.application
    * @name Application
+   * @param {object} config - the global configuration object
    * @param {app.api.apiManager} apiManager - the application API manager
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} appStateService - the Application State service
@@ -34,15 +36,18 @@
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
+   * @property {number} pageSize - page size for pagination.
    * @class
    */
-  function Application(apiManager, modelManager, appStateService, $q) {
+  function Application(config, apiManager, modelManager, appStateService, $q) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.appStateService = appStateService;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.$q = $q;
+    this.pageSize = config.pagination.pageSize;
+
     this.data = {
       applications: []
     };
@@ -55,8 +60,11 @@
       pipeline: {
         fetching: false,
         valid: false,
-        hceCnsi: undefined
-      }
+        hceCnsi: undefined,
+        hceServiceGuid: undefined,
+        projectId: undefined
+      },
+      project: null
     };
     this.appStateSwitchTo = '';
     this.filterParams = {
@@ -108,7 +116,9 @@
         cnsis = [this.filterParams.cnsiGuid];
       }
 
-      options = angular.extend(options || {}, this._buildFilter());
+      options = angular.extend(options || {}, {
+        'results-per-page': this.pageSize
+      }, this._buildFilter());
 
       return this.applicationApi.ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
@@ -600,37 +610,59 @@
         metadata.valid = false;
         metadata.hceCnsi = undefined;
         metadata.hce_api_url = undefined;
+        metadata.hceServiceGuid = undefined;
+        metadata.projectId = undefined;
       }
 
       if (hceServiceData) {
         // Go fetch the service metadata
         return hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
-        .then(function (data) {
-          // Now we need to see if the CNSI is known
-          if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
-            // HCE API Endpoint
-            pipeline.hce_api_url = data.entity.credentials.hce_api_url;
-            return that.listHceCnsis().then(function (hceEndpoints) {
-              var hceInstance = _.find(hceEndpoints, function (hce) {
-                var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
-                return pipeline.hce_api_url.indexOf(url) === 0;
+          .then(function (data) {
+            // Now we need to see if the CNSI is known
+            if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
+              // HCE API Endpoint
+              pipeline.hceServiceGuid = hceServiceData.guid;
+              pipeline.hce_api_url = data.entity.credentials.hce_api_url;
+              pipeline.projectId = _.toNumber(data.entity.credentials.hce_pipeline_id);
+              return that.listHceCnsis().then(function (hceEndpoints) {
+                var hceInstance = _.find(hceEndpoints, function (hce) {
+                  var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
+                  return pipeline.hce_api_url.indexOf(url) === 0;
+                });
+                pipeline.hceCnsi = hceInstance;
+                pipeline.valid = angular.isDefined(hceInstance);
+                pipeline.fetching = false;
+                return pipeline;
               });
-              pipeline.hceCnsi = hceInstance;
-              pipeline.valid = angular.isDefined(hceInstance);
-              pipeline.fetching = false;
-              return pipeline;
-            });
-          } else {
+            } else {
+              clearDeliveryPipelineMetadata(pipeline);
+            }
+          })
+          .catch(function () {
             clearDeliveryPipelineMetadata(pipeline);
-          }
-        })
-        .catch(function () {
-          clearDeliveryPipelineMetadata(pipeline);
-        });
+          });
       } else {
         clearDeliveryPipelineMetadata(pipeline);
         return that.$q.when(pipeline);
       }
+    },
+
+    /**
+     * @function _calculateTotalNumbers
+     * @memberof  cloud-foundry.model.application
+     * @description calculate total app and total page numbers
+     * @private
+     */
+    _calculateTotalNumbers: function () {
+      var totalAppNumber = 0;
+      angular.forEach(this.data.applications, function (cluster) {
+        if (cluster.total_results) {
+          totalAppNumber += cluster.total_results;
+        }
+      });
+
+      this.data.totalAppNumber = totalAppNumber;
+      this.data.totalPageNumber = Math.ceil(totalAppNumber / this.pageSize);
     },
 
     /**
@@ -642,6 +674,7 @@
      */
     onAll: function (response) {
       this.data.applications = response.data;
+      this._calculateTotalNumbers();
 
       // Check the data we have and determine if we have any applications
       this.hasApps = false;

@@ -50,7 +50,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.hceNotificationApi = apiManager.retrieve('cloud-foundry.api.HceNotificationApi');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.project = this.hceModel.getProject(this.model.application.summary.name);
+    this.project = this.model.application.project;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.$uibModalInstance = $uibModalInstance;
     this.hceCnsi = that.model.application.pipeline.hceCnsi;
