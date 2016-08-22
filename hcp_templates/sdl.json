@@ -213,7 +213,7 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "quay.io/coreos",
-      "image": "etcd:2.3.7",
+      "image": "etcd:v2.3.7",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -249,7 +249,7 @@
         }
       ],
       "affinity": [],
-      "min_instances": 2,
+      "min_instances": 3,
       "max_instances": 3,
       "service_ports": [
         {
@@ -270,11 +270,11 @@
       "volume_mounts": [
         {
           "volume_name": "hsc-etcd-data-volume",
-          "mountpoint": "/etcd/data"
+          "mountpoint": "/etcd_data"
         },
         {
           "volume_name": "hsc-etcd-wal-volume",
-          "mountpoint": "/etcd/wal"
+          "mountpoint": "/etcd_wal"
         }
       ]
     }
@@ -795,7 +795,7 @@
       "name": "ETCD_DATA_DIR",
       "description": "Path to the etcd data directory (shared volume).",
       "data_type": "string",
-      "default": "/etcd/data",
+      "default": "/etcd_data/data",
       "required": true,
       "secret": false
     },
@@ -803,7 +803,7 @@
       "name": "ETCD_WAL_DIR",
       "description": "Path to the dedicated wal directory (shared volume).",
       "data_type": "string",
-      "default": "/etcd/wal",
+      "default": "/etcd_wal/wal",
       "required": true,
       "secret": false
     },
