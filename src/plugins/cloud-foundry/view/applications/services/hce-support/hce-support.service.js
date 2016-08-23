@@ -23,16 +23,14 @@
     // Supported VCS Types
     var vcsTypes = {
       GITHUB: {
-        label: gettext('GitHub'),
         description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
         img: 'github_octocat.png',
         supported: true
       },
       GITHUB_ENTERPRISE: {
-        label: gettext('Github Enterprise'),
         description: gettext('Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.'),
-        img: 'github_octocat.png',
-        supported: false
+        img: 'GitHub-Mark-120px-plus.png',
+        supported: true
       }
     };
 
@@ -72,6 +70,7 @@
           });
           return _.map(supported, function (supportedVcs) {
             var vcs = _.clone(vcsTypes[_expandVcsType(supportedVcs)]);
+            vcs.label = supportedVcs.label;
             vcs.browse_url = supportedVcs.browse_url;
             vcs.value = supportedVcs;
             return vcs;

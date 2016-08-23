@@ -36,7 +36,8 @@
         {
           vcs_type: 'BITBUCKET',
           vcs_id: 'test_id_2',
-          browse_url: 'bitbucket_url'
+          browse_url: 'bitbucket_url',
+          label: 'BitBucket'
         }
       ];
       var supported = hceSupport.getSupportedVcsInstances(hceInstanceData);
@@ -49,12 +50,14 @@
         {
           vcs_type: 'BITBUCKET',
           vcs_id: 'test_id_2',
-          browse_url: 'bitbucket_url'
+          browse_url: 'bitbucket_url',
+          label: 'BitBucket'
         },
         {
           vcs_type: 'GITHUB',
           vcs_id: 'test_id_3',
-          browse_url: 'https://github.com'
+          browse_url: 'https://github.com',
+          label: 'GitHub'
         }
       ];
       var supported = hceSupport.getSupportedVcsInstances(hceInstanceData);
@@ -73,17 +76,19 @@
         {
           vcs_type: 'BITBUCKET',
           vcs_id: 'test_id_2',
-          browse_url: 'bitbucket_url'
+          browse_url: 'bitbucket_url',
+          label: 'BitBucket'
         },
         {
           vcs_type: 'GITHUB',
           vcs_id: 'test_id_3',
-          browse_url: 'https://my.github.enterprise'
+          browse_url: 'https://my.github.enterprise',
+          label: 'GitHub Enterprise'
         }
       ];
       var supported = hceSupport.getSupportedVcsInstances(hceInstanceData);
       expect(angular.isArray(supported)).toBe(true);
-      expect(supported.length).toBe(0);
+      expect(supported.length).toBe(1);
     });
 
     it('should not have browse_url', function () {
@@ -91,11 +96,13 @@
         {
           vcs_type: 'BITBUCKET',
           vcs_id: 'test_id_2',
-          browse_url: 'bitbucket_url'
+          browse_url: 'bitbucket_url',
+          label: 'BitBucket'
         },
         {
           vcs_type: 'GITHUB',
-          vcs_id: 'test_id_3'
+          vcs_id: 'test_id_3',
+          label: 'GitHub'
         }
       ];
       var supported = hceSupport.getSupportedVcsInstances(hceInstanceData);
