@@ -53,8 +53,7 @@
     this.actions = [];
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    console.log('initialising auth service');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     // Present memory usage
     this.memory = utils.sizeUtilization(this.organization.memUsed, this.organization.memQuota);
@@ -165,6 +164,24 @@
         }
       });
     }
+
+    function init() {
+
+      // Edit organization
+      that.actions[0].disabled = !authService.principal.isAllowed(that.organization.org.entity.name, 'organization', 'update');
+
+      // Delete organization
+      that.actions[1].disabled = !authService.principal.isAllowed(that.organization.org.entity.name, 'organization', 'delete');
+
+      // TODO Assign Users
+      that.actions[2].disabled = false;
+
+      return $q.resolve();
+
+    }
+
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.cluster.detail.organizations', $state, init);
 
   }
 

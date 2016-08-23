@@ -29,11 +29,13 @@
     '$stateParams',
     '$q',
     '$log',
+    '$state',
     'app.model.modelManager',
-    'app.view.endpoints.clusters.routesService'
+    'app.view.endpoints.clusters.routesService',
+    'app.utils.utilsService'
   ];
 
-  function SpaceRoutesController($scope, $stateParams, $q, $log, modelManager, routesService) {
+  function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, utils) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -48,15 +50,25 @@
 
     this.apps = {};
     this.actionsPerRoute = {};
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     $scope.$watch(function () {
-      return that.visibleRoutes;
+      return that.visibleRoutes &&
+        that.authService.isInitialized();
     }, function (routes) {
+
+      routes = that.visibleRoutes;
       if (!routes) {
         return;
       }
       that.updateActions(routes);
     });
+
+    function init() {
+      return $q.resolve();
+    }
+
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
   }
 
   angular.extend(SpaceRoutesController.prototype, {
@@ -113,7 +125,10 @@
       var that = this;
       _.forEach(routes, function (route) {
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
-        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1;
+        if (that.authService.isInitialized()) {
+          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed(route, 'route', 'delete');
+          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed(route, 'route', 'update');
+        }
       });
     },
 

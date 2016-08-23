@@ -37,14 +37,22 @@
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var stateName = $state.current.name;
 
     function init() {
       that.organizationNames = that.organizationModel.organizationNames[that.clusterGuid];
-      return $q.resolve();
+      // If the user directly navigates to an org with a URL,
+      // authService will not be initialised
+      if (authService.isInitialized()) {
+        return $q.resolve();
+      } else {
+        return authService.initAuthService(that.clusterGuid);
+      }
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
+    utils.chainStateResolve(stateName, $state, init);
   }
 
   angular.extend(ClusterOrgDetailController.prototype, {

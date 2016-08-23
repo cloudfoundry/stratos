@@ -58,6 +58,14 @@
               that.principal = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
             });
         });
+    },
+
+    isAllowed: function (context, resourceType, action) {
+      return this.principal.isAllowed(context, resourceType, action);
+    },
+
+    isInitialized: function () {
+      return this.principal !== null;
     }
 
   });

@@ -48,9 +48,9 @@
        * @returns {boolean}
        */
       create: function () {
-        // Formerly, this had a param: @param {Object} space - Domain space
-        // Not sure if we need that or not.
-        return this.principal.isAdmin;
+         // Users can create organization is they are an admin
+        // or the appropriate feature flag is enabled
+        return this.principal.isAdmin || this.principal.hasAccessTo('user_org_creation');
       },
 
       /**
@@ -58,8 +58,14 @@
        * @description Does user have update organization permission
        * @returns {boolean}
        */
-      delete: function () {
-        return this.principal.isAdmin;
+      delete: function (org) {
+        if (this.baseAccess.delete(org)) {
+          return true;
+        }
+
+        // If user is manager of org
+        return this.baseAccess
+          ._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
       },
 
       /**

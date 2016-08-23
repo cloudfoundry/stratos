@@ -56,6 +56,7 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.utils = utils;
 
@@ -84,7 +85,7 @@
     this.actions = [
       {
         name: gettext('Edit Organization'),
-        disabled: that.authService.principal.isAllowed(that.organization.org.entity.name, 'organization', 'update'),
+        disabled: !that.isAdmin,
         execute: function () {
           return asyncTaskDialog(
             {
@@ -117,7 +118,7 @@
       },
       {
         name: gettext('Delete Organization'),
-        disabled: that.authService.principal.isAllowed(that.organization.org.entity.name, 'organization', 'update'),
+        disabled: !canDelete,
         execute: function () {
           confirmDialog({
             title: gettext('Delete Organization'),
@@ -159,6 +160,22 @@
       // Present the user's roles
       that.roles = that.organizationModel.organizationRolesToStrings(roles);
     });
+
+    function init() {
+
+      // Edit organization
+      that.actions[0].disabled = !authService.isAllowed(that.organization.details.org.entity.name, 'organization', 'update');
+
+      // Delete organization
+      that.actions[1].disabled = !authService.isAllowed(that.organization.details.org.entity.name, 'organization', 'delete');
+
+      return $q.resolve();
+
+    }
+
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.cluster.detail.organizations', $state, init);
+
   }
 
 })();

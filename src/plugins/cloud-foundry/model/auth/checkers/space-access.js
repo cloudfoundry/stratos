@@ -59,7 +59,7 @@
        * @returns {boolean}
        */
       delete: function () {
-        return  this.principal.isAdmin ||
+        return this.principal.isAdmin ||
           this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
       },
 
@@ -70,13 +70,35 @@
        * @returns {boolean}
        */
 
-      update: function (org) {
-        if (this.baseAccess.update(org)) {
+      update: function (space) {
+        if (this.baseAccess.update(space)) {
           return true;
         }
 
         // If user is manager of org
         return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
+      },
+
+      /**
+       * @name rename
+       * @description A user can rename space, if either of the following are true
+       * 1. User is admin
+       * 2. User is an Org Manager
+       * 3. User is a Space Manager
+       * 4. User is a Space Developer
+       * @param {Object} org - Application detail
+       * @returns {boolean}
+       */
+
+      rename: function (space) {
+
+        return this.principal.isAdmin ||
+          // User is Org manager
+          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, space.entity.organization_guid) ||
+          // User is Space manager
+          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_spaces, space.metadata.guid) ||
+          // User is Space developer
+          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
       },
 
       /**

@@ -44,47 +44,48 @@
     angular.extend(ServiceInstanceAccess.prototype, {
       /**
        * @name create
-       * @description Does user have create service instance permission in the space
+       * @description A User is can create a service if:
+       * 1. They are an admin
+       * 2. or they are a space developer and the feature flag is enabled
+       *
        * @param {Object} space Domain space
        * @returns {boolean}
        */
       create: function (space) {
-        // Admin
-        if (this.baseAccess.create(space)) {
-          return true;
-        }
 
         // If user is developer in space the service instances will
         // belong to and the service_instance_creation flag is set
-        return this.principal.hasAccessTo('service_instance_creation', this.flags) &&
-          this._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
+        return this.principal.isAdmin ||
+          (this.principal.hasAccessTo('service_instance_creation') &&
+          this._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid));
       },
 
       /**
        * @name update
-       * @description Does user have update service instance permission
+       * @description User can update a service instance if:
+       * 1. They are an admin
+       * 2. or they are a space developer
        * @param {Object} serviceInstance service instance detail
        * @returns {boolean}
        */
       update: function (serviceInstance) {
-        // Admin
-        if (this.baseAccess.update(serviceInstance)) {
-          return true;
-        }
 
         // If user is developer in space the service instances belongs to
-        return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.entity.spaces, serviceInstance.entity.space_guid);
+        return this.principal.isAdmin || this.baseAccess
+          ._doesContainGuid(this.principal.userSummary.entity.spaces, serviceInstance.metadata.guid);
       },
 
       /**
        * @name delete
-       * @description Does user have delete application permission
+       * @description User can delete a service instance if:
+       * 1. They are an admin
+       * 2. or they are a space developer
        * @param {Object} serviceInstance service instance detail
        * @returns {boolean}
        */
       delete: function (serviceInstance) {
-        return this.baseAccess.update(serviceInstance);
+        return this.principal.isAdmin || this.baseAccess
+            ._doesContainGuid(this.principal.userSummary.entity.spaces, serviceInstance.metadata.guid);
       },
 
       /**

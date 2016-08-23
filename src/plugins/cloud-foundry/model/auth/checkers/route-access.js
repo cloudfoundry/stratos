@@ -43,7 +43,9 @@
     angular.extend(RouteAccess.prototype, {
       /**
        * @name create
-       * @description Does user have create route permission in the space
+       * @description User can create a route if:
+       * 1. User is admin
+       * 2. User is a space developer AND route_creation feature flag is turned on
        * @param {Object} space Domain space
        * @returns {boolean}
        */
@@ -53,19 +55,8 @@
           return true;
         }
 
-        // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations,
-            space.entity.organization_guid)) {
-          return true;
-        }
-
-        // If user is manager in space
-        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_spaces, space.metadata.guid)) {
-          return true;
-        }
-
-        // Finally, if user is developer in space
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid) &&
+          this.principal.hasAccessTo('route_creation');
       },
 
       /**
@@ -80,19 +71,7 @@
           return true;
         }
 
-        // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations,
-            route.entity.space.entity.organization_guid)) {
-          return true;
-        }
-
-        // If user is manager in space
-        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_spaces, route.entity.space_guid)) {
-          return true;
-        }
-
-        // Finally, if user is developer in space
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, route.entity.space_guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
       },
 
       /**
@@ -107,15 +86,10 @@
           return true;
         }
 
-        // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations,
-            route.entity.space.entity.organization_guid)) {
-          return true;
-        }
+        console.log(route)
 
-        // If user is manager in space
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_spaces,
-          route.entity.space_guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
+
       },
 
       /**

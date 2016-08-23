@@ -90,7 +90,7 @@
             if (orgData.name && orgData.name.length > 0) {
               return organizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
                 notificationsService.notify('success', gettext('Organisation \'{{name}}\' successfully created'),
-                  { name: orgData.name });
+                  {name: orgData.name});
               });
             } else {
               return $q.reject('Invalid Name!');
@@ -155,7 +155,7 @@
         var organizations = _.map(authService.principal.userSummary.entity.managed_organizations, function (org) {
           return {
             label: org.entity.name,
-            value:  organizationModel.organizations[that.clusterGuid][org.metadata.guid]
+            value: organizationModel.organizations[that.clusterGuid][org.metadata.guid]
           };
         });
 
@@ -196,7 +196,7 @@
               .then(function () {
                 notificationsService.notify('success', toCreate.length > 1
                   ? gettext('Spaces \'{{names}}\' successfully created')
-                  : gettext('Space \'{{name}}\' successfully created'), { name: toCreate[0], names: toCreate.join(',')});
+                  : gettext('Space \'{{name}}\' successfully created'), {name: toCreate[0], names: toCreate.join(',')});
               });
           }
         );
@@ -216,11 +216,11 @@
       icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
     };
 
-    this.clusterActions = {
-      organization: createOrg,
-      space: createSpace,
-      users: assignUsers
-    };
+    this.clusterActions = [
+      createOrg,
+      createSpace,
+      assignUsers
+    ];
 
     /**
      * Enable actions based on admin status
@@ -229,13 +229,13 @@
     function enableActions() {
 
       // Organization access - enabled is user is either admin or the appropriate flag is enabled
-      that.clusterActions.organization.disabled = !authService.principal.hasAccessTo('user_org_creation');
+      that.clusterActions[0].disabled = !authService.principal.isAllowed(null, 'organization', 'create');
 
       // Space access - if user is an Org Manager in atleast one organization then show slide in
-      that.clusterActions.space.disabled = !authService.principal.userSummary.entity.managed_organizations.length > 0;
+      that.clusterActions[1].disabled = !authService.principal.userSummary.entity.managed_organizations.length > 0;
 
-      // Assign Users access   TODO
-      that.clusterActions.users.disabled = !authService.principal.hasAccessTo('user_org_creation');
+      // TODO Assign Users access
+      that.clusterActions[2].disabled = !authService.principal.hasAccessTo('user_org_creation');
 
     }
 
@@ -244,7 +244,12 @@
       return $q.resolve();
     }
 
-    utils.chainStateResolve(this.stateName, $state, init);
+    // Ensure the parent state is fully initialised before we start our own init
+    if (this.context !== 'space'){
+      utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
+    } else {
+      utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
+    }
   }
 
   UniqueSpaceName.$inject = [];

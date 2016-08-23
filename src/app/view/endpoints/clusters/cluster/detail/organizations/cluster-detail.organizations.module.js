@@ -40,11 +40,11 @@
 
     var that = this;
 
-    function init() {
-      return that.authService.initAuthService(that.clusterGuid);
-    }
-
-    utils.chainStateResolve(this.stateName, $state, init);
+    // function init() {
+    //   return that.authService.initAuthService(that.clusterGuid);
+    // }
+    //
+    // utils.chainStateResolve(this.stateName, $state, init);
 
   }
 

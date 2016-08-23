@@ -27,11 +27,14 @@
   SpaceServicesController.$inject = [
     '$scope',
     '$stateParams',
+    '$state',
+    '$q',
     'app.model.modelManager',
-    'cloud-foundry.view.applications.services.serviceInstanceService'
+    'cloud-foundry.view.applications.services.serviceInstanceService',
+    'app.utils.utilsService'
   ];
 
-  function SpaceServicesController($scope, $stateParams, modelManager, serviceInstanceService) {
+  function SpaceServicesController($scope, $stateParams, $state, $q, modelManager, serviceInstanceService, utils) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -42,15 +45,25 @@
     this.serviceInstanceService = serviceInstanceService;
 
     this.actionsPerSI = {};
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     $scope.$watch(function () {
-      return that.visibleServiceInstances;
+      return that.visibleServiceInstances &&
+        that.authService.isInitialized();
     }, function (serviceInstances) {
+
+      serviceInstances = that.visibleServiceInstances;
       if (!serviceInstances) {
         return;
       }
       that.updateActions(serviceInstances);
     });
+
+    function init() {
+      return $q.resolve();
+    }
+
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
 
   }
 
@@ -102,7 +115,10 @@
       var that = this;
       _.forEach(serviceInstances, function (si) {
         that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
-        that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1;
+        if (that.authService.isInitialized()) {
+          that.actionsPerSI[si.metadata.guid][0].disabled = !that.authService.isAllowed(si, 'managed_service_instance', 'delete');
+          that.actionsPerSI[si.metadata.guid][1].disabled = !that.authService.isAllowed(si, 'managed_service_instance', 'update');
+        }
       });
     }
 

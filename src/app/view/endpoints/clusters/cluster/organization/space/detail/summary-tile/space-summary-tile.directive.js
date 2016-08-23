@@ -61,6 +61,7 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.cardData = {
       title: gettext('Summary')
@@ -68,12 +69,12 @@
 
     this.actions = [
       {
-        name: gettext('Edit Space'),
+        name: gettext('Rename Space'),
         disabled: true,
         execute: function () {
           return asyncTaskDialog(
             {
-              title: gettext('Edit Space'),
+              title: gettext('Rename Space'),
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
               buttonTitles: {
                 submit: gettext('Save')
@@ -140,6 +141,16 @@
       that.roles = that.spaceModel.spaceRolesToStrings(roles);
     });
 
+    function enableActions() {
+
+      // Rename Space
+      that.actions[0].disabled = !authService.isAllowed(that.spaceDetail().details.space, 'space', 'rename');
+
+      // Delete Space
+      that.actions[1].disabled = !authService.isAllowed(that.spaceDetail().details.space, 'space', 'delete');
+
+    }
+
     function init() {
       var canDelete = false;
       that.isAdmin = user.admin;
@@ -155,7 +166,7 @@
       that.actions[1].disabled = !canDelete;
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
-
+      enableActions();
       return $q.resolve();
     }
 

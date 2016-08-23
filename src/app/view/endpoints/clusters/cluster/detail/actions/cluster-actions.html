@@ -1,10 +1,10 @@
 <actions-menu class="application-nav-menu visible-sm visible-xs cluster-actions-menu"
-              actions="_.values(clusterActionsCtrl.clusterActions)"
+              actions="clusterActionsCtrl.clusterActions"
               menu-icon="helion-icon helion-icon-2x helion-icon-More"
               menu-position="actions-menu-right">
 </actions-menu>
 <ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col">
-  <li ng-repeat="(actionName, clusterAction) in clusterActionsCtrl.clusterActions">
+  <li ng-repeat="clusterAction in clusterActionsCtrl.clusterActions">
     <button class="btn btn-link btn-border-less"
             ng-disabled="clusterAction.disabled"
             ng-hide="clusterAction.hidden"

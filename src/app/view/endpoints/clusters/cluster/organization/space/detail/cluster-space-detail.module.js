@@ -24,16 +24,33 @@
 
   ClusterSpaceController.$inject = [
     'app.model.modelManager',
-    '$stateParams'
+    '$stateParams',
+    '$state',
+    '$q',
+    'app.utils.utilsService'
   ];
 
-  function ClusterSpaceController(modelManager, $stateParams) {
+  function ClusterSpaceController(modelManager, $stateParams, $state, $q, utils) {
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
     this.spaceGuid = $stateParams.space;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+
+    var that = this;
+    function init() {
+      // If the user directly navigates to a space with a URL,
+      // authService will not be initialised
+      if (authService.isInitialized()) {
+        return $q.resolve();
+      } else {
+        return authService.initAuthService(that.clusterGuid);
+      }
+    }
+
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
   }
 
   angular.extend(ClusterSpaceController.prototype, {
