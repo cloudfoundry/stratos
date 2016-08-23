@@ -119,10 +119,6 @@
     this.debouncedOnMouseWheel = _.debounce(this.onMouseWheel, 150, {
       maxWait: 500
     });
-    this.debouncedOnMouseWheel2 = function (delta) {
-      console.log('debouncedOnMouseWheel called');
-      this.debouncedOnMouseWheel(delta);
-    };
   }
 
   angular.extend(LoginPageController.prototype, {
@@ -202,7 +198,6 @@
      * @public
      */
     onMouseWheel: function (delta) {
-      console.log('onMouseWheel');
       if (delta < 0) {
         this.goToNextSection();
       } else {
