@@ -1,6 +1,5 @@
-@import "add-notification-dialog";
-
-add-app-workflow {
+add-app-workflow,
+add-pipeline-workflow {
   table.table {
     tbody, tr:nth-child(2) {
       border: 1px solid $table-border-color;
