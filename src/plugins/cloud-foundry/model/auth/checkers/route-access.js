@@ -54,18 +54,18 @@
         }
 
         // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_organizations,
+        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations,
             space.entity.organization_guid)) {
           return true;
         }
 
         // If user is manager in space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_spaces, space.metadata.guid)) {
+        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_spaces, space.metadata.guid)) {
           return true;
         }
 
         // Finally, if user is developer in space
-        return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
       },
 
       /**
@@ -81,18 +81,18 @@
         }
 
         // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_organizations,
+        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations,
             route.entity.space.entity.organization_guid)) {
           return true;
         }
 
         // If user is manager in space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_spaces, route.entity.space_guid)) {
+        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_spaces, route.entity.space_guid)) {
           return true;
         }
 
         // Finally, if user is developer in space
-        return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, route.entity.space_guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, route.entity.space_guid);
       },
 
       /**
@@ -108,13 +108,13 @@
         }
 
         // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_organizations,
+        if (this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations,
             route.entity.space.entity.organization_guid)) {
           return true;
         }
 
         // If user is manager in space
-        return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_spaces,
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_spaces,
           route.entity.space_guid);
       },
 

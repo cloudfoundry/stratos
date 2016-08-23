@@ -16,69 +16,67 @@
   ];
 
   function register(modelManager) {
-    modelManager.register('cloud-foundry.model.auth.checkers.organizationAccess',
-      OrganizationAccessFactory(modelManager));
+    modelManager.register('cloud-foundry.model.auth.checkers.spaceAccess',
+      SpaceAccessFactory(modelManager));
   }
 
   /**
-   * @name OrganizationAccessFactory
-   * @description Function to return an OrganizationAccess class
+   * @name SpaceAccessFactory
+   * @description Function to return an SpaceAccess class
    * @param {app.api.modelManager} modelManager - the Model management service
    * @returns {OrganizationAccess}
    */
-  function OrganizationAccessFactory(modelManager) {
+  function SpaceAccessFactory(modelManager) {
     /**
-     * @name OrganizationAccess
-     * @description Constructor for OrganizationAccess
+     * @name SpaceAccess
+     * @description Constructor for SpaceAccess
      * @param {Principal} principal Principal instance
      * @param {Array} flags feature flags
      * @constructor
      */
-    function OrganizationAccess(principal, flags) {
+    function SpaceAccess(principal, flags) {
       this.principal = principal;
       this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
-    angular.extend(OrganizationAccess.prototype, {
+    angular.extend(SpaceAccess.prototype, {
 
       /**
        * @name create
-       * @description Does user have create organization permission
+       * @description Does user have create space permission.
+       * A
        * @returns {boolean}
        */
-      create: function () {
-        // Formerly, this had a param: @param {Object} space - Domain space
-        // Not sure if we need that or not.
-        return this.principal.isAdmin;
+      create: function (org) {
+        return this.principal.isAdmin ||
+          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
       },
 
       /**
        * @name update
-       * @description Does user have update organization permission
+       * @description Does user have update space permission
        * @returns {boolean}
        */
       delete: function () {
-        return this.principal.isAdmin;
+        return  this.principal.isAdmin ||
+          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
       },
 
       /**
        * @name delete
        * @description Does user have delete organization permission
-       * Original source contained a `//TODO(irfran):` annotation https://jira.hpcloud.net/browse/TEAMFOUR-625
        * @param {Object} org - Application detail
        * @returns {boolean}
        */
 
       update: function (org) {
-
         if (this.baseAccess.update(org)) {
           return true;
         }
 
         // If user is manager of org
-        return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
       },
 
       /**
@@ -88,11 +86,11 @@
        * @returns {boolean}
        */
       canHandle: function (resource) {
-        return resource === 'organization';
+        return resource === 'space';
       }
     });
 
-    return OrganizationAccess;
+    return SpaceAccess;
   }
 
 })();

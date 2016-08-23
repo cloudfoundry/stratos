@@ -82,7 +82,7 @@
     this.actions = [
       {
         name: gettext('Edit Organization'),
-        disabled: !that.isAdmin,
+        disabled: that.authService.principal.isAllowed(that.organization.org.entity.name, 'organization', 'update'),
         execute: function () {
           return asyncTaskDialog(
             {
@@ -111,7 +111,7 @@
       },
       {
         name: gettext('Delete Organization'),
-        disabled: !canDelete,
+        disabled: that.authService.principal.isAllowed(that.organization.org.entity.name, 'organization', 'update'),
         execute: function () {
           confirmDialog({
             title: gettext('Delete Organization'),

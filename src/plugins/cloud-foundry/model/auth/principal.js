@@ -31,57 +31,50 @@
     /**
      * @name Principal
      * @description initialise a Principal object
-     * @param {String} username - username
-     * @param {String} expiresIn - expires in
-     * @param {Boolean} isAdmin - is this user and admin
-     * @param {Object} userInfo - user info
+     * @param {String} stackatoInfo - stackatoInfo data
+     * @param {Object} userSummary - user info
      * @constructor
      */
-    function Principal(username, expiresIn, isAdmin, userInfo) {
-      this.username = username;
-      // this.authToken = authToken;
-      // this.refreshToken = refreshToken;
-      this.expiresIn = expiresIn;
-      // this.tokenType = tokenType;
-      this.isAdmin = isAdmin;
-      this.userInfo = userInfo;
+    function Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid) {
+
+      this.isAdmin = stackatoInfo.endpoints.hcf[cnsiGuid].user.admin;
+      this.stackatoInfo = stackatoInfo;
+      this.userSummary = userSummary;
+      this.featureFlags = featureFlags;
     }
 
     angular.extend(Principal.prototype, {
 
       /**
        * @name hasAccessTo
-       * @description Does user have access to operation
+       * @description Does user have access to operation based on feature flags
        * @param {String} operation - operation name
-       * @param {Array} flags - feature flags
        * @returns {*}
        */
-      hasAccessTo: function (operation, flags) {
-        return this.isAdmin || flags[operation];
+      hasAccessTo: function (operation) {
+        return this.isAdmin || this.featureFlags[operation];
       },
 
       /**
        * @name isAllowed
-       * @description Is user permitted to do the action
-       * @param {Object} context - context
+       * @description Is user permitted to do the action.
+       * @param {Object} context - context  (org level or space level)
        * @param {String} resourceType - ACL type
        * @param {String} action - action name
-       * @param {Array} flags - feature flags
        * @returns {*}
        */
-      isAllowed: function (context, resourceType, action, flags) {
-        var accessChecker = this._getAccessChecker(resourceType, flags);
+      isAllowed: function (context, resourceType, action) {
+        var accessChecker = this._getAccessChecker(resourceType, this.featureFlags);
         return accessChecker[action](context);
       },
 
       /**
        * @name_createAccessCheckerList
        * @description Internal method to create checker list
-       * @param {Array} flags - feature flags
        * @returns {Array}
        * @private
        */
-      _createAccessCheckerList: function (flags) {
+      _createAccessCheckerList: function () {
 
         var ServiceInstanceAccess = modelManager
           .retrieve('cloud-foundry.model.auth.checkers.serviceInstanceAccess');
@@ -90,13 +83,16 @@
         var RouteAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.routeAccess');
         var ApplicationAccess = modelManager
           .retrieve('cloud-foundry.model.auth.checkers.applicationAccess');
+        var SpaceAccess = modelManager
+          .retrieve('cloud-foundry.model.auth.checkers.spaceAccess');
 
         var checkers = [];
 
         checkers.push(new OrganizationAccess(this));
-        checkers.push(new ServiceInstanceAccess(this, flags));
-        checkers.push(new RouteAccess(this, flags));
-        checkers.push(new ApplicationAccess(this, flags));
+        checkers.push(new ServiceInstanceAccess(this, this.featureFlags));
+        checkers.push(new RouteAccess(this, this.featureFlags));
+        checkers.push(new ApplicationAccess(this, this.featureFlags));
+        checkers.push(new SpaceAccess(this, this.featureFlags));
         return checkers;
       },
 
@@ -105,7 +101,7 @@
        * @returns {object}
        * @private
        */
-      _accessConstants: function () {
+      accessConstants: function () {
         return {
           resources: {
             space: 'space',
@@ -123,6 +119,10 @@
             create: 'create',
             update: 'update',
             delete: 'delete'
+          },
+
+          flags: {
+            user_org_creation: 'user_org_creation'
           }
         };
       },
@@ -131,12 +131,11 @@
        * @name _getAccessChecker
        * @description Get Access checker for a given resource type
        * @param {string} resourceType - resource type
-       * @param {array} flags - feature flags
        * @returns {*}
        * @private
        */
-      _getAccessChecker: function (resourceType, flags) {
-        var checkers = this._createAccessCheckerList(flags);
+      _getAccessChecker: function (resourceType) {
+        var checkers = this._createAccessCheckerList();
         return _.find(checkers, function (checker) {
           return checker.canHandle(resourceType);
         });

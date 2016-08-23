@@ -43,7 +43,7 @@
 
   angular.extend(Users.prototype, {
     /**
-     * @function GetUserSummary
+     * @function getUserSummary
      * @memberof cloud-foundry.model.space
      * @description lists all spaces
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
@@ -52,11 +52,11 @@
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    GetUserSummary: function (cnsiGuid, userGuid, params) {
+    getUserSummary: function (cnsiGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .GetUserSummary(userGuid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data.resources;
+          return response.data;
         });
     },
 

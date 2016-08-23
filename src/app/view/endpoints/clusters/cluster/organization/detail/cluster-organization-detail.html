@@ -7,7 +7,8 @@
   <organization-summary-tile
     cluster-guid="clusterOrgDetailController.clusterGuid"
     organization="clusterOrgDetailController.organization()"
-    organization-names="clusterOrgDetailController.organizationNames">
+    organization-names="clusterOrgDetailController.organizationNames"
+    auth="clusterOrgDetailController.principal">
   </organization-summary-tile>
 
   <ul class="application-nav nav nav-tabs col-sm-12">
@@ -24,4 +25,4 @@
   </ul>
   <ui-view></ui-view>
 </div>
-<cluster-actions></cluster-actions>
+<cluster-actions context="organization"></cluster-actions>

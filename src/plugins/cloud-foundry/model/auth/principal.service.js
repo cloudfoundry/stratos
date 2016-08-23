@@ -12,55 +12,54 @@
     .run(register);
 
   register.$inject = [
-    'app.model.modelManager'
+    'app.model.modelManager',
+    '$q'
   ];
 
-  function register(modelManager) {
-    var principalFactory = modelManager.retrieve('cloud-foundry.model.auth.principalFactory');
-    modelManager.register('cloud-foundry.model.auth', new PrincipalService(principalFactory));
+  function register(modelManager, $q) {
+    modelManager.register('cloud-foundry.model.auth', new AuthService(modelManager, $q));
   }
 
   /**
-   * @name PrincipalService
-   * @param {Object} principalFactory - factor to retrieve initialised Principal object
+   * @name AuthService
    * @constructor
    */
-  function PrincipalService(principalFactory) {
-    // Original implementation also passed in $localStorage which was used
-    // to store and retrieve `currentUser`
-    this.principalFactory = principalFactory;
+  function AuthService(modelManager, $q) {
+    this.modelManager = modelManager;
+    this.principal = null;
+    this.$q = $q;
+
   }
 
-  angular.extend(PrincipalService.prototype, {
-    /* eslint-disable */
-    //TODO(irfran): Not original implement relied on localStorage to retrieve current user https://jira.hpcloud.net/browse/TEAMFOUR-625
-    /* eslint-enable */
-    /**
-     * @name getCurrentUser
-     * @description Retrieves current user
-     */
-    getCurrentUser: function () {
-      // Original implementation retrieved `currentUser` from localStorage
-      // var currentUser = this.localStorage.currentUser;
-      // if(angular.isDefined(currentUser)) {
-      //   return this.principalFactory.create(currentUser);
-      // } else {
-      //   return;
-      // }
-    },
+  angular.extend(AuthService.prototype, {
 
-    /* eslint-disable */
-    // TODO(irfran): Not original implement relied on localStorage to store current user https://jira.hpcloud.net/browse/TEAMFOUR-625
-    /* eslint-enable */
     /**
-     * @name setCurrentUser
+     * @name initAuthService
      * @description get a Principal instance for the current user
-     * @param {Object} authInfo - object containing authentication information
      */
-    setCurrentUser: function (authInfo) {
-      var currentUser = this.principalFactory.create(authInfo);   // eslint-disable-line no-unused-vars
-      // this.localStorage.currentUser = currentUser;
+    initAuthService: function (cnsiGuid) {
+      var that = this;
+
+      var featureFlagsModel = this.modelManager.retrieve('cloud-foundry.model.featureFlags');
+      var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
+      var usersModel = this.modelManager.retrieve('cloud-foundry.model.users');
+      var Principal = this.modelManager.retrieve('cloud-foundry.model.auth.principal');
+
+      var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
+      var stackatoInfoPromise = stackatoInfo.getStackatoInfo();
+
+      return this.$q.all([featureFlagsPromise, stackatoInfoPromise])
+        .then(function (promises) {
+          var featureFlags = promises[0];
+          var stackatoInfo = promises[1];
+          return usersModel.getUserSummary(cnsiGuid, stackatoInfo.endpoints.hcf[cnsiGuid].user.guid)
+            .then(function (userSummary) {
+              console.log('Initialising auth service');
+              that.principal = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
+            });
+        });
     }
+
   });
 
 })();

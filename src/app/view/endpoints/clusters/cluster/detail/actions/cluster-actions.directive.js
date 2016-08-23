@@ -19,6 +19,7 @@
       controllerAs: 'clusterActionsCtrl',
       scope: {
         // stateName: '@'
+        context: '@'
       },
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/cluster-actions.html'
     };
@@ -51,16 +52,12 @@
   function ClusterActionsController(modelManager, $state, $q, $stateParams,
                                     utils, asyncTaskDialog, assignUsersService, userSelection) {
     var that = this;
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
-
-    function getOrgName(org) {
-      return _.get(org, 'details.org.entity.name');
-    }
 
     function getExistingSpaceNames(orgGuid) {
       var orgSpaces = organizationModel.organizations[that.clusterGuid][orgGuid].spaces;
@@ -149,14 +146,17 @@
           contextData.spaces.length--;
         }
 
+        // Fetch organizations in which user is an Org Manager
+        var organizations = _.map(authService.principal.userSummary.entity.managed_organizations, function (org) {
+          return {
+            label: org.entity.name,
+            value:  organizationModel.organizations[that.clusterGuid][org.metadata.guid]
+          };
+        });
+
         contextData = {
           organization: selectedOrg,
-          organizations: _.map(organizationModel.organizations[that.clusterGuid], function (org) {
-            return {
-              label: getOrgName(org),
-              value: org
-            };
-          }),
+          organizations: organizations,
           existingSpaceNames: existingSpaceNames,
           spaces: [''],
           setOrganization: setOrganization,
@@ -206,22 +206,27 @@
       icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
     };
 
-    this.clusterActions = [
-      createOrg,
-      createSpace,
-      assignUsers
-    ];
+    this.clusterActions = {
+      organization: createOrg,
+      space: createSpace,
+      users: assignUsers
+    };
 
     /**
      * Enable actions based on admin status
      * N.B. when finer grain ACLs are wired in this should be updated
      * */
     function enableActions() {
-      if (stackatoInfo.info.endpoints.hcf[that.clusterGuid].user.admin) {
-        _.forEach(that.clusterActions, function (action) {
-          action.disabled = false;
-        });
-      }
+
+      // Organization access - enabled is user is either admin or the appropriate flag is enabled
+      that.clusterActions.organization.disabled = !authService.principal.hasAccessTo('user_org_creation');
+
+      // Space access - if user is an Org Manager in atleast one organization then show slide in
+      that.clusterActions.space.disabled = !authService.principal.userSummary.entity.managed_organizations.length > 0;
+
+      // Assign Users access   TODO
+      that.clusterActions.users.disabled = !authService.principal.hasAccessTo('user_org_creation');
+
     }
 
     function init() {

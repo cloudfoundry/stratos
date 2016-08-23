@@ -57,7 +57,7 @@
         // If user is developer in space the service instances will
         // belong to and the service_instance_creation flag is set
         return this.principal.hasAccessTo('service_instance_creation', this.flags) &&
-          this._doesContainGuid(this.principal.userInfo.entity.spaces, space.metadata.guid);
+          this._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
       },
 
       /**
@@ -74,7 +74,7 @@
 
         // If user is developer in space the service instances belongs to
         return this.baseAccess
-          ._doesContainGuid(this.principal.userInfo.entity.spaces, serviceInstance.entity.space_guid);
+          ._doesContainGuid(this.principal.userSummary.entity.spaces, serviceInstance.entity.space_guid);
       },
 
       /**

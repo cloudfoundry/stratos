@@ -27,7 +27,7 @@
 
     it('should have access to an operation through flags', function () {
       var principal = principalFactory.create({isAdmin: false});
-      expect(principal.hasAccessTo('add', {add: {}})).toBeTruthy();
+      expect(principal.hasAccessTo('user_org_creation', {add: {}})).toBeTruthy();
     });
 
     it('should have access to an operation through admin', function () {
