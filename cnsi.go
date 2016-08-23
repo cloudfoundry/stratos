@@ -347,14 +347,16 @@ func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 	logger.Debug("setCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		logger.Errorf("Unable to establish a database reference: '%v'", err)
-		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
+		msg := "Unable to establish a database reference: '%v'"
+		logger.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
 	}
 
 	err = cnsiRepo.Save(guid, c)
 	if err != nil {
-		logger.Errorf("Unable to save a CNSI Token: %v", err)
-		return fmt.Errorf("Unable to save a CNSI record: '%v'", err)
+		msg := "Unable to save a CNSI Token: %v"
+		logger.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
 	}
 
 	return nil
@@ -364,14 +366,16 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 	logger.Debug("unsetCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		logger.Errorf("Unable to establish a database reference: '%v'", err)
-		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
+		msg := "Unable to establish a database reference: '%v'"
+		logger.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
 	}
 
 	err = cnsiRepo.Delete(guid)
 	if err != nil {
-		logger.Errorf("Unable to delete a CNSI record: %v", err)
-		return fmt.Errorf("Unable to delete a CNSI record: '%v'", err)
+		msg := "Unable to delete a CNSI record: %v"
+		logger.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
 	}
 
 	return nil
@@ -411,14 +415,16 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tok
 	logger.Debug("setCNSITokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		logger.Errorf("Unable to establish a database reference: '%v'", err)
-		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
+		msg := "Unable to establish a database reference: '%v'"
+		logger.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
 	}
 
 	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t, p.Config.EncryptionKeyInBytes)
 	if err != nil {
-		logger.Errorf("Unable to save a CNSI Token: %v", err)
-		return fmt.Errorf("Unable to save a CNSI Token: %v", err)
+		msg := "Unable to save a CNSI Token: %v"
+		logger.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
 	}
 
 	return nil
@@ -428,14 +434,16 @@ func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) err
 	logger.Debug("unsetCNSITokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		logger.Errorf("Unable to establish a database reference: '%v'", err)
-		return fmt.Errorf("Unable to establish a database reference: '%v'", err)
+		msg := "Unable to establish a database reference: '%v'"
+		logger.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
 	}
 
 	err = tokenRepo.DeleteCNSIToken(cnsiGUID, userGUID)
 	if err != nil {
-		logger.Errorf("Unable to delete a CNSI Token: %v", err)
-		return fmt.Errorf("Unable to delete a CNSI Token: %v", err)
+		msg := "Unable to delete a CNSI Token: %v"
+		logger.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
 	}
 
 	return nil
