@@ -91,7 +91,7 @@ func main() {
 
 	portalConfig.VCSClientMap, err = getVCSClients(portalConfig)
 	if err != nil {
-		log.Println("Error parsing VCS clients")
+		logger.Fatalf("Error parsing VCS clients")
 	}
 
 	// Establish a Postgresql connection pool
@@ -109,8 +109,7 @@ func main() {
 	// Initialize the Postgres backed session store for Gorilla sessions
 	sessionStore, err := initSessionStore(databaseConnectionPool, portalConfig)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		logger.Fatal(err)
 	}
 	defer func() {
 		logger.Info(`--- Closing sessionStore`)

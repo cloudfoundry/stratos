@@ -223,7 +223,7 @@ func (p *portalProxy) logout(c echo.Context) error {
 	http.SetCookie(res, cookie)
 	err := p.clearSession(c)
 	if err != nil {
-		log.Printf("Unable to clear session: %v", err)
+		logger.Errorf("Unable to clear session: %v", err)
 	}
 
 	return err
