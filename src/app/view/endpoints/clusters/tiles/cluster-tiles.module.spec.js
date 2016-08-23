@@ -3,7 +3,7 @@
 
   describe('endpoint clusters', function () {
     var $q, $state, $scope, modelManager, confirmModal, clusterTilesCtrl, hcfRegistration, serviceInstanceModel,
-      userServiceInstanceModel, $uibModal, stackatoInfo;
+      userServiceInstanceModel, $uibModal, stackatoInfo, notificationService;
 
     var hceService = {
       guid: '817ef115-7ae6-4591-a883-8f1c3447e012',
@@ -66,6 +66,7 @@
 
       modelManager = $injector.get('app.model.modelManager');
       hcfRegistration = $injector.get('app.view.hcfRegistration');
+      notificationService = $injector.get('app.view.notificationsService');
       confirmModal = $injector.get('helion.framework.widgets.dialog.confirm');
       $uibModal = $injector.get('$uibModal');
 
@@ -81,7 +82,7 @@
 
     function createCluster() {
       var ClusterTilesCtrl = $state.get('endpoint.clusters.tiles').controller;
-      clusterTilesCtrl = new ClusterTilesCtrl(modelManager, $q, hcfRegistration, confirmModal);
+      clusterTilesCtrl = new ClusterTilesCtrl($q, modelManager, hcfRegistration, notificationService, confirmModal);
     }
 
     describe('Init', function () {
@@ -319,8 +320,8 @@
       });
 
       it('success', function () {
-        spyOn($uibModal, 'open').and.returnValue({
-          result: $q.when()
+        spyOn($uibModal, 'open').and.callFake(function (config) {
+          config.resolve.confirmDialogContext().callback();
         });
         spyOn(serviceInstanceModel, 'remove').and.callFake(function (serviceInstance) {
           expect(serviceInstance).toBe(hcfService);

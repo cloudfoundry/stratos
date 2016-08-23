@@ -21,7 +21,8 @@
         hceCnsi: {
           guid: 1234
         }
-      }
+      },
+      project: null
     };
 
     var cnsi = {guid: 1234, name: 'appName', url: ' cluster2_url', cnsi_type: 'hce'};
@@ -82,6 +83,11 @@
       expect(controller).toBeDefined();
     }
 
+    function setProject() {
+      var model = modelManager.retrieve('cloud-foundry.model.application');
+      _.set(model.application, 'project', project);
+    }
+
     afterEach(function () {
       // Not necessarily needed, but will catch any requests that have not been overwritten.
       $httpBackend.verifyNoOutstandingExpectation();
@@ -112,7 +118,7 @@
           expect(controller.hceModel).not.toBeNull();
           expect(controller.cnsiModel).not.toBeNull();
           expect(controller.hceCnsi).not.toBeNull();
-          expect(controller.hasProject).toBeNull();
+          expect(controller.hasProject).toEqual(false);
           expect(controller.last).not.toBeNull();
           expect(controller.id).not.toBeNull();
         });
@@ -120,41 +126,38 @@
         it('Constructor test, pipeline metadata not fetched', function () {
           createController();
           $rootScope.$apply();
-          expect(controller.hasProject).toEqual(null);
-          expect(controller.project).toBeUndefined();
+          expect(controller.hasProject).toEqual(false);
         });
       });
 
       describe('Constructor test, pipeline metadata fetched', function () {
         it('no project', function () {
-          fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
           createController();
           $rootScope.$apply();
-          expect(hceModel.getProjects).toHaveBeenCalled();
           expect(controller.hasProject).toEqual(false);
-          expect(controller.project).toBeUndefined();
         });
 
         it('has project', function () {
-          fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
-          fakeModelCall(hceModel, 'getProject', false, { testData: true });
+          setProject();
           fakeModelCall(hceModel, 'getPipelineExecutions', 500);
           createController();
           $rootScope.$apply();
-          expect(hceModel.getProjects).toHaveBeenCalled();
-          expect(hceModel.getProject).toHaveBeenCalled();
           expect(controller.hasProject).toEqual(true);
-          expect(controller.project).not.toBeUndefined();
-          expect(controller.project.testData).toBe(true);
+          expect(controller.model.application.project).not.toEqual(null);
         });
       });
     });
 
     describe('Trigger Build', function () {
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
-        _.set(controller, 'project', project);
+        $rootScope.$apply();
+
+        $httpBackend.flush();
       });
 
       it('Shows slide out - success', function () {
@@ -211,8 +214,14 @@
       };
 
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
+
+        $httpBackend.flush();
+
         _.set(controller, 'hceModel.data.pipelineExecutions', executions);
         _.set(controller, 'eventsPerExecution', eventsPerExecution);
       });
@@ -245,8 +254,13 @@
       var executionId = '1';
 
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
+
+        $httpBackend.flush();
       });
 
       afterEach(function () {
@@ -297,9 +311,14 @@
 
     describe('parse event', function () {
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
         spyOn(controller, 'determineLatestEvent');
+
+        $httpBackend.flush();
       });
 
       afterEach(function () {
@@ -361,9 +380,14 @@
       var eventType = 'type';
 
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
         controller.last = {};
+
+        $httpBackend.flush();
       });
 
       it('no previous event of this type used', function () {
@@ -429,8 +453,13 @@
 
     describe('parse execution', function () {
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
+
+        $httpBackend.flush();
       });
 
       it('no events obj', function () {
@@ -484,8 +513,13 @@
     describe('determine execution result', function () {
 
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
+
+        $httpBackend.flush();
       });
 
       it('execution completed (pipeline_complete - failed)', function () {
@@ -567,8 +601,14 @@
 
     describe('dynamic loading of events when execution visible - updateVisibleExecutions', function () {
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
+
+        $httpBackend.flush();
+
         // Call updateModel to set up watch, we'll test if this watch is correctly called
         spyOn(hceModel, 'getProject').and.callFake(function () {
           return project;
@@ -721,7 +761,10 @@
       var execution;
 
       beforeEach(function () {
-        fakeModelCall(hceModel, 'getProjects', false, {}, 'data.projects');
+        var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
+        $httpBackend.expectGET(request).respond([]);
+
+        setProject();
         createController(true);
 
         execution = {
@@ -729,26 +772,23 @@
             created_date: moment().format()
           }
         };
+
+        $httpBackend.flush();
       });
 
       it('get executions fails', function () {
-        spyOn(hceModel, 'getProject').and.callFake(function (appName) {
-          expect(appName).toEqual(application.summary.name);
-          return project;
-        });
+        controller.parsedHceModel = undefined;
         spyOn(hceModel, 'getPipelineExecutions').and.callFake(function () {
           return $q.reject();
         });
+
         controller.updateData();
         expect(controller.hceModel.getPipelineExecutions).toHaveBeenCalled();
         expect(controller.parsedHceModel).toBeUndefined();
       });
 
       it('pipeline result cloned successfully, execution is parsed', function () {
-        spyOn(hceModel, 'getProject').and.callFake(function (appName) {
-          expect(appName).toEqual(application.summary.name);
-          return project;
-        });
+        controller.parsedHceModel = undefined;
         spyOn(hceModel, 'getPipelineExecutions').and.callFake(function (guid, projectId) {
           expect(guid).toEqual(cnsi.guid);
           expect(projectId).toEqual(project.id);

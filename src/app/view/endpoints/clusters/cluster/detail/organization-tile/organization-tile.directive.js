@@ -26,9 +26,10 @@
     '$q',
     '$scope',
     'app.utils.utilsService',
+    'app.view.endpoints.clusters.cluster.assignUsers',
+    'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm',
-    'helion.framework.widgets.asyncTaskDialog',
-    'app.view.endpoints.clusters.cluster.assignUsers'
+    'helion.framework.widgets.asyncTaskDialog'
   ];
 
   /**
@@ -39,13 +40,14 @@
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the angular $scope service
    * @param {object} utils - our utils service
+   * @param {object} assignUsers - our assign users slide out service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
-   * @param {object} assignUsers - our assign users slide out service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, $q, $scope, utils, confirmDialog, asyncTaskDialog,
-                                      assignUsers) {
+  function OrganizationTileController(modelManager, $state, $q, $scope, utils, assignUsers, notificationsService,
+                                      confirmDialog, asyncTaskDialog) {
     var that = this;
     this.$state = $state;
     this.actions = [];
@@ -114,7 +116,11 @@
             function (orgData) {
               if (orgData.name && orgData.name.length > 0) {
                 return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
-                  {name: orgData.name});
+                  {name: orgData.name})
+                  .then(function () {
+                    notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                      {name: orgData.name});
+                  });
               } else {
                 return $q.reject('Invalid Name!');
               }
@@ -133,9 +139,15 @@
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
+            },
+            errorMessage: gettext('Failed to delete organization'),
+            callback: function () {
+              return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
+                .then(function () {
+                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
+                    {name: that.organization.org.entity.name});
+                });
             }
-          }).result.then(function () {
-            return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid);
           });
 
         }

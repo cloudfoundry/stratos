@@ -19,11 +19,12 @@
   }
 
   EndpointsViewController.$inject = [
+    '$log',
+    '$q',
     'app.model.modelManager',
     'app.api.apiManager',
     'app.view.hceRegistration',
-    '$log',
-    '$q',
+    'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm'
   ];
 
@@ -33,14 +34,16 @@
    * @name EndpointsViewController
    * @description Controller for HCE Endpoints View
    * @constructor
+   * @param {object} $log - the Angular $log service
+   * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.api.apiManager} apiManager - the api manager
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
-   * @param {object} $log - the Angular $log service
-   * @param {object} $q - the Angular $q service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} confirmDialog - the confirm dialog service
    */
-  function EndpointsViewController(modelManager, apiManager, hceRegistration, $log, $q, confirmDialog) {
+  function EndpointsViewController($log, $q, modelManager, apiManager, hceRegistration, notificationsService,
+                                   confirmDialog) {
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -57,6 +60,7 @@
       this.resolvedUpdateCurrentEndpoints = true;
     }
     this.hceRegistration = hceRegistration;
+    this.notificationsService = notificationsService;
     this.tokenExpiryMessage = 'Token has expired';
     this.activeServiceInstance = null;
     this.$log = $log;
@@ -122,7 +126,14 @@
       var that = this;
       var userServiceInstance = that.userServiceInstanceModel.serviceInstances[endpoint.guid];
       this.userServiceInstanceModel.disconnect(endpoint.guid)
+        .catch(function (error) {
+          that.notificationsService.notify('error', gettext('Failed to disconnect HCE endpoint'), {
+            timeOut: 10000
+          });
+          return $q.reject(error);
+        })
         .then(function success() {
+          that.notificationsService.notify('success', gettext('HCE endpoint successfully disconnected'));
           delete userServiceInstance.account;
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
@@ -145,15 +156,16 @@
       this.confirmDialog({
         title: gettext('Unregister Endpoint'),
         description: gettext('Are you sure you want to unregister the endpoint \'') + endpoint.name + '\'?',
+        errorMessage: gettext('Failed to unregister endpoint'),
         buttonText: {
           yes: gettext('Unregister'),
           no: gettext('Cancel')
         },
         callback: function () {
-          that.serviceInstanceModel.remove(endpoint.model)
-            .then(function success() {
-              return that._updateCurrentEndpoints(true);
-            });
+          return that.serviceInstanceModel.remove(endpoint.model).then(function success() {
+            that.notificationsService.notify('success', gettext('HCE endpoint successfully unregistered'));
+            that._updateCurrentEndpoints(true);
+          });
         }
       });
 
