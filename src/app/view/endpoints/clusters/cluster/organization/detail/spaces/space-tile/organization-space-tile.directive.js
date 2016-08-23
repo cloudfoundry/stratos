@@ -58,9 +58,7 @@
     this.spaceGuid = this.space.metadata.guid;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
 
     var destroyed = false;
@@ -190,7 +188,10 @@
     ];
 
     $scope.$watchCollection(function () {
-      return _.get(that.spaceModel, that.spacePath + '.roles.' + that.user.guid);
+      var space = that.spaceDetail();
+      if (space && space.roles && space.roles[that.user.guid]) {
+        return space.roles[that.user.guid];
+      }
     }, function (roles) {
       // Present the user's roles
       that.roles = that.spaceModel.spaceRolesToStrings(roles);
@@ -208,11 +209,11 @@
     },
 
     spaceDetail: function () {
-      return _.get(this.spaceModel, this.spacePath);
+      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
     },
 
     orgDetails: function () {
-      return _.get(this.organizationModel, this.orgPath);
+      return this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
     }
 
   });

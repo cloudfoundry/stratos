@@ -41,7 +41,6 @@
     this.organizationGuid = $stateParams.organization;
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.spacesPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid) + '.spaces';
 
     this.stateInitialised = false;
 
@@ -55,7 +54,8 @@
 
   angular.extend(ClusterDetailSpacesController.prototype, {
     spaces: function () {
-      return _.get(this.organizationModel, this.spacesPath);
+      var org = this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid) || {};
+      return org.spaces;
     },
 
     keys: _.keys

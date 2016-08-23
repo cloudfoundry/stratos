@@ -205,8 +205,10 @@
       };
     },
 
-    fetchOrganizationPath: function (cnsiGuid, orgGuid) {
-      return 'organizations.' + cnsiGuid + '.' + orgGuid;
+    fetchOrganization: function (cnsiGuid, orgGuid) {
+      if (this.organizations && this.organizations[cnsiGuid]) {
+        return this.organizations[cnsiGuid][orgGuid];
+      }
     },
 
     cacheOrganizationDetails: function (cnsiGuid, orgGuid, details) {

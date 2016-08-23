@@ -355,8 +355,10 @@
       });
     },
 
-    fetchSpacePath: function (cnsiGuid, guid) {
-      return 'spaces.' + cnsiGuid + '.' + guid;
+    fetchSpace: function (cnsiGuid, spaceGuid) {
+      if (this.spaces && this.spaces[cnsiGuid]) {
+        return this.spaces[cnsiGuid][spaceGuid];
+      }
     },
 
     updateRoutesCount: function (cnsiGuid, spaceGuid, count) {

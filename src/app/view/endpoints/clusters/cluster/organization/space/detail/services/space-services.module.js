@@ -41,7 +41,6 @@
     this.organizationGuid = $stateParams.organization;
     this.spaceGuid = $stateParams.space;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.serviceInstanceService = serviceInstanceService;
 
     this.actionsPerSI = {};
@@ -112,7 +111,7 @@
     },
 
     spaceDetail: function () {
-      return _.get(this.spaceModel, this.spacePath);
+      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
     },
 
     updateActions: function (serviceInstances) {

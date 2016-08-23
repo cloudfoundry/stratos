@@ -56,7 +56,6 @@
     this.$state = $state;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -134,7 +133,10 @@
     };
 
     $scope.$watchCollection(function () {
-      return _.get(that.spaceModel, that.spacePath + '.roles.' + user.guid);
+      var space = that.spaceDetail();
+      if (space && space.roles && space.roles[user.guid]) {
+        return space.roles[user.guid];
+      }
     }, function (roles) {
       // Present the user's roles
       that.roles = that.spaceModel.spaceRolesToStrings(roles);
@@ -182,7 +184,7 @@
   angular.extend(SpaceSummaryTileController.prototype, {
 
     spaceDetail: function () {
-      return _.get(this.spaceModel, this.spacePath);
+      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
     }
 
   });

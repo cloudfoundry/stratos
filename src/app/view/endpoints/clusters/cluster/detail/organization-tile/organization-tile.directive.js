@@ -84,9 +84,11 @@
       canDelete = _.keys(spacesInOrg).length === 0;
     }
 
-    var orgPath = that.organizationModel.fetchOrganizationPath(that.organization.cnsiGuid, that.organization.guid);
     $scope.$watchCollection(function () {
-      return _.get(that.organizationModel, orgPath + '.roles.' + that.user.guid);
+      var org = that.organizationModel.fetchOrganization(that.organization.cnsiGuid, that.organization.guid);
+      if (org && org.roles && org.roles[that.user.guid]) {
+        return org.roles[that.user.guid];
+      }
     }, function (roles) {
       // Present the user's roles
       that.roles = that.organizationModel.organizationRolesToStrings(roles);

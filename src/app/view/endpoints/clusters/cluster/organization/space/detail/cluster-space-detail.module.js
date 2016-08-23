@@ -38,7 +38,6 @@
     this.spaceGuid = $stateParams.space;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
 
     this.stateInitialised = false;
 
@@ -52,7 +51,7 @@
 
   angular.extend(ClusterSpaceController.prototype, {
     space: function () {
-      return _.get(this.spaceModel, this.spacePath);
+      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
     }
 
   });
