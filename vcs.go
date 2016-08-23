@@ -1,11 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/labstack/echo"
 
 	"golang.org/x/oauth2"
 )
@@ -109,4 +113,28 @@ func getAuthPathPrefix(vcs string) VCSAuthPathPrefix {
 	default:
 		return VCSGITHUBAUTHPATHPREFIX
 	}
+}
+
+func (p *portalProxy) listVCSClients(c echo.Context) error {
+	log.Println("listVCSClients")
+	keys := make([]string, len(p.Config.VCSClientMap))
+
+	i := 0
+	for k := range p.Config.VCSClientMap {
+		keys[i] = k.Endpoint
+		i++
+	}
+
+	jsonString, err := json.Marshal(keys)
+	if err != nil {
+		return newHTTPShadowError(
+			http.StatusUnauthorized,
+			"Listing VCS clients failed",
+			"Listing VCS clients failed: %v", err)
+	}
+
+	c.Response().Header().Set("Content-Type", "application/json")
+	c.Response().Write(jsonString)
+
+	return nil
 }
