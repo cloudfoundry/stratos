@@ -33,4 +33,12 @@ add-pipeline-workflow {
     cursor: pointer;
     pointer-events: auto;
   }
+
+  .flyout-content {
+    z-index: 1040;
+  }
+
+  .step-spinner {
+    padding: $hpe-unit-space 0;
+  }
 }

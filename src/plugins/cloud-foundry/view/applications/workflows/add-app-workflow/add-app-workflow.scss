@@ -1,21 +1,12 @@
 @import "pipeline-subflow/add-notification-dialog";
-@import "pipeline-subflow/code-engine-info/code-engine-info";
 
 .media-list.hpe-add-option-list > .media.service-panel {
   padding: $hpe-unit-space 0;
 }
 
 add-app-workflow {
-  .flyout-content {
-    z-index: 1040;
-  }
-
   .services-filter-form {
     margin-bottom: $hpe-unit-space / 2;
-  }
-
-  .step-spinner {
-    padding: $hpe-unit-space 0;
   }
 }
 
