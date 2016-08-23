@@ -147,6 +147,7 @@
           repos: [],
           branches: [],
           buildContainers: [],
+          notificationFormAppMode: true,
           imageRegistries: []
         };
 
