@@ -141,26 +141,41 @@
     });
 
     function init() {
-      var canDelete = false;
-      that.isAdmin = user.admin;
-      that.userName = user.name;
       var spaceDetail = that.spaceDetail();
-      if (that.isAdmin) {
-        canDelete = spaceDetail.details.totalRoutes === 0 &&
-          spaceDetail.details.totalServiceInstances === 0 &&
-          spaceDetail.details.totalApps === 0 &&
-          spaceDetail.details.totalServices === 0;
-      }
-      that.actions[0].disabled = !that.isAdmin;
-      that.actions[1].disabled = !canDelete;
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
 
-      return $q.resolve();
+      // If navigating to/reloading the space details page these will be missing. Do these here instead of in
+      // getSpaceDetails to avoid blocking state init when there are 100s of spaces
+      var updatePromises = [];
+      if (angular.isUndefined(spaceDetail.details.totalRoutes)) {
+        updatePromises.push(that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid));
+      }
+      if (angular.isUndefined(spaceDetail.details.totalServices)) {
+        updatePromises.push(that.spaceModel.updateServiceCount(that.clusterGuid, that.spaceGuid));
+      }
+
+      return $q.all(updatePromises).then(function () {
+        var canDelete = false;
+        that.isAdmin = user.admin;
+        that.userName = user.name;
+
+        if (that.isAdmin) {
+          canDelete = spaceDetail.details.totalRoutes === 0 &&
+            spaceDetail.details.totalServiceInstances === 0 &&
+            spaceDetail.details.totalApps === 0 &&
+            spaceDetail.details.totalServices === 0;
+        }
+        that.actions[0].disabled = !that.isAdmin;
+        that.actions[1].disabled = !canDelete;
+
+        return $q.resolve();
+      });
+
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
 
   }
 

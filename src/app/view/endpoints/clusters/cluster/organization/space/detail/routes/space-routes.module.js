@@ -81,6 +81,7 @@
         .then(function () {
           if (route) {
             that.updateActions([route]);
+            that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid, _.keys(that.spaceDetail().routes).length);
           }
         });
     },

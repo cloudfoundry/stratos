@@ -359,6 +359,53 @@
       return 'spaces.' + cnsiGuid + '.' + guid;
     },
 
+    updateRoutesCount: function (cnsiGuid, spaceGuid, count) {
+      var that = this;
+      //TODO: update this x 3
+      // The full routes collection (with depth) is possibly required later on. Rather than fetching them all here
+      // just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
+      // should be super quick.
+      var promise = this.$q.resolve({ data: { total_results: count }});
+      if (!count) {
+        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllRoutesForSpace(spaceGuid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+      }
+      return promise.then(function (response) {
+        _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details.totalRoutes', response.data.total_results);
+        return response.data.total_results;
+      });
+    },
+
+    updateServiceInstanceCount: function (cnsiGuid, spaceGuid, count) {
+      var that = this;
+      // The full service instance collection (with depth) is possibly required later on. Rather than fetching them all
+      // here just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
+      // should be super quick.
+      var promise = this.$q.resolve({ data: { total_results: count }});
+      if (!count) {
+        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllServiceInstancesForSpace(spaceGuid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+      }
+      return promise.then(function (response) {
+        _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details.totalServiceInstances', response.data.total_results);
+        return response.data.total_results;
+      });
+    },
+
+    updateServiceCount: function (cnsiGuid, spaceGuid, count) {
+      var that = this;
+      // Services are never inlined
+      var promise = this.$q.resolve({ data: { total_results: count }});
+      if (!count) {
+        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllServicesForSpace(spaceGuid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+      }
+      return promise.then(function (response) {
+        _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details.totalServices', response.data.total_results);
+        return response.data.total_results;
+      });
+    },
+
     /**
      * @function  getSpaceDetails
      * @memberof cloud-foundry.model.space
@@ -381,14 +428,12 @@
 
       var rolesP, appP, quotaP;
 
-      // The full service instance collection (with depth) is possibly required later on. Rather than fetching them all
-      // here just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
-      // should be super quick.
-      var serviceInstancesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServiceInstancesForSpace(spaceGuid, { 'results-per-page': 1 }, httpConfig)
-        .then(function (response) {
-          return response.data.total_results;
-        });
+      // Service instances will not be cached now, they lack the 'depth' required and will be loaded on demand.
+      // If there's no service instances (probably due to paging), lazy load later on to avoid blocking space lists
+      // with 100's in
+      var serviceInstancesCountP = space.entity.service_instances
+        ? that.$q.resolve(space.entity.service_instances.length)
+        : that.$q.resolve();
 
       if (spaceQuotaGuid) {
         // Check for inline quota!
@@ -431,28 +476,18 @@
         appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid, {}, true);
       }
 
-      // Services are never inlined
-      var servicesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServicesForSpace(spaceGuid, { 'results-per-page': 1 }, httpConfig)
-        .then(function (response) {
-          return response.data.total_results;
-        });
-
-      // The full routes collection (with depth) is possibly required later on. Rather than fetching them all here
-      // just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
-      // should be super quick.
-      var routesCountP = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(spaceGuid, { 'results-per-page': 1 }, httpConfig)
-        .then(function (response) {
-          return response.data.total_results;
-        });
+      // Routes will not be cached now, they lack the 'depth' required and will be loaded on demand.
+      // If there's no service instances (probably due to paging), lazy load later on to avoid blocking space lists
+      // with 100's in
+      var routesCountP = space.entity.routes
+        ? that.$q.resolve(space.entity.routes.length)
+        : that.$q.resolve();
 
       return this.$q.all({
         quota: quotaP,
         serviceInstancesCount: serviceInstancesCountP,
         apps: appP,
         roles: spaceRolesP,
-        servicesCount: servicesCountP,
         routesCount: routesCountP
       }).then(function (vals) {
         var details = {};
@@ -488,7 +523,9 @@
 
         details.roles = vals.roles;
 
-        details.totalServices = vals.servicesCount;
+        // Will be lazy loaded to avoid block in cases where there are 100's of spaces. At this point we're just
+        // clearing the cache
+        details.totalServices = undefined;
         details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
 
         details.totalRoutes = vals.routesCount;

@@ -74,6 +74,7 @@
       }, true).then(function () {
         if (serviceInstance) {
           that.updateActions([serviceInstance]);
+          that.spaceModel.updateServiceInstanceCount(that.clusterGuid, that.spaceGuid, _.keys(that.spaceDetail().instances).length);
         }
       });
     },

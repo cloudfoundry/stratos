@@ -63,23 +63,51 @@
     this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
 
+    var destroyed = false;
+    $scope.$on('$destroy', function () {
+      destroyed = true;
+    });
+
     function init() {
-      var canDelete = false;
-      var isAdmin = that.user.admin;
-      var spaceDetail = that.spaceDetail();
-      if (isAdmin) {
-        canDelete = spaceDetail.details.totalRoutes === 0 &&
-          spaceDetail.details.totalServiceInstances === 0 &&
-          spaceDetail.details.totalApps === 0 &&
-          spaceDetail.details.totalServices === 0;
+      if (destroyed) {
+        return $q.resolve();
       }
-      that.actions[0].disabled = !isAdmin;
-      that.actions[1].disabled = !canDelete;
-      that.actions[2].disabled = !isAdmin;
+
+      var spaceDetail = that.spaceDetail();
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
 
-      return $q.resolve();
+      // Update these counts per tile, meaning the core getSpaceDetails does not block in the case of 100s of
+      // spaces but instead shows list and updates when async data returns
+      var updatePromises = [];
+      if (angular.isUndefined(spaceDetail.details.totalRoutes)) {
+        updatePromises.push(that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid));
+      }
+      if (angular.isUndefined(spaceDetail.details.totalServiceInstances)) {
+        updatePromises.push(that.spaceModel.updateServiceInstanceCount(that.clusterGuid, that.spaceGuid));
+      }
+      if (angular.isUndefined(spaceDetail.details.totalServices)) {
+        updatePromises.push(that.spaceModel.updateServiceCount(that.clusterGuid, that.spaceGuid));
+      }
+
+      return $q.all(updatePromises).then(function () {
+
+        var canDelete = false;
+        var isAdmin = that.user.admin;
+
+        if (isAdmin) {
+          canDelete = spaceDetail.details.totalRoutes === 0 &&
+            spaceDetail.details.totalServiceInstances === 0 &&
+            spaceDetail.details.totalApps === 0 &&
+            spaceDetail.details.totalServices === 0;
+        }
+        that.actions[0].disabled = !isAdmin;
+        that.actions[1].disabled = !canDelete;
+        that.actions[2].disabled = !isAdmin;
+
+        return $q.resolve();
+      });
+
     }
 
     var cardData = {};
