@@ -26,6 +26,7 @@
     '$q',
     'app.model.modelManager',
     'app.utils.utilsService',
+    'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
   ];
@@ -39,12 +40,13 @@
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.model.utilsService} utils - the utils service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function SpaceSummaryTileController($state, $scope, $stateParams, $q,
-                                      modelManager, utils, confirmDialog, asyncTaskDialog) {
+  function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, utils, notificationsService,
+                                      confirmDialog, asyncTaskDialog) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -88,7 +90,11 @@
             function (spaceData) {
               if (spaceData.name && spaceData.name.length > 0) {
                 return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
-                  {name: spaceData.name});
+                  {name: spaceData.name})
+                  .then(function () {
+                    notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
+                      {name: spaceData.name});
+                  });
               } else {
                 return $q.reject('Invalid Name!');
               }
@@ -107,12 +113,17 @@
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
+            },
+            errorMessage: gettext('Failed to delete space'),
+            callback: function () {
+              return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
+                .then(function () {
+                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
+                    {name: that.spaceDetail().details.space.entity.name});
+                  // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
+                  return $state.go($state.current.ncyBreadcrumb.parent());
+                });
             }
-          }).result.then(function () {
-            return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid).then(function () {
-              // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
-              return $state.go($state.current.ncyBreadcrumb.parent());
-            });
           });
         }
       }

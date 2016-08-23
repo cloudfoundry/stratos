@@ -28,6 +28,7 @@
     '$q',
     'app.model.modelManager',
     'app.utils.utilsService',
+    'app.view.notificationsService',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
   ];
@@ -41,11 +42,12 @@
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.utilsService} utils - the console utils service
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    */
-  function OrganizationSummaryTileController($scope, $state, $stateParams, $q,
-                                             modelManager, utils, confirmDialog, asyncTaskDialog) {
+  function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, utils,
+                                             notificationsService, confirmDialog, asyncTaskDialog) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -101,7 +103,11 @@
             function (orgData) {
               if (orgData.name && orgData.name.length > 0) {
                 return that.organizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
-                  {name: orgData.name});
+                  {name: orgData.name})
+                  .then(function () {
+                    notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                      {name: orgData.name});
+                  });
               } else {
                 return $q.reject('Invalid Name!');
               }
@@ -120,12 +126,17 @@
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
+            },
+            errorMessage: gettext('Failed to delete organization'),
+            callback: function () {
+              return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
+                .then(function () {
+                  notificationsService.notify('success', gettext('Organization \'{{name}\'} successfully deleted'),
+                    {name: that.organization.details.org.entity.name});
+                  // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
+                  return $state.go($state.current.ncyBreadcrumb.parent());
+                });
             }
-          }).result.then(function () {
-            return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid).then(function () {
-              // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
-              return $state.go($state.current.ncyBreadcrumb.parent());
-            });
           });
         }
       }

@@ -33,7 +33,8 @@
     'app.utils.utilsService',
     'helion.framework.widgets.asyncTaskDialog',
     'app.view.endpoints.clusters.cluster.assignUsers',
-    'app.view.userSelection'
+    'app.view.userSelection',
+    'app.view.notificationsService'
   ];
 
   /**
@@ -47,10 +48,11 @@
    * @param {object} asyncTaskDialog - our async dialog service
    * @param {object} assignUsersService - service that allows assigning roles to users
    * @param {object} userSelection - service centralizing user selection
+   * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function ClusterActionsController(modelManager, $state, $q, $stateParams,
-                                    utils, asyncTaskDialog, assignUsersService, userSelection) {
+                                    utils, asyncTaskDialog, assignUsersService, userSelection, notificationsService) {
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -86,7 +88,10 @@
           },
           function (orgData) {
             if (orgData.name && orgData.name.length > 0) {
-              return organizationModel.createOrganization(that.clusterGuid, orgData.name);
+              return organizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
+                notificationsService.notify('success', gettext('Organisation \'{{name}}\' successfully created'),
+                  { name: orgData.name });
+              });
             } else {
               return $q.reject('Invalid Name!');
             }
@@ -187,7 +192,12 @@
             if (toCreate.length < 1) {
               return $q.reject('Nothing to create!');
             }
-            return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate);
+            return spaceModel.createSpaces(that.clusterGuid, contextData.organization.details.guid, toCreate)
+              .then(function () {
+                notificationsService.notify('success', toCreate.length > 1
+                  ? gettext('Spaces \'{{names}}\' successfully created')
+                  : gettext('Space \'{{name}}\' successfully created'), { name: toCreate[0], names: toCreate.join(',')});
+              });
           }
         );
       },
