@@ -222,18 +222,18 @@
     addNotificationTarget: function () {
       var that = this;
       this.addNotificationService.add(this.hceCnsi && this.hceCnsi.guid)
-        .closed
-        .then(function () {
-          that.getPipelineData();
+        .result
+        .then(function (notificationTargetData) {
+          that.notificationTargets.push(notificationTargetData);
         });
     },
 
     addPostDeployAction: function () {
       var that = this;
       this.postDeployActionService.add(this.hceCnsi.guid, this.project.id)
-        .closed
-        .then(function () {
-          that.getPipelineData();
+        .result
+        .then(function (postDeployAction) {
+          that.postDeployActions.push(postDeployAction.data);
         });
     }
   });
