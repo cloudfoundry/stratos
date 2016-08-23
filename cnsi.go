@@ -48,7 +48,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	}
 
 	// check if we've already got this endpoint in the DB
-	_, ok := p.getCNSIRecordByAPIEndpoint(apiEndpoint)
+	ok := p.cnsiRecordExists(apiEndpoint)
 	if ok {
 		// a record with the same api endpoint was found
 		return newHTTPShadowError(
@@ -375,19 +375,19 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 	return rec, true
 }
 
-func (p *portalProxy) getCNSIRecordByAPIEndpoint(endpoint string) (cnsis.CNSIRecord, bool) {
-	log.Println("getCNSIRecordByAPIEndpoint")
+func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
+	log.Println("cnsiRecordExists")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		return cnsis.CNSIRecord{}, false
+		return false
 	}
 
-	rec, err := cnsiRepo.FindByAPIEndpoint(endpoint)
+	_, err = cnsiRepo.FindByAPIEndpoint(endpoint)
 	if err != nil {
-		return cnsis.CNSIRecord{}, false
+		return false
 	}
 
-	return rec, true
+	return true
 }
 
 func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
