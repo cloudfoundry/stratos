@@ -78,6 +78,23 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
     </body>
     </html>`
 
+  var notFoundHTML = `
+    <!doctype html>
+    <html>
+    <head><link rel="stylesheet" href="/index.css"></head>
+    <body id="github-auth-callback-page">
+    <h1 class="text-center">VCS endpoint is not found.</h1>
+    <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
+    <script>
+      (function () {
+        window.opener.postMessage(JSON.stringify({
+          name: 'VCS OAuth - failure'
+        }), window.location.origin);
+      })();
+    </script>
+    </body>
+    </html>`
+
 	// retrieve endpoint from session using OAuth state string
 	state := c.FormValue("state")
 	endpoint, ok := p.getSessionStringValue(c, state)
@@ -112,14 +129,14 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		// stuff the token into the user's session
 		sessionKey := newSessionKey(endpoint)
 		if err = setVCSSession(p, c, sessionKey, token.AccessToken); err != nil {
-			return c.HTML(http.StatusBadRequest, "Unable to update user session with token")
+			return c.HTML(http.StatusOK, failureHTML)
 		}
 
 		return c.HTML(http.StatusOK, successHTML)
 	}
 
 	log.Println("VCS Client not found")
-	return c.HTML(http.StatusBadRequest, "VCS Client not found")
+	return c.HTML(http.StatusOK, notFoundHTML)
 }
 
 func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
