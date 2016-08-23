@@ -46,33 +46,40 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, error) {
 	if pc.VCSClients != "" {
 		for _, client := range strings.Split(pc.VCSClients, ";") {
 			clientData := strings.Split(client, ",")
-			vcsType := strings.ToLower(clientData[0])
-			vcsClientType, err := getVCSType(vcsType)
-			if err != nil {
-				log.Printf("Unable to get VCS type %s: %v", vcsType, err)
-				continue
+			if len(clientData) == 4 {
+				vcsType := strings.ToLower(clientData[0])
+				vcsClientType, err := getVCSType(vcsType)
+				if err != nil {
+					log.Printf("Unable to get VCS type %s: %v", vcsType, err)
+					continue
+				}
+
+				pathPrefix := getAuthPathPrefix(vcsType)
+				baseEndpoint := strings.TrimSpace(clientData[1])
+				baseEndpointURL, err := url.Parse(baseEndpoint)
+				if err != nil {
+					log.Printf("Unable to parse VCS endpoint URL: %s", baseEndpoint)
+					continue
+				}
+
+				authEndpoint := fmt.Sprintf("%s://%s%s/oauth/authorize", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
+				tokenEndpoint := fmt.Sprintf("%s://%s%s/oauth/access_token", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
+
+				vcsConfig := oauth2.Config{
+					Endpoint: oauth2.Endpoint{
+						AuthURL:  authEndpoint,
+						TokenURL: tokenEndpoint,
+					},
+					ClientID:     clientData[2],
+					ClientSecret: clientData[3],
+				}
+
+				if vcsClientType == VCSGITHUB {
+					vcsConfig.Scopes = githubScopes
+				}
+
+				vcsClientMap[VCSClientMapKey{baseEndpoint}] = vcsConfig
 			}
-
-			pathPrefix := getAuthPathPrefix(vcsType)
-			baseEndpoint := strings.TrimSpace(clientData[1])
-			baseEndpointURL, _ := url.Parse(baseEndpoint)
-			authEndpoint := fmt.Sprintf("%s://%s%s/oauth/authorize", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-			tokenEndpoint := fmt.Sprintf("%s://%s%s/oauth/access_token", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-
-			vcsConfig := oauth2.Config{
-				Endpoint: oauth2.Endpoint{
-					AuthURL:  authEndpoint,
-					TokenURL: tokenEndpoint,
-				},
-				ClientID:     clientData[2],
-				ClientSecret: clientData[3],
-			}
-
-			if vcsClientType == VCSGITHUB {
-				vcsConfig.Scopes = githubScopes
-			}
-
-			vcsClientMap[VCSClientMapKey{baseEndpoint}] = vcsConfig
 		}
 	}
 
