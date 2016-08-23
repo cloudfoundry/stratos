@@ -355,55 +355,89 @@
       });
     },
 
-    fetchSpace: function (cnsiGuid, spaceGuid) {
+    /**
+     * @function fetchSpace
+     * @memberof cloud-foundry.model.space
+     * @description Fetches the cached space object
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @returns {object} The cached space object
+     * @public
+     */
+    fetchSpace: function (cnsiGuid, guid) {
       if (this.spaces && this.spaces[cnsiGuid]) {
-        return this.spaces[cnsiGuid][spaceGuid];
+        return this.spaces[cnsiGuid][guid];
       }
     },
 
-    updateRoutesCount: function (cnsiGuid, spaceGuid, count) {
+    /**
+     * @function updateRoutesCount
+     * @memberof cloud-foundry.model.space
+     * @description Updates the cached route count either from the provided value or via HCF. This will be used when
+     * it's not appropriate to fetch/use data that's inline
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {number=} count - the number of routes.
+     * @returns {promise} promise object once completed, contains number of routes
+     * @public
+     */
+    updateRoutesCount: function (cnsiGuid, guid, count) {
       var that = this;
-      //TODO: update this x 3
-      // The full routes collection (with depth) is possibly required later on. Rather than fetching them all here
-      // just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
-      // should be super quick.
       var promise = this.$q.resolve({ data: { total_results: count }});
       if (!count) {
         promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllRoutesForSpace(spaceGuid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+          .ListAllRoutesForSpace(guid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
-        _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details.totalRoutes', response.data.total_results);
+        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', response.data.total_results);
         return response.data.total_results;
       });
     },
 
-    updateServiceInstanceCount: function (cnsiGuid, spaceGuid, count) {
+    /**
+     * @function updateServiceInstanceCount
+     * @memberof cloud-foundry.model.space
+     * @description Updates the service instance count either from the provided value or via HCF. This will be used when
+     * it's not appropriate to fetch/use data that's inline
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {number=} count - the number of routes.
+     * @returns {promise} promise object once completed, contains number of service instances
+     * @public
+     */
+    updateServiceInstanceCount: function (cnsiGuid, guid, count) {
       var that = this;
-      // The full service instance collection (with depth) is possibly required later on. Rather than fetching them all
-      // here just get the count. This is a slight optimisation for when there are many many spaces in an org. This call
-      // should be super quick.
       var promise = this.$q.resolve({ data: { total_results: count }});
       if (!count) {
         promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllServiceInstancesForSpace(spaceGuid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+          .ListAllServiceInstancesForSpace(guid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
-        _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details.totalServiceInstances', response.data.total_results);
+        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances', response.data.total_results);
         return response.data.total_results;
       });
     },
 
-    updateServiceCount: function (cnsiGuid, spaceGuid, count) {
+    /**
+     * @function updateServiceCount
+     * @memberof cloud-foundry.model.space
+     * @description Updates the service count either from the provided value or via HCF. This will be used when
+     * it's not appropriate to fetch/use data that's inline
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {number=} count - the number of routes.
+     * @returns {promise} promise object once completed, contains number of services
+     * @public
+     */
+    updateServiceCount: function (cnsiGuid, guid, count) {
       var that = this;
-      // Services are never inlined
       var promise = this.$q.resolve({ data: { total_results: count }});
       if (!count) {
         promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
-          .ListAllServicesForSpace(spaceGuid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+          .ListAllServicesForSpace(guid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
       }
       return promise.then(function (response) {
-        _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details.totalServices', response.data.total_results);
+        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServices', response.data.total_results);
         return response.data.total_results;
       });
     },
