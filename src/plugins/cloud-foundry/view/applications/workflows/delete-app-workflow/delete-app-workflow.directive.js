@@ -215,33 +215,28 @@
      * @returns {promise} A resolved/rejected promise
      */
     deleteServiceBindings: function () {
-      var promises = [];
+      var that = this;
       var checkedServiceValue = this.userInput.checkedServiceValue;
-
-      // checked service instances that are safe to delete
-      var safeServiceInstances = _.chain(checkedServiceValue)
-        .filter(function (o) { return o && o.bound_app_count === 1; })
-        .map('guid')
-        .value();
 
       /**
        * service instances that aren't bound to only this app
        * should not be deleted, only unbound
        */
-      var serviceInstanceGuids = _.chain(checkedServiceValue)
-        .keys()
-        .difference(safeServiceInstances)
-        .value();
-
+      var serviceInstanceGuids = _.keys(checkedServiceValue);
       if (serviceInstanceGuids.length > 0) {
-        promises.push(this._unbindServiceInstances(serviceInstanceGuids));
+        return this._unbindServiceInstances(serviceInstanceGuids)
+          .then(function () {
+            var safeServiceInstances = _.chain(checkedServiceValue)
+              .filter(function (o) { return o && o.bound_app_count === 1; })
+              .map('guid')
+              .value();
+            return that._deleteServiceInstances(safeServiceInstances);
+          });
+      } else {
+        var deferred = this.$q.defer();
+        deferred.resolve();
+        return deferred.promise;
       }
-
-      if (safeServiceInstances.length > 0) {
-        promises.push(this._deleteServiceInstances(safeServiceInstances));
-      }
-
-      return this.$q.all(promises);
     },
 
     /**
@@ -282,7 +277,7 @@
 
       angular.forEach(safeServiceInstances, function (serviceInstanceGuid) {
         funcStack.push(function () {
-          return that.serviceInstanceModel.deleteServiceInstance(that.cnsiGuid, serviceInstanceGuid, {recursive: true});
+          return that.serviceInstanceModel.deleteServiceInstance(that.cnsiGuid, serviceInstanceGuid);
         });
       });
 
