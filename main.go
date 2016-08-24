@@ -91,7 +91,7 @@ func main() {
 
 	portalConfig.VCSClientMap, err = getVCSClients(portalConfig)
 	if err != nil {
-		logger.Fatalf("Error parsing VCS clients")
+		logger.Error("Error parsing VCS clients")
 	}
 
 	// Establish a Postgresql connection pool
