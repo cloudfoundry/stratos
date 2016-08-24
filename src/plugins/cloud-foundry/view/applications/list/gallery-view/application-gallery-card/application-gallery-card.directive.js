@@ -22,14 +22,22 @@
   }
 
   ApplicationGalleryCardController.$inject = [
-    '$state'
+    '$state',
+    '$scope'
   ];
 
-  function ApplicationGalleryCardController($state) {
+  function ApplicationGalleryCardController($state, $scope) {
+    var that = this;
     this.$state = $state;
     this.cardData = {
       title: this.app.entity.name
     };
+
+    $scope.$watch(function () {
+      return that.app.entity.state;
+    }, function () {
+      that.canShowStats = that.app.entity.state === 'STARTED';
+    });
   }
 
   angular.extend(ApplicationGalleryCardController.prototype, {

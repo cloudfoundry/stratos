@@ -118,9 +118,9 @@
 
         return that.hceNotificationApi.addNotificationTarget(that.hceCnsi.guid,
           request, {project_id: that.project.id}, that.hceModel.hceProxyPassthroughConfig)
-          .then(function () {
+          .then(function (response) {
             that.indications.busy = false;
-            that.$uibModalInstance.close();
+            that.$uibModalInstance.close(response.data);
           }).catch(function () {
             that.indications.busy = false;
             that.indications.error = true;
