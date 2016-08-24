@@ -25,7 +25,8 @@
     'app.model.modelManager',
     'app.event.eventService',
     '$q',
-    '$interpolate'
+    '$interpolate',
+    'app.utils.utilsService'
   ];
 
   /**
@@ -36,9 +37,11 @@
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} $q - angular $q service
    * @param {object} $interpolate - the Angular $interpolate service
+   * @param {app.utils.utilsService} utils - the utils service
    * @property {app.event.eventService} eventService - the Event management service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the Angular $interpolate service
+   * @property {app.utils.utilsService} utils - the utils service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} routeModel - the Cloud Foundry route model
    * @property {object} serviceBindingModel - the Cloud Foundry service binding model
@@ -46,12 +49,13 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController(modelManager, eventService, $q, $interpolate) {
+  function DeleteAppWorkflowController(modelManager, eventService, $q, $interpolate, utils) {
     var that = this;
 
     this.eventService = eventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
+    this.utils = utils;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     this.serviceBindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
@@ -183,18 +187,15 @@
       var that = this;
       var checkedRouteValue = this.userInput.checkedRouteValue;
       var appGuid = this.appModel.application.summary.guid;
-      var list = Object.keys(checkedRouteValue);
+      var funcStack = [];
 
-      return this.$q(function (resolve, reject) {
-        (function _doIt() {
-          if (!list.length) {
-            resolve();
-            return;
-          }
-          var guid = list.pop();
-          that.routeModel.removeAppFromRoute(that.cnsiGuid, guid, appGuid).then(_doIt, reject);
-        })();
+      Object.keys(checkedRouteValue).forEach(function (guid) {
+        funcStack.push(function () {
+          return that.routeModel.removeAppFromRoute(that.cnsiGuid, guid, appGuid);
+        })
       });
+
+      return this.utils.runInSequence(funcStack);
     },
 
     /**
@@ -261,18 +262,15 @@
     tryDeleteEachRoute: function () {
       var that = this;
       var checkedRouteValue = this.userInput.checkedRouteValue;
-      var list = Object.keys(checkedRouteValue);
+      var funcStack = [];
 
-      return this.$q(function (resolve, reject) {
-        (function _doIt() {
-          if (!list.length) {
-            resolve();
-            return;
-          }
-          var routeId = list.pop();
-          that.deleteRouteIfPossible(routeId).then(_doIt, reject);
-        })();
+      Object.keys(checkedRouteValue).forEach(function (routeId) {
+        funcStack.push(function () {
+          return that.deleteRouteIfPossible(routeId);
+        })
       });
+
+      return this.utils.runInSequence(funcStack);
     },
 
     /**
