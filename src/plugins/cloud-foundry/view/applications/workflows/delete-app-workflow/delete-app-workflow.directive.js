@@ -257,14 +257,15 @@
       var q = 'service_instance_guid IN ' + bindingGuids.join(',');
       return this.appModel.listServiceBindings(this.cnsiGuid, appGuid, {q: q})
         .then(function (bindings) {
-          // service bindings can't be deleted async, so chain the requests
-          var chain = that.$q.when();
+          var funcStack = [];
+
           angular.forEach(bindings, function (binding) {
-            chain = chain.then(function () {
+            funcStack.push(function () {
               return that.appModel.unbindServiceFromApp(that.cnsiGuid, appGuid, binding.metadata.guid);
             });
           });
-          return chain;
+
+          return that.utils.runInSequence(funcStack);
         });
     },
 
@@ -277,15 +278,15 @@
      */
     _deleteServiceInstances: function (safeServiceInstances) {
       var that = this;
-      // service instances can't be deleted async, so chain the requests
-      var chain = that.$q.when();
+      var funcStack = [];
+
       angular.forEach(safeServiceInstances, function (serviceInstanceGuid) {
-        chain = chain.then(function () {
+        funcStack.push(function () {
           return that.serviceInstanceModel.deleteServiceInstance(that.cnsiGuid, serviceInstanceGuid, {recursive: true});
         });
       });
 
-      return chain;
+      return this.utils.runInSequence(funcStack);
     },
 
     /**
