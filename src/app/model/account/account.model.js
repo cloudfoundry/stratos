@@ -14,11 +14,12 @@
   registerAccountModel.$inject = [
     '$cookies',
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    '$q'
   ];
 
-  function registerAccountModel($cookies, modelManager, apiManager) {
-    modelManager.register('app.model.account', new Account($cookies, apiManager));
+  function registerAccountModel($cookies, modelManager, apiManager, $q) {
+    modelManager.register('app.model.account', new Account($cookies, apiManager, $q));
   }
 
   /**
@@ -27,15 +28,18 @@
    * @name app.model.account.Account
    * @param {object} $cookies - the Angular $cookies service
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {object} $q - the $q service for promise/deferred objects
    * @property {object} $cookies - the Angular $cookies service
    * @property {app.api.apiManager} apiManager - the application API manager
+   * @property {object} $q - the $q service for promise/deferred objects
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {object} data - the account data object
    * @class
    */
-  function Account($cookies, apiManager) {
+  function Account($cookies, apiManager, $q) {
     this.$cookies = $cookies;
     this.apiManager = apiManager;
+    this.$q = $q;
     this.loggedIn = false;
     this.data = {};
   }
@@ -55,7 +59,15 @@
       var accountApi = this.apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
         .then(function (response) {
-          that.onLoggedIn(response);
+          // Check that the response data is actually valid - data must be an object
+          // string indicates that maybe an HTML error page was returned (e.g. from a proxy or firewall)
+          if (!angular.isObject(response.data)) {
+            // Reject the promise and change the status code to indicate a server error
+            response.status = 500;
+            return that.$q.reject(response);
+          } else {
+            that.onLoggedIn(response);
+          }
         });
     },
 
