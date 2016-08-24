@@ -219,6 +219,12 @@
       "parameters": [
         {
           "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "ETCD_DATA_DIR"
+        },
+        {
+          "name": "ETCD_WAL_DIR"
         }
       ],
       "affinity": [],
@@ -240,7 +246,16 @@
           "public": false
         }
       ],
-      "volume_mounts": []
+      "volume_mounts": [
+        {
+          "volume_name": "hsc-etcd-data-volume",
+          "mountpoint": "/etcd_data"
+        },
+        {
+          "volume_name": "hsc-etcd-wal-volume",
+          "mountpoint": "/etcd_wal"
+        }
+      ]
     }
   ],
   "features": {
@@ -400,13 +415,13 @@
       "name": "hsc-etcd-data-volume",
       "size_gb": 10,
       "filesystem": "ext4",
-      "shared": true
+      "shared": false
     },
     {
       "name": "hsc-etcd-wal-volume",
       "size_gb": 1,
       "filesystem": "ext4",
-      "shared": true
+      "shared": false
     }
   ],
   "parameters": [
@@ -757,7 +772,7 @@
     },
     {
       "name": "ETCD_DATA_DIR",
-      "description": "Path to the etcd data directory (shared volume).",
+      "description": "Path to the etcd data directory.",
       "data_type": "string",
       "default": "/etcd_data/data",
       "required": true,
@@ -765,7 +780,7 @@
     },
     {
       "name": "ETCD_WAL_DIR",
-      "description": "Path to the dedicated wal directory (shared volume).",
+      "description": "Path to the etcd wal directory.",
       "data_type": "string",
       "default": "/etcd_wal/wal",
       "required": true,
