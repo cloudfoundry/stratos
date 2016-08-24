@@ -61,6 +61,10 @@
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
 
+    function getOrgName(org) {
+      return _.get(org, 'details.org.entity.name');
+    }
+
     function getExistingSpaceNames(orgGuid) {
       var orgSpaces = organizationModel.organizations[that.clusterGuid][orgGuid].spaces;
       return _.map(orgSpaces, function (space) {
@@ -228,11 +232,11 @@
       // Organization access - enabled is user is either admin or the appropriate flag is enabled
       that.clusterActions[0].disabled = !authService.isAllowed('organization', 'create');
 
-      // Space access - if user is an Org Manager in atleast one organization then show slide in
+      // Space access - if user is an Org Manager in at least one organization then show slide in
       that.clusterActions[1].disabled = !authService.principal.userSummary.organizations.managed.length > 0;
 
-      // TODO Assign Users access
-      that.clusterActions[2].disabled = !authService.principal.hasAccessTo('user_org_creation');
+      // User Assignment access - if user is an Org Manager in at least one organization then show slide in
+      that.clusterActions[2].disabled = !authService.principal.userSummary.organizations.managed;
 
     }
 

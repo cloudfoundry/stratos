@@ -186,18 +186,6 @@
                 that.userInput.org = that.data.organizations[0].value;
               }
 
-              // if (!that.authService.isAllowed(org, 'user', 'updateOrgs')) {
-              //   // User is not an admin or an Org Manager, only show spaces for which he is a space manager
-              //   var spaces = [];
-              //   _.each(that.userInput.org.spaces, function (space) {
-              //     console.log(space)
-              //     if (that.authService.isAllowed(space, 'user', 'updateSpaces')) {
-              //       spaces.push(space);
-              //     }
-              //   });
-              //   that.userInput.org.spaces = spaces;
-              // }
-
               that.options.workflow.steps[1].table.config.users = that.userInput.selectedUsers;
 
               return organizationChanged(that.userInput.org);
@@ -218,9 +206,11 @@
               keys: function (obj) {
                 return _.keys(obj);
               },
-              isUserOrgManager: function () {
-                // TODO  Irfan
-                return false;
+              isUserOrgManager: function (org) {
+                if (angular.isUndefined(org)) {
+                  return false;
+                }
+                return that.authService.isAllowed('organization', 'update', org.details.org);
               }
             },
             table: {
