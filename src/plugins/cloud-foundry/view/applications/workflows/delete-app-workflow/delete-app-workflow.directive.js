@@ -192,7 +192,7 @@
       Object.keys(checkedRouteValue).forEach(function (guid) {
         funcStack.push(function () {
           return that.routeModel.removeAppFromRoute(that.cnsiGuid, guid, appGuid);
-        })
+        });
       });
 
       return this.utils.runInSequence(funcStack);
@@ -267,7 +267,7 @@
       Object.keys(checkedRouteValue).forEach(function (routeId) {
         funcStack.push(function () {
           return that.deleteRouteIfPossible(routeId);
-        })
+        });
       });
 
       return this.utils.runInSequence(funcStack);
