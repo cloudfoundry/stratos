@@ -329,14 +329,8 @@
      * @public
      */
     unbindServiceFromApp: function (cnsiGuid, guid, bindingGuid, params) {
-      var config = {
-        headers: {
-          'x-cnap-passthrough': 'true',
-          'x-cnap-cnsi-list': cnsiGuid
-        }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .RemoveServiceBindingFromApp(guid, bindingGuid, params, config);
+        .RemoveServiceBindingFromApp(guid, bindingGuid, params, this.makeHttpConfig(cnsiGuid));
     },
 
     /**
