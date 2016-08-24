@@ -59,7 +59,7 @@
      * @public
      */
     version: function () {
-      return this.stackatoInfo.versions();
+      return this.stackatoInfo.version();
     },
 
     /**
