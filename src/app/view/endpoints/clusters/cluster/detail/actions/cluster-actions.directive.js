@@ -229,14 +229,14 @@
      * */
     function enableActions() {
 
-      // Organization access - enabled is user is either admin or the appropriate flag is enabled
+      // Organization access - enabled if user is either an admin or the appropriate flag is enabled
       that.clusterActions[0].disabled = !authService.isAllowed('organization', 'create');
 
       // Space access - if user is an Org Manager in at least one organization then show slide in
       that.clusterActions[1].disabled = !authService.principal.userSummary.organizations.managed.length > 0;
 
       // User Assignment access - if user is an Org Manager in at least one organization then show slide in
-      that.clusterActions[2].disabled = !authService.principal.userSummary.organizations.managed;
+      that.clusterActions[2].disabled =  !authService.principal.userSummary.organizations.managed.length > 0;
 
     }
 

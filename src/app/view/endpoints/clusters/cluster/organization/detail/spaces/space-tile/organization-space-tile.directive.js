@@ -88,8 +88,8 @@
       // Delete Space
       that.actions[1].disabled = !authService.isAllowed('space', 'delete', that.spaceDetail().details.space);
 
-      // TODO Assign Users access
-      that.actions[2].disabled = !authService.principal.hasAccessTo('user_org_creation');
+      // User Assignment
+      that.actions[2].disabled =  !authService.principal.userSummary.organizations.managed.length > 0;
 
     }
 

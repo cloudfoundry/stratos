@@ -104,7 +104,6 @@
 
       // Set the current org and spaces collections
       that.org = [that.organization];
-      // TODO irfan - filter spaces out for which user is not a space manager when he's a org manager
       that.spaces = _.map(that.organization.spaces, function (space) {
         return {
           label: space.entity.name,
