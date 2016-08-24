@@ -281,11 +281,33 @@
 
       angular.forEach(safeServiceInstances, function (serviceInstanceGuid) {
         funcStack.push(function () {
-          return that.serviceInstanceModel.deleteServiceInstance(that.cnsiGuid, serviceInstanceGuid);
+          return that._deleteServiceInstanceIfPossible(serviceInstanceGuid);
         });
       });
 
       return this.utils.runInSequence(funcStack);
+    },
+
+    /**
+     * @function _deleteServiceInstanceIfPossible
+     * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
+     * @description Delete service instance if possible. Ignore AssociationNotEmpty
+     * errors.
+     * @param {string} serviceInstanceGuid - the service instance GUID
+     * @returns {promise} A resolved/rejected promise
+     */
+    _deleteServiceInstanceIfPossible: function (serviceInstanceGuid) {
+      var that = this;
+      return this.$q(function (resolve, reject) {
+        that.serviceInstanceModel.deleteServiceInstance(that.cnsiGuid, serviceInstanceGuid)
+          .then(resolve, function (response) {
+            if (response.data.error_code === 'CF-AssociationNotEmpty') {
+              resolve();
+            } else {
+              reject();
+            }
+          });
+      });
     },
 
     /**
