@@ -55,7 +55,7 @@
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid) &&
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid) &&
           this.principal.hasAccessTo('route_creation');
       },
 
@@ -71,7 +71,7 @@
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**
@@ -86,9 +86,7 @@
           return true;
         }
 
-        console.log(route)
-
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
 
       },
 

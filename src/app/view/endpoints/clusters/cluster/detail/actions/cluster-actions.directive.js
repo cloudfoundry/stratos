@@ -151,17 +151,14 @@
           contextData.spaces.length--;
         }
 
-        // Fetch organizations in which user is an Org Manager
-        var organizations = _.map(authService.principal.userSummary.entity.managed_organizations, function (org) {
-          return {
-            label: org.entity.name,
-            value: organizationModel.organizations[that.clusterGuid][org.metadata.guid]
-          };
-        });
-
         contextData = {
           organization: selectedOrg,
-          organizations: organizations,
+          organizations: _.map(organizationModel.organizations[that.clusterGuid], function (org) {
+            return {
+              label: getOrgName(org),
+              value: org
+            };
+          }),
           existingSpaceNames: existingSpaceNames,
           spaces: [''],
           setOrganization: setOrganization,
@@ -229,10 +226,10 @@
     function enableActions() {
 
       // Organization access - enabled is user is either admin or the appropriate flag is enabled
-      that.clusterActions[0].disabled = !authService.principal.isAllowed(null, 'organization', 'create');
+      that.clusterActions[0].disabled = !authService.isAllowed('organization', 'create');
 
       // Space access - if user is an Org Manager in atleast one organization then show slide in
-      that.clusterActions[1].disabled = !authService.principal.userSummary.entity.managed_organizations.length > 0;
+      that.clusterActions[1].disabled = !authService.principal.userSummary.organizations.managed.length > 0;
 
       // TODO Assign Users access
       that.clusterActions[2].disabled = !authService.principal.hasAccessTo('user_org_creation');

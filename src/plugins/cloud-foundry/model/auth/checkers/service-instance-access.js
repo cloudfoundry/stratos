@@ -57,7 +57,7 @@
         // belong to and the service_instance_creation flag is set
         return this.principal.isAdmin ||
           (this.principal.hasAccessTo('service_instance_creation') &&
-          this._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid));
+          this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid));
       },
 
       /**
@@ -72,7 +72,7 @@
 
         // If user is developer in space the service instances belongs to
         return this.principal.isAdmin || this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.entity.spaces, serviceInstance.metadata.guid);
+          ._doesContainGuid(this.principal.userSummary.spaces.all, serviceInstance.metadata.guid);
       },
 
       /**
@@ -85,7 +85,7 @@
        */
       delete: function (serviceInstance) {
         return this.principal.isAdmin || this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.entity.spaces, serviceInstance.metadata.guid);
+            ._doesContainGuid(this.principal.userSummary.spaces.all, serviceInstance.metadata.guid);
       },
 
       /**

@@ -58,14 +58,20 @@
       /**
        * @name isAllowed
        * @description Is user permitted to do the action.
-       * @param {Object} context - context  (org level or space level)
        * @param {String} resourceType - ACL type
        * @param {String} action - action name
        * @returns {*}
        */
-      isAllowed: function (context, resourceType, action) {
+      isAllowed: function (resourceType, action) {
+
+        var args = Array.prototype.slice.call(arguments);
+        if (args.length > 2) {
+          // pass the reset of the arguments into accessChecker action
+          args = args.splice(2);
+        }
+
         var accessChecker = this._getAccessChecker(resourceType, this.featureFlags);
-        return accessChecker[action](context);
+        return accessChecker[action].apply(accessChecker, args);
       },
 
       /**
@@ -85,6 +91,8 @@
           .retrieve('cloud-foundry.model.auth.checkers.applicationAccess');
         var SpaceAccess = modelManager
           .retrieve('cloud-foundry.model.auth.checkers.spaceAccess');
+        var UserAssignmentAccess = modelManager
+          .retrieve('cloud-foundry.model.auth.checkers.usersAssignmentAccess');
 
         var checkers = [];
 
@@ -93,6 +101,7 @@
         checkers.push(new RouteAccess(this, this.featureFlags));
         checkers.push(new ApplicationAccess(this, this.featureFlags));
         checkers.push(new SpaceAccess(this, this.featureFlags));
+        checkers.push(new UserAssignmentAccess(this, this.featureFlags));
         return checkers;
       },
 

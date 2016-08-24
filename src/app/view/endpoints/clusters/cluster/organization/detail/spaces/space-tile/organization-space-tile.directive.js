@@ -83,10 +83,10 @@
     function enableActions() {
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(that.spaceDetail().details.space, 'space', 'rename');
+      that.actions[0].disabled = !authService.isAllowed('space', 'rename', that.spaceDetail().details.space);
 
       // Delete Space
-      that.actions[1].disabled = !authService.isAllowed(that.spaceDetail().details.space, 'space', 'delete');
+      that.actions[1].disabled = !authService.isAllowed('space', 'delete', that.spaceDetail().details.space);
 
       // TODO Assign Users access
       that.actions[2].disabled = !authService.principal.hasAccessTo('user_org_creation');

@@ -54,7 +54,7 @@
         }
 
         // If user is developer in space app belongs to
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**
@@ -70,7 +70,7 @@
         }
 
         // If user is developer in space app belongs to
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, app.entity.space_guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**

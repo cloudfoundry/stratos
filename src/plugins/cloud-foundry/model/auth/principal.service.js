@@ -42,30 +42,68 @@
 
       var featureFlagsModel = this.modelManager.retrieve('cloud-foundry.model.featureFlags');
       var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
-      var usersModel = this.modelManager.retrieve('cloud-foundry.model.users');
       var Principal = this.modelManager.retrieve('cloud-foundry.model.auth.principal');
 
       var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
       var stackatoInfoPromise = stackatoInfo.getStackatoInfo();
 
       return this.$q.all([featureFlagsPromise, stackatoInfoPromise])
-        .then(function (promises) {
-          var featureFlags = promises[0];
-          var stackatoInfo = promises[1];
-          return usersModel.getUserSummary(cnsiGuid, stackatoInfo.endpoints.hcf[cnsiGuid].user.guid)
-            .then(function (userSummary) {
-              console.log('Initialising auth service');
+        .then(function (data) {
+          var featureFlags = data[0];
+          var stackatoInfo = data[1];
+          var userId = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
+
+          var promises = that._addOrganisationRolePromisesForUser(cnsiGuid, userId);
+          promises = promises.concat(that._addSpaceRolePromisesForUser(cnsiGuid, userId));
+          return that.$q.all(promises)
+            .then(function (userRoles) {
+              var userSummary = {
+                organizations: {
+                  audited: userRoles[0].data.resources,
+                  billingManaged: userRoles[1].data.resources,
+                  managed: userRoles[2].data.resources,
+                  // User is a user in all these orgs
+                  all: userRoles[3].data.resources
+                },
+                spaces: {
+                  audited: userRoles[4].data.resources,
+                  managed: userRoles[5].data.resources,
+                  // User is a developer in this spaces
+                  all: userRoles[6].data.resources
+                }
+              };
+                 console.log(userSummary)
               that.principal = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
             });
         });
     },
 
-    isAllowed: function (context, resourceType, action) {
-      return this.principal.isAllowed(context, resourceType, action);
+    isAllowed: function () {
+      return this.principal.isAllowed.apply(this.principal, arguments);
     },
 
     isInitialized: function () {
       return this.principal !== null;
+    },
+
+    _addOrganisationRolePromisesForUser: function (cnsiGuid, userGuid) {
+      var promises = [];
+      var usersModel = this.modelManager.retrieve('cloud-foundry.model.users');
+
+      promises.push(usersModel.listAllAuditedOrganizationsForUser(cnsiGuid, userGuid));
+      promises.push(usersModel.listAllBillingManagedOrganizationsForUser(cnsiGuid, userGuid));
+      promises.push(usersModel.listAllManagedOrganizationsForUser(cnsiGuid, userGuid));
+      promises.push(usersModel.listAllOrganizationsForUser(cnsiGuid, userGuid));
+      return promises;
+    },
+    _addSpaceRolePromisesForUser: function (cnsiGuid, userGuid) {
+      var promises = [];
+      var usersModel = this.modelManager.retrieve('cloud-foundry.model.users');
+
+      promises.push(usersModel.listAllAuditedSpacesForUser(cnsiGuid, userGuid));
+      promises.push(usersModel.listAllManagedSpacesForUser(cnsiGuid, userGuid));
+      promises.push(usersModel.listAllSpacesForUser(cnsiGuid, userGuid));
+      return promises;
     }
 
   });

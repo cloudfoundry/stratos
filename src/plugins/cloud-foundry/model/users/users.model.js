@@ -169,6 +169,41 @@
     removeSpaceFromUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .RemoveSpaceFromUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
+    listAllAuditedOrganizationsForUser: function (cnsiGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .ListAllAuditedOrganizationsForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
+    listAllBillingManagedOrganizationsForUser: function (cnsiGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .ListAllBillingManagedOrganizationsForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
+    listAllManagedOrganizationsForUser: function (cnsiGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .ListAllManagedOrganizationsForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
+    listAllOrganizationsForUser: function (cnsiGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .ListAllOrganizationsForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
+    listAllAuditedSpacesForUser: function (cnsiGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .ListAllAuditedSpacesForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
+    listAllManagedSpacesForUser: function (cnsiGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .ListAllManagedSpacesForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+    },
+
+    listAllSpacesForUser: function (cnsiGuid, userGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Users')
+        .ListAllSpacesForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
     }
   });
 

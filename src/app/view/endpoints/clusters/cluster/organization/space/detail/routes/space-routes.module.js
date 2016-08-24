@@ -126,8 +126,8 @@
       _.forEach(routes, function (route) {
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
         if (that.authService.isInitialized()) {
-          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed(route, 'route', 'delete');
-          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed(route, 'route', 'update');
+          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed('route', 'delete', route);
+          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed('route', 'update', route);
         }
       });
     },

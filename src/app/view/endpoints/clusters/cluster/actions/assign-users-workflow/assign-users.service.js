@@ -20,8 +20,7 @@
       assign: function (context) {
         return detailView(
           {
-            detailViewTemplateUrl:
-              'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
+            detailViewTemplateUrl: 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
             controller: AssignUsersWorkflowController,
             controllerAs: 'assignUsers'
           },
@@ -69,11 +68,12 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     var path = 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/';
 
-    this.data = { };
-    this.userInput = { };
+    this.data = {};
+    this.userInput = {};
 
     // Ensure that the org_user is correctly updated given any changes in other org roles
     _.forEach(rolesService.organizationRoles, function (val, roleKey) {
@@ -98,7 +98,7 @@
       that.data.usersByGuid = [];
 
       that.userInput.selectedUsersByGuid = {};
-      that.userInput.roles = { };
+      that.userInput.roles = {};
       if (context.selectedUsers) {
         that.userInput.selectedUsersByGuid = angular.fromJson(angular.toJson(context.selectedUsers));
       }
@@ -186,6 +186,18 @@
                 that.userInput.org = that.data.organizations[0].value;
               }
 
+              // if (!that.authService.isAllowed(org, 'user', 'updateOrgs')) {
+              //   // User is not an admin or an Org Manager, only show spaces for which he is a space manager
+              //   var spaces = [];
+              //   _.each(that.userInput.org.spaces, function (space) {
+              //     console.log(space)
+              //     if (that.authService.isAllowed(space, 'user', 'updateSpaces')) {
+              //       spaces.push(space);
+              //     }
+              //   });
+              //   that.userInput.org.spaces = spaces;
+              // }
+
               that.options.workflow.steps[1].table.config.users = that.userInput.selectedUsers;
 
               return organizationChanged(that.userInput.org);
@@ -205,6 +217,10 @@
               },
               keys: function (obj) {
                 return _.keys(obj);
+              },
+              isUserOrgManager: function () {
+                // TODO  Irfan
+                return false;
               }
             },
             table: {

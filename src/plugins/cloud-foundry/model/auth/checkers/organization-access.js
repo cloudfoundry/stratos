@@ -65,7 +65,7 @@
 
         // If user is manager of org
         return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
+          ._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
       },
 
       /**
@@ -84,7 +84,7 @@
 
         // If user is manager of org
         return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
+          ._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
       },
 
       /**

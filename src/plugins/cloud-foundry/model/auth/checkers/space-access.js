@@ -50,17 +50,20 @@
        */
       create: function (org) {
         return this.principal.isAdmin ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
+          this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
       },
 
       /**
-       * @name update
-       * @description Does user have update space permission
+       * @name delete
+       * @description User can delete space if:
+       * 1. user is an admin
+       * 2. user is the org manager
+       * 3. user is the space manager
        * @returns {boolean}
        */
-      delete: function () {
+      delete: function (org) {
         return this.principal.isAdmin ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
+          this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
       },
 
       /**
@@ -76,7 +79,7 @@
         }
 
         // If user is manager of org
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, org.metadata.guid);
+        this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
       },
 
       /**
@@ -94,11 +97,11 @@
 
         return this.principal.isAdmin ||
           // User is Org manager
-          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_organizations, space.entity.organization_guid) ||
+          this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
           // User is Space manager
-          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.managed_spaces, space.metadata.guid) ||
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid) ||
           // User is Space developer
-          this.baseAccess._doesContainGuid(this.principal.userSummary.entity.spaces, space.metadata.guid);
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**
