@@ -491,13 +491,8 @@
      * @public
      */
     deleteApp: function (cnsiGuid, guid) {
-      var httpConfig = {
-        headers: {
-          'x-cnap-passthrough': 'true'
-        }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .DeleteApp(guid, null, httpConfig);
+        .DeleteApp(guid, null, this.makeHttpConfig(cnsiGuid));
     },
 
     /**
