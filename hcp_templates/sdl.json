@@ -212,40 +212,13 @@
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "capabilities": [],
-      "repository": "quay.io/coreos",
-      "image": "etcd:v2.3.7",
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/console-etcd2-base",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
         {
           "name": "CONSOLE_VERSION"
-        },
-        {
-          "name": "ETCD_DATA_DIR"
-        },
-        {
-          "name": "ETCD_WAL_DIR"
-        },
-        {
-          "name": "ETCD_LISTEN_PEER_URLS"
-        },
-        {
-          "name": "ETCD_LISTEN_CLIENT_URLS"
-        },
-        {
-          "name": "ETCD_INITIAL_ADVERTISE_PEER_URLS"
-        },
-        {
-          "name": "ETCD_INITIAL_CLUSTER"
-        },
-        {
-          "name": "ETCD_INITIAL_CLUSTER_STATE"
-        },
-        {
-          "name": "ETCD_INITIAL_CLUSTER_TOKEN"
-        },
-        {
-          "name": "ETCD_ADVERTISE_CLIENT_URLS"
         }
       ],
       "affinity": [],
@@ -267,16 +240,7 @@
           "public": false
         }
       ],
-      "volume_mounts": [
-        {
-          "volume_name": "hsc-etcd-data-volume",
-          "mountpoint": "/etcd_data"
-        },
-        {
-          "volume_name": "hsc-etcd-wal-volume",
-          "mountpoint": "/etcd_wal"
-        }
-      ]
+      "volume_mounts": []
     }
   ],
   "features": {
@@ -804,62 +768,6 @@
       "description": "Path to the dedicated wal directory (shared volume).",
       "data_type": "string",
       "default": "/etcd_wal/wal",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "ETCD_LISTEN_PEER_URLS",
-      "description": "List of etcd URLs to listen on for peer traffic.",
-      "data_type": "string",
-      "default": "http://0.0.0.0:2380",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "ETCD_LISTEN_CLIENT_URLS",
-      "description": "List of etcd URLs to listen on for client traffic.",
-      "data_type": "string",
-      "default": "http://0.0.0.0:2379",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "ETCD_INITIAL_ADVERTISE_PEER_URLS",
-      "description": "List of this member’s peer URLs to advertise to the rest of the cluster.",
-      "data_type": "string",
-      "default": "http://hsc-etcd-0-int:2380,http://hsc-etcd-1-int:2380,http://hsc-etcd-2-int:2380",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "ETCD_INITIAL_CLUSTER",
-      "description": "Initial etcd cluster configuration for bootstrapping.",
-      "data_type": "string",
-      "default": "hsc-etcd-0-int=http://hsc-etcd-0-int:2380,hsc-etcd-1-int=http://hsc-etcd-1-int:2380,hsc-etcd-2-int=http://hsc-etcd-2-int:2380",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "ETCD_INITIAL_CLUSTER_STATE",
-      "description": "Initial cluster state (“new” or “existing”).",
-      "data_type": "string",
-      "default": "new",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "ETCD_INITIAL_CLUSTER_TOKEN",
-      "description": "Initial cluster token for the etcd cluster during bootstrap.",
-      "data_type": "string",
-      "default": "hsc-etcd-cluster",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "ETCD_ADVERTISE_CLIENT_URLS",
-      "description": "List of this etc member’s client URLs to advertise to the rest of the cluster.",
-      "data_type": "string",
-      "default": "http://hsc-etcd-0-int:2379,http://hsc-etcd-1-int:2379,http://hsc-etcd-2-int:2379",
       "required": true,
       "secret": false
     }
