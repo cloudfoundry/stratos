@@ -19,6 +19,8 @@ type portalConfig struct {
 	AllowedOrigins          []string `ucp:"ALLOWED_ORIGINS"`
 	SessionStoreSecret      string   `ucp:"SESSION_STORE_SECRET"`
 	VCSClients              string   `ucp:"VCS_CLIENTS"`
+	HCPFlightRecorderHost   string   `ucp:"HCP_FLIGHTRECORDER_HOST"`
+	HCPFlightRecorderPort   string   `ucp:"HCP_FLIGHTRECORDER_PORT"`
 	EncryptionKeyVolume     string   `ucp:"ENCRYPTION_KEY_VOLUME"`
 	EncryptionKeyFilename   string   `ucp:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey           string   `ucp:"ENCRYPTION_KEY"`

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 )
@@ -12,7 +10,7 @@ const (
 )
 
 func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, bool) {
-	log.Println("getSessionValue")
+	logger.Debug("getSessionValue")
 	req := c.Request().(*standard.Request).Request
 	session, _ := p.SessionStore.Get(req, portalSessionName)
 
@@ -26,7 +24,7 @@ func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, 
 }
 
 func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, bool) {
-	log.Println("getSessionInt64Value")
+	logger.Debug("getSessionInt64Value")
 	intf, ok := p.getSessionValue(c, key)
 	if !ok {
 		return 0, false
@@ -36,7 +34,7 @@ func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, b
 }
 
 func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string, bool) {
-	log.Println("getSessionStringValue")
+	logger.Debug("getSessionStringValue")
 	intf, ok := p.getSessionValue(c, key)
 	if !ok {
 		return "", false
@@ -46,7 +44,7 @@ func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string,
 }
 
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {
-	log.Println("setSessionValues")
+	logger.Debug("setSessionValues")
 
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter
@@ -60,7 +58,7 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 }
 
 func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error {
-	log.Println("unsetSessionValues")
+	logger.Debug("unsetSessionValues")
 
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter
@@ -72,7 +70,7 @@ func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error
 }
 
 func (p *portalProxy) clearSession(c echo.Context) error {
-	log.Println("clearSession")
+	logger.Debug("clearSession")
 
 	req := c.Request().(*standard.Request).Request
 	res := c.Response().(*standard.Response).ResponseWriter

@@ -1,5 +1,5 @@
-hash: b3661a0ab97c8757be6fbae9ecdb045e1cb8e2a2afd49c24cd2c0ddd7fe9f8e5
-updated: 2016-08-22T12:58:17.135656349-04:00
+hash: 66bd560be602c2b8bbdc1f44025d2030c9e93d9857eb34a0c996913d80644b00
+updated: 2016-08-22T17:25:29.111473648-07:00
 imports:
 - name: github.com/antonlindstrom/pgstore
   version: 68b36d681acbc3cb0d511f65a02877ae3050cc2e
@@ -60,6 +60,10 @@ imports:
   version: 56b76bdf51f7708750eac80fa38b952bb9f32639
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
+- name: github.com/Sirupsen/logrus
+  version: 08a8a7c27e3d058a8989316a850daad1c10bf4ab
+  subpackages:
+  - hooks/syslog
 - name: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
 - name: golang.org/x/net
