@@ -10,15 +10,19 @@
     .factory('cloud-foundry.view.applications.services.hceSupport', hceSupport);
 
   hceSupport.$inject = [
+    '$q',
+    'app.model.modelManager'
   ];
 
   /**
    * @memberof cloud-foundry.view.applications.services
    * @name hceSupport
    * @description A service to help with HCE supported capabilities wihtin the UI
+   * @param {object} $q - the Angular $q service
+   * @param {app.model.modelManager} modelManager - the application model manager
    * @returns {object} A service instance factory
    */
-  function hceSupport() {
+  function hceSupport($q, modelManager) {
 
     // Supported VCS Types
     var vcsTypes = {
@@ -61,21 +65,35 @@
        * @public
        */
       getSupportedVcsInstances: function (hceVcsInstances) {
-        if (!hceVcsInstances) {
-          return [];
+        var deferred = $q.defer();
+
+        if (!hceVcsInstances || angular.isArray(hceVcsInstances) && _.isEmpty(hceVcsInstances)) {
+          deferred.resolve([]);
         } else {
-          var supported = _.filter(hceVcsInstances, function (vcs) {
-            var vcsInfo = vcsTypes[_expandVcsType(vcs)];
-            return vcsInfo && vcsInfo.supported;
-          });
-          return _.map(supported, function (supportedVcs) {
-            var vcs = _.clone(vcsTypes[_expandVcsType(supportedVcs)]);
-            vcs.label = supportedVcs.label;
-            vcs.browse_url = supportedVcs.browse_url;
-            vcs.value = supportedVcs;
-            return vcs;
+          var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+          vcsModel.listVcsClients().then(function (response) {
+            var registeredVcsClients = response.data || [];
+            var supported = _.filter(hceVcsInstances, function (vcs) {
+              var vcsInfo = vcsTypes[_expandVcsType(vcs)];
+              return vcsInfo && vcsInfo.supported && _.includes(registeredVcsClients, vcs.browse_url);
+            });
+
+            var supportedVcsInstances = _.map(supported, function (supportedVcs) {
+              var vcs = _.clone(vcsTypes[_expandVcsType(supportedVcs)]);
+              vcs.label = supportedVcs.label;
+              vcs.browse_url = supportedVcs.browse_url;
+              vcs.value = supportedVcs;
+              return vcs;
+            });
+
+            deferred.resolve(supportedVcsInstances);
+          }, function () {
+            var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
+            deferred.reject(msg);
           });
         }
+
+        return deferred.promise;
       }
     };
   }

@@ -190,14 +190,28 @@
       getVcsInstances: function () {
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var deferred = this.$q.defer();
 
         hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
-          var sources = that.hceSupport.getSupportedVcsInstances(hceModel.data.vcsInstances);
-          if (sources.length > 0) {
-            [].push.apply(that.options.sources, sources);
-            that.userInput.source = sources[0].value;
-          }
+          that.hceSupport.getSupportedVcsInstances(hceModel.data.vcsInstances)
+            .then(function (sources) {
+              if (sources.length > 0) {
+                [].push.apply(that.options.sources, sources);
+                that.userInput.source = sources[0].value;
+                deferred.resolve();
+              } else {
+                var msg = gettext('No VCS instances were available for the selected delivery pipeline instance.');
+                deferred.reject(msg);
+              }
+            }, function (reason) {
+              deferred.reject(reason);
+            });
+        }, function () {
+          var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
+          deferred.reject(msg);
         });
+
+        return deferred.promise;
       },
 
       getRepos: function () {
