@@ -28,8 +28,8 @@
 
   ClusterRegistrationController.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager',
-    'helion.framework.widgets.detailView'
+    'app.view.hcfRegistration',
+    'app.view.hceRegistration'
   ];
 
   /**
@@ -45,13 +45,13 @@
    * @property {array} clusterInstances - the cluster instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ClusterRegistrationController(modelManager, apiManager, detailView) {
+  function ClusterRegistrationController(modelManager, hcfRegistration, hceRegistration) {
     this.overlay = angular.isDefined(this.showClusterOverlayRegistration);
-    this.clusterAddFlyoutActive = false;
     this.clusterInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.clusterInstances = this.clusterInstanceModel.serviceInstances;
     this.clusterInstanceModel.list();
-    this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
+    this.hcfRegistration = hcfRegistration;
+    this.hceRegistration = hceRegistration;
     this.detailView = detailView;
   }
 
@@ -62,16 +62,7 @@
      * @description Show the cluster add form flyout
      */
     showClusterAddForm: function () {
-      this.clusterAddFlyoutActive = true;
-    },
-
-    /**
-     * @function hideClusterAddForm
-     * @memberOf app.view.ClusterRegistrationController
-     * @description Hide the cluster add form flyout
-     */
-    hideClusterAddForm: function () {
-      this.clusterAddFlyoutActive = false;
+      this.hcfRegistration.add();
     },
 
     /**
@@ -81,20 +72,8 @@
      */
     showHCEEndpointAddForm: function () {
       var that = this;
-      var data = { name: '', url: '' };
-      this.detailView(
-        {
-          templateUrl: 'app/view/hce-registration/hce-registration.html',
-          title: gettext('Register Code Engine Endpoint'),
-          class: 'detail-view-thin'
-        },
-        {
-          data: data
-        }
-      ).result.then(function () {
-        return that.serviceInstanceApi.createHCE(data.url, data.name).then(function () {
-          that.clusterInstanceModel.list();
-        });
+      this.hcfRegistration.add().then(function () {
+        that.clusterInstanceModel.list();
       });
     }
   });
