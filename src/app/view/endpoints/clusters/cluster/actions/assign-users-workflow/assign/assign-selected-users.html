@@ -14,13 +14,13 @@
       </select-input>
     </div>
     <div class="assign-selected-users-orgs-roles">
-        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_manager']" input-disabled="!step.actions.isUserOrgManager(step.userInput.org)"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_manager']" input-disabled="!step.actions.canAssignOrgRoles(step.userInput.org)"></checkbox-input>
         <span translate>Org Manager</span>
-        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_auditor']"  input-disabled="!step.actions.isUserOrgManager(step.userInput.org)"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_auditor']"  input-disabled="!step.actions.canAssignOrgRoles(step.userInput.org)"></checkbox-input>
         <span translate>Org Auditor</span>
-        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['billing_manager']" input-disabled="!step.actions.isUserOrgManager(step.userInput.org)"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['billing_manager']" input-disabled="!step.actions.canAssignOrgRoles(step.userInput.org)"></checkbox-input>
         <span translate>Billing Manager</span>
-        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_user']" input-disabled="!step.actions.isUserOrgManager(step.userInput.org)"></checkbox-input>
+        <checkbox-input ng-model="step.userInput.roles[step.userInput.org.details.guid].organization['org_user']" input-disabled="!step.actions.canAssignOrgRoles(step.userInput.org)"></checkbox-input>
         <span translate>Org User</span>
     </div>
   </div>

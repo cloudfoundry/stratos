@@ -208,11 +208,11 @@
                 return _.keys(obj);
               },
               // Helper to enable/disable organisation role checkbox inputs
-              isUserOrgManager: function (org) {
+              canAssignOrgRoles: function (org) {
                 if (angular.isUndefined(org)) {
                   return false;
                 }
-                return that.authService.isAllowed('organization', 'update', org.details.org);
+                return that.authService.isAllowed('user', 'update', org.details.org);
               }
             },
             table: {
