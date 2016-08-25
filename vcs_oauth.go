@@ -35,8 +35,25 @@ func (p *portalProxy) handleVCSAuth(c echo.Context) error {
 		return c.Redirect(302, url)
 	}
 
+	var clientNotFound = `
+    <!doctype html>
+    <html>
+    <head><link rel="stylesheet" href="/index.css"></head>
+    <body id="github-auth-callback-page">
+    <h1 class="text-center">VCS client is not found.</h1>
+    <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
+    <script>
+      (function () {
+        window.opener.postMessage(JSON.stringify({
+          name: 'VCS OAuth - failure'
+        }), window.location.origin);
+      })();
+    </script>
+    </body>
+    </html>`
+
 	log.Println("VCS Client not found")
-	return c.HTML(http.StatusBadRequest, "VCS Client not found")
+	return c.HTML(http.StatusOK, clientNotFound)
 }
 
 // handleVCSAuthCallback <TBD>
@@ -78,7 +95,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
     </body>
     </html>`
 
-	var handleVCSAuth = `
+	var clientNotFound = `
     <!doctype html>
     <html>
     <head><link rel="stylesheet" href="/index.css"></head>
@@ -136,7 +153,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	}
 
 	log.Println("VCS Client not found")
-	return c.HTML(http.StatusOK, handleVCSAuth)
+	return c.HTML(http.StatusOK, clientNotFound)
 }
 
 func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
