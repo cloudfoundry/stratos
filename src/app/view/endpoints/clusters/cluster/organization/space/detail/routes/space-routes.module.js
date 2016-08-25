@@ -29,13 +29,11 @@
     '$stateParams',
     '$q',
     '$log',
-    '$state',
     'app.model.modelManager',
-    'app.view.endpoints.clusters.routesService',
-    'app.utils.utilsService'
+    'app.view.endpoints.clusters.routesService'
   ];
 
-  function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, utils) {
+  function SpaceRoutesController($scope, $stateParams, $q, $log, modelManager, routesService) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -46,6 +44,7 @@
     this.routesService = routesService;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
 
     this.apps = {};
@@ -53,11 +52,8 @@
     this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     $scope.$watch(function () {
-      return that.visibleRoutes &&
-        that.authService.isInitialized();
+      return that.visibleRoutes;
     }, function (routes) {
-
-      routes = that.visibleRoutes;
       if (!routes) {
         return;
       }
@@ -118,13 +114,13 @@
     updateActions: function (routes) {
       var that = this;
       _.forEach(routes, function (route) {
+
+        var space = that.spaceDetail().details.space;
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
-        if (that.authService.isInitialized()) {
-          // Delete route
-          that.actionsPerRoute[route.metadata.guid][0].disabled = !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.delete, route);
-          // Unmap route
-          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.update, route);
-        }
+        // Delete route
+        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.delete, space);
+        // Unmap route
+        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.update, space);
       });
     },
 

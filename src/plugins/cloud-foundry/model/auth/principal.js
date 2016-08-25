@@ -108,37 +108,6 @@
       },
 
       /**
-       * Access constants
-       * @returns {object}
-       * @private
-       */
-      accessConstants: function () {
-        return {
-          resources: {
-            space: 'space',
-            space_quota_definition: 'space_quota_definition',
-            user_provided_service_instance: 'user_provided_service_instance',
-            managed_service_instance: 'managed_service_instance',
-            service_instance: 'service_instance',
-            organization: 'organization',
-            application: 'application',
-            domain: 'domain',
-            route: 'route'
-          },
-
-          actions: {
-            create: 'create',
-            update: 'update',
-            delete: 'delete'
-          },
-
-          flags: {
-            user_org_creation: 'user_org_creation'
-          }
-        };
-      },
-
-      /**
        * @name _getAccessChecker
        * @description Get Access checker for a given resource type
        * @param {string} resourceType - resource type

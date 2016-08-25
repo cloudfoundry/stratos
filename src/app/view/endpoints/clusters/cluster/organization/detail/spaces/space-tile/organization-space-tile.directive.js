@@ -67,6 +67,11 @@
     function init() {
 
       var spaceDetail = that.spaceDetail();
+      that.canDelete = spaceDetail.routes.length === 0 &&
+        spaceDetail.instances.length === 0 &&
+        spaceDetail.apps.length === 0 &&
+        spaceDetail.services.length === 0;
+
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
       enableActions();
       return $q.resolve();
@@ -78,7 +83,7 @@
       that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
 
       // Delete Space
-      that.actions[1].disabled = !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+      that.actions[1].disabled = !that.canDelete && !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
 
       // User Assignment
       that.actions[2].disabled = authService.principal.userSummary.organizations.managed.length === 0 &&

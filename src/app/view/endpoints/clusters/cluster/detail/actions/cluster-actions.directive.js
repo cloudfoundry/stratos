@@ -254,12 +254,7 @@
       return $q.resolve();
     }
 
-    // Ensure the parent state is fully initialised before we start our own init
-    if (this.context !== 'space') {
-      utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
-    } else {
-      utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
-    }
+    utils.chainStateResolve(this.stateName, $state, init);
   }
 
   UniqueSpaceName.$inject = [];

@@ -76,16 +76,13 @@
     var user = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user;
     that.isAdmin = user.admin;
     that.userName = user.name;
-    var canDelete = false;
-    if (that.isAdmin) {
-      var spacesInOrg = that.organization.spaces;
-      canDelete = _.keys(spacesInOrg).length === 0;
-    }
+    var spacesInOrg = that.organization.spaces;
+    var canDelete = _.keys(spacesInOrg).length === 0;
 
     this.actions = [
       {
         name: gettext('Edit Organization'),
-        disabled: !that.isAdmin,
+        disabled: !authService.isAllowed(authService.resources.organization, authService.actions.update, that.organization.details.org),
         execute: function () {
           return asyncTaskDialog(
             {
@@ -118,7 +115,7 @@
       },
       {
         name: gettext('Delete Organization'),
-        disabled: !canDelete,
+        disabled: !canDelete && !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.details.org),
         execute: function () {
           confirmDialog({
             title: gettext('Delete Organization'),
@@ -160,22 +157,6 @@
       // Present the user's roles
       that.roles = that.organizationModel.organizationRolesToStrings(roles);
     });
-
-    function init() {
-
-      // Edit organization
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.update, that.organization.details.org);
-
-      // Delete organization
-      that.actions[1].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.details.org);
-
-      return $q.resolve();
-
-    }
-
-    // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.detail.organizations', $state, init);
-
   }
 
 })();

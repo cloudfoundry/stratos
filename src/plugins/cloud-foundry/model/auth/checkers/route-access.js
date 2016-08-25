@@ -64,12 +64,12 @@
        * @description User can create a route if:
        * 1. User is admin
        * 2. User is a space developer
-       * @param {Object} route - route detail
+       * @param {Object} space - space detail
        * @returns {boolean}
        */
-      update: function (route) {
+      update: function (space) {
         // Admin
-        if (this.baseAccess.update(route)) {
+        if (this.baseAccess.update(space)) {
           return true;
         }
 
@@ -81,12 +81,12 @@
        * @description User can create a route if:
        * 1. User is admin
        * 2. User is a space developer
-       * @param {Object} route route detail
+       * @param {Object} space - space detail
        * @returns {boolean}
        */
-      delete: function (route) {
+      delete: function (space) {
         // Admin
-        if (this.baseAccess.update(route)) {
+        if (this.baseAccess.update(space)) {
           return true;
         }
 

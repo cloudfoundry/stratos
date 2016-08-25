@@ -63,13 +63,14 @@
     initAuthService: function (cnsiGuid) {
       var that = this;
 
+      this.principal = null;
+
       var featureFlagsModel = this.modelManager.retrieve('cloud-foundry.model.featureFlags');
       var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
       var Principal = this.modelManager.retrieve('cloud-foundry.model.auth.principal');
 
       var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
       var stackatoInfoPromise = stackatoInfo.getStackatoInfo();
-
       return this.$q.all([featureFlagsPromise, stackatoInfoPromise])
         .then(function (data) {
           var featureFlags = data[0];

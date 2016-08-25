@@ -10,7 +10,7 @@
               translate>Manage Roles</button>
       <button class="btn btn-default"
               ng-if="spaceUsersController.selectedUsersCount() > 1"
-              ng-disabled="spaceUsersController.disableManageRoles()"
+              ng-disabled="spaceUsersController.disableChangeRoles()"
               ng-click="spaceUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
@@ -18,7 +18,7 @@
               ng-click="spaceUsersController.removeFromSpace()"
               translate>Remove From Space</button>
       <button class="btn btn-default"
-              ng-disabled="spaceUsersController.disableManageRoles()"
+              ng-disabled="spaceUsersController.disableRemoveFromOrg()"
               ng-click="spaceUsersController.removeFromOrganization()"
               translate>Remove From Organization</button>
     </div>

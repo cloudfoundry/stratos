@@ -108,14 +108,20 @@
         this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org, that.space.details.space);
     };
 
-    this.disableRemoveFromSpace = function () {
+    this.disableChangeRoles = function () {
+      return this.rolesService.changingRoles || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org, that.space.details.space);
+    };
+
+    this.disableRemoveFromOrg = function () {
       return this.rolesService.changingRoles || this.selectedUsersCount() < 1 || !that.canUserRemoveFromOrg(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org);
+    };
+    this.disableRemoveFromSpace = function () {
+      return this.rolesService.changingRoles || this.selectedUsersCount() < 1 || !that.canUserRemoveFromSpace(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org, that.space.details.space);
     };
 
     function init() {
       $scope.$watch(function () {
-        return rolesService.changingRoles &&
-          that.authService.isInitialized();
+        return rolesService.changingRoles;
       }, function () {
 
         // Manage Roles - show slide in if user is an admin, org manager or the space manager

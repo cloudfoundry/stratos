@@ -40,7 +40,6 @@
     this.totalApps = 0;
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.updateTotalApps = function () {
       that.totalApps = 0;
@@ -81,10 +80,7 @@
       that.initialized = true;
 
       // init functions should return a promise
-      return authService.initAuthService(that.guid)
-        .then(function () {
-          return $q.resolve(that.organizations);
-        });
+      return $q.resolve(that.organizations);
     }
 
     utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
