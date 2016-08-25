@@ -50,6 +50,10 @@ resources:
     type: docker-image
     source:
       repository: docker-registry.helion.space:443/hsc/hsc-proxy
+  - name: hsc-etcd2-image
+    type: docker-image
+    source:
+      repository: docker-registry.helion.space:443/hsc/hsc-etcd2
   - name: hsc-initiate-upgrade-job-image
     type: docker-image
     source:
@@ -116,6 +120,13 @@ jobs:
     - put: hsc-proxy-image
       params:
         dockerfile: portal-proxy-output/Dockerfile.HCP
+        build: portal-proxy-output
+        tag: tag-files/version_tag
+
+    # Build the etcd2 image, push to registry
+    - put: hsc-etcd2-image
+      params:
+        dockerfile: portal-proxy-output/containers/etcd/Dockerfile.HCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 
