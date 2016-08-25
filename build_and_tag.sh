@@ -74,8 +74,6 @@ rm -rf ${__DIRNAME}/../stratos-ui/dist
 echo "Cleaning up ${__DIRNAME}/../stratos-ui/containers/nginx/dist"
 rm -rf ${__DIRNAME}/../stratos-ui/containers/nginx/dist
 
-# TODO (wchrisjohnson) document this and add a shell script to regenerate the
-# image when necessary.
 # Build the Proxy executable in a container, and leave it on the local filesystem
 # Use the existing build container we created for the CI process
 echo "Building the Console Proxy executable"
@@ -87,6 +85,10 @@ popd
 # Build and publish the container image for the portal proxy
 echo "Build & publish the container image for the Console Proxy"
 buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
+
+# Build and publish the container image for etcd
+echo "Build & publish the container image for etcd"
+buildAndPublishImage hsc-etcd2 ./containers/etcd/Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
 # Build the preflight container - initiate service upgrade
 echo "Build & publish the container image for the preflight job"

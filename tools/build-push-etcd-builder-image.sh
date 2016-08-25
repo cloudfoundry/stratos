@@ -14,7 +14,7 @@ SHARED_IMAGE_URL=${DOCKER_REGISTRY}/${GROUP_NAME}/${NAME}:${TAG}
 
 echo "Building Docker Image for $NAME"
 docker build --tag ${NAME} \
-             --file Dockerfile \
+             --file Dockerfile.HCP \
              .
 
 echo "Tag and push the shared image"
