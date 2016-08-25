@@ -39,6 +39,16 @@
           return $http.get('/pp/v1/stackato/info');
         }
         return $q.reject(sessionName + ' cookie missing!');
+      },
+
+      /**
+       * @function version
+       * @memberof app.stackatoInfoService
+       * @description Fetch the version metadata
+       * @returns {promise} A promise object
+       */
+      version: function () {
+        return $http.get('/pp/v1/version');
       }
     };
   }

@@ -52,6 +52,17 @@
     },
 
     /**
+     * @function version
+     * @memberof app.model.stackatoInfo.StackatoInfo
+     * @description Fetch the version metadata
+     * @returns {promise} A promise object
+     * @public
+     */
+    version: function () {
+      return this.stackatoInfo.version();
+    },
+
+    /**
      * @function onLoggedIn
      * @memberof app.model.account.Account
      * @description Logged-in handler at model layer

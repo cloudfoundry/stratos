@@ -115,6 +115,10 @@
     this.lastSectionIdx = 0;
 
     this.scrolling = $q.resolve();
+
+    this.debouncedOnMouseWheel = _.debounce(this.onMouseWheel, 150, {
+      maxWait: 500
+    });
   }
 
   angular.extend(LoginPageController.prototype, {

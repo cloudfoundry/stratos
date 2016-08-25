@@ -3,6 +3,9 @@
   <div>
     <h4 class="font-semi-bold">{{ serviceCardCtrl.service.entity.extra.displayName || serviceCardCtrl.service.entity.label }}</h4>
     <p>{{ serviceCardCtrl.service.entity.extra.longDescription || serviceCardCtrl.service.entity.description }}</p>
+    <div class="font-semi-bold" ng-if="!serviceCardCtrl.canBind" translate>
+      This service can not be bound to an Application
+    </div>
   </div>
 </div>
 <div class="service-metadata">
@@ -17,7 +20,7 @@
     </dt>
   </dl>
   <div class="service-actions">
-    <actions-menu actions="serviceCardCtrl.actions" ng-if="!serviceCardCtrl.allowAddOnly"
+    <actions-menu actions="serviceCardCtrl.actions" ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.canBind"
       action-target="service" menu-icon="helion-icon helion-icon-2x helion-icon-More"
       menu-position="actions-menu-right">
     </actions-menu>
@@ -26,7 +29,7 @@
       {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
     </div>
     <button class="btn btn-sm btn-link"
-      ng-if="serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0"
+      ng-if="serviceCardCtrl.canBind && (serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0)"
       ng-click="serviceCardCtrl.addService()" translate>
       Add Service
       <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>

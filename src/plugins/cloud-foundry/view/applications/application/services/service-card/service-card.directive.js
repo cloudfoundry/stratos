@@ -87,6 +87,12 @@
     }, function () {
       that.init();
     });
+
+    $scope.$watch(function () {
+      return that.service;
+    }, function () {
+      that.canBind = that.service._bindTarget === 'APP';
+    });
   }
 
   angular.extend(ServiceCardController.prototype, {

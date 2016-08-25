@@ -13,11 +13,12 @@
     '$q',
     'app.model.modelManager',
     'app.api.apiManager',
+    'cloud-foundry.model.service.serviceUtils',
     'cloud-foundry.api.hcfPagination'
   ];
 
-  function registerSpaceModel($q, modelManager, apiManager, hcfPagination) {
-    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, hcfPagination));
+  function registerSpaceModel($q, modelManager, apiManager, serviceUtils, hcfPagination) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils, hcfPagination));
   }
 
   /**
@@ -29,13 +30,15 @@
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
    * @property {object} stackatoInfoModel - the stackatoInfoModel service
+   * @param {cloud-foundry.model.service.serviceUtils} serviceUtils - the service utils service
    * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @class
    */
-  function Space($q, apiManager, modelManager, hcfPagination) {
+  function Space($q, apiManager, modelManager, serviceUtils, hcfPagination) {
     this.$q = $q;
     this.apiManager = apiManager;
+    this.serviceUtils = serviceUtils;
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.hcfPagination = hcfPagination;
@@ -158,6 +161,7 @@
      * @public
      */
     onListAllServicesForSpace: function (cnsiGuid, guid, services) {
+      this.serviceUtils.enhance(services);
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.services', services);
       return services;
     },
