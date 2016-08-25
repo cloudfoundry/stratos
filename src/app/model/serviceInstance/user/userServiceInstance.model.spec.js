@@ -129,7 +129,6 @@
       $httpBackend.flush();
     });
 
-
     // An error getting info should not fail the list call
     it('should set `serviceInstances` on list() and info error', function () {
       var data = [
