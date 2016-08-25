@@ -1,11 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"log"
+	"html/template"
 	"net/http"
 
 	"golang.org/x/net/context"
@@ -15,9 +16,17 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// handleVCSAuth <TBD>
+// Templates we'll need - cache them here when the module first loads
+// to give us good performance, especially on the ones used > once.
+var s = template.Must(template.ParseFiles("templates/success.html"))
+var f = template.Must(template.ParseFiles("templates/failure.html"))
+var cnf = template.Must(template.ParseFiles("templates/clientNotFound.html"))
+
+// handleVCSAuth This is step 1 of the 2 step OAuth dance. We redirect to the
+// OAuth provider, and if all goes well, they will hit our callback URL - see
+// handleVCSAuthCallback below.
 func (p *portalProxy) handleVCSAuth(c echo.Context) error {
-	log.Println("handle VCS OAuth")
+	logger.Debug("handle VCS OAuth")
 
 	endpoint := c.QueryParam("endpoint")
 	vcsClientKey := VCSClientMapKey{endpoint}
@@ -27,101 +36,34 @@ func (p *portalProxy) handleVCSAuth(c echo.Context) error {
 
 		url := oauthConf.AuthCodeURL(oauthStateString, oauth2.AccessTypeOnline)
 
-		// save to endpoint to session using OAuth state string
+		// save to endpoint to session via the OAuth state string
 		setVCSSession(p, c, oauthStateString, endpoint)
 
-		log.Printf("OAuth url: %s", url)
+		logger.Debug("OAuth url: %s", url)
 
+		// redirect to the VCS provider
 		return c.Redirect(302, url)
 	}
 
-	var clientNotFound = `
-    <!doctype html>
-    <html>
-    <head><link rel="stylesheet" href="/index.css"></head>
-    <body id="github-auth-callback-page">
-    <h1 class="text-center">VCS client is not found.</h1>
-    <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
-    <script>
-      (function () {
-        window.opener.postMessage(JSON.stringify({
-          name: 'VCS OAuth - failure'
-        }), window.location.origin);
-      })();
-    </script>
-    </body>
-    </html>`
+	logger.Error("VCS Client not found")
 
-	log.Println("VCS Client not found")
-	return c.HTML(http.StatusOK, clientNotFound)
+	return c.HTML(http.StatusOK, templateToString(cnf))
 }
 
-// handleVCSAuthCallback <TBD>
+// handleVCSAuthCallback This is step 2 of the 2 step OAuth dance.
 func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
-	log.Println("handleVCSAuthCallback")
-
-	// TODO (wchrisjohnson): TEAMFOUR-561 - Change this to a template and put in a file.
-	// This is an entry point for an XSS attack because you have no logic to
-	// escape the token at all. Printf should never be used for HTML templating
-	// because of that. Please use the html/template package to get this functionality.
-	var successHTML = `
-    <!doctype html>
-    <html>
-    <body>
-    <script>
-      (function () {
-        window.opener.postMessage(JSON.stringify({
-          name: 'VCS OAuth - success'
-        }), window.location.origin);
-      })();
-    </script>
-    </body>
-    </html>`
-
-	var failureHTML = `
-    <!doctype html>
-    <html>
-    <head><link rel="stylesheet" href="/index.css"></head>
-    <body id="github-auth-callback-page">
-    <h1 class="text-center">VCS authorization failed.</h1>
-    <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
-    <script>
-      (function () {
-        window.opener.postMessage(JSON.stringify({
-          name: 'VCS OAuth - failure'
-        }), window.location.origin);
-      })();
-    </script>
-    </body>
-    </html>`
-
-	var clientNotFound = `
-    <!doctype html>
-    <html>
-    <head><link rel="stylesheet" href="/index.css"></head>
-    <body id="github-auth-callback-page">
-    <h1 class="text-center">VCS client is not found.</h1>
-    <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
-    <script>
-      (function () {
-        window.opener.postMessage(JSON.stringify({
-          name: 'VCS OAuth - failure'
-        }), window.location.origin);
-      })();
-    </script>
-    </body>
-    </html>`
+	logger.Debug("handleVCSAuthCallback")
 
 	// retrieve endpoint from session using OAuth state string
 	state := c.FormValue("state")
 	endpoint, ok := p.getSessionStringValue(c, state)
 	if !ok {
-		return c.HTML(http.StatusOK, failureHTML)
+		return c.HTML(http.StatusOK, templateToString(f))
 	}
 
 	// clean up session
 	if err := p.unsetSessionValue(c, state); err != nil {
-		log.Printf("Unable to delete session value for key %s", state)
+		logger.Error("Unable to delete session value for key %s", state)
 	}
 
 	vcsClientKey := VCSClientMapKey{endpoint}
@@ -139,35 +81,35 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		token, err := oauthConf.Exchange(ctx, code)
 		if err != nil {
 			msg := fmt.Sprintf("oauthConf.Exchange() failed with '%s'\n", err)
-			log.Println(msg)
-			return c.HTML(http.StatusOK, failureHTML)
+			logger.Error(msg)
+			return c.HTML(http.StatusOK, templateToString(f))
 		}
 
 		// stuff the token into the user's session
 		sessionKey := newSessionKey(endpoint)
 		if err = setVCSSession(p, c, sessionKey, token.AccessToken); err != nil {
-			return c.HTML(http.StatusOK, failureHTML)
+			return c.HTML(http.StatusOK, templateToString(f))
 		}
 
-		return c.HTML(http.StatusOK, successHTML)
+		return c.HTML(http.StatusOK, templateToString(s))
 	}
 
-	log.Println("VCS Client not found")
-	return c.HTML(http.StatusOK, clientNotFound)
+	logger.Error("VCS Client not found")
+	return c.HTML(http.StatusOK, templateToString(cnf))
 }
 
 func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
-	log.Println("verifyVCSAuthToken")
+	logger.Debug("verifyVCSAuthToken")
 
 	var tokenExists = false
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
 	if _, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
-		log.Println("VCS OAuth token found in the session.")
+		logger.Error("VCS OAuth token found in the session.")
 		tokenExists = true
 	}
 
-	log.Println("Preparing response")
+	logger.Error("Preparing response")
 	authResp := &VCSAuthCheckResp{
 		Authorized: tokenExists,
 	}
@@ -184,7 +126,7 @@ func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
 }
 
 func (p *portalProxy) getVCSOAuthToken(c echo.Context) (string, bool) {
-	log.Println("getVCSOAuthToken")
+	logger.Debug("getVCSOAuthToken")
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
 	if token, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
@@ -204,10 +146,16 @@ func setVCSSession(p *portalProxy, c echo.Context, sessionKey string, sessionVal
 	sessionValues := make(map[string]interface{})
 	sessionValues[sessionKey] = sessionValue
 
-	log.Println("Storing value in session")
+	logger.Error("Storing value in session")
 	if err := p.setSessionValues(c, sessionValues); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func templateToString(t *template.Template) string {
+	var html bytes.Buffer
+	t.Execute(&html, nil)
+	return html.String()
 }
