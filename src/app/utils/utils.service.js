@@ -40,9 +40,14 @@
      * @memberOf app.utils.utilsService
      * @description runs async functions in sequence
      * @param {object} funcStack - a stack containing async functions
+     * @param {boolean} asQueue - optional, indicting to treat the funcStack as a queue
      * @returns {promise} a promise that will be resolved or rejected later
      */
-    function runInSequence(funcStack) {
+    function runInSequence(funcStack, asQueue) {
+      if (asQueue) {
+        funcStack.reverse();
+      }
+
       return $q(function (resolve, reject) {
         (function _doIt() {
           if (!funcStack.length) {
