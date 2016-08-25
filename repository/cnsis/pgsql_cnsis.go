@@ -20,6 +20,10 @@ const (
               FROM cnsis
               WHERE guid=$1`
 
+	findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint
+              FROM cnsis
+              WHERE api_endpoint=$1`
+
 	saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint)
               VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
@@ -146,6 +150,41 @@ func (p *PostgresCNSIRepository) Find(guid string) (CNSIRecord, error) {
 	switch {
 	case err == sql.ErrNoRows:
 		return CNSIRecord{}, errors.New("No match for that GUID")
+	case err != nil:
+		return CNSIRecord{}, fmt.Errorf("Error trying to Find CNSI record: %v", err)
+	default:
+		// do nothing
+	}
+
+	// TODO(wchrisjohnson): discover a way to do this automagically
+	// These two fields need to be converted manually
+	if cnsi.CNSIType, err = getCNSIType(pCNSIType); err != nil {
+		return CNSIRecord{}, fmt.Errorf("Unable to get CNSI type: %v", err)
+	}
+
+	if cnsi.APIEndpoint, err = url.Parse(pURL); err != nil {
+		return CNSIRecord{}, fmt.Errorf("Unable to parse API Endpoint: %v", err)
+	}
+
+	return *cnsi, nil
+}
+
+// FindByAPIEndpoint - Returns a single CNSI Record
+func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (CNSIRecord, error) {
+	log.Println("Find")
+	var (
+		pCNSIType string
+		pURL      string
+	)
+
+	cnsi := new(CNSIRecord)
+
+	err := p.db.QueryRow(findCNSIByAPIEndpoint, endpoint).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
+		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint)
+
+	switch {
+	case err == sql.ErrNoRows:
+		return CNSIRecord{}, errors.New("No match for that API Endpoint")
 	case err != nil:
 		return CNSIRecord{}, fmt.Errorf("Error trying to Find CNSI record: %v", err)
 	default:
