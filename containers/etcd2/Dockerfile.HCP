@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y curl rsyslog rsyslog-relp && \
   curl -L  https://github.com/coreos/etcd/releases/download/v2.3.7/etcd-v2.3.7-linux-amd64.tar.gz -o etcd-v2.3.7-linux-amd64.tar.gz && \
   tar xzvf etcd-v2.3.7-linux-amd64.tar.gz
 
-COPY /containers/etcd/rsyslog/rsyslog.conf /etc
-COPY /containers/etcd/run.sh /
+COPY /containers/etcd2/rsyslog/rsyslog.conf /etc
+COPY /containers/etcd2/run.sh /
 
 RUN chmod +x /usr/bin/logger
 RUN chmod +x /run.sh
