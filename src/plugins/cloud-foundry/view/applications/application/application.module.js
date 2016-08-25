@@ -280,7 +280,9 @@
             that.model.application.project = response.data;
 
             if (angular.isDefined(that.model.application.project)) {
+              /* eslint-disable */
               // TODO (kdomico): Fix once vcs_id is returned - TEAMFOUR-946
+              /* eslint-enable */
               // get VCS instance data
               var repoUrl = that.model.application.project.repo.http_url;
               return that.hceModel.getVcses(that.hceCnsi.guid)

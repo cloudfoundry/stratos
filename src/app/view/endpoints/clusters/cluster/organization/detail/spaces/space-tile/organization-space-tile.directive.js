@@ -65,16 +65,8 @@
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     function init() {
-      var canDelete = false;
-      var isAdmin = that.user.admin;
-      var spaceDetail = that.spaceDetail();
-      if (isAdmin) {
-        canDelete = spaceDetail.routes.length === 0 &&
-          spaceDetail.instances.length === 0 &&
-          spaceDetail.apps.length === 0 &&
-          spaceDetail.services.length === 0;
-      }
 
+      var spaceDetail = that.spaceDetail();
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
       enableActions();
       return $q.resolve();

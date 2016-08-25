@@ -33,6 +33,8 @@
      * @description initialise a Principal object
      * @param {String} stackatoInfo - stackatoInfo data
      * @param {Object} userSummary - user info
+     * @param {Object} featureFlags - Feature flags for cluster
+     * @param {String} cnsiGuid - cluster GUID
      * @constructor
      */
     function Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid) {

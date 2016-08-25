@@ -89,9 +89,11 @@
      * @param {string} action - action (create, delete, update..)
      * @returns {*}
      */
-    isAllowed: function (resourceType, action) {
+    /* eslint-disable */
+     isAllowed: function (resourceType, action) {
       return this.principal.isAllowed.apply(this.principal, arguments);
     },
+    /* eslint-enable */
 
     /**
      * @name isInitialized
