@@ -26,6 +26,7 @@
     'app.model.modelManager',
     'app.event.eventService',
     'github.view.githubOauthService',
+    'cloud-foundry.view.applications.services.hceSupport',
     '$scope',
     '$q',
     '$timeout'
@@ -38,6 +39,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
+   * @param {object} hceSupport - HCE Support service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
@@ -48,6 +50,7 @@
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
    * @property {github.view.githubOauthService} githubOauthService - github oauth service
+   * @property {object} hceSupport - HCE Support service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model
@@ -60,7 +63,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, $scope, $q, $timeout) {
+  function AddAppWorkflowController(modelManager, eventService, githubOauthService, hceSupport, $scope, $q, $timeout) {
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -68,6 +71,7 @@
     this.modelManager = modelManager;
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
+    this.hceSupport = hceSupport;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -478,6 +482,29 @@
         [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
       },
 
+      /**
+       * @function notify
+       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
+       * @description notify success
+       */
+      notify: function () {
+        if (!this.userInput.application) {
+          return;
+        }
+
+        var href = [
+          '#/cf/applications',
+          this.userInput.serviceInstance.guid,
+          'app',
+          this.userInput.application.summary.guid,
+          'summary'
+        ].join('/');
+
+        this.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
+          message: gettext('A new app has been created: ') + '<a href="' + href + '">' + this.userInput.name + '</a>'
+        });
+      },
+
       startWorkflow: function () {
         var that = this;
         this.addingApplication = true;
@@ -497,6 +524,7 @@
       },
 
       stopWorkflow: function () {
+        this.notify();
         this.addingApplication = false;
       },
 
@@ -504,6 +532,7 @@
         if (this.options.subflow === 'pipeline') {
           this.triggerPipeline();
         }
+        this.notify();
         this.addingApplication = false;
       }
     });

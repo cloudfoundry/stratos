@@ -8,6 +8,7 @@
   RolesService.$inject = [
     '$log',
     '$q',
+    '$interpolate',
     'app.model.modelManager',
     'app.event.eventService',
     'app.view.notificationsService',
@@ -21,6 +22,7 @@
    * @constructor
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
+   * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
@@ -42,7 +44,7 @@
    * @property {function} orgContainsRoles - Determine if the organisation provided and it's spaces has any roles
    * selected
    */
-  function RolesService($log, $q, modelManager, eventService, notificationsService, confirmDialog) {
+  function RolesService($log, $q, $interpolate, modelManager, eventService, notificationsService, confirmDialog) {
     var that = this;
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
@@ -120,16 +122,7 @@
       var oldRolesByUser = _.set({}, path, true);
       var newRolesByUser = _.set({}, path, false);
 
-      /* eslint-disable no-warning-comments */
-      // TODO: TEAMFOUR-906: Endpoint Dashboard: Show list of changed roles per user in change role warning modal
-      /* eslint-enable no-warning-comments */
-      var confirmationConfig = {
-        description: gettext('Are you sure you want to remove the following user\'s role? ') +
-        user.entity.username + gettext(' from ') + that.organizationRoles[orgRole]
-      };
-
-      return updateUsersOrgsAndSpaces(clusterGuid, [user], oldRolesByUser, newRolesByUser,
-        removeConfirmationConfig([user], confirmationConfig));
+      return updateUsersOrgsAndSpaces(clusterGuid, [user], oldRolesByUser, newRolesByUser);
     };
 
     /**
@@ -150,16 +143,7 @@
       var oldRolesByUser = _.set({}, path, true);
       var newRolesByUser = _.set({}, path, false);
 
-      /* eslint-disable no-warning-comments */
-      // TODO: TEAMFOUR-906: Endpoint Dashboard: Show list of changed roles per user in change role warning modal
-      /* eslint-enable no-warning-comments */
-      var confirmationConfig = {
-        description: gettext('Are you sure you want to remove the following user\'s role? ') +
-        that.spaceRoles[spaceRole] + gettext(' from ') + user.entity.username
-      };
-
-      return updateUsersOrgsAndSpaces(clusterGuid, [user], oldRolesByUser, newRolesByUser,
-        removeConfirmationConfig([user], confirmationConfig));
+      return updateUsersOrgsAndSpaces(clusterGuid, [user], oldRolesByUser, newRolesByUser);
     };
 
     /**
@@ -180,8 +164,7 @@
           that.clearOrgs(userRoles);
         });
 
-        return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser,
-          removeConfirmationConfig(users));
+        return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
       });
     };
 
@@ -204,8 +187,7 @@
           that.clearOrgs(userRoles);
         });
 
-        return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser,
-          removeConfirmationConfig(users));
+        return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
       });
     };
 
@@ -231,8 +213,7 @@
         });
       });
 
-      return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser,
-        removeConfirmationConfig(users));
+      return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
 
     };
 
@@ -264,8 +245,7 @@
      * removing roles. If successful refresh the cache of the affected organizations and spaces
      * @param {string} clusterGuid - HCF service guid
      * @param {object} selectedUsers - collection of users to apply roles to
-     * @param {object} newRoles - Object containing the new roles to apply. The diff of this and oldRoles will be
-     * applied (assign/remove). Format is...
+     * @param {object} newRoles - Object containing the new roles to apply. Format is...
      *  Organizations... [orgGuid].organization[roleKey] = truthy
      *  Spaces...        [orgGuid].spaces[spaceGuid][roleKey] = truthy
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
@@ -299,8 +279,7 @@
       var oldRolesByUser = createRolesByUserObj(selectedUsers, oldRoles);
       var newRolesByUser = createRolesByUserObj(selectedUsers, newRoles);
 
-      return updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRolesByUser, newRolesByUser,
-        assignConfirmationConfig(selectedUsers));
+      return updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRolesByUser, newRolesByUser);
     };
 
     /**
@@ -308,8 +287,7 @@
      * @description Update (assign or remove) organization and space roles for the users supplied
      * @param {string} clusterGuid - HCF service guid
      * @param {Array} selectedUsers - collection of users to apply roles to
-     * @param {object} newRoles - Object containing the new roles to apply. The diff of this and oldRoles will be
-     * applied (assign/remove). Format is...
+     * @param {object} newRoles - Object containing the new roles to apply. Format is...
      *  Organizations... [orgGuid].organization[roleKey] = truthy
      *  Spaces...        [orgGuid].spaces[spaceGuid][roleKey] = truthy
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
@@ -318,8 +296,7 @@
       var oldRolesByUser = createCurrentRoles(selectedUsers, clusterGuid);
       var newRolesByUser = createRolesByUserObj(selectedUsers, newRoles);
 
-      return updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRolesByUser, newRolesByUser,
-        updateConfirmationConfig(selectedUsers));
+      return updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRolesByUser, newRolesByUser);
     };
 
     /**
@@ -353,7 +330,7 @@
     /**
      * @name app.view.endpoints.clusters.cluster.rolesService.orgContainsRoles
      * @description Determine if the organisation provided and it's spaces has any roles selected
-     * @param {object} org - organization to clear. Format as below.
+     * @param {object} org - organization to test. Format as below.
      *  organization[roleKey] = truthy
      *  spaces[spaceGuid][roleKey] = truthy
      * @returns {boolean}
@@ -457,65 +434,156 @@
       return newRolesByUser;
     }
 
-    function removeConfirmationConfig(users, config) {
-      /* eslint-disable no-warning-comments */
-      // TODO: TEAMFOUR-906: Endpoint Dashboard: Show list of changed roles per user in change role warning modal
-      /* eslint-enable no-warning-comments */
+    /* eslint-disable complexity */
+    // NOTE - Complexity of 13, left in to improve readability.
+    /**
+     * @name createConfirmationConfig
+     * @description Create a standard confirmation dialog configuration containing call specific text (sensitive to
+     * user/s, role/s, assign, remove, etc)
+     * @param {Array} users - array of HCF user objects
+     * @param {object} delta - actual set of roles to assign or unassign
+     * @returns {object} confirmation dialog configuration
+     */
+    function createConfirmationConfig(users, delta) {
       var usernames = _.map(users, 'entity.username');
-      return _.assign({
-        title: usernames.length > 1 ? gettext('Remove Users Roles') : gettext('Remove User Roles'),
-        description: usernames.length > 1
-          ? gettext('Are you sure you want to remove role/s for the following users? ') + usernames.join(', ')
-          : gettext('Are you sure you want to remove role/s for the following user? ') + usernames.join(', '),
-        buttonText: {
-          yes: gettext('Remove')
-        },
-        errorMessage: usernames.length > 1 ? gettext('Failed to remove users role(s)')
-          : gettext('Failed to remove user role(s)'),
-        successMessage: usernames.length > 1 ? gettext('Successfully removed users role(s)')
-          : gettext('Successfully removed user role(s)')
-      }, config);
+      var assigns = [];
+      var removes = [];
 
+      // Discover the number of assignments and removes, including their human readable string
+      // (the lookup for these could be factored out to the end for speed, but for code clarrity doing them inline)
+      _.forEach(delta, function (orgsRolesPerUser) {
+        _.forEach(orgsRolesPerUser, function (orgRolesPerUser) {
+
+          // Determine organization roles delta
+          _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
+            if (selected) {
+              assigns.push(that.organizationRoles[roleKey]);
+            } else {
+              removes.push(that.organizationRoles[roleKey]);
+            }
+          });
+
+          // Determine spaces roles delta
+          _.forEach(orgRolesPerUser.spaces, function (spaceRoles) {
+            _.forEach(spaceRoles, function (selected, roleKey) {
+              if (selected) {
+                assigns.push(that.spaceRoles[roleKey]);
+              } else {
+                removes.push(that.spaceRoles[roleKey]);
+              }
+            });
+          });
+        });
+      });
+
+      // Determine the title, description, success message and error message of the confirmation model.
+      // These are verbose to allow better localization
+
+      var multipleRoles = assigns.length + removes.length > 1;
+
+      // Determine the title
+      var title = multipleRoles ? gettext('Update Roles') : gettext('Update Role');
+      if (assigns.length === 0) {
+        title = multipleRoles ? gettext('Remove Roles') : gettext('Remove Role');
+      } else if (removes.length === 0) {
+        title = multipleRoles ? gettext('Assign Roles') : gettext('Assign Role');
+      }
+
+      // Determine the description
+      var line1 = usernames.length > 1
+        ? gettext('You are about to make the following changes for users {{users}}.')
+        : gettext('You are about to make the following changes to user \'{{user}}\'.');
+      var line2 = assigns.length > 1 ? gettext('Assign {{count}} roles') : gettext('Assign role \'{{role}}\'');
+      var line3 = removes.length > 1 ? gettext('Remove {{count}} roles') : gettext('Remove role \'{{role}}\'');
+      var line4 = gettext('Are you sure you wish to continue?');
+
+      line1 = $interpolate(line1)({user: usernames[0], users: usernames.join(', ')});
+      line2 = $interpolate(line2)({count: assigns.length, role: assigns[0]});
+      line3 = $interpolate(line3)({count: removes.length, role: removes[0]});
+
+      var description =
+        line1 + '<br><br>' +
+        (assigns.length > 0 ? line2 + '<br>' : '') +
+        (removes.length > 0 ? line3 + '<br>' : '') +
+        '<br>' + line4;
+
+      // Success and error messages
+      var successMessage = multipleRoles ? gettext('Successfully updated user roles')
+        : gettext('Successfully updated user role');
+      var errorMessage = multipleRoles ? gettext('Failed to update user roles')
+        : gettext('Failed to update user role');
+      if (usernames.length > 1) {
+        successMessage = multipleRoles ? gettext('Successfully updated users roles')
+          : gettext('Successfully updated users role');
+        errorMessage = multipleRoles ? gettext('Failed to update users roles')
+          : gettext('Failed to update users role');
+      }
+
+      return {
+        title: title,
+        description: description,
+        successMessage: successMessage,
+        errorMessage: errorMessage,
+        buttonText: {
+          yes: gettext('Yes'),
+          no: gettext('No')
+        },
+        windowClass: 'roles-conf-dialog'
+      };
     }
+    /* eslint-enable complexity */
 
-    function assignConfirmationConfig(users, config) {
-      /* eslint-disable no-warning-comments */
-      // TODO: TEAMFOUR-906: Endpoint Dashboard: Show list of changed roles per user in change role warning modal
-      /* eslint-enable no-warning-comments */
-      var usernames = _.map(users, 'entity.username');
-      return _.assign({
-        title: usernames.length > 1 ? gettext('Assign Roles to Users') : gettext('Assign Roles to User'),
-        description: usernames.length > 1
-          ? gettext('Are you sure you want to assign role/s for the following users? ') + usernames.join(', ')
-          : gettext('Are you sure you want to assign role/s for the following user? ') + usernames.join(', '),
-        buttonText: {
-          yes: gettext('Assign')
-        },
-        errorMessage: usernames.length > 1 ? gettext('Failed to assign users role(s)')
-          : gettext('Failed to assign user role(s)'),
-        successMessage: usernames.length > 1 ? gettext('Successfully assigned users role(s)')
-          : gettext('Successfully assigned user role(s)')
-      }, config);
-    }
+    /**
+     * @name rolesDelta
+     * @description Determine the difference between the old/current roles and the new roles to be applied
+     * @param {object} oldRoles - Object containing the previously selected roles, or the initial state. Format matches
+     * newRoles.
+     *  Organizations... [userGuid][orgGuid].organization[roleKey] = truthy
+     *  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
+     * @param {object} newRoles - Object containing the new roles to apply. Format matches oldRoles.
+     *  Organizations... [userGuid][orgGuid].organization[roleKey] = truthy
+     *  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
+     * @returns {object} confirmation dialog configuration
+     */
+    function rolesDelta(oldRoles, newRoles) {
+      var delta = angular.fromJson(angular.toJson(newRoles));
+      var changes = false;
 
-    function updateConfirmationConfig(users, config) {
-      /* eslint-disable no-warning-comments */
-      // TODO: TEAMFOUR-906: Endpoint Dashboard: Show list of changed roles per user in change role warning modal
-      /* eslint-enable no-warning-comments */
-      var usernames = _.map(users, 'entity.username');
-      return _.assign({
-        title: usernames.length > 1 ? gettext('Update Users Roles') : gettext('Update User Roles'),
-        description: usernames.length > 1
-          ? gettext('Are you sure you want to update role/s for the following users? ') + usernames.join(', ')
-          : gettext('Are you sure you want to update role/s for the following user? ') + usernames.join(', '),
-        buttonText: {
-          yes: gettext('Update')
-        },
-        errorMessage: usernames.length > 1 ? gettext('Failed to update users roles')
-          : gettext('Failed to update user roles'),
-        successMessage: usernames.length > 1 ? gettext('Successfully updated users roles')
-          : gettext('Successfully update user roles')
-      }, config);
+      // For each user
+      _.forEach(delta, function (orgsRolesPerUser, userGuid) {
+        // For each org
+        _.forEach(orgsRolesPerUser, function (orgRolesPerUser, orgGuid) {
+
+          var oldOrgRolesPerUser = _.get(oldRoles, userGuid + '.' + orgGuid);
+
+          // For each organization role
+          _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
+            // Has there been a change in the org role?
+            var oldRoleSelected = _.get(oldOrgRolesPerUser, 'organization.' + roleKey) || false;
+            if (!!oldRoleSelected === !!selected) {
+              delete orgRolesPerUser.organization[roleKey];
+            } else {
+              changes = true;
+            }
+          });
+
+          // For each space
+          _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
+            // For each space role
+            _.forEach(spaceRoles, function (selected, roleKey) {
+              // Has there been a change in the space role?
+              var oldRoleSelected = _.get(oldOrgRolesPerUser, 'spaces.' + spaceGuid + '.' + roleKey) || false;
+              if (oldRoleSelected === selected) {
+                delete orgRolesPerUser.spaces[spaceGuid][roleKey];
+              }else {
+                changes = true;
+              }
+            });
+          });
+        });
+      });
+
+      return changes ? delta : null;
     }
 
     /**
@@ -532,76 +600,91 @@
      *  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
      * @param {object} newRolesByUser - Object containing the new roles to apply. The delta of this and oldRoles will be
      * applied (assign/remove). Format matches oldRoles
-     * @param {string=} overrideConfConfig - Override the default confirmation dialog config
      * @returns {promise}
      */
-    function updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRolesByUser, newRolesByUser, overrideConfConfig) {
+    function updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRolesByUser, newRolesByUser) {
       that.changingRoles = true;
 
-      var combinedConfig;
+      var delta = rolesDelta(oldRolesByUser, newRolesByUser);
 
-      var defaultConfirmationDialogConfig = {
-        title: gettext('Change Roles'),
-        description: gettext('Are you sure you want to change user roles?'),
-        errorMessage: gettext('Failed to update roles.'),
-        buttonText: {
-          yes: gettext('Change'),
-          no: gettext('Cancel')
-        },
-        callback: function () {
-          var failedAssignForUsers = [];
+      if (!delta) {
+        notificationsService.notify('warning', gettext('There are no changes to make. User(s) roles have not changed'));
+        that.changingRoles = false;
+        return $q.reject();
+      }
 
-          // For each user assign their new roles. Do this asynchronously
-          var promises = [];
-          _.forEach(selectedUsers, function (user) {
-            var promise = updateUserOrgsAndSpaces(clusterGuid, user, oldRolesByUser[user.metadata.guid],
-              newRolesByUser[user.metadata.guid])
-              .catch(function (error) {
-                // Swallow promise chain error and track by number of failed users
-                failedAssignForUsers.push(user.entity.username);
-                $log.error('Failed to update user ' + user.entity.username, error);
-              });
-            promises.push(promise);
-          });
+      var confirmationConfig = createConfirmationConfig(selectedUsers, delta);
+      confirmationConfig.callback = function () {
+        var failedAssignForUsers = [];
 
-          return $q.all(promises)
-            .then(function () {
-              notificationsService.notify('success', combinedConfig.successMessage);
-            })
-            .then(function () {
-              // If all async requests have finished invalidate any cache associated with roles
-              eventService.$emit(eventService.events.ROLES_UPDATED);
-              if (failedAssignForUsers.length > 0) {
-                return $q.reject(gettext('Failed to update user(s) ') + failedAssignForUsers.join(','));
-              }
+        // For each user assign their new roles. Do this asynchronously
+        var promises = [];
+        _.forEach(selectedUsers, function (user) {
+          var promise = updateUserOrgsAndSpaces(clusterGuid, user, delta[user.metadata.guid])
+            .catch(function (error) {
+              // Swallow promise chain error and track by number of failed users
+              failedAssignForUsers.push(user.entity.username);
+              $log.error('Failed to update user ' + user.entity.username, error);
             });
-        }
-      };
-      combinedConfig = _.assign(defaultConfirmationDialogConfig, overrideConfConfig);
+          promises.push(promise);
+        });
 
-      return confirmDialog(combinedConfig).result.finally(function () {
+        return $q.all(promises)
+          .then(function () {
+            // If all async requests have finished invalidate any cache associated with roles
+            eventService.$emit(eventService.events.ROLES_UPDATED);
+
+            // If something has failed return an failed promise
+            if (failedAssignForUsers.length > 0) {
+              return $q.reject(gettext('Failed to update roles for user(s) ') + failedAssignForUsers.join(', '));
+            } else {
+              // Otherwise notify success, hurrah
+              notificationsService.notify('success', confirmationConfig.successMessage);
+            }
+          });
+      };
+
+      return confirmDialog(confirmationConfig).result.finally(function () {
         that.changingRoles = false;
       });
     }
 
-    function updateUserOrgsAndSpaces(clusterGuid, user, oldRolesPerOrg, newRolesPerOrg) {
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.updateUserOrgsAndSpaces
+     * @description As per updateUsersOrgsAndSpaces, except for a single user. This should not be called separately only
+     * via updateUsersOrgsAndSpaces.
+     * @param {string} clusterGuid - HCF service guid
+     * @param {object} user - user to apply roles to
+     * @param {object} newRolesPerOrg - Object containing the new roles to apply. Format is...
+     *  Organizations... [orgGuid].organization[roleKey] = truthy
+     *  Spaces...        [orgGuid].spaces[spaceGuid][roleKey] = truthy
+     * @returns {promise}
+     */
+    function updateUserOrgsAndSpaces(clusterGuid, user, newRolesPerOrg) {
       var promises = [];
 
-      _.forEach(newRolesPerOrg, function (orgRoles, orgGuid) {
-        promises.push(updateUserOrgAndSpaces(clusterGuid, user, orgGuid, _.get(oldRolesPerOrg, orgGuid), orgRoles));
+      _.forEach(newRolesPerOrg, function (newOrgRoles, orgGuid) {
+        promises.push(updateUserOrgAndSpaces(clusterGuid, user, orgGuid, newOrgRoles));
       });
 
       return $q.all(promises);
     }
 
-    function updateUserOrgAndSpaces(clusterGuid, user, orgGuid, oldOrgRoles, newOrgRoles) {
-      var userGuid = user.metadata.guid;
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.updateUserOrgAndSpaces
+     * @description As per updateUserOrgsAndSpaces, except for a single org. This should not be called separately only
+     * via updateUsersOrgsAndSpaces.
+     * @param {string} clusterGuid - HCF service guid
+     * @param {object} user - user to apply roles to
+     * @param {object} orgGuid - guid of organization
+     * @param {object} newOrgRoles - Object containing the new roles to apply. Format is...
+     *  Organizations... organization[roleKey] = truthy
+     *  Spaces...        spaces[spaceGuid][roleKey] = truthy
+     * @returns {promise}
+     */
+    function updateUserOrgAndSpaces(clusterGuid, user, orgGuid, newOrgRoles) {
 
-      // Track which orgs and spaces were affected. We'll update the cache for these afterwards
-      var changes = {
-        organization: false,
-        spaces: {}
-      };
+      var userGuid = user.metadata.guid;
 
       // Need to ensure that we execute organization role changes in a specific order
       // If we're ADDING non-org_user roles we need to first ensure that we complete the add for org_user
@@ -611,12 +694,6 @@
         var orgPromises = [];
         // Assign/Remove Organization Roles
         _.forEach(roles, function (selected, roleKey) {
-          // Has there been a change in the org role?
-          var oldRoleSelected = _.get(oldOrgRoles, 'organization.' + roleKey) || false;
-          if (!!oldRoleSelected === !!selected) {
-            return;
-          }
-
           // We're either assigning a new role or removing an old role....
           if (selected) {
             // ... Assign role.
@@ -625,7 +702,6 @@
             // ... Remove role.
             orgPromises.push(rolesToFunctions.org.remove[roleKey](clusterGuid, orgGuid, userGuid));
           }
-          changes.organization = true;
         });
         return $q.all(orgPromises);
       }
@@ -635,12 +711,11 @@
       var preReqPromise = $q.when();
       // Clone the new org roles. This will be the 'to do' list of changes that are executed after preReqPromise.
       var orgRoles = _.clone(newOrgRoles.organization);
-      // Understand what the old org_user value was which will be compared to the new org_user value;
-      var newOrgUser = _.get(orgRoles, 'org_user') || false;
-      var oldOrgUser = _.get(oldOrgRoles, 'organization.org_user') || false;
+      // What are we attempting to set for the org user role?
+      var newOrgUser = _.get(orgRoles, 'org_user');
 
-      // Has it changed?
-      if (!!oldOrgUser !== !!newOrgUser) {
+      // Has it changed? Undefined means no change
+      if (angular.isDefined(newOrgUser)) {
         delete orgRoles.org_user;
 
         if (newOrgUser) {
@@ -655,8 +730,6 @@
         }
         // By this stage the orgRoles object should contain a set of changes to make after the initial promise is
         // resolved.
-        // Track that we've made changes to this org.
-        changes.organization = true;
       }
 
       return preReqPromise
@@ -671,14 +744,6 @@
           _.forEach(newOrgRoles.spaces, function (spaceRoles, spaceGuid) {
 
             _.forEach(spaceRoles, function (selected, roleKey) {
-              // Has there been a change in the space role?
-              var oldRoleSelected = _.get(oldOrgRoles, 'spaces.' + spaceGuid + '.' + roleKey) || false;
-              if (oldRoleSelected === selected) {
-                return;
-              }
-
-              // Track changes
-              changes.spaces[spaceGuid] = true;
 
               if (selected) {
                 // Assign role
@@ -696,13 +761,15 @@
           // All changes have been made, refresh the local cache of all affected orgs/spaces
           var cachePromises = [];
           // Refresh org cache
-          if (changes.organization) {
+          if (_.keys(newOrgRoles.organization).length > 0) {
             cachePromises.push(organizationModel.refreshOrganizationUserRoles(clusterGuid, orgGuid));
           }
 
           // Refresh space caches
-          _.forEach(changes.spaces, function (changed, spaceGuid) {
-            cachePromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, spaceGuid));
+          _.forEach(newOrgRoles.spaces, function (spaceRoles, spaceGuid) {
+            if (_.keys(spaceRoles).length > 0) {
+              cachePromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, spaceGuid));
+            }
           });
 
           return $q.all(cachePromises);

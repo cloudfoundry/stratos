@@ -61,8 +61,10 @@
         fetching: false,
         valid: false,
         hceCnsi: undefined,
-        hceServiceGuid: undefined
-      }
+        hceServiceGuid: undefined,
+        projectId: undefined
+      },
+      project: null
     };
     this.appStateSwitchTo = '';
     this.filterParams = {
@@ -313,6 +315,22 @@
         .then(function (data) {
           that.application.variables = data;
         });
+    },
+
+    /**
+     * @function unbindServiceFromApp
+     * @memberof cloud-foundry.model.application
+     * @description Unbind service instance from application
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - the application id
+     * @param {string} bindingGuid - the service binding id
+     * @param {object} params - optional params
+     * @returns {promise} a promise object
+     * @public
+     */
+    unbindServiceFromApp: function (cnsiGuid, guid, bindingGuid, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .RemoveServiceBindingFromApp(guid, bindingGuid, params, this.makeHttpConfig(cnsiGuid));
     },
 
     /**
@@ -609,34 +627,36 @@
         metadata.hceCnsi = undefined;
         metadata.hce_api_url = undefined;
         metadata.hceServiceGuid = undefined;
+        metadata.projectId = undefined;
       }
 
       if (hceServiceData) {
         // Go fetch the service metadata
         return hcfUserProvidedServiceInstanceModel.getUserProvidedServiceInstance(that.cnsiGuid, hceServiceData.guid)
-        .then(function (data) {
-          // Now we need to see if the CNSI is known
-          if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
-            // HCE API Endpoint
-            pipeline.hceServiceGuid = hceServiceData.guid;
-            pipeline.hce_api_url = data.entity.credentials.hce_api_url;
-            return that.listHceCnsis().then(function (hceEndpoints) {
-              var hceInstance = _.find(hceEndpoints, function (hce) {
-                var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
-                return pipeline.hce_api_url.indexOf(url) === 0;
+          .then(function (data) {
+            // Now we need to see if the CNSI is known
+            if (data && data.entity && data.entity.credentials && data.entity.credentials.hce_api_url) {
+              // HCE API Endpoint
+              pipeline.hceServiceGuid = hceServiceData.guid;
+              pipeline.hce_api_url = data.entity.credentials.hce_api_url;
+              pipeline.projectId = _.toNumber(data.entity.credentials.hce_pipeline_id);
+              return that.listHceCnsis().then(function (hceEndpoints) {
+                var hceInstance = _.find(hceEndpoints, function (hce) {
+                  var url = hce.info ? hce.info.api_public_uri : hce.api_endpoint.Scheme + '://' + hce.api_endpoint.Host;
+                  return pipeline.hce_api_url.indexOf(url) === 0;
+                });
+                pipeline.hceCnsi = hceInstance;
+                pipeline.valid = angular.isDefined(hceInstance);
+                pipeline.fetching = false;
+                return pipeline;
               });
-              pipeline.hceCnsi = hceInstance;
-              pipeline.valid = angular.isDefined(hceInstance);
-              pipeline.fetching = false;
-              return pipeline;
-            });
-          } else {
+            } else {
+              clearDeliveryPipelineMetadata(pipeline);
+            }
+          })
+          .catch(function () {
             clearDeliveryPipelineMetadata(pipeline);
-          }
-        })
-        .catch(function () {
-          clearDeliveryPipelineMetadata(pipeline);
-        });
+          });
       } else {
         clearDeliveryPipelineMetadata(pipeline);
         return that.$q.when(pipeline);

@@ -27,6 +27,7 @@
     'app.event.eventService',
     'github.view.githubOauthService',
     'app.utils.utilsService',
+    'cloud-foundry.view.applications.services.hceSupport',
     '$scope',
     '$q',
     '$timeout',
@@ -41,6 +42,7 @@
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
    * @param {app.model.utilsService} utils - the utils service
+   * @param {object} hceSupport - HCE Support service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
@@ -49,17 +51,19 @@
    * @property {app.event.eventService} eventService - the Event management service
    * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {app.model.utilsService} utils - the utils service
+   * @property {object} hceSupport - HCE Support service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
    * @property {object} $timeout - the Angular $timeout service
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, utils, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, utils, hceSupport, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
     this.utils = utils;
+    this.hceSupport = hceSupport;
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;

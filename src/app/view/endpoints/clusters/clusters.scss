@@ -1,6 +1,13 @@
 @import 'tiles/cluster-tiles',
         'cluster/cluster';
 
+// An override for the ui-framework confirm-dialog fixed sizing. This ensures common lines don't wrap + enough vertical
+// space for error messages
+.confirm-dialog.roles-conf-dialog > .modal-dialog > .modal-content {
+  width: 550px;
+  height: 450px;
+}
+
 // Provide a uniform gallery card across all cluster pages. We should consider moving this to cover all gallery cards
 .cluster-gallery-card {
   &.unlink {

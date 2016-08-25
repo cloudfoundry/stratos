@@ -81,7 +81,7 @@
         {
           title: this.targetType.title,
           templateUrl: 'plugins/cloud-foundry/view/applications/workflows/' +
-          'add-app-workflow/pipeline-subflow/add-notification-dialog.html',
+            'add-app-workflow/pipeline-subflow/add-notification-dialog.html',
           buttonTitles: {
             submit: gettext('Add notification'),
             cancel: gettext('Back to notifications')

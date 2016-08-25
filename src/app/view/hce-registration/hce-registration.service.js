@@ -47,10 +47,10 @@
    * @param {object} $scope - angular $scope
    * @param {$uibModalInstance} $uibModalInstance - the UIB modal instance service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {object} context - context object
    * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {object} context - context object
    */
-  function HceRegistrationController($scope, $uibModalInstance, modelManager, context, notificationsService) {
+  function HceRegistrationController($scope, $uibModalInstance, modelManager, notificationsService, context) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.context = context;
 
