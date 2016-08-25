@@ -4,7 +4,7 @@
   /**
    * @namespace cloud-foundry.model
    * @memberOf cloud-foundry.model
-   * @name PrincipalService
+   * @name AuthService
    * @description CF ACL Model
    */
   angular
@@ -22,6 +22,8 @@
 
   /**
    * @name AuthService
+   * @param {object} modelManager - Model Manager
+   * @param {object} $q - angular $q service
    * @constructor
    */
   function AuthService(modelManager, $q) {
@@ -36,6 +38,8 @@
     /**
      * @name initAuthService
      * @description get a Principal instance for the current user
+     * @param {string} cnsiGuid - Cluster Guid
+     * @returns {*}
      */
     initAuthService: function (cnsiGuid) {
       var that = this;
@@ -77,14 +81,35 @@
         });
     },
 
-    isAllowed: function () {
+    /**
+     * @name isAllowed
+     * @description is user allowed the certain action
+     * @param {string} resourceType - Type is resource
+     * (organization, space, user, service_managed_instances, routes, applications)
+     * @param {string} action - action (create, delete, update..)
+     * @returns {*}
+     */
+    isAllowed: function (resourceType, action) {
       return this.principal.isAllowed.apply(this.principal, arguments);
     },
 
+    /**
+     * @name isInitialized
+     * @description Is authService intialised
+     * @returns {boolean}
+     */
     isInitialized: function () {
       return this.principal !== null;
     },
 
+    /**
+     * @name _addOrganisationRolePromisesForUser
+     * @description private method to fetch organization roles
+     * @param {string} cnsiGuid - Cluster GUID
+     * @param {string} userGuid - User GUID
+     * @returns {Array} promises
+     * @private
+     */
     _addOrganisationRolePromisesForUser: function (cnsiGuid, userGuid) {
       var promises = [];
       var usersModel = this.modelManager.retrieve('cloud-foundry.model.users');
@@ -95,6 +120,15 @@
       promises.push(usersModel.listAllOrganizationsForUser(cnsiGuid, userGuid));
       return promises;
     },
+
+    /**
+     * @name _addSpaceRolePromisesForUser
+     * @description private method to fetch space roles
+     * @param {string} cnsiGuid - Cluster GUID
+     * @param {string} userGuid - User GUID
+     * @returns {Array} promises
+     * @private
+     */
     _addSpaceRolePromisesForUser: function (cnsiGuid, userGuid) {
       var promises = [];
       var usersModel = this.modelManager.retrieve('cloud-foundry.model.users');

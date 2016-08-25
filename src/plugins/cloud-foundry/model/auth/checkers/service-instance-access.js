@@ -45,9 +45,8 @@
       /**
        * @name create
        * @description A User is can create a service if:
-       * 1. They are an admin
-       * 2. or they are a space developer and the feature flag is enabled
-       *
+       * 1. User is an admin
+       * 2. Is a space developer and the feature flag is enabled
        * @param {Object} space Domain space
        * @returns {boolean}
        */
@@ -55,24 +54,30 @@
 
         // If user is developer in space the service instances will
         // belong to and the service_instance_creation flag is set
-        return this.principal.isAdmin ||
-          (this.principal.hasAccessTo('service_instance_creation') &&
-          this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid));
+        // Admin
+        if (this.baseAccess.create(space)) {
+          return true;
+        }
+
+        return this.principal.hasAccessTo('service_instance_creation') &&
+          this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**
        * @name update
        * @description User can update a service instance if:
-       * 1. They are an admin
-       * 2. or they are a space developer
-       * @param {Object} serviceInstance service instance detail
+       * 1. User is an admin
+       * 2. or a space developer
+       * @param {Object} space - space detail
        * @returns {boolean}
        */
-      update: function (serviceInstance) {
+      update: function (space) {
+        // Admin
+        if (this.baseAccess.create(space)) {
+          return true;
+        }
 
-        // If user is developer in space the service instances belongs to
-        return this.principal.isAdmin || this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.spaces.all, serviceInstance.metadata.guid);
+        return this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**
@@ -80,12 +85,17 @@
        * @description User can delete a service instance if:
        * 1. They are an admin
        * 2. or they are a space developer
-       * @param {Object} serviceInstance service instance detail
+       * @param {Object} space - spacedetail
        * @returns {boolean}
        */
-      delete: function (serviceInstance) {
-        return this.principal.isAdmin || this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.spaces.all, serviceInstance.metadata.guid);
+      delete: function (space) {
+        // Admin
+        if (this.baseAccess.delete(space)) {
+          return true;
+        }
+
+        return this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+
       },
 
       /**

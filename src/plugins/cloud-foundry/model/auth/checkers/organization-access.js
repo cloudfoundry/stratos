@@ -44,21 +44,33 @@
 
       /**
        * @name create
-       * @description Does user have create organization permission
+       * @description Users can create an organisation if:
+       * 1. User is and admin
+       * 2. the `user_org_creation` feature flag is enabled
        * @returns {boolean}
        */
       create: function () {
-         // Users can create organization is they are an admin
-        // or the appropriate feature flag is enabled
-        return this.principal.isAdmin || this.principal.hasAccessTo('user_org_creation');
+
+        // Admin
+        if (this.baseAccess.create(org)) {
+          return true;
+        }
+
+        return this.principal.hasAccessTo('user_org_creation');
+
       },
 
       /**
-       * @name update
-       * @description Does user have update organization permission
+       * @name delete
+       * @description Users can delete an organisation if:
+       * 1. User is and admin
+       * 2. is Org Manager
+       * @param {object} org - organisation details
        * @returns {boolean}
        */
       delete: function (org) {
+
+        // Admin
         if (this.baseAccess.delete(org)) {
           return true;
         }
@@ -69,9 +81,10 @@
       },
 
       /**
-       * @name delete
-       * @description User can update
-
+       * @name update
+       * @description Users can update an organisation if:
+       * 1. User is and admin
+       * 2. is Org Manager
        * @param {Object} org - Application detail
        * @returns {boolean}
        */

@@ -43,11 +43,14 @@
     angular.extend(ApplicationAccess.prototype, {
       /**
        * @name create
-       * @description Does user have create application permission in the space
+       * @description User can deploy apps if:
+       * 1. User is an admin
+       * 2. User is a space developer
        * @param {Object} space Domain space
        * @returns {boolean}
        */
       create: function (space) {
+
         // Admin
         if (this.baseAccess.create(space)) {
           return true;
@@ -59,13 +62,15 @@
 
       /**
        * @name update
-       * @description Does user have update application permission
-       * @param {Object} app Application detail
+       * @description User can manage apps if:
+       * 1. User is an admin
+       * 2. User is a space developer
+       * @param {Object} space Domain space
        * @returns {boolean}
        */
-      update: function (app) {
+      update: function (space) {
         // Admin
-        if (this.baseAccess.update(app)) {
+        if (this.baseAccess.update(space)) {
           return true;
         }
 
@@ -75,12 +80,20 @@
 
       /**
        * @name delete
-       * @description Does user have delete application permission
-       * @param {Object} app - Application detail
+       * @description User can delete apps if:
+       * 1. User is an admin
+       * 2. User is a space developer
+       * @param {Object} space Domain space
        * @returns {boolean}
        */
-      delete: function (app) {
-        return this.baseAccess.delete(app);
+      delete: function (space) {
+        // Admin
+        if (this.baseAccess.delete(space)) {
+          return true;
+        }
+
+        // If user is developer in space app belongs to
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**

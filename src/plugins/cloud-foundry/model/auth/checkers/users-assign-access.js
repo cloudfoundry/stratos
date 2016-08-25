@@ -48,11 +48,13 @@
        * 1. User is admin
        * 2. User is an organisation manager
        * 3. User is a space manager  (in case its a space)
+       * @param {object} object - Can be space or org detail
+       * @param {boolean} isSpace - flag to indicate what object is
        * @returns {boolean}
        */
-
       update: function (object, isSpace) {
 
+        // Admin
         if (this.baseAccess.update(object)) {
           return true;
         }

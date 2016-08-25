@@ -207,6 +207,7 @@
               keys: function (obj) {
                 return _.keys(obj);
               },
+              // Helper to enable/disable organisation role checkbox inputs
               isUserOrgManager: function (org) {
                 if (angular.isUndefined(org)) {
                   return false;

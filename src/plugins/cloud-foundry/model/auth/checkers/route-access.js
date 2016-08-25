@@ -61,8 +61,10 @@
 
       /**
        * @name update
-       * @description Does user have update route permission
-       * @param {Object} route route detail
+       * @description User can create a route if:
+       * 1. User is admin
+       * 2. User is a space developer
+       * @param {Object} route - route detail
        * @returns {boolean}
        */
       update: function (route) {
@@ -76,7 +78,9 @@
 
       /**
        * @name delete
-       * @description Does user have delete route permission
+       * @description User can create a route if:
+       * 1. User is admin
+       * 2. User is a space developer
        * @param {Object} route route detail
        * @returns {boolean}
        */

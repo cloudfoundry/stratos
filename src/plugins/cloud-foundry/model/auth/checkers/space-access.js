@@ -44,13 +44,19 @@
 
       /**
        * @name create
-       * @description Does user have create space permission.
-       * A
+       * @description User can create a space if:
+       * 1. User is an Admin
+       * 2. User is an Org Manager
+       * @param {Object} org - org detail
        * @returns {boolean}
        */
       create: function (org) {
-        return this.principal.isAdmin ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+        // Admin
+        if (this.baseAccess.create(space)) {
+          return true;
+        }
+
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
       },
 
       /**
@@ -59,11 +65,16 @@
        * 1. user is an admin
        * 2. user is the org manager
        * 3. user is the space manager
+       * @param {Object} space - space detail
        * @returns {boolean}
        */
       delete: function (space) {
-        return this.principal.isAdmin ||
-        this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
+        // Admin
+        if (this.baseAccess.create(space)) {
+          return true;
+        }
+
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
           this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
       },
 
@@ -73,11 +84,12 @@
        * 1. User is an admin
        * 2. User is org manager
        * 3. user is space manager
-       * @param {Object} org - Application detail
+       * @param {Object} space - space detail
        * @returns {boolean}
        */
 
       update: function (space) {
+        // Admin
         if (this.baseAccess.update(space)) {
           return true;
         }
@@ -93,15 +105,19 @@
        * 2. User is an Org Manager
        * 3. User is a Space Manager
        * 4. User is a Space Developer
-       * @param {Object} org - Application detail
+       * @param {Object} space - Application detail
        * @returns {boolean}
        */
 
       rename: function (space) {
 
-        return this.principal.isAdmin ||
-          // User is Org manager
-          this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
+        // Admin
+        if (this.baseAccess.update(space)) {
+          return true;
+        }
+
+        // User is Org manager
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
           // User is Space manager
           this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid) ||
           // User is Space developer

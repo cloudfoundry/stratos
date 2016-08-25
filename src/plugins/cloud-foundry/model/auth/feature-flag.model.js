@@ -20,6 +20,13 @@
     modelManager.register('cloud-foundry.model.featureFlags', new FeatureFlags(apiManager));
   }
 
+  /**
+   * @name FeatureFlags
+   * @description Fetches feature flags for a CF
+   * @param {object} apiManager - Api Manager
+   * @property {object}featureFlagsByCnsi - Feature flag cache
+   * @contructor
+   */
   function FeatureFlags(apiManager) {
 
     this.featureFlagsApi = apiManager.retrieve('cloud-foundry.api.FeatureFlags');
@@ -28,6 +35,12 @@
 
   angular.extend(FeatureFlags.prototype, {
 
+    /**
+     * @name fetch
+     * @description fetch featureflags
+     * @param {Object} cnsiGuid - Cluster Guid
+     * @returns {*}
+     */
     fetch: function (cnsiGuid) {
 
       var that = this;
@@ -45,6 +58,12 @@
         });
     },
 
+    /**
+     * @name getFeatureFlagsForCnsi
+     * @description fetch featureflags from cache
+     * @param {Object} cnsi - Cluster Guid
+     * @returns {*}
+     */
     getFeatureFlagsForCnsi: function (cnsi) {
 
       if (this.featureFlagsByCnsi[cnsi]) {
