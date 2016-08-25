@@ -126,7 +126,7 @@ jobs:
     # Build the etcd2 image, push to registry
     - put: hsc-etcd2-image
       params:
-        dockerfile: portal-proxy-output/containers/etcd/Dockerfile.HCP
+        dockerfile: portal-proxy-output/containers/etcd2/Dockerfile.HCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 

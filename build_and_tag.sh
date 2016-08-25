@@ -88,7 +88,7 @@ buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
 # Build and publish the container image for etcd
 echo "Build & publish the container image for etcd"
-buildAndPublishImage hsc-etcd2 ./containers/etcd/Dockerfile.HCP ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-etcd2 ./containers/etcd2/Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
 # Build the preflight container - initiate service upgrade
 echo "Build & publish the container image for the preflight job"
