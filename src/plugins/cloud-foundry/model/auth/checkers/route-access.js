@@ -2,8 +2,8 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model
-   * @memberOf cloud-foundry.model
+   * @namespace cloud-foundry.model.RouteAccess
+   * @memberof cloud-foundry.model
    * @name RouteAccess
    * @description CF ACL Model
    */

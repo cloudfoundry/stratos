@@ -3,7 +3,7 @@
 
   /**
    * @namespace cloud-foundry.model.featureFlag
-   * @memberOf cloud-foundry.model
+   * @memberof cloud-foundry.model
    * @name service
    * @description Service model
    */
