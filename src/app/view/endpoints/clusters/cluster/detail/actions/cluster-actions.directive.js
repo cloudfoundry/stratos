@@ -168,7 +168,14 @@
           setOrganization: setOrganization,
           createSpaceDisabled: createSpaceDisabled,
           addSpace: addSpace,
-          removeSpace: removeSpace
+          removeSpace: removeSpace,
+          // enable input box if user an org manager for the selected org
+          isUserOrgManager: function (org) {
+            if (angular.isUndefined(org)) {
+              return false;
+            }
+            return authService.isAllowed('space', 'create', org.details.org);
+          }
         };
 
         return asyncTaskDialog(

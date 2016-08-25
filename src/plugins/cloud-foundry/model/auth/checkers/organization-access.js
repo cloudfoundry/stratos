@@ -52,7 +52,7 @@
       create: function () {
 
         // Admin
-        if (this.baseAccess.create(org)) {
+        if (this.baseAccess.create()) {
           return true;
         }
 
