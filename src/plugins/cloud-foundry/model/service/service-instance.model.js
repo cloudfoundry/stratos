@@ -86,14 +86,11 @@
      * with the service instance
      * @param {string} cnsiGuid - the CNSI guid
      * @param {object} serviceInstanceGuid - the service instance guid of the service instance to delete
+     * @param {object} params - additional params to pass to request
      * @returns {promise} A promise object
      * @public
      */
-    deleteServiceInstance: function (cnsiGuid, serviceInstanceGuid) {
-      var params = {
-        recursive: true,
-        async: false
-      };
+    deleteServiceInstance: function (cnsiGuid, serviceInstanceGuid, params) {
       return this.serviceInstanceApi.DeleteServiceInstance(serviceInstanceGuid, params, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;

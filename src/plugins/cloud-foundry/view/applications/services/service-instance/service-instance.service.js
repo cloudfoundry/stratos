@@ -164,7 +164,11 @@
             no: gettext('Cancel')
           },
           callback: function () {
-            return instanceModel.deleteServiceInstance(cnsiGuid, serviceInstanceGuid)
+            var params = {
+              recursive: true,
+              async: false
+            };
+            return instanceModel.deleteServiceInstance(cnsiGuid, serviceInstanceGuid, params)
               .then(function () {
                 notificationsService.notify('success', gettext('Service instance successfully deleted'));
                 if (angular.isDefined(callbackFunc)) {

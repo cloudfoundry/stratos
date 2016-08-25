@@ -37,7 +37,7 @@
 
     <!-- Services -->
     <table class="table table-outlined table-selectable"
-      ng-if="wizardCtrl.options.appModel.application.summary.services.length">
+      ng-if="wizardCtrl.options.safeServices.length">
       <thead>
         <tr>
           <th></th>
@@ -47,7 +47,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="service in wizardCtrl.options.appModel.application.summary.services">
+        <tr ng-repeat="service in wizardCtrl.options.safeServices">
           <td>
             <checkbox-input
               ng-model="wizardCtrl.options.userInput.checkedServiceValue[service.guid]">
@@ -60,7 +60,7 @@
       </tbody>
     </table>
 
-    <div ng-if="wizardCtrl.options.safeRoutes.length === 0 && wizardCtrl.options.appModel.application.summary.services.length === 0">
+    <div ng-if="wizardCtrl.options.safeRoutes.length === 0 && wizardCtrl.options.safeServices.length === 0">
       <p translate>
         There are no associated items that can be deleted.
       </p>

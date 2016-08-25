@@ -28,11 +28,32 @@
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     return {
-      mbToHumanSize: mbToHumanSize,
-      sizeUtilization: sizeUtilization,
       chainStateResolve: chainStateResolve,
-      getClusterEndpoint: getClusterEndpoint
+      getClusterEndpoint: getClusterEndpoint,
+      mbToHumanSize: mbToHumanSize,
+      runInSequence: runInSequence,
+      sizeUtilization: sizeUtilization
     };
+
+    /**
+     * @function runInSequence
+     * @memberOf app.utils.utilsService
+     * @description runs async functions in sequence
+     * @param {object} funcStack - a stack containing async functions
+     * @returns {promise} a promise that will be resolved or rejected later
+     */
+    function runInSequence(funcStack) {
+      return $q(function (resolve, reject) {
+        (function _doIt() {
+          if (!funcStack.length) {
+            resolve();
+            return;
+          }
+          var func = funcStack.pop();
+          func().then(_doIt, reject);
+        })();
+      });
+    }
 
     function precisionIfUseful(size, precision) {
       if (angular.isUndefined(precision)) {
