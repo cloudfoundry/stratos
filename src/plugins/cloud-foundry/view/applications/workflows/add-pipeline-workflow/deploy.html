@@ -5,9 +5,7 @@
 <p translate>You must update the manifest.yml file in your source code repository, this will automatically trigger the delivery pipeline. You can <strong>copy & paste</strong> the code below into the manifest.yml file in your repository. Cloud Foundry uses the manifest file to set the application's name and route. Since the application and its route has been created for you, please ensure that the name, host and domain of your manifest file matches the example below. If the application name and route is not correct in the manifest file, two applications and routes will get created.</p>
 <div class="row">
   <div class="col-sm-12 col-md-12">
-    <div class="hpe-copy hpe-copy-dark">
-      <pre class="hpe-pre-dark">
----
+    <code-block>---
 <span class="text-primary" translate># We have created a temporary app in the gallery</span>
 <span class="text-primary" translate># We have created a delivery pipeline</span>
 applications:
@@ -17,7 +15,6 @@ applications:
   domain: {{ wizardCtrl.options.userInput.domain.entity.name }}<span ng-if="wizardCtrl.options.userInput.services.length > 0">
   <span class="text-primary" translate># We have provisioned and bound services</span>
   services:<span ng-repeat="service in wizardCtrl.options.userInput.services">
-  - {{ service.name }}</span></pre>
-    </div>
+  - {{ service.name }}</span></code-block>
   </div>
 </div>
