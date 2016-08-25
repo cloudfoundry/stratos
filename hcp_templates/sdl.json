@@ -629,7 +629,7 @@
     {
       "name": "HCE_CLIENT",
       "description": "HCE client",
-      "default": "console",
+      "default": "code-engine-renamed",
       "data_type": "string",
       "required": true,
       "secret": false
