@@ -86,8 +86,9 @@
         }
       }];
 
-    if (this.isUserAdmin()) {
+    this.expiredActionMenu = _.concat(this.disconnectedActionMenu, this.connectedActionMenu);
 
+    if (this.isUserAdmin()) {
       var unregister = function (endpoint) {
         that.unregister(endpoint);
       };
@@ -97,11 +98,29 @@
       this.disconnectedActionMenu.push(
         {name: gettext('Unregister'), execute: unregister}
       );
+      this.expiredActionMenu.push(
+        {name: gettext('Unregister'), execute: unregister}
+      );
     }
-
   }
 
   angular.extend(EndpointsViewController.prototype, {
+
+    /**
+     * @namespace app.view.endpoints.hce
+     * @memberof app.view.endpoints.hce
+     * @name getActions
+     * @description Get the menu actions appropriate to the given endpoint
+     * @param {object} endpoint - Endpoint to return the actions for
+     * @returns {object} Array of actions for an action menu appropriate to the given endpoint
+     */
+    getActions: function (endpoint) {
+      if (endpoint.expired) {
+        return this.expiredActionMenu;
+      } else {
+        return endpoint.connected ? this.connectedActionMenu : this.disconnectedActionMenu;
+      }
+    },
 
     /**
      * @namespace app.view.endpoints.hce
@@ -275,12 +294,14 @@
           var endpoint = c.api_endpoint;
           var isConnected = angular.isDefined(that.userServiceInstanceModel.serviceInstances[c.guid]) &&
                             that.userServiceInstanceModel.serviceInstances[c.guid].valid;
-
+          var isExpired = angular.isDefined(that.userServiceInstanceModel.serviceInstances[c.guid]) &&
+                            !that.userServiceInstanceModel.serviceInstances[c.guid].valid;
           return {
             name: c.name,
             guid: c.guid,
             url: endpoint.Scheme + '://' + endpoint.Host,
             connected: isConnected,
+            expired: isExpired,
             model: c
           };
         });

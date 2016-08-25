@@ -39,13 +39,14 @@
       </thead>
       <tbody>
       <tr ng-repeat="endpoint in endpointsViewCtrl.currentEndpoints"
-          show-table-inline-message=" {{!endpoint.connected ? endpointsViewCtrl.tokenExpiryMessage : ''}}">
+          show-table-inline-message="{{endpoint.expired ? endpointsViewCtrl.tokenExpiryMessage : ''}}"
+          table-inline-status="error">
         <td>{{endpoint.name}}</td>
         <td>{{endpoint.url}}</td>
-        <td translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
+        <td ng-if="!endpoint.expired" translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
+        <td ng-if="endpoint.expired" translate>Expired</td>
         <td>
-          <actions-menu actions="endpoint.connected ? endpointsViewCtrl.connectedActionMenu :
-                      endpointsViewCtrl.disconnectedActionMenu"
+          <actions-menu actions="endpointsViewCtrl.getActions(endpoint)"
                         action-target="endpoint" menu-icon="helion-icon helion-icon-More"
                         menu-position="actions-menu-right"></actions-menu>
         </td>
@@ -58,7 +59,8 @@
 
 </div>
 <flyout flyout-active="endpointsViewCtrl.credentialsFormOpen"
-        flyout-close-icon="'helion-icon helion-icon-Close'">
+        flyout-close-icon="'helion-icon helion-icon-Close'"
+        class="flyout-content-thin">
   <credentials-form cnsi="endpointsViewCtrl.activeServiceInstance"
                     on-cancel="endpointsViewCtrl.onConnectCancel()"
                     on-submit="endpointsViewCtrl.onConnectSuccess(serviceInstance)">
