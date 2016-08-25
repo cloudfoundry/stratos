@@ -358,6 +358,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// VCS OAuth callback/response
 	vcsGroup.GET("/oauth/callback", p.handleVCSAuthCallback)
 
+	// List VCS clients
+	vcsGroup.GET("/clients", p.listVCSClients)
+
 	// Verify existence of VCS token in Session
 	vcsGroup.GET("/oauth/verify", p.verifyVCSOAuthToken)
 
