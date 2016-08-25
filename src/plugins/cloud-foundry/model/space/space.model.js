@@ -12,11 +12,12 @@
   registerSpaceModel.$inject = [
     '$q',
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.service.serviceUtils'
   ];
 
-  function registerSpaceModel($q, modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager));
+  function registerSpaceModel($q, modelManager, apiManager, serviceUtils) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils));
   }
 
   /**
@@ -25,14 +26,15 @@
    * @param {object} $q - angular $q service
    * @property {object} $q - angular $q service
    * @param {app.api.apiManager} apiManager - the API manager
-   * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
+   * @param {cloud-foundry.model.service.serviceUtils} serviceUtils - the service utils service
    * @property {object} stackatoInfoModel - the stackatoInfoModel service
    * @class
    */
-  function Space($q, apiManager, modelManager) {
+  function Space($q, apiManager, modelManager, serviceUtils) {
     this.$q = $q;
     this.apiManager = apiManager;
+    this.serviceUtils = serviceUtils;
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.data = {
@@ -140,6 +142,7 @@
      * @public
      */
     onListAllServicesForSpace: function (cnsiGuid, guid, services) {
+      this.serviceUtils.enhance(services);
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.services', services);
       return services;
     },
