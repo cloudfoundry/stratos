@@ -70,14 +70,15 @@
 
       /**
        * @name delete
-       * @description Does user have delete organization permission
-       * Original source contained a `//TODO(irfran):` annotation https://jira.hpcloud.net/browse/TEAMFOUR-625
+       * @description User can update
+
        * @param {Object} org - Application detail
        * @returns {boolean}
        */
 
       update: function (org) {
 
+        // User is an admin
         if (this.baseAccess.update(org)) {
           return true;
         }

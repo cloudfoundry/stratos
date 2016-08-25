@@ -235,8 +235,10 @@
       // Space access - if user is an Org Manager in at least one organization then show slide in
       that.clusterActions[1].disabled = !authService.principal.userSummary.organizations.managed.length > 0;
 
-      // User Assignment access - if user is an Org Manager in at least one organization then show slide in
-      that.clusterActions[2].disabled =  !authService.principal.userSummary.organizations.managed.length > 0;
+      // User Assignment access - if user is an Org Manager in at least one organization
+      // or a space manager in a space then show slide in
+      that.clusterActions[2].disabled = authService.principal.userSummary.organizations.managed.length === 0 &&
+        authService.principal.userSummary.spaces.managed.length === 0;
 
     }
 
@@ -246,7 +248,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    if (this.context !== 'space'){
+    if (this.context !== 'space') {
       utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
     } else {
       utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);

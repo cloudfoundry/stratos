@@ -47,7 +47,7 @@
        * @description User can update role assignments if:
        * 1. User is admin
        * 2. User is an organisation manager
-       * 3. User is a space manager
+       * 3. User is a space manager  (in case its a space)
        * @returns {boolean}
        */
 

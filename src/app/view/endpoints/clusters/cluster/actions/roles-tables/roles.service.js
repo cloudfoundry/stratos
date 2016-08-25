@@ -50,7 +50,7 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var usersModel = modelManager.retrieve('cloud-foundry.model.users');
-
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
     this.changingRoles = false;
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
@@ -404,7 +404,7 @@
       _.forEach(organizationModel.organizations[clusterGuid], function (org, orgGuid) {
         if (!singleOrgGuid || singleOrgGuid === orgGuid) {
           _.forEach(org.roles, function (roles, userGuid) {
-            if (_.find(users, { metadata: { guid: userGuid }})) {
+            if (_.find(users, {metadata: {guid: userGuid}})) {
               _.set(rolesByUser, userGuid + '.' + orgGuid + '.organization', _.keyBy(roles));
             }
           });
@@ -416,7 +416,7 @@
           _.forEach(space.roles, function (roles, userGuid) {
             if (!singleSpaceGuid || singleSpaceGuid === spaceGuid) {
 
-              if (_.find(users, { metadata: { guid: userGuid }})) {
+              if (_.find(users, {metadata: {guid: userGuid}})) {
                 _.set(rolesByUser, userGuid + '.' + orgGuid + '.spaces.' + spaceGuid, _.keyBy(roles));
               }
             }
@@ -531,6 +531,7 @@
         windowClass: 'roles-conf-dialog'
       };
     }
+
     /* eslint-enable complexity */
 
     /**
@@ -543,9 +544,10 @@
      * @param {object} newRoles - Object containing the new roles to apply. Format matches oldRoles.
      *  Organizations... [userGuid][orgGuid].organization[roleKey] = truthy
      *  Spaces...        [userGuid][orgGuid].spaces[spaceGuid][roleKey] = truthy
+     * @param {string} clusterGuid - CNSI Guid
      * @returns {object} confirmation dialog configuration
      */
-    function rolesDelta(oldRoles, newRoles) {
+    function rolesDelta(oldRoles, newRoles, clusterGuid) {
       var delta = angular.fromJson(angular.toJson(newRoles));
       var changes = false;
 
@@ -556,29 +558,36 @@
 
           var oldOrgRolesPerUser = _.get(oldRoles, userGuid + '.' + orgGuid);
 
-          // For each organization role
-          _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
-            // Has there been a change in the org role?
-            var oldRoleSelected = _.get(oldOrgRolesPerUser, 'organization.' + roleKey) || false;
-            if (!!oldRoleSelected === !!selected) {
-              delete orgRolesPerUser.organization[roleKey];
-            } else {
-              changes = true;
-            }
-          });
-
-          // For each space
-          _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
-            // For each space role
-            _.forEach(spaceRoles, function (selected, roleKey) {
-              // Has there been a change in the space role?
-              var oldRoleSelected = _.get(oldOrgRolesPerUser, 'spaces.' + spaceGuid + '.' + roleKey) || false;
-              if (oldRoleSelected === selected) {
-                delete orgRolesPerUser.spaces[spaceGuid][roleKey];
-              }else {
+          // Calculate org role delta only for organizations for which user is allowed to
+          if (authService.isAllowed('user', 'update', organizationModel.organizations[clusterGuid][orgGuid])) {
+            // For each organization role
+            _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
+              // Has there been a change in the org role?
+              var oldRoleSelected = _.get(oldOrgRolesPerUser, 'organization.' + roleKey) || false;
+              if (!!oldRoleSelected === !!selected) {
+                delete orgRolesPerUser.organization[roleKey];
+              } else {
                 changes = true;
               }
             });
+          }
+
+          // For each space
+          _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
+
+            // calculate space role delta only for spaces for which user is allowed
+            if (authService.isAllowed('user', 'update', organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid], true)) {
+              // For each space role
+              _.forEach(spaceRoles, function (selected, roleKey) {
+                // Has there been a change in the space role?
+                var oldRoleSelected = _.get(oldOrgRolesPerUser, 'spaces.' + spaceGuid + '.' + roleKey) || false;
+                if (oldRoleSelected === selected) {
+                  delete orgRolesPerUser.spaces[spaceGuid][roleKey];
+                } else {
+                  changes = true;
+                }
+              });
+            }
           });
         });
       });
@@ -605,7 +614,7 @@
     function updateUsersOrgsAndSpaces(clusterGuid, selectedUsers, oldRolesByUser, newRolesByUser) {
       that.changingRoles = true;
 
-      var delta = rolesDelta(oldRolesByUser, newRolesByUser);
+      var delta = rolesDelta(oldRolesByUser, newRolesByUser, clusterGuid);
 
       if (!delta) {
         notificationsService.notify('warning', gettext('There are no changes to make. User(s) roles have not changed'));

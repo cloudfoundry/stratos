@@ -57,7 +57,7 @@
             ng-if="role || !rolesTablesCtrl.config.disableOrg">
             <checkbox-input
               ng-if="role"
-              ng-model="rolesTablesCtrl.selection.spaces[space.key][roleKey]"></checkbox-input>
+              ng-model="rolesTablesCtrl.selection.spaces[space.key][roleKey]" input-disabled="rolesTablesCtrl.disableAction(space.key)"></checkbox-input>
             <span ng-if="!role">&nbsp;</span>
           </td>
           <td ng-if="!rolesTablesCtrl.config.disableOrg"></td>

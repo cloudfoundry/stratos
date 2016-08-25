@@ -20,7 +20,8 @@
       assign: function (context) {
         return detailView(
           {
-            detailViewTemplateUrl: 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
+            detailViewTemplateUrl:
+              'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/assign-users.html',
             controller: AssignUsersWorkflowController,
             controllerAs: 'assignUsers'
           },
@@ -72,8 +73,8 @@
 
     var path = 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/';
 
-    this.data = {};
-    this.userInput = {};
+    this.data = { };
+    this.userInput = { };
 
     // Ensure that the org_user is correctly updated given any changes in other org roles
     _.forEach(rolesService.organizationRoles, function (val, roleKey) {
@@ -98,7 +99,7 @@
       that.data.usersByGuid = [];
 
       that.userInput.selectedUsersByGuid = {};
-      that.userInput.roles = {};
+      that.userInput.roles = { };
       if (context.selectedUsers) {
         that.userInput.selectedUsersByGuid = angular.fromJson(angular.toJson(context.selectedUsers));
       }

@@ -72,7 +72,6 @@
                   all: userRoles[6].data.resources
                 }
               };
-                 console.log(userSummary)
               that.principal = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
             });
         });

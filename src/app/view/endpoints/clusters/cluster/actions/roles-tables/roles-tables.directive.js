@@ -43,6 +43,7 @@
     var that = this;
 
     this.rolesService = rolesService;
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     // If the organization changes, ensure we respond
     $scope.$watch(function () {
@@ -71,6 +72,11 @@
         })
         .value();
     }
+
+    this.disableAction = function (spaceKey) {
+      var space = that.organization.spaces[spaceKey];
+      return !that.authService.isAllowed('space', 'update', space);
+    };
 
     function refresh() {
       // Show either the currently selected roles OR set all roles to false (such that they can be removed later)

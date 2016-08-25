@@ -61,14 +61,18 @@
        * 3. user is the space manager
        * @returns {boolean}
        */
-      delete: function (org) {
+      delete: function (space) {
         return this.principal.isAdmin ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+        this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
       },
 
       /**
-       * @name delete
-       * @description Does user have delete organization permission
+       * @name update
+       * @description User can update a space if:
+       * 1. User is an admin
+       * 2. User is org manager
+       * 3. user is space manager
        * @param {Object} org - Application detail
        * @returns {boolean}
        */
@@ -78,8 +82,8 @@
           return true;
         }
 
-        // If user is manager of org
-        this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
       },
 
       /**
