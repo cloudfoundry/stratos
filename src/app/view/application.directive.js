@@ -67,7 +67,6 @@
     this.serverFailedToRespond = false;
     this.showGlobalSpinner = false;
     this.showRegistration = false;
-    this.showClusterRegistration = false;
 
     $timeout(function () {
       that.verifySession();

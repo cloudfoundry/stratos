@@ -3,19 +3,19 @@
 
   angular
     .module('app.view')
-    .factory('app.view.hceRegistration', HceRegistrationFactory);
+    .factory('app.view.registerService', ServiceRegistrationService);
 
-  HceRegistrationFactory.$inject = [
+  ServiceRegistrationService.$inject = [
     'app.model.modelManager',
     'app.view.notificationsService',
     'helion.framework.widgets.asyncTaskDialog'
   ];
 
-  function HceRegistrationFactory(modelManager, notificationsService, asyncTaskDialog) {
+  function ServiceRegistrationService(modelManager, notificationsService, asyncTaskDialog) {
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
 
-    function createInstances(serviceInstances) {
-      var filteredInstances = _.filter(serviceInstances, {cnsi_type: 'hce'});
+    function createInstances(serviceInstances, filter) {
+      var filteredInstances = _.filter(serviceInstances, {cnsi_type: filter});
       return _.map(filteredInstances,
         function (c) {
           var endpoint = c.api_endpoint;
@@ -24,15 +24,15 @@
     }
 
     return {
-      add: function () {
+      add: function (title, description, type) {
         var data = {
           name: '',
           url: ''
         };
         return asyncTaskDialog(
           {
-            title: gettext('Register Code Engine Endpoint'),
-            templateUrl: 'app/view/hce-registration/hce-registration.html',
+            title: title,
+            templateUrl: 'app/view/endpoints/register/register-service.html',
             class: 'detail-view-thin',
             buttonTitles: {
               submit: gettext('Register')
@@ -40,13 +40,15 @@
           },
           {
             data: data,
-            instances: createInstances(serviceInstanceModel.serviceInstances)
+            instances: createInstances(serviceInstanceModel.serviceInstances, type),
+            description: description
           },
           function () {
             return serviceInstanceModel.createHce(data.url, data.name)
               .then(function () {
-                notificationsService.notify('success', gettext('HCE endpoint \'{{name}}\' successfully registered'),
-                  {name: data.name});
+                notificationsService.notify('success',
+                  gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
+                  {endpointType: type.toUpperCase(), name: data.name});
               });
           }
         ).result;
