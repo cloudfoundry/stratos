@@ -168,13 +168,13 @@
     function init() {
 
       // Edit organization
-      that.actions[0].disabled = !authService.isAllowed('organization', 'update', that.organization.org);
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.update, that.organization.org);
 
       // Delete organization
-      that.actions[1].disabled = !authService.isAllowed('organization', 'delete', that.organization.org);
+      that.actions[1].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.org);
 
       // Assign users to organization
-      that.actions[2].disabled = !authService.isAllowed('user', 'update', that.organization.org, false);
+      that.actions[2].disabled = !authService.isAllowed(authService.resources.user, authService.actions.update, that.organization.org);
 
       return $q.resolve();
 

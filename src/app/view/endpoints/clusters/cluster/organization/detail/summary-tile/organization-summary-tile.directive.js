@@ -164,10 +164,10 @@
     function init() {
 
       // Edit organization
-      that.actions[0].disabled = !authService.isAllowed('organization', 'update', that.organization.details.org);
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.update, that.organization.details.org);
 
       // Delete organization
-      that.actions[1].disabled = !authService.isAllowed('organization', 'delete', that.organization.details.org);
+      that.actions[1].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.details.org);
 
       return $q.resolve();
 

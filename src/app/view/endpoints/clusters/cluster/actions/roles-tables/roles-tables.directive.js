@@ -76,7 +76,7 @@
     // Helper to enable/disable space role checkbox inputs
     this.disableAction = function (spaceKey) {
       var space = that.organization.spaces[spaceKey];
-      return !that.authService.isAllowed('space', 'update', space);
+      return !that.authService.isAllowed(that.authService.resources.space, that.authService.actions.update, space);
     };
 
     function refresh() {

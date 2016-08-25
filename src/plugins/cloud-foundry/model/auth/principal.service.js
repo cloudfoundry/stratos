@@ -31,6 +31,25 @@
     this.principal = null;
     this.$q = $q;
 
+    this.resources = {
+      space: 'space',
+      user: 'user',
+      space_quota_definition: 'space_quota_definition',
+      user_provided_service_instance: 'user_provided_service_instance',
+      managed_service_instance: 'managed_service_instance',
+      service_instance: 'service_instance',
+      organization: 'organization',
+      application: 'application',
+      domain: 'domain',
+      route: 'route'
+    };
+
+    this.actions = {
+      create: 'create',
+      update: 'update',
+      delete: 'delete',
+      rename: 'rename'
+    };
   }
 
   angular.extend(AuthService.prototype, {
@@ -90,7 +109,7 @@
      * @returns {*}
      */
     /* eslint-disable */
-     isAllowed: function (resourceType, action) {
+    isAllowed: function (resourceType, action) {
       return this.principal.isAllowed.apply(this.principal, arguments);
     },
     /* eslint-enable */
@@ -140,7 +159,6 @@
       promises.push(usersModel.listAllSpacesForUser(cnsiGuid, userGuid));
       return promises;
     }
-
   });
-
-})();
+})
+();

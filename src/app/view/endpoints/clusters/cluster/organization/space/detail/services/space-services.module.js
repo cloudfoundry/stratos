@@ -116,8 +116,10 @@
       _.forEach(serviceInstances, function (si) {
         that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
         if (that.authService.isInitialized()) {
-          that.actionsPerSI[si.metadata.guid][0].disabled = !that.authService.isAllowed('managed_service_instance', 'delete', si);
-          that.actionsPerSI[si.metadata.guid][1].disabled = !that.authService.isAllowed('managed_service_instance', 'update', si);
+          // Delete Services
+          that.actionsPerSI[si.metadata.guid][0].disabled = !that.authService.isAllowed(that.authService.resources.managed_service_instance, that.authService.actions.delete, si);
+          // Update Services
+          that.actionsPerSI[si.metadata.guid][1].disabled = !that.authService.isAllowed(that.authService.resources.managed_service_instance, that.authService.actions.update, si);
         }
       });
     }

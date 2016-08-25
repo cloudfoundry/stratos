@@ -63,12 +63,6 @@
       }
       that.updateActions(routes);
     });
-
-    function init() {
-      return $q.resolve();
-    }
-
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
   }
 
   angular.extend(SpaceRoutesController.prototype, {
@@ -126,8 +120,10 @@
       _.forEach(routes, function (route) {
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
         if (that.authService.isInitialized()) {
-          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed('route', 'delete', route);
-          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed('route', 'update', route);
+          // Delete route
+          that.actionsPerRoute[route.metadata.guid][0].disabled = !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.delete, route);
+          // Unmap route
+          that.actionsPerRoute[route.metadata.guid][1].disabled = !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.update, route);
         }
       });
     },

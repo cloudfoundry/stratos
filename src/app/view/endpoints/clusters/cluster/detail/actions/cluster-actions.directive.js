@@ -174,7 +174,7 @@
             if (angular.isUndefined(org)) {
               return false;
             }
-            return authService.isAllowed('space', 'create', org.details.org);
+            return authService.isAllowed(authService.resources.space, authService.actions.create, org.details.org);
           }
         };
 
@@ -237,7 +237,7 @@
     function enableActions() {
 
       // Organization access - enabled if user is either an admin or the appropriate flag is enabled
-      that.clusterActions[0].disabled = !authService.isAllowed('organization', 'create');
+      that.clusterActions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.create);
 
       // Space access - if user is an Org Manager in at least one organization then show slide in
       that.clusterActions[1].disabled = !authService.principal.userSummary.organizations.managed.length > 0;

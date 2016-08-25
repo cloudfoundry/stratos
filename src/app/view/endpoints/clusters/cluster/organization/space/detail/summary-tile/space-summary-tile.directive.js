@@ -144,10 +144,10 @@
     function enableActions() {
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed('space', 'rename', that.spaceDetail().details.space);
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
 
       // Delete Space
-      that.actions[1].disabled = !authService.isAllowed('space', 'delete', that.spaceDetail().details.space);
+      that.actions[1].disabled = !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
 
     }
 
