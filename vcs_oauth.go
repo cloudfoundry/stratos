@@ -35,8 +35,25 @@ func (p *portalProxy) handleVCSAuth(c echo.Context) error {
 		return c.Redirect(302, url)
 	}
 
+	var clientNotFound = `
+    <!doctype html>
+    <html>
+    <head><link rel="stylesheet" href="/index.css"></head>
+    <body id="github-auth-callback-page">
+    <h1 class="text-center">VCS client is not found.</h1>
+    <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
+    <script>
+      (function () {
+        window.opener.postMessage(JSON.stringify({
+          name: 'VCS OAuth - failure'
+        }), window.location.origin);
+      })();
+    </script>
+    </body>
+    </html>`
+
 	log.Println("VCS Client not found")
-	return c.HTML(http.StatusBadRequest, "VCS Client not found")
+	return c.HTML(http.StatusOK, clientNotFound)
 }
 
 // handleVCSAuthCallback <TBD>
@@ -50,14 +67,45 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	var successHTML = `
     <!doctype html>
     <html>
+    <body>
+    <script>
+      (function () {
+        window.opener.postMessage(JSON.stringify({
+          name: 'VCS OAuth - success'
+        }), window.location.origin);
+      })();
+    </script>
+    </body>
+    </html>`
+
+	var failureHTML = `
+    <!doctype html>
+    <html>
     <head><link rel="stylesheet" href="/index.css"></head>
     <body id="github-auth-callback-page">
-    <h1 class="text-center">VCS authorization is done.</h1>
+    <h1 class="text-center">VCS authorization failed.</h1>
     <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
     <script>
       (function () {
         window.opener.postMessage(JSON.stringify({
-          name: 'GitHub Oauth - token'
+          name: 'VCS OAuth - failure'
+        }), window.location.origin);
+      })();
+    </script>
+    </body>
+    </html>`
+
+	var clientNotFound = `
+    <!doctype html>
+    <html>
+    <head><link rel="stylesheet" href="/index.css"></head>
+    <body id="github-auth-callback-page">
+    <h1 class="text-center">VCS client is not found.</h1>
+    <p class="text-center"><button class="btn btn-primary" onclick="window.close()">Close window and continue</button></p>
+    <script>
+      (function () {
+        window.opener.postMessage(JSON.stringify({
+          name: 'VCS OAuth - failure'
         }), window.location.origin);
       })();
     </script>
@@ -68,8 +116,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	state := c.FormValue("state")
 	endpoint, ok := p.getSessionStringValue(c, state)
 	if !ok {
-		msg := fmt.Sprintf("Invalid OAuth state - %s not found in session\n", state)
-		return c.HTML(http.StatusBadRequest, msg)
+		return c.HTML(http.StatusOK, failureHTML)
 	}
 
 	// clean up session
@@ -93,20 +140,20 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		if err != nil {
 			msg := fmt.Sprintf("oauthConf.Exchange() failed with '%s'\n", err)
 			log.Println(msg)
-			return c.HTML(http.StatusBadRequest, msg)
+			return c.HTML(http.StatusOK, failureHTML)
 		}
 
 		// stuff the token into the user's session
 		sessionKey := newSessionKey(endpoint)
 		if err = setVCSSession(p, c, sessionKey, token.AccessToken); err != nil {
-			return c.HTML(http.StatusBadRequest, "Unable to update user session with token")
+			return c.HTML(http.StatusOK, failureHTML)
 		}
 
 		return c.HTML(http.StatusOK, successHTML)
 	}
 
 	log.Println("VCS Client not found")
-	return c.HTML(http.StatusBadRequest, "VCS Client not found")
+	return c.HTML(http.StatusOK, clientNotFound)
 }
 
 func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
