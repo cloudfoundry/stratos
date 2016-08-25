@@ -355,7 +355,7 @@ func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
 }
 
 func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
-	log.Println("cnsiRecordExists")
+	logger.Debug("cnsiRecordExists")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return false
