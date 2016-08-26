@@ -100,7 +100,7 @@
         });
       }
 
-      if (this.service.isConnected || this.service.hasExpired ) {
+      if (this.service.isConnected || this.service.hasExpired) {
         this.actions.push({
           name: gettext('Disconnect'),
           execute: function () {
