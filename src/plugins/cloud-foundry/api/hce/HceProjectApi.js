@@ -99,6 +99,42 @@
     },
 
     /**
+     * @name createCfBinding
+     * @description Creates a binding in CF between a CF application and an HCE project.
+     * @param {string} guid - the HCE instance GUID
+     * @param {!number} projectId - The project id.
+     * @param {object} data - the request body
+     * @param {object} params - the query parameters
+     * @param {object} httpConfigOptions - additional config options
+     * @returns {promise} A resolved/rejected promise
+     */
+    createCfBinding: function (guid, projectId, data, params, httpConfigOptions) {
+      var path = this.baseUrl + '/projects/{project_id}/bindings/cloudfoundry'
+        .replace('{' + 'project_id' + '}', projectId);
+      var headers = {
+        'x-cnap-cnsi-list': guid
+      };
+
+      var config = {
+        method: 'POST',
+        url: path,
+        params: params || {},
+        data: data,
+        headers: headers
+      };
+
+      angular.forEach(httpConfigOptions, function (optionConfig, option) {
+        if (option === 'headers') {
+          angular.extend(config[option], optionConfig);
+        } else {
+          config[option] = optionConfig;
+        }
+      });
+
+      return this.$http(config);
+    },
+
+    /**
      * @name createProject
      * @description Create a new project.
      * @param {string} guid - the HCE instance GUID

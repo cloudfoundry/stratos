@@ -114,16 +114,10 @@
                   var name = that._getDeploymentTargetName();
                   var target = _.find(hceModel.data.deploymentTargets, {name: name});
                   if (target) {
-                    return that.createPipeline(target.deployment_target_id)
-                      .then(function (response) {
-                        that.userInput.projectId = response.data.id;
-                      });
+                    return that.createPipeline(target.deployment_target_id);
                   } else {
                     return that.createDeploymentTarget().then(function (newTarget) {
-                      return that.createPipeline(newTarget.deployment_target_id)
-                        .then(function (response) {
-                          that.userInput.projectId = response.data.id;
-                        });
+                      return that.createPipeline(newTarget.deployment_target_id);
                     });
                   }
                 });
@@ -307,16 +301,27 @@
       },
 
       createPipeline: function (targetId) {
+        var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
         var githubUrl = this.userInput.source.browse_url;
-        return hceModel.createProject(this.userInput.hceCnsi.guid,
-                                      this._createProjectName(),
-                                      this.userInput.source,
-                                      targetId,
-                                      this.userInput.buildContainer.build_container_id,
-                                      this.userInput.repo,
-                                      this.userInput.branch,
-                                      githubUrl);
+        return hceModel.createProject(
+          this.userInput.hceCnsi.guid,
+          this._createProjectName(),
+          this.userInput.source,
+          targetId,
+          this.userInput.buildContainer.build_container_id,
+          this.userInput.repo,
+          this.userInput.branch,
+          githubUrl
+        ).then(function (response) {
+          that.userInput.projectId = response.data.id;
+
+          return hceModel.createCfBinding(
+            that.userInput.hceCnsi.guid,
+            that.userInput.projectId,
+            that.userInput.application.summary.guid
+          );
+        });
       },
 
       /**
