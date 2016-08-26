@@ -68,7 +68,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 
 	// clean up session
 	if err := p.unsetSessionValue(c, state); err != nil {
-		logger.Error("Unable to delete session value for key %s", state)
+		logger.Errorf("Unable to delete session value for key %s", state)
 	}
 
 	vcsClientKey := VCSClientMapKey{endpoint}
