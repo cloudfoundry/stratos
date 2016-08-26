@@ -59,11 +59,14 @@
           return true;
         }
 
-        // If user is manager of org
         if (isSpace) {
+          // Check if user is space manager or org manager
           return this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.spaces.managed, object.metadata.guid);
+            ._doesContainGuid(this.principal.userSummary.spaces.managed, object.metadata.guid) ||
+            this.baseAccess
+              ._doesContainGuid(this.principal.userSummary.organizations.managed, object.entity.organization_guid);
         } else {
+          // check if user is org manager
           return this.baseAccess
             ._doesContainGuid(this.principal.userSummary.organizations.managed, object.metadata.guid);
         }

@@ -21,7 +21,7 @@
         <tr ng-repeat="org in rolesTablesCtrl.ctrl.displayedOrgs">
           <td>{{ org.details.org.entity.name }}</td>
           <td ng-repeat="(roleKey, role) in rolesTablesCtrl.config.orgRoles">
-            <checkbox-input ng-model="rolesTablesCtrl.selection.organization[roleKey]" input-disabled="rolesTablesCtrl.canAssignOrgRoles(org.details.org)></checkbox-input>
+            <checkbox-input ng-model="rolesTablesCtrl.selection.organization[roleKey]" input-disabled="rolesTablesCtrl.canAssignOrgRoles(org.details.org)"></checkbox-input>
           </td>
           <td>
             <a ng-if="rolesTablesCtrl.config.containsRoles(org.details.org.metadata.guid)"
