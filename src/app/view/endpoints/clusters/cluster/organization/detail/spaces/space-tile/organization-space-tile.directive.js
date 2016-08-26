@@ -83,7 +83,7 @@
       that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
 
       // Delete Space
-      that.actions[1].disabled = !that.canDelete && !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+      that.actions[1].disabled = !that.canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
 
       // User Assignment
       that.actions[2].disabled = authService.principal.userSummary.organizations.managed.length === 0 &&

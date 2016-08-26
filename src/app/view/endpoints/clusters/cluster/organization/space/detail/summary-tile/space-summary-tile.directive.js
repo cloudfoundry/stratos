@@ -62,6 +62,7 @@
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var canDelete = false;
 
     this.cardData = {
       title: gettext('Summary')
@@ -147,23 +148,17 @@
       that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
 
       // Delete Space
-      that.actions[1].disabled = !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
 
     }
 
     function init() {
-      var canDelete = false;
-      that.isAdmin = user.admin;
       that.userName = user.name;
       var spaceDetail = that.spaceDetail();
-      if (that.isAdmin) {
-        canDelete = spaceDetail.routes.length === 0 &&
-          spaceDetail.instances.length === 0 &&
-          spaceDetail.apps.length === 0 &&
-          spaceDetail.services.length === 0;
-      }
-      that.actions[0].disabled = !that.isAdmin;
-      that.actions[1].disabled = !canDelete;
+      canDelete = spaceDetail.routes.length === 0 &&
+        spaceDetail.instances.length === 0 &&
+        spaceDetail.apps.length === 0 &&
+        spaceDetail.services.length === 0;
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
       enableActions();

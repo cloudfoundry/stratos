@@ -127,7 +127,7 @@
       });
       that.actions.push({
         name: gettext('Delete Organization'),
-        disabled: !canDelete && !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.org),
+        disabled: !canDelete || !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.org),
         execute: function () {
           return confirmDialog({
             title: gettext('Delete Organization'),

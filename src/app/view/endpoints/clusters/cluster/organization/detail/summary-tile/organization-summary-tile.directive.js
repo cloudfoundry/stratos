@@ -82,7 +82,7 @@
     this.actions = [
       {
         name: gettext('Edit Organization'),
-        disabled: !authService.isAllowed(authService.resources.organization, authService.actions.update, that.organization.details.org),
+        disabled: true,
         execute: function () {
           return asyncTaskDialog(
             {
@@ -115,7 +115,7 @@
       },
       {
         name: gettext('Delete Organization'),
-        disabled: !canDelete && !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.details.org),
+        disabled: true,
         execute: function () {
           confirmDialog({
             title: gettext('Delete Organization'),
@@ -157,6 +157,18 @@
       // Present the user's roles
       that.roles = that.organizationModel.organizationRolesToStrings(roles);
     });
+
+    function init() {
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.update,
+        that.organization.details.org);
+
+      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.organization,
+          authService.actions.delete, that.organization.details.org);
+      return $q.resolve();
+    }
+
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
   }
 
 })();
