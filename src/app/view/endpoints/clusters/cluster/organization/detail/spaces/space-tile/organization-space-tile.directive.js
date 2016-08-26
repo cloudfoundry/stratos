@@ -62,20 +62,19 @@
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
+    var destroyed = false;
+    $scope.$on('$destroy', function () {
+      destroyed = true;
+    });
+
     function init() {
       if (destroyed) {
         return $q.resolve();
       }
 
       var spaceDetail = that.spaceDetail();
-      that.canDelete = spaceDetail.routes.length === 0 &&
-        spaceDetail.instances.length === 0 &&
-        spaceDetail.apps.length === 0 &&
-        spaceDetail.services.length === 0;
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
-      enableActions();
-
 
       // Update these counts per tile, meaning the core getSpaceDetails does not block in the case of 100s of
       // spaces but instead shows list and updates when async data returns
@@ -92,18 +91,12 @@
 
       return $q.all(updatePromises).then(function () {
 
-        var canDelete = false;
-        var isAdmin = that.user.admin;
+        that.canDelete = spaceDetail.details.totalRoutes === 0 &&
+          spaceDetail.details.totalServiceInstances === 0 &&
+          spaceDetail.details.totalApps === 0 &&
+          spaceDetail.details.totalServices === 0;
 
-        if (isAdmin) {
-          canDelete = spaceDetail.details.totalRoutes === 0 &&
-            spaceDetail.details.totalServiceInstances === 0 &&
-            spaceDetail.details.totalApps === 0 &&
-            spaceDetail.details.totalServices === 0;
-        }
-        that.actions[0].disabled = !isAdmin;
-        that.actions[1].disabled = !canDelete;
-        that.actions[2].disabled = !isAdmin;
+        enableActions();
 
         return $q.resolve();
       });

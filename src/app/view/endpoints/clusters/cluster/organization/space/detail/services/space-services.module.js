@@ -121,9 +121,9 @@
         that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
         var space = that.spaceDetail().details.space;
         // Delete Services
-        that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.managed_service_instance, that.authService.actions.delete, space);
-        // Update Services
-        that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.managed_service_instance, that.authService.actions.update, space);
+        that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !that.authService.isAllowed(that.authService.resources.managed_service_instance, that.authService.actions.delete, space);
+        // Unbind Services
+        that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !that.authService.isAllowed(that.authService.resources.managed_service_instance, that.authService.actions.update, space);
       });
     }
 

@@ -150,7 +150,7 @@
       that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+      that.actions[1].disabled = !that.canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
 
     }
 
@@ -171,12 +171,12 @@
       }
 
       return $q.all(updatePromises).then(function () {
-          canDelete = spaceDetail.details.totalRoutes === 0 &&
-            spaceDetail.details.totalServiceInstances === 0 &&
-            spaceDetail.details.totalApps === 0 &&
-            spaceDetail.details.totalServices === 0;
-        
+        that.canDelete = spaceDetail.details.totalRoutes === 0 &&
+          spaceDetail.details.totalServiceInstances === 0 &&
+          spaceDetail.details.totalApps === 0 &&
+          spaceDetail.details.totalServices === 0;
 
+        enableActions();
         return $q.resolve();
       });
 
