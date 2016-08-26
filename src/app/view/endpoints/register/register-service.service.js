@@ -11,6 +11,16 @@
     'helion.framework.widgets.asyncTaskDialog'
   ];
 
+  /**
+   * @name ServiceRegistrationService
+   * @description Register a service via a slide out
+   * @namespace app.view.registerService.ServiceRegistrationService
+   * @param {app.model.modelManager} modelManager The console model manager service
+   * @param {app.view.notificationsService} notificationsService The console notification service
+   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
+   * @property {function} add Opens slide out containing registration form
+   * @constructor
+   */
   function ServiceRegistrationService(modelManager, notificationsService, asyncTaskDialog) {
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
 
@@ -24,7 +34,16 @@
     }
 
     return {
-      add: function (title, description, type) {
+      /**
+       * @name add
+       * @description Opens slide out containing registration form
+       * @namespace app.view.registerService.ServiceRegistrationService
+       * @param {string} type The type of service. For example hce or hcf
+       * @param {string} title The title of the detail view
+       * @param {string=} description optional description to add in the detail view
+       * @returns {promise}
+       */
+      add: function (type, title, description) {
         var data = {
           name: '',
           url: ''
@@ -44,10 +63,7 @@
             description: description
           },
           function () {
-            var promise = type === 'hcf'
-              ? serviceInstanceModel.create(data.url, data.name)
-              : serviceInstanceModel.createHce(data.url, data.name);
-            return promise.then(function () {
+            return serviceInstanceModel.create(type, data.url, data.name).then(function () {
               notificationsService.notify('success',
                 gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
                 {endpointType: type.toUpperCase(), name: data.name});

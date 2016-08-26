@@ -39,18 +39,21 @@
      * @function create
      * @memberof app.model.serviceInstance.ServiceInstance
      * @description Create a service instance
+     * @param {string} type - the service instance API endpoint
      * @param {string} url - the service instance API endpoint
      * @param {string} name - the service instance friendly name
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    create: function (url, name) {
+    create: function (type, url, name) {
       var that = this;
       var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance');
-      return serviceInstanceApi.create(url, name)
-        .then(function (response) {
-          that.serviceInstances.push(response.data);
-        });
+      var promise = type === 'hcf'
+        ? serviceInstanceApi.create(url, name)
+        : serviceInstanceApi.createHce(url, name);
+      return promise.then(function (response) {
+        that.serviceInstances.push(response.data);
+      });
     },
 
     /**
