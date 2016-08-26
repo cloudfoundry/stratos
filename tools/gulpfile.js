@@ -14,10 +14,10 @@ var concat = require('gulp-concat-util'),
   sass = require('gulp-sass'),
   sh = require('shelljs'),
   browserSync = require('browser-sync').create(),
-  browserSyncProxy = require('proxy-middleware'),
   gutil = require('gulp-util'),
   node_url = require('url'),
   utils = require('./gulp.utils'),
+  request = require('request'),
   wiredep = require('wiredep').stream;
 
 var config = require('./gulp.config')();
@@ -55,8 +55,8 @@ gulp.task('copy:index', function () {
 
 // Copy 'lib' folder to 'dist'
 gulp.task('copy:lib', function (done) {
-	utils.copyBowerFolder(paths.src + 'lib', paths.dist + 'lib');
-	done();
+  utils.copyBowerFolder(paths.src + 'lib', paths.dist + 'lib');
+  done();
 });
 
 // Copy JavaScript source files to 'dist'
@@ -173,16 +173,29 @@ gulp.task('watch', function () {
 });
 
 gulp.task('browsersync', function (callback) {
-  var proxyOptions = {};
+  var middleware = [];
   try {
     // Need a JSON file named 'dev_config.json'
     var devOptions = require('./dev_config.json');
-    // Need key 'pp' with the URL to the API server
-    proxyOptions = node_url.parse(devOptions.pp);
-    proxyOptions.route = '/pp';
+    var target_url = node_url.parse(devOptions.pp);
     gutil.log('Proxying API requests to:', gutil.colors.magenta(devOptions.pp));
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
+    /* For web proxy support - set options in dev_config - e.g.
+      "options": {
+        "proxy": "http://proxy.sdc.hp.com:8080"
+      }
+    */
+    var proxiedRequest = request.defaults(devOptions.options);
+    var proxyMiddleware = {
+      route: '/pp',
+      handle: function (req, res, next) {
+        var url = node_url.format(target_url) + req.url;
+        var method = (req.method + '        ').substring(0, 8);
+        gutil.log(method, req.url);
+        req.pipe(proxiedRequest(url)).pipe(res);
+      }
+    }
+    middleware.push(proxyMiddleware);
   } catch (e) {
     throw new gutil.PluginError('browsersync', 'dev_config.json file is required with portal-proxy(pp) endpoint' +
       'configuration');
@@ -191,12 +204,11 @@ gulp.task('browsersync', function (callback) {
   browserSync.init({
     server: {
       baseDir: "../dist",
-      middleware: [browserSyncProxy(proxyOptions)]
+      middleware: middleware
     },
     ghostMode: false,
     open: false,
     port: 3100
-
   }, function () {
     callback();
   });

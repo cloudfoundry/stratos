@@ -55,9 +55,8 @@
      * @public
      */
     createServiceBinding: function (cnsiGuid, bindingSpec) {
-      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .CreateServiceBinding(bindingSpec, {}, that.makeHttpConfig(cnsiGuid))
+        .CreateServiceBinding(bindingSpec, {}, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
@@ -74,9 +73,8 @@
      * @public
      */
     deleteServiceBinding: function (cnsiGuid, guid, params) {
-      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .DeleteServiceBinding(guid, params, that.makeHttpConfig(cnsiGuid));
+        .DeleteServiceBinding(guid, params, this.makeHttpConfig(cnsiGuid));
     },
 
     /**

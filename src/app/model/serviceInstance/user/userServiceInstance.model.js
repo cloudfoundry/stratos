@@ -117,7 +117,8 @@
           }
           return that.serviceInstances;
         } else {
-          return that.$q.all(tasks).then(function () {
+          // Swallow errors - we don't want one failure to fail everything
+          return that.$q.all(tasks).catch(angular.noop).then(function () {
             return serviceInstanceApi.list().then(function (listResponse) {
               that.onList(listResponse);
               return that.serviceInstances;

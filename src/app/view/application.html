@@ -1,6 +1,6 @@
-<navbar ng-if="applicationCtrl.loggedIn"></navbar>
-<login-page ng-if="!applicationCtrl.loggedIn"></login-page>
-<console-view ng-if="applicationCtrl.loggedIn"></console-view>
+<navbar ng-if="applicationCtrl.ready && applicationCtrl.loggedIn"></navbar>
+<login-page ng-if="applicationCtrl.ready && !applicationCtrl.loggedIn"></login-page>
+<console-view ng-if="applicationCtrl.ready && applicationCtrl.loggedIn"></console-view>
 <service-registration id="registration-overlay"
   ng-if="applicationCtrl.showRegistration"
   show-overlay-registration="applicationCtrl.showRegistration">
