@@ -10,7 +10,7 @@
     beforeEach(module(function ($provide) {
       var mock = function () {
         detailViewCalled = true;
-        return {result: $q.reject()};
+        return {rendered: $q.resolve(), result: $q.reject()};
       };
       $provide.value('helion.framework.widgets.detailView', mock);
     }));

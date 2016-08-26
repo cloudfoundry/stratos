@@ -44,12 +44,14 @@
             description: description
           },
           function () {
-            return serviceInstanceModel.createHce(data.url, data.name)
-              .then(function () {
-                notificationsService.notify('success',
-                  gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
-                  {endpointType: type.toUpperCase(), name: data.name});
-              });
+            var promise = type === 'hcf'
+              ? serviceInstanceModel.create(data.url, data.name)
+              : serviceInstanceModel.createHce(data.url, data.name);
+            return promise.then(function () {
+              notificationsService.notify('success',
+                gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
+                {endpointType: type.toUpperCase(), name: data.name});
+            });
           }
         ).result;
       }
