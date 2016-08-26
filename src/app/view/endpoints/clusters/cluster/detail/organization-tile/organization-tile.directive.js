@@ -53,6 +53,7 @@
     this.actions = [];
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     // Present memory usage
     this.memory = utils.sizeUtilization(this.organization.memUsed, this.organization.memQuota);
@@ -77,12 +78,8 @@
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.user = stackatoInfo.info.endpoints.hcf[that.organization.cnsiGuid].user;
-    var isAdmin = this.user.admin;
-    var canDelete = false;
-    if (isAdmin) {
-      var spacesInOrg = that.organizationModel.organizations[that.organization.cnsiGuid][that.organization.guid].spaces;
-      canDelete = _.keys(spacesInOrg).length === 0;
-    }
+    var spacesInOrg = that.organizationModel.organizations[that.organization.cnsiGuid][that.organization.guid].spaces;
+    var canDelete = _.keys(spacesInOrg).length === 0;
 
     var orgPath = that.organizationModel.fetchOrganizationPath(that.organization.cnsiGuid, that.organization.guid);
     $scope.$watchCollection(function () {
@@ -97,7 +94,7 @@
     function setActions() {
       that.actions.push({
         name: gettext('Edit Organization'),
-        disabled: !isAdmin,
+        disabled: !authService.isAllowed(authService.resources.organization, authService.actions.update, that.organization.org),
         execute: function () {
           return asyncTaskDialog(
             {
@@ -130,7 +127,7 @@
       });
       that.actions.push({
         name: gettext('Delete Organization'),
-        disabled: !canDelete,
+        disabled: !canDelete || !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.org),
         execute: function () {
           return confirmDialog({
             title: gettext('Delete Organization'),
@@ -152,9 +149,16 @@
 
         }
       });
+
+      var isSpaceManager = false;
+      // Iterate through all spaces in the organization to determine if user is a space manager
+      _.each(that.organization.org.entity.spaces, function (space) {
+        isSpaceManager = isSpaceManager || authService.isAllowed(authService.resources.user, authService.actions.update, space, true);
+      });
+
       that.actions.push({
         name: gettext('Assign User(s)'),
-        disabled: !isAdmin,
+        disabled: !authService.isAllowed(authService.resources.user, authService.actions.update, that.organization.org) || !isSpaceManager,
         execute: function () {
           assignUsers.assign({
             clusterGuid: that.organization.cnsiGuid,
@@ -163,7 +167,6 @@
         }
       });
     }
-
   }
 
 })();

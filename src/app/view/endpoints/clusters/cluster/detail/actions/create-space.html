@@ -17,6 +17,7 @@
            ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]"
            helion-unique items="asyncTaskDialogCtrl.context.data.existingSpaceNames"
            unique-space-name="{{ $index }}"
+           ng-disabled = "!asyncTaskDialogCtrl.context.data.isUserOrgManager(asyncTaskDialogCtrl.context.data.organization)"
            required/>
   </div>
 

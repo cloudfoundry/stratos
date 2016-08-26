@@ -126,6 +126,8 @@
      * @description Determine the number of users associated with this cluster
      */
     setUserCount: function () {
+      this.userCount = 0;
+
       if (!this.service.isConnected) {
         return;
       }
@@ -135,6 +137,8 @@
       // just for the count. This will help in the case the connected user does not have privileges.
       this.cfModelUsers.listAllUsers(this.service.guid).then(function (res) {
         that.userCount = _.get(res, 'length', null);
+      }).catch(function () {
+        that.userCount = undefined;
       });
     },
 
@@ -145,6 +149,8 @@
      * @description Determine the number of organisations associated with this cluster
      */
     setOrganisationCount: function () {
+      this.orgCount = 0;
+
       if (!this.service.isConnected) {
         return;
       }
@@ -153,6 +159,8 @@
       // just for the count. This will help in the case the connected user does not have privileges.
       this.cfModelOrg.listAllOrganizations(this.service.guid).then(function (res) {
         that.orgCount = _.get(res, 'length', null);
+      }).catch(function () {
+        that.orgCount = undefined;
       });
     },
 

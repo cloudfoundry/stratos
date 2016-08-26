@@ -12,10 +12,10 @@
     <dt ng-if="clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>CF ACCOUNT STATUS</dt>
     <dd class="cluster-tile-account" ng-if="clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid]" translate>
       {{ clusterTile.stackatoInfo.info.endpoints.hcf[clusterTile.service.guid].user.admin ? 'Admin' : 'User'}}</dd>
-    <dt ng-if="clusterTile.orgCount" translate>TOTAL ORGS</dt>
-    <dd ng-if="clusterTile.orgCount" >{{clusterTile.orgCount}}</dd>
-    <dt ng-if="clusterTile.userCount" translate>TOTAL USERS</dt>
-    <dd ng-if="clusterTile.userCount" >{{clusterTile.userCount}}</dd>
+    <dt ng-if="clusterTile.orgCount >= 0" translate>TOTAL ORGS</dt>
+    <dd ng-if="clusterTile.orgCount >= 0" >{{clusterTile.orgCount}}</dd>
+    <dt ng-if="clusterTile.userCount >= 0" translate>TOTAL USERS</dt>
+    <dd ng-if="clusterTile.userCount >= 0" >{{clusterTile.userCount}}</dd>
   </dl>
   <div ng-if="!clusterTile.service.isConnected" class="text-center">
     <i class="helion-icon-lg helion-icon helion-icon-Cluster"></i><br>
