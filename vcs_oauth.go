@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -18,9 +20,12 @@ import (
 
 // Templates we'll need - cache them here when the module first loads
 // to give us good performance, especially on the ones used > once.
-var s = template.Must(template.ParseFiles("templates/success.html"))
-var f = template.Must(template.ParseFiles("templates/failure.html"))
-var cnf = template.Must(template.ParseFiles("templates/clientNotFound.html"))
+var (
+	cwd, _ = os.Getwd()
+	s      = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/success.html")))
+	f      = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/failure.html")))
+	cnf    = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/clientNotFound.html")))
+)
 
 // handleVCSAuth This is step 1 of the 2 step OAuth dance. We redirect to the
 // OAuth provider, and if all goes well, they will hit our callback URL - see
