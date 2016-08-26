@@ -37,6 +37,7 @@
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.initialized = false;
     this.guid = $stateParams.guid;
@@ -82,9 +83,13 @@
       // Reset any cache we may be interested in
       delete appModel.appSummary;
 
+      // Initialise AuthService promise
+      var authServicePromise = authService.initAuthService(that.guid);
+
       return $q.all([
         orgPromise,
-        servicesPromise])
+        servicesPromise,
+        authServicePromise])
         .finally(function () {
           that.initialized = true;
         });

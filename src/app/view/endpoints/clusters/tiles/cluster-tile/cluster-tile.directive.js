@@ -107,18 +107,20 @@
       var that = this;
       this.actions = [];
 
-      if (this.service.isConnected) {
-        this.actions.push({
-          name: gettext('Disconnect'),
-          execute: function () {
-            that.disconnect(that.service.guid);
-          }
-        });
-      } else {
+      if (!this.service.isConnected) {
         this.actions.push({
           name: gettext('Connect'),
           execute: function () {
             that.connect(that.service);
+          }
+        });
+      }
+
+      if (this.service.isConnected || this.service.hasExpired) {
+        this.actions.push({
+          name: gettext('Disconnect'),
+          execute: function () {
+            that.disconnect(that.service.guid);
           }
         });
       }
@@ -140,6 +142,8 @@
      * @description Determine the number of users associated with this cluster
      */
     setUserCount: function () {
+      this.userCount = 0;
+
       if (!this.service.isConnected) {
         return;
       }
@@ -149,6 +153,8 @@
       this.userApi.ListAllUsers({'results-per-page': 1}, this.makeHttpConfig(this.service.guid))
         .then(function (response) {
           that.userCount = response.data.total_results;
+        }).catch(function () {
+          that.userCount = undefined;
         });
     },
 
@@ -159,6 +165,8 @@
      * @description Determine the number of organisations associated with this cluster
      */
     setOrganisationCount: function () {
+      this.orgCount = 0;
+
       if (!this.service.isConnected) {
         return;
       }
@@ -166,6 +174,8 @@
       this.organizationApi.ListAllOrganizations({'results-per-page': 1}, this.makeHttpConfig(this.service.guid))
         .then(function (response) {
           that.orgCount = response.data.total_results;
+        }).catch(function () {
+          that.orgCount = undefined;
         });
     },
 

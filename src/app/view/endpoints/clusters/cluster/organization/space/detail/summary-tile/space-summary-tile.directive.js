@@ -60,6 +60,8 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var canDelete = false;
 
     this.cardData = {
       title: gettext('Summary')
@@ -67,12 +69,12 @@
 
     this.actions = [
       {
-        name: gettext('Edit Space'),
+        name: gettext('Rename Space'),
         disabled: true,
         execute: function () {
           return asyncTaskDialog(
             {
-              title: gettext('Edit Space'),
+              title: gettext('Rename Space'),
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
               buttonTitles: {
                 submit: gettext('Save')
@@ -142,10 +144,21 @@
       that.roles = that.spaceModel.spaceRolesToStrings(roles);
     });
 
+    function enableActions() {
+
+      // Rename Space
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
+
+      // Delete Space
+      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+
+    }
+
     function init() {
       var spaceDetail = that.spaceDetail();
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
+      that.userName = user.name;
 
       // If navigating to/reloading the space details page these will be missing. Do these here instead of in
       // getSpaceDetails to avoid blocking state init when there are 100s of spaces
@@ -158,18 +171,11 @@
       }
 
       return $q.all(updatePromises).then(function () {
-        var canDelete = false;
-        that.isAdmin = user.admin;
-        that.userName = user.name;
-
-        if (that.isAdmin) {
           canDelete = spaceDetail.details.totalRoutes === 0 &&
             spaceDetail.details.totalServiceInstances === 0 &&
             spaceDetail.details.totalApps === 0 &&
             spaceDetail.details.totalServices === 0;
-        }
-        that.actions[0].disabled = !that.isAdmin;
-        that.actions[1].disabled = !canDelete;
+        
 
         return $q.resolve();
       });

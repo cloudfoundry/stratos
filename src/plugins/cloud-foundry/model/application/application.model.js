@@ -492,7 +492,7 @@
      */
     deleteApp: function (cnsiGuid, guid) {
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .DeleteApp(guid);
+        .DeleteApp(guid, null, this.makeHttpConfig(cnsiGuid));
     },
 
     /**

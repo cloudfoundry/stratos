@@ -9,16 +9,16 @@
     <div class="change-roles-buttons">
       <button class="btn btn-default"
               ng-if="organizationUsersController.selectedUsersCount() < 2"
-              ng-disabled="organizationUsersController.rolesService.changingRoles || organizationUsersController.selectedUsersCount() !== 1"
+              ng-disabled="organizationUsersController.disableManageRoles()"
               ng-click="organizationUsersController.manageSelectedUsers()"
               translate>Manage Roles</button>
       <button class="btn btn-default"
               ng-if="organizationUsersController.selectedUsersCount() > 1"
-              ng-disabled="organizationUsersController.rolesService.changingRoles"
+              ng-disabled="organizationUsersController.disableChangeRoles()"
               ng-click="organizationUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
-              ng-disabled="organizationUsersController.rolesService.changingRoles || organizationUsersController.selectedUsersCount() < 1"
+              ng-disabled="organizationUsersController.disableRemoveFromOrg()"
               ng-click="organizationUsersController.removeFromOrganization()"
               translate>Remove From Organization</button>
     </div>

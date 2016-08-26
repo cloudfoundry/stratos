@@ -2,8 +2,8 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model
-   * @memberOf cloud-foundry.model
+   * @namespace cloud-foundry.model.OrganizationAccess
+   * @memberof cloud-foundry.model
    * @name OrganizationAccess
    * @description CF ACL Model
    */
@@ -44,40 +44,61 @@
 
       /**
        * @name create
-       * @description Does user have create organization permission in the space
+       * @description Users can create an organisation if:
+       * 1. User is and admin
+       * 2. the `user_org_creation` feature flag is enabled
        * @returns {boolean}
        */
       create: function () {
-        // Formerly, this had a param: @param {Object} space - Domain space
-        // Not sure if we need that or not.
-        return this.principal.isAdmin;
-      },
 
-      /**
-       * @name update
-       * @description Does user have update organization permission
-       * @returns {boolean}
-       */
-      delete: function () {
-        return this.principal.isAdmin;
+        // Admin
+        if (this.baseAccess.create()) {
+          return true;
+        }
+
+        return this.principal.hasAccessTo('user_org_creation');
+
       },
 
       /**
        * @name delete
-       * @description Does user have delete organization permission
-       * Original source contained a `//TODO(irfran):` annotation https://jira.hpcloud.net/browse/TEAMFOUR-625
+       * @description Users can delete an organisation if:
+       * 1. User is and admin
+       * 2. is Org Manager
+       * @param {object} org - organisation details
+       * @returns {boolean}
+       */
+      delete: function (org) {
+
+        // Admin
+        if (this.baseAccess.delete(org)) {
+          return true;
+        }
+
+        // If user is manager of org
+        return this.baseAccess
+          ._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+      },
+
+      /**
+       * @name update
+       * @description Users can update an organisation if:
+       * 1. User is and admin
+       * 2. is Org Manager
        * @param {Object} org - Application detail
        * @returns {boolean}
        */
 
       update: function (org) {
+
+        // User is an admin
         if (this.baseAccess.update(org)) {
           return true;
         }
 
         // If user is manager of org
         return this.baseAccess
-          ._doesContainGuid(this.principal.userInfo.entity.managed_organizations, org.metadata.guid);
+          ._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
       },
 
       /**

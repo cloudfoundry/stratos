@@ -436,6 +436,21 @@
     },
 
     /**
+     * @function createCfBinding
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Create a Cloud Foundry service instance binding to the application
+     * @param {string} guid - the HCE instance GUID
+     * @param {string} projectId - the project ID
+     * @param {string} appGuid - the application GUID
+     * @returns {promise} A promise object
+     * @public
+     */
+    createCfBinding: function (guid, projectId, appGuid) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .createCfBinding(guid, projectId, {cf_app_guid: appGuid}, {}, this.hceProxyPassthroughConfig);
+    },
+
+    /**
      * @function createProject
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a new project

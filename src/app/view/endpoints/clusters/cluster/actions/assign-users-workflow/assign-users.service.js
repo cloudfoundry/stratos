@@ -69,6 +69,7 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     var path = 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/';
 
@@ -205,6 +206,13 @@
               },
               keys: function (obj) {
                 return _.keys(obj);
+              },
+              // Helper to enable/disable organisation role checkbox inputs
+              canAssignOrgRoles: function (org) {
+                if (angular.isUndefined(org)) {
+                  return false;
+                }
+                return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org.details.org);
               }
             },
             table: {
