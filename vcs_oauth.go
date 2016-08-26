@@ -110,11 +110,11 @@ func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
 	if _, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
-		logger.Error("VCS OAuth token found in the session.")
+		logger.Debug("VCS OAuth token found in the session.")
 		tokenExists = true
 	}
 
-	logger.Error("Preparing response")
+	logger.Debug("Preparing response")
 	authResp := &VCSAuthCheckResp{
 		Authorized: tokenExists,
 	}
@@ -151,7 +151,7 @@ func setVCSSession(p *portalProxy, c echo.Context, sessionKey string, sessionVal
 	sessionValues := make(map[string]interface{})
 	sessionValues[sessionKey] = sessionValue
 
-	logger.Error("Storing value in session")
+	logger.Debug("Storing value in session")
 	if err := p.setSessionValues(c, sessionValues); err != nil {
 		return err
 	}
