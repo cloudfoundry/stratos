@@ -212,7 +212,7 @@
                 if (angular.isUndefined(org)) {
                   return false;
                 }
-                return that.authService.isAllowed('user', 'update', org.details.org);
+                return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org.details.org);
               }
             },
             table: {
