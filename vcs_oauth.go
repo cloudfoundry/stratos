@@ -21,10 +21,10 @@ import (
 // Templates we'll need - cache them here when the module first loads
 // to give us good performance, especially on the ones used > once.
 var (
-	cwd, _ = os.Getwd()
-	s      = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/success.html")))
-	f      = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/failure.html")))
-	cnf    = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/clientNotFound.html")))
+	cwd, _      = os.Getwd()
+	successTpl  = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/success.html")))
+	failureTpl  = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/failure.html")))
+	notfoundTpl = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/clientNotFound.html")))
 )
 
 // handleVCSAuth This is step 1 of the 2 step OAuth dance. We redirect to the
@@ -52,7 +52,7 @@ func (p *portalProxy) handleVCSAuth(c echo.Context) error {
 
 	logger.Error("VCS Client not found")
 
-	return c.HTML(http.StatusOK, templateToString(cnf))
+	return c.HTML(http.StatusOK, templateToString(notfoundTpl))
 }
 
 // handleVCSAuthCallback This is step 2 of the 2 step OAuth dance.
@@ -63,7 +63,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	state := c.FormValue("state")
 	endpoint, ok := p.getSessionStringValue(c, state)
 	if !ok {
-		return c.HTML(http.StatusOK, templateToString(f))
+		return c.HTML(http.StatusOK, templateToString(failureTpl))
 	}
 
 	// clean up session
@@ -87,20 +87,20 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		if err != nil {
 			msg := fmt.Sprintf("oauthConf.Exchange() failed with '%s'\n", err)
 			logger.Error(msg)
-			return c.HTML(http.StatusOK, templateToString(f))
+			return c.HTML(http.StatusOK, templateToString(failureTpl))
 		}
 
 		// stuff the token into the user's session
 		sessionKey := newSessionKey(endpoint)
 		if err = setVCSSession(p, c, sessionKey, token.AccessToken); err != nil {
-			return c.HTML(http.StatusOK, templateToString(f))
+			return c.HTML(http.StatusOK, templateToString(failureTpl))
 		}
 
-		return c.HTML(http.StatusOK, templateToString(s))
+		return c.HTML(http.StatusOK, templateToString(successTpl))
 	}
 
 	logger.Error("VCS Client not found")
-	return c.HTML(http.StatusOK, templateToString(cnf))
+	return c.HTML(http.StatusOK, templateToString(notfoundTpl))
 }
 
 func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
