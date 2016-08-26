@@ -111,6 +111,7 @@
     ng-pattern="/^[a-zA-Z0-9\-_]*$/"
     ng-disabled="!wizardCtrl.options.userInput.domain"
     required>
+  <auto-populate-input form="wizardForm['application-name-form']" from="appName" to="routeName"></auto-populate-input>
 </div>
 
 <br>
