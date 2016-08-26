@@ -129,7 +129,8 @@
       $httpBackend.flush();
     });
 
-    it('should not set `serviceInstances` on list() and info error', function () {
+    // An error getting info should not fail the list call
+    it('should set `serviceInstances` on list() and info error', function () {
       var data = [
         { guid: 'c1', name: 'cluster1', cnsi_type: 'hcf', url:' cluster1_url', token_expiry: (new Date()).getTime() + 36000 },
         { guid: 'c2', name: 'cluster2', cnsi_type: 'hcf', url:' cluster2_url' }
@@ -139,9 +140,10 @@
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, data);
 
       userServiceInstance.list().then(function (response) {
-        expect(response).toEqual({});
-        expect(userServiceInstance.serviceInstances).toEqual({});
-        expect(userServiceInstance.numValid).toBe(0);
+        expect(Object.keys(response).length).toBe(2);
+        expect(response.c1).toBeDefined();
+        expect(response.c2).toBeDefined();
+        expect(userServiceInstance.numValid).toBe(1);
       });
 
       $httpBackend.flush();

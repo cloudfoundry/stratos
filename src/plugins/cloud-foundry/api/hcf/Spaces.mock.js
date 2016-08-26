@@ -216,7 +216,119 @@
           }
         }
       };
+    },
+
+    ListAllServicesForSpaceWithSSO: function (guid) {
+      return {
+        url: '/pp/v1/proxy/v2/spaces/' + guid + '/services',
+        response: {
+          200: {
+            body: {
+              "total_results": 3,
+              "total_pages": 1,
+              "prev_url": null,
+              "next_url": null,
+              "resources": [
+                {
+                  "metadata": {
+                    "guid": "871e6711-2da6-42d8-992d-645fd9c930c5",
+                    "url": "/v2/services/871e6711-2da6-42d8-992d-645fd9c930c5",
+                    "created_at": "2016-07-26T03:48:12Z",
+                    "updated_at": null
+                  },
+                  "entity": {
+                    "label": "sso-routing",
+                    "provider": null,
+                    "url": null,
+                    "description": "Application single sign-on service broker",
+                    "long_description": null,
+                    "version": null,
+                    "info_url": null,
+                    "active": 1,
+                    "bindable": 1,
+                    "unique_id": "a98eb389-64e1-475e-afc0-824394ed60d1",
+                    "extra": null,
+                    "tags": [
+
+                    ],
+                    "requires": [
+                      "route_forwarding"
+                    ],
+                    "documentation_url": null,
+                    "service_broker_guid": "bec439da-7d35-4a09-921c-842585a1aee1",
+                    "plan_updateable": 0,
+                    "service_plans_url": "/v2/services/871e6711-2da6-42d8-992d-645fd9c930c5/service_plans"
+                  }
+                },
+                {
+                  "metadata": {
+                    "guid": "0b936783-2330-423b-8349-7378ece6cd1e",
+                    "url": "/v2/services/0b936783-2330-423b-8349-7378ece6cd1e",
+                    "created_at": "2016-07-26T04:04:32Z",
+                    "updated_at": "2016-07-26T04:04:40Z"
+                  },
+                  "entity": {
+                    "label": "Mongo",
+                    "provider": null,
+                    "url": null,
+                    "description": "Default service",
+                    "long_description": null,
+                    "version": null,
+                    "info_url": null,
+                    "active": 1,
+                    "bindable": 1,
+                    "unique_id": "60204887-f232-4bff-8bcb-7954bc1a6852",
+                    "extra": "{\"displayName\":\"dev-mongo\",\"longDescription\":\"MongoDB is a cross-platform document-oriented database. Classified as a NoSQL database, MongoDB uses JSON-like documents with dynamic schemas\"}",
+                    "tags": [
+                      "Mongo"
+                    ],
+                    "requires": [
+
+                    ],
+                    "documentation_url": null,
+                    "service_broker_guid": "c19472bf-5644-4fa0-8d7c-e3f2c0ead312",
+                    "plan_updateable": 0,
+                    "service_plans_url": "/v2/services/0b936783-2330-423b-8349-7378ece6cd1e/service_plans"
+                  }
+                },
+                {
+                  "metadata": {
+                    "guid": "6fe696c1-1d95-4a63-aa29-1fa404282fa2",
+                    "url": "/v2/services/6fe696c1-1d95-4a63-aa29-1fa404282fa2",
+                    "created_at": "2016-07-26T04:04:40Z",
+                    "updated_at": null
+                  },
+                  "entity": {
+                    "label": "MySQL",
+                    "provider": null,
+                    "url": null,
+                    "description": "Default service",
+                    "long_description": null,
+                    "version": null,
+                    "info_url": null,
+                    "active": 1,
+                    "bindable": 1,
+                    "unique_id": "6ab90aeb-c7b1-4ae9-8c37-b5a9fb6a49ab",
+                    "extra": "{\"displayName\":\"dev-mysql\",\"longDescription\":\"MySQL is a popular open source relational database management system.\"}",
+                    "tags": [
+                      "MySQL"
+                    ],
+                    "requires": [
+
+                    ],
+                    "documentation_url": null,
+                    "service_broker_guid": "c19472bf-5644-4fa0-8d7c-e3f2c0ead312",
+                    "plan_updateable": 0,
+                    "service_plans_url": "/v2/services/6fe696c1-1d95-4a63-aa29-1fa404282fa2/service_plans"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
     }
+
   };
 
   /* eslint-enable quote-props */

@@ -1,13 +1,17 @@
 <div>
-
   <div ng-if="wizardCtrl.options.isBusy" class="message-box message-box-no-bg">
     <p translate>Checking application for associated items that can be safely deleted.</p>
     <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
 
-  <div ng-if="!wizardCtrl.options.isBusy">
+  <div ng-if="wizardCtrl.options.isDeleting" class="message-box message-box-no-bg">
+    <p translate>Your application is being deleted.</p>
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+
+  <div ng-if="!wizardCtrl.options.isBusy && !wizardCtrl.options.isDeleting">
     <p translate>
-        Unchecked items will be orphaned when you delete this app.
+      Unchecked items will be orphaned when you delete this app.
     </p>
 
     <div class="caption" translate>
@@ -65,6 +69,9 @@
         There are no associated items that can be deleted.
       </p>
     </div>
+  </div>
 
+  <div ng-if="wizardCtrl.options.hasError" class="alert alert-danger">
+    <p translate>The was a problem deleting the application. Please try again. If this error persists, please contact the administrator.</p>
   </div>
 </div>
