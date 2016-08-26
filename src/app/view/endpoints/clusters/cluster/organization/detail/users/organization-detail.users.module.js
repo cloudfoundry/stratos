@@ -116,6 +116,17 @@
         this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
+    this.disableChangeRoles = function () {
+      return this.rolesService.changingRoles ||
+        !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+    };
+
+    this.disableRemoveFromOrg = function () {
+      return this.rolesService.changingRoles ||
+        organizationUsersController.selectedUsersCount() < 1 ||
+        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+    };
+
     var debouncedUpdateSelection = _.debounce(function () {
       userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
       $scope.$apply();

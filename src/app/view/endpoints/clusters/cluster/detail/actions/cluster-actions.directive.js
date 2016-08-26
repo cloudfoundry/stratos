@@ -19,7 +19,6 @@
       controllerAs: 'clusterActionsCtrl',
       scope: {
         // stateName: '@'
-        context: '@'
       },
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/cluster-actions.html'
     };

@@ -74,13 +74,13 @@
     }
 
     // Helper to enable/disable space role checkbox inputs
-    this.canAssignSpaceRoles = function (spaceKey) {
+    this.disableAssignSpaceRoles = function (spaceKey) {
       var space = that.organization.spaces[spaceKey];
       return !that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, space, true);
     };
 
     // Helper to enable/disable org role checkbox inputs
-    this.canAssignOrgRoles = function (org) {
+    this.disableAssignOrgRoles = function (org) {
       return !that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
     };
 
