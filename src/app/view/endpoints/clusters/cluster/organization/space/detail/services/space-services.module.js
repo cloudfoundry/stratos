@@ -27,14 +27,11 @@
   SpaceServicesController.$inject = [
     '$scope',
     '$stateParams',
-    '$state',
-    '$q',
     'app.model.modelManager',
-    'cloud-foundry.view.applications.services.serviceInstanceService',
-    'app.utils.utilsService'
+    'cloud-foundry.view.applications.services.serviceInstanceService'
   ];
 
-  function SpaceServicesController($scope, $stateParams, $state, $q, modelManager, serviceInstanceService, utils) {
+  function SpaceServicesController($scope, $stateParams, modelManager, serviceInstanceService) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
