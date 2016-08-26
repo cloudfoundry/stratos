@@ -91,18 +91,20 @@
       var that = this;
       this.actions = [];
 
-      if (this.service.isConnected) {
-        this.actions.push({
-          name: gettext('Disconnect'),
-          execute: function () {
-            that.disconnect(that.service.guid);
-          }
-        });
-      } else {
+      if (!this.service.isConnected) {
         this.actions.push({
           name: gettext('Connect'),
           execute: function () {
             that.connect(that.service);
+          }
+        });
+      }
+
+      if (this.service.isConnected || this.service.hasExpired) {
+        this.actions.push({
+          name: gettext('Disconnect'),
+          execute: function () {
+            that.disconnect(that.service.guid);
           }
         });
       }
