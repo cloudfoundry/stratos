@@ -117,14 +117,12 @@
     };
 
     this.disableChangeRoles = function () {
-      return this.rolesService.changingRoles ||
-        !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+      return this.rolesService.changingRoles || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
     this.disableRemoveFromOrg = function () {
       return this.rolesService.changingRoles ||
-        organizationUsersController.selectedUsersCount() < 1 ||
-        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+        this.selectedUsersCount() < 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
     var debouncedUpdateSelection = _.debounce(function () {
