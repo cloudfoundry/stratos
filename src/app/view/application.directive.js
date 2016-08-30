@@ -67,7 +67,6 @@
     this.serverFailedToRespond = false;
     this.showGlobalSpinner = false;
     this.showRegistration = false;
-    this.showClusterRegistration = false;
     this.ready = false;
 
     $timeout(function () {

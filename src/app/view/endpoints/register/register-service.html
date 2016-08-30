@@ -1,0 +1,29 @@
+<div class="registration-form">
+  <p ng-if="asyncTaskDialogCtrl.context.description">{{asyncTaskDialogCtrl.context.description}}</p>
+  <form name="form.regForm">
+    <div class="form-group" focusable-input
+         ng-class="{'has-error': form.regForm.url.$invalid && form.regForm.url.$dirty}">
+      <label class="control-label" translate>Endpoint Address</label>
+      <span class="control-message">
+        <span translate
+              ng-if="form.regForm.url.$error.pattern && form.regForm.url.$dirty">
+          Invalid url format
+        </span>
+        <span translate
+              ng-if="form.regForm.url.$error.helionUnique && form.regForm.url.$dirty">
+          Url is not unique
+        </span>
+      </span>
+      <input type="text" name="url" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.url"
+             required
+             ng-pattern="/^http(s)?://(.)+$/"
+             helion-unique items="asyncTaskDialogCtrl.context.instances"
+             ignore-case/>
+    </div>
+    <div class="form-group" focusable-input
+         ng-class="{'has-error': form.regForm.name.$invalid && form.regForm.name.$dirty}">
+      <label class="control-label" translate>Name</label>
+      <input type="text" name="name" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.name" required/>
+    </div>
+  </form>
+</div>

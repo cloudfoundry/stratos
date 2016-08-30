@@ -36,7 +36,7 @@
       var response = { cnsi_type: 'hcf', api_endpoint: 'url', name: 'name' };
       var data = { api_endpoint: 'url', cnsi_name: 'name' };
       $httpBackend.expectPOST('/pp/v1/register/hcf', $httpParamSerializer(data)).respond(200, response);
-      serviceInstance.create('url', 'name')
+      serviceInstance.create('hcf', 'url', 'name')
         .then(function () {
           var serviceInstances = serviceInstance.serviceInstances;
           expect(serviceInstances.length).toBe(1);

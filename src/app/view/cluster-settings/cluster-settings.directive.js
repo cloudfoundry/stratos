@@ -49,7 +49,6 @@
   function ClusterSettingsController($scope, modelManager, apiManager) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
-    this.clusterAddFlyoutActive = false;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');

@@ -54,7 +54,6 @@
   function ServiceRegistrationController($scope, modelManager, apiManager, hceRegistration, hcfRegistration) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
-    this.clusterAddFlyoutActive = false;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.serviceInstances = {};
