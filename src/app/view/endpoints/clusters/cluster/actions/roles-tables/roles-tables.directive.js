@@ -50,16 +50,12 @@
       return that.organization;
     }, refresh);
 
-    if (!this.config.disableOrg) {
-      // Ensure that the org_user is correctly updated given any changes in other org roles
-      _.forEach(this.config.orgRoles, function (val, roleKey) {
-        $scope.$watch(function () {
-          return _.get(that.selection, 'organization.' + roleKey);
-        }, function () {
-          that.rolesService.updateOrgUser(that.selection.organization);
-        });
-      });
-    }
+    // Ensure that the org_user is correctly updated given any changes in other org and space roles
+    $scope.$watch(function () {
+      return that.selection;
+    }, function (selection) {
+      that.rolesService.updateRoles(selection);
+    }, true);
 
     function rolesToSelection(roles) {
       return _.chain(roles)

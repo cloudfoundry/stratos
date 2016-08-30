@@ -98,11 +98,32 @@
       }
     };
 
-    this.canRemoveOrgRole = function (role, orgRoles) {
-      var hasOtherRoles = _.find(orgRoles, function (role) {
-        return role !== 'org_user';
-      });
-      return role === 'org_user' ? !hasOtherRoles : true;
+    this.canRemoveOrgRole = function (role, clusterGuid, orgGuid, userGuid) {
+      if (role !== 'org_user') {
+        return true;
+      }
+
+      var hasOtherRoles, spaceGuid;
+
+      var org = organizationModel.organizations[clusterGuid][orgGuid];
+      var orgRoles = org.roles[userGuid];
+      if (orgRoles && (orgRoles.length > 1 || orgRoles[0] !== 'org_user')) {
+        hasOtherRoles = true;
+      } else {
+        for (spaceGuid in org.spaces) {
+          if (!org.spaces.hasOwnProperty(spaceGuid)) {
+            continue;
+          }
+
+          var spaceRoles = spaceModel.spaces[clusterGuid][spaceGuid].roles[userGuid];
+          if (spaceRoles && spaceRoles.length) {
+            hasOtherRoles = true;
+            break;
+          }
+        }
+      }
+
+      return !hasOtherRoles;
     };
 
     /**
@@ -358,22 +379,17 @@
       return false;
     };
 
-    this.updateOrgUser = function (orgRoles) {
-      if (!orgRoles) {
-        return;
-      }
-      for (var role in orgRoles) {
-        if (!orgRoles.hasOwnProperty(role)) {
-          continue;
-        }
-        if (role === 'org_user') {
-          continue;
-        }
-        if (orgRoles[role]) {
-          // Org has role other than org_user, so it MUST also have org_user
-          orgRoles.org_user = true;
-          return;
-        }
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.updateRoles
+     * @description Ensure that the provided roles pass org_user rules. Specifically user must be org_user if any other
+     * role is assigned
+     * @param {object} roles - roles to check. Format as below.
+     *  organization[roleKey] = truthy
+     *  spaces[spaceGuid][roleKey] = truthy
+     */
+    this.updateRoles = function (roles) {
+      if (that.orgContainsRoles(roles)) {
+        _.set(roles, 'organization.org_user', true);
       }
     };
 
@@ -624,15 +640,15 @@
 
       var confirmationConfig = createConfirmationConfig(selectedUsers, delta);
       confirmationConfig.callback = function () {
-        var failedAssignForUsers = [];
+        var failures = [];
 
         // For each user assign their new roles. Do this asynchronously
         var promises = [];
         _.forEach(selectedUsers, function (user) {
           var promise = updateUserOrgsAndSpaces(clusterGuid, user, delta[user.metadata.guid])
             .catch(function (error) {
-              // Swallow promise chain error and track by number of failed users
-              failedAssignForUsers.push(user.entity.username);
+              // Swallow promise chain error and track errors separately
+              failures.push({user: user.entity.username, error: error});
               $log.error('Failed to update user ' + user.entity.username, error);
             });
           promises.push(promise);
@@ -643,9 +659,23 @@
             // If all async requests have finished invalidate any cache associated with roles
             eventService.$emit(eventService.events.ROLES_UPDATED);
 
-            // If something has failed return an failed promise
-            if (failedAssignForUsers.length > 0) {
-              return $q.reject(gettext('Failed to update roles for user(s) ') + failedAssignForUsers.join(', '));
+            // If something has failed return a failed promise
+            if (failures.length > 0) {
+
+              var errorMessage, reason;
+              if (failures.length > 1) {
+                errorMessage = gettext('Failed to update role(s) for users {{failedUsers}}. ');
+              } else {
+                errorMessage = gettext('Failed to update role(s) for user {{failedUsers}}. ');
+                reason = _.get(failures[0], 'error.data.description', '');
+                errorMessage += reason.length > 0 ? gettext('Reason: \'{{reason}}\'') : '';
+              }
+              errorMessage = $interpolate(errorMessage)({
+                failedUsers: _.map(failures, 'user').join(', '),
+                reason: reason }
+              );
+
+              return $q.reject(errorMessage);
             } else {
               // Otherwise notify success, hurrah
               notificationsService.notify('success', confirmationConfig.successMessage);

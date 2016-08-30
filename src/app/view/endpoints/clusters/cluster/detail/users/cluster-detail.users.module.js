@@ -143,7 +143,7 @@
     };
 
     this.canRemoveOrgRole = function (user, orgRole) {
-      return rolesService.canRemoveOrgRole(orgRole.role, orgRole.org.roles[user.metadata.guid]);
+      return rolesService.canRemoveOrgRole(orgRole.role, orgRole.org.details.cnsiGuid, orgRole.org.details.guid, user.metadata.guid);
     };
 
     this.removeOrgRole = function (user, orgRole) {
