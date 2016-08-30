@@ -2,7 +2,7 @@
   'use strict';
 
   describe('service-registration directive', function () {
-    var $compile, $httpBackend, $httpParamSerializer, $scope;
+    var $compile, $httpBackend, $httpParamSerializer, $scope, $state;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -13,6 +13,8 @@
       $httpParamSerializer = $injector.get('$httpParamSerializer');
       $scope = $injector.get('$rootScope').$new();
       $scope.showRegistration = false;
+      $state = $injector.get('$state');
+      $state.current.name = 'test';
 
       var items = [{
         id: 1,
@@ -28,6 +30,8 @@
       $httpBackend.when('GET', '/pp/v1/proxy/v2/apps?results-per-page=48').respond(200, { guid: {} });
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
+
+      spyOn($state, 'go');
     }));
 
     describe('without overlay', function () {
@@ -150,6 +154,7 @@
         serviceRegistrationCtrl.completeRegistration();
 
         expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(false);
+        expect($state.go).toHaveBeenCalled();
       });
 
       it('should be hidden on completeRegistration() and numValid > 0', function () {
@@ -169,6 +174,7 @@
         $httpBackend.flush();
 
         expect(serviceRegistrationCtrl.showOverlayRegistration).toBe(false);
+        expect($state.go).toHaveBeenCalled();
       });
     });
   });
