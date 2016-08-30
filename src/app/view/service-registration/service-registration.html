@@ -21,7 +21,6 @@
             <th translate>Name</th>
             <th translate>URL</th>
             <th translate>User Account</th>
-            <th translate>Valid Until</th>
             <th translate>&nbsp;</th>
           </tr>
         </thead>
@@ -38,8 +37,7 @@
             </td>
             <td>{{cnsi.name}}</td>
             <td>{{cnsi.api_endpoint.Host}}</td>
-            <td>{{serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].account}}</td>
-            <td>{{serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].token_expiry | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
+            <td>{{serviceRegistrationCtrl.stackatoInfoModel.info.endpoints[cnsi.cnsi_type][cnsi.guid].user.name}}</td>
             <td class="text-right">
               <a class="btn btn-link btn-sm" ng-if="!serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
                 ng-click="serviceRegistrationCtrl.connect(cnsi)">
