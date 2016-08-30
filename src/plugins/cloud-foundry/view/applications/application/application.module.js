@@ -190,6 +190,15 @@
             that.startUpdate();
           }
         });
+
+      // When a modal interaction starts, stop the background polling
+      this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
+        that.stopUpdate();
+      });
+      // When a modal interaction ends, resume the background polling
+      this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
+        that.startUpdate();
+      });
     },
 
     /**
