@@ -74,8 +74,7 @@
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid);
       },
 
       /**
