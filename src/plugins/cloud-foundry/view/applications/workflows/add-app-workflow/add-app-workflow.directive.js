@@ -529,9 +529,6 @@
       },
 
       finishWorkflow: function () {
-        if (this.options.subflow === 'pipeline') {
-          this.triggerPipeline();
-        }
         this.notify();
         this.addingApplication = false;
       }
