@@ -78,13 +78,16 @@
         var data = { cnsi_guid: 'cnsi_guid' };
         $httpBackend.expectPOST('/pp/v1/auth/logout/cnsi', $httpParamSerializer(data)).respond(200, '');
 
-        var serviceInstance = { guid: 'cnsi_guid' };
+        var serviceInstance = { guid: 'cnsi_guid', account: 'defined', token_expiry: 'defined', valid: 'defined' };
+        expect(serviceInstance.account).toBeDefined();
+        expect(serviceInstance.token_expiry).toBeDefined();
+        expect(serviceInstance.valid).toBeDefined();
 
         serviceRegistrationCtrl.disconnect(serviceInstance);
         $httpBackend.flush();
 
         expect(serviceInstance.account).toBeUndefined();
-        expect(serviceInstance.expires_at).toBeUndefined();
+        expect(serviceInstance.token_expiry).toBeUndefined();
         expect(serviceInstance.valid).toBeUndefined();
         expect(serviceRegistrationCtrl.userCnsiModel.numValid).toBe(initialNumValid - 1);
       });
