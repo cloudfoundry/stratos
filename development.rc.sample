@@ -28,9 +28,9 @@ export GITHUB_OAUTH_STATE=thisshouldberando
 # All the things  #
 ###################
 
-export PGSQL_USER='stratos'
-export PGSQL_PASSWORD='stratos'
-export PGSQL_DATABASE='stratos-db'
+export PGSQL_USER='stackato'
+export PGSQL_PASSWORD='stackato'
+export PGSQL_DATABASE='stackato-db'
 export PGSQL_HOST='localhost'
 export PGSQL_PORT=5432
 export PGSQL_CONNECT_TIMEOUT_IN_SECS=100

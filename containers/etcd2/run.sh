@@ -18,29 +18,16 @@ echo "Advertise peer URLs: ${ADVERTISE_PEER_URLS}"
 ADVERTISE_CLIENT_URLS="http://${HOST_NAME}:${CLIENT_COMM_PORT}"
 echo "Advertise client URLs: ${ADVERTISE_CLIENT_URLS}"
 
-# These ENV VARs are generally applicable for each etcd node that comes up
-LISTEN_PEER_URLS="http://0.0.0.0:${PEER_COMM_PORT}"
-echo "Listen peer URLs: ${LISTEN_PEER_URLS}"
+# These ENV VARs are defined/set in SDL and are applicable for each
+# node that comes up
+echo "Listen peer URLs: ${ETCD_LISTEN_PEER_URLS}"
+echo "Listen client URLs: ${ETCD_LISTEN_CLIENT_URLS}"
+echo "Initial cluster token: ${ETCD_INITIAL_CLUSTER_TOKEN}"
+echo "Initial cluster state: ${ETCD_INITIAL_CLUSTER_STATE}"
+echo "Initial cluster: ${ETCD_INITIAL_CLUSTER}"
+echo "Strict reconfig check is set to: ${ETCD_STRICT_RECONFIG_CHECK}"
 
-LISTEN_CLIENT_URLS="http://0.0.0.0:${CLIENT_COMM_PORT}"
-echo "Listen client URLs: ${LISTEN_CLIENT_URLS}"
-
-INITIAL_CLUSTER_TOKEN="hsc-etcd-cluster-1"
-echo "Initial cluster token: ${INITIAL_CLUSTER_TOKEN}"
-
-INITIAL_CLUSTER_STATE="new"
-echo "Initial cluster state: ${INITIAL_CLUSTER_STATE}"
-
-# Define the members of the cluster
-CM0="hsc-etcd-0-int"
-CM1="hsc-etcd-1-int"
-CM2="hsc-etcd-2-int"
-CM3="hsc-etcd-3-int"
-CM4="hsc-etcd-4-int"
-
-INITIAL_CLUSTER="${CM0}=http://${CM0}:${PEER_COMM_PORT},${CM1}=http://${CM1}:${PEER_COMM_PORT},${CM2}=http://${CM2}:${PEER_COMM_PORT},${CM3}=http://${CM3}:${PEER_COMM_PORT},${CM4}=http://${CM4}:${PEER_COMM_PORT}"
-echo "Initial cluster: ${INITIAL_CLUSTER}"
-
+echo "Configure logging to FlightRecorder"
 log_cmd=''
 if [[ -n "$HCP_FLIGHTRECORDER_HOST" && -n "$HCP_FLIGHTRECORDER_PORT" ]]; then
   log_cmd="2>&1 | tee >(logger -t ${HOST_NAME} -n 127.0.0.1 -P 514)"
@@ -49,7 +36,8 @@ if [[ -n "$HCP_FLIGHTRECORDER_HOST" && -n "$HCP_FLIGHTRECORDER_PORT" ]]; then
   service rsyslog start
 fi
 
-cmd="./etcd --name ${HOST_NAME} --initial-advertise-peer-urls ${ADVERTISE_PEER_URLS} --listen-peer-urls ${LISTEN_PEER_URLS} --listen-client-urls ${LISTEN_CLIENT_URLS} --advertise-client-urls ${ADVERTISE_CLIENT_URLS} --initial-cluster-token ${INITIAL_CLUSTER_TOKEN} --initial-cluster-state ${INITIAL_CLUSTER_STATE} --initial-cluster ${INITIAL_CLUSTER}"
+cmd="./etcd --name ${HOST_NAME} --initial-advertise-peer-urls ${ADVERTISE_PEER_URLS} --advertise-client-urls ${ADVERTISE_CLIENT_URLS}"
+echo "etcd startup command to be executed: $cmd $log_cmd"
 
-echo "Command to be executed: $cmd $log_cmd"
+echo "Starting etcd..."
 eval "$cmd $log_cmd"

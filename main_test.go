@@ -143,9 +143,9 @@ func TestLoadPortalConfig(t *testing.T) {
 func TestLoadDatabaseConfig(t *testing.T) {
 	t.Parallel()
 
-	os.Setenv("PGSQL_USER", "stratos")
-	os.Setenv("PGSQL_PASSWORD", "stratos")
-	os.Setenv("PGSQL_DATABASE", "stratos-db")
+	os.Setenv("PGSQL_USER", "stackato")
+	os.Setenv("PGSQL_PASSWORD", "stackato")
+	os.Setenv("PGSQL_DATABASE", "stackato-db")
 	os.Setenv("PGSQL_HOST", "localhost")
 	os.Setenv("PGSQL_PORT", "5432")
 	os.Setenv("PGSQL_CONNECT_TIMEOUT_IN_SECS", "5")
