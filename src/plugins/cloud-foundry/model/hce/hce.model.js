@@ -454,6 +454,21 @@
     },
 
     /**
+     * @function updateDeploymentTarget
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Create a new deployment target
+     * @param {string} guid - the HCE instance GUID
+     * @param {string} targetId - the deployment target ID
+     * @param {object} data - the updated deployment target data
+     * @returns {promise} A promise object
+     * @public
+     */
+    updateDeploymentTarget: function (guid, targetId, data) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceDeploymentApi')
+        .updateTarget(guid, targetId, data, {}, this.hceProxyPassthroughConfig);
+    },
+
+    /**
      * @function createCfBinding
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Create a Cloud Foundry service instance binding to the application
