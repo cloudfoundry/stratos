@@ -22,8 +22,8 @@
    */
   function HcfRegistrationFactory(registerService) {
 
-    var title = gettext('Register Cluster');
-    var description = gettext('Enter the cluster API endpoint URL and name.');
+    var title = gettext('Register Cloud Foundry Endpoint');
+    var description = gettext('Enter the Cloud Foundry API endpoint URL and name.');
 
     return {
       /**
