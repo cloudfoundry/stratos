@@ -90,13 +90,17 @@ buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 echo "Build & publish the container image for etcd"
 buildAndPublishImage hsc-etcd2 ./containers/etcd2/Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
-# Build the preflight container - initiate service upgrade
-echo "Build & publish the container image for the preflight job"
-buildAndPublishImage hsc-initiate-upgrade-job ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
+# Build and publish the container image for stolon
+echo "Build & publish the container image for stolon"
+buildAndPublishImage hsc-stolon ./containers/stolon/Dockerfile.HCP ${PORTAL_PROXY_PATH}
 
-# Build the postflight container - finalize service upgrade
+# Build the preflight container
+echo "Build & publish the container image for the preflight job"
+buildAndPublishImage hsc-preflight-job ./db/Dockerfile.preflight-job.HCP ${PORTAL_PROXY_PATH}
+
+# Build the postflight container
 echo "Build & publish the container image for the postflight job"
-buildAndPublishImage hsc-finalize-upgrade-job ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
+buildAndPublishImage hsc-postflight-job ./db/Dockerfile.postflight-job.HCP ${PORTAL_PROXY_PATH}
 
 # Prepare the nginx server
 echo "Provision the UI"
