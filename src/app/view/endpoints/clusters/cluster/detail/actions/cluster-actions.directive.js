@@ -53,9 +53,9 @@
   function ClusterActionsController(modelManager, $state, $q, $stateParams,
                                     utils, asyncTaskDialog, assignUsersService, userSelection, notificationsService) {
     var that = this;
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
@@ -93,7 +93,7 @@
             if (orgData.name && orgData.name.length > 0) {
               return organizationModel.createOrganization(that.clusterGuid, orgData.name).then(function () {
                 notificationsService.notify('success', gettext('Organisation \'{{name}}\' successfully created'),
-                  { name: orgData.name });
+                  {name: orgData.name});
               });
             } else {
               return $q.reject('Invalid Name!');
@@ -167,7 +167,14 @@
           setOrganization: setOrganization,
           createSpaceDisabled: createSpaceDisabled,
           addSpace: addSpace,
-          removeSpace: removeSpace
+          removeSpace: removeSpace,
+          // enable input box if user an org manager for the selected org
+          isUserOrgManager: function (org) {
+            if (angular.isUndefined(org)) {
+              return false;
+            }
+            return authService.isAllowed(authService.resources.space, authService.actions.create, org.details.org);
+          }
         };
 
         return asyncTaskDialog(
@@ -196,7 +203,7 @@
               .then(function () {
                 notificationsService.notify('success', toCreate.length > 1
                   ? gettext('Spaces \'{{names}}\' successfully created')
-                  : gettext('Space \'{{name}}\' successfully created'), { name: toCreate[0], names: toCreate.join(',')});
+                  : gettext('Space \'{{name}}\' successfully created'), {name: toCreate[0], names: toCreate.join(',')});
               });
           }
         );
@@ -227,11 +234,18 @@
      * N.B. when finer grain ACLs are wired in this should be updated
      * */
     function enableActions() {
-      if (stackatoInfo.info.endpoints.hcf[that.clusterGuid].user.admin) {
-        _.forEach(that.clusterActions, function (action) {
-          action.disabled = false;
-        });
-      }
+
+      // Organization access - enabled if user is either an admin or the appropriate flag is enabled
+      that.clusterActions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.create);
+
+      // Space access - if user is an Org Manager in at least one organization then show slide in
+      that.clusterActions[1].disabled = !authService.principal.userSummary.organizations.managed.length > 0;
+
+      // User Assignment access - if user is an Org Manager in at least one organization
+      // or a space manager in a space then show slide in
+      that.clusterActions[2].disabled = authService.principal.userSummary.organizations.managed.length === 0 &&
+        authService.principal.userSummary.spaces.managed.length === 0;
+
     }
 
     function init() {

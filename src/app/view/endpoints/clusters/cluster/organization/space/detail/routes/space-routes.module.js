@@ -44,10 +44,12 @@
     this.routesService = routesService;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
 
     this.apps = {};
     this.actionsPerRoute = {};
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     $scope.$watch(function () {
       return that.visibleRoutes;
@@ -112,8 +114,13 @@
     updateActions: function (routes) {
       var that = this;
       _.forEach(routes, function (route) {
+
+        var space = that.spaceDetail().details.space;
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
-        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1;
+        // Delete route
+        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.delete, space);
+        // Unmap route
+        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.update, space);
       });
     },
 

@@ -2,8 +2,8 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model
-   * @memberOf cloud-foundry.model
+   * @namespace cloud-foundry.model.RouteAccess
+   * @memberof cloud-foundry.model
    * @name RouteAccess
    * @description CF ACL Model
    */
@@ -43,7 +43,9 @@
     angular.extend(RouteAccess.prototype, {
       /**
        * @name create
-       * @description Does user have create route permission in the space
+       * @description User can create a route if:
+       * 1. User is admin
+       * 2. User is a space developer AND route_creation feature flag is turned on
        * @param {Object} space Domain space
        * @returns {boolean}
        */
@@ -53,69 +55,43 @@
           return true;
         }
 
-        // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_organizations,
-            space.entity.organization_guid)) {
-          return true;
-        }
-
-        // If user is manager in space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_spaces, space.metadata.guid)) {
-          return true;
-        }
-
-        // Finally, if user is developer in space
-        return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid) &&
+          this.principal.hasAccessTo('route_creation');
       },
 
       /**
        * @name update
-       * @description Does user have update route permission
-       * @param {Object} route route detail
+       * @description User can create a route if:
+       * 1. User is admin
+       * 2. User is a space developer
+       * @param {Object} space - space detail
        * @returns {boolean}
        */
-      update: function (route) {
+      update: function (space) {
         // Admin
-        if (this.baseAccess.update(route)) {
+        if (this.baseAccess.update(space)) {
           return true;
         }
 
-        // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_organizations,
-            route.entity.space.entity.organization_guid)) {
-          return true;
-        }
-
-        // If user is manager in space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_spaces, route.entity.space_guid)) {
-          return true;
-        }
-
-        // Finally, if user is developer in space
-        return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.spaces, route.entity.space_guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**
        * @name delete
-       * @description Does user have delete route permission
-       * @param {Object} route route detail
+       * @description User can create a route if:
+       * 1. User is admin
+       * 2. User is a space developer
+       * @param {Object} space - space detail
        * @returns {boolean}
        */
-      delete: function (route) {
+      delete: function (space) {
         // Admin
-        if (this.baseAccess.update(route)) {
+        if (this.baseAccess.update(space)) {
           return true;
         }
 
-        // If user is manager of org that owns the space
-        if (this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_organizations,
-            route.entity.space.entity.organization_guid)) {
-          return true;
-        }
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
 
-        // If user is manager in space
-        return this.baseAccess._doesContainGuid(this.principal.userInfo.entity.managed_spaces,
-          route.entity.space_guid);
       },
 
       /**
