@@ -142,13 +142,13 @@
       it('Borked, usually due to starting timeouts', function () {
         var testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT']);
         var res = appStateService.get(testData.summary, testData.instances);
-        expect(res.indicator).toBe('error');
-        expect(res.label).toBe('Crashing');
+        expect(res.indicator).toBe('warning');
+        expect(res.label).toBe('Starting App');
 
         testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'TIMEOUT']);
         res = appStateService.get(testData.summary, testData.instances);
-        expect(res.indicator).toBe('error');
-        expect(res.label).toBe('Crashing');
+        expect(res.indicator).toBe('warning');
+        expect(res.label).toBe('Starting App');
         expect(_.keys(res.actions).length).toBe(2);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
