@@ -28,12 +28,14 @@
     '$scope',
     'app.utils.utilsService',
     '$state',
-    '$q'
+    '$q',
+    'app.view.endpoints.clusters.cluster.cliCommands'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, $q) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, $q, cliCommands) {
     var that = this;
     this.guid = $stateParams.guid;
+    this.cliCommands = cliCommands;
 
     this.$scope = $scope;
 

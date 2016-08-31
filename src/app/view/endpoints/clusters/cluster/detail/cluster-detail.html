@@ -31,12 +31,10 @@
             {{ clusterController.getEndpoint() }}
           </dd>
           <!-- TODO: TEAMFOUR-805 Handle CLI Commands links-->
-          <!--<dt translate>CF Interactions</dt>-->
-          <!--<dd>-->
-            <!--<a class="btn btn-link">-->
-              <!--<span translate>CLI Commands</span>-->
-            <!--</a>-->
-          <!--</dd>-->
+          <dt translate>CF Interactions</dt>
+          <dd>
+            <a ng-click="clusterDetailController.cliCommands.show()" class="btn btn-link" translate>CLI Commands</a>
+          </dd>
           <dt ng-if="clusterDetailController.initialized" translate>Account Username</dt>
           <dd ng-if="clusterDetailController.initialized">
             {{ clusterDetailController.userName }}
