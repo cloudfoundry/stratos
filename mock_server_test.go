@@ -34,19 +34,22 @@ type mockPGStore struct {
 }
 
 func (m *mockPGStore) Save(r *http.Request, w http.ResponseWriter, session *sessions.Session) error {
-	fmt.Println("called mockPGStore.Save()")
 	m.StoredSession = session
 	return nil
 }
 
 func (m *mockPGStore) Get(r *http.Request, name string) (*sessions.Session, error) {
-	fmt.Println("called mockPGStore.Get()")
+
 	if m.StoredSession == nil {
 		m.StoredSession = &sessions.Session{}
 	}
 	if m.StoredSession.Values == nil {
 		m.StoredSession.Values = make(map[interface{}]interface{})
 	}
+	if m.StoredSession.Options == nil {
+		m.StoredSession.Options = &sessions.Options{}
+	}
+
 	return m.StoredSession, nil
 }
 
