@@ -224,9 +224,10 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
 			ciphertextRefreshToken, tr.TokenExpiry); insertErr != nil {
+
 			msg := "Unable to INSERT CNSI token: %v"
-			log.Printf(msg, err)
-			return fmt.Errorf(msg, err)
+			log.Printf(msg, insertErr)
+			return fmt.Errorf(msg, insertErr)
 		}
 
 		log.Println("CNSI token INSERT complete.")
