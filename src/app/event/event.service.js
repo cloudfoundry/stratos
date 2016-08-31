@@ -14,7 +14,9 @@
     HTTP_5XX_ON_LOGIN   : 'HTTP_5XX_ON_LOGIN',
     REDIRECT            : 'REDIRECT',
     TRANSFER            : 'TRANSFER',
-    ROLES_UPDATED       : 'ROLES_UPDATED'
+    ROLES_UPDATED       : 'ROLES_UPDATED',
+    APP_ERROR_NOTIFY    : 'APP_ERROR_NOTIFY',
+    APP_ERROR_CLEAR     : 'APP_ERROR_CLEAR'
   };
 
   angular

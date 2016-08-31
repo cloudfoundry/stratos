@@ -8,6 +8,7 @@
   angular
     .module('app', [
       'app.api',
+      'app.error',
       'app.event',
       'app.model',
       'app.view',
