@@ -61,8 +61,9 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
+    that.isAdmin = user.admin;
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
-    var canDelete = false;
+    var spaceDetail;
 
     this.cardData = {
       title: gettext('Summary')
@@ -143,22 +144,34 @@
     });
 
     function enableActions() {
+      var canDelete = spaceDetail.routes.length === 0 &&
+        spaceDetail.instances.length === 0 &&
+        spaceDetail.apps.length === 0 &&
+        spaceDetail.services.length === 0;
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename,
+        spaceDetail.details.space);
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space,
+          authService.actions.delete, spaceDetail.details.space);
 
     }
 
     function init() {
       that.userName = user.name;
-      var spaceDetail = that.spaceDetail();
-      canDelete = spaceDetail.routes.length === 0 &&
-        spaceDetail.instances.length === 0 &&
-        spaceDetail.apps.length === 0 &&
-        spaceDetail.services.length === 0;
+      spaceDetail = that.spaceDetail();
+
+      // Update delete action when space info changes (requires authService which depends on chainStateResolve)
+      $scope.$watch(function () {
+        return spaceDetail.routes.length === 0 &&
+          spaceDetail.instances.length === 0 &&
+          spaceDetail.apps.length === 0 &&
+          spaceDetail.services.length === 0;
+      }, function () {
+        enableActions();
+      });
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
       enableActions();
