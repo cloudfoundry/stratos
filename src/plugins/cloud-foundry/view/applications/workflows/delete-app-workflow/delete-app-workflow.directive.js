@@ -199,7 +199,7 @@
      */
     removeAppFromRoutes: function () {
       var that = this;
-      var checkedRouteValue = this.userInput.checkedRouteValue;
+      var checkedRouteValue = _.pickBy(this.userInput.checkedRouteValue, function (value) { return value; });
       var appGuid = this.appModel.application.summary.guid;
       var funcStack = [];
 
@@ -339,7 +339,7 @@
      */
     tryDeleteEachRoute: function () {
       var that = this;
-      var checkedRouteValue = this.userInput.checkedRouteValue;
+      var checkedRouteValue = _.pickBy(this.userInput.checkedRouteValue, function (value) { return value; });
       var funcStack = [];
 
       Object.keys(checkedRouteValue).forEach(function (routeId) {
