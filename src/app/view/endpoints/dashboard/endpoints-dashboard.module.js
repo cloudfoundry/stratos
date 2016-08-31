@@ -55,12 +55,12 @@
     if (this.serviceInstanceModel.serviceInstances > 0) {
       // serviceInstanceModel has previously been updated
       // to decrease load time, we will use that data.
+      // we will still refresh the data asyncronously and the UI will update to relect and changes
       this.listPromiseResolved = true;
       _updateLocalServiceInstances();
     }
     // Show welcome message only if no endpoints are registered
     this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
-    this.serviceInstanceModel.list();
     this.$q = $q;
 
     _updateEndpoints();
