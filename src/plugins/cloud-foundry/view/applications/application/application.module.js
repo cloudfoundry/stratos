@@ -157,6 +157,8 @@
     });
 
     $scope.$on('$destroy', function () {
+      that.removeModalStartListener();
+      that.removeModalEndListener();
       that.scopeDestroyed = true;
       that.stopUpdate();
     });
@@ -192,11 +194,11 @@
         });
 
       // When a modal interaction starts, stop the background polling
-      this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
+      this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
         that.stopUpdate();
       });
       // When a modal interaction ends, resume the background polling
-      this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
+      this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
         that.startUpdate();
       });
     },
