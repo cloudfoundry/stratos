@@ -277,6 +277,8 @@
             } else {
               deferred.reject();
             }
+          }, function () {
+            deferred.reject();
           });
         this.options.servicePlan = this.options.userInput.plan;
       } else {
@@ -307,6 +309,8 @@
           if (angular.isDefined(newBinding.metadata)) {
             that.appModel.getAppSummary(that.data.cnsiGuid, that.data.app.summary.guid);
           }
+        }, function () {
+          return that.$q.reject();
         });
     },
 
@@ -363,7 +367,7 @@
             return that._onServiceBindingError();
           });
         }, function () {
-          that._onCreateServiceError();
+          return that._onCreateServiceError();
         });
       } else {
         this.modal.close();
