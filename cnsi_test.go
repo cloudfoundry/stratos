@@ -25,19 +25,12 @@ func TestRegisterHCFCluster(t *testing.T) {
 		"api_endpoint": mockV2Info.URL,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// Setup database expectations for CNSO record insert
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	sql := `INSERT INTO cnsis`
 	mock.ExpectExec(sql).
-		WithArgs(sqlmock.AnyArg(), "Some fancy HCF Cluster", "hcf", mockV2Info.URL, "https://login.127.0.0.1", "https://uaa.127.0.0.1").
+		WithArgs(sqlmock.AnyArg(), "Some fancy HCF Cluster", "hcf", mockV2Info.URL, "https://login.127.0.0.1", "https://uaa.127.0.0.1", "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.registerHCFCluster(ctx); err != nil {
@@ -64,7 +57,8 @@ func TestRegisterHCFClusterWithMissingName(t *testing.T) {
 		"api_endpoint": mockV2Info.URL,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	if err := pp.registerHCFCluster(ctx); err == nil {
 		t.Error("Should not be able to register cluster without cluster name")
@@ -86,7 +80,8 @@ func TestRegisterHCFClusterWithMissingAPIEndpoint(t *testing.T) {
 		"cnsi_name": "Some fancy HCF Cluster",
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	if err := pp.registerHCFCluster(ctx); err == nil {
 		t.Error("Should not be able to register cluster without api endpoint")
@@ -111,7 +106,8 @@ func TestRegisterHCFClusterWithInvalidAPIEndpoint(t *testing.T) {
 		"api_endpoint": "%zzzzz",
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	if err := pp.registerHCFCluster(ctx); err == nil {
 		t.Error("Should not be able to register cluster without a valid api endpoint")
@@ -134,7 +130,8 @@ func TestRegisterHCFClusterWithBadV2Request(t *testing.T) {
 		"api_endpoint": mockV2Info.URL,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	if err := pp.registerHCFCluster(ctx); err == nil {
 		t.Error("Should not register cluster if call to v2/info fails")
@@ -157,15 +154,8 @@ func TestRegisterHCFClusterButCantSaveCNSIRecord(t *testing.T) {
 		"api_endpoint": mockV2Info.URL,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// Setup database expectations for CNSO record insert
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	sql := `INSERT INTO cnsis`
 	mock.ExpectExec(sql).
@@ -192,19 +182,12 @@ func TestRegisterHCECluster(t *testing.T) {
 		"api_endpoint": mockInfo.URL,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// Setup database expectations for CNSO record insert
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	sql := `INSERT INTO cnsis`
 	mock.ExpectExec(sql).
-		WithArgs(sqlmock.AnyArg(), "Some fancy HCE Cluster", "hce", mockInfo.URL, "", "").
+		WithArgs(sqlmock.AnyArg(), "Some fancy HCE Cluster", "hce", mockInfo.URL, "", "", "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.registerHCECluster(ctx); err != nil {
@@ -231,7 +214,8 @@ func TestRegisterHCEClusterWithMissingName(t *testing.T) {
 		"api_endpoint": mockInfo.URL,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	if err := pp.registerHCECluster(ctx); err == nil {
 		t.Error("Should not be able to register cluster without cluster name")
@@ -253,7 +237,8 @@ func TestRegisterHCEClusterWithMissingAPIEndpoint(t *testing.T) {
 		"cnsi_name": "Some fancy HCE Cluster",
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	if err := pp.registerHCECluster(ctx); err == nil {
 		t.Error("Should not be able to register cluster without api endpoint")
@@ -278,7 +263,8 @@ func TestRegisterHCEClusterWithInvalidAPIEndpoint(t *testing.T) {
 		"api_endpoint": "%zzzzz",
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	if err := pp.registerHCECluster(ctx); err == nil {
 		t.Error("Should not be able to register cluster without a valid api endpoint")
@@ -302,7 +288,8 @@ func TestRegisterHCEClusterWithBadV2Request(t *testing.T) {
 		"api_endpoint": mockInfo.URL,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	if err := pp.registerHCECluster(ctx); err == nil {
 		t.Error("Should not register cluster if call to info fails")
@@ -325,15 +312,8 @@ func TestRegisterHCEClusterButCantSaveCNSIRecord(t *testing.T) {
 		"api_endpoint": mockInfo.URL,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// Setup database expectations for CNSO record insert
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	sql := `INSERT INTO cnsis`
 	mock.ExpectExec(sql).
@@ -350,21 +330,14 @@ func TestListCNSIs(t *testing.T) {
 
 	req := setupMockReq("GET", "", nil)
 
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// Setup database expectations for CNSO record insert
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	// Mock the CNSIs in the database
-	expectedCNSIList := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
-		AddRow(mockCNSIGUID, "Some fancy HCF Cluster", "hcf", urlMust(mockAPIEndpoint), mockAuthEndpoint, mockAuthEndpoint).
-		AddRow(mockCNSIGUID, "Some fancy HCE Cluster", "hce", urlMust(mockAPIEndpoint), mockAuthEndpoint, mockAuthEndpoint)
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	expectedCNSIList := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
+		AddRow(mockCNSIGUID, "Some fancy HCF Cluster", "hcf", urlMust(mockAPIEndpoint), mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint).
+		AddRow(mockCNSIGUID, "Some fancy HCE Cluster", "hce", urlMust(mockAPIEndpoint), mockAuthEndpoint, mockAuthEndpoint, "")
+	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WillReturnRows(expectedCNSIList)
 
@@ -383,18 +356,11 @@ func TestListCNSIsWhenListFails(t *testing.T) {
 
 	req := setupMockReq("GET", "", nil)
 
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// Setup database expectations for CNSO record insert
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	// Mock a database error
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WillReturnError(errors.New("Unknown Database Error"))
 
