@@ -92,8 +92,8 @@
           actions: 'stop,restart'
         },
         'STAGED(0,0,N)': {
-          label: gettext('Crashing'),
-          indicator: 'error',
+          label: gettext('Starting App'),
+          indicator: 'warning',
           actions: 'stop,restart'
         },
         'STAGED(0,N,N)': {
