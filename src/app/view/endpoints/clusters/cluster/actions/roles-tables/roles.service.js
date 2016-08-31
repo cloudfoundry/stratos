@@ -107,15 +107,17 @@
 
       var org = organizationModel.organizations[clusterGuid][orgGuid];
       var orgRoles = org.roles[userGuid];
-      if (orgRoles && (orgRoles.length > 1 || orgRoles[0] !== 'org_user')) {
+      if (orgRoles && orgRoles.length > 0 && (orgRoles.length > 1 || orgRoles[0] !== 'org_user')) {
         hasOtherRoles = true;
       } else {
+        var clusterSpaces = spaceModel.spaces[clusterGuid];
         for (spaceGuid in org.spaces) {
           if (!org.spaces.hasOwnProperty(spaceGuid)) {
             continue;
           }
 
-          var spaceRoles = spaceModel.spaces[clusterGuid][spaceGuid].roles[userGuid];
+          var space = clusterSpaces[spaceGuid];
+          var spaceRoles = space.roles ? space.roles[userGuid] : null;
           if (spaceRoles && spaceRoles.length) {
             hasOtherRoles = true;
             break;
@@ -357,11 +359,17 @@
      * @returns {boolean}
      */
     this.orgContainsRoles = function (org) {
-      var orgContainsRoles = _.find(org.organization, function (role) {
-        return role;
-      });
-      if (orgContainsRoles) {
-        return true;
+      if (!org) {
+        return false;
+      }
+
+      if (org.organization) {
+        var orgContainsRoles = _.find(org.organization, function (role) {
+          return role;
+        });
+        if (orgContainsRoles) {
+          return true;
+        }
       }
 
       var spaces = org.spaces;
@@ -388,9 +396,13 @@
      *  spaces[spaceGuid][roleKey] = truthy
      */
     this.updateRoles = function (roles) {
-      if (that.orgContainsRoles(roles)) {
-        _.set(roles, 'organization.org_user', true);
+      if (!that.orgContainsRoles(roles)) {
+        return;
       }
+      if (!roles.organization) {
+        roles.organization = {};
+      }
+      roles.organization.org_user = true;
     };
 
     function clearRoleArray(roleObject) {
