@@ -49,15 +49,10 @@ func TestPassthroughDoRequest(t *testing.T) {
 	}
 	// pp.CNSIs[mockCNSIGuid] = mockCNSI
 
-	// setup database mocks
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	// setup mocks
+	req := setupMockReq("POST", "", map[string]string{})
+	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-
-	pp := setupPortalProxy()
-	pp.DatabaseConnectionPool = db
 
 	sql := `SELECT (.+) FROM tokens WHERE (.+)`
 	mock.ExpectQuery(sql).
@@ -65,9 +60,10 @@ func TestPassthroughDoRequest(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 	// set up the database expectation for pp.setCNSITokenRecord
+	//encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 	sql = `INSERT INTO tokens`
 	mock.ExpectExec(sql).
-		WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, mockTokenRecord.TokenExpiry).
+		//	WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, mockTokenRecord.TokenExpiry).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	pp.setCNSITokenRecord(mockCNSIGUID, mockUserGUID, mockTokenRecord)
@@ -95,9 +91,9 @@ func TestPassthroughDoRequest(t *testing.T) {
 
 	//  p.getCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
 	var mockURLasString string
-	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
-		AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint)
-	sql = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
+		AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
+	sql = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRecordRow)
@@ -116,7 +112,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 	}
 
 	if string(newCNSIRequest.Response) != jsonMust(mockV2InfoResponse) {
-		t.Errorf("Did not get expected output: %v", newCNSIRequest.Response)
+		t.Errorf("Expected %v, got %v", jsonMust(mockV2InfoResponse), string(newCNSIRequest.Response))
 	}
 }
 
@@ -124,7 +120,8 @@ func TestPassthroughGetEchoURL(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _ := setupHTTPTest(req)
+	_, _, ctx, _, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	uri := getEchoURL(ctx)
 
@@ -140,7 +137,8 @@ func TestPassthroughGetEchoHeaders(t *testing.T) {
 	fakeHeaderValue := "application/x-www-form-urlencoded"
 
 	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _ := setupHTTPTest(req)
+	_, _, ctx, _, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	req.Header.Set(fakeHeaderKey, fakeHeaderValue)
 
@@ -162,7 +160,8 @@ func TestPassthroughMakeRequestURI(t *testing.T) {
 	fakeURL := "http://localhost/v1/proxy/v2/info/"
 
 	req := setupMockReq("GET", fakeURL, nil)
-	_, _, ctx, _ := setupHTTPTest(req)
+	_, _, ctx, _, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	uri := makeRequestURI(ctx)
 
@@ -177,7 +176,8 @@ func TestPassthroughGetPortalUserGUID(t *testing.T) {
 	var fakeUserGUID = "fake-users-guid"
 
 	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _ := setupHTTPTest(req)
+	_, _, ctx, _, db, _ := setupHTTPTest(req)
+	defer db.Close()
 	ctx.Set("user_id", fakeUserGUID)
 
 	userGUID, err := getPortalUserGUID(ctx)
@@ -193,7 +193,8 @@ func TestPassthroughGetPortalUserGUIDWhenCorruptedSession(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _ := setupHTTPTest(req)
+	_, _, ctx, _, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	_, err := getPortalUserGUID(ctx)
 	if err == nil {
@@ -205,7 +206,8 @@ func TestPassthroughGetRequestParts(t *testing.T) {
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)
-	_, _, ctx, _ := setupHTTPTest(req)
+	_, _, ctx, _, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	_, _, err := getRequestParts(ctx)
 
@@ -228,25 +230,17 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 	var cr CNSIRequest
 
 	req := setupMockReq("GET", "", nil)
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
 	r := ctx.Request()
 
 	var ur *url.URL
 	ur, _ = url.Parse(mockAPIEndpoint)
 
-	// setup database mocks
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
-	defer db.Close()
-
-	pp.DatabaseConnectionPool = db
-
 	//  p.getCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
-	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
-		AddRow(mockCNSIGUID, "Test", "hcf", mockAPIEndpoint, mockAuthEndpoint, mockTokenEndpoint)
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
+		AddRow(mockCNSIGUID, "Test", "hcf", mockAPIEndpoint, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint)
+	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRecordRow)
@@ -272,19 +266,12 @@ func TestValidateCNSIListWithValidGUID(t *testing.T) {
 	cnsiGUIDList = append(cnsiGUIDList, "valid-guid-abc123")
 
 	req := setupMockReq("GET", "", nil)
-	_, _, _, pp := setupHTTPTest(req)
-
-	// Setup database expectations for CNSO record insert
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
-	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
-		AddRow("valid-guid-abc123", "mock-name", "hcf", "http://localhost", "http://localhost", "http://localhost")
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
+		AddRow("valid-guid-abc123", "mock-name", "hcf", "http://localhost", "http://localhost", "http://localhost", mockDopplerEndpoint)
+	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WithArgs("valid-guid-abc123").
 		WillReturnRows(expectedCNSIRecordRow)
@@ -306,18 +293,11 @@ func TestValidateCNSIListWithInvalidGUID(t *testing.T) {
 	cnsiGUIDList = append(cnsiGUIDList, "fake-guid-abc123")
 
 	req := setupMockReq("GET", "", nil)
-	_, _, _, pp := setupHTTPTest(req)
-
-	// Setup database expectations for CNSO record insert
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	// Mock a database error
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WillReturnError(errors.New("Unknown Database Error"))
 

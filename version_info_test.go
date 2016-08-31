@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"testing"
 
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
+
 	"github.com/labstack/echo"
 )
 
@@ -26,7 +28,8 @@ func VersionTestSetup() (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *
 		"username": "admin",
 		"password": "changeme",
 	})
-	res, e, ctx, pp := setupHTTPTest(req)
+	res, e, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 	err := pp.getVersions(ctx)
 
 	return res, e, ctx, pp, err
@@ -108,11 +111,18 @@ func TestVersionDefault(t *testing.T) {
 }
 
 func TestVersionProxyEnvVar(t *testing.T) {
-
 	expectedJSON := &VersionJSON{
 		ProxyVersion:    "1.2.3",
-		DatabaseVersion: "1.2.3",
+		DatabaseVersion: "1.2.4",
 	}
+
+	req := setupMockReq("POST", "", map[string]string{})
+	_, _, _, _, db, mock := setupHTTPTest(req)
+	defer db.Close()
+
+	expectedVersionRow := sqlmock.NewRows([]string{"guid"}).AddRow("1.2.3")
+	sql := `SELECT version_id FROM goose_db_version`
+	mock.ExpectQuery(sql).WillReturnRows(expectedVersionRow)
 
 	// Mock out the os.getenv call.
 	oldOsGetEnv := osGetEnv
@@ -123,7 +133,7 @@ func TestVersionProxyEnvVar(t *testing.T) {
 		if key == "CONSOLE_VERSION" {
 			return "1.2.3"
 		} else if key == "DATABASE_VERSION" {
-			return ""
+			return "1.2.4"
 		}
 		return os.Getenv(key)
 	}

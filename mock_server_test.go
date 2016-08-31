@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +10,10 @@ import (
 	"strings"
 	"testing"
 
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
+
+	"github.com/gorilla/securecookie"
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 )
@@ -17,6 +23,34 @@ type mockServer struct {
 	Status int
 	Method string
 	Body   string
+}
+
+type mockPGStore struct {
+	Codecs        []securecookie.Codec
+	Options       *sessions.Options
+	Path          string
+	DbPool        *sql.DB
+	StoredSession *sessions.Session
+}
+
+func (m *mockPGStore) Save(r *http.Request, w http.ResponseWriter, session *sessions.Session) error {
+	m.StoredSession = session
+	return nil
+}
+
+func (m *mockPGStore) Get(r *http.Request, name string) (*sessions.Session, error) {
+
+	if m.StoredSession == nil {
+		m.StoredSession = &sessions.Session{}
+	}
+	if m.StoredSession.Values == nil {
+		m.StoredSession.Values = make(map[interface{}]interface{})
+	}
+	if m.StoredSession.Options == nil {
+		m.StoredSession.Options = &sessions.Options{}
+	}
+
+	return m.StoredSession, nil
 }
 
 type mockServerFunc func(*mockServer)
@@ -61,7 +95,16 @@ func setupMockReq(method string, urlString string, formValues map[string]string)
 	return req
 }
 
-func setupPortalProxy() *portalProxy {
+func setupMockPGStore(db *sql.DB) *mockPGStore {
+	pgs := &mockPGStore{
+		Options: &sessions.Options{},
+		DbPool:  db,
+	}
+
+	return pgs
+}
+
+func setupPortalProxy(db *sql.DB) *portalProxy {
 	key := make([]byte, 32)
 	_, _ = rand.Read(key)
 
@@ -74,17 +117,24 @@ func setupPortalProxy() *portalProxy {
 		EncryptionKeyInBytes: key,
 	}
 
-	pp := newPortalProxy(pc, nil, nil)
+	pp := newPortalProxy(pc, db, nil)
+	pp.SessionStore = setupMockPGStore(db)
 
 	return pp
 }
 
-func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy) {
+func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
 	res := httptest.NewRecorder()
 	e, ctx := setupEchoContext(res, req)
-	pp := setupPortalProxy()
+	db, mock, dberr := sqlmock.New()
+	if dberr != nil {
+		fmt.Printf("an error '%s' was not expected when opening a stub database connection", dberr)
+	}
+	pp := setupPortalProxy(db)
 
-	return res, e, ctx, pp
+	pp.DatabaseConnectionPool = db
+
+	return res, e, ctx, pp, db, mock
 }
 
 func msRoute(route string) mockServerFunc {
@@ -152,9 +202,10 @@ var mockUAAResponse = UAAResponse{
 }
 
 const (
-	mockAPIEndpoint   = "https://api.127.0.0.1"
-	mockAuthEndpoint  = "https://login.127.0.0.1"
-	mockTokenEndpoint = "https://uaa.127.0.0.1"
+	mockAPIEndpoint     = "https://api.127.0.0.1"
+	mockAuthEndpoint    = "https://login.127.0.0.1"
+	mockTokenEndpoint   = "https://uaa.127.0.0.1"
+	mockDopplerEndpoint = "https://doppler.127.0.0.1"
 )
 
 var mockV2InfoResponse = v2Info{

@@ -13,7 +13,7 @@ func TestTokenEncryptAndDecrypt(t *testing.T) {
 	key = []byte("THISISTHEKEYUSEDTODOENCRYPTIONYA")
 	token = "My daughter thinks HAMILTON is THE BOMB !!!"
 
-	encryptedToken, err := encryptToken(key, token)
+	encryptedToken, err := EncryptToken(key, token)
 	if err != nil {
 		t.Errorf("Error thrown encrypting token %v", err)
 	}

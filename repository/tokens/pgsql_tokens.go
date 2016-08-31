@@ -80,13 +80,13 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 	}
 
 	log.Println("Encrypting Auth Token")
-	ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
+	ciphertextAuthToken, err := EncryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
 		return err
 	}
 
 	log.Println("Encrypting Refresh Token")
-	ciphertextRefreshToken, err := encryptToken(encryptionKey, tr.RefreshToken)
+	ciphertextRefreshToken, err := EncryptToken(encryptionKey, tr.RefreshToken)
 	if err != nil {
 		return err
 	}
@@ -201,13 +201,13 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	}
 
 	log.Println("Encrypting Auth Token")
-	ciphertextAuthToken, err := encryptToken(encryptionKey, tr.AuthToken)
+	ciphertextAuthToken, err := EncryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
 		return err
 	}
 
 	log.Println("Encrypting Refresh Token")
-	ciphertextRefreshToken, err := encryptToken(encryptionKey, tr.RefreshToken)
+	ciphertextRefreshToken, err := EncryptToken(encryptionKey, tr.RefreshToken)
 	if err != nil {
 		return err
 	}
@@ -224,9 +224,10 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
 			ciphertextRefreshToken, tr.TokenExpiry); insertErr != nil {
+
 			msg := "Unable to INSERT CNSI token: %v"
-			log.Printf(msg, err)
-			return fmt.Errorf(msg, err)
+			log.Printf(msg, insertErr)
+			return fmt.Errorf(msg, insertErr)
 		}
 
 		log.Println("CNSI token INSERT complete.")
@@ -401,7 +402,7 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 // I chose option 1.
 
 // encryptToken - TBD
-func encryptToken(key []byte, t string) ([]byte, error) {
+func EncryptToken(key []byte, t string) ([]byte, error) {
 	log.Println("encryptToken")
 	var plaintextToken = []byte(t)
 	ciphertextToken, err := Encrypt(key, plaintextToken)

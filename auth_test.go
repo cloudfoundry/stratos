@@ -23,7 +23,8 @@ func TestLoginToUAA(t *testing.T) {
 		"password": "changeme",
 	})
 
-	res, _, ctx, pp := setupHTTPTest(req)
+	res, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
@@ -38,30 +39,13 @@ func TestLoginToUAA(t *testing.T) {
 	pp.Config.HCPIdentityHost = s[0]
 	pp.Config.HCPIdentityPort = s[1]
 
-	var tokenExpiration = time.Now().AddDate(0, 0, 1).Unix()
-	var mockTokenRecord = tokens.TokenRecord{
-		AuthToken:    mockUAAToken,
-		RefreshToken: mockUAAToken,
-		TokenExpiry:  tokenExpiration,
-	}
-
-	// setup database mocks
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
-	defer db.Close()
-	pp.DatabaseConnectionPool = db
-
-	sql := `SELECT (.+) FROM tokens WHERE (.+)`
+	sql := `SELECT .+ FROM tokens WHERE .+`
 	mock.ExpectQuery(sql).
-		WithArgs(mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 	sql = `INSERT INTO tokens`
-	var newExpiry = 1234567
 	mock.ExpectExec(sql).
-		WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
+		// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.loginToUAA(ctx); err != nil {
@@ -88,7 +72,8 @@ func TestLoginToUAAWithBadCreds(t *testing.T) {
 		"password": "busted",
 	})
 
-	res, _, ctx, pp := setupHTTPTest(req)
+	res, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
@@ -129,7 +114,8 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 		"password": "changeme",
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
@@ -144,17 +130,9 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 	pp.Config.HCPIdentityHost = s[0]
 	pp.Config.HCPIdentityPort = s[1]
 
-	// setup database mocks
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
-	defer db.Close()
-	pp.DatabaseConnectionPool = db
-
-	sql := `SELECT (.+) FROM tokens WHERE (.+)`
+	sql := `SELECT .+ FROM tokens WHERE .+`
 	mock.ExpectQuery(sql).
-		WithArgs(mockUserGUID).
+		// WithArgs(mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 	// --- set up the database expectation for pp.saveUAAToken
@@ -176,7 +154,8 @@ func TestLoginToCNSI(t *testing.T) {
 		"cnsi_guid": mockCNSIGUID,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
@@ -190,33 +169,19 @@ func TestLoginToCNSI(t *testing.T) {
 	mockURL, _ = url.Parse(mockUAA.URL)
 	stringHCFType := "hcf"
 	var mockCNSI = cnsis.CNSIRecord{
-		GUID:                  mockCNSIGUID,
-		Name:                  "mockHCF",
-		CNSIType:              cnsis.CNSIHCF,
-		APIEndpoint:           mockURL,
-		AuthorizationEndpoint: mockUAA.URL,
-		TokenEndpoint:         mockUAA.URL,
+		GUID:                   mockCNSIGUID,
+		Name:                   "mockHCF",
+		CNSIType:               cnsis.CNSIHCF,
+		APIEndpoint:            mockURL,
+		AuthorizationEndpoint:  mockUAA.URL,
+		TokenEndpoint:          mockUAA.URL,
+		DopplerLoggingEndpoint: mockDopplerEndpoint,
 	}
 
-	var tokenExpiration = time.Now().AddDate(0, 0, 1).Unix()
-	var mockTokenRecord = tokens.TokenRecord{
-		AuthToken:    mockUAAToken,
-		RefreshToken: mockUAAToken,
-		TokenExpiry:  tokenExpiration,
-	}
+	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
+		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
 
-	// setup database mocks
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
-	defer db.Close()
-	pp.DatabaseConnectionPool = db
-	pp.SessionStore, _ = initSessionStore(db, pp.Config)
-
-	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
-		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint)
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	sql := `SELECT (.+) FROM cnsis WHERE (.+)`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRow)
@@ -230,16 +195,17 @@ func TestLoginToCNSI(t *testing.T) {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	sql = `SELECT (.+) FROM tokens WHERE (.+)`
+	sql = `SELECT .+ FROM tokens WHERE .+`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID, mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 	// Setup expectation that the CNSI token will get saved
 	sql = `INSERT INTO tokens`
-	var newExpiry = 1234567
+
+	//encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 	mock.ExpectExec(sql).
-		WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
+		//WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, sessionValues["exp"]).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	// do the call
@@ -260,7 +226,8 @@ func TestLoginToCNSIWithoutCNSIGuid(t *testing.T) {
 		"password": "changeme",
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	// do the call - expect an error
 	if err := pp.loginToCNSI(ctx); err == nil {
@@ -277,24 +244,18 @@ func TestLoginToCNSIWithMissingCNSIRecord(t *testing.T) {
 		"cnsi_guid": mockCNSIGUID,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
-
-	// setup database mocks
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	// Return nil from db call
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID).
-		WillReturnRows(nil)
+		WillReturnError(errors.New("No match for that GUID"))
 
 	// do the call
-	if err := pp.loginToCNSI(ctx); err == nil {
+	err := pp.loginToCNSI(ctx)
+	if err == nil {
 		t.Error("Expected an error attempting to get a registered endpoint from the database.")
 	}
 
@@ -309,7 +270,8 @@ func TestLoginToCNSIWithMissingCreds(t *testing.T) {
 	req := setupMockReq("POST", "", map[string]string{
 		"cnsi_guid": mockCNSIGUID,
 	})
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
@@ -319,17 +281,9 @@ func TestLoginToCNSIWithMissingCreds(t *testing.T) {
 
 	defer mockUAA.Close()
 
-	// setup database mocks
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
-	defer db.Close()
-	pp.DatabaseConnectionPool = db
-
-	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
-		AddRow(mockCNSIGUID, "mockHCF", "hcf", mockUAA.URL, mockUAA.URL, mockUAA.URL)
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
+		AddRow(mockCNSIGUID, "mockHCF", "hcf", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockDopplerEndpoint)
+	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRow)
@@ -348,7 +302,8 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 		"cnsi_guid": mockCNSIGUID,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
@@ -370,18 +325,9 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 		TokenEndpoint:         mockUAA.URL,
 	}
 
-	// setup database mocks
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
-	defer db.Close()
-	pp.DatabaseConnectionPool = db
-	pp.SessionStore, _ = initSessionStore(db, pp.Config)
-
-	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint"}).
-		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint)
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint FROM cnsis`
+	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
+		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockDopplerEndpoint)
+	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRow)
@@ -406,7 +352,8 @@ func TestLogout(t *testing.T) {
 
 	req := setupMockReq("POST", "", map[string]string{})
 
-	res, _, ctx, pp := setupHTTPTest(req)
+	res, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	pp.logout(ctx)
 
@@ -431,14 +378,8 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 	emptyTokenRecord := tokens.TokenRecord{}
 
 	req := setupMockReq("POST", "", map[string]string{})
-	_, _, _, pp := setupHTTPTest(req)
-
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	sql := `INSERT INTO tokens`
 	mock.ExpectExec(sql).
@@ -458,14 +399,8 @@ func TestSetUAATokenRecord(t *testing.T) {
 	fakeTr := tokens.TokenRecord{}
 
 	req := setupMockReq("POST", "", map[string]string{})
-	_, _, _, pp := setupHTTPTest(req)
-
-	db, mock, dberr := sqlmock.New()
-	if dberr != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", dberr)
-	}
+	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	pp.DatabaseConnectionPool = db
 
 	sql := `INSERT INTO tokens`
 	mock.ExpectExec(sql).
@@ -488,7 +423,8 @@ func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
 		"cnsi_guid": mockCNSIGUID,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
@@ -524,7 +460,8 @@ func TestLoginToCNSIWithBadCreds(t *testing.T) {
 		"cnsi_guid": mockCNSIGUID,
 	})
 
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
@@ -558,7 +495,8 @@ func TestVerifySession(t *testing.T) {
 		"username": "admin",
 		"password": "changeme",
 	})
-	res, _, ctx, pp := setupHTTPTest(req)
+	res, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
 
 	// Set a dummy userid in session - normally the login to UAA would do this.
 	sessionValues := make(map[string]interface{})
@@ -568,6 +506,15 @@ func TestVerifySession(t *testing.T) {
 	if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
+
+	newExpiry := 1234567
+	encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
+	expectedTokensRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+		AddRow(encryptedUAAToken, encryptedUAAToken, newExpiry)
+	sql := `SELECT .+ FROM tokens WHERE .+`
+	mock.ExpectQuery(sql).
+		WithArgs(mockUserGUID).
+		WillReturnRows(expectedTokensRow)
 
 	if err := pp.verifySession(ctx); err != nil {
 		t.Error(err)
@@ -579,10 +526,13 @@ func TestVerifySession(t *testing.T) {
 		t.Errorf("Expected content type 'application/json', got: %s", contentType)
 	}
 
-	// var expectedBody = "{\"account\":\"admin\",\"scope\":\"cloud_controller.admin\"}"
-	var expectedBody = "{\"account\":\"admin\",\"scope\":\"openid scim.read cloud_controller.admin uaa.user cloud_controller.read password.write routing.router_groups.read cloud_controller.write doppler.firehose scim.write\"}"
+	var expectedBody = "{\"account\":\"asd-gjfg-bob\",\"admin\":false}"
 	if res == nil || strings.TrimSpace(res.Body.String()) != expectedBody {
 		t.Errorf("Response Body incorrect.  Expected %s  Received %s", expectedBody, res.Body)
+	}
+
+	if dberr := mock.ExpectationsWereMet(); dberr != nil {
+		t.Errorf("There were unfulfilled expectations: %s", dberr)
 	}
 
 }
@@ -594,7 +544,8 @@ func TestVerifySessionNoDate(t *testing.T) {
 		"username": "admin",
 		"password": "changeme",
 	})
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	// Set a dummy userid in session - normally the login to UAA would do this.
 	sessionValues := make(map[string]interface{})
@@ -628,7 +579,8 @@ func TestVerifySessionExpired(t *testing.T) {
 		"username": "admin",
 		"password": "changeme",
 	})
-	_, _, ctx, pp := setupHTTPTest(req)
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
 
 	// Set a dummy userid in session - normally the login to UAA would do this.
 	sessionValues := make(map[string]interface{})
