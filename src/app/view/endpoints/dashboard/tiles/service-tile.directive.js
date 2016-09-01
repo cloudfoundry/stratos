@@ -9,7 +9,6 @@
     return {
       scope: {
         serviceType: '@',
-        serviceInstances: '=?',
         useCachedData: '=?'
       },
       controller: ServiceTileController,
@@ -42,6 +41,8 @@
    */
   function ServiceTileController($scope, modelManager, $state, hceRegistration, hcfRegistration, $q) {
 
+    var that = this;
+
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceType = $scope.serviceType;
@@ -52,12 +53,11 @@
     this.hceRegistration = hceRegistration;
     this.hcfRegistration = hcfRegistration;
     this.$q = $q;
-    this.serviceInstances = _.filter($scope.serviceInstances, {cnsi_type: this.serviceType});
+
     /* eslint-disable no-warning-comments */
     // FIXME We should use ui-router/resolve for this, but can't currently
     /* eslint-enable no-warning-comments */
     this.resolvedPromise = false;
-    var that = this;
 
     this.chartLabels = {
       totalOne: gettext('Endpoint'),
@@ -152,11 +152,11 @@
      * @returns {Number} count
      */
     getInstancesCountByStatus: function (status) {
-      var count = 0;
       var that = this;
+      var count = 0;
+      var isConnected = status.toLowerCase() === 'connected';
+      var isDisconnected = status.toLowerCase() === 'disconnected';
       _.each(_.keys(that.serviceInstances), function (cnsiGuid) {
-        var isConnected = status.toLowerCase() === 'connected';
-        var isDisconnected = status.toLowerCase() === 'disconnected';
         if (_.isUndefined(that.userServiceInstanceModel.serviceInstances[cnsiGuid])) {
           if (isDisconnected) {
             count += 1;
@@ -202,6 +202,8 @@
 
     _updateInstances: function () {
       var that = this;
+
+      that.serviceInstances = {};
       var filteredInstances = _.filter(this.serviceInstanceModel.serviceInstances, function (serviceInstance) {
         return serviceInstance.cnsi_type === that.serviceType;
       });
