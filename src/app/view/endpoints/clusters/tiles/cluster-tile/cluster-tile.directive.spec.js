@@ -182,7 +182,7 @@
         clusterTileCtrl.setUserCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.userCount).toBeNull();
+        expect(clusterTileCtrl.userCount).toBe(0);
         expect(cfAPIUsers.ListAllUsers).toHaveBeenCalled();
       });
 
@@ -253,7 +253,7 @@
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
+        expect(clusterTileCtrl.orgCount).toBe(0);
         expect(cfAPIOrg.ListAllOrganizations).toHaveBeenCalled();
       });
 
