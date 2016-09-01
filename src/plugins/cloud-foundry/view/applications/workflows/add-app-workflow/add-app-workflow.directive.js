@@ -502,7 +502,6 @@
         var that = this;
         this.addingApplication = true;
         this.reset();
-        this.appModel.all();
         this.getHceInstances();
         this.serviceInstanceModel.list()
           .then(function (serviceInstances) {

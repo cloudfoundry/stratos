@@ -171,12 +171,10 @@
     _resetPagination: function () {
       var that = this;
       this.loading = true;
-      this.ready = true;
 
       return this.model.resetPagination().
         finally(function () {
           that.paginationProperties.total = that.model.pagination.totalPage;
-          that.ready = true;
           that.loading = false;
         });
     },

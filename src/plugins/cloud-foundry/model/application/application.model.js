@@ -147,7 +147,7 @@
     },
 
     loadPage: function (pageNumber) {
-      this.tempApplications.length = 0;
+      this.tempApplications = [];
 
       var that = this;
       var page = this.pagination.pages[pageNumber - 1];
@@ -157,14 +157,11 @@
 
       for (var i = 0; i < page.length; i++) {
         clusterLoad = page[i];
-        var clusterId = clusterLoad.clusterId;
+        var cnsiGuid = clusterLoad.cnsiGuid;
         for (var j = 0; j < clusterLoad.loads.length; j++) {
           load = clusterLoad.loads[j];
           funcs.push(function () {
-
-            console.log(load);
-
-            return that.all(clusterId, {
+            return that.all(cnsiGuid, {
               page: load.number,
               'results-per-page': load.resultsPerPage
             }, false, {
@@ -176,7 +173,6 @@
       }
 
       var p = this.utils.runInSequence(funcs, true);
-
       p.then(function () {
         that.data.applications = that.tempApplications;
       });
@@ -522,7 +518,6 @@
         .CreateApp(newAppSpec, {}, this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           that.getAppSummary(cnsiGuid, response.data.metadata.guid);
-          that.all();
           return response.data;
         });
     },
@@ -753,8 +748,6 @@
           totalAppNumber += cluster.total_results;
         }
       });
-
-      console.log('TOTAL Application # %d', totalAppNumber);
       this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize));
     },
 
@@ -880,8 +873,6 @@
     this.totalPage = totalPage;
     this.pages = [];
     this.init();
-
-    console.log(this.pages);
   }
 
   angular.extend(AppPagination.prototype, {
@@ -893,22 +884,21 @@
      * @private
      */
     init: function () {
-      var remaining, prevPage, cluster, from, to, resultsPerPage, loads, trimStart, page;
+      var remaining, prevPage, cluster, from, to, resultsPerPage, loads, trimStart, page, cnsiGuid;
       var clusterKeys = Object.keys(this.clusters);
       var clusterIndex = 0;
       var pageSize = this.pageSize;
 
       for (var i = 0; i < this.totalPage; i++) {
         this.pages[i] = [];
-
         remaining = pageSize;
         prevPage = this.pages[i - 1];
+        cnsiGuid = clusterKeys[clusterIndex];
 
         while (remaining && clusterIndex < clusterKeys.length) {
           cluster = this.clusters[clusterKeys[clusterIndex]];
-
           from = 0;
-          if (prevPage && prevPage[prevPage.length - 1].clusterId === clusterKeys[clusterIndex]) {
+          if (prevPage && prevPage[prevPage.length - 1].cnsiGuid === cnsiGuid) {
             from = prevPage[prevPage.length - 1].to + 1;
           }
 
@@ -960,7 +950,7 @@
             } else {
               loads = [{
                 number: page,
-                resultsPerPage: 19,
+                resultsPerPage: resultsPerPage,
                 trimStart: trimStart,
                 trimEnd: 0
               }, {
@@ -974,7 +964,7 @@
 
           this.pages[i].push({
             cluster: cluster,
-            clusterId: clusterKeys[clusterIndex],
+            cnsiGuid: cnsiGuid,
             from: from,
             to: to,
             loads: loads
