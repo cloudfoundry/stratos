@@ -912,7 +912,7 @@
             remaining = 0;
 
           } else {
-            to = from + cluster.total_results - 1;
+            to = from + cluster.total_results;
             remaining -= cluster.total_results;
             clusterIndex++;
           }
@@ -956,7 +956,7 @@
                 number: page + 1,
                 resultsPerPage: resultsPerPage,
                 trimStart: 0,
-                trimEnd: resultsPerPage - trimStart
+                trimEnd: resultsPerPage - trimStart - 1
               }];
             }
           }
