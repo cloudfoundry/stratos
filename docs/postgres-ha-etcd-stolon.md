@@ -10,5 +10,13 @@ Within the [stolon architecture](https://github.com/sorintlab/stolon/blob/master
 ## etcd
 TBD
 
+### Links
+[Getting Started](https://coreos.com/etcd/docs/latest/getting-started-with-etcd.html)
+[etcd under Docker](https://coreos.com/etcd/docs/latest/docker_guide.html)
+[etcd Proxy](https://coreos.com/etcd/docs/latest/proxy.html)
+[etcd v2](https://www.youtube.com/watch?v=z6tjawXZ71E)
+[Bootstrapping etcd](https://www.youtube.com/watch?v=duUTk8xxGbU)
+[Running an etcd2 cluster](http://blog.scottlowe.org/2015/04/15/running-etcd-20-cluster/)
+
 ## stolon
 TBD
