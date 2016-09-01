@@ -94,8 +94,8 @@
 
       var githubOptions = {
         headers: {
-          'x-cnap-vcs-url': this.context.project.vcsInstance.browse_url,
-          'x-cnap-vcs-api-url': this.context.project.vcsInstance.api_url
+          'x-cnap-vcs-url': this.hceModel.data.vcsInstance.browse_url,
+          'x-cnap-vcs-api-url': this.hceModel.data.vcsInstance.api_url
         }
       };
       that.githubModel.commits(that.context.project.repo.full_name, that.context.project.repo.branch, 20, githubOptions)
@@ -115,7 +115,7 @@
 
     githubAuth: function () {
       var that = this;
-      this.githubOauthService.start(this.context.project.vcsInstance.browse_url)
+      this.githubOauthService.start(this.hceModel.data.vcsInstance.browse_url)
         .then(function () {
           that.isAuthenticated = true;
           that.fetchCommits();

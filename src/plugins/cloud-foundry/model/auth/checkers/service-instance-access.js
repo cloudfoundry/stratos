@@ -2,8 +2,8 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model
-   * @memberOf cloud-foundry.model
+   * @namespace cloud-foundry.model.ServiceInstanceAccess
+   * @memberof cloud-foundry.model
    * @name ServiceInstanceAccess
    * @description CF ACL Model
    */
@@ -44,47 +44,58 @@
     angular.extend(ServiceInstanceAccess.prototype, {
       /**
        * @name create
-       * @description Does user have create service instance permission in the space
+       * @description A User is can create a service if:
+       * 1. User is an admin
+       * 2. Is a space developer and the feature flag is enabled
        * @param {Object} space Domain space
        * @returns {boolean}
        */
       create: function (space) {
+
+        // If user is developer in space the service instances will
+        // belong to and the service_instance_creation flag is set
         // Admin
         if (this.baseAccess.create(space)) {
           return true;
         }
 
-        // If user is developer in space the service instances will
-        // belong to and the service_instance_creation flag is set
-        return this.principal.hasAccessTo('service_instance_creation', this.flags) &&
-          this._doesContainGuid(this.principal.userInfo.entity.spaces, space.metadata.guid);
+        return this.principal.hasAccessTo('service_instance_creation') &&
+          this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**
        * @name update
-       * @description Does user have update service instance permission
-       * @param {Object} serviceInstance service instance detail
+       * @description User can update a service instance if:
+       * 1. User is an admin
+       * 2. or a space developer
+       * @param {Object} space - space detail
        * @returns {boolean}
        */
-      update: function (serviceInstance) {
+      update: function (space) {
         // Admin
-        if (this.baseAccess.update(serviceInstance)) {
+        if (this.baseAccess.create(space)) {
           return true;
         }
 
-        // If user is developer in space the service instances belongs to
-        return this.baseAccess
-          ._doesContainGuid(this.principal.userInfo.entity.spaces, serviceInstance.entity.space_guid);
+        return this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
       },
 
       /**
        * @name delete
-       * @description Does user have delete application permission
-       * @param {Object} serviceInstance service instance detail
+       * @description User can delete a service instance if:
+       * 1. They are an admin
+       * 2. or they are a space developer
+       * @param {Object} space - spacedetail
        * @returns {boolean}
        */
-      delete: function (serviceInstance) {
-        return this.baseAccess.update(serviceInstance);
+      delete: function (space) {
+        // Admin
+        if (this.baseAccess.delete(space)) {
+          return true;
+        }
+
+        return this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+
       },
 
       /**

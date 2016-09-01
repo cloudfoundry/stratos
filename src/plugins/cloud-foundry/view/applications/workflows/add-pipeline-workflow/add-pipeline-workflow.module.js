@@ -340,21 +340,6 @@
         return name;
       },
 
-      triggerPipeline: function () {
-        var that = this;
-        var githubModel = this.modelManager.retrieve('github.model');
-        var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-        var githubOptions = this._getVcsHeaders();
-
-        githubModel.getBranch(this.userInput.repo.full_name, this.userInput.branch, githubOptions)
-          .then(function (response) {
-            var branch = response.data;
-            hceModel.triggerPipelineExecution(that.userInput.hceCnsi.guid,
-                                              that.userInput.projectId,
-                                              branch.commit.sha);
-          });
-      },
-
       _getVcsHeaders: function () {
         var githubOptions = {};
         if (this.userInput.source) {

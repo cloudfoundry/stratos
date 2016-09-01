@@ -36,12 +36,12 @@
 <p class="control-title" translate>Select deploy location</p>
 
 <div class="form-group form-group-large">
-  <label class="control-label" required translate>Cluster</label>
+  <label class="control-label" required translate>Cloud Foundry Endpoint</label>
   <select-input
     arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
     ng-model="wizardCtrl.options.userInput.serviceInstance"
     input-options="wizardCtrl.options.serviceInstances"
-    placeholder="{{'Select Cluster' | translate}}"
+    placeholder="{{'Select Endpoint' | translate}}"
     tabindex="0" required>
   </select-input>
 </div>
@@ -111,9 +111,7 @@
     ng-pattern="/^[a-zA-Z0-9\-_]*$/"
     ng-disabled="!wizardCtrl.options.userInput.domain"
     required>
+  <auto-populate-input form="wizardForm['application-name-form']" from="appName" to="routeName"></auto-populate-input>
 </div>
 
 <br>
-<div class="alert alert-danger" ng-show="wizardCtrl.options.errors.invalidRoute" translate>
-  This route already exists. Choose a new one.
-</div>

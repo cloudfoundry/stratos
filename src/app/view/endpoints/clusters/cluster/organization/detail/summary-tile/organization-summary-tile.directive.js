@@ -56,6 +56,7 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.utils = utils;
 
@@ -75,16 +76,13 @@
     var user = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user;
     that.isAdmin = user.admin;
     that.userName = user.name;
-    var canDelete = false;
-    if (that.isAdmin) {
-      var spacesInOrg = that.organization.spaces;
-      canDelete = _.keys(spacesInOrg).length === 0;
-    }
+    var spacesInOrg = that.organization.spaces;
+    var canDelete = _.keys(spacesInOrg).length === 0;
 
     this.actions = [
       {
         name: gettext('Edit Organization'),
-        disabled: !that.isAdmin,
+        disabled: true,
         execute: function () {
           return asyncTaskDialog(
             {
@@ -118,7 +116,7 @@
       },
       {
         name: gettext('Delete Organization'),
-        disabled: !canDelete,
+        disabled: true,
         execute: function () {
           confirmDialog({
             title: gettext('Delete Organization'),
@@ -160,6 +158,18 @@
       // Present the user's roles
       that.roles = that.organizationModel.organizationRolesToStrings(roles);
     });
+
+    function init() {
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.update,
+        that.organization.details.org);
+
+      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.organization,
+          authService.actions.delete, that.organization.details.org);
+      return $q.resolve();
+    }
+
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
   }
 
 })();

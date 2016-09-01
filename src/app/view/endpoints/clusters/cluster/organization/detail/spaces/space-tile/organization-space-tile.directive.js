@@ -62,24 +62,33 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     function init() {
-      var canDelete = false;
-      var isAdmin = that.user.admin;
+
       var spaceDetail = that.spaceDetail();
-      if (isAdmin) {
-        canDelete = spaceDetail.routes.length === 0 &&
-          spaceDetail.instances.length === 0 &&
-          spaceDetail.apps.length === 0 &&
-          spaceDetail.services.length === 0;
-      }
-      that.actions[0].disabled = !isAdmin;
-      that.actions[1].disabled = !canDelete;
-      that.actions[2].disabled = !isAdmin;
+      that.canDelete = spaceDetail.routes.length === 0 &&
+        spaceDetail.instances.length === 0 &&
+        spaceDetail.apps.length === 0 &&
+        spaceDetail.services.length === 0;
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
-
+      enableActions();
       return $q.resolve();
+    }
+
+    function enableActions() {
+
+      // Rename Space
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
+
+      // Delete Space
+      that.actions[1].disabled = !that.canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+
+      // User Assignment
+      that.actions[2].disabled = authService.principal.userSummary.organizations.managed.length === 0 &&
+        authService.principal.userSummary.spaces.managed.length === 0;
+
     }
 
     var cardData = {};
@@ -90,12 +99,12 @@
 
     this.actions = [
       {
-        name: gettext('Edit Space'),
+        name: gettext('Rename Space'),
         disabled: true,
         execute: function () {
           return asyncTaskDialog(
             {
-              title: gettext('Edit Space'),
+              title: gettext('Rename Space'),
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
               buttonTitles: {
                 submit: gettext('Save')

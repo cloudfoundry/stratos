@@ -19,7 +19,7 @@
       abstract: true,
       template: '<ui-view/>',
       ncyBreadcrumb: {
-        label: gettext('Cloud Foundry Clusters')
+        label: gettext('Cloud Foundry Endpoints')
       }
     });
   }

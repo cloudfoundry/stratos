@@ -247,7 +247,6 @@
           $httpBackend.flush();
           //$rootScope.$digest();
 
-          expect(applicationCtrl.showClusterRegistration).toBe(false);
           expect(applicationCtrl.redirectState).toBe('endpoint.dashboard');
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
           expect($state.current.name).toBe('endpoint.dashboard');
@@ -265,7 +264,6 @@
           $httpBackend.flush();
 
           expect(applicationCtrl.redirectState).toBe(false);
-          expect(applicationCtrl.showClusterRegistration).toBe(false);
           expect(applicationCtrl.showGlobalSpinner).toBe(false);
         });
       });

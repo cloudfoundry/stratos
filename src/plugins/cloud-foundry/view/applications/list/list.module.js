@@ -41,9 +41,9 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
     this.ready = false;
-    this.loading = false;
+    this.loading = true;
     this.currentPage = 1;
-    this.clusters = [{label: 'All Clusters', value: 'all'}];
+    this.clusters = [{label: 'All Endpoints', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
     this.filter = {
@@ -83,7 +83,7 @@
      * @private
      */
     _setClusters: function () {
-      // get the list of connected HCF clusters
+      // get the list of connected HCF endpoints
       this.clusters.length = 1;
       var clusters = _.chain(this.userCnsiModel.serviceInstances)
                       .values()

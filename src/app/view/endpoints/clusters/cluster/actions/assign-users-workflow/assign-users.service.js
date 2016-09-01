@@ -69,24 +69,14 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     var path = 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/';
 
     this.data = { };
     this.userInput = { };
 
-    // Ensure that the org_user is correctly updated given any changes in other org roles
-    _.forEach(rolesService.organizationRoles, function (val, roleKey) {
-      $scope.$watch(function () {
-        var orgGuid = _.get(that.userInput, 'org.details.guid');
-        return orgGuid ? _.get(that.userInput.roles, orgGuid + '.organization.' + roleKey) : null;
-      }, function () {
-        var orgGuid = _.get(that.userInput, 'org.details.guid');
-        if (orgGuid) {
-          rolesService.updateOrgUser(that.userInput.roles[orgGuid].organization);
-        }
-      });
-    });
+    var orgWatch;
 
     function initialise() {
 
@@ -132,6 +122,23 @@
       that.data.spaces = _.map(org.spaces, function (value) {
         return value;
       });
+
+      // Ensure that any change of role respects various rules determined in the rolesService. Normally this is handled
+      // by the roles-table, however if there are no spaces there is no table...
+      if (that.data.spaces < 1) {
+        //... so for this case manually watch the org roles and make the same request as the table
+        if (orgWatch) {
+          orgWatch();
+        }
+        orgWatch = $scope.$watch(function () {
+          return that.userInput.roles[org.details.guid].organization;
+        }, function () {
+          rolesService.updateRoles(that.userInput.roles[org.details.guid]);
+        }, true);
+      } else if (orgWatch) {
+        orgWatch();
+      }
+
       return $q.when();
     }
 
@@ -205,6 +212,13 @@
               },
               keys: function (obj) {
                 return _.keys(obj);
+              },
+              // Helper to enable/disable organisation role checkbox inputs
+              canAssignOrgRoles: function (org) {
+                if (angular.isUndefined(org)) {
+                  return false;
+                }
+                return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org.details.org);
               }
             },
             table: {

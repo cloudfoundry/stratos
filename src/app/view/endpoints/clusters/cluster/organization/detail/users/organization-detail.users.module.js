@@ -52,6 +52,8 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+
     this.rolesService = rolesService;
 
     this.userRoles = {};
@@ -100,6 +102,29 @@
       return $q.resolve();
     }
 
+    this.canUserManageRoles = function (org) {
+      // User can assign org roles
+      return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
+    };
+
+    this.canUserRemoveFromOrg = function (org) {
+      return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
+    };
+
+    this.disableManageRoles = function () {
+      return this.rolesService.changingRoles ||
+        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+    };
+
+    this.disableChangeRoles = function () {
+      return this.rolesService.changingRoles || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+    };
+
+    this.disableRemoveFromOrg = function () {
+      return this.rolesService.changingRoles ||
+        this.selectedUsersCount() < 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+    };
+
     var debouncedUpdateSelection = _.debounce(function () {
       userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
       $scope.$apply();
@@ -109,11 +134,8 @@
       $scope.$watch(function () {
         return rolesService.changingRoles;
       }, function () {
-        var isAdmin = that.stackatoInfo.info.endpoints
-          ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin
-          : false;
-        that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
-        that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
+        that.userActions[0].disabled = rolesService.changingRoles || !that.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+        that.userActions[1].disabled = rolesService.changingRoles || !that.canUserRemoveFromOrg(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
       });
 
       $scope.$watchCollection(function () {

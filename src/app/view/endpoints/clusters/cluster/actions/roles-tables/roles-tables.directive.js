@@ -43,22 +43,19 @@
     var that = this;
 
     this.rolesService = rolesService;
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     // If the organization changes, ensure we respond
     $scope.$watch(function () {
       return that.organization;
     }, refresh);
 
-    if (!this.config.disableOrg) {
-      // Ensure that the org_user is correctly updated given any changes in other org roles
-      _.forEach(this.config.orgRoles, function (val, roleKey) {
-        $scope.$watch(function () {
-          return _.get(that.selection, 'organization.' + roleKey);
-        }, function () {
-          that.rolesService.updateOrgUser(that.selection.organization);
-        });
-      });
-    }
+    // Ensure that the org_user is correctly updated given any changes in other org and space roles
+    $scope.$watch(function () {
+      return that.selection;
+    }, function (selection) {
+      that.rolesService.updateRoles(selection);
+    }, true);
 
     function rolesToSelection(roles) {
       return _.chain(roles)
@@ -71,6 +68,17 @@
         })
         .value();
     }
+
+    // Helper to enable/disable space role checkbox inputs
+    this.disableAssignSpaceRoles = function (spaceKey) {
+      var space = that.organization.spaces[spaceKey];
+      return !that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, space, true);
+    };
+
+    // Helper to enable/disable org role checkbox inputs
+    this.disableAssignOrgRoles = function (org) {
+      return !that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
+    };
 
     function refresh() {
       // Show either the currently selected roles OR set all roles to false (such that they can be removed later)

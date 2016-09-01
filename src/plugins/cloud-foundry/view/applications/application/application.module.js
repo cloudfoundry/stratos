@@ -170,9 +170,7 @@
       // Fetching flag onlt set initially - subsequent calls update the data, so we don't want to show a busy indicator
       // in those cases
       this.model.application.pipeline.fetching = true;
-
       this.model.getClusterWithId(this.cnsiGuid);
-      this.model.getAppDetailsOnOrgAndSpace(this.cnsiGuid, this.id);
 
       this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
@@ -277,18 +275,14 @@
         this.hceCnsi = pipeline.hceCnsi;
         this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
           .then(function (response) {
-            that.model.application.project = response.data;
-
-            if (angular.isDefined(that.model.application.project)) {
-              // TODO (kdomico): Fix once vcs_id is returned - TEAMFOUR-946
-              // get VCS instance data
-              var repoUrl = that.model.application.project.repo.http_url;
-              return that.hceModel.getVcses(that.hceCnsi.guid)
-                .then(function (vcsInstances) {
-                  that.model.application.project.vcsInstance = _.find(vcsInstances, function (o) {
-                    return _.startsWith(repoUrl, o.browse_url);
-                  });
+            var project = response.data;
+            if (!_.isNil(project)) {
+              return that.hceModel.getVcs(that.hceCnsi.guid, project.vcs_id)
+                .then(function () {
+                  that.model.application.project = project;
                 });
+            } else {
+              that.model.application.project = null;
             }
           });
       } else {

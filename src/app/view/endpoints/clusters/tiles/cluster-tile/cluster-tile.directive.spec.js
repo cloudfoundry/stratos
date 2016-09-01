@@ -71,8 +71,8 @@
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
-        expect(clusterTileCtrl.userCount).toBeNull();
+        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.userCount).toBe(0);
         expect(clusterTileCtrl.getCardData()).toBeDefined();
         expect(clusterTileCtrl.getCardData().title).toEqual(initialService.name);
       });
@@ -145,12 +145,12 @@
         spyOn(cfModelUsers, 'listAllUsers');
         createCtrl();
 
-        expect(clusterTileCtrl.userCount).toBeNull();
+        expect(clusterTileCtrl.userCount).toBe(0);
         clusterTileCtrl.service.isConnected = false;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.userCount).toBeNull();
+        expect(clusterTileCtrl.userCount).toBe(0);
         expect(cfModelUsers.listAllUsers).not.toHaveBeenCalled();
       });
 
@@ -161,7 +161,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.userCount).toBeNull();
+        expect(clusterTileCtrl.userCount).toBe(0);
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
@@ -177,7 +177,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.userCount).toBeNull();
+        expect(clusterTileCtrl.userCount).toBe(0);
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
@@ -193,12 +193,12 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.userCount).toBeNull();
+        expect(clusterTileCtrl.userCount).toBe(0);
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.userCount).toBeNull();
+        expect(clusterTileCtrl.userCount).toBeUndefined();
         expect(cfModelUsers.listAllUsers).toHaveBeenCalled();
       });
     });
@@ -216,12 +216,12 @@
         spyOn(cfModelOrg, 'listAllOrganizations');
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
+        expect(clusterTileCtrl.orgCount).toBe(0);
         clusterTileCtrl.service.isConnected = false;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
+        expect(clusterTileCtrl.orgCount).toBe(0);
         expect(cfModelOrg.listAllOrganizations).not.toHaveBeenCalled();
       });
 
@@ -232,7 +232,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
+        expect(clusterTileCtrl.orgCount).toBe(0);
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
@@ -248,7 +248,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
+        expect(clusterTileCtrl.orgCount).toBe(0);
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
@@ -264,12 +264,12 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
+        expect(clusterTileCtrl.orgCount).toBe(0);
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.orgCount).toBeNull();
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         expect(cfModelOrg.listAllOrganizations).toHaveBeenCalled();
       });
     });
