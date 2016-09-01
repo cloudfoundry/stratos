@@ -227,18 +227,18 @@
         }
       ],
       "affinity": [],
-      "min_instances": 3,
-      "max_instances": 3,
+      "min_instances": 5,
+      "max_instances": 5,
       "service_ports": [
         {
-          "name": "etcd-2379",
+          "name": "etcd-client",
           "protocol": "TCP",
           "source_port": 2379,
           "target_port": 2379,
           "public": false
         },
         {
-          "name": "etcd-2380",
+          "name": "etcd-peer",
           "protocol": "TCP",
           "source_port": 2380,
           "target_port": 2380,
@@ -695,7 +695,7 @@
     {
       "name": "HCE_CLIENT",
       "description": "HCE client",
-      "default": "console",
+      "default": "code-engine-renamed",
       "data_type": "string",
       "required": true,
       "secret": false
