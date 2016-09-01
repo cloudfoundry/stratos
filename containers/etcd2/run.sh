@@ -49,18 +49,6 @@ if [[ -n "$HCP_FLIGHTRECORDER_HOST" && -n "$HCP_FLIGHTRECORDER_PORT" ]]; then
   service rsyslog start
 fi
 
-# cmd="
-# ETCD_NAME=${HOST_NAME}
-# ETCD_INITIAL_ADVERTISE_PEER_URLS=${ADVERTISE_PEER_URLS}
-# ETCD_LISTEN_PEER_URLS=${LISTEN_PEER_URLS}
-# ETCD_LISTEN_CLIENT_URLS=${LISTEN_CLIENT_URLS}
-# ETCD_ADVERTISE_CLIENT_URLS=${ADVERTISE_CLIENT_URLS}
-# ETCD_INITIAL_CLUSTER_TOKEN=${INITIAL_CLUSTER_TOKEN}
-# ETCD_INITIAL_CLUSTER_STATE=${INITIAL_CLUSTER_STATE}
-# ETCD_INITIAL_CLUSTER=${INITIAL_CLUSTER}
-# ./etcd
-# "
-
 cmd="./etcd --name ${HOST_NAME} --initial-advertise-peer-urls ${ADVERTISE_PEER_URLS} --listen-peer-urls ${LISTEN_PEER_URLS} --listen-client-urls ${LISTEN_CLIENT_URLS} --advertise-client-urls ${ADVERTISE_CLIENT_URLS} --initial-cluster-token ${INITIAL_CLUSTER_TOKEN} --initial-cluster-state ${INITIAL_CLUSTER_STATE} --initial-cluster ${INITIAL_CLUSTER}"
 
 echo "Command to be executed: $cmd $log_cmd"
