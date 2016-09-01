@@ -895,7 +895,6 @@
         prevPage = this.pages[i - 1];
 
         while (remaining && clusterIndex < clusterKeys.length) {
-
           cnsiGuid = clusterKeys[clusterIndex];
           cluster = this.clusters[cnsiGuid];
           from = 0;
@@ -969,7 +968,7 @@
             to: to,
             loads: loads
           });
-        } // end while
+        } // end of while
       } // end of for
     }
   });
