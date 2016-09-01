@@ -56,7 +56,9 @@
       that._setClusters();
       that._setOrgs();
       that._setSpaces();
-      that._loadPage(1);
+      that._resetPagination().then(function () {
+        return that._loadPage(1);
+      });
     });
 
     this.paginationProperties = {
@@ -161,6 +163,25 @@
     },
 
     /**
+     * @function _resetPagination
+     * @description reset pagination
+     * @returns {promise} A promise
+     * @private
+     */
+    _resetPagination: function () {
+      var that = this;
+      this.loading = true;
+      this.ready = true;
+
+      return this.model.resetPagination().
+        finally(function () {
+          that.paginationProperties.total = that.model.pagination.totalPage;
+          that.ready = true;
+          that.loading = false;
+        });
+    },
+
+    /**
      * @function _loadPage
      * @description Retrieve apps with given page number
      * @param {number} page - page number
@@ -172,13 +193,7 @@
       this.loading = true;
       this.currentPage = page;
 
-      return this.model
-        .all(null, {
-          page: page
-        })
-        .then(function () {
-          that.paginationProperties.total = that.model.data.totalPageNumber;
-        })
+      return this.model.loadPage(page)
         .finally(function () {
           that.ready = true;
           that.loading = false;
@@ -202,10 +217,13 @@
      * @public
      */
     setCluster: function () {
+      var that = this;
       this.organizations.length = 1;
       this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
       this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
-      this._loadPage(1);
+      this._resetPagination().then(function () {
+        return that._loadPage(1);
+      });
       this._setOrgs();
     },
 
@@ -224,8 +242,11 @@
     },
 
     setSpace: function () {
+      var that = this;
       this.model.filterParams.spaceGuid = this.filter.spaceGuid;
-      this._loadPage(1);
+      this._resetPagination().then(function () {
+        return that._loadPage(1);
+      });
     },
 
     /**
