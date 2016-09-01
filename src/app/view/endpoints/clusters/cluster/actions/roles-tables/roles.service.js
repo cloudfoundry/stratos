@@ -587,7 +587,7 @@
           var oldOrgRolesPerUser = _.get(oldRoles, userGuid + '.' + orgGuid);
 
           // Calculate org role delta only for organizations for which user is allowed to
-          if (authService.isAllowed(authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].details.org)) {
+          if (authService.isAllowed(clusterGuid, authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].details.org)) {
             // For each organization role
             _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
               // Has there been a change in the org role?
@@ -604,7 +604,7 @@
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
 
             // calculate space role delta only for spaces for which user is allowed
-            if (authService.isAllowed(authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid], true)) {
+            if (authService.isAllowed(clusterGuid, authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid], true)) {
               // For each space role
               _.forEach(spaceRoles, function (selected, roleKey) {
                 // Has there been a change in the space role?

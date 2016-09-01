@@ -94,7 +94,7 @@
     function setActions() {
       that.actions.push({
         name: gettext('Edit Organization'),
-        disabled: !authService.isAllowed(authService.resources.organization, authService.actions.update, that.organization.org),
+        disabled: !authService.isAllowed(that.organization.cnsiGuid, authService.resources.organization, authService.actions.update, that.organization.org),
         execute: function () {
           return asyncTaskDialog(
             {
@@ -127,7 +127,7 @@
       });
       that.actions.push({
         name: gettext('Delete Organization'),
-        disabled: !canDelete || !authService.isAllowed(authService.resources.organization, authService.actions.delete, that.organization.org),
+        disabled: !canDelete || !authService.isAllowed(that.organization.cnsiGuid, authService.resources.organization, authService.actions.delete, that.organization.org),
         execute: function () {
           return confirmDialog({
             title: gettext('Delete Organization'),
@@ -153,12 +153,12 @@
       var isSpaceManager = false;
       // Iterate through all spaces in the organization to determine if user is a space manager
       _.each(that.organization.org.entity.spaces, function (space) {
-        isSpaceManager = isSpaceManager || authService.isAllowed(authService.resources.user, authService.actions.update, space, true);
+        isSpaceManager = isSpaceManager || authService.isAllowed(that.organization.cnsiGuid, authService.resources.user, authService.actions.update, space, true);
       });
 
       that.actions.push({
         name: gettext('Assign User(s)'),
-        disabled: !authService.isAllowed(authService.resources.user, authService.actions.update, that.organization.org) || !isSpaceManager,
+        disabled: !authService.isAllowed(that.organization.cnsiGuid, authService.resources.user, authService.actions.update, that.organization.org) || !isSpaceManager,
         execute: function () {
           assignUsers.assign({
             clusterGuid: that.organization.cnsiGuid,

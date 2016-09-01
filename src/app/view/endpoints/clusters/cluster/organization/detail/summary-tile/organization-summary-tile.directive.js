@@ -159,10 +159,10 @@
     });
 
     function init() {
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.update,
+      that.actions[0].disabled = !authService.isAllowed(that.clusterGuid, authService.resources.organization, authService.actions.update,
         that.organization.details.org);
 
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.organization,
+      that.actions[1].disabled = !canDelete || !authService.isAllowed(that.clusterGuid, authService.resources.organization,
           authService.actions.delete, that.organization.details.org);
       return $q.resolve();
     }

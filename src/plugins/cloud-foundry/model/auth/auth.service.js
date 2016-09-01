@@ -28,7 +28,9 @@
    */
   function AuthService(modelManager, $q) {
     this.modelManager = modelManager;
-    this.principal = null;
+
+    // Initialised authorization checkers for individual CNSIs
+    this.principal = {};
     this.$q = $q;
 
     this.resources = {
@@ -63,7 +65,7 @@
     initAuthService: function (cnsiGuid) {
       var that = this;
 
-      this.principal = null;
+      this.principal[cnsiGuid] = null;
 
       var featureFlagsModel = this.modelManager.retrieve('cloud-foundry.model.featureFlags');
       var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
@@ -96,7 +98,8 @@
                   all: userRoles[6].data.resources
                 }
               };
-              that.principal = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
+              that.principal[cnsiGuid] = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
+
             });
         });
     },
@@ -104,24 +107,26 @@
     /**
      * @name isAllowed
      * @description is user allowed the certain action
+     * @param {string} cnsiGuid - Cluster GUID
      * @param {string} resourceType - Type is resource
      * (organization, space, user, service_managed_instances, routes, applications)
      * @param {string} action - action (create, delete, update..)
      * @returns {*}
      */
     /* eslint-disable */
-    isAllowed: function (resourceType, action) {
-      return this.principal.isAllowed.apply(this.principal, arguments);
+    isAllowed: function (cnsiGuid, resourceType, action) {
+      return this.principal[cnsiGuid].isAllowed.apply(this.principal, arguments);
     },
     /* eslint-enable */
 
     /**
      * @name isInitialized
      * @description Is authService intialised
+     * @param {string} cnsiGuid - Cluster GUID
      * @returns {boolean}
      */
-    isInitialized: function () {
-      return this.principal !== null;
+    isInitialized: function (cnsiGuid) {
+      return _.has(this.principal, cnsiGuid) && this.principal !== null;
     },
 
     /**

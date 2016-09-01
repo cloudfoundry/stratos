@@ -104,25 +104,25 @@
 
     this.canUserManageRoles = function (org) {
       // User can assign org roles
-      return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
+      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org);
     };
 
     this.canUserRemoveFromOrg = function (org) {
-      return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
+      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org);
     };
 
     this.disableManageRoles = function () {
       return this.rolesService.changingRoles ||
-        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.guid, that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
     this.disableChangeRoles = function () {
-      return this.rolesService.changingRoles || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+      return this.rolesService.changingRoles || !this.canUserManageRoles(that.guid, that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
     this.disableRemoveFromOrg = function () {
       return this.rolesService.changingRoles ||
-        this.selectedUsersCount() < 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+        this.selectedUsersCount() < 1 || !this.canUserManageRoles(that.guid, that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
     var debouncedUpdateSelection = _.debounce(function () {

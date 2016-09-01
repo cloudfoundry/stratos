@@ -118,9 +118,9 @@
         var space = that.spaceDetail().details.space;
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
         // Delete route
-        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.delete, space);
+        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.clusterGuid, that.authService.resources.route, that.authService.actions.delete, space);
         // Unmap route
-        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.update, space);
+        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.clusterGuid, that.authService.resources.route, that.authService.actions.update, space);
       });
     },
 
