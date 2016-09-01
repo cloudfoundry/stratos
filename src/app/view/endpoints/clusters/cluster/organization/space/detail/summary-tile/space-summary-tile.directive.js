@@ -27,6 +27,7 @@
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.notificationsService',
+    'app.view.endpoints.clusters.cluster.cliCommands',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
   ];
@@ -41,12 +42,13 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.model.utilsService} utils - the utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, utils, notificationsService,
-                                      confirmDialog, asyncTaskDialog) {
+                                      cliCommands, confirmDialog, asyncTaskDialog) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -59,6 +61,7 @@
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
+
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
@@ -133,6 +136,12 @@
 
     this.getEndpoint = function () {
       return utils.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
+    };
+
+    this.showCliCommands = function () {
+      cliCommands.show(this.getEndpoint(), this.userName,
+        that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].details.org.entity.name,
+        that.spaceDetail().details.space.entity.name);
     };
 
     $scope.$watchCollection(function () {

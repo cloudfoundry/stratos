@@ -1,66 +1,46 @@
-<div>
-  <p>Use the <a href="https://github.com/cloudfoundry/cli" target="_blank">Cloud Foundry CLI tool</a> to execute commands directly
-  against a Helion Cloud Foundry instance</p>
-  <p>Before starting follow these steps</p>
-  <p>1. Download and install the tool via <a href="https://github.com/cloudfoundry/cli#downloads" target="_blank">these</a> instructions</p>
-  <p>2. Log in to your Cloud Foundry<code-block hide-copy="true">$ cf login -a api.[my-cloudfoundry]
-API endpoint: https://api.[my-cloudfoundry]
+<div
+  ng-init="context = context || detailViewCtrl.context">
+  <p translate >Use the <a href="https://github.com/cloudfoundry/cli" rel="noopener noreferrer" target="_blank">Cloud Foundry CLI</a> to execute commands directly
+  against a Helion Cloud Foundry.</p>
+  <div>
+    <br>
+    <h4 translate>Getting Started</h4>
+    <p translate>Before starting follow these steps</p>
+    <p translate>1. Download and install the tool via instructions <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">here</a></p>
+    <p translate>2. Set the api endpoint<code-block>cf api {{context.api || '[Cloud Foundry API endpoint]'}}</code-block></p>
+    <p translate>3. Login<code-block hide-copy="true">$ cf login
+API endpoint: {{context.api || '[Cloud Foundry API endpoint]'}}
 
-Email> [my-email]
+Email> {{context.username || '[username]'}}
 
-Password> [my-password]
+Password> [password]
 Authenticating...
 OK
     </code-block></p>
-  <p>3. Change/set the targeted org and/or space
-    <code-block hide-copy="true">$ cf target -o [organization name] -s [space name]
-
-API endpoint:   https://api.[my-cloudfoundry] (API version: 2.56.0)
-User:           [logged user]
-Org:            [organization name]
-Space:          [space name]
-  </code-block></p>
-
-  <h4>Cluster Commands</h4>
-  <dl>
-    <dt>REST API</dt>
-    <dd>To make a request to the API via curl<code-block><br>cf curl [curl parameters]</code-block></dd>
-    <dt>Environment variables</dt>
-    <dd><code-block hide-copy="true">CF_COLOR=false                     Do not colorize output
-CF_HOME=path/to/dir/               Override path to default config directory
-CF_PLUGIN_HOME=path/to/dir/        Override path to default plugin config directory
-CF_STAGING_TIMEOUT=15              Max wait time for buildpack staging, in minutes
-CF_STARTUP_TIMEOUT=5               Max wait time for app instance startup, in minutes
-CF_TRACE=true                      Print API request diagnostics to stdout
-CF_TRACE=path/to/trace.log         Append API request diagnostics to a log file
-https_proxy=proxy.example.com:8080 Enable HTTP proxying for API requests</code-block></dd>
-    <dt>All commands</dt>
-    <dd>To view all commands<code-block><br>cf</code-block></dd>
-    <dt>Service|Brokers commands??</dt>
-    <dd>xyz <code-block><br>cf xyz</code-block></dd>
-  </dl>
-  <h4>Organization Commands</h4>
-  <dl>
-    <dt>List</dt>
-    <dd>To list all orgs<code-block><br>cf orgs</code-block></dd>
-    <dt>Rename</dt>
-    <dd>To rename an org<code-block><br>cf rename-org [org] [name]</code-block></dd>
-    <dt>Information</dt>
-    <dd>To fetch org information<code-block><br>cf org [org]</code-block></dd>
-    <dt>Users</dt>
-    <dd>List each org role's users<code-block><br>cf org-users [org]</code-block></dd>
-  </dl>
-  <h4>Space Commands</h4>
-  <dl>
-    <dt>List</dt>
-    <dd>To list the spaces in the targeted org<code-block><br>cf spaces</code-block></dd>
-    <dt>Rename</dt>
-    <dd>To rename a space<code-block><br>cf rename-space [space] [name]</code-block></dd>
-    <dt>Information</dt>
-    <dd>To fetch space information<code-block><br>cf space [space]</code-block></dd>
-    <dt>Users</dt>
-    <dd>List each space role's users<code-block><br>cf space-users [space]</code-block></dd>
-  </dl>
-
-
+    <p translate>4. Target an org and space<code-block>cf target -o {{context.orgName || '[organization name]'}} -s {{context.spaceName || '[space name]'}}</code-block></p>
+  </div>
+  <div>
+    <br><h4 translate>Organization Commands</h4>
+    <dl>
+      <dt translate>List</dt>
+      <dd translate>To list all orgs<code-block>cf orgs</code-block></dd>
+      <dt translate>Rename</dt>
+      <dd translate>To rename an org<code-block>cf rename-org {{context.orgName || '[organization name]'}} [name]</code-block></dd>
+      <dt translate>Information</dt>
+      <dd translate>To fetch org information<code-block>cf org {{context.orgName || '[organization name]'}}</code-block></dd>
+      <dt translate>Users</dt>
+      <dd translate>List each org role's users<code-block>cf org-users {{context.orgName || '[organization name]'}}</code-block></dd>
+    </dl>
+    <br><h4 translate>Space Commands</h4>
+    <dl>
+      <dt translate>List</dt>
+      <dd translate>To list the spaces in the targeted org<code-block>cf spaces</code-block></dd>
+      <dt translate>Rename</dt>
+      <dd translate>To rename a space<code-block>cf rename-space {{context.spaceName || '[space name]'}} [name]</code-block></dd>
+      <dt translate>Information</dt>
+      <dd translate>To fetch space information<code-block>cf space {{context.spaceName || '[space name]'}}</code-block></dd>
+      <dt translate>Users</dt>
+      <dd translate>List each space role's users<code-block>cf space-users {{context.orgName || '[organization name]'}} {{context.spaceName || '[space name]'}}</code-block></dd>
+    </dl>
+  </div>
 </div>

@@ -12,13 +12,18 @@
   function CliCommandsFactory(detailView) {
 
     return {
-      show: function (context) {
+      show: function (api, username, orgName, spaceName) {
         return detailView(
           {
             templateUrl: 'app/view/endpoints/clusters/cluster/actions/cli-commands/cli-commands.html',
             title: gettext('CLI Commands')
           },
-          context
+          {
+            api: api,
+            orgName: orgName,
+            spaceName: spaceName,
+            username: username
+          }
         );
       }
     };

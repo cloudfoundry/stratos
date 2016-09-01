@@ -30,10 +30,9 @@
           <dd ng-if="clusterDetailController.initialized">
             {{ clusterController.getEndpoint() }}
           </dd>
-          <!-- TODO: TEAMFOUR-805 Handle CLI Commands links-->
           <dt translate>CF Interactions</dt>
           <dd>
-            <a ng-click="clusterDetailController.cliCommands.show()" class="btn btn-link" translate>CLI Commands</a>
+            <a ng-click="clusterDetailController.cliCommands.show(clusterController.getEndpoint(), clusterDetailController.userName)" class="btn btn-link" translate>CLI Commands</a>
           </dd>
           <dt ng-if="clusterDetailController.initialized" translate>Account Username</dt>
           <dd ng-if="clusterDetailController.initialized">
