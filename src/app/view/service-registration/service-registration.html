@@ -12,7 +12,7 @@
         <span translate>Welcome to Helion Stackato</span>
       </h2>
       <h4 translate>
-        To get started, setup your account by connecting to clusters and other services.
+        To get started, setup your account by connecting to endpoints and other services.
       </h4>
       <table class="table table-actionable">
         <thead>
@@ -21,7 +21,6 @@
             <th translate>Name</th>
             <th translate>URL</th>
             <th translate>User Account</th>
-            <th translate>Valid Until</th>
             <th translate>&nbsp;</th>
           </tr>
         </thead>
@@ -38,8 +37,7 @@
             </td>
             <td>{{cnsi.name}}</td>
             <td>{{cnsi.api_endpoint.Host}}</td>
-            <td>{{serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].account}}</td>
-            <td>{{serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].token_expiry | secondsToMs | amDateFormat:'MMM D YYYY, h:mm:ss a'}}</td>
+            <td>{{serviceRegistrationCtrl.stackatoInfoModel.info.endpoints[cnsi.cnsi_type][cnsi.guid].user.name}}</td>
             <td class="text-right">
               <a class="btn btn-link btn-sm" ng-if="!serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"
                 ng-click="serviceRegistrationCtrl.connect(cnsi)">
@@ -58,8 +56,8 @@
     <span class="registration-notification" ng-if="serviceRegistrationCtrl.userCnsiModel.numValid > 0"
       translate
       translate-n="serviceRegistrationCtrl.userCnsiModel.numValid"
-      translate-plural="{{serviceRegistrationCtrl.userCnsiModel.numValid}} clusters registered">
-      {{serviceRegistrationCtrl.userCnsiModel.numValid}} cluster registered
+      translate-plural="{{serviceRegistrationCtrl.userCnsiModel.numValid}} endpoints registered">
+      {{serviceRegistrationCtrl.userCnsiModel.numValid}} endpoint registered
     </span>
     <button type="button" class="btn btn-primary"
       ng-click="serviceRegistrationCtrl.completeRegistration()" translate>

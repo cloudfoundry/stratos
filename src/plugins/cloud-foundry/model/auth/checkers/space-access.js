@@ -64,7 +64,6 @@
        * @description User can delete space if:
        * 1. user is an admin
        * 2. user is the org manager
-       * 3. user is the space manager
        * @param {Object} space - space detail
        * @returns {boolean}
        */
@@ -74,8 +73,7 @@
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid);
       },
 
       /**
@@ -104,7 +102,6 @@
        * 1. User is admin
        * 2. User is an Org Manager
        * 3. User is a Space Manager
-       * 4. User is a Space Developer
        * @param {Object} space - Application detail
        * @returns {boolean}
        */
@@ -119,9 +116,7 @@
         // User is Org manager
         return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
           // User is Space manager
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid) ||
-          // User is Space developer
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
       },
 
       /**

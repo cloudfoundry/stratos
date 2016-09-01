@@ -29,11 +29,8 @@
 
   ServiceRegistrationController.$inject = [
     '$scope',
-    'app.model.modelManager',
-    'app.api.apiManager',
-    'app.view.hceRegistration',
-    'app.view.hcfRegistration'
-
+    '$state',
+    'app.model.modelManager'
   ];
 
   /**
@@ -42,33 +39,25 @@
    * @name ServiceRegistrationController
    * @constructor
    * @param {object} $scope - the Angular $scope service
+   * @param {object} $state - the Angular $state service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.api.apiManager} apiManager - the application API manager
-   * @param {app.view.hceRegistration} hceRegistration  HCE Registration service
-   * @param {app.view.hcfRegistration}  hcfRegistration   HCF Registration service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
-   * @property {array} serviceInstances - the service instances available to user
+   * @property {Array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
+   * @property {app.model.stackatoInfo} stackatoInfoModel - the stackato info model containing connected service/user data
    */
-  function ServiceRegistrationController($scope, modelManager, apiManager, hceRegistration, hcfRegistration) {
+  function ServiceRegistrationController($scope, $state, modelManager) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
-    this.clusterAddFlyoutActive = false;
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.serviceInstances = {};
-    this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
-    this.warningMsg = gettext('Authentication failed, please try reconnect.');
-    this.hceRegistration = hceRegistration;
-    this.hcfRegistration = hcfRegistration;
+    this.warningMsg = gettext('Authentication failed, please try to reconnect.');
     this.currentEndpoints = [];
-    /* eslint-disable */
-    // TODO(woodnt): There must be a more reproducable/general way of doing this. https://jira.hpcloud.net/browse/TEAMFOUR-626
-    /* eslint-enable */
-    this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
+    this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
+    this.$state = $state;
 
     $scope.$watchCollection(function () {
       return that.cnsiModel.serviceInstances;
@@ -106,8 +95,10 @@
      * @description Set service instances as registered
      */
     completeRegistration: function () {
-      var that = this;
-      that.showOverlayRegistration = false;
+      this.showOverlayRegistration = false;
+      // Navigate to intended state, this helps refresh any init state now that the connected services have changed
+      // (particularly important for apps on app wall, endpoint tiles that are now connected, etc)
+      this.$state.go(this.$state.current.name, {}, {reload: true});
     },
 
     /**
@@ -135,7 +126,8 @@
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
           that.userCnsiModel.numValid -= 1;
-          that.cfModel.all();
+          // Update stackato info to remove connected user's name
+          that.stackatoInfoModel.getStackatoInfo();
         });
     },
 
@@ -147,52 +139,8 @@
       this.userCnsiModel.numValid += 1;
       this.credentialsFormOpen = false;
       this.activeServiceInstance = null;
-    },
-
-    remove: function (serviceInstance) {
-      var that = this;
-      this.cnsiModel.remove(serviceInstance)
-        .then(function success() {
-          that.serviceInstances = {};
-          that.userCnsiModel.list().then(function () {
-            angular.extend(that.serviceInstances, that.userCnsiModel.serviceInstances);
-            that.cnsiModel.list();
-          });
-        });
-    },
-
-    /**
-     * @function showClusterAddForm
-     * @memberof app.view.ServiceRegistrationController
-     * @description Show the cluster add form flyout
-     */
-    showClusterAddForm: function () {
-      this.hcfRegistration.add();
-    },
-
-    /**
-     * @function showHCEEndpointAddForm
-     * @memberof app.view.ServiceRegistrationController
-     * @description Show the HCE Endpoint add form detail view
-     */
-    showHCEEndpointAddForm: function () {
-      this.hceRegistration.add();
-    },
-
-    /**
-     * @function isAdmin
-     * @memberOf app.view.ServiceRegistrationController
-     * @description Return whether current user account is admin
-     * @returns {boolean} Whether user account is admin
-     */
-    /**
-     * @function isAdmin
-     * @memberof app.view.ServiceRegistrationController
-     * @description Determines if the current user is an admin user
-     * @returns {boolean} to indicate if the user is an admin user
-     */
-    isAdmin: function () {
-      return this.currentUserAccount.isAdmin();
+      // Update stackato info to get connected user's name
+      this.stackatoInfoModel.getStackatoInfo();
     }
 
   });

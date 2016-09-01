@@ -366,11 +366,9 @@
           )
           .then(function (data) {
             if (data && data.code === 10000) {
-              that.errors.invalidRoute = false;
               resolve();
             } else {
-              that.errors.invalidRoute = true;
-              reject();
+              reject(gettext('This route already exists. Choose a new one.'));
             }
           });
         });
@@ -529,9 +527,6 @@
       },
 
       finishWorkflow: function () {
-        if (this.options.subflow === 'pipeline') {
-          this.triggerPipeline();
-        }
         this.notify();
         this.addingApplication = false;
       }

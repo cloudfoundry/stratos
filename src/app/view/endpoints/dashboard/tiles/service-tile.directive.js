@@ -9,7 +9,8 @@
     return {
       scope: {
         serviceType: '@',
-        serviceInstances: '=?'
+        serviceInstances: '=?',
+        useCachedData: '=?'
       },
       controller: ServiceTileController,
       controllerAs: 'serviceTileCtrl',
@@ -44,6 +45,7 @@
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.serviceType = $scope.serviceType;
+    this.useCachedData = $scope.useCachedData;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.$state = $state;
@@ -69,6 +71,11 @@
       .then(function () {
         $scope.$watchCollection(function () {
           return that.serviceInstanceModel.serviceInstances;
+        }, function () {
+          that._updateInstances();
+        });
+        $scope.$watchCollection(function () {
+          return that.userServiceInstanceModel.serviceInstances;
         }, function () {
           that._updateInstances();
         });
@@ -177,12 +184,12 @@
 
     _listServiceInstances: function () {
       var that = this;
-      return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()])
-        .then(function () {
-          return that._updateInstances();
-        }).then(function () {
-          that.resolvedPromise = true;
-        });
+      var promise = this.useCachedData ? this.$q.when(true) : this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()]);
+      return promise.then(function () {
+        return that._updateInstances();
+      }).then(function () {
+        that.resolvedPromise = true;
+      });
     },
 
     _updateChart: function () {

@@ -16,7 +16,7 @@
       controller: ClusterTilesController,
       controllerAs: 'clustersCtrl',
       ncyBreadcrumb: {
-        label: gettext('Cloud Foundry Clusters'),
+        label: gettext('Cloud Foundry Endpoints'),
         parent: function () {
           return 'endpoint.dashboard';
         }
@@ -148,13 +148,13 @@
       var that = this;
       this.userServiceInstanceModel.disconnect(cnsiGUID)
         .catch(function (error) {
-          that.notificationsService.notify('error', gettext('Failed to disconnect HCF cluster'), {
+          that.notificationsService.notify('error', gettext('Failed to disconnect Cloud Foundry endpoint'), {
             timeOut: 10000
           });
           return that.$q.reject(error);
         })
         .then(function () {
-          that.notificationsService.notify('success', gettext('HCF cluster successfully disconnected'));
+          that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully disconnected'));
           that.refreshClusterModel();
         });
     },
@@ -183,16 +183,16 @@
       var that = this;
 
       this.confirmDialog({
-        title: gettext('Unregister Cluster'),
-        description: gettext('Are you sure you want to unregister cluster \'' + serviceInstance.name + '\''),
-        errorMessage: gettext('Failed to unregister cluster'),
+        title: gettext('Unregister Endpoint'),
+        description: gettext('Are you sure you want to unregister endpoint \'' + serviceInstance.name + '\''),
+        errorMessage: gettext('Failed to unregister endpoint'),
         buttonText: {
           yes: gettext('Unregister'),
           no: gettext('Cancel')
         },
         callback: function () {
           return that.serviceInstanceModel.remove(serviceInstance).then(function () {
-            that.notificationsService.notify('success', gettext('HCF cluster successfully unregistered'));
+            that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully unregistered'));
             that.refreshClusterModel();
           });
         }

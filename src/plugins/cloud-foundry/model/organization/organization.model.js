@@ -252,8 +252,12 @@
       this.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
 
       var spaceCache = this.organizations[cnsiGuid][orgGuid].spaces;
+      var spaceModel = this.modelManager.retrieve('cloud-foundry.model.space');
       _.forEach(spaces, function (space) {
         spaceCache[space.metadata.guid] = space;
+        // Ensure the space roles get cached as well. This allows use to determine org role status from space roles
+        // without having to fetch all space data
+        spaceModel.cacheUsersRolesInSpace(cnsiGuid, space);
       });
       this.organizations[cnsiGuid][orgGuid].details.org.entity.spaces = spaces;
     },

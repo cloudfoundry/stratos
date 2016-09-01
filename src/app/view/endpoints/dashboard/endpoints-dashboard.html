@@ -21,7 +21,7 @@
             To enable developers to use this Web console to interact with Stackato, please
           </span>
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.showClusterAddForm(true)" translate>
-            Register Cloud Foundry clusters
+            Register Cloud Foundry endpoints
           </span>
             and
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.showClusterAddForm()" translate>
@@ -35,9 +35,9 @@
       </div>
     </div>
 
-    <service-tile service-instances="endpointsDashboardCtrl.serviceInstances" service-type="hcf"
+    <service-tile use-cached-data="true" service-instances="endpointsDashboardCtrl.serviceInstances" service-type="hcf"
                   class="endpoint-tile col-md-4 col-sm-1"></service-tile>
-    <service-tile service-instances="endpointsDashboardCtrl.serviceInstances" service-type="hce"
+    <service-tile use-cached-data="true" service-instances="endpointsDashboardCtrl.serviceInstances" service-type="hce"
                   class="endpoint-tile col-md-4 col-sm-1"></service-tile>
   </div>
 </div>

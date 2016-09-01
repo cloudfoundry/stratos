@@ -385,6 +385,24 @@
     },
 
     /**
+     * @function getVcs
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get VCS instance
+     * @param {string} guid - the HCE instance GUID
+     * @param {number} vcsId - the VCS instance ID
+     * @returns {promise} A promise object
+     * @public
+     */
+    getVcs: function (guid, vcsId) {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.HceVcsApi')
+        .getVcs(guid, vcsId, {}, this.hceProxyPassthroughConfig)
+        .then(function (response) {
+          return that.onGetVcs(response);
+        });
+    },
+
+    /**
      * @function listVcsTypes
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get VCS types
@@ -652,11 +670,40 @@
       return response.data;
     },
 
+    /**
+     * @function onGetVcses
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Extract VCS instances data from response
+     * @param {object} response - the JSON response from API call
+     * @returns {object} The response data
+     * @private
+     */
     onGetVcses: function (response) {
       this.data.vcsInstances = response.data;
       return response.data;
     },
 
+    /**
+     * @function onGetVcs
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Extract VCS instance data from response
+     * @param {object} response - the JSON response from API call
+     * @returns {object} The response data
+     * @private
+     */
+    onGetVcs: function (response) {
+      this.data.vcsInstance = response.data;
+      return response.data;
+    },
+
+    /**
+     * @function onListVcsTypes
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Extract VCS types data from response
+     * @param {object} response - the JSON response from API call
+     * @returns {object} The response data
+     * @private
+     */
     onListVcsTypes: function (response) {
       var vcsTypes = response.data;
       this.data.vcsTypes = _.keyBy(vcsTypes, 'vcs_type') || {};

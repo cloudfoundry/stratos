@@ -4,13 +4,13 @@
       <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
     </div>
     <div ng-switch-when="loadError" class="message-box message-box-no-bg">
-      <div translate>An error occurred retrieving clusters</div>
+      <div translate>An error occurred retrieving endpoints.</div>
     </div>
     <div ng-switch-when="noClusters" class="empty-view-message">
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
-      <div class="view-msg" translate>There are no registered Cloud Foundry clusters.</div>
+      <div class="view-msg" translate>There are no registered Cloud Foundry endpoints.</div>
       <div class="view-cta" ng-show="clustersCtrl.currentUserAccount.isAdmin()">
-        <a class="btn btn-link" ng-click="clustersCtrl.register()"><span translate>Register a cluster</span></a>
+        <a class="btn btn-link" ng-click="clustersCtrl.register()"><span translate>Register an endpoint</span></a>
         <span translate>to make it available to developers.</span>
       </div>
       <div class="view-cta" ng-show="!clustersCtrl.currentUserAccount.isAdmin()">
@@ -20,14 +20,14 @@
     <div ng-switch-default>
       <div class="header">
         <div class="applications-header font-semi-bold pull-left" translate>
-          Cloud Foundry Clusters
+          Cloud Foundry Endpoints
         </div>
         <button ng-if="clustersCtrl.currentUserAccount.isAdmin()" class="btn btn-primary"
-                ng-click="clustersCtrl.register()" translate>Register Cluster</button>
+                ng-click="clustersCtrl.register()" translate>Register Endpoint</button>
       </div>
       <div id="welcome-message" class="welcome-message panel panel-default">
         <span class="helion-icon helion-icon-Information"></span>
-        <span translate>You must connect to a cluster with your credentials to access and manage the cluster</span>
+        <span translate>You must connect to an endpoint with your credentials to access and manage the endpoint.</span>
       </div>
       <div class="cluster-gallery-card-container">
         <div class="cluster-gallery-card-parent clusters-card col-md-4 col-sm-1" ng-repeat="(guid, service) in clustersCtrl.serviceInstances">
