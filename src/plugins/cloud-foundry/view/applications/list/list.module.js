@@ -41,15 +41,12 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
     this.ready = false;
-<<<<<<< HEAD
     this.loading = true;
-    this.currentPage = 1;
+    this.currentPage = 0;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
-=======
     this.loading = false;
     this.currentPage = 0;
     this.clusters = [{label: 'All Clusters', value: 'all'}];
->>>>>>> Preventing page from jumping.
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
     this.filter = {
