@@ -51,8 +51,8 @@
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
       that.onLogout();
     });
-    this.eventService.$on(this.eventService.events.REDIRECT, function (event, state) {
-      that.onAutoNav(event, state);
+    this.eventService.$on(this.eventService.events.REDIRECT, function (event, state, params) {
+      that.onAutoNav(event, state, params);
     });
     this.eventService.$on(this.eventService.events.TRANSFER, function (event, state, params) {
       that.$state.go(state, params, {location: false});
@@ -100,8 +100,8 @@
      * @param {string} state - the state to navigate to
      * @private
      */
-    onAutoNav: function (event, state) {
-      this.$state.go(state);
+    onAutoNav: function (event, state, params) {
+      this.$state.go(state, params);
     }
   });
 
