@@ -90,7 +90,8 @@
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
               buttonTitles: {
                 submit: gettext('Save')
-              }
+              },
+              class: 'detail-view-thin'
             },
             {
               data: {
