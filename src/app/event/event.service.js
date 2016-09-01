@@ -47,7 +47,7 @@
   function eventServiceFactory($rootScope, dialogEvents) {
     var eventService = $rootScope.$new();
     eventService.events = events;
-    // Configure dialog events service to send events using this event service (scope)
+    // Configure the dialog events service to send events using this event service (scope)
     dialogEvents.configure({ scope: eventService });
     return eventService;
   }
