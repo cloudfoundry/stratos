@@ -398,7 +398,7 @@
       "name": "pgsql-data-volume",
       "size_gb": 10,
       "filesystem": "ext4",
-      "shared": true
+      "shared": false
     },
     {
       "name": "hsc-upgrade-volume",
