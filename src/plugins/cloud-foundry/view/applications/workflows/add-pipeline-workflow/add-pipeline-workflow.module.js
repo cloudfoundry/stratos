@@ -11,6 +11,8 @@
         this.eventService.$on('cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
           that.startWorkflow();
         });
+
+        this.setWatchers();
       },
 
       setWatchers: function () {
@@ -26,6 +28,14 @@
           that.filterTimeout = that.$timeout(function () {
             return that.filterRepos(newFilterTerm);
           }, 500);
+        });
+
+        this.$scope.$watch(function () {
+          return that.userInput.clusterUsername;
+        }, function (newUsername) {
+          if (newUsername) {
+            that._onClusterUsernameChanged();
+          }
         });
       },
 

@@ -456,7 +456,7 @@
     /**
      * @function updateDeploymentTarget
      * @memberof cloud-foundry.model.hce.HceModel
-     * @description Create a new deployment target
+     * @description Update a deployment target
      * @param {string} guid - the HCE instance GUID
      * @param {string} targetId - the deployment target ID
      * @param {object} data - the updated deployment target data

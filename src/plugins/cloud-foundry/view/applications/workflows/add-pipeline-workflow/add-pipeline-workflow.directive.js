@@ -73,15 +73,6 @@
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
     this.init();
-
-    var that = this;
-    this.$scope.$watch(function () {
-      return that.userInput.clusterUsername;
-    }, function (newUsername) {
-      if (newUsername) {
-        that._onClusterUsernameChanged();
-      }
-    });
   }
 
   run.$inject = [

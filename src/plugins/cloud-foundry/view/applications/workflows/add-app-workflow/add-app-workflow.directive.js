@@ -144,14 +144,6 @@
           }
         });
 
-        this.$scope.$watch(function () {
-          return that.userInput.clusterUsername;
-        }, function (newUsername) {
-          if (newUsername) {
-            that._onClusterUsernameChanged();
-          }
-        });
-
         this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
           that.loadMoreRepos();
         });
