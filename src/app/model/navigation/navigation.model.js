@@ -98,6 +98,7 @@
      * @description automatic navigating event handler
      * @param {object} event - angular event object
      * @param {string} state - the state to navigate to
+     * @param {object} params - optional params
      * @private
      */
     onAutoNav: function (event, state, params) {

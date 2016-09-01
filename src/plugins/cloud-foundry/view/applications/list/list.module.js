@@ -210,7 +210,6 @@
     /**
      * @function _reload
      * @description Reload
-     * @returns {promise} A promise
      * @private
      */
     _reload: function () {

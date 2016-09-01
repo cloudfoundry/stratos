@@ -104,6 +104,7 @@
      * @param {string} guid - CNSI guid
      * @param {object} options - options for url building
      * @param {boolean} sync - whether the response should wait for all app stats or just the app metadata
+     * @param {object} trim - tell how the result should be trimmed.
      * @returns {promise} A promise object
      * @public
      **/
@@ -148,18 +149,13 @@
 
     loadPage: function (pageNumber) {
       this.tempApplications = [];
-
       var that = this;
       var page = this.pagination.pages[pageNumber - 1];
-      var clusterLoad;
       var funcs = [];
-      var load;
 
-      for (var i = 0; i < page.length; i++) {
-        clusterLoad = page[i];
+      angular.forEach(page, function (clusterLoad) {
         var cnsiGuid = clusterLoad.cnsiGuid;
-        for (var j = 0; j < clusterLoad.loads.length; j++) {
-          load = clusterLoad.loads[j];
+        angular.forEach(clusterLoad.loads, function (load) {
           funcs.push(function () {
             return that.all(cnsiGuid, {
               page: load.number,
@@ -169,8 +165,8 @@
               end: load.trimEnd
             });
           });
-        }
-      }
+        });
+      });
 
       var p = this.utils.runInSequence(funcs, true);
       p.then(function () {
@@ -182,7 +178,7 @@
     /**
      * @function resetPagination
      * @description reset application wall pagination plan
-     * @returns {object} The CF q filter
+     * @returns {object} a promise object
      * @public
      */
     resetPagination: function () {
@@ -757,6 +753,7 @@
      * @description onAll handler at model layer
      * @param {string} guid - CNSI guid
      * @param {string} response - the json return from the api call
+     * @param {object} trim - tell how the result should be trimmed.
      * @private
      */
     onAll: function (guid, response, trim) {
@@ -861,13 +858,16 @@
   /**
    * @memberOf cloud-foundry.model.application
    * @name AppPagination
-   * @property {array} clusters - avialable clusters.
+   * @param {array} clusters - available clusters.
+   * @param {number} pageSize - page size for pagination.
+   * @param {number} totalPage - total number of pages.
+   * @property {array} clusters - available clusters.
    * @property {number} pageSize - page size for pagination.
    * @property {number} totalPage - total number of pages.
    * @property {array} pages - plan of how each page should be loaded.
    * @class
    */
-  function AppPagination (clusters, pageSize, totalPage) {
+  function AppPagination(clusters, pageSize, totalPage) {
     this.clusters = clusters;
     this.pageSize = pageSize;
     this.totalPage = totalPage;
