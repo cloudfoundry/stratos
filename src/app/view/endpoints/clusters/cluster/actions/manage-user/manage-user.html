@@ -40,11 +40,11 @@
     </div>
 
     <div class="manage-users-values">
-      <div class="manage-users-org" ng-repeat="(guid, org) in asyncTaskDialogCtrl.context.data.organizations">
+      <div class="manage-users-org" ng-repeat="org in asyncTaskDialogCtrl.context.data.organizationsArray">
         <roles-tables
           config="asyncTaskDialogCtrl.context.tableConfig"
           organization="org"
-          selection="asyncTaskDialogCtrl.context.selectedRoles[guid]"
+          selection="asyncTaskDialogCtrl.context.selectedRoles[org.details.guid]"
           filter="asyncTaskDialogCtrl.ctrl.filter"
         ></roles-tables>
       </div>

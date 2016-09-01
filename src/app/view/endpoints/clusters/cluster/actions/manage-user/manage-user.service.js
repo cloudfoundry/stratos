@@ -85,7 +85,8 @@
         },
         {
           data: {
-            organizations: organizations
+            organizations: organizations,
+            organizationsArray: _.orderBy(organizations, 'details.created_at', 'desc')
           },
           selectedRoles: selectedRoles,
           tableConfig: {

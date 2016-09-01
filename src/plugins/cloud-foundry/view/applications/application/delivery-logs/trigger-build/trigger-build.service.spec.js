@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  describe('variables manager service', function () {
-    var promise, dialogContext, $controller, $q, modelManager, $httpBackend, $uibModalInstance,
+  describe('trigger build service', function () {
+    var promise, dialogContext, $controller, $q, modelManager, hceModel, $httpBackend, $uibModalInstance,
       githubOauthService, $timeout;
 
     var cnsi = 1234;
@@ -10,11 +10,11 @@
       repo: {
         full_name: 'test_full_name',
         http_url: 'https://github.com'
-      },
-      vcsInstance: {
-        browse_url: 'https://github.com',
-        api_url: 'https://api.github.com'
       }
+    };
+    var vcsInstance = {
+      browse_url: 'https://github.com',
+      api_url: 'https://api.github.com'
     };
     var defaultCommitCount = 20;
     var defaultCommitsRequest = '/pp/v1/vcs/repos/' + project.repo.full_name + '/commits?per_page=' +
@@ -49,6 +49,8 @@
       $timeout = _$timeout_;
 
       modelManager = $injector.get('app.model.modelManager');
+      hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+      hceModel.data.vcsInstance = vcsInstance;
 
       $uibModalInstance = jasmine.createSpyObj('$uibModalInstance', ['close', 'dismiss']);
       githubOauthService = $injector.get('github.view.githubOauthService');

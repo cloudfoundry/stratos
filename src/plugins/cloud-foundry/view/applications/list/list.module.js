@@ -41,7 +41,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
     this.ready = false;
-    this.loading = false;
+    this.loading = true;
     this.currentPage = 1;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];

@@ -275,6 +275,21 @@
     },
 
     /**
+     * @function cacheUsersRolesInSpace
+     * @memberof cloud-foundry.model.space
+     * @description Cache user roles from a HCF space entity
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} space - HCF space entity. This should contain a set of params to extract the roles from
+     * @returns {object} unsplit space roles
+     * @public
+     */
+    cacheUsersRolesInSpace: function (cnsiGuid, space) {
+      var unsplitRoles = _unsplitSpaceRoles(space);
+      this.onListRolesOfAllUsersInSpace(cnsiGuid, space.metadata.guid, unsplitRoles);
+      return unsplitRoles;
+    },
+
+    /**
      * @function spaceRoleToString
      * @memberof cloud-foundry.model.space
      * @description Converts a space role to a localized string. The list of all organization
@@ -371,9 +386,7 @@
 
       // Space roles can be inlined
       if (space.entity.managers) {
-        var unsplitRoles = _unsplitSpaceRoles(space);
-        rolesP = that.$q.resolve(unsplitRoles);
-        that.onListRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, unsplitRoles);
+        rolesP = that.$q.resolve(that.cacheUsersRolesInSpace(cnsiGuid, space));
       } else {
         rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
       }
