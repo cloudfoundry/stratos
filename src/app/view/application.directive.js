@@ -29,6 +29,7 @@
 
   ApplicationController.$inject = [
     '$timeout',
+    '$q',
     'app.event.eventService',
     'app.model.modelManager',
     '$state',
@@ -41,6 +42,7 @@
    * @memberof app.view.application
    * @name ApplicationController
    * @param {function} $timeout - angular $timeout service
+   * @param {object} $q - the angular $q service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {$state} $state - Angular ui-router $state service
@@ -54,13 +56,14 @@
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck) {
+  function ApplicationController($timeout, $q, eventService, modelManager, $state, $window, upgradeCheck) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$window = $window;
     this.upgradeCheck = upgradeCheck;
+    this.$q = $q;
     this.loggedIn = false;
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
@@ -201,7 +204,19 @@
         })
         .then(function () {
           // Update stackatoInfo
+          // TODO make sure you update the authService everytime this needs to be called
           return that.modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
+        })
+        .then(function (stackatoInfo) {
+          // Initialise Auth Service
+          var authServiceInitPromises = [];
+          var authService = that.modelManager.retrieve('cloud-foundry.model.auth');
+          if (Object.keys(stackatoInfo.endpoints.hcf).length > 0) {
+            _.each(stackatoInfo.endpoints.hcf, function (hcfEndpoint, guid) {
+              authServiceInitPromises.push(authService.initAuthService(guid, true));
+            });
+            return that.$q.all(authServiceInitPromises);
+          }
         })
         .finally(function () {
           that.showGlobalSpinner = false;

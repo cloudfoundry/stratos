@@ -52,6 +52,10 @@
       delete: 'delete',
       rename: 'rename'
     };
+
+    this.roles = {
+      space_developer: 'space_developer'
+    };
   }
 
   angular.extend(AuthService.prototype, {
@@ -60,9 +64,10 @@
      * @name initAuthService
      * @description get a Principal instance for the current user
      * @param {string} cnsiGuid - Cluster Guid
+     * @param {boolean} useStackatoInfoCache - Set to true if StackatoInfo has already been fetched
      * @returns {*}
      */
-    initAuthService: function (cnsiGuid) {
+    initAuthService: function (cnsiGuid, useStackatoInfoCache) {
       var that = this;
 
       this.principal[cnsiGuid] = null;
@@ -72,7 +77,10 @@
       var Principal = this.modelManager.retrieve('cloud-foundry.model.auth.principal');
 
       var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
-      var stackatoInfoPromise = stackatoInfo.getStackatoInfo();
+      var stackatoInfoPromise = this.$q.resolve(stackatoInfo.info);
+      if (useStackatoInfoCache) {
+        stackatoInfoPromise = stackatoInfo.getStackatoInfo();
+      }
       return this.$q.all([featureFlagsPromise, stackatoInfoPromise])
         .then(function (data) {
           var featureFlags = data[0];
@@ -115,7 +123,8 @@
      */
     /* eslint-disable */
     isAllowed: function (cnsiGuid, resourceType, action) {
-      return this.principal[cnsiGuid].isAllowed.apply(this.principal, arguments);
+      var args = Array.prototype.slice.call(arguments);
+      return this.principal[cnsiGuid].isAllowed.apply(this.principal[cnsiGuid], args.slice(1));
     },
     /* eslint-enable */
 
@@ -127,6 +136,25 @@
      */
     isInitialized: function (cnsiGuid) {
       return _.has(this.principal, cnsiGuid) && this.principal !== null;
+    },
+
+    /**
+     * @name doesUserHaveRole
+     * @description convenience method for ascertaining is user
+     * has a specific role (i.e. is user space developer anywhere?)
+     * @param cnsiGuid
+     * @param role
+     * @returns {boolean}
+     */
+    doesUserHaveRole: function (cnsiGuid, role) {
+
+      // convenience method implemented for Application permissions
+      var cnsiPrincipal = this.principal[cnsiGuid];
+      var hasRole = false;
+      if (role === 'space_developer') {
+        hasRole = cnsiPrincipal.userSummary.spaces.all.length > 0;
+      }
+      return hasRole;
     },
 
     /**

@@ -39,6 +39,7 @@
     var that = this;
     this.modelManager = modelManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
     this.eventService = eventService;
     this.ready = false;
     this.loading = true;
@@ -86,12 +87,12 @@
       // get the list of connected HCF endpoints
       this.clusters.length = 1;
       var clusters = _.chain(this.userCnsiModel.serviceInstances)
-                      .values()
-                      .filter({cnsi_type: 'hcf'})
-                      .map(function (o) {
-                        return {label: o.name, value: o.guid};
-                      })
-                      .value();
+        .values()
+        .filter({cnsi_type: 'hcf'})
+        .map(function (o) {
+          return {label: o.name, value: o.guid};
+        })
+        .value();
       [].push.apply(this.clusters, clusters);
       this.model.clusterCount = clusters.length;
 
@@ -131,12 +132,12 @@
     _setSpaces: function () {
       var that = this;
       if (this.model.filterParams.cnsiGuid !== 'all' &&
-          this.model.filterParams.orgGuid !== 'all') {
+        this.model.filterParams.orgGuid !== 'all') {
         var orgModel = this.modelManager.retrieve('cloud-foundry.model.organization');
         return orgModel.listAllSpacesForOrganization(
-            this.model.filterParams.cnsiGuid,
-            this.model.filterParams.orgGuid
-          )
+          this.model.filterParams.cnsiGuid,
+          this.model.filterParams.orgGuid
+        )
           .then(function (newSpaces) {
             var spaces = _.map(newSpaces, that._selectMapping);
             [].push.apply(that.spaces, spaces);
@@ -251,7 +252,30 @@
         label: obj.entity.name,
         value: obj.metadata.guid
       };
+    },
+
+    showAddApplicationButton: function () {
+
+      // If we're not ready or there is no
+      // connected cluster, hide the button
+      if (!this.ready || this.model.clusterCount === 0) {
+        return false;
+      }
+
+      var that = this;
+      // Confirm that user has access to deploy
+      // applications in any connected cluster
+      var isSpaceDeveloper = false;
+      _.each(this.clusters, function (cluster) {
+        var guid = cluster.value;
+        if (guid === 'all') {
+          return;
+        }
+        isSpaceDeveloper = isSpaceDeveloper ||
+          that.authService.doesUserHaveRole(guid, that.authService.roles.space_developer);
+
+      });
+      return isSpaceDeveloper;
     }
   });
-
 })();

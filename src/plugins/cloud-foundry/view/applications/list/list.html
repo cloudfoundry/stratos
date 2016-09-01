@@ -5,7 +5,7 @@
   </div>
   <div class="pull-right">
     <button class="btn btn-primary"
-      ng-if="applicationsListCtrl.ready && applicationsListCtrl.model.clusterCount > 0"
+      ng-if="applicationsListCtrl.showAddApplicationButton()"
       translate
       ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')">
       add application
