@@ -199,7 +199,7 @@
      */
     removeAppFromRoutes: function () {
       var that = this;
-      var checkedRouteValue = _.pickBy(this.userInput.checkedRouteValue, function (value) { return value; });
+      var checkedRouteValue = this.userInput.checkedRouteValue;
       var appGuid = this.appModel.application.summary.guid;
       var funcStack = [];
 
