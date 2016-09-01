@@ -893,24 +893,24 @@
         this.pages[i] = [];
         remaining = pageSize;
         prevPage = this.pages[i - 1];
-        cnsiGuid = clusterKeys[clusterIndex];
 
         while (remaining && clusterIndex < clusterKeys.length) {
-          cluster = this.clusters[clusterKeys[clusterIndex]];
+
+          cnsiGuid = clusterKeys[clusterIndex];
+          cluster = this.clusters[cnsiGuid];
           from = 0;
           if (prevPage && prevPage[prevPage.length - 1].cnsiGuid === cnsiGuid) {
             from = prevPage[prevPage.length - 1].to + 1;
           }
 
           if (cluster.total_results > pageSize) {
-            to = from + pageSize - 1;
+            to = from + remaining - 1;
             remaining = 0;
             cluster.total_results -= pageSize;
 
           } else if (cluster.total_results === pageSize) {
             to = from + pageSize - 1;
             remaining = 0;
-            clusterIndex++;
 
           } else {
             to = from + cluster.total_results - 1;
@@ -969,8 +969,8 @@
             to: to,
             loads: loads
           });
-        }
-      }
+        } // end while
+      } // end of for
     }
   });
 
