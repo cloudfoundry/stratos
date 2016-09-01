@@ -16,11 +16,12 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'cloud-foundry.model.application.stateService',
-    '$q'
+    '$q',
+    'app.utils.utilsService'
   ];
 
-  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q) {
-    modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager, appStateService, $q));
+  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q, utils) {
+    modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager, appStateService, $q, utils));
   }
 
   /**
@@ -31,22 +32,26 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} appStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
+   * @param {app.utils.utilsService} utils - the utils service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
+   * @property {app.utils.utilsService} utils - the utils service
    * @property {number} pageSize - page size for pagination.
    * @class
    */
-  function Application(config, apiManager, modelManager, appStateService, $q) {
+  function Application(config, apiManager, modelManager, appStateService, $q, utils) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.appStateService = appStateService;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.$q = $q;
+    this.utils = utils;
     this.pageSize = config.pagination.pageSize;
+    this.tempApplications = []; // used to collecting applications on app wall
 
     this.data = {
       applications: []
@@ -102,22 +107,11 @@
      * @returns {promise} A promise object
      * @public
      **/
-    all: function (guid, options, sync) {
+    all: function (guid, options, sync, trim) {
       var that = this;
-
-      var cnsis = [];
-      if (this.filterParams.cnsiGuid === 'all') {
-        cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
-                  .values()
-                  .filter({cnsi_type: 'hcf'})
-                  .map('guid')
-                  .value();
-      } else {
-        cnsis = [this.filterParams.cnsiGuid];
-      }
+      var cnsis = [guid];
 
       options = angular.extend(options || {}, {
-        'results-per-page': this.pageSize
       }, this._buildFilter());
 
       return this.applicationApi.ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
@@ -143,13 +137,93 @@
           if (!sync) {
             // Fire off the stats requests in parallel - don't wait for them to complete
             that.$q.all(tasks);
-            return that.onAll(response);
+            return that.onAll(guid, response, trim);
           } else {
             return that.$q.all(tasks).then(function () {
-              return that.onAll(response);
+              return that.onAll(guid, response, trim);
             });
           }
         });
+    },
+
+    loadPage: function (pageNumber) {
+      this.tempApplications.length = 0;
+
+      var that = this;
+      var page = this.pagination.pages[pageNumber - 1];
+      var clusterLoad;
+      var funcs = [];
+      var load;
+
+      for (var i = 0; i < page.length; i++) {
+        clusterLoad = page[i];
+        var clusterId = clusterLoad.clusterId;
+        for (var j = 0; j < clusterLoad.loads.length; j++) {
+          load = clusterLoad.loads[j];
+          funcs.push(function () {
+
+            console.log(load);
+
+            return that.all(clusterId, {
+              page: load.number,
+              'results-per-page': load.resultsPerPage
+            }, false, {
+              start: load.trimStart,
+              end: load.trimEnd
+            });
+          });
+        }
+      }
+
+      var p = this.utils.runInSequence(funcs, true);
+
+      p.then(function () {
+        that.data.applications = that.tempApplications;
+      });
+      return p;
+    },
+
+    /**
+     * @function resetPagination
+     * @description reset application wall pagination plan
+     * @returns {object} The CF q filter
+     * @public
+     */
+    resetPagination: function () {
+      var that = this;
+      var cnsis = this._getCurrentCnsis();
+      var options = angular.extend({
+        'results-per-page': 1,
+        page: 1
+      }, this._buildFilter());
+
+      this.data.applications.length = 0;
+
+      return this.applicationApi
+        .ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
+        .then(function (response) {
+          return that.onGetPaginationData(response);
+        });
+    },
+
+    /**
+     * @function _getCurentCnsis
+     * @description get currently filtered service instances
+     * @returns {object} The CF q filter
+     * @private
+     */
+    _getCurrentCnsis: function () {
+      var cnsis = [];
+      if (this.filterParams.cnsiGuid === 'all') {
+        cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
+                  .values()
+                  .filter({cnsi_type: 'hcf'})
+                  .map('guid')
+                  .value();
+      } else {
+        cnsis = [this.filterParams.cnsiGuid];
+      }
+      return cnsis;
     },
 
     /**
@@ -664,46 +738,42 @@
     },
 
     /**
-     * @function _calculateTotalNumbers
+     * @function onGetPaginationData
      * @memberof  cloud-foundry.model.application
-     * @description calculate total app and total page numbers
+     * @description  onGetPaginationData handler at model layer
+     * @param {object} response - the response object returned from api call
      * @private
      */
-    _calculateTotalNumbers: function () {
+    onGetPaginationData: function (response) {
+      var clusters = response.data;
       var totalAppNumber = 0;
-      angular.forEach(this.data.applications, function (cluster) {
+
+      angular.forEach(clusters, function (cluster) {
         if (cluster.total_results) {
           totalAppNumber += cluster.total_results;
         }
       });
 
-      this.data.totalAppNumber = totalAppNumber;
-      this.data.totalPageNumber = Math.ceil(totalAppNumber / this.pageSize);
+      console.log('TOTAL Application # %d', totalAppNumber);
+      this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize));
     },
 
     /**
      * @function onAll
      * @memberof  cloud-foundry.model.application
      * @description onAll handler at model layer
+     * @param {string} guid - CNSI guid
      * @param {string} response - the json return from the api call
      * @private
      */
-    onAll: function (response) {
-      this.data.applications = response.data;
-      this._calculateTotalNumbers();
-
-      // Check the data we have and determine if we have any applications
-      this.hasApps = false;
-      if (this.clusterCount > 0 && this.data && this.data.applications) {
-        var appCount = _.reduce(this.data.applications, function (sum, app) {
-          if (!app.error && app.resources) {
-            return sum + app.resources.length;
-          } else {
-            return sum;
-          }
-        }, 0);
-        this.hasApps = appCount > 0;
-      }
+    onAll: function (guid, response, trim) {
+      var apps = response.data[guid].resources;
+      apps = apps.slice(trim.start, apps.length - trim.end);
+      angular.forEach(apps, function (app) {
+        app.clusterId = guid;
+      });
+      [].push.apply(this.tempApplications, apps);
+      this.hasApps = this.pagination.totalPage > 0;
     },
 
     /**
@@ -792,6 +862,125 @@
 
     onAppStateChange: function () {
       this.application.state = this.appStateService.get(this.application.summary, this.application.instances);
+    }
+  });
+
+  /**
+   * @memberOf cloud-foundry.model.application
+   * @name AppPagination
+   * @property {array} clusters - avialable clusters.
+   * @property {number} pageSize - page size for pagination.
+   * @property {number} totalPage - total number of pages.
+   * @property {array} pages - plan of how each page should be loaded.
+   * @class
+   */
+  function AppPagination (clusters, pageSize, totalPage) {
+    this.clusters = clusters;
+    this.pageSize = pageSize;
+    this.totalPage = totalPage;
+    this.pages = [];
+    this.init();
+
+    console.log(this.pages);
+  }
+
+  angular.extend(AppPagination.prototype, {
+
+    /**
+     * @function init
+     * @memberof  AppPagination
+     * @description calculate the how each page should be loaded.
+     * @private
+     */
+    init: function () {
+      var remaining, prevPage, cluster, from, to, resultsPerPage, loads, trimStart, page;
+      var clusterKeys = Object.keys(this.clusters);
+      var clusterIndex = 0;
+      var pageSize = this.pageSize;
+
+      for (var i = 0; i < this.totalPage; i++) {
+        this.pages[i] = [];
+
+        remaining = pageSize;
+        prevPage = this.pages[i - 1];
+
+        while (remaining && clusterIndex < clusterKeys.length) {
+          cluster = this.clusters[clusterKeys[clusterIndex]];
+
+          from = 0;
+          if (prevPage && prevPage[prevPage.length - 1].clusterId === clusterKeys[clusterIndex]) {
+            from = prevPage[prevPage.length - 1].to + 1;
+          }
+
+          if (cluster.total_results > pageSize) {
+            to = from + pageSize - 1;
+            remaining = 0;
+            cluster.total_results -= pageSize;
+
+          } else if (cluster.total_results === pageSize) {
+            to = from + pageSize - 1;
+            remaining = 0;
+            clusterIndex++;
+
+          } else {
+            to = from + cluster.total_results - 1;
+            remaining -= cluster.total_results;
+            clusterIndex++;
+          }
+
+          if (from === 0) {
+            loads = [{
+              number: 1,
+              resultsPerPage: to + 1,
+              trimStart: 0,
+              trimEnd: 0
+            }];
+
+          } else if (from + 1 < pageSize) {
+            loads = [{
+              number: 1,
+              resultsPerPage: from + pageSize,
+              trimStart: from,
+              trimEnd: 0
+            }];
+
+          } else {
+            resultsPerPage = pageSize;
+            page = Math.floor(from / resultsPerPage) + 1;
+            trimStart = from % resultsPerPage;
+
+            if (trimStart === 0) {
+              loads = [{
+                number: page,
+                resultsPerPage: resultsPerPage,
+                trimStart: 0,
+                trimEnd: 0
+              }];
+
+            } else {
+              loads = [{
+                number: page,
+                resultsPerPage: 19,
+                trimStart: trimStart,
+                trimEnd: 0
+              }, {
+                number: page + 1,
+                resultsPerPage: resultsPerPage,
+                trimStart: 0,
+                trimEnd: resultsPerPage - trimStart
+              }];
+            }
+          }
+
+          this.pages[i].push({
+            cluster: cluster,
+            clusterId: clusterKeys[clusterIndex],
+            from: from,
+            to: to,
+            loads: loads
+          });
+        }
+      }
     }
   });
 

@@ -486,6 +486,8 @@
        * @description notify success
        */
       notify: function () {
+
+
         if (!this.userInput.application) {
           return;
         }
@@ -495,12 +497,12 @@
           this.userInput.serviceInstance.guid,
           'app',
           this.userInput.application.summary.guid,
-          'summary'
+          'delivery-logs'
         ].join('/');
 
-        this.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
-          message: gettext('A new app has been created: ') + '<a href="' + href + '">' + this.userInput.name + '</a>'
-        });
+        console.log();
+
+        this.eventService.$emit(this.eventService.events.REDIRECT, href);
       },
 
       startWorkflow: function () {
