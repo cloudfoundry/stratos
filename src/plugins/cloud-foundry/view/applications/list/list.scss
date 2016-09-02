@@ -29,7 +29,7 @@ $applications-msg-height: 50px;
   }
 }
 
-.applications-empty {
+.applications-empty, .console-error-block {
   clear: both;
   text-align: center;
   padding: $hpe-unit-space*2 0;
@@ -60,6 +60,9 @@ $applications-msg-height: 50px;
     margin-bottom: $hpe-unit-space * .5;
   }
 
+}
+
+.applications-empty {
   .btn span {
     text-transform: none;
     font-size: $font-size-h1;
