@@ -18,32 +18,80 @@
    */
   function errorServiceFactory(eventService) {
     var hasError = false;
+    var appErrorMessage, systemErrorMessage;
 
     return {
       /**
-       * @function clearError
+       * @function _update
        * @memberOf app.error.errorService
-       * @description Clear the application error if one has been set
+       * @description Updates the error based on combination of system and application level error messages
        */
-      clearError: function () {
-        if (hasError) {
-          hasError = false;
+      _update: function () {
+        var hasErrorMsg = this.getError();
+        if (hasError && !hasErrorMsg) {
           eventService.$broadcast(eventService.events.APP_ERROR_CLEAR);
+        }
+        hasError = !!hasErrorMsg;
+        if (hasError) {
+          eventService.$broadcast(eventService.events.APP_ERROR_NOTIFY, hasErrorMsg);
         }
       },
 
       /**
-       * @function setError
+       * @function getError
        * @memberOf app.error.errorService
-       * @description Set the application error. Uses a default error message if one is not supplied.
+       * @description Gets the current error message
+       * @returns {string} The current error message or undefined if there is no system or application error set
+       */
+      getError: function () {
+        return systemErrorMessage || appErrorMessage;
+      },
+
+      /**
+       * @function clearSystemError
+       * @memberOf app.error.errorService
+       * @description Clear the system-level error
+       */
+      clearSystemError: function () {
+        systemErrorMessage = undefined;
+        this._update();
+      },
+
+      /**
+       * @function setSystemError
+       * @memberOf app.error.errorService
+       * @description Set the system-level error.
        * @param {string} msg - the error message to set
        */
-      setError: function (msg) {
-        hasError = true;
-        if (!msg) {
-          msg = gettext('The Console encountered a problem communicating with the server. Please try again.');
+      setSystemError: function (msg) {
+        if (msg) {
+          systemErrorMessage = msg;
+          this._update();
         }
-        eventService.$broadcast(eventService.events.APP_ERROR_NOTIFY, msg);
+      },
+
+      /**
+       * @function clearAppError
+       * @memberOf app.error.errorService
+       * @description Clear the application-level error
+       */
+      clearAppError: function () {
+        appErrorMessage = undefined;
+        this._update();
+      },
+
+      /**
+       * @function setAppError
+       * @memberOf app.error.errorService
+       * @description Set the application-level error. There is no default error message for application errors.
+       * @param {string} msg - the error message to set
+       */
+      setAppError: function (msg) {
+        if (msg) {
+          appErrorMessage = msg;
+          this._update();
+        }
+
       }
     };
   }
