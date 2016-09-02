@@ -35,6 +35,13 @@
     height: $hpe-unit-space;
   }
 
+  // Ensure that anchor 'buttons' that live in a list inherit the line height of the list (avoiding large height of btn)
+  .dl-horizontal {
+    a.btn {
+      line-height: inherit;
+    }
+  }
+
   .cluster-loading {
     margin: 72px auto;
     text-align: center;

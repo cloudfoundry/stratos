@@ -22,12 +22,9 @@
       <dt translate>CF SPACE ROLE</dt>
       <dd>{{ spaceSummaryTileCtrl.roles.join(', ') }}</dd>
       <dt translate>INSTANCE ADDRESS</dt>
-      <dd>
-        {{ spaceSummaryTileCtrl.getEndpoint() }}
-      </dd>
-      <!-- TODO: TEAMFOUR-805 Handle CLI Commands links-->
-      <!--<dt translate>CR INTERACTIONS</dt>-->
-      <!--<dd><a class="btn btn-link"><span translate>CLI Commands</span></a></dd>-->
+      <dd>{{ spaceSummaryTileCtrl.getEndpoint() }}</dd>
+      <dt translate>CF Interactions</dt>
+      <dd><a ng-click="spaceSummaryTileCtrl.showCliCommands()" class="btn btn-link" translate>CLI Commands</a></dd>
       <dt translate>Account Username</dt>
       <dd>{{ spaceSummaryTileCtrl.userName }}</dd>
       <dt translate>Account Status</dt>

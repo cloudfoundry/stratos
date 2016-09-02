@@ -20,14 +20,12 @@
       <dt translate>CF ORG ROLE</dt>
       <dd>{{ orgSummaryTileCtrl.roles.join(', ') }}</dd>
       <dt translate>INSTANCE ADDRESS</dt>
+      <dd>{{ orgSummaryTileCtrl.getEndpoint() }}</dd>
+      <dt translate>CF Interactions</dt>
       <dd>
-        {{ orgSummaryTileCtrl.getEndpoint() }}
+        <a ng-click="orgSummaryTileCtrl.cliCommands.show(orgSummaryTileCtrl.getEndpoint(), orgSummaryTileCtrl.userName, orgSummaryTileCtrl.organization.details.org.entity.name)"
+           class="btn btn-link" translate>CLI Commands</a>
       </dd>
-      <!-- TODO: TEAMFOUR-805 Handle CLI Commands links-->
-      <!--<dt translate>CR INTERACTIONS</dt>-->
-      <!--<dd>-->
-        <!--<a class="btn btn-link"><span translate>CLI Commands</span></a>-->
-      <!--</dd>-->
       <dt translate>Account Username</dt>
       <dd>{{ orgSummaryTileCtrl.userName }}</dd>
       <dt translate>Account Status</dt>

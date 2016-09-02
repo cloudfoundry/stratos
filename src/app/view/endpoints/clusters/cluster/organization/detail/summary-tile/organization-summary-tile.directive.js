@@ -29,6 +29,7 @@
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.notificationsService',
+    'app.view.endpoints.clusters.cluster.cliCommands',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
   ];
@@ -43,11 +44,12 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.utilsService} utils - the console utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    */
   function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, utils,
-                                             notificationsService, confirmDialog, asyncTaskDialog) {
+                                             notificationsService, cliCommands, confirmDialog, asyncTaskDialog) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -59,6 +61,7 @@
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.utils = utils;
+    this.cliCommands = cliCommands;
 
     this.cardData = {
       title: gettext('Summary')
