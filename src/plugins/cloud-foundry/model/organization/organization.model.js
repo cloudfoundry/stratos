@@ -70,6 +70,12 @@
         headers: headers
       };
     };
+
+    this.applyDefaultListParams = function (params) {
+      return _.defaults(params, {
+        'results-per-page': 100
+      });
+    };
   }
 
   angular.extend(Organization.prototype, {
@@ -88,7 +94,7 @@
       var that = this;
       this.unCacheOrganization(cnsiGuid);
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllOrganizations(params, this.makeHttpConfig(cnsiGuid))
+        .ListAllOrganizations(this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
             return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
@@ -104,13 +110,19 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} orgGuid - organization id
      * @param {object} params - optional parameters
+     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
+     * and return the entire collection
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSpacesForOrganization: function (cnsiGuid, orgGuid, params) {
+    listAllSpacesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllSpacesForOrganization(orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllSpacesForOrganization(orgGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -130,7 +142,7 @@
     listAllServicesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllServicesForOrganization(orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllServicesForOrganization(orgGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
             return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
@@ -498,12 +510,9 @@
         allSpacesP = that.$q.resolve(org.entity.spaces);
       }
 
-      allSpacesP = allSpacesP || this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllSpacesForOrganization(orgGuid, {
-          'inline-relations-depth': 1
-        }, httpConfig).then(function (res) {
-          return that.hcfPagination.dePaginate(res.data, httpConfig);
-        });
+      allSpacesP = allSpacesP || this.listAllSpacesForOrganization(cnsiGuid, orgGuid, {
+        'inline-relations-depth': 1
+      }, true);
 
       var routesCountP = allSpacesP.then(getRouteCount);
 

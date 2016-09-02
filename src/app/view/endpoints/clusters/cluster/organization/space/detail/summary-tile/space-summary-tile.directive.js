@@ -183,7 +183,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
 
   }
 

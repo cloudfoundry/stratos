@@ -56,6 +56,12 @@
         headers: headers
       };
     };
+
+    this.applyDefaultListParams = function (params) {
+      return _.defaults(params, {
+        'results-per-page': 100
+      });
+    };
   }
 
   angular.extend(Space.prototype, {
@@ -73,7 +79,7 @@
     listAllAppsForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllAppsForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllAppsForSpace(guid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
             return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
@@ -91,8 +97,8 @@
      * @description Cache response
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
-     * @param {object} apps - list of apps
-     * @returns {promise} A resolved/rejected promise
+     * @param {Array} apps - array of apps
+     * @returns {Array} The array of apps
      * @public
      */
     onListAllAppsForSpace: function (cnsiGuid, guid, apps) {
@@ -113,13 +119,18 @@
      * @description lists all spaces
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object} params - optional parameters
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSpaces: function (cnsiGuid, params) {
+    listAllSpaces: function (cnsiGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllSpaces(params, this.makeHttpConfig(cnsiGuid))
+        .ListAllSpaces(this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -138,7 +149,7 @@
     listAllServicesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServicesForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllServicesForSpace(guid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
             return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
@@ -186,7 +197,7 @@
       };
       _.assign(combinedParams, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServiceInstancesForSpace(guid, combinedParams, this.makeHttpConfig(cnsiGuid))
+        .ListAllServiceInstancesForSpace(guid, this.applyDefaultListParams(combinedParams), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
             return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
@@ -231,8 +242,9 @@
         'inline-relations-depth': 1,
         'include-relations': 'domain,apps'
       };
+      _.assign(combinedParams, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(guid, _.defaults(combinedParams, inlineParams), this.makeHttpConfig(cnsiGuid))
+        .ListAllRoutesForSpace(guid, this.applyDefaultListParams(combinedParams), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
             return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
@@ -273,7 +285,7 @@
     listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .RetrievingRolesOfAllUsersInSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .RetrievingRolesOfAllUsersInSpace(guid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
             return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
