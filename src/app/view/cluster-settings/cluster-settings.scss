@@ -47,6 +47,15 @@
           text-transform: uppercase;
           padding-right: 24px;
         }
+        .cluster-expired {
+          color: $status-critical;
+          display: inline-block;
+        }
+
+        .btn-link {
+          margin-left: $hpe-unit-space;
+          font-weight: 600;
+        }
       }
     }
 

@@ -5,7 +5,14 @@
   <div ng-show="!endpointsDashboardCtrl.listPromiseResolved" class="message-box message-box-no-bg">
     <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
-  <div ng-show="endpointsDashboardCtrl.listPromiseResolved">
+  <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.listPromiseResolved && endpointsDashboardCtrl.listError">
+    <div>
+      <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
+      <div class="applications-msg" translate>The Console could not retrieve Endpoint information.</div>
+      <button ng-click="endpointsDashboardCtrl.reload()" class="btn btn-primary" translate>Retry</button>
+    </div>
+  </div>
+  <div ng-show="endpointsDashboardCtrl.listPromiseResolved && !endpointsDashboardCtrl.listError">
     <div id="welcome-message" class="welcome-message"
          ng-if="endpointsDashboardCtrl.showWelcomeMessage"
          ng-show="endpointsDashboardCtrl.isUserAdmin()">
@@ -35,9 +42,7 @@
       </div>
     </div>
 
-    <service-tile use-cached-data="true" service-instances="endpointsDashboardCtrl.serviceInstances" service-type="hcf"
-                  class="endpoint-tile col-md-4 col-sm-1"></service-tile>
-    <service-tile use-cached-data="true" service-instances="endpointsDashboardCtrl.serviceInstances" service-type="hce"
-                  class="endpoint-tile col-md-4 col-sm-1"></service-tile>
+    <service-tile use-cached-data="true" service-type="hcf" class="endpoint-tile col-md-4 col-sm-1"></service-tile>
+    <service-tile use-cached-data="true" service-type="hce" class="endpoint-tile col-md-4 col-sm-1"></service-tile>
   </div>
 </div>

@@ -61,7 +61,7 @@
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
-    var canDelete = false;
+    var spaceDetail;
 
     this.cardData = {
       title: gettext('Summary')
@@ -78,7 +78,8 @@
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
               buttonTitles: {
                 submit: gettext('Save')
-              }
+              },
+              class: 'detail-view-thin'
             },
             {
               data: {
@@ -145,20 +146,23 @@
     });
 
     function enableActions() {
+      var canDelete = spaceDetail.routes.length === 0 &&
+        spaceDetail.instances.length === 0 &&
+        spaceDetail.apps.length === 0;
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
+      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename,
+        spaceDetail.details.space);
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space,
+          authService.actions.delete, spaceDetail.details.space);
 
     }
 
     function init() {
-      var spaceDetail = that.spaceDetail();
-
-      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
       that.userName = user.name;
+      spaceDetail = that.spaceDetail();
 
       // If navigating to/reloading the space details page these will be missing. Do these here instead of in
       // getSpaceDetails to avoid blocking state init when there are 100s of spaces
@@ -180,6 +184,18 @@
         return $q.resolve();
       });
 
+      // Update delete action when space info changes (requires authService which depends on chainStateResolve)
+      $scope.$watch(function () {
+        return spaceDetail.routes.length === 0 &&
+          spaceDetail.instances.length === 0 &&
+          spaceDetail.apps.length === 0;
+      }, function () {
+        enableActions();
+      });
+
+      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
+      enableActions();
+      return $q.resolve();
     }
 
     // Ensure the parent state is fully initialised before we start our own init

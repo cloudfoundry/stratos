@@ -1,4 +1,8 @@
-.console-error.applications-empty {
+.console-error.console-error-block {
   padding-top: 110px;
   width: 75%;
+
+  .btn {
+    margin-top: $hpe-unit-space;
+  }
 }

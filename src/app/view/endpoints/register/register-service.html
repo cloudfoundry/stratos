@@ -16,6 +16,7 @@
       </span>
       <input type="text" name="url" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.url"
              required
+             placeholder="{{ asyncTaskDialogCtrl.context.urlHint }}"
              ng-pattern="/^http(s)?://(.)+$/"
              helion-unique items="asyncTaskDialogCtrl.context.instances"
              ignore-case/>

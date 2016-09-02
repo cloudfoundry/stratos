@@ -93,8 +93,7 @@
 
         that.canDelete = spaceDetail.details.totalRoutes === 0 &&
           spaceDetail.details.totalServiceInstances === 0 &&
-          spaceDetail.details.totalApps === 0 &&
-          spaceDetail.details.totalServices === 0;
+          spaceDetail.details.totalApps === 0;
 
         enableActions();
 
@@ -134,7 +133,8 @@
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
               buttonTitles: {
                 submit: gettext('Save')
-              }
+              },
+              class: 'detail-view-thin'
             },
             {
               data: {

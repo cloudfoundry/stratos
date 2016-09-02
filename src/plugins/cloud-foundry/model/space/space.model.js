@@ -221,6 +221,7 @@
      */
     onListAllServiceInstancesForSpace: function (cnsiGuid, guid, serviceInstances) {
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.instances', serviceInstances);
+      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances', (serviceInstances || []).length);
       return serviceInstances;
     },
 
@@ -268,6 +269,7 @@
      */
     onListAllRoutesForSpace: function (cnsiGuid, guid, routes) {
       _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.routes', routes);
+      _.set(this, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', (routes || []).length);
       return routes;
     },
 

@@ -40,14 +40,26 @@
               <div translate>User Name</div>
               <div>{{ clusterSettingsCtrl.getClusterUserName(cnsi) }}</div>
             </div>
-            <!--<div class="cluster-property">-->
-            <!--<div translate>Token Expiration</div>-->
-            <!--<div>{{ cnsi.token_expiry }}</div>-->
-            <!--</div>-->
+            <div class="cluster-property" ng-if="cnsi.expired">
+              <div translate>Token Status</div>
+              <div>
+                <div class="cluster-expired" translate>Expired</div>
+                <a ng-click="clusterSettingsCtrl.reconnect(cnsi)" class="btn-link">
+                  <span translate>Reconnect</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-
+<flyout flyout-active="clusterSettingsCtrl.credentialsFormOpen"
+        flyout-close-icon="'helion-icon helion-icon-Close'"
+        class="flyout-content-thin">
+  <credentials-form cnsi="clusterSettingsCtrl.activeServiceInstance"
+                    on-cancel="clusterSettingsCtrl.onConnectCancel()"
+                    on-submit="clusterSettingsCtrl.onConnectSuccess(serviceInstance)">
+  </credentials-form>
+</flyout>

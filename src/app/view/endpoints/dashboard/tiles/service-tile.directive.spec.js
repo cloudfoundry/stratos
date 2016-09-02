@@ -53,10 +53,6 @@
         expect(element).toBeDefined();
       });
 
-      it('should have `serviceInstances` property initially be []', function () {
-        expect(serviceTileCtrl.serviceInstances).toEqual([]);
-      });
-
       it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
         serviceTileCtrl.showClusterAddForm();
         expect(detailViewCalled).toBe(true);
