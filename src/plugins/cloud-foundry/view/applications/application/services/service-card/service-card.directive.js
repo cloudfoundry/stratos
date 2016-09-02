@@ -224,7 +224,9 @@
      * @returns {*}
      */
     hideServiceActions: function () {
-      return !this.authService.isAllowed(this.cnsiGuid, this.authService.resources.managed_service_instance, this.authService.actions.create);
+      return !this.authService.isAllowed(this.cnsiGuid,
+        this.authService.resources.managed_service_instance,
+        this.authService.actions.create, this.app.summary.space_guid);
     }
   });
 

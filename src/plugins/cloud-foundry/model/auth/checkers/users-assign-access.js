@@ -54,7 +54,7 @@
       update: function (spaceGuid, orgGuid, isSpace) {
 
         // Admin
-        if (this.baseAccess.update(object)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 

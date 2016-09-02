@@ -83,7 +83,9 @@
       }
       return this.$q.all([featureFlagsPromise, stackatoInfoPromise])
         .then(function (data) {
-          var featureFlags = data[0];
+          var featureFlags = _.transform(data[0], function (result, value) {
+            result[value.name] = value.enabled;
+          });
           var stackatoInfo = data[1];
           var userId = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
 
