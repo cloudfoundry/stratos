@@ -26,7 +26,7 @@
   /**
    * @name interceptor
    * @description A $http interceptor, which emits a global HTTP error event when
-   * response.status >= 400
+   * response.status === -1
    *
    * See https://docs.angularjs.org/api/ng/service/$http for details
    *
