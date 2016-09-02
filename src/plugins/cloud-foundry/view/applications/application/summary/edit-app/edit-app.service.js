@@ -51,7 +51,8 @@
             'application/summary/edit-app/edit-app.html',
             buttonTitles: {
               submit: 'Save'
-            }
+            },
+            class: 'detail-view-thin'
           },
           {
             data: data

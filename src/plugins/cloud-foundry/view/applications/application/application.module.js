@@ -157,6 +157,8 @@
     });
 
     $scope.$on('$destroy', function () {
+      that.removeModalStartListener();
+      that.removeModalEndListener();
       that.scopeDestroyed = true;
       that.stopUpdate();
     });
@@ -190,6 +192,15 @@
             that.startUpdate();
           }
         });
+
+      // When a modal interaction starts, stop the background polling
+      this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
+        that.stopUpdate();
+      });
+      // When a modal interaction ends, resume the background polling
+      this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
+        that.startUpdate();
+      });
     },
 
     /**
@@ -275,20 +286,14 @@
         this.hceCnsi = pipeline.hceCnsi;
         this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
           .then(function (response) {
-            that.model.application.project = response.data;
-
-            if (angular.isDefined(that.model.application.project)) {
-              /* eslint-disable */
-              // TODO (kdomico): Fix once vcs_id is returned - TEAMFOUR-946
-              /* eslint-enable */
-              // get VCS instance data
-              var repoUrl = that.model.application.project.repo.http_url;
-              return that.hceModel.getVcses(that.hceCnsi.guid)
-                .then(function (vcsInstances) {
-                  that.model.application.project.vcsInstance = _.find(vcsInstances, function (o) {
-                    return _.startsWith(repoUrl, o.browse_url);
-                  });
+            var project = response.data;
+            if (!_.isNil(project)) {
+              return that.hceModel.getVcs(that.hceCnsi.guid, project.vcs_id)
+                .then(function () {
+                  that.model.application.project = project;
                 });
+            } else {
+              that.model.application.project = null;
             }
           });
       } else {

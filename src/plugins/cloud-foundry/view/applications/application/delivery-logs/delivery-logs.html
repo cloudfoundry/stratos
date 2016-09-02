@@ -54,7 +54,8 @@
     <div id="delivery-logs-builds" class="delivery-logs-builds">
       <div class="action-header">
         <span translate>Builds</span>
-        <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()">
+        <a class="btn btn-link" href="" ng-click="appDelLogsCtrl.triggerBuild()"
+          ng-if="appDelLogsCtrl.hceModel.data.vcsInstance.vcs_type === 'GITHUB'">
           <i class="helion-icon helion-icon-Right_Arrow"></i>
           <span translate>Trigger Build</span>
         </a>
