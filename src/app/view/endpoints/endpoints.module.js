@@ -51,6 +51,7 @@
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       var stacakatoInfoPromise;
+      // Check if StackatoInfo is uninitialised
       if (Object.keys(stackatoInfo.info).length === 0) {
         stacakatoInfoPromise = stackatoInfo.getStackatoInfo();
       } else {

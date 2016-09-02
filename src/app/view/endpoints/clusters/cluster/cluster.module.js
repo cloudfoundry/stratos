@@ -87,8 +87,11 @@
       // Reset any cache we may be interested in
       delete appModel.appSummary;
 
-      // Initialise AuthService promise
-      var authServicePromise = authService.initAuthService(that.guid);
+      // Initialise AuthService for CNSI promise
+      var authServicePromise = $q.resolve();
+      if (!authService.isInitialized(that.guid)) {
+        authServicePromise = authService.initAuthService(that.guid);
+      }
 
       return $q.all([
         orgPromise,

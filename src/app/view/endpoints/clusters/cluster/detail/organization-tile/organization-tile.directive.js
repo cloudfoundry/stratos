@@ -97,7 +97,7 @@
         disabled: !authService.isAllowed(that.organization.cnsiGuid,
           authService.resources.organization,
           authService.actions.update,
-          that.organization.org.metadata.guid),
+          that.organization.guid),
         execute: function () {
           return asyncTaskDialog(
             {
@@ -133,7 +133,7 @@
         disabled: !canDelete || !authService.isAllowed(that.organization.cnsiGuid,
           authService.resources.organization,
           authService.actions.delete,
-          that.organization.org.metadata.guid),
+          that.organization.guid),
         execute: function () {
           return confirmDialog({
             title: gettext('Delete Organization'),
@@ -164,7 +164,7 @@
 
       that.actions.push({
         name: gettext('Assign User(s)'),
-        disabled: !authService.isAllowed(that.organization.cnsiGuid, authService.resources.user, authService.actions.update, that.organization.org.metadata.guid) || !isSpaceManager,
+        disabled: !authService.isAllowed(that.organization.cnsiGuid, authService.resources.user, authService.actions.update, that.organization.guid) || !isSpaceManager,
         execute: function () {
           assignUsers.assign({
             clusterGuid: that.organization.cnsiGuid,

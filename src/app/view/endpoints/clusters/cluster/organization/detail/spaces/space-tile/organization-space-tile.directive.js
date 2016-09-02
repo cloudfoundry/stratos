@@ -80,10 +80,10 @@
     function enableActions() {
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.rename, that.spaceDetail().details.space.metadata.guid);
+      that.actions[0].disabled = !authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.rename, that.spaceDetail().details.guid);
 
       // Delete Space
-      that.actions[1].disabled = !that.canDelete || !authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.delete, that.spaceDetail().details.space.metadata.guid);
+      that.actions[1].disabled = !that.canDelete || !authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.delete, that.spaceDetail().details.guid);
 
       // User Assignment
       that.actions[2].disabled = authService.principal[that.clusterGuid].userSummary.organizations.managed.length === 0 &&

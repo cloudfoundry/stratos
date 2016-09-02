@@ -29,7 +29,6 @@
 
   ApplicationController.$inject = [
     '$timeout',
-    '$q',
     'app.event.eventService',
     'app.model.modelManager',
     '$state',
@@ -42,7 +41,6 @@
    * @memberof app.view.application
    * @name ApplicationController
    * @param {function} $timeout - angular $timeout service
-   * @param {object} $q - the angular $q service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {$state} $state - Angular ui-router $state service
@@ -56,14 +54,13 @@
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController($timeout, $q, eventService, modelManager, $state, $window, upgradeCheck) {
+  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
     this.$state = $state;
     this.$window = $window;
     this.upgradeCheck = upgradeCheck;
-    this.$q = $q;
     this.loggedIn = false;
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
@@ -203,6 +200,7 @@
           }
         })
         .finally(function () {
+
           that.showGlobalSpinner = false;
           if (that.continueLogin) {
             // When we notify listeners that login has completed, in some cases we don't want them

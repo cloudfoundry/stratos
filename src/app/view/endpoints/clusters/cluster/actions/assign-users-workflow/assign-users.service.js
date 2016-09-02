@@ -218,7 +218,10 @@
                 if (angular.isUndefined(org)) {
                   return false;
                 }
-                return that.authService.isAllowed(context.clusterGuid, that.authService.resources.user, that.authService.actions.update, null, org.details.org.metadata.guid);
+                return that.authService.isAllowed(context.clusterGuid,
+                  that.authService.resources.user,
+                  that.authService.actions.update, null,
+                  org.details.guid);
               }
             },
             table: {

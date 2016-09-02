@@ -81,6 +81,7 @@
     });
 
     // The watch above will trigger when the info has loaded and updated the model
+    // TODO perform fine-grained update of AuthService
     this.stackatoInfo.getStackatoInfo();
   }
 
@@ -117,6 +118,7 @@
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
           that.userCnsiModel.numValid -= 1;
+          // TODO Perform finegrained update of authService
           that.stackatoInfo.getStackatoInfo();
           that.cfModel.all();
         }).catch(function () {

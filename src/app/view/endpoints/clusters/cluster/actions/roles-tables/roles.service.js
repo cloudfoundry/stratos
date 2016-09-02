@@ -591,7 +591,7 @@
             authService.resources.user,
             authService.actions.update,
             null,
-            organizationModel.organizations[clusterGuid][orgGuid].details.org.metadata.guid);
+            orgGuid);
           if (isUserAllowed) {
             // For each organization role
             _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
@@ -609,7 +609,10 @@
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
 
             // calculate space role delta only for spaces for which user is allowed
-            if (authService.isAllowed(clusterGuid, authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid], true)) {
+            var isAllowed = authService.isAllowed(clusterGuid, authService.resources.user,
+              authService.actions.update,
+              organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid].details.guid, orgGuid, true);
+            if (isAllowed) {
               // For each space role
               _.forEach(spaceRoles, function (selected, roleKey) {
                 // Has there been a change in the space role?

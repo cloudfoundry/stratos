@@ -160,10 +160,10 @@
 
     function init() {
       that.actions[0].disabled = !authService.isAllowed(that.clusterGuid, authService.resources.organization, authService.actions.update,
-        that.organization.details.org.metadata.guid);
+        that.organization.details.guid);
 
       that.actions[1].disabled = !canDelete || !authService.isAllowed(that.clusterGuid, authService.resources.organization,
-          authService.actions.delete, that.organization.details.org.metadata.guid);
+          authService.actions.delete, that.organization.details.guid);
       return $q.resolve();
     }
 
