@@ -104,11 +104,11 @@
 
     this.canUserManageRoles = function (org) {
       // User can assign org roles
-      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org);
+      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org.metadata.guid);
     };
 
     this.canUserRemoveFromOrg = function (org) {
-      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org);
+      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org.metadata.guid);
     };
 
     this.disableManageRoles = function () {

@@ -50,13 +50,13 @@
        * @param {Object} org - org detail
        * @returns {boolean}
        */
-      create: function (org) {
+      create: function (orgGuid) {
         // Admin
-        if (this.baseAccess.create(org)) {
+        if (this.baseAccess.create(orgGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
       },
 
       /**
@@ -67,13 +67,13 @@
        * @param {Object} space - space detail
        * @returns {boolean}
        */
-      delete: function (space) {
+      delete: function (orgGuid) {
         // Admin
-        if (this.baseAccess.create(space)) {
+        if (this.baseAccess.create(orgGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
       },
 
       /**
@@ -86,14 +86,14 @@
        * @returns {boolean}
        */
 
-      update: function (space) {
+      update: function (spaceGuid, orgGuid) {
         // Admin
-        if (this.baseAccess.update(space)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid) ||
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid);
       },
 
       /**
@@ -106,17 +106,17 @@
        * @returns {boolean}
        */
 
-      rename: function (space) {
+      rename: function (spaceGuid, orgGuid) {
 
         // Admin
-        if (this.baseAccess.update(space)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 
         // User is Org manager
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid) ||
           // User is Space manager
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid);
       },
 
       /**

@@ -19,7 +19,7 @@
       {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
     </dt>
   </dl>
-  <div class="service-actions">
+  <div class="service-actions" ng-hide="serviceCardCtrl.hideServiceActions()">
     <actions-menu actions="serviceCardCtrl.actions" ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.canBind"
       action-target="service" menu-icon="helion-icon helion-icon-2x helion-icon-More"
       menu-position="actions-menu-right">

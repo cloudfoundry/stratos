@@ -22,6 +22,7 @@
   }
 
   ApplicationsListController.$inject = [
+    '$log',
     'app.model.modelManager',
     'app.event.eventService'
   ];
@@ -29,18 +30,20 @@
   /**
    * @name ApplicationsListController
    * @constructor
+   * @param {Object} $log - the angular $log service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {app.event.eventService} eventService - the event bus service
    */
-  function ApplicationsListController(modelManager, eventService) {
+  function ApplicationsListController($log, modelManager, eventService) {
     var that = this;
     this.modelManager = modelManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.authService = modelManager.retrieve('cloud-foundry.model.auth');
     this.eventService = eventService;
+    this.$log = $log;
     this.ready = false;
     this.loading = true;
     this.currentPage = 1;
@@ -275,6 +278,9 @@
           that.authService.doesUserHaveRole(guid, that.authService.roles.space_developer);
 
       });
+
+      this.$log.debug('Auth Action: Add Application button hidden: ' + !isSpaceDeveloper);
+
       return isSpaceDeveloper;
     }
   });

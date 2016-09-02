@@ -90,13 +90,13 @@
 
     this.canUserManageRoles = function (org, space) {
       // User can assign org roles
-      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org) ||
+      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org.metadata.guid) ||
         // User can assign space roles
-        that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, space, true);
+        that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, space.metadata.guid, space.entity.organization_guid, true);
     };
 
     this.canUserRemoveFromOrg = function (org) {
-      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org);
+      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org.metadata.guid);
     };
 
     this.canUserRemoveFromSpace = function (org, space) {

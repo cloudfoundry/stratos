@@ -35,7 +35,9 @@
     '$q',
     '$interval',
     '$interpolate',
-    'helion.framework.widgets.dialog.confirm'
+    '$state',
+    'helion.framework.widgets.dialog.confirm',
+    'app.utils.utilsService'
   ];
 
   /**
@@ -49,7 +51,9 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $interval - the Angular $interval service
    * @param {object} $interpolate - the Angular $interpolate service
+   * @param {object} $state - the UI router $state service
    * @param {object} confirmDialog - the confirm dialog service
+   * @param {object} utils - the utils service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
@@ -61,7 +65,7 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
    */
-  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, confirmDialog) {
+  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, $state, confirmDialog, utils) {
     var that = this;
 
     this.$window = $window;
@@ -73,14 +77,16 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
-
-    this.init();
+    that.hideVariables = true;
+    // Wait for parent state to be fully initialised
+    utils.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
     this.appActions = [
       {
@@ -145,7 +151,8 @@
     ];
 
     $scope.$watch(function () {
-      return that.model.application.summary.state;
+      return that.model.application.summary.state &&
+        that.authService.isInitialized(that.cnsiGuid);
     }, function (newState) {
       that.onAppStateChange(newState);
     });
@@ -172,7 +179,7 @@
       this.model.application.pipeline.fetching = true;
       this.model.getClusterWithId(this.cnsiGuid);
 
-      this.model.getAppSummary(this.cnsiGuid, this.id, true)
+      return this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
           return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);
         })
@@ -189,6 +196,12 @@
           if (!that.scopeDestroyed) {
             that.startUpdate();
           }
+          that.onAppStateChange();
+          that.hideVariables = !that.authService.isAllowed(that.cnsiGuid,
+            that.authService.resources.application,
+            that.authService.actions.update,
+            that.model.application.summary.space_guid
+          );
         });
     },
 
@@ -344,7 +357,20 @@
       if (!this.model.application.state || !this.model.application.state.actions) {
         return true;
       } else {
-        return this.model.application.state.actions[id] !== true;
+        var hideAction = true;
+        // TODO special case for delete
+        // check user is a space developer
+        if (id !== 'launch') {
+          var spaceGuid = this.model.application.summary.space_guid;
+          hideAction = !this.authService.isAllowed(this.cnsiGuid,
+            this.authService.resources.application,
+            this.authService.actions.update,
+            spaceGuid);
+        } else if (id === 'launch') {
+          hideAction = false;
+        }
+
+        return this.model.application.state.actions[id] !== true || hideAction;
       }
     },
 

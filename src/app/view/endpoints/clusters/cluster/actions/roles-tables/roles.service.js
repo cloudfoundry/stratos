@@ -587,7 +587,12 @@
           var oldOrgRolesPerUser = _.get(oldRoles, userGuid + '.' + orgGuid);
 
           // Calculate org role delta only for organizations for which user is allowed to
-          if (authService.isAllowed(clusterGuid, authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].details.org)) {
+          var isUserAllowed = authService.isAllowed(clusterGuid,
+            authService.resources.user,
+            authService.actions.update,
+            null,
+            organizationModel.organizations[clusterGuid][orgGuid].details.org.metadata.guid);
+          if (isUserAllowed) {
             // For each organization role
             _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
               // Has there been a change in the org role?
@@ -683,8 +688,9 @@
                 errorMessage += reason.length > 0 ? gettext('Reason: \'{{reason}}\'') : '';
               }
               errorMessage = $interpolate(errorMessage)({
-                failedUsers: _.map(failures, 'user').join(', '),
-                reason: reason }
+                  failedUsers: _.map(failures, 'user').join(', '),
+                  reason: reason
+                }
               );
 
               return $q.reject(errorMessage);

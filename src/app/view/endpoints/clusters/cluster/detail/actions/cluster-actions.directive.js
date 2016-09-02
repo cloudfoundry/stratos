@@ -173,7 +173,7 @@
             if (angular.isUndefined(org)) {
               return false;
             }
-            return authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.create, org.details.org);
+            return authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.create, org.details.org.metadata.guid);
           }
         };
 

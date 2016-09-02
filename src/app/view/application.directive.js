@@ -202,22 +202,6 @@
             }
           }
         })
-        .then(function () {
-          // Update stackatoInfo
-          // TODO make sure you update the authService everytime this needs to be called
-          return that.modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
-        })
-        .then(function (stackatoInfo) {
-          // Initialise Auth Service
-          var authServiceInitPromises = [];
-          var authService = that.modelManager.retrieve('cloud-foundry.model.auth');
-          if (Object.keys(stackatoInfo.endpoints.hcf).length > 0) {
-            _.each(stackatoInfo.endpoints.hcf, function (hcfEndpoint, guid) {
-              authServiceInitPromises.push(authService.initAuthService(guid, true));
-            });
-            return that.$q.all(authServiceInitPromises);
-          }
-        })
         .finally(function () {
           that.showGlobalSpinner = false;
           if (that.continueLogin) {

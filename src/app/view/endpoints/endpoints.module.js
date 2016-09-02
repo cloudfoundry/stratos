@@ -18,7 +18,7 @@
     $stateProvider.state('endpoint', {
       url: '/endpoint',
       abstract: true,
-      template : '<ui-view/>',
+      template: '<ui-view/>',
       data: {
         activeMenuState: 'endpoints'
       },
@@ -48,7 +48,18 @@
     this.modelManager = modelManager;
 
     function init() {
-      return that.initialized.promise;
+
+      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      var stacakatoInfoPromise;
+      if (Object.keys(stackatoInfo.info).length === 0) {
+        stacakatoInfoPromise = stackatoInfo.getStackatoInfo();
+      } else {
+        stacakatoInfoPromise = $q.resolve;
+      }
+
+      return stacakatoInfoPromise.then(function () {
+        return that.initialized.promise;
+      });
     }
 
     eventService.$on(eventService.events.LOGIN, function () {

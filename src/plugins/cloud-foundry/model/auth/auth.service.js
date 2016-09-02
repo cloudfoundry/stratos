@@ -135,7 +135,7 @@
      * @returns {boolean}
      */
     isInitialized: function (cnsiGuid) {
-      return _.has(this.principal, cnsiGuid) && this.principal !== null;
+      return _.has(this.principal, cnsiGuid) && this.principal[cnsiGuid] !== null;
     },
 
     /**

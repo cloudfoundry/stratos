@@ -34,9 +34,8 @@
      * @param {Array} flags feature flags
      * @constructor
      */
-    function UsersAssignmentAccess(principal, flags) {
+    function UsersAssignmentAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
@@ -52,7 +51,7 @@
        * @param {boolean} isSpace - flag to indicate what object is
        * @returns {boolean}
        */
-      update: function (object, isSpace) {
+      update: function (spaceGuid, orgGuid, isSpace) {
 
         // Admin
         if (this.baseAccess.update(object)) {
@@ -62,13 +61,13 @@
         if (isSpace) {
           // Check if user is space manager or org manager
           return this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.spaces.managed, object.metadata.guid) ||
+            ._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid) ||
             this.baseAccess
-              ._doesContainGuid(this.principal.userSummary.organizations.managed, object.entity.organization_guid);
+              ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
         } else {
           // check if user is org manager
           return this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.organizations.managed, object.metadata.guid);
+            ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
         }
 
       },

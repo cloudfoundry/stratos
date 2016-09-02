@@ -35,9 +35,8 @@
      * @param {Array} flags feature flags
      * @constructor
      */
-    function ServiceInstanceAccess(principal, flags) {
+    function ServiceInstanceAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
@@ -50,17 +49,17 @@
        * @param {Object} space Domain space
        * @returns {boolean}
        */
-      create: function (space) {
+      create: function (spaceGuid) {
 
         // If user is developer in space the service instances will
         // belong to and the service_instance_creation flag is set
         // Admin
-        if (this.baseAccess.create(space)) {
+        if (this.baseAccess.create(spaceGuid)) {
           return true;
         }
 
         return this.principal.hasAccessTo('service_instance_creation') &&
-          this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
       },
 
       /**
@@ -71,13 +70,13 @@
        * @param {Object} space - space detail
        * @returns {boolean}
        */
-      update: function (space) {
+      update: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.create(space)) {
+        if (this.baseAccess.create(spaceGuid)) {
           return true;
         }
 
-        return this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
       },
 
       /**
@@ -88,13 +87,13 @@
        * @param {Object} space - spacedetail
        * @returns {boolean}
        */
-      delete: function (space) {
+      delete: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.delete(space)) {
+        if (this.baseAccess.delete(spaceGuid)) {
           return true;
         }
 
-        return this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
 
       },
 

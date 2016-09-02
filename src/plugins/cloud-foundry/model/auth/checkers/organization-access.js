@@ -34,9 +34,8 @@
      * @param {Array} flags feature flags
      * @constructor
      */
-    function OrganizationAccess(principal, flags) {
+    function OrganizationAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
@@ -68,16 +67,16 @@
        * @param {object} org - organisation details
        * @returns {boolean}
        */
-      delete: function (org) {
+      delete: function (orgGuid) {
 
         // Admin
-        if (this.baseAccess.delete(org)) {
+        if (this.baseAccess.delete(orgGuid)) {
           return true;
         }
 
         // If user is manager of org
         return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+          ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
       },
 
       /**
@@ -89,16 +88,16 @@
        * @returns {boolean}
        */
 
-      update: function (org) {
+      update: function (orgGuid) {
 
         // User is an admin
-        if (this.baseAccess.update(org)) {
+        if (this.baseAccess.update(orgGuid)) {
           return true;
         }
 
         // If user is manager of org
         return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+          ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
       },
 
       /**
