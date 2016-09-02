@@ -43,11 +43,29 @@ $gallery-card-layout-steps: 4;
   }
 }
 
-// Tweak the card width slightly when samller to stop application state name over-running
+// Tweak the card width slightly when smaller to stop application state name over-running
 @media (min-width: 768px) {
   gallery-card {
     .card .dl-horizontal dd {
         margin-left: 170px;
+    }
+  }
+}
+
+// Tweak tile views when the page width is small
+@media (max-width: 768px) {
+  gallery-card .card, .panel {
+    dl.dl-horizontal {
+      dt {
+      float: left;
+      clear: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      }
+      dd {
+        text-align: right;
+      }
     }
   }
 }
