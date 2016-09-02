@@ -146,8 +146,7 @@
     function enableActions() {
       var canDelete = spaceDetail.routes.length === 0 &&
         spaceDetail.instances.length === 0 &&
-        spaceDetail.apps.length === 0 &&
-        spaceDetail.services.length === 0;
+        spaceDetail.apps.length === 0;
 
       // Rename Space
       that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename,
@@ -167,8 +166,7 @@
       $scope.$watch(function () {
         return spaceDetail.routes.length === 0 &&
           spaceDetail.instances.length === 0 &&
-          spaceDetail.apps.length === 0 &&
-          spaceDetail.services.length === 0;
+          spaceDetail.apps.length === 0;
       }, function () {
         enableActions();
       });
