@@ -79,6 +79,7 @@
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.userInput = {};
     this.options = {};
 

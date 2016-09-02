@@ -11,6 +11,8 @@
         this.eventService.$on('cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
           that.startWorkflow();
         });
+
+        this.setWatchers();
       },
 
       setWatchers: function () {
@@ -26,6 +28,14 @@
           that.filterTimeout = that.$timeout(function () {
             return that.filterRepos(newFilterTerm);
           }, 500);
+        });
+
+        this.$scope.$watch(function () {
+          return that.userInput.clusterUsername;
+        }, function (newUsername) {
+          if (newUsername) {
+            that._onClusterUsernameChanged();
+          }
         });
       },
 
@@ -108,19 +118,16 @@
               formName: 'application-pipeline-details-form',
               nextBtnText: gettext('Create pipeline'),
               onNext: function () {
-                var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
-
-                return hceModel.getDeploymentTargets(that.userInput.hceCnsi.guid).then(function () {
-                  var name = that._getDeploymentTargetName();
-                  var target = _.find(hceModel.data.deploymentTargets, {name: name});
-                  if (target) {
-                    return that.createPipeline(target.deployment_target_id);
-                  } else {
-                    return that.createDeploymentTarget().then(function (newTarget) {
-                      return that.createPipeline(newTarget.deployment_target_id);
+                if (that.options.deploymentTarget) {
+                  return that.$q.when(that._updateDeploymentTarget(that.options.deploymentTarget))
+                    .then(function () {
+                      return that.createPipeline(that.options.deploymentTarget.deployment_target_id);
                     });
-                  }
-                });
+                } else {
+                  return that.createDeploymentTarget().then(function (newTarget) {
+                    return that.createPipeline(newTarget.deployment_target_id);
+                  });
+                }
               }
             },
             {
@@ -306,36 +313,103 @@
                                                this.userInput.space.entity.name);
       },
 
+      _updateDeploymentTarget: function (target) {
+        if (this.userInput.clusterPassword) {
+          target.userName = this.userInput.clusterUsername;
+          target.password = this.userInput.clusterPassword;
+
+          return this.hceModel.updateDeploymentTarget(
+            this.userInput.hceCnsi.guid,
+            target.deployment_target_id,
+            target);
+        }
+      },
+
       _getDeploymentTargetName: function () {
         return [
           this.userInput.serviceInstance.name,
           this.userInput.organization.entity.name,
-          this.userInput.space.entity.name
-        ].join('_');
+          this.userInput.space.entity.name,
+          this.userInput.clusterUsername
+        ].join(' - ');
+      },
+
+      _findDeploymentTarget: function (targets) {
+        var endpoint = this.userInput.serviceInstance.api_endpoint;
+        var url = endpoint.Scheme + '://' + endpoint.Host;
+        var toMatch = {
+          url: url,
+          organization: this.userInput.organization.entity.name,
+          space: this.userInput.space.entity.name,
+          userName: this.userInput.clusterUsername
+        };
+        return _.find(targets, toMatch);
+      },
+
+      _getDeploymentTargets: function () {
+        if (_.isNil(this.options.deploymentTargets)) {
+          var that = this;
+          return this.hceModel.getDeploymentTargets(this.userInput.hceCnsi.guid)
+            .then(function () {
+              that.options.deploymentTargets = that.hceModel.data.deploymentTargets;
+            });
+        }
+      },
+
+      _onClusterUsernameChanged: function () {
+        var that = this;
+        this.$q.when(this._getDeploymentTargets())
+          .then(function () {
+            that.options.deploymentTarget = that._findDeploymentTarget(that.options.deploymentTargets);
+          });
       },
 
       createPipeline: function (targetId) {
         var that = this;
-        var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-        var githubUrl = this.userInput.source.browse_url;
-        return hceModel.createProject(
-          this.userInput.hceCnsi.guid,
-          this._createProjectName(),
-          this.userInput.source,
-          targetId,
-          this.userInput.buildContainer.build_container_id,
-          this.userInput.repo,
-          this.userInput.branch,
-          githubUrl
-        ).then(function (response) {
-          that.userInput.projectId = response.data.id;
-
-          return hceModel.createCfBinding(
-            that.userInput.hceCnsi.guid,
-            that.userInput.projectId,
-            that.userInput.application.summary.guid
-          );
+        return this.createProject(targetId).then(function () {
+          return that.createCfBinding().then(angular.noop, function () {
+            return that.$q(function (resolve, reject) {
+              var msg = gettext('There was a problem creating the pipeline binding. Please check your username and password.');
+              reject(msg);
+            });
+          });
+        }, function () {
+          return that.$q(function (resolve, reject) {
+            var msg = gettext('There was a problem creating the pipeline. Please ensure the webhook limit has not been reached on your repository.');
+            reject(msg);
+          });
         });
+      },
+
+      createProject:function (targetId) {
+        if (this.userInput.projectId) {
+          var deferred = this.$q.defer();
+          deferred.resolve();
+          return deferred.promise;
+        } else {
+          var that = this;
+          var githubUrl = this.userInput.source.browse_url;
+          return this.hceModel.createProject(
+            this.userInput.hceCnsi.guid,
+            this._createProjectName(),
+            this.userInput.source,
+            targetId,
+            this.userInput.buildContainer.build_container_id,
+            this.userInput.repo,
+            this.userInput.branch,
+            githubUrl
+          ).then(function (response) {
+            that.userInput.projectId = response.data.id;
+          });
+        }
+      },
+
+      createCfBinding: function () {
+        return this.hceModel.createCfBinding(
+          this.userInput.hceCnsi.guid,
+          this.userInput.projectId,
+          this.userInput.application.summary.guid
+        );
       },
 
       /**
