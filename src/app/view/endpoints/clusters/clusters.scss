@@ -19,9 +19,9 @@
 
   .panel-body {
     min-height: 124px;
-    .col-md-5 {
-      padding-left: 0;
-    }
+    // Match row class used in cluster pseudo gallery card
+    margin-left: -15px;
+    margin-right: -15px;
   }
 
   .panel-footer {

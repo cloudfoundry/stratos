@@ -54,7 +54,7 @@ $gallery-card-layout-steps: 4;
 
 // Tweak tile views when the page width is small
 @media (max-width: 768px) {
-  gallery-card .card, .application-details .panel {
+  gallery-card .card, .panel {
     dl.dl-horizontal {
       dt {
       float: left;
@@ -65,7 +65,7 @@ $gallery-card-layout-steps: 4;
       }
       dd {
         text-align: right;
-      }      
+      }
     }
   }
 }
