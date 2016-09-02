@@ -339,7 +339,7 @@
      */
     tryDeleteEachRoute: function () {
       var that = this;
-      var checkedRouteValue = _.pickBy(this.userInput.checkedRouteValue, function (value) { return value; });
+      var checkedRouteValue = this.userInput.checkedRouteValue;
       var funcStack = [];
 
       Object.keys(checkedRouteValue).forEach(function (routeId) {
