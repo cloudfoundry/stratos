@@ -41,9 +41,10 @@
        * @param {string} type The type of service. For example hce or hcf
        * @param {string} title The title of the detail view
        * @param {string=} description optional description to add in the detail view
+       * @param {string=} urlHint optional hint to use for the URL field
        * @returns {promise}
        */
-      add: function (type, title, description) {
+      add: function (type, title, description, urlHint) {
         var data = {
           name: '',
           url: ''
@@ -60,7 +61,8 @@
           {
             data: data,
             instances: createInstances(serviceInstanceModel.serviceInstances, type),
-            description: description
+            description: description,
+            urlHint: urlHint
           },
           function () {
             return serviceInstanceModel.create(type, data.url, data.name).then(function () {
