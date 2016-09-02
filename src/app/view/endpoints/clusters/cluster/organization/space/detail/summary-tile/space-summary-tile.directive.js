@@ -146,9 +146,9 @@
     });
 
     function enableActions() {
-      var canDelete = spaceDetail.routes.length === 0 &&
-        spaceDetail.instances.length === 0 &&
-        spaceDetail.apps.length === 0;
+      var canDelete = spaceDetail.details.totalRoutes === 0 &&
+        spaceDetail.details.totalServiceInstances === 0 &&
+        spaceDetail.details.totalApps === 0;
 
       // Rename Space
       that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename,
@@ -175,27 +175,21 @@
       }
 
       return $q.all(updatePromises).then(function () {
-        canDelete = spaceDetail.details.totalRoutes === 0 &&
-          spaceDetail.details.totalServiceInstances === 0 &&
-          spaceDetail.details.totalApps === 0 &&
-          spaceDetail.details.totalServices === 0;
 
+        // Update delete action when space info changes (requires authService which depends on chainStateResolve)
+        $scope.$watch(function () {
+          return spaceDetail.details.totalRoutes === 0 &&
+            spaceDetail.details.totalServiceInstances === 0 &&
+            spaceDetail.details.totalApps === 0;
+        }, function () {
+          enableActions();
+        });
+
+        that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
         enableActions();
         return $q.resolve();
       });
 
-      // Update delete action when space info changes (requires authService which depends on chainStateResolve)
-      $scope.$watch(function () {
-        return spaceDetail.routes.length === 0 &&
-          spaceDetail.instances.length === 0 &&
-          spaceDetail.apps.length === 0;
-      }, function () {
-        enableActions();
-      });
-
-      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
-      enableActions();
-      return $q.resolve();
     }
 
     // Ensure the parent state is fully initialised before we start our own init
