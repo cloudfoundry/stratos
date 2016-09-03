@@ -108,6 +108,7 @@
           hceCnsi: null,
           source: null,
           repo: null,
+          repoFilterTerm: null,
           branch: null,
           buildContainer: null,
           projectId: null,
