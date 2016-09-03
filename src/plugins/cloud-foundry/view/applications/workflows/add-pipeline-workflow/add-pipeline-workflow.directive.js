@@ -92,7 +92,7 @@
 
         if (route) {
           host = route.host;
-          domain = { metadata: route.domain };
+          domain = { entity: route.domain };
         }
 
         this.userInput = {
