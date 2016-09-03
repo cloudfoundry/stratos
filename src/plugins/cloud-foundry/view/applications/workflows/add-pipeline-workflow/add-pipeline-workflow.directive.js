@@ -175,6 +175,7 @@
           },
 
           finish: function () {
+            that.modelManager.retrieve('cloud-foundry.model.application').updateDeliveryPipelineMetadata(true);
             that.finishWorkflow();
           }
         };
