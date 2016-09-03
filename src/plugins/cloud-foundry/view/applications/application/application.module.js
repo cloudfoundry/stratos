@@ -230,9 +230,9 @@
 
           return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id)
           .then(function () {
-            that.model.updateDeliveryPipelineMetadata(true)
+            return that.model.updateDeliveryPipelineMetadata(true)
               .then(function (response) {
-                that.onUpdateDeliveryPipelineMetadata(response);
+                return that.onUpdateDeliveryPipelineMetadata(response);
               });
           })
           .finally(function () {
@@ -328,7 +328,7 @@
       var that = this;
       if (pipeline && pipeline.valid) {
         this.hceCnsi = pipeline.hceCnsi;
-        this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
+        return this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
           .then(function (response) {
             var project = response.data;
             if (!_.isNil(project)) {

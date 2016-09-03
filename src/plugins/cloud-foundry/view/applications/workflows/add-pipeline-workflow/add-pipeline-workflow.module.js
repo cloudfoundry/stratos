@@ -6,10 +6,15 @@
     .constant('cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype', {
 
       init: function () {
-        this.addingPipeline = false;
         var that = this;
+        this.addingPipeline = false;
+
         this.eventService.$on('cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
           that.startWorkflow();
+        });
+
+        this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
+          that.loadMoreRepos();
         });
 
         this.setWatchers();
@@ -80,6 +85,7 @@
               templateUrl: path + 'select-source.html',
               formName: 'application-source-form',
               nextBtnText: gettext('Next'),
+              showBusyOnNext: true,
               onNext: function () {
                 var oauth;
                 if (that.userInput.source.vcs_type === 'GITHUB') {
@@ -93,6 +99,9 @@
                 return oauth
                   .then(function () {
                     return that.getRepos();
+                  }, function () {
+                    var msg = gettext('There was a problem retrieving your repositories. Please try again.');
+                    return that.$q.reject(msg);
                   });
               }
             },
@@ -102,13 +111,14 @@
               templateUrl: path + 'select-repository.html',
               formName: 'application-repo-form',
               nextBtnText: gettext('Next'),
+              showBusyOnNext: true,
               onNext: function () {
                 that.getPipelineDetailsData();
                 var githubModel = that.modelManager.retrieve('github.model');
                 var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
 
                 if (that.userInput.repo) {
-                  hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
+                  return hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
                     var githubOptions = that._getVcsHeaders();
                     var usedBranches = _.chain(projects)
                                         .filter(function (p) {
@@ -129,6 +139,9 @@
                                               };
                                             });
                         [].push.apply(that.options.branches, branches);
+                      }, function () {
+                        var msg = gettext('There was a problem retrieving the branches for your repository. Please try again.');
+                        return that.$q.reject(msg);
                       });
                   });
                 }
@@ -140,6 +153,7 @@
               templateUrl: path + 'pipeline-details.html',
               formName: 'application-pipeline-details-form',
               nextBtnText: gettext('Create pipeline'),
+              showBusyOnNext: true,
               onNext: function () {
 
                 var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
@@ -180,16 +194,23 @@
               nextBtnText: gettext('Next'),
               onEnter: function () {
                 var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
+                that.options.notificationTargetsReady = false;
 
                 return hceModel.listNotificationTargetTypes(that.userInput.hceCnsi.guid)
                   .then(function () {
                     that.options.notificationTargetTypes = hceModel.data.notificationTargetTypes;
-                  }).then(function () {
+
                     // Fetch automatically associated notification targets (i.e. GitHub pull request)
                     return hceModel.getNotificationTargets(that.userInput.hceCnsi.guid, that.userInput.projectId)
                       .then(function (response) {
                         that.userInput.notificationTargets = response.data;
                       });
+                  })
+                  .catch(function () {
+                    that.options.notificationTargetsError = true;
+                  })
+                  .finally(function () {
+                    that.options.notificationTargetsReady = true;
                   });
               }
             },
