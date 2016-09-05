@@ -56,7 +56,7 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.utils = utils;
 
@@ -159,11 +159,11 @@
     });
 
     function init() {
-      that.actions[0].disabled = !authService.isAllowed(that.clusterGuid, authService.resources.organization, authService.actions.update,
+      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update,
         that.organization.details.guid);
 
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(that.clusterGuid, authService.resources.organization,
-          authService.actions.delete, that.organization.details.guid);
+      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.organization,
+          authModel.actions.delete, that.organization.details.guid);
       return $q.resolve();
     }
 

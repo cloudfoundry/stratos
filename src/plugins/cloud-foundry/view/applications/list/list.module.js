@@ -44,7 +44,7 @@
     var that = this;
     this.modelManager = modelManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.eventService = eventService;
     this.$log = $log;
     this.ready = false;
@@ -90,7 +90,7 @@
         if (guid === 'all') {
           continue;
         }
-        if (that.authService.doesUserHaveRole(guid, that.authService.roles.space_developer)) {
+        if (that.authModel.doesUserHaveRole(guid, that.authModel.roles.space_developer)) {
           that.isSpaceDeveloper = true;
           break;
         }

@@ -52,7 +52,7 @@
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.serviceInstances = {};
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
@@ -85,7 +85,7 @@
 
     // The watch above will trigger when the info has loaded and updated the model
     this.stackatoInfo.getStackatoInfo().then(function () {
-      that.authService.initialize();
+      that.authModel.initialize();
     });
   }
 
@@ -124,7 +124,7 @@
           that.userCnsiModel.numValid -= 1;
           that.stackatoInfo.getStackatoInfo().then(function () {
             // Remove principal for disconnected instance
-            that.authService.remove(id);
+            that.authModel.remove(id);
           });
           that.cfModel.all();
            })

@@ -55,7 +55,7 @@
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
@@ -173,7 +173,7 @@
             if (angular.isUndefined(org)) {
               return false;
             }
-            return authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.create, org.details.guid);
+            return authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.create, org.details.guid);
           }
         };
 
@@ -236,15 +236,15 @@
     function enableActions() {
 
       // Organization access - enabled if user is either an admin or the appropriate flag is enabled
-      that.clusterActions[0].disabled = !authService.isAllowed(that.clusterGuid, authService.resources.organization, authService.actions.create);
+      that.clusterActions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.create);
 
       // Space access - if user is an Org Manager in at least one organization then show slide in
-      that.clusterActions[1].disabled = !authService.principal[that.clusterGuid].userSummary.organizations.managed.length > 0;
+      that.clusterActions[1].disabled = !authModel.principal[that.clusterGuid].userSummary.organizations.managed.length > 0;
 
       // User Assignment access - if user is an Org Manager in at least one organization
       // or a space manager in a space then show slide in
-      that.clusterActions[2].disabled = authService.principal[that.clusterGuid].userSummary.organizations.managed.length === 0 &&
-        authService.principal[that.clusterGuid].userSummary.spaces.managed.length === 0;
+      that.clusterActions[2].disabled = authModel.principal[that.clusterGuid].userSummary.organizations.managed.length === 0 &&
+        authModel.principal[that.clusterGuid].userSummary.spaces.managed.length === 0;
 
     }
 

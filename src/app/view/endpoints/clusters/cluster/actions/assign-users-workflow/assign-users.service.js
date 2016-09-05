@@ -69,7 +69,7 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     var path = 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/';
 
@@ -218,9 +218,9 @@
                 if (angular.isUndefined(org)) {
                   return false;
                 }
-                return that.authService.isAllowed(context.clusterGuid,
-                  that.authService.resources.user,
-                  that.authService.actions.update, null,
+                return that.authModel.isAllowed(context.clusterGuid,
+                  that.authModel.resources.user,
+                  that.authModel.actions.update, null,
                   org.details.guid);
               }
             },

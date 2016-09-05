@@ -2,9 +2,9 @@
   'use strict';
 
   /**
-   * @namespace cloud-foundry.model.AuthService
+   * @namespace cloud-foundry.model.AuthModel
    * @memberof cloud-foundry.model
-   * @name AuthService
+   * @name AuthModel
    * @description CF ACL Model
    */
   angular
@@ -17,16 +17,16 @@
   ];
 
   function register(modelManager, $q) {
-    modelManager.register('cloud-foundry.model.auth', new AuthService(modelManager, $q));
+    modelManager.register('cloud-foundry.model.auth', new AuthModel(modelManager, $q));
   }
 
   /**
-   * @name AuthService
+   * @name AuthModel
    * @param {object} modelManager - Model Manager
    * @param {object} $q - angular $q service
    * @constructor
    */
-  function AuthService(modelManager, $q) {
+  function AuthModel(modelManager, $q) {
     this.modelManager = modelManager;
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
@@ -59,24 +59,24 @@
     };
   }
 
-  angular.extend(AuthService.prototype, {
+  angular.extend(AuthModel.prototype, {
 
     initialize: function () {
       // Initialise Auth Service
       var that = this;
-      var authServiceInitPromises = [];
+      var authModelInitPromise = [];
       if (Object.keys(this.stackatoInfo.info.endpoints.hcf).length > 0) {
         _.each(that.stackatoInfo.info.endpoints.hcf, function (hcfEndpoint, guid) {
           if (hcfEndpoint.user === null) {
             // User hasn't connected to this endpoint
             return;
-          } else if (!that.authService.isInitialized(hcfGuid, hcfEndpoint.user)){
+          } else if (!that.authModel.isInitialized(hcfGuid, hcfEndpoint.user)){
             // We have already initialised for this endpoint + user
             return;
           }
-          authServiceInitPromises.push(that.initializeForEndpoint(guid, true));
+          authModelInitPromise.push(that.initializeForEndpoint(guid, true));
         });
-        return that.$q.all(authServiceInitPromises);
+        return that.$q.all(authModelInitPromise);
       } else {
         return that.$q.resolve();
       }

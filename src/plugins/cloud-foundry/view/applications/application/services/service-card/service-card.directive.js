@@ -58,7 +58,7 @@
     this.eventService = eventService;
     this.serviceInstanceService = serviceInstanceService;
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.allowAddOnly = angular.isDefined(this.addOnly) ? this.addOnly : false;
     this.serviceBindings = [];
     this.numAttached = 0;
@@ -224,9 +224,9 @@
      * @returns {*}
      */
     hideServiceActions: function () {
-      return !this.authService.isAllowed(this.cnsiGuid,
-        this.authService.resources.managed_service_instance,
-        this.authService.actions.create, this.app.summary.space_guid);
+      return !this.authModel.isAllowed(this.cnsiGuid,
+        this.authModel.resources.managed_service_instance,
+        this.authModel.actions.create, this.app.summary.space_guid);
     }
   });
 

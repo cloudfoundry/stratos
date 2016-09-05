@@ -50,7 +50,7 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var usersModel = modelManager.retrieve('cloud-foundry.model.users');
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.changingRoles = false;
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
@@ -587,9 +587,9 @@
           var oldOrgRolesPerUser = _.get(oldRoles, userGuid + '.' + orgGuid);
 
           // Calculate org role delta only for organizations for which user is allowed to
-          var isUserAllowed = authService.isAllowed(clusterGuid,
-            authService.resources.user,
-            authService.actions.update,
+          var isUserAllowed = authModel.isAllowed(clusterGuid,
+            authModel.resources.user,
+            authModel.actions.update,
             null,
             orgGuid);
           if (isUserAllowed) {
@@ -609,8 +609,8 @@
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
 
             // calculate space role delta only for spaces for which user is allowed
-            var isAllowed = authService.isAllowed(clusterGuid, authService.resources.user,
-              authService.actions.update,
+            var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.user,
+              authModel.actions.update,
               organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid].details.guid, orgGuid, true);
             if (isAllowed) {
               // For each space role

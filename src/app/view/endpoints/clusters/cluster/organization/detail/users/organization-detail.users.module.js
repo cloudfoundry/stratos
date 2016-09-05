@@ -52,7 +52,7 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.rolesService = rolesService;
 
@@ -104,11 +104,11 @@
 
     this.canUserManageRoles = function (org) {
       // User can assign org roles
-      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org.metadata.guid);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
     };
 
     this.canUserRemoveFromOrg = function (org) {
-      return that.authService.isAllowed(that.guid, that.authService.resources.user, that.authService.actions.update, org.metadata.guid);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
     };
 
     this.disableManageRoles = function () {

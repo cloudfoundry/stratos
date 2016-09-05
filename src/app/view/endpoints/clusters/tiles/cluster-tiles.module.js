@@ -50,7 +50,7 @@
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.boundUnregister = angular.bind(this, this.unregister);
     this.boundConnect = angular.bind(this, this.connect);
@@ -138,7 +138,7 @@
       var that = this;
       this.refreshClusterModel().then(function () {
         // Initialise AuthModel for service
-        that.authService.initializeForEndpoint(serviceInstance.guid);
+        that.authModel.initializeForEndpoint(serviceInstance.guid);
       });
     },
 
@@ -161,7 +161,7 @@
         .then(function () {
           that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully disconnected'));
           that.refreshClusterModel().then(function () {
-            that.authService.remove(cnsiGUID);
+            that.authModel.remove(cnsiGUID);
           });
         });
     },
@@ -178,7 +178,7 @@
         // TODO (irfan)
         console.log(serviceInstance);
         return that.refreshClusterModel().then(function () {
-          that.authService.initializeForEndpoint(serviceInstance.guid);
+          that.authModel.initializeForEndpoint(serviceInstance.guid);
         });
       })
     },
@@ -205,7 +205,7 @@
           return that.serviceInstanceModel.remove(serviceInstance).then(function () {
             that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully unregistered'));
             that.refreshClusterModel().then(function () {
-              that.authService.remove(serviceInstance.guid);
+              that.authModel.remove(serviceInstance.guid);
             });
           });
         }

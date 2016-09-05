@@ -61,7 +61,7 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var canDelete = false;
 
     this.cardData = {
@@ -145,10 +145,10 @@
     function enableActions() {
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.rename, that.spaceDetail().details.guid);
+      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename, that.spaceDetail().details.guid);
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(that.clusterGuid, authService.resources.space, authService.actions.delete, that.spaceDetail().details.guid);
+      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.delete, that.spaceDetail().details.guid);
 
     }
 

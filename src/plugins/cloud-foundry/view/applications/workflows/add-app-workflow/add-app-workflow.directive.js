@@ -79,7 +79,7 @@
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.userInput = {};
     this.options = {};
 
@@ -394,7 +394,7 @@
             var filteredOrgs = _.filter(organizations, function (organization) {
               // Retrieve filtered list of Spaces where the user is a developer
               var orgGuid = organization.metadata.guid;
-              var filteredSpaces = _.filter(that.authService.principal[cnsiGuid].userSummary.spaces.all,
+              var filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
                 {entity: {organization_guid: orgGuid}});
               return filteredSpaces.length > 0;
             });
@@ -420,9 +420,9 @@
 
             // Filter out spaces in which user is not a Space Developer
             var filteredSpaces = _.filter(spaces, function (space) {
-              return that.authService.isAllowed(cnsiGuid,
-                that.authService.resources.application,
-                that.authService.actions.create, space.metadata.guid);
+              return that.authModel.isAllowed(cnsiGuid,
+                that.authModel.resources.application,
+                that.authModel.actions.create, space.metadata.guid);
             });
             that.options.spaces.length = 0;
             [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
@@ -535,7 +535,7 @@
             var validServiceInstances = _.chain(_.values(serviceInstances))
               .filter({cnsi_type: 'hcf', valid: true})
               .filter(function(cnsi){
-                return that.authService.doesUserHaveRole(cnsi.guid, that.authService.roles.space_developer);
+                return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
               })
               .map(function (o) {
                 return {label: o.api_endpoint.Host, value: o};

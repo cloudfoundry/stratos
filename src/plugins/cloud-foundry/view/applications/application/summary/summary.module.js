@@ -55,7 +55,7 @@
                                         routesService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.routesService = routesService;
     this.id = $stateParams.guid;
     this.cnsiGuid = $stateParams.cnsiGuid;
@@ -93,36 +93,36 @@
     function init() {
 
       // Unmap from app
-      that.routesActionMenu[0].disabled = !that.authService.isAllowed(that.cnsiGuid,
-        that.authService.resources.application,
-        that.authService.actions.update,
+      that.routesActionMenu[0].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.application,
+        that.authModel.actions.update,
         that.model.application.summary.space_guid
       );
       that.$log.debug('Auth Action: Unmap from app disabled: ' + that.routesActionMenu[0].disabled);
       // delete route
-      that.routesActionMenu[1].disabled = !that.authService.isAllowed(that.cnsiGuid,
-        that.authService.resources.route,
-        that.authService.actions.delete,
+      that.routesActionMenu[1].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.route,
+        that.authModel.actions.delete,
         that.model.application.summary.space_guid
       );
       that.$log.debug('Auth Action: Delete from app disabled: ' + that.routesActionMenu[1].disabled);
 
       // hide Add Routes
-      that.hideAddRoutes = !that.authService.isAllowed(that.cnsiGuid,
-        that.authService.resources.route,
-        that.authService.actions.create, that.model.application.summary.space_guid);
+      that.hideAddRoutes = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.route,
+        that.authModel.actions.create, that.model.application.summary.space_guid);
       that.$log.debug('Auth Action: Hide Add routes disabled: ' + that.hideAddRoutes);
 
       // hide Edit App
-      that.hideEditApp = !that.authService.isAllowed(that.cnsiGuid,
-        that.authService.resources.application,
-        that.authService.actions.update, that.model.application.summary.space_guid);
+      that.hideEditApp = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.application,
+        that.authModel.actions.update, that.model.application.summary.space_guid);
       that.$log.debug('Auth Action: Hide Edit App disabled: ' + that.hideEditApp);
 
       // hide Manage Services
-      that.hideManageServices = !that.authService.isAllowed(that.cnsiGuid,
-        that.authService.resources.managed_service_instance,
-        that.authService.actions.create, that.model.application.summary.space_guid);
+      that.hideManageServices = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.managed_service_instance,
+        that.authModel.actions.create, that.model.application.summary.space_guid);
       that.$log.debug('Auth Action: Hide Manage Services disabled: ' + that.hideEditApp);
 
       return that.$q.resolve();

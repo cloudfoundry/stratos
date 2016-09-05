@@ -52,7 +52,7 @@
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.serviceInstances = {};
     this.credentialsFormOpen = false;
     this.warningMsg = gettext('Authentication failed, please try to reconnect.');
@@ -129,7 +129,7 @@
           that.userCnsiModel.numValid -= 1;
           // Update stackato info to remove connected user's name
           that.stackatoInfoModel.getStackatoInfo().then(function () {
-            that.authService.remove(userServiceInstance.guid);
+            that.authModel.remove(userServiceInstance.guid);
           });
         });
     },
@@ -145,7 +145,7 @@
       var that = this;
       // Update stackato info to get connected user's name
       this.stackatoInfoModel.getStackatoInfo().then(function () {
-        that.authService.initializeForEndpoint(serviceInstance.guid, true);
+        that.authModel.initializeForEndpoint(serviceInstance.guid, true);
       });
     }
 

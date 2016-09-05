@@ -42,7 +42,7 @@
     this.serviceInstanceService = serviceInstanceService;
 
     this.actionsPerSI = {};
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     $scope.$watch(function () {
       return that.visibleServiceInstances;
@@ -105,9 +105,9 @@
         that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
         var space = that.spaceDetail().details.space;
         // Delete Services
-        that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 && !that.authService.isAllowed(that.clusterGuid, that.authService.resources.managed_service_instance, that.authService.actions.delete, space.metadata.guid);
+        that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 && !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.delete, space.metadata.guid);
         // Update Services
-        that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 && !that.authService.isAllowed(that.clusterGuid, that.authService.resources.managed_service_instance, that.authService.actions.update, space.metadata.guid);
+        that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 && !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.update, space.metadata.guid);
       });
     }
 

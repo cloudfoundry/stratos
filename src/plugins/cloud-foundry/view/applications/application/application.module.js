@@ -77,7 +77,7 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
@@ -152,7 +152,7 @@
 
     $scope.$watch(function () {
       return that.model.application.summary.state &&
-        that.authService.isInitialized(that.cnsiGuid);
+        that.authModel.isInitialized(that.cnsiGuid);
     }, function (newState) {
       that.onAppStateChange(newState);
     });
@@ -197,9 +197,9 @@
             that.startUpdate();
           }
           that.onAppStateChange();
-          that.hideVariables = !that.authService.isAllowed(that.cnsiGuid,
-            that.authService.resources.application,
-            that.authService.actions.update,
+          that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
+            that.authModel.resources.application,
+            that.authModel.actions.update,
             that.model.application.summary.space_guid
           );
         });
@@ -362,9 +362,9 @@
         // check user is a space developer
         if (id !== 'launch') {
           var spaceGuid = this.model.application.summary.space_guid;
-          hideAction = !this.authService.isAllowed(this.cnsiGuid,
-            this.authService.resources.application,
-            this.authService.actions.update,
+          hideAction = !this.authModel.isAllowed(this.cnsiGuid,
+            this.authModel.resources.application,
+            this.authModel.actions.update,
             spaceGuid);
         } else if (id === 'launch') {
           hideAction = false;

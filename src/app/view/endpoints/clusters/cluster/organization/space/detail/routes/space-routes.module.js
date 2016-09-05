@@ -49,7 +49,7 @@
 
     this.apps = {};
     this.actionsPerRoute = {};
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     $scope.$watch(function () {
       return that.visibleRoutes;
@@ -118,9 +118,9 @@
         var space = that.spaceDetail().details.space;
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
         // Delete route
-        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.clusterGuid, that.authService.resources.route, that.authService.actions.delete, space.metadata.guid);
+        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.route, that.authModel.actions.delete, space.metadata.guid);
         // Unmap route
-        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.clusterGuid, that.authService.resources.route, that.authService.actions.update, space.metadata.guid);
+        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.route, that.authModel.actions.update, space.metadata.guid);
       });
     },
 

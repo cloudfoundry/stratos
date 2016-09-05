@@ -36,14 +36,14 @@
 
   function ApplicationsController($q, $state, utils, modelManager, eventService) {
 
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     var initialized = $q.defer();
 
     function init() {
 
       return initialized.promise.then(function () {
-        return authService.initialize();
+        return authModel.initialize();
       });
     }
 
