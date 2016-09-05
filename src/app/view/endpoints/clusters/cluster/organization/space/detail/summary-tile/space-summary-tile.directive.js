@@ -163,6 +163,7 @@
     function init() {
       that.userName = user.name;
       spaceDetail = that.spaceDetail();
+      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
 
       // If navigating to/reloading the space details page these will be missing. Do these here instead of in
       // getSpaceDetails to avoid blocking state init when there are 100s of spaces
@@ -185,7 +186,6 @@
           enableActions();
         });
 
-        that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
         enableActions();
         return $q.resolve();
       });
