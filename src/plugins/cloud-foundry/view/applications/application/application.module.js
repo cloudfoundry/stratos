@@ -358,7 +358,6 @@
         return true;
       } else {
         var hideAction = true;
-        // TODO special case for delete
         // check user is a space developer
         if (id !== 'launch') {
           var spaceGuid = this.model.application.summary.space_guid;

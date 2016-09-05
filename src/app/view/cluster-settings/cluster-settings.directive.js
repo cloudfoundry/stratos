@@ -82,7 +82,6 @@
       });
     });
 
-
     // The watch above will trigger when the info has loaded and updated the model
     this.stackatoInfo.getStackatoInfo().then(function () {
       that.authModel.initialize();
@@ -127,13 +126,13 @@
             that.authModel.remove(id);
           });
           that.cfModel.all();
-           })
-          .catch(function () {
-        // Failed
+        })
+        .catch(function () {
+          // Failed
         })
         .finally(function () {
-        delete userServiceInstance._busy;
-      });
+          delete userServiceInstance._busy;
+        });
     },
 
     /**

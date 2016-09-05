@@ -84,13 +84,10 @@
 
     function init() {
 
-      for (var i = 0; i < that.clusters.length; i++) {
-        var cluster = that.clusters[i];
-        var guid = cluster.value;
-        if (guid === 'all') {
-          continue;
-        }
-        if (that.authModel.doesUserHaveRole(guid, that.authModel.roles.space_developer)) {
+      var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
+      for (var i = 0; i < serviceInstances.length; i++) {
+        var cluster = serviceInstances[i];
+        if (that.authModel.doesUserHaveRole(cluster.guid, that.authModel.roles.space_developer)) {
           that.isSpaceDeveloper = true;
           break;
         }

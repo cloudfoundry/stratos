@@ -71,7 +71,7 @@
     refreshClusterModel: function () {
       var that = this;
       this.updateState(true, false);
-      this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
+      return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
         .then(function () {
           that.createClusterList();
         })
@@ -175,12 +175,10 @@
     register: function () {
       var that = this;
       this.hcfRegistration.add().then(function (serviceInstance) {
-        // TODO (irfan)
-        console.log(serviceInstance);
         return that.refreshClusterModel().then(function () {
           that.authModel.initializeForEndpoint(serviceInstance.guid);
         });
-      })
+      });
     },
 
     /**

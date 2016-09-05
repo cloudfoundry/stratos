@@ -63,10 +63,11 @@
             description: description
           },
           function () {
-            return serviceInstanceModel.create(type, data.url, data.name).then(function () {
+            return serviceInstanceModel.create(type, data.url, data.name).then(function (serviceInstance) {
               notificationsService.notify('success',
                 gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
                 {endpointType: type.toUpperCase(), name: data.name});
+              return serviceInstance;
             });
           }
         ).result;

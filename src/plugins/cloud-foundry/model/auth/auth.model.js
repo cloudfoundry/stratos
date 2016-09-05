@@ -67,10 +67,10 @@
       var authModelInitPromise = [];
       if (Object.keys(this.stackatoInfo.info.endpoints.hcf).length > 0) {
         _.each(that.stackatoInfo.info.endpoints.hcf, function (hcfEndpoint, guid) {
-          if (hcfEndpoint.user === null) {
+          if (_.isNull(hcfEndpoint.user)) {
             // User hasn't connected to this endpoint
             return;
-          } else if (!that.authModel.isInitialized(hcfGuid, hcfEndpoint.user)){
+          } else if (that.isInitialized(guid, hcfEndpoint.user)) {
             // We have already initialised for this endpoint + user
             return;
           }

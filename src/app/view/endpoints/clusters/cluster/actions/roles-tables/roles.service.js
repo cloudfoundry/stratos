@@ -691,10 +691,9 @@
                 errorMessage += reason.length > 0 ? gettext('Reason: \'{{reason}}\'') : '';
               }
               errorMessage = $interpolate(errorMessage)({
-                  failedUsers: _.map(failures, 'user').join(', '),
-                  reason: reason
-                }
-              );
+                failedUsers: _.map(failures, 'user').join(', '),
+                reason: reason
+              });
 
               return $q.reject(errorMessage);
             } else {
