@@ -90,7 +90,7 @@
       // Initialise AuthService for CNSI promise
       var authServicePromise = $q.resolve();
       if (!authService.isInitialized(that.guid)) {
-        authServicePromise = authService.initAuthService(that.guid);
+        authServicePromise = authService.initializeForEndpoint(that.guid, true);
       }
 
       return $q.all([

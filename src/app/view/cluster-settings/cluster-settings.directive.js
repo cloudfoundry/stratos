@@ -52,9 +52,11 @@
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
     this.serviceInstances = {};
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.credentialsFormOpen = false;
+    this.activeServiceInstance = null;
     //this.warningMsg = gettext('Authentication failed, please try reconnect.');
 
     this.cfModel = modelManager.retrieve('cloud-foundry.model.application');
@@ -80,9 +82,11 @@
       });
     });
 
+
     // The watch above will trigger when the info has loaded and updated the model
-    // TODO perform fine-grained update of AuthService
-    this.stackatoInfo.getStackatoInfo();
+    this.stackatoInfo.getStackatoInfo().then(function () {
+      that.authService.initialize();
+    });
   }
 
   angular.extend(ClusterSettingsController.prototype, {
@@ -118,14 +122,18 @@
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
           that.userCnsiModel.numValid -= 1;
-          // TODO Perform finegrained update of authService
-          that.stackatoInfo.getStackatoInfo();
+          that.stackatoInfo.getStackatoInfo().then(function () {
+            // Remove principal for disconnected instance
+            that.authService.remove(id);
+          });
           that.cfModel.all();
-        }).catch(function () {
-          // Failed
-        }).finally(function () {
-          delete userServiceInstance._busy;
-        });
+           })
+          .catch(function () {
+        // Failed
+        })
+        .finally(function () {
+        delete userServiceInstance._busy;
+      });
     },
 
     /**

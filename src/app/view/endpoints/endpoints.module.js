@@ -48,19 +48,7 @@
     this.modelManager = modelManager;
 
     function init() {
-
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      var stacakatoInfoPromise;
-      // Check if StackatoInfo is uninitialised
-      if (Object.keys(stackatoInfo.info).length === 0) {
-        stacakatoInfoPromise = stackatoInfo.getStackatoInfo();
-      } else {
-        stacakatoInfoPromise = $q.resolve;
-      }
-
-      return stacakatoInfoPromise.then(function () {
-        return that.initialized.promise;
-      });
+      return that.initialized.promise;
     }
 
     eventService.$on(eventService.events.LOGIN, function () {

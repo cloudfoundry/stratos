@@ -23,8 +23,11 @@
 
   ApplicationsListController.$inject = [
     '$log',
+    '$q',
+    '$state',
     'app.model.modelManager',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.utils.utilsService'
   ];
 
   /**
@@ -37,7 +40,7 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {app.event.eventService} eventService - the event bus service
    */
-  function ApplicationsListController($log, modelManager, eventService) {
+  function ApplicationsListController($log, $q, $state, modelManager, eventService, utils) {
     var that = this;
     this.modelManager = modelManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
@@ -47,6 +50,7 @@
     this.ready = false;
     this.loading = true;
     this.currentPage = 1;
+    this.isSpaceDeveloper = false;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
@@ -77,6 +81,25 @@
     this.eventService.$on('cf.events.NEW_APP_CREATED', function () {
       that.reloadPage();
     });
+
+    function init() {
+
+      for (var i = 0; i < that.clusters.length; i++) {
+        var cluster = that.clusters[i];
+        var guid = cluster.value;
+        if (guid === 'all') {
+          continue;
+        }
+        if (that.authService.doesUserHaveRole(guid, that.authService.roles.space_developer)) {
+          that.isSpaceDeveloper = true;
+          break;
+        }
+
+      }
+      return $q.resolve();
+    }
+
+    utils.chainStateResolve('cf.applications.list', $state, init);
   }
 
   angular.extend(ApplicationsListController.prototype, {
@@ -265,23 +288,7 @@
         return false;
       }
 
-      var that = this;
-      // Confirm that user has access to deploy
-      // applications in any connected cluster
-      var isSpaceDeveloper = false;
-      _.each(this.clusters, function (cluster) {
-        var guid = cluster.value;
-        if (guid === 'all') {
-          return;
-        }
-        isSpaceDeveloper = isSpaceDeveloper ||
-          that.authService.doesUserHaveRole(guid, that.authService.roles.space_developer);
-
-      });
-
-      this.$log.debug('Auth Action: Add Application button hidden: ' + !isSpaceDeveloper);
-
-      return isSpaceDeveloper;
+      return this.isSpaceDeveloper;
     }
   });
 })();

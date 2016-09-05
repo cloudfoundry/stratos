@@ -199,8 +199,11 @@
             }
           }
         })
+        .then(function () {
+          // Update stackatoInfo
+          return that.modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
+        })
         .finally(function () {
-
           that.showGlobalSpinner = false;
           if (that.continueLogin) {
             // When we notify listeners that login has completed, in some cases we don't want them

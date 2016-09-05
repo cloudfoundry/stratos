@@ -27,47 +27,36 @@
   }
 
   ApplicationsController.$inject = [
-    '$scope',
     '$q',
     '$state',
     'app.utils.utilsService',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.event.eventService'
   ];
 
-  function ApplicationsController($scope, $q, $state, utils, modelManager) {
+  function ApplicationsController($q, $state, utils, modelManager, eventService) {
 
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
-    var init = function () {
+    var initialized = $q.defer();
 
-      var getStackatoInfo = function () {
-        // Check if StackatoInfo is uninitialised
-        if (Object.keys(stackatoInfo.info).length === 0) {
-          return stackatoInfo.getStackatoInfo();
-        }
-        return $q.resolve(stackatoInfo.info);
-      };
+    function init() {
 
-      return getStackatoInfo().then(function (stackatoInfo) {
-
-        // Initialise Auth Service
-        var authServiceInitPromises = [];
-        if (Object.keys(stackatoInfo.endpoints.hcf).length > 0) {
-          _.each(stackatoInfo.endpoints.hcf, function (hcfEndpoint, guid) {
-            if (hcfEndpoint.user === null){
-              // User hasn't connected to this endpoint
-              return;
-            }
-            authServiceInitPromises.push(authService.initAuthService(guid, true));
-          });
-          return $q.all(authServiceInitPromises);
-        } else {
-          return $q.resolve();
-        }
+      return initialized.promise.then(function () {
+        return authService.initialize();
       });
-    };
+    }
+
     utils.chainStateResolve('cf.applications', $state, init);
+
+    function onLoggedIn() {
+      initialized.resolve();
+    }
+
+    eventService.$on(eventService.events.LOGIN, function () {
+      onLoggedIn();
+    });
+
   }
 
 })();

@@ -50,6 +50,7 @@
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.boundUnregister = angular.bind(this, this.unregister);
     this.boundConnect = angular.bind(this, this.connect);
@@ -132,9 +133,13 @@
      * @name onConnectCancel
      * @description Handle the success from connecting to a cluster
      */
-    onConnectSuccess: function () {
+    onConnectSuccess: function (serviceInstance) {
       this.credentialsFormCNSI = false;
-      this.refreshClusterModel();
+      var that = this;
+      this.refreshClusterModel().then(function () {
+        // Initialise AuthModel for service
+        that.authService.initializeForEndpoint(serviceInstance.guid);
+      });
     },
 
     /**
@@ -155,7 +160,9 @@
         })
         .then(function () {
           that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully disconnected'));
-          that.refreshClusterModel();
+          that.refreshClusterModel().then(function () {
+            that.authService.remove(cnsiGUID);
+          });
         });
     },
 
@@ -167,9 +174,13 @@
      */
     register: function () {
       var that = this;
-      this.hcfRegistration.add().then(function () {
-        that.refreshClusterModel();
-      });
+      this.hcfRegistration.add().then(function (serviceInstance) {
+        // TODO (irfan)
+        console.log(serviceInstance);
+        return that.refreshClusterModel().then(function () {
+          that.authService.initializeForEndpoint(serviceInstance.guid);
+        });
+      })
     },
 
     /**
@@ -193,7 +204,9 @@
         callback: function () {
           return that.serviceInstanceModel.remove(serviceInstance).then(function () {
             that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully unregistered'));
-            that.refreshClusterModel();
+            that.refreshClusterModel().then(function () {
+              that.authService.remove(serviceInstance.guid);
+            });
           });
         }
       });

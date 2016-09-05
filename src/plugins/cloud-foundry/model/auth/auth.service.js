@@ -28,6 +28,7 @@
    */
   function AuthService(modelManager, $q) {
     this.modelManager = modelManager;
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     // Initialised authorization checkers for individual CNSIs
     this.principal = {};
@@ -60,6 +61,26 @@
 
   angular.extend(AuthService.prototype, {
 
+    initialize: function () {
+      // Initialise Auth Service
+      var that = this;
+      var authServiceInitPromises = [];
+      if (Object.keys(this.stackatoInfo.info.endpoints.hcf).length > 0) {
+        _.each(that.stackatoInfo.info.endpoints.hcf, function (hcfEndpoint, guid) {
+          if (hcfEndpoint.user === null) {
+            // User hasn't connected to this endpoint
+            return;
+          } else if (!that.authService.isInitialized(hcfGuid, hcfEndpoint.user)){
+            // We have already initialised for this endpoint + user
+            return;
+          }
+          authServiceInitPromises.push(that.initializeForEndpoint(guid, true));
+        });
+        return that.$q.all(authServiceInitPromises);
+      } else {
+        return that.$q.resolve();
+      }
+    },
     /**
      * @name initAuthService
      * @description get a Principal instance for the current user
@@ -67,7 +88,7 @@
      * @param {boolean} useStackatoInfoCache - Set to true if StackatoInfo has already been fetched
      * @returns {*}
      */
-    initAuthService: function (cnsiGuid, useStackatoInfoCache) {
+    initializeForEndpoint: function (cnsiGuid, useStackatoInfoCache) {
       var that = this;
 
       this.principal[cnsiGuid] = null;
@@ -136,8 +157,24 @@
      * @param {string} cnsiGuid - Cluster GUID
      * @returns {boolean}
      */
-    isInitialized: function (cnsiGuid) {
-      return _.has(this.principal, cnsiGuid) && this.principal[cnsiGuid] !== null;
+    isInitialized: function (cnsiGuid, userInfo) {
+
+      var initialised = angular.isObject(this.principal[cnsiGuid]);
+
+      if (userInfo && initialised) {
+        initialised = that.principal[cnsiGuid].stackatoInfo.endpoints.hcf[cnsiGuid].user.guid === userInfo.guid;
+      }
+      return initialised;
+    },
+
+    /**
+     * @name isInitialized
+     * @description Is authService intialised
+     * @param {string} cnsiGuid - Cluster GUID
+     * @returns {boolean}
+     */
+    remove: function (cnsiGuid) {
+      delete this.principal[cnsiGuid];
     },
 
     /**
