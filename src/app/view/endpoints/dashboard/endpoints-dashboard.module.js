@@ -50,6 +50,7 @@
     this.hceRegistration = hceRegistration;
     this.hcfRegistration = hcfRegistration;
     this.listPromiseResolved = false;
+    this.listError = false;
 
     this.serviceInstances = {};
     if (this.serviceInstanceModel.serviceInstances > 0) {
@@ -108,6 +109,15 @@
     };
 
     /**
+     * @function reload
+     * @memberOf app.view.endpoints.dashboard
+     * @description Reload the curent view (used if there was an error loading the dashboard)
+     */
+    this.reload = function () {
+      $state.reload();
+    };
+
+    /**
      * @function _updateLocalServiceInstances
      * @memberOf app.view.endpoints.dashboard
      * @description Updates local service instances
@@ -137,8 +147,11 @@
     function _updateEndpoints() {
       return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
         .then(function () {
+          that.listError = false;
           _updateLocalServiceInstances();
-        }).then(function () {
+        }).catch(function () {
+          that.listError = true;
+        }).finally(function () {
           that.listPromiseResolved = true;
         });
     }

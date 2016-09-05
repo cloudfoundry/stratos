@@ -1,0 +1,53 @@
+$app-error-bar-height: 48px;
+
+app-error-bar {
+
+	.app-error-bar {
+		width: 100%;
+		height: $app-error-bar-height;
+		background-color: $status-critical;
+		color: $page-footer-color-fg;
+		font-size: $font-size-base;
+		display: flex;
+		padding-left: 35px;
+
+		.app-error-bar-icon {
+			display: inline-block;
+			margin: auto 0 auto 0;
+			padding-right: $hpe-unit-space * .5;
+			
+			&:before {
+			  font-family: "helion-icons";
+			  font-size: 24px;
+			  content: $helion-icon-Critical_L;
+			}
+		}
+
+		.app-error-bar-message {
+			display: inline-block;
+			margin: auto 0 auto 0;
+		}
+	}
+
+	&.errorbar-without-navbar {
+		.app-error-bar {
+			z-index: 4000;
+			position: absolute;
+			opacity: 0.9;
+			top: 0;
+			left: 0;
+		}
+	}
+
+	&.errorbar-with-navbar {
+		.app-error-bar {
+			position: absolute;
+			top: $page-header-height;
+			left: 0;
+		}
+	}
+}
+
+console-view.with-app-error-bar {
+	padding-top: $page-header-height  + $app-error-bar-height;
+}

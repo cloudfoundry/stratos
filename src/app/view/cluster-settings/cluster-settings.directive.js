@@ -55,6 +55,7 @@
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.serviceInstances = {};
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
+    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.credentialsFormOpen = false;
     this.activeServiceInstance = null;
     //this.warningMsg = gettext('Authentication failed, please try reconnect.');
@@ -64,6 +65,14 @@
     $scope.$watchCollection(function () {
       return that.stackatoInfo.info.endpoints;
     }, function (endpoints) {
+      // Fetch user service metadata - this will attempt token refresh which lets us show if a service has expired
+      that.userServiceInstanceModel.list().then(function (data) {
+        _.each(data, function (obj, guid) {
+          if (angular.isDefined(that.serviceInstances[guid])) {
+            that.serviceInstances[guid].expired = !obj.valid;
+          }
+        });
+      });
       _.forEach(endpoints, function (obj, type) {
         _.forEach(obj, function (ep) {
           var guid = ep.guid;
@@ -102,8 +111,39 @@
     },
 
     /**
+     * @function reconnect
+     * @memberof app.view.ClusterSettingsController
+     * @description Connect to service
+     * @param {object} serviceInstance - Service instance
+     */
+    reconnect: function (serviceInstance) {
+      this.activeServiceInstance = serviceInstance;
+      this.credentialsFormOpen = true;
+    },
+
+    /**
+     * @function onConnectCancel
+     * @memberof app.view.ClusterSettingsController
+     * @description Handle the cancel from connecting to a cluster
+     */
+    onConnectCancel: function () {
+      this.credentialsFormOpen = false;
+    },
+
+    /**
+     * @function onConnectCancel
+     * @memberof app.view.ClusterSettingsController
+     * @description Handle the success from connecting to a cluster
+     */
+    onConnectSuccess: function () {
+      this.credentialsFormOpen = false;
+      this.activeServiceInstance = undefined;
+      this.stackatoInfo.getStackatoInfo();
+    },
+
+    /**
      * @function disconnect
-     * @memberOf app.view.ServiceRegistrationController
+     * @memberOf app.view.ClusterSettingsController
      * @description Disconnect service instance for user
      * @param {object} userServiceInstance - the model user version of the service instance to disconnect
      */

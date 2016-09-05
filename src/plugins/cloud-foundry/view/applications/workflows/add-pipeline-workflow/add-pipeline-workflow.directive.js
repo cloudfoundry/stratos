@@ -70,6 +70,7 @@
     this.userInput = {};
     this.options = {};
     this.cnsiGuid = $stateParams.cnsiGuid;
+    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
     this.init();
   }

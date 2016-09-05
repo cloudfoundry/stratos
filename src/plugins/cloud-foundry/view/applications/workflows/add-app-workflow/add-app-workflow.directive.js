@@ -79,7 +79,8 @@
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');  
     this.userInput = {};
     this.options = {};
 
@@ -204,33 +205,31 @@
                       that.userInput.serviceInstance.guid,
                       that.userInput.space.metadata.guid
                     )
-                      .then(function (services) {
-                        that.options.services.length = 0;
-                        [].push.apply(that.options.services, services);
+                    .then(function (services) {
+                      that.options.services.length = 0;
+                      [].push.apply(that.options.services, services);
 
-                        // retrieve categories that user can filter services by
-                        var categories = [];
-                        angular.forEach(services, function (service) {
-                          // Parse service entity extra data JSON string
-                          if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
-                            service.entity.extra = angular.fromJson(service.entity.extra);
+                      // retrieve categories that user can filter services by
+                      var categories = [];
+                      angular.forEach(services, function (service) {
+                        // Parse service entity extra data JSON string
+                        if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
+                          service.entity.extra = angular.fromJson(service.entity.extra);
 
-                            if (angular.isDefined(service.entity.extra.categories)) {
-                              var serviceCategories = _.map(service.entity.extra.categories,
-                                function (o) {
-                                  return {label: o, value: {categories: o}, lower: o.toLowerCase()};
-                                });
-                              categories = _.unionBy(categories, serviceCategories, 'lower');
-                            }
+                          if (angular.isDefined(service.entity.extra.categories)) {
+                            var serviceCategories = _.map(service.entity.extra.categories,
+                                                          function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
+                            categories = _.unionBy(categories, serviceCategories, 'lower');
                           }
-                        });
-                        categories = _.sortBy(categories, 'lower');
-                        that.options.serviceCategories.length = 1;
-                        [].push.apply(that.options.serviceCategories, categories);
-                      })
-                      .finally(function () {
-                        that.options.servicesReady = true;
+                        }
                       });
+                      categories = _.sortBy(categories, 'lower');
+                      that.options.serviceCategories.length = 1;
+                      [].push.apply(that.options.serviceCategories, categories);
+                    })
+                    .finally(function () {
+                      that.options.servicesReady = true;
+                    });
                   });
                 });
               }
@@ -285,7 +284,7 @@
           serviceInstances: [],
           services: [],
           serviceCategories: [
-            {label: gettext('All Services'), value: 'all'}
+            { label: gettext('All Services'), value: 'all' }
           ],
           servicesReady: false,
           organizations: [],
@@ -367,13 +366,13 @@
             that.userInput.domain.metadata.guid,
             that.userInput.host
           )
-            .then(function (data) {
-              if (data && data.code === 10000) {
-                resolve();
-              } else {
-                reject(gettext('This route already exists. Choose a new one.'));
-              }
-            });
+          .then(function (data) {
+            if (data && data.code === 10000) {
+              resolve();
+            } else {
+              reject(gettext('This route already exists. Choose a new one.'));
+            }
+          });
         });
       },
 

@@ -101,7 +101,8 @@
             'application/summary/add-route/add-route.html',
             buttonTitles: {
               submit: 'Create route'
-            }
+            },
+            class: 'detail-view-thin'
           },
           {
             data: data,

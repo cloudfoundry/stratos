@@ -29,6 +29,7 @@
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.notificationsService',
+    'app.view.endpoints.clusters.cluster.cliCommands',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
   ];
@@ -43,11 +44,12 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.utils.utilsService} utils - the console utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    */
   function OrganizationSummaryTileController($scope, $state, $stateParams, $q, modelManager, utils,
-                                             notificationsService, confirmDialog, asyncTaskDialog) {
+                                             notificationsService, cliCommands, confirmDialog, asyncTaskDialog) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -59,6 +61,7 @@
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.utils = utils;
+    this.cliCommands = cliCommands;
 
     this.cardData = {
       title: gettext('Summary')
@@ -76,8 +79,6 @@
     var user = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user;
     that.isAdmin = user.admin;
     that.userName = user.name;
-    var spacesInOrg = that.organization.spaces;
-    var canDelete = _.keys(spacesInOrg).length === 0;
 
     this.actions = [
       {
@@ -90,7 +91,8 @@
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
               buttonTitles: {
                 submit: gettext('Save')
-              }
+              },
+              class: 'detail-view-thin'
             },
             {
               data: {
@@ -127,10 +129,11 @@
             },
             errorMessage: gettext('Failed to delete organization'),
             callback: function () {
+              var name = that.organization.details.org.entity.name;
               return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
                 .then(function () {
-                  notificationsService.notify('success', gettext('Organization \'{{name}\'} successfully deleted'),
-                    {name: that.organization.details.org.entity.name});
+                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
+                    {name: name});
                   // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
                   return $state.go($state.current.ncyBreadcrumb.parent());
                 });
@@ -139,6 +142,16 @@
         }
       }
     ];
+
+    function enableActions() {
+      var canDelete = _.keys(that.organization.spaces).length === 0;
+
+      that.actions[0].disabled = !authModel.isAllowed(authModel.resources.organization, authModel.actions.update,
+        that.organization.details.org);
+
+      that.actions[1].disabled = !canDelete || !authModel.isAllowed(authModel.resources.organization,
+          authModel.actions.delete, that.organization.details.org);
+    }
 
     $scope.$watch(function () {
       return _.get(that.organization, 'details');
@@ -159,11 +172,13 @@
     });
 
     function init() {
-      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update,
-        that.organization.details.guid);
+      // Update delete action when number of spaces changes (requires authService which depends on chainStateResolve)
+      $scope.$watchCollection(function () {
+        return that.organization.spaces;
+      }, function () {
+        enableActions();
+      });
 
-      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.organization,
-          authModel.actions.delete, that.organization.details.guid);
       return $q.resolve();
     }
 

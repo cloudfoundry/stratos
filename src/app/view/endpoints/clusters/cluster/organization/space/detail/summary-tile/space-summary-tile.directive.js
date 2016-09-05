@@ -27,6 +27,7 @@
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.notificationsService',
+    'app.view.endpoints.clusters.cluster.cliCommands',
     'helion.framework.widgets.dialog.confirm',
     'helion.framework.widgets.asyncTaskDialog'
   ];
@@ -41,12 +42,13 @@
    * @param {app.model.modelManager} modelManager - the model management service
    * @param {app.model.utilsService} utils - the utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {app.view.endpoints.clusters.cluster.cliCommands} cliCommands - service to show cli command slide out
    * @param {object} confirmDialog - our confirmation dialog service
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
   function SpaceSummaryTileController($state, $scope, $stateParams, $q, modelManager, utils, notificationsService,
-                                      confirmDialog, asyncTaskDialog) {
+                                      cliCommands, confirmDialog, asyncTaskDialog) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -59,10 +61,12 @@
     this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
+
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
+    that.isAdmin = user.admin;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    var canDelete = false;
+    var spaceDetail;
 
     this.cardData = {
       title: gettext('Summary')
@@ -79,7 +83,8 @@
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
               buttonTitles: {
                 submit: gettext('Save')
-              }
+              },
+              class: 'detail-view-thin'
             },
             {
               data: {
@@ -135,6 +140,12 @@
       return utils.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
     };
 
+    this.showCliCommands = function () {
+      cliCommands.show(this.getEndpoint(), this.userName,
+        that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].details.org.entity.name,
+        that.spaceDetail().details.space.entity.name);
+    };
+
     $scope.$watchCollection(function () {
       return _.get(that.spaceModel, that.spacePath + '.roles.' + user.guid);
     }, function (roles) {
@@ -143,22 +154,32 @@
     });
 
     function enableActions() {
+      var canDelete = spaceDetail.routes.length === 0 &&
+        spaceDetail.instances.length === 0 &&
+        spaceDetail.apps.length === 0;
 
       // Rename Space
-      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename, that.spaceDetail().details.guid);
+      that.actions[0].disabled = !authModel.isAllowed(authModel.resources.space, authModel.actions.rename,
+        spaceDetail.details.space);
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.delete, that.spaceDetail().details.guid);
+      that.actions[1].disabled = !canDelete || !authModel.isAllowed(authModel.resources.space,
+          authModel.actions.delete, spaceDetail.details.space);
 
     }
 
     function init() {
       that.userName = user.name;
-      var spaceDetail = that.spaceDetail();
-      canDelete = spaceDetail.routes.length === 0 &&
-        spaceDetail.instances.length === 0 &&
-        spaceDetail.apps.length === 0 &&
-        spaceDetail.services.length === 0;
+      spaceDetail = that.spaceDetail();
+
+      // Update delete action when space info changes (requires authService which depends on chainStateResolve)
+      $scope.$watch(function () {
+        return spaceDetail.routes.length === 0 &&
+          spaceDetail.instances.length === 0 &&
+          spaceDetail.apps.length === 0;
+      }, function () {
+        enableActions();
+      });
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
       enableActions();

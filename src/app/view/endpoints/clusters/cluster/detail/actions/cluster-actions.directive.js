@@ -81,7 +81,8 @@
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-organization.html',
             buttonTitles: {
               submit: gettext('Create')
-            }
+            },
+            class: 'detail-view-thin'
           },
           {
             data: {
@@ -183,7 +184,8 @@
             templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/create-space.html',
             buttonTitles: {
               submit: gettext('Create')
-            }
+            },
+            class: 'detail-view-thin'
           },
           {
             data: contextData

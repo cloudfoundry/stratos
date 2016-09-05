@@ -1,0 +1,46 @@
+<div
+  ng-init="context = context || detailViewCtrl.context">
+  <p translate >Use the <a href="https://github.com/cloudfoundry/cli" rel="noopener noreferrer" target="_blank">Cloud Foundry CLI</a> to execute commands directly
+  against a Helion Cloud Foundry.</p>
+  <div>
+    <br>
+    <h4 translate>Getting Started</h4>
+    <p translate>Before starting follow these steps</p>
+    <p translate>1. Download and install the CLI - see  <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">here</a></p>
+    <p translate>2. Set the api endpoint<code-block>cf api {{context.api || '[Cloud Foundry API endpoint]'}}</code-block></p>
+    <p translate>3. Login<code-block hide-copy="true">$ cf login
+API endpoint: {{context.api || '[Cloud Foundry API endpoint]'}}
+
+Email> {{context.username || '[username]'}}
+
+Password> [password]
+Authenticating...
+OK
+    </code-block></p>
+    <p translate>4. Target an org and space<code-block>cf target -o {{context.orgName || '[organization name]'}} -s {{context.spaceName || '[space name]'}}</code-block></p>
+  </div>
+  <div>
+    <br><h4 translate>Organization Commands</h4>
+    <dl>
+      <dt translate>List</dt>
+      <dd translate>To list all orgs<code-block>cf orgs</code-block></dd>
+      <dt translate>Rename</dt>
+      <dd translate>To rename an org<code-block>cf rename-org {{context.orgName || '[organization name]'}} [name]</code-block></dd>
+      <dt translate>Information</dt>
+      <dd translate>To fetch org information<code-block>cf org {{context.orgName || '[organization name]'}}</code-block></dd>
+      <dt translate>Users</dt>
+      <dd translate>List each org role's users<code-block>cf org-users {{context.orgName || '[organization name]'}}</code-block></dd>
+    </dl>
+    <br><h4 translate>Space Commands</h4>
+    <dl>
+      <dt translate>List</dt>
+      <dd translate>To list the spaces in the targeted org<code-block>cf spaces</code-block></dd>
+      <dt translate>Rename</dt>
+      <dd translate>To rename a space<code-block>cf rename-space {{context.spaceName || '[space name]'}} [name]</code-block></dd>
+      <dt translate>Information</dt>
+      <dd translate>To fetch space information<code-block>cf space {{context.spaceName || '[space name]'}}</code-block></dd>
+      <dt translate>Users</dt>
+      <dd translate>List each space role's users<code-block>cf space-users {{context.orgName || '[organization name]'}} {{context.spaceName || '[space name]'}}</code-block></dd>
+    </dl>
+  </div>
+</div>

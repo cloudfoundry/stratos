@@ -69,8 +69,7 @@
       var spaceDetail = that.spaceDetail();
       that.canDelete = spaceDetail.routes.length === 0 &&
         spaceDetail.instances.length === 0 &&
-        spaceDetail.apps.length === 0 &&
-        spaceDetail.services.length === 0;
+        spaceDetail.apps.length === 0;
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
       enableActions();
@@ -108,7 +107,8 @@
               templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
               buttonTitles: {
                 submit: gettext('Save')
-              }
+              },
+              class: 'detail-view-thin'
             },
             {
               data: {
