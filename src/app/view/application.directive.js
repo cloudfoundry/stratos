@@ -33,7 +33,8 @@
     'app.model.modelManager',
     '$state',
     '$window',
-    'app.view.upgradeCheck'
+    'app.view.upgradeCheck',
+    'app.logged-in.loggedInService'
   ];
 
   /**
@@ -54,7 +55,7 @@
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck) {
+  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck, loggedInService) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;

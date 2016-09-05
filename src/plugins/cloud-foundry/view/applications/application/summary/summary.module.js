@@ -128,7 +128,7 @@
       return that.$q.resolve();
     }
 
-    this.utils.chainStateResolve('cf.applications', $state, init);
+    this.utils.chainStateResolve('cf.applications.application.summary', $state, init);
 
   }
 

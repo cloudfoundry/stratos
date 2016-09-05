@@ -31,19 +31,23 @@
     '$state',
     'app.utils.utilsService',
     'app.model.modelManager',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.logged-in.loggedInService'
   ];
 
-  function ApplicationsController($q, $state, utils, modelManager, eventService) {
+  function ApplicationsController($q, $state, utils, modelManager, eventService, loggedInService) {
 
-    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     var initialized = $q.defer();
 
-    function init() {
+    if (loggedInService.isLoggedIn()) {
+      initialized.resolve();
+    }
 
+    function init() {
       return initialized.promise.then(function () {
-        return authModel.initialize();
+        return authService.initialize();
       });
     }
 

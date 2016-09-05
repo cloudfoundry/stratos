@@ -77,9 +77,9 @@
           authModelInitPromise.push(that.initializeForEndpoint(guid, true));
         });
         return that.$q.all(authModelInitPromise);
-      } else {
-        return that.$q.resolve();
       }
+
+      return that.$q.resolve();
     },
     /**
      * @name initAuthService
@@ -96,6 +96,7 @@
       var featureFlagsModel = this.modelManager.retrieve('cloud-foundry.model.featureFlags');
       var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
       var Principal = this.modelManager.retrieve('cloud-foundry.model.auth.principal');
+      var userModel = this.modelManager.retrieve('cloud-foundry.model.users');
 
       var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
       var stackatoInfoPromise = this.$q.resolve(stackatoInfo.info);
@@ -109,29 +110,56 @@
           });
           var stackatoInfo = data[1];
           var userId = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
+          var isAdmin = stackatoInfo.endpoints.hcf[cnsiGuid].user.admin;
 
-          var promises = that._addOrganisationRolePromisesForUser(cnsiGuid, userId);
-          promises = promises.concat(that._addSpaceRolePromisesForUser(cnsiGuid, userId));
-          return that.$q.all(promises)
-            .then(function (userRoles) {
-              var userSummary = {
-                organizations: {
-                  audited: userRoles[0].data.resources,
-                  billingManaged: userRoles[1].data.resources,
-                  managed: userRoles[2].data.resources,
-                  // User is a user in all these orgs
-                  all: userRoles[3].data.resources
-                },
-                spaces: {
-                  audited: userRoles[4].data.resources,
-                  managed: userRoles[5].data.resources,
-                  // User is a developer in this spaces
-                  all: userRoles[6].data.resources
-                }
-              };
-              that.principal[cnsiGuid] = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
+          if (isAdmin) {
+            // User is an admin, therefore, we will use the more efficient userSummary request
+            return userModel.getUserSummary(cnsiGuid, userId)
+              .then(function (userSummary) {
+                var mappedSummary = {
+                  organizations: {
+                    audited: userSummary.entity.audited_organizations,
+                    billingManaged: userSummary.entity.billing_managed_organizations,
+                    managed: userSummary.entity.managed_organizations,
+                    // User is a user in all these orgs
+                    all: userSummary.entity.organizations
+                  },
+                  spaces: {
+                    audited: userSummary.entity.audited_spaces,
+                    managed: userSummary.entity.managed_spaces,
+                    // User is a developer in this spaces
+                    all: userSummary.entity.spaces
+                  }
+                };
+                that.principal[cnsiGuid] = new Principal(stackatoInfo, mappedSummary, featureFlags, cnsiGuid);
 
-            });
+              });
+
+          } else {
+            var promises = that._addOrganisationRolePromisesForUser(cnsiGuid, userId);
+            promises = promises.concat(that._addSpaceRolePromisesForUser(cnsiGuid, userId));
+            return that.$q.all(promises)
+              .then(function (userRoles) {
+                var userSummary = {
+                  organizations: {
+                    audited: userRoles[0].data.resources,
+                    billingManaged: userRoles[1].data.resources,
+                    managed: userRoles[2].data.resources,
+                    // User is a user in all these orgs
+                    all: userRoles[3].data.resources
+                  },
+                  spaces: {
+                    audited: userRoles[4].data.resources,
+                    managed: userRoles[5].data.resources,
+                    // User is a developer in this spaces
+                    all: userRoles[6].data.resources
+                  }
+                };
+                that.principal[cnsiGuid] = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
+
+              });
+          }
+
         });
     },
 
@@ -162,7 +190,7 @@
       var initialised = angular.isObject(this.principal[cnsiGuid]);
 
       if (userInfo && initialised) {
-        initialised = that.principal[cnsiGuid].stackatoInfo.endpoints.hcf[cnsiGuid].user.guid === userInfo.guid;
+        initialised = this.principal[cnsiGuid].stackatoInfo.endpoints.hcf[cnsiGuid].user.guid === userInfo.guid;
       }
       return initialised;
     },
@@ -189,6 +217,11 @@
 
       // convenience method implemented for Application permissions
       var cnsiPrincipal = this.principal[cnsiGuid];
+      if (_.isUndefined(cnsiPrincipal)) {
+        // Principal object is probably being initialised
+        // Unable to ascertain is user has role now
+        return false;
+      }
       var hasRole = false;
       if (role === 'space_developer') {
         hasRole = cnsiPrincipal.userSummary.spaces.all.length > 0;

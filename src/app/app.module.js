@@ -9,6 +9,7 @@
     .module('app', [
       'app.api',
       'app.event',
+      'app.logged-in',
       'app.model',
       'app.view',
       'app.utils'
