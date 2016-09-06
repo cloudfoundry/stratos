@@ -35,6 +35,17 @@
     'app.logged-in.loggedInService'
   ];
 
+  /**
+   * @name ApplicationsController
+   * @description   Controller for applications module
+   * @param {object} $q - the angular $q service
+   * @param {object} $state - the UI router $state service
+   * @param {object} utils - the utils service
+   * @param {app.model.modelManager} modelManager - the model management service
+   * @param {app.event.eventService} eventService - the event bus service
+   * @param {object} loggedInService - Logged In Service
+   * @constructor
+   */
   function ApplicationsController($q, $state, utils, modelManager, eventService, loggedInService) {
 
     var authService = modelManager.retrieve('cloud-foundry.model.auth');

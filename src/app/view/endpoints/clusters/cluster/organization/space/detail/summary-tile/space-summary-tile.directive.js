@@ -160,11 +160,11 @@
 
       // Rename Space
       that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
-        spaceDetail.details.space);
+        spaceDetail.details.guid);
 
       // Delete Space
       that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space,
-          authModel.actions.delete, spaceDetail.details.space);
+          authModel.actions.delete, spaceDetail.details.guid);
 
     }
 

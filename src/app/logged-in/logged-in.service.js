@@ -10,7 +10,7 @@
   ];
 
   /**
-   * @namespace app.logged-in.loggedInService
+   * @namespace app.logged-in.loggedInServiceFactory
    * @memberof app.logged-in
    * @name loggedInServiceFactory
    * @description Service to store the fact that the user is currently logged in

@@ -34,8 +34,11 @@
    * @name ApplicationsListController
    * @constructor
    * @param {Object} $log - the angular $log service
+   * @param {object} $q - the angular $q service
+   * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
+   * @param {object} utils - the utils service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {app.event.eventService} eventService - the event bus service

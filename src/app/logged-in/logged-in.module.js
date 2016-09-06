@@ -2,11 +2,10 @@
   'use strict';
 
   /**
-   * @namespace app.event
+   * @namespace app.logged-in
    * @memberof app
-   * @name event
-   * @description The event bus that allows communication between the
-   * view, model and API layers
+   * @name logged-in
+   * @description Service to store fact is user has logged in
    */
   angular
     .module('app.logged-in', [

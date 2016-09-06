@@ -159,9 +159,19 @@
 
       var isSpaceManager = false;
       // Iterate through all spaces in the organization to determine if user is a space manager
-      _.each(that.organization.org.entity.spaces, function (space) {
-        isSpaceManager = isSpaceManager || authModel.isAllowed(that.organization.cnsiGuid, authModel.resources.user, authModel.actions.update, space.metadata.guid, space.entity.organization_guid, true);
-      });
+      for (var i = 0; i < that.organization.org.entity.spaces.length; i++) {
+        var space = that.organization.org.entity.spaces[i];
+        if (authModel.isAllowed(that.organization.cnsiGuid,
+            authModel.resources.user,
+            authModel.actions.update,
+            space.metadata.guid,
+            space.entity.organization_guid,
+            true)) {
+
+          isSpaceManager = true;
+          break;
+        }
+      }
 
       that.actions.push({
         name: gettext('Assign User(s)'),

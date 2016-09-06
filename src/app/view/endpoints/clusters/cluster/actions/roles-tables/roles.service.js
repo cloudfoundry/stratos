@@ -610,8 +610,7 @@
 
             // calculate space role delta only for spaces for which user is allowed
             var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.user,
-              authModel.actions.update,
-              organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid].details.guid, orgGuid, true);
+              authModel.actions.update, spaceGuid, orgGuid, true);
             if (isAllowed) {
               // For each space role
               _.forEach(spaceRoles, function (selected, roleKey) {

@@ -21,6 +21,8 @@
   }
 
   /**
+   * @namespace  cloud-foundry.model.AuthModel
+   * @memberof cloud-foundry.model
    * @name AuthModel
    * @param {object} modelManager - Model Manager
    * @param {object} $q - angular $q service
@@ -61,6 +63,11 @@
 
   angular.extend(AuthModel.prototype, {
 
+    /**
+     * @name initialize
+     * @description Initialize AuthModel for all connected endpoints
+     * @returns {promise} Initialization promise
+     */
     initialize: function () {
       // Initialise Auth Service
       var that = this;
@@ -82,8 +89,8 @@
       return that.$q.resolve();
     },
     /**
-     * @name initAuthService
-     * @description get a Principal instance for the current user
+     * @name initializeForEndpoint
+     * @description Initialize a principal instance for connected CF
      * @param {string} cnsiGuid - Cluster Guid
      * @param {boolean} useStackatoInfoCache - Set to true if StackatoInfo has already been fetched
      * @returns {*}
@@ -181,8 +188,9 @@
 
     /**
      * @name isInitialized
-     * @description Is authService intialised
+     * @description Is authService initialized
      * @param {string} cnsiGuid - Cluster GUID
+     * @param {object} userInfo - User info
      * @returns {boolean}
      */
     isInitialized: function (cnsiGuid, userInfo) {
@@ -196,10 +204,9 @@
     },
 
     /**
-     * @name isInitialized
-     * @description Is authService intialised
+     * @name remove
+     * @description Remove an initialized principal for an endpoint
      * @param {string} cnsiGuid - Cluster GUID
-     * @returns {boolean}
      */
     remove: function (cnsiGuid) {
       delete this.principal[cnsiGuid];
@@ -209,8 +216,8 @@
      * @name doesUserHaveRole
      * @description convenience method for ascertaining is user
      * has a specific role (i.e. is user space developer anywhere?)
-     * @param cnsiGuid
-     * @param role
+     * @param {string} cnsiGuid - Cluster GUID
+     * @param {string} role - role
      * @returns {boolean}
      */
     doesUserHaveRole: function (cnsiGuid, role) {
@@ -228,10 +235,11 @@
       }
       return hasRole;
     },
+
     /**
      * @name isAdmin
-     * @description Is User Admin in Endpoint
-     * @param cnsiGuid
+     * @description Is User Admin in endpoint
+     * @param {string} cnsiGuid - Cluster GUID
      * @returns {boolean}
      */
     isAdmin: function (cnsiGuid) {

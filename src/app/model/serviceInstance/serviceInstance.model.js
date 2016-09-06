@@ -109,7 +109,7 @@
           that.serviceInstances.length = 0;
           [].push.apply(that.serviceInstances, _.sortBy(items, 'name'));
 
-          var hcfOnly = _.filter(that.serviceInstances, {cnsi_type: 'hcf'}) || [];
+          var hcfOnly = _.filter(that.serviceInstances, { cnsi_type: 'hcf' }) || [];
 
           return {
             numAvailable: hcfOnly.length

@@ -147,10 +147,10 @@
       var canDelete = _.keys(that.organization.spaces).length === 0;
 
       that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update,
-        that.organization.details.org);
+        that.organization.details.guid);
 
       that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.organization,
-          authModel.actions.delete, that.organization.details.org);
+          authModel.actions.delete, that.organization.details.guid);
     }
 
     $scope.$watch(function () {

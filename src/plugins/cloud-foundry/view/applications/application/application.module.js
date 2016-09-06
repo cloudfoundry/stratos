@@ -364,23 +364,21 @@
      * @returns {boolean} whether or not the action should be hidden
      */
     isActionHidden: function (id) {
+
+      var hideAction = true;
       if (!this.model.application.state || !this.model.application.state.actions) {
         return true;
+      } else if (id === 'launch') {
+        hideAction = false;
       } else if (this.authModel.isInitialized(this.cnsiGuid)) {
-        var hideAction = true;
         // check user is a space developer
-        if (id !== 'launch') {
-          var spaceGuid = this.model.application.summary.space_guid;
-          hideAction = !this.authModel.isAllowed(this.cnsiGuid,
-            this.authModel.resources.application,
-            this.authModel.actions.update,
-            spaceGuid);
-        } else if (id === 'launch') {
-          hideAction = false;
-        }
-
-        return this.model.application.state.actions[id] !== true || hideAction;
+        var spaceGuid = this.model.application.summary.space_guid;
+        hideAction = !this.authModel.isAllowed(this.cnsiGuid,
+          this.authModel.resources.application,
+          this.authModel.actions.update,
+          spaceGuid);
       }
+      return this.model.application.state.actions[id] !== true || hideAction;
     },
 
     /**
