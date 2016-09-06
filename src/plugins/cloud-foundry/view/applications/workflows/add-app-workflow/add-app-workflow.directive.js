@@ -104,10 +104,12 @@
         $scope.$watch(function () {
           return that.userInput.serviceInstance;
         }, function (serviceInstance) {
+          that.userInput.organization = null;
+          that.userInput.space = null;
           if (serviceInstance) {
             that.getOrganizations();
             that.getDomains().then(function () {
-              that.userInput.domain = that.options.domains[0].value;
+              that.userInput.domain = that.options.domains[0] && that.options.domains[0].value;
             });
           }
         });
@@ -115,6 +117,7 @@
         $scope.$watch(function () {
           return that.userInput.organization;
         }, function (organization) {
+          that.userInput.space = null;
           if (organization) {
             that.getSpacesForOrganization(organization.metadata.guid);
           }
