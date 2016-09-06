@@ -80,7 +80,7 @@
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
-    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');  
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.userInput = {};
     this.options = {};
 
@@ -205,31 +205,33 @@
                       that.userInput.serviceInstance.guid,
                       that.userInput.space.metadata.guid
                     )
-                    .then(function (services) {
-                      that.options.services.length = 0;
-                      [].push.apply(that.options.services, services);
+                      .then(function (services) {
+                        that.options.services.length = 0;
+                        [].push.apply(that.options.services, services);
 
-                      // retrieve categories that user can filter services by
-                      var categories = [];
-                      angular.forEach(services, function (service) {
-                        // Parse service entity extra data JSON string
-                        if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
-                          service.entity.extra = angular.fromJson(service.entity.extra);
+                        // retrieve categories that user can filter services by
+                        var categories = [];
+                        angular.forEach(services, function (service) {
+                          // Parse service entity extra data JSON string
+                          if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
+                            service.entity.extra = angular.fromJson(service.entity.extra);
 
-                          if (angular.isDefined(service.entity.extra.categories)) {
-                            var serviceCategories = _.map(service.entity.extra.categories,
-                                                          function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
-                            categories = _.unionBy(categories, serviceCategories, 'lower');
+                            if (angular.isDefined(service.entity.extra.categories)) {
+                              var serviceCategories = _.map(service.entity.extra.categories,
+                                function (o) {
+                                  return {label: o, value: {categories: o}, lower: o.toLowerCase()};
+                                });
+                              categories = _.unionBy(categories, serviceCategories, 'lower');
+                            }
                           }
-                        }
+                        });
+                        categories = _.sortBy(categories, 'lower');
+                        that.options.serviceCategories.length = 1;
+                        [].push.apply(that.options.serviceCategories, categories);
+                      })
+                      .finally(function () {
+                        that.options.servicesReady = true;
                       });
-                      categories = _.sortBy(categories, 'lower');
-                      that.options.serviceCategories.length = 1;
-                      [].push.apply(that.options.serviceCategories, categories);
-                    })
-                    .finally(function () {
-                      that.options.servicesReady = true;
-                    });
                   });
                 });
               }
@@ -284,7 +286,7 @@
           serviceInstances: [],
           services: [],
           serviceCategories: [
-            { label: gettext('All Services'), value: 'all' }
+            {label: gettext('All Services'), value: 'all'}
           ],
           servicesReady: false,
           organizations: [],
@@ -366,13 +368,13 @@
             that.userInput.domain.metadata.guid,
             that.userInput.host
           )
-          .then(function (data) {
-            if (data && data.code === 10000) {
-              resolve();
-            } else {
-              reject(gettext('This route already exists. Choose a new one.'));
-            }
-          });
+            .then(function (data) {
+              if (data && data.code === 10000) {
+                resolve();
+              } else {
+                reject(gettext('This route already exists. Choose a new one.'));
+              }
+            });
         });
       },
 
@@ -390,14 +392,18 @@
 
             // Filter out organizations in which user does not
             // have any space where they aren't a developer
-            var filteredOrgs = _.filter(organizations, function (organization) {
-              // Retrieve filtered list of Spaces where the user is a developer
-              var orgGuid = organization.metadata.guid;
-              var filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
-                {entity: {organization_guid: orgGuid}});
-              return filteredSpaces.length > 0;
-            });
-
+            // NOTE: This is unnecessary for admin users, and will fail
+            // because the userSummary doesn't contain organization_guid data
+            var filteredOrgs = organizations;
+            if (!that.authModel.isAdmin(cnsiGuid)) {
+              filteredOrgs = _.filter(organizations, function (organization) {
+                // Retrieve filtered list of Spaces where the user is a developer
+                var orgGuid = organization.metadata.guid;
+                var filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
+                  {entity: {organization_guid: orgGuid}});
+                return filteredSpaces.length > 0;
+              });
+            }
             that.options.organizations.length = 0;
             [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
             that.userInput.organization = that.options.organizations[0].value;
@@ -418,11 +424,15 @@
           .then(function (spaces) {
 
             // Filter out spaces in which user is not a Space Developer
-            var filteredSpaces = _.filter(spaces, function (space) {
-              return that.authModel.isAllowed(cnsiGuid,
-                that.authModel.resources.application,
-                that.authModel.actions.create, space.metadata.guid);
-            });
+            var filteredSpaces = spaces;
+            if (!that.authModel.isAdmin(cnsiGuid)) {
+              filteredSpaces = _.filter(spaces, function (space) {
+                return that.authModel.isAllowed(cnsiGuid,
+                  that.authModel.resources.application,
+                  that.authModel.actions.create, space.metadata.guid);
+              });
+            }
+
             that.options.spaces.length = 0;
             [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
             that.userInput.space = that.options.spaces[0].value;
@@ -533,7 +543,7 @@
           .then(function (serviceInstances) {
             var validServiceInstances = _.chain(_.values(serviceInstances))
               .filter({cnsi_type: 'hcf', valid: true})
-              .filter(function(cnsi){
+              .filter(function (cnsi) {
                 return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
               })
               .map(function (o) {

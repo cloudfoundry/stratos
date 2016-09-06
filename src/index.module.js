@@ -47,7 +47,7 @@
      */
     $compileProvider.debugInfoEnabled(false);
 
-    $logProvider.debugEnabled(true);
+    $logProvider.debugEnabled(false);
   }
 
 })();

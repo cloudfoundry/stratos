@@ -88,6 +88,15 @@
     // Wait for parent state to be fully initialised
     utils.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
+    // When a modal interaction starts, stop the background polling
+    this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
+      that.stopUpdate();
+    });
+    // When a modal interaction ends, resume the background polling
+    this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
+      that.startUpdate();
+    });
+
     this.appActions = [
       {
         name: gettext('View App'),
@@ -151,8 +160,7 @@
     ];
 
     $scope.$watch(function () {
-      return that.model.application.summary.state &&
-        that.authModel.isInitialized(that.cnsiGuid);
+      return that.model.application.summary.state;
     }, function (newState) {
       that.onAppStateChange(newState);
     });
@@ -205,15 +213,6 @@
             that.model.application.summary.space_guid
           );
         });
-
-      // When a modal interaction starts, stop the background polling
-      this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
-        that.stopUpdate();
-      });
-      // When a modal interaction ends, resume the background polling
-      this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
-        that.startUpdate();
-      });
     },
 
     /**
@@ -367,7 +366,7 @@
     isActionHidden: function (id) {
       if (!this.model.application.state || !this.model.application.state.actions) {
         return true;
-      } else {
+      } else if (this.authModel.isInitialized(this.cnsiGuid)) {
         var hideAction = true;
         // check user is a space developer
         if (id !== 'launch') {

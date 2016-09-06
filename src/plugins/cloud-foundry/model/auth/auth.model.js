@@ -228,6 +228,15 @@
       }
       return hasRole;
     },
+    /**
+     * @name isAdmin
+     * @description Is User Admin in Endpoint
+     * @param cnsiGuid
+     * @returns {boolean}
+     */
+    isAdmin: function (cnsiGuid) {
+      return this.principal[cnsiGuid].isAdmin;
+    },
 
     /**
      * @name _addOrganisationRolePromisesForUser
