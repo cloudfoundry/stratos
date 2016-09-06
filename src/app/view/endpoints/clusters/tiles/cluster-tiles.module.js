@@ -67,6 +67,7 @@
      * @memberof app.view.endpoints.clusters
      * @name refreshClusterList
      * @description Update the core model data + create the cluster list
+     * @returns {promise} refresh cluster promise
      */
     refreshClusterModel: function () {
       var that = this;
@@ -131,6 +132,7 @@
      * @namespace app.view.endpoints.clusters
      * @memberof app.view.endpoints.clusters
      * @name onConnectCancel
+     * @param {object} serviceInstance - Service instance details
      * @description Handle the success from connecting to a cluster
      */
     onConnectSuccess: function (serviceInstance) {

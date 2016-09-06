@@ -10,12 +10,11 @@
   ];
 
   /**
-   * @namespace app.logged-in.loggedInServiceFactory
-   * @memberof app.logged-in
+   * @namespace app.loggedIn.loggedInService
+   * @memberof app.loggedIn
    * @name loggedInServiceFactory
-   * @description Service to store the fact that the user is currently logged in
-   * @param {object} eventService - Event service
-   * @returns LoggedIn Service
+   * @param {object} eventService - Event Service
+   * @returns {object} Logged In Service
    */
   function loggedInServiceFactory(eventService) {
 

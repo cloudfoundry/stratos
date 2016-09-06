@@ -31,7 +31,6 @@
      * @name OrganizationAccess
      * @description Constructor for OrganizationAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
     function UsersAssignmentAccess(principal) {
@@ -47,7 +46,8 @@
        * 1. User is admin
        * 2. User is an organisation manager
        * 3. User is a space manager  (in case its a space)
-       * @param {object} object - Can be space or org detail
+       * @param {Object} spaceGuid - Space GUID
+       * @param {Object} orgGuid - Organization GUID
        * @param {boolean} isSpace - flag to indicate what object is
        * @returns {boolean}
        */

@@ -31,7 +31,6 @@
      * @name OrganizationAccess
      * @description Constructor for OrganizationAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
     function OrganizationAccess(principal) {
@@ -64,7 +63,7 @@
        * @description Users can delete an organisation if:
        * 1. User is and admin
        * 2. is Org Manager
-       * @param {object} org - organisation details
+       * @param {object} orgGuid - organisation GUID
        * @returns {boolean}
        */
       delete: function (orgGuid) {
@@ -84,7 +83,7 @@
        * @description Users can update an organisation if:
        * 1. User is and admin
        * 2. is Org Manager
-       * @param {Object} org - Application detail
+       * @param {object} orgGuid - organisation GUID
        * @returns {boolean}
        */
 

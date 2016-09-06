@@ -21,8 +21,6 @@
   }
 
   /**
-   * @namespace  cloud-foundry.model.AuthModel
-   * @memberof cloud-foundry.model
    * @name AuthModel
    * @param {object} modelManager - Model Manager
    * @param {object} $q - angular $q service

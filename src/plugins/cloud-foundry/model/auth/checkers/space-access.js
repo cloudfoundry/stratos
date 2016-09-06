@@ -47,7 +47,7 @@
        * @description User can create a space if:
        * 1. User is an Admin
        * 2. User is an Org Manager
-       * @param {Object} org - org detail
+       * @param {Object} orgGuid - org GUID
        * @returns {boolean}
        */
       create: function (orgGuid) {
@@ -64,7 +64,7 @@
        * @description User can delete space if:
        * 1. user is an admin
        * 2. user is the org manager
-       * @param {Object} space - space detail
+       * @param {Object} orgGuid - Organization GUID
        * @returns {boolean}
        */
       delete: function (orgGuid) {
@@ -82,7 +82,8 @@
        * 1. User is an admin
        * 2. User is org manager
        * 3. user is space manager
-       * @param {Object} space - space detail
+       * @param {Object} spaceGuid - Space GUID
+       * @param {Object} orgGuid - Organization GUID
        * @returns {boolean}
        */
 
@@ -102,7 +103,8 @@
        * 1. User is admin
        * 2. User is an Org Manager
        * 3. User is a Space Manager
-       * @param {Object} space - Application detail
+       * @param {Object} spaceGuid - Space GUID
+       * @param {Object} orgGuid - Organization GUID
        * @returns {boolean}
        */
 

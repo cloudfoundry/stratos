@@ -41,12 +41,13 @@
     }
 
     angular.extend(ServiceInstanceAccess.prototype, {
+
       /**
        * @name create
        * @description A User is can create a service if:
        * 1. User is an admin
        * 2. Is a space developer and the feature flag is enabled
-       * @param {Object} space Domain space
+       * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
       create: function (spaceGuid) {
@@ -67,7 +68,7 @@
        * @description User can update a service instance if:
        * 1. User is an admin
        * 2. or a space developer
-       * @param {Object} space - space detail
+       * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
       update: function (spaceGuid) {
@@ -84,7 +85,7 @@
        * @description User can delete a service instance if:
        * 1. They are an admin
        * 2. or they are a space developer
-       * @param {Object} space - spacedetail
+       * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
       delete: function (spaceGuid) {
