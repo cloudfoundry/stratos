@@ -7,6 +7,14 @@
     </div>
   </div>
 
+
+  <div class="alert alert-info alert-no-bg alert-bordered" ng-if="wizardCtrl.options.service.entity.unique_id==='app-autoscaler-id'">
+    <p>
+      You can bind the Auto-scaler to this application here. Please note that you will need to use the CLI
+      to configure the auto-scaling policy for this application in order for it to be enabled. 
+    </p>
+  </div>
+
   <div class="loading-services-spinner" ng-if="wizardCtrl.options.spinners.loadingServiceInstances">
     <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
   </div>
