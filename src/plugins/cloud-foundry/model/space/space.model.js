@@ -190,12 +190,11 @@
      */
     listAllServiceInstancesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
-      var combinedParams = params || {};
       var inlineParams = {
         'inline-relations-depth': 2,
         'include-relations': 'service_bindings,service_plan,service,app'
       };
-      _.assign(combinedParams, inlineParams);
+      var combinedParams = _.assign(params, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllServiceInstancesForSpace(guid, this.applyDefaultListParams(combinedParams), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
@@ -238,12 +237,11 @@
      */
     listAllRoutesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
-      var combinedParams = params || {};
       var inlineParams = {
         'inline-relations-depth': 1,
         'include-relations': 'domain,apps'
       };
-      _.assign(combinedParams, inlineParams);
+      var combinedParams = _.assign(params, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllRoutesForSpace(guid, this.applyDefaultListParams(combinedParams), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {

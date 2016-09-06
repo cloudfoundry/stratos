@@ -75,9 +75,7 @@
 
     update: function (route) {
       var that = this;
-      return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid, {
-        return_user_provided_service_instances: false
-      }, true)
+      return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid, null, true)
         .then(function () {
           if (route) {
             that.updateActions([route]);
