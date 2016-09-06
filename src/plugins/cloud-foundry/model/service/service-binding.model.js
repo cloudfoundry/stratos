@@ -13,34 +13,26 @@
 
   registerServiceBindingModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerServiceBindingModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.service-binding', new ServiceBinding(apiManager));
+  function registerServiceBindingModel(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.service-binding', new ServiceBinding(apiManager, modelUtils));
   }
 
   /**
    * @memberof cloud-foundry.model.serviceBinding
    * @name ServiceBinding
    * @param {app.api.apiManager} apiManager - the API manager
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the API manager
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function ServiceBinding(apiManager) {
+  function ServiceBinding(apiManager, modelUtils) {
     this.apiManager = apiManager;
-
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
+    this.modelUtils = modelUtils;
   }
 
   angular.extend(ServiceBinding.prototype, {
@@ -56,7 +48,7 @@
      */
     createServiceBinding: function (cnsiGuid, bindingSpec) {
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .CreateServiceBinding(bindingSpec, {}, this.makeHttpConfig(cnsiGuid))
+        .CreateServiceBinding(bindingSpec, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
@@ -74,7 +66,7 @@
      */
     deleteServiceBinding: function (cnsiGuid, guid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .DeleteServiceBinding(guid, params, this.makeHttpConfig(cnsiGuid));
+        .DeleteServiceBinding(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     /**
@@ -89,7 +81,7 @@
     listAllServiceBindings: function (cnsiGuid, params) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .ListAllServiceBindings(params, this.makeHttpConfig(cnsiGuid))
+        .ListAllServiceBindings(params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           that.onListAllServiceBindings(cnsiGuid, response.data.resources);
           return response.data.resources;

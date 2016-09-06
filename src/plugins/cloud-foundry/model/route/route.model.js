@@ -11,11 +11,12 @@
 
   registerRouteModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerRouteModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.route', new Route(apiManager, modelManager));
+  function registerRouteModel(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.route', new Route(apiManager, modelManager, modelUtils));
   }
 
   /**
@@ -23,27 +24,18 @@
    * @name Route
    * @param {app.api.apiManager} apiManager - the API manager
    * @param {app.api.modelManager}  modelManager - the Model management service
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the API manager
    * @property {app.api.modelManager} modelManager - the Model management service
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {object} route - the currently selected route state
    * @class
    */
-  function Route(apiManager, modelManager) {
+  function Route(apiManager, modelManager, modelUtils) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
+    this.modelUtils = modelUtils;
     this.route = {};
-
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
   }
 
   angular.extend(Route.prototype, {
@@ -100,7 +92,7 @@
     */
     removeAppFromRoute: function (cnsiGuid, guid, appGuid) {
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .RemoveAppFromRoute(guid, appGuid, {}, this.makeHttpConfig(cnsiGuid));
+        .RemoveAppFromRoute(guid, appGuid, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     createRoute: function (cnsiGuid, routeSpec) {
@@ -126,7 +118,7 @@
     */
     deleteRoute: function (cnsiGuid, guid, recursive) {
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .DeleteRoute(guid, recursive, {}, this.makeHttpConfig(cnsiGuid));
+        .DeleteRoute(guid, recursive, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
    /**
@@ -180,7 +172,7 @@
      */
     listAllRouteMappingsForRoute: function (cnsiGuid, guid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllRouteMappingsForRoute(guid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllRouteMappingsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });

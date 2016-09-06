@@ -13,38 +13,29 @@
 
   registerServiceModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerServiceModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.service', new Service(apiManager));
+  function registerServiceModel(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.service', new Service(apiManager, modelUtils));
   }
 
   /**
    * @memberof cloud-foundry.model.service
    * @name Service
    * @param {app.api.apiManager} apiManager - the service API manager
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the service API manager
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {app.api.servicePlanApi} serviceApi - the service API proxy
    * @class
    */
-  function Service(apiManager) {
+  function Service(apiManager, modelUtils) {
     this.apiManager = apiManager;
     this.serviceApi = this.apiManager.retrieve('cloud-foundry.api.Services');
+    this.modelUtils = modelUtils;
     this.data = {};
-
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
-
   }
 
   angular.extend(Service.prototype, {
@@ -97,7 +88,7 @@
      * @public
      */
     retrieveService: function (cnsiGuid, guid, options) {
-      return this.serviceApi.RetrieveService(guid, options, this.makeHttpConfig(cnsiGuid))
+      return this.serviceApi.RetrieveService(guid, options, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });

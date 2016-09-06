@@ -16,11 +16,13 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'cloud-foundry.model.application.stateService',
-    '$q'
+    '$q',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q) {
-    modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager, appStateService, $q));
+  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q, modelUtils) {
+    modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager,
+      appStateService, $q, modelUtils));
   }
 
   /**
@@ -31,15 +33,17 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} appStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
    * @property {object} application - the currently focused application.
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @property {number} pageSize - page size for pagination.
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Application(config, apiManager, modelManager, appStateService, $q) {
+  function Application(config, apiManager, modelManager, appStateService, $q, modelUtils) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.appStateService = appStateService;
@@ -47,6 +51,7 @@
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.$q = $q;
     this.pageSize = config.pagination.pageSize;
+    this.modelUtils = modelUtils;
 
     this.data = {
       applications: []
@@ -76,18 +81,6 @@
     // This state should be in the model
     this.clusterCount = 0;
     this.hasApps = false;
-
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
 
   }
 
@@ -330,7 +323,7 @@
      */
     unbindServiceFromApp: function (cnsiGuid, guid, bindingGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .RemoveServiceBindingFromApp(guid, bindingGuid, params, this.makeHttpConfig(cnsiGuid));
+        .RemoveServiceBindingFromApp(guid, bindingGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     /**
@@ -445,7 +438,7 @@
     createApp: function (cnsiGuid, newAppSpec) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .CreateApp(newAppSpec, {}, this.makeHttpConfig(cnsiGuid))
+        .CreateApp(newAppSpec, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           that.getAppSummary(cnsiGuid, response.data.metadata.guid);
           that.all();
@@ -492,7 +485,7 @@
      */
     deleteApp: function (cnsiGuid, guid) {
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .DeleteApp(guid, null, this.makeHttpConfig(cnsiGuid));
+        .DeleteApp(guid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     /**

@@ -15,12 +15,12 @@
     'app.utils.utilsService',
     '$q',
     '$log',
-    'cloud-foundry.api.hcfPagination'
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerOrgModel(modelManager, apiManager, utils, $q, $log, hcfPagination) {
+  function registerOrgModel(modelManager, apiManager, utils, $q, $log, modelUtils) {
     modelManager.register('cloud-foundry.model.organization',
-      new Organization(modelManager, apiManager, utils, $q, $log, hcfPagination));
+      new Organization(modelManager, apiManager, utils, $q, $log, modelUtils));
   }
 
   /**
@@ -32,22 +32,22 @@
    * @param {object} utils - the utils service
    * @param {object} $q - angular $q service
    * @param {object} $log - angular $log service
-   * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {object} modelManager - the model manager
    * @property {object} apiManager - the API manager
    * @property {object} utils - the utils service
    * @property {object} $q - angular $q service
    * @property {object} $log - angular $log service
-   * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Organization(modelManager, apiManager, utils, $q, $log, hcfPagination) {
+  function Organization(modelManager, apiManager, utils, $q, $log, modelUtils) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.$q = $q;
     this.$log = $log;
     this.utils = utils;
-    this.hcfPagination = hcfPagination;
+    this.modelUtils = modelUtils;
 
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.orgsApi = apiManager.retrieve('cloud-foundry.api.Organizations');
@@ -59,23 +59,6 @@
     this.organizations = {};
     this.organizationNames = {};
 
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
-
-    this.applyDefaultListParams = function (params) {
-      return _.defaults(params, {
-        'results-per-page': 100
-      });
-    };
   }
 
   angular.extend(Organization.prototype, {
@@ -94,10 +77,10 @@
       var that = this;
       this.unCacheOrganization(cnsiGuid);
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllOrganizations(this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllOrganizations(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -118,10 +101,11 @@
     listAllSpacesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllSpacesForOrganization(orgGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllSpacesForOrganization(orgGuid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -142,10 +126,11 @@
     listAllServicesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllServicesForOrganization(orgGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllServicesForOrganization(orgGuid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -316,16 +301,17 @@
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, {
           'inline-relations-depth': 1
-        }, this.makeHttpConfig(cnsiGuid))
+        }, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (res) {
-          return that.hcfPagination.dePaginate(res.data, that.makeHttpConfig(cnsiGuid));
+          return that.modelUtils.dePaginate(res.data, that.modelUtils.makeHttpConfig(cnsiGuid));
         })
         .then(function (depthOneSpaces) {
           that.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
           that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces);
-          return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org).then(function () {
-            return depthOneSpaces;
-          });
+          return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org)
+            .then(function () {
+              return depthOneSpaces;
+            });
         });
     },
 
@@ -342,7 +328,7 @@
 
       var that = this;
 
-      var httpConfig = this.makeHttpConfig(cnsiGuid);
+      var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
       var orgGuid = org.metadata.guid;
       var orgQuotaGuid = org.entity.quota_definition_guid;
       var createdDate = moment(org.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
@@ -356,7 +342,7 @@
         }
         // Note, users in the context are users with a defined org or space role.
         return that.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig).then(function (val) {
-          return that.hcfPagination.dePaginate(val.data, httpConfig);
+          return that.modelUtils.dePaginate(val.data, httpConfig);
         });
       }
 
@@ -584,7 +570,7 @@
 
     createOrganization: function (cnsiGuid, orgName) {
       var that = this;
-      var httpConfig = this.makeHttpConfig(cnsiGuid);
+      var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
       return that.orgsApi.CreateOrganization({name: orgName}, {}, httpConfig).then(function (res) {
         var org = res.data;
         var newOrgGuid = org.metadata.guid;
@@ -599,34 +585,37 @@
 
     deleteOrganization: function (cnsiGuid, orgGuid) {
       var that = this;
-      return that.orgsApi.DeleteOrganization(orgGuid, {}, this.makeHttpConfig(cnsiGuid)).then(function (val) {
-        that.unCacheOrganization(cnsiGuid, orgGuid);
-        return val;
-      });
+      return that.orgsApi.DeleteOrganization(orgGuid, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+        .then(function (val) {
+          that.unCacheOrganization(cnsiGuid, orgGuid);
+          return val;
+        });
     },
 
     updateOrganization: function (cnsiGuid, orgGuid, orgData) {
       var that = this;
       var oldName = _.get(that.organizations[cnsiGuid][orgGuid], 'details.org.entity.name');
-      return that.orgsApi.UpdateOrganization(orgGuid, orgData, {}, that.makeHttpConfig(cnsiGuid)).then(function (val) {
-        that.organizations[cnsiGuid][orgGuid].details.org = val.data;
-        var newName = _.get(val.data, 'entity.name');
-        if (oldName !== newName) {
-          var idx = that.organizationNames[cnsiGuid].indexOf(oldName);
-          if (idx > -1) {
-            that.organizationNames[cnsiGuid].splice(idx, 1);
+      return that.orgsApi.UpdateOrganization(orgGuid, orgData, {}, that.modelUtils.makeHttpConfig(cnsiGuid))
+        .then(function (val) {
+          that.organizations[cnsiGuid][orgGuid].details.org = val.data;
+          var newName = _.get(val.data, 'entity.name');
+          if (oldName !== newName) {
+            var idx = that.organizationNames[cnsiGuid].indexOf(oldName);
+            if (idx > -1) {
+              that.organizationNames[cnsiGuid].splice(idx, 1);
+            }
+            that.organizationNames[cnsiGuid].push(newName);
           }
-          that.organizationNames[cnsiGuid].push(newName);
-        }
-        return val;
-      });
+          return val;
+        });
     },
 
     refreshOrganizationUserRoles: function (cnsiGuid, orgGuid) {
       var that = this;
-      return this.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, null, this.makeHttpConfig(cnsiGuid))
+      return this.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, null,
+        this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (val) {
-          return that.hcfPagination.dePaginate(val.data, that.makeHttpConfig(cnsiGuid));
+          return that.modelUtils.dePaginate(val.data, that.modelUtils.makeHttpConfig(cnsiGuid));
         })
         .then(function (allUsersRoles) {
           that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, allUsersRoles);

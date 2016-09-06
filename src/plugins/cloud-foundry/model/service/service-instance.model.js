@@ -13,36 +13,28 @@
 
   registerServiceInstanceModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerServiceInstanceModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.service-instance', new ServiceInstance(apiManager));
+  function registerServiceInstanceModel(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.service-instance', new ServiceInstance(apiManager, modelUtils));
   }
 
   /**
    * @memberof cloud-foundry.model.service-instance
    * @name ServiceInstance
    * @param {app.api.apiManager} apiManager - the API manager
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the API manager
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {object} data - the data holder
    * @class
    */
-  function ServiceInstance(apiManager) {
+  function ServiceInstance(apiManager, modelUtils) {
     this.serviceInstanceApi = apiManager.retrieve('cloud-foundry.api.ServiceInstances');
+    this.modelUtils = modelUtils;
     this.data = {};
-
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
   }
 
   angular.extend(ServiceInstance.prototype, {
@@ -57,7 +49,7 @@
      */
     all: function (cnsiGuid, options) {
       var that = this;
-      return this.serviceInstanceApi.ListAllServiceInstances(options, this.makeHttpConfig(cnsiGuid))
+      return this.serviceInstanceApi.ListAllServiceInstances(options, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return that.onAll(response.data);
         });
@@ -73,7 +65,8 @@
      * @public
      */
     createServiceInstance: function (cnsiGuid, newInstanceSpec) {
-      return this.serviceInstanceApi.CreateServiceInstance(newInstanceSpec, {}, this.makeHttpConfig(cnsiGuid))
+      return this.serviceInstanceApi.CreateServiceInstance(newInstanceSpec, {},
+        this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
@@ -91,7 +84,8 @@
      * @public
      */
     deleteServiceInstance: function (cnsiGuid, serviceInstanceGuid, params) {
-      return this.serviceInstanceApi.DeleteServiceInstance(serviceInstanceGuid, params, this.makeHttpConfig(cnsiGuid))
+      return this.serviceInstanceApi.DeleteServiceInstance(serviceInstanceGuid, params,
+        this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
@@ -107,7 +101,8 @@
      * @public
      */
     listAllServiceBindingsForServiceInstance: function (cnsiGuid, guid) {
-      return this.serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid, {}, this.makeHttpConfig(cnsiGuid))
+      return this.serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid, {},
+        this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
