@@ -34,7 +34,6 @@
   /**
    * @name ApplicationSummaryController
    * @constructor
-   * @param {object} $scope - the Angular $scope
    * @param {object} $state - UI Router $state
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
@@ -51,7 +50,7 @@
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {app.model.utilsService} utils - the utils service
    */
-  function ApplicationSummaryController($scope, $state, $log, $q, modelManager, $stateParams, addRoutesService, editAppService, utils,
+  function ApplicationSummaryController($state, $log, $q, modelManager, $stateParams, addRoutesService, editAppService, utils,
                                         routesService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
