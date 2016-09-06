@@ -88,20 +88,38 @@
         this.errors = {};
 
         var application = this.modelManager.retrieve('cloud-foundry.model.application').application;
+        var route = application.summary.routes[0];
+        var host, domain;
+
+        if (route) {
+          host = route.host;
+          domain = { entity: route.domain };
+        }
 
         this.userInput = {
           name: application.summary.name,
           serviceInstance: application.cluster,
+          clusterUsername: null,
+          clusterPassword: null,
           organization: { entity: application.organization },
           space: { entity: application.space },
+          host: host,
+          domain: domain,
           application: application,
           hceCnsi: null,
           source: null,
           repo: null,
+          repoFilterTerm: null,
           branch: null,
           buildContainer: null,
+          projectId: null,
           imageRegistry: null,
-          projectId: null
+          searchCategory: 'all',
+          search: {
+            entity: {
+              extra: undefined
+            }
+          }
         };
 
         this.data.workflow = {
@@ -148,6 +166,7 @@
           repos: [],
           branches: [],
           buildContainers: [],
+          notificationFormAppMode: true,
           imageRegistries: []
         };
 
@@ -157,6 +176,7 @@
           },
 
           finish: function () {
+            that.modelManager.retrieve('cloud-foundry.model.application').updateDeliveryPipelineMetadata(true);
             that.finishWorkflow();
           }
         };
