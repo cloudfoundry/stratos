@@ -8,6 +8,15 @@
   loggedInServiceFactory.$inject = [
     'app.event.eventService'
   ];
+
+  /**
+   * @namespace app.logged-in.loggedInService
+   * @memberof app.logged-in
+   * @name loggedInServiceFactory
+   * @description Service to store the fact that the user is currently logged in
+   * @param {object} eventService - Event service
+   * @returns LoggedIn Service
+   */
   function loggedInServiceFactory(eventService) {
 
     var loggedIn = false;

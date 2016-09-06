@@ -159,11 +159,11 @@
         spaceDetail.apps.length === 0;
 
       // Rename Space
-      that.actions[0].disabled = !authModel.isAllowed(authModel.resources.space, authModel.actions.rename,
+      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
         spaceDetail.details.space);
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authModel.isAllowed(authModel.resources.space,
+      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space,
           authModel.actions.delete, spaceDetail.details.space);
 
     }
