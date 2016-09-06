@@ -83,17 +83,17 @@
             .then(function (userRoles) {
               var userSummary = {
                 organizations: {
-                  audited: userRoles[0].data.resources,
-                  billingManaged: userRoles[1].data.resources,
-                  managed: userRoles[2].data.resources,
+                  audited: userRoles[0],
+                  billingManaged: userRoles[1],
+                  managed: userRoles[2],
                   // User is a user in all these orgs
-                  all: userRoles[3].data.resources
+                  all: userRoles[3]
                 },
                 spaces: {
-                  audited: userRoles[4].data.resources,
-                  managed: userRoles[5].data.resources,
+                  audited: userRoles[4],
+                  managed: userRoles[5],
                   // User is a developer in this spaces
-                  all: userRoles[6].data.resources
+                  all: userRoles[6]
                 }
               };
               that.principal = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);

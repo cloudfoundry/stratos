@@ -8,7 +8,7 @@
 
     ListAllAppsForSpace: function (guid) {
       return {
-        url: '/pp/v1/proxy/v2/spaces/' + guid + '/apps',
+        url: '/pp/v1/proxy/v2/spaces/' + guid + '/apps?results-per-page=100',
 
         response: {
 
@@ -81,7 +81,7 @@
 
     ListAllSpaces: function () {
       return {
-        url: '/pp/v1/proxy/v2/spaces',
+        url: '/pp/v1/proxy/v2/spaces?results-per-page=100',
 
         response: {
 
@@ -175,7 +175,7 @@
 
     ListAllServicesForSpace: function(guid) {
       return {
-        url: '/pp/v1/proxy/v2/spaces/' + guid + '/services',
+        url: '/pp/v1/proxy/v2/spaces/' + guid + '/services?results-per-page=100',
         response: {
           200: {
             body: {
@@ -220,7 +220,7 @@
 
     ListAllServicesForSpaceWithSSO: function (guid) {
       return {
-        url: '/pp/v1/proxy/v2/spaces/' + guid + '/services',
+        url: '/pp/v1/proxy/v2/spaces/' + guid + '/services?results-per-page=100',
         response: {
           200: {
             body: {

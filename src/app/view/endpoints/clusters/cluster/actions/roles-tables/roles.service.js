@@ -255,7 +255,7 @@
 
       _.forEach(organizationModel.organizations[clusterGuid], function (organization) {
         _.forEach(organization.spaces, function (space) {
-          initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid));
+          initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid, {}, true));
         });
       });
 
@@ -819,7 +819,7 @@
           // Refresh space caches
           _.forEach(newOrgRoles.spaces, function (spaceRoles, spaceGuid) {
             if (_.keys(spaceRoles).length > 0) {
-              cachePromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, spaceGuid));
+              cachePromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, spaceGuid, {}, true));
             }
           });
 

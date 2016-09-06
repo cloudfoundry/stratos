@@ -384,7 +384,7 @@
       getOrganizations: function () {
         var that = this;
         var cnsiGuid = that.userInput.serviceInstance.guid;
-        return this.organizationModel.listAllOrganizations(cnsiGuid)
+        return this.organizationModel.listAllOrganizations(cnsiGuid, {}, true)
           .then(function (organizations) {
             that.options.organizations.length = 0;
             [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));

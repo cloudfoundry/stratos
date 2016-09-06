@@ -36,7 +36,6 @@
     this.organizationGuid = $stateParams.organization;
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
 
     function init() {
       that.organizationNames = that.organizationModel.organizationNames[that.clusterGuid];
@@ -49,7 +48,7 @@
 
   angular.extend(ClusterOrgDetailController.prototype, {
     organization: function () {
-      return _.get(this.organizationModel, this.orgPath);
+      return this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
     }
   });
 })();

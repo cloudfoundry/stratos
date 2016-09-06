@@ -154,7 +154,9 @@
     }
 
     $scope.$watch(function () {
-      return _.get(that.organization, 'details');
+      if (that.organization) {
+        return that.organization.details;
+      }
     }, function () {
       if (!that.organization.details) {
         return;
@@ -165,7 +167,9 @@
     });
 
     $scope.$watchCollection(function () {
-      return _.get(that.organization, '.roles.' + user.guid);
+      if (that.organization && that.organization.roles) {
+        return that.organization.roles[user.guid];
+      }
     }, function (roles) {
       // Present the user's roles
       that.roles = that.organizationModel.organizationRolesToStrings(roles);

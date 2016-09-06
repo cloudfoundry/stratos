@@ -29,11 +29,13 @@
     '$stateParams',
     '$q',
     '$log',
+    '$state',
     'app.model.modelManager',
-    'app.view.endpoints.clusters.routesService'
+    'app.view.endpoints.clusters.routesService',
+    'app.utils.utilsService'
   ];
 
-  function SpaceRoutesController($scope, $stateParams, $q, $log, modelManager, routesService) {
+  function SpaceRoutesController($scope, $stateParams, $q, $log, $state, modelManager, routesService, utils) {
     var that = this;
     this.clusterGuid = $stateParams.guid;
     this.organizationGuid = $stateParams.organization;
@@ -44,8 +46,6 @@
     this.routesService = routesService;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
 
     this.apps = {};
     this.actionsPerRoute = {};
@@ -59,9 +59,30 @@
       }
       that.updateActions(routes);
     });
+
+    function init() {
+      if (angular.isUndefined(that.spaceDetail().routes)) {
+        return that.update();
+      }
+
+      return $q.resolve();
+    }
+
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.routes', $state, init);
   }
 
   angular.extend(SpaceRoutesController.prototype, {
+
+    update: function (route) {
+      var that = this;
+      return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid, null, true)
+        .then(function () {
+          if (route) {
+            that.updateActions([route]);
+            that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid, _.keys(that.spaceDetail().routes).length);
+          }
+        });
+    },
 
     getInitialActions: function () {
       var that = this;
@@ -70,13 +91,9 @@
           name: gettext('Delete Route'),
           disabled: false,
           execute: function (route) {
-            that.routesService.deleteRoute(that.clusterGuid, route.entity, route.metadata.guid)
-              .then(function () {
-                return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid);
-              })
-              .then(function () {
-                that.updateActions([route]);
-              });
+            that.routesService.deleteRoute(that.clusterGuid, route.entity, route.metadata.guid).then(function () {
+              that.update(route);
+            });
           }
         },
         {
@@ -95,9 +112,7 @@
               if (changeCount < 1) {
                 return;
               }
-              that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid).then(function () {
-                that.updateActions([route]);
-              });
+              that.update(route);
             });
 
           }
@@ -118,14 +133,14 @@
         var space = that.spaceDetail().details.space;
         that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
         // Delete route
-        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.delete, space);
+        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) > 0 || !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.delete, space);
         // Unmap route
-        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 && !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.update, space);
+        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 || !that.authService.isAllowed(that.authService.resources.route, that.authService.actions.update, space);
       });
     },
 
     spaceDetail: function () {
-      return _.get(this.spaceModel, this.spacePath);
+      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
     }
 
   });

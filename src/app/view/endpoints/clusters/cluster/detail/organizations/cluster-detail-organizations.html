@@ -1,4 +1,5 @@
-<div ng-if="clusterDetailController.organizations === null" class="cluster-loading col-md-9 col-sm-12">
+<div ng-if="!clusterDetailController.organizations && clusterDetailController.organizations !== false"
+     class="cluster-loading message-box message-box-no-bg">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 <div ng-if="clusterDetailController.organizations === false" class="cluster-loading col-md-9 col-sm-12">
@@ -15,5 +16,3 @@
     <organization-tile organization="organization" organization-names="clusterController.organizationNames"></organization-tile>
   </div>
 </div>
-
-

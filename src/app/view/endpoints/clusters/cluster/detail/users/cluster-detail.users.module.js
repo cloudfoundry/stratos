@@ -52,6 +52,7 @@
     this.userRoles = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
+    this.stateInitialised = false;
 
     function refreshUsers() {
       that.userRoles = {};
@@ -107,9 +108,12 @@
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
+      return that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
         that.users = res;
         return refreshUsers();
+      }).then(function () {
+        that.stateInitialised = true;
+        return $q.resolve();
       });
     }
 
