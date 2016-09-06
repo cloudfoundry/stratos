@@ -79,6 +79,7 @@
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.userInput = {};
     this.options = {};
@@ -175,6 +176,8 @@
           branch: null,
           buildContainer: null,
           projectId: null,
+          hcfApiEndpoint: null,
+          hcfUserName: null,
           searchCategory: 'all',
           search: {
             entity: {
@@ -269,7 +272,20 @@
               templateUrl: path + 'cli-subflow/deploy.html',
               formName: 'application-cli-deploy-form',
               nextBtnText: gettext('Finished'),
-              isLastStep: true
+              isLastStep: true,
+              onEnter: function () {
+                that.userInput.hcfApiEndpoint = that.userInput.serviceInstance.api_endpoint.Scheme + '://' +
+                  that.userInput.serviceInstance.api_endpoint.Host;
+
+                // Get user name from StackatoInfo
+                if (that.stackatoInfo.info) {
+                  var endpointUser = that.stackatoInfo.info.endpoints.hcf[that.userInput.serviceInstance.guid].user;
+                  if (endpointUser) {
+                    that.userInput.hcfUserName = endpointUser.name;
+                  }
+                }
+                return that.$q.resolve();
+              }
             }
           ]
         };
