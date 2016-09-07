@@ -250,13 +250,24 @@
 
       var spaceCache = this.organizations[cnsiGuid][orgGuid].spaces;
       var spaceModel = this.modelManager.retrieve('cloud-foundry.model.space');
+
+      var promises = [];
       _.forEach(spaces, function (space) {
         spaceCache[space.metadata.guid] = space;
+
         // Ensure the space roles get cached as well. This allows use to determine org role status from space roles
         // without having to fetch all space data
-        spaceModel.cacheUsersRolesInSpace(cnsiGuid, space);
+
+        // Space roles can be inlined
+        if (space.entity.managers && space.entity.developers && space.entity.auditors) {
+          spaceModel.cacheUsersRolesInSpace(cnsiGuid, space);
+        } else {
+          promises.push(spaceModel.listRolesOfAllUsersInSpace(cnsiGuid, space.metadata.guid, null, true));
+        }
       });
       this.organizations[cnsiGuid][orgGuid].details.org.entity.spaces = spaces;
+
+      return this.$q.all(promises);
     },
 
     unCacheOrganization: function (cnsiGuid, orgGuid) {
@@ -307,11 +318,11 @@
         })
         .then(function (depthOneSpaces) {
           that.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
-          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces);
-          return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org)
-            .then(function () {
+          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces).then(function () {
+            return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org).then(function () {
               return depthOneSpaces;
             });
+          });
         });
     },
 
@@ -562,9 +573,10 @@
 
         that.cacheOrganizationDetails(cnsiGuid, orgGuid, details);
         that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, allUsersRoles);
-        that.cacheOrganizationSpaces(cnsiGuid, orgGuid, vals.spaces);
-
-        return details;
+        
+        return that.cacheOrganizationSpaces(cnsiGuid, orgGuid, vals.spaces).then(function () {
+          return details;
+        });
       });
     },
 

@@ -1,11 +1,80 @@
-<div class="service-text">
-  <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
-  <div>
-    <h4 class="font-semi-bold">{{ serviceCardCtrl.service.entity.extra.displayName || serviceCardCtrl.service.entity.label }}</h4>
-    <p>{{ serviceCardCtrl.service.entity.extra.longDescription || serviceCardCtrl.service.entity.description }}</p>
+<div class="service-card">
+  <div class="service-icon">
+    <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
+  </div>
+  <div class="service-block">
+    <div class="service-title">
+      <div class="service-text">
+        <h4 class="font-semi-bold">{{ serviceCardCtrl.service.entity.extra.displayName || serviceCardCtrl.service.entity.label }}</h4>
+      </div>
+      <div class="service-metadata">
+        <dl>
+          <dt class="font-semi-bold" translate>Version</dt>
+          <dd>{{ ::serviceCardCtrl.service.entity.version || '-'}}</dd>
+        </dl>
+      </div>
+      <div class="service-actions-menu">
+        <actions-menu actions="serviceCardCtrl.actions" ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.canBind"
+          action-target="service" menu-icon="helion-icon helion-icon-2x helion-icon-More"
+          menu-position="actions-menu-right">
+        </actions-menu>
+      </div>
+    </div>
+    <div class="service-description">
+      <p>{{ serviceCardCtrl.service.entity.extra.longDescription || serviceCardCtrl.service.entity.description }}</p>
+    </div>
+    <div class="service-action-block">
+      <div class="service-attached-msg">
+        <div class="service-attached font-semi-bold"
+          ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 0">
+          {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
+        </div>
+      </div>
+      <div class="service-actions">
+        <div class="font-semi-bold" ng-if="!serviceCardCtrl.canBind" translate>
+          This service can not be bound to an Application
+        </div>
+        <div class="service-added font-semi-bold text-uppercase"
+          ng-if="serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 0">
+          {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
+        </div>
+        <button class="btn btn-sm btn-link"
+          ng-if="serviceCardCtrl.canBind && (serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0)"
+          ng-click="serviceCardCtrl.addService()" translate>
+          Add Service
+          <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+        </button>
+        <button class="btn btn-sm btn-link"
+          ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached === 1"
+          ng-click="serviceCardCtrl.detach()" translate>
+          Detach
+        </button>
+        <button class="btn btn-sm btn-link"
+          ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 1"
+          ng-click="serviceCardCtrl.manageInstances()" translate>
+          Manage Instances
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--
     <div class="font-semi-bold" ng-if="!serviceCardCtrl.canBind" translate>
       This service can not be bound to an Application
     </div>
+
+
+          <dt class="service-attached font-semi-bold"
+            ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 0">
+            {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
+          </dt>
+
+
+<div class="service-text">
+  <div>
+    <h4 class="font-semi-bold">{{ serviceCardCtrl.service.entity.label }}</h4>
+    <p>{{ serviceCardCtrl.service.entity.extra.longDescription || serviceCardCtrl.service.entity.description }}</p>
   </div>
 </div>
 <div class="service-metadata">
@@ -20,29 +89,5 @@
     </dt>
   </dl>
   <div class="service-actions">
-    <actions-menu actions="serviceCardCtrl.actions" ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.canBind"
-      action-target="service" menu-icon="helion-icon helion-icon-2x helion-icon-More"
-      menu-position="actions-menu-right">
-    </actions-menu>
-    <div class="service-added font-semi-bold text-uppercase"
-      ng-if="serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 0">
-      {{ serviceCardCtrl.numAttached }} <span translate>Attached</span>
-    </div>
-    <button class="btn btn-sm btn-link"
-      ng-if="serviceCardCtrl.canBind && (serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0)"
-      ng-click="serviceCardCtrl.addService()" translate>
-      Add Service
-      <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
-    </button>
-    <button class="btn btn-sm btn-link"
-      ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached === 1"
-      ng-click="serviceCardCtrl.detach()" translate>
-      Detach
-    </button>
-    <button class="btn btn-sm btn-link"
-      ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 1"
-      ng-click="serviceCardCtrl.manageInstances()" translate>
-      Manage Instances
-    </button>
-  </div>
 </div>
+-->
