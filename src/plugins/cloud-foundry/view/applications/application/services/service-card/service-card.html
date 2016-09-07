@@ -1,7 +1,7 @@
 <div class="service-text">
   <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
   <div>
-    <h4 class="font-semi-bold">{{ serviceCardCtrl.service.entity.extra.displayName || serviceCardCtrl.service.entity.label }}</h4>
+    <h4 class="font-semi-bold">{{ serviceCardCtrl.service.entity.label }}</h4>
     <p>{{ serviceCardCtrl.service.entity.extra.longDescription || serviceCardCtrl.service.entity.description }}</p>
     <div class="font-semi-bold" ng-if="!serviceCardCtrl.canBind" translate>
       This service can not be bound to an Application
