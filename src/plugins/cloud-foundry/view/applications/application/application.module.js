@@ -143,7 +143,7 @@
         execute: function () {
 
           var username = null;
-          if (that.stackatoInfo.info) {
+          if (that.stackatoInfo.info.endpoints) {
             username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
           }
           that.cliCommands.show(that.model.application, username);

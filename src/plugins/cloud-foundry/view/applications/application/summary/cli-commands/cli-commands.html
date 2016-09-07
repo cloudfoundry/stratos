@@ -29,31 +29,36 @@
     </p>
   </div>
   <div>
+
     <br><h4 translate>Application Management Commands</h4>
     <dl>
-      <dt translate>Start application</dt>
+      <dt translate>Summary</dt>
       <dd>
-        <code-block>cf start {{context.appName || '[app name]'}}</code-block>
+        To get the application summary<code-block>cf app {{context.appName || '[app name]'}}</code-block>
         <br></dd>
-      <dt translate>Stop application</dt>
+      <dt translate>Start</dt>
       <dd>
-        <code-block>cf stop {{context.appName || '[app name]'}}</code-block>
+        To start the application<code-block>cf start {{context.appName || '[app name]'}}</code-block>
         <br></dd>
-      <dt translate>Restart application</dt>
+      <dt translate>Stop</dt>
       <dd>
-        <code-block>cf restart {{context.appName || '[app name]'}}</code-block>
+        To stop the application<code-block>cf stop {{context.appName || '[app name]'}}</code-block>
+        <br></dd>
+      <dt translate>Restart</dt>
+      <dd>
+        To restart the application<code-block>cf restart {{context.appName || '[app name]'}}</code-block>
         <br></dd>
     </dl>
 
-    <br><h4 translate>Scaling Application </h4>
+    <br><h4 translate>Scaling The Application</h4>
     <dl>
-      <dt translate>Change number of application instances</dt>
+      <dt translate>Instances</dt>
       <dd translate>
-        <code-block>cf scale {{context.appName || '[app name]'}} -i [N]</code-block>
+        To change the number of application instances<code-block>cf scale {{context.appName || '[app name]'}} -i [N]</code-block>
         <br></dd>
-      <dt translate>Change memory allocated to application instances</dt>
+      <dt translate>Memory</dt>
       <dd translate>
-        <code-block>cf scale {{context.appName || '[app name]'}} -m [N]</code-block>
+        To change memory allocated to application instances <code-block>cf scale {{context.appName || '[app name]'}} -m [N]</code-block>
         <br></dd>
     </dl>
 
