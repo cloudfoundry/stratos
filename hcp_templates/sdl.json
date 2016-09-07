@@ -201,6 +201,60 @@
           "mountpoint": "/database"
         }
       ]
+    },
+    {
+      "name": "hsc-etcd",
+      "version": "1.0.0",
+      "vendor": "HPE",
+      "min_RAM_mb": 512,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "capabilities": [],
+      "repository": "{{REGISTRY}}",
+      "image": "hsc/hsc-etcd2:{{TAG}}",
+      "workload_type": "container",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "CONSOLE_VERSION"
+        },
+        {
+          "name": "ETCD_DATA_DIR"
+        },
+        {
+          "name": "ETCD_WAL_DIR"
+        }
+      ],
+      "affinity": [],
+      "min_instances": 5,
+      "max_instances": 5,
+      "service_ports": [
+        {
+          "name": "etcd-client",
+          "protocol": "TCP",
+          "source_port": 2379,
+          "target_port": 2379,
+          "public": false
+        },
+        {
+          "name": "etcd-peer",
+          "protocol": "TCP",
+          "source_port": 2380,
+          "target_port": 2380,
+          "public": false
+        }
+      ],
+      "volume_mounts": [
+        {
+          "volume_name": "hsc-etcd-data-volume",
+          "mountpoint": "/etcd_data"
+        },
+        {
+          "volume_name": "hsc-etcd-wal-volume",
+          "mountpoint": "/etcd_wal"
+        }
+      ]
     }
   ],
   "features": {
@@ -355,6 +409,18 @@
       "name": "hsc-encryption-key-volume",
       "size_gb": 1,
       "shared": true
+    },
+    {
+      "name": "hsc-etcd-data-volume",
+      "size_gb": 10,
+      "filesystem": "ext4",
+      "shared": false
+    },
+    {
+      "name": "hsc-etcd-wal-volume",
+      "size_gb": 1,
+      "filesystem": "ext4",
+      "shared": false
     }
   ],
   "parameters": [
@@ -700,6 +766,22 @@
       "description": "The filename of the encryption key used to encrypt sensitive data before it gets saved to Postgresql.",
       "data_type": "string",
       "default": "key",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_DATA_DIR",
+      "description": "Path to the etcd data directory.",
+      "data_type": "string",
+      "default": "/etcd_data/data",
+      "required": true,
+      "secret": false
+    },
+    {
+      "name": "ETCD_WAL_DIR",
+      "description": "Path to the etcd wal directory.",
+      "data_type": "string",
+      "default": "/etcd_wal/wal",
       "required": true,
       "secret": false
     }

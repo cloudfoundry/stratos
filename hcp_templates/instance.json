@@ -5,7 +5,13 @@
   "vendor": "HPE",
   "instance_id": "hsc",
   "description": "An instance of the Helion Stackato Console",
-  "scaling": [],
+  "scaling": [
+    {
+      "component": "hsc-etcd",
+      "min_instances": 5,
+      "max_instances": 5
+    }
+  ],
   "volumes": [],
   "parameters": []
 }
