@@ -43,10 +43,9 @@
      * @param {string} clusterGuid guid of the HCF cluster
      * @param {string} organizationGuid guid of the organization to show
      * @param {object} users collection of users to pre-select
-     * @param {boolean} refreshSpaceRoles true if the space roles should be updated
      * @returns {promise} promise fulfilled when dialogue has closed
      */
-    this.show = function (clusterGuid, organizationGuid, users, refreshSpaceRoles) {
+    this.show = function (clusterGuid, organizationGuid, users) {
 
       selectedRoles = {};
       var organizations = _.omitBy(organizationModel.organizations[clusterGuid], function (org, orgGuid) {
@@ -59,14 +58,9 @@
       });
 
       // Async refresh roles
-      var state = {};
-      var initPromise = rolesService.refreshRoles(clusterGuid, refreshSpaceRoles)
-        .then(function () {
-          state.initialised = true;
-        })
-        .catch(function () {
-          state.initialised = false;
-        });
+      var state = {
+        initialised: true
+      };
 
       // Make the actual user role changes
       var updateUsers = function () {
@@ -94,7 +88,6 @@
             orgRoles: rolesService.organizationRoles,
             spaceRoles: rolesService.spaceRoles,
             users: users,
-            initPromise: initPromise,
             removeFromOrg: removeFromOrg,
             containsRoles: containsRoles,
             showExistingRoles: users.length < 2

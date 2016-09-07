@@ -158,7 +158,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser], false).result;
+          return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
         }
       },
       {
@@ -216,7 +216,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, guidsToUsers(), true).result;
+      return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, guidsToUsers()).result;
     };
 
     this.removeFromOrganization = function () {
