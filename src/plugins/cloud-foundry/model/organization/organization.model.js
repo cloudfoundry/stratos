@@ -573,7 +573,7 @@
 
         that.cacheOrganizationDetails(cnsiGuid, orgGuid, details);
         that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, allUsersRoles);
-        
+
         return that.cacheOrganizationSpaces(cnsiGuid, orgGuid, vals.spaces).then(function () {
           return details;
         });
