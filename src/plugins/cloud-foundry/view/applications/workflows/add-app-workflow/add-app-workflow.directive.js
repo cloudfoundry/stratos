@@ -387,7 +387,7 @@
       getOrganizations: function () {
         var that = this;
         var cnsiGuid = that.userInput.serviceInstance.guid;
-        return this.organizationModel.listAllOrganizations(cnsiGuid)
+        return this.organizationModel.listAllOrganizations(cnsiGuid, {}, true)
           .then(function (organizations) {
 
             // Filter out organizations in which user does not

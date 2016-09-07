@@ -25,7 +25,8 @@
   ClusterTileController.$inject = [
     '$scope',
     '$state',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.api.apiManager'
   ];
 
   /**
@@ -34,17 +35,32 @@
    * @param {object} $scope - the angular $scope service
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.api.apiManager} apiManager - the API management service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    * @property {number} orgCount - organisation count
    * @property {number} userCount - user count
    * @property {object} cardData - gallery-card directive data object
    */
-  function ClusterTileController($scope, $state, modelManager) {
+  function ClusterTileController($scope, $state, modelManager, apiManager) {
     var that = this;
 
+    var passThroughHeader = {
+      'x-cnap-passthrough': 'true'
+    };
+
+    this.makeHttpConfig = function (cnsiGuid) {
+      var headers = {'x-cnap-cnsi-list': cnsiGuid};
+      angular.extend(headers, passThroughHeader);
+      return {
+        headers: headers
+      };
+    };
+
     this.$state = $state;
-    this.cfModelUsers = modelManager.retrieve('cloud-foundry.model.users');
-    this.cfModelOrg = modelManager.retrieve('cloud-foundry.model.organization');
+    // Need to fetch the total number of organizations and users. To avoid fetching all items, only fetch 1 and read
+    // list metadata total_results. In order to do this we must go via the api, not the model.
+    this.userApi = apiManager.retrieve('cloud-foundry.api.Users');
+    this.organizationApi = apiManager.retrieve('cloud-foundry.api.Organizations');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
@@ -69,7 +85,7 @@
       return cardData;
     };
 
-    $scope.$watch(function () { return that.service; }, function (newVal) {
+    $scope.$watch(function () { return that.service.guid; }, function (newVal) {
       if (!newVal) {
         return;
       }
@@ -133,13 +149,13 @@
       }
 
       var that = this;
-      // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
-      // just for the count. This will help in the case the connected user does not have privileges.
-      this.cfModelUsers.listAllUsers(this.service.guid).then(function (res) {
-        that.userCount = _.get(res, 'length', null);
-      }).catch(function () {
-        that.userCount = undefined;
-      });
+
+      this.userApi.ListAllUsers({'results-per-page': 1}, this.makeHttpConfig(this.service.guid))
+        .then(function (response) {
+          that.userCount = response.data.total_results;
+        }).catch(function () {
+          that.userCount = undefined;
+        });
     },
 
     /**
@@ -155,13 +171,12 @@
         return;
       }
       var that = this;
-      // We should look to improve this, maybe overload portal-proxy such that the whole user set has to be retrieved
-      // just for the count. This will help in the case the connected user does not have privileges.
-      this.cfModelOrg.listAllOrganizations(this.service.guid).then(function (res) {
-        that.orgCount = _.get(res, 'length', null);
-      }).catch(function () {
-        that.orgCount = undefined;
-      });
+      this.organizationApi.ListAllOrganizations({'results-per-page': 1}, this.makeHttpConfig(this.service.guid))
+        .then(function (response) {
+          that.orgCount = response.data.total_results;
+        }).catch(function () {
+          that.orgCount = undefined;
+        });
     },
 
     /**

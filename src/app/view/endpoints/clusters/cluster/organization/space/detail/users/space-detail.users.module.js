@@ -57,6 +57,7 @@
     this.userRoles = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
+    this.stateInitialised = false;
 
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
@@ -143,9 +144,12 @@
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
+      return that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
         that.users = res;
         return refreshUsers();
+      }).then(function () {
+        that.stateInitialised = true;
+        return $q.resolve();
       });
     }
 
