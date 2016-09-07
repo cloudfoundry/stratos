@@ -42,8 +42,11 @@
     this.eventService = eventService;
     this.ready = false;
     this.loading = true;
-    this.currentPage = 1;
+    this.currentPage = 0;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
+    this.loading = false;
+    this.currentPage = 0;
+    this.clusters = [{label: 'All Clusters', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
     this.spaces = [{label: 'All Spaces', value: 'all'}];
     this.filter = {
@@ -56,7 +59,7 @@
       that._setClusters();
       that._setOrgs();
       that._setSpaces();
-      that._loadPage(1);
+      that._reload();
     });
 
     this.paginationProperties = {
@@ -69,10 +72,6 @@
         prevBtn: gettext('Previous')
       }
     };
-
-    this.eventService.$on('cf.events.NEW_APP_CREATED', function () {
-      that.reloadPage();
-    });
   }
 
   angular.extend(ApplicationsListController.prototype, {
@@ -161,6 +160,25 @@
     },
 
     /**
+     * @function _resetPagination
+     * @description reset pagination
+     * @returns {promise} A promise
+     * @private
+     */
+    _resetPagination: function () {
+      var that = this;
+      this.loading = true;
+      this.currentPage = 0;
+      this.paginationProperties.total = 0;
+
+      return this.model.resetPagination().
+        finally(function () {
+          that.paginationProperties.total = that.model.pagination.totalPage;
+          that.loading = false;
+        });
+    },
+
+    /**
      * @function _loadPage
      * @description Retrieve apps with given page number
      * @param {number} page - page number
@@ -170,16 +188,10 @@
     _loadPage: function (page) {
       var that = this;
       this.loading = true;
-      this.currentPage = page;
 
-      return this.model
-        .all(null, {
-          page: page
-        })
-        .then(function () {
-          that.paginationProperties.total = that.model.data.totalPageNumber;
-        })
+      return this.model.loadPage(page)
         .finally(function () {
+          that.currentPage = page;
           that.ready = true;
           that.loading = false;
         });
@@ -196,6 +208,21 @@
     },
 
     /**
+     * @function _reload
+     * @description Reload
+     * @private
+     */
+    _reload: function () {
+      var that = this;
+
+      this._resetPagination().then(function () {
+        if (that.model.pagination.totalPage) {
+          return that._loadPage(1);
+        }
+      });
+    },
+
+    /**
      * @function getClusterOrganizations
      * @description Get organizations for selected cluster
      * @returns {void}
@@ -205,8 +232,8 @@
       this.organizations.length = 1;
       this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
       this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
-      this._loadPage(1);
       this._setOrgs();
+      this._reload();
     },
 
     /**
@@ -219,13 +246,13 @@
       this.spaces.length = 1;
       this.model.filterParams.orgGuid = this.filter.orgGuid;
       this._setFilter({spaceGuid: 'all'});
-      this._loadPage(1);
       this._setSpaces();
+      this._reload();
     },
 
     setSpace: function () {
       this.model.filterParams.spaceGuid = this.filter.spaceGuid;
-      this._loadPage(1);
+      this._reload();
     },
 
     /**
