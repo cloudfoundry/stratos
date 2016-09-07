@@ -75,16 +75,23 @@
      * @description list all service bindings
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object=} params - params for url building
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A promise object
      * @public
      */
-    listAllServiceBindings: function (cnsiGuid, params) {
+    listAllServiceBindings: function (cnsiGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.ServiceBindings')
-        .ListAllServiceBindings(params, this.modelUtils.makeHttpConfig(cnsiGuid))
+        .ListAllServiceBindings(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.onListAllServiceBindings(cnsiGuid, response.data.resources);
+          if (dePaginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
+        })
+        .then(function (serviceBindings) {
+          that.onListAllServiceBindings(cnsiGuid, serviceBindings);
+          return serviceBindings;
         });
     },
 

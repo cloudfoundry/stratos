@@ -332,15 +332,22 @@
      * @description List service bindings for application
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the application guid
-     * @param {object} params - the extra params to pass to request
+     * @param {object=} params - the extra params to pass to request
+     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
+     * and return the entire collection
      * @returns {promise} A promise object
      * @public
      **/
-    listServiceBindings: function (cnsiGuid, guid, params) {
+    listServiceBindings: function (cnsiGuid, guid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .ListAllServiceBindingsForApp(guid, params)
+        .ListAllServiceBindingsForApp(guid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid].resources;
+          if (dePaginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
         });
     },
 

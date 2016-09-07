@@ -107,7 +107,7 @@
     getServiceBindings: function (serviceInstanceGuids) {
       var that = this;
       var q = 'service_instance_guid IN ' + serviceInstanceGuids.join(',');
-      return this.appModel.listServiceBindings(this.data.cnsiGuid, this.data.app.summary.guid, { q: q })
+      return this.appModel.listServiceBindings(this.data.cnsiGuid, this.data.app.summary.guid, { q: q }, true)
         .then(function (bindings) {
           that.serviceBindings = _.keyBy(bindings, function (o) { return o.entity.service_instance_guid; });
         });

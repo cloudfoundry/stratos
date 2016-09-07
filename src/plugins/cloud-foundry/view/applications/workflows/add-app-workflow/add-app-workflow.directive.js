@@ -450,7 +450,7 @@
       getPrivateDomains: function () {
         var that = this;
         var cnsiGuid = that.userInput.serviceInstance.guid;
-        return this.privateDomainModel.listAllPrivateDomains(cnsiGuid).then(function (privateDomains) {
+        return this.privateDomainModel.listAllPrivateDomains(cnsiGuid, null, true).then(function (privateDomains) {
           [].push.apply(that.options.domains, _.map(privateDomains, that.selectOptionMapping));
         });
       },

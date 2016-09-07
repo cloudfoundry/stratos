@@ -127,18 +127,18 @@
     * @description lists all apps for the route and store the response in the model
     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - route identifier
-    * @param {object} params - optional parameters
+    * @param {object=} params - optional parameters
     * @returns {promise} A resolved/rejected promise
     * @public
     */
     listAllAppsForRoute: function (cnsiGuid, guid, params) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllAppsForRoute(guid, params)
+        .ListAllAppsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           that.route.id = guid;
-          that.route.apps = response.data[cnsiGuid];
-          return response.data[cnsiGuid];
+          that.route.apps = response.data;
+          return response.data;
         });
     },
 
@@ -154,9 +154,9 @@
     */
     listAllAppsForRouteWithoutStore: function (cnsiGuid, guid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllAppsForRoute(guid, params)
+        .ListAllAppsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid].resources;
+          return response.data;
         });
     },
 

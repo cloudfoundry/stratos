@@ -63,8 +63,9 @@
     this.ready = false;
 
     $scope.$watch(function () {
-      return that.appModel.application.summary;
-    }, function (summary) {
+      return that.appModel.application.summary.guid;
+    }, function () {
+      var summary = that.appModel.application.summary;
       var spaceGuid = summary.space_guid;
       if (angular.isDefined(spaceGuid)) {
         that.model.listAllServicesForSpace(that.cnsiGuid, spaceGuid)
