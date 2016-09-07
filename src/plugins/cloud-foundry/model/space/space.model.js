@@ -519,7 +519,7 @@
       var userGuid = that.stackatoInfoModel.info;
 
       // Space roles can be inlined
-      if (space.entity.managers) {
+      if (space.entity.managers && space.entity.developers && space.entity.auditors) {
         rolesP = that.$q.resolve(that.cacheUsersRolesInSpace(cnsiGuid, space));
       } else {
         rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params, true);
