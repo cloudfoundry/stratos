@@ -35,7 +35,6 @@
    * @property {function} removeAllRoles - Remove users from all organizations and spaces in a cluster
    * @property {function} removeFromOrganization - Remove users from an organization and it's spaces
    * @property {function} removeFromSpace - Remove users from a space
-   * @property {function} refreshRoles - Conditionally refresh the space roles cache
    * @property {function} assignUsers - Assign organization and space roles for the users supplied. does not cover
    * removing roles.
    * @property {function} updateUsers - Update (assign or remove) organization and space roles for the users supplied
@@ -177,18 +176,16 @@
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
     this.removeAllRoles = function (clusterGuid, users) {
-      return this.refreshRoles(users, clusterGuid, true).then(function () {
-        var oldRolesByUser = createCurrentRoles(users, clusterGuid);
+      var oldRolesByUser = createCurrentRoles(users, clusterGuid);
 
-        // Need to create a 'newRolesByUser' struct just like oldRolesByUser except flips any org/space role 'truthy' to
-        // 'falsy'.
-        var newRolesByUser = _.cloneDeep(oldRolesByUser);
-        _.forEach(newRolesByUser, function (userRoles) {
-          that.clearOrgs(userRoles);
-        });
-
-        return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
+      // Need to create a 'newRolesByUser' struct just like oldRolesByUser except flips any org/space role 'truthy' to
+      // 'falsy'.
+      var newRolesByUser = _.cloneDeep(oldRolesByUser);
+      _.forEach(newRolesByUser, function (userRoles) {
+        that.clearOrgs(userRoles);
       });
+
+      return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
     };
 
     /**
@@ -200,18 +197,16 @@
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
     this.removeFromOrganization = function (clusterGuid, orgGuid, users) {
-      return this.refreshRoles(users, clusterGuid, true).then(function () {
-        var oldRolesByUser = createCurrentRoles(users, clusterGuid, orgGuid);
+      var oldRolesByUser = createCurrentRoles(users, clusterGuid, orgGuid);
 
-        // Need to create a 'newRolesByUser' struct just like oldRolesByUser except flips any org/space role 'truthy' to
-        // 'falsy'.
-        var newRolesByUser = _.cloneDeep(oldRolesByUser);
-        _.forEach(newRolesByUser, function (userRoles) {
-          that.clearOrgs(userRoles);
-        });
-
-        return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
+      // Need to create a 'newRolesByUser' struct just like oldRolesByUser except flips any org/space role 'truthy' to
+      // 'falsy'.
+      var newRolesByUser = _.cloneDeep(oldRolesByUser);
+      _.forEach(newRolesByUser, function (userRoles) {
+        that.clearOrgs(userRoles);
       });
+
+      return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
     };
 
     /**
@@ -238,28 +233,6 @@
 
       return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
 
-    };
-
-    /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.refreshRoles
-     * @description Conditionally refresh the space roles cache
-     * @param {string} clusterGuid - HCF service guid
-     * @param {object} refreshSpaceRoles - True if the space roles cache should be updated
-     * @returns {promise}
-     */
-    this.refreshRoles = function (clusterGuid, refreshSpaceRoles) {
-      var initPromises = [];
-      if (!refreshSpaceRoles) {
-        return $q.when();
-      }
-
-      _.forEach(organizationModel.organizations[clusterGuid], function (organization) {
-        _.forEach(organization.spaces, function (space) {
-          initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid, {}, true));
-        });
-      });
-
-      return $q.all(initPromises);
     };
 
     /**

@@ -2,94 +2,141 @@ service-card {
   display: flex;
   width: 100%;
 
-  .service-icon {
-    display: block;
-    padding: $hpe-unit-space * 1.5;
-    padding-left: $hpe-unit-space / 2;
-  }
-
-  .service-text {
+  .service-card {
     display: flex;
-    flex-grow: 1;
-    max-width: 50%;
+    width: 100%;
+    min-height: $hpe-unit-space * 5;
 
-    h4 {
-      margin-top: 0;
+    .service-icon {
+      display: block;
+      padding: 0;
+      padding-right: $hpe-unit-space;
     }
-  }
 
-  .service-metadata {
-    display: flex;
-    flex-grow: 1;
-    padding-left: $hpe-unit-space;
-
-    dl {
+    .service-block {
+      display: flex;
       flex-grow: 1;
-      dt {
-        text-transform: uppercase;
+      flex-direction: column;
 
-        &:not(:first-of-type) {
-          margin-top: $hpe-unit-space / 2;
+      .service-title {
+        display: flex;
+        .service-text {
+          display: flex;
+          flex: 1 1 0;
+
+          h4 {
+            margin-top: 0;
+          }
         }
+
+        .service-metadata {
+          display: flex;
+          padding: 0 $hpe-unit-space 0 $hpe-unit-space;
+          flex: none;
+          width: 35%;
+
+          dl {
+            margin: 0;
+            dt {
+              display: inline-block;
+              text-transform: uppercase;
+              margin-right: $hpe-unit-space;
+
+              &:not(:first-of-type) {
+                margin-top: $hpe-unit-space / 2;
+              }
+            }
+            dd {
+              display: inline-block;
+            }
+          }
+        }
+
+        @media (max-width: 640px) {
+          .service-metadata {
+            display: none;
+          }
+        }
+
+        .service-actions-menu {
+          text-align: right;
+          width:  $hpe-unit-space * 2;
+          flex: none;
+
+          .actions-menu {
+            &.open {
+              .actions-menu-icon {
+                color: $brand-primary;
+              }
+
+              .actions-menu-list {
+                margin-top: -$hpe-unit-space / 2;
+              }
+            }
+
+            .actions-menu-icon {
+              font-weight: $hpe-font-weight-semibold;
+              line-height: $hpe-unit-space;
+              font-size: 1.75em;
+            }
+          }
+        }
+
       }
-    }
 
-    .service-actions {
-      @include flex-align($flex-direction: column);
-      text-align: right;
-
-      .actions-menu {
-        &.open {
-          .actions-menu-icon {
-            color: $brand-primary;
-          }
-
-          .actions-menu-list {
-            margin-top: -$hpe-unit-space / 2;
-          }
-        }
-
-        .actions-menu-icon {
-          font-weight: $hpe-font-weight-semibold;
-          line-height: $hpe-unit-space;
-        }
+      .service-description {
+        flex-grow: 1;
+        padding-right: $hpe-unit-space * 2;
       }
 
-      .btn-link {
-        margin-top: auto;
-        padding-right: 0;
+      .service-action-block {
+        display: flex;
 
-        &:hover,
-        &:focus,
-        &:active {
-          text-decoration: none;
-          outline: 0;
-
-          .add-icon {
-            border-color: $link-hover-color;
-          }
+        .service-attached-msg {
+          flex: 1 1 0;
+          margin: auto 0;
         }
 
-        .add-icon {
-          border: 2px solid $brand-primary;
-          font-size: $hpe-unit-space / 2;
-          border-radius: 50%;
-          padding: $hpe-unit-space / 6;
+        .service-attached:before {
+          font-family: 'helion-icons';
+          content: '\e916';
+          margin-right: $hpe-unit-space / 4;
+        }
+
+        .service-added:after {
+          font-family: 'helion-icons';
+          content: '\e916';
           margin-left: $hpe-unit-space / 4;
         }
       }
-    }
 
-    .service-attached:before {
-      font-family: 'helion-icons';
-      content: '\e916';
-      margin-right: $hpe-unit-space / 4;
-    }
+      .service-actions {
+        text-align: right;
 
-    .service-added:after {
-      font-family: 'helion-icons';
-      content: '\e916';
-      margin-left: $hpe-unit-space / 4;
+        .btn-link {
+          margin-top: auto;
+          padding-right: 0;
+
+          &:hover,
+          &:focus,
+          &:active {
+            text-decoration: none;
+            outline: 0;
+
+            .add-icon {
+              border-color: $link-hover-color;
+            }
+          }
+
+          .add-icon {
+            border: 2px solid $brand-primary;
+            font-size: $hpe-unit-space / 2;
+            border-radius: 50%;
+            padding: $hpe-unit-space / 6;
+            margin-left: $hpe-unit-space / 4;
+          }
+        }
+      }
     }
   }
 }
