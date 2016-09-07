@@ -105,7 +105,7 @@
 
       var featureFlagsPromise = featureFlagsModel.fetch(cnsiGuid);
       var stackatoInfoPromise = this.$q.resolve(stackatoInfo.info);
-      if (useStackatoInfoCache) {
+      if (!useStackatoInfoCache) {
         stackatoInfoPromise = stackatoInfo.getStackatoInfo();
       }
       return this.$q.all([featureFlagsPromise, stackatoInfoPromise])

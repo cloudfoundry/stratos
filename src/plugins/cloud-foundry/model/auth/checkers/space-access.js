@@ -31,12 +31,10 @@
      * @name SpaceAccess
      * @description Constructor for SpaceAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
-    function SpaceAccess(principal, flags) {
+    function SpaceAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 

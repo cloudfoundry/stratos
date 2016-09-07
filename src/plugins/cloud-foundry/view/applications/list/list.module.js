@@ -284,11 +284,11 @@
 
       // If we're not ready or there is no
       // connected cluster, hide the button
-      if (!this.ready || this.model.clusterCount === 0) {
-        return false;
+      if (this.ready && this.model.clusterCount > 0) {
+        return this.isSpaceDeveloper;
       }
 
-      return this.isSpaceDeveloper;
+      return false;
     }
   });
 })();

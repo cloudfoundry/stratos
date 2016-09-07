@@ -31,7 +31,6 @@
      * @name ApplicationAccess
      * @description Constructor for ApplicationAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
     function ApplicationAccess(principal) {

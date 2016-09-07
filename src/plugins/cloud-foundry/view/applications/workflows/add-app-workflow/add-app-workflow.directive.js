@@ -426,11 +426,8 @@
             // Filter out spaces in which user is not a Space Developer
             var filteredSpaces = spaces;
             if (!that.authModel.isAdmin(cnsiGuid)) {
-              filteredSpaces = _.filter(spaces, function (space) {
-                return that.authModel.isAllowed(cnsiGuid,
-                  that.authModel.resources.application,
-                  that.authModel.actions.create, space.metadata.guid);
-              });
+              filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
+                {entity: {organization_guid: guid}});
             }
 
             that.options.spaces.length = 0;

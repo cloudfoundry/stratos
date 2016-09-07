@@ -191,6 +191,11 @@
 
       return this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
+          that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
+            that.authModel.resources.application,
+            that.authModel.actions.update,
+            that.model.application.summary.space_guid
+          );
           return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);
         })
         .then(function () {
@@ -207,11 +212,6 @@
             that.startUpdate();
           }
           that.onAppStateChange();
-          that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
-            that.authModel.resources.application,
-            that.authModel.actions.update,
-            that.model.application.summary.space_guid
-          );
         });
     },
 

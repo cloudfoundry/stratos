@@ -31,7 +31,6 @@
      * @name RouteAccess
      * @description Constructor for RouteAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
     function RouteAccess(principal) {

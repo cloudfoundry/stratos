@@ -19,7 +19,6 @@
   }
 
   ApplicationSummaryController.$inject = [
-    '$scope',
     '$state',
     '$log',
     '$q',

@@ -32,7 +32,6 @@
      * @name ServiceInstanceAccess
      * @description Constructor for ServiceInstanceAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
     function ServiceInstanceAccess(principal) {
