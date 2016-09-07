@@ -27,6 +27,7 @@
     'app.event.eventService',
     'github.view.githubOauthService',
     'cloud-foundry.view.applications.services.hceSupport',
+    'app.utils.utilsService',
     '$scope',
     '$q',
     '$timeout'
@@ -40,6 +41,7 @@
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
    * @param {object} hceSupport - HCE Support service
+   * @param {object} utils - Utils service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
@@ -63,7 +65,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, hceSupport, $scope, $q, $timeout) {
+  function AddAppWorkflowController(modelManager, eventService, githubOauthService, hceSupport, utils, $scope, $q, $timeout) {
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -72,6 +74,7 @@
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
     this.hceSupport = hceSupport;
+    this.utils = utils;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -274,8 +277,7 @@
               nextBtnText: gettext('Finished'),
               isLastStep: true,
               onEnter: function () {
-                that.userInput.hcfApiEndpoint = that.userInput.serviceInstance.api_endpoint.Scheme + '://' +
-                  that.userInput.serviceInstance.api_endpoint.Host;
+                that.userInput.hcfApiEndpoint = that.utils.getClusterEndpoint(that.userInput.serviceInstance);
 
                 // Get user name from StackatoInfo
                 if (that.stackatoInfo.info) {
