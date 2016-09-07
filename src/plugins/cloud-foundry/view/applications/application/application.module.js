@@ -35,7 +35,8 @@
     '$q',
     '$interval',
     '$interpolate',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'cloud-foundry.view.applications.application.summary.cliCommands'
   ];
 
   /**
@@ -61,7 +62,7 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
    */
-  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, confirmDialog) {
+  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, confirmDialog, cliCommands) {
     var that = this;
 
     this.$window = $window;
@@ -73,7 +74,9 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
+    this.cliCommands = cliCommands;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
     this.ready = false;
@@ -138,6 +141,12 @@
         name: gettext('CLI Instructions'),
         id: 'cli',
         execute: function () {
+
+          var username = null;
+          if (that.stackatoInfo.info) {
+            username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
+          }
+          that.cliCommands.show(that.model.application, username);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
