@@ -115,16 +115,16 @@
 
     this.disableManageRoles = function () {
       return this.rolesService.changingRoles ||
-        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.guid, that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
     this.disableChangeRoles = function () {
-      return this.rolesService.changingRoles || !this.canUserManageRoles(that.guid, that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+      return this.rolesService.changingRoles || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
     this.disableRemoveFromOrg = function () {
       return this.rolesService.changingRoles ||
-        this.selectedUsersCount() < 1 || !this.canUserManageRoles(that.guid, that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+        this.selectedUsersCount() < 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
     };
 
     var debouncedUpdateSelection = _.debounce(function () {
