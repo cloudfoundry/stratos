@@ -1,4 +1,8 @@
-<div class="cluster-users-table"
+<div ng-if="!clusterUsersController.stateInitialised" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="clusterUsersController.stateInitialised"
+     class="cluster-users-table"
      st-table="clusterUsersController.visibleUsers"
      st-safe-src="clusterUsersController.users">
   <div>

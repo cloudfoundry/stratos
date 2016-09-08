@@ -32,35 +32,34 @@
      * @name ServiceInstanceAccess
      * @description Constructor for ServiceInstanceAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
-    function ServiceInstanceAccess(principal, flags) {
+    function ServiceInstanceAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
     angular.extend(ServiceInstanceAccess.prototype, {
+
       /**
        * @name create
        * @description A User is can create a service if:
        * 1. User is an admin
        * 2. Is a space developer and the feature flag is enabled
-       * @param {Object} space Domain space
+       * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
-      create: function (space) {
+      create: function (spaceGuid) {
 
         // If user is developer in space the service instances will
         // belong to and the service_instance_creation flag is set
         // Admin
-        if (this.baseAccess.create(space)) {
+        if (this.baseAccess.create(spaceGuid)) {
           return true;
         }
 
         return this.principal.hasAccessTo('service_instance_creation') &&
-          this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
       },
 
       /**
@@ -68,16 +67,16 @@
        * @description User can update a service instance if:
        * 1. User is an admin
        * 2. or a space developer
-       * @param {Object} space - space detail
+       * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
-      update: function (space) {
+      update: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.create(space)) {
+        if (this.baseAccess.create(spaceGuid)) {
           return true;
         }
 
-        return this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
       },
 
       /**
@@ -85,16 +84,16 @@
        * @description User can delete a service instance if:
        * 1. They are an admin
        * 2. or they are a space developer
-       * @param {Object} space - spacedetail
+       * @param {Object} spaceGuid Space Guid
        * @returns {boolean}
        */
-      delete: function (space) {
+      delete: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.delete(space)) {
+        if (this.baseAccess.delete(spaceGuid)) {
           return true;
         }
 
-        return this._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
 
       },
 

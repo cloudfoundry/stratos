@@ -50,6 +50,7 @@
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.boundUnregister = angular.bind(this, this.unregister);
     this.boundConnect = angular.bind(this, this.connect);
@@ -66,11 +67,12 @@
      * @memberof app.view.endpoints.clusters
      * @name refreshClusterList
      * @description Update the core model data + create the cluster list
+     * @returns {promise} refresh cluster promise
      */
     refreshClusterModel: function () {
       var that = this;
       this.updateState(true, false);
-      this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
+      return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
         .then(function () {
           that.createClusterList();
         })
@@ -130,11 +132,16 @@
      * @namespace app.view.endpoints.clusters
      * @memberof app.view.endpoints.clusters
      * @name onConnectCancel
+     * @param {object} serviceInstance - Service instance details
      * @description Handle the success from connecting to a cluster
      */
-    onConnectSuccess: function () {
+    onConnectSuccess: function (serviceInstance) {
       this.credentialsFormCNSI = false;
-      this.refreshClusterModel();
+      var that = this;
+      this.refreshClusterModel().then(function () {
+        // Initialise AuthModel for service
+        that.authModel.initializeForEndpoint(serviceInstance.guid);
+      });
     },
 
     /**
@@ -155,7 +162,9 @@
         })
         .then(function () {
           that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully disconnected'));
-          that.refreshClusterModel();
+          that.refreshClusterModel().then(function () {
+            that.authModel.remove(cnsiGUID);
+          });
         });
     },
 
@@ -167,8 +176,10 @@
      */
     register: function () {
       var that = this;
-      this.hcfRegistration.add().then(function () {
-        that.refreshClusterModel();
+      this.hcfRegistration.add().then(function (serviceInstance) {
+        return that.refreshClusterModel().then(function () {
+          that.authModel.initializeForEndpoint(serviceInstance.guid);
+        });
       });
     },
 
@@ -193,7 +204,9 @@
         callback: function () {
           return that.serviceInstanceModel.remove(serviceInstance).then(function () {
             that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully unregistered'));
-            that.refreshClusterModel();
+            that.refreshClusterModel().then(function () {
+              that.authModel.remove(serviceInstance.guid);
+            });
           });
         }
       });

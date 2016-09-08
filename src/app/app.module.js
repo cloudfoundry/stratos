@@ -10,6 +10,7 @@
       'app.api',
       'app.error',
       'app.event',
+      'app.logged-in',
       'app.model',
       'app.view',
       'app.utils'

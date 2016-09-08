@@ -8,7 +8,7 @@
 
     ListAllOrganizations: function () {
       return {
-        url: '/pp/v1/proxy/v2/organizations',
+        url: '/pp/v1/proxy/v2/organizations?results-per-page=100',
 
         response: {
 
@@ -57,7 +57,7 @@
 
     ListAllSpacesForOrganization: function (guid) {
       return {
-        url: '/pp/v1/proxy/v2/organizations/' + guid + '/spaces',
+        url: '/pp/v1/proxy/v2/organizations/' + guid + '/spaces?results-per-page=100',
 
         response: {
 

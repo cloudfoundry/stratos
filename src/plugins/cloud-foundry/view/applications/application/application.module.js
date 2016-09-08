@@ -35,7 +35,9 @@
     '$q',
     '$interval',
     '$interpolate',
-    'helion.framework.widgets.dialog.confirm'
+    '$state',
+    'helion.framework.widgets.dialog.confirm',
+    'app.utils.utilsService'
   ];
 
   /**
@@ -49,7 +51,9 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $interval - the Angular $interval service
    * @param {object} $interpolate - the Angular $interpolate service
+   * @param {object} $state - the UI router $state service
    * @param {object} confirmDialog - the confirm dialog service
+   * @param {object} utils - the utils service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
@@ -61,7 +65,7 @@
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
    */
-  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, confirmDialog) {
+  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, $state, confirmDialog, utils) {
     var that = this;
 
     this.$window = $window;
@@ -73,14 +77,26 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
+    that.hideVariables = true;
+    that.hideDeliveryPipelineData = true;
+    // Wait for parent state to be fully initialised
+    utils.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
-    this.init();
+    // When a modal interaction starts, stop the background polling
+    this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
+      that.stopUpdate();
+    });
+    // When a modal interaction ends, resume the background polling
+    this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
+      that.startUpdate();
+    });
 
     this.appActions = [
       {
@@ -174,8 +190,19 @@
       this.model.application.pipeline.fetching = true;
       this.model.getClusterWithId(this.cnsiGuid);
 
-      this.model.getAppSummary(this.cnsiGuid, this.id, true)
+      return this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
+          that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
+            that.authModel.resources.application,
+            that.authModel.actions.update,
+            that.model.application.summary.space_guid
+          );
+
+          that.hideDeliveryPipelineData = !that.authModel.isAllowed(that.cnsiGuid,
+            that.authModel.resources.application,
+            that.authModel.actions.update,
+            that.model.application.summary.space_guid
+          );
           return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);
         })
         .then(function () {
@@ -191,16 +218,8 @@
           if (!that.scopeDestroyed) {
             that.startUpdate();
           }
+          that.onAppStateChange();
         });
-
-      // When a modal interaction starts, stop the background polling
-      this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
-        that.stopUpdate();
-      });
-      // When a modal interaction ends, resume the background polling
-      this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
-        that.startUpdate();
-      });
     },
 
     /**
@@ -352,11 +371,21 @@
      * @returns {boolean} whether or not the action should be hidden
      */
     isActionHidden: function (id) {
+
+      var hideAction = true;
       if (!this.model.application.state || !this.model.application.state.actions) {
         return true;
-      } else {
-        return this.model.application.state.actions[id] !== true;
+      } else if (id === 'launch') {
+        hideAction = false;
+      } else if (this.authModel.isInitialized(this.cnsiGuid)) {
+        // check user is a space developer
+        var spaceGuid = this.model.application.summary.space_guid;
+        hideAction = !this.authModel.isAllowed(this.cnsiGuid,
+          this.authModel.resources.application,
+          this.authModel.actions.update,
+          spaceGuid);
       }
+      return this.model.application.state.actions[id] !== true || hideAction;
     },
 
     /**

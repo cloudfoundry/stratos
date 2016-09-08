@@ -31,12 +31,10 @@
      * @name RouteAccess
      * @description Constructor for RouteAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
-    function RouteAccess(principal, flags) {
+    function RouteAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
@@ -46,16 +44,16 @@
        * @description User can create a route if:
        * 1. User is admin
        * 2. User is a space developer AND route_creation feature flag is turned on
-       * @param {Object} space Domain space
+       * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      create: function (space) {
+      create: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.create(space)) {
+        if (this.baseAccess.create(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid) &&
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid) &&
           this.principal.hasAccessTo('route_creation');
       },
 
@@ -64,16 +62,16 @@
        * @description User can create a route if:
        * 1. User is admin
        * 2. User is a space developer
-       * @param {Object} space - space detail
+       * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      update: function (space) {
+      update: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.update(space)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
       },
 
       /**
@@ -81,16 +79,16 @@
        * @description User can create a route if:
        * 1. User is admin
        * 2. User is a space developer
-       * @param {Object} space - space detail
+       * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      delete: function (space) {
+      delete: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.update(space)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
 
       },
 

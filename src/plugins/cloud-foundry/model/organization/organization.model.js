@@ -14,12 +14,13 @@
     'app.api.apiManager',
     'app.utils.utilsService',
     '$q',
-    '$log'
+    '$log',
+    'cloud-foundry.api.hcfPagination'
   ];
 
-  function registerOrgModel(modelManager, apiManager, utils, $q, $log) {
+  function registerOrgModel(modelManager, apiManager, utils, $q, $log, hcfPagination) {
     modelManager.register('cloud-foundry.model.organization',
-      new Organization(modelManager, apiManager, utils, $q, $log));
+      new Organization(modelManager, apiManager, utils, $q, $log, hcfPagination));
   }
 
   /**
@@ -31,23 +32,28 @@
    * @param {object} utils - the utils service
    * @param {object} $q - angular $q service
    * @param {object} $log - angular $log service
+   * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @property {object} modelManager - the model manager
    * @property {object} apiManager - the API manager
    * @property {object} utils - the utils service
    * @property {object} $q - angular $q service
    * @property {object} $log - angular $log service
+   * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @class
    */
-  function Organization(modelManager, apiManager, utils, $q, $log) {
+  function Organization(modelManager, apiManager, utils, $q, $log, hcfPagination) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.$q = $q;
     this.$log = $log;
     this.utils = utils;
+    this.hcfPagination = hcfPagination;
 
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.orgsApi = apiManager.retrieve('cloud-foundry.api.Organizations');
     this.orgsQuotaApi = apiManager.retrieve('cloud-foundry.api.OrganizationQuotaDefinitions');
+    this.appsApi = apiManager.retrieve('cloud-foundry.api.Apps');
+    this.routesApi = apiManager.retrieve('cloud-foundry.api.Routes');
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
 
     this.organizations = {};
@@ -64,6 +70,12 @@
         headers: headers
       };
     };
+
+    this.applyDefaultListParams = function (params) {
+      return _.defaults(params, {
+        'results-per-page': 100
+      });
+    };
   }
 
   angular.extend(Organization.prototype, {
@@ -72,15 +84,21 @@
      * @memberof cloud-foundry.model.organization
      * @description lists all organizations
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-     * @param {object} params - optional parameters
+     * @param {object=} params - optional parameters
+     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
+     * and return the entire collection
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllOrganizations: function (cnsiGuid, params) {
+    listAllOrganizations: function (cnsiGuid, params, dePaginate) {
+      var that = this;
       this.unCacheOrganization(cnsiGuid);
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllOrganizations(params, this.makeHttpConfig(cnsiGuid))
+        .ListAllOrganizations(this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -92,13 +110,19 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} orgGuid - organization id
      * @param {object} params - optional parameters
+     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
+     * and return the entire collection
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSpacesForOrganization: function (cnsiGuid, orgGuid, params) {
+    listAllSpacesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllSpacesForOrganization(orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllSpacesForOrganization(orgGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -110,13 +134,19 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} orgGuid - organization id
      * @param {object} params - optional parameters
+     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
+     * and return the entire collection
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServicesForOrganization: function (cnsiGuid, orgGuid, params) {
+    listAllServicesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllServicesForOrganization(orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllServicesForOrganization(orgGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -187,8 +217,10 @@
       };
     },
 
-    fetchOrganizationPath: function (cnsiGuid, orgGuid) {
-      return 'organizations.' + cnsiGuid + '.' + orgGuid;
+    fetchOrganization: function (cnsiGuid, orgGuid) {
+      if (this.organizations && this.organizations[cnsiGuid]) {
+        return this.organizations[cnsiGuid][orgGuid];
+      }
     },
 
     cacheOrganizationDetails: function (cnsiGuid, orgGuid, details) {
@@ -233,13 +265,24 @@
 
       var spaceCache = this.organizations[cnsiGuid][orgGuid].spaces;
       var spaceModel = this.modelManager.retrieve('cloud-foundry.model.space');
+
+      var promises = [];
       _.forEach(spaces, function (space) {
         spaceCache[space.metadata.guid] = space;
+
         // Ensure the space roles get cached as well. This allows use to determine org role status from space roles
         // without having to fetch all space data
-        spaceModel.cacheUsersRolesInSpace(cnsiGuid, space);
+
+        // Space roles can be inlined
+        if (space.entity.managers && space.entity.developers && space.entity.auditors) {
+          spaceModel.cacheUsersRolesInSpace(cnsiGuid, space);
+        } else {
+          promises.push(spaceModel.listRolesOfAllUsersInSpace(cnsiGuid, space.metadata.guid, null, true));
+        }
       });
       this.organizations[cnsiGuid][orgGuid].details.org.entity.spaces = spaces;
+
+      return this.$q.all(promises);
     },
 
     unCacheOrganization: function (cnsiGuid, orgGuid) {
@@ -284,12 +327,16 @@
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, {
           'inline-relations-depth': 1
-        }, this.makeHttpConfig(cnsiGuid)).then(function (res) {
-          var depthOneSpaces = res.data.resources;
+        }, this.makeHttpConfig(cnsiGuid))
+        .then(function (res) {
+          return that.hcfPagination.dePaginate(res.data, that.makeHttpConfig(cnsiGuid));
+        })
+        .then(function (depthOneSpaces) {
           that.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
-          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces);
-          return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org).then(function () {
-            return depthOneSpaces;
+          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces).then(function () {
+            return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org).then(function () {
+              return depthOneSpaces;
+            });
           });
         });
     },
@@ -319,19 +366,20 @@
           // Reconstruct all user roles from inline data
           return that.$q.resolve(_unsplitOrgRoles(org));
         }
+        // Note, users in the context are users with a defined org or space role.
         return that.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, params, httpConfig).then(function (val) {
-          return val.data.resources;
+          return that.hcfPagination.dePaginate(val.data, httpConfig);
         });
       }
 
-      function getUsedMem(org) {
-        if (org.entity.spaces) {
-          if (org.entity.spaces.length === 0) {
+      function getUsedMem(spaces) {
+        if (spaces) {
+          if (spaces.length === 0) {
             return that.$q.resolve(0);
           }
-          if (org.entity.spaces[0].entity.apps) { // check if apps were inlined in the spaces
+          if (spaces[0].entity.apps) { // check if apps were inlined in the spaces
             var totalMem = 0;
-            _.forEach(org.entity.spaces, function (space) {
+            _.forEach(spaces, function (space) {
               var apps = space.entity.apps;
               _.forEach(apps, function (app) {
                 // Only count running apps, like the CF API would do
@@ -343,19 +391,24 @@
             return that.$q.resolve(totalMem);
           }
         }
+        // If spaces apps collection is missing it could be due to incorrect relation params in the list orgs requests.
+        // More likely it's due to the items count exceeding the max items per page limit. Instead of returning this
+        // large collection the _url is passed back instead. Therefore we cannot use the inline data and must make a
+        // new request. The new request will be made once per org with this issue. This number may become troublesome
+        // if there are 50+ such orgs.
         return that.orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
           return res.data.memory_usage_in_mb;
         });
       }
 
-      function getInstances(org) {
-        if (org.entity.spaces) {
-          if (org.entity.spaces.length === 0) {
+      function getInstances(spaces) {
+        if (spaces) {
+          if (spaces.length === 0) {
             return that.$q.resolve(0);
           }
-          if (org.entity.spaces[0].entity.apps) { // check if apps were inlined in the spaces
+          if (spaces[0].entity.apps) { // check if apps were inlined in the spaces
             var totalInstances = 0;
-            _.forEach(org.entity.spaces, function (space) {
+            _.forEach(spaces, function (space) {
               var apps = space.entity.apps;
               _.forEach(apps, function (app) {
                 // Only count running apps, like the CF API would do
@@ -367,40 +420,101 @@
             return that.$q.resolve(totalInstances);
           }
         }
+        // If spaces apps collection is missing it could be due to incorrect relation params in the list orgs requests.
+        // More likely it's due to the items count exceeding the max items per page limit. Instead of returning this
+        // large collection the _url is passed back instead. Therefore we cannot use the inline data and must make a
+        // new request. The new request will be made once per org with this issue. This number may become troublesome
+        // if there are 50+ such orgs.
         return that.orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig).then(function (res) {
           return res.data.instance_usage;
         });
       }
 
-      function getRouteCount(org) {
-        if (org.entity.spaces) {
-          if (org.entity.spaces.length === 0) {
+      function getRouteCount(spaces) {
+        if (spaces) {
+          if (spaces.length === 0) {
             return that.$q.resolve(0);
           } else {
-            if (org.entity.spaces[0].entity.routes) { // check if routes were inlined in the spaces
+            if (spaces[0].entity.routes) { // check if routes were inlined in the spaces
               var totalRoutes = 0;
-              _.forEach(org.entity.spaces, function (space) {
+              _.forEach(spaces, function (space) {
                 totalRoutes += space.entity.routes.length;
               });
               return that.$q.resolve(totalRoutes);
             }
           }
         }
+        // If spaces routes collection is missing it could be due to incorrect relation params in the list orgs requests.
+        // More likely it's due to the items count exceeding the max items per page limit. Instead of returning this
+        // large collection the _url is passed back instead. Therefore we cannot use the inline data and must make a
+        // new request. The new request will be made once per org with this issue. This number may become troublesome
+        // if there are 50+ such orgs.
+        var q = 'organization_guid:' + orgGuid;
+        var routesParams = {
+          q: q,
+          'results-per-page': 1
+        };
+        return that.routesApi.ListAllRoutes(_.defaults(routesParams, params), httpConfig).then(function (response) {
+          return response.data.total_results;
+        });
       }
 
       function getQuota(org) {
         if (org.entity.quota_definition) {
           return that.$q.resolve(org.entity.quota_definition);
         }
-        return that.orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig).then(function (val) {
-          return val.data;
+        return that.orgsQuotaApi.RetrieveOrganizationQuotaDefinition(orgQuotaGuid, params, httpConfig)
+          .then(function (val) {
+            return val.data;
+          });
+      }
+
+      function getAppsCount(spaces) {
+        var appsCountPromises = [];
+        var missingSpaces = [];
+
+        _.forEach(spaces, function (space) {
+          // If spaces apps collection is missing it could be due to incorrect relation params in the list orgs
+          // requests.
+          // More likely it's due to the items count exceeding the max items per page limit. Instead of returning this
+          // large collection the _url is passed back instead. Therefore we cannot use the inline data and must make a
+          // new request. The new request will be made once per org with this issue. This number may become troublesome
+          // if there are 50+ such orgs.
+          if (space.entity.apps) {
+            // If we have the space's apps, great, use that
+            appsCountPromises.push(that.$q.resolve(space.entity.apps.length));
+          } else {
+            // If we don't have the space's apps (most probably due to the number of apps exceeding 'results-per-page')
+            // then create a single request for the end. This avoids making a request per space.
+            missingSpaces.push(space.metadata.guid);
+          }
+        });
+
+        // Instead of making one request per space (this could be 50+ spaces) only make one and use total_results
+        if (missingSpaces.length > 0) {
+          // We shouldn't have to worry about the length of the query string, this only affects browsers.
+          var q = 'space_guid IN ' + missingSpaces.join(',');
+          var missingAppParams = {
+            q: q,
+            'results-per-page': 1
+          };
+          missingAppParams = _.defaults(missingAppParams, params);
+          var promise = that.appsApi.ListAllApps(missingAppParams, httpConfig).then(function (response) {
+            return response.data.total_results;
+          });
+          appsCountPromises.push(promise);
+        }
+
+        return that.$q.all(appsCountPromises).then(function (appCounts) {
+          var total = 0;
+          _.forEach(appCounts, function (count) {
+            total += count;
+          });
+          return total;
         });
       }
 
       var rolesP = getRoles(org); // Roles can be returned inline
-      var usedMemP = getUsedMem(org); // Memory usage can be inferred from inlined apps
-      var instancesP = getInstances(org); // Instance usage can be inferred from inlined apps
-      var routesCountP = getRouteCount(org); // Routes can be returned inline
       var quotaP = getQuota(org); // The quota can be returned inline
 
       var allSpacesP, allUsersRoles;
@@ -408,31 +522,11 @@
         allSpacesP = that.$q.resolve(org.entity.spaces);
       }
 
-      allSpacesP = allSpacesP || this.apiManager.retrieve('cloud-foundry.api.Organizations')
-        .ListAllSpacesForOrganization(orgGuid, params, httpConfig).then(function (res) {
-          return res.data.resources;
-        });
+      allSpacesP = allSpacesP || this.listAllSpacesForOrganization(cnsiGuid, orgGuid, {
+        'inline-relations-depth': 1
+      }, true);
 
-      routesCountP = routesCountP || allSpacesP.then(function (spaces) {
-        var promises = [];
-        var spaceModel = that.modelManager.retrieve('cloud-foundry.model.space');
-        _.forEach(spaces, function (space) {
-          var promise = spaceModel.listAllRoutesForSpace(cnsiGuid, space.metadata.guid).then(function (res) {
-            return res.length;
-          }).catch(function (error) {
-            that.$log.error('Failed to listAllRoutesForSpace', error);
-            throw error;
-          });
-          promises.push(promise);
-        });
-        return that.$q.all(promises).then(function (appCounts) {
-          var total = 0;
-          _.forEach(appCounts, function (count) {
-            total += count;
-          });
-          return total;
-        });
-      });
+      var routesCountP = allSpacesP.then(getRouteCount);
 
       var orgRolesP = rolesP.then(function (usersRoles) {
         var i, myRoles;
@@ -451,33 +545,11 @@
       });
 
       // Count apps in each space
-      var appCountsP = allSpacesP.then(function (spaces) {
-        var appsCountPromises = [];
-        _.forEach(spaces, function (space) {
-          var appsCountPromise;
-          if (space.entity.apps) {
-            appsCountPromise = that.$q.resolve(space.entity.apps.length);
-          } else {
-            appsCountPromise = that.spaceApi.ListAllAppsForSpace(space.metadata.guid, params, httpConfig).then(function (res) {
-              return res.data.resources.length;
-            }).catch(function (error) {
-              that.$log.error('Failed to ListAllAppsForSpace', error);
-              throw error;
-            });
-          }
-          appsCountPromises.push(appsCountPromise);
-        });
-        return that.$q.all(appsCountPromises).then(function (appCounts) {
-          var total = 0;
-          _.forEach(appCounts, function (count) {
-            total += count;
-          });
-          return total;
-        });
-      }).catch(function (error) {
-        that.$log.error('Failed to ListAllSpacesForOrganization', error);
-        throw error;
-      });
+      var appCountsP = allSpacesP.then(getAppsCount);
+
+      var usedMemP = allSpacesP.then(getUsedMem);
+
+      var instancesP = allSpacesP.then(getInstances);
 
       return this.$q.all({
         memory: usedMemP,
@@ -516,9 +588,10 @@
 
         that.cacheOrganizationDetails(cnsiGuid, orgGuid, details);
         that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, allUsersRoles);
-        that.cacheOrganizationSpaces(cnsiGuid, orgGuid, vals.spaces);
 
-        return details;
+        return that.cacheOrganizationSpaces(cnsiGuid, orgGuid, vals.spaces).then(function () {
+          return details;
+        });
       });
     },
 
@@ -566,7 +639,9 @@
       var that = this;
       return this.orgsApi.RetrievingRolesOfAllUsersInOrganization(orgGuid, null, this.makeHttpConfig(cnsiGuid))
         .then(function (val) {
-          var allUsersRoles = val.data.resources;
+          return that.hcfPagination.dePaginate(val.data, that.makeHttpConfig(cnsiGuid));
+        })
+        .then(function (allUsersRoles) {
           that.cacheOrganizationUsersRoles(cnsiGuid, orgGuid, allUsersRoles);
           // Ensures we also update inlined data for getDetails to pick up
           _splitOrgRoles(that.organizations[cnsiGuid][orgGuid].details.org, allUsersRoles);

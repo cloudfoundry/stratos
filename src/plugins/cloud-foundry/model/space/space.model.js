@@ -13,11 +13,12 @@
     '$q',
     'app.model.modelManager',
     'app.api.apiManager',
-    'cloud-foundry.model.service.serviceUtils'
+    'cloud-foundry.model.service.serviceUtils',
+    'cloud-foundry.api.hcfPagination'
   ];
 
-  function registerSpaceModel($q, modelManager, apiManager, serviceUtils) {
-    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils));
+  function registerSpaceModel($q, modelManager, apiManager, serviceUtils, hcfPagination) {
+    modelManager.register('cloud-foundry.model.space', new Space($q, apiManager, modelManager, serviceUtils, hcfPagination));
   }
 
   /**
@@ -26,17 +27,21 @@
    * @param {object} $q - angular $q service
    * @property {object} $q - angular $q service
    * @param {app.api.apiManager} apiManager - the API manager
+   * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
-   * @param {cloud-foundry.model.service.serviceUtils} serviceUtils - the service utils service
    * @property {object} stackatoInfoModel - the stackatoInfoModel service
+   * @param {cloud-foundry.model.service.serviceUtils} serviceUtils - the service utils service
+   * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
+   * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @class
    */
-  function Space($q, apiManager, modelManager, serviceUtils) {
+  function Space($q, apiManager, modelManager, serviceUtils, hcfPagination) {
     this.$q = $q;
     this.apiManager = apiManager;
     this.serviceUtils = serviceUtils;
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.hcfPagination = hcfPagination;
     this.data = {
     };
 
@@ -51,6 +56,12 @@
         headers: headers
       };
     };
+
+    this.applyDefaultListParams = function (params) {
+      return _.defaults(params, {
+        'results-per-page': 100
+      });
+    };
   }
 
   angular.extend(Space.prototype, {
@@ -60,16 +71,23 @@
     * @description lists all spaces
     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - space GUID.
-    * @param {object} params - optional parameters
+    * @param {object=} params - optional parameters
+    * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllAppsForSpace: function (cnsiGuid, guid, params) {
+    listAllAppsForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllAppsForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllAppsForSpace(guid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllAppsForSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (apps) {
+          return that.onListAllAppsForSpace(cnsiGuid, guid, apps);
         });
     },
 
@@ -79,8 +97,8 @@
      * @description Cache response
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
-     * @param {object} apps - list of apps
-     * @returns {promise} A resolved/rejected promise
+     * @param {Array} apps - array of apps
+     * @returns {Array} The array of apps
      * @public
      */
     onListAllAppsForSpace: function (cnsiGuid, guid, apps) {
@@ -101,13 +119,18 @@
      * @description lists all spaces
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object} params - optional parameters
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSpaces: function (cnsiGuid, params) {
+    listAllSpaces: function (cnsiGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllSpaces(params, this.makeHttpConfig(cnsiGuid))
+        .ListAllSpaces(this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -118,16 +141,23 @@
      * @description List all services available for space
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
-     * @param {object} params - extra params to pass to request
+     * @param {object=} params - extra params to pass to request
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServicesForSpace: function (cnsiGuid, guid, params) {
+    listAllServicesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServicesForSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .ListAllServicesForSpace(guid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllServicesForSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (services) {
+          return that.onListAllServicesForSpace(cnsiGuid, guid, services);
         });
     },
 
@@ -154,21 +184,27 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object=} params - extra params to pass to request
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServiceInstancesForSpace: function (cnsiGuid, guid, params) {
+    listAllServiceInstancesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
-      var combinedParams = params || {};
       var inlineParams = {
         'inline-relations-depth': 2,
         'include-relations': 'service_bindings,service_plan,service,app'
       };
-      _.assign(combinedParams, inlineParams);
+      var combinedParams = _.assign(params, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllServiceInstancesForSpace(guid, combinedParams, this.makeHttpConfig(cnsiGuid))
+        .ListAllServiceInstancesForSpace(guid, this.applyDefaultListParams(combinedParams), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllServiceInstancesForSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (serviceInstances) {
+          return that.onListAllServiceInstancesForSpace(cnsiGuid, guid, serviceInstances);
         });
     },
 
@@ -195,21 +231,27 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object=} params - additional parameters for request
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A promise object
      * @public
      */
-    listAllRoutesForSpace: function (cnsiGuid, guid, params) {
+    listAllRoutesForSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
-      var combinedParams = params || {};
       var inlineParams = {
         'inline-relations-depth': 1,
         'include-relations': 'domain,apps'
       };
-      _.assign(combinedParams, inlineParams);
+      var combinedParams = _.assign(params, inlineParams);
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .ListAllRoutesForSpace(guid, combinedParams, this.makeHttpConfig(cnsiGuid))
+        .ListAllRoutesForSpace(guid, this.applyDefaultListParams(combinedParams), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListAllRoutesForSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (routes) {
+          return that.onListAllRoutesForSpace(cnsiGuid, guid, routes);
         });
     },
 
@@ -236,15 +278,22 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
      * @param {object=} params - optional parameters
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params) {
+    listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
-        .RetrievingRolesOfAllUsersInSpace(guid, params, this.makeHttpConfig(cnsiGuid))
+        .RetrievingRolesOfAllUsersInSpace(guid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onListRolesOfAllUsersInSpace(cnsiGuid, guid, response.data.resources);
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (roles) {
+          return that.onListRolesOfAllUsersInSpace(cnsiGuid, guid, roles);
         });
     },
 
@@ -337,8 +386,91 @@
       });
     },
 
-    fetchSpacePath: function (cnsiGuid, guid) {
-      return 'spaces.' + cnsiGuid + '.' + guid;
+    /**
+     * @function fetchSpace
+     * @memberof cloud-foundry.model.space
+     * @description Fetches the cached space object
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @returns {object} The cached space object
+     * @public
+     */
+    fetchSpace: function (cnsiGuid, guid) {
+      if (this.spaces && this.spaces[cnsiGuid]) {
+        return this.spaces[cnsiGuid][guid];
+      }
+    },
+
+    /**
+     * @function updateRoutesCount
+     * @memberof cloud-foundry.model.space
+     * @description Updates the cached route count either from the provided value or via HCF. This will be used when
+     * it's not appropriate to fetch/use data that's inline
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {number=} count - the number of routes.
+     * @returns {promise} promise object once completed, contains number of routes
+     * @public
+     */
+    updateRoutesCount: function (cnsiGuid, guid, count) {
+      var that = this;
+      var promise = this.$q.resolve({ data: { total_results: count }});
+      if (!count) {
+        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllRoutesForSpace(guid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+      }
+      return promise.then(function (response) {
+        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalRoutes', response.data.total_results);
+        return response.data.total_results;
+      });
+    },
+
+    /**
+     * @function updateServiceInstanceCount
+     * @memberof cloud-foundry.model.space
+     * @description Updates the service instance count either from the provided value or via HCF. This will be used when
+     * it's not appropriate to fetch/use data that's inline
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {number=} count - the number of routes.
+     * @returns {promise} promise object once completed, contains number of service instances
+     * @public
+     */
+    updateServiceInstanceCount: function (cnsiGuid, guid, count) {
+      var that = this;
+      var promise = this.$q.resolve({ data: { total_results: count }});
+      if (!count) {
+        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllServiceInstancesForSpace(guid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+      }
+      return promise.then(function (response) {
+        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServiceInstances', response.data.total_results);
+        return response.data.total_results;
+      });
+    },
+
+    /**
+     * @function updateServiceCount
+     * @memberof cloud-foundry.model.space
+     * @description Updates the service count either from the provided value or via HCF. This will be used when
+     * it's not appropriate to fetch/use data that's inline
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - space GUID.
+     * @param {number=} count - the number of routes.
+     * @returns {promise} promise object once completed, contains number of services
+     * @public
+     */
+    updateServiceCount: function (cnsiGuid, guid, count) {
+      var that = this;
+      var promise = this.$q.resolve({ data: { total_results: count }});
+      if (!count) {
+        promise = this.apiManager.retrieve('cloud-foundry.api.Spaces')
+          .ListAllServicesForSpace(guid, { 'results-per-page': 1 }, this.makeHttpConfig(cnsiGuid));
+      }
+      return promise.then(function (response) {
+        _.set(that, 'spaces.' + cnsiGuid + '.' + guid + '.details.totalServices', response.data.total_results);
+        return response.data.total_results;
+      });
     },
 
     /**
@@ -363,10 +495,12 @@
 
       var rolesP, appP, quotaP;
 
-      // We cannot rely on inline routes as they lack the depth we need later on
-      var serviceInstancesP = this.listAllServiceInstancesForSpace(cnsiGuid, spaceGuid, {
-        return_user_provided_service_instances: false
-      });
+      // Service instances will not be cached now, they lack the 'depth' required and will be loaded on demand.
+      // If there's no service instances (probably due to paging), lazy load later on to avoid blocking space lists
+      // with 100's in
+      var serviceInstancesCountP = space.entity.service_instances
+        ? that.$q.resolve(space.entity.service_instances.length)
+        : that.$q.resolve();
 
       if (spaceQuotaGuid) {
         // Check for inline quota!
@@ -385,10 +519,10 @@
       var userGuid = that.stackatoInfoModel.info;
 
       // Space roles can be inlined
-      if (space.entity.managers) {
+      if (space.entity.managers && space.entity.developers && space.entity.auditors) {
         rolesP = that.$q.resolve(that.cacheUsersRolesInSpace(cnsiGuid, space));
       } else {
-        rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
+        rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params, true);
       }
 
       var spaceRolesP = rolesP.then(function () {
@@ -404,23 +538,22 @@
         appP = that.$q.resolve(space.entity.apps);
         that.onListAllAppsForSpace(cnsiGuid, spaceGuid, space.entity.apps);
       } else {
-        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid);
+        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid, {}, true);
       }
 
-      // Services are never inlined
-      var servicesP = this.listAllServicesForSpace(cnsiGuid, spaceGuid);
-
-      // We cannot rely on inline routes as they lack the depth we need later on
-      var routesP = this.listAllRoutesForSpace(cnsiGuid, spaceGuid);
+      // Routes will not be cached now, they lack the 'depth' required and will be loaded on demand.
+      // If there's no service instances (probably due to paging), lazy load later on to avoid blocking space lists
+      // with 100's in
+      var routesCountP = space.entity.routes
+        ? that.$q.resolve(space.entity.routes.length)
+        : that.$q.resolve();
 
       return this.$q.all({
-        // memory: usedMemP,
         quota: quotaP,
-        serviceInstances: serviceInstancesP,
+        serviceInstancesCount: serviceInstancesCountP,
         apps: appP,
         roles: spaceRolesP,
-        services: servicesP,
-        routes: routesP
+        routesCount: routesCountP
       }).then(function (vals) {
         var details = {};
 
@@ -450,20 +583,20 @@
 
         // Set total apps and app instances count
         details.totalApps = (vals.apps || []).length;
-
         details.totalAppInstances = appInstances;
         details.appInstancesQuota = _.get(vals.quota, 'entity.app_instance_limit', -1);
 
-        details.totalRoles = (vals.roles || []).length;
         details.roles = vals.roles;
 
-        details.totalServices = (vals.services || []).length;
+        // Will be lazy loaded to avoid block in cases where there are 100's of spaces. At this point we're just
+        // clearing the cache
+        details.totalServices = undefined;
         details.servicesQuota = _.get(vals.quota, 'entity.total_services', -1);
 
-        details.totalRoutes = (vals.routes || []).length;
+        details.totalRoutes = vals.routesCount;
         details.routesQuota = _.get(vals.quota, 'entity.total_routes', -1);
 
-        details.totalServiceInstances = (vals.serviceInstances || []).length;
+        details.totalServiceInstances = vals.serviceInstancesCount;
         details.serviceInstancesQuota = _.get(vals.quota, 'entity.total_services', -1);
 
         _.set(that, 'spaces.' + cnsiGuid + '.' + spaceGuid + '.details', details);

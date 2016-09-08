@@ -52,6 +52,7 @@
     this.userRoles = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
+    this.stateInitialised = false;
 
     function refreshUsers() {
       that.userRoles = {};
@@ -107,9 +108,12 @@
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
+      return that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
         that.users = res;
         return refreshUsers();
+      }).then(function () {
+        that.stateInitialised = true;
+        return $q.resolve();
       });
     }
 
@@ -118,7 +122,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          return manageUsers.show(that.guid, false, [aUser], true).result;
+          return manageUsers.show(that.guid, false, [aUser]).result;
         }
       },
       {
@@ -170,7 +174,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, false, guidsToUsers(that.selectedUsers), true);
+      return manageUsers.show(that.guid, false, guidsToUsers(that.selectedUsers));
     };
 
     this.removeAllRoles = function () {

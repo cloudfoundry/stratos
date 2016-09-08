@@ -58,35 +58,58 @@
     this.spaceGuid = this.space.metadata.guid;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-    this.orgPath = this.organizationModel.fetchOrganizationPath(this.clusterGuid, this.organizationGuid);
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
+    var destroyed = false;
+    $scope.$on('$destroy', function () {
+      destroyed = true;
+    });
 
     function init() {
+      if (destroyed) {
+        return $q.resolve();
+      }
 
       var spaceDetail = that.spaceDetail();
-      that.canDelete = spaceDetail.routes.length === 0 &&
-        spaceDetail.instances.length === 0 &&
-        spaceDetail.apps.length === 0;
 
       that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
-      enableActions();
-      return $q.resolve();
+
+      // Update these counts per tile, meaning the core getSpaceDetails does not block in the case of 100s of
+      // spaces but instead shows list and updates when async data returns
+      var updatePromises = [];
+      if (angular.isUndefined(spaceDetail.details.totalRoutes)) {
+        updatePromises.push(that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid));
+      }
+      if (angular.isUndefined(spaceDetail.details.totalServiceInstances)) {
+        updatePromises.push(that.spaceModel.updateServiceInstanceCount(that.clusterGuid, that.spaceGuid));
+      }
+
+      return $q.all(updatePromises).then(function () {
+
+        that.canDelete = spaceDetail.details.totalRoutes === 0 &&
+          spaceDetail.details.totalServiceInstances === 0 &&
+          spaceDetail.details.totalApps === 0;
+
+        enableActions();
+
+        return $q.resolve();
+      });
+
     }
 
     function enableActions() {
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
+      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename, that.spaceDetail().details.guid);
 
       // Delete Space
-      that.actions[1].disabled = !that.canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+      that.actions[1].disabled = !that.canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.delete, that.spaceDetail().details.guid);
 
       // User Assignment
-      that.actions[2].disabled = authService.principal.userSummary.organizations.managed.length === 0 &&
-        authService.principal.userSummary.spaces.managed.length === 0;
+      that.actions[2].disabled = authModel.principal[that.clusterGuid].userSummary.organizations.managed.length === 0 &&
+        authModel.principal[that.clusterGuid].userSummary.spaces.managed.length === 0;
 
     }
 
@@ -171,7 +194,10 @@
     ];
 
     $scope.$watchCollection(function () {
-      return _.get(that.spaceModel, that.spacePath + '.roles.' + that.user.guid);
+      var space = that.spaceDetail();
+      if (space && space.roles && space.roles[that.user.guid]) {
+        return space.roles[that.user.guid];
+      }
     }, function (roles) {
       // Present the user's roles
       that.roles = that.spaceModel.spaceRolesToStrings(roles);
@@ -189,11 +215,11 @@
     },
 
     spaceDetail: function () {
-      return _.get(this.spaceModel, this.spacePath);
+      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
     },
 
     orgDetails: function () {
-      return _.get(this.organizationModel, this.orgPath);
+      return this.organizationModel.fetchOrganization(this.clusterGuid, this.organizationGuid);
     }
 
   });

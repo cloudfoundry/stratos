@@ -1,4 +1,7 @@
-<div class="cluster-gallery-card-container">
+<div ng-if="!clusterDetailSpacesController.stateInitialised" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="clusterDetailSpacesController.stateInitialised" class="cluster-gallery-card-container">
   <div ng-if="clusterDetailSpacesController.keys(clusterDetailSpacesController.spaces()).length < 1"
        class="panel panel-default cluster-empty-list">
     <div class="panel-body" translate>

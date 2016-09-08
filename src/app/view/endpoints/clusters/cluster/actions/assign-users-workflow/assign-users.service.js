@@ -69,7 +69,7 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     var path = 'app/view/endpoints/clusters/cluster/actions/assign-users-workflow/';
 
@@ -110,7 +110,7 @@
           .value();
 
         // Fetch a list of all users for this cluster
-        return that.usersModel.listAllUsers(that.data.clusterGuid).then(function (res) {
+        return that.usersModel.listAllUsers(that.data.clusterGuid, {}, true).then(function (res) {
           that.data.users = res;
           //Smart table struggles with an object, so keep two versions
           that.data.usersByGuid = _.keyBy(res, 'metadata.guid');
@@ -218,7 +218,10 @@
                 if (angular.isUndefined(org)) {
                   return false;
                 }
-                return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org.details.org);
+                return that.authModel.isAllowed(context.clusterGuid,
+                  that.authModel.resources.user,
+                  that.authModel.actions.update, null,
+                  org.details.guid);
               }
             },
             table: {

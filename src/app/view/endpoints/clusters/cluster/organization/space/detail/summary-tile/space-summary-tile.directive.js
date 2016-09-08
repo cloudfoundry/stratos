@@ -58,14 +58,13 @@
     this.$state = $state;
 
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    this.spacePath = this.spaceModel.fetchSpacePath(this.clusterGuid, this.spaceGuid);
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
     that.isAdmin = user.admin;
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var spaceDetail;
 
     this.cardData = {
@@ -147,43 +146,60 @@
     };
 
     $scope.$watchCollection(function () {
-      return _.get(that.spaceModel, that.spacePath + '.roles.' + user.guid);
+      var space = that.spaceDetail();
+      if (space && space.roles && space.roles[user.guid]) {
+        return space.roles[user.guid];
+      }
     }, function (roles) {
       // Present the user's roles
       that.roles = that.spaceModel.spaceRolesToStrings(roles);
     });
 
     function enableActions() {
-      var canDelete = spaceDetail.routes.length === 0 &&
-        spaceDetail.instances.length === 0 &&
-        spaceDetail.apps.length === 0;
+      var canDelete = spaceDetail.details.totalRoutes === 0 &&
+        spaceDetail.details.totalServiceInstances === 0 &&
+        spaceDetail.details.totalApps === 0;
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename,
-        spaceDetail.details.space);
+      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
+        spaceDetail.details.guid);
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space,
-          authService.actions.delete, spaceDetail.details.space);
+      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space,
+          authModel.actions.delete, spaceDetail.details.guid);
 
     }
 
     function init() {
       that.userName = user.name;
       spaceDetail = that.spaceDetail();
+      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
 
-      // Update delete action when space info changes (requires authService which depends on chainStateResolve)
-      $scope.$watch(function () {
-        return spaceDetail.routes.length === 0 &&
-          spaceDetail.instances.length === 0 &&
-          spaceDetail.apps.length === 0;
-      }, function () {
+      // If navigating to/reloading the space details page these will be missing. Do these here instead of in
+      // getSpaceDetails to avoid blocking state init when there are 100s of spaces
+      var updatePromises = [];
+      if (angular.isUndefined(spaceDetail.details.totalRoutes)) {
+        updatePromises.push(that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid));
+      }
+      if (angular.isUndefined(spaceDetail.details.totalServices)) {
+        updatePromises.push(that.spaceModel.updateServiceCount(that.clusterGuid, that.spaceGuid));
+      }
+
+      return $q.all(updatePromises).then(function () {
+
+        // Update delete action when space info changes (requires authService which depends on chainStateResolve)
+        $scope.$watch(function () {
+          return spaceDetail.details.totalRoutes === 0 &&
+            spaceDetail.details.totalServiceInstances === 0 &&
+            spaceDetail.details.totalApps === 0;
+        }, function () {
+          enableActions();
+        });
+
         enableActions();
+        return $q.resolve();
       });
 
-      that.memory = utils.sizeUtilization(spaceDetail.details.memUsed, spaceDetail.details.memQuota);
-      enableActions();
-      return $q.resolve();
     }
 
     // Ensure the parent state is fully initialised before we start our own init
@@ -194,7 +210,7 @@
   angular.extend(SpaceSummaryTileController.prototype, {
 
     spaceDetail: function () {
-      return _.get(this.spaceModel, this.spacePath);
+      return this.spaceModel.fetchSpace(this.clusterGuid, this.spaceGuid);
     }
 
   });

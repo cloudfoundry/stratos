@@ -11,11 +11,12 @@
 
   registerUsersModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.api.hcfPagination'
   ];
 
-  function registerUsersModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.users', new Users(apiManager));
+  function registerUsersModel(modelManager, apiManager, hcfPagination) {
+    modelManager.register('cloud-foundry.model.users', new Users(apiManager, hcfPagination));
   }
 
   /**
@@ -23,10 +24,13 @@
    * @name Users
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
+   * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
+   * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
    * @class
    */
-  function Users(apiManager) {
+  function Users(apiManager, hcfPagination) {
     this.apiManager = apiManager;
+    this.hcfPagination = hcfPagination;
 
     var passThroughHeader = {
       'x-cnap-passthrough': 'true'
@@ -38,6 +42,12 @@
       return {
         headers: headers
       };
+    };
+
+    this.applyDefaultListParams = function (params) {
+      return _.defaults(params, {
+        'results-per-page': 100
+      });
     };
   }
 
@@ -66,13 +76,18 @@
      * @description lists all spaces
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object=} params - optional parameters
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllUsers: function (cnsiGuid, params) {
+    listAllUsers: function (cnsiGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllUsers(params, this.makeHttpConfig(cnsiGuid))
+        .ListAllUsers(this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -176,12 +191,20 @@
      * @describe lists all audited organizations for user in cluster
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
-     * @param {object} params - http params
+     * @param {object=} params - http params
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {*}
      */
-    listAllAuditedOrganizationsForUser: function (cnsiGuid, userGuid, params) {
+    listAllAuditedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllAuditedOrganizationsForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+        .ListAllAuditedOrganizationsForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
     },
 
     /**
@@ -189,12 +212,20 @@
      * @describe lists all billing managed organizations for user in cluster
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
-     * @param {object} params - http params
+     * @param {object=} params - http params
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {*}
      */
-    listAllBillingManagedOrganizationsForUser: function (cnsiGuid, userGuid, params) {
+    listAllBillingManagedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllBillingManagedOrganizationsForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+        .ListAllBillingManagedOrganizationsForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
     },
 
     /**
@@ -202,12 +233,20 @@
      * @describe lists all managed organizations for user in cluster
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
-     * @param {object} params - http params
+     * @param {object=} params - http params
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {*}
      */
-    listAllManagedOrganizationsForUser: function (cnsiGuid, userGuid, params) {
+    listAllManagedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllManagedOrganizationsForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+        .ListAllManagedOrganizationsForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
     },
 
     /**
@@ -215,12 +254,20 @@
      * @describe lists all organizations where the user is an Org User in cluster
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
-     * @param {object} params - http params
+     * @param {object=} params - http params
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {*}
      */
-    listAllOrganizationsForUser: function (cnsiGuid, userGuid, params) {
+    listAllOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllOrganizationsForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+        .ListAllOrganizationsForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
     },
 
     /**
@@ -228,12 +275,20 @@
      * @describe lists all audited spaces for user in cluster
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
-     * @param {object} params - http params
+     * @param {object=} params - http params
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {*}
      */
-    listAllAuditedSpacesForUser: function (cnsiGuid, userGuid, params) {
+    listAllAuditedSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllAuditedSpacesForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+        .ListAllAuditedSpacesForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
     },
 
     /**
@@ -241,12 +296,20 @@
      * @describe lists all managed spaces for user in cluster
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
-     * @param {object} params - http params
+     * @param {object=} params - http params
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {*}
      */
-    listAllManagedSpacesForUser: function (cnsiGuid, userGuid, params) {
+    listAllManagedSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllManagedSpacesForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+        .ListAllManagedSpacesForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
     },
 
     /**
@@ -254,12 +317,20 @@
      * @describe lists all spaces where user is a developer in
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
-     * @param {object} params - http params
+     * @param {object=} params - http params
+     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
      * @returns {*}
      */
-    listAllSpacesForUser: function (cnsiGuid, userGuid, params) {
+    listAllSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllSpacesForUser(userGuid, params, this.makeHttpConfig(cnsiGuid));
+        .ListAllSpacesForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
     }
   });
 

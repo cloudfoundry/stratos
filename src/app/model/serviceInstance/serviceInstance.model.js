@@ -53,6 +53,7 @@
         : serviceInstanceApi.createHce(url, name);
       return promise.then(function (response) {
         that.serviceInstances.push(response.data);
+        return response.data;
       });
     },
 

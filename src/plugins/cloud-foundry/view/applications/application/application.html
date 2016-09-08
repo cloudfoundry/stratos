@@ -24,17 +24,17 @@
         Services
       </a>
     </li>
-    <li class="nav-item" ui-sref-active="active">
+    <li class="nav-item" ui-sref-active="active" ng-hide="appCtrl.hideDeliveryPipelineData">
       <a class="nav-link" ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id})" translate>
         Delivery Pipeline
       </a>
     </li>
-    <li class="nav-item" ui-sref-active="active">
+    <li class="nav-item" ui-sref-active="active" ng-hide="appCtrl.hideDeliveryPipelineData">
       <a class="nav-link" ui-sref="cf.applications.application.delivery-logs({guid: appCtrl.id})" translate>
         Delivery Logs
       </a>
     </li>
-    <li class="nav-item" ui-sref-active="active">
+    <li class="nav-item" ui-sref-active="active" ng-hide="appCtrl.hideVariables">
       <a class="nav-link" ui-sref="cf.applications.application.variables({guid: appCtrl.id})" translate>
         Variables
       </a>

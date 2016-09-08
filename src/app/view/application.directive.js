@@ -33,7 +33,8 @@
     'app.model.modelManager',
     '$state',
     '$window',
-    'app.view.upgradeCheck'
+    'app.view.upgradeCheck',
+    'app.logged-in.loggedInService'
   ];
 
   /**
@@ -46,6 +47,7 @@
    * @param {$state} $state - Angular ui-router $state service
    * @param {$window} $window - Angular $window service
    * @param {app.view.upgradeCheck} upgradeCheck - the upgrade check service
+   * @param {object} loggedInService - the Logged In Service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {boolean} loggedIn - a flag indicating if user logged in
@@ -54,7 +56,7 @@
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck) {
+  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck, loggedInService) {
     var that = this;
     this.eventService = eventService;
     this.modelManager = modelManager;
@@ -68,6 +70,7 @@
     this.showGlobalSpinner = false;
     this.showRegistration = false;
     this.ready = false;
+    this.loggedInService = loggedInService;
 
     $timeout(function () {
       that.verifySessionOrCheckUpgrade();

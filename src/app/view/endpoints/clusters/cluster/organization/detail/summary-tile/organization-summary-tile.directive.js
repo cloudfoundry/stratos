@@ -58,7 +58,7 @@
     this.userServiceInstance = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.organization = this.organizationModel.organizations[this.clusterGuid][this.organizationGuid];
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.utils = utils;
     this.cliCommands = cliCommands;
@@ -146,15 +146,17 @@
     function enableActions() {
       var canDelete = _.keys(that.organization.spaces).length === 0;
 
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.organization, authService.actions.update,
-        that.organization.details.org);
+      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update,
+        that.organization.details.guid);
 
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.organization,
-          authService.actions.delete, that.organization.details.org);
+      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.organization,
+          authModel.actions.delete, that.organization.details.guid);
     }
 
     $scope.$watch(function () {
-      return _.get(that.organization, 'details');
+      if (that.organization) {
+        return that.organization.details;
+      }
     }, function () {
       if (!that.organization.details) {
         return;
@@ -165,7 +167,9 @@
     });
 
     $scope.$watchCollection(function () {
-      return _.get(that.organization, '.roles.' + user.guid);
+      if (that.organization && that.organization.roles) {
+        return that.organization.roles[user.guid];
+      }
     }, function (roles) {
       // Present the user's roles
       that.roles = that.organizationModel.organizationRolesToStrings(roles);

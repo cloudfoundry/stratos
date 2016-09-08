@@ -185,6 +185,10 @@ gulp.task('browsersync', function (callback) {
         "proxy": "http://proxy.sdc.hp.com:8080"
       }
     */
+
+    devOptions.options = devOptions.options || {}; 
+    // Do NOT follow redirects - return them back to the browser
+    devOptions.options.followRedirect = false;
     var proxiedRequest = request.defaults(devOptions.options);
     var proxyMiddleware = {
       route: '/pp',

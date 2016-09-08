@@ -51,12 +51,13 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.rolesService = rolesService;
 
     this.userRoles = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
+    this.stateInitialised = false;
 
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
@@ -90,13 +91,13 @@
 
     this.canUserManageRoles = function (org, space) {
       // User can assign org roles
-      return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org) ||
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid) ||
         // User can assign space roles
-        that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, space, true);
+        that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, space.metadata.guid, space.entity.organization_guid, true);
     };
 
     this.canUserRemoveFromOrg = function (org) {
-      return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
     };
 
     this.canUserRemoveFromSpace = function (org, space) {
@@ -143,9 +144,12 @@
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
+      return that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
         that.users = res;
         return refreshUsers();
+      }).then(function () {
+        that.stateInitialised = true;
+        return $q.resolve();
       });
     }
 
@@ -154,7 +158,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser], false).result;
+          return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
         }
       },
       {
@@ -212,7 +216,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, guidsToUsers(), true).result;
+      return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, guidsToUsers()).result;
     };
 
     this.removeFromOrganization = function () {

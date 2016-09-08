@@ -52,13 +52,14 @@
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    this.authService = modelManager.retrieve('cloud-foundry.model.auth');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.rolesService = rolesService;
 
     this.userRoles = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
+    this.stateInitialised = false;
 
     function refreshUsers() {
       that.userRoles = {};
@@ -99,16 +100,17 @@
         });
 
       });
+
       return $q.resolve();
     }
 
     this.canUserManageRoles = function (org) {
       // User can assign org roles
-      return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
     };
 
     this.canUserRemoveFromOrg = function (org) {
-      return that.authService.isAllowed(that.authService.resources.user, that.authService.actions.update, org);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
     };
 
     this.disableManageRoles = function () {
@@ -147,9 +149,12 @@
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid, {}).then(function (res) {
+      return that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
         that.users = res;
         return refreshUsers();
+      }).then(function () {
+        that.stateInitialised = true;
+        return $q.resolve();
       });
     }
 
@@ -158,7 +163,7 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          return manageUsers.show(that.guid, that.organizatioGuid, [aUser], false).result;
+          return manageUsers.show(that.guid, that.organizatioGuid, [aUser]).result;
         }
       },
       {
@@ -207,7 +212,7 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, that.organizatioGuid, guidsToUsers(), true).result;
+      return manageUsers.show(that.guid, that.organizatioGuid, guidsToUsers()).result;
     };
 
     this.removeFromOrganization = function () {
