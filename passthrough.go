@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"strings"
 	"time"
-	"log"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine"
@@ -167,7 +166,6 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	logger.Debug("proxy")
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
-	log.Println("NWM")
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
