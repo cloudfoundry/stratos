@@ -206,7 +206,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 		//req.Header = header
 	}
 
-	const apiPrefix = ".api"
+	const apiPrefix = "api."
 
 	// send the request to each CNSI
 	done := make(chan CNSIRequest)
