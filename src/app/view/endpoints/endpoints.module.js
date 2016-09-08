@@ -18,7 +18,7 @@
     $stateProvider.state('endpoint', {
       url: '/endpoint',
       abstract: true,
-      template : '<ui-view/>',
+      template: '<ui-view/>',
       data: {
         activeMenuState: 'endpoints'
       },

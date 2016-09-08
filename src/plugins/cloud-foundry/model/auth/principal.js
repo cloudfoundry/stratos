@@ -30,7 +30,7 @@
 
     /**
      * @name Principal
-     * @description initialise a Principal object
+     * @description Enforces ACLs for a particular connceted endpoint
      * @param {String} stackatoInfo - stackatoInfo data
      * @param {Object} userSummary - user info
      * @param {Object} featureFlags - Feature flags for cluster

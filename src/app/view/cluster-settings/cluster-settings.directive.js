@@ -52,6 +52,7 @@
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.serviceInstances = {};
     this.serviceInstanceApi = apiManager.retrieve('app.api.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -91,7 +92,9 @@
     });
 
     // The watch above will trigger when the info has loaded and updated the model
-    this.stackatoInfo.getStackatoInfo();
+    this.stackatoInfo.getStackatoInfo().then(function () {
+      that.authModel.initialize();
+    });
   }
 
   angular.extend(ClusterSettingsController.prototype, {
@@ -158,11 +161,16 @@
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
           that.userCnsiModel.numValid -= 1;
-          that.stackatoInfo.getStackatoInfo();
+          that.stackatoInfo.getStackatoInfo().then(function () {
+            // Remove principal for disconnected instance
+            that.authModel.remove(id);
+          });
           that.cfModel.all();
-        }).catch(function () {
+        })
+        .catch(function () {
           // Failed
-        }).finally(function () {
+        })
+        .finally(function () {
           delete userServiceInstance._busy;
         });
     },

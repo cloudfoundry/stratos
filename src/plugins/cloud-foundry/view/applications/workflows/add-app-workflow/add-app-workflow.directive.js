@@ -76,6 +76,7 @@
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.userInput = {};
     this.options = {};
 
@@ -385,8 +386,23 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         return this.organizationModel.listAllOrganizations(cnsiGuid, {}, true)
           .then(function (organizations) {
+
+            // Filter out organizations in which user does not
+            // have any space where they aren't a developer
+            // NOTE: This is unnecessary for admin users, and will fail
+            // because the userSummary doesn't contain organization_guid data
+            var filteredOrgs = organizations;
+            if (!that.authModel.isAdmin(cnsiGuid)) {
+              filteredOrgs = _.filter(organizations, function (organization) {
+                // Retrieve filtered list of Spaces where the user is a developer
+                var orgGuid = organization.metadata.guid;
+                var filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
+                  {entity: {organization_guid: orgGuid}});
+                return filteredSpaces.length > 0;
+              });
+            }
             that.options.organizations.length = 0;
-            [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));
+            [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
             that.userInput.organization = that.options.organizations[0] && that.options.organizations[0].value;
           });
       },
@@ -403,8 +419,16 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
           .then(function (spaces) {
+
+            // Filter out spaces in which user is not a Space Developer
+            var filteredSpaces = spaces;
+            if (!that.authModel.isAdmin(cnsiGuid)) {
+              filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
+                {entity: {organization_guid: guid}});
+            }
+
             that.options.spaces.length = 0;
-            [].push.apply(that.options.spaces, _.map(spaces, that.selectOptionMapping));
+            [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
             that.userInput.space = that.options.spaces[0] && that.options.spaces[0].value;
           });
       },
@@ -512,11 +536,14 @@
         this.serviceInstanceModel.list()
           .then(function (serviceInstances) {
             var validServiceInstances = _.chain(_.values(serviceInstances))
-                                         .filter({ cnsi_type: 'hcf', valid: true })
-                                         .map(function (o) {
-                                           return { label: o.api_endpoint.Host, value: o };
-                                         })
-                                         .value();
+              .filter({cnsi_type: 'hcf', valid: true})
+              .filter(function (cnsi) {
+                return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
+              })
+              .map(function (o) {
+                return {label: o.api_endpoint.Host, value: o};
+              })
+              .value();
             [].push.apply(that.options.serviceInstances, validServiceInstances);
           });
       },
