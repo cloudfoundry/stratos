@@ -100,10 +100,12 @@
         $scope.$watch(function () {
           return that.userInput.serviceInstance;
         }, function (serviceInstance) {
+          that.userInput.organization = null;
+          that.userInput.space = null;
           if (serviceInstance) {
             that.getOrganizations();
             that.getDomains().then(function () {
-              that.userInput.domain = that.options.domains[0].value;
+              that.userInput.domain = that.options.domains[0] && that.options.domains[0].value;
             });
           }
         });
@@ -111,6 +113,7 @@
         $scope.$watch(function () {
           return that.userInput.organization;
         }, function (organization) {
+          that.userInput.space = null;
           if (organization) {
             that.getSpacesForOrganization(organization.metadata.guid);
           }
@@ -384,7 +387,7 @@
           .then(function (organizations) {
             that.options.organizations.length = 0;
             [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));
-            that.userInput.organization = that.options.organizations[0].value;
+            that.userInput.organization = that.options.organizations[0] && that.options.organizations[0].value;
           });
       },
 
@@ -402,7 +405,7 @@
           .then(function (spaces) {
             that.options.spaces.length = 0;
             [].push.apply(that.options.spaces, _.map(spaces, that.selectOptionMapping));
-            that.userInput.space = that.options.spaces[0].value;
+            that.userInput.space = that.options.spaces[0] && that.options.spaces[0].value;
           });
       },
 
