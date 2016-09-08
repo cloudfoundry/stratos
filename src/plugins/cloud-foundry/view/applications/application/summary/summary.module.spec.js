@@ -10,9 +10,10 @@
       var modelManager = $injector.get('app.model.modelManager');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
+      var $scope = $injector.get('$rootScope');
 
       var ApplicationSummaryController = $state.get('cf.applications.application.summary').controller;
-      $controller = new ApplicationSummaryController(modelManager, $stateParams);
+      $controller = new ApplicationSummaryController($stateParams, $scope, modelManager);
       expect($controller).toBeDefined();
       expect($controller).not.toBe(null);
       expect($controller.isWebLink).toBeDefined();

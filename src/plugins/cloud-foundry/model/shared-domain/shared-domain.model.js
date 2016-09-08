@@ -48,8 +48,9 @@
       return this.apiManager.retrieve('cloud-foundry.api.SharedDomains')
         .ListAllSharedDomains(params, httpConfig)
         .then(function (response) {
-          that.onListAllSharedDomains(cnsiGuid, response.data[cnsiGuid].resources);
-          return response.data[cnsiGuid].resources;
+          var resources = response.data[cnsiGuid] ? response.data[cnsiGuid].resources : [];
+          that.onListAllSharedDomains(cnsiGuid, resources);
+          return resources;
         });
     },
 

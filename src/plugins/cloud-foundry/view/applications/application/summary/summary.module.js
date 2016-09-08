@@ -19,8 +19,9 @@
   }
 
   ApplicationSummaryController.$inject = [
-    'app.model.modelManager',
     '$stateParams',
+    '$scope',
+    'app.model.modelManager',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
     'app.utils.utilsService',
@@ -30,8 +31,9 @@
   /**
    * @name ApplicationSummaryController
    * @constructor
-   * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} $stateParams - the UI router $stateParams service
+   * @param {object} $scope - the Angular $scope service
+   * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
    * @param {app.model.utilsService} utils - the utils service
@@ -43,7 +45,7 @@
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {app.model.utilsService} utils - the utils service
    */
-  function ApplicationSummaryController(modelManager, $stateParams, addRoutesService, editAppService, utils,
+  function ApplicationSummaryController($stateParams, $scope, modelManager, addRoutesService, editAppService, utils,
                                         routesService) {
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -57,18 +59,24 @@
 
     this.instanceViewLimit = 5;
 
+    this.update = _.get($scope, '$parent.appCtrl.updateSummary') || angular.noop;
+
     var that = this;
     this.routesActionMenu = [
       {
         name: gettext('Unmap from App'),
         execute: function (route) {
-          routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id);
+          routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id).finally(function () {
+            that.update();
+          });
         }
       },
       {
         name: gettext('Delete Route'),
         execute: function (route) {
-          routesService.deleteRoute(that.cnsiGuid, route, route.guid);
+          routesService.deleteRoute(that.cnsiGuid, route, route.guid).finally(function () {
+            that.update();
+          });
         }
       }
     ];

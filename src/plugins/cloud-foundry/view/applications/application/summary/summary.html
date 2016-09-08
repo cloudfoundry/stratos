@@ -39,9 +39,10 @@
         </dd>
 
         <dt translate>MODIFIED</dt>
-        <dd class="pull-right">
-          {{ appCtrl.model.application.summary.package_updated_at | date : 'M/d/yy h:mm:ss a' }}
+        <dd class="pull-right" ng-if="appCtrl.model.application.summary.package_updated_at">
+          {{ appCtrl.model.application.summary.package_updated_at | date : 'M/d/yy h:mm:ss a'}}
         </dd>
+        <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
 
       </dl>
     </div>
@@ -49,7 +50,7 @@
       <dl class="dl-horizontal">
         <dt translate>BUILDPACK</dt>
         <dd class="nowrap align-right">
-          <span ng-if="!applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)">{{ appCtrl.appBuildPack }}</span>
+          <span ng-if="!applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)">{{ appCtrl.appBuildPack || '-' }}</span>
           <a ng-if="applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)" target="buildpack" href="{{ appCtrl.appBuildPack }}">{{ appCtrl.appBuildPack }}</a>
         </dd>
 
@@ -116,9 +117,9 @@
 <div>
   <div class="action-header">
     <span translate>Routes</span>
-    <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()">
+    <a ng-if="appCtrl.ready" class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()">
       <i class="helion-icon helion-icon-Right_Arrow" ></i>
-      <span translate>Add routes</span>
+      <span translate>Add route</span>
     </a>
   </div>
   <div class="panel panel-default">
@@ -136,7 +137,7 @@
       </thead>
       <tbody>
         <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.routesService.getRouteId(route)">
-          <td>{{ route.host + '.' + route.domain.name + route.path }}</td>
+          <td>{{ applicationSummaryCtrl.routesService.getRouteId(route) }}</td>
           <td>
             <actions-menu actions="applicationSummaryCtrl.routesActionMenu"
                             action-target="route"

@@ -103,12 +103,13 @@
         .RemoveAppFromRoute(guid, appGuid, {}, this.makeHttpConfig(cnsiGuid));
     },
 
-    createRoute: function (cnsiGuid, routeSpec) {
+    createRoute: function (cnsiGuid, routeSpec, params) {
       var httpConfig = {
         headers: { 'x-cnap-cnsi-list': cnsiGuid }
       };
+      var routeParams = params || {};
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .CreateRoute(routeSpec, {}, httpConfig)
+        .CreateRoute(routeSpec, routeParams, httpConfig)
         .then(function (response) {
           return response.data[cnsiGuid];
         });
