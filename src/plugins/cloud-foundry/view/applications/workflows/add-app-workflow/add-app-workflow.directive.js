@@ -402,7 +402,7 @@
               });
             }
             that.options.organizations.length = 0;
-            [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));
+            [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
             that.userInput.organization = that.options.organizations[0] && that.options.organizations[0].value;
           });
       },
@@ -428,7 +428,7 @@
             }
 
             that.options.spaces.length = 0;
-            [].push.apply(that.options.spaces, _.map(spaces, that.selectOptionMapping));
+            [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
             that.userInput.space = that.options.spaces[0] && that.options.spaces[0].value;
           });
       },
