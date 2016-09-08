@@ -36,16 +36,16 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {object} $interpolate - the angular $interpolate service
+   * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.error.errorService} errorService - the error service
+   * @param {object} utils - the utils service
    * @property {object} $interpolate - the angular $interpolate service
-   * @param {object} $state - the UI router $state service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.error.errorService} errorService - the error service
-   * @param {object} utils - the utils service
    */
   function ApplicationsListController($scope, $interpolate, $state, modelManager, eventService, errorService, utils) {
     var that = this;
@@ -102,7 +102,7 @@
     }
 
     utils.chainStateResolve('cf.applications.list', $state, init);
-  
+
     // Ensure any app errors we have set are cleared when the scope is destroyed
     $scope.$on('$destroy', function () {
       that.errorService.clearAppError();
