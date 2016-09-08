@@ -101,10 +101,12 @@
         $scope.$watch(function () {
           return that.userInput.serviceInstance;
         }, function (serviceInstance) {
+          that.userInput.organization = null;
+          that.userInput.space = null;
           if (serviceInstance) {
             that.getOrganizations();
             that.getDomains().then(function () {
-              that.userInput.domain = that.options.domains[0].value;
+              that.userInput.domain = that.options.domains[0] && that.options.domains[0].value;
             });
           }
         });
@@ -112,6 +114,7 @@
         $scope.$watch(function () {
           return that.userInput.organization;
         }, function (organization) {
+          that.userInput.space = null;
           if (organization) {
             that.getSpacesForOrganization(organization.metadata.guid);
           }
@@ -201,33 +204,31 @@
                       that.userInput.serviceInstance.guid,
                       that.userInput.space.metadata.guid
                     )
-                      .then(function (services) {
-                        that.options.services.length = 0;
-                        [].push.apply(that.options.services, services);
+                    .then(function (services) {
+                      that.options.services.length = 0;
+                      [].push.apply(that.options.services, services);
 
-                        // retrieve categories that user can filter services by
-                        var categories = [];
-                        angular.forEach(services, function (service) {
-                          // Parse service entity extra data JSON string
-                          if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
-                            service.entity.extra = angular.fromJson(service.entity.extra);
+                      // retrieve categories that user can filter services by
+                      var categories = [];
+                      angular.forEach(services, function (service) {
+                        // Parse service entity extra data JSON string
+                        if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
+                          service.entity.extra = angular.fromJson(service.entity.extra);
 
-                            if (angular.isDefined(service.entity.extra.categories)) {
-                              var serviceCategories = _.map(service.entity.extra.categories,
-                                function (o) {
-                                  return {label: o, value: {categories: o}, lower: o.toLowerCase()};
-                                });
-                              categories = _.unionBy(categories, serviceCategories, 'lower');
-                            }
+                          if (angular.isDefined(service.entity.extra.categories)) {
+                            var serviceCategories = _.map(service.entity.extra.categories,
+                                                          function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
+                            categories = _.unionBy(categories, serviceCategories, 'lower');
                           }
-                        });
-                        categories = _.sortBy(categories, 'lower');
-                        that.options.serviceCategories.length = 1;
-                        [].push.apply(that.options.serviceCategories, categories);
-                      })
-                      .finally(function () {
-                        that.options.servicesReady = true;
+                        }
                       });
+                      categories = _.sortBy(categories, 'lower');
+                      that.options.serviceCategories.length = 1;
+                      [].push.apply(that.options.serviceCategories, categories);
+                    })
+                    .finally(function () {
+                      that.options.servicesReady = true;
+                    });
                   });
                 });
               }
@@ -282,7 +283,7 @@
           serviceInstances: [],
           services: [],
           serviceCategories: [
-            {label: gettext('All Services'), value: 'all'}
+            { label: gettext('All Services'), value: 'all' }
           ],
           servicesReady: false,
           organizations: [],
@@ -364,13 +365,13 @@
             that.userInput.domain.metadata.guid,
             that.userInput.host
           )
-            .then(function (data) {
-              if (data && data.code === 10000) {
-                resolve();
-              } else {
-                reject(gettext('This route already exists. Choose a new one.'));
-              }
-            });
+          .then(function (data) {
+            if (data && data.code === 10000) {
+              resolve();
+            } else {
+              reject(gettext('This route already exists. Choose a new one.'));
+            }
+          });
         });
       },
 
@@ -401,8 +402,8 @@
               });
             }
             that.options.organizations.length = 0;
-            [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
-            that.userInput.organization = that.options.organizations[0].value;
+            [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));
+            that.userInput.organization = that.options.organizations[0] && that.options.organizations[0].value;
           });
       },
 
@@ -427,8 +428,8 @@
             }
 
             that.options.spaces.length = 0;
-            [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
-            that.userInput.space = that.options.spaces[0].value;
+            [].push.apply(that.options.spaces, _.map(spaces, that.selectOptionMapping));
+            that.userInput.space = that.options.spaces[0] && that.options.spaces[0].value;
           });
       },
 
