@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"log"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine"
@@ -166,6 +167,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	logger.Debug("proxy")
 	cnsiList := strings.Split(c.Request().Header().Get("x-cnap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cnap-passthrough")
+	log.Println("NWM")
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -206,11 +208,29 @@ func (p *portalProxy) proxy(c echo.Context) error {
 		//req.Header = header
 	}
 
+	const apiPrefix = ".api"
+
 	// send the request to each CNSI
 	done := make(chan CNSIRequest)
 	kill := make(chan struct{})
 	for _, cnsi := range cnsiList {
 		cnsiRequest := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
+
+		// Allow the host part of the API URL to be overridden
+		apiHost := c.Request().Header().Get("x-cnap-api-host")
+		// Don't allow any '.' chars in the api name
+		if apiHost != "" && (strings.Index(apiHost, ".") == -1) {
+			// Add trailing . for when we replace
+			apiHost = apiHost + "."
+			// Override the API URL if needed
+			if strings.HasPrefix(cnsiRequest.URL.Host, apiPrefix) {
+				// Replace 'api.' prefix with supplied prefix
+				cnsiRequest.URL.Host = strings.Replace(cnsiRequest.URL.Host, apiPrefix, apiHost, 1)
+			} else {
+				// Add supplied prefix to the domain
+				cnsiRequest.URL.Host = apiHost + cnsiRequest.URL.Host;
+			}
+		}
 		go p.doRequest(cnsiRequest, done, kill)
 	}
 
