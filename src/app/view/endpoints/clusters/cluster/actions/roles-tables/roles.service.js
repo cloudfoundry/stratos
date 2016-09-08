@@ -35,7 +35,6 @@
    * @property {function} removeAllRoles - Remove users from all organizations and spaces in a cluster
    * @property {function} removeFromOrganization - Remove users from an organization and it's spaces
    * @property {function} removeFromSpace - Remove users from a space
-   * @property {function} refreshRoles - Conditionally refresh the space roles cache
    * @property {function} assignUsers - Assign organization and space roles for the users supplied. does not cover
    * removing roles.
    * @property {function} updateUsers - Update (assign or remove) organization and space roles for the users supplied
@@ -50,7 +49,7 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var usersModel = modelManager.retrieve('cloud-foundry.model.users');
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.changingRoles = false;
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
@@ -177,18 +176,16 @@
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
     this.removeAllRoles = function (clusterGuid, users) {
-      return this.refreshRoles(users, clusterGuid, true).then(function () {
-        var oldRolesByUser = createCurrentRoles(users, clusterGuid);
+      var oldRolesByUser = createCurrentRoles(users, clusterGuid);
 
-        // Need to create a 'newRolesByUser' struct just like oldRolesByUser except flips any org/space role 'truthy' to
-        // 'falsy'.
-        var newRolesByUser = _.cloneDeep(oldRolesByUser);
-        _.forEach(newRolesByUser, function (userRoles) {
-          that.clearOrgs(userRoles);
-        });
-
-        return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
+      // Need to create a 'newRolesByUser' struct just like oldRolesByUser except flips any org/space role 'truthy' to
+      // 'falsy'.
+      var newRolesByUser = _.cloneDeep(oldRolesByUser);
+      _.forEach(newRolesByUser, function (userRoles) {
+        that.clearOrgs(userRoles);
       });
+
+      return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
     };
 
     /**
@@ -200,18 +197,16 @@
      * @returns {promise} Resolved if changes occurred, Rejected if no changes or failure
      */
     this.removeFromOrganization = function (clusterGuid, orgGuid, users) {
-      return this.refreshRoles(users, clusterGuid, true).then(function () {
-        var oldRolesByUser = createCurrentRoles(users, clusterGuid, orgGuid);
+      var oldRolesByUser = createCurrentRoles(users, clusterGuid, orgGuid);
 
-        // Need to create a 'newRolesByUser' struct just like oldRolesByUser except flips any org/space role 'truthy' to
-        // 'falsy'.
-        var newRolesByUser = _.cloneDeep(oldRolesByUser);
-        _.forEach(newRolesByUser, function (userRoles) {
-          that.clearOrgs(userRoles);
-        });
-
-        return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
+      // Need to create a 'newRolesByUser' struct just like oldRolesByUser except flips any org/space role 'truthy' to
+      // 'falsy'.
+      var newRolesByUser = _.cloneDeep(oldRolesByUser);
+      _.forEach(newRolesByUser, function (userRoles) {
+        that.clearOrgs(userRoles);
       });
+
+      return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
     };
 
     /**
@@ -238,28 +233,6 @@
 
       return updateUsersOrgsAndSpaces(clusterGuid, users, oldRolesByUser, newRolesByUser);
 
-    };
-
-    /**
-     * @name app.view.endpoints.clusters.cluster.rolesService.refreshRoles
-     * @description Conditionally refresh the space roles cache
-     * @param {string} clusterGuid - HCF service guid
-     * @param {object} refreshSpaceRoles - True if the space roles cache should be updated
-     * @returns {promise}
-     */
-    this.refreshRoles = function (clusterGuid, refreshSpaceRoles) {
-      var initPromises = [];
-      if (!refreshSpaceRoles) {
-        return $q.when();
-      }
-
-      _.forEach(organizationModel.organizations[clusterGuid], function (organization) {
-        _.forEach(organization.spaces, function (space) {
-          initPromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, space.metadata.guid, {}, true));
-        });
-      });
-
-      return $q.all(initPromises);
     };
 
     /**
@@ -587,7 +560,12 @@
           var oldOrgRolesPerUser = _.get(oldRoles, userGuid + '.' + orgGuid);
 
           // Calculate org role delta only for organizations for which user is allowed to
-          if (authService.isAllowed(authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].details.org)) {
+          var isUserAllowed = authModel.isAllowed(clusterGuid,
+            authModel.resources.user,
+            authModel.actions.update,
+            null,
+            orgGuid);
+          if (isUserAllowed) {
             // For each organization role
             _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
               // Has there been a change in the org role?
@@ -604,7 +582,9 @@
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
 
             // calculate space role delta only for spaces for which user is allowed
-            if (authService.isAllowed(authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid], true)) {
+            var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.user,
+              authModel.actions.update, spaceGuid, orgGuid, true);
+            if (isAllowed) {
               // For each space role
               _.forEach(spaceRoles, function (selected, roleKey) {
                 // Has there been a change in the space role?
@@ -684,8 +664,8 @@
               }
               errorMessage = $interpolate(errorMessage)({
                 failedUsers: _.map(failures, 'user').join(', '),
-                reason: reason }
-              );
+                reason: reason
+              });
 
               return $q.reject(errorMessage);
             } else {

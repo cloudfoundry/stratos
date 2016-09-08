@@ -31,12 +31,10 @@
      * @name OrganizationAccess
      * @description Constructor for OrganizationAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
-    function UsersAssignmentAccess(principal, flags) {
+    function UsersAssignmentAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
@@ -48,27 +46,28 @@
        * 1. User is admin
        * 2. User is an organisation manager
        * 3. User is a space manager  (in case its a space)
-       * @param {object} object - Can be space or org detail
+       * @param {Object} spaceGuid - Space GUID
+       * @param {Object} orgGuid - Organization GUID
        * @param {boolean} isSpace - flag to indicate what object is
        * @returns {boolean}
        */
-      update: function (object, isSpace) {
+      update: function (spaceGuid, orgGuid, isSpace) {
 
         // Admin
-        if (this.baseAccess.update(object)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 
         if (isSpace) {
           // Check if user is space manager or org manager
           return this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.spaces.managed, object.metadata.guid) ||
+            ._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid) ||
             this.baseAccess
-              ._doesContainGuid(this.principal.userSummary.organizations.managed, object.entity.organization_guid);
+              ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
         } else {
           // check if user is org manager
           return this.baseAccess
-            ._doesContainGuid(this.principal.userSummary.organizations.managed, object.metadata.guid);
+            ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
         }
 
       },
