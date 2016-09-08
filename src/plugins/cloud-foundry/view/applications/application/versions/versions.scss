@@ -1,0 +1,20 @@
+td {
+  .app-versions-age {
+    color: $silver-sand;
+    padding-left: 24px;
+  }
+}
+
+.app-version-info.welcome-message {
+  padding: 12px;
+  margin-top: 12px;
+
+  > .helion-icon {
+    font-size: 24px;
+    margin-right: 12px;
+  }
+
+  > span {
+    vertical-align: middle;
+  }
+}

@@ -9,6 +9,7 @@
       'cloud-foundry.view.applications.application.delivery-logs',
       'cloud-foundry.view.applications.application.delivery-pipeline',
       'cloud-foundry.view.applications.application.variables',
+      'cloud-foundry.view.applications.application.versions',
       'cloud-foundry.view.applications.application.notification-target'
     ])
     .config(registerRoute);
@@ -75,6 +76,7 @@
     this.eventService = eventService;
     this.confirmDialog = confirmDialog;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -84,6 +86,7 @@
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
+    this.supportsVersions = false;
     that.hideVariables = true;
     that.hideDeliveryPipelineData = true;
     // Wait for parent state to be fully initialised
@@ -160,8 +163,11 @@
       }
     ];
 
+    // On first load, hide all of the application actions
+    this.onAppStateChange();
+
     $scope.$watch(function () {
-      return that.model.application.summary.state;
+      return that.model.application.state ? that.model.application.state.label : undefined;
     }, function (newState) {
       that.onAppStateChange(newState);
     });
@@ -190,6 +196,12 @@
       this.model.application.pipeline.fetching = true;
       this.model.getClusterWithId(this.cnsiGuid);
 
+      var supportsVersions = this.versions.hasVersionSupport(this.cnsiGuid);
+      var promise = angular.isDefined(supportsVersions) ? that.$q.when(supportsVersions) : this.versions.list(this.cnsiGuid, this.id, true);
+      promise.then(function () {
+        that.supportsVersions = !!that.versions.hasVersionSupport(that.cnsiGuid);
+      });
+
       return this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
           that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
@@ -203,22 +215,23 @@
             that.authModel.actions.update,
             that.model.application.summary.space_guid
           );
-          return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);
-        })
-        .then(function () {
-          that.model.updateDeliveryPipelineMetadata(true)
-            .then(function (response) {
-              that.onUpdateDeliveryPipelineMetadata(response);
-            });
-        })
-        .finally(function () {
-          that.ready = true;
-          // Don't start updating until we have completed the first init
-          // Don't create timer when scope has been destroyed
-          if (!that.scopeDestroyed) {
-            that.startUpdate();
-          }
-          that.onAppStateChange();
+
+          return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id)
+          .then(function () {
+            that.model.updateDeliveryPipelineMetadata(true)
+              .then(function (response) {
+                that.onUpdateDeliveryPipelineMetadata(response);
+              });
+          })
+          .finally(function () {
+            that.ready = true;
+            // Don't start updating until we have completed the first init
+            // Don't create timer when scope has been destroyed
+            if (!that.scopeDestroyed) {
+              that.startUpdate();
+            }
+            that.onAppStateChange();
+          });
         });
     },
 
@@ -402,7 +415,7 @@
     },
 
     /**
-     * @function onAppStateChange
+     * @function onAppRoutesChange
      * @description invoked when the application routes change, so we can update action visibility
      * @param {object} newRoutes - application route metadata
      */
