@@ -41,14 +41,14 @@
     };
 
     function response(response) {
-      errorService.clearError();
+      errorService.clearSystemError();
       return response;
     }
 
     function responseError(response) {
       // Network failure
       if (response.status === -1) {
-        errorService.setError();
+        errorService.setSystemError(gettext('The Console encountered a problem communicating with the server. Please try again.'));
       }
       return $q.reject(response);
     }
