@@ -82,6 +82,16 @@
       }
     });
 
+    var projectWatch = this.$scope.$watch(function () {
+      return that.model.application.project;
+    }, function (newProject, oldProject) {
+      if (oldProject && newProject && newProject.id === oldProject.id) {
+        that.fetchExecutions().then(function () {
+          that.updateVisibleExecutions(that.displayedExecutions);
+        });
+      }
+    });
+
     that.debouncedUpdateVisibleExecutions = _.debounce(function (visibleExecutions) {
       that.updateVisibleExecutions(visibleExecutions);
     }, 500);
@@ -90,6 +100,8 @@
       if (that.debouncedUpdateVisibleExecutions) {
         that.debouncedUpdateVisibleExecutions.cancel();
       }
+
+      projectWatch();
     });
   }
 
@@ -161,10 +173,15 @@
         return that.displayedExecutions;
       }, that.debouncedUpdateVisibleExecutions);
 
-      var pipeline = that.model.application.pipeline;
-      // Fetch pipeline executions
+      this.fetchExecutions();
+    },
+
+    fetchExecutions: function () {
+      var that = this;
+      var pipeline = this.model.application.pipeline;
       var projectId = this.model.application.project.id;
-      this.hceModel.getPipelineExecutions(pipeline.hceCnsi.guid, projectId)
+
+      return this.hceModel.getPipelineExecutions(pipeline.hceCnsi.guid, projectId)
         .then(function () {
           // The ux will need to show additional properties. In order to not muddy the original model make a copy
           that.parsedHceModel = angular.fromJson(angular.toJson(that.hceModel.data));
@@ -295,6 +312,7 @@
         event.state === this.eventStates.FAILED;
 
       var result = {
+        completed: hasCompleted,
         state: hasCompleted ? event.state : this.eventStates.RUNNING,
         label: event.name
       };
@@ -325,7 +343,7 @@
       var fetchEventsPromises = [];
       for (var i = 0; i < visibleExecutions.length; i++) {
         var execution = visibleExecutions[i];
-        if (!that.eventsPerExecution[execution.id]) {
+        if (!that.eventsPerExecution[execution.id] || !execution.result || !execution.result.completed) {
           fetchEventsPromises.push(that.fetchEvents(that.eventsPerExecution, execution.id));
         }
       }
