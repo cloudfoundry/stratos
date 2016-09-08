@@ -63,12 +63,6 @@
       spaceGuid: 'all'
     };
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.userCnsiModel.list().then(function () {
-      that._setClusters();
-      that._setOrgs();
-      that._setSpaces();
-      that._loadPage(1);
-    });
 
     this.paginationProperties = {
       callback: function (page) {
@@ -87,16 +81,20 @@
 
     function init() {
 
-      var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
-      for (var i = 0; i < serviceInstances.length; i++) {
-        var cluster = serviceInstances[i];
-        if (that.authModel.doesUserHaveRole(cluster.guid, that.authModel.roles.space_developer)) {
-          that.isSpaceDeveloper = true;
-          break;
+      return that.userCnsiModel.list().then(function () {
+        that._setClusters();
+        that._setOrgs();
+        that._setSpaces();
+        that._loadPage(1);
+        var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
+        for (var i = 0; i < serviceInstances.length; i++) {
+          var cluster = serviceInstances[i];
+          if (that.authModel.doesUserHaveRole(cluster.guid, that.authModel.roles.space_developer)) {
+            that.isSpaceDeveloper = true;
+            break;
+          }
         }
-
-      }
-      return $q.resolve();
+      });
     }
 
     utils.chainStateResolve('cf.applications.list', $state, init);
