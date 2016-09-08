@@ -4,10 +4,11 @@
         'summary/summary',
         'log-stream/log-stream',
         'variables/variables',
+        'versions/versions',
         'notification-targets/notification-target';
 
 .application-action-col {
-  padding-top: $hpe-unit-space * 2;
+  padding-top: $hpe-unit-space;
 
   .btn {
     font-size: $font-size-large;
@@ -38,8 +39,8 @@
 .application-header {
   @include flex-vertical-centered();
   font-size: $hpe-unit-space;
-  padding-top: $hpe-unit-space * 2;
-  padding-bottom: $hpe-unit-space * 2;
+  padding-top: $hpe-unit-space;
+  padding-bottom: $hpe-unit-space * 0.5;
 
   .action-target-state, .bounce-spinner {
     margin-left: $hpe-unit-space;
@@ -54,14 +55,35 @@
 .application-details {
   padding-top: $hpe-unit-space;
   padding-bottom: $hpe-unit-space;
+
+  .summary {
+    .percent-gauge {
+      padding: 0;
+    }
+
+    .data-body dl.dl-horizontal {
+      dt:last-of-type, dd:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+  }
 }
 
 .application-nav.nav.nav-tabs > li {
   padding-top: 0;
+  margin: $hpe-unit-space * 0.5 $hpe-unit-space 0 0;
+
+  &:last-child {
+    margin: $hpe-unit-space * 0.5 0 0 0;
+  }
 }
 
 .application-nav-menu {
   margin-left: auto;
+
+  .actions-menu > .actions-menu-icon {
+    font-size: 1.75em;
+  }
 
   .actions-menu.open > .actions-menu-icon {
     color: $brand-primary;
