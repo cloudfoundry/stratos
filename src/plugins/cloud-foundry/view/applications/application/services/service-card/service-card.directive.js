@@ -142,7 +142,7 @@
 
       var q = 'service_instance_guid IN ' + serviceInstanceGuids.join(',');
       var options = { q: q, 'inline-relations-depth': 1, 'include-relations': 'service_instance' };
-      return this.bindingModel.listAllServiceBindings(this.cnsiGuid, options, true)
+      return this.bindingModel.listAllServiceBindings(this.cnsiGuid, options)
         .then(function (bindings) {
           var appGuid = that.app.summary.guid;
           var appBindings = _.filter(bindings, function (o) { return o.entity.app_guid === appGuid; });

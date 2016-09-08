@@ -44,14 +44,23 @@
      * @description List all service instances
      * @param {string} cnsiGuid - the CNSI guid
      * @param {object} options - the additional parameters for request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A promise object
      * @public
      */
-    all: function (cnsiGuid, options) {
+    all: function (cnsiGuid, options, paginate) {
       var that = this;
-      return this.serviceInstanceApi.ListAllServiceInstances(options, this.modelUtils.makeHttpConfig(cnsiGuid))
+      return this.serviceInstanceApi.ListAllServiceInstances(this.modelUtils.makeListParams(options),
+        this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onAll(response.data);
+          if (!paginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (all) {
+          return that.onAll(all);
         });
     },
 
@@ -97,13 +106,21 @@
      * @description List all service bindings for a service instance
      * @param {string} cnsiGuid - the CNSI guid
      * @param {object} guid - the service instance guid
+     * @param {object} params - optional parameters
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A promise object
      * @public
      */
-    listAllServiceBindingsForServiceInstance: function (cnsiGuid, guid) {
-      return this.serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid, {},
+    listAllServiceBindingsForServiceInstance: function (cnsiGuid, guid, params, paginate) {
+      var that = this;
+      return this.serviceInstanceApi.ListAllServiceBindingsForServiceInstance(guid,
+        this.modelUtils.makeListParams(params),
         this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (!paginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
     },
@@ -116,9 +133,9 @@
      * @returns {object} The response
      * @private
      */
-    onAll: function (response) {
-      this.data = response.resources;
-      return response.resources;
+    onAll: function (all) {
+      this.data = all;
+      return all;
     }
   });
 

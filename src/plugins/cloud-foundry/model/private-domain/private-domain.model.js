@@ -35,22 +35,24 @@
   }
 
   angular.extend(PrivateDomain.prototype, {
+
     /**
      * @function listAllPrivateDomains
      * @memberof cloud-foundry.model.private-domain
      * @description list all private domains
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object=} params - optional parameters
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
-     * @returns {promise} A resolved/rejected promise
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
+     * @returns {promise} A promise which will be resolved with the list
      * @public
      */
-    listAllPrivateDomains: function (cnsiGuid, params, dePaginate) {
+    listAllPrivateDomains: function (cnsiGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.PrivateDomains')
         .ListAllPrivateDomains(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;

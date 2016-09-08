@@ -68,18 +68,18 @@
      * @description lists all organizations
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object=} params - optional parameters
-     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
-     * and return the entire collection
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllOrganizations: function (cnsiGuid, params, dePaginate) {
+    listAllOrganizations: function (cnsiGuid, params, paginate) {
       var that = this;
       this.unCacheOrganization(cnsiGuid);
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllOrganizations(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -93,18 +93,18 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} orgGuid - organization id
      * @param {object} params - optional parameters
-     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
-     * and return the entire collection
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSpacesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
+    listAllSpacesForOrganization: function (cnsiGuid, orgGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllSpacesForOrganization(orgGuid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -117,19 +117,19 @@
      * @description lists all services for organization
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} orgGuid - organization id
-     * @param {object} params - optional parameters
-     * @param {boolean=} dePaginate - optional if the original response contains a paginated list, traverse the pages
-     * and return the entire collection
+     * @param {object=} params - optional parameters
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServicesForOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
+    listAllServicesForOrganization: function (cnsiGuid, orgGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Organizations')
         .ListAllServicesForOrganization(orgGuid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -498,7 +498,7 @@
 
       allSpacesP = allSpacesP || this.listAllSpacesForOrganization(cnsiGuid, orgGuid, {
         'inline-relations-depth': 1
-      }, true);
+      });
 
       var routesCountP = allSpacesP.then(getRouteCount);
 

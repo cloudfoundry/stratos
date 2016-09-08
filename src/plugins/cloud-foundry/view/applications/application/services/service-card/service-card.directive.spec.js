@@ -39,7 +39,8 @@
       var ListAllServiceBindings = mockBindingsApi.ListAllServiceBindings();
       var params = '?include-relations=service_instance' +
         '&inline-relations-depth=1' +
-        '&q=service_instance_guid+IN+01430cca-2592-4396-ac79-b1405a488b3e';
+        '&q=service_instance_guid+IN+01430cca-2592-4396-ac79-b1405a488b3e' +
+        '&results-per-page=100';
       $httpBackend.whenGET(ListAllServiceBindings.url + params)
         .respond(200, ListAllServiceBindings.response['200'].body);
     }));

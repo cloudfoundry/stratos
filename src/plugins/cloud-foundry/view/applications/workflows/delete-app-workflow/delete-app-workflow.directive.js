@@ -133,7 +133,7 @@
       var tasks = [];
       var routes = this.appModel.application.summary.routes;
       routes.forEach(function (route) {
-        tasks.push(that.routeModel.listAllAppsForRoute(that.cnsiGuid, route.guid, { 'results-per-page': 1}));
+        tasks.push(that.routeModel.listAllAppsForRoute(that.cnsiGuid, route.guid, { 'results-per-page': 1}, true));
       });
       return this.$q.all(tasks).then(function (results) {
         results.forEach(function (routeInfo, index) {
@@ -320,7 +320,7 @@
     deleteRouteIfPossible: function (routeId) {
       var that = this;
       return this.$q(function (resolve, reject) {
-        that.routeModel.listAllAppsForRouteWithoutStore(that.cnsiGuid, routeId, { 'results-per-page': 1})
+        that.routeModel.listAllAppsForRouteWithoutStore(that.cnsiGuid, routeId, { 'results-per-page': 1}, true)
           .then(function (apps) {
             if (apps.total_results === 0) {
               that.routeModel.deleteRoute(that.cnsiGuid, routeId).then(resolve, reject);

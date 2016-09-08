@@ -2,7 +2,7 @@
   'use strict';
 
   describe('variables view', function () {
-    var $controller, createController, $rootScope, $q;
+    var $controller, createController, $rootScope, $q, $httpBackend;;
     var cnsiGuid = 'HCF_GUID';
     var guid = 'APP_ID';
 
@@ -14,6 +14,7 @@
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
       var appVarsManager = $injector.get('cloud-foundry.view.applications.application.variables.manager');
+      $httpBackend = $injector.get('$httpBackend');
       $stateParams.cnsiGuid = cnsiGuid;
       $stateParams.guid = guid;
       var ApplicationVariablesController = $state.get('cf.applications.application.variables').controller;
@@ -25,6 +26,11 @@
       expect($controller).not.toBe(null);
       expect($controller.isObject).toBeDefined();
     }));
+
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
 
     it("isObject checks", function () {
       expect($controller.isObject(123)).toBe(false);

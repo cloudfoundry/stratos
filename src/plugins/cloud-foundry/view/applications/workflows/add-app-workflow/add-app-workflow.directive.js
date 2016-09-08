@@ -359,20 +359,22 @@
        */
       validateNewRoute: function () {
         var that = this;
-        return this.$q(function (resolve, reject) {
-          that.routeModel.checkRouteExists(
-            that.userInput.serviceInstance.guid,
-            that.userInput.domain.metadata.guid,
-            that.userInput.host
+        return that.routeModel.checkRouteExists(
+          that.userInput.serviceInstance.guid,
+          that.userInput.domain.metadata.guid,
+          that.userInput.host
           )
-          .then(function (data) {
-            if (data && data.code === 10000) {
-              resolve();
-            } else {
-              reject(gettext('This route already exists. Choose a new one.'));
+          .then(function () {
+            // Route has been found, this is not a valid route to add
+            return that.$q.reject(gettext('This route already exists. Choose a new one.'));
+          })
+          .catch(function (error) {
+            if (error.status === 404) {
+              // Route has not been found, this is a valid route to add
+              return that.$q.resolve();
             }
+            return that.$q.reject(error);
           });
-        });
       },
 
       /**
@@ -384,7 +386,7 @@
       getOrganizations: function () {
         var that = this;
         var cnsiGuid = that.userInput.serviceInstance.guid;
-        return this.organizationModel.listAllOrganizations(cnsiGuid, {}, true)
+        return this.organizationModel.listAllOrganizations(cnsiGuid)
           .then(function (organizations) {
             that.options.organizations.length = 0;
             [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));
@@ -450,7 +452,7 @@
       getPrivateDomains: function () {
         var that = this;
         var cnsiGuid = that.userInput.serviceInstance.guid;
-        return this.privateDomainModel.listAllPrivateDomains(cnsiGuid, null, true).then(function (privateDomains) {
+        return this.privateDomainModel.listAllPrivateDomains(cnsiGuid).then(function (privateDomains) {
           [].push.apply(that.options.domains, _.map(privateDomains, that.selectOptionMapping));
         });
       },

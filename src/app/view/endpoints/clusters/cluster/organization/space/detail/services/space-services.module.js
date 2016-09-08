@@ -71,7 +71,7 @@
       var that = this;
       return this.spaceModel.listAllServiceInstancesForSpace(this.clusterGuid, this.spaceGuid, {
         return_user_provided_service_instances: false
-      }, true).then(function () {
+      }).then(function () {
         if (serviceInstance) {
           that.updateActions([serviceInstance]);
           that.spaceModel.updateServiceInstanceCount(that.clusterGuid, that.spaceGuid, _.keys(that.spaceDetail().instances).length);

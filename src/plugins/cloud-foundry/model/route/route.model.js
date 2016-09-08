@@ -39,6 +39,7 @@
   }
 
   angular.extend(Route.prototype, {
+
    /**
     * @function checkRouteExists
     * @memberof cloud-foundry.model.route
@@ -52,13 +53,10 @@
     * @public
     */
     checkRouteExists: function (cnsiGuid, domainGuid, host, path, port) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .CheckRouteExists(domainGuid, host, path || '', port || '', {}, httpConfig)
+        .CheckRouteExists(domainGuid, host, path || '', port || '', {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid];
+          return response.data;
         });
     },
 
@@ -73,11 +71,8 @@
     * @public
     */
     associateAppWithRoute: function (cnsiGuid, guid, appGuid) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .AssociateAppWithRoute(guid, appGuid, {}, httpConfig);
+        .AssociateAppWithRoute(guid, appGuid, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
    /**
@@ -96,13 +91,10 @@
     },
 
     createRoute: function (cnsiGuid, routeSpec) {
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .CreateRoute(routeSpec, {}, httpConfig)
+        .CreateRoute(routeSpec, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid];
+          return response.data;
         });
     },
 
@@ -128,17 +120,34 @@
     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - route identifier
     * @param {object=} params - optional parameters
+    * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+    * containing ALL results will be returned. This could mean more than one http request is made.
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllAppsForRoute: function (cnsiGuid, guid, params) {
+    listAllAppsForRoute: function (cnsiGuid, guid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
         .ListAllAppsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (paginate) {
+            return response.data;
+          }
+          return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid))
+            .then(function (list) {
+              return {
+                total_pages: 1,
+                total_results: list.length,
+                prev_url: null,
+                next_url: null,
+                resources: list
+              };
+            });
+        })
+        .then(function (responseData) {
           that.route.id = guid;
-          that.route.apps = response.data;
-          return response.data;
+          that.route.apps = responseData;
+          return responseData;
         });
     },
 
@@ -149,14 +158,29 @@
     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - route identifier
     * @param {object} params - optional parameters
+    * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+    * containing ALL results will be returned. This could mean more than one http request is made.
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllAppsForRouteWithoutStore: function (cnsiGuid, guid, params) {
+    listAllAppsForRouteWithoutStore: function (cnsiGuid, guid, params, paginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
         .ListAllAppsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data;
+          if (paginate) {
+            return response.data;
+          }
+          return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid))
+            .then(function (list) {
+              return {
+                total_pages: 1,
+                total_results: list.length,
+                prev_url: null,
+                next_url: null,
+                resources: list
+              };
+            });
         });
     },
 
@@ -167,39 +191,23 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - route identifier
      * @param {object=} params - optional parameters
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllRouteMappingsForRoute: function (cnsiGuid, guid, params) {
+    listAllRouteMappingsForRoute: function (cnsiGuid, guid, params, paginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
         .ListAllRouteMappingsForRoute(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          if (!paginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
           return response.data.resources;
         });
-    },
-
-   /**
-    * @function listAllRoutes
-    * @memberof cloud-foundry.model.route
-    * @description get all route
-    * @param {object} params - optional parameters
-    * @returns {promise} A resolved/rejected promise
-    * @public
-    */
-    listAllRoutes: function (params) {
-      var cnsis = _.chain(this.modelManager.retrieve('app.model.serviceInstance.user').serviceInstances)
-                   .values()
-                   .map('guid')
-                   .value();
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsis.join(',') }
-      };
-      return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .ListAllRoutes(params, httpConfig)
-        .then(function (response) {
-          return response.data;
-        });
     }
+
   });
 
 })();

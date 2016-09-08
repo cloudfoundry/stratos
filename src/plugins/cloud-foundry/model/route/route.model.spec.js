@@ -51,7 +51,7 @@
       routeModel.listAllAppsForRoute('guid', '123');
       $httpBackend.flush();
       expect(routeModel.route.id).toBe('123');
-      expect(routeModel.route.apps).toEqual(ListAllAppsForRoute.response['200'].body.guid);
+      expect(routeModel.route.apps).toEqual(ListAllAppsForRoute.response['200'].body);
     });
 
     it('listAllAppsForRouteWithoutStore', function () {
@@ -61,8 +61,8 @@
 
       var result;
       expect(result).not.toBeDefined();
-      routeModel.listAllAppsForRouteWithoutStore('guid', '123').then(function (resources) {
-        result = resources;
+      routeModel.listAllAppsForRouteWithoutStore('guid', '123').then(function (response) {
+        result = response.resources;
       });
       $httpBackend.flush();
       expect(result).toBeDefined();

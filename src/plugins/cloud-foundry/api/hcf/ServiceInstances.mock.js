@@ -55,7 +55,7 @@
 
     ListAllServiceInstances: function () {
       return {
-        url: '/pp/v1/proxy/v2/service_instances',
+        url: '/pp/v1/proxy/v2/service_instances?results-per-page=100',
         response: {
           200: {
             body: {

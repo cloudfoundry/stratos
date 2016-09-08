@@ -56,7 +56,7 @@
         'inline-relations-depth': 2,
         'exclude-relations': 'domains,private_domains,space_quota_definitions'
       };
-      var orgPromise = organizationModel.listAllOrganizations(that.guid, inDepthParams, true).then(function (orgs) {
+      var orgPromise = organizationModel.listAllOrganizations(that.guid, inDepthParams).then(function (orgs) {
         var allDetailsP = [];
         _.forEach(orgs, function (org) {
           var orgDetailsP = organizationModel.getOrganizationDetails(that.guid, org).catch(function () {

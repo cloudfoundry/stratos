@@ -55,16 +55,17 @@
     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
     * @param {string} guid - space GUID.
     * @param {object=} params - optional parameters
-    * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+    * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+    * containing ALL results will be returned. This could mean more than one http request is made.
     * @returns {promise} A resolved/rejected promise
     * @public
     */
-    listAllAppsForSpace: function (cnsiGuid, guid, params, dePaginate) {
+    listAllAppsForSpace: function (cnsiGuid, guid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllAppsForSpace(guid, this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -102,16 +103,17 @@
      * @description lists all spaces
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object} params - optional parameters
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSpaces: function (cnsiGuid, params, dePaginate) {
+    listAllSpaces: function (cnsiGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllSpaces(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -125,16 +127,17 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object=} params - extra params to pass to request
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServicesForSpace: function (cnsiGuid, guid, params, dePaginate) {
+    listAllServicesForSpace: function (cnsiGuid, guid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .ListAllServicesForSpace(guid, this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -167,11 +170,12 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object=} params - extra params to pass to request
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllServiceInstancesForSpace: function (cnsiGuid, guid, params, dePaginate) {
+    listAllServiceInstancesForSpace: function (cnsiGuid, guid, params, paginate) {
       var that = this;
       var inlineParams = {
         'inline-relations-depth': 2,
@@ -182,7 +186,7 @@
         .ListAllServiceInstancesForSpace(guid, this.modelUtils.makeListParams(combinedParams),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -215,11 +219,12 @@
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the space guid
      * @param {object=} params - additional parameters for request
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A promise object
      * @public
      */
-    listAllRoutesForSpace: function (cnsiGuid, guid, params, dePaginate) {
+    listAllRoutesForSpace: function (cnsiGuid, guid, params, paginate) {
       var that = this;
       var inlineParams = {
         'inline-relations-depth': 1,
@@ -230,7 +235,7 @@
         .ListAllRoutesForSpace(guid, this.modelUtils.makeListParams(combinedParams),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -263,17 +268,18 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - space GUID.
      * @param {object=} params - optional parameters
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params, dePaginate) {
+    listRolesOfAllUsersInSpace: function (cnsiGuid, guid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Spaces')
         .RetrievingRolesOfAllUsersInSpace(guid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -508,7 +514,7 @@
       if (space.entity.managers) {
         rolesP = that.$q.resolve(that.cacheUsersRolesInSpace(cnsiGuid, space));
       } else {
-        rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params, true);
+        rolesP = this.listRolesOfAllUsersInSpace(cnsiGuid, spaceGuid, params);
       }
 
       var spaceRolesP = rolesP.then(function () {
@@ -524,7 +530,7 @@
         appP = that.$q.resolve(space.entity.apps);
         that.onListAllAppsForSpace(cnsiGuid, spaceGuid, space.entity.apps);
       } else {
-        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid, {}, true);
+        appP = this.listAllAppsForSpace(cnsiGuid, spaceGuid);
       }
 
       // Routes will not be cached now, they lack the 'depth' required and will be loaded on demand.
