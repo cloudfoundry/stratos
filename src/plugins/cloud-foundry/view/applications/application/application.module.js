@@ -85,6 +85,7 @@
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
     that.hideVariables = true;
+    that.hideDeliveryPipelineData = true;
     // Wait for parent state to be fully initialised
     utils.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
@@ -192,6 +193,12 @@
       return this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
           that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
+            that.authModel.resources.application,
+            that.authModel.actions.update,
+            that.model.application.summary.space_guid
+          );
+
+          that.hideDeliveryPipelineData = !that.authModel.isAllowed(that.cnsiGuid,
             that.authModel.resources.application,
             that.authModel.actions.update,
             that.model.application.summary.space_guid
