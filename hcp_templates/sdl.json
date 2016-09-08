@@ -761,34 +761,6 @@
         }
     },
     {
-      "name": "console-db-cert",
-      "description": "TLS certificate for the Console Database",
-      "required": true,
-      "secret": true,
-      "generator":
-        {
-          "id": "console_db_certificate",
-          "generate": {
-              "type": "Certificate",
-              "value_type": "certificate"
-          }
-        }
-    },
-    {
-      "name": "console-db-cert-key",
-      "description": "TLS private key for the Console Database",
-      "required": true,
-      "secret": true,
-      "generator":
-        {
-          "id": "console_db_certificate",
-          "generate": {
-            "type": "Certificate",
-            "value_type": "private_key"
-          }
-        }
-    },
-    {
       "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
       "description": "HTTP client timeoout",
       "default": "100",
