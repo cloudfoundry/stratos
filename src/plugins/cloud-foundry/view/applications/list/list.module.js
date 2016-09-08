@@ -210,8 +210,8 @@
      */
     _handleErrors: function (data) {
       var that = this;
+      var errors = [];
       if (data.applications) {
-        var errors = [];
         _.each(data.applications, function (result, cnsiGuid) {
           if (result.error) {
             // This request failed
@@ -220,14 +220,14 @@
             }
           }
         });
-        if (errors.length === 1) {
-          var errorMessage = 'The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.';
-          that.errorService.setAppError(that.$interpolate(errorMessage)({name: errors[0]}));
-        } else if (errors.length > 1) {
-          that.errorService.setAppError(gettext('The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your manage your endpoints.'));
-        } else {
-          that.errorService.clearAppError();
-        }
+      }
+      if (errors.length === 1) {
+        var errorMessage = 'The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.';
+        that.errorService.setAppError(that.$interpolate(errorMessage)({name: errors[0]}));
+      } else if (errors.length > 1) {
+        that.errorService.setAppError(gettext('The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints.'));
+      } else {
+        that.errorService.clearAppError();
       }
     },
 
