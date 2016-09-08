@@ -31,12 +31,10 @@
      * @name SpaceAccess
      * @description Constructor for SpaceAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
-    function SpaceAccess(principal, flags) {
+    function SpaceAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
@@ -47,16 +45,16 @@
        * @description User can create a space if:
        * 1. User is an Admin
        * 2. User is an Org Manager
-       * @param {Object} org - org detail
+       * @param {Object} orgGuid - org GUID
        * @returns {boolean}
        */
-      create: function (org) {
+      create: function (orgGuid) {
         // Admin
-        if (this.baseAccess.create(org)) {
+        if (this.baseAccess.create(orgGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
       },
 
       /**
@@ -64,16 +62,16 @@
        * @description User can delete space if:
        * 1. user is an admin
        * 2. user is the org manager
-       * @param {Object} space - space detail
+       * @param {Object} orgGuid - Organization GUID
        * @returns {boolean}
        */
-      delete: function (space) {
+      delete: function (orgGuid) {
         // Admin
-        if (this.baseAccess.create(space)) {
+        if (this.baseAccess.create(orgGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
       },
 
       /**
@@ -82,18 +80,19 @@
        * 1. User is an admin
        * 2. User is org manager
        * 3. user is space manager
-       * @param {Object} space - space detail
+       * @param {Object} spaceGuid - Space GUID
+       * @param {Object} orgGuid - Organization GUID
        * @returns {boolean}
        */
 
-      update: function (space) {
+      update: function (spaceGuid, orgGuid) {
         // Admin
-        if (this.baseAccess.update(space)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid) ||
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid);
       },
 
       /**
@@ -102,21 +101,22 @@
        * 1. User is admin
        * 2. User is an Org Manager
        * 3. User is a Space Manager
-       * @param {Object} space - Application detail
+       * @param {Object} spaceGuid - Space GUID
+       * @param {Object} orgGuid - Organization GUID
        * @returns {boolean}
        */
 
-      rename: function (space) {
+      rename: function (spaceGuid, orgGuid) {
 
         // Admin
-        if (this.baseAccess.update(space)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 
         // User is Org manager
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, space.entity.organization_guid) ||
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid) ||
           // User is Space manager
-          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, space.metadata.guid);
+          this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.managed, spaceGuid);
       },
 
       /**

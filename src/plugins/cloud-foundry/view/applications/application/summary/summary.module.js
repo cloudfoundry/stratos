@@ -19,7 +19,10 @@
   }
 
   ApplicationSummaryController.$inject = [
+    '$state',
     '$stateParams',
+    '$log',
+    '$q',
     '$scope',
     'app.model.modelManager',
     'cloud-foundry.view.applications.application.summary.addRoutes',
@@ -31,7 +34,10 @@
   /**
    * @name ApplicationSummaryController
    * @constructor
+   * @param {object} $state - UI Router $state
    * @param {object} $stateParams - the UI router $stateParams service
+   * @param {object} $log - the angular $log service
+   * @param {object} $q - the angular $q service
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
@@ -45,10 +51,13 @@
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {app.model.utilsService} utils - the utils service
    */
-  function ApplicationSummaryController($stateParams, $scope, modelManager, addRoutesService, editAppService, utils,
+//  function ApplicationSummaryController($state, $log, $q, modelManager, $stateParams, addRoutesService, editAppService, utils,
+  function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, modelManager, addRoutesService, editAppService, utils,
                                         routesService) {
+
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.routesService = routesService;
     this.id = $stateParams.guid;
     this.cnsiGuid = $stateParams.cnsiGuid;
@@ -56,15 +65,22 @@
     this.editAppService = editAppService;
     this.userCnsiModel.list();
     this.utils = utils;
-
+    this.$log = $log;
+    this.$q = $q;
     this.instanceViewLimit = 5;
 
     this.update = _.get($scope, '$parent.appCtrl.updateSummary') || angular.noop;
+
+    // Hide these options by default until we can ascertain that user can perform them
+    this.hideAddRoutes = true;
+    this.hideEditApp = true;
+    this.hideManageServices = true;
 
     var that = this;
     this.routesActionMenu = [
       {
         name: gettext('Unmap from App'),
+        disabled: true,
         execute: function (route) {
           routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id).finally(function () {
             that.update();
@@ -73,6 +89,7 @@
       },
       {
         name: gettext('Delete Route'),
+        disable: true,
         execute: function (route) {
           routesService.deleteRoute(that.cnsiGuid, route, route.guid).finally(function () {
             that.update();
@@ -80,6 +97,47 @@
         }
       }
     ];
+
+    function init() {
+
+      // Unmap from app
+      that.routesActionMenu[0].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.application,
+        that.authModel.actions.update,
+        that.model.application.summary.space_guid
+      );
+      that.$log.debug('Auth Action: Unmap from app disabled: ' + that.routesActionMenu[0].disabled);
+      // delete route
+      that.routesActionMenu[1].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.route,
+        that.authModel.actions.delete,
+        that.model.application.summary.space_guid
+      );
+      that.$log.debug('Auth Action: Delete from app disabled: ' + that.routesActionMenu[1].disabled);
+
+      // hide Add Routes
+      that.hideAddRoutes = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.route,
+        that.authModel.actions.create, that.model.application.summary.space_guid);
+      that.$log.debug('Auth Action: Hide Add routes disabled: ' + that.hideAddRoutes);
+
+      // hide Edit App
+      that.hideEditApp = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.application,
+        that.authModel.actions.update, that.model.application.summary.space_guid);
+      that.$log.debug('Auth Action: Hide Edit App disabled: ' + that.hideEditApp);
+
+      // hide Manage Services
+      that.hideManageServices = !that.authModel.isAllowed(that.cnsiGuid,
+        that.authModel.resources.managed_service_instance,
+        that.authModel.actions.create, that.model.application.summary.space_guid);
+      that.$log.debug('Auth Action: Hide Manage Services disabled: ' + that.hideEditApp);
+
+      return that.$q.resolve();
+    }
+
+    this.utils.chainStateResolve('cf.applications.application.summary', $state, init);
+
   }
 
   angular.extend(ApplicationSummaryController.prototype, {
@@ -149,9 +207,9 @@
       }
 
       return (formatPart(days, gettext('day'), gettext('days')) +
-        formatPart(hours, gettext('hour'), gettext('hours')) +
-        formatPart(minutes, gettext('minute'), gettext('minutes')) +
-        formatPart(seconds, gettext('second'), gettext('seconds'))).trim();
+      formatPart(hours, gettext('hour'), gettext('hours')) +
+      formatPart(minutes, gettext('minute'), gettext('minutes')) +
+      formatPart(seconds, gettext('second'), gettext('seconds'))).trim();
     }
   });
 

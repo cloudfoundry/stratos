@@ -60,7 +60,7 @@
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     var destroyed = false;
     $scope.$on('$destroy', function () {
@@ -102,14 +102,14 @@
     function enableActions() {
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename, that.spaceDetail().details.space);
+      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename, that.spaceDetail().details.guid);
 
       // Delete Space
-      that.actions[1].disabled = !that.canDelete || !authService.isAllowed(authService.resources.space, authService.actions.delete, that.spaceDetail().details.space);
+      that.actions[1].disabled = !that.canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.delete, that.spaceDetail().details.guid);
 
       // User Assignment
-      that.actions[2].disabled = authService.principal.userSummary.organizations.managed.length === 0 &&
-        authService.principal.userSummary.spaces.managed.length === 0;
+      that.actions[2].disabled = authModel.principal[that.clusterGuid].userSummary.organizations.managed.length === 0 &&
+        authModel.principal[that.clusterGuid].userSummary.spaces.managed.length === 0;
 
     }
 

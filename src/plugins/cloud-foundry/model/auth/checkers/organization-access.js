@@ -31,12 +31,10 @@
      * @name OrganizationAccess
      * @description Constructor for OrganizationAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
-    function OrganizationAccess(principal, flags) {
+    function OrganizationAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
@@ -65,19 +63,19 @@
        * @description Users can delete an organisation if:
        * 1. User is and admin
        * 2. is Org Manager
-       * @param {object} org - organisation details
+       * @param {object} orgGuid - organisation GUID
        * @returns {boolean}
        */
-      delete: function (org) {
+      delete: function (orgGuid) {
 
         // Admin
-        if (this.baseAccess.delete(org)) {
+        if (this.baseAccess.delete(orgGuid)) {
           return true;
         }
 
         // If user is manager of org
         return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+          ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
       },
 
       /**
@@ -85,20 +83,20 @@
        * @description Users can update an organisation if:
        * 1. User is and admin
        * 2. is Org Manager
-       * @param {Object} org - Application detail
+       * @param {object} orgGuid - organisation GUID
        * @returns {boolean}
        */
 
-      update: function (org) {
+      update: function (orgGuid) {
 
         // User is an admin
-        if (this.baseAccess.update(org)) {
+        if (this.baseAccess.update(orgGuid)) {
           return true;
         }
 
         // If user is manager of org
         return this.baseAccess
-          ._doesContainGuid(this.principal.userSummary.organizations.managed, org.metadata.guid);
+          ._doesContainGuid(this.principal.userSummary.organizations.managed, orgGuid);
       },
 
       /**

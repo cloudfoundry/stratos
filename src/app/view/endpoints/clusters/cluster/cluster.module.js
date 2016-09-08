@@ -37,7 +37,7 @@
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.initialized = false;
     this.guid = $stateParams.guid;
@@ -83,13 +83,16 @@
       // Reset any cache we may be interested in
       delete appModel.appSummary;
 
-      // Initialise AuthService promise
-      var authServicePromise = authService.initAuthService(that.guid);
+      // Initialise AuthModel for CNSI promise
+      var authModelPromise = $q.resolve();
+      if (!authModel.isInitialized(that.guid)) {
+        authModelPromise = authModel.initializeForEndpoint(that.guid, true);
+      }
 
       return $q.all([
         orgPromise,
         servicesPromise,
-        authServicePromise])
+        authModelPromise])
         .finally(function () {
           that.initialized = true;
         });
