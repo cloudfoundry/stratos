@@ -22,24 +22,34 @@
   }
 
   ApplicationsListController.$inject = [
+    '$scope',
+    '$interpolate',
     'app.model.modelManager',
-    'app.event.eventService'
+    'app.event.eventService',
+    'app.error.errorService'
   ];
 
   /**
    * @name ApplicationsListController
    * @constructor
+   * @param {object} $scope - the Angular $scope service
+   * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.error.errorService} errorService - the error service
+   * @property {object} $interpolate - the angular $interpolate service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {app.event.eventService} eventService - the event bus service
+   * @property {app.error.errorService} errorService - the error service
    */
-  function ApplicationsListController(modelManager, eventService) {
+  function ApplicationsListController($scope, $interpolate, modelManager, eventService, errorService) {
     var that = this;
+    this.$interpolate = $interpolate;
     this.modelManager = modelManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.eventService = eventService;
+    this.errorService = errorService;
     this.ready = false;
     this.loading = true;
     this.currentPage = 1;
@@ -72,6 +82,11 @@
 
     this.eventService.$on('cf.events.NEW_APP_CREATED', function () {
       that.reloadPage();
+    });
+
+    // Ensure any app errors we have set are cleared when the scope is destroyed
+    $scope.$on('$destroy', function () {
+      that.errorService.clearAppError();
     });
   }
 
@@ -182,7 +197,38 @@
         .finally(function () {
           that.ready = true;
           that.loading = false;
+          that._handleErrors(that.model.data);
         });
+    },
+
+    /**
+     * @function _handleErrors
+     * @description Check the response to see if any of the calls returned an error
+     * @param {object} data - applications model data object
+     * @returns {void}
+     * @orivate
+     */
+    _handleErrors: function (data) {
+      var that = this;
+      var errors = [];
+      if (data.applications) {
+        _.each(data.applications, function (result, cnsiGuid) {
+          if (result.error) {
+            // This request failed
+            if (that.userCnsiModel.serviceInstances[cnsiGuid]) {
+              errors.push(that.userCnsiModel.serviceInstances[cnsiGuid].name);
+            }
+          }
+        });
+      }
+      if (errors.length === 1) {
+        var errorMessage = 'The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.';
+        that.errorService.setAppError(that.$interpolate(errorMessage)({name: errors[0]}));
+      } else if (errors.length > 1) {
+        that.errorService.setAppError(gettext('The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints.'));
+      } else {
+        that.errorService.clearAppError();
+      }
     },
 
     /**
