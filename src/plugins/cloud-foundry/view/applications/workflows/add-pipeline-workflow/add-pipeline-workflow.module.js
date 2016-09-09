@@ -39,6 +39,29 @@
         });
       },
 
+      setOptions: function () {
+        this.options = this.options || {};
+
+        angular.extend(this.options, {
+          workflow: this.data.workflow,
+          userInput: this.userInput,
+          errors: this.errors,
+          apps: [],
+          hceCnsis: [],
+          notificationTargetTypes: [],
+          notificationTargets: [],
+          sources: [],
+          displayedRepos: [],
+          repos: [],
+          hasMoreRepos: false,
+          loadingRepos: false,
+          branches: [],
+          buildContainers: [],
+          notificationFormAppMode: true,
+          imageRegistries: []
+        });
+      },
+
       getWorkflowDefinition: function () {
         var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
         var that = this;

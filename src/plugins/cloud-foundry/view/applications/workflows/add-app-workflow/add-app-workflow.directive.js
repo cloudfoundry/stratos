@@ -293,10 +293,7 @@
         };
 
         this.options = {
-          workflow: that.data.workflow,
-          userInput: this.userInput,
           eventService: this.eventService,
-          errors: this.errors,
           subflow: null,
           serviceInstances: [],
           services: [],
@@ -306,21 +303,10 @@
           servicesReady: false,
           organizations: [],
           spaces: [],
-          apps: [],
-          domains: [],
-          hceCnsis: [],
-          notificationTargetTypes: [],
-          notificationTargets: [],
-          sources: [],
-          displayedRepos: [],
-          repos: [],
-          hasMoreRepos: false,
-          loadingRepos: false,
-          branches: [],
-          buildContainers: [],
-          notificationFormAppMode: true,
-          imageRegistries: []
+          domains: []
         };
+
+        this.setOptions();
 
         this.addApplicationActions = {
           stop: function () {
