@@ -542,7 +542,6 @@
       },
 
       startWorkflow: function () {
-        var that = this;
         this.addingApplication = true;
         this.reset();
         this.appModel.all();
