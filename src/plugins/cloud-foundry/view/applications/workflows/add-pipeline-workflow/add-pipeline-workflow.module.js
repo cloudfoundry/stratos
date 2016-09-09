@@ -55,6 +55,7 @@
           hceCnsis: [],
           notificationTargetTypes: [],
           notificationTargets: [],
+          notificationTargetsReady: false,
           sources: [],
           displayedRepos: [],
           repos: [],
@@ -365,10 +366,11 @@
 
       createDeploymentTarget: function () {
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-        var name = this._getDeploymentTargetName();
         var endpoint = this.userInput.serviceInstance.api_endpoint;
         var url = endpoint.Scheme + '://' + endpoint.Host;
-        return hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid, name,
+        var name = this._getDeploymentTargetName(url);
+        return hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
+                                               name,
                                                url,
                                                this.userInput.clusterUsername,
                                                this.userInput.clusterPassword,
@@ -388,9 +390,9 @@
         }
       },
 
-      _getDeploymentTargetName: function () {
+      _getDeploymentTargetName: function (url) {
         return [
-          this.userInput.serviceInstance.name,
+          url,
           this.userInput.organization.entity.name,
           this.userInput.space.entity.name,
           this.userInput.clusterUsername
@@ -431,30 +433,47 @@
         var that = this;
         return this.createProject(targetId).then(function () {
           return that.createCfBinding().then(angular.noop, function () {
+            return that.$q.when(that.deleteProject(that.userInput.projectId))
+              .then(function () {
+                that.userInput.projectId = null;
+              })
+              .finally(function () {
+                return that.$q(function (resolve, reject) {
+                  var msg = gettext('There was a problem creating the pipeline binding. Please check your username and password.');
+                  reject(msg);
+                });
+              });
+          });
+        }, function () {
+          return that.utils.retryRequest(function () {
+            return that.hceModel.getProjectByName(that.userInput.hceCnsi.guid, that.userInput.projectName);
+          })
+          .then(function (project) {
+            if (project) {
+              return that.deleteProject(project.id);
+            }
+          })
+          .finally(function () {
             return that.$q(function (resolve, reject) {
               var msg = gettext('There was a problem creating the pipeline binding.');
               reject(msg);
             });
           });
-        }, function () {
-          return that.$q(function (resolve, reject) {
-            var msg = gettext('There was a problem creating the pipeline. Please ensure the webhook limit has not been reached on your repository.');
-            reject(msg);
-          });
         });
       },
 
-      createProject:function (targetId) {
+      createProject: function (targetId) {
         if (this.userInput.projectId) {
           var deferred = this.$q.defer();
           deferred.resolve();
           return deferred.promise;
         } else {
           var that = this;
+          this.userInput.projectName = this._createProjectName();
           var githubUrl = this.userInput.source.browse_url;
           return this.hceModel.createProject(
             this.userInput.hceCnsi.guid,
-            this._createProjectName(),
+            this.userInput.projectName,
             this.userInput.source,
             targetId,
             this.userInput.buildContainer.build_container_id,
@@ -464,6 +483,15 @@
           ).then(function (response) {
             that.userInput.projectId = response.data.id;
           });
+        }
+      },
+
+      deleteProject: function (projectId) {
+        if (projectId) {
+          return this.hceModel.removeProject(
+            this.userInput.hceCnsi.guid,
+            projectId
+          );
         }
       },
 
