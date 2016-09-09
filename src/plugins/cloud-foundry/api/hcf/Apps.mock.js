@@ -353,7 +353,7 @@
                 "VCAP_SERVICES": {
                   "label-19": [
                     {"name": "instance_123"},
-                    {"name": "instance_456"},
+                    {"name": "instance_456"}
                   ]
                 }
               },
