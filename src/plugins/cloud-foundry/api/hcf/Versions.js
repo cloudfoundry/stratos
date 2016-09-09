@@ -21,23 +21,31 @@
   /* eslint-disable camelcase */
   angular.extend(VersionsApi.prototype, {
 
-   /*
-    * List Versions for an Application
-    * For detailed information, see online documentation at:
-    * https://github.com/hpcloud/hcf-versions/blob/develop/swagger-spec/hcf-versions.yml
-    */
-    ListVersions: function (guid, params, httpConfigOptions) {
+
+    /**
+     * Helper method to make the request config for $http
+     */
+    _makeConfig: function(params, httpConfigOptions) {
       var config = {};
       config.params = params;
-      config.url = '/pp/v1/proxy/v1/apps/' + guid + '/droplets';
-      config.method = 'GET';
-
       for (var option in httpConfigOptions) {
         if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
         config[option] = httpConfigOptions[option];
       }
       config.headers = config.headers || {};
       config.headers['x-cnap-api-host'] = 'hcf-versions-api';
+      return config;
+    },
+
+   /*
+    * List Versions for an Application
+    * For detailed information, see online documentation at:
+    * https://github.com/hpcloud/hcf-versions/blob/develop/swagger-spec/hcf-versions.yml
+    */
+    ListVersions: function (guid, params, httpConfigOptions) {
+      var config = this._makeConfig(params, httpConfigOptions);
+      config.url = '/pp/v1/proxy/v1/apps/' + guid + '/droplets';
+      config.method = 'GET';
       return this.$http(config);
     },
 
@@ -47,17 +55,9 @@
     * https://github.com/hpcloud/hcf-versions/blob/develop/swagger-spec/hcf-versions.yml
     */
     Rollback: function (guid, params, httpConfigOptions) {
-      var config = {};
-      config.params = params;
+      var config = this._makeConfig(params, httpConfigOptions);
       config.url = '/pp/v1/proxy/v1/apps/' + guid + '/droplets/current';
       config.method = 'PUT';
-
-      for (var option in httpConfigOptions) {
-        if (!httpConfigOptions.hasOwnProperty(option)) { continue; }
-        config[option] = httpConfigOptions[option];
-      }
-      config.headers = config.headers || {};
-      config.headers['x-cnap-api'] = 'hcf-versions-api';
       return this.$http(config);
     }
   });
