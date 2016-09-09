@@ -146,6 +146,14 @@
         that.project = null;
       }
     });
+
+    this.$scope.$watch(function () {
+      return that.model.application.project;
+    }, function (newProject, oldProject) {
+      if (!_.isNil(oldProject) && newProject.id === oldProject.id) {
+        that.getPipelineData();
+      }
+    });
   }
 
   angular.extend(ApplicationDeliveryPipelineController.prototype, {

@@ -88,6 +88,11 @@
       _.set(model.application, 'project', project);
     }
 
+    function clearProject() {
+      var model = modelManager.retrieve('cloud-foundry.model.application');
+      _.set(model.application, 'project', null);
+    }
+
     afterEach(function () {
       // Not necessarily needed, but will catch any requests that have not been overwritten.
       $httpBackend.verifyNoOutstandingExpectation();
@@ -155,9 +160,10 @@
 
         setProject();
         createController(true);
-        $rootScope.$apply();
+      });
 
-        $httpBackend.flush();
+      afterEach(function () {
+        clearProject();
       });
 
       it('Shows slide out - success', function () {
@@ -170,7 +176,7 @@
         spyOn(controller, 'updateData');
 
         controller.triggerBuild();
-        $rootScope.$apply();
+        $httpBackend.flush();
 
         expect(triggerBuild.open).toHaveBeenCalled();
         expect(controller.updateData).toHaveBeenCalled();
@@ -184,17 +190,18 @@
         spyOn(controller, 'updateData');
 
         controller.triggerBuild();
-        $rootScope.$apply();
+        $httpBackend.flush();
 
         expect(triggerBuild.open).toHaveBeenCalled();
-        expect(controller.updateData).not.toHaveBeenCalled();
+        expect(controller.updateData.calls.count()).toBe(1);
       });
     });
 
     describe('View Execution', function () {
+      var now = new Date();
       var execution = {id: 'two'};
-      var rawExecution = {id: 'two', junkParam: true};
-      var executions = [{id: 'one'}, rawExecution];
+      var rawExecution = {id: 'two', junkParam: true, reason: { created_date: now }};
+      var executions = [{id: 'one', reason: { created_date: now }}, rawExecution];
       var events = [
         {
           event: '3'
@@ -215,10 +222,11 @@
 
       beforeEach(function () {
         var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
-        $httpBackend.expectGET(request).respond([]);
+        $httpBackend.expectGET(request).respond(executions);
 
-        setProject();
         createController(true);
+        $rootScope.$apply();
+        setProject();
 
         $httpBackend.flush();
 
@@ -226,12 +234,15 @@
         _.set(controller, 'eventsPerExecution', eventsPerExecution);
       });
 
+      afterEach(function () {
+        clearProject();
+      });
+
       it('Shows detail view', function () {
         // Spy on the required functions to be called as a result of trigger
         spyOn(viewExecution, 'open');
 
         controller.viewExecution(execution);
-        $rootScope.$apply();
 
         expect(viewExecution.open).toHaveBeenCalled();
         expect(viewExecution.open.calls.argsFor(0).length).toBe(3);
@@ -239,7 +250,6 @@
         expect(viewExecution.open.calls.argsFor(0)[0]).toEqual(rawExecution);
         expect(viewExecution.open.calls.argsFor(0)[1]).toEqual(events);
       });
-
     });
 
     describe('Fetching events', function () {
@@ -257,10 +267,15 @@
         var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
         $httpBackend.expectGET(request).respond([]);
 
-        setProject();
         createController(true);
+        $rootScope.$apply();
+        setProject();
 
         $httpBackend.flush();
+      });
+
+      afterEach(function () {
+        clearProject();
       });
 
       afterEach(function () {
@@ -289,7 +304,6 @@
         }).catch(function () {
           fail('Fetch should not have failed');
         });
-
       });
 
       it('Some events', function () {
@@ -305,7 +319,6 @@
         }).catch(function () {
           fail('Fetch should not have failed');
         });
-
       });
     });
 
@@ -314,16 +327,20 @@
         var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
         $httpBackend.expectGET(request).respond([]);
 
-        setProject();
         createController(true);
-        spyOn(controller, 'determineLatestEvent');
+        $rootScope.$apply();
+        setProject();
 
         $httpBackend.flush();
+
+        spyOn(controller, 'determineLatestEvent');
       });
 
       afterEach(function () {
         expect(controller.determineLatestEvent).toHaveBeenCalled();
         expect(controller.determineLatestEvent.calls.argsFor(0)[0]).toBeDefined();
+
+        clearProject();
       });
 
       it('Empty event', function () {
@@ -383,11 +400,16 @@
         var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
         $httpBackend.expectGET(request).respond([]);
 
-        setProject();
         createController(true);
         controller.last = {};
+        $rootScope.$apply();
+        setProject();
 
         $httpBackend.flush();
+      });
+
+      afterEach(function () {
+        clearProject();
       });
 
       it('no previous event of this type used', function () {
@@ -456,10 +478,15 @@
         var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
         $httpBackend.expectGET(request).respond([]);
 
-        setProject();
         createController(true);
+        $rootScope.$apply();
+        setProject();
 
         $httpBackend.flush();
+      });
+
+      afterEach(function () {
+        clearProject();
       });
 
       it('no events obj', function () {
@@ -516,10 +543,15 @@
         var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
         $httpBackend.expectGET(request).respond([]);
 
-        setProject();
         createController(true);
+        $rootScope.$apply();
+        setProject();
 
         $httpBackend.flush();
+      });
+
+      afterEach(function () {
+        clearProject();
       });
 
       it('execution completed (pipeline_complete - failed)', function () {
@@ -604,8 +636,9 @@
         var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
         $httpBackend.expectGET(request).respond([]);
 
-        setProject();
         createController(true);
+        $rootScope.$apply();
+        setProject();
 
         $httpBackend.flush();
 
@@ -619,6 +652,10 @@
         _.set(controller, 'hceModel.data.pipelineExecutions', []);
         controller.updateData();
         $rootScope.$apply();
+      });
+
+      afterEach(function () {
+        clearProject();
       });
 
       it('Nothing visible? Nothing to update', function () {
@@ -652,7 +689,8 @@
           id: 'one',
           reason: {
             created_date: moment().format()
-          }
+          },
+          result: {completed: true}
         };
         var eventsPerExecution = {};
         eventsPerExecution[execution.id] = {};
@@ -764,8 +802,9 @@
         var request = '/pp/v1/proxy/v2/pipelines/executions?project_id=4321';
         $httpBackend.expectGET(request).respond([]);
 
-        setProject();
         createController(true);
+        $rootScope.$apply();
+        setProject();
 
         execution = {
           reason: {
@@ -774,6 +813,10 @@
         };
 
         $httpBackend.flush();
+      });
+
+      afterEach(function () {
+        clearProject();
       });
 
       it('get executions fails', function () {

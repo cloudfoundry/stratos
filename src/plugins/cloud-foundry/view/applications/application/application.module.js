@@ -330,10 +330,16 @@
           .then(function (response) {
             var project = response.data;
             if (!_.isNil(project)) {
-              return that.hceModel.getVcs(that.hceCnsi.guid, project.vcs_id)
-                .then(function () {
-                  that.model.application.project = project;
-                });
+              // Don't need to fetch VCS data every time if project hasn't changed
+              if (_.isNil(that.model.application.project) ||
+                  that.model.application.project.id !== project.id) {
+                return that.hceModel.getVcs(that.hceCnsi.guid, project.vcs_id)
+                  .then(function () {
+                    that.model.application.project = project;
+                  });
+              } else {
+                that.model.application.project = project;
+              }
             } else {
               that.model.application.project = null;
             }
