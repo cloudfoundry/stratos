@@ -20,7 +20,8 @@
 
   interceptor.$inject = [
     '$q',
-    'app.error.errorService'
+    'app.error.errorService',
+    'app.view.upgradeCheck'
   ];
 
   /**
@@ -32,9 +33,12 @@
    *
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {object} errorService - the error service
+   * @param {object} upgradeCheck - the upgrade check service
    * @returns {object} The response error function
    */
-  function interceptor($q, errorService) {
+  function interceptor($q, errorService, upgradeCheck) {
+
+    var commsErrorMsg = gettext('The Console encountered a problem communicating with the server. Please try again.');
     return {
       response: response,
       responseError: responseError
@@ -48,7 +52,9 @@
     function responseError(response) {
       // Network failure
       if (response.status === -1) {
-        errorService.setSystemError(gettext('The Console encountered a problem communicating with the server. Please try again.'));
+        errorService.setSystemError(commsErrorMsg);
+      } else if (response.status === 503 && !upgradeCheck.isUpgrading(response)) {
+        errorService.setSystemError(commsErrorMsg);
       }
       return $q.reject(response);
     }
