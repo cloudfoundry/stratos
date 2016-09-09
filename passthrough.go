@@ -17,6 +17,9 @@ import (
 	"github.com/labstack/echo/engine/standard"
 )
 
+// API Host Prefix to replace if the custom header is supplied
+const apiPrefix = "api."
+
 // CNSIRequest - <TBD>
 type CNSIRequest struct {
 	GUID     string
@@ -206,8 +209,6 @@ func (p *portalProxy) proxy(c echo.Context) error {
 		//req.Header = header
 	}
 
-	const apiPrefix = "api."
-
 	// send the request to each CNSI
 	done := make(chan CNSIRequest)
 	kill := make(chan struct{})
@@ -217,7 +218,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 		// Allow the host part of the API URL to be overridden
 		apiHost := c.Request().Header().Get("x-cnap-api-host")
 		// Don't allow any '.' chars in the api name
-		if apiHost != "" && (strings.Index(apiHost, ".") == -1) {
+		if apiHost != "" && !strings.ContainsAny(apiHost, ".") {
 			// Add trailing . for when we replace
 			apiHost = apiHost + "."
 			// Override the API URL if needed
