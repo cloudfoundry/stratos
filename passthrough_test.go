@@ -79,6 +79,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 	mock.ExpectQuery(selectAnyFromCNSIs).
 		WithArgs(mockHCFGUID).
 		WillReturnRows(expectHCFRow())
+
 	go pp.doRequest(mockCNSIRequest, done, kill)
 
 	newCNSIRequest := <-done
