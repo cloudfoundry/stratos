@@ -29,15 +29,16 @@
   ApplicationController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
+    'helion.framework.widgets.dialog.confirm',
+    'app.utils.utilsService',
+    'cloud-foundry.view.applications.application.summary.cliCommands',
     '$stateParams',
     '$scope',
     '$window',
     '$q',
     '$interval',
     '$interpolate',
-    '$state',
-    'helion.framework.widgets.dialog.confirm',
-    'app.utils.utilsService'
+    '$state'
   ];
 
   /**
@@ -45,6 +46,9 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
+   * @param {object} confirmDialog - the confirm dialog service
+   * @param {object} utils - the utils service
+   * @param {object} cliCommands - the cliCommands dialog service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
    * @param {object} $window - the Angular $window service
@@ -52,8 +56,6 @@
    * @param {object} $interval - the Angular $interval service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $state - the UI router $state service
-   * @param {object} confirmDialog - the confirm dialog service
-   * @param {object} utils - the utils service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
@@ -64,8 +66,8 @@
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
-   */
-  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, $state, confirmDialog, utils) {
+*/
+  function ApplicationController(modelManager, eventService, confirmDialog, utils, cliCommands, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
     this.$window = $window;
@@ -78,7 +80,9 @@
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
+    this.cliCommands = cliCommands;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
     this.ready = false;
@@ -154,6 +158,12 @@
         name: gettext('CLI Instructions'),
         id: 'cli',
         execute: function () {
+
+          var username = null;
+          if (that.stackatoInfo.info.endpoints) {
+            username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
+          }
+          that.cliCommands.show(that.model.application, username);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
