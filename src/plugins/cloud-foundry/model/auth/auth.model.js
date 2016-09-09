@@ -81,7 +81,7 @@
           }
           authModelInitPromise.push(that.initializeForEndpoint(guid, true));
         });
-        return that.$q.all(authModelInitPromise);
+        return that.$q.all(authModelInitPromise).catch(angular.noop);
       }
 
       return that.$q.resolve();
@@ -222,7 +222,7 @@
 
       // convenience method implemented for Application permissions
       var cnsiPrincipal = this.principal[cnsiGuid];
-      if (_.isUndefined(cnsiPrincipal)) {
+      if (_.isUndefined(cnsiPrincipal) || _.isNull(cnsiPrincipal)) {
         // Principal object is probably being initialised
         // Unable to ascertain is user has role now
         return false;
