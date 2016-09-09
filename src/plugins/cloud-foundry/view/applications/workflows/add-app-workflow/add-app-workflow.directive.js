@@ -197,6 +197,21 @@
               formName: 'application-name-form',
               nextBtnText: gettext('Create and continue'),
               cancelBtnText: gettext('Cancel'),
+              onEnter: function () {
+                return that.serviceInstanceModel.list()
+                  .then(function (serviceInstances) {
+                    var validServiceInstances = _.chain(_.values(serviceInstances))
+                      .filter({cnsi_type: 'hcf', valid: true})
+                      .filter(function (cnsi) {
+                        return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
+                      })
+                      .map(function (o) {
+                        return {label: o.api_endpoint.Host, value: o};
+                      })
+                      .value();
+                    [].push.apply(that.options.serviceInstances, validServiceInstances);
+                  });
+              },
               onNext: function () {
                 return that.validateNewRoute().then(function () {
                   return that.createApp().then(function () {
@@ -384,6 +399,8 @@
       getOrganizations: function () {
         var that = this;
         var cnsiGuid = that.userInput.serviceInstance.guid;
+        this.options.organizations.length = 0;
+
         return this.organizationModel.listAllOrganizations(cnsiGuid, {}, true)
           .then(function (organizations) {
 
@@ -401,9 +418,7 @@
                 return filteredSpaces.length > 0;
               });
             }
-            that.options.organizations.length = 0;
             [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
-            that.userInput.organization = that.options.organizations[0] && that.options.organizations[0].value;
           });
       },
 
@@ -417,7 +432,9 @@
       getSpacesForOrganization: function (guid) {
         var that = this;
         var cnsiGuid = that.userInput.serviceInstance.guid;
-        return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
+        this.options.spaces.length = 0;
+
+        return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid, {}, true)
           .then(function (spaces) {
 
             // Filter out spaces in which user is not a Space Developer
@@ -426,10 +443,7 @@
               filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
                 {entity: {organization_guid: guid}});
             }
-
-            that.options.spaces.length = 0;
             [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
-            that.userInput.space = that.options.spaces[0] && that.options.spaces[0].value;
           });
       },
 
@@ -533,19 +547,6 @@
         this.reset();
         this.appModel.all();
         this.getHceInstances();
-        this.serviceInstanceModel.list()
-          .then(function (serviceInstances) {
-            var validServiceInstances = _.chain(_.values(serviceInstances))
-              .filter({cnsi_type: 'hcf', valid: true})
-              .filter(function (cnsi) {
-                return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
-              })
-              .map(function (o) {
-                return {label: o.api_endpoint.Host, value: o};
-              })
-              .value();
-            [].push.apply(that.options.serviceInstances, validServiceInstances);
-          });
       },
 
       stopWorkflow: function () {
