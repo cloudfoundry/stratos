@@ -39,7 +39,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
-   * @param {object} utils - Utils service 
+   * @param {object} utils - Utils service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
