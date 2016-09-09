@@ -12,11 +12,11 @@
   registerUsersModel.$inject = [
     'app.model.modelManager',
     'app.api.apiManager',
-    'cloud-foundry.api.hcfPagination'
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerUsersModel(modelManager, apiManager, hcfPagination) {
-    modelManager.register('cloud-foundry.model.users', new Users(apiManager, hcfPagination));
+  function registerUsersModel(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.users', new Users(apiManager, modelUtils));
   }
 
   /**
@@ -24,31 +24,13 @@
    * @name Users
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
-   * @param {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
-   * @property {cloud-foundry.api.hcfPagination} hcfPagination - service containing general hcf pagination helpers
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Users(apiManager, hcfPagination) {
+  function Users(apiManager, modelUtils) {
     this.apiManager = apiManager;
-    this.hcfPagination = hcfPagination;
-
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
-
-    this.applyDefaultListParams = function (params) {
-      return _.defaults(params, {
-        'results-per-page': 100
-      });
-    };
+    this.modelUtils = modelUtils;
   }
 
   angular.extend(Users.prototype, {
@@ -64,7 +46,7 @@
      */
     getUserSummary: function (cnsiGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .GetUserSummary(userGuid, params, this.makeHttpConfig(cnsiGuid))
+        .GetUserSummary(userGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
@@ -83,10 +65,10 @@
     listAllUsers: function (cnsiGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllUsers(this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllUsers(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -94,7 +76,8 @@
 
     associateAuditedOrganizationWithUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .AssociateAuditedOrganizationWithUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .AssociateAuditedOrganizationWithUser(userGuid, orgGuid, params,
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
@@ -102,12 +85,14 @@
 
     removeAuditedOrganizationFromUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .RemoveAuditedOrganizationFromUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid));
+        .RemoveAuditedOrganizationFromUser(userGuid, orgGuid, params,
+          this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     associateBillingManagedOrganizationWithUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .AssociateBillingManagedOrganizationWithUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .AssociateBillingManagedOrganizationWithUser(userGuid, orgGuid, params,
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
@@ -115,12 +100,14 @@
 
     removeBillingManagedOrganizationFromUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .RemoveBillingManagedOrganizationFromUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid));
+        .RemoveBillingManagedOrganizationFromUser(userGuid, orgGuid, params,
+          this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     associateManagedOrganizationWithUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .AssociateManagedOrganizationWithUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .AssociateManagedOrganizationWithUser(userGuid, orgGuid, params,
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
@@ -128,12 +115,13 @@
 
     removeManagedOrganizationFromUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .RemoveManagedOrganizationFromUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid));
+        .RemoveManagedOrganizationFromUser(userGuid, orgGuid, params,
+          this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     associateOrganizationWithUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .AssociateOrganizationWithUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .AssociateOrganizationWithUser(userGuid, orgGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
@@ -141,7 +129,7 @@
 
     removeOrganizationFromUser: function (cnsiGuid, orgGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .RemoveOrganizationFromUser(userGuid, orgGuid, params, this.makeHttpConfig(cnsiGuid))
+        .RemoveOrganizationFromUser(userGuid, orgGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
@@ -149,7 +137,7 @@
 
     associateAuditedSpaceWithUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .AssociateAuditedSpaceWithUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid))
+        .AssociateAuditedSpaceWithUser(userGuid, spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
@@ -157,12 +145,12 @@
 
     removeAuditedSpaceFromUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .RemoveAuditedSpaceFromUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid));
+        .RemoveAuditedSpaceFromUser(userGuid, spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     associateManagedSpaceWithUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .AssociateManagedSpaceWithUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid))
+        .AssociateManagedSpaceWithUser(userGuid, spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
@@ -170,12 +158,12 @@
 
     removeManagedSpaceFromUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .RemoveManagedSpaceFromUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid));
+        .RemoveManagedSpaceFromUser(userGuid, spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     associateSpaceWithUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .AssociateSpaceWithUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid))
+        .AssociateSpaceWithUser(userGuid, spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data.resources;
         });
@@ -183,7 +171,7 @@
 
     removeSpaceFromUser: function (cnsiGuid, spaceGuid, userGuid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .RemoveSpaceFromUser(userGuid, spaceGuid, params, this.makeHttpConfig(cnsiGuid));
+        .RemoveSpaceFromUser(userGuid, spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     /**
@@ -198,10 +186,11 @@
     listAllAuditedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllAuditedOrganizationsForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllAuditedOrganizationsForUser(userGuid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -219,10 +208,11 @@
     listAllBillingManagedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllBillingManagedOrganizationsForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllBillingManagedOrganizationsForUser(userGuid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -240,10 +230,11 @@
     listAllManagedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllManagedOrganizationsForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllManagedOrganizationsForUser(userGuid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -261,10 +252,11 @@
     listAllOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllOrganizationsForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllOrganizationsForUser(userGuid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -282,10 +274,11 @@
     listAllAuditedSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllAuditedSpacesForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllAuditedSpacesForUser(userGuid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -303,10 +296,11 @@
     listAllManagedSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllManagedSpacesForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllManagedSpacesForUser(userGuid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });
@@ -324,10 +318,10 @@
     listAllSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
-        .ListAllSpacesForUser(userGuid, this.applyDefaultListParams(params), this.makeHttpConfig(cnsiGuid))
+        .ListAllSpacesForUser(userGuid, this.modelUtils.makeListParams(params),this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
-            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
         });

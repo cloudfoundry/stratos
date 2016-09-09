@@ -14,11 +14,12 @@
   registerApplicationVersionsModel.$inject = [
     '$q',
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerApplicationVersionsModel($q, modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.appVersions', new ApplicationVersions($q, apiManager));
+  function registerApplicationVersionsModel($q, modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.appVersions', new ApplicationVersions($q, apiManager, modelUtils));
   }
 
   /**
@@ -26,13 +27,16 @@
    * @name ApplicationVersions
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {object} $q - the $q service for promise/deferred objects
    * @property {object} versionsApi - the application versions API
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function ApplicationVersions($q, apiManager) {
+  function ApplicationVersions($q, apiManager, modelUtils) {
     this.versionsApi = apiManager.retrieve('cloud-foundry.api.Versions');
     this.$q = $q;
+    this.modelUtils = modelUtils;
 
     this.versions = [];
 
@@ -40,17 +44,6 @@
     this.versionSupportCache = {};
     this.versionSupportCacheGuids = [];
 
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
   }
 
   angular.extend(ApplicationVersions.prototype, {
@@ -78,9 +71,9 @@
      **/
     list: function (cnsiGuid, guid) {
       var that = this;
-      var config = this.makeHttpConfig(cnsiGuid);
+      var config = this.modelUtils.makeHttpConfig(cnsiGuid);
       var params = {
-        per_paeg: 200,
+        per_page: 200,
         order_by: '-created_at'
       };
       return this.versionsApi.ListVersions(guid, params, config).then(function (response) {
@@ -101,7 +94,7 @@
      * @public
      **/
     rollback: function (cnsiGuid, appGuid, guid) {
-      var config = this.makeHttpConfig(cnsiGuid);
+      var config = this.modelUtils.makeHttpConfig(cnsiGuid);
       var params = {
         droplet_guid: guid
       };

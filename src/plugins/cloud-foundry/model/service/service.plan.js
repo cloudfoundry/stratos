@@ -13,36 +13,28 @@
 
   registerServicePlan.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerServicePlan(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.service-plan', new ServicePlan(apiManager));
+  function registerServicePlan(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.service-plan', new ServicePlan(apiManager, modelUtils));
   }
 
   /**
    * @memberof cloud-foundry.model.service-plan
    * @name ServicePlan
    * @param {app.api.apiManager} apiManager - the service API manager
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the service API manager
    * @property {app.api.servicePlanApi} serviceApi - the service API proxy
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function ServicePlan(apiManager) {
+  function ServicePlan(apiManager, modelUtils) {
     this.apiManager = apiManager;
     this.servicePlanApi = this.apiManager.retrieve('cloud-foundry.api.ServicePlans');
-
-    var passThroughHeader = {
-      'x-cnap-passthrough': 'true'
-    };
-
-    this.makeHttpConfig = function (cnsiGuid) {
-      var headers = {'x-cnap-cnsi-list': cnsiGuid};
-      angular.extend(headers, passThroughHeader);
-      return {
-        headers: headers
-      };
-    };
+    this.modelUtils = modelUtils;
   }
 
   angular.extend(ServicePlan.prototype, {
@@ -58,7 +50,7 @@
      * @public
      */
     retrieveServicePlan: function (cnsiGuid, guid, options) {
-      return this.servicePlanApi.RetrieveServicePlan(guid, options, this.makeHttpConfig(cnsiGuid))
+      return this.servicePlanApi.RetrieveServicePlan(guid, options, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
