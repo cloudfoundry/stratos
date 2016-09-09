@@ -1,0 +1,43 @@
+<div ng-if="!applicationVersionsCtrl.fetchError && applicationVersionsCtrl.isBusy" class="message-box message-box-no-bg">
+  <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+</div>
+<div ng-if="applicationVersionsCtrl.fetchError" class="alert alert-danger alert-with-icon">
+  <div translate>An error occurred retrieving application versions</div>
+</div>
+<div ng-if="!applicationVersionsCtrl.fetchError && !applicationVersionsCtrl.isBusy">
+  <div class="action-header">
+    <span translate>Versions</span>
+  </div>
+
+  <div ng-if="applicationVersionsCtrl.hasVersions()" id="app-version-info-message" class="app-version-info welcome-message panel panel-default">
+    <span class="helion-icon helion-icon-Information"></span>
+    <span translate>You will need to restart the application after rolling back to a previous version.</span>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-body"
+         ng-if="!applicationVersionsCtrl.hasVersions()" translate>
+      This application has no versions.
+    </div>
+    <table class="app-variables-table table table-actionable" ng-if="applicationVersionsCtrl.hasVersions()" >
+      <thead>
+        <tr>
+          <th translate>Created</th>
+          <th translate>ID</th>
+          <th translate></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="v in applicationVersionsCtrl.versions">
+          <td>{{ v.created_at | date : 'M/d/yy h:mm:ss a' }}</span></td>
+          <td>{{ v.guid }}</td>
+          <td>
+            <a class="btn-link" ng-click="applicationVersionsCtrl.rollback(v)">
+              <span translate>Rollback</span>
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
