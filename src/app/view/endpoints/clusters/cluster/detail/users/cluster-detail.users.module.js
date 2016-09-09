@@ -57,19 +57,19 @@
     function refreshUsers() {
       that.userRoles = {};
 
-      // For each user, get its roles in all organization
+      // For each user, get her roles in all organizations
       _.forEach(that.users, function (aUser) {
-        var myRoles = {};
+        var aUserRoles = {};
         _.forEach(that.organizationModel.organizations[that.guid], function (org) {
           var roles = org.roles[aUser.metadata.guid];
-          if (!_.isUndefined(roles)) {
-            myRoles[org.details.org.metadata.guid] = roles;
+          if (angular.isDefined(roles)) {
+            aUserRoles[org.details.org.metadata.guid] = roles;
           }
         });
-        that.userRoles[aUser.metadata.guid] = [];
 
-        // Format that in an array of pairs for direct use in the template
-        _.forEach(myRoles, function (orgRoles, orgGuid) {
+        // Format that for direct use in the template
+        that.userRoles[aUser.metadata.guid] = [];
+        _.forEach(aUserRoles, function (orgRoles, orgGuid) {
           _.forEach(orgRoles, function (role) {
             that.userRoles[aUser.metadata.guid].push({
               org: that.organizationModel.organizations[that.guid][orgGuid],
@@ -83,20 +83,21 @@
       return $q.resolve();
     }
 
+    // We need the debounce to account for SmartTable delays
     var debouncedUpdateSelection = _.debounce(function () {
       userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
       $scope.$apply();
     }, 100);
 
     function init() {
+
+      var isAdmin = that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
+
       $scope.$watch(function () {
         return rolesService.changingRoles;
       }, function () {
-        var isAdmin = that.stackatoInfo.info.endpoints
-          ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin
-          : false;
-        that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
-        that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
+        that.userActions[0].disabled = rolesService.changingRoles;
+        that.userActions[1].disabled = rolesService.changingRoles;
       });
 
       $scope.$watchCollection(function () {
@@ -108,13 +109,32 @@
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
-        that.users = res;
-        return refreshUsers();
-      }).then(function () {
+      // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
+      var promiseForUsers;
+      if (isAdmin) {
+        promiseForUsers = that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
+          that.users = res;
+        });
+      } else {
+        var allUsersP = [];
+        _.forEach(that.organizationModel.organizations[that.guid], function (org) {
+          allUsersP.push(that.organizationModel.retrievingRolesOfAllUsersInOrganization(that.guid, org.details.guid));
+        });
+        promiseForUsers = $q.all(allUsersP).then(function (results) {
+          var allUsers = {};
+          _.forEach(results, function (usersArray) {
+            _.forEach(usersArray, function (aUser) {
+              allUsers[aUser.metadata.guid] = aUser;
+            });
+          });
+          that.users = _.values(allUsers);
+        });
+      }
+
+      return promiseForUsers.then(refreshUsers).then(function () {
         that.stateInitialised = true;
-        return $q.resolve();
       });
+
     }
 
     this.userActions = [

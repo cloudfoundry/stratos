@@ -121,6 +121,9 @@
     };
 
     function init() {
+
+      var isAdmin = that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
+
       $scope.$watch(function () {
         return rolesService.changingRoles;
       }, function () {
@@ -144,13 +147,32 @@
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
-        that.users = res;
-        return refreshUsers();
-      }).then(function () {
+      // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
+      var promiseForUsers;
+      if (isAdmin) {
+        promiseForUsers = that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
+          that.users = res;
+        });
+      } else {
+        var allUsersP = [];
+        _.forEach(that.organizationModel.organizations[that.guid], function (org) {
+          allUsersP.push(that.organizationModel.retrievingRolesOfAllUsersInOrganization(that.guid, org.details.guid));
+        });
+        promiseForUsers = $q.all(allUsersP).then(function (results) {
+          var allUsers = {};
+          _.forEach(results, function (usersArray) {
+            _.forEach(usersArray, function (aUser) {
+              allUsers[aUser.metadata.guid] = aUser;
+            });
+          });
+          that.users = _.values(allUsers);
+        });
+      }
+
+      return promiseForUsers.then(refreshUsers).then(function () {
         that.stateInitialised = true;
-        return $q.resolve();
       });
+
     }
 
     this.userActions = [

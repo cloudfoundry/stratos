@@ -68,7 +68,7 @@
 
         var args = Array.prototype.slice.call(arguments);
         if (args.length > 2) {
-          // pass the reset of the arguments into accessChecker action
+          // pass the rest of the arguments into accessChecker action
           args = args.splice(2);
         }
 

@@ -635,7 +635,56 @@
           _splitOrgRoles(that.organizations[cnsiGuid][orgGuid].details.org, allUsersRoles);
           return allUsersRoles;
         });
+    },
+
+    retrievingRolesOfAllUsersInOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
+      var that = this;
+      return this.orgsApi
+        .RetrievingRolesOfAllUsersInOrganization(orgGuid, this.applyDefaultListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
+    },
+
+    // Warning: this does not update the cache
+    removeAuditorFromOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.RemoveAuditorFromOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateAuditorWithOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.AssociateAuditorWithOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeManagerFromOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.RemoveManagerFromOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateManagerWithOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.AssociateManagerWithOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeBillingManagerFromOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.RemoveBillingManagerFromOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateBillingManagerWithOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.AssociateBillingManagerWithOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeUserFromOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.RemoveUserFromOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateUserWithOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.AssociateUserWithOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
     }
+
   });
 
   var ORG_ROLE_TO_KEY = {
