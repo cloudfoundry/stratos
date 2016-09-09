@@ -64,9 +64,9 @@
       // Activate the correct menu entry or deactivate all menu entries if none match
       that.menu.currentState = _.get(toState, 'data.activeMenuState', '');
       // Scroll to the console-view's top after a state transition
-      var consoleView = angular.element(document).find('console-view');
-      if (consoleView[0]) {
-        consoleView[0].scrollTop = 0;
+      var consoleViewScrollPanel = angular.element(document).find('#console-view-scroll-panel');
+      if (consoleViewScrollPanel[0]) {
+        consoleViewScrollPanel[0].scrollTop = 0;
       }
     });
   }
