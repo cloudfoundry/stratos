@@ -1,0 +1,67 @@
+<div
+  ng-init="context = context || detailViewCtrl.context">
+  <p translate>Use the <a href="https://github.com/cloudfoundry/cli" rel="noopener noreferrer" target="_blank">Cloud
+    Foundry CLI</a> to execute commands directly
+    against a Helion Cloud Foundry.</p>
+  <div>
+    <br>
+    <h4 translate>Getting Started</h4>
+    <p translate>Before starting follow these steps:</p>
+    <p translate>1. Download and install the CLI - see <a href="https://github.com/cloudfoundry/cli#downloads"
+                                                          rel="noopener noreferrer" target="_blank">here</a></p>
+    <p translate>2. Set the api endpoint
+      <code-block>cf api {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}</code-block>
+    </p>
+    <p translate>3. Login
+      <code-block hide-copy="true">$ cf login
+        API endpoint: {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}
+
+        Email> {{context.username || '[username]'}}
+
+        Password> [password]
+        Authenticating...
+        OK
+      </code-block>
+    </p>
+    <p translate>4. Target an org and space
+      <code-block>cf target -o {{context.orgName || '[organization name]'}} -s {{context.spaceName || '[space name]'}}
+      </code-block>
+    </p>
+  </div>
+  <div>
+
+    <br><h4 translate>Application Management Commands</h4>
+    <dl>
+      <dt translate>Summary</dt>
+      <dd>
+        To get the application summary<code-block>cf app {{context.appName || '[app name]'}}</code-block>
+        <br></dd>
+      <dt translate>Start</dt>
+      <dd>
+        To start the application<code-block>cf start {{context.appName || '[app name]'}}</code-block>
+        <br></dd>
+      <dt translate>Stop</dt>
+      <dd>
+        To stop the application<code-block>cf stop {{context.appName || '[app name]'}}</code-block>
+        <br></dd>
+      <dt translate>Restart</dt>
+      <dd>
+        To restart the application<code-block>cf restart {{context.appName || '[app name]'}}</code-block>
+        <br></dd>
+    </dl>
+
+    <br><h4 translate>Scaling the Application</h4>
+    <dl>
+      <dt translate>Instances</dt>
+      <dd translate>
+        To change the number of application instances<code-block>cf scale {{context.appName || '[app name]'}} -i [N]</code-block>
+        <br></dd>
+      <dt translate>Memory</dt>
+      <dd translate>
+        To change the memory allocated to application instances <code-block>cf scale {{context.appName || '[app name]'}} -m [N]</code-block>
+        <br></dd>
+    </dl>
+
+
+  </div>
+</div>

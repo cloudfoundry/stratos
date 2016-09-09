@@ -13,7 +13,7 @@
           <dd>{{ ::serviceCardCtrl.service.entity.version || '-'}}</dd>
         </dl>
       </div>
-      <div class="service-actions-menu">
+      <div class="service-actions-menu" ng-hide="serviceCardCtrl.hideServiceActions()">
         <actions-menu actions="serviceCardCtrl.actions" ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.canBind"
           action-target="service" menu-icon="helion-icon helion-icon-2x helion-icon-More"
           menu-position="actions-menu-right">
@@ -40,18 +40,18 @@
         </div>
         <button class="btn btn-sm btn-link"
           ng-if="serviceCardCtrl.canBind && (serviceCardCtrl.allowAddOnly || serviceCardCtrl.numAttached === 0)"
-          ng-click="serviceCardCtrl.addService()" translate>
+          ng-click="serviceCardCtrl.addService()" ng-hide="serviceCardCtrl.hideServiceActions()" translate>
           Add Service
           <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
         </button>
         <button class="btn btn-sm btn-link"
           ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached === 1"
-          ng-click="serviceCardCtrl.detach()" translate>
+          ng-click="serviceCardCtrl.detach()" ng-hide="serviceCardCtrl.hideServiceActions()" translate>
           Detach
         </button>
         <button class="btn btn-sm btn-link"
           ng-if="!serviceCardCtrl.allowAddOnly && serviceCardCtrl.numAttached > 1"
-          ng-click="serviceCardCtrl.manageInstances()" translate>
+          ng-click="serviceCardCtrl.manageInstances()" ng-hide="serviceCardCtrl.hideServiceActions()" translate>
           Manage Instances
         </button>
       </div>

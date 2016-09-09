@@ -9,6 +9,7 @@
       'cloud-foundry.view.applications.application.delivery-logs',
       'cloud-foundry.view.applications.application.delivery-pipeline',
       'cloud-foundry.view.applications.application.variables',
+      'cloud-foundry.view.applications.application.versions',
       'cloud-foundry.view.applications.application.notification-target'
     ])
     .config(registerRoute);
@@ -29,13 +30,16 @@
   ApplicationController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
+    'helion.framework.widgets.dialog.confirm',
+    'app.utils.utilsService',
+    'cloud-foundry.view.applications.application.summary.cliCommands',
     '$stateParams',
     '$scope',
     '$window',
     '$q',
     '$interval',
     '$interpolate',
-    'helion.framework.widgets.dialog.confirm'
+    '$state'
   ];
 
   /**
@@ -43,13 +47,16 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
+   * @param {object} confirmDialog - the confirm dialog service
+   * @param {object} utils - the utils service
+   * @param {object} cliCommands - the cliCommands dialog service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the Angular $scope
    * @param {object} $window - the Angular $window service
    * @param {object} $q - the Angular $q service
    * @param {object} $interval - the Angular $interval service
    * @param {object} $interpolate - the Angular $interpolate service
-   * @param {object} confirmDialog - the confirm dialog service
+   * @param {object} $state - the UI router $state service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {object} $window - the Angular $window service
    * @property {object} $q - the Angular $q service
@@ -60,8 +67,8 @@
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
-   */
-  function ApplicationController(modelManager, eventService, $stateParams, $scope, $window, $q, $interval, $interpolate, confirmDialog) {
+*/
+  function ApplicationController(modelManager, eventService, confirmDialog, utils, cliCommands, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
     this.$window = $window;
@@ -71,16 +78,32 @@
     this.eventService = eventService;
     this.confirmDialog = confirmDialog;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
+    this.versions = modelManager.retrieve('cloud-foundry.model.appVersions');
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.cnsiGuid = $stateParams.cnsiGuid;
+    this.cliCommands = cliCommands;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
+    this.supportsVersions = false;
+    that.hideVariables = true;
+    that.hideDeliveryPipelineData = true;
+    // Wait for parent state to be fully initialised
+    utils.chainStateResolve('cf.applications', $state, _.bind(this.init, this));
 
-    this.init();
+    // When a modal interaction starts, stop the background polling
+    this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
+      that.stopUpdate();
+    });
+    // When a modal interaction ends, resume the background polling
+    this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
+      that.startUpdate();
+    });
 
     this.appActions = [
       {
@@ -138,14 +161,23 @@
         name: gettext('CLI Instructions'),
         id: 'cli',
         execute: function () {
+
+          var username = null;
+          if (that.stackatoInfo.info.endpoints) {
+            username = that.stackatoInfo.info.endpoints.hcf[that.model.application.cluster.guid].user.name;
+          }
+          that.cliCommands.show(that.model.application, username);
         },
         disabled: true,
         icon: 'helion-icon helion-icon-lg helion-icon-Command_line'
       }
     ];
 
+    // On first load, hide all of the application actions
+    this.onAppStateChange();
+
     $scope.$watch(function () {
-      return that.model.application.summary.state;
+      return that.model.application.state ? that.model.application.state.label : undefined;
     }, function (newState) {
       that.onAppStateChange(newState);
     });
@@ -174,33 +206,43 @@
       this.model.application.pipeline.fetching = true;
       this.model.getClusterWithId(this.cnsiGuid);
 
-      this.model.getAppSummary(this.cnsiGuid, this.id, true)
-        .then(function () {
-          return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);
-        })
-        .then(function () {
-          that.model.updateDeliveryPipelineMetadata(true)
-            .then(function (response) {
-              that.onUpdateDeliveryPipelineMetadata(response);
-            });
-        })
-        .finally(function () {
-          that.ready = true;
-          // Don't start updating until we have completed the first init
-          // Don't create timer when scope has been destroyed
-          if (!that.scopeDestroyed) {
-            that.startUpdate();
-          }
-        });
+      var supportsVersions = this.versions.hasVersionSupport(this.cnsiGuid);
+      var promise = angular.isDefined(supportsVersions) ? that.$q.when(supportsVersions) : this.versions.list(this.cnsiGuid, this.id, true);
+      promise.then(function () {
+        that.supportsVersions = !!that.versions.hasVersionSupport(that.cnsiGuid);
+      });
 
-      // When a modal interaction starts, stop the background polling
-      this.removeModalStartListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_START, function () {
-        that.stopUpdate();
-      });
-      // When a modal interaction ends, resume the background polling
-      this.removeModalEndListener = this.eventService.$on(this.eventService.events.MODAL_INTERACTION_END, function () {
-        that.startUpdate();
-      });
+      return this.model.getAppSummary(this.cnsiGuid, this.id, true)
+        .then(function () {
+          that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
+            that.authModel.resources.application,
+            that.authModel.actions.update,
+            that.model.application.summary.space_guid
+          );
+
+          that.hideDeliveryPipelineData = !that.authModel.isAllowed(that.cnsiGuid,
+            that.authModel.resources.application,
+            that.authModel.actions.update,
+            that.model.application.summary.space_guid
+          );
+
+          return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id)
+          .then(function () {
+            that.model.updateDeliveryPipelineMetadata(true)
+              .then(function (response) {
+                that.onUpdateDeliveryPipelineMetadata(response);
+              });
+          })
+          .finally(function () {
+            that.ready = true;
+            // Don't start updating until we have completed the first init
+            // Don't create timer when scope has been destroyed
+            if (!that.scopeDestroyed) {
+              that.startUpdate();
+            }
+            that.onAppStateChange();
+          });
+        });
     },
 
     /**
@@ -352,11 +394,21 @@
      * @returns {boolean} whether or not the action should be hidden
      */
     isActionHidden: function (id) {
+
+      var hideAction = true;
       if (!this.model.application.state || !this.model.application.state.actions) {
         return true;
-      } else {
-        return this.model.application.state.actions[id] !== true;
+      } else if (id === 'launch') {
+        hideAction = false;
+      } else if (this.authModel.isInitialized(this.cnsiGuid)) {
+        // check user is a space developer
+        var spaceGuid = this.model.application.summary.space_guid;
+        hideAction = !this.authModel.isAllowed(this.cnsiGuid,
+          this.authModel.resources.application,
+          this.authModel.actions.update,
+          spaceGuid);
       }
+      return this.model.application.state.actions[id] !== true || hideAction;
     },
 
     /**
@@ -373,7 +425,7 @@
     },
 
     /**
-     * @function onAppStateChange
+     * @function onAppRoutesChange
      * @description invoked when the application routes change, so we can update action visibility
      * @param {object} newRoutes - application route metadata
      */

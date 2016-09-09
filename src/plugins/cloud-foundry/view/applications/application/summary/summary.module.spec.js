@@ -10,17 +10,29 @@
       var modelManager = $injector.get('app.model.modelManager');
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
-
+      var $log = $injector.get('$log');
+      var $q = $injector.get('$q');
+      var addRoutesService = $injector.get('cloud-foundry.view.applications.application.summary.addRoutes');
+      var editAppService = $injector.get('cloud-foundry.view.applications.application.summary.editApp');
+      var utils = $injector.get('app.utils.utilsService');
+      var routesService = $injector.get('app.view.endpoints.clusters.routesService');
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+      spyOn(authModel, 'isAllowed').and.callFake(function () {
+        // Everything is allowed in tests
+        return true;
+      });
       var ApplicationSummaryController = $state.get('cf.applications.application.summary').controller;
-      $controller = new ApplicationSummaryController(modelManager, $stateParams);
+      $controller = new ApplicationSummaryController($state, $log, $q, modelManager, $stateParams, addRoutesService, editAppService, utils, routesService);
       expect($controller).toBeDefined();
       expect($controller).not.toBe(null);
       expect($controller.isWebLink).toBeDefined();
+
     }));
 
     describe('buildpack links', function () {
       beforeEach(function () {
         expect($controller.isWebLink).toBeDefined();
+
       });
 
       it('http buildpack is a web link', function () {

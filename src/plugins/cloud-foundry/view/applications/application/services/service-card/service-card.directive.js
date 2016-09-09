@@ -58,6 +58,7 @@
     this.eventService = eventService;
     this.serviceInstanceService = serviceInstanceService;
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.allowAddOnly = angular.isDefined(this.addOnly) ? this.addOnly : false;
     this.serviceBindings = [];
     this.numAttached = 0;
@@ -121,12 +122,12 @@
     getServiceInstanceGuids: function () {
       var that = this;
       var serviceInstances = _.chain(this.app.summary.services)
-                              .filter(function (o) {
-                                return angular.isDefined(o.service_plan) &&
-                                  o.service_plan.service.guid === that.service.metadata.guid;
-                              })
-                              .map('guid')
-                              .value();
+        .filter(function (o) {
+          return angular.isDefined(o.service_plan) &&
+            o.service_plan.service.guid === that.service.metadata.guid;
+        })
+        .map('guid')
+        .value();
       return serviceInstances;
     },
 
@@ -141,11 +142,13 @@
       var that = this;
 
       var q = 'service_instance_guid IN ' + serviceInstanceGuids.join(',');
-      var options = { q: q, 'inline-relations-depth': 1, 'include-relations': 'service_instance' };
+      var options = {q: q, 'inline-relations-depth': 1, 'include-relations': 'service_instance'};
       return this.bindingModel.listAllServiceBindings(this.cnsiGuid, options)
         .then(function (bindings) {
           var appGuid = that.app.summary.guid;
-          var appBindings = _.filter(bindings, function (o) { return o.entity.app_guid === appGuid; });
+          var appBindings = _.filter(bindings, function (o) {
+            return o.entity.app_guid === appGuid;
+          });
           that.serviceBindings = appBindings;
           that.updateActions();
         });
@@ -212,6 +215,18 @@
       this.numAttached = this.serviceBindings.length;
       this.actions[1].hidden = this.numAttached !== 1;
       this.actions[2].hidden = this.numAttached === 0;
+    },
+
+    /**
+     * @function updateActions
+     * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
+     * @description Update service actions visibility
+     * @returns {*}
+     */
+    hideServiceActions: function () {
+      return !this.authModel.isAllowed(this.cnsiGuid,
+        this.authModel.resources.managed_service_instance,
+        this.authModel.actions.create, this.app.summary.space_guid);
     }
   });
 

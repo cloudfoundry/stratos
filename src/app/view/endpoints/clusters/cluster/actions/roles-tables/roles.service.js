@@ -49,7 +49,7 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var usersModel = modelManager.retrieve('cloud-foundry.model.users');
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.changingRoles = false;
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
@@ -560,7 +560,12 @@
           var oldOrgRolesPerUser = _.get(oldRoles, userGuid + '.' + orgGuid);
 
           // Calculate org role delta only for organizations for which user is allowed to
-          if (authService.isAllowed(authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].details.org)) {
+          var isUserAllowed = authModel.isAllowed(clusterGuid,
+            authModel.resources.user,
+            authModel.actions.update,
+            null,
+            orgGuid);
+          if (isUserAllowed) {
             // For each organization role
             _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
               // Has there been a change in the org role?
@@ -577,7 +582,9 @@
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
 
             // calculate space role delta only for spaces for which user is allowed
-            if (authService.isAllowed(authService.resources.user, authService.actions.update, organizationModel.organizations[clusterGuid][orgGuid].spaces[spaceGuid], true)) {
+            var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.user,
+              authModel.actions.update, spaceGuid, orgGuid, true);
+            if (isAllowed) {
               // For each space role
               _.forEach(spaceRoles, function (selected, roleKey) {
                 // Has there been a change in the space role?
@@ -657,8 +664,8 @@
               }
               errorMessage = $interpolate(errorMessage)({
                 failedUsers: _.map(failures, 'user').join(', '),
-                reason: reason }
-              );
+                reason: reason
+              });
 
               return $q.reject(errorMessage);
             } else {
