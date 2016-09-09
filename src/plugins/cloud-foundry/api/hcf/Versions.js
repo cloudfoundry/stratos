@@ -37,7 +37,7 @@
         config[option] = httpConfigOptions[option];
       }
       config.headers = config.headers || {};
-      config.headers['x-cnap-api'] = 'hcf-versions-api';
+      config.headers['x-cnap-api-host'] = 'hcf-versions-api';
       return this.$http(config);
     },
 
