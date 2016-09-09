@@ -79,9 +79,9 @@
             // We have already initialised for this endpoint + user
             return;
           }
-          authModelInitPromise.push(that.initializeForEndpoint(guid, true));
+          authModelInitPromise.push(that.initializeForEndpoint(guid, true).catch(angular.noop));
         });
-        return that.$q.all(authModelInitPromise).catch(angular.noop);
+        return that.$q.all(authModelInitPromise);
       }
 
       return that.$q.resolve();
