@@ -135,36 +135,7 @@
           ].concat(this.getWorkflowDefinition().steps)
         };
 
-        this.options = {
-          workflow: that.data.workflow,
-          userInput: this.userInput,
-          errors: this.errors,
-          apps: [],
-          hceCnsis: [],
-          notificationTargets: [
-            {
-              title: 'HipChat',
-              description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
-              img: 'hipchat_logo.png'
-            },
-            {
-              title: 'Http',
-              description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
-              img: 'httppost_logo.png'
-            },
-            {
-              title: 'Flow Dock',
-              description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
-              img: 'flowdock_logo.png'
-            }
-          ],
-          sources: [],
-          repos: [],
-          branches: [],
-          buildContainers: [],
-          notificationFormAppMode: true,
-          imageRegistries: []
-        };
+        this.setOptions();
 
         this.addPipelineActions = {
           stop: function () {
