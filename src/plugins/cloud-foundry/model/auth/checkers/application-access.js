@@ -31,12 +31,10 @@
      * @name ApplicationAccess
      * @description Constructor for ApplicationAccess
      * @param {Principal} principal Principal instance
-     * @param {Array} flags feature flags
      * @constructor
      */
-    function ApplicationAccess(principal, flags) {
+    function ApplicationAccess(principal) {
       this.principal = principal;
-      this.flags = flags;
       this.baseAccess = modelManager.retrieve('cloud-foundry.model.auth.checkers.baseAccess')(principal);
     }
 
@@ -46,18 +44,18 @@
        * @description User can deploy apps if:
        * 1. User is an admin
        * 2. User is a space developer
-       * @param {Object} space Domain space
+       * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      create: function (space) {
+      create: function (spaceGuid) {
 
         // Admin
-        if (this.baseAccess.create(space)) {
+        if (this.baseAccess.create(spaceGuid)) {
           return true;
         }
 
         // If user is developer in space app belongs to
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
       },
 
       /**
@@ -65,17 +63,17 @@
        * @description User can manage apps if:
        * 1. User is an admin
        * 2. User is a space developer
-       * @param {Object} space Domain space
+       * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      update: function (space) {
+      update: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.update(space)) {
+        if (this.baseAccess.update(spaceGuid)) {
           return true;
         }
 
         // If user is developer in space app belongs to
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
       },
 
       /**
@@ -83,17 +81,17 @@
        * @description User can delete apps if:
        * 1. User is an admin
        * 2. User is a space developer
-       * @param {Object} space Domain space
+       * @param {string} spaceGuid GUID of the space where the application resides
        * @returns {boolean}
        */
-      delete: function (space) {
+      delete: function (spaceGuid) {
         // Admin
-        if (this.baseAccess.delete(space)) {
+        if (this.baseAccess.delete(spaceGuid)) {
           return true;
         }
 
         // If user is developer in space app belongs to
-        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, space.metadata.guid);
+        return this.baseAccess._doesContainGuid(this.principal.userSummary.spaces.all, spaceGuid);
       },
 
       /**

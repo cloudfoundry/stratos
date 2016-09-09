@@ -27,7 +27,6 @@
     'app.event.eventService',
     'github.view.githubOauthService',
     'app.utils.utilsService',
-    'cloud-foundry.view.applications.services.hceSupport',
     '$scope',
     '$q',
     '$timeout',
@@ -42,7 +41,6 @@
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
    * @param {app.model.utilsService} utils - the utils service
-   * @param {object} hceSupport - HCE Support service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
@@ -51,19 +49,17 @@
    * @property {app.event.eventService} eventService - the Event management service
    * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {app.model.utilsService} utils - the utils service
-   * @property {object} hceSupport - HCE Support service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
    * @property {object} $timeout - the Angular $timeout service
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, utils, hceSupport, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, utils, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
     this.utils = utils;
-    this.hceSupport = hceSupport;
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -88,20 +84,38 @@
         this.errors = {};
 
         var application = this.modelManager.retrieve('cloud-foundry.model.application').application;
+        var route = application.summary.routes[0];
+        var host, domain;
+
+        if (route) {
+          host = route.host;
+          domain = { entity: route.domain };
+        }
 
         this.userInput = {
           name: application.summary.name,
           serviceInstance: application.cluster,
+          clusterUsername: null,
+          clusterPassword: null,
           organization: { entity: application.organization },
           space: { entity: application.space },
+          host: host,
+          domain: domain,
           application: application,
           hceCnsi: null,
           source: null,
           repo: null,
+          repoFilterTerm: null,
           branch: null,
           buildContainer: null,
+          projectId: null,
           imageRegistry: null,
-          projectId: null
+          searchCategory: 'all',
+          search: {
+            entity: {
+              extra: undefined
+            }
+          }
         };
 
         this.data.workflow = {
@@ -121,35 +135,7 @@
           ].concat(this.getWorkflowDefinition().steps)
         };
 
-        this.options = {
-          workflow: that.data.workflow,
-          userInput: this.userInput,
-          errors: this.errors,
-          apps: [],
-          hceCnsis: [],
-          notificationTargets: [
-            {
-              title: 'HipChat',
-              description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
-              img: 'hipchat_logo.png'
-            },
-            {
-              title: 'Http',
-              description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
-              img: 'httppost_logo.png'
-            },
-            {
-              title: 'Flow Dock',
-              description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
-              img: 'flowdock_logo.png'
-            }
-          ],
-          sources: [],
-          repos: [],
-          branches: [],
-          buildContainers: [],
-          imageRegistries: []
-        };
+        this.setOptions();
 
         this.addPipelineActions = {
           stop: function () {
@@ -157,6 +143,7 @@
           },
 
           finish: function () {
+            that.modelManager.retrieve('cloud-foundry.model.application').updateDeliveryPipelineMetadata(true);
             that.finishWorkflow();
           }
         };

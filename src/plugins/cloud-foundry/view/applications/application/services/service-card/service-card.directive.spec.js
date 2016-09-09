@@ -11,7 +11,13 @@
       $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
+      var modelManager = $injector.get('app.model.modelManager');
 
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+      spyOn(authModel, 'isAllowed').and.callFake(function () {
+        // Everything is allowed in tests
+        return true;
+      });
       // mocks
       $scope.guid = 'guid';
       $scope.app = {

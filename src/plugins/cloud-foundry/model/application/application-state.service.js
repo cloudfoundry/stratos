@@ -62,7 +62,7 @@
         STAGED: {
           label: gettext('Offline'),
           indicator: 'warning',
-          actions: 'start,delete'
+          actions: 'start,delete,cli'
         },
         '*NONE*': {
           label: gettext('Incomplete'),
@@ -79,37 +79,37 @@
         'STAGED(0,0,0)': {
           label: gettext('Starting App'),
           indicator: 'busy',
-          actions: 'stop,restart'
+          actions: 'stop,restart,cli'
         },
         'STAGED(N,0,0)': {
           label: gettext('Online'),
           indicator: 'ok',
-          actions: 'stop,restart,launch'
+          actions: 'stop,restart,launch,cli'
         },
         'STAGED(0,N,0)': {
           label: gettext('Crashed'),
           indicator: 'error',
-          actions: 'stop,restart'
+          actions: 'stop,restart,cli'
         },
         'STAGED(0,0,N)': {
           label: gettext('Starting App'),
           indicator: 'warning',
-          actions: 'stop,restart'
+          actions: 'stop,restart,cli'
         },
         'STAGED(0,N,N)': {
           label: gettext('Crashing'),
           indicator: 'error',
-          actions: 'stop,restart'
+          actions: 'stop,restart,cli'
         },
         'STAGED(N,N,0)': {
           label: gettext('Partially Online'),
           indicator: 'warning',
-          actions: 'stop,restart,launch'
+          actions: 'stop,restart,launch,cli'
         },
         'STAGED(N,0,N)': {
           label: gettext('Partially Online'),
           indicator: 'warning',
-          actions: 'stop,restart,launch'
+          actions: 'stop,restart,launch,cli'
         }
       }
     };

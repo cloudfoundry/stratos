@@ -39,6 +39,29 @@
         });
       },
 
+      setOptions: function () {
+        this.options = this.options || {};
+
+        angular.extend(this.options, {
+          workflow: this.data.workflow,
+          userInput: this.userInput,
+          errors: this.errors,
+          apps: [],
+          hceCnsis: [],
+          notificationTargetTypes: [],
+          notificationTargets: [],
+          sources: [],
+          displayedRepos: [],
+          repos: [],
+          hasMoreRepos: false,
+          loadingRepos: false,
+          branches: [],
+          buildContainers: [],
+          notificationFormAppMode: true,
+          imageRegistries: []
+        });
+      },
+
       getWorkflowDefinition: function () {
         var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
         var that = this;
@@ -197,10 +220,11 @@
       getVcsInstances: function () {
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
         var deferred = this.$q.defer();
 
         hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
-          that.hceSupport.getSupportedVcsInstances(hceModel.data.vcsInstances)
+          vcsModel.getSupportedVcsInstances(hceModel.data.vcsInstances)
             .then(function (sources) {
               if (sources.length > 0) {
                 [].push.apply(that.options.sources, sources);

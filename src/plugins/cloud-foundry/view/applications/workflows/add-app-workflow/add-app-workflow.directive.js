@@ -26,7 +26,7 @@
     'app.model.modelManager',
     'app.event.eventService',
     'github.view.githubOauthService',
-    'cloud-foundry.view.applications.services.hceSupport',
+    'app.utils.utilsService',
     '$scope',
     '$q',
     '$timeout'
@@ -39,7 +39,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
-   * @param {object} hceSupport - HCE Support service
+   * @param {object} utils - Utils service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
@@ -50,7 +50,6 @@
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
    * @property {github.view.githubOauthService} githubOauthService - github oauth service
-   * @property {object} hceSupport - HCE Support service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model
@@ -63,7 +62,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, hceSupport, $scope, $q, $timeout) {
+  function AddAppWorkflowController(modelManager, eventService, githubOauthService, utils, $scope, $q, $timeout) {
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -71,7 +70,7 @@
     this.modelManager = modelManager;
     this.eventService = eventService;
     this.githubOauthService = githubOauthService;
-    this.hceSupport = hceSupport;
+    this.utils = utils;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -79,7 +78,9 @@
     this.privateDomainModel = modelManager.retrieve('cloud-foundry.model.private-domain');
     this.sharedDomainModel = modelManager.retrieve('cloud-foundry.model.shared-domain');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.userInput = {};
     this.options = {};
 
@@ -104,10 +105,12 @@
         $scope.$watch(function () {
           return that.userInput.serviceInstance;
         }, function (serviceInstance) {
+          that.userInput.organization = null;
+          that.userInput.space = null;
           if (serviceInstance) {
             that.getOrganizations();
             that.getDomains().then(function () {
-              that.userInput.domain = that.options.domains[0].value;
+              that.userInput.domain = that.options.domains[0] && that.options.domains[0].value;
             });
           }
         });
@@ -115,6 +118,7 @@
         $scope.$watch(function () {
           return that.userInput.organization;
         }, function (organization) {
+          that.userInput.space = null;
           if (organization) {
             that.getSpacesForOrganization(organization.metadata.guid);
           }
@@ -175,6 +179,8 @@
           branch: null,
           buildContainer: null,
           projectId: null,
+          hcfApiEndpoint: null,
+          hcfUserName: null,
           searchCategory: 'all',
           search: {
             entity: {
@@ -269,16 +275,25 @@
               templateUrl: path + 'cli-subflow/deploy.html',
               formName: 'application-cli-deploy-form',
               nextBtnText: gettext('Finished'),
-              isLastStep: true
+              isLastStep: true,
+              onEnter: function () {
+                that.userInput.hcfApiEndpoint = that.utils.getClusterEndpoint(that.userInput.serviceInstance);
+
+                // Get user name from StackatoInfo
+                if (that.stackatoInfo.info) {
+                  var endpointUser = that.stackatoInfo.info.endpoints.hcf[that.userInput.serviceInstance.guid].user;
+                  if (endpointUser) {
+                    that.userInput.hcfUserName = endpointUser.name;
+                  }
+                }
+                return that.$q.resolve();
+              }
             }
           ]
         };
 
         this.options = {
-          workflow: that.data.workflow,
-          userInput: this.userInput,
           eventService: this.eventService,
-          errors: this.errors,
           subflow: null,
           serviceInstances: [],
           services: [],
@@ -288,21 +303,10 @@
           servicesReady: false,
           organizations: [],
           spaces: [],
-          apps: [],
-          domains: [],
-          hceCnsis: [],
-          notificationTargetTypes: [],
-          notificationTargets: [],
-          sources: [],
-          displayedRepos: [],
-          repos: [],
-          hasMoreRepos: false,
-          loadingRepos: false,
-          branches: [],
-          buildContainers: [],
-          notificationFormAppMode: true,
-          imageRegistries: []
+          domains: []
         };
+
+        this.setOptions();
 
         this.addApplicationActions = {
           stop: function () {
@@ -388,9 +392,24 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         return this.organizationModel.listAllOrganizations(cnsiGuid)
           .then(function (organizations) {
+
+            // Filter out organizations in which user does not
+            // have any space where they aren't a developer
+            // NOTE: This is unnecessary for admin users, and will fail
+            // because the userSummary doesn't contain organization_guid data
+            var filteredOrgs = organizations;
+            if (!that.authModel.isAdmin(cnsiGuid)) {
+              filteredOrgs = _.filter(organizations, function (organization) {
+                // Retrieve filtered list of Spaces where the user is a developer
+                var orgGuid = organization.metadata.guid;
+                var filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
+                  {entity: {organization_guid: orgGuid}});
+                return filteredSpaces.length > 0;
+              });
+            }
             that.options.organizations.length = 0;
-            [].push.apply(that.options.organizations, _.map(organizations, that.selectOptionMapping));
-            that.userInput.organization = that.options.organizations[0].value;
+            [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
+            that.userInput.organization = that.options.organizations[0] && that.options.organizations[0].value;
           });
       },
 
@@ -406,9 +425,17 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
           .then(function (spaces) {
+
+            // Filter out spaces in which user is not a Space Developer
+            var filteredSpaces = spaces;
+            if (!that.authModel.isAdmin(cnsiGuid)) {
+              filteredSpaces = _.filter(that.authModel.principal[cnsiGuid].userSummary.spaces.all,
+                {entity: {organization_guid: guid}});
+            }
+
             that.options.spaces.length = 0;
-            [].push.apply(that.options.spaces, _.map(spaces, that.selectOptionMapping));
-            that.userInput.space = that.options.spaces[0].value;
+            [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
+            that.userInput.space = that.options.spaces[0] && that.options.spaces[0].value;
           });
       },
 
@@ -515,11 +542,14 @@
         this.serviceInstanceModel.list()
           .then(function (serviceInstances) {
             var validServiceInstances = _.chain(_.values(serviceInstances))
-                                         .filter({ cnsi_type: 'hcf', valid: true })
-                                         .map(function (o) {
-                                           return { label: o.api_endpoint.Host, value: o };
-                                         })
-                                         .value();
+              .filter({cnsi_type: 'hcf', valid: true})
+              .filter(function (cnsi) {
+                return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
+              })
+              .map(function (o) {
+                return {label: o.api_endpoint.Host, value: o};
+              })
+              .value();
             [].push.apply(that.options.serviceInstances, validServiceInstances);
           });
       },

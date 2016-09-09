@@ -1,7 +1,7 @@
 <div class="panel panel-default summary">
   <div class="panel-heading action-header">
     <span translate>Summary</span>
-    <a class="btn btn-link" ng-click="applicationSummaryCtrl.editApp()">
+    <a class="btn btn-link" ng-click="applicationSummaryCtrl.editApp()" ng-hide="applicationSummaryCtrl.hideEditApp">
       <i class="helion-icon helion-icon-Right_Arrow"></i>
       <span translate>Edit</span>
     </a>
@@ -75,7 +75,8 @@
 <div>
   <div class="action-header">
     <span translate>Service Instances</span>
-    <a class="btn btn-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})">
+    <a class="btn btn-link" ui-sref="cf.applications.application.services({guid: appCtrl.id})"
+       ng-hide="applicationSummaryCtrl.hideManageServices">
       <i class="helion-icon helion-icon-Right_Arrow"></i>
       <span translate>Manage Services</span>
     </a>
@@ -116,7 +117,7 @@
 <div>
   <div class="action-header">
     <span translate>Routes</span>
-    <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()">
+    <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()" ng-hide="applicationSummaryCtrl.hideAddRoutes">
       <i class="helion-icon helion-icon-Right_Arrow" ></i>
       <span translate>Add routes</span>
     </a>

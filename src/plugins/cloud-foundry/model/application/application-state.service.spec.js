@@ -75,7 +75,7 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Offline');
-        expect(_.keys(res.actions).length).toBe(2);
+        expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.start).toBe(true);
         expect(res.actions.delete).toBe(true);
       });
@@ -103,7 +103,7 @@
         var res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('busy');
         expect(res.label).toBe('Starting App');
-        expect(_.keys(res.actions).length).toBe(2);
+        expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.stop).toBe(true);
         expect(res.actions.restart).toBe(true);
       });
@@ -118,7 +118,7 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('ok');
         expect(res.label).toBe('Online');
-        expect(_.keys(res.actions).length).toBe(3);
+        expect(_.keys(res.actions).length).toBe(4);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
         expect(res.actions.launch).toBe(true);
@@ -134,7 +134,7 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Crashed');
-        expect(_.keys(res.actions).length).toBe(2);
+        expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
       });
@@ -149,7 +149,7 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Starting App');
-        expect(_.keys(res.actions).length).toBe(2);
+        expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
       });
@@ -164,7 +164,7 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('error');
         expect(res.label).toBe('Crashing');
-        expect(_.keys(res.actions).length).toBe(2);
+        expect(_.keys(res.actions).length).toBe(3);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
       });
@@ -179,7 +179,7 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Partially Online');
-        expect(_.keys(res.actions).length).toBe(3);
+        expect(_.keys(res.actions).length).toBe(4);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
         expect(res.actions.launch).toBe(true);
@@ -195,7 +195,7 @@
         res = appStateService.get(testData.summary, testData.instances);
         expect(res.indicator).toBe('warning');
         expect(res.label).toBe('Partially Online');
-        expect(_.keys(res.actions).length).toBe(3);
+        expect(_.keys(res.actions).length).toBe(4);
         expect(res.actions.restart).toBe(true);
         expect(res.actions.stop).toBe(true);
         expect(res.actions.launch).toBe(true);

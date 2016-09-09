@@ -63,7 +63,8 @@
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
-    var authService = modelManager.retrieve('cloud-foundry.model.auth');
+    that.isAdmin = user.admin;
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var spaceDetail;
 
     this.cardData = {
@@ -160,12 +161,12 @@
         spaceDetail.details.totalApps === 0;
 
       // Rename Space
-      that.actions[0].disabled = !authService.isAllowed(authService.resources.space, authService.actions.rename,
-        spaceDetail.details.space);
+      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
+        spaceDetail.details.guid);
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authService.isAllowed(authService.resources.space,
-          authService.actions.delete, spaceDetail.details.space);
+      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space,
+          authModel.actions.delete, spaceDetail.details.guid);
 
     }
 

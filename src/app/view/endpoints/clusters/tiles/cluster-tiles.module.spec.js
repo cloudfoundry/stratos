@@ -3,7 +3,7 @@
 
   describe('endpoint clusters', function () {
     var $q, $state, $scope, modelManager, confirmModal, clusterTilesCtrl, hcfRegistration, serviceInstanceModel,
-      userServiceInstanceModel, $uibModal, stackatoInfo, notificationService;
+      userServiceInstanceModel, $uibModal, stackatoInfo, notificationService, authModel;
 
     var hceService = {
       guid: '817ef115-7ae6-4591-a883-8f1c3447e012',
@@ -72,6 +72,7 @@
 
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      authModel = modelManager.retrieve('cloud-foundry.model.auth');
       stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
       var $httpBackend = $injector.get('$httpBackend');
@@ -243,13 +244,13 @@
       });
 
       it('on cancel', function () {
-        clusterTilesCtrl.onConnectCancel();
+        clusterTilesCtrl.onConnectCancel(hcfService);
         expect(clusterTilesCtrl.credentialsFormCNSI).toBeFalsy();
       });
 
       it('on success', function () {
-        spyOn(clusterTilesCtrl, 'refreshClusterModel');
-        clusterTilesCtrl.onConnectSuccess();
+        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
+        clusterTilesCtrl.onConnectSuccess(hcfService);
         expect(clusterTilesCtrl.credentialsFormCNSI).toBeFalsy();
         expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
       });
@@ -270,7 +271,7 @@
           expect(guid).toEqual(hcfUserService.guid);
           return $q.when();
         });
-        spyOn(clusterTilesCtrl, 'refreshClusterModel');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
         clusterTilesCtrl.disconnect(hcfUserService.guid);
         $scope.$digest();
         expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
@@ -282,7 +283,7 @@
           expect(guid).toEqual(hcfUserService.guid);
           return $q.reject();
         });
-        spyOn(clusterTilesCtrl, 'refreshClusterModel');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
         clusterTilesCtrl.disconnect(hcfUserService.guid);
         $scope.$digest();
         expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
@@ -293,11 +294,12 @@
     describe('register', function () {
       beforeEach(function () {
         createCluster();
+        spyOn(authModel, 'initializeForEndpoint').and.callFake(angular.noop);
       });
 
       it('success', function () {
-        spyOn(hcfRegistration, 'add').and.returnValue($q.when());
-        spyOn(clusterTilesCtrl, 'refreshClusterModel');
+        spyOn(hcfRegistration, 'add').and.returnValue($q.resolve(hcfService));
+        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
         clusterTilesCtrl.register();
         $scope.$digest();
         expect(hcfRegistration.add).toHaveBeenCalled();
@@ -327,7 +329,7 @@
           expect(serviceInstance).toBe(hcfService);
           return $q.when();
         });
-        spyOn(clusterTilesCtrl, 'refreshClusterModel');
+        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
 
         clusterTilesCtrl.unregister(hcfService);
         $scope.$digest();
