@@ -586,6 +586,9 @@
           // Retrieve dynamicllay as this model may load before the one we need
           var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
           var hceCnsis = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'}) || [];
+          if (hceCnsis.length === 0) {
+            return that.$q.when(hceCnsis);
+          }
           var hceCnsisGuids = _.chain(hceCnsis).map('guid').value();
           return hceModel.infos(hceCnsisGuids.join(',')).then(function (infos) {
             _.each(hceCnsis, function (cnsi) {
