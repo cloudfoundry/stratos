@@ -532,23 +532,16 @@
           return;
         }
 
-        var href = [
-          '#/cf/applications',
-          this.userInput.serviceInstance.guid,
-          'app',
-          this.userInput.application.summary.guid,
-          'summary'
-        ].join('/');
-
-        this.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
-          message: gettext('A new app has been created: ') + '<a href="' + href + '">' + this.userInput.name + '</a>'
-        });
+        var params = {
+          cnsiGuid: this.userInput.serviceInstance.guid,
+          guid: this.userInput.application.summary.guid
+        };
+        this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.delivery-logs', params);
       },
 
       startWorkflow: function () {
         this.addingApplication = true;
         this.reset();
-        this.appModel.all();
         this.getHceInstances();
       },
 
