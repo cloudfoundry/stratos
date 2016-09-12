@@ -104,39 +104,10 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	cnsiGUID := c.FormValue("cnsi_guid")
 
-	if len(cnsiGUID) == 0 {
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Missing target endpoint",
-			"Need CNSI GUID passed as form param")
-	}
+	uaaRes, u, cnsiRecord, err := p.fetchToken(cnsiGUID, c)
 
-	endpoint := ""
-	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
-
-	if !ok {
-		return newHTTPShadowError(
-			http.StatusBadRequest,
-			"Requested endpoint not registered",
-			"No CNSI registered with GUID %s", cnsiGUID)
-	}
-
-	endpoint = cnsiRecord.AuthorizationEndpoint
-
-	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
-
-	clientID := p.Config.HCFClient
-
-	if cnsiRecord.CNSIType == cnsis.CNSIHCE {
-		clientID = p.Config.HCEClient
-	}
-
-	uaaRes, u, err := p.login(c, clientID, "", tokenEndpoint)
 	if err != nil {
-		return newHTTPShadowError(
-			http.StatusUnauthorized,
-			"Login failed",
-			"Login failed: %v", err)
+		return err
 	}
 
 	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
@@ -165,6 +136,59 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	c.Response().Write(jsonString)
 
 	return nil
+}
+
+func (p*portalProxy) verifyLoginToCNSI(c echo.Context) error {
+
+	logger.Debug("verifyLoginToCNSI")
+
+	cnsiGUID := c.FormValue("cnsi_guid")
+	_, _, _, err := p.fetchToken(cnsiGUID, c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
+	}
+	return c.NoContent(http.StatusOK)
+}
+
+func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse, *userTokenInfo, *cnsis.CNSIRecord, error) {
+
+	if len(cnsiGUID) == 0 {
+		return nil, nil, nil, newHTTPShadowError(
+			http.StatusBadRequest,
+			"Missing target endpoint",
+			"Need CNSI GUID passed as form param")
+	}
+
+	endpoint := ""
+	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
+
+	if !ok {
+		return nil, nil, nil, newHTTPShadowError(
+			http.StatusBadRequest,
+			"Requested endpoint not registered",
+			"No CNSI registered with GUID %s", cnsiGUID)
+	}
+
+	endpoint = cnsiRecord.AuthorizationEndpoint
+
+	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
+
+	clientID := p.Config.HCFClient
+
+	if cnsiRecord.CNSIType == cnsis.CNSIHCE {
+		clientID = p.Config.HCEClient
+	}
+
+	uaaRes, u, err := p.login(c, clientID, "", tokenEndpoint)
+
+	if err != nil {
+		return nil, nil, nil, newHTTPShadowError(
+			http.StatusUnauthorized,
+			"Login failed",
+			"Login failed: %v", err)
+	}
+	return uaaRes, u, &cnsiRecord, nil
+
 }
 
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
