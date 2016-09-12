@@ -3,7 +3,7 @@
 
   /**
    * @namespace cloud-foundry.model
-   * @memberOf cloud-foundry.model
+   * @memberof cloud-foundry.model
    */
   angular
     .module('cloud-foundry.model')

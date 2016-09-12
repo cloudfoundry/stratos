@@ -39,6 +39,11 @@
         Variables
       </a>
     </li>
+    <li class="nav-item" ui-sref-active="active" ng-if="appCtrl.supportsVersions">
+      <a class="nav-link" ui-sref="cf.applications.application.versions({guid: appCtrl.id})" translate>
+        Versions
+      </a>
+    </li>
   </ul>
 
   <div class="application-details col-sm-12">
