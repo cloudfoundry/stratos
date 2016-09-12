@@ -23,12 +23,14 @@
 
   ApplicationGalleryCardController.$inject = [
     '$state',
-    '$scope'
+    '$scope',
+    'app.model.modelManager'
   ];
 
-  function ApplicationGalleryCardController($state, $scope) {
+  function ApplicationGalleryCardController($state, $scope, modelManager) {
     var that = this;
     this.$state = $state;
+    this.modelManager = modelManager;
     this.cardData = {
       title: this.app.entity.name
     };
@@ -41,11 +43,14 @@
   }
 
   angular.extend(ApplicationGalleryCardController.prototype, {
+
     goToApp: function () {
       var guids = {
         cnsiGuid: this.cnsiGuid,
         guid: this.app.metadata.guid
       };
+      var appModel = this.modelManager.retrieve('cloud-foundry.model.application');
+      appModel.initApplicationFromSummary(this.app);
       this.$state.go('cf.applications.application.summary', guids);
     }
   });
