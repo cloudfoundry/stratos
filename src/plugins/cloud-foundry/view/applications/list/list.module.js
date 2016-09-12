@@ -25,6 +25,7 @@
     '$scope',
     '$interpolate',
     '$state',
+    '$timeout',
     'app.model.modelManager',
     'app.event.eventService',
     'app.error.errorService',
@@ -37,19 +38,22 @@
    * @param {object} $scope - the Angular $scope service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {object} $state - the UI router $state service
+   * @param {object} $timeout - the angular $timeout service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.error.errorService} errorService - the error service
    * @param {object} utils - the utils service
    * @property {object} $interpolate - the angular $interpolate service
+   * @property {object} $timeout - the angular $timeout service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.error.errorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, modelManager, eventService, errorService, utils) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, modelManager, eventService, errorService, utils) {
     var that = this;
     this.$interpolate = $interpolate;
+    this.$timeout = $timeout;
     this.modelManager = modelManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -300,8 +304,15 @@
      * @public
      */
     resetFilter: function () {
-      this._setFilter({cnsiGuid: 'all'});
-      this.setCluster();
+      var that = this;
+      var clusters = this.clusters;
+
+      this.clusters = [];
+      this.$timeout(function () {
+        that.clusters = clusters;
+        that._setFilter({cnsiGuid: 'all'});
+        that.setCluster();
+      }, 100);
     },
 
     /**

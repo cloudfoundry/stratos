@@ -37,35 +37,32 @@
 
 <div class="form-group form-group-large">
   <label class="control-label" required translate>Cloud Foundry Endpoint</label>
-  <select-input
-    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+  <search-box
     ng-model="wizardCtrl.options.userInput.serviceInstance"
     input-options="wizardCtrl.options.serviceInstances"
     placeholder="{{'Select Endpoint' | translate}}"
     tabindex="0" required>
-  </select-input>
+  </search-box>
 </div>
 
 <div class="form-group form-group-large">
   <label class="control-label" required translate>Organization</label>
-  <select-input
-    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+  <search-box
     ng-model="wizardCtrl.options.userInput.organization"
     input-options="wizardCtrl.options.organizations"
     placeholder="{{'Select Organization' | translate}}"
     tabindex="0" required>
-  </select-input>
+  </search-box>
 </div>
 
 <div class="form-group form-group-large">
   <label class="control-label" required translate>Space</label>
-  <select-input
-    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+  <search-box
     ng-model="wizardCtrl.options.userInput.space"
     input-options="wizardCtrl.options.spaces"
     placeholder="{{'Select Space' | translate}}"
     tabindex="0" required>
-  </select-input>
+  </search-box>
 </div>
 
 <p class="control-title" translate>Create a route
@@ -75,13 +72,12 @@
 
 <div class="form-group form-group-large">
   <label class="control-label" required translate>Domain</label>
-  <select-input
-    arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+  <search-box
     ng-model="wizardCtrl.options.userInput.domain"
     input-options="wizardCtrl.options.domains"
     placeholder="{{'Select Domain' | translate}}"
     tabindex="0" required>
-  </select-input>
+  </search-box>
 </div>
 
 <div class="form-group form-group-large"
@@ -113,5 +109,4 @@
     required>
   <auto-populate-input form="wizardForm['application-name-form']" from="appName" to="routeName"></auto-populate-input>
 </div>
-
 <br>
