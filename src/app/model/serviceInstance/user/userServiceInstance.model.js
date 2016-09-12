@@ -62,6 +62,25 @@
     },
 
     /**
+     * @function verify
+     * @memberof app.api.serviceInstance.user.UserServiceInstance
+     * @description Verify credentials provided by user
+     * @param {string} guid - the CNSI GUID
+     * @param {string} name - the CNSI name
+     * @param {string} username - the login username
+     * @param {string} password - the login password
+     * @returns {promise} A resolved/rejected promise
+     * @public
+     */
+    verify: function (guid, username, password) {
+      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
+      return serviceInstanceApi.verify(guid, username, password)
+        .then(function (response) {
+          return response;
+        });
+    },
+
+    /**
      * @function disconnect
      * @memberof app.model.serviceInstance.user.UserServiceInstance
      * @description Disconnect user from service instance
