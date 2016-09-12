@@ -229,14 +229,10 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, 
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	logger.Debug("Database Config: %+v\n", dc)
-
 	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
-
-	logger.Debug("Database Config: %+v\n", dc)
 
 	return dc, nil
 }
