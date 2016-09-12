@@ -56,21 +56,8 @@
     this.data = {
       applications: []
     };
-    this.application = {
-      instanceCount: 0,
-      summary: {
-        state: 'LOADING'
-      },
-      stats: {},
-      pipeline: {
-        fetching: false,
-        valid: false,
-        hceCnsi: undefined,
-        hceServiceGuid: undefined,
-        projectId: undefined
-      },
-      project: null
-    };
+
+    this.clearApplication();
     this.appStateSwitchTo = '';
     this.filterParams = {
       cnsiGuid: 'all',
@@ -85,6 +72,45 @@
   }
 
   angular.extend(Application.prototype, {
+
+    /**
+     * @function clearApplication
+     * @memberof  cloud-foundry.model.application
+     * @description Clear the cached application metadata
+     * @public
+     **/
+    clearApplication: function () {
+      this.application = {
+        instanceCount: 0,
+        summary: {
+          state: 'LOADING'
+        },
+        stats: {},
+        pipeline: {
+          fetching: false,
+          valid: false,
+          hceCnsi: undefined,
+          hceServiceGuid: undefined,
+          projectId: undefined
+        },
+        project: null
+      };
+    },
+
+    /**
+     * @function initApplicationFromSummary
+     * @memberof  cloud-foundry.model.application
+     * @param {object} appSummaryMetadata - application summary metadata
+     * @public
+     **/
+    initApplicationFromSummary: function (appSummaryMetadata) {
+      this.clearApplication();
+      this.application.summary = appSummaryMetadata.entity;
+      this.application.instances = appSummaryMetadata.instances || {};
+      this.application.instanceCount = appSummaryMetadata.instanceCount || 0;
+      this.application.state = appSummaryMetadata.state | {};
+    },
+
     /**
      * @function all
      * @memberof  cloud-foundry.model.application
