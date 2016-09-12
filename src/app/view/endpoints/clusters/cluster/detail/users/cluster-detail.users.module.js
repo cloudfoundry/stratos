@@ -47,9 +47,11 @@
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.rolesService = rolesService;
 
     this.userRoles = {};
+    this.userActions = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
     this.stateInitialised = false;
@@ -69,6 +71,7 @@
 
         // Format that for direct use in the template
         that.userRoles[aUser.metadata.guid] = [];
+        var unEditableOrg = false;
         _.forEach(aUserRoles, function (orgRoles, orgGuid) {
           _.forEach(orgRoles, function (role) {
             that.userRoles[aUser.metadata.guid].push({
@@ -76,12 +79,34 @@
               role: role,
               roleLabel: that.organizationModel.organizationRoleToString(role)
             });
+            unEditableOrg = unEditableOrg ||
+              !rolesService.canRemoveOrgRole(role, that.guid, orgGuid, aUser.metadata.guid);
           });
         });
 
+        that.userActions[aUser.metadata.guid] = that.userActions[aUser.metadata.guid]
+          ? that.userActions[aUser.metadata.guid] : createUserActions();
+        // All manage/change buttons will be the same (dependent on orgs rather than individual user roles)
+        that.userActions[aUser.metadata.guid][0].disabled = !that.canEditAnOrg;
+        // Each rows 'Remove All' buttons will be dependent on the signed in user's permissions to edit every role
+        // of the user row
+        that.userActions[aUser.metadata.guid][1].disabled = unEditableOrg;
       });
+
       return $q.resolve();
     }
+
+    this.disableManageRoles = function () {
+      return this.selectedUsersCount() !== 1 || !that.canEditAnOrg;
+    };
+
+    this.disableChangeRoles = function () {
+      return !that.canEditAnOrg;
+    };
+
+    this.disableRemoveFromOrg = function () {
+      return this.selectedUsersCount() < 1 || !that.canEditAllOrgs;
+    };
 
     // We need the debounce to account for SmartTable delays
     var debouncedUpdateSelection = _.debounce(function () {
@@ -93,13 +118,6 @@
 
       var isAdmin = that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
 
-      $scope.$watch(function () {
-        return rolesService.changingRoles;
-      }, function () {
-        that.userActions[0].disabled = rolesService.changingRoles;
-        that.userActions[1].disabled = rolesService.changingRoles;
-      });
-
       $scope.$watchCollection(function () {
         return that.visibleUsers;
       }, function () {
@@ -108,6 +126,35 @@
           debouncedUpdateSelection();
         }
       });
+
+      // Determine if the signed in user can edit ANY of the orgs in this group. If so we can show all 'manage/change'
+      // buttons
+      $scope.$watchCollection(function () {
+        return that.organizationModel.organizations[that.guid];
+      }, function () {
+        var orgGuids = _.keys(that.organizationModel.organizations[that.guid]);
+        that.canEditAnOrg = false;
+        for (var i = 0; i < orgGuids.length; i++) {
+          if (that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update,
+              null, orgGuids[i])) {
+            that.canEditAnOrg = true;
+            break;
+          }
+        }
+      });
+
+      // Determine if the signed in user can edit the orgs of all the selected user's roles
+      $scope.$watch(function () {
+        return that.selectedUsers;
+      }, function () {
+        that.canEditAllOrgs = true;
+        var selectedUsersGuids = _.invert(that.selectedUsers, true).true || [];
+        for (var i = 0; i < selectedUsersGuids.length; i++) {
+          if (that.userActions[selectedUsersGuids[i]][1].disabled) {
+            that.canEditAllOrgs = false;
+          }
+        }
+      }, true);
 
       // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
       var promiseForUsers;
@@ -137,22 +184,24 @@
 
     }
 
-    this.userActions = [
-      {
-        name: gettext('Manage Roles'),
-        disabled: true,
-        execute: function (aUser) {
-          return manageUsers.show(that.guid, false, [aUser]).result;
+    function createUserActions() {
+      return [
+        {
+          name: gettext('Manage Roles'),
+          disabled: true,
+          execute: function (aUser) {
+            return manageUsers.show(that.guid, false, [aUser]).result;
+          }
+        },
+        {
+          name: gettext('Remove all roles'),
+          disabled: true,
+          execute: function (aUser) {
+            return rolesService.removeAllRoles(that.guid, [aUser]);
+          }
         }
-      },
-      {
-        name: gettext('Remove all roles'),
-        disabled: true,
-        execute: function (aUser) {
-          return rolesService.removeAllRoles(that.guid, [aUser]);
-        }
-      }
-    ];
+      ];
+    }
 
     this.getOrganizationsRoles = function (aUser) {
       return that.userRoles[aUser.metadata.guid];

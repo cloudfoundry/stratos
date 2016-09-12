@@ -57,12 +57,14 @@
     this.rolesService = rolesService;
 
     this.userRoles = {};
+    this.userActions = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
     this.stateInitialised = false;
 
     function refreshUsers() {
       that.userRoles = {};
+      var unEditableSpace = false;
 
       // For each user, get its roles in all spaces
       _.forEach(that.users, function (aUser) {
@@ -96,35 +98,33 @@
               role: role,
               roleLabel: that.spaceModel.spaceRoleToString(role)
             });
+            unEditableSpace = unEditableSpace || !that.canRemoveSpaceRole(spaceGuid);
           });
         });
+
+        that.userActions[aUser.metadata.guid] = that.userActions[aUser.metadata.guid]
+          ? that.userActions[aUser.metadata.guid] : createUserActions();
+        // All manage/change buttons will be the same (dependent on orgs rather than individual user roles)
+        that.userActions[aUser.metadata.guid][0].disabled = !that.canEditASpace;
+        // Each rows 'Remove All' buttons will be dependent on the signed in user's permissions to edit every role
+        // of the user row
+        that.userActions[aUser.metadata.guid][1].disabled = unEditableSpace;
 
       });
 
       return $q.resolve();
     }
 
-    this.canUserManageRoles = function (org) {
-      // User can assign org roles
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
-    };
-
-    this.canUserRemoveFromOrg = function (org) {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
-    };
-
     this.disableManageRoles = function () {
-      return this.rolesService.changingRoles ||
-        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizationGuid].details.org);
+      return this.selectedUsersCount() !== 1 || !that.canEditASpace;
     };
 
     this.disableChangeRoles = function () {
-      return this.rolesService.changingRoles || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizationGuid].details.org);
+      return !that.canEditASpace;
     };
 
     this.disableRemoveFromOrg = function () {
-      return this.rolesService.changingRoles ||
-        this.selectedUsersCount() < 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizationGuid].details.org);
+      return this.selectedUsersCount() < 1 || !that.canEditAllSpaces;
     };
 
     var debouncedUpdateSelection = _.debounce(function () {
@@ -134,12 +134,6 @@
 
     function init() {
       var isAdmin = that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
-      $scope.$watch(function () {
-        return rolesService.changingRoles;
-      }, function () {
-        that.userActions[0].disabled = rolesService.changingRoles || !that.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizationGuid].details.org);
-        that.userActions[1].disabled = rolesService.changingRoles || !that.canUserRemoveFromOrg(that.organizationModel.organizations[that.guid][that.organizationGuid].details.org);
-      });
 
       $scope.$watchCollection(function () {
         return that.visibleUsers;
@@ -149,6 +143,34 @@
           debouncedUpdateSelection();
         }
       });
+
+      // Determine if the signed in user can edit ANY of the orgs in this group. If so we can show all 'manage/change'
+      // buttons
+      $scope.$watchCollection(function () {
+        return that.spaceModel.spaces[that.guid];
+      }, function () {
+        var spaceGuids = _.keys(that.spaceModel.spaces[that.guid]);
+        that.canEditASpace = false;
+        for (var i = 0; i < spaceGuids.length; i++) {
+          if (that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update,
+              spaceGuids[i], that.organizationGuid, true)) {
+            that.canEditASpace = true;
+            break;
+          }
+        }
+      });
+      // Determine if the signed in user can edit the orgs of all the selected user's roles
+      $scope.$watch(function () {
+        return that.selectedUsers;
+      }, function () {
+        that.canEditAllSpaces = true;
+        var selectedUsersGuids = _.invert(that.selectedUsers, true).true || [];
+        for (var i = 0; i < selectedUsersGuids.length; i++) {
+          if (that.userActions[selectedUsersGuids[i]][1].disabled) {
+            that.canEditAllSpaces = false;
+          }
+        }
+      }, true);
 
       // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
       var promiseForUsers;
@@ -178,22 +200,24 @@
 
     }
 
-    this.userActions = [
-      {
-        name: gettext('Manage Roles'),
-        disabled: true,
-        execute: function (aUser) {
-          return manageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
+    function createUserActions() {
+      return [
+        {
+          name: gettext('Manage Roles'),
+          disabled: true,
+          execute: function (aUser) {
+            return manageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
+          }
+        },
+        {
+          name: gettext('Remove from Organization'),
+          disabled: true,
+          execute: function (aUser) {
+            return rolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);
+          }
         }
-      },
-      {
-        name: gettext('Remove from Organization'),
-        disabled: true,
-        execute: function (aUser) {
-          return rolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);
-        }
-      }
-    ];
+      ];
+    }
 
     this.getSpaceRoles = function (aUser) {
       return that.userRoles[aUser.metadata.guid];
@@ -205,6 +229,11 @@
       } else {
         userSelection.deselectAllUsers(that.guid);
       }
+    };
+
+    this.canRemoveSpaceRole = function (spaceGuid) {
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update,
+        spaceGuid, that.organizationGuid, true);
     };
 
     this.removeSpaceRole = function (user, spaceRole) {
