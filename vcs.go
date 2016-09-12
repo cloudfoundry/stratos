@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -54,7 +53,7 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, error) {
 				vcsType := strings.ToLower(clientData[0])
 				vcsClientType, err := getVCSType(vcsType)
 				if err != nil {
-					log.Printf("Unable to get VCS type %s: %v", vcsType, err)
+					logger.Errorf("Unable to get VCS type %s: %v", vcsType, err)
 					continue
 				}
 
@@ -62,7 +61,7 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, error) {
 				baseEndpoint := strings.TrimSpace(clientData[1])
 				baseEndpointURL, err := url.Parse(baseEndpoint)
 				if err != nil {
-					log.Printf("Unable to parse VCS endpoint URL: %s", baseEndpoint)
+					logger.Errorf("Unable to parse VCS endpoint URL: %s", baseEndpoint)
 					continue
 				}
 
@@ -91,7 +90,7 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, error) {
 }
 
 func getVCSType(vcs string) (VCSType, error) {
-	log.Println("getVCSType")
+	logger.Info("getVCSType")
 
 	var newType VCSType
 
@@ -105,7 +104,7 @@ func getVCSType(vcs string) (VCSType, error) {
 }
 
 func getAuthPathPrefix(vcs string) VCSAuthPathPrefix {
-	log.Println("getAuthPathPrefix")
+	logger.Info("getAuthPathPrefix")
 
 	switch vcs {
 	case "bitbucket":
@@ -116,7 +115,7 @@ func getAuthPathPrefix(vcs string) VCSAuthPathPrefix {
 }
 
 func (p *portalProxy) listVCSClients(c echo.Context) error {
-	log.Println("listVCSClients")
+	logger.Info("listVCSClients")
 	keys := make([]string, len(p.Config.VCSClientMap))
 
 	i := 0
