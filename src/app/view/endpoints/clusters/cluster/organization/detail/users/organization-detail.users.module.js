@@ -153,7 +153,7 @@
       // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
       var promiseForUsers;
       if (isAdmin) {
-        promiseForUsers = that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
+        promiseForUsers = that.usersModel.listAllUsers(that.guid).then(function (res) {
           that.users = res;
         });
       } else {

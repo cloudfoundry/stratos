@@ -110,10 +110,11 @@
           .value();
 
         // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
+        // TODO: (see todo below) RC Ensure we only filter out users with no username for the assign-users screen
         var isAdmin = modelManager.retrieve('app.model.stackatoInfo').info.endpoints.hcf[that.data.clusterGuid].user.admin;
         var promiseForUsers;
         if (isAdmin) {
-          promiseForUsers = that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
+          promiseForUsers = that.usersModel.listAllUsers(that.data.clusterGuid).then(function (res) {
             return res;
           });
         } else {
@@ -133,11 +134,18 @@
         }
 
         // Fetch a list of all users for this cluster
-        return promiseForUsers.then(function (users) {
-          that.data.users = users;
-          //Smart table struggles with an object, so keep two versions
-          that.data.usersByGuid = _.keyBy(users, 'metadata.guid');
-        });
+        return promiseForUsers
+          .then(function (users) {
+            // TODO: RC Ensure we only filter out users with no username for the assign-users screen
+            return _.filter(users, function (user) {
+              return user.entity.username;
+            });
+          })
+          .then(function (users) {
+            that.data.users = users;
+            //Smart table struggles with an object, so keep two versions
+            that.data.usersByGuid = _.keyBy(users, 'metadata.guid');
+          });
       });
     }
 
