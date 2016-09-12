@@ -214,7 +214,7 @@
         this.hceModel.getNotificationTargets(this.hceCnsi.guid, this.project.id)
           .then(function (response) {
             that.notificationTargets.length = 0;
-            [].push.apply(that.notificationTargets, response.data);
+            [].push.apply(that.notificationTargets, that.hceModel.filterNotificationTargets(response.data));
           });
 
         this.hceModel.listNotificationTargetTypes(this.hceCnsi.guid);

@@ -3,6 +3,7 @@
   <bounce-spinner classes="bounce-spinner-md"></bounce-spinner>
 </div>
 <ul class="media-list hpe-add-option-list">
+  <input type="hidden" ng-model="wizardCtrl.options.userInput.notificationTargetType" ng-required="true"></input>
   <li class="media" ng-repeat="notificationTargetType in wizardCtrl.options.notificationTargetTypes">
     <notification-target
       target-type="notificationTargetType"
