@@ -910,7 +910,7 @@
      * @private
      */
     init: function () {
-      var remaining, prevPage, cluster, from, to, resultsPerPage, loads, trimStart, page, cnsiGuid;
+      var remaining, prevPage, cluster, from, to, loads, trimStart, page, cnsiGuid;
       var clusterKeys = Object.keys(this.clusters);
       var clusterIndex = 0;
       var pageSize = this.pageSize;
@@ -941,7 +941,7 @@
 
           } else {
             to = from + Math.min(remaining, cluster.total_results) - 1;
-            remaining -= (to - from + 1);
+            remaining -= to - from + 1;
 
             if (remaining > 0) {
               clusterIndex++;
