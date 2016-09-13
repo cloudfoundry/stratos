@@ -17,12 +17,13 @@
     'app.api.apiManager',
     'cloud-foundry.model.application.stateService',
     '$q',
-    'cloud-foundry.model.modelUtils'
+    'cloud-foundry.model.modelUtils',
+    'app.utils.utilsService'
   ];
 
-  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q, modelUtils) {
+  function registerApplicationModel(config, modelManager, apiManager, appStateService, $q, modelUtils, utils) {
     modelManager.register('cloud-foundry.model.application', new Application(config, apiManager, modelManager,
-      appStateService, $q, modelUtils));
+      appStateService, $q, modelUtils, utils));
   }
 
   /**
@@ -34,6 +35,7 @@
    * @param {object} appStateService - the Application State service
    * @param {object} $q - the $q service for promise/deferred objects
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
+   * @param {app.utils.utilsService} utils - the utils service
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {app.api.applicationApi} applicationApi - the application API proxy
    * @property {object} data - holding data.
@@ -41,9 +43,10 @@
    * @property {string} appStateSwitchTo - the state of currently focused application is switching to.
    * @property {number} pageSize - page size for pagination.
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+   * @property {app.utils.utilsService} utils - the utils service
    * @class
    */
-  function Application(config, apiManager, modelManager, appStateService, $q, modelUtils) {
+  function Application(config, apiManager, modelManager, appStateService, $q, modelUtils, utils) {
     this.apiManager = apiManager;
     this.modelManager = modelManager;
     this.appStateService = appStateService;
@@ -52,6 +55,9 @@
     this.$q = $q;
     this.pageSize = config.pagination.pageSize;
     this.modelUtils = modelUtils;
+    this.utils = utils;
+
+    this.tempApplications = []; // used to collecting applications on app wall
 
     this.data = {
       applications: []
@@ -118,25 +124,16 @@
      * @param {string} guid - CNSI guid
      * @param {object} options - options for url building
      * @param {boolean} sync - whether the response should wait for all app stats or just the app metadata
+     * @param {object} trim - tell how the result should be trimmed.
      * @returns {promise} A promise object
      * @public
      **/
-    all: function (guid, options, sync) {
+    all: function (guid, options, sync, trim) {
       var that = this;
 
-      var cnsis = [];
-      if (this.filterParams.cnsiGuid === 'all') {
-        cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
-                  .values()
-                  .filter({cnsi_type: 'hcf'})
-                  .map('guid')
-                  .value();
-      } else {
-        cnsis = [this.filterParams.cnsiGuid];
-      }
+      var cnsis = [guid];
 
       options = angular.extend(options || {}, {
-        'results-per-page': this.pageSize
       }, this._buildFilter());
 
       return this.applicationApi.ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
@@ -162,13 +159,85 @@
           if (!sync) {
             // Fire off the stats requests in parallel - don't wait for them to complete
             that.$q.all(tasks);
-            return that.onAll(response);
+            return that.onAll(guid, response, trim);
           } else {
             return that.$q.all(tasks).then(function () {
-              return that.onAll(response);
+              return that.onAll(guid, response, trim);
             });
           }
         });
+    },
+
+    loadPage: function (pageNumber) {
+      this.tempApplications = [];
+      var that = this;
+      var page = this.pagination.pages[pageNumber - 1];
+      var funcs = [];
+
+      angular.forEach(page, function (clusterLoad) {
+        var cnsiGuid = clusterLoad.cnsiGuid;
+        angular.forEach(clusterLoad.loads, function (load) {
+          funcs.push(function () {
+            return that.all(cnsiGuid, {
+              page: load.number,
+              'results-per-page': load.resultsPerPage
+            }, false, {
+              start: load.trimStart,
+              end: load.trimEnd,
+              resultsPerPage: load.resultsPerPage
+            });
+          });
+        });
+      });
+
+      var p = this.utils.runInSequence(funcs, true);
+      p.then(function () {
+        that.data.applications = that.tempApplications;
+      });
+      return p;
+    },
+
+    /**
+     * @function resetPagination
+     * @description reset application wall pagination plan
+     * @returns {object} a promise object
+     * @public
+     */
+    resetPagination: function () {
+      var that = this;
+      var cnsis = this._getCurrentCnsis();
+      var options = angular.extend({
+        'results-per-page': 1,
+        page: 1
+      }, this._buildFilter());
+
+      this.data.applications.length = 0;
+
+      return this.applicationApi
+        .ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
+        .then(function (response) {
+          return that.onGetPaginationData(response);
+        });
+    },
+
+    /**
+     * @function _getCurentCnsis
+     * @description get currently filtered service instances
+     * @returns {object} The CF q filter
+     * @private
+     */
+    _getCurrentCnsis: function () {
+      var cnsis = [];
+      if (this.filterParams.cnsiGuid === 'all') {
+        cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
+                  .values()
+                  .filter({cnsi_type: 'hcf'})
+                  .map('guid')
+                  .value();
+      } else {
+        cnsis = [this.filterParams.cnsiGuid];
+      }
+      return cnsis;
     },
 
     /**
@@ -467,7 +536,6 @@
         .CreateApp(newAppSpec, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           that.getAppSummary(cnsiGuid, response.data.metadata.guid);
-          that.all();
           return response.data;
         });
     },
@@ -686,46 +754,42 @@
     },
 
     /**
-     * @function _calculateTotalNumbers
+     * @function onGetPaginationData
      * @memberof  cloud-foundry.model.application
-     * @description calculate total app and total page numbers
+     * @description onGetPaginationData handler at model layer
+     * @param {object} response - the response object returned from api call
      * @private
      */
-    _calculateTotalNumbers: function () {
+    onGetPaginationData: function (response) {
+      var clusters = response.data;
       var totalAppNumber = 0;
-      angular.forEach(this.data.applications, function (cluster) {
+      angular.forEach(clusters, function (cluster) {
         if (cluster.total_results) {
           totalAppNumber += cluster.total_results;
         }
       });
 
-      this.data.totalAppNumber = totalAppNumber;
-      this.data.totalPageNumber = Math.ceil(totalAppNumber / this.pageSize);
+      this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize));
     },
 
     /**
      * @function onAll
      * @memberof  cloud-foundry.model.application
      * @description onAll handler at model layer
+     * @param {string} guid - CNSI guid
      * @param {string} response - the json return from the api call
+     * @param {object} trim - tell how the result should be trimmed.
      * @private
      */
-    onAll: function (response) {
-      this.data.applications = response.data;
-      this._calculateTotalNumbers();
+    onAll: function (guid, response, trim) {
+      var apps = response.data[guid].resources;
 
-      // Check the data we have and determine if we have any applications
-      this.hasApps = false;
-      if (this.clusterCount > 0 && this.data && this.data.applications) {
-        var appCount = _.reduce(this.data.applications, function (sum, app) {
-          if (!app.error && app.resources) {
-            return sum + app.resources.length;
-          } else {
-            return sum;
-          }
-        }, 0);
-        this.hasApps = appCount > 0;
-      }
+      apps = apps.slice(trim.start, trim.resultsPerPage - trim.end);
+      angular.forEach(apps, function (app) {
+        app.clusterId = guid;
+      });
+      [].push.apply(this.tempApplications, apps);
+      this.hasApps = this.pagination.totalPage > 0;
     },
 
     /**
@@ -814,6 +878,128 @@
 
     onAppStateChange: function () {
       this.application.state = this.appStateService.get(this.application.summary, this.application.instances);
+    }
+  });
+
+  /**
+   * @memberOf cloud-foundry.model.application
+   * @name AppPagination
+   * @param {array} clusters - available clusters.
+   * @param {number} pageSize - page size for pagination.
+   * @param {number} totalPage - total number of pages.
+   * @property {array} clusters - available clusters.
+   * @property {number} pageSize - page size for pagination.
+   * @property {number} totalPage - total number of pages.
+   * @property {array} pages - plan of how each page should be loaded.
+   * @class
+   */
+  function AppPagination(clusters, pageSize, totalPage) {
+    this.clusters = clusters;
+    this.pageSize = pageSize;
+    this.totalPage = totalPage;
+    this.pages = [];
+    this.init();
+  }
+
+  angular.extend(AppPagination.prototype, {
+
+    /**
+     * @function init
+     * @memberof  AppPagination
+     * @description calculate the how each page should be loaded.
+     * @private
+     */
+    init: function () {
+      var remaining, prevPage, cluster, from, to, loads, trimStart, page, cnsiGuid;
+      var clusterKeys = Object.keys(this.clusters);
+      var clusterIndex = 0;
+      var pageSize = this.pageSize;
+
+      for (var i = 0; i < this.totalPage; i++) {
+        this.pages[i] = [];
+        remaining = pageSize;
+        prevPage = this.pages[i - 1];
+
+        while (remaining && clusterIndex < clusterKeys.length) {
+          cnsiGuid = clusterKeys[clusterIndex];
+          cluster = this.clusters[cnsiGuid];
+          from = 0;
+          if (prevPage && prevPage[prevPage.length - 1].cnsiGuid === cnsiGuid) {
+            from = prevPage[prevPage.length - 1].to + 1;
+          }
+
+          if (cluster.total_results > pageSize) {
+            to = from + remaining - 1;
+            cluster.total_results -= remaining;
+            remaining = 0;
+
+          } else if (cluster.total_results === pageSize) {
+            to = from + pageSize - 1;
+            remaining = 0;
+
+            clusterIndex++;
+
+          } else {
+            to = from + Math.min(remaining, cluster.total_results) - 1;
+            remaining -= to - from + 1;
+
+            if (remaining > 0) {
+              clusterIndex++;
+            }
+          }
+
+          if (from === 0) {
+            loads = [{
+              number: 1,
+              resultsPerPage: to + 1,
+              trimStart: 0,
+              trimEnd: 0
+            }];
+
+          } else if (from + 1 < pageSize) {
+            loads = [{
+              number: 1,
+              resultsPerPage: from + pageSize,
+              trimStart: from,
+              trimEnd: 0
+            }];
+
+          } else {
+            page = Math.floor(from / pageSize) + 1;
+            trimStart = from % pageSize;
+
+            if (trimStart === 0) {
+              loads = [{
+                number: page,
+                resultsPerPage: pageSize,
+                trimStart: 0,
+                trimEnd: 0
+              }];
+
+            } else {
+              loads = [{
+                number: page,
+                resultsPerPage: pageSize,
+                trimStart: trimStart,
+                trimEnd: 0
+              }, {
+                number: page + 1,
+                resultsPerPage: pageSize,
+                trimStart: 0,
+                trimEnd: pageSize - trimStart
+              }];
+            }
+          }
+
+          this.pages[i].push({
+            cluster: cluster,
+            cnsiGuid: cnsiGuid,
+            from: from,
+            to: to,
+            loads: loads
+          });
+        } // end of while
+      } // end of for
     }
   });
 
