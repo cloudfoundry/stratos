@@ -99,7 +99,7 @@
       return (context.initPromise || that.$q.when()).then(function () {
         // Omit any org that we don't have permissions to either edit org or at least one child space
         // Create a collection to support the organization drop down
-        var organizations = _.omitBy(that.organizationModel.organizations[that.data.clusterGuid], function (org, orgGuid) {
+        var organizations = _.omitBy(that.organizationModel.organizations[that.data.clusterGuid], function (org) {
           return !that.authModel.doesAnyOrgOrSpaceHaveResourceAction(that.data.clusterGuid, org,
             that.authModel.resources.user, that.authModel.actions.update);
         });
@@ -142,7 +142,7 @@
         // Fetch a list of all users for this cluster
         return promiseForUsers
           .then(function (users) {
-            // TODO: RC Ensure we only filter out users with no username for the assign-users screen
+            // TODO: RC For the assign-users case this is needed. For other uses this should not be filtered
             return _.filter(users, function (user) {
               return user.entity.username;
             });
