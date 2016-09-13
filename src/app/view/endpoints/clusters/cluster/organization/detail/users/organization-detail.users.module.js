@@ -64,7 +64,6 @@
 
     function refreshUsers() {
       that.userRoles = {};
-      var unEditableSpace = false;
 
       // For each user, get its roles in all spaces
       _.forEach(that.users, function (aUser) {
@@ -89,7 +88,7 @@
           }
         });
         that.userRoles[aUser.metadata.guid] = [];
-
+        var unEditableSpace = false;
         // Format that in an array of pairs for direct use in the template
         _.forEach(myRoles, function (spaceRoles, spaceGuid) {
           _.forEach(spaceRoles, function (role) {
@@ -232,8 +231,12 @@
     };
 
     this.canRemoveSpaceRole = function (spaceGuid) {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update,
-        spaceGuid, that.organizationGuid, true);
+      this.cachedcCanRemoveSpaceRol = this.cachedcCanRemoveSpaceRol || {};
+      this.cachedcCanRemoveSpaceRol[spaceGuid] = angular.isDefined(this.cachedcCanRemoveSpaceRol[spaceGuid])
+        ? this.cachedcCanRemoveSpaceRol[spaceGuid]
+        : that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, spaceGuid,
+        that.organizationGuid, true);
+      return this.cachedcCanRemoveSpaceRol[spaceGuid];
     };
 
     this.removeSpaceRole = function (user, spaceRole) {

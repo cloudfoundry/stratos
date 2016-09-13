@@ -234,6 +234,28 @@
       return hasRole;
     },
 
+    doesAnyOrgOrSpaceHaveResourceAction: function (cnsiGuid, org, resource, action) {
+      var that = this;
+      var orgGuid = org.details.org.metadata.guid;
+      // Do we have org or space permissions?
+      if (this.isAllowed(cnsiGuid, resource, action, null, orgGuid)) {
+        // Can edit top level org, org is valid
+        return true;
+      } else {
+        // Can't edit org, can any of the space?
+        for (var spaceGuid in org.spaces) {
+          if (!org.spaces.hasOwnProperty(spaceGuid)) { continue; }
+          var space = org.spaces[spaceGuid];
+          if (that.isAllowed(cnsiGuid, resource, action, space.metadata.guid, orgGuid, true)) {
+            // Can edit a space, org is valid
+            return true;
+          }
+        }
+        // Cannot edit any space in this org, org is not valid
+        return false;
+      }
+    },
+
     /**
      * @name isAdmin
      * @description Is User Admin in endpoint

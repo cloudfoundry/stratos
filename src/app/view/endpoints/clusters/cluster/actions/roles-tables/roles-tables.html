@@ -25,8 +25,8 @@
                             input-disabled="rolesTablesCtrl.disableAssignOrgRoles(org.details.org)"></checkbox-input>
           </td>
           <td>
-            <a ng-if="rolesTablesCtrl.config.containsRoles(org.details.org.metadata.guid)"
-               ng-click="rolesTablesCtrl.config.removeFromOrg(org.details.org.metadata.guid)">
+            <a ng-if="rolesTablesCtrl.config.containsRoles(org.details.org.metadata.guid) && !rolesTablesCtrl.disableAssignOrgRoles(org.details.org)"
+               ng-click="rolesTablesCtrl.config.removeFromOrg(org.details.org.metadata.guid)" translate>
               Remove from Org</a>
           </td>
         </tr>

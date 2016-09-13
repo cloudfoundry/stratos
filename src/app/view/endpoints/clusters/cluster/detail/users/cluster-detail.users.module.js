@@ -80,7 +80,7 @@
               roleLabel: that.organizationModel.organizationRoleToString(role)
             });
             unEditableOrg = unEditableOrg ||
-              !rolesService.canRemoveOrgRole(role, that.guid, orgGuid, aUser.metadata.guid);
+                !that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null, orgGuid);
           });
         });
 
@@ -143,19 +143,6 @@
         }
       });
 
-      // Determine if the signed in user can edit the orgs of all the selected user's roles
-      $scope.$watch(function () {
-        return that.selectedUsers;
-      }, function () {
-        that.canEditAllOrgs = true;
-        var selectedUsersGuids = _.invert(that.selectedUsers, true).true || [];
-        for (var i = 0; i < selectedUsersGuids.length; i++) {
-          if (that.userActions[selectedUsersGuids[i]][1].disabled) {
-            that.canEditAllOrgs = false;
-          }
-        }
-      }, true);
-
       // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
       var promiseForUsers;
       if (isAdmin) {
@@ -179,6 +166,19 @@
       }
 
       return promiseForUsers.then(refreshUsers).then(function () {
+        // Determine if the signed in user can edit the orgs of all the selected user's roles
+        $scope.$watch(function () {
+          return that.selectedUsers;
+        }, function () {
+          that.canEditAllOrgs = true;
+          var selectedUsersGuids = _.invert(that.selectedUsers, true).true || [];
+          for (var i = 0; i < selectedUsersGuids.length; i++) {
+            if (that.userActions[selectedUsersGuids[i]][1].disabled) {
+              that.canEditAllOrgs = false;
+            }
+          }
+        }, true);
+
         that.stateInitialised = true;
       });
 

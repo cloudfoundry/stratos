@@ -13,10 +13,12 @@
       ng-if="asyncTaskDialogCtrl.context.tableConfig.users.length > 1">
       <div class="manager-users-info-message"
         translate>Change roles for the following users.
-        <span class="manager-users-warning">All previously assigned roles will be updated.</span>
       </div>
       <div>
         <selected-users-list selected-users="asyncTaskDialogCtrl.context.tableConfig.users"></selected-users-list>
+      </div>
+      <div class="manager-users-alert-info alert alert-info alert-no-bg alert-bordered" translate>
+        All previously assigned roles will be updated.
       </div>
     </div>
     <div class="manage-users-filter">
@@ -34,7 +36,9 @@
           </form>
         </div>
         <div class="manage-users-clear">
-          <a ng-click="asyncTaskDialogCtrl.context.clearSelections()">Clear All User's Roles</a>
+          <a
+            ng-if="!asyncTaskDialogCtrl.context.tableConfig.disableClearAll"
+            ng-click="asyncTaskDialogCtrl.context.clearSelections()">Clear All User's Roles</a>
         </div>
       </div>
     </div>
