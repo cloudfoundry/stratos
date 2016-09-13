@@ -47,9 +47,10 @@
       var domain = _.get(routeEntity, 'domain.entity', routeEntity.domain);
       var domainName = domain ? domain.name : gettext('Unknown');
 
+      var host = routeEntity.host ? routeEntity.host + '.' : '';
       var port = routeEntity.port ? ':' + routeEntity.port : '';
 
-      return 'http://' + routeEntity.host + '.' + domainName + port + routeEntity.path;
+      return host + domainName + port + routeEntity.path;
     },
 
     /**

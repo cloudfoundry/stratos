@@ -90,9 +90,10 @@
         .RemoveAppFromRoute(guid, appGuid, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
-    createRoute: function (cnsiGuid, routeSpec) {
+    createRoute: function (cnsiGuid, routeSpec, params) {
+      var routeParams = params || {};
       return this.apiManager.retrieve('cloud-foundry.api.Routes')
-        .CreateRoute(routeSpec, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+        .CreateRoute(routeSpec, routeParams, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
@@ -171,16 +172,7 @@
           if (paginate) {
             return response.data;
           }
-          return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid))
-            .then(function (list) {
-              return {
-                total_pages: 1,
-                total_results: list.length,
-                prev_url: null,
-                next_url: null,
-                resources: list
-              };
-            });
+          return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
         });
     },
 
@@ -205,6 +197,29 @@
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
+        });
+    },
+
+   /**
+    * @function listAllRoutes
+    * @memberof cloud-foundry.model.route
+    * @description get all route
+    * @param {object} params - optional parameters
+    * @returns {promise} A resolved/rejected promise
+    * @public
+    */
+    listAllRoutes: function (params) {
+      var cnsis = _.chain(this.modelManager.retrieve('app.model.serviceInstance.user').serviceInstances)
+                   .values()
+                   .map('guid')
+                   .value();
+      var httpConfig = {
+        headers: { 'x-cnap-cnsi-list': cnsis.join(',') }
+      };
+      return this.apiManager.retrieve('cloud-foundry.api.Routes')
+        .ListAllRoutes(params, httpConfig)
+        .then(function (response) {
+          return response.data;
         });
     }
 
