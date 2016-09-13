@@ -6,7 +6,6 @@
     .factory('cloud-foundry.view.applications.application.summary.addRoutes', AddRouteServiceFactory);
 
   AddRouteServiceFactory.$inject = [
-    '$timeout',
     'app.model.modelManager',
     'helion.framework.widgets.asyncTaskDialog'
   ];
@@ -15,12 +14,11 @@
    * @name AddRouteServiceFactory
    * @description Factory for getting the Add Route Dialog
    * @memberof cloud-foundry.view.applications.application.summary
-   * @param {function} $timeout - angular $timeout service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} asyncTaskDialog - async dialog service
    * @constructor
    */
-  function AddRouteServiceFactory($timeout, modelManager, asyncTaskDialog) {
+  function AddRouteServiceFactory(modelManager, asyncTaskDialog) {
     var that = this;
     this.routeModel = modelManager.retrieve('cloud-foundry.model.route');
     return {
