@@ -66,10 +66,9 @@
      * @memberof app.api.serviceInstance.user.UserServiceInstance
      * @description Verify credentials provided by user
      * @param {string} guid - the CNSI GUID
-     * @param {string} name - the CNSI name
      * @param {string} username - the login username
      * @param {string} password - the login password
-     * @returns {promise} A resolved/rejected promise
+     * @returns {promise}
      * @public
      */
     verify: function (guid, username, password) {
