@@ -163,9 +163,13 @@
                         return that.createPipeline(newTarget.deployment_target_id);
                       });
                     }
+                  }, function () {
+                    // Failed to validate credentials
+                    var msg = gettext('The username and password combination provided is invalid. Please check and try again.');
+                    return that.$q.reject(msg);
                   })
                   .catch(function (err) {
-                    // Failed to validate credentials
+                    // Some other exception occurred
                     return that.$q.reject(err);
                   });
               }
@@ -414,7 +418,7 @@
         return this.createProject(targetId).then(function () {
           return that.createCfBinding().then(angular.noop, function () {
             return that.$q(function (resolve, reject) {
-              var msg = gettext('There was a problem creating the pipeline binding. Please check your username and password.');
+              var msg = gettext('There was a problem creating the pipeline binding.');
               reject(msg);
             });
           });

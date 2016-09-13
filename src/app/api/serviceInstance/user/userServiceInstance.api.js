@@ -71,7 +71,7 @@
      * @param {string} guid - the CNSI guid
      * @param {string} username - the login username
      * @param {string} password - the login password
-     * @returns {promise} A resolved/rejected promise
+     * @returns {promise}
      * @public
      */
     verify: function (guid, username, password) {
