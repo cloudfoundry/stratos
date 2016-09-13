@@ -111,25 +111,23 @@
                   hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
                     var githubOptions = that._getVcsHeaders();
                     var usedBranches = _.chain(projects)
-                      .filter(function (p) {
-                        return p.repo.full_name === that.userInput.repo.full_name;
-                      })
-                      .map(function (p) {
-                        return p.repo.branch;
-                      })
-                      .value();
+                                        .filter(function (p) {
+                                          return p.repo.full_name === that.userInput.repo.full_name;
+                                        })
+                                        .map(function (p) { return p.repo.branch; })
+                                        .value();
 
                     return githubModel.branches(that.userInput.repo.full_name, githubOptions)
                       .then(function () {
                         var branches = _.map(githubModel.data.branches,
-                          function (o) {
-                            var used = _.indexOf(usedBranches, o.name) >= 0;
-                            return {
-                              disabled: used,
-                              label: o.name + (used ? gettext(' (used by other project)') : ''),
-                              value: o.name
-                            };
-                          });
+                                            function (o) {
+                                              var used = _.indexOf(usedBranches, o.name) >= 0;
+                                              return {
+                                                disabled: used,
+                                                label: o.name + (used ? gettext(' (used by other project)') : ''),
+                                                value: o.name
+                                              };
+                                            });
                         [].push.apply(that.options.branches, branches);
                       });
                   });
@@ -144,9 +142,8 @@
               nextBtnText: gettext('Create pipeline'),
               onNext: function () {
 
-                // verify if provided credentials are correct.
                 var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
-
+                // First verify if provided credentials are correct
                 return userServiceInstanceModel.verify(
                   that.userInput.serviceInstance.guid,
                   that.userInput.clusterUsername,
@@ -228,7 +225,7 @@
 
         serviceInstanceModel.list().then(function () {
           that.options.hceCnsis.length = 0;
-          var hceCnsis = _.filter(serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'}) || [];
+          var hceCnsis = _.filter(serviceInstanceModel.serviceInstances, { cnsi_type: 'hce' }) || [];
           if (hceCnsis.length > 0) {
             [].push.apply(that.options.hceCnsis, hceCnsis);
             that.userInput.hceCnsi = hceCnsis[0];
@@ -322,18 +319,14 @@
         hceModel.getBuildContainers(this.userInput.hceCnsi.guid)
           .then(function () {
             var buildContainers = _.map(hceModel.data.buildContainers,
-              function (o) {
-                return {label: o.build_container_label, value: o};
-              });
+                                        function (o) { return { label: o.build_container_label, value: o }; });
             [].push.apply(that.options.buildContainers, buildContainers);
           });
 
         hceModel.getImageRegistries(this.userInput.hceCnsi.guid)
           .then(function () {
             var imageRegistries = _.map(hceModel.data.imageRegistries,
-              function (o) {
-                return {label: o.registry_label, value: o};
-              });
+                                        function (o) { return { label: o.registry_label, value: o }; });
             [].push.apply(that.options.imageRegistries, imageRegistries);
           });
       },
@@ -355,11 +348,11 @@
         var endpoint = this.userInput.serviceInstance.api_endpoint;
         var url = endpoint.Scheme + '://' + endpoint.Host;
         return hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid, name,
-          url,
-          this.userInput.clusterUsername,
-          this.userInput.clusterPassword,
-          this.userInput.organization.entity.name,
-          this.userInput.space.entity.name);
+                                               url,
+                                               this.userInput.clusterUsername,
+                                               this.userInput.clusterPassword,
+                                               this.userInput.organization.entity.name,
+                                               this.userInput.space.entity.name);
       },
 
       _updateDeploymentTarget: function (target) {
@@ -430,7 +423,7 @@
         });
       },
 
-      createProject: function (targetId) {
+      createProject:function (targetId) {
         if (this.userInput.projectId) {
           var deferred = this.$q.defer();
           deferred.resolve();
