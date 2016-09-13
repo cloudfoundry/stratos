@@ -146,10 +146,10 @@
               if (app.entity.state === 'STARTED') {
                 // We need more information
                 tasks.push(that.returnAppStats(cnsi, app.metadata.guid, null, true).then(function (stats) {
-                  app.instances = stats.data[cnsi];
+                  app.instances = stats.data;
                   app.instanceCount = _.keys(app.instances).length;
                   app.state = that.appStateService.get(app.entity, app.instances);
-                  return stats.data[cnsi];
+                  return stats.data;
                 }));
               } else {
                 app.state = that.appStateService.get(app.entity);
@@ -268,9 +268,9 @@
      **/
     usage: function (cnsiGuid, guid, options) {
       var that = this;
-      return this.applicationApi.GetDetailedStatsForStartedApp(guid, options)
+      return this.applicationApi.GetDetailedStatsForStartedApp(guid, options, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.onUsage(response.data[cnsiGuid]);
+          that.onUsage(response.data);
         });
     },
 
@@ -321,20 +321,17 @@
      */
     getAppSummary: function (cnsiGuid, guid, includeStats) {
       var that = this;
-      var config = {
-        headers: {'x-cnap-cnsi-list': cnsiGuid}
-      };
 
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetAppSummary(guid, {}, config)
+        .GetAppSummary(guid, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (!includeStats || response.data[cnsiGuid].state !== 'STARTED') {
-            that.onSummary(cnsiGuid, guid, response.data[cnsiGuid]);
+          if (!includeStats || response.data.state !== 'STARTED') {
+            that.onSummary(cnsiGuid, guid, response.data);
             return response;
           } else {
             // We were asked for stats and this app is RUNNING, so go and get them
             return that.getAppStats(cnsiGuid, guid).then(function () {
-              that.onSummary(cnsiGuid, guid, response.data[cnsiGuid]);
+              that.onSummary(cnsiGuid, guid, response.data);
             });
           }
         });
@@ -352,14 +349,11 @@
      */
     _getAppDetails: function (cnsiGuid, guid, params) {
       var that = this;
-      var config = {
-        headers: {'x-cnap-cnsi-list': cnsiGuid}
-      };
 
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .RetrieveApp(guid, params, config)
+        .RetrieveApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.onGetAppOrgAndSpace(response.data[cnsiGuid].entity);
+          that.onGetAppOrgAndSpace(response.data.entity);
         });
     },
 
@@ -391,13 +385,13 @@
     getAppVariables: function (cnsiGuid, guid) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetEnvForApp(guid)
+        .GetEnvForApp(guid, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          var data = response.data[cnsiGuid];
+          var data = response.data;
           if (data.error_code) {
             throw data;
           } else {
-            return response.data[cnsiGuid];
+            return response.data;
           }
         })
         .then(function (data) {
@@ -427,15 +421,22 @@
      * @description List service bindings for application
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the application guid
-     * @param {object} params - the extra params to pass to request
+     * @param {object=} params - the extra params to pass to request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A promise object
      * @public
      **/
-    listServiceBindings: function (cnsiGuid, guid, params) {
+    listServiceBindings: function (cnsiGuid, guid, params, paginate) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .ListAllServiceBindingsForApp(guid, params)
+        .ListAllServiceBindingsForApp(guid, this.modelUtils.makeListParams(params),
+          this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid].resources;
+          if (!paginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
         });
     },
 
@@ -453,11 +454,11 @@
       this.appStateSwitchTo = 'STARTED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {state: 'STARTED'})
+        .UpdateApp(guid, {state: 'STARTED'}, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(that.getAppStats(cnsiGuid, guid))
         .then(
           function (response) {
-            var data = response.data[cnsiGuid];
+            var data = response.data;
             if (angular.isDefined(data.entity)) {
               that.onAppStateChangeSuccess(data);
             } else if (data.error_code === 'CF-AppPackageInvalid') {
@@ -488,10 +489,10 @@
       this.appStateSwitchTo = 'STOPPED';
       this.application.summary.state = 'PENDING';
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .UpdateApp(guid, {state: 'STOPPED'})
+        .UpdateApp(guid, {state: 'STOPPED'}, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(
           function (response) {
-            var data = response.data[cnsiGuid];
+            var data = response.data;
             if (angular.isDefined(data.entity)) {
               that.onAppStateChangeSuccess(data);
             } else {
@@ -553,13 +554,7 @@
     update: function (cnsiGuid, guid, newAppSpec) {
       var that = this;
       var applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-      /** Since we are targeting a single cnsi, we will enable passthrough **/
-      var httpParams = {
-        headers: {
-          'x-cnap-passthrough': 'true'
-        }
-      };
-      return applicationApi.UpdateApp(guid, newAppSpec, null, httpParams)
+      return applicationApi.UpdateApp(guid, newAppSpec, null, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (response.data.metadata) {
             that.getAppSummary(cnsiGuid, response.data.metadata.guid);
@@ -597,7 +592,7 @@
       var that = this;
       return that.returnAppStats(cnsiGuid, guid, params, noCache).then(function (response) {
         if (!noCache) {
-          var data = response.data[cnsiGuid];
+          var data = response.data;
           //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           // Stats for all instances
           that.application.instances = data;
@@ -620,14 +615,11 @@
      */
     returnAppStats: function (cnsiGuid, guid, params, noCache) {
       var that = this;
-      var config = {
-        headers: {'x-cnap-cnsi-list': cnsiGuid}
-      };
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetDetailedStatsForStartedApp(guid, params, config)
+        .GetDetailedStatsForStartedApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (!noCache) {
-            var data = response.data[cnsiGuid];
+            var data = response.data;
             that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           }
           return response;
@@ -646,9 +638,9 @@
      */
     getEnv: function (cnsiGuid, guid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
-        .GetEnvForApp(guid, params)
+        .GetEnvForApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return response.data[cnsiGuid];
+          return response.data;
         });
     },
 

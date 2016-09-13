@@ -50,54 +50,52 @@
 
     ListAllPrivateDomains: function () {
       return {
-        url: '/pp/v1/proxy/v2/private_domains',
+        url: '/pp/v1/proxy/v2/private_domains?results-per-page=100',
 
         response: {
 
           200: {
 
             body: {
-              "guid": {
-                "total_results": 2,
-                "total_pages": 1,
-                "prev_url": null,
-                "next_url": null,
-                "resources": [
-                  {
-                    "metadata": {
-                      "guid": "6ea5aeab-cced-43ad-b1bd-44057d2c648f",
-                      "url": "/v2/private_domains/6ea5aeab-cced-43ad-b1bd-44057d2c648f",
-                      "created_at": "2016-04-20T18:45:03Z",
-                      "updated_at": null
-                    },
-                    "entity": {
-                      "name": "example.com",
-                      "owning_organization_guid": "2fe5b39d-2147-4687-88d1-07abf3500e41",
-                      "owning_organization_url": "/v2/organizations/2fe5b39d-2147-4687-88d1-07abf3500e41",
-                      "shared_organizations_url": "/v2/private_domains/6ea5aeab-cced-43ad-b1bd-44057d2c648f/shared_organizations"
-                    }
+              "total_results": 2,
+              "total_pages": 1,
+              "prev_url": null,
+              "next_url": null,
+              "resources": [
+                {
+                  "metadata": {
+                    "guid": "6ea5aeab-cced-43ad-b1bd-44057d2c648f",
+                    "url": "/v2/private_domains/6ea5aeab-cced-43ad-b1bd-44057d2c648f",
+                    "created_at": "2016-04-20T18:45:03Z",
+                    "updated_at": null
                   },
-                  {
-                    "metadata": {
-                      "guid": "36d72b3b-1bf5-44a0-9aa8-7401a78e484d",
-                      "url": "/v2/private_domains/36d72b3b-1bf5-44a0-9aa8-7401a78e484d",
-                      "created_at": "2016-04-20T20:33:13Z",
-                      "updated_at": null
-                    },
-                    "entity": {
-                      "name": "example.net",
-                      "owning_organization_guid": "2fe5b39d-2147-4687-88d1-07abf3500e41",
-                      "owning_organization_url": "/v2/organizations/2fe5b39d-2147-4687-88d1-07abf3500e41",
-                      "shared_organizations_url": "/v2/private_domains/36d72b3b-1bf5-44a0-9aa8-7401a78e484d/shared_organizations"
-                    }
+                  "entity": {
+                    "name": "example.com",
+                    "owning_organization_guid": "2fe5b39d-2147-4687-88d1-07abf3500e41",
+                    "owning_organization_url": "/v2/organizations/2fe5b39d-2147-4687-88d1-07abf3500e41",
+                    "shared_organizations_url": "/v2/private_domains/6ea5aeab-cced-43ad-b1bd-44057d2c648f/shared_organizations"
                   }
-                ]
-              }
+                },
+                {
+                  "metadata": {
+                    "guid": "36d72b3b-1bf5-44a0-9aa8-7401a78e484d",
+                    "url": "/v2/private_domains/36d72b3b-1bf5-44a0-9aa8-7401a78e484d",
+                    "created_at": "2016-04-20T20:33:13Z",
+                    "updated_at": null
+                  },
+                  "entity": {
+                    "name": "example.net",
+                    "owning_organization_guid": "2fe5b39d-2147-4687-88d1-07abf3500e41",
+                    "owning_organization_url": "/v2/organizations/2fe5b39d-2147-4687-88d1-07abf3500e41",
+                    "shared_organizations_url": "/v2/private_domains/36d72b3b-1bf5-44a0-9aa8-7401a78e484d/shared_organizations"
+                  }
+                }
+              ]
             }
           },
 
           500: {
-            body: { guid: {} }
+            body: { }
           }
 
         }

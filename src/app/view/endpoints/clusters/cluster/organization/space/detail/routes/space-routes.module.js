@@ -75,7 +75,7 @@
 
     update: function (route) {
       var that = this;
-      return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid, null, true)
+      return that.spaceModel.listAllRoutesForSpace(that.clusterGuid, that.spaceGuid)
         .then(function () {
           if (route) {
             that.updateActions([route]);

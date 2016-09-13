@@ -10,10 +10,8 @@
     var applicationId = 'testApplicationId';
     var path = 'testpath';
     var mockAddRouteResponse = {
-      testCnsi: {
-        metadata: {
-          guid: 'testGuid'
-        }
+      metadata: {
+        guid: 'testGuid'
       }
     };
     var data = {

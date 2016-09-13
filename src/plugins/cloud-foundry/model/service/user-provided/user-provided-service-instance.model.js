@@ -13,23 +13,28 @@
 
   registerUserProvidedServiceInstanceModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerUserProvidedServiceInstanceModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.user-provided-service-instance', new UserProvidedServiceInstance(apiManager));
+  function registerUserProvidedServiceInstanceModel(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.user-provided-service-instance',
+      new UserProvidedServiceInstance(apiManager, modelUtils));
   }
 
   /**
    * @memberof cloud-foundry.model.service-instance
    * @name ServiceInstance
    * @param {app.api.apiManager} apiManager - the API manager
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the API manager
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {object} data - the data holder
    * @class
    */
-  function UserProvidedServiceInstance(apiManager) {
+  function UserProvidedServiceInstance(apiManager, modelUtils) {
     this.userProvidedServiceInstance = apiManager.retrieve('cloud-foundry.api.UserProvidedServiceInstances');
+    this.modelUtils = modelUtils;
   }
 
   angular.extend(UserProvidedServiceInstance.prototype, {
@@ -43,14 +48,8 @@
      * @returns {promise} A promise object
      */
     getUserProvidedServiceInstance: function (cnsiGuid, guid) {
-      var httpConfig = {
-        headers: {
-          'x-cnap-cnsi-list': cnsiGuid,
-          'x-cnap-passthrough': 'true'
-        }
-      };
-
-      return this.userProvidedServiceInstance.RetrieveUserProvidedServiceInstance(guid, {}, httpConfig)
+      return this.userProvidedServiceInstance.RetrieveUserProvidedServiceInstance(guid, {},
+        this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           return response.data;
         });
@@ -65,14 +64,8 @@
      * @returns {promise} A promise object
      */
     listAllServiceBindings: function (cnsiGuid, guid) {
-      var httpConfig = {
-        headers: {
-          'x-cnap-cnsi-list': cnsiGuid,
-          'x-cnap-passthrough': 'true'
-        }
-      };
-
-      return this.userProvidedServiceInstance.ListAllServiceBindingsForUserProvidedServiceInstance(guid, {}, httpConfig);
+      return this.userProvidedServiceInstance.ListAllServiceBindingsForUserProvidedServiceInstance(guid, {},
+        this.modelUtils.makeHttpConfig(cnsiGuid));
     },
 
     /**
@@ -84,14 +77,8 @@
      * @returns {promise} A promise object
      */
     deleteUserProvidedServiceInstance: function (cnsiGuid, guid) {
-      var httpConfig = {
-        headers: {
-          'x-cnap-cnsi-list': cnsiGuid,
-          'x-cnap-passthrough': 'true'
-        }
-      };
-
-      return this.userProvidedServiceInstance.DeleteUserProvidedServiceInstance(guid, {}, httpConfig);
+      return this.userProvidedServiceInstance.DeleteUserProvidedServiceInstance(guid, {},
+        this.modelUtils.makeHttpConfig(cnsiGuid));
     }
   });
 

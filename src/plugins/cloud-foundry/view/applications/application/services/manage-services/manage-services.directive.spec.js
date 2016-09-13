@@ -39,12 +39,12 @@
       var appGuid = 'app_123';
       mockAppsApi = mock.cloudFoundryAPI.Apps;
       var GetAppSummary = mockAppsApi.GetAppSummary(appGuid);
-      mockApp = GetAppSummary.response['200'].body.guid;
+      mockApp = GetAppSummary.response['200'].body;
       $httpBackend.whenGET(GetAppSummary.url)
         .respond(200, GetAppSummary.response['200'].body);
       // mock CF application model - ListAllServiceBindingsForApp
       var ListAllServiceBindingsForApp = mockAppsApi.ListAllServiceBindingsForApp(appGuid);
-      var params = '?q=service_instance_guid+IN+28aa8270-ab0e-480d-b9b6-ba4ec4f15015';
+      var params = '?q=service_instance_guid+IN+28aa8270-ab0e-480d-b9b6-ba4ec4f15015&results-per-page=100';
       $httpBackend.whenGET(ListAllServiceBindingsForApp.url + params)
         .respond(200, ListAllServiceBindingsForApp.response['200'].body);
     }));

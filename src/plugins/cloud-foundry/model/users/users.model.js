@@ -58,16 +58,17 @@
      * @description lists all spaces
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object=} params - optional parameters
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllUsers: function (cnsiGuid, params, dePaginate) {
+    listAllUsers: function (cnsiGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllUsers(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -180,16 +181,17 @@
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
      * @param {object=} params - http params
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {*}
      */
-    listAllAuditedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+    listAllAuditedOrganizationsForUser: function (cnsiGuid, userGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllAuditedOrganizationsForUser(userGuid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -202,16 +204,17 @@
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
      * @param {object=} params - http params
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {*}
      */
-    listAllBillingManagedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+    listAllBillingManagedOrganizationsForUser: function (cnsiGuid, userGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllBillingManagedOrganizationsForUser(userGuid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -224,16 +227,17 @@
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
      * @param {object=} params - http params
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {*}
      */
-    listAllManagedOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+    listAllManagedOrganizationsForUser: function (cnsiGuid, userGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllManagedOrganizationsForUser(userGuid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -246,16 +250,17 @@
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
      * @param {object=} params - http params
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {*}
      */
-    listAllOrganizationsForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+    listAllOrganizationsForUser: function (cnsiGuid, userGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllOrganizationsForUser(userGuid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -268,16 +273,17 @@
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
      * @param {object=} params - http params
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {*}
      */
-    listAllAuditedSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+    listAllAuditedSpacesForUser: function (cnsiGuid, userGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllAuditedSpacesForUser(userGuid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -290,16 +296,17 @@
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
      * @param {object=} params - http params
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {*}
      */
-    listAllManagedSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+    listAllManagedSpacesForUser: function (cnsiGuid, userGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllManagedSpacesForUser(userGuid, this.modelUtils.makeListParams(params),
           this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;
@@ -312,15 +319,16 @@
      * @param {string} cnsiGuid - CNSI GUID
      * @param {string} userGuid - User GUID
      * @param {object=} params - http params
-     * @param {boolean=} dePaginate - true to return the entire collection, not just the first page of the list request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {*}
      */
-    listAllSpacesForUser: function (cnsiGuid, userGuid, params, dePaginate) {
+    listAllSpacesForUser: function (cnsiGuid, userGuid, params, paginate) {
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Users')
         .ListAllSpacesForUser(userGuid, this.modelUtils.makeListParams(params),this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (dePaginate) {
+          if (!paginate) {
             return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
           }
           return response.data.resources;

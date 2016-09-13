@@ -12,22 +12,26 @@
 
   registerSharedDomainModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerSharedDomainModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.shared-domain', new SharedDomain(apiManager));
+  function registerSharedDomainModel(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.shared-domain', new SharedDomain(apiManager, modelUtils));
   }
 
   /**
    * @memberOf cloud-foundry.model
    * @name SharedDomain
    * @param {app.api.apiManager} apiManager - the shared-domain API manager
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {app.api.apiManager} apiManager - the shared-domain API manager
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function SharedDomain(apiManager) {
+  function SharedDomain(apiManager, modelUtils) {
     this.apiManager = apiManager;
+    this.modelUtils = modelUtils;
   }
 
   angular.extend(SharedDomain.prototype, {
@@ -37,20 +41,24 @@
      * @description list all shared domains
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {object=} params - optional parameters
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    listAllSharedDomains: function (cnsiGuid, params) {
+    listAllSharedDomains: function (cnsiGuid, params, paginate) {
       var that = this;
-      var httpConfig = {
-        headers: {'x-cnap-cnsi-list': cnsiGuid}
-      };
       return this.apiManager.retrieve('cloud-foundry.api.SharedDomains')
-        .ListAllSharedDomains(params, httpConfig)
+        .ListAllSharedDomains(this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          var resources = response.data[cnsiGuid] ? response.data[cnsiGuid].resources : [];
-          that.onListAllSharedDomains(cnsiGuid, resources);
-          return resources;
+          if (!paginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (list) {
+          that.onListAllSharedDomains(cnsiGuid, list);
+          return list;
         });
     },
 
