@@ -92,16 +92,18 @@
                 if (that.userInput.source.vcs_type === 'GITHUB') {
                   oauth = that.githubOauthService.start(that.userInput.source.browse_url);
                 } else {
-                  oauth = that.$q.defer();
-                  oauth.resolve();
-                  oauth = oauth.promise;
+                  oauth = that.$q.resolve();
                 }
 
                 return oauth
                   .then(function () {
-                    return that.getRepos();
-                  }, function () {
-                    var msg = gettext('There was a problem retrieving your repositories. Please try again.');
+                    return that.getRepos().catch(function () {
+                      var msg = gettext('There was a problem retrieving your repositories. Please try again.');
+                      return that.$q.reject(msg);
+                    });
+                  })
+                  .catch(function () {
+                    var msg = gettext('There was a problem authorizing with the selected source. Please try again.');
                     return that.$q.reject(msg);
                   });
               }
@@ -156,7 +158,6 @@
               nextBtnText: gettext('Create pipeline'),
               showBusyOnNext: true,
               onNext: function () {
-
                 var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
                 // First verify if provided credentials are correct
                 return userServiceInstanceModel.verify(
@@ -172,6 +173,7 @@
                         });
                     } else {
                       return that.createDeploymentTarget().then(function (newTarget) {
+                        that.options.deploymentTarget = newTarget;
                         return that.createPipeline(newTarget.deployment_target_id);
                       });
                     }
@@ -432,16 +434,14 @@
       createPipeline: function (targetId) {
         var that = this;
         return this.createProject(targetId).then(function () {
-          return that.createCfBinding().then(angular.noop, function () {
+          return that.createCfBinding().catch(function () {
             return that.$q.when(that.deleteProject(that.userInput.projectId))
               .then(function () {
                 that.userInput.projectId = null;
               })
               .finally(function () {
-                return that.$q(function (resolve, reject) {
-                  var msg = gettext('There was a problem creating the pipeline binding. Please check your username and password.');
-                  reject(msg);
-                });
+                var msg = gettext('There was a problem creating the pipeline binding.');
+                return that.$q.reject(msg);
               });
           });
         }, function () {
@@ -454,19 +454,15 @@
             }
           })
           .finally(function () {
-            return that.$q(function (resolve, reject) {
-              var msg = gettext('There was a problem creating the pipeline binding.');
-              reject(msg);
-            });
+            var msg = gettext('There was a problem creating the pipeline. Please ensure the webhook limit has not been reached on your repository.');
+            return that.$q.reject(msg);
           });
         });
       },
 
       createProject: function (targetId) {
         if (this.userInput.projectId) {
-          var deferred = this.$q.defer();
-          deferred.resolve();
-          return deferred.promise;
+          return this.$q.resolve();
         } else {
           var that = this;
           this.userInput.projectName = this._createProjectName();
