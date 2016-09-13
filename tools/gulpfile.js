@@ -1,7 +1,7 @@
 'use strict';
 
 var concat = require('gulp-concat-util'),
-  del = require('del'),
+  del = require('delete'),
   eslint = require('gulp-eslint'),
   file = require('gulp-file'),
   gettext = require('gulp-angular-gettext'),
@@ -18,6 +18,10 @@ var concat = require('gulp-concat-util'),
   node_url = require('url'),
   utils = require('./gulp.utils'),
   request = require('request'),
+  uglify = require('gulp-uglify'),
+  sort = require('gulp-sort'),
+  angularFilesort = require('gulp-angular-filesort'),
+  gulpBowerFiles = require('bower-files'),
   wiredep = require('wiredep').stream;
 
 var config = require('./gulp.config')();
@@ -33,6 +37,10 @@ var paths = config.paths,
   partials = config.partials;
 
 var usePlumber = true;
+
+var bowerFiles = gulpBowerFiles({
+  overrides: config.bower.overrides
+});
 
 // Clear the 'dist' folder
 gulp.task('clean:dist', function (next) {
@@ -60,10 +68,29 @@ gulp.task('copy:lib', function (done) {
 });
 
 // Copy JavaScript source files to 'dist'
-gulp.task('copy:js', function () {
+gulp.task('copy:configjs', function () {
+  return gulp
+    .src(paths.src + 'config.js')
+    .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+    .pipe(gulp.dest(paths.dist));
+});
+
+// Copy JavaScript source files to 'dist'
+gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs'], function () {
   return gulp
     .src(jsSourceFiles, { base: paths.src })
+    .pipe(sort())
+    .pipe(angularFilesort())
+    .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFile))
+    .pipe(gutil.env.devMode ? gutil.noop() : uglify())
     .pipe(gulp.dest(paths.dist));
+});
+
+gulp.task("copy:bowerjs", function () {
+  return gulp.src(bowerFiles.ext('js').files)
+    .pipe(uglify())
+    .pipe(concat('stackato-libs.js'))
+    .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
 });
 
 gulp.task('copy:assets', function () {
@@ -99,6 +126,7 @@ gulp.task('inject:index', ['copy:index'], function () {
     jsLibs
     .concat(plugins)
     .concat(jsFiles)
+    .concat(paths.dist + config.jsFile)
     .concat(cssFiles), { read: false });
 
   return gulp
@@ -218,14 +246,30 @@ gulp.task('browsersync', function (callback) {
   });
 });
 
+gulp.task('dev-default', function (next) {
+  gutil.env.devMode = true;
+  delete config.bower.exclude;
+  usePlumber = false;
+  runSequence(
+    'default',
+    next
+  );
+});
+
+
 // Static server
-gulp.task('dev', ['default'], function () {
+gulp.task('dev', ['dev-default'], function () {
+  runSequence('browsersync', 'watch');
+});
+
+gulp.task('run-default', ['default'], function () {
   runSequence('browsersync', 'watch');
 });
 
 gulp.task('default', function (next) {
   usePlumber = false;
   runSequence(
+    'clean:dist',
     'plugin',
     'translate:compile',
     'copy:js',

@@ -15,6 +15,7 @@ module.exports = function () {
       bowerJson: require('./bower.json'),
       directory: '../src/lib/',
       ignorePath: '../src/',
+      exclude: [/.js$/, 'jquery.js'],
   	  overrides: {
         "angular-link-header-parser": {
 		      "main": [ "release/angular-link-header-parser.min.js" ]
@@ -23,15 +24,20 @@ module.exports = function () {
 		      "main": [
             "./dist/angular-toastr.tpls.js"
           ]
+        },
+        "lodash": {
+		      "main": [
+            "./lodash.js"
+          ]
         }
       }
     },
 
     bowerDev: {
-        bowerJson: require('./bower.json'),
-        directory: '../src/lib/',
-        ignorePath: '../src/',
-        devDependencies: false
+      bowerJson: require('./bower.json'),
+      directory: '../src/lib/',
+      ignorePath: '../src/',
+      devDependencies: false
     },
 
     assetFiles: [
@@ -44,6 +50,7 @@ module.exports = function () {
     ],
 
     jsFiles: [
+      paths.dist + 'lib/*.js',
       paths.dist + 'plugins/**/plugin.config.js',
       paths.dist + 'index.module.js',
       paths.dist + 'app/**/*.module.js',
@@ -53,6 +60,8 @@ module.exports = function () {
       '!' + paths.dist + '**/*.mock.js',
       '!' + paths.dist + '**/*.spec.js'
     ],
+
+    jsFile: 'stackato-console.js',
 
     jsLibs: [
       paths.dist + 'lib/helion-ui-framework/src/**/*.module.js',
