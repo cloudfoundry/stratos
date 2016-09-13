@@ -121,7 +121,8 @@
           that.stopWorkflow();
         },
 
-        finish: function () {
+        finish: function (wizard) {
+          wizard.disableButtons();
           that.finishWorkflow();
         }
       };
