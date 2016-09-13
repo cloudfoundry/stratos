@@ -24,9 +24,11 @@
     '$stateParams',
     '$scope',
     '$timeout',
+    '$state',
     'app.model.modelManager',
     'helion.framework.widgets.dialog.confirm',
-    'app.view.notificationsService'
+    'app.view.notificationsService',
+    'app.utils.utilsService'
   ];
 
   /**
@@ -37,9 +39,11 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope - the angular $scope service
    * @param {object} $timeout - the angular $timeout service
+   * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} confirmDialog - the confirm dialog service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
+   * @param {object} utilsService - Utils service
    * @property {object} $q - angular $q service
    * @property {object} $interpolate - the angular $interpolate service
    * @property {object} versionModel - the Cloud Foundry Application Versions Model
@@ -47,7 +51,7 @@
    * @property {string} id - the application GUID
    * @property {object} confirmDialog - the confirm dialog service
    */
-  function ApplicationVersionsController($q, $interpolate, $stateParams, $scope, $timeout, modelManager, confirmDialog, notificationsService) {
+  function ApplicationVersionsController($q, $interpolate, $stateParams, $scope, $timeout, $state, modelManager, confirmDialog, notificationsService, utilsService) {
     var that = this;
     this.$q = $q;
     this.$interpolate = $interpolate;
@@ -62,6 +66,7 @@
     this.isBusy = false;
     this.fetchError = false;
     this.deleteError = false;
+    this.disableRollbackAction = true;
     this.versions = [];
 
     this.refreshVersions(true);
@@ -81,6 +86,20 @@
         that.refreshVersions(false);
       }
     });
+
+    function init() {
+
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+      // Keep rollback action disabled if user does not
+      // have permissions to update applications
+      that.disableRollbackAction = !authModel.isAllowed(that.cnsiGuid,
+        authModel.resources.application,
+        authModel.actions.update,
+        that.appModel.application.summary.space_guid);
+    }
+
+    utilsService.chainStateResolve('cf.applications.application.versions', $state, init);
+
   }
 
   angular.extend(ApplicationVersionsController.prototype, {
@@ -137,10 +156,12 @@
         .then(function () {
           that.fetchError = false;
           that.versions = that.versionModel.versions;
-        }).catch(function () {
+        })
+        .catch(function () {
           that.fetchError = true;
           that.versions = [];
-        }).finally(function () {
+        })
+        .finally(function () {
           that.isBusy = false;
         });
     }
