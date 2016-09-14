@@ -123,7 +123,9 @@
 
         finish: function (wizard) {
           wizard.disableButtons();
-          that.finishWorkflow();
+          that.finishWorkflow().catch(function () {
+            wizard.resetButtons();
+          });
         }
       };
     },
@@ -163,33 +165,17 @@
      */
     deleteApp: function () {
       var that = this;
-
-      var tryDeleteEachRoute = this.$q.defer();
-      var deleteApp = this.$q.defer();
-
-      this.removeAppFromRoutes().then(function () {
-        that.tryDeleteEachRoute().then(function () {
-          tryDeleteEachRoute.resolve();
-        }, function () {
-          tryDeleteEachRoute.reject();
-        });
+      var removeAndDeleteRoutes = this.removeAppFromRoutes().then(function () {
+        return that.tryDeleteEachRoute()
       });
 
-      this.$q.all([
-        tryDeleteEachRoute.promise,
+      return this.$q.all([
+        removeAndDeleteRoutes,
         this.deleteServiceBindings(),
         this.deleteProject()
       ]).then(function () {
-        that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid).then(function () {
-          deleteApp.resolve();
-        }, function () {
-          deleteApp.reject();
-        });
-      }, function () {
-        deleteApp.reject();
+        return that.appModel.deleteApp(that.cnsiGuid, that.appModel.application.summary.guid);
       });
-
-      return deleteApp.promise;
     },
 
     /**
@@ -400,15 +386,17 @@
       var appName = this.appModel.application.summary.name;
       this.options.isDeleting = true;
       this.options.hasError = false;
-      this.deleteApp().then(function () {
+      return this.deleteApp().then(function () {
         that.deletingApplication = false;
         // show notification for successful binding
         var successMsg = gettext('"{{appName}}" has been deleted.');
         var message = that.$interpolate(successMsg)({appName: appName});
         that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
-      }, function () {
+      })
+      .catch(function () {
         that.options.hasError = true;
+        return that.$q.reject();
       })
       .finally(function () {
         that.options.isDeleting = false;
