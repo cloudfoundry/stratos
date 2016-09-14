@@ -38,8 +38,13 @@
         </thead>
         <tbody>
         <tr class="" ng-repeat="user in spaceUsersController.visibleUsers">
-          <td><checkbox-input ng-model="spaceUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
-          <td class="user-name">{{ user.entity.username }}</td>
+          <td>
+            <checkbox-input
+              ng-model="spaceUsersController.selectedUsers[user.metadata.guid]"
+              ng-if="user.entity.username">
+            </checkbox-input>
+          </td>
+          <td class="user-name">{{ user.entity.username || user.metadata.guid}}</td>
           <td class="roles-list">
             <div class="role-pill closable-pill"
                  ng-repeat="spaceRole in spaceUsersController.getSpaceRoles(user)"
@@ -48,13 +53,17 @@
               <i class="close-icon helion-icon helion-icon-Close"
                  ng-click="spaceUsersController.removeSpaceRole(user, spaceRole)"></i>
             </div>
-            <div ng-if="spaceUsersController.getSpaceRoles(user).length === 0" translate>None assigned</div>
+            <div ng-if="spaceUsersController.getSpaceRoles(user).length === 0">
+              <span ng-if="user.entity.username" translate>None assigned</span>
+              <span ng-if="!user.entity.username" translate>Not Applicable</span>
+            </div>
           </td>
           <td>
             <actions-menu actions="spaceUsersController.userActions"
                           action-target="user"
                           menu-icon="helion-icon helion-icon-More"
-                          menu-position="actions-menu-right">
+                          menu-position="actions-menu-right"
+                          ng-if="user.entity.username">
             </actions-menu>
           </td>
         </tr>

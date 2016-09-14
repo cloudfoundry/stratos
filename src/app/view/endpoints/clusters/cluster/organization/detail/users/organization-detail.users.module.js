@@ -131,6 +131,13 @@
       $scope.$apply();
     }, 100);
 
+    function refreshAllSelected() {
+      that.selectAllUsers = userSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
+        // Ignore system users
+        return user.entity.username;
+      }));
+    }
+
     function init() {
       $scope.$watch(function () {
         return rolesService.changingRoles;
@@ -143,9 +150,13 @@
         return that.visibleUsers;
       }, function () {
         if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
-          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+          refreshAllSelected();
           debouncedUpdateSelection();
         }
+      });
+
+      $scope.$watch(that.selectedUsersCount, function () {
+        refreshAllSelected();
       });
 
       return rolesService.listUsers(that.guid)
@@ -181,7 +192,10 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        userSelection.selectUsers(that.guid, that.visibleUsers);
+        userSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
+          // Never select system users
+          return user.entity.username;
+        }));
       } else {
         userSelection.deselectAllUsers(that.guid);
       }
@@ -201,7 +215,7 @@
     };
 
     this.selectedUsersCount = function () {
-      return (_.invert(this.selectedUsers, true).true || []).length;
+      return (_.invert(that.selectedUsers, true).true || []).length;
     };
 
     function guidsToUsers() {
