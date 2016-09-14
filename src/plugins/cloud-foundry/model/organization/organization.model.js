@@ -640,7 +640,7 @@
     retrievingRolesOfAllUsersInOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
       var that = this;
       return this.orgsApi
-        .RetrievingRolesOfAllUsersInOrganization(orgGuid, this.applyDefaultListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+        .RetrievingRolesOfAllUsersInOrganization(orgGuid, this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (dePaginate) {
             return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));

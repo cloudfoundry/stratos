@@ -49,6 +49,11 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var usersModel = modelManager.retrieve('cloud-foundry.model.users');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+
+    var promiseForUsers;
+
     this.changingRoles = false;
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
@@ -385,6 +390,31 @@
         roles.organization = {};
       }
       roles.organization.org_user = true;
+    };
+
+    this.listUsers = function (clusterGuid, forceRefresh) {
+      var isAdmin = stackatoInfo.info.endpoints.hcf[clusterGuid].user.admin;
+      if (!forceRefresh && angular.isDefined(promiseForUsers)) {
+        return promiseForUsers;
+      }
+      if (isAdmin) {
+        promiseForUsers = usersModel.listAllUsers(clusterGuid, {}, true);
+      } else {
+        var allUsersP = [];
+        _.forEach(organizationModel.organizations[clusterGuid], function (org) {
+          allUsersP.push(organizationModel.retrievingRolesOfAllUsersInOrganization(clusterGuid, org.details.guid));
+        });
+        promiseForUsers = $q.all(allUsersP).then(function (results) {
+          var allUsers = {};
+          _.forEach(results, function (usersArray) {
+            _.forEach(usersArray, function (aUser) {
+              allUsers[aUser.metadata.guid] = aUser;
+            });
+          });
+          return _.values(allUsers);
+        });
+      }
+      return promiseForUsers;
     };
 
     function clearRoleArray(roleObject) {

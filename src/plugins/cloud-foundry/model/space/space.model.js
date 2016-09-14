@@ -612,7 +612,7 @@
           developer_guids: [userGuid]
         };
 
-        var createP = this.spaceApi.CreateSpace(newSpace, params,  this.modelUtils.makeHttpConfig(cnsiGuid))
+        var createP = this.spaceApi.CreateSpace(newSpace, params, this.modelUtils.makeHttpConfig(cnsiGuid))
           .then(getSpaceDetails); // Cache the space details
 
         createPromises.push(createP);

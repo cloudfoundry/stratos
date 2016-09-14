@@ -109,31 +109,8 @@
           .sortBy('label')
           .value();
 
-        // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
-        var isAdmin = modelManager.retrieve('app.model.stackatoInfo').info.endpoints.hcf[that.data.clusterGuid].user.admin;
-        var promiseForUsers;
-        if (isAdmin) {
-          promiseForUsers = that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
-            return res;
-          });
-        } else {
-          var allUsersP = [];
-          _.forEach(that.organizationModel.organizations[that.data.clusterGuid], function (org) {
-            allUsersP.push(that.organizationModel.retrievingRolesOfAllUsersInOrganization(that.data.clusterGuid, org.details.guid));
-          });
-          promiseForUsers = $q.all(allUsersP).then(function (results) {
-            var allUsers = {};
-            _.forEach(results, function (usersArray) {
-              _.forEach(usersArray, function (aUser) {
-                allUsers[aUser.metadata.guid] = aUser;
-              });
-            });
-            return _.values(allUsers);
-          });
-        }
-
         // Fetch a list of all users for this cluster
-        return promiseForUsers.then(function (users) {
+        return rolesService.listUsers(that.data.clusterGuid).then(function (users) {
           that.data.users = users;
           //Smart table struggles with an object, so keep two versions
           that.data.usersByGuid = _.keyBy(users, 'metadata.guid');
