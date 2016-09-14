@@ -52,10 +52,6 @@
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
         var userKey;
-        // Count anything without a username as un-editable
-        if (angular.isUndefined(user.entity.username)) {
-          continue;
-        }
         // Support selecting by guid or Object
         if (_.isString(user)) {
           userKey = user;
@@ -78,10 +74,6 @@
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
         var userKey;
-        // Ignore anything without a username
-        if (angular.isUndefined(user.entity.username)) {
-          continue;
-        }
         // Support checking by guid or Object
         if (_.isString(user)) {
           userKey = user;
@@ -107,10 +99,6 @@
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
         var userKey;
-        // Ignore anything without a username
-        if (angular.isUndefined(user.entity.username)) {
-          continue;
-        }
         // Support deselecting by guid or Object
         if (_.isString(user)) {
           userKey = user;
