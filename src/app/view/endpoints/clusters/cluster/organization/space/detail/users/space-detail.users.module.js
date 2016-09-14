@@ -121,6 +121,7 @@
     };
 
     function init() {
+
       $scope.$watch(function () {
         return rolesService.changingRoles;
       }, function () {
@@ -144,13 +145,14 @@
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid).then(function (res) {
-        that.users = res;
-        return refreshUsers();
-      }).then(function () {
-        that.stateInitialised = true;
-        return $q.resolve();
-      });
+      return rolesService.listUsers(that.guid)
+        .then(function (users) {
+          that.users = users;
+        })
+        .then(refreshUsers).then(function () {
+          that.stateInitialised = true;
+        });
+
     }
 
     this.userActions = [

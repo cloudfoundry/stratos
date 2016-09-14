@@ -101,6 +101,16 @@
       return usedMemHuman + ' / ' + totalMemHuman;
     }
 
+    // Wrap val into a promise if it's not one already
+    // N.B. compared with using $q.resolve(val) directly,
+    // this avoids creating an additional deferred if val was already a promise
+    function _wrapPromise(val) {
+      if (val && angular.isFunction(val.then)) {
+        return val;
+      }
+      return $q.resolve(val);
+    }
+
     /**
      * Chain promise returning init functions for ensuring in-order Controller initialisation of nested states
      * NB: this uses custom state data to mimick ui-router's resolve functionality.
@@ -126,17 +136,17 @@
       };
 
       if (_.isUndefined(promiseStack)) {
-        $log.debug('Promise stack undefined, initialized by state: ' + aState.name);
-        aState.data.initialized = [];
-        thisPromise = initFunc().catch(wrappedCatch);
-      } else if (promiseStack.length < 1) {
-        $log.debug('Promise stack empty, initialized by state: ' + aState.name);
-        thisPromise = initFunc().catch(wrappedCatch);
+        promiseStack = [];
+        aState.data.initialized = promiseStack;
+      }
+      if (promiseStack.length < 1) {
+        $log.debug('Promise stack empty, starting chain from state: ' + aState.name);
+        thisPromise = _wrapPromise(initFunc()).catch(wrappedCatch);
       } else {
         var previousPromise = promiseStack[promiseStack.length - 1];
         $log.debug('Init promise chain continued from state: ' + previousPromise._state + ' by: ' + aState.name);
         thisPromise = previousPromise.then(function () {
-          return initFunc().catch(wrappedCatch);
+          return _wrapPromise(initFunc()).catch(wrappedCatch);
         });
       }
 

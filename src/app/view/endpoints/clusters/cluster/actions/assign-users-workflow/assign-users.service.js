@@ -110,10 +110,10 @@
           .value();
 
         // Fetch a list of all users for this cluster
-        return that.usersModel.listAllUsers(that.data.clusterGuid).then(function (res) {
-          that.data.users = res;
+        return rolesService.listUsers(that.data.clusterGuid).then(function (users) {
+          that.data.users = users;
           //Smart table struggles with an object, so keep two versions
-          that.data.usersByGuid = _.keyBy(res, 'metadata.guid');
+          that.data.usersByGuid = _.keyBy(users, 'metadata.guid');
         });
       });
     }
