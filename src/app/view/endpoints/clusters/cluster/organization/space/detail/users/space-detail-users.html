@@ -46,13 +46,13 @@
           </td>
           <td class="user-name">{{ user.entity.username || user.metadata.guid}}</td>
           <td class="roles-list">
-            <div class="role-pill" ng-class="{'closable-pill': spaceUsersController.canRemoveSpaceRole()}"
+            <div class="role-pill" ng-class="{'closable-pill': spaceUsersController.canUserRemoveFromSpace()}"
                  ng-repeat="spaceRole in spaceUsersController.getSpaceRoles(user)"
                  ng-class="{ 'progress-cursor' : spaceUsersController.removingSpace[spaceUsersController.space.details.space.entity.name + spaceRole.roleLabel] }">
               {{ spaceUsersController.space.details.space.entity.name }}: {{ spaceRole.roleLabel }}
               <i class="close-icon helion-icon helion-icon-Close"
                  ng-click="spaceUsersController.removeSpaceRole(user, spaceRole)"
-                 ng-if="spaceUsersController.canRemoveSpaceRole()"></i>
+                 ng-if="spaceUsersController.canUserRemoveFromSpace()"></i>
             </div>
             <div ng-if="spaceUsersController.getSpaceRoles(user).length === 0">
               <span ng-if="user.entity.username" translate>None assigned</span>

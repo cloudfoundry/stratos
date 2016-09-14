@@ -59,6 +59,11 @@
     function refreshUsers() {
       that.userRoles = {};
 
+      // Determine if the signed in user can edit ANY of the orgs in this group. If so we can show all 'manage/change'
+      // buttons
+      that.canEditAnOrg = that.authModel.principal[that.guid].userSummary.organizations.managed.length > 0 ||
+        that.authModel.principal[that.guid].userSummary.spaces.managed.length > 0;
+
       // For each user, get her roles in all organizations
       _.forEach(that.users, function (aUser) {
         var aUserRoles = {};
@@ -122,22 +127,6 @@
         if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
           that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
           debouncedUpdateSelection();
-        }
-      });
-
-      // Determine if the signed in user can edit ANY of the orgs in this group. If so we can show all 'manage/change'
-      // buttons
-      $scope.$watchCollection(function () {
-        return that.organizationModel.organizations[that.guid];
-      }, function () {
-        var orgGuids = _.keys(that.organizationModel.organizations[that.guid]);
-        that.canEditAnOrg = false;
-        for (var i = 0; i < orgGuids.length; i++) {
-          if (that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update,
-              null, orgGuids[i])) {
-            that.canEditAnOrg = true;
-            break;
-          }
         }
       });
 
