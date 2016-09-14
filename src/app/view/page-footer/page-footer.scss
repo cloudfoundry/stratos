@@ -70,3 +70,56 @@ page-footer, [page-footer] {
     }
   }
 }
+
+@media(max-width: 480px) {
+
+  page-footer.bleeding {
+
+    > a {
+      img.helion-logo {
+        left: 8px;
+      } 
+      img.hpe-logo {
+        right: 8px;
+      }
+    }
+
+    div.copyright {
+      left: 8px;
+      bottom: 48px;
+      width: 80%;
+      margin: 0;
+      padding: 0;
+
+      .secondary {
+        display: none;
+      }
+    }
+
+    ul.links {
+      left: 8px;
+      bottom: 20px;
+      padding: 0;
+      margin: 0;
+
+      > li:first-child {
+        margin: 0;
+      }
+    }
+  }
+}
+
+@media(max-width: 360px) {
+
+  page-footer.bleeding {
+
+    > a {
+      img.helion-logo {
+        display: none;
+      } 
+      img.hpe-logo {
+        left: 8px;
+      }
+    }
+  }
+}

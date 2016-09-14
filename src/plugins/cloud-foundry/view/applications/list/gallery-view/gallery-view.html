@@ -1,6 +1,4 @@
-<div ng-repeat="(cnsiGUID, cnsiApps) in applicationsListCtrl.model.data.applications">
-  <div class="app-gallery-card col-md-4 col-sm-1"
-    ng-repeat="app in cnsiApps.resources track by app.metadata.guid">
-    <application-gallery-card app="app" cnsi-guid="cnsiGUID"></application-gallery-card>
-  </div>
+<div class="app-gallery-card col-md-4 col-sm-1"
+     ng-repeat="app in applicationsListCtrl.model.data.applications track by app.metadata.guid">
+  <application-gallery-card app="app" cnsi-guid="app.clusterId"></application-gallery-card>
 </div>

@@ -10,10 +10,8 @@
     var applicationId = 'testApplicationId';
     var path = 'testpath';
     var mockAddRouteResponse = {
-      testCnsi: {
-        metadata: {
-          guid: 'testGuid'
-        }
+      metadata: {
+        guid: 'testGuid'
       }
     };
     var data = {
@@ -75,11 +73,20 @@
 
       var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
 
+      $httpBackend.expectGET('/pp/v1/proxy/v2/shared_domains?results-per-page=100').respond(200, { resources: []});
       $httpBackend.expectPOST('/pp/v1/proxy/v2/routes', expectedPostReq).respond(200, mockAddRouteResponse);
       $httpBackend.expectPUT('/pp/v1/proxy/v2/routes/testGuid/apps/testApplicationId').respond(200, {});
       $httpBackend.expectGET('/pp/v1/proxy/v2/apps/' + applicationId + '/summary').respond(200, {});
 
-      modalObj.actionTask(data);
+      var dialog = {
+        context: {
+          options: {
+            domainMap: {}
+          }
+        }
+      };
+
+      modalObj.actionTask(data, dialog);
       $httpBackend.flush();
     });
 

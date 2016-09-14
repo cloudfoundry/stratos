@@ -398,7 +398,7 @@
         return promiseForUsers;
       }
       if (isAdmin) {
-        promiseForUsers = usersModel.listAllUsers(clusterGuid, {}, true);
+        promiseForUsers = usersModel.listAllUsers(clusterGuid);
       } else {
         var allUsersP = [];
         _.forEach(organizationModel.organizations[clusterGuid], function (org) {
@@ -836,7 +836,7 @@
           // Refresh space caches
           _.forEach(newOrgRoles.spaces, function (spaceRoles, spaceGuid) {
             if (_.keys(spaceRoles).length > 0) {
-              cachePromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, spaceGuid, {}, true));
+              cachePromises.push(spaceModel.listRolesOfAllUsersInSpace(clusterGuid, spaceGuid));
             }
           });
 

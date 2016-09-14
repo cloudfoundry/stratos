@@ -51,43 +51,41 @@
 
     ListAllSharedDomains: function () {
       return {
-        url: '/pp/v1/proxy/v2/shared_domains',
+        url: '/pp/v1/proxy/v2/shared_domains?results-per-page=100',
 
         response: {
 
           200: {
 
             body: {
-              "guid": {
-                "total_results": 2,
-                "total_pages": 1,
-                "prev_url": null,
-                "next_url": null,
-                "resources": [
-                  {
-                    "metadata": {
-                      "guid": "e05c91d8-e0d1-439a-911f-2216e62dafa6",
-                      "url": "/v2/shared_domains/e05c91d8-e0d1-439a-911f-2216e62dafa6",
-                      "created_at": "2016-04-12T22:02:34Z",
-                      "updated_at": "2016-04-18T19:55:58Z"
-                    },
-                    "entity": {
-                      "name": "stackato-8hhk.local"
-                    }
+              "total_results": 2,
+              "total_pages": 1,
+              "prev_url": null,
+              "next_url": null,
+              "resources": [
+                {
+                  "metadata": {
+                    "guid": "e05c91d8-e0d1-439a-911f-2216e62dafa6",
+                    "url": "/v2/shared_domains/e05c91d8-e0d1-439a-911f-2216e62dafa6",
+                    "created_at": "2016-04-12T22:02:34Z",
+                    "updated_at": "2016-04-18T19:55:58Z"
                   },
-                  {
-                    "metadata": {
-                      "guid": "98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
-                      "url": "/v2/shared_domains/98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
-                      "created_at": "2016-04-20T20:33:26Z",
-                      "updated_at": null
-                    },
-                    "entity": {
-                      "name": "example.org"
-                    }
+                  "entity": {
+                    "name": "stackato-8hhk.local"
                   }
-                ]
-              }
+                },
+                {
+                  "metadata": {
+                    "guid": "98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
+                    "url": "/v2/shared_domains/98dcbe2a-f14f-4dc8-bb33-ccec7ca736df",
+                    "created_at": "2016-04-20T20:33:26Z",
+                    "updated_at": null
+                  },
+                  "entity": {
+                    "name": "example.org"
+                  }
+                }
+              ]
             }
           },
 

@@ -36,3 +36,25 @@
     }
   }
 }
+
+.add-route-form-section {
+  margin: $hpe-unit-space 0 $hpe-unit-space * 0.5 0;
+  padding: 0;
+  font-weight: $hpe-font-weight-semibold;
+  font-size: $font-size-large;
+}
+
+.form-group.add-route-checkbox {
+  display: flex;
+  > checkbox-input {
+    display: flex;
+  }
+}
+
+div.add-route-path-prefix {
+  position: absolute;
+}
+
+input.add-route-path-prefix {
+  margin-left: 8px;
+}

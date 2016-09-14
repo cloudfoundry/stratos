@@ -20,10 +20,11 @@
 
   ApplicationSummaryController.$inject = [
     '$state',
+    '$stateParams',
     '$log',
     '$q',
+    '$scope',
     'app.model.modelManager',
-    '$stateParams',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
     'app.utils.utilsService',
@@ -34,10 +35,11 @@
    * @name ApplicationSummaryController
    * @constructor
    * @param {object} $state - UI Router $state
+   * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
+   * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} $stateParams - the UI router $stateParams service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
    * @param {app.model.utilsService} utils - the utils service
@@ -49,8 +51,10 @@
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {app.model.utilsService} utils - the utils service
    */
-  function ApplicationSummaryController($state, $log, $q, modelManager, $stateParams, addRoutesService, editAppService, utils,
+//  function ApplicationSummaryController($state, $log, $q, modelManager, $stateParams, addRoutesService, editAppService, utils,
+  function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, modelManager, addRoutesService, editAppService, utils,
                                         routesService) {
+
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -65,6 +69,8 @@
     this.$q = $q;
     this.instanceViewLimit = 5;
 
+    this.update = _.get($scope, '$parent.appCtrl.updateSummary') || angular.noop;
+
     // Hide these options by default until we can ascertain that user can perform them
     this.hideAddRoutes = true;
     this.hideEditApp = true;
@@ -76,14 +82,18 @@
         name: gettext('Unmap from App'),
         disabled: true,
         execute: function (route) {
-          routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id);
+          routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id).finally(function () {
+            that.update();
+          });
         }
       },
       {
         name: gettext('Delete Route'),
         disable: true,
         execute: function (route) {
-          routesService.deleteRoute(that.cnsiGuid, route, route.guid);
+          routesService.deleteRoute(that.cnsiGuid, route, route.guid).finally(function () {
+            that.update();
+          });
         }
       }
     ];

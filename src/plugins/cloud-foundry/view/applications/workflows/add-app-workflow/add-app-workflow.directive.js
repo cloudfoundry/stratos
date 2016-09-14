@@ -378,20 +378,22 @@
        */
       validateNewRoute: function () {
         var that = this;
-        return this.$q(function (resolve, reject) {
-          that.routeModel.checkRouteExists(
-            that.userInput.serviceInstance.guid,
-            that.userInput.domain.metadata.guid,
-            that.userInput.host
+        return that.routeModel.checkRouteExists(
+          that.userInput.serviceInstance.guid,
+          that.userInput.domain.metadata.guid,
+          that.userInput.host
           )
-          .then(function (data) {
-            if (data && data.code === 10000) {
-              resolve();
-            } else {
-              reject(gettext('This route already exists. Choose a new one.'));
+          .then(function () {
+            // Route has been found, this is not a valid route to add
+            return that.$q.reject(gettext('This route already exists. Choose a new one.'));
+          })
+          .catch(function (error) {
+            if (error.status === 404) {
+              // Route has not been found, this is a valid route to add
+              return that.$q.resolve();
             }
+            return that.$q.reject(error);
           });
-        });
       },
 
       /**
@@ -405,7 +407,7 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         this.options.organizations.length = 0;
 
-        return this.organizationModel.listAllOrganizations(cnsiGuid, {}, true)
+        return this.organizationModel.listAllOrganizations(cnsiGuid)
           .then(function (organizations) {
 
             // Filter out organizations in which user does not
@@ -438,7 +440,7 @@
         var cnsiGuid = that.userInput.serviceInstance.guid;
         this.options.spaces.length = 0;
 
-        return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid, {}, true)
+        return this.organizationModel.listAllSpacesForOrganization(cnsiGuid, guid)
           .then(function (spaces) {
 
             // Filter out spaces in which user is not a Space Developer
@@ -532,23 +534,16 @@
           return;
         }
 
-        var href = [
-          '#/cf/applications',
-          this.userInput.serviceInstance.guid,
-          'app',
-          this.userInput.application.summary.guid,
-          'summary'
-        ].join('/');
-
-        this.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
-          message: gettext('A new app has been created: ') + '<a href="' + href + '">' + this.userInput.name + '</a>'
-        });
+        var params = {
+          cnsiGuid: this.userInput.serviceInstance.guid,
+          guid: this.userInput.application.summary.guid
+        };
+        this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.delivery-logs', params);
       },
 
       startWorkflow: function () {
         this.addingApplication = true;
         this.reset();
-        this.appModel.all();
         this.getHceInstances();
       },
 

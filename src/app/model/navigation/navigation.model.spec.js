@@ -59,13 +59,13 @@
     it('`onAutoNav` should called when events.REDIRECT triggered', function () {
       spyOn(navigationModel, 'onAutoNav');
       navigationModel.eventService.$emit(navigationModel.eventService.events.REDIRECT, 'cf.applications');
-      expect(navigationModel.onAutoNav).toHaveBeenCalledWith(jasmine.any(Object), 'cf.applications');
+      expect(navigationModel.onAutoNav).toHaveBeenCalledWith(jasmine.any(Object), 'cf.applications', undefined);
     });
 
     it('`$state.go` should be called when events.REDIRECT triggered', function () {
       spyOn(navigationModel.$state, 'go');
       navigationModel.eventService.$emit(navigationModel.eventService.events.REDIRECT, 'cf.applications');
-      expect(navigationModel.$state.go).toHaveBeenCalledWith('cf.applications');
+      expect(navigationModel.$state.go).toHaveBeenCalledWith('cf.applications', undefined);
       // TEAMFOUR-366 - the menu is now updated using a $rootScope stateChangeSuccess handler
       // expect(navigationModel.menu.currentState).toBe('cf.applications');
     });

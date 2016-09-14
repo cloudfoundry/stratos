@@ -67,7 +67,7 @@
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
-*/
+   */
   function ApplicationController(modelManager, eventService, confirmDialog, utils, cliCommands, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
@@ -184,8 +184,10 @@
 
     $scope.$watch(function () {
       return that.model.application.summary.routes;
-    }, function (newRoutes) {
-      that.onAppRoutesChange(newRoutes);
+    }, function (newRoutes, oldRoutes) {
+      if (angular.toJson(newRoutes) !== angular.toJson(oldRoutes)) {
+        that.onAppRoutesChange(newRoutes);
+      }
     });
 
     $scope.$on('$destroy', function () {
