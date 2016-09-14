@@ -116,8 +116,6 @@
 
     function init() {
 
-      var isAdmin = that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
-
       $scope.$watchCollection(function () {
         return that.visibleUsers;
       }, function () {
@@ -143,44 +141,26 @@
         }
       });
 
-      // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
-      var promiseForUsers;
-      if (isAdmin) {
-        promiseForUsers = that.usersModel.listAllUsers(that.guid).then(function (res) {
-          that.users = res;
-        });
-      } else {
-        var allUsersP = [];
-        _.forEach(that.organizationModel.organizations[that.guid], function (org) {
-          allUsersP.push(that.organizationModel.retrievingRolesOfAllUsersInOrganization(that.guid, org.details.guid));
-        });
-        promiseForUsers = $q.all(allUsersP).then(function (results) {
-          var allUsers = {};
-          _.forEach(results, function (usersArray) {
-            _.forEach(usersArray, function (aUser) {
-              allUsers[aUser.metadata.guid] = aUser;
-            });
-          });
-          that.users = _.values(allUsers);
-        });
-      }
-
-      return promiseForUsers.then(refreshUsers).then(function () {
-        // Determine if the signed in user can edit the orgs of all the selected user's roles
-        $scope.$watch(function () {
-          return that.selectedUsers;
-        }, function () {
-          that.canEditAllOrgs = true;
-          var selectedUsersGuids = _.invert(that.selectedUsers, true).true || [];
-          for (var i = 0; i < selectedUsersGuids.length; i++) {
-            if (that.userActions[selectedUsersGuids[i]][1].disabled) {
-              that.canEditAllOrgs = false;
+      return rolesService.listUsers(that.guid)
+        .then(function (users) {
+          that.users = users;
+        })
+        .then(refreshUsers).then(function () {
+          // Determine if the signed in user can edit the orgs of all the selected user's roles
+          $scope.$watch(function () {
+            return that.selectedUsers;
+          }, function () {
+            that.canEditAllOrgs = true;
+            var selectedUsersGuids = _.invert(that.selectedUsers, true).true || [];
+            for (var i = 0; i < selectedUsersGuids.length; i++) {
+              if (that.userActions[selectedUsersGuids[i]][1].disabled) {
+                that.canEditAllOrgs = false;
+              }
             }
-          }
-        }, true);
+          }, true);
 
-        that.stateInitialised = true;
-      });
+          that.stateInitialised = true;
+        });
 
     }
 

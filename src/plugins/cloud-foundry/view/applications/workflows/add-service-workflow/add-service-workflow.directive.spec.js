@@ -31,7 +31,7 @@
       // mock CF application model
       var mockAppsApi = mock.cloudFoundryAPI.Apps;
       var GetAppSummary = mockAppsApi.GetAppSummary('app_123');
-      mockApp = GetAppSummary.response['200'].body.guid;
+      mockApp = GetAppSummary.response['200'].body;
       $httpBackend.whenGET(GetAppSummary.url)
         .respond(200, GetAppSummary.response['200'].body);
       // mock CF services models

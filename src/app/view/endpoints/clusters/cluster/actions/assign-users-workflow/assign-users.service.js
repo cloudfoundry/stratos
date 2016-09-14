@@ -115,34 +115,9 @@
           .sortBy('label')
           .value();
 
-        // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
-        // TODO: (see todo below) RC Ensure we only filter out users with no username for the assign-users screen
-        var isAdmin = modelManager.retrieve('app.model.stackatoInfo').info.endpoints.hcf[that.data.clusterGuid].user.admin;
-        var promiseForUsers;
-        if (isAdmin) {
-          promiseForUsers = that.usersModel.listAllUsers(that.data.clusterGuid).then(function (res) {
-            return res;
-          });
-        } else {
-          var allUsersP = [];
-          _.forEach(that.organizationModel.organizations[that.data.clusterGuid], function (org) {
-            allUsersP.push(that.organizationModel.retrievingRolesOfAllUsersInOrganization(that.data.clusterGuid, org.details.guid));
-          });
-          promiseForUsers = $q.all(allUsersP).then(function (results) {
-            var allUsers = {};
-            _.forEach(results, function (usersArray) {
-              _.forEach(usersArray, function (aUser) {
-                allUsers[aUser.metadata.guid] = aUser;
-              });
-            });
-            return _.values(allUsers);
-          });
-        }
-
         // Fetch a list of all users for this cluster
-        return promiseForUsers
+        return rolesService.listUsers(that.data.clusterGuid)
           .then(function (users) {
-            // TODO: RC For the assign-users case this is needed. For other uses this should not be filtered
             return _.filter(users, function (user) {
               return user.entity.username;
             });

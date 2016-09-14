@@ -115,8 +115,6 @@
 
     function init() {
 
-      var isAdmin = that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin;
-
       // Manage Roles - show slide in if user is an admin, org manager or the space manager
       that.userActions[0].disabled = !that.canRemoveSpaceRole();
 
@@ -135,31 +133,13 @@
         }
       });
 
-      // TODO: trigger this from cluster init, make promiseForUsers visible to here then chain it here
-      var promiseForUsers;
-      if (isAdmin) {
-        promiseForUsers = that.usersModel.listAllUsers(that.guid).then(function (res) {
-          that.users = res;
+      return rolesService.listUsers(that.guid)
+        .then(function (users) {
+          that.users = users;
+        })
+        .then(refreshUsers).then(function () {
+          that.stateInitialised = true;
         });
-      } else {
-        var allUsersP = [];
-        _.forEach(that.organizationModel.organizations[that.guid], function (org) {
-          allUsersP.push(that.organizationModel.retrievingRolesOfAllUsersInOrganization(that.guid, org.details.guid));
-        });
-        promiseForUsers = $q.all(allUsersP).then(function (results) {
-          var allUsers = {};
-          _.forEach(results, function (usersArray) {
-            _.forEach(usersArray, function (aUser) {
-              allUsers[aUser.metadata.guid] = aUser;
-            });
-          });
-          that.users = _.values(allUsers);
-        });
-      }
-
-      return promiseForUsers.then(refreshUsers).then(function () {
-        that.stateInitialised = true;
-      });
 
     }
 

@@ -13,24 +13,28 @@
 
   registerServiceModel.$inject = [
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'cloud-foundry.model.modelUtils'
   ];
 
-  function registerServiceModel(modelManager, apiManager) {
-    modelManager.register('cloud-foundry.model.featureFlags', new FeatureFlags(apiManager));
+  function registerServiceModel(modelManager, apiManager, modelUtils) {
+    modelManager.register('cloud-foundry.model.featureFlags', new FeatureFlags(apiManager, modelUtils));
   }
 
   /**
    * @name FeatureFlags
    * @description Fetches feature flags for a CF
    * @param {object} apiManager - Api Manager
+   * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {object}featureFlagsByCnsi - Feature flag cache
+   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @contructor
    */
-  function FeatureFlags(apiManager) {
+  function FeatureFlags(apiManager, modelUtils) {
 
     this.featureFlagsApi = apiManager.retrieve('cloud-foundry.api.FeatureFlags');
     this.featureFlagsByCnsi = {};
+    this.modelUtils = modelUtils;
   }
 
   angular.extend(FeatureFlags.prototype, {
@@ -44,13 +48,7 @@
     fetch: function (cnsiGuid) {
 
       var that = this;
-      var httpConfig = {
-        headers: {
-          'x-cnap-cnsi-list': cnsiGuid,
-          'x-cnap-passthrough': 'true'
-        }
-      };
-      return this.featureFlagsApi.GetAllFeatureFlags({}, httpConfig)
+      return this.featureFlagsApi.GetAllFeatureFlags({}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           // consider using cache
           that.featureFlagsByCnsi[cnsiGuid] = response.data;
