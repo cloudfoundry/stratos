@@ -96,6 +96,8 @@
         authModel.resources.application,
         authModel.actions.update,
         that.appModel.application.summary.space_guid);
+
+      return that.$q.resolve();
     }
 
     utilsService.chainStateResolve('cf.applications.application.versions', $state, init);

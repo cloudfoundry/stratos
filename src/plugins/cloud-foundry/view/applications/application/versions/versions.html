@@ -9,7 +9,9 @@
     <span translate>Versions</span>
   </div>
 
-  <div ng-if="applicationVersionsCtrl.hasVersions()" id="app-version-info-message" class="app-version-info welcome-message panel panel-default">
+  <div ng-if="applicationVersionsCtrl.hasVersions() && !applicationVersionsCtrl.disableRollbackAction"
+       id="app-version-info-message"
+       class="app-version-info welcome-message panel panel-default">
     <span class="helion-icon helion-icon-Information"></span>
     <span translate>You will need to restart the application after rolling back to a previous version.</span>
   </div>
