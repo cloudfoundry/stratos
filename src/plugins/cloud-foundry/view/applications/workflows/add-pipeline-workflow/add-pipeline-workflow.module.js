@@ -87,6 +87,7 @@
               formName: 'application-source-form',
               nextBtnText: gettext('Next'),
               showBusyOnNext: true,
+              onNextCancellable: true,
               onNext: function () {
                 var oauth;
                 if (that.userInput.source.vcs_type === 'GITHUB') {
