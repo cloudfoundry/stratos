@@ -89,6 +89,13 @@
       $scope.$apply();
     }, 100);
 
+    function refreshAllSelected() {
+      that.selectAllUsers = userSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
+        // Ignore system users
+        return user.entity.username;
+      }));
+    }
+
     this.canUserManageRoles = function () {
       // User can assign org roles
       return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, that.organizationGuid) ||
@@ -134,9 +141,13 @@
         return that.visibleUsers;
       }, function () {
         if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
-          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+          refreshAllSelected();
           debouncedUpdateSelection();
         }
+      });
+
+      $scope.$watch(that.selectedUsersCount, function () {
+        refreshAllSelected();
       });
 
       return rolesService.listUsers(that.guid)
@@ -181,7 +192,10 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        userSelection.selectUsers(that.guid, that.visibleUsers);
+        userSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
+          // Never select system users
+          return user.entity.username;
+        }));
       } else {
         userSelection.deselectAllUsers(that.guid);
       }
