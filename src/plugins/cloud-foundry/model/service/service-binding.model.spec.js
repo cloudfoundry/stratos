@@ -50,8 +50,9 @@
 
     it('listAllServiceBindings', function () {
       var ListAllServiceBindings = mockBindingsApi.ListAllServiceBindings();
-      $httpBackend.whenGET(ListAllServiceBindings.url).respond(200, ListAllServiceBindings.response['200'].body);
-      $httpBackend.expectGET(ListAllServiceBindings.url);
+      var params = '?results-per-page=100';
+      $httpBackend.whenGET(ListAllServiceBindings.url + params).respond(200, ListAllServiceBindings.response['200'].body);
+      $httpBackend.expectGET(ListAllServiceBindings.url + params);
       var result;
       expect(result).not.toBeDefined();
       model.listAllServiceBindings('guid', {}).then(function (resources) {

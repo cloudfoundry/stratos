@@ -1,11 +1,12 @@
 <div class="add-route">
-  <form name="addRouteForm">
+  <form name="form.addRouteForm">
+    <fieldset> 
     <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists()}" focusable-input>
       <label class="control-label" translate>Host</label>
       <span class="control-message" translate>A route with this name already exists. Choose a new one</span>
       <input type="text" name="host" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.host"
-             required
-             placeholder="{{'a unique identifier for this app' | translate}}"
+        ng-required="asyncTaskDialogCtrl.context.isType('http')"
+        placeholder="{{'a unique identifier for this route' | translate}}"
       />
     </div>
     <div class="form-group" focusable-input>
@@ -18,5 +19,34 @@
         required
       />
     </div>
+
+    <div ng-if="asyncTaskDialogCtrl.context.isType('http')" >
+      <div class="add-route-form-section">HTTP Route Options</div>
+      <div ng-if="asyncTaskDialogCtrl.context.isType('http')" class="form-group" focusable-input>
+        <label class="control-label" translate>Path (Optional)</label>
+        <div class="add-route-path-prefix">/</div>
+        <input type="text" name="path" class="add-route-path-prefix form-control" ng-model="asyncTaskDialogCtrl.context.data.path"
+              placeholder="{{'optional path for this route' | translate}}"
+        />
+      </div>
+    </div>
+
+    <div ng-if="asyncTaskDialogCtrl.context.isType('tcp')" >
+      <div class="add-route-form-section">TCP Route Options</div>
+      <div class="form-group add-route-checkbox" focusable-input>
+        <checkbox-input ng-model="asyncTaskDialogCtrl.context.data.useRandomPort"
+          input-label="{{'Use random port' | translate}}">
+        </checkbox-input>
+      </div>
+      <div class="form-group" focusable-input>
+        <label class="control-label" translate>Port</label>
+        <input ng-disabled="asyncTaskDialogCtrl.context.data.useRandomPort"
+          ng-required="!asyncTaskDialogCtrl.context.data.useRandomPort"
+          type="number" name="port" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.port"
+          placeholder="{{'port for this route' | translate}}"
+        />
+      </div>
+    </div>
+    </fieldset> 
   </form>
 </div>
