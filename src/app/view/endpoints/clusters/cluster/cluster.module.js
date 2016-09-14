@@ -29,11 +29,12 @@
     'app.utils.utilsService',
     '$state',
     '$q',
+    'app.view.endpoints.clusters.cluster.rolesService',
     'app.model.modelManager',
     'app.view.userSelection'
   ];
 
-  function ClusterController($stateParams, $log, utils, $state, $q, modelManager, userSelection) {
+  function ClusterController($stateParams, $log, utils, $state, $q, rolesService, modelManager, userSelection) {
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
@@ -88,6 +89,11 @@
       if (!authModel.isInitialized(that.guid)) {
         authModelPromise = authModel.initializeForEndpoint(that.guid, true);
       }
+
+      orgPromise.then(function () {
+        // Background load of users list
+        rolesService.listUsers(that.guid, true);
+      });
 
       return $q.all([
         orgPromise,

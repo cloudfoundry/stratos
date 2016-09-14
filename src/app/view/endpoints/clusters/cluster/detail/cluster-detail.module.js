@@ -27,13 +27,12 @@
     '$stateParams',
     '$scope',
     'app.utils.utilsService',
-    'app.view.endpoints.clusters.cluster.rolesService',
     '$state',
     '$q',
     'app.view.endpoints.clusters.cluster.cliCommands'
   ];
 
-  function ClusterDetailController(modelManager, $stateParams, $scope, utils, rolesService, $state, $q, cliCommands) {
+  function ClusterDetailController(modelManager, $stateParams, $scope, utils, $state, $q, cliCommands) {
     var that = this;
     this.guid = $stateParams.guid;
     this.cliCommands = cliCommands;
@@ -81,9 +80,6 @@
       });
 
       that.initialized = true;
-
-      // Background load of users list
-      rolesService.listUsers(that.guid, true);
 
       // init functions should return a promise
       return $q.resolve(that.organizations);
