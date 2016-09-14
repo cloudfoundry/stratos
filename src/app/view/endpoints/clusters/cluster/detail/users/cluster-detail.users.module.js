@@ -94,8 +94,11 @@
       $scope.$watch(function () {
         return rolesService.changingRoles;
       }, function () {
-        that.userActions[0].disabled = rolesService.changingRoles;
-        that.userActions[1].disabled = rolesService.changingRoles;
+        var isAdmin = that.stackatoInfo.info.endpoints
+          ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin
+          : false;
+        that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
+        that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
       });
 
       $scope.$watchCollection(function () {
