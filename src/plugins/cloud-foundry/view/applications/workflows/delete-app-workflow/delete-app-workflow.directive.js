@@ -166,7 +166,7 @@
     deleteApp: function () {
       var that = this;
       var removeAndDeleteRoutes = this.removeAppFromRoutes().then(function () {
-        return that.tryDeleteEachRoute()
+        return that.tryDeleteEachRoute();
       });
 
       return this.$q.all([
@@ -380,6 +380,7 @@
      * @function finishWorkflow
      * @memberOf cloud-foundry.view.applications.DeleteAppWorkflowController
      * @description finish workflow
+     * @returns {promise} A promise
      */
     finishWorkflow: function () {
       var that = this;
