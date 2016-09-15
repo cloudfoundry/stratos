@@ -82,10 +82,8 @@
 
       it("should handle success", function () {
         var data = {
-          HCF_GUID: {
-            environment_json: {
-              env_1: 'test1'
-            }
+          environment_json: {
+            env_1: 'test1'
           }
         };
         $httpBackend.when('GET', '/pp/v1/proxy/v2/apps/' + guid + '/env').respond(200, data);

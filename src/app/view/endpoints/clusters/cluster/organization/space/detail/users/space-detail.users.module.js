@@ -89,6 +89,13 @@
       $scope.$apply();
     }, 100);
 
+    function refreshAllSelected() {
+      that.selectAllUsers = userSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
+        // Ignore system users
+        return user.entity.username;
+      }));
+    }
+
     this.canUserManageRoles = function (org, space) {
       // User can assign org roles
       return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid) ||
@@ -121,6 +128,7 @@
     };
 
     function init() {
+
       $scope.$watch(function () {
         return rolesService.changingRoles;
       }, function () {
@@ -139,18 +147,23 @@
         return that.visibleUsers;
       }, function () {
         if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
-          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+          refreshAllSelected();
           debouncedUpdateSelection();
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid, {}, true).then(function (res) {
-        that.users = res;
-        return refreshUsers();
-      }).then(function () {
-        that.stateInitialised = true;
-        return $q.resolve();
+      $scope.$watch(that.selectedUsersCount, function () {
+        refreshAllSelected();
       });
+
+      return rolesService.listUsers(that.guid)
+        .then(function (users) {
+          that.users = users;
+        })
+        .then(refreshUsers).then(function () {
+          that.stateInitialised = true;
+        });
+
     }
 
     this.userActions = [
@@ -185,7 +198,10 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        userSelection.selectUsers(that.guid, that.visibleUsers);
+        userSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
+          // Never select system users
+          return user.entity.username;
+        }));
       } else {
         userSelection.deselectAllUsers(that.guid);
       }

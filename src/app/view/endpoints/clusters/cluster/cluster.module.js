@@ -29,11 +29,12 @@
     'app.utils.utilsService',
     '$state',
     '$q',
+    'app.view.endpoints.clusters.cluster.rolesService',
     'app.model.modelManager',
     'app.view.userSelection'
   ];
 
-  function ClusterController($stateParams, $log, utils, $state, $q, modelManager, userSelection) {
+  function ClusterController($stateParams, $log, utils, $state, $q, rolesService, modelManager, userSelection) {
     var that = this;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var appModel = modelManager.retrieve('cloud-foundry.model.application');
@@ -56,7 +57,7 @@
         'inline-relations-depth': 2,
         'exclude-relations': 'domains,private_domains,space_quota_definitions'
       };
-      var orgPromise = organizationModel.listAllOrganizations(that.guid, inDepthParams, true).then(function (orgs) {
+      var orgPromise = organizationModel.listAllOrganizations(that.guid, inDepthParams).then(function (orgs) {
         var allDetailsP = [];
         _.forEach(orgs, function (org) {
           var orgDetailsP = organizationModel.getOrganizationDetails(that.guid, org).catch(function () {
@@ -88,6 +89,11 @@
       if (!authModel.isInitialized(that.guid)) {
         authModelPromise = authModel.initializeForEndpoint(that.guid, true);
       }
+
+      orgPromise.then(function () {
+        // Background load of users list
+        rolesService.listUsers(that.guid, true);
+      });
 
       return $q.all([
         orgPromise,

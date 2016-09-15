@@ -44,15 +44,24 @@
      * @memberof  cloud-foundry.model.service
      * @description List all services at the model layer
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
-     * @param {object} options - options for url building
+     * @param {object=} options - options for url building
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A promise object
      * @public
      **/
-    all: function (cnsiGuid, options) {
+    all: function (cnsiGuid, options, paginate) {
       var that = this;
-      return this.serviceApi.ListAllServices(options)
+      return this.serviceApi.ListAllServices(this.modelUtils.makeListParams(options),
+        this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onAll(response.data[cnsiGuid]);
+          if (!paginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (all) {
+          return that.onAll(all);
         });
     },
 
@@ -62,18 +71,24 @@
      * @description LIst all service plans for service
      * @param {string} cnsiGuid - the CNSI guid
      * @param {string} guid - the service guid
-     * @param {object} options - additional parameters for request
+     * @param {object=} options - additional parameters for request
+     * @param {boolean=} paginate - true to return the original possibly paginated list, otherwise a de-paginated list
+     * containing ALL results will be returned. This could mean more than one http request is made.
      * @returns {promise} A promise object
      * @public
      */
-    allServicePlans: function (cnsiGuid, guid, options) {
+    allServicePlans: function (cnsiGuid, guid, options, paginate) {
       var that = this;
-      var httpConfig = {
-        headers: { 'x-cnap-cnsi-list': cnsiGuid }
-      };
-      return this.serviceApi.ListAllServicePlansForService(guid, options, httpConfig)
+      return this.serviceApi.ListAllServicePlansForService(guid, this.modelUtils.makeListParams(options),
+        this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          return that.onAllServicePlans(response.data[cnsiGuid]);
+          if (!paginate) {
+            return that.modelUtils.dePaginate(response.data, that.modelUtils.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        })
+        .then(function (all) {
+          return that.onAllServicePlans(all);
         });
     },
 
@@ -98,26 +113,26 @@
      * @function onAll
      * @memberof cloud-foundry.model.service
      * @description onAll handler at model layer
-     * @param {string} response - the json return from the api call
-     * @returns {object} The response
+     * @param {Array} all - the list returned from the api call
+     * @returns {Array} The response
      * @private
      */
-    onAll: function (response) {
-      this.data = response.resources;
-      return response.resources;
+    onAll: function (all) {
+      this.data = all;
+      return all;
     },
 
     /**
      * @function onAllServicePlans
      * @memberof cloud-foundry.model.service
      * @description onAllServicePlans handler at model layer
-     * @param {string} response - the JSON returned from API call
-     * @returns {object} The response
+     * @param {Array} all - the list returned from the api call
+     * @returns {Array} The response
      * @private
      */
-    onAllServicePlans: function (response) {
-      this.data.servicePlans = response.resources;
-      return response.resources;
+    onAllServicePlans: function (all) {
+      this.data.servicePlans = all;
+      return all;
     }
   });
 
