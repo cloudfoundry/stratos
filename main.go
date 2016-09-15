@@ -326,6 +326,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// Connect to HCF cluster
 	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
 
+	// Verify credentials for HCF cluster
+	sessionGroup.POST("/auth/login/cnsi/verify", p.verifyLoginToCNSI)
+
 	// Disconnect HCF cluster
 	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
 
