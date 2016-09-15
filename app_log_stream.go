@@ -74,7 +74,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 
 	// Open a Noaa consumer to the doppler endpoint
 	logger.Infof("Opening Noaa consumer to Doppler endpoint", dopplerAddress)
-	noaaConsumer := consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, nil)
+	noaaConsumer := consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, http.ProxyFromEnvironment)
 	defer noaaConsumer.Close()
 
 	messages, err := getRecentLogs(noaaConsumer, cnsiGUID, appGUID, authToken, refreshTokenRecord)
