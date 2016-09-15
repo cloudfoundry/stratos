@@ -288,10 +288,10 @@
       this.updating = true;
       this.$q.when()
         .then(function () {
-          that.updateSummary().then(function () {
-            that.model.updateDeliveryPipelineMetadata()
+          return that.updateSummary().then(function () {
+            return that.model.updateDeliveryPipelineMetadata()
               .then(function (response) {
-                that.onUpdateDeliveryPipelineMetadata(response);
+                return that.onUpdateDeliveryPipelineMetadata(response);
               });
           });
         })
