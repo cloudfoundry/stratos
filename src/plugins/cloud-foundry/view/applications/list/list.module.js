@@ -85,20 +85,18 @@
     };
 
     function init() {
-      return that.userCnsiModel.list().then(function () {
-        that._setClusters();
-        that._setOrgs();
-        that._setSpaces();
-        that._reload();
-        var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
-        for (var i = 0; i < serviceInstances.length; i++) {
-          var cluster = serviceInstances[i];
-          if (that.authModel.doesUserHaveRole(cluster.guid, that.authModel.roles.space_developer)) {
-            that.isSpaceDeveloper = true;
-            break;
-          }
+      that._setClusters();
+      that._setOrgs();
+      that._setSpaces();
+      that._reload();
+      var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
+      for (var i = 0; i < serviceInstances.length; i++) {
+        var cluster = serviceInstances[i];
+        if (that.authModel.doesUserHaveRole(cluster.guid, that.authModel.roles.space_developer)) {
+          that.isSpaceDeveloper = true;
+          break;
         }
-      });
+      }
     }
 
     utils.chainStateResolve('cf.applications.list', $state, init);

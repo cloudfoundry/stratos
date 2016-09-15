@@ -81,11 +81,9 @@
     };
 
     // Fetch HCE service metadata so that we can show the appropriate message
-    this.userCnsiModel.list().finally(function () {
-      that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
-      that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
-      that.hceServices.fetching = false;
-    });
+    that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
+    that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
+    that.hceServices.fetching = false;
 
     this.notificationTargetActions = [
       {

@@ -63,7 +63,6 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.addRoutesService = addRoutesService;
     this.editAppService = editAppService;
-    this.userCnsiModel.list();
     this.utils = utils;
     this.$log = $log;
     this.$q = $q;

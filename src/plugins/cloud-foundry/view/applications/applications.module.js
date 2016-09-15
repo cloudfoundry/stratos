@@ -48,6 +48,7 @@
    */
   function ApplicationsController($q, $state, utils, modelManager, eventService, loggedInService) {
 
+    var userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
 
     var initialized = $q.defer();
@@ -57,7 +58,11 @@
     }
 
     function init() {
-      return initialized.promise.then(function () {
+      return initialized.promise
+      .then(function () {
+        return userCnsiModel.list();
+      })
+      .then(function () {
         return authService.initialize();
       });
     }
