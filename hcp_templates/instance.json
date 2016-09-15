@@ -10,6 +10,11 @@
       "component": "hsc-etcd",
       "min_instances": 5,
       "max_instances": 5
+    },
+    {
+      "component": "hsc-stkeeper",
+      "min_instances": 3,
+      "max_instances": 3
     }
   ],
   "volumes": [],

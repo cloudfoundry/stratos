@@ -54,40 +54,18 @@ resources:
     type: docker-image
     source:
       repository: docker-registry.helion.space:443/hsc/hsc-etcd2
-  - name: hsc-initiate-upgrade-job-image
+  - name: hsc-stolon-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/hsc/hsc-initiate-upgrade-job
-  - name: hsc-finalize-upgrade-job-image
+      repository: docker-registry.helion.space:443/hsc/hsc-stolon
+  - name: hsc-preflight-job-image
     type: docker-image
     source:
-      repository: docker-registry.helion.space:443/hsc/hsc-finalize-upgrade-job
-
-  # HSM assets
-  - name: hsm-sdl-bucket
-    type: s3
+      repository: docker-registry.helion.space:443/hsc/hsc-preflight-job
+  - name: hsc-postflight-job-image
+    type: docker-image
     source:
-      bucket: {{s3-hsm-bucket}}
-      versioned_file: {{s3-hsm-sdl}}
-      access_key_id: {{s3-access-key}}
-      secret_access_key: {{s3-secret}}
-      region_name: {{s3-region-name}}
-  - name: hsm-instance-bucket
-    type: s3
-    source:
-      bucket: {{s3-hsm-bucket}}
-      versioned_file: {{s3-hsm-instance}}
-      access_key_id: {{s3-access-key}}
-      secret_access_key: {{s3-secret}}
-      region_name: {{s3-region-name}}
-  - name: hsm-config-bucket
-    type: s3
-    source:
-      bucket: {{s3-hsm-bucket}}
-      versioned_file: {{s3-hsm-config}}
-      access_key_id: {{s3-access-key}}
-      secret_access_key: {{s3-secret}}
-      region_name: {{s3-region-name}}
+      repository: docker-registry.helion.space:443/hsc/hsc-postflight-job
 
 jobs:
   - name: build-console
@@ -130,15 +108,22 @@ jobs:
         build: portal-proxy-output
         tag: tag-files/version_tag
 
-    # Build the initiate upgrade image, push to registry
-    - put: hsc-initiate-upgrade-job-image
+    # Build the stolon image, push to registry
+    - put: hsc-stolon-image
+      params:
+        dockerfile: portal-proxy-output/containers/stolon/Dockerfile.HCP
+        build: portal-proxy-output
+        tag: tag-files/version_tag
+
+    # Build the preflight image, push to registry
+    - put: hsc-preflight-job-image
       params:
         dockerfile: portal-proxy-output/db/Dockerfile.preflight-job.HCP
         build: portal-proxy-output
         tag: tag-files/version_tag
 
-    # Build the finalize upgrade image, push to registry
-    - put: hsc-finalize-upgrade-job-image
+    # Build the postflight image, push to registry
+    - put: hsc-postflight-job-image
       params:
         dockerfile: portal-proxy-output/db/Dockerfile.postflight-job.HCP
         build: portal-proxy-output
@@ -152,24 +137,6 @@ jobs:
         dockerfile: stratos-server-output/Dockerfile.HCP
         build: stratos-server-output
         tag: tag-files/version_tag
-
-    # Push out the HSM configs
-    - task: build-hsm-configs
-      file: stratos-deploy/ci/tasks/build-hsm-configs.yml
-      params:
-        registry: {{registry}}
-    - put: hsm-sdl-bucket
-      params:
-        file: stratos-deploy-output/sdl.json
-        acl: public-read
-    - put: hsm-instance-bucket
-      params:
-        file: stratos-deploy-output/instance.json
-        acl: public-read
-    - put: hsm-config-bucket
-      params:
-        file: stratos-deploy-output/config.json
-        acl: public-read
 
     # Tag all repos with the current version
     - put: stratos-deploy
