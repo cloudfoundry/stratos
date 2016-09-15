@@ -51,7 +51,10 @@
         <dt translate>BUILDPACK</dt>
         <dd class="nowrap align-right">
           <span ng-if="!applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)">{{ appCtrl.appBuildPack || '-' }}</span>
-          <a ng-if="applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)" target="buildpack" href="{{ appCtrl.appBuildPack }}">{{ appCtrl.appBuildPack }}</a>
+          <a ng-if="applicationSummaryCtrl.isWebLink(appCtrl.appBuildPack)"
+             target="buildpack"
+             href="{{ appCtrl.appBuildPack }}"
+             rel="noopener noreferrer">{{ appCtrl.appBuildPack }}</a>
         </dd>
 
         <dt translate>ENDPOINT</dt>
