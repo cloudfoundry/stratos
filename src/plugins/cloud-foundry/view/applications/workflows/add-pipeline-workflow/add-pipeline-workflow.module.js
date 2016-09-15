@@ -101,8 +101,7 @@
                       var msg = gettext('There was a problem retrieving your repositories. Please try again.');
                       return that.$q.reject(msg);
                     });
-                  })
-                  .catch(function () {
+                  }, function () {
                     var msg = gettext('There was a problem authorizing with the selected source. Please try again.');
                     return that.$q.reject(msg);
                   });
@@ -142,7 +141,8 @@
                                               };
                                             });
                         [].push.apply(that.options.branches, branches);
-                      }, function () {
+                      })
+                      .catch(function () {
                         var msg = gettext('There was a problem retrieving the branches for your repository. Please try again.');
                         return that.$q.reject(msg);
                       });
