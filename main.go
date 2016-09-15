@@ -320,6 +320,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	e.POST("/v1/auth/login/uaa", p.loginToUAA)
 	e.POST("/v1/auth/logout", p.logout)
 
+	// Version info
+	e.GET("/v1/version", p.getVersions)
+
+	// All routes in the session group need the user to be authenticated
 	sessionGroup := e.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
 
@@ -341,9 +345,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 
 	// Stackato info
 	sessionGroup.GET("/stackato/info", p.stackatoInfo)
-
-	// Version info
-	sessionGroup.GET("/version", p.getVersions)
 
 	// VCS Requests
 	vcsGroup := sessionGroup.Group("/vcs")
