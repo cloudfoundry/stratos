@@ -27,6 +27,7 @@
     'app.event.eventService',
     'github.view.githubOauthService',
     'app.utils.utilsService',
+    '$interpolate',
     '$scope',
     '$q',
     '$timeout'
@@ -40,9 +41,11 @@
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
    * @param {object} utils - Utils service
+   * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
+   * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
    * @property {object} $timeout - the Angular $timeout service
@@ -62,7 +65,8 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, utils, $scope, $q, $timeout) {
+  function AddAppWorkflowController(modelManager, eventService, githubOauthService, utils, $interpolate, $scope, $q, $timeout) {
+    this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -148,10 +152,6 @@
           }
         });
 
-        this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
-          that.loadMoreRepos();
-        });
-
         addPipelineWorkflowPrototype.setWatchers.apply(this);
       },
 
@@ -203,6 +203,7 @@
               formName: 'application-name-form',
               nextBtnText: gettext('Create and continue'),
               cancelBtnText: gettext('Cancel'),
+              showBusyOnNext: true,
               onEnter: function () {
                 return that.serviceInstanceModel.list()
                   .then(function (serviceInstances) {
@@ -221,6 +222,11 @@
               onNext: function () {
                 return that.validateNewRoute().then(function () {
                   return that.createApp().then(function () {
+                    var msg = gettext('A new app tile, name and route have been created and saved for "{{appName}}".');
+                    that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
+                      message: that.$interpolate(msg)({appName: that.userInput.name})
+                    });
+
                     that.spaceModel.listAllServicesForSpace(
                       that.userInput.serviceInstance.guid,
                       that.userInput.space.metadata.guid
@@ -246,10 +252,15 @@
                       categories = _.sortBy(categories, 'lower');
                       that.options.serviceCategories.length = 1;
                       [].push.apply(that.options.serviceCategories, categories);
+                    }, function () {
+                      that.options.servicesError = true;
                     })
                     .finally(function () {
                       that.options.servicesReady = true;
                     });
+                  }, function () {
+                    var msg = gettext('There was problem creating your application. Please try again.');
+                    return that.$q.reject(msg);
                   });
                 });
               }
@@ -259,6 +270,7 @@
               formName: 'application-services-form',
               templateUrl: path + 'services.html',
               nextBtnText: gettext('Next'),
+              showBusyOnNext: true,
               onNext: function () {
                 that.userInput.services = that.appModel.application.summary.services;
                 that.options.subflow = that.options.subflow || 'pipeline';
@@ -269,6 +281,7 @@
               formName: 'application-delivery-form',
               templateUrl: path + 'delivery.html',
               nextBtnText: gettext('Next'),
+              showBusyOnNext: true,
               onNext: function () {
                 if (that.options.subflow === 'pipeline') {
                   that.options.sources.length = 0;
@@ -392,7 +405,7 @@
               // Route has not been found, this is a valid route to add
               return that.$q.resolve();
             }
-            return that.$q.reject(error);
+            return that.$q.reject(gettext('There was a problem validating your route. Please try again.'));
           });
       },
 

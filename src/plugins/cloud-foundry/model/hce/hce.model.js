@@ -303,7 +303,7 @@
     /**
      * @function getProject
      * @memberof cloud-foundry.model.hce.HceModel
-     * @description Get project by name
+     * @description Get project by ID
      * @param {string} guid - the HCE instance GUID
      * @param {number} projectId - the HCE project ID
      * @returns {promise} A promise object
@@ -312,6 +312,25 @@
     getProject: function (guid, projectId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
         .getProject(guid, projectId, {}, this.hceProxyPassthroughConfig);
+    },
+
+    /**
+     * @function getProjectByName
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get project by name
+     * @param {string} guid - the HCE instance GUID
+     * @param {number} name - the HCE project name
+     * @param {object} params - additional query params
+     * @returns {promise} A promise object
+     * @public
+     */
+    getProjectByName: function (guid, name, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .getProjects(guid, params, this.hceProxyPassthroughConfig)
+        .then(function (response) {
+          var projects = response.data || [];
+          return _.find(projects, {name: name});
+        });
     },
 
     /**
