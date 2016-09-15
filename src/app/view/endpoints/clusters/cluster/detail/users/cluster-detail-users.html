@@ -9,16 +9,16 @@
     <div class="change-roles-buttons">
       <button class="btn btn-default"
               ng-if="clusterUsersController.selectedUsersCount() < 2"
-              ng-disabled="clusterUsersController.rolesService.changingRoles || clusterUsersController.selectedUsersCount() !== 1"
+              ng-disabled="clusterUsersController.disableManageRoles()"
               ng-click="clusterUsersController.manageSelectedUsers()"
               translate>Manage Roles</button>
       <button class="btn btn-default"
               ng-if="clusterUsersController.selectedUsersCount() > 1"
-              ng-disabled="clusterUsersController.rolesService.changingRoles"
+              ng-disabled="clusterUsersController.disableChangeRoles()"
               ng-click="clusterUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
-              ng-disabled="clusterUsersController.rolesService.changingRoles || clusterUsersController.selectedUsersCount() < 1"
+              ng-disabled="clusterUsersController.disableRemoveFromOrg()"
               ng-click="clusterUsersController.removeAllRoles()"
               translate>Remove All Roles</button>
     </div>
@@ -56,7 +56,7 @@
             </div>
           </td>
           <td>
-            <actions-menu actions="clusterUsersController.userActions"
+            <actions-menu actions="clusterUsersController.userActions[user.metadata.guid]"
                           action-target="user"
                           menu-icon="helion-icon helion-icon-More"
                           menu-position="actions-menu-right"

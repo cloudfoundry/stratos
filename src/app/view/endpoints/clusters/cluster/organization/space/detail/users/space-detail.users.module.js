@@ -43,11 +43,11 @@
     var that = this;
 
     this.guid = $stateParams.guid;
+    this.organizationGuid = $stateParams.organization;
     this.spaceGuid = $stateParams.space;
     this.users = [];
     this.removingSpace = {};
 
-    this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -96,52 +96,46 @@
       }));
     }
 
-    this.canUserManageRoles = function (org, space) {
+    this.canUserManageRoles = function () {
       // User can assign org roles
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid) ||
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, that.organizationGuid) ||
         // User can assign space roles
-        that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, space.metadata.guid, space.entity.organization_guid, true);
+        that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, that.spaceGuid, that.organizationGuid, true);
     };
 
-    this.canUserRemoveFromOrg = function (org) {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
+    this.canUserRemoveFromOrg = function () {
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null, that.organizationGuid);
     };
 
-    this.canUserRemoveFromSpace = function (org, space) {
-      return that.canUserManageRoles(org, space);
+    this.canUserRemoveFromSpace = function () {
+      return that.canUserManageRoles();
     };
 
     this.disableManageRoles = function () {
-      return this.rolesService.changingRoles ||
-        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org, that.space.details.space);
+      return this.selectedUsersCount() !== 1 || !this.canUserManageRoles();
     };
 
     this.disableChangeRoles = function () {
-      return this.rolesService.changingRoles || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org, that.space.details.space);
+      return !this.canUserManageRoles();
     };
 
     this.disableRemoveFromOrg = function () {
-      return this.rolesService.changingRoles || this.selectedUsersCount() < 1 || !that.canUserRemoveFromOrg(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org);
+      return this.selectedUsersCount() < 1 || !that.canUserRemoveFromOrg();
     };
     this.disableRemoveFromSpace = function () {
-      return this.rolesService.changingRoles || this.selectedUsersCount() < 1 || !that.canUserRemoveFromSpace(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org, that.space.details.space);
+      return this.selectedUsersCount() < 1 || !that.canUserRemoveFromSpace();
     };
 
     function init() {
 
-      $scope.$watch(function () {
-        return rolesService.changingRoles;
-      }, function () {
+      // Manage Roles - show slide in if user is an admin, org manager or the space manager
+      that.userActions[0].disabled = !that.canUserManageRoles();
 
-        // Manage Roles - show slide in if user is an admin, org manager or the space manager
-        that.userActions[0].disabled = rolesService.changingRoles || !that.canUserManageRoles(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org, that.space.details.space);
+      //Remove from Organization - remove user from organization if user is an admin or org manager
+      that.userActions[1].disabled = !that.canUserRemoveFromOrg();
 
-        //Remove from Organization - remove user from organization if user is an admin or org manager
-        that.userActions[1].disabled = rolesService.changingRoles || !that.canUserRemoveFromOrg(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org);
-
-        // Remove from Space - remove if user is an admin, org manager or the space manager
-        that.userActions[2].disabled = rolesService.changingRoles || !that.canUserManageRoles(that.organizationModel.organizations[that.guid][that.space.details.space.entity.organization_guid].details.org, that.space.details.space);
-      });
+      // Remove from Space - remove if user is an admin, org manager or the space manager
+      that.userActions[2].disabled = !that.canUserManageRoles();
 
       $scope.$watchCollection(function () {
         return that.visibleUsers;
