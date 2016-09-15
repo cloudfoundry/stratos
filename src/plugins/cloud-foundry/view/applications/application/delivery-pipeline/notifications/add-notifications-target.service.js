@@ -3,7 +3,8 @@
 
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline')
-    .factory('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService', AddNotificationTargetServiceFactory);
+    .factory('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService', AddNotificationTargetServiceFactory)
+    .controller('cloud-foundry.view.applications.application.delivery-pipeline.addNotificationTargetController', AddNotificationTargetController);
 
   AddNotificationTargetServiceFactory.$inject = [
     'helion.framework.widgets.detailView'

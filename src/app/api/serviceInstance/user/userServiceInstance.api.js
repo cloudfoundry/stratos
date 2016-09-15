@@ -65,6 +65,32 @@
     },
 
     /**
+     * @function verify
+     * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
+     * @description Verify credentials provided by user
+     * @param {string} guid - the CNSI guid
+     * @param {string} username - the login username
+     * @param {string} password - the login password
+     * @returns {promise}
+     * @public
+     */
+    verify: function (guid, username, password) {
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var loginData = {
+        cnsi_guid: guid,
+        username: username,
+        password: password
+      };
+      var data = this.$httpParamSerializer(loginData);
+
+      return this.$http.post('/pp/v1/auth/login/cnsi/verify', data, config);
+    },
+
+    /**
      * @function disconnect
      * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
      * @description Disconnect user from service instance

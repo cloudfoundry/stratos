@@ -60,7 +60,7 @@
     this.eventService = eventService;
     this.errorService = errorService;
     this.ready = false;
-    this.loading = false;
+    this.loading = true;
     this.currentPage = 0;
     this.isSpaceDeveloper = false;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
