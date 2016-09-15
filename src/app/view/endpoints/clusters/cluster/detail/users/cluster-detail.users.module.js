@@ -89,8 +89,7 @@
           });
         });
 
-        that.userActions[aUser.metadata.guid] = that.userActions[aUser.metadata.guid]
-          ? that.userActions[aUser.metadata.guid] : createUserActions();
+        that.userActions[aUser.metadata.guid] = that.userActions[aUser.metadata.guid] || createUserActions();
         // All manage/change buttons will be the same (dependent on orgs rather than individual user roles)
         that.userActions[aUser.metadata.guid][0].disabled = !that.canEditAnOrg;
         // Each rows 'Remove All' buttons will be dependent on the signed in user's permissions to edit every role

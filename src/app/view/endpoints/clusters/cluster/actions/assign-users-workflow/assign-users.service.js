@@ -100,7 +100,7 @@
         // Omit any org that we don't have permissions to either edit org or at least one child space
         // Create a collection to support the organization drop down
         var organizations = _.omitBy(that.organizationModel.organizations[that.data.clusterGuid], function (org) {
-          return !that.authModel.doesAnyOrgOrSpaceHaveResourceAction(that.data.clusterGuid, org,
+          return !that.authModel.isOrgOrSpaceActionableByResource(that.data.clusterGuid, org,
             that.authModel.resources.user, that.authModel.actions.update);
         });
 

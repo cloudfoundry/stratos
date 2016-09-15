@@ -234,24 +234,32 @@
       return hasRole;
     },
 
-    doesAnyOrgOrSpaceHaveResourceAction: function (cnsiGuid, org, resource, action) {
+    /**
+     * @name isOrgOrSpaceActionableByResource
+     * @description convenience method to determine if the user has rights to execute the action against the resource
+     * in the organization or any of the organization's spaces
+     * @param {string} cnsiGuid - Cluster GUID
+     * @param {object} org - console organization object
+     * @param {string} resourceType - Type of resource
+     * (organization, space, user, service_managed_instances, routes, applications)
+     * @param {string} action - action (create, delete, update..)
+     * @returns {boolean}
+     */
+    isOrgOrSpaceActionableByResource: function (cnsiGuid, org, resourceType, action) {
       var that = this;
       var orgGuid = org.details.org.metadata.guid;
-      // Do we have org or space permissions?
-      if (this.isAllowed(cnsiGuid, resource, action, null, orgGuid)) {
-        // Can edit top level org, org is valid
+      // Is the organization valid?
+      if (this.isAllowed(cnsiGuid, resourceType, action, null, orgGuid)) {
         return true;
       } else {
-        // Can't edit org, can any of the space?
+        // Is any of the organization's spaces valid?
         for (var spaceGuid in org.spaces) {
           if (!org.spaces.hasOwnProperty(spaceGuid)) { continue; }
           var space = org.spaces[spaceGuid];
-          if (that.isAllowed(cnsiGuid, resource, action, space.metadata.guid, orgGuid, true)) {
-            // Can edit a space, org is valid
+          if (that.isAllowed(cnsiGuid, resourceType, action, space.metadata.guid, orgGuid, true)) {
             return true;
           }
         }
-        // Cannot edit any space in this org, org is not valid
         return false;
       }
     },

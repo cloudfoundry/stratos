@@ -253,7 +253,7 @@
           canAssignUsers =
             authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, that.spaceGuid, that.organizationGuid, true);
         } else {
-          // We're at most the organization depth, check if user has any space manager roles within it
+          // We're at the organization depth, check if user has any space manager roles within it
           canAssignUsers =
             authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, null, that.organizationGuid) ||
             _.find(authModel.principal[that.clusterGuid].userSummary.spaces.managed, { entity: { organization_guid: that.organizationGuid}});

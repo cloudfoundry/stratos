@@ -9,15 +9,15 @@
   </div>
   <div class="manage-users-loaded"
        ng-if="asyncTaskDialogCtrl.context.state.initialised === true">
-    <div class="manager-users-info"
+    <div class="manage-users-info"
       ng-if="asyncTaskDialogCtrl.context.tableConfig.users.length > 1">
-      <div class="manager-users-info-message"
+      <div class="manage-users-info-message"
         translate>Change roles for the following users.
       </div>
       <div>
         <selected-users-list selected-users="asyncTaskDialogCtrl.context.tableConfig.users"></selected-users-list>
       </div>
-      <div class="manager-users-alert-info alert alert-info alert-no-bg alert-bordered" translate>
+      <div class="manage-users-alert-info alert alert-info alert-no-bg alert-bordered" translate>
         All previously assigned roles will be updated.
       </div>
     </div>

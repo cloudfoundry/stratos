@@ -54,11 +54,13 @@
         if (organizationGuid) {
           return organizationGuid !== orgGuid;
         }
-        return !authModel.doesAnyOrgOrSpaceHaveResourceAction(clusterGuid, org, authModel.resources.user,
+        return !authModel.isOrgOrSpaceActionableByResource(clusterGuid, org, authModel.resources.user,
           authModel.actions.update);
       });
 
-      // Ensure that the selected roles objects are initialised correctly. The roles table will then fiddle inside these
+      // Ensure that the selected roles objects are initialised correctly. The roles table will then fiddle faddle
+      // mc terry flop inside these. Also determine if the connected user can edit all orgs or we should disable the
+      // clear all roles button
       var disableClearAll = false;
       _.forEach(organizations, function (organization) {
         selectedRoles[organization.details.org.metadata.guid] = {};
