@@ -141,16 +141,34 @@
               formName: 'application-pipeline-details-form',
               nextBtnText: gettext('Create pipeline'),
               onNext: function () {
-                if (that.options.deploymentTarget) {
-                  return that.$q.when(that._updateDeploymentTarget(that.options.deploymentTarget))
-                    .then(function () {
-                      return that.createPipeline(that.options.deploymentTarget.deployment_target_id);
-                    });
-                } else {
-                  return that.createDeploymentTarget().then(function (newTarget) {
-                    return that.createPipeline(newTarget.deployment_target_id);
+
+                var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
+                // First verify if provided credentials are correct
+                return userServiceInstanceModel.verify(
+                  that.userInput.serviceInstance.guid,
+                  that.userInput.clusterUsername,
+                  that.userInput.clusterPassword)
+                  .then(function () {
+                    // Successfully validated
+                    if (that.options.deploymentTarget) {
+                      return that.$q.when(that._updateDeploymentTarget(that.options.deploymentTarget))
+                        .then(function () {
+                          return that.createPipeline(that.options.deploymentTarget.deployment_target_id);
+                        });
+                    } else {
+                      return that.createDeploymentTarget().then(function (newTarget) {
+                        return that.createPipeline(newTarget.deployment_target_id);
+                      });
+                    }
+                  }, function () {
+                    // Failed to validate credentials
+                    var msg = gettext('The username and password combination provided is invalid. Please check and try again.');
+                    return that.$q.reject(msg);
+                  })
+                  .catch(function (err) {
+                    // Some other exception occurred
+                    return that.$q.reject(err);
                   });
-                }
               }
             },
             {
@@ -393,7 +411,7 @@
         return this.createProject(targetId).then(function () {
           return that.createCfBinding().then(angular.noop, function () {
             return that.$q(function (resolve, reject) {
-              var msg = gettext('There was a problem creating the pipeline binding. Please check your username and password.');
+              var msg = gettext('There was a problem creating the pipeline binding.');
               reject(msg);
             });
           });
