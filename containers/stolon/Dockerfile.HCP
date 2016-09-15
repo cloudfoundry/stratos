@@ -1,0 +1,2 @@
+FROM sorintlab/stolon:master
+COPY /containers/stolon/initialClusterConfig.json /

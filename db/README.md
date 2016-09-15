@@ -31,7 +31,11 @@ There are three sections of the SDL that are of interest here:
 The preflight job or task is run first, and the success of the install rests on a successful return code (0). The job is really simple: it is used to create a file called `upgrade.lock` on a shared volume. This file will let the rest of the components that make up the Console know that an upgrade is in process.
 
 #### The Components
-The `components` section defines the components that make up the Console: the user interface container, the proxy container, and the Postgres database container.
+The `components` section defines the components that make up the Console:
+- the web server/user interface container
+- the console proxy/api container
+- the postgres database cluster (HA via stolon: 1-proxy node, 3-keep nodes, 1-sentinel node)
+- the etcd cluster (5 nodes, used by stolon for storage of config info)
 
 #### The Postflight Job/Task
 The `preflight` job or task is run last, after all of the components have successfully arrived at a `running` state. This job has the key role in an upgrade: it runs the database migrations to bring the database up to date as of the current deployment. If that fails in some way, a non-zero return code will abort the upgrade. If the migration succeeds, the `upgrade.lock` file from the preflight task is removed, and the Console can proceed as normal.

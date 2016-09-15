@@ -96,7 +96,7 @@ func buildConnectionString(dc DatabaseConfig) string {
 		return strings.Replace(in, `'`, `\'`, -1)
 	}
 
-	connStr := fmt.Sprintf("user='%s' password='%s' dbname='%s' host=%s port=%d connect_timeout=%d",
+	connStr := fmt.Sprintf("user='%s' password='%s' dbname='%s' host='%s' port=%d connect_timeout=%d",
 		escapeStr(dc.Username),
 		escapeStr(dc.Password),
 		escapeStr(dc.Database),
@@ -105,7 +105,7 @@ func buildConnectionString(dc DatabaseConfig) string {
 		dc.ConnectionTimeoutInSecs)
 
 	if dc.SSLMode != "" {
-		connStr = connStr + fmt.Sprintf(" sslmode=%s", dc.SSLMode)
+		connStr = connStr + fmt.Sprintf(" sslmode='%s'", dc.SSLMode)
 	}
 
 	if dc.SSLCertificate != "" {
