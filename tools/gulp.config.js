@@ -62,6 +62,8 @@ module.exports = function () {
     ],
 
     jsFile: 'stackato-console.js',
+    
+    jsTemplatesFile: 'stackato-templates.js',
 
     jsLibs: [
       paths.dist + 'lib/helion-ui-framework/src/**/*.module.js',
