@@ -140,6 +140,10 @@
         refreshAllSelected();
       });
 
+      $scope.$watchCollection(function () {
+        return _.keys(that.organizationModel.organizations[that.guid]).length;
+      }, refreshUsers);
+
       return rolesService.listUsers(that.guid)
         .then(function (users) {
           that.users = users;
