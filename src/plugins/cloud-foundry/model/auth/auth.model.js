@@ -28,6 +28,7 @@
    */
   function AuthModel(modelManager, $q) {
     this.modelManager = modelManager;
+    this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
     // Initialised authorization checkers for individual CNSIs
@@ -70,17 +71,21 @@
       // Initialise Auth Service
       var that = this;
       var authModelInitPromise = [];
-      if (Object.keys(this.stackatoInfo.info.endpoints.hcf).length > 0) {
-        _.each(that.stackatoInfo.info.endpoints.hcf, function (hcfEndpoint, guid) {
-          if (_.isNull(hcfEndpoint.user)) {
+
+      var services = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true});
+      if (services.length > 0) {
+        _.each(services, function (service) {
+          var endpointUser = _.get(that.stackatoInfo.info.endpoints.hcf, service.guid + '.user');
+          if (_.isNull(endpointUser)) {
             // User hasn't connected to this endpoint
             return;
-          } else if (that.isInitialized(guid, hcfEndpoint.user)) {
+          } else if (that.isInitialized(service.guid, endpointUser)) {
             // We have already initialised for this endpoint + user
             return;
           }
-          authModelInitPromise.push(that.initializeForEndpoint(guid, true).catch(angular.noop));
+          authModelInitPromise.push(that.initializeForEndpoint(service.guid, true).catch(angular.noop));
         });
+
         return that.$q.all(authModelInitPromise);
       }
 

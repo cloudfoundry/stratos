@@ -131,30 +131,27 @@
     all: function (guid, options, sync, trim) {
       var that = this;
 
-      var cnsis = [guid];
-
       options = angular.extend(options || {}, {
       }, this._buildFilter());
 
-      return this.applicationApi.ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
+      return this.applicationApi.ListAllApps(options, this.modelUtils.makeHttpConfig(guid))
         .then(function (response) {
           // For all of the apps in the running state, we may need to get stats in order to be able to
           // determine the user-friendly state of the application
           var tasks = [];
-          _.each(response.data, function (appsResponse, cnsi) {
-            _.each(appsResponse.resources, function (app) {
-              if (app.entity.state === 'STARTED') {
-                // We need more information
-                tasks.push(that.returnAppStats(cnsi, app.metadata.guid, null, true).then(function (stats) {
-                  app.instances = stats.data;
-                  app.instanceCount = _.keys(app.instances).length;
-                  app.state = that.appStateService.get(app.entity, app.instances);
-                  return stats.data;
-                }));
-              } else {
-                app.state = that.appStateService.get(app.entity);
-              }
-            });
+
+          _.each(response.data.resources, function (app) {
+            if (app.entity.state === 'STARTED') {
+              // We need more information
+              tasks.push(that.returnAppStats(guid, app.metadata.guid, null, true).then(function (stats) {
+                app.instances = stats.data;
+                app.instanceCount = _.keys(app.instances).length;
+                app.state = that.appStateService.get(app.entity, app.instances);
+                return stats.data;
+              }));
+            } else {
+              app.state = that.appStateService.get(app.entity);
+            }
           });
           if (!sync) {
             // Fire off the stats requests in parallel - don't wait for them to complete
@@ -206,6 +203,11 @@
     resetPagination: function () {
       var that = this;
       var cnsis = this._getCurrentCnsis();
+
+      if (!cnsis || !cnsis.length) {
+        return this.$q.reject(gettext('There are no valid HCF endpoints'));
+      }
+
       var options = angular.extend({
         'results-per-page': 1,
         page: 1
@@ -222,16 +224,17 @@
 
     /**
      * @function _getCurentCnsis
-     * @description get currently filtered service instances
-     * @returns {object} The CF q filter
+     * @description get a collection of CNSIs for all valid CF instances
+     * @returns {Array} collection of valid CF cnsis
      * @private
      */
     _getCurrentCnsis: function () {
       var cnsis = [];
       if (this.filterParams.cnsiGuid === 'all') {
+        // Ensure that we ignore any service that's invalid (cannot contact)
         cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
                   .values()
-                  .filter({cnsi_type: 'hcf'})
+                  .filter({cnsi_type: 'hcf', valid: true})
                   .map('guid')
                   .value();
       } else {
@@ -754,6 +757,11 @@
      */
     onGetPaginationData: function (response) {
       var clusters = response.data;
+      // We should in theory not reach here with error'd calls, but catch just in case
+      clusters = _.pickBy(clusters, function (cluster) {
+        return !cluster.error;
+      });
+
       var totalAppNumber = 0;
       angular.forEach(clusters, function (cluster) {
         if (cluster.total_results) {
@@ -774,7 +782,7 @@
      * @private
      */
     onAll: function (guid, response, trim) {
-      var apps = response.data[guid].resources;
+      var apps = response.data.resources;
 
       apps = apps.slice(trim.start, trim.resultsPerPage - trim.end);
       angular.forEach(apps, function (app) {
