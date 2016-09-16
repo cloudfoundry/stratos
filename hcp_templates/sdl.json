@@ -795,7 +795,7 @@
     {
       "name": "HCE_CLIENT",
       "description": "HCE client",
-      "default": "code-engine-renamed",
+      "default": "hce",
       "data_type": "string",
       "required": true,
       "secret": false
