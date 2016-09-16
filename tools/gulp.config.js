@@ -49,6 +49,12 @@ module.exports = function () {
       paths.dist + 'index.css'
     ],
 
+    templatePaths: [
+      paths.src + '**/app/**/*.html',
+      paths.src + '**/plugins/**/*.html',
+      paths.src + '**/helion-ui-framework/**/*.html'
+    ],
+
     jsFiles: [
       paths.dist + 'lib/*.js',
       paths.dist + 'plugins/**/plugin.config.js',

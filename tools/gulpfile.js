@@ -22,6 +22,7 @@ var concat = require('gulp-concat-util'),
   sort = require('gulp-sort'),
   angularFilesort = require('gulp-angular-filesort'),
   gulpBowerFiles = require('bower-files'),
+  templateCache = require('gulp-angular-templatecache'),
   wiredep = require('wiredep').stream;
 
 var config = require('./gulp.config')();
@@ -72,6 +73,7 @@ gulp.task('copy:configjs', function () {
   return gulp
     .src(paths.src + 'config.js')
     .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+    .pipe(rename('stackato-config.js'))
     .pipe(gulp.dest(paths.dist));
 });
 
@@ -120,6 +122,23 @@ gulp.task('css', ['inject:scss'], function () {
     .pipe(gulp.dest(paths.dist));
 });
 
+gulp.task('template-cache', function () {
+  return gulp.src(config.templatePaths)
+    .pipe(templateCache(config.jsTemplatesFile, {
+      module: 'stackato-templates',
+      standalone: true
+    }))
+    .pipe(uglify())
+    .pipe(gulp.dest(paths.dist));
+});
+
+// In dev we do not use the cached templates, so we beed ab empty angular module
+// for the templates so the dependency is still met
+gulp.task('dev-template-cache', function () {
+  return gulp.src('./' + config.jsTemplatesFile)
+    .pipe(gulp.dest(paths.dist));
+});
+
 // Inject JavaScript and SCSS source file references in index.html
 gulp.task('inject:index', ['copy:index'], function () {
   var sources = gulp.src(
@@ -127,6 +146,7 @@ gulp.task('inject:index', ['copy:index'], function () {
     .concat(plugins)
     .concat(jsFiles)
     .concat(paths.dist + config.jsFile)
+    .concat(paths.dist + config.jsTemplatesFile)
     .concat(cssFiles), { read: false });
 
   return gulp
@@ -252,6 +272,7 @@ gulp.task('dev-default', function (next) {
   usePlumber = false;
   runSequence(
     'default',
+    'dev-template-cache',
     next
   );
 });
@@ -275,6 +296,7 @@ gulp.task('default', function (next) {
     'copy:js',
     'copy:lib',
     'css',
+    'template-cache',
     'copy:html',
     'copy:assets',
     'inject:index',
