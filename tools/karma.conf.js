@@ -33,6 +33,12 @@ module.exports = function (config) {
         included: false,
         served: true,
         nocache: false
+      }, {
+        pattern: 'plugins/cloud-foundry/view/assets/**/*.png',
+        watched: false,
+        included: false,
+        served: true,
+        nocache: false
       },
 
       'index.module.js',
@@ -78,7 +84,8 @@ module.exports = function (config) {
     },
 
     proxies: {
-      '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/'
+      '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
+      '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/',
     },
 
     reporters: ['progress', 'coverage']
