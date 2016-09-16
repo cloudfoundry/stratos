@@ -105,6 +105,10 @@ func buildJSONResponse(cnsiList []string, responses map[string]CNSIRequest) map[
 		case cnsiResponse.Response != nil:
 			response = cnsiResponse.Response
 		}
+		// Check the HTTP Status code to make sure that it is actually a valid response 
+		if cnsiResponse.StatusCode >= 400 {
+			response = []byte(fmt.Sprintf(`{"error": "Unexpected HTTP status code: %d"}`, cnsiResponse.StatusCode))
+		}
 		if len(response) > 0 {
 			jsonResponse[guid] = (*json.RawMessage)(&response)
 		} else {
