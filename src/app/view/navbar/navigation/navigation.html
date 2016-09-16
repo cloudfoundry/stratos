@@ -1,6 +1,6 @@
 <ul class="nav navbar-nav">
   <li ng-repeat="menuItem in navigationCtrl.navigationModel.menu"
       ng-class="{ active: navigationCtrl.navigationModel.menu.currentState === menuItem.baseState }">
-    <a ui-sref="{{ menuItem.href }}">{{ menuItem.text }}</a>
+    <a ui-sref="{{ menuItem.href }}" ui-sref-opts="{reload: true}">{{ menuItem.text }}</a>
   </li>
 </ul>

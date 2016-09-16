@@ -131,8 +131,7 @@
     all: function (guid, options, sync, trim) {
       var that = this;
 
-      options = angular.extend(options || {}, {
-      }, this._buildFilter());
+      options = angular.extend(options || {}, {}, this._buildFilter());
 
       return this.applicationApi.ListAllApps(options, this.modelUtils.makeHttpConfig(guid))
         .then(function (response) {
@@ -757,6 +756,7 @@
      */
     onGetPaginationData: function (response) {
       var clusters = response.data;
+
       // We should in theory not reach here with error'd calls, but catch just in case
       clusters = _.pickBy(clusters, function (cluster) {
         return !cluster.error;
