@@ -19,6 +19,7 @@
    * @param {object} $window - angular $window service
    * @param {object} $q - angular $q service
    * @param {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
+   * @param {app.event.eventService} eventService - the application event service
    */
   function githubOauthServiceFactory($window, $q, GITHUB_ENDPOINTS, eventService) {
     return new GithubOauthService($window, $q, GITHUB_ENDPOINTS, eventService);
@@ -31,9 +32,11 @@
    * @param {object} $window - angular $window service
    * @param {object} $q - angular $q service
    * @param {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
+   * @param {app.event.eventService} eventService - the application event service
    * @property {object} $window - angular $window service
    * @property {object} $q - angular $q service
    * @property {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
+   * @property {app.event.eventService} eventService - the application event service
    */
   function GithubOauthService($window, $q, GITHUB_ENDPOINTS, eventService) {
     this.$window = $window;
