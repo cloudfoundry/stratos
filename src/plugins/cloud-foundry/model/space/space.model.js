@@ -42,6 +42,7 @@
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.modelUtils = modelUtils;
+    this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.data = {
     };
 
@@ -601,7 +602,6 @@
       var that = this;
 
       var userGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
-      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
 
       var createPromises = [];
 
@@ -618,7 +618,7 @@
           developer_guids: [userGuid]
         };
 
-        var createP = spaceApi.CreateSpace(newSpace, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+        var createP = this.spaceApi.CreateSpace(newSpace, params, this.modelUtils.makeHttpConfig(cnsiGuid))
           .then(getSpaceDetails); // Cache the space details
 
         createPromises.push(createP);
@@ -637,8 +637,7 @@
         recursive: false,
         async: false
       };
-      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
-      return spaceApi.DeleteSpace(spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
+      return this.spaceApi.DeleteSpace(spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
         // Refresh the spaces
         return that.organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
       });
@@ -646,8 +645,7 @@
 
     updateSpace: function (cnsiGuid, orgGuid, spaceGuid, spaceData) {
       var that = this;
-      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
-      return spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+      return this.spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (val) {
           // Refresh the org spaces
           var orgRefreshedP = that.organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
@@ -657,6 +655,33 @@
 
           return that.$q.all([orgRefreshedP, spaceRefreshedP]);
         });
+    },
+
+    // Warning: this does not update the cache
+    removeManagerFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.RemoveManagerFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateManagerWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.AssociateManagerWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeAuditorFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.RemoveAuditorFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateAuditorWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.AssociateAuditorWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeDeveloperFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.RemoveDeveloperFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateDeveloperWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.AssociateDeveloperWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
     }
 
   });

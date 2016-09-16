@@ -97,8 +97,14 @@
 
     function initialiseSelect() {
       return (context.initPromise || that.$q.when()).then(function () {
+        // Omit any org that we don't have permissions to either edit org or at least one child space
         // Create a collection to support the organization drop down
-        that.data.organizations = _.chain(that.organizationModel.organizations[that.data.clusterGuid])
+        var organizations = _.omitBy(that.organizationModel.organizations[that.data.clusterGuid], function (org) {
+          return !that.authModel.isOrgOrSpaceActionableByResource(that.data.clusterGuid, org,
+            that.authModel.resources.user, that.authModel.actions.update);
+        });
+
+        that.data.organizations = _.chain(organizations)
           .map(function (obj) {
             that.userInput.roles[obj.details.org.metadata.guid] = {};
             return {
@@ -110,11 +116,17 @@
           .value();
 
         // Fetch a list of all users for this cluster
-        return that.usersModel.listAllUsers(that.data.clusterGuid).then(function (res) {
-          that.data.users = res;
-          //Smart table struggles with an object, so keep two versions
-          that.data.usersByGuid = _.keyBy(res, 'metadata.guid');
-        });
+        return rolesService.listUsers(that.data.clusterGuid)
+          .then(function (users) {
+            return _.filter(users, function (user) {
+              return user.entity.username;
+            });
+          })
+          .then(function (users) {
+            that.data.users = users;
+            //Smart table struggles with an object, so keep two versions
+            that.data.usersByGuid = _.keyBy(users, 'metadata.guid');
+          });
       });
     }
 

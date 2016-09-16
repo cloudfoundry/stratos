@@ -67,7 +67,7 @@
    * @property {number} tabIndex - index of active tab
    * @property {string} warningMsg - warning message for application
    * @property {object} confirmDialog - the confirm dialog service
-*/
+   */
   function ApplicationController(modelManager, eventService, confirmDialog, utils, cliCommands, $stateParams, $scope, $window, $q, $interval, $interpolate, $state) {
     var that = this;
 
@@ -184,8 +184,10 @@
 
     $scope.$watch(function () {
       return that.model.application.summary.routes;
-    }, function (newRoutes) {
-      that.onAppRoutesChange(newRoutes);
+    }, function (newRoutes, oldRoutes) {
+      if (angular.toJson(newRoutes) !== angular.toJson(oldRoutes)) {
+        that.onAppRoutesChange(newRoutes);
+      }
     });
 
     $scope.$on('$destroy', function () {
@@ -228,9 +230,9 @@
 
           return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id)
           .then(function () {
-            that.model.updateDeliveryPipelineMetadata(true)
+            return that.model.updateDeliveryPipelineMetadata(true)
               .then(function (response) {
-                that.onUpdateDeliveryPipelineMetadata(response);
+                return that.onUpdateDeliveryPipelineMetadata(response);
               });
           })
           .finally(function () {
@@ -286,10 +288,10 @@
       this.updating = true;
       this.$q.when()
         .then(function () {
-          that.updateSummary().then(function () {
-            that.model.updateDeliveryPipelineMetadata()
+          return that.updateSummary().then(function () {
+            return that.model.updateDeliveryPipelineMetadata()
               .then(function (response) {
-                that.onUpdateDeliveryPipelineMetadata(response);
+                return that.onUpdateDeliveryPipelineMetadata(response);
               });
           });
         })
@@ -326,7 +328,7 @@
       var that = this;
       if (pipeline && pipeline.valid) {
         this.hceCnsi = pipeline.hceCnsi;
-        this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
+        return this.hceModel.getProject(this.hceCnsi.guid, pipeline.projectId)
           .then(function (response) {
             var project = response.data;
             if (!_.isNil(project)) {

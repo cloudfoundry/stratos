@@ -44,10 +44,9 @@
     var that = this;
 
     this.guid = $stateParams.guid;
-    this.organizatioGuid = $stateParams.organization;
+    this.organizationGuid = $stateParams.organization;
     this.users = [];
     this.removingSpace = {};
-    this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -57,6 +56,7 @@
     this.rolesService = rolesService;
 
     this.userRoles = {};
+    this.userActions = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
     this.stateInitialised = false;
@@ -77,7 +77,7 @@
             return;
           }
           // Skip space from other organizations
-          if (space.details.space.entity.organization_guid !== that.organizatioGuid) {
+          if (space.details.space.entity.organization_guid !== that.organizationGuid) {
             return;
           }
           // Space is in current org, check roles!
@@ -87,7 +87,6 @@
           }
         });
         that.userRoles[aUser.metadata.guid] = [];
-
         // Format that in an array of pairs for direct use in the template
         _.forEach(myRoles, function (spaceRoles, spaceGuid) {
           _.forEach(spaceRoles, function (role) {
@@ -98,33 +97,31 @@
             });
           });
         });
-
       });
 
       return $q.resolve();
     }
 
-    this.canUserManageRoles = function (org) {
-      // User can assign org roles
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
+    this.canUserManageRoles = function () {
+      return that.canUserRemoveFromOrg() ||
+        _.find(that.authModel.principal[that.guid].userSummary.spaces.managed, { entity: { organization_guid: that.organizationGuid}});
     };
 
-    this.canUserRemoveFromOrg = function (org) {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, org.metadata.guid);
+    this.canUserRemoveFromOrg = function () {
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null,
+        that.organizationGuid);
     };
 
     this.disableManageRoles = function () {
-      return this.rolesService.changingRoles ||
-        this.selectedUsersCount() !== 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+      return this.selectedUsersCount() !== 1 || !that.canUserManageRoles();
     };
 
     this.disableChangeRoles = function () {
-      return this.rolesService.changingRoles || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+      return !that.canUserManageRoles();
     };
 
     this.disableRemoveFromOrg = function () {
-      return this.rolesService.changingRoles ||
-        this.selectedUsersCount() < 1 || !this.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
+      return this.selectedUsersCount() < 1 || !that.canUserRemoveFromOrg();
     };
 
     var debouncedUpdateSelection = _.debounce(function () {
@@ -132,30 +129,38 @@
       $scope.$apply();
     }, 100);
 
+    function refreshAllSelected() {
+      that.selectAllUsers = userSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
+        // Ignore system users
+        return user.entity.username;
+      }));
+    }
+
     function init() {
-      $scope.$watch(function () {
-        return rolesService.changingRoles;
-      }, function () {
-        that.userActions[0].disabled = rolesService.changingRoles || !that.canUserManageRoles(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
-        that.userActions[1].disabled = rolesService.changingRoles || !that.canUserRemoveFromOrg(that.organizationModel.organizations[that.guid][that.organizatioGuid].details.org);
-      });
+      that.userActions[0].disabled = !that.canUserManageRoles();
+      that.userActions[1].disabled = !that.canUserRemoveFromOrg();
 
       $scope.$watchCollection(function () {
         return that.visibleUsers;
       }, function () {
         if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
-          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+          refreshAllSelected();
           debouncedUpdateSelection();
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid).then(function (res) {
-        that.users = res;
-        return refreshUsers();
-      }).then(function () {
-        that.stateInitialised = true;
-        return $q.resolve();
+      $scope.$watch(that.selectedUsersCount, function () {
+        refreshAllSelected();
       });
+
+      return rolesService.listUsers(that.guid)
+        .then(function (users) {
+          that.users = users;
+        })
+        .then(refreshUsers).then(function () {
+          that.stateInitialised = true;
+        });
+
     }
 
     this.userActions = [
@@ -163,14 +168,14 @@
         name: gettext('Manage Roles'),
         disabled: true,
         execute: function (aUser) {
-          return manageUsers.show(that.guid, that.organizatioGuid, [aUser]).result;
+          return manageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
         }
       },
       {
         name: gettext('Remove from Organization'),
         disabled: true,
         execute: function (aUser) {
-          return rolesService.removeFromOrganization(that.guid, that.organizatioGuid, [aUser]);
+          return rolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);
         }
       }
     ];
@@ -181,10 +186,18 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        userSelection.selectUsers(that.guid, that.visibleUsers);
+        userSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
+          // Never select system users
+          return user.entity.username;
+        }));
       } else {
         userSelection.deselectAllUsers(that.guid);
       }
+    };
+
+    this.canRemoveSpaceRole = function (spaceGuid) {
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update,
+        spaceGuid, that.organizationGuid, true);
     };
 
     this.removeSpaceRole = function (user, spaceRole) {
@@ -201,7 +214,7 @@
     };
 
     this.selectedUsersCount = function () {
-      return (_.invert(this.selectedUsers, true).true || []).length;
+      return (_.invert(that.selectedUsers, true).true || []).length;
     };
 
     function guidsToUsers() {
@@ -212,11 +225,11 @@
     }
 
     this.manageSelectedUsers = function () {
-      return manageUsers.show(that.guid, that.organizatioGuid, guidsToUsers()).result;
+      return manageUsers.show(that.guid, that.organizationGuid, guidsToUsers()).result;
     };
 
     this.removeFromOrganization = function () {
-      return rolesService.removeFromOrganization(that.guid, that.organizatioGuid, guidsToUsers());
+      return rolesService.removeFromOrganization(that.guid, that.organizationGuid, guidsToUsers());
     };
 
     eventService.$on(eventService.events.ROLES_UPDATED, function () {

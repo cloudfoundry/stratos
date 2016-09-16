@@ -47,9 +47,11 @@
     this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.rolesService = rolesService;
 
     this.userRoles = {};
+    this.userActions = {};
 
     this.selectedUsers = userSelection.getSelectedUsers(this.guid);
     this.stateInitialised = false;
@@ -57,82 +59,128 @@
     function refreshUsers() {
       that.userRoles = {};
 
-      // For each user, get its roles in all organization
+      // Determine if the signed in user can edit ANY of the orgs in this group. If so we can show all 'manage/change'
+      // buttons
+      that.canEditAnOrg = that.authModel.principal[that.guid].userSummary.organizations.managed.length > 0 ||
+        that.authModel.principal[that.guid].userSummary.spaces.managed.length > 0;
+
+      // For each user, get her roles in all organizations
       _.forEach(that.users, function (aUser) {
-        var myRoles = {};
+        var aUserRoles = {};
         _.forEach(that.organizationModel.organizations[that.guid], function (org) {
           var roles = org.roles[aUser.metadata.guid];
-          if (!_.isUndefined(roles)) {
-            myRoles[org.details.org.metadata.guid] = roles;
+          if (angular.isDefined(roles)) {
+            aUserRoles[org.details.org.metadata.guid] = roles;
           }
         });
-        that.userRoles[aUser.metadata.guid] = [];
 
-        // Format that in an array of pairs for direct use in the template
-        _.forEach(myRoles, function (orgRoles, orgGuid) {
+        // Format that for direct use in the template
+        that.userRoles[aUser.metadata.guid] = [];
+        var unEditableOrg = false;
+        _.forEach(aUserRoles, function (orgRoles, orgGuid) {
           _.forEach(orgRoles, function (role) {
             that.userRoles[aUser.metadata.guid].push({
               org: that.organizationModel.organizations[that.guid][orgGuid],
               role: role,
               roleLabel: that.organizationModel.organizationRoleToString(role)
             });
+            unEditableOrg = unEditableOrg ||
+                !that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null, orgGuid);
           });
         });
 
+        that.userActions[aUser.metadata.guid] = that.userActions[aUser.metadata.guid] || createUserActions();
+        // All manage/change buttons will be the same (dependent on orgs rather than individual user roles)
+        that.userActions[aUser.metadata.guid][0].disabled = !that.canEditAnOrg;
+        // Each rows 'Remove All' buttons will be dependent on the signed in user's permissions to edit every role
+        // of the user row
+        that.userActions[aUser.metadata.guid][1].disabled = unEditableOrg;
       });
+
       return $q.resolve();
     }
 
+    this.disableManageRoles = function () {
+      return this.selectedUsersCount() !== 1 || !that.canEditAnOrg;
+    };
+
+    this.disableChangeRoles = function () {
+      return !that.canEditAnOrg;
+    };
+
+    this.disableRemoveFromOrg = function () {
+      return this.selectedUsersCount() < 1 || !that.canEditAllOrgs;
+    };
+
+    // We need the debounce to account for SmartTable delays
     var debouncedUpdateSelection = _.debounce(function () {
       userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
       $scope.$apply();
     }, 100);
 
+    function refreshAllSelected() {
+      that.selectAllUsers = userSelection.isAllSelected(that.guid, _.filter(that.visibleUsers, function (user) {
+        // Ignore system users
+        return user.entity.username;
+      }));
+    }
+
     function init() {
-      $scope.$watch(function () {
-        return rolesService.changingRoles;
-      }, function () {
-        var isAdmin = that.stackatoInfo.info.endpoints
-          ? that.stackatoInfo.info.endpoints.hcf[that.guid].user.admin
-          : false;
-        that.userActions[0].disabled = rolesService.changingRoles || !isAdmin;
-        that.userActions[1].disabled = rolesService.changingRoles || !isAdmin;
-      });
 
       $scope.$watchCollection(function () {
         return that.visibleUsers;
       }, function () {
         if (angular.isDefined(that.visibleUsers) && that.visibleUsers.length > 0) {
-          that.selectAllUsers = userSelection.isAllSelected(that.guid, that.visibleUsers);
+          refreshAllSelected();
           debouncedUpdateSelection();
         }
       });
 
-      return that.usersModel.listAllUsers(that.guid).then(function (res) {
-        that.users = res;
-        return refreshUsers();
-      }).then(function () {
-        that.stateInitialised = true;
-        return $q.resolve();
+      $scope.$watch(that.selectedUsersCount, function () {
+        refreshAllSelected();
       });
+
+      return rolesService.listUsers(that.guid)
+        .then(function (users) {
+          that.users = users;
+        })
+        .then(refreshUsers).then(function () {
+          // Determine if the signed in user can edit the orgs of all the selected user's roles
+          $scope.$watch(function () {
+            return that.selectedUsers;
+          }, function () {
+            that.canEditAllOrgs = true;
+            var selectedUsersGuids = _.invert(that.selectedUsers, true).true || [];
+            for (var i = 0; i < selectedUsersGuids.length; i++) {
+              if (that.userActions[selectedUsersGuids[i]][1].disabled) {
+                that.canEditAllOrgs = false;
+              }
+            }
+          }, true);
+
+          that.stateInitialised = true;
+        });
+
     }
 
-    this.userActions = [
-      {
-        name: gettext('Manage Roles'),
-        disabled: true,
-        execute: function (aUser) {
-          return manageUsers.show(that.guid, false, [aUser]).result;
+    function createUserActions() {
+      return [
+        {
+          name: gettext('Manage Roles'),
+          disabled: true,
+          execute: function (aUser) {
+            return manageUsers.show(that.guid, false, [aUser]).result;
+          }
+        },
+        {
+          name: gettext('Remove all roles'),
+          disabled: true,
+          execute: function (aUser) {
+            return rolesService.removeAllRoles(that.guid, [aUser]);
+          }
         }
-      },
-      {
-        name: gettext('Remove all roles'),
-        disabled: true,
-        execute: function (aUser) {
-          return rolesService.removeAllRoles(that.guid, [aUser]);
-        }
-      }
-    ];
+      ];
+    }
 
     this.getOrganizationsRoles = function (aUser) {
       return that.userRoles[aUser.metadata.guid];
@@ -140,7 +188,10 @@
 
     this.selectAllChanged = function () {
       if (that.selectAllUsers) {
-        userSelection.selectUsers(that.guid, that.visibleUsers);
+        userSelection.selectUsers(that.guid, _.filter(that.visibleUsers, function (user) {
+          // Never select system users
+          return user.entity.username;
+        }));
       } else {
         userSelection.deselectAllUsers(that.guid);
       }
@@ -163,7 +214,7 @@
     };
 
     this.selectedUsersCount = function () {
-      return (_.invert(this.selectedUsers, true).true || []).length;
+      return (_.invert(that.selectedUsers, true).true || []).length;
     };
 
     function guidsToUsers(users) {

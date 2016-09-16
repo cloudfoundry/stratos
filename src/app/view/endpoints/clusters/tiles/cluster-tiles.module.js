@@ -176,10 +176,8 @@
      */
     register: function () {
       var that = this;
-      this.hcfRegistration.add().then(function (serviceInstance) {
-        return that.refreshClusterModel().then(function () {
-          that.authModel.initializeForEndpoint(serviceInstance.guid);
-        });
+      this.hcfRegistration.add().then(function () {
+        return that.refreshClusterModel();
       });
     },
 

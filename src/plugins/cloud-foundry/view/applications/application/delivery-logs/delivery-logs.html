@@ -65,7 +65,7 @@
           <thead>
           <tr>
             <th st-sort="message" translate>MESSAGE</th>
-            <th translate>RESULT</th>
+            <th translate>STATUS</th>
             <th st-sort="reason.mCreatedDate" st-sort-default="reverse" translate>TIME</th>
             <th st-sort="reason.author" translate>COMMIT AUTHOR</th>
             <th st-sort="reason.type" translate>REASON</th>
@@ -86,6 +86,7 @@
               <a translate
                  ng-if="execution.result.state === appDelLogsCtrl.eventStates.SUCCEEDED &&
                         appCtrl.model.application.summary.routes[0]"
+                 rel="noopener noreferrer"
                  target="_blank"
                  ng-init="route=appCtrl.model.application.summary.routes[0]"
                  ng-href="http://{{ route.host + '.' + route.domain.name + (route.port ? ':' + route.port : '') + route.path }}">view</a>

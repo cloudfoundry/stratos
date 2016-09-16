@@ -34,23 +34,33 @@
         </thead>
         <tbody>
         <tr class="" ng-repeat="user in organizationUsersController.visibleUsers">
-          <td><checkbox-input ng-model="organizationUsersController.selectedUsers[user.metadata.guid]"></checkbox-input></td>
-          <td class="user-name">{{ user.entity.username }}</td>
+          <td>
+            <checkbox-input
+              ng-model="organizationUsersController.selectedUsers[user.metadata.guid]"
+              ng-if="user.entity.username">
+            </checkbox-input>
+          </td>
+          <td class="user-name">{{ user.entity.username || user.metadata.guid}}</td>
           <td class="roles-list">
-            <div class="role-pill closable-pill"
+            <div class="role-pill" ng-class="{'closable-pill': organizationUsersController.canRemoveSpaceRole(spaceRole.space.details.space.metadata.guid)}"
                  ng-repeat="spaceRole in organizationUsersController.getSpaceRoles(user)"
                  ng-class="{ 'progress-cursor' : organizationUsersController.removingSpace[spaceRole.space.details.space.entity.name + spaceRole.roleLabel] }">
               {{ spaceRole.space.details.space.entity.name }}: {{ spaceRole.roleLabel }}
               <i class="close-icon helion-icon helion-icon-Close"
-                 ng-click="organizationUsersController.removeSpaceRole(user, spaceRole)"></i>
+                 ng-click="organizationUsersController.removeSpaceRole(user, spaceRole)"
+                 ng-if="organizationUsersController.canRemoveSpaceRole(spaceRole.space.details.space.metadata.guid)"></i>
             </div>
-            <div ng-if="organizationUsersController.getSpaceRoles(user).length === 0" translate>None assigned</div>
+            <div ng-if="organizationUsersController.getSpaceRoles(user).length === 0" translate>
+              <span ng-if="user.entity.username" translate>None assigned</span>
+              <span ng-if="!user.entity.username" translate>Not Applicable</span>
+            </div>
           </td>
           <td>
             <actions-menu actions="organizationUsersController.userActions"
                           action-target="user"
                           menu-icon="helion-icon helion-icon-More"
-                          menu-position="actions-menu-right">
+                          menu-position="actions-menu-right"
+                          ng-if="user.entity.username">
             </actions-menu>
           </td>
         </tr>

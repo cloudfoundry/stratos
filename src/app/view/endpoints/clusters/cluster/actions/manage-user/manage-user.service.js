@@ -22,6 +22,7 @@
   function ManageUsersFactory(modelManager, asyncTaskDialog, rolesService) {
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     var selectedRoles = {};
 
@@ -49,12 +50,24 @@
 
       selectedRoles = {};
       var organizations = _.omitBy(organizationModel.organizations[clusterGuid], function (org, orgGuid) {
-        return organizationGuid ? organizationGuid !== orgGuid : false;
+        // Is it the single org we're looking for?
+        if (organizationGuid) {
+          return organizationGuid !== orgGuid;
+        }
+        return !authModel.isOrgOrSpaceActionableByResource(clusterGuid, org, authModel.resources.user,
+          authModel.actions.update);
       });
 
-      // Ensure that the selected roles objects are initialised correctly. The roles table will then fiddle inside these
+      // Ensure that the selected roles objects are initialised correctly. The roles table will then fiddle faddle
+      // mc terry flop inside these. Also determine if the connected user can edit all orgs or we should disable the
+      // clear all roles button
+      var disableClearAll = false;
       _.forEach(organizations, function (organization) {
         selectedRoles[organization.details.org.metadata.guid] = {};
+        disableClearAll = disableClearAll || !authModel.isAllowed(clusterGuid,
+            authModel.resources.user,
+            authModel.actions.update,
+            null, organization.details.org.metadata.guid);
       });
 
       // Async refresh roles
@@ -90,7 +103,8 @@
             users: users,
             removeFromOrg: removeFromOrg,
             containsRoles: containsRoles,
-            showExistingRoles: users.length < 2
+            showExistingRoles: users.length < 2,
+            disableClearAll: disableClearAll
           },
           state: state,
           clearSelections: clearAllOrgs,

@@ -27,6 +27,7 @@
     '$state',
     'app.model.modelManager',
     'app.api.apiManager',
+    'app.utils.utilsService',
     'cloud-foundry.model.modelUtils'
   ];
 
@@ -37,6 +38,7 @@
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.api.apiManager} apiManager - the API management service
+   * @param {app.model.utilsService} utils - the utils service
    * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    * @property {number} orgCount - organisation count
@@ -44,7 +46,7 @@
    * @property {object} cardData - gallery-card directive data object
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    */
-  function ClusterTileController($scope, $state, modelManager, apiManager, modelUtils) {
+  function ClusterTileController($scope, $state, modelManager, apiManager, utils, modelUtils) {
     var that = this;
 
     this.$state = $state;
@@ -77,14 +79,19 @@
       return cardData;
     };
 
-    $scope.$watch(function () { return that.service.guid; }, function (newVal) {
-      if (!newVal) {
-        return;
-      }
-      that.setActions();
-      that.setOrganisationCount();
-      that.setUserCount();
-    });
+    function init() {
+      $scope.$watch(function () { return that.service; }, function (newVal) {
+        if (!newVal) {
+          return;
+        }
+        that.setActions();
+        that.setOrganisationCount();
+        that.setUserCount();
+      });
+    }
+
+    // Ensure the parent state is fully initialised before we start our own init
+    utils.chainStateResolve('endpoint.clusters.tiles', $state, init);
   }
 
   angular.extend(ClusterTileController.prototype, {
@@ -136,12 +143,12 @@
     setUserCount: function () {
       this.userCount = 0;
 
-      if (!this.service.isConnected) {
+      if (!this.service.isConnected || !this.stackatoInfo.info.endpoints.hcf[this.service.guid].user.admin) {
+        this.userCount = undefined;
         return;
       }
 
       var that = this;
-
       this.userApi.ListAllUsers({'results-per-page': 1}, this.modelUtils.makeHttpConfig(this.service.guid))
         .then(function (response) {
           that.userCount = response.data.total_results;
