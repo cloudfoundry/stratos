@@ -113,9 +113,6 @@
       return serviceInstanceApi.list().then(function (response) {
         var items = response.data;
 
-        that.serviceInstances = {};
-        that.numValid = 0;
-
         var hcfGuids = _.map(_.filter(items, {cnsi_type: 'hcf'}) || [], 'guid') || [];
         var hcfCfg = {headers: {'x-cnap-cnsi-list': hcfGuids.join(',')}};
         var hceGuids = _.map(_.filter(items, {cnsi_type: 'hce'}) || [], 'guid') || [];
@@ -123,23 +120,26 @@
         var tasks = [];
         // call /v2/info to refresh tokens, then list
         if (hcfGuids.length > 0) {
-          tasks.push(cfInfoApi.GetInfo({}, hcfCfg));
+          tasks.push(cfInfoApi.GetInfo({}, hcfCfg).then(function (response) {
+            return response.data ? response.data : {};
+          }));
         }
         if (hceGuids.length > 0) {
           tasks.push(hceInfoApi.info(hceGuids.join(',')));
         }
 
         if (tasks.length === 0) {
-          if (items.length > 0) {
-            that.onList(response);
-          }
+          that.onList(response);
           return that.serviceInstances;
         } else {
           // Swallow errors - we don't want one failure to fail everything
-          return that.$q.all(tasks).catch(angular.noop).then(function () {
+          return that.$q.all(tasks).catch(angular.noop).then(function (infoResults) {
             return serviceInstanceApi.list().then(function (listResponse) {
-              that.onList(listResponse);
+              that.onList(listResponse, infoResults);
               return that.serviceInstances;
+            }).catch(function () {
+              that.serviceInstances = {};
+              that.numValid = 0;
             });
           });
         }
@@ -197,7 +197,8 @@
       }
     },
 
-    onList: function (response) {
+    onList: function (response, infoResults) {
+      var that = this;
       var items = response.data;
 
       // check token expirations
@@ -210,6 +211,17 @@
 
       this.serviceInstances = _.keyBy(items, 'guid');
       this.numValid = _.sumBy(items, function (o) { return o.valid ? 1 : 0; }) || 0;
+
+      // Add in the metadata about error status of endpoints
+      if (infoResults) {
+        _.each(infoResults, function (data) {
+          // info calls were non-passthrough - so we should have a map of guids to responses
+          _.each(data, function (cnsiData, cnsiGuid) {
+            // Record error status
+            that.serviceInstances[cnsiGuid].error = !!cnsiData.error;
+          });
+        });
+      }
     }
   });
 

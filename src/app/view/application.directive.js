@@ -206,6 +206,11 @@
           // Update stackatoInfo
           return that.modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
         })
+        .then(function () {
+          // Get the user registered services once at login - only refreshed in endpoints dashboard
+          var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
+          return userServiceInstanceModel.list();
+        })
         .finally(function () {
           that.showGlobalSpinner = false;
           if (that.continueLogin) {
