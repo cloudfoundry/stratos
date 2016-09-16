@@ -61,6 +61,7 @@
           repos: [],
           hasMoreRepos: false,
           loadingRepos: false,
+          repoStSearch: 'full_name',
           branches: [],
           buildContainers: [],
           notificationFormAppMode: true,
@@ -88,6 +89,9 @@
               nextBtnText: gettext('Next'),
               showBusyOnNext: true,
               onNextCancellable: true,
+              onNextCancel: function () {
+                that.githubOauthService.cancel();
+              },
               onNext: function () {
                 var oauth;
                 if (that.userInput.source.vcs_type === 'GITHUB') {
@@ -116,6 +120,7 @@
               nextBtnText: gettext('Next'),
               showBusyOnNext: true,
               onNext: function () {
+                that.options.repoStSearch = '';
                 that.getPipelineDetailsData();
                 var githubModel = that.modelManager.retrieve('github.model');
                 var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
@@ -147,6 +152,9 @@
                         var msg = gettext('There was a problem retrieving the branches for your repository. Please try again.');
                         return that.$q.reject(msg);
                       });
+                  }).catch(function (msg) {
+                    that.options.repoStSearch = 'full_name';
+                    return that.$q.reject(msg);
                   });
                 }
               }
@@ -296,6 +304,8 @@
         this.options.loadingRepos = true;
         return githubModel.repos(false, githubOptions)
           .then(function (response) {
+            that.options.repos.length = 0;
+
             that.options.hasMoreRepos = angular.isDefined(response.links.next);
             [].push.apply(that.options.repos, response.repos);
           })
