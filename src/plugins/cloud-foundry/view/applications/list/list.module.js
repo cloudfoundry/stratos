@@ -251,6 +251,8 @@
       this._resetPagination().then(function () {
         if (that.model.pagination.totalPage) {
           return that._loadPage(1);
+        } else {
+          that.ready = true;
         }
       });
     },

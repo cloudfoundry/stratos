@@ -841,8 +841,8 @@
      * @private
      */
     onGetAppOrgAndSpace: function (entity) {
-      this.application.organization = entity.space.entity.organization.entity;
-      this.application.space = entity.space.entity;
+      this.application.organization = entity.space.entity.organization;
+      this.application.space = entity.space;
     },
 
     /**
