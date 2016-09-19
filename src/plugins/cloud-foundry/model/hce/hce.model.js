@@ -241,11 +241,9 @@
       var that = this;
       var filtered = [];
       if (targets) {
-        _.each(targets, function (target) {
-          if (target.type && that.staticNotificationData[target.type] &&
-          !that.staticNotificationData[target.type].hidden) {
-            filtered.push(target);
-          }
+        filtered = _.filter(targets, function (target) {
+          return target.type && that.staticNotificationData[target.type] &&
+          !that.staticNotificationData[target.type].hidden;
         });
       }
       return filtered;
@@ -794,9 +792,9 @@
       var notificationTypes = response.data;
       var that = this;
       angular.forEach(notificationTypes, function (notificationType) {
-        if (that.staticNotificationData[notificationType.item_value] &&
-        !that.staticNotificationData[notificationType.item_value].hidden) {
-          var typeData = _.assign(notificationType, that.staticNotificationData[notificationType.item_value]);
+        var staticNotificationData = that.staticNotificationData[notificationType.item_value];
+        if (staticNotificationData && !staticNotificationData.hidden) {
+          var typeData = _.assign(notificationType, staticNotificationData);
           if (!_.find(that.data.notificationTargetTypes, {item_value: notificationType.item_value})) {
             that.data.notificationTargetTypes.push(typeData);
           }

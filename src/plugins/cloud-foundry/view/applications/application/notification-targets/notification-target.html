@@ -3,7 +3,8 @@
   <div class="media-left media-middle">
     <radio-input ng-model="notificationTargetCtrl.userInput.notificationTargetType"
                  input-value="notificationTargetCtrl.targetType"
-                 ng-show="!notificationTargetCtrl.addAppMode"
+                 ng-required="true"
+                 ng-if="!notificationTargetCtrl.addAppMode"
     ></radio-input>
   </div>
   <div class="media-left media-middle">
