@@ -257,43 +257,64 @@
         var serviceInstanceModel = this.modelManager.retrieve('app.model.serviceInstance.user');
 
         serviceInstanceModel.list().then(function () {
-          that.options.hceCnsis.length = 0;
-          var hceCnsis = _.filter(serviceInstanceModel.serviceInstances, { cnsi_type: 'hce' }) || [];
-          if (hceCnsis.length > 0) {
-            [].push.apply(that.options.hceCnsis, hceCnsis);
-            that.userInput.hceCnsi = hceCnsis[0];
-          } else {
-            that.redefineWorkflowWithoutHce();
-          }
+          that._onGetHceInstances();
         });
       },
+
+      _onGetHceInstances: function () {
+        var serviceInstanceModel = this.modelManager.retrieve('app.model.serviceInstance.user');
+
+        this.options.hceCnsis.length = 0;
+        var hceCnsis = _.filter(serviceInstanceModel.serviceInstances, { cnsi_type: 'hce' }) || [];
+        if (hceCnsis.length > 0) {
+          [].push.apply(this.options.hceCnsis, hceCnsis);
+          this.userInput.hceCnsi = hceCnsis[0];
+        } else {
+          this.redefineWorkflowWithoutHce();
+        }
+      },
+
+      redefineWorkflowWithoutHce: function () {},
 
       getVcsInstances: function () {
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+
         var deferred = this.$q.defer();
 
         hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
-          vcsModel.getSupportedVcsInstances(hceModel.data.vcsInstances)
-            .then(function (sources) {
-              if (sources.length > 0) {
-                [].push.apply(that.options.sources, sources);
-                that.userInput.source = sources[0].value;
-                deferred.resolve();
-              } else {
-                var msg = gettext('No VCS instances were available for the selected delivery pipeline instance.');
-                deferred.reject(msg);
-              }
-            }, function (reason) {
-              deferred.reject(reason);
-            });
+          this._onGetVcses(deferred);
         }, function () {
           var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
           deferred.reject(msg);
         });
 
         return deferred.promise;
+      },
+
+      _onGetVcses: function (deferred) {
+        var that = this;
+        var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+
+        vcsModel.getSupportedVcsInstances(hceModel.data.vcsInstances)
+          .then(function (sources) {
+            that._onGetSupportedVcsInstances(sources, deferred);
+          }, function (reason) {
+            deferred.reject(reason);
+          });
+      },
+
+      _onGetSupportedVcsInstances: function (sources, deferred) {
+        var that = this;
+        if (sources.length > 0) {
+          [].push.apply(that.options.sources, sources);
+          that.userInput.source = sources[0].value;
+          deferred.resolve();
+        } else {
+          var msg = gettext('No VCS instances were available for the selected delivery pipeline instance.');
+          deferred.reject(msg);
+        }
       },
 
       getRepos: function () {
@@ -349,7 +370,7 @@
 
       getPipelineDetailsData: function () {
         var that = this;
-        var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
+        var hceModel = this.hceModel;
 
         hceModel.getBuildContainers(this.userInput.hceCnsi.guid)
           .then(function () {
@@ -444,19 +465,26 @@
 
       createPipeline: function (targetId) {
         var that = this;
-        return this.createProject(targetId).then(function () {
-          return that.createCfBinding().catch(function () {
-            return that.$q.when(that.deleteProject(that.userInput.projectId))
-              .then(function () {
-                that.userInput.projectId = null;
-              })
-              .finally(function () {
-                var msg = gettext('There was a problem creating the pipeline binding.');
-                return that.$q.reject(msg);
-              });
-          });
-        }, function () {
-          return that.utils.retryRequest(function () {
+        return this.createProject(targetId).then(
+          function () {
+            that._onCreateProject();
+          },
+          function () {
+            that._onCreateProjectFailure();
+          }
+        );
+      },
+
+      _onCreateProject: function () {
+        var that = this;
+        return that.createCfBinding().catch(function () {
+          that._onCreateCfBindingError();
+        });
+      },
+
+      _onCreateProjectFailure: function () {
+        var that = this;
+        return that.utils.retryRequest(function () {
             return that.hceModel.getProjectByName(that.userInput.hceCnsi.guid, that.userInput.projectName);
           })
           .then(function (project) {
@@ -468,7 +496,18 @@
             var msg = gettext('There was a problem creating the pipeline. Please ensure the webhook limit has not been reached on your repository.');
             return that.$q.reject(msg);
           });
-        });
+      },
+
+      _onCreateCfBindingError: function () {
+        var that = this;
+        return that.$q.when(that.deleteProject(that.userInput.projectId))
+          .then(function () {
+            that.userInput.projectId = null;
+          })
+          .finally(function () {
+            var msg = gettext('There was a problem creating the pipeline binding.');
+            return that.$q.reject(msg);
+          });
       },
 
       createProject: function (targetId) {
@@ -537,6 +576,8 @@
 
         return githubOptions;
       },
+
+      reset: function () {},
 
       startWorkflow: function () {
         this.addingPipeline = true;
