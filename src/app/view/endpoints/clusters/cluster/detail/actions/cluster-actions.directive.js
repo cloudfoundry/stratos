@@ -57,6 +57,7 @@
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
+    console.log(authModel.principal);
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
     // Depending on depth into endpoints these two might be null
