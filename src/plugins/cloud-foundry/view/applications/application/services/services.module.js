@@ -83,16 +83,25 @@
                 }
               }
 
-              // a service can belong to >1 category, so allow filtering by any of them
-              if (angular.isObject(service.entity.extra) && angular.isDefined(service.entity.extra.categories)) {
-                var serviceCategories = _.map(service.entity.extra.categories,
-                                              function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
-                categories = _.unionBy(categories, serviceCategories, 'lower');
-              }
-
               // Parse service entity extra data JSON string
               if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
                 service.entity.extra = angular.fromJson(service.entity.extra);
+              }
+
+              // a service can belong to >1 category, so allow filtering by any of them
+              if (angular.isObject(service.entity.extra) && angular.isDefined(service.entity.extra.Categories)) {
+                var _categories = service.entity.extra.Categories;
+                if (angular.isString(_categories)) {
+                  _categories = [_categories];
+                }
+                var serviceCategories = _.map(_categories, function (o) {
+                  return {
+                    label: o,
+                    value: { Categories: o },
+                    lower: o.toLowerCase()
+                  };
+                });
+                categories = _.unionBy(categories, serviceCategories, 'lower');
               }
             });
 

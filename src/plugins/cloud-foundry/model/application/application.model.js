@@ -57,8 +57,6 @@
     this.modelUtils = modelUtils;
     this.utils = utils;
 
-    this.tempApplications = []; // used to collecting applications on app wall
-
     this.data = {
       applications: []
     };
@@ -131,28 +129,11 @@
     all: function (guid, options, sync, trim) {
       var that = this;
 
-      options = angular.extend(options || {}, {
-      }, this._buildFilter());
+      options = angular.extend(options || {}, {}, this._buildFilter());
 
       return this.applicationApi.ListAllApps(options, this.modelUtils.makeHttpConfig(guid))
         .then(function (response) {
-          // For all of the apps in the running state, we may need to get stats in order to be able to
-          // determine the user-friendly state of the application
-          var tasks = [];
-
-          _.each(response.data.resources, function (app) {
-            if (app.entity.state === 'STARTED') {
-              // We need more information
-              tasks.push(that.returnAppStats(guid, app.metadata.guid, null, true).then(function (stats) {
-                app.instances = stats.data;
-                app.instanceCount = _.keys(app.instances).length;
-                app.state = that.appStateService.get(app.entity, app.instances);
-                return stats.data;
-              }));
-            } else {
-              app.state = that.appStateService.get(app.entity);
-            }
-          });
+          var tasks = that._fetchAppStatsForApps(guid, response.data.resources);
           if (!sync) {
             // Fire off the stats requests in parallel - don't wait for them to complete
             that.$q.all(tasks);
@@ -165,33 +146,75 @@
         });
     },
 
-    loadPage: function (pageNumber) {
+    _fetchAppStatsForApps: function (cnsiGuid, apps) {
+      var that = this;
+      // For all of the apps in the running state, we may need to get stats in order to be able to
+      // determine the user-friendly state of the application
+      var tasks = [];
+      _.each(apps, function (app) {
+        if (app.entity.state === 'STARTED') {
+          // We need more information
+          tasks.push(that.returnAppStats(cnsiGuid, app.metadata.guid, null, true).then(function (stats) {
+            app.instances = stats.data;
+            app.instanceCount = _.keys(app.instances).length;
+            app.state = that.appStateService.get(app.entity, app.instances);
+            return stats.data;
+          }));
+        } else {
+          app.state = that.appStateService.get(app.entity);
+        }
+      });
+    },
+
+    _applyTrim: function (trim) {
+      return function (apps) {
+        return apps.slice(trim.start, trim.resultsPerPage - trim.end);
+      };
+    },
+
+    loadPage: function (pageNumber, cachedData) {
       this.tempApplications = [];
       var that = this;
       var page = this.pagination.pages[pageNumber - 1];
-      var funcs = [];
+      var tasks = [];
 
+      // cached data currently always applies to page 1
       angular.forEach(page, function (clusterLoad) {
         var cnsiGuid = clusterLoad.cnsiGuid;
+
         angular.forEach(clusterLoad.loads, function (load) {
-          funcs.push(function () {
-            return that.all(cnsiGuid, {
+          var trim = {
+            start: load.trimStart,
+            end: load.trimEnd,
+            resultsPerPage: load.resultsPerPage
+          };
+          // We only support using cached data for page 1 for now
+          if (pageNumber === 1 && cachedData && cachedData[cnsiGuid]) {
+            tasks.push(that.$q.resolve(cachedData[cnsiGuid].resources)
+            .then(that._applyTrim(trim))
+            .then(function (needStats) {
+              that._fetchAppStatsForApps(cnsiGuid, needStats, false);
+              return needStats;
+            }));
+          } else {
+            tasks.push(that.all(cnsiGuid, {
               page: load.number,
               'results-per-page': load.resultsPerPage
-            }, false, {
-              start: load.trimStart,
-              end: load.trimEnd,
-              resultsPerPage: load.resultsPerPage
-            });
-          });
+            }, false)
+              .catch(angular.noop)
+              .then(that._applyTrim(trim)));
+          }
         });
       });
 
-      var p = this.utils.runInSequence(funcs, true);
-      p.then(function () {
-        that.data.applications = that.tempApplications;
+      return this.$q.all(tasks).then(function (allData) {
+        that.data.applications = [];
+        _.each(allData, function (apps) {
+          [].push.apply(that.data.applications, apps);
+        });
+
+        that.hasApps = that.pagination.totalPage > 0;
       });
-      return p;
     },
 
     /**
@@ -208,8 +231,11 @@
         return this.$q.reject(gettext('There are no valid HCF endpoints'));
       }
 
+      // If we are making an API call to get the total number of apps,
+      // the additional overhead to retrieve the metadata for those apps
+      // is small in comparison to the cost of another API call to later fetch this data
       var options = angular.extend({
-        'results-per-page': 1,
+        'results-per-page': this.pageSize,
         page: 1
       }, this._buildFilter());
 
@@ -753,23 +779,30 @@
      * @memberof  cloud-foundry.model.application
      * @description onGetPaginationData handler at model layer
      * @param {object} response - the response object returned from api call
+     * @returns {object} list of applications
      * @private
      */
     onGetPaginationData: function (response) {
       var clusters = response.data;
+
       // We should in theory not reach here with error'd calls, but catch just in case
       clusters = _.pickBy(clusters, function (cluster) {
         return !cluster.error;
       });
 
       var totalAppNumber = 0;
-      angular.forEach(clusters, function (cluster) {
+      angular.forEach(clusters, function (cluster, cnsiGuid) {
         if (cluster.total_results) {
           totalAppNumber += cluster.total_results;
         }
+        angular.forEach(cluster.resources, function (app) {
+          app.clusterId = cnsiGuid;
+        });
       });
 
-      this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize));
+      this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize), totalAppNumber);
+
+      return clusters || [];
     },
 
     /**
@@ -778,18 +811,15 @@
      * @description onAll handler at model layer
      * @param {string} guid - CNSI guid
      * @param {string} response - the json return from the api call
-     * @param {object} trim - tell how the result should be trimmed.
+     * @returns {object} list of applications
      * @private
      */
-    onAll: function (guid, response, trim) {
+    onAll: function (guid, response) {
       var apps = response.data.resources;
-
-      apps = apps.slice(trim.start, trim.resultsPerPage - trim.end);
       angular.forEach(apps, function (app) {
         app.clusterId = guid;
       });
-      [].push.apply(this.tempApplications, apps);
-      this.hasApps = this.pagination.totalPage > 0;
+      return apps;
     },
 
     /**
@@ -887,16 +917,19 @@
    * @param {array} clusters - available clusters.
    * @param {number} pageSize - page size for pagination.
    * @param {number} totalPage - total number of pages.
+   * @param {number} totalApps - total number of applications.
    * @property {array} clusters - available clusters.
    * @property {number} pageSize - page size for pagination.
    * @property {number} totalPage - total number of pages.
    * @property {array} pages - plan of how each page should be loaded.
+   * @property {number} totalApps - total number of applications.
    * @class
    */
-  function AppPagination(clusters, pageSize, totalPage) {
+  function AppPagination(clusters, pageSize, totalPage, totalApps) {
     this.clusters = clusters;
     this.pageSize = pageSize;
     this.totalPage = totalPage;
+    this.totalApps = totalApps;
     this.pages = [];
     this.init();
   }

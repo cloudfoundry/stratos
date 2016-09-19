@@ -139,13 +139,14 @@
     },
 
     onConnectSuccess: function (serviceInstance) {
-      this.userCnsiModel.numValid += 1;
-      this.credentialsFormOpen = false;
-      this.activeServiceInstance = null;
       var that = this;
       // Update stackato info to get connected user's name
       this.stackatoInfoModel.getStackatoInfo().then(function () {
-        that.authModel.initializeForEndpoint(serviceInstance.guid, true);
+        that.authModel.initializeForEndpoint(serviceInstance.guid, true).then(function () {
+          that.userCnsiModel.numValid += 1;
+          that.credentialsFormOpen = false;
+          that.activeServiceInstance = null;
+        });
       });
     }
 

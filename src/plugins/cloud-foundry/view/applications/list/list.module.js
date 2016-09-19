@@ -26,6 +26,7 @@
     '$interpolate',
     '$state',
     '$timeout',
+    '$q',
     'app.model.modelManager',
     'app.event.eventService',
     'app.error.errorService',
@@ -39,6 +40,7 @@
    * @param {object} $interpolate - the angular $interpolate service
    * @param {object} $state - the UI router $state service
    * @param {object} $timeout - the angular $timeout service
+   * @param {object} $q - the angular $q promise service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.error.errorService} errorService - the error service
@@ -50,10 +52,11 @@
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.error.errorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, modelManager, eventService, errorService, utils) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$timeout = $timeout;
+    this.$q = $q;
     this.modelManager = modelManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -151,6 +154,8 @@
               that.filter.orgGuid = that.model.filterParams.orgGuid;
             }
           });
+      } else {
+        return this.$q.resolve();
       }
     },
 
@@ -177,6 +182,8 @@
               that.filter.spaceGuid = that.model.filterParams.spaceGuid;
             }
           });
+      } else {
+        return this.$q.resolve();
       }
     },
 
@@ -215,68 +222,58 @@
      * @function _loadPage
      * @description Retrieve apps with given page number
      * @param {number} page - page number
+     * @param {object} cachedData - cached page data
      * @returns {promise} A promise
      * @private
      */
-    _loadPage: function (page) {
+    _loadPage: function (page, cachedData) {
       var that = this;
       this.loading = true;
 
-      return this.model.loadPage(page)
+      return this.model.loadPage(page, cachedData)
         .finally(function () {
           that.currentPage = page;
           that.ready = true;
           that.loading = false;
+          that._handleErrors();
         });
-    },
-
-    /**
-     * @function reloadPage
-     * @description Reload current page
-     * @returns {promise} A promise
-     * @public
-     */
-    reloadPage: function () {
-      return this._loadPage(this.currentPage);
     },
 
     /**
      * @function _reload
      * @description Reload
+     * @returns {promise} A promise
      * @private
      */
     _reload: function () {
       var that = this;
-
-      this._resetPagination().then(function () {
+      return this._resetPagination().then(function (cachedData) {
         if (that.model.pagination.totalPage) {
-          return that._loadPage(1);
+          return that._loadPage(1, cachedData);
         } else {
+          // Show ready/filters even if there are no apps or one or emore services failed to return apps
           that.ready = true;
+          that._handleErrors();
+          return that.$q.resolve();
         }
       });
     },
 
     /**
      * @function _handleErrors
-     * @description Check the response to see if any of the calls returned an error
-     * @param {object} data - applications model data object
+     * @description Check the user's service instance data to see if any services returned an error
      * @returns {void}
      * @orivate
      */
-    _handleErrors: function (data) {
+    _handleErrors: function () {
       var that = this;
       var errors = [];
-      if (data.applications) {
-        _.each(data.applications, function (result, cnsiGuid) {
-          if (result.error) {
-            // This request failed
-            if (that.userCnsiModel.serviceInstances[cnsiGuid]) {
-              errors.push(that.userCnsiModel.serviceInstances[cnsiGuid].name);
-            }
-          }
-        });
-      }
+      var servicesWithErrors = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf', error: true});
+      _.each(servicesWithErrors, function (cnsi) {
+        if (that.filter.cnsiGuid === cnsi.guid || that.filter.cnsiGuid === 'all') {
+          errors.push(cnsi.name);
+        }
+      });
       if (errors.length === 1) {
         var errorMessage = 'The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.';
         that.errorService.setAppError(that.$interpolate(errorMessage)({name: errors[0]}));

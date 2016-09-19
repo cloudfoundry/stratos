@@ -243,13 +243,13 @@
       // this directly in a language file, however these are auto generated.
       switch (event.type) {
         case this.eventTypes.BUILDING:
-          event.name = gettext('Build');
+          event.name = gettext('Built');
           break;
         case this.eventTypes.TESTING:
-          event.name = gettext('Test');
+          event.name = gettext('Tested');
           break;
         case this.eventTypes.DEPLOYING:
-          event.name = gettext('Deploy');
+          event.name = gettext('Deployed');
           break;
         case this.eventTypes.WATCHDOG_TERMINATED:
           event.name = gettext('Terminated');

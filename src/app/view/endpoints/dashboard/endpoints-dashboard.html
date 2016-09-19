@@ -1,9 +1,9 @@
 <div class="endpoints endpoints-dashboard">
   <div class="action-bar app-actions-bar col-md-12 panel-less">
-    <div class="applications-header font-semi-bold pull-left" translate>Endpoints</div>
-  </div>
-  <div ng-show="!endpointsDashboardCtrl.listPromiseResolved" class="message-box message-box-no-bg">
-    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+    <div class="applications-header font-semi-bold pull-left" translate>
+      Endpoints
+      <bounce-spinner classes="bounce-spinner-sm" ng-show="!endpointsDashboardCtrl.listPromiseResolved"></bounce-spinner>
+    </div>
   </div>
   <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.listPromiseResolved && endpointsDashboardCtrl.listError">
     <div>

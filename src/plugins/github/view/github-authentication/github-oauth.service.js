@@ -8,7 +8,8 @@
   githubOauthServiceFactory.$inject = [
     '$window',
     '$q',
-    'GITHUB_ENDPOINTS'
+    'GITHUB_ENDPOINTS',
+    'app.event.eventService'
   ];
 
   /**
@@ -18,9 +19,10 @@
    * @param {object} $window - angular $window service
    * @param {object} $q - angular $q service
    * @param {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
+   * @param {app.event.eventService} eventService - the application event service
    */
-  function githubOauthServiceFactory($window, $q, GITHUB_ENDPOINTS) {
-    return new GithubOauthService($window, $q, GITHUB_ENDPOINTS);
+  function githubOauthServiceFactory($window, $q, GITHUB_ENDPOINTS, eventService) {
+    return new GithubOauthService($window, $q, GITHUB_ENDPOINTS, eventService);
   }
 
   /**
@@ -30,14 +32,17 @@
    * @param {object} $window - angular $window service
    * @param {object} $q - angular $q service
    * @param {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
+   * @param {app.event.eventService} eventService - the application event service
    * @property {object} $window - angular $window service
    * @property {object} $q - angular $q service
    * @property {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
+   * @property {app.event.eventService} eventService - the application event service
    */
-  function GithubOauthService($window, $q, GITHUB_ENDPOINTS) {
+  function GithubOauthService($window, $q, GITHUB_ENDPOINTS, eventService) {
     this.$window = $window;
     this.$q = $q;
     this.GITHUB_ENDPOINTS = GITHUB_ENDPOINTS;
+    this.eventService = eventService;
   }
 
   angular.extend(GithubOauthService.prototype, {
@@ -54,12 +59,19 @@
           if (message.name === 'VCS OAuth - success') {
             resolve();
             win.close();
-
           } else if (message.name === 'VCS OAuth - failure') {
             reject();
           }
         });
+
+        that.eventService.$on('vcs.OAUTH_CANCELLED', function () {
+          reject('VCS_OAUTH_CANCELLED');
+        });
       });
+    },
+
+    cancel: function () {
+      this.eventService.$emit('vcs.OAUTH_CANCELLED');
     }
   });
 
