@@ -63,7 +63,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 		)
 	}
 
-	v2InfoResponse, err := getHCFv2Info(apiEndpoint)
+	v2InfoResponse, err := getHCFv2Info(apiEndpoint, skipSSLValidation)
 	if err != nil {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
@@ -285,7 +285,7 @@ func marshalClusterList(clusterList []*cnsis.RegisteredCluster) ([]byte, error) 
 	return jsonString, nil
 }
 
-func getHCFv2Info(apiEndpoint string) (v2Info, error) {
+func getHCFv2Info(apiEndpoint string, skipSSLValidation bool) (v2Info, error) {
 	logger.Debug("getHCFv2Info")
 	var v2InfoReponse v2Info
 
@@ -295,7 +295,11 @@ func getHCFv2Info(apiEndpoint string) (v2Info, error) {
 	}
 
 	uri.Path = "v2/info"
-	res, err := httpClient.Get(uri.String())
+	h := httpClient
+	if skipSSLValidation {
+		h = httpClientSkipSSL
+	}
+	res, err := h.Get(uri.String())
 	if err != nil {
 		return v2InfoReponse, err
 	}

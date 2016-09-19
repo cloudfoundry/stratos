@@ -58,7 +58,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 
 	var HCPIdentityEndpoint = fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
 
-	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
+	uaaRes, u, err := p.login(c, p.Config.SkipTLSVerification, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
 	if err != nil {
 		err = newHTTPShadowError(
 			http.StatusUnauthorized,
@@ -138,7 +138,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	return nil
 }
 
-func (p*portalProxy) verifyLoginToCNSI(c echo.Context) error {
+func (p *portalProxy) verifyLoginToCNSI(c echo.Context) error {
 
 	logger.Debug("verifyLoginToCNSI")
 
@@ -179,7 +179,7 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 		clientID = p.Config.HCEClient
 	}
 
-	uaaRes, u, err := p.login(c, clientID, "", tokenEndpoint)
+	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, clientID, "", tokenEndpoint)
 
 	if err != nil {
 		return nil, nil, nil, newHTTPShadowError(
@@ -213,7 +213,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) login(c echo.Context, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
+func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
 	logger.Debug("login")
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -222,7 +222,7 @@ func (p *portalProxy) login(c echo.Context, client string, clientSecret string, 
 		return uaaRes, u, errors.New("Needs username and password")
 	}
 
-	uaaRes, err = p.getUAATokenWithCreds(username, password, client, clientSecret, endpoint)
+	uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, username, password, client, clientSecret, endpoint)
 	if err != nil {
 		return uaaRes, u, err
 	}
@@ -253,7 +253,7 @@ func (p *portalProxy) logout(c echo.Context) error {
 	return err
 }
 
-func (p *portalProxy) getUAATokenWithCreds(username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	logger.Debug("getUAATokenWithCreds")
 	body := url.Values{}
 	body.Set("grant_type", "password")
@@ -261,20 +261,20 @@ func (p *portalProxy) getUAATokenWithCreds(username, password, client, clientSec
 	body.Set("password", password)
 	body.Set("response_type", "token")
 
-	return p.getUAAToken(body, client, clientSecret, authEndpoint)
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
-func (p *portalProxy) getUAATokenWithRefreshToken(refreshToken, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	logger.Debug("getUAATokenWithRefreshToken")
 	body := url.Values{}
 	body.Set("grant_type", "refresh_token")
 	body.Set("refresh_token", refreshToken)
 	body.Set("response_type", "token")
 
-	return p.getUAAToken(body, client, clientSecret, authEndpoint)
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
-func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	logger.WithField("authEndpoint", authEndpoint).Debug("getUAAToken")
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
@@ -286,7 +286,12 @@ func (p *portalProxy) getUAAToken(body url.Values, client, clientSecret, authEnd
 	req.SetBasicAuth(client, clientSecret)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
-	res, err := httpClient.Do(req)
+	h := httpClient
+	if skipSSLValidation {
+		h = httpClientSkipSSL
+	}
+
+	res, err := h.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
 		logger.Errorf("Error performing http request - response: %v, error: %v", res, err)
 		return nil, logHTTPError(res, err)

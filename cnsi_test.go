@@ -375,7 +375,7 @@ func TestGetHCFv2InfoWithBadURL(t *testing.T) {
 	t.Parallel()
 
 	invalidEndpoint := "%zzzz"
-	if _, err := getHCFv2Info(invalidEndpoint); err == nil {
+	if _, err := getHCFv2Info(invalidEndpoint, true); err == nil {
 		t.Error("getHCFv2Info should not return a valid response when the URL is bad.")
 	}
 }
@@ -384,7 +384,7 @@ func TestGetHCFv2InfoWithInvalidEndpoint(t *testing.T) {
 	t.Parallel()
 
 	ep := "http://invalid.net"
-	if _, err := getHCFv2Info(ep); err == nil {
+	if _, err := getHCFv2Info(ep, true); err == nil {
 		t.Error("getHCFv2Info should not return a valid response when the endpoint is invalid.")
 	}
 }

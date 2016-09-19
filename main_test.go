@@ -9,7 +9,7 @@ import (
 
 // DO NOT DELETE - this is necessary for thr HTTP Client used during unit tests
 func init() {
-	initializeHTTPClient(true, 10)
+	initializeHTTPClients(true, 10)
 }
 
 /* type echoContextMock struct{}
