@@ -10,6 +10,10 @@ DROP  INDEX IF EXISTS cnsis_cnsi_type;
 DROP  INDEX IF EXISTS cnsis_name;
 DROP  TABLE IF EXISTS cnsis;
 
+DROP  INDEX IF EXISTS vcstokens_user;
+DROP  INDEX IF EXISTS vcstokens_endpoint;
+DROP  TABLE IF EXISTS vcstokens;
+
 
 -- +goose Up
 -- SQL in section 'Up' is executed when this migration is applied
@@ -45,3 +49,15 @@ CREATE TABLE IF NOT EXISTS cnsis (
 
 CREATE INDEX cnsis_name ON cnsis (name);
 CREATE INDEX cnsis_cnsi_type ON cnsis (cnsi_type);
+
+
+-- For storage of VCS Tokens
+CREATE TABLE IF NOT EXISTS vcstokens (
+  user_guid   VARCHAR(36)   NOT NULL,
+  endpoint    VARCHAR(255)  NOT NULL,
+  access_token  BYTEA         NOT NULL,
+  PRIMARY KEY (user_guid, endpoint)
+);
+
+CREATE INDEX vcstokens_user ON vcstokens (user_guid);
+CREATE INDEX vcstokens_endpoint ON vcstokens (endpoint);
