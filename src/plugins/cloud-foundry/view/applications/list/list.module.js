@@ -251,7 +251,8 @@
         if (that.model.pagination.totalPage) {
           return that._loadPage(1, cachedData);
         } else {
-          // Show ready/filters even if there are no apps or one or emore services failed to return apps
+          // Set ready (which will show the filters) even if there are no apps or one or more services failed to return
+          // apps
           that.ready = true;
           that._handleErrors();
           return that.$q.resolve();
