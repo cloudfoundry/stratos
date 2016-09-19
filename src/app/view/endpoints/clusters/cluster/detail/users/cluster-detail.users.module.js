@@ -44,7 +44,6 @@
     this.guid = $stateParams.guid;
     this.users = [];
     this.removingOrg = {};
-    this.usersModel = modelManager.retrieve('cloud-foundry.model.users');
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -140,7 +139,7 @@
         refreshAllSelected();
       });
 
-      $scope.$watchCollection(function () {
+      $scope.$watch(function () {
         return _.keys(that.organizationModel.organizations[that.guid]).length;
       }, refreshUsers);
 

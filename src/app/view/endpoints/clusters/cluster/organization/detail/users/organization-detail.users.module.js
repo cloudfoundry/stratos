@@ -153,7 +153,7 @@
         refreshAllSelected();
       });
 
-      $scope.$watchCollection(function () {
+      $scope.$watch(function () {
         return _.keys(that.organizationModel.organizations[that.guid][that.organizationGuid].spaces).length;
       }, refreshUsers);
 
