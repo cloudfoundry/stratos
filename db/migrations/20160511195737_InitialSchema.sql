@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS cnsis (
   auth_endpoint             VARCHAR(255)  NOT NULL,
   token_endpoint            VARCHAR(255)  NOT NULL,
   doppler_logging_endpoint  VARCHAR(255)  NOT NULL,
+  skip_ssl_validation       BOOLEAN       NOT NULL DEFAULT FALSE,
   last_updated    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
   PRIMARY KEY (guid)
 );

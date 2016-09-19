@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
@@ -29,6 +30,12 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 	logger.Debug("registerHCFCluster")
 	cnsiName := c.FormValue("cnsi_name")
 	apiEndpoint := c.FormValue("api_endpoint")
+	skipSSLValidation, err := strconv.ParseBool(c.FormValue("skip_ssl_validation"))
+	if err != nil {
+		logger.Errorf("Failed to parse skip_ssl_validation value: %s", err)
+		// default to false
+		skipSSLValidation = false
+	}
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return newHTTPShadowError(
@@ -75,6 +82,7 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 		TokenEndpoint:          v2InfoResponse.TokenEndpoint,
 		AuthorizationEndpoint:  v2InfoResponse.AuthorizationEndpoint,
 		DopplerLoggingEndpoint: v2InfoResponse.DopplerLoggingEndpoint,
+		SkipSSLValidation:      skipSSLValidation,
 	}
 
 	err = p.setCNSIRecord(guid, newCNSI)
