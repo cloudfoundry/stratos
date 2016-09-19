@@ -222,14 +222,15 @@
      * @function _loadPage
      * @description Retrieve apps with given page number
      * @param {number} page - page number
+     * @param {object} cachedData - cached page data
      * @returns {promise} A promise
      * @private
      */
-    _loadPage: function (page) {
+    _loadPage: function (page, cachedData) {
       var that = this;
       this.loading = true;
 
-      return this.model.loadPage(page)
+      return this.model.loadPage(page, cachedData)
         .finally(function () {
           that.currentPage = page;
           that.ready = true;
@@ -246,9 +247,9 @@
      */
     _reload: function () {
       var that = this;
-      this._resetPagination().then(function () {
+      return this._resetPagination().then(function (cachedData) {
         if (that.model.pagination.totalPage) {
-          return that._loadPage(1);
+          return that._loadPage(1, cachedData);
         } else {
           that._handleErrors();
           return that.$q.resolve();
