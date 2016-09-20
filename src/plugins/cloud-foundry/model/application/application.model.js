@@ -183,6 +183,10 @@
         var cnsiGuid = clusterLoad.cnsiGuid;
 
         angular.forEach(clusterLoad.loads, function (load) {
+          if (load.resultsPerPage === 0) {
+            return;
+          }
+
           var trim = {
             start: load.trimStart,
             end: load.trimEnd,
@@ -228,7 +232,8 @@
       var cnsis = this._getCurrentCnsis();
 
       if (!cnsis || !cnsis.length) {
-        return this.$q.reject(gettext('There are no valid HCF endpoints'));
+        // Ensure the pagination object is initialised by running through the handler
+        return this.$q.resolve(that.onGetPaginationData({ data: {}}));
       }
 
       // If we are making an API call to get the total number of apps,
@@ -801,6 +806,8 @@
       });
 
       this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize), totalAppNumber);
+
+      this.hasApps = this.pagination.totalPage > 0;
 
       return clusters || [];
     },
