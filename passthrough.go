@@ -231,7 +231,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 				cnsiRequest.URL.Host = strings.Replace(cnsiRequest.URL.Host, apiPrefix, apiHost, 1)
 			} else {
 				// Add supplied prefix to the domain
-				cnsiRequest.URL.Host = apiHost + cnsiRequest.URL.Host;
+				cnsiRequest.URL.Host = apiHost + cnsiRequest.URL.Host
 			}
 		}
 		go p.doRequest(cnsiRequest, done, kill)
