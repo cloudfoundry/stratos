@@ -23,6 +23,7 @@ module.exports = function (config) {
       'lib/jquery/dist/jquery.js',
       'lib/angular-mocks/angular-mocks.js',
       'lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
+      '../tools/stackato-templates.js',
 
       'config.js',
       'plugins/*/plugin.config.js',
