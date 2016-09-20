@@ -15,7 +15,7 @@ const (
 
 	countVCSTokens = `SELECT COUNT(*)
 	                  FROM vcstokens
-	                  WHERE endpoint = $1 AND vcs_user_id = $2`
+	                  WHERE endpoint = $1 AND user_guid = $2`
 
 	insertVCSToken = `INSERT INTO vcstokens (endpoint, user_guid, access_token)
 		                VALUES ($1, $2, $3)`
