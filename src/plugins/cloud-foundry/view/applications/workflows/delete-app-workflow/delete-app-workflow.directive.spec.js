@@ -73,6 +73,7 @@
         that.checkAppRoutes = function () {
           return that.$q.resolve();
         };
+        spyOn(that, 'checkAppServices');
         spyOn(that, 'checkAppRoutes').and.callThrough();
         var deferred = that.$q.defer();
         var wizard = {
@@ -84,6 +85,8 @@
         $scope.$apply();
         expect(that.options.isBusy).toBe(false);
         expect(that.wizard.nextBtnDisabled).toBe(false);
+        expect(that.checkAppServices).toHaveBeenCalled();
+        expect(that.checkAppRoutes).toHaveBeenCalled();
       });
 
       it('deleteApplicationActions - stop', function () {
