@@ -390,12 +390,6 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
-		msg := "Session has expired"
-		logger.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
-
 	sessionUser, ok := p.getSessionStringValue(c, "user_id")
 	if !ok {
 		msg := "Could not find user_id in Session"
@@ -416,6 +410,40 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		msg := "Unable to find scope information in the UAA Auth Token: %s"
 		logger.Error(msg, err)
 		return fmt.Errorf(msg, err)
+	}
+
+	 // Check if UAA token has expired
+	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
+		// UAA Token has expired, refresh the token
+		// if that fails, fail the request.
+
+		var HCPIdentityEndpoint = fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
+
+		uaaRes, err := p.getUAATokenWithRefreshToken(tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
+		if err != nil {
+			err = newHTTPShadowError(
+				http.StatusUnauthorized,
+				"Access Denied",
+				"Access Denied: %v", err)
+			return err
+		}
+		u, err := getUserTokenInfo(uaaRes.AccessToken)
+		if err != nil {
+			return err
+		}
+
+		err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+		if err != nil {
+			return err
+		}
+		sessionValues := make(map[string]interface{})
+		sessionValues["user_id"] = u.UserGUID
+		sessionValues["exp"] = u.TokenExpiry
+
+		if err = p.setSessionValues(c, sessionValues); err != nil {
+			return err
+		}
+		userTokenInfo = u
 	}
 
 	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
