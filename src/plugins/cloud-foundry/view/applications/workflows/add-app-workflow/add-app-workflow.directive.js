@@ -213,10 +213,19 @@
                         return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
                       })
                       .map(function (o) {
-                        return {label: o.api_endpoint.Host, value: o};
+                        return {label: o.name, value: o};
                       })
                       .value();
                     [].push.apply(that.options.serviceInstances, validServiceInstances);
+
+                    if (!that.options.userInput.serviceInstance &&
+                      that.appModel.filterParams.cnsiGuid &&
+                      that.appModel.filterParams.cnsiGuid !== 'all') {
+                      // Find the option to set. If the user has no permissions this may be null
+                      var preSelectedService = _.find(that.options.serviceInstances, { value: { guid: that.appModel.filterParams.cnsiGuid}}) || {};
+                      that.options.userInput.serviceInstance = preSelectedService.value;
+                    }
+
                   });
               },
               onNext: function () {
@@ -438,6 +447,14 @@
               });
             }
             [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
+
+            if (!that.options.userInput.organization &&
+              that.appModel.filterParams.orgGuid &&
+              that.appModel.filterParams.orgGuid !== 'all') {
+              // Find the option to set. If the user has no permissions this may be null
+              var preSelectedOrg = _.find(that.options.organizations, { value: { metadata: { guid: that.appModel.filterParams.orgGuid}}}) || {};
+              that.options.userInput.organization = preSelectedOrg.value;
+            }
           });
       },
 
@@ -463,6 +480,14 @@
                 {entity: {organization_guid: guid}});
             }
             [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
+
+            if (!that.options.userInput.space &&
+              that.appModel.filterParams.spaceGuid &&
+              that.appModel.filterParams.spaceGuid !== 'all') {
+              // Find the option to set. If the user has no permissions this may be null
+              var preSelectedOrg = _.find(that.options.spaces, { value: { metadata: { guid: that.appModel.filterParams.spaceGuid}}}) || {};
+              that.options.userInput.space = preSelectedOrg.value;
+            }
           });
       },
 
