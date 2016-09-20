@@ -67,7 +67,7 @@ func main() {
 	logger.Info("Proxy configuration loaded.")
 
 	// Initialize the HTTP client
-	initializeHTTPClients(portalConfig.SkipTLSVerification, time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
+	initializeHTTPClients(time.Duration(portalConfig.HTTPClientTimeoutInSecs) * time.Second)
 	logger.Info("HTTP client initialized.")
 
 	// Get the encryption key we need for tokens in the database
@@ -275,7 +275,7 @@ func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalPr
 	return pp
 }
 
-func initializeHTTPClients(skipCertVerification bool, timeoutInSeconds time.Duration) {
+func initializeHTTPClients(timeoutInSeconds time.Duration) {
 	logger.Debug("initializeHTTPClients")
 	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
 	tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: false}

@@ -393,7 +393,7 @@ func TestGetHCEInfoWithBadURL(t *testing.T) {
 	t.Parallel()
 
 	invalidEndpoint := "%zzzz"
-	if _, err := getHCEInfo(invalidEndpoint); err == nil {
+	if _, err := getHCEInfo(invalidEndpoint, true); err == nil {
 		t.Error("getHCEInfo should not return a valid response when the URL is bad.")
 	}
 }
@@ -402,7 +402,7 @@ func TestGetHCEInfoWithInvalidEndpoint(t *testing.T) {
 	t.Parallel()
 
 	ep := "http://invalid.net"
-	if _, err := getHCEInfo(ep); err == nil {
+	if _, err := getHCEInfo(ep, true); err == nil {
 		t.Error("getHCEInfo should not return a valid response when the endpoint is invalid.")
 	}
 }

@@ -109,6 +109,12 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 	logger.Debug("registerHCECluster")
 	cnsiName := c.FormValue("cnsi_name")
 	apiEndpoint := c.FormValue("api_endpoint")
+	skipSSLValidation, err := strconv.ParseBool(c.FormValue("skip_ssl_validation"))
+	if err != nil {
+		logger.Errorf("Failed to parse skip_ssl_validation value: %s", err)
+		// default to false
+		skipSSLValidation = false
+	}
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return newHTTPShadowError(
@@ -125,7 +131,7 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 			"Failed to get API Endpoint: %v", err)
 	}
 
-	infoResponse, err := getHCEInfo(apiEndpoint)
+	infoResponse, err := getHCEInfo(apiEndpoint, skipSSLValidation)
 	if err != nil {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
@@ -143,6 +149,7 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 		APIEndpoint:           apiEndpointURL,
 		TokenEndpoint:         infoResponse.AuthorizationEndpoint,
 		AuthorizationEndpoint: infoResponse.AuthorizationEndpoint,
+		SkipSSLValidation:     skipSSLValidation,
 	}
 
 	err = p.setCNSIRecord(guid, newCNSI)
@@ -320,7 +327,7 @@ func getHCFv2Info(apiEndpoint string, skipSSLValidation bool) (v2Info, error) {
 	return v2InfoReponse, nil
 }
 
-func getHCEInfo(apiEndpoint string) (hceInfo, error) {
+func getHCEInfo(apiEndpoint string, skipSSLValidation bool) (hceInfo, error) {
 	logger.Debug("getHCEInfo")
 	var infoReponse hceInfo
 
@@ -330,7 +337,11 @@ func getHCEInfo(apiEndpoint string) (hceInfo, error) {
 	}
 
 	uri.Path = "info"
-	res, err := httpClient.Get(uri.String())
+	h := httpClient
+	if skipSSLValidation {
+		h = httpClientSkipSSL
+	}
+	res, err := h.Get(uri.String())
 	if err != nil {
 		return infoReponse, err
 	}
