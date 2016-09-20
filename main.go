@@ -111,13 +111,20 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
+
+	// Make cookies expire after 20 minutes
+	sessionStore.Options.MaxAge = 20 * 60;
+
 	defer func() {
 		logger.Info(`--- Closing sessionStore`)
 		sessionStore.Close()
 	}()
+
+	// Ensure the cleanup tick starts now (this will delete expired sessions from the DB)
+	quitCleanup, doneCleanup := sessionStore.Cleanup(time.Minute * 3)
 	defer func() {
 		logger.Info(`--- Setting up sessionStore cleanup`)
-		sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
+		sessionStore.StopCleanup(quitCleanup, doneCleanup)
 	}()
 	logger.Info("Proxy session store initialized.")
 

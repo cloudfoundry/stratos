@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
+	"time"
 )
 
 // UAAResponse - Response returned by Cloud Foundry UAA Service
@@ -421,19 +421,16 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 		uaaRes, err := p.getUAATokenWithRefreshToken(tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
 		if err != nil {
-			err = newHTTPShadowError(
-				http.StatusUnauthorized,
-				"Access Denied",
-				"Access Denied: %v", err)
-			return err
+			msg := "Could not refresh UAA token"
+			logger.Error(msg, err)
+			return echo.NewHTTPError(http.StatusForbidden, msg)
 		}
 		u, err := getUserTokenInfo(uaaRes.AccessToken)
 		if err != nil {
 			return err
 		}
 
-		err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
-		if err != nil {
+		if err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken); err != nil {
 			return err
 		}
 		sessionValues := make(map[string]interface{})
