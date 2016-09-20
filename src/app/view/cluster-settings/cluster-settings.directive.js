@@ -165,7 +165,6 @@
             // Remove principal for disconnected instance
             that.authModel.remove(id);
           });
-          that.cfModel.all();
         })
         .catch(function () {
           // Failed
@@ -184,7 +183,7 @@
      */
     getCnsiTypeText: function (cnsi) {
       if (cnsi.cnsi_type === 'hcf') {
-        return gettext('Cloud Foundry Cluster');
+        return gettext('Cloud Foundry');
       } else if (cnsi.cnsi_type === 'hce') {
         return gettext('Code Engine');
       } else {

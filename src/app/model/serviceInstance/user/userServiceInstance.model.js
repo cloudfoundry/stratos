@@ -130,19 +130,6 @@
     },
 
     /**
-     * @function register
-     * @memberof app.model.serviceInstance.user.UserServiceInstance
-     * @description Set the service instances as registered
-     * @param {array} urls - the service instance endpoints
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    register: function (urls) {
-      var serviceInstanceApi = this.apiManager.retrieve('app.api.serviceInstance.user');
-      return serviceInstanceApi.register(urls);
-    },
-
-    /**
      * @function onConnect
      * @memberof app.model.serviceInstance.user.UserServiceInstance
      * @description onConnect handler

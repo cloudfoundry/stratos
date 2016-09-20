@@ -95,20 +95,6 @@
      */
     list: function () {
       return this.$http.get('/pp/v1/cnsis/registered');
-    },
-
-    /**
-     * @function register
-     * @memberof app.api.serviceInstance.user.UserServiceInstanceApi
-     * @description Set the service instances as registered
-     * @param {array} urls - the service instance endpoints
-     * @returns {promise} A resolved/rejected promise
-     * @public
-     */
-    register: function (urls) {
-      return this.$http.post('/api/service-instances/user/register', {
-        serviceInstances: urls
-      });
     }
   });
 

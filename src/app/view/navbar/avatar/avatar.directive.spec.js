@@ -2,7 +2,7 @@
   'use strict';
 
   describe('avatar directive', function () {
-    var $element, avatarCtrl;
+    var $element, avatarCtrl, $timeout, $document;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -11,7 +11,8 @@
       var $compile = $injector.get('$compile');
       var $scope = $injector.get('$rootScope').$new();
       var markup = '<avatar></avatar>';
-
+      $timeout = $injector.get('$timeout');
+      $document = $injector.get('$document');
       $element = angular.element(markup);
       $compile($element)($scope);
       $scope.$apply();
@@ -56,8 +57,24 @@
         expect(avatarCtrl.showingActions).toBe(true);
       });
 
-    });
+      it('show actions - allow timeout to run hide', function () {
+        avatarCtrl.showActions();
+        $timeout.flush();
+      });
 
+      it('show actions - allow timeout to run hide - check off handler is installed', function () {
+        avatarCtrl.showActions();
+        avatarCtrl.showingActions = false;
+        $timeout.flush();
+      });
+
+      it('show actions - check hide is called on click', function () {
+        avatarCtrl.showActions();
+        avatarCtrl.showingActions = false;
+        $timeout.flush();
+        $document.trigger('click');
+      });
+    });
   });
 
 })();
