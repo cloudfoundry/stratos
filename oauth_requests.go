@@ -42,14 +42,19 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 		}
 
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.refreshToken(cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.refreshToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
 			if err != nil {
 				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
 			}
 			tokenRec = refreshedTokenRec
 		}
 		req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
-		res, err := httpClient.Do(req)
+
+		client := httpClient
+		if cnsi.SkipSSLValidation {
+			client = httpClientSkipSSL
+		}
+		res, err := client.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("Request failed: %v", err)
 		}
@@ -81,7 +86,7 @@ func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord
 	return t, c, nil
 }
 
-func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokens.TokenRecord, err error) {
+func (p *portalProxy) refreshToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t tokens.TokenRecord, err error) {
 	logger.Debug("refreshToken")
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 
@@ -93,7 +98,7 @@ func (p *portalProxy) refreshToken(cnsiGUID, userGUID, client, clientSecret, tok
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)
 	}
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath)
+	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath)
 	if err != nil {
 		return t, fmt.Errorf("Token refresh request failed: %v", err)
 	}

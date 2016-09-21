@@ -46,7 +46,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 
 	// Reusable closure to refresh the authToken
 	refreshTokenRecord := func() error {
-		newTokenRecord, err := p.refreshToken(cnsiGUID, userGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsiRecord.TokenEndpoint)
+		newTokenRecord, err := p.refreshToken(cnsiRecord.SkipSSLValidation, cnsiGUID, userGUID, p.Config.HCFClient, p.Config.HCFClientSecret, cnsiRecord.TokenEndpoint)
 		if err != nil {
 			return fmt.Errorf("Error refreshing token for CNSI %s : [%v]", cnsiGUID, err)
 		}
