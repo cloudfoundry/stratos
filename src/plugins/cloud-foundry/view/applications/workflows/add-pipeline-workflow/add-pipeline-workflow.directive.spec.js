@@ -2,7 +2,7 @@
   'use strict';
 
   describe('add-pipeline-workflow directive', function () {
-    var $httpBackend, $scope, eventService, addPipelineWorkflowCtrl, mockApp;
+    var $httpBackend, $scope, addPipelineWorkflowCtrl, mockApp;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -10,7 +10,6 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      eventService = $injector.get('app.event.eventService');
       var markup = '<add-pipeline-workflow></add-pipeline-workflow>';
       var element = angular.element(markup);
       $compile(element)($scope);
@@ -35,7 +34,7 @@
 
       beforeEach(function () {
         var appModel = addPipelineWorkflowCtrl.modelManager.retrieve('cloud-foundry.model.application');
-          appModel.application = {
+        appModel.application = {
           summary: mockApp
         };
         application = appModel.application;
