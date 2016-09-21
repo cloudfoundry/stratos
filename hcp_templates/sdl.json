@@ -491,6 +491,7 @@
       "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
+      "timeout": 300,
       "retry_count": 100,
       "service_ports": [],
       "volume_mounts": [
@@ -560,6 +561,7 @@
       "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
+      "timeout": 300,
       "retry_count": 100,
       "service_ports": [],
       "volume_mounts": [
