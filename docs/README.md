@@ -1,5 +1,5 @@
-# Helion Stratos Console UI
-The Helion Stratos Console UI provides a single comprehensive and ubiquitous user experience for: discovering, composing, developing and managing Cloud Native workloads which are hosted in a myriad of: public, managed and private cloud/compute providers.
+# Helion Stackato Console UI
+The Helion Stackato Console UI provides a single comprehensive and ubiquitous user experience for: discovering, composing, developing and managing Cloud Native workloads which are hosted in a myriad of: public, managed and private cloud/compute providers.
 
 The Angular-based application is composed of three layers and an event bus. The source code is therefore organized by those four components: `api`, `event`, `model` and `view`. The application can be extended by registering plugins with the same organizational structure.
 

@@ -129,8 +129,8 @@ function sendRequest(req, method, url, body) {
  * @function createSession
  * @description Create a session
  * @param {object} req - the request
- * @param {string} username - the Stratos username
- * @param {string} password - the Stratos password
+ * @param {string} username - the Stackato username
+ * @param {string} password - the Stackato password
  * @returns {Promise} A promise
  */
 function createSession(req, username, password) {

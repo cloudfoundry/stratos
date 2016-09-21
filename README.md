@@ -1,5 +1,5 @@
-# Helion Stratos Console UI
-The Helion Stratos Console UI is written in JavaScript and runs in a Docker container. It also uses Angular 1.4.x to maintain compability with Angular UI Bootstrap.
+# Helion Stackato Console UI
+The Helion Stackato Console UI is written in JavaScript and runs in a Docker container. It also uses Angular 1.4.x to maintain compatibility with Angular UI Bootstrap.
 
 For more implementation details, please see the following pages:
 * [Overview](docs/README.md)
@@ -7,7 +7,7 @@ For more implementation details, please see the following pages:
 * [Plugins](docs/plugins.md)
 
 ## System Requirements
-Nginx is used to serve static files while Node.js + Express is used to host the mock REST API backend (which is in development). Another container hosts the MySQL database for session and service instance management. Finally, there is a container hosting Elasticsearch that provides the cache component.
+Nginx is used to serve static files while a Golang based REST API backend. Another container hosts the Postgres database for session and service instance management. Finally, there is a container hosting Elasticsearch that provides the cache component.
 
 This project depends on the following:
 * [Docker](https://docs.docker.com/mac)
