@@ -22,7 +22,6 @@
         this.hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
         this.vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
         this.githubModel = this.modelManager.retrieve('github.model');
-        this.serviceInstanceModel = this.modelManager.retrieve('app.model.serviceInstance.user');
         this.userServiceInstanceModel = this.modelManager.retrieve('app.model.serviceInstance.user');
       },
 
@@ -260,15 +259,17 @@
 
       getHceInstances: function () {
         var that = this;
-        var serviceInstanceModel = this.serviceInstanceModel;
+        var serviceInstanceModel = this.modelManager.retrieve('app.model.serviceInstance.user');
+
         serviceInstanceModel.list().then(function () {
           that._onGetHceInstances();
         });
       },
 
       _onGetHceInstances: function () {
-        var serviceInstanceModel = this.serviceInstanceModel;
+        var serviceInstanceModel = this.modelManager.retrieve('app.model.serviceInstance.user');
         this.options.hceCnsis.length = 0;
+
         var hceCnsis = _.filter(serviceInstanceModel.serviceInstances, { cnsi_type: 'hce' }) || [];
         if (hceCnsis.length > 0) {
           [].push.apply(this.options.hceCnsis, hceCnsis);
