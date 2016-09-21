@@ -1,12 +1,12 @@
 {
   "name": "hsc",
-  "product_version": "4.0",
+  "product_version": "4.0.0",
   "sdl_version": "{{TAG}}",
   "vendor": "HPE",
   "components": [
     {
       "name": "hsc-etcd",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
@@ -78,7 +78,7 @@
     },
     {
       "name": "hsc-stsentinel",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
@@ -139,7 +139,7 @@
     },
     {
       "name": "hsc-stkeeper",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
@@ -228,7 +228,7 @@
     },
     {
       "name": "hsc-stproxy",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
@@ -283,7 +283,7 @@
     },
     {
       "name": "hsc-proxy",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
@@ -387,7 +387,7 @@
     },
     {
       "name": "hsc-console",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 256,
       "min_disk_gb": 1,
@@ -460,7 +460,7 @@
   "preflight": [
     {
       "name": "hsc-preflight-job",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
@@ -509,7 +509,7 @@
   "postflight": [
     {
       "name": "hsc-postflight-job",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 512,
       "min_disk_gb": 1,
