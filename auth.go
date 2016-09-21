@@ -414,8 +414,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	 // Check if UAA token has expired
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
-		// UAA Token has expired, refresh the token
-		// if that fails, fail the request.
+		// UAA Token has expired, refresh the token, if that fails, fail the request
 
 		var HCPIdentityEndpoint = fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
 
@@ -441,6 +440,11 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 			return err
 		}
 		userTokenInfo = u
+	} else {
+		// Still need to extend the expires_on of the Session
+		if err = p.setSessionValues(c, nil); err != nil {
+			return err
+		}
 	}
 
 	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
