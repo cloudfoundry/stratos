@@ -47,7 +47,8 @@
       add: function (type, title, description, urlHint) {
         var data = {
           name: '',
-          url: ''
+          url: '',
+          skipSslValidation: false
         };
         return asyncTaskDialog(
           {
@@ -65,7 +66,7 @@
             urlHint: urlHint
           },
           function () {
-            return serviceInstanceModel.create(type, data.url, data.name).then(function (serviceInstance) {
+            return serviceInstanceModel.create(type, data.url, data.name, data.skipSslValidation).then(function (serviceInstance) {
               notificationsService.notify('success',
                 gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
                 {endpointType: type.toUpperCase(), name: data.name});
