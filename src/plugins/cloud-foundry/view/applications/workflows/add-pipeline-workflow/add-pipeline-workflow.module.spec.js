@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  /* eslint-disable angular/no-private-call */
+
   describe('add-pipeline-workflow prototype', function () {
     var $httpBackend;
 
@@ -19,7 +21,7 @@
         this.githubOauthService = $injector.get('github.view.githubOauthService');
         this.utils = $injector.get('app.utils.utilsService');
         this.$scope = $injector.get('$rootScope').$new();
-        this.$timeout =  $injector.get('$timeout');
+        this.$timeout = $injector.get('$timeout');
         this.userInput = {
           application: {
             summary: {
@@ -148,17 +150,14 @@
           expect(that.redefineWorkflowWithoutHce).toHaveBeenCalled();
         });
 
-        xit('#getVcsInstances', function () {
+        it('#getVcsInstances', function () {
           var that = this.instance;
           var deferred = that.$q.defer();
           that.hceModel.getVcses = function () {
             return that.$q.resolve(deferred);
           };
-          that._onGetVcses = function () {
-            return that.$q.resolve(deferred);
-          };
           spyOn(that.hceModel, 'getVcses').and.callThrough();
-          spyOn(that, '_onGetVcses').and.callThrough();
+          spyOn(that, '_onGetVcses');
           that.getVcsInstances();
           that.$scope.$apply();
           expect(that.hceModel.getVcses).toHaveBeenCalled();
@@ -337,7 +336,7 @@
             return that.$q.resolve({
             });
           };
-          that.createPipeline = function (id) {
+          that.createPipeline = function () {
             return that.$q.resolve({
             });
           };
@@ -432,7 +431,6 @@
         this.instance.$scope.$apply();
         expect(githubModel.repos).toHaveBeenCalled();
       });
-
 
       it('#loadMoreRepos', function () {
         $httpBackend.whenGET('/pp/v1/vcs/user/repos?per_page=50').respond({ });
@@ -705,4 +703,5 @@
     });
   });
 
+  /* eslint-enable angular/no-private-call */
 })();
