@@ -90,8 +90,8 @@ gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs'], function () {
 
 gulp.task("copy:bowerjs", function () {
   return gulp.src(bowerFiles.ext('js').files)
-    .pipe(uglify())
-    .pipe(concat('stackato-libs.js'))
+    .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+    .pipe(gutil.env.devMode ? gutil.noop() : concat('stackato-libs.js'))
     .pipe(gutil.env.devMode ? gutil.noop() : gulp.dest(paths.dist + 'lib'));
 });
 
@@ -271,8 +271,16 @@ gulp.task('dev-default', function (next) {
   delete config.bower.exclude;
   usePlumber = false;
   runSequence(
-    'default',
+    'clean:dist',
+    'plugin',
+    'translate:compile',
+    'copy:js',
+    'copy:lib',
+    'css',
     'dev-template-cache',
+    'copy:html',
+    'copy:assets',
+    'inject:index',
     next
   );
 });
