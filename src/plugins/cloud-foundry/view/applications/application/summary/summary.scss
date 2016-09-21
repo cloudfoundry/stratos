@@ -15,14 +15,25 @@
       margin-left: auto;
     }
 
-    dd.nowrap {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    dd {
+      &.nowrap {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
 
-      &.align-right {
-        clear: right;
-        text-align: right;
+        &.align-right {
+          clear: right;
+          text-align: right;
+        }
+      }
+
+      .btn {
+        padding: 0;
+        font-size: inherit;
+        text-transform: none;
+        height: inherit;
+        display: table-cell;
+        line-height: normal;
       }
     }
 

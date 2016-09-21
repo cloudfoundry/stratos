@@ -57,7 +57,7 @@
     // Many columns
     @for $i from 2 through $card-layout-steps {
       @media (min-width: $i * $card-max-width) {
-        flex: 1 1 percentage(1/$i)
+        flex: 0 0 percentage(1/$i)
       }
     }
 
@@ -102,10 +102,6 @@
     >:nth-child(#{$card-layout-steps}n+1) {
       padding-left: 0;
     }
-  }
-
-  >:last-child {
-    padding-right: 0;
   }
 
 }
