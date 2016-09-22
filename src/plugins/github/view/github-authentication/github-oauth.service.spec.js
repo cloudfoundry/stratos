@@ -33,13 +33,13 @@
       expect(that.eventService.$emit).toHaveBeenCalledWith('vcs.OAUTH_CANCELLED');
     });
 
-    it('#start, promise is rejected when event `VCS_OAUTH_CANCELLED` is fired', function () {
+    it('#start, promise should be rejected when event `VCS_OAUTH_CANCELLED` is fired', function () {
       var promise = that.start();
       that.eventService.$emit('vcs.OAUTH_CANCELLED');
       expectRejectedWith(promise, 'VCS_OAUTH_CANCELLED');
     });
 
-    it('#start, promise should be resolve with message {"name": "VCS OAuth - success"}', function (done) {
+    it('#start, promise should be resolved with message {"name": "VCS OAuth - success"}', function (done) {
       var promise = that.start();
       that.$window.postMessage('{"name": "VCS OAuth - success"}', '*');
       setTimeout(function () {
@@ -57,7 +57,7 @@
       }, 0);
     });
 
-    it('#start, promise should be ignored with other message', function (done) {
+    it('#start, promise should be ignored with other messages', function (done) {
       var promise = that.start();
       that.$window.postMessage('{}', '*');
       setTimeout(function () {
