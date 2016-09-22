@@ -46,7 +46,6 @@
           "name": "ETCD_STRICT_RECONFIG_CHECK"
         }
       ],
-      "affinity": [],
       "min_instances": 5,
       "max_instances": 5,
       "service_ports": [
@@ -124,7 +123,6 @@
           "name": "STSENTINEL_DEBUG"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
       "service_ports": [
@@ -200,7 +198,6 @@
           "name": "stolon"
         }
       ],
-      "affinity": [],
       "min_instances": 3,
       "max_instances": 3,
       "service_ports": [
@@ -268,7 +265,6 @@
           "name": "STPROXY_DEBUG"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
       "service_ports": [
@@ -362,7 +358,6 @@
           "name": "ENCRYPTION_KEY_FILENAME"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
       "service_ports": [
@@ -409,7 +404,6 @@
           "name": "console-cert-key"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
       "service_ports": [
@@ -488,7 +482,6 @@
           "name": "ENCRYPTION_KEY_FILENAME"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
       "timeout": 300,
@@ -558,7 +551,6 @@
           "name": "UPGRADE_LOCK_FILENAME"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
       "timeout": 300,
