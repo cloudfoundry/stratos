@@ -12,10 +12,12 @@ PEER_COMM_PORT="2380"
 HOST_NAME="hsc-etcd-${HCP_COMPONENT_INDEX}-int"
 echo "ETCD container hostname setting: ${HOST_NAME}"
 
-ADVERTISE_PEER_URLS="http://${HOST_NAME}:${PEER_COMM_PORT}"
+HOST_URL="${HOST_NAME}.${HCP_SERVICE_DOMAIN_SUFFIX}.${HCP_DOMAIN_SUFFIX}"
+
+ADVERTISE_PEER_URLS="http://${HOST_URL}:${PEER_COMM_PORT}"
 echo "Advertise peer URLs: ${ADVERTISE_PEER_URLS}"
 
-ADVERTISE_CLIENT_URLS="http://${HOST_NAME}:${CLIENT_COMM_PORT}"
+ADVERTISE_CLIENT_URLS="http://${HOST_URL}:${CLIENT_COMM_PORT}"
 echo "Advertise client URLs: ${ADVERTISE_CLIENT_URLS}"
 
 # These ENV VARs are defined/set in SDL and are applicable for each
