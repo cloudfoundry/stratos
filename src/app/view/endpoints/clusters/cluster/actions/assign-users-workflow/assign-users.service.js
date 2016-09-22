@@ -3,7 +3,8 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster')
-    .factory('app.view.endpoints.clusters.cluster.assignUsers', AssignUserFactory);
+    .factory('app.view.endpoints.clusters.cluster.assignUsers', AssignUserFactory)
+    .controller('app.view.endpoints.clusters.cluster.assignUsersController', AssignUsersWorkflowController);
 
   AssignUserFactory.$inject = [
     'helion.framework.widgets.detailView'
@@ -79,7 +80,6 @@
     var orgWatch;
 
     function initialise() {
-
       that.data.clusterGuid = context.clusterGuid || $stateParams.guid;
       that.data.organizationGuid = context.organizationGuid || $stateParams.organization;
       that.data.spaceGuid = context.spaceGuid || $stateParams.spaceGuid;
