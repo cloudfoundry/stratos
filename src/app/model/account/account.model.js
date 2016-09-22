@@ -41,7 +41,7 @@
     this.apiManager = apiManager;
     this.$q = $q;
     this.loggedIn = false;
-    this.data = {};
+    this.accountData = {};
   }
 
   angular.extend(Account.prototype, {
@@ -131,7 +131,7 @@
      * @returns {boolean} True if this user is an ITOps admin
      */
     isAdmin: function () {
-      return this.data && this.data.isAdmin;
+      return this.accountData && this.accountData.isAdmin;
     },
 
     /**
@@ -143,11 +143,13 @@
      */
     onLoggedIn: function (response) {
       this.loggedIn = true;
+      var sessionExpiresOnEpoch = response.headers()['x-cnap-session-expires-on'];
 
       var loginRes = response.data;
-      this.data = {
+      this.accountData = {
         username: loginRes.account,
-        isAdmin: loginRes.admin
+        isAdmin: loginRes.admin,
+        sessionExpiresOn: moment.unix(sessionExpiresOnEpoch)
       };
     },
 
@@ -161,7 +163,7 @@
       var sessionName = this.apiManager.retrieve('app.api.account').sessionName;
       this.$cookies.remove(sessionName);
       this.loggedIn = false;
-      delete this.data;
+      delete this.accountData;
     }
 
   });
