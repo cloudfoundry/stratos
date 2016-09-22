@@ -7,6 +7,7 @@
 
     var cnsi = 1234;
     var project = {
+      id: 1234,
       repo: {
         full_name: 'test_full_name',
         http_url: 'https://github.com'
@@ -20,6 +21,7 @@
     var defaultCommitsRequest = '/pp/v1/vcs/repos/' + project.repo.full_name + '/commits?per_page=' +
       defaultCommitCount;
     var defaultTriggerRequest = '/pp/v1/proxy/v2/pipelines/triggers';
+    var defaultUpdateProjectRequest = '/pp/v1/proxy/v2/projects/1234';
     var defaultCommit = {
       sha: '1234'
     };
@@ -141,21 +143,34 @@
         });
 
         it('Basic successful trigger', function () {
-          $httpBackend.expectPOST(defaultTriggerRequest, {commit_ref: defaultCommit.sha}).respond();
-          controller.build();
+          $httpBackend.expectPOST(defaultTriggerRequest, {project_id: 1234, commit_ref: defaultCommit.sha}).respond(200);
+
+          controller.build().then(function () {
+            expect($uibModalInstance.close).toHaveBeenCalled();
+            expect($uibModalInstance.dismiss).not.toHaveBeenCalled();
+            expect(controller.triggerError).toBeFalsy();
+          });
+
           $httpBackend.flush();
-          expect($uibModalInstance.close).toHaveBeenCalled();
-          expect($uibModalInstance.dismiss).not.toHaveBeenCalled();
-          expect(controller.triggerError).toBeFalsy();
         });
 
         it('Basic failed trigger', function () {
-          $httpBackend.expectPOST(defaultTriggerRequest, {commit_ref: defaultCommit.sha}).respond(500);
-          controller.build();
+          dialogContext.project.id = 1234;
+          $httpBackend.expectPOST(defaultTriggerRequest, {project_id: 1234, commit_ref: defaultCommit.sha}).respond(500);
+          $httpBackend.expectPUT(defaultUpdateProjectRequest, project).respond(500);
+
+          controller.build().then(function () {
+            $httpBackend.flush();
+
+            expect($uibModalInstance.close).not.toHaveBeenCalled();
+            expect($uibModalInstance.dismiss).not.toHaveBeenCalled();
+            expect(controller.triggerError).toBeTruthy();
+            expect(controller.triggering).toBeFalsy();
+          });
+
+          expect(controller.triggering).toBeTruthy();
+
           $httpBackend.flush();
-          expect($uibModalInstance.close).not.toHaveBeenCalled();
-          expect($uibModalInstance.dismiss).not.toHaveBeenCalled();
-          expect(controller.triggerError).toBeTruthy();
         });
 
       });

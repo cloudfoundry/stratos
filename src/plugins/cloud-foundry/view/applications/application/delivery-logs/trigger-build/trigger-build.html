@@ -15,12 +15,12 @@
   <div ng-if="detailViewCtrl.isAuthenticated" class="delivery-log-flex">
 
     <!-- Commits are being fetched -->
-    <div ng-if="detailViewCtrl.fetchError === undefined" class="message-box message-box-no-bg">
+    <div ng-if="detailViewCtrl.fetchError === undefined || detailViewCtrl.triggering" class="message-box message-box-no-bg">
       <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
     </div>
 
     <!-- Commits have been fetched, no errors -->
-    <div ng-if="detailViewCtrl.fetchError === false" class="delivery-log-flex">
+    <div ng-if="detailViewCtrl.fetchError === false && !detailViewCtrl.triggering" class="delivery-log-flex">
 
       <!-- No commits for this project (think this might be impossible?) -->
       <div ng-if="detailViewCtrl.githubModel.data.commits.length < 1" class="message-box message-box-no-bg">
@@ -52,9 +52,8 @@
       </div>
 
       <!-- Failed to trigger a build -->
-      <div ng-if="detailViewCtrl.triggerError" class="alert alert-danger pull-left">
-        <p translate> There was a problem triggering the build. Please try again. If this error persists, please contact the
-          administrator. </p>
+      <div ng-if="!detailViewCtrl.triggering && detailViewCtrl.triggerError" class="alert alert-danger pull-left">
+        <p translate>There was a problem triggering the build. Please try again. If this error persists, please contact the administrator.</p>
       </div>
 
       <div class="delivery-log-trigger-build-buttons">
@@ -62,7 +61,7 @@
           CANCEL
         </button>
         <button translate type="button" class="btn btn-primary next" ng-click="detailViewCtrl.build()"
-                ng-disabled="!detailViewCtrl.selectedCommit || detailViewCtrl.githubModel.data.commits.length < 1">
+                ng-disabled="!detailViewCtrl.selectedCommit || detailViewCtrl.githubModel.data.commits.length < 1 || detailViewCtrl.triggering">
           START BUILD
         </button>
       </div>
@@ -70,8 +69,7 @@
 
     <!-- Commits have failed to have been fetched -->
     <div ng-if="detailViewCtrl.fetchError" class="alert alert-danger pull-left">
-      <p translate> There was a problem fetching commits. Please try again. If this error persists, please contact the
-        administrator. </p>
+      <p translate>There was a problem fetching commits. Please try again. If this error persists, please contact the administrator.</p>
     </div>
 
   </div>
