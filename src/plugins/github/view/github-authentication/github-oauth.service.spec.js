@@ -1,14 +1,14 @@
 (function () {
   'use strict';
+  /* eslint-disable angular/no-private-call */
+  /* eslint-disable angular/timeout-service */
 
   describe('github.view.githubOauthService - ', function () {
-    var that, $rootScope, $timeout;
+    var that;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       that = $injector.get('github.view.githubOauthService');
-      $rootScope = $injector.get('$rootScope');
-      $timeout = $injector.get('$timeout');
     }));
 
     it('should be defined', function () {
@@ -67,7 +67,6 @@
     });
   });
 
-  /* eslint-disable angular/no-private-call */
   function expectResolveWith(promise, value) {
     expect(promise.$$state.status).toBe(1);
     expect(promise.$$state.value).toBe(value);
@@ -77,6 +76,8 @@
     expect(promise.$$state.status).toBe(2);
     expect(promise.$$state.value).toBe(value);
   }
+
+  /* eslint-enable angular/timeout-service */
   /* eslint-enable angular/no-private-call */
 
 })();
