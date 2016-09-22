@@ -28,10 +28,6 @@ s3-access-key | This should be your AWS S3 access key. | console-ci-master
 s3-secret | This should be your AWS S3 secret. | console-ci-master
 s3-version-bucket | This should be a bucket in S3 that will contain a file that is used to track the current version of the Console. | console-ci-master
 s3-version-key | The full path within the noted `s3-version-bucket` to the version file, including the filename. | console-ci-master
-s3-hsm-bucket | The Helion Service Manager bucket name for Console HSM assets. The real, live one is `helion-service-manager`. DO NOT use this one for testing. | console-ci-master
-s3-hsm-sdl | The full path within the `s3-hsm-bucket` to the `sdl.json` file, including the filename. | console-ci-master
-s3-hsm-instance | The full path within the `s3-hsm-bucket` to the `instance.json` file, including the filename. | console-ci-master
-s3-hsm-config | The full path within the `s3-hsm-bucket` to the `config.json` file, including the filename. | console-ci-master
 registry | The registry used to store the tagged docker images required to install the Console within HCP. Generally this is one of two values: 1) `docker-registry.helion.space:443`, the shared internal HPE registry. 2) the registry url for DockerHub | console-ci-master
 github-access-token | This should be a Github access token with `repo:status` (public repos) or `repo` access (private repos). | console-ui-tests
 github-private-key | This should be a private SSH key properly authorized to interact against the GitHub repos your pipeline with operate against. | console-ci-master, console-ui-tests
