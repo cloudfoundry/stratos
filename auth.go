@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -53,6 +54,9 @@ const UAAAdminIdentifier = "hcp.admin"
 // HCFAdminIdentifier - The identifier that the Cloud Foundry HCF Service uses to convey administrative level perms
 const HCFAdminIdentifier = "cloud_controller.admin"
 
+// Custom header for communicating the session expiry time to clients
+const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	logger.Debug("loginToUAA")
 
@@ -74,6 +78,14 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	if err = p.setSessionValues(c, sessionValues); err != nil {
 		return err
 	}
+
+	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
+	// the Set-Cookie header and session cookie expires_on from client side javascript
+	expOn, ok := p.getSessionValue(c, "expires_on")
+	if !ok {
+		return err
+	}
+	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
 	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
@@ -446,6 +458,14 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 			return err
 		}
 	}
+
+	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
+	// the Set-Cookie header and session cookie expires_on from client side javascript
+	expOn, ok := p.getSessionValue(c, "expires_on")
+	if !ok {
+		return err
+	}
+	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
 	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
 

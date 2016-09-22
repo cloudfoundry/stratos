@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"database/sql"
+	"encoding/gob"
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
@@ -56,6 +57,9 @@ func main() {
 	// initially set log output to stdout to capture errors with loading portalconfig
 	logger.Out = os.Stdout
 	logger.Info("Proxy initialization started.")
+
+	// Register time.Time  in gob
+	gob.Register(time.Time{})
 
 	// Load the portal configuration from env vars via ucpconfig
 	var portalConfig portalConfig
