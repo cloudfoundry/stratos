@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  describe('roles-smart-search directive', function () {
-    var $httpBackend, element;
+  describe('selected-users-list directive', function () {
+    var $httpBackend, element, controller;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -11,22 +11,19 @@
       var $compile = $injector.get('$compile');
 
       var contextScope = $injector.get('$rootScope').$new();
-      contextScope.stTable = [];
-      contextScope.rolesSmartSearch = '';
-      contextScope.rolesSmartSearchBy = undefined;
-      contextScope.rolesSmartSearchDisable = undefined;
+      contextScope.selectedUsers = undefined;
+      contextScope.maxVisibleUsers = undefined;
 
-      var markup = '<div ' +
-        'st-table="stTable" ' +
-        'roles-smart-search="rolesSmartSearch">' +
-        'roles-smart-search-by="rolesSmartSearchBy">' +
-        'roles-smart-search-disable="rolesSmartSearchDisable">' +
-        '</div>';
+      var markup = '<selected-users-list ' +
+        'selected-users="selectedUsers" ' +
+        'max-visible-users="maxVisibleUsers">' +
+        '</selected-users-list>';
 
       element = angular.element(markup);
       $compile(element)(contextScope);
 
       contextScope.$apply();
+      controller = element.controller('selectedUsersList');
     }));
 
     afterEach(function () {
@@ -36,6 +33,7 @@
 
     it('should be defined', function () {
       expect(element).toBeDefined();
+      expect(controller).toBeDefined();
     });
 
   });

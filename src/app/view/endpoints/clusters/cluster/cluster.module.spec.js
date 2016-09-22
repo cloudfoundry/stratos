@@ -8,7 +8,6 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
-    beforeEach(module('green-box-console'));
 
     var clusterGuid = 'clusterGuid';
 
@@ -60,14 +59,13 @@
       });
 
       // list all users
-      $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond([]);
+      $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: []});
     }
 
     it('initial state', function () {
       standardRequests();
 
       expect($controller).toBeDefined();
-      expect($controller).not.toBe(null);
       expect($controller.initialized).toBeFalsy();
       expect($controller.guid).toEqual(clusterGuid);
       expect($controller.getEndpoint).toBeDefined();

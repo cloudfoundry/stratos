@@ -3,7 +3,7 @@
 
   describe('Manager Users test', function () {
 
-    var manageUsersService, organizationModel, authModel;
+    var $httpBackend, manageUsersService, organizationModel, authModel;
 
     var constants = {
       clusterGuid: 'clusterGuid',
@@ -34,12 +34,18 @@
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
+      $httpBackend = $injector.get('$httpBackend');
       manageUsersService = $injector.get('app.view.endpoints.clusters.cluster.manageUsers');
 
       var modelManager = $injector.get('app.model.modelManager');
       organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       authModel = modelManager.retrieve('cloud-foundry.model.auth');
     }));
+
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
 
     it('should be defined', function () {
       expect(manageUsersService).toBeDefined();

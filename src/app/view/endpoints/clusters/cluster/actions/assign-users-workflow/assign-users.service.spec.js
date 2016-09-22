@@ -106,7 +106,5 @@
       expect(assignUsersController.actions.finish).toBeDefined();
 
     });
-
-
   });
 })();

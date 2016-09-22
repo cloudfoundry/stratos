@@ -6502,7 +6502,7 @@
           };
         default:
           return {
-            url: '/pp/v1/proxy/v2/organizations?exclude-relations=domains,private_domains,space_quota_definitions&inline-relations-depth=2&results-per-page=100',
+            url: '/pp/v1/proxy/v2/organizations?results-per-page=100',
 
             response: {
 
