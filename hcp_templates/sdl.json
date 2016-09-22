@@ -812,8 +812,8 @@
     },
     {
       "name": "ALLOWED_ORIGINS",
-      "description": "Allowed origins - WHAT DOES THIS NEED TO BE SET TO ?!?!?!?!?!?!??",
-      "default": "https://localhost,https://127.0.0.1,http://192.168.200.2,https://192.168.200.2,http://192.168.200.3,https://192.168.200.3,http://172.17.27.1,https://172.17.27.1",
+      "description": "Allowed origins for the Console proxy.",
+      "default": "https://hsc-proxy-int,http://hsc-proxy-int",
       "data_type": "string",
       "required": true,
       "secret": false
