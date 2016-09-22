@@ -49,9 +49,9 @@
     var activityPromptShown = false;
 
     function logout() {
-      $log.info('Logging out');
+      $log.debug('Logging out');
       return accountModel.logout().finally(function () {
-        $log.info('Reloading page');
+        $log.debug('Reloading page');
         $window.location = '/';
       });
     }
@@ -92,7 +92,7 @@
       });
       dialog.result
         .then(function () {
-          $log.info('User is still here! Automatically refresh session activityPromptShown: ' + activityPromptShown);
+          $log.debug('User is still here! Automatically refresh session');
           return accountModel.verifySession().catch(function (error) {
             // If we fail to refresh, logout!
             $log.error('Failed to refreshed Session!', error);
@@ -115,9 +115,9 @@
       var delta = safeExpire.diff(now);
       var aboutToExpire = delta < warnBeforeLogout;
 
-      var idleDelta = now.diff(lastUserInteraction);
-      var userIsActive = idleDelta < userIdlePeriod;
       if (aboutToExpire) {
+        var idleDelta = now.diff(lastUserInteraction);
+        var userIsActive = idleDelta < userIdlePeriod;
         if (userIsActive) {
           accountModel.verifySession().catch(function (error) {
             // If we fail to refresh, logout!
