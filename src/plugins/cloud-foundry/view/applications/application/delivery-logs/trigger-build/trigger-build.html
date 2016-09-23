@@ -11,11 +11,24 @@
     </div>
   </div>
 
+  <div ng-if="detailViewCtrl.permissionError">
+    <div class="alert alert-danger">
+      <p translate>You don't have permissions to trigger a build for this repository.</p>
+    </div>
+  </div>
+
+  <!-- Commits have failed to have been fetched -->
+  <div ng-if="detailViewCtrl.fetchError">
+    <div class="alert alert-danger">
+      <p translate>There was a problem fetching commits. Please try again. If this error persists, please contact the administrator.</p>
+    </div>
+  </div>
+
   <!-- User has a github token -->
   <div ng-if="detailViewCtrl.isAuthenticated" class="delivery-log-flex">
 
     <!-- Commits are being fetched -->
-    <div ng-if="detailViewCtrl.fetchError === undefined || detailViewCtrl.triggering" class="message-box message-box-no-bg">
+    <div ng-if="detailViewCtrl.fetching || detailViewCtrl.triggering" class="message-box message-box-no-bg">
       <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
     </div>
 
@@ -66,11 +79,5 @@
         </button>
       </div>
     </div>
-
-    <!-- Commits have failed to have been fetched -->
-    <div ng-if="detailViewCtrl.fetchError" class="alert alert-danger pull-left">
-      <p translate>There was a problem fetching commits. Please try again. If this error persists, please contact the administrator.</p>
-    </div>
-
   </div>
 </div>

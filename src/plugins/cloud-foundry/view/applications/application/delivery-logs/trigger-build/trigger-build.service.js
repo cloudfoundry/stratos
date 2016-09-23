@@ -109,7 +109,7 @@
 
     fetchCommits: function () {
       var that = this;
-      this.fetchError = undefined;
+      this.fetching = true;
 
       var githubOptions = {
         headers: {
@@ -119,16 +119,22 @@
       };
       that.githubModel.commits(that.context.project.repo.full_name, that.context.project.repo.branch, 20, githubOptions)
         .then(function () {
+          that.fetching = false;
           that.fetchError = false;
+          that.permissionError = false;
           that.selectedCommit =
             _.get(that, 'githubModel.data.commits.length') ? that.githubModel.data.commits[0] : null;
         })
         .catch(function (response) {
           if (response.status === 401) {
             that.isAuthenticated = false;
+          } else if (response.status === 404) {
+            that.permissionError = true;
           } else {
             that.fetchError = true;
           }
+
+          that.fetching = false;
         });
     },
 
