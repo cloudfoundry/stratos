@@ -45,32 +45,25 @@
       });
 
       it('should have been rest properly', function () {
-        expect(addPipelineWorkflowCtrl.userInput).toEqual({
-          name: application.summary.name,
-          serviceInstance: application.cluster,
-          clusterUsername: null,
-          clusterPassword: null,
-          organization: { entity: application.organization },
-          space: { entity: application.space },
-          host: host,
-          domain: domain,
-          application: application,
-          hceCnsi: null,
-          source: null,
-          repo: null,
-          repoFilterTerm: null,
-          branch: null,
-          buildContainer: null,
-          projectId: null,
-          imageRegistry: null,
-          searchCategory: 'all',
-          search: {
-            entity: {
-              extra: undefined
-            }
-          }
-        });
-
+        expect(addPipelineWorkflowCtrl.userInput.name).toBe(application.summary.name);
+        expect(addPipelineWorkflowCtrl.userInput.serviceInstance).toBe(application.cluster);
+        expect(addPipelineWorkflowCtrl.userInput.clusterUsername).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.clusterPassword).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.organization).toBe(application.organization);
+        expect(addPipelineWorkflowCtrl.userInput.space).toBe(application.space);
+        expect(addPipelineWorkflowCtrl.userInput.host).toBe(host);
+        expect(addPipelineWorkflowCtrl.userInput.domain).toEqual(domain);
+        expect(addPipelineWorkflowCtrl.userInput.application).toBe(application);
+        expect(addPipelineWorkflowCtrl.userInput.hceCnsi).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.source).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.repo).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.repoFilterTerm).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.branch).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.buildContainer).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.projectId).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.imageRegistry).toBe(null);
+        expect(addPipelineWorkflowCtrl.userInput.searchCategory).toBe('all');
+        expect(addPipelineWorkflowCtrl.userInput.search.entity.extra).toBe(undefined);
         expect(addPipelineWorkflowCtrl.data.workflow.allowJump).toBe(false);
         expect(addPipelineWorkflowCtrl.data.workflow.allowBack).toBe(false);
         expect(addPipelineWorkflowCtrl.data.workflow.title).toBe('Add Pipeline');
