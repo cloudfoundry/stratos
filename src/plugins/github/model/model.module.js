@@ -213,7 +213,6 @@
           .catch(function (err) {
             that.onBranchesError();
             deferred.reject();
-            throw err;
           });
       }
 
@@ -262,7 +261,6 @@
         })
         .catch(function (err) {
           that.onCommitsError();
-          throw err;
         });
     },
 
