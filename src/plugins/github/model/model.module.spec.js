@@ -5,6 +5,16 @@
     var that, $httpBackend, $rootScope;
 
     beforeEach(module('green-box-console'));
+
+    beforeEach(module('cloud-foundry.view.applications.application.delivery-logs'));
+    beforeEach(module('ng', function ($exceptionHandlerProvider) {
+      // angular-mock implementation differs in the way it handles exceptions thrown by promises (it does not nicely
+      // wrap them as per the actual implementation). Therefor disable so we can test error cases.
+      // See stratos-ui/src/plugins/cloud-foundry/model/github/github.model.js +
+      // http://stackoverflow.com/questions/31538364/promise-catch-does-not-catch-exception-in-angularjs-unit-test
+      $exceptionHandlerProvider.mode('log');
+    }));
+
     beforeEach(inject(function ($injector) {
       var modelManager = $injector.get('app.model.modelManager');
       $httpBackend = $injector.get('$httpBackend');
