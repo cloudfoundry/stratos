@@ -7,27 +7,25 @@
 
   registerGithubApi.$inject = [
     '$http',
-    '$window',
     'app.api.apiManager',
     'GITHUB_ENDPOINTS'
   ];
 
-  function registerGithubApi($http, $window, apiManager, GITHUB_ENDPOINTS) {
-    apiManager.register('github.api', new GithubApi($http, $window, GITHUB_ENDPOINTS));
+  function registerGithubApi($http, apiManager, GITHUB_ENDPOINTS) {
+    apiManager.register('github.api', new GithubApi($http, GITHUB_ENDPOINTS));
   }
 
   /**
    * @memberof cloud-foundry.api.github
    * @name GithubApi
    * @param {object} $http - the Angular $http service
-   * @param {object} $window - the Angular $window service
    * @param {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
    * @property {object} $http - the Angular $http service
    * @property {GITHUB_ENDPOINTS} GITHUB_ENDPOINTS - the public Github Endpoints
    * @property {string} githubApiUrl - the Github API endpoint
    * @class
    */
-  function GithubApi($http, $window, GITHUB_ENDPOINTS) {
+  function GithubApi($http, GITHUB_ENDPOINTS) {
     this.$http = $http;
     this.GITHUB_ENDPOINTS = GITHUB_ENDPOINTS;
     this.githubApiUrl = '/pp/v1/vcs/';

@@ -279,7 +279,7 @@
      * @function onCommits
      * @memberof github.model.GithubModel
      * @description onCommits handler
-     * @param {string} response - the JSON response from API call
+     * @param {object} response - the JSON response from API call
      * @private
      */
     onCommits: function (response) {
