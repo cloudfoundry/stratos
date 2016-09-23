@@ -29,10 +29,10 @@
       $stateParams.space = spaceGuid;
 
       var modelManager = $injector.get('app.model.modelManager');
-      
+
       var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, space);
-      
+
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
         guid: 'user_guid',

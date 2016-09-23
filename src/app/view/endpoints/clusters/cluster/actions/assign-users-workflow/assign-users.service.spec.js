@@ -2,7 +2,7 @@
   'use strict';
 
   describe('Assign Users test', function () {
-    var assignUsersService, assignUsersController, $httpBackend, $uibModal, $uibModalInstance, $scope, modelManager,
+    var assignUsersService, assignUsersController, $httpBackend, $uibModalInstance, $scope, modelManager,
       rolesService, $stateParams, $q, $timeout, $controller, stackatoInfo;
 
     var clusterGuid = 'clusterGuid';
@@ -23,7 +23,6 @@
     beforeEach(inject(function ($injector) {
 
       $httpBackend = $injector.get('$httpBackend');
-      $uibModal = $injector.get('$uibModal');
       $uibModalInstance = {
         close: angular.noop,
         dismiss: angular.noop
