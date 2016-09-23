@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  /* eslint-disable angular/no-private-call */
   describe('github.model - ', function () {
     var that, $httpBackend, $rootScope;
 
@@ -143,7 +144,7 @@
           repos: [
             { permissions: { admin: true } }
           ],
-          links: {  },
+          links: {},
           page: 1
         });
       });
@@ -166,7 +167,7 @@
           repos: [
             { permissions: { admin: true } }
           ],
-          links: {  },
+          links: {},
           page: 1
         });
       });
@@ -287,7 +288,7 @@
     });
 
     it('#onBranchesError()', function () {
-      expect(that.onBranchesError()).toBeUndefined()
+      expect(that.onBranchesError()).toBeUndefined();
     });
 
     it('#onCommitsError()', function () {
@@ -296,4 +297,5 @@
       expect(that.data.commits.length).toBe(0);
     });
   });
+  /* eslint-enable angular/no-private-call */
 })();
