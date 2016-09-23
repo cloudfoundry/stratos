@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  fdescribe('github.model - ', function () {
+  describe('github.model - ', function () {
     var that, $httpBackend, $rootScope;
 
     beforeEach(module('green-box-console'));
