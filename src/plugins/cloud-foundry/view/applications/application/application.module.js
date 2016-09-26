@@ -214,6 +214,14 @@
         that.supportsVersions = !!that.versions.hasVersionSupport(that.cnsiGuid);
       });
 
+      var haveApplication = angular.isDefined(this.model.application) &&
+        angular.isDefined(this.model.application.summary) &&
+        angular.isDefined(this.model.application.state);
+
+      // If we already have an application - then we are ready to display straight away
+      // the rest of the data me migh tneed will load and update the UI incrementally
+      this.ready = haveApplication;
+
       return this.model.getAppSummary(this.cnsiGuid, this.id, true)
         .then(function () {
           that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,

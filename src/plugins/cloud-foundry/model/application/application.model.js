@@ -97,7 +97,8 @@
           hceServiceGuid: undefined,
           projectId: undefined
         },
-        project: null
+        project: null,
+        state: undefined
       };
     },
 
@@ -112,7 +113,18 @@
       this.application.summary = appSummaryMetadata.entity;
       this.application.instances = appSummaryMetadata.instances || {};
       this.application.instanceCount = appSummaryMetadata.instanceCount || 0;
-      this.application.state = appSummaryMetadata.state | {};
+      this.application.state = appSummaryMetadata.state || {};
+
+      // HACK: NEED TO FIX THIS
+      if (this.application.instances) {
+        var keys = Object.keys(this.application.instances);
+        if (keys && keys.length) {
+          this.application.stats = this.application.instances[keys[0]].stats;
+        }
+
+        var running = _.filter(this.application.instances, {state: 'RUNNING'});
+        this.application.summary.running_instances = running.length;
+      }
     },
 
     /**
