@@ -764,7 +764,7 @@
     },
     {
       "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
-      "description": "HTTP client timeoout",
+      "description": "HTTP client timeout",
       "default": "100",
       "data_type": "string",
       "required": true,
@@ -772,7 +772,7 @@
     },
     {
       "name": "SKIP_TLS_VERIFICATION",
-      "description": "To skip TLS or now?",
+      "description": "Change this value to true if TLS verification should be skipped for UAA, VCS related connections. Otherwise, accept the default and they will be verified.",
       "default": "false",
       "data_type": "string",
       "required": true,
