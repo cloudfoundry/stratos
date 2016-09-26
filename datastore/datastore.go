@@ -120,7 +120,11 @@ func buildConnectionString(dc DatabaseConfig) string {
 		connStr = connStr + fmt.Sprintf(" sslrootcert='%s'", escapeStr(dc.SSLRootCertificate))
 	}
 
-	log.Printf("DB Connection string: %s", connStr)
+	log.Printf("DB Connection string: dbname='%s' host='%s' port=%d connect_timeout=%d",
+		escapeStr(dc.Database),
+		dc.Host,
+		dc.Port,
+		dc.ConnectionTimeoutInSecs)
 
 	return connStr
 }
