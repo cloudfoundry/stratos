@@ -11,20 +11,6 @@ import (
 
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Request) (*http.Response, error) {
 	logger.Debug("doOauthFlowRequest")
-	// TODO (wchrisjohnson): Temporary measure until HCE has authentication; REMOVE befoe we ship
-	shouldSkipTokenAuth := "true" == cnsiRequest.Header.Get("x-cnap-skip-token-auth")
-	if shouldSkipTokenAuth {
-		res, err := httpClient.Do(req)
-		if err != nil {
-			return nil, fmt.Errorf("Request failed: %v", err)
-		}
-
-		if res.StatusCode != 401 {
-			return res, nil
-		}
-
-		return nil, fmt.Errorf("Request failed")
-	}
 
 	// get a cnsi token record and a cnsi record
 	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
