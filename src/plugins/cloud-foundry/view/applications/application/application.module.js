@@ -87,6 +87,7 @@
     this.cliCommands = cliCommands;
     this.hceCnsi = null;
     this.id = $stateParams.guid;
+    // Do we have the application summary? If so ready = true. This should be renamed
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 500000; // milliseconds
@@ -218,57 +219,64 @@
         angular.isDefined(this.model.application.summary) &&
         angular.isDefined(this.model.application.state);
 
-      // If we already have an application - then we are ready to display straight away
-      // the rest of the data me migh tneed will load and update the UI incrementally
-      this.ready = haveApplication;
+      // Block the automatic update until we've finished the first round
+      var blockUpdate = [];
 
       if (haveApplication) {
+        // If we already have an application - then we are ready to display straight away
+        // the rest of the data we might need will load and update the UI incrementally
+        this.ready = true;
+
+        // If we already have the application summary a lot of information can be requested in parrallel as the initial
+        // getAppSummary
         this.updateBuildPack();
+        this.updateHiddenProperties();
+
+        if (this.model.application.summary.state === 'STARTED') {
+          blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
+            that.model.onAppStateChange();
+          }));
+        }
       }
 
-      that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);
+      this.model.getAppDetailsOnOrgAndSpace(this.cnsiGuid, this.id);
 
-      if (haveApplication && this.model.application.summary.state === 'STARTED') {
-        this.model.getAppStats(this.cnsiGuid, this.id).then(function () {
-          that.model.onAppStateChange();
-        });
-      }
-
-      return this.model.getAppSummary(this.cnsiGuid, this.id, false)
+      var appSummaryPromise = this.model.getAppSummary(this.cnsiGuid, this.id, false)
         .then(function () {
           that.updateBuildPack();
-          that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
-            that.authModel.resources.application,
-            that.authModel.actions.update,
-            that.model.application.summary.space_guid
-          );
+          that.updateHiddenProperties();
 
-          that.hideDeliveryPipelineData = !that.authModel.isAllowed(that.cnsiGuid,
-            that.authModel.resources.application,
-            that.authModel.actions.update,
-            that.model.application.summary.space_guid
-          );
-
-          that.model.updateDeliveryPipelineMetadata(true)
+          // updateDeliveryPipelineMetadata requires summary.guid and summary.services which are only found in updated
+          // app summary
+          blockUpdate.push(that.model.updateDeliveryPipelineMetadata(true)
             .then(function (response) {
               return that.onUpdateDeliveryPipelineMetadata(response);
-            });
+            }));
 
           if (!haveApplication) {
-            that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
+            blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
               that.model.onAppStateChange();
-            });
+            }));
           }
-
-        }).finally(function () {
+        })
+        .finally(function () {
           that.ready = true;
+
+          that.onAppStateChange();
+
           // Don't start updating until we have completed the first init
           // Don't create timer when scope has been destroyed
           if (!that.scopeDestroyed) {
-            that.startUpdate();
+            return that.$q.all(blockUpdate).finally(function () {
+              that.startUpdate();
+            });
           }
-          that.onAppStateChange();
+
         });
+
+      // Only block on fetching the app summary, anything else is not required by child states... or is but watches for
+      // value change
+      return haveApplication ? this.$q.resolve() : appSummaryPromise;
     },
 
     /**
@@ -341,8 +349,21 @@
       // Convenience property, rather than verbose html determine which build pack to use here. Also resolves issue
       // where ng-if expressions (with function) were not correctly updating after on scope application.summary
       // changed
-      this.appBuildPack = this.model.application.summary.buildpack ||
-        this.model.application.summary.detected_buildpack;
+      this.appBuildPack = this.model.application.summary.buildpack || this.model.application.summary.detected_buildpack;
+    },
+
+    updateHiddenProperties: function () {
+      this.hideVariables = !this.authModel.isAllowed(this.cnsiGuid,
+        this.authModel.resources.application,
+        this.authModel.actions.update,
+        this.model.application.summary.space_guid
+      );
+
+      this.hideDeliveryPipelineData = !this.authModel.isAllowed(this.cnsiGuid,
+        this.authModel.resources.application,
+        this.authModel.actions.update,
+        this.model.application.summary.space_guid
+      );
     },
 
     /**
@@ -362,7 +383,7 @@
             if (!_.isNil(project)) {
               // Don't need to fetch VCS data every time if project hasn't changed
               if (_.isNil(that.model.application.project) ||
-                  that.model.application.project.id !== project.id) {
+                that.model.application.project.id !== project.id) {
                 return that.hceModel.getVcs(that.hceCnsi.guid, project.vcs_id)
                   .then(function () {
                     that.model.application.project = project;

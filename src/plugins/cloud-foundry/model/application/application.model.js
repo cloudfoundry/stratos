@@ -630,8 +630,8 @@
      * @description Returns the stats for the STARTED app
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
-     * @param {object} params - options for getting the stats of an app
-     * @param {boolean} noCache - Do not cache fetched data
+     * @param {object=} params - options for getting the stats of an app
+     * @param {boolean=} noCache - Do not cache fetched data
      * @returns {promise} A resolved/rejected promise
      * @public
      */
