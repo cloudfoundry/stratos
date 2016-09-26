@@ -85,8 +85,8 @@
       dialog = confirmDialog({
         title: gettext('Are you still there?'),
         description: function () {
-          return gettext('You have been inactive for a while. For your protection, ' +
-              'we will automatically log you out in') + ' ' + $interpolate('{{ getExpiryDuration() }}')(scope);
+          return $interpolate(gettext('You have been inactive for a while. For your protection, ' +
+              'we will automatically log you out in {{ getExpiryDuration() }}'))(scope);
         },
         moment: moment,
         hideNo: true,
