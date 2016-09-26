@@ -14,17 +14,18 @@
   registerModel.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
+    'app.logged-in.loggedInService',
     '$state',
     '$rootScope',
     '$log'
   ];
 
-  function registerModel(modelManager, eventService, $state, $rootScope, $log) {
+  function registerModel(modelManager, eventService, loggedInService, $state, $rootScope, $log) {
     /**
      * Register 'app.model.navigation' with the model manager service.
      * This model hosts the application's navigation tree.
      */
-    modelManager.register('app.model.navigation', new NavigationModel(eventService, $state, $rootScope, $log));
+    modelManager.register('app.model.navigation', new NavigationModel(eventService, loggedInService, $state, $rootScope, $log));
   }
 
   /**
@@ -33,6 +34,7 @@
    * @name NavigationModel
    * @constructor
    * @param {app.event.eventService} eventService - the event bus service
+   * @param {app.logged-in.loggedInService} loggedInService - the logged-in service
    * @param {object} $state - ui-router $state service
    * @param {object} $rootScope - Angular rootScope object
    * @param {object} $log - angular log service
@@ -40,7 +42,7 @@
    * @property {object} $state - ui-router $state service
    * @property {app.model.navigation} menu - the navigation model
    */
-  function NavigationModel(eventService, $state, $rootScope, $log) {
+  function NavigationModel(eventService, loggedInService, $state, $rootScope, $log) {
     var that = this;
     this.eventService = eventService;
     this.$state = $state;
@@ -68,6 +70,7 @@
       if (consoleViewScrollPanel[0]) {
         consoleViewScrollPanel[0].scrollTop = 0;
       }
+      loggedInService.userInteracted();
     });
   }
 
