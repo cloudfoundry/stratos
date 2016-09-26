@@ -68,3 +68,11 @@
     }
   }
 }
+
+.form-group.skip-ssl-validation-checkbox {
+  display: flex;
+
+  > checkbox-input {
+    display: flex;
+  }
+}

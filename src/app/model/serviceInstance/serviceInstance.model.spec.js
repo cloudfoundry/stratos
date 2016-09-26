@@ -33,8 +33,8 @@
     });
 
     it('should POST correct data on create()', function () {
-      var response = { cnsi_type: 'hcf', api_endpoint: 'url', name: 'name' };
-      var data = { api_endpoint: 'url', cnsi_name: 'name' };
+      var response = { cnsi_type: 'hcf', api_endpoint: 'url', name: 'name', skip_ssl_validation: false };
+      var data = { api_endpoint: 'url', cnsi_name: 'name', skip_ssl_validation: false };
       $httpBackend.expectPOST('/pp/v1/register/hcf', $httpParamSerializer(data)).respond(200, response);
       serviceInstance.create('hcf', 'url', 'name')
         .then(function () {

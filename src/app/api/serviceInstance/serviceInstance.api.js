@@ -44,16 +44,17 @@
      * @description Create a service instance
      * @param {string} url - the service instance endpoint
      * @param {string} name - the service instance friendly name
+     * @param {boolean} skipSslValidation - whether to skip SSL validation for this endpoint
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    create: function (url, name) {
+    create: function (url, name, skipSslValidation) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
-      var data = this.$httpParamSerializer({ api_endpoint: url, cnsi_name: name });
+      var data = this.$httpParamSerializer({ api_endpoint: url, cnsi_name: name, skip_ssl_validation: skipSslValidation });
       return this.$http.post('/pp/v1/register/hcf', data, config);
     },
 
@@ -63,16 +64,17 @@
      * @description Create a HCE service instance
      * @param {string} url - the service instance endpoint
      * @param {string} name - the service instance friendly name
+     * @param {boolean} skipSslValidation - whether to skip SSL validation for this endpoint
      * @returns {promise} A resolved/rejected promise
      * @public
      */
-    createHce: function (url, name) {
+    createHce: function (url, name, skipSslValidation) {
       var config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       };
-      var data = this.$httpParamSerializer({ api_endpoint: url, cnsi_name: name });
+      var data = this.$httpParamSerializer({ api_endpoint: url, cnsi_name: name, skip_ssl_validation: skipSslValidation });
       return this.$http.post('/pp/v1/register/hce', data, config);
     },
 

@@ -7,6 +7,7 @@
   ];
 
   var otherModules = [
+    'stackato-templates',
     'angularMoment',
     'gettext',
     'helion.framework',

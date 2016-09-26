@@ -64,12 +64,23 @@
 
         <dt translate>ORGANIZATION</dt>
         <dd class="pull-right">
-          {{ appCtrl.model.application.organization.name }}
+          <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.detail.spaces({
+                  guid: applicationSummaryCtrl.cnsiGuid,
+                  organization: applicationSummaryCtrl.model.application.organization.metadata.guid,
+          })" translate>
+            {{ appCtrl.model.application.organization.entity.name }}
+          </a>
         </dd>
 
         <dt translate>SPACE</dt>
         <dd class="pull-right">
-          {{ appCtrl.model.application.space.name }}
+          <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.services({
+                  guid: applicationSummaryCtrl.cnsiGuid,
+                  organization: applicationSummaryCtrl.model.application.organization.metadata.guid,
+                  space: applicationSummaryCtrl.model.application.space.metadata.guid
+          })" translate>
+            {{ appCtrl.model.application.space.entity.name }}
+          </a>
         </dd>
       </dl>
     </div>

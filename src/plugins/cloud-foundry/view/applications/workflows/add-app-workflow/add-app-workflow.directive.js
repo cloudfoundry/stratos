@@ -106,7 +106,7 @@
           that.startWorkflow();
         });
 
-        $scope.$watch(function () {
+        this.stopWatchServiceInstance = $scope.$watch(function () {
           return that.userInput.serviceInstance;
         }, function (serviceInstance) {
           that.userInput.organization = null;
@@ -119,7 +119,7 @@
           }
         });
 
-        $scope.$watch(function () {
+        this.stopWatchOrganization = $scope.$watch(function () {
           return that.userInput.organization;
         }, function (organization) {
           that.userInput.space = null;
@@ -128,7 +128,7 @@
           }
         });
 
-        $scope.$watch(function () {
+        this.stopWatchSpace = $scope.$watch(function () {
           return that.userInput.space;
         }, function (space) {
           if (space) {
@@ -136,7 +136,7 @@
           }
         });
 
-        $scope.$watch(function () {
+        this.stopWatchSearchCategory = $scope.$watch(function () {
           return that.userInput.searchCategory;
         }, function (newSearchCategory) {
           if (angular.isDefined(that.userInput.search)) {
@@ -144,7 +144,7 @@
           }
         });
 
-        $scope.$watch(function () {
+        this.stopWatchSubflow = $scope.$watch(function () {
           return that.options.subflow;
         }, function (subflow) {
           if (subflow) {
@@ -213,10 +213,19 @@
                         return that.authModel.doesUserHaveRole(cnsi.guid, that.authModel.roles.space_developer);
                       })
                       .map(function (o) {
-                        return {label: o.api_endpoint.Host, value: o};
+                        return {label: o.name, value: o};
                       })
                       .value();
                     [].push.apply(that.options.serviceInstances, validServiceInstances);
+
+                    if (!that.options.userInput.serviceInstance &&
+                      that.appModel.filterParams.cnsiGuid &&
+                      that.appModel.filterParams.cnsiGuid !== 'all') {
+                      // Find the option to set. If the user has no permissions this may be null
+                      var preSelectedService = _.find(that.options.serviceInstances, { value: { guid: that.appModel.filterParams.cnsiGuid}}) || {};
+                      that.options.userInput.serviceInstance = preSelectedService.value;
+                    }
+
                   });
               },
               onNext: function () {
@@ -398,13 +407,20 @@
           )
           .then(function () {
             // Route has been found, this is not a valid route to add
-            return that.$q.reject(gettext('This route already exists. Choose a new one.'));
+            return that.$q.reject({
+              exist: true
+            });
           })
           .catch(function (error) {
             if (error.status === 404) {
               // Route has not been found, this is a valid route to add
               return that.$q.resolve();
             }
+
+            if (error.exist) {
+              return that.$q.reject(gettext('This route already exists. Choose a new one.'));
+            }
+
             return that.$q.reject(gettext('There was a problem validating your route. Please try again.'));
           });
       },
@@ -422,7 +438,6 @@
 
         return this.organizationModel.listAllOrganizations(cnsiGuid)
           .then(function (organizations) {
-
             // Filter out organizations in which user does not
             // have any space where they aren't a developer
             // NOTE: This is unnecessary for admin users, and will fail
@@ -438,6 +453,14 @@
               });
             }
             [].push.apply(that.options.organizations, _.map(filteredOrgs, that.selectOptionMapping));
+
+            if (!that.options.userInput.organization &&
+              that.appModel.filterParams.orgGuid &&
+              that.appModel.filterParams.orgGuid !== 'all') {
+              // Find the option to set. If the user has no permissions this may be null
+              var preSelectedOrg = _.find(that.options.organizations, { value: { metadata: { guid: that.appModel.filterParams.orgGuid}}}) || {};
+              that.options.userInput.organization = preSelectedOrg.value;
+            }
           });
       },
 
@@ -463,6 +486,14 @@
                 {entity: {organization_guid: guid}});
             }
             [].push.apply(that.options.spaces, _.map(filteredSpaces, that.selectOptionMapping));
+
+            if (!that.options.userInput.space &&
+              that.appModel.filterParams.spaceGuid &&
+              that.appModel.filterParams.spaceGuid !== 'all') {
+              // Find the option to set. If the user has no permissions this may be null
+              var preSelectedOrg = _.find(that.options.spaces, { value: { metadata: { guid: that.appModel.filterParams.spaceGuid}}}) || {};
+              that.options.userInput.space = preSelectedOrg.value;
+            }
           });
       },
 

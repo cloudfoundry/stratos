@@ -91,7 +91,10 @@
       that._setClusters();
       that._setOrgs();
       that._setSpaces();
-      that._reload();
+      that._reload().finally(function () {
+        // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
+        that.ready = true;
+      });
       var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
       for (var i = 0; i < serviceInstances.length; i++) {
         var cluster = serviceInstances[i];
@@ -211,9 +214,13 @@
       this.currentPage = 0;
       this.paginationProperties.total = 0;
 
-      return this.model.resetPagination().
-        finally(function () {
+      return this.model.resetPagination()
+        .then(function () {
+          // Only in the success case is the pagination model set correctly. If the call is rejected pagination is
+          // likely to be undefined
           that.paginationProperties.total = that.model.pagination.totalPage;
+        })
+        .finally(function () {
           that.loading = false;
         });
     },
@@ -233,7 +240,6 @@
       return this.model.loadPage(page, cachedData)
         .finally(function () {
           that.currentPage = page;
-          that.ready = true;
           that.loading = false;
           that._handleErrors();
         });
@@ -252,7 +258,6 @@
           return that._loadPage(1, cachedData);
         } else {
           that._handleErrors();
-          return that.$q.resolve();
         }
       });
     },
@@ -273,7 +278,7 @@
         }
       });
       if (errors.length === 1) {
-        var errorMessage = 'The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.';
+        var errorMessage = gettext('The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
         that.errorService.setAppError(that.$interpolate(errorMessage)({name: errors[0]}));
       } else if (errors.length > 1) {
         that.errorService.setAppError(gettext('The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints.'));
