@@ -61,7 +61,7 @@
       scope.moment = moment;
 
       var skipDigest = false;
-      var digestInterval = $interval(function () {}, 100);
+      var digestInterval = $interval(function () {}, 1000);
       activityPromptShown = true;
 
       scope.getExpiryDuration = function () {
