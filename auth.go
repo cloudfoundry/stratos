@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -53,12 +54,17 @@ const UAAAdminIdentifier = "hcp.admin"
 // HCFAdminIdentifier - The identifier that the Cloud Foundry HCF Service uses to convey administrative level perms
 const HCFAdminIdentifier = "cloud_controller.admin"
 
+// Custom header for communicating the session expiry time to clients
+const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
+
+func (p *portalProxy) getHCPIdentityEndpoint() string {
+	return fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
+}
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	logger.Debug("loginToUAA")
 
-	var HCPIdentityEndpoint = fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
-
-	uaaRes, u, err := p.login(c, p.Config.SkipTLSVerification, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
+	uaaRes, u, err := p.login(c, p.Config.SkipTLSVerification, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
 	if err != nil {
 		err = newHTTPShadowError(
 			http.StatusUnauthorized,
@@ -74,6 +80,16 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	if err = p.setSessionValues(c, sessionValues); err != nil {
 		return err
 	}
+
+	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
+	// the Set-Cookie header and session cookie expires_on from client side javascript
+	expOn, ok := p.getSessionValue(c, "expires_on")
+	if !ok {
+		msg := "Could not get session expiry"
+		logger.Error(msg)
+		return echo.NewHTTPError(http.StatusInternalServerError, msg)
+	}
+	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
 	err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
@@ -395,12 +411,6 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
-		msg := "Session has expired"
-		logger.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
-
 	sessionUser, ok := p.getSessionStringValue(c, "user_id")
 	if !ok {
 		msg := "Could not find user_id in Session"
@@ -422,6 +432,49 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		logger.Error(msg, err)
 		return fmt.Errorf(msg, err)
 	}
+
+	 // Check if UAA token has expired
+	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
+		// UAA Token has expired, refresh the token, if that fails, fail the request
+
+		uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.SkipTLSVerification, tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
+		if err != nil {
+			msg := "Could not refresh UAA token"
+			logger.Error(msg, err)
+			return echo.NewHTTPError(http.StatusForbidden, msg)
+		}
+		u, err := getUserTokenInfo(uaaRes.AccessToken)
+		if err != nil {
+			return err
+		}
+
+		if err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken); err != nil {
+			return err
+		}
+		sessionValues := make(map[string]interface{})
+		sessionValues["user_id"] = u.UserGUID
+		sessionValues["exp"] = u.TokenExpiry
+
+		if err = p.setSessionValues(c, sessionValues); err != nil {
+			return err
+		}
+		userTokenInfo = u
+	} else {
+		// Still need to extend the expires_on of the Session
+		if err = p.setSessionValues(c, nil); err != nil {
+			return err
+		}
+	}
+
+	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
+	// the Set-Cookie header and session cookie expires_on from client side javascript
+	expOn, ok := p.getSessionValue(c, "expires_on")
+	if !ok {
+		msg := "Could not get session expiry"
+		logger.Error(msg)
+		return echo.NewHTTPError(http.StatusInternalServerError, msg)
+	}
+	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
 	uaaAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), UAAAdminIdentifier)
 

@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"database/sql"
+	"encoding/gob"
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
@@ -34,6 +35,7 @@ const (
 	WARN            = "warn"
 	ERROR           = "error"
 	FATAL           = "fatal"
+	SessionExpiry   = 20 * 60 // Session cookies expire after 20 minutes
 )
 
 var (
@@ -57,6 +59,9 @@ func main() {
 	// initially set log output to stdout to capture errors with loading portalconfig
 	logger.Out = os.Stdout
 	logger.Info("Proxy initialization started.")
+
+	// Register time.Time  in gob
+	gob.Register(time.Time{})
 
 	// Load the portal configuration from env vars via ucpconfig
 	var portalConfig portalConfig
@@ -111,13 +116,19 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
+
+	sessionStore.Options.MaxAge = SessionExpiry;
+
 	defer func() {
 		logger.Info(`--- Closing sessionStore`)
 		sessionStore.Close()
 	}()
+
+	// Ensure the cleanup tick starts now (this will delete expired sessions from the DB)
+	quitCleanup, doneCleanup := sessionStore.Cleanup(time.Minute * 3)
 	defer func() {
 		logger.Info(`--- Setting up sessionStore cleanup`)
-		sessionStore.StopCleanup(sessionStore.Cleanup(time.Minute * 5))
+		sessionStore.StopCleanup(quitCleanup, doneCleanup)
 	}()
 	logger.Info("Proxy session store initialized.")
 

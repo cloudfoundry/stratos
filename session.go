@@ -1,8 +1,11 @@
 package main
 
 import (
+	"time"
+
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+	"github.com/gorilla/sessions"
 )
 
 const (
@@ -43,30 +46,38 @@ func (p *portalProxy) getSessionStringValue(c echo.Context, key string) (string,
 	return intf.(string), true
 }
 
+func (p *portalProxy) saveSession(c echo.Context, session *sessions.Session) error {
+	req := c.Request().(*standard.Request).Request
+	res := c.Response().(*standard.Response).ResponseWriter
+
+	expiresOn := time.Now().Add(time.Second * time.Duration(session.Options.MaxAge))
+	session.Values["expires_on"] = expiresOn
+
+	return p.SessionStore.Save(req, res, session)
+}
+
 func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interface{}) error {
 	logger.Debug("setSessionValues")
 
 	req := c.Request().(*standard.Request).Request
-	res := c.Response().(*standard.Response).ResponseWriter
 	session, _ := p.SessionStore.Get(req, portalSessionName)
 
 	for k, v := range values {
 		session.Values[k] = v
 	}
 
-	return p.SessionStore.Save(req, res, session)
+	return p.saveSession(c, session)
 }
 
 func (p *portalProxy) unsetSessionValue(c echo.Context, sessionKey string) error {
 	logger.Debug("unsetSessionValues")
 
 	req := c.Request().(*standard.Request).Request
-	res := c.Response().(*standard.Response).ResponseWriter
 	session, _ := p.SessionStore.Get(req, portalSessionName)
 
 	delete(session.Values, sessionKey)
 
-	return p.SessionStore.Save(req, res, session)
+	return p.saveSession(c, session)
 }
 
 func (p *portalProxy) clearSession(c echo.Context) error {
