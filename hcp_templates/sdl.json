@@ -773,7 +773,7 @@
     {
       "name": "SKIP_TLS_VERIFICATION",
       "description": "To skip TLS or now?",
-      "default": "true",
+      "default": "false",
       "data_type": "string",
       "required": true,
       "secret": false
