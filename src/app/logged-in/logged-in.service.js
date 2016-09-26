@@ -38,13 +38,17 @@
     var accountModel = modelManager.retrieve('app.model.account');
     var sessionChecker, dialog;
 
-    var warnBeforeLogout = 2 * 60 * 1000; // warn user 2 minutes before logout
+    // Check the session every 30 seconds (Note: this is vey cheap to do unless the session is about to expire)
+    var checkSessionInterval = 30 * 1000;
 
-    // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
-    var autoLogoutDelta = 5 * 1000;
+    // Warn inactive users 2 minutes before logging them out
+    var warnBeforeLogout = 2 * 60 * 1000;
 
     // User considered idle if no interaction for 5 minutes
     var userIdlePeriod = 5 * 60 * 1000;
+
+    // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
+    var autoLogoutDelta = 5 * 1000;
 
     var activityPromptShown = false;
 
@@ -132,7 +136,7 @@
 
     eventService.$on(eventService.events.LOGIN, function () {
       loggedIn = true;
-      sessionChecker = $interval(checkSession, 30000);
+      sessionChecker = $interval(checkSession, checkSessionInterval);
     });
 
     eventService.$on(eventService.events.LOGOUT, function () {
