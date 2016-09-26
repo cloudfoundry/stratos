@@ -35,7 +35,7 @@ const (
 	WARN            = "warn"
 	ERROR           = "error"
 	FATAL           = "fatal"
-	SessionExpiry = 20 * 60 // Session cookies expire after 20 minutes
+	SessionExpiry   = 20 * 60 // Session cookies expire after 20 minutes
 )
 
 var (
