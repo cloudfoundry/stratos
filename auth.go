@@ -57,12 +57,14 @@ const HCFAdminIdentifier = "cloud_controller.admin"
 // Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
 
+func (p *portalProxy) getHCPIdentityEndpoint() string {
+	return fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
+}
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	logger.Debug("loginToUAA")
 
-	var HCPIdentityEndpoint = fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
-
-	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
+	uaaRes, u, err := p.login(c, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
 	if err != nil {
 		err = newHTTPShadowError(
 			http.StatusUnauthorized,
@@ -83,6 +85,10 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	// the Set-Cookie header and session cookie expires_on from client side javascript
 	expOn, ok := p.getSessionValue(c, "expires_on")
 	if !ok {
+		err = newHTTPShadowError(
+			http.StatusInternalServerError,
+			"Could not get session expiry",
+			"Could not get session value expires_on: %v", err)
 		return err
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
@@ -428,9 +434,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 		// UAA Token has expired, refresh the token, if that fails, fail the request
 
-		var HCPIdentityEndpoint = fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
-
-		uaaRes, err := p.getUAATokenWithRefreshToken(tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, HCPIdentityEndpoint)
+		uaaRes, err := p.getUAATokenWithRefreshToken(tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
 		if err != nil {
 			msg := "Could not refresh UAA token"
 			logger.Error(msg, err)
@@ -463,6 +467,10 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	// the Set-Cookie header and session cookie expires_on from client side javascript
 	expOn, ok := p.getSessionValue(c, "expires_on")
 	if !ok {
+		err = newHTTPShadowError(
+			http.StatusInternalServerError,
+			"Could not get session expiry",
+			"Could not get session value expires_on: %v", err)
 		return err
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
