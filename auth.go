@@ -85,11 +85,9 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	// the Set-Cookie header and session cookie expires_on from client side javascript
 	expOn, ok := p.getSessionValue(c, "expires_on")
 	if !ok {
-		err = newHTTPShadowError(
-			http.StatusInternalServerError,
-			"Could not get session expiry",
-			"Could not get session value expires_on: %v", err)
-		return err
+		msg := "Could not get session expiry"
+		logger.Error(msg)
+		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
@@ -439,7 +437,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 		// UAA Token has expired, refresh the token, if that fails, fail the request
 
-		uaaRes, err := p.getUAATokenWithRefreshToken(tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
+		uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.SkipTLSVerification, tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
 		if err != nil {
 			msg := "Could not refresh UAA token"
 			logger.Error(msg, err)
@@ -472,11 +470,9 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	// the Set-Cookie header and session cookie expires_on from client side javascript
 	expOn, ok := p.getSessionValue(c, "expires_on")
 	if !ok {
-		err = newHTTPShadowError(
-			http.StatusInternalServerError,
-			"Could not get session expiry",
-			"Could not get session value expires_on: %v", err)
-		return err
+		msg := "Could not get session expiry"
+		logger.Error(msg)
+		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
