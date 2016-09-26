@@ -27,6 +27,7 @@ var (
 	notfoundTpl = template.Must(template.ParseFiles(filepath.Join(cwd, "./templates/clientNotFound.html")))
 )
 
+// GithubUser - TBD
 type GithubUser struct {
 	ID   string `json:"id"`
 	Name string `json:"login"`
@@ -103,7 +104,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		oauthConf := &vcsConfig
 
 		tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
-		if p.Config.SkipTLSVerification {
+		if p.Config.VCSClientSkipSSLMap[vcsClientKey] == true {
 			tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		}
 		client := &http.Client{Transport: tr}

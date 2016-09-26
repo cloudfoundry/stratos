@@ -94,7 +94,7 @@ func main() {
 		logger.Info("Flight recorder endpoint not set.")
 	}
 
-	portalConfig.VCSClientMap, err = getVCSClients(portalConfig)
+	portalConfig.VCSClientMap, portalConfig.VCSClientSkipSSLMap, err = getVCSClients(portalConfig)
 	if err != nil {
 		logger.Error("Error parsing VCS clients")
 	}
@@ -117,7 +117,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	sessionStore.Options.MaxAge = SessionExpiry;
+	sessionStore.Options.MaxAge = SessionExpiry
 
 	defer func() {
 		logger.Info(`--- Closing sessionStore`)

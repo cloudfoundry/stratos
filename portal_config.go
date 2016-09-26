@@ -26,4 +26,5 @@ type portalConfig struct {
 	EncryptionKey           string   `ucp:"ENCRYPTION_KEY"`
 	EncryptionKeyInBytes    []byte
 	VCSClientMap            map[VCSClientMapKey]oauth2.Config
+	VCSClientSkipSSLMap     map[VCSClientMapKey]bool
 }

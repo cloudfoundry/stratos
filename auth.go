@@ -54,7 +54,7 @@ const UAAAdminIdentifier = "hcp.admin"
 // HCFAdminIdentifier - The identifier that the Cloud Foundry HCF Service uses to convey administrative level perms
 const HCFAdminIdentifier = "cloud_controller.admin"
 
-// Custom header for communicating the session expiry time to clients
+// SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
 
 func (p *portalProxy) getHCPIdentityEndpoint() string {
@@ -433,7 +433,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return fmt.Errorf(msg, err)
 	}
 
-	 // Check if UAA token has expired
+	// Check if UAA token has expired
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 		// UAA Token has expired, refresh the token, if that fails, fail the request
 
