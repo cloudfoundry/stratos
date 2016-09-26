@@ -83,8 +83,8 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 
 	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
 	// the Set-Cookie header and session cookie expires_on from client side javascript
-	expOn, ok := p.getSessionValue(c, "expires_on")
-	if !ok {
+	expOn, err := p.getSessionValue(c, "expires_on")
+	if err != nil {
 		msg := "Could not get session expiry"
 		logger.Error(msg)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
@@ -127,8 +127,8 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	}
 
 	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
-	userID, ok := p.getSessionStringValue(c, "user_id")
-	if !ok {
+	userID, err := p.getSessionStringValue(c, "user_id")
+	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 	u.UserGUID = userID
@@ -219,8 +219,8 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 			"Need CNSI GUID passed as form param")
 	}
 
-	userID, ok := p.getSessionStringValue(c, "user_id")
-	if !ok {
+	userID, err := p.getSessionStringValue(c, "user_id")
+	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 
@@ -404,15 +404,15 @@ func (p *portalProxy) setUAATokenRecord(key string, t tokens.TokenRecord) error 
 
 func (p *portalProxy) verifySession(c echo.Context) error {
 	logger.Debug("verifySession")
-	sessionExpireTime, ok := p.getSessionInt64Value(c, "exp")
-	if !ok {
+	sessionExpireTime, err := p.getSessionInt64Value(c, "exp")
+	if err != nil {
 		msg := "Could not find session date"
 		logger.Error(msg)
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
-	sessionUser, ok := p.getSessionStringValue(c, "user_id")
-	if !ok {
+	sessionUser, err := p.getSessionStringValue(c, "user_id")
+	if err != nil {
 		msg := "Could not find user_id in Session"
 		logger.Error(msg)
 		return echo.NewHTTPError(http.StatusForbidden, msg)
@@ -468,8 +468,8 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	// Explicitly tell the client when this session will expire. This is needed because browsers actively hide
 	// the Set-Cookie header and session cookie expires_on from client side javascript
-	expOn, ok := p.getSessionValue(c, "expires_on")
-	if !ok {
+	expOn, err := p.getSessionValue(c, "expires_on")
+	if err != nil {
 		msg := "Could not get session expiry"
 		logger.Error(msg)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)

@@ -179,8 +179,8 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
 	p.unsetCNSIRecord(cnsiGUID)
 
-	userID, ok := p.getSessionStringValue(c, "user_id")
-	if !ok {
+	userID, err := p.getSessionStringValue(c, "user_id")
+	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 
@@ -229,8 +229,8 @@ func (p *portalProxy) listCNSIs(c echo.Context) error {
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 	logger.Debug("listRegisteredCNSIs")
-	userGUIDIntf, ok := p.getSessionValue(c, "user_id")
-	if !ok {
+	userGUIDIntf, err := p.getSessionValue(c, "user_id")
+	if err != nil {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
 			"User session could not be found",

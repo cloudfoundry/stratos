@@ -12,12 +12,15 @@ import (
 func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		logger.Debug("sessionMiddleware")
-		if userID, ok := p.getSessionValue(c, "user_id"); ok {
+		userID, err := p.getSessionValue(c, "user_id")
+		if err == nil {
 			c.Set("user_id", userID)
 			return h(c)
 		}
-
-		return c.NoContent(http.StatusUnauthorized)
+		if _, ok := err.(*SessionValueNotFound); ok {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+		return c.NoContent(http.StatusServiceUnavailable)
 	}
 }
 
@@ -36,7 +39,7 @@ func (p *portalProxy) stackatoAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 	return func(c echo.Context) error {
 		// if user is an admin, passthrough request
 		// get the user guid
-		if userID, ok := p.getSessionValue(c, "user_id"); ok {
+		if userID, err := p.getSessionValue(c, "user_id"); err == nil {
 			// check their admin status in UAA
 			u, err := p.getUAAUser(userID.(string))
 			if err != nil {

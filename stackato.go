@@ -33,8 +33,8 @@ func (p *portalProxy) stackatoInfo(c echo.Context) error {
 	}
 
 	// get the user
-	userGUID, ok := p.getSessionStringValue(c, "user_id")
-	if !ok {
+	userGUID, err := p.getSessionStringValue(c, "user_id")
+	if err != nil {
 		msg := "Could not find session user_id"
 		logger.Error(msg)
 		return echo.NewHTTPError(http.StatusForbidden, msg)
