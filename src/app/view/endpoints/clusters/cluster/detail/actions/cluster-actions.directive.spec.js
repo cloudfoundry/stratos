@@ -54,7 +54,7 @@
         };
       }
 
-      function setupFeatureFlagsRequest() {
+      function setupSummaryRequest() {
         $httpBackend.whenGET('/pp/v1/proxy/v2/users/0c97cd5a-8ef8-4f80-af46-acfa8697824e/summary').respond(200, {
           metadata: {
             guid: "a256c708-09cc-4650-ac7d-a44b291fe997",
@@ -221,138 +221,43 @@
         });
       }
 
-      function setupSummary() {
-        $httpBackend.whenGET('/pp/v1/proxy/v2/config/feature_flags').respond(200, [
-          {
-            name: 'user_org_creation',
-            enabled: false,
-            error_message: null,
-            url: '/v2/config/feature_flags/user_org_creation'
-          },
-          {
-            name: 'route_creation',
-            enabled: true,
-            error_message: null,
-            url: '/v2/config/feature_flags/route_creation'
-          },
-          {
-            name: 'service_instance_creation',
-            enabled: true,
-            error_message: null,
-            url: '/v2/config/feature_flags/service_instance_creation'
-          }
-        ]);
+      function setupFeatureFlagsRequest() {
+        $httpBackend.whenGET(mock.cloudFoundryAPI.FeatureFlags.url).respond(
+          mock.cloudFoundryAPI.FeatureFlags.success.code,
+          mock.cloudFoundryAPI.FeatureFlags.success.response);
       }
 
-      function setupOrganizations(isOrgManager) {
-        $httpBackend.whenGET('/pp/v1/proxy/v2/users/0c97cd5a-8ef8-4f80-af46-acfa8697824e/audited_organizations?results-per-page=100')
-          .respond(200, {
-            total_results: 0,
-            total_pages: 0,
-            prev_url: null,
-            next_url: null,
-            resources: []
-          });
+      function setupOrganizations(isOrgManager, guid) {
 
-        $httpBackend.whenGET('/pp/v1/proxy/v2/users/0c97cd5a-8ef8-4f80-af46-acfa8697824e/billing_managed_organizations?results-per-page=100')
-          .respond(200, {
-            total_results: 0,
-            total_pages: 0,
-            prev_url: null,
-            next_url: null,
-            resources: []
-          });
+        $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllAuditedOrganizationsForUser(guid).url,
+          mock.cloudFoundryAPI.Users.ListAllAuditedOrganizationsForUser(guid).success.response.code,
+          mock.cloudFoundryAPI.Users.ListAllAuditedOrganizationsForUser(guid).success.response.response);
 
-        $httpBackend.whenGET('/pp/v1/proxy/v2/users/0c97cd5a-8ef8-4f80-af46-acfa8697824e/managed_organizations?results-per-page=100')
-          .respond(200, {
-            total_results: isOrgManager ? 1 : 0,
-            total_pages: isOrgManager ? 1 : 0,
-            prev_url: null,
-            next_url: null,
-            resources: isOrgManager ? [{
-              total_results: 1,
-              total_pages: 1,
-              prev_url: null,
-              next_url: null,
-              resources: [
-                {
-                  metadata: {
-                    guid: "guid",
-                    url: "/v2/organizations/guid",
-                    created_at: "2016-08-25T12:02:01Z",
-                    updated_at: null
-                  },
-                  entity: {
-                    name: "BRUI",
-                    "billing_enabled": false,
-                    "quota_definition_guid": "guid",
-                    "status": "active",
-                    "quota_definition_url": "/v2/quota_definitions/guid",
-                    "spaces_url": "/v2/organizations/guid/spaces",
-                    "domains_url": "/v2/organizations/guid/domains",
-                    "private_domains_url": "/v2/organizations/guid/private_domains",
-                    "users_url": "/v2/organizations/guid/users",
-                    "managers_url": "/v2/organizations/guid/managers",
-                    "billing_managers_url": "/v2/organizations/guid/billing_managers",
-                    "auditors_url": "/v2/organizations/guid/auditors",
-                    "app_events_url": "/v2/organizations/guid/app_events",
-                    "space_quota_definitions_url": "/v2/organizations/guid/space_quota_definitions"
-                  }
-                }
-              ]
-            }] : []
-          });
+        $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllBillingManagedOrganizationsForUser(guid).url,
+          mock.cloudFoundryAPI.Users.ListAllBillingManagedOrganizationsForUser(guid).success.code,
+          mock.cloudFoundryAPI.Users.ListAllBillingManagedOrganizationsForUser(guid).success.response);
 
-        $httpBackend.whenGET('/pp/v1/proxy/v2/users/0c97cd5a-8ef8-4f80-af46-acfa8697824e/organizations?results-per-page=100')
-          .respond(200, {
-            total_results: 1,
-            total_pages: 1,
-            prev_url: null,
-            next_url: null,
-            resources: [{
-              total_results: 1,
-              total_pages: 1,
-              prev_url: null,
-              next_url: null,
-              resources: [
-                {
-                  metadata: {
-                    guid: "guid",
-                    url: "/v2/organizations/guid",
-                    created_at: "2016-08-25T12:02:01Z",
-                    updated_at: null
-                  },
-                  entity: {
-                    name: "BRUI",
-                    "billing_enabled": false,
-                    "quota_definition_guid": "guid",
-                    "status": "active",
-                    "quota_definition_url": "/v2/quota_definitions/guid",
-                    "spaces_url": "/v2/organizations/guid/spaces",
-                    "domains_url": "/v2/organizations/guid/domains",
-                    "private_domains_url": "/v2/organizations/guid/private_domains",
-                    "users_url": "/v2/organizations/guid/users",
-                    "managers_url": "/v2/organizations/guid/managers",
-                    "billing_managers_url": "/v2/organizations/guid/billing_managers",
-                    "auditors_url": "/v2/organizations/guid/auditors",
-                    "app_events_url": "/v2/organizations/guid/app_events",
-                    "space_quota_definitions_url": "/v2/organizations/guid/space_quota_definitions"
-                  }
-                }
-              ]
-            }]
-          });
+        if (isOrgManager) {
+          $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllManagedOrganizationsForUser(guid).url,
+            mock.cloudFoundryAPI.Users.ListAllManagedOrganizationsForUser(guid).success.is_manager.code,
+            mock.cloudFoundryAPI.Users.ListAllManagedOrganizationsForUser(guid).success.is_manager.response);
+        } else {
+          $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllManagedOrganizationsForUser(guid).url,
+            mock.cloudFoundryAPI.Users.ListAllManagedOrganizationsForUser(guid).success.is_not_manager.code,
+            mock.cloudFoundryAPI.Users.ListAllManagedOrganizationsForUser(guid).success.is_not_manager.response);
+        }
+
+        $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllOrganizationsForUser(guid).url,
+          mock.cloudFoundryAPI.Users.ListAllOrganizationsForUser(guid).success.code,
+          mock.cloudFoundryAPI.Users.ListAllOrganizationsForUser(guid).success.response);
       }
 
       function setupSpaces(isSpaceManager, isSpaceDeveloper) {
-        $httpBackend.whenGET('/pp/v1/proxy/v2/users/0c97cd5a-8ef8-4f80-af46-acfa8697824e/audited_spaces?results-per-page=100')
-          .respond(200, {
-            total_results: 0,
-            total_pages: 0,
-            prev_url: null,
-            next_url: null,
-            resources: []
-          });
+
+        $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllAuditedOrganizationsForUser(guid).url,
+          mock.cloudFoundryAPI.Users.ListAllAuditedOrganizationsForUser(guid).success.response.code,
+          mock.cloudFoundryAPI.Users.ListAllAuditedOrganizationsForUser(guid).success.response.response);
+
         $httpBackend.whenGET('/pp/v1/proxy/v2/users/0c97cd5a-8ef8-4f80-af46-acfa8697824e/managed_spaces?results-per-page=100')
           .respond(200, {
             total_results: isSpaceManager ? 1 : 0,

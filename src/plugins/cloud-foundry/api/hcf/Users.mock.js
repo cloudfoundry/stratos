@@ -7,93 +7,44 @@
   // NOTE: This is not complete, I've just dont the minimum I required for Endpoints/ACL tests
   mock.cloudFoundryAPI.Users = {
 
+    // Organizations
     ListAllAuditedOrganizationsForUser: function (guid) {
       return {
         url: '/pp/v1/proxy/v2/users/' + guid + '/audited_organizations?results-per-page=100',
 
-        response: {
-
-          200: {
-            body: {
+        success: {
+          response: {
+            data: {
               total_results: 0,
               total_pages: 0,
               prev_url: null,
               next_url: null,
               resources: []
-            },
-
-            500: {
-              body: {
-                total_results: 0,
-                total_pages: 0,
-                prev_url: null,
-                next_url: null,
-                resources: []
-              }
             }
 
-          }
+          },
+          code: 200
         }
       };
     },
 
-    ListAllAuditedSpacesForUser: function (guid) {
-      return {
-        url: '/pp/v1/proxy/v2/users/' + guid + '/audited_spaces?results-per-page=100',
-
-        response: {
-
-          200: {
-            body: {
-              total_results: 0,
-              total_pages: 0,
-              prev_url: null,
-              next_url: null,
-              resources: []
-            },
-
-            500: {
-              body: {
-                total_results: 0,
-                total_pages: 0,
-                prev_url: null,
-                next_url: null,
-                resources: []
-              }
-            }
-
-          }
-        }
-      };
-    },
 
     ListAllBillingManagedOrganizationsForUser: function (guid) {
       return {
         url: '/pp/v1/proxy/v2/users/' + guid + '/billing_managed_organizations?results-per-page=100',
-
-        response: {
-
-          200: {
-            body: {
+        success: {
+          response: {
+            data: {
               total_results: 0,
               total_pages: 0,
               prev_url: null,
               next_url: null,
               resources: []
-            },
-
-            500: {
-              body: {
-                total_results: 0,
-                total_pages: 0,
-                prev_url: null,
-                next_url: null,
-                resources: []
-              }
             }
-
-          }
+          },
+          code: 200
         }
+
       };
     },
 
@@ -101,11 +52,10 @@
       return {
         url: '/pp/v1/proxy/v2/users/' + guid + '/managed_organizations?results-per-page=100',
 
-        response: {
-
+        success: {
           is_manager: {
-            200: {
-              body: {
+            response: {
+              data: {
                 total_results: 1,
                 total_pages: 1,
                 prev_url: null,
@@ -137,22 +87,90 @@
                   }
                 ]
               }
-            }
+            },
+            code: 200
           },
           is_not_manager: {
-            200: {
-              body: {
+            response: {
+              data: {
                 total_results: 0,
                 total_pages: 0,
                 prev_url: null,
                 next_url: null,
                 resources: []
-              }
+              },
+              code: 200
             }
           }
         }
       };
     },
+
+    ListAllOrganizationsForUser: function (guid) {
+      return {
+        url: '/pp/v1/proxy/v2/users/' + guid + '/organizations?results-per-page=100',
+
+        success: {
+          code: 200,
+          response: {
+            body: {
+              total_results: 1,
+              total_pages: 1,
+              prev_url: null,
+              next_url: null,
+              resources: [
+                {
+                  metadata: {
+                    guid: "guid",
+                    url: "/v2/organizations/guid",
+                    created_at: "2016-08-25T12:02:01Z",
+                    updated_at: null
+                  },
+                  entity: {
+                    name: "BRUI",
+                    "billing_enabled": false,
+                    "quota_definition_guid": "guid",
+                    "status": "active",
+                    "quota_definition_url": "/v2/quota_definitions/guid",
+                    "spaces_url": "/v2/organizations/guid/spaces",
+                    "domains_url": "/v2/organizations/guid/domains",
+                    "private_domains_url": "/v2/organizations/guid/private_domains",
+                    "users_url": "/v2/organizations/guid/users",
+                    "managers_url": "/v2/organizations/guid/managers",
+                    "billing_managers_url": "/v2/organizations/guid/billing_managers",
+                    "auditors_url": "/v2/organizations/guid/auditors",
+                    "app_events_url": "/v2/organizations/guid/app_events",
+                    "space_quota_definitions_url": "/v2/organizations/guid/space_quota_definitions"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      };
+    },
+
+    // Space
+    ListAllAuditedSpacesForUser: function (guid) {
+      return {
+        url: '/pp/v1/proxy/v2/users/' + guid + '/audited_spaces?results-per-page=100',
+
+        success: {
+          response: {
+            data: {
+              total_results: 0,
+              total_pages: 0,
+              prev_url: null,
+              next_url: null,
+              resources: []
+            }
+
+          },
+          code: 200
+        }
+      };
+    },
+
     ListAllManagedSpacesForUser: function (guid) {
       return {
         url: '/pp/v1/proxy/v2/users/' + guid + '/managed_spaces?results-per-page=100',
@@ -209,49 +227,7 @@
         }
       };
     },
-    ListAllOrganizationsForUser: function (guid) {
-      return {
-        url: '/pp/v1/proxy/v2/users/' + guid + '/organizations?results-per-page=100',
 
-        response: {
-
-          200: {
-            body: {
-              total_results: 1,
-              total_pages: 1,
-              prev_url: null,
-              next_url: null,
-              resources: [
-                {
-                  metadata: {
-                    guid: "guid",
-                    url: "/v2/organizations/guid",
-                    created_at: "2016-08-25T12:02:01Z",
-                    updated_at: null
-                  },
-                  entity: {
-                    name: "BRUI",
-                    "billing_enabled": false,
-                    "quota_definition_guid": "guid",
-                    "status": "active",
-                    "quota_definition_url": "/v2/quota_definitions/guid",
-                    "spaces_url": "/v2/organizations/guid/spaces",
-                    "domains_url": "/v2/organizations/guid/domains",
-                    "private_domains_url": "/v2/organizations/guid/private_domains",
-                    "users_url": "/v2/organizations/guid/users",
-                    "managers_url": "/v2/organizations/guid/managers",
-                    "billing_managers_url": "/v2/organizations/guid/billing_managers",
-                    "auditors_url": "/v2/organizations/guid/auditors",
-                    "app_events_url": "/v2/organizations/guid/app_events",
-                    "space_quota_definitions_url": "/v2/organizations/guid/space_quota_definitions"
-                  }
-                }
-              ]
-            }
-          }
-        }
-      };
-    },
     ListAllSpacesForUser: function (guid) {
       return {
         url: '/pp/v1/proxy/v2/users/' + guid + '/spaces?results-per-page=100',
