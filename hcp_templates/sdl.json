@@ -834,7 +834,7 @@
     },
     {
       "name": "VCS_CLIENTS",
-      "description": "VCS Clients for OAuth",
+      "description": "VCS Clients for OAuth: VCS Provider (string),VCS URL (string),Client ID (string),Client Secret (string),Skip SSL (true|false)",
       "data_type": "string",
       "required": true,
       "secret": false
