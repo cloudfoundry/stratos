@@ -90,7 +90,7 @@
     // Do we have the application summary? If so ready = true. This should be renamed
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
-    this.UPDATE_INTERVAL = 500000; // milliseconds
+    this.UPDATE_INTERVAL = 5000; // milliseconds
     this.supportsVersions = false;
     that.hideVariables = true;
     that.hideDeliveryPipelineData = true;
