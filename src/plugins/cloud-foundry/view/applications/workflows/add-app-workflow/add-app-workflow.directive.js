@@ -106,7 +106,7 @@
           that.startWorkflow();
         });
 
-        $scope.$watch(function () {
+        this.stopWatchServiceInstance = $scope.$watch(function () {
           return that.userInput.serviceInstance;
         }, function (serviceInstance) {
           that.userInput.organization = null;
@@ -119,7 +119,7 @@
           }
         });
 
-        $scope.$watch(function () {
+        this.stopWatchOrganization = $scope.$watch(function () {
           return that.userInput.organization;
         }, function (organization) {
           that.userInput.space = null;
@@ -128,7 +128,7 @@
           }
         });
 
-        $scope.$watch(function () {
+        this.stopWatchSpace = $scope.$watch(function () {
           return that.userInput.space;
         }, function (space) {
           if (space) {
@@ -136,7 +136,7 @@
           }
         });
 
-        $scope.$watch(function () {
+        this.stopWatchSearchCategory = $scope.$watch(function () {
           return that.userInput.searchCategory;
         }, function (newSearchCategory) {
           if (angular.isDefined(that.userInput.search)) {
@@ -144,7 +144,7 @@
           }
         });
 
-        $scope.$watch(function () {
+        this.stopWatchSubflow = $scope.$watch(function () {
           return that.options.subflow;
         }, function (subflow) {
           if (subflow) {
@@ -407,13 +407,20 @@
           )
           .then(function () {
             // Route has been found, this is not a valid route to add
-            return that.$q.reject(gettext('This route already exists. Choose a new one.'));
+            return that.$q.reject({
+              exist: true
+            });
           })
           .catch(function (error) {
             if (error.status === 404) {
               // Route has not been found, this is a valid route to add
               return that.$q.resolve();
             }
+
+            if (error.exist) {
+              return that.$q.reject(gettext('This route already exists. Choose a new one.'));
+            }
+
             return that.$q.reject(gettext('There was a problem validating your route. Please try again.'));
           });
       },
@@ -431,7 +438,6 @@
 
         return this.organizationModel.listAllOrganizations(cnsiGuid)
           .then(function (organizations) {
-
             // Filter out organizations in which user does not
             // have any space where they aren't a developer
             // NOTE: This is unnecessary for admin users, and will fail

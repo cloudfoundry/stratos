@@ -53,20 +53,23 @@
       win.focus();
 
       return this.$q(function (resolve, reject) {
-        that.$window.addEventListener('message', function (event) {
-          var message = angular.fromJson(event.data);
+        that.$window.addEventListener('message', onMessage);
 
+        that.eventService.$on('vcs.OAUTH_CANCELLED', function () {
+          that.$window.removeEventListener('message', onMessage);
+          reject('VCS_OAUTH_CANCELLED');
+        });
+
+        function onMessage(event) {
+          var message = angular.fromJson(event.data);
           if (message.name === 'VCS OAuth - success') {
             resolve();
             win.close();
           } else if (message.name === 'VCS OAuth - failure') {
             reject();
           }
-        });
-
-        that.eventService.$on('vcs.OAUTH_CANCELLED', function () {
-          reject('VCS_OAUTH_CANCELLED');
-        });
+          that.$window.removeEventListener('message', onMessage);
+        }
       });
     },
 
