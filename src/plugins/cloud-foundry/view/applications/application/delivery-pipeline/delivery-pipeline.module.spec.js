@@ -77,7 +77,7 @@
             valid: true
           }
         });
-        account.data = {isAdmin: true};
+        account.accountData = {isAdmin: true};
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(1);
@@ -104,7 +104,7 @@
             valid: false
           }
         });
-        account.data = {isAdmin: true};
+        account.accountData = {isAdmin: true};
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(1);
