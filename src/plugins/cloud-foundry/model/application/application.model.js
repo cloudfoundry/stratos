@@ -349,10 +349,11 @@
      */
     getClusterWithId: function (cnsiGuid) {
       var that = this;
-      return this.serviceInstanceModel.list()
-        .then(function () {
-          that.application.cluster = that.serviceInstanceModel.serviceInstances[cnsiGuid];
-        });
+      var isAvailable = that.serviceInstanceModel.serviceInstances[cnsiGuid];
+      var p = isAvailable ? this.$q.resolve(true) : this.serviceInstanceModel.list();
+      return p.then(function () {
+        that.application.cluster = that.serviceInstanceModel.serviceInstances[cnsiGuid];
+      });
     },
 
     /**

@@ -89,7 +89,7 @@
     this.id = $stateParams.guid;
     this.ready = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
-    this.UPDATE_INTERVAL = 5000; // milliseconds
+    this.UPDATE_INTERVAL = 500000; // milliseconds
     this.supportsVersions = false;
     that.hideVariables = true;
     that.hideDeliveryPipelineData = true;
@@ -222,8 +222,21 @@
       // the rest of the data me migh tneed will load and update the UI incrementally
       this.ready = haveApplication;
 
-      return this.model.getAppSummary(this.cnsiGuid, this.id, true)
+      if (haveApplication) {
+        this.updateBuildPack();
+      }
+
+      that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id);
+
+      if (haveApplication && this.model.application.summary.state === 'STARTED') {
+        this.model.getAppStats(this.cnsiGuid, this.id).then(function () {
+          that.model.onAppStateChange();
+        });
+      }
+
+      return this.model.getAppSummary(this.cnsiGuid, this.id, false)
         .then(function () {
+          that.updateBuildPack();
           that.hideVariables = !that.authModel.isAllowed(that.cnsiGuid,
             that.authModel.resources.application,
             that.authModel.actions.update,
@@ -236,22 +249,25 @@
             that.model.application.summary.space_guid
           );
 
-          return that.model.getAppDetailsOnOrgAndSpace(that.cnsiGuid, that.id)
-          .then(function () {
-            return that.model.updateDeliveryPipelineMetadata(true)
-              .then(function (response) {
-                return that.onUpdateDeliveryPipelineMetadata(response);
-              });
-          })
-          .finally(function () {
-            that.ready = true;
-            // Don't start updating until we have completed the first init
-            // Don't create timer when scope has been destroyed
-            if (!that.scopeDestroyed) {
-              that.startUpdate();
-            }
-            that.onAppStateChange();
-          });
+          that.model.updateDeliveryPipelineMetadata(true)
+            .then(function (response) {
+              return that.onUpdateDeliveryPipelineMetadata(response);
+            });
+
+          if (!haveApplication) {
+            that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
+              that.model.onAppStateChange();
+            });
+          }
+
+        }).finally(function () {
+          that.ready = true;
+          // Don't start updating until we have completed the first init
+          // Don't create timer when scope has been destroyed
+          if (!that.scopeDestroyed) {
+            that.startUpdate();
+          }
+          that.onAppStateChange();
         });
     },
 
@@ -317,12 +333,16 @@
     updateSummary: function () {
       var that = this;
       return this.model.getAppSummary(this.cnsiGuid, this.id, true).then(function () {
-        // Convenience property, rather than verbose html determine which build pack to use here. Also resolves issue
-        // where ng-if expressions (with function) were not correctly updating after on scope application.summary
-        // changed
-        that.appBuildPack = that.model.application.summary.buildpack ||
-          that.model.application.summary.detected_buildpack;
+        that.updateBuildPack();
       });
+    },
+
+    updateBuildPack: function () {
+      // Convenience property, rather than verbose html determine which build pack to use here. Also resolves issue
+      // where ng-if expressions (with function) were not correctly updating after on scope application.summary
+      // changed
+      this.appBuildPack = this.model.application.summary.buildpack ||
+        this.model.application.summary.detected_buildpack;
     },
 
     /**
