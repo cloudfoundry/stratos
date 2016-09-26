@@ -39,8 +39,9 @@ const (
 )
 
 var (
-	httpClient = http.Client{}
-	logger     = logrus.New()
+	httpClient        = http.Client{}
+	httpClientSkipSSL = http.Client{}
+	logger            = logrus.New()
 )
 
 func cleanup(dbc *sql.DB, ss *pgstore.PGStore) {
@@ -71,8 +72,7 @@ func main() {
 	logger.Info("Proxy configuration loaded.")
 
 	// Initialize the HTTP client
-	initializeHTTPClient(portalConfig.SkipTLSVerification,
-		time.Duration(portalConfig.HTTPClientTimeoutInSecs)*time.Second)
+	initializeHTTPClients(time.Duration(portalConfig.HTTPClientTimeoutInSecs) * time.Second)
 	logger.Info("HTTP client initialized.")
 
 	// Get the encryption key we need for tokens in the database
@@ -286,14 +286,18 @@ func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalPr
 	return pp
 }
 
-func initializeHTTPClient(skipCertVerification bool, timeoutInSeconds time.Duration) {
-	logger.Debug("initializeHTTPClient")
+func initializeHTTPClients(timeoutInSeconds time.Duration) {
+	logger.Debug("initializeHTTPClients")
 	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
-	if skipCertVerification {
-		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
+	tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: false}
 	httpClient.Transport = tr
 	httpClient.Timeout = time.Second * timeoutInSeconds
+
+	trSkipSSL := &http.Transport{Proxy: http.ProxyFromEnvironment}
+	trSkipSSL.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	httpClientSkipSSL.Transport = trSkipSSL
+	httpClientSkipSSL.Timeout = time.Second * timeoutInSeconds
+
 }
 
 func start(p *portalProxy) error {

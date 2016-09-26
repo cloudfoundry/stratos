@@ -517,14 +517,14 @@ func TestRefreshTokenWithInvalidRefreshToken(t *testing.T) {
 
 	// Setup for getCNSITokenRecord
 	tokenExpiration := time.Now().AddDate(0, 0, 1).Unix()
-	expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
-		AddRow(mockUAAToken, mockUAAToken, tokenExpiration)
-	sql := `SELECT auth_token, refresh_token, token_expiry FROM tokens`
+	expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "skip_ssl_validation"}).
+		AddRow(mockUAAToken, mockUAAToken, tokenExpiration, true)
+	sql := `SELECT auth_token, refresh_token, token_expiry, skip_ssl_validation FROM tokens`
 	mock.ExpectQuery(sql).
 		WithArgs(mockCNSIGUID, mockUserGUID).
 		WillReturnRows(expectedCNSITokenRow)
 
-	_, err := pp.refreshToken(cnsiGUID, userGUID, client, clientSecret, invalidTokenEndpoint)
+	_, err := pp.refreshToken(true, cnsiGUID, userGUID, client, clientSecret, invalidTokenEndpoint)
 	if err == nil {
 		t.Error("Unexpected success - should not be able to refresh  token with bad token endpoint.")
 	}
