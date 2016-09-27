@@ -46,8 +46,8 @@
           "name": "ETCD_STRICT_RECONFIG_CHECK"
         }
       ],
-      "min_instances": 5,
-      "max_instances": 5,
+      "min_instances": 3,
+      "max_instances": 3,
       "service_ports": [
         {
           "name": "etcd-client",
@@ -902,7 +902,7 @@
     {
       "name": "ETCD_INITIAL_CLUSTER",
       "description": "A comma delimited list of nodes that make up the initial cluster for etcd.",
-      "default": "hsc-etcd-0-int=http://hsc-etcd-0-int:2380,hsc-etcd-1-int=http://hsc-etcd-1-int:2380,hsc-etcd-2-int=http://hsc-etcd-2-int:2380,hsc-etcd-3-int=http://hsc-etcd-3-int:2380,hsc-etcd-4-int=http://hsc-etcd-4-int:2380"
+      "default": "hsc-etcd-0-int=http://hsc-etcd-0-int:2380,hsc-etcd-1-int=http://hsc-etcd-1-int:2380,hsc-etcd-2-int=http://hsc-etcd-2-int:2380"
     },
     {
       "name": "ETCD_STRICT_RECONFIG_CHECK",
@@ -922,7 +922,7 @@
     {
       "name": "STSENTINEL_STORE_ENDPOINTS",
       "description": "Stolon sentinel store endpoints",
-      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379,hsc-etcd-3-int:2379,hsc-etcd-4-int:2379"
+      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379"
     },
     {
       "name": "STSENTINEL_CLUSTER_NAME",
@@ -972,7 +972,7 @@
     {
       "name": "STKEEPER_STORE_ENDPOINTS",
       "description": "Stolon keeper store endpoints",
-      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379,hsc-etcd-3-int:2379,hsc-etcd-4-int:2379"
+      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379"
     },
     {
       "name": "STKEEPER_DATA_DIR",
@@ -1042,7 +1042,7 @@
     {
       "name": "STPROXY_STORE_ENDPOINTS",
       "description": "Stolon proxy store endpoints",
-      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379,hsc-etcd-3-int:2379,hsc-etcd-4-int:2379"
+      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379"
     },
     {
       "name": "STPROXY_CLUSTER_NAME",

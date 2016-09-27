@@ -8,8 +8,8 @@
   "scaling": [
     {
       "component": "hsc-etcd",
-      "min_instances": 5,
-      "max_instances": 5
+      "min_instances": 3,
+      "max_instances": 3
     },
     {
       "component": "hsc-stkeeper",
