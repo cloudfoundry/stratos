@@ -252,7 +252,7 @@
               return that.onUpdateDeliveryPipelineMetadata(response);
             }));
 
-          if (!haveApplication) {
+          if (!haveApplication && that.model.application.summary.state === 'STARTED') {
             blockUpdate.push(that.model.getAppStats(that.cnsiGuid, that.id).then(function () {
               that.model.onAppStateChange();
             }));
