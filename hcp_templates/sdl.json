@@ -813,7 +813,7 @@
     {
       "name": "ALLOWED_ORIGINS",
       "description": "Allowed origins for the Console proxy.",
-      "default": "https://hsc-proxy-int,http://hsc-proxy-int",
+      "default": "https://hsc-proxy-int",
       "data_type": "string",
       "required": true,
       "secret": false
