@@ -96,7 +96,8 @@
           hceServiceGuid: undefined,
           projectId: undefined
         },
-        project: null
+        project: null,
+        state: undefined
       };
     },
 
@@ -111,7 +112,21 @@
       this.application.summary = appSummaryMetadata.entity;
       this.application.instances = appSummaryMetadata.instances || {};
       this.application.instanceCount = appSummaryMetadata.instanceCount || 0;
-      this.application.state = appSummaryMetadata.state | {};
+      this.application.state = appSummaryMetadata.state || {};
+
+      if (this.application.instances) {
+
+        /* eslint-disable no-warning-comments */
+        // TODO (HSC-1132): Instance display shows stats for only the first instance
+        /* eslint-enable no-warning-comments */
+        var keys = Object.keys(this.application.instances);
+        if (keys && keys.length) {
+          this.application.stats = this.application.instances[keys[0]].stats;
+        }
+
+        var running = _.filter(this.application.instances, {state: 'RUNNING'});
+        this.application.summary.running_instances = running.length;
+      }
     },
 
     /**
@@ -337,10 +352,11 @@
     getClusterWithId: function (cnsiGuid) {
       var that = this;
       var userCnsiModel = this._getUserCnsiModel();
-      return userCnsiModel.list()
-        .then(function () {
-          that.application.cluster = userCnsiModel.serviceInstances[cnsiGuid];
-        });
+      var isAvailable = userCnsiModel.serviceInstances[cnsiGuid];
+      var p = isAvailable ? this.$q.resolve(true) : userCnsiModel.list();
+      return p.then(function () {
+        that.application.cluster = userCnsiModel.serviceInstances[cnsiGuid];
+      });
     },
 
     /**
@@ -627,8 +643,8 @@
      * @description Returns the stats for the STARTED app
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
-     * @param {object} params - options for getting the stats of an app
-     * @param {boolean} noCache - Do not cache fetched data
+     * @param {object=} params - options for getting the stats of an app
+     * @param {boolean=} noCache - Do not cache fetched data
      * @returns {promise} A resolved/rejected promise
      * @public
      */
@@ -637,7 +653,6 @@
       return that.returnAppStats(cnsiGuid, guid, params, noCache).then(function (response) {
         if (!noCache) {
           var data = response.data;
-          //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           // Stats for all instances
           that.application.instances = data;
           that.application.instanceCount = _.keys(data).length;
@@ -664,6 +679,9 @@
         .then(function (response) {
           if (!noCache) {
             var data = response.data;
+            /* eslint-disable no-warning-comments */
+            // TODO (HSC-1132): Instance display shows stats for only the first instance
+            /* eslint-enable no-warning-comments */
             that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           }
           return response;

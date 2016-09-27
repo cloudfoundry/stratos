@@ -145,6 +145,13 @@
           }
         }
       };
+    },
+
+    ListAllRoutes: function (guid, type) {
+      switch (type) {
+        case 'cluster_set_1':
+          return {};
+      }
     }
   };
 
