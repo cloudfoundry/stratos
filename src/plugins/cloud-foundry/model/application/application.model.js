@@ -51,7 +51,6 @@
     this.modelManager = modelManager;
     this.appStateService = appStateService;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.$q = $q;
     this.pageSize = config.pagination.pageSize;
     this.modelUtils = modelUtils;
@@ -278,11 +277,11 @@
       var cnsis = [];
       if (this.filterParams.cnsiGuid === 'all') {
         // Ensure that we ignore any service that's invalid (cannot contact)
-        cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
-                  .values()
-                  .filter({cnsi_type: 'hcf', valid: true})
-                  .map('guid')
-                  .value();
+        cnsis = _.chain(this._getUserCnsiModel().serviceInstances)
+          .values()
+          .filter({cnsi_type: 'hcf', valid: true})
+          .map('guid')
+          .value();
       } else {
         cnsis = [this.filterParams.cnsiGuid];
       }
@@ -352,10 +351,11 @@
      */
     getClusterWithId: function (cnsiGuid) {
       var that = this;
-      var isAvailable = that.serviceInstanceModel.serviceInstances[cnsiGuid];
-      var p = isAvailable ? this.$q.resolve(true) : this.serviceInstanceModel.list();
+      var userCnsiModel = this._getUserCnsiModel();
+      var isAvailable = userCnsiModel.serviceInstances[cnsiGuid];
+      var p = isAvailable ? this.$q.resolve(true) : userCnsiModel.list();
       return p.then(function () {
-        that.application.cluster = that.serviceInstanceModel.serviceInstances[cnsiGuid];
+        that.application.cluster = userCnsiModel.serviceInstances[cnsiGuid];
       });
     },
 
@@ -421,6 +421,16 @@
         'inline-relations-depth': 2,
         'include-relations': 'organization,space'
       });
+    },
+
+    /**
+     * @function _getUserCnsiModel
+     * @description Private method to retrieve user CNSI Model
+     * @returns {*|Object}
+     * @private
+     */
+    _getUserCnsiModel: function () {
+      return this.modelManager.retrieve('app.model.serviceInstance.user');
     },
 
     /**
@@ -708,15 +718,16 @@
       var that = this;
       // We cache on the application - so if you add an HCE while on the app, we won't detect that
       // Saves making lots of calls
+      var userCnsiModel = this._getUserCnsiModel();
       if (this.hceServiceInfo) {
         return this.$q.when(this.hceServiceInfo);
       } else {
-        var promise = this.serviceInstanceModel.serviceInstances && _.keys(this.serviceInstanceModel.serviceInstances).length
-          ? this.$q.when(this.serviceInstanceModel.serviceInstances) : this.serviceInstanceModel.list();
+        var promise = userCnsiModel.serviceInstances && _.keys(userCnsiModel.serviceInstances).length
+          ? this.$q.when(userCnsiModel.serviceInstances) : userCnsiModel.list();
         return promise.then(function () {
           // Retrieve dynamicllay as this model may load before the one we need
           var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
-          var hceCnsis = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'}) || [];
+          var hceCnsis = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
           if (hceCnsis.length === 0) {
             return that.$q.when(hceCnsis);
           }
