@@ -43,6 +43,7 @@
       this.stackatoInfo = stackatoInfo;
       this.userSummary = userSummary;
       this.featureFlags = featureFlags;
+      this.checkers = [];
     }
 
     angular.extend(Principal.prototype, {
@@ -115,8 +116,11 @@
        * @private
        */
       _getAccessChecker: function (resourceType) {
-        var checkers = this._createAccessCheckerList();
-        return _.find(checkers, function (checker) {
+
+        if (this.checkers.length === 0) {
+          this.checkers = this._createAccessCheckerList();
+        }
+        return _.find(this.checkers, function (checker) {
           return checker.canHandle(resourceType);
         });
       }

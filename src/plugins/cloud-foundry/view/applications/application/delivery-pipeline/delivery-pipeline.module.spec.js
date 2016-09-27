@@ -53,7 +53,7 @@
 
     describe('Check HCE status', function () {
       it('Non-admin user with no services', function () {
-        account.data = {isAdmin: false};
+        account.accountData = {isAdmin: false};
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(0);
@@ -62,7 +62,7 @@
       });
 
       it('Admin user with no services', function () {
-        account.data = {isAdmin: true};
+        account.accountData = {isAdmin: true};
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(0);
@@ -77,7 +77,7 @@
             valid: true
           }
         });
-        account.data = {isAdmin: true};
+        account.accountData = {isAdmin: true};
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(1);
@@ -104,7 +104,7 @@
             valid: false
           }
         });
-        account.data = {isAdmin: true};
+        account.accountData = {isAdmin: true};
         createController();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(1);

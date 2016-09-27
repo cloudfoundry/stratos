@@ -25,8 +25,8 @@
 
   /**
    * @namespace app.api
-   * @memberof app.api.account
-   * @name app.model.account.AccountApi
+   * @memberof app.api
+   * @name app.api.account
    * @param {object} $http - the Angular $http service
    * @param {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @param {object} $q - the Angular Promise service

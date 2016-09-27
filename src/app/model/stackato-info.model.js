@@ -64,7 +64,7 @@
 
     /**
      * @function onLoggedIn
-     * @memberof app.model.account.Account
+     * @memberof app.model.stackatoInfo.StackatoInfo
      * @description Logged-in handler at model layer
      * @param {object} response - the HTTP response object
      * @private

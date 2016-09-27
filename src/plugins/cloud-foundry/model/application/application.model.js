@@ -51,7 +51,6 @@
     this.modelManager = modelManager;
     this.appStateService = appStateService;
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.$q = $q;
     this.pageSize = config.pagination.pageSize;
     this.modelUtils = modelUtils;
@@ -97,7 +96,8 @@
           hceServiceGuid: undefined,
           projectId: undefined
         },
-        project: null
+        project: null,
+        state: undefined
       };
     },
 
@@ -112,7 +112,21 @@
       this.application.summary = appSummaryMetadata.entity;
       this.application.instances = appSummaryMetadata.instances || {};
       this.application.instanceCount = appSummaryMetadata.instanceCount || 0;
-      this.application.state = appSummaryMetadata.state | {};
+      this.application.state = appSummaryMetadata.state || {};
+
+      if (this.application.instances) {
+
+        /* eslint-disable no-warning-comments */
+        // TODO (HSC-1132): Instance display shows stats for only the first instance
+        /* eslint-enable no-warning-comments */
+        var keys = Object.keys(this.application.instances);
+        if (keys && keys.length) {
+          this.application.stats = this.application.instances[keys[0]].stats;
+        }
+
+        var running = _.filter(this.application.instances, {state: 'RUNNING'});
+        this.application.summary.running_instances = running.length;
+      }
     },
 
     /**
@@ -263,11 +277,11 @@
       var cnsis = [];
       if (this.filterParams.cnsiGuid === 'all') {
         // Ensure that we ignore any service that's invalid (cannot contact)
-        cnsis = _.chain(this.serviceInstanceModel.serviceInstances)
-                  .values()
-                  .filter({cnsi_type: 'hcf', valid: true})
-                  .map('guid')
-                  .value();
+        cnsis = _.chain(this._getUserCnsiModel().serviceInstances)
+          .values()
+          .filter({cnsi_type: 'hcf', valid: true})
+          .map('guid')
+          .value();
       } else {
         cnsis = [this.filterParams.cnsiGuid];
       }
@@ -337,10 +351,12 @@
      */
     getClusterWithId: function (cnsiGuid) {
       var that = this;
-      return this.serviceInstanceModel.list()
-        .then(function () {
-          that.application.cluster = that.serviceInstanceModel.serviceInstances[cnsiGuid];
-        });
+      var userCnsiModel = this._getUserCnsiModel();
+      var isAvailable = userCnsiModel.serviceInstances[cnsiGuid];
+      var p = isAvailable ? this.$q.resolve(true) : userCnsiModel.list();
+      return p.then(function () {
+        that.application.cluster = userCnsiModel.serviceInstances[cnsiGuid];
+      });
     },
 
     /**
@@ -405,6 +421,16 @@
         'inline-relations-depth': 2,
         'include-relations': 'organization,space'
       });
+    },
+
+    /**
+     * @function _getUserCnsiModel
+     * @description Private method to retrieve user CNSI Model
+     * @returns {*|Object}
+     * @private
+     */
+    _getUserCnsiModel: function () {
+      return this.modelManager.retrieve('app.model.serviceInstance.user');
     },
 
     /**
@@ -617,8 +643,8 @@
      * @description Returns the stats for the STARTED app
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
-     * @param {object} params - options for getting the stats of an app
-     * @param {boolean} noCache - Do not cache fetched data
+     * @param {object=} params - options for getting the stats of an app
+     * @param {boolean=} noCache - Do not cache fetched data
      * @returns {promise} A resolved/rejected promise
      * @public
      */
@@ -627,7 +653,6 @@
       return that.returnAppStats(cnsiGuid, guid, params, noCache).then(function (response) {
         if (!noCache) {
           var data = response.data;
-          //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           // Stats for all instances
           that.application.instances = data;
           that.application.instanceCount = _.keys(data).length;
@@ -654,6 +679,9 @@
         .then(function (response) {
           if (!noCache) {
             var data = response.data;
+            /* eslint-disable no-warning-comments */
+            // TODO (HSC-1132): Instance display shows stats for only the first instance
+            /* eslint-enable no-warning-comments */
             that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           }
           return response;
@@ -690,15 +718,16 @@
       var that = this;
       // We cache on the application - so if you add an HCE while on the app, we won't detect that
       // Saves making lots of calls
+      var userCnsiModel = this._getUserCnsiModel();
       if (this.hceServiceInfo) {
         return this.$q.when(this.hceServiceInfo);
       } else {
-        var promise = this.serviceInstanceModel.serviceInstances && _.keys(this.serviceInstanceModel.serviceInstances).length
-          ? this.$q.when(this.serviceInstanceModel.serviceInstances) : this.serviceInstanceModel.list();
+        var promise = userCnsiModel.serviceInstances && _.keys(userCnsiModel.serviceInstances).length
+          ? this.$q.when(userCnsiModel.serviceInstances) : userCnsiModel.list();
         return promise.then(function () {
           // Retrieve dynamicllay as this model may load before the one we need
           var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
-          var hceCnsis = _.filter(that.serviceInstanceModel.serviceInstances, {cnsi_type: 'hce'}) || [];
+          var hceCnsis = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hce'}) || [];
           if (hceCnsis.length === 0) {
             return that.$q.when(hceCnsis);
           }
