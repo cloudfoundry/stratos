@@ -165,7 +165,7 @@
       var thisPromise;
 
       var wrappedCatch = function (error) {
-        $log.error('Failed to initialise state. This may result in missing or incorrect data.');
+        $log.error('Failed to initialise state. This may result in missing or incorrect data.', error);
         return $q.reject(error);
       };
 
