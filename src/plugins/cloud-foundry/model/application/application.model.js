@@ -115,8 +115,11 @@
       this.application.instanceCount = appSummaryMetadata.instanceCount || 0;
       this.application.state = appSummaryMetadata.state || {};
 
-      // HACK: NEED TO FIX THIS
       if (this.application.instances) {
+
+        /* eslint-disable no-warning-comments */
+        // TODO (HSC-1132): Instance display shows stats for only the first instance
+        /* eslint-enable no-warning-comments */
         var keys = Object.keys(this.application.instances);
         if (keys && keys.length) {
           this.application.stats = this.application.instances[keys[0]].stats;
@@ -640,7 +643,6 @@
       return that.returnAppStats(cnsiGuid, guid, params, noCache).then(function (response) {
         if (!noCache) {
           var data = response.data;
-          //that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           // Stats for all instances
           that.application.instances = data;
           that.application.instanceCount = _.keys(data).length;
@@ -667,6 +669,9 @@
         .then(function (response) {
           if (!noCache) {
             var data = response.data;
+            /* eslint-disable no-warning-comments */
+            // TODO (HSC-1132): Instance display shows stats for only the first instance
+            /* eslint-enable no-warning-comments */
             that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
           }
           return response;

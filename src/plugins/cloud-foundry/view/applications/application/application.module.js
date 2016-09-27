@@ -227,8 +227,6 @@
         // the rest of the data we might need will load and update the UI incrementally
         this.ready = true;
 
-        // If we already have the application summary a lot of information can be requested in parrallel as the initial
-        // getAppSummary
         this.updateBuildPack();
         this.updateHiddenProperties();
 
@@ -239,6 +237,7 @@
         }
       }
 
+      // Only the org and space names are needed, these cane be displayed dynamically when fetched
       this.model.getAppDetailsOnOrgAndSpace(this.cnsiGuid, this.id);
 
       var appSummaryPromise = this.model.getAppSummary(this.cnsiGuid, this.id, false)
