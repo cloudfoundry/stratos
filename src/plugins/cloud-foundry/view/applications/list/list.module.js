@@ -62,9 +62,7 @@
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.eventService = eventService;
     this.errorService = errorService;
-    this.ready = false;
     this.loading = true;
-    this.currentPage = 0;
     this.isSpaceDeveloper = false;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
@@ -80,12 +78,17 @@
       callback: function (page) {
         return that._loadPage(page);
       },
-      total: 0,
+      total: _.get(that.model, 'pagination.totalPage', 0),
+      pageNumber: _.get(that.model, 'appPage', 1),
       text: {
         nextBtn: gettext('Next'),
         prevBtn: gettext('Previous')
       }
     };
+
+    // If we have previous apps show the stale values from cache. This avoids showing a blank screen for the majority
+    // use case where nothing has changed.
+    this.ready = this.model.hasApps;
 
     function init() {
       that._setClusters();
@@ -203,30 +206,6 @@
     },
 
     /**
-     * @function _resetPagination
-     * @description reset pagination
-     * @returns {promise} A promise
-     * @private
-     */
-    _resetPagination: function () {
-      var that = this;
-      this.loading = true;
-      this.currentPage = 0;
-      this.paginationProperties.total = 0;
-
-      return this.model.resetPagination()
-        .then(function (cacheData) {
-          // Only in the success case is the pagination model set correctly. If the call is rejected pagination is
-          // likely to be undefined
-          that.paginationProperties.total = that.model.pagination.totalPage;
-          return cacheData;
-        })
-        .finally(function () {
-          that.loading = false;
-        });
-    },
-
-    /**
      * @function _loadPage
      * @description Retrieve apps with given page number
      * @param {number} page - page number
@@ -240,7 +219,6 @@
 
       return this.model.loadPage(page, cachedData)
         .finally(function () {
-          that.currentPage = page;
           that.loading = false;
           that._handleErrors();
         });
@@ -248,19 +226,49 @@
 
     /**
      * @function _reload
-     * @description Reload
+     * @description Reload the application wall at the position it previously was
      * @returns {promise} A promise
      * @private
      */
     _reload: function () {
       var that = this;
-      return this._resetPagination().then(function (cachedData) {
-        if (that.model.pagination.totalPage) {
-          return that._loadPage(1, cachedData);
-        } else {
-          that._handleErrors();
-        }
-      });
+      var previousPage = that.model.appPage;
+
+      this.loading = true;
+
+      //TODO: RC what do in error??
+      // this.paginationProperties.total = 0;
+
+      return this.model.resetPagination()
+        .then(function (cacheData) {
+          // Only in the success case is the pagination model set correctly. If the call is rejected pagination is
+          // likely to be undefined
+          that.paginationProperties.total = that.model.pagination.totalPage;
+          return cacheData;
+        })
+        .then(function (cachedData) {
+          if (that.model.pagination.totalPage) {
+            //Ensure page number is valid
+            previousPage = previousPage - 1 < 0 ? 1 : previousPage;
+            previousPage = previousPage > that.model.pagination.pages.length ? that.model.pagination.pages.length : previousPage;
+            
+            return that._loadPage(previousPage, cachedData)
+              .then(function () {
+                that.paginationProperties.pageNumber = previousPage;
+              })
+              .catch(function () {
+                // this.paginationProperties.pageNumber = 0;
+              })
+              .finally(function () {
+                return cachedData;
+              });
+          } else {
+            that._handleErrors();
+          }
+        }).finally(function () {
+          that.loading = false;
+          return cachedData;
+        });
     },
 
     /**

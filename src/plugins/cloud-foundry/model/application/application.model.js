@@ -72,6 +72,8 @@
     // This state should be in the model
     this.clusterCount = 0;
     this.hasApps = false;
+    // Page number (not zero based, used in UX)
+    this.appPage = 1;
 
   }
 
@@ -188,7 +190,6 @@
     },
 
     loadPage: function (pageNumber, cachedData) {
-      this.tempApplications = [];
       var that = this;
       var page = this.pagination.pages[pageNumber - 1];
       var tasks = [];
@@ -233,6 +234,7 @@
         });
 
         that.hasApps = that.pagination.totalPage > 0;
+        that.appPage = that.hasApps ? pageNumber : 0;
       });
     },
 
@@ -258,8 +260,6 @@
         'results-per-page': this.pageSize,
         page: 1
       }, this._buildFilter());
-
-      this.data.applications.length = 0;
 
       return this.applicationApi
         .ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
@@ -826,6 +826,7 @@
       this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize), totalAppNumber);
 
       this.hasApps = this.pagination.totalPage > 0;
+      this.appPage = this.appPage > this.pagination.pages.length ? this.pagination.pages.length : this.appPage;
 
       return clusters || [];
     },
