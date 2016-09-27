@@ -9,6 +9,21 @@ import (
 	"github.com/labstack/echo/engine/standard"
 )
 
+func handleSessionError(err error) error {
+	if _, ok := err.(*SessionValueNotFound); ok {
+		return newHTTPShadowError(
+			http.StatusUnauthorized,
+			"User session could not be found",
+			"User session could not be found: %v", err,
+		)
+	}
+	return newHTTPShadowError(
+		http.StatusServiceUnavailable,
+		"Service is currently unavailable",
+		"Service is currently unavailable: %v", err,
+	)
+}
+
 func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		logger.Debug("sessionMiddleware")
@@ -17,10 +32,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			c.Set("user_id", userID)
 			return h(c)
 		}
-		if _, ok := err.(*SessionValueNotFound); ok {
-			return c.NoContent(http.StatusUnauthorized)
-		}
-		return c.NoContent(http.StatusServiceUnavailable)
+		return handleSessionError(err)
 	}
 }
 
@@ -39,7 +51,8 @@ func (p *portalProxy) stackatoAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 	return func(c echo.Context) error {
 		// if user is an admin, passthrough request
 		// get the user guid
-		if userID, err := p.getSessionValue(c, "user_id"); err == nil {
+		userID, err := p.getSessionValue(c, "user_id")
+		if err == nil {
 			// check their admin status in UAA
 			u, err := p.getUAAUser(userID.(string))
 			if err != nil {
@@ -51,7 +64,7 @@ func (p *portalProxy) stackatoAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 			}
 		}
 
-		return c.NoContent(http.StatusUnauthorized)
+		return handleSessionError(err)
 	}
 }
 

@@ -13,10 +13,12 @@ const (
 	portalSessionName = "stackato-console-session"
 )
 
-type SessionValueNotFound string
+type SessionValueNotFound struct {
+	msg string
+}
 
-func (f SessionValueNotFound) Error() string {
-	return fmt.Sprintf("Session value not found %s", string(f))
+func (e SessionValueNotFound) Error() string {
+	return fmt.Sprintf("Session value not found %s", e.msg)
 }
 
 func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, error) {
@@ -33,7 +35,7 @@ func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, 
 		return intf, nil
 	}
 
-	return nil, SessionValueNotFound(key)
+	return nil, SessionValueNotFound{key}
 }
 
 func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, error) {

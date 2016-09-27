@@ -234,7 +234,7 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 		return newHTTPShadowError(
 			http.StatusBadRequest,
 			"User session could not be found",
-			"User session could not be found",
+			"User session could not be found: %v", err,
 		)
 	}
 	userGUID := userGUIDIntf.(string)
