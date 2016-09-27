@@ -265,6 +265,13 @@
         .ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
           return that.onGetPaginationData(response);
+        })
+        .catch(function (error) {
+          // Clear everything
+          that.data.applications.length = 0;
+          that.appPage = 0;
+          that.hasApps = false;
+          return that.$q.reject(error);
         });
     },
 
