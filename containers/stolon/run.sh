@@ -1,38 +1,33 @@
 #!/usr/bin/env bash
 
-HCP_SVC_DOMAIN=".${HCP_SERVICE_DOMAIN_SUFFIX}.${HCP_DOMAIN_SUFFIX}"
-
 echo "Stackato Console Stolon Startup Script"
 
-function modifyEndpoints()
+function modifyNoProxy()
 {
-  # Add domain name to the endpoints
-ENDPOINTS=""
-IFS=',' read -ra ADDR <<< "$1"
-for i in "${ADDR[@]}"; do
-    HOST="${i%:*}"
-    PORT="${i#*:}"
-    ENDPOINTS=$ENDPOINTS,$HOST$HCP_SVC_DOMAIN:$PORT
-done
-ENDPOINTS=${ENDPOINTS#","}
+  if [ ! -z $1 ]; then
+    # Add names to the NO PROXY environment variable
+    IFS=',' read -ra ADDR <<< "$1"
+    for i in "${ADDR[@]}"; do
+      HOST="${i%:*}"
+      PORT="${i#*:}"
+      NO_PROXY=${NO_PROXY},${HOST}
+    done
+  fi
 }
 
-if [ ! -z ${STKEEPER_STORE_ENDPOINTS} ]; then
-  modifyEndpoints $STKEEPER_STORE_ENDPOINTS
-  export STKEEPER_STORE_ENDPOINTS="$ENDPOINTS"
-  echo "Modified STKEEPER_STORE_ENDPOINTS=${STKEEPER_STORE_ENDPOINTS}"
+# Only do this if there is a proxy set
+if [ ! -z ${HTTP_PROXY} ] || [ ! -z ${HTTPS_PROXY} ]; then
+  echo "Running with a web proxy set - updating NO_PROXY"
+  # We will append to NO_PROXY delimiting with "," - so make sure it has a value if there is not one
+  if [ -z ${NO_PROXY} ]; then
+    NO_PROXY="127.0.0.1"
+  fi
+  modifyNoProxy $STKEEPER_STORE_ENDPOINTS
+  modifyNoProxy $STPROXY_STORE_ENDPOINTS
+  modifyNoProxy $STSENTINEL_STORE_ENDPOINTS
+  echo "NO_PROXY: ${NO_PROXY}"
+  export NO_PROXY=${NO_PROXY}
 fi
 
-if [ ! -z ${STPROXY_STORE_ENDPOINTS} ]; then
-  modifyEndpoints $STPROXY_STORE_ENDPOINTS
-  export STPROXY_STORE_ENDPOINTS="$ENDPOINTS"
-  echo "Modified STPROXY_STORE_ENDPOINTS=${STPROXY_STORE_ENDPOINTS}"
-fi
-
-if [ ! -z ${STSENTINEL_STORE_ENDPOINTS} ]; then
-  modifyEndpoints $STSENTINEL_STORE_ENDPOINTS
-  export STSENTINEL_STORE_ENDPOINTS="$ENDPOINTS"
-  echo "Modified STSENTINEL_STORE_ENDPOINTS=${STSENTINEL_STORE_ENDPOINTS}"
-fi
-
+# Now run the Stolon start-up script
 /usr/local/bin/run.sh

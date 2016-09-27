@@ -12,12 +12,23 @@ PEER_COMM_PORT="2380"
 HOST_NAME="hsc-etcd-${HCP_COMPONENT_INDEX}-int"
 echo "ETCD container hostname setting: ${HOST_NAME}"
 
+# Update the NO_PROXY ENV VAR if we have a web proxy set
+if [ ! -z ${HTTP_PROXY} ] || [ ! -z ${HTTPS_PROXY} ]; then
+  echo "Running with a web proxy set - updating NO_PROXY"
+  if [ -z ${NO_PROXY} ]; then
+    export NO_PROXY="${HOST_NAME}"
+  else
+    export NO_PROXY="${NO_PROXY},${HOST_NAME}"
+  fi
+  echo "NO_PROXY: ${NO_PROXY}"
+fi
+
 HOST_URL="${HOST_NAME}.${HCP_SERVICE_DOMAIN_SUFFIX}.${HCP_DOMAIN_SUFFIX}"
 
-ADVERTISE_PEER_URLS="http://${HOST_URL}:${PEER_COMM_PORT}"
+ADVERTISE_PEER_URLS="http://${HOST_NAME}:${PEER_COMM_PORT}"
 echo "Advertise peer URLs: ${ADVERTISE_PEER_URLS}"
 
-ADVERTISE_CLIENT_URLS="http://${HOST_URL}:${CLIENT_COMM_PORT}"
+ADVERTISE_CLIENT_URLS="http://${HOST_NAME}:${CLIENT_COMM_PORT}"
 echo "Advertise client URLs: ${ADVERTISE_CLIENT_URLS}"
 
 # These ENV VARs are defined/set in SDL and are applicable for each
