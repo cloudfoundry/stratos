@@ -31,7 +31,6 @@
 
         serviceInstance.unbindServiceFromApp('guid', 'app_123', 'binding_123', 'service_123');
         confirmDialog.confirmed();
-
         $httpBackend.flush();
       });
     });
