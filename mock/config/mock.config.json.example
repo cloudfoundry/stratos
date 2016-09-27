@@ -1,0 +1,6 @@
+{
+  "portal_proxy": {
+    "host": "HOST",
+    "port": 80
+  }
+}
