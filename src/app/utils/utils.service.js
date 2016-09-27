@@ -9,8 +9,7 @@
   utilsServiceFactory.$inject = [
     '$q',
     '$timeout',
-    '$log',
-    'helion.framework.widgets.toaster'
+    '$log'
   ];
 
   /**
@@ -21,10 +20,9 @@
    * @param {object} $q - the Angular $q service
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $log - the Angular $log service
-   * @param {helion.framework.widgets.toaster} toaster - the helion framework toaster service
    * @returns {object} the utils service
    */
-  function utilsServiceFactory($q, $timeout, $log, toaster) {
+  function utilsServiceFactory($q, $timeout, $log) {
     var UNIT_GRABBER = /([0-9.]+)( .*)/;
 
     return {
@@ -164,14 +162,10 @@
       var aState = $state.get(stateName);
       var promiseStack = _.get($state.current, 'data.initialized');
 
-      var toast, thisPromise;
+      var thisPromise;
 
       var wrappedCatch = function (error) {
-        toast = toaster.warning(gettext('Failed to initialise state. This may result in missing or incorrect data. Please refresh your browser to try again.'), {
-          timeOut: 0,
-          extendedTimeOut: 0,
-          closeButton: false
-        });
+        $log.error('Failed to initialise state. This may result in missing or incorrect data.');
         return $q.reject(error);
       };
 
@@ -197,11 +191,6 @@
         $log.debug('Cleaning up obsolete promise from state: ' + aState.name);
         var index = aState.data.initialized.indexOf(aState);
         aState.data.initialized.splice(index, 1);
-        if (toast) {
-          $timeout(function () {
-            toaster.clear(toast);
-          }, 15000);
-        }
       };
     }
 
