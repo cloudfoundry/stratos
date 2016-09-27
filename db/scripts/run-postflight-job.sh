@@ -10,13 +10,14 @@ execStatement() {
 echo "$PGSQL_HOST:$STPROXY_PORT:postgres:$STKEEPER_PG_SU_USERNAME:$(cat $STKEEPER_PG_SU_PASSWORDFILE)" > /tmp/pgpass
 chmod 0600 /tmp/pgpass
 
+# Get Stackato user password from secrets file
+PWD=$(cat $PGSQL_PASSWORDFILE)
+
 stackatoDbExists=$(execStatement "SELECT 1 FROM pg_database WHERE datname = '$PGSQL_DATABASE';")
 if [ -z "$stackatoDbExists" ] ; then
     echo "Creating database $PGSQL_DATABASE"
     execStatement "CREATE DATABASE \"$PGSQL_DATABASE\";"
     echo "Creating user $PGSQL_USER"
-    # Get stackato password from secrets file
-    PWD=$(cat $PGSQL_PASSWORDFILE)
     execStatement "CREATE USER $PGSQL_USER WITH ENCRYPTED PASSWORD '$PWD';"
     echo "Granting privs for $PGSQL_DATABASE to $PGSQL_USER"
     execStatement "GRANT ALL PRIVILEGES ON DATABASE \"$PGSQL_DATABASE\" TO $PGSQL_USER;"
