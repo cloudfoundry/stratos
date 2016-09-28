@@ -72,25 +72,25 @@
       });
 
       it('formats 0 correctly', function () {
-        expect($controller.formatUptime(0)).toBe('0 seconds');
+        expect($controller.formatUptime(0)).toBe('0s');
       });
 
       it('formats 1 correctly', function () {
-        expect($controller.formatUptime(1)).toBe('1 second');
+        expect($controller.formatUptime(1)).toBe('1s');
       });
 
       it('formats day uptime correctly', function () {
-        expect($controller.formatUptime(86400)).toBe('1 day');
-        expect($controller.formatUptime(172800)).toBe('2 days');
+        expect($controller.formatUptime(86400)).toBe('1d');
+        expect($controller.formatUptime(172800)).toBe('2d');
       });
 
       it('formats mixed uptime correctly', function () {
-        expect($controller.formatUptime(3661)).toBe('1 hour 1 minute 1 second');
-        expect($controller.formatUptime(3665)).toBe('1 hour 1 minute 5 seconds');
-        expect($controller.formatUptime(7200)).toBe('2 hours');
-        expect($controller.formatUptime(7320)).toBe('2 hours 2 minutes');
-        expect($controller.formatUptime(172800 + 7321)).toBe('2 days 2 hours 2 minutes 1 second');
-        expect($controller.formatUptime(172800 + 7327)).toBe('2 days 2 hours 2 minutes 7 seconds');
+        expect($controller.formatUptime(3661)).toBe('1h 1m 1s');
+        expect($controller.formatUptime(3665)).toBe('1h 1m 5s');
+        expect($controller.formatUptime(7200)).toBe('2h');
+        expect($controller.formatUptime(7320)).toBe('2h 2m');
+        expect($controller.formatUptime(172800 + 7321)).toBe('2d 2h 2m 1s');
+        expect($controller.formatUptime(172800 + 7327)).toBe('2d 2h 2m 7s');
       });
 
     });

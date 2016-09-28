@@ -11,25 +11,6 @@
     <div class="col-md-6">
       <dl class="dl-horizontal">
 
-        <dd>
-          <percent-gauge title="{{ 'Memory Utilization' | translate }}"
-                         value="{{ appCtrl.model.application.stats.usage.mem / appCtrl.model.application.stats.mem_quota }}"
-                         value-text="{{ [appCtrl.model.application.stats.usage.mem, appCtrl.model.application.stats.mem_quota] | usageBytes:0 }}" />
-        </dd>
-
-        <dd>
-          <percent-gauge mode="instance"
-                         title="{{ 'Instances' | translate }}"
-                         value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
-                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}" />
-        </dd>
-
-        <dd>
-          <percent-gauge title="{{ 'Disk Utilization' | translate }}"
-                         value="{{ appCtrl.model.application.stats.usage.disk / appCtrl.model.application.stats.disk_quota }}"
-                         value-text="{{ [appCtrl.model.application.stats.usage.disk, appCtrl.model.application.stats.disk_quota] | usageBytes }}" />
-        </dd>
-
         <dt translate>STATE</dt>
         <dd class="pull-right app-status-block">
           <div ng-if="appCtrl.ready">
@@ -40,11 +21,28 @@
           </div>
         </dd>
 
+        <dt class="app-instance-title" translate>INSTANCES</dt>
+        <dd>
+          <percent-gauge mode="instance"
+                         value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
+                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}" />
+        </dd>
+
         <dt translate>MODIFIED</dt>
         <dd class="pull-right" ng-if="appCtrl.model.application.summary.package_updated_at">
           {{ appCtrl.model.application.summary.package_updated_at | date : 'M/d/yy h:mm:ss a'}}
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
+
+        <dt translate>MEMORY QUOTA</dt>
+        <dd class="pull-right">
+          {{ applicationSummaryCtrl.utils.mbToHumanSize(appCtrl.model.application.summary.memory)}}
+        </dd>
+
+        <dt translate>DISK QUOTA</dt>
+        <dd class="pull-right">
+          {{ applicationSummaryCtrl.utils.mbToHumanSize(appCtrl.model.application.summary.disk_quota)}}
+        </dd>
 
       </dl>
     </div>
@@ -59,9 +57,18 @@
              rel="noopener noreferrer">{{ appCtrl.appBuildPack }}</a>
         </dd>
 
-        <dt translate>ENDPOINT</dt>
+        <dt translate>ENDPOINT URL</dt>
         <dd class="pull-right">
           {{ applicationSummaryCtrl.getEndpoint() }}
+        </dd>
+
+        <dt translate>ENDPOINT</dt>
+        <dd class="pull-right">
+          <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.detail.organizations({
+                  guid: applicationSummaryCtrl.cnsiGuid
+          })">
+            {{ applicationSummaryCtrl.userCnsiModel.serviceInstances[applicationSummaryCtrl.cnsiGuid].name }}
+          </a>
         </dd>
 
         <dt translate>ORGANIZATION</dt>
@@ -69,7 +76,7 @@
           <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.detail.spaces({
                   guid: applicationSummaryCtrl.cnsiGuid,
                   organization: applicationSummaryCtrl.model.application.organization.metadata.guid,
-          })" translate>
+          })">
             {{ appCtrl.model.application.organization.entity.name }}
           </a>
         </dd>
@@ -80,12 +87,103 @@
                   guid: applicationSummaryCtrl.cnsiGuid,
                   organization: applicationSummaryCtrl.model.application.organization.metadata.guid,
                   space: applicationSummaryCtrl.model.application.space.metadata.guid
-          })" translate>
+          })">
             {{ appCtrl.model.application.space.entity.name }}
           </a>
         </dd>
       </dl>
     </div>
+  </div>
+</div>
+
+<div class="summary-instances">
+  <div class="action-header">
+    <span translate>Instances</span>
+    <!--
+    <a class="btn btn-link">
+      <i class="helion-icon helion-icon-Right_Arrow"></i>
+      <span translate>Add instances</span>
+    </a>
+    -->
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-body" ng-if="appCtrl.model.application.summary.running_instances === 0" translate>
+      This application has no running instances.
+    </div>
+    <table class="table" ng-if="appCtrl.model.application.summary.running_instances > 0" >
+      <thead>
+      <tr>
+        <th translate>Index</th>
+        <th translate>Status</th>
+        <th translate>Memory</th>
+        <th translate>Disk</th>
+        <th translate>Uptime</th>
+        <!--<th></th>-->
+      </tr>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="instance in appCtrl.model.application.instances" ng-show="$index < applicationSummaryCtrl.instanceViewLimit">
+        <td>{{ $index }}</td>
+        <td>{{ instance.state }}</td>
+        <td class="instance-percent-gauge">
+          <percent-gauge value="{{ instance.stats.usage.mem / instance.stats.mem_quota }}"
+                         value-text="{{ [instance.stats.usage.mem, instance.stats.mem_quota] | usageBytes:0 }}"/>
+        </td>
+        <td class="instance-percent-gauge">
+          <percent-gauge value="{{ instance.stats.usage.disk / instance.stats.disk_quota }}"
+                         value-text="{{ [instance.stats.usage.disk, instance.stats.disk_quota] | usageBytes }}" />
+        </td>
+        <td class="instance-uptime-td">{{ applicationSummaryCtrl.formatUptime(instance.stats.uptime) }}</td>
+        <!--<td></td>-->
+      </tr>
+      </tbody>
+      <tfoot ng-show="applicationSummaryCtrl.instanceViewLimit < appCtrl.model.application.instanceCount">
+      <tr>
+        <td colspan="4" class="text-center">
+          <a ng-click="applicationSummaryCtrl.instanceViewLimit = appCtrl.model.application.instanceCount">
+            <span translate>Show All</span> ({{appCtrl.model.application.instanceCount}})
+          </a>
+        </td>
+      </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div>
+  <div class="action-header">
+    <span translate>Routes</span>
+    <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()" ng-hide="!appCtrl.ready || applicationSummaryCtrl.hideAddRoutes">
+      <i class="helion-icon helion-icon-Right_Arrow" ></i>
+      <span translate>Add route</span>
+    </a>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-body"
+         ng-if="!appCtrl.model.application.summary.routes.length" translate>
+      You have no routes.
+    </div>
+    <table class="table table-actionable"
+           ng-if="appCtrl.model.application.summary.routes.length" >
+      <thead>
+      <tr>
+        <th translate>Route</th>
+        <th translate>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.routesService.getRouteId(route)">
+        <td>{{ applicationSummaryCtrl.routesService.getRouteId(route) }}</td>
+        <td>
+          <actions-menu actions="applicationSummaryCtrl.routesActionMenu"
+                        action-target="route"
+                        menu-position="actions-menu-right"
+                        menu-icon="helion-icon helion-icon-More"></actions-menu>
+        </td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -131,83 +229,3 @@
   </div>
 </div>
 
-<div>
-  <div class="action-header">
-    <span translate>Routes</span>
-    <a class="btn btn-link" ng-click="applicationSummaryCtrl.showAddRouteForm()" ng-hide="!appCtrl.ready || applicationSummaryCtrl.hideAddRoutes">
-      <i class="helion-icon helion-icon-Right_Arrow" ></i>
-      <span translate>Add route</span>
-    </a>
-  </div>
-  <div class="panel panel-default">
-    <div class="panel-body"
-      ng-if="!appCtrl.model.application.summary.routes.length" translate>
-      You have no routes.
-    </div>
-    <table class="table table-actionable"
-      ng-if="appCtrl.model.application.summary.routes.length" >
-      <thead>
-        <tr>
-          <th translate>Route</th>
-          <th translate>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="route in appCtrl.model.application.summary.routes track by applicationSummaryCtrl.routesService.getRouteId(route)">
-          <td>{{ applicationSummaryCtrl.routesService.getRouteId(route) }}</td>
-          <td>
-            <actions-menu actions="applicationSummaryCtrl.routesActionMenu"
-                            action-target="route"
-                            menu-position="actions-menu-right"
-                            menu-icon="helion-icon helion-icon-More"></actions-menu>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div>
-  <div class="action-header">
-    <span translate>Instances</span>
-    <!--
-    <a class="btn btn-link">
-      <i class="helion-icon helion-icon-Right_Arrow"></i>
-      <span translate>Add instances</span>
-    </a>
-    -->
-  </div>
-  <div class="panel panel-default">
-    <div class="panel-body" ng-if="appCtrl.model.application.summary.running_instances === 0" translate>
-      This application has no running instances.
-    </div>
-    <table class="table" ng-if="appCtrl.model.application.summary.running_instances > 0" >
-      <thead>
-        <tr>
-          <th translate>Index</th>
-          <th translate>Status</th>
-          <th translate>Uptime</th>
-          <th></th>
-        </tr>
-      </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="instance in appCtrl.model.application.instances" ng-show="$index < applicationSummaryCtrl.instanceViewLimit">
-          <td>{{ $index }}</td>
-          <td>{{ instance.state }}</td>
-          <td>{{ applicationSummaryCtrl.formatUptime(instance.stats.uptime) }}</td>
-          <td></td>
-        </tr>
-      </tbody>
-      <tfoot ng-show="applicationSummaryCtrl.instanceViewLimit < appCtrl.model.application.instanceCount">
-      <tr>
-        <td colspan="4" class="text-center">
-          <a ng-click="applicationSummaryCtrl.instanceViewLimit = appCtrl.model.application.instanceCount">
-            <span translate>Show All</span> ({{appCtrl.model.application.instanceCount}})
-          </a>
-        </td>
-      </tr>
-      </tfoot>
-    </table>
-  </div>
-</div>

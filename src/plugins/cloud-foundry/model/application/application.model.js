@@ -71,6 +71,8 @@
     // This state should be in the model
     this.clusterCount = 0;
     this.hasApps = false;
+    // Page number (not zero based, used in UX)
+    this.appPage = 1;
 
   }
 
@@ -115,15 +117,6 @@
       this.application.state = appSummaryMetadata.state || {};
 
       if (this.application.instances) {
-
-        /* eslint-disable no-warning-comments */
-        // TODO (HSC-1132): Instance display shows stats for only the first instance
-        /* eslint-enable no-warning-comments */
-        var keys = Object.keys(this.application.instances);
-        if (keys && keys.length) {
-          this.application.stats = this.application.instances[keys[0]].stats;
-        }
-
         var running = _.filter(this.application.instances, {state: 'RUNNING'});
         this.application.summary.running_instances = running.length;
       }
@@ -169,7 +162,7 @@
         app.state = that.appStateService.get(app.entity);
         if (app.entity.state === 'STARTED') {
           // We need more information
-          tasks.push(that.returnAppStats(cnsiGuid, app.metadata.guid, null, true).then(function (stats) {
+          tasks.push(that.returnAppStats(cnsiGuid, app.metadata.guid, null).then(function (stats) {
             app.instances = stats.data;
             app.instanceCount = _.keys(app.instances).length;
             app.state = that.appStateService.get(app.entity, app.instances);
@@ -189,7 +182,6 @@
     },
 
     loadPage: function (pageNumber, cachedData) {
-      this.tempApplications = [];
       var that = this;
       var page = this.pagination.pages[pageNumber - 1];
       var tasks = [];
@@ -234,6 +226,7 @@
         });
 
         that.hasApps = that.pagination.totalPage > 0;
+        that.appPage = that.hasApps ? pageNumber : 0;
       });
     },
 
@@ -260,12 +253,17 @@
         page: 1
       }, this._buildFilter());
 
-      this.data.applications.length = 0;
-
       return this.applicationApi
         .ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
         .then(function (response) {
           return that.onGetPaginationData(response);
+        })
+        .catch(function (error) {
+          // Clear everything
+          that.data.applications.length = 0;
+          that.appPage = 0;
+          that.hasApps = false;
+          return that.$q.reject(error);
         });
     },
 
@@ -652,7 +650,7 @@
      */
     getAppStats: function (cnsiGuid, guid, params, noCache) {
       var that = this;
-      return that.returnAppStats(cnsiGuid, guid, params, noCache).then(function (response) {
+      return that.returnAppStats(cnsiGuid, guid, params).then(function (response) {
         if (!noCache) {
           var data = response.data;
           // Stats for all instances
@@ -670,22 +668,13 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
      * @param {object} params - options for getting the stats of an app
-     * @param {boolean} noCache - Do not cache fetched data
      * @returns {promise} A promise object
      * @public
      */
-    returnAppStats: function (cnsiGuid, guid, params, noCache) {
-      var that = this;
+    returnAppStats: function (cnsiGuid, guid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetDetailedStatsForStartedApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (!noCache) {
-            var data = response.data;
-            /* eslint-disable no-warning-comments */
-            // TODO (HSC-1132): Instance display shows stats for only the first instance
-            /* eslint-enable no-warning-comments */
-            that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
-          }
           return response;
         });
     },
@@ -839,6 +828,7 @@
       this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize), totalAppNumber);
 
       this.hasApps = this.pagination.totalPage > 0;
+      this.appPage = this.appPage > this.pagination.pages.length ? this.pagination.pages.length : this.appPage;
 
       return clusters || [];
     },
