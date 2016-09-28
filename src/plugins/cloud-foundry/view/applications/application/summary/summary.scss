@@ -10,9 +10,19 @@
   .summary .data-body {
     padding: $hpe-unit-space * .75 $hpe-unit-space;
 
-    .dl-horizontal > * {
-      margin-bottom: $hpe-unit-space * .5;
-      margin-left: auto;
+    .dl-horizontal {
+
+      & > * {
+        margin-bottom: $hpe-unit-space * .5;
+        margin-left: auto;
+      }
+
+      @media (min-width: 992px) {
+        // Remove extra margin at bottom of lists (except for when lists are stacked)
+        dt:last-of-type, dd:last-of-type {
+          margin-bottom: 0;
+        }
+      }
     }
 
     dd {
@@ -35,6 +45,10 @@
         display: table-cell;
         line-height: normal;
       }
+
+      .percent-gauge {
+        padding: 0;
+      }
     }
 
     .app-status-block {
@@ -44,6 +58,21 @@
         margin-left: 0;
         margin-right: 2px;
       }
+    }
+
+    .app-instance-title {
+      margin-bottom: 0;
+    }
+  }
+
+  .summary-instances {
+
+    .instance-percent-gauge {
+      padding: 7px 14px;
+    }
+
+    .instance-uptime-td {
+      min-width: 120px;
     }
   }
 }
