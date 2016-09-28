@@ -19,9 +19,6 @@
       "entrypoint": [],
       "parameters": [
         {
-          "name": "CONSOLE_VERSION"
-        },
-        {
           "name": "ETCD_DATA_DIR"
         },
         {
@@ -90,9 +87,6 @@
       "entrypoint": [],
       "parameters": [
         {
-          "name": "CONSOLE_VERSION"
-        },
-        {
           "name": "SENTINEL"
         },
         {
@@ -149,9 +143,6 @@
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
         {
           "name": "KEEPER"
         },
@@ -238,9 +229,6 @@
       "entrypoint": [],
       "parameters": [
         {
-          "name": "CONSOLE_VERSION"
-        },
-        {
           "name": "PROXY"
         },
         {
@@ -291,9 +279,6 @@
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
         {
           "name": "PGSQL_USER"
         },
@@ -395,9 +380,6 @@
       "entrypoint": [],
       "parameters": [
         {
-          "name": "CONSOLE_VERSION"
-        },
-        {
           "name": "console-cert"
         },
         {
@@ -460,9 +442,6 @@
       "entrypoint": [],
       "parameters": [
         {
-          "name": "CONSOLE_VERSION"
-        },
-        {
           "name": "UPGRADE_VOLUME"
         },
         {
@@ -507,9 +486,6 @@
       "image": "hsc/hsc-postflight-job:{{TAG}}",
       "entrypoint": [],
       "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
         {
           "name": "PGSQL_HOST"
         },
@@ -588,14 +564,6 @@
     }
   ],
   "parameters": [
-    {
-      "name": "CONSOLE_VERSION",
-      "description": "The current version of the Helion Stackato Console. This param will be automatically incremented with each release of the Console so as to allow HCP to properly restart each component at the time of upgrade. This should not be changed manually.",
-      "default": "{{TAG}}",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
     {
       "name": "CONSOLE_CA_CERT",
       "description": "CA Cert that is used to sign other SSL Certificates",
