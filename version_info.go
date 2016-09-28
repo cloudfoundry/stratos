@@ -19,8 +19,7 @@ type Versions struct {
 }
 
 func (p *portalProxy) getVersionsData() (*Versions, error) {
-	proxyVersion := osGetEnv("CONSOLE_VERSION")
-	// Default CONSOLE_VERSION to be "dev"
+	proxyVersion := p.Config.ConsoleVersion
 	if proxyVersion == "" {
 		proxyVersion = "dev"
 	}
