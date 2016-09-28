@@ -35,7 +35,6 @@
 
     var loggedIn = false;
     var lastUserInteraction = moment();
-    var accountModel = modelManager.retrieve('app.model.account');
     var sessionChecker, dialog;
 
     // Check the session every 30 seconds (Note: this is vey cheap to do unless the session is about to expire)
@@ -54,7 +53,7 @@
 
     function logout() {
       $log.debug('Logging out');
-      return accountModel.logout().finally(function () {
+      return _getAccountModel().logout().finally(function () {
         $log.debug('Reloading page');
         $window.location = '/';
       });
@@ -97,7 +96,7 @@
       dialog.result
         .then(function () {
           $log.debug('User is still here! Automatically refresh session');
-          return accountModel.verifySession().catch(function (error) {
+          return _getAccountModel().verifySession().catch(function (error) {
             // If we fail to refresh, logout!
             $log.error('Failed to refreshed Session!', error);
             logout();
@@ -114,7 +113,7 @@
         return;
       }
       var now = moment();
-      var sessionExpiresOn = accountModel.accountData.sessionExpiresOn;
+      var sessionExpiresOn = _getAccountModel().accountData.sessionExpiresOn;
       var safeExpire = moment(sessionExpiresOn).subtract(moment.duration(autoLogoutDelta));
       var delta = safeExpire.diff(now);
       var aboutToExpire = delta < warnBeforeLogout;
@@ -123,7 +122,7 @@
         var idleDelta = now.diff(lastUserInteraction);
         var userIsActive = idleDelta < userIdlePeriod;
         if (userIsActive) {
-          accountModel.verifySession().catch(function (error) {
+          _getAccountModel().verifySession().catch(function (error) {
             // If we fail to refresh, logout!
             $log.error('Failed to refreshed Session!', error);
             logout();
@@ -158,6 +157,10 @@
 
     function userInteracted() {
       lastUserInteraction = moment();
+    }
+
+    function _getAccountModel() {
+      return modelManager.retrieve('app.model.account');
     }
 
   }
