@@ -104,7 +104,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		oauthConf := &vcsConfig
 
 		tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
-		if p.Config.VCSClientSkipSSLMap[vcsClientKey] == true {
+		if p.Config.VCSClientSkipSSLMap[vcsClientKey] {
 			tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		}
 		client := &http.Client{Transport: tr}

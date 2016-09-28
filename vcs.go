@@ -75,7 +75,6 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, map[VCSC
 
 			authEndpoint := fmt.Sprintf("%s://%s%s/oauth/authorize", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
 			tokenEndpoint := fmt.Sprintf("%s://%s%s/oauth/access_token", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-			//	apiEndpoint := fmt.Sprintf("%s://api.%s%s", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
 
 			vcsConfig := oauth2.Config{
 				Endpoint: oauth2.Endpoint{
