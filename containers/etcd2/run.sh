@@ -29,8 +29,6 @@ if [ ! -z ${HTTP_PROXY} ] || [ ! -z ${HTTPS_PROXY} ]; then
   export NO_PROXY=${NO_PROXY}
 fi
 
-HOST_URL="${HOST_NAME}.${HCP_SERVICE_DOMAIN_SUFFIX}.${HCP_DOMAIN_SUFFIX}"
-
 ADVERTISE_PEER_URLS="http://${HOST_NAME}:${PEER_COMM_PORT}"
 echo "Advertise peer URLs: ${ADVERTISE_PEER_URLS}"
 
