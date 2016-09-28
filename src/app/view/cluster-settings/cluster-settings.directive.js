@@ -184,7 +184,7 @@
      */
     getCnsiTypeText: function (cnsi) {
       if (cnsi.cnsi_type === 'hcf') {
-        return gettext('Helion Cloud Foundry Cluster');
+        return gettext('Helion Cloud Foundry');
       } else if (cnsi.cnsi_type === 'hce') {
         return gettext('Helion Code Engine');
       } else {
