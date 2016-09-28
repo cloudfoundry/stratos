@@ -408,13 +408,6 @@
       "max_instances": 1,
       "service_ports": [
         {
-          "name": "http",
-          "protocol": "TCP",
-          "source_port": 80,
-          "target_port": 80,
-          "public": true
-        },
-        {
           "name": "https",
           "protocol": "TCP",
           "source_port": 443,
