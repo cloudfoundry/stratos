@@ -84,7 +84,7 @@ msgid "BUILDPACK"
 msgstr ""
 
 #: view/login-page/login-page.html:38
-msgid "Built for Enterprise applications, Helion Stackato has open source Cloud Foundry as a core component and adds support for things that Enterprise operations teams need most such as resiliency, ease of management, and ease of install. It also provides additional capabilities for developers such as a continuous integration and deployment service that automates build, test, and deployment actions."
+msgid "Built for Enterprise applications, Helion Stackato has open source Helion Cloud Foundry as a core component and adds support for things that Enterprise operations teams need most such as resiliency, ease of management, and ease of install. It also provides additional capabilities for developers such as a continuous integration and deployment service that automates build, test, and deployment actions."
 msgstr ""
 
 #: cloud-foundry/view/applications/application/services/service/service.html:37
