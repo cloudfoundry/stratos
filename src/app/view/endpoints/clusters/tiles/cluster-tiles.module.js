@@ -16,7 +16,7 @@
       controller: ClusterTilesController,
       controllerAs: 'clustersCtrl',
       ncyBreadcrumb: {
-        label: gettext('Cloud Foundry Endpoints'),
+        label: gettext('Helion Cloud Foundry Endpoints'),
         parent: function () {
           return 'endpoint.dashboard';
         }
@@ -155,13 +155,13 @@
       var that = this;
       this.userServiceInstanceModel.disconnect(cnsiGUID)
         .catch(function (error) {
-          that.notificationsService.notify('error', gettext('Failed to disconnect Cloud Foundry endpoint'), {
+          that.notificationsService.notify('error', gettext('Failed to disconnect Helion Cloud Foundry endpoint'), {
             timeOut: 10000
           });
           return that.$q.reject(error);
         })
         .then(function () {
-          that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully disconnected'));
+          that.notificationsService.notify('success', gettext('Helion Cloud Foundry endpoint successfully disconnected'));
           that.refreshClusterModel().then(function () {
             that.authModel.remove(cnsiGUID);
           });
@@ -201,7 +201,7 @@
         },
         callback: function () {
           return that.serviceInstanceModel.remove(serviceInstance).then(function () {
-            that.notificationsService.notify('success', gettext('Cloud Foundry endpoint successfully unregistered'));
+            that.notificationsService.notify('success', gettext('Helion Cloud Foundry endpoint successfully unregistered'));
             that.refreshClusterModel().then(function () {
               that.authModel.remove(serviceInstance.guid);
             });
