@@ -12,6 +12,23 @@ PEER_COMM_PORT="2380"
 HOST_NAME="hsc-etcd-${HCP_COMPONENT_INDEX}-int"
 echo "ETCD container hostname setting: ${HOST_NAME}"
 
+# Update the NO_PROXY ENV VAR if we have a web proxy set
+if [ ! -z ${HTTP_PROXY} ] || [ ! -z ${HTTPS_PROXY} ]; then
+  echo "Running with a web proxy set - updating NO_PROXY"
+  # We will append to NO_PROXY delimiting with "," - so make sure it has a value if there is not one
+  if [ -z ${NO_PROXY} ]; then
+    export NO_PROXY="127.0.0.1"
+  fi
+  # Add names to the NO PROXY environment variable
+  IFS=',' read -ra ADDR <<< "${ETCD_INITIAL_CLUSTER}"
+  for i in "${ADDR[@]}"; do
+    HOST="${i%=*}"
+    NO_PROXY=${NO_PROXY},${HOST}
+  done
+  echo "NO_PROXY: ${NO_PROXY}"
+  export NO_PROXY=${NO_PROXY}
+fi
+
 ADVERTISE_PEER_URLS="http://${HOST_NAME}:${PEER_COMM_PORT}"
 echo "Advertise peer URLs: ${ADVERTISE_PEER_URLS}"
 
