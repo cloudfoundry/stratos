@@ -269,6 +269,7 @@
             that.paginationProperties.total = 0;
             that.paginationProperties.pageNumber = 0;
             that._handleErrors();
+            return cacheData;
           }
         }).finally(function () {
           that.loading = false;
