@@ -160,10 +160,13 @@ func fwdCNSIStandardHeaders(cnsiRequest CNSIRequest, req *http.Request) {
 	logger.Debug("fwdCNSIStandardHeaders")
 	for k, v := range cnsiRequest.Header {
 		switch {
-		case k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cnap-"):
-		// Skip these. Note: "Referer" causes HCF to fail with a 403
+		// Skip these
+		//  - "Referer" causes HCF to fail with a 403
+		//  - "Connection", "X-Cnap-*" and "Cookie" are consumed by us
+		case k == "Connection", k == "Cookie", k == "Referer", strings.HasPrefix(strings.ToLower(k), "x-cnap-"):
+
+		// Forwarding everything else
 		default:
-			// Forwarding everything else
 			req.Header[k] = v
 		}
 	}
