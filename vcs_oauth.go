@@ -108,7 +108,7 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 		} else {
 			h = httpClient
 		}
-		ctx := context.WithValue(oauth2.NoContext, oauth2.HTTPClient, h)
+		ctx := context.WithValue(oauth2.NoContext, oauth2.HTTPClient, &h)
 
 		code := c.FormValue("code")
 		token, err := oauthConf.Exchange(ctx, code)
