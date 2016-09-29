@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"os"
 
 	"github.com/labstack/echo"
-
 	"github.com/hpcloud/portal-proxy/repository/goose-db-version"
 )
 
@@ -26,14 +25,10 @@ func (p *portalProxy) getVersionsData() (*Versions, error) {
 		proxyVersion = "dev"
 	}
 
-	dbVersionRepo, err := goosedbversion.NewPostgresGooseDBVersionRepository(p.DatabaseConnectionPool)
+	dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(p.DatabaseConnectionPool)
+	databaseVersionRec, err := dbVersionRepo.GetCurrentVersion()
 	if err != nil {
-		return &Versions{}, fmt.Errorf("getVersionsData: %s", err)
-	}
-
-	databaseVersionRec, _ := dbVersionRepo.GetCurrentVersion()
-	if err != nil {
-		return &Versions{}, fmt.Errorf("getVersionsData: %s", err)
+		return &Versions{}, errors.New("Error trying to get current database version")
 	}
 
 	databaseVersion := databaseVersionRec.VersionID
@@ -50,7 +45,7 @@ func (p *portalProxy) getVersions(c echo.Context) error {
 	v, err := p.getVersionsData()
 	if err != nil {
 		logger.Error(err.Error())
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
 	}
 	return c.JSON(http.StatusOK, v)
 }

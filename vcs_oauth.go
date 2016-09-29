@@ -88,8 +88,8 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 
 	// retrieve endpoint from session using OAuth state string
 	userGUID := c.FormValue("state")
-	endpoint, ok := p.getSessionStringValue(c, userGUID)
-	if !ok {
+	endpoint, err := p.getSessionStringValue(c, userGUID)
+	if err != nil {
 		return c.HTML(http.StatusOK, templateToString(failureTpl))
 	}
 
@@ -151,7 +151,7 @@ func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
 	var tokenExists = false
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
-	if _, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
+	if _, err := p.getSessionStringValue(c, newSessionKey(endpoint)); err == nil {
 		logger.Debug("VCS OAuth token found in the session.")
 		tokenExists = true
 	}
@@ -176,7 +176,7 @@ func (p *portalProxy) getVCSOAuthToken(c echo.Context) (string, bool) {
 	logger.Debug("getVCSOAuthToken")
 
 	endpoint := c.Request().Header().Get("x-cnap-vcs-url")
-	if token, ok := p.getSessionStringValue(c, newSessionKey(endpoint)); ok {
+	if token, err := p.getSessionStringValue(c, newSessionKey(endpoint)); err == nil {
 		return token, true
 	}
 
