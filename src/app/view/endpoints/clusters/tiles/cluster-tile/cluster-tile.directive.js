@@ -90,12 +90,11 @@
     };
 
     function init() {
-      that.userService = userServiceInstanceModel.serviceInstances[that.service.guid];
-
       $scope.$watch(function () { return that.service; }, function (newVal) {
         if (!newVal) {
           return;
         }
+        that.userService = userServiceInstanceModel.serviceInstances[that.service.guid] || {};
         that.setActions();
         that.setOrganisationCount();
         that.setUserCount();
@@ -165,7 +164,8 @@
       this.userApi.ListAllUsers({'results-per-page': 1}, this.modelUtils.makeHttpConfig(this.service.guid))
         .then(function (response) {
           that.userCount = response.data.total_results;
-        }).catch(function () {
+        })
+        .catch(function () {
           that.userCount = undefined;
         });
     },
@@ -188,7 +188,8 @@
         this.modelUtils.makeHttpConfig(this.service.guid))
         .then(function (response) {
           that.orgCount = response.data.total_results;
-        }).catch(function () {
+        })
+        .catch(function () {
           that.orgCount = undefined;
         });
     },
