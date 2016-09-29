@@ -53,7 +53,8 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, map[VCSC
 		for _, client := range strings.Split(pc.VCSClients, ";") {
 			clientData := strings.Split(client, ",")
 
-			if len(clientData) < 4 || len(clientData) > 5 {
+			clientDataLen := len(clientData)
+			if clientDataLen < 4 || clientDataLen > 5 {
 				logger.Errorf("Expected to have 4 or 5 elements for VCS entry: %s", clientData)
 				continue
 			}
@@ -86,7 +87,7 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, map[VCSC
 			}
 
 			vcsSkipSSLMap[VCSClientMapKey{baseEndpoint}] = false
-			if len(clientData) == 5 && clientData[4] != "" && strings.ToLower(clientData[4]) == "true" {
+			if clientDataLen == 5 && clientData[4] != "" && strings.ToLower(clientData[4]) == "true" {
 				vcsSkipSSLMap[VCSClientMapKey{baseEndpoint}] = true
 			}
 
