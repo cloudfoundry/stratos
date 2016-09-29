@@ -14,12 +14,12 @@ ret=$?
 popd
 
 if [ ${ret} -eq 0 ]; then
-    docker-compose -f docker-compose.development.yml up -d proxy
+    # nginx also restarts the proxy
+    docker-compose -f docker-compose.development.yml up -d nginx
 else
     echo -e "\033[0;31mOoops Build failed! Not restarting portal-proxy container until you fix the build!\033[0m"
 fi
 
-docker-compose -f docker-compose.development.yml up -d nginx
 popd
 
 exit ${ret}
