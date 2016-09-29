@@ -11,5 +11,8 @@ COPY portal-proxy portal-proxy
 
 RUN chmod +x portal-proxy
 
+COPY /containers/proxy/run.sh /
+RUN chmod +x /run.sh
+
 EXPOSE 443
-ENTRYPOINT ["/srv/portal-proxy"]
+CMD ["/run.sh"]
