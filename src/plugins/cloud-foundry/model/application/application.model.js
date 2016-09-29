@@ -142,8 +142,7 @@
         .then(function (response) {
           var tasks = that._fetchAppStatsForApps(guid, response.data.resources);
           if (!sync) {
-            // Fire off the stats requests in parallel - don't wait for them to complete
-            that.$q.all(tasks);
+            // We don't need to wait for the tasks - they are already running in parallel
             return that.onAll(guid, response, trim);
           } else {
             return that.$q.all(tasks).then(function () {
@@ -159,6 +158,8 @@
       // determine the user-friendly state of the application
       var tasks = [];
       _.each(apps, function (app) {
+        // Update the state for the app to give it an initial state while we wait for the API call to return
+        app.state = that.appStateService.get(app.entity);
         if (app.entity.state === 'STARTED') {
           // We need more information
           tasks.push(that.returnAppStats(cnsiGuid, app.metadata.guid, null).then(function (stats) {
@@ -171,6 +172,7 @@
           app.state = that.appStateService.get(app.entity);
         }
       });
+      return tasks;
     },
 
     _applyTrim: function (trim) {

@@ -14,8 +14,10 @@
         <dt translate>STATE</dt>
         <dd class="pull-right app-status-block">
           <div ng-if="appCtrl.ready">
-            <span class="app-status helion-icon {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
-            <span class="app-status">{{ appCtrl.model.application.state.label }}</span>
+          <span class="app-status helion-icon {{ appCtrl.model.application.state.indicator | appStateIcon }}"></span>
+          <span class="app-status">{{ appCtrl.model.application.state.label }}
+            <span ng-if="appCtrl.model.application.state.subLabel">&nbsp;- {{ appCtrl.model.application.state.subLabel }}</span>
+          </span>
           </div>
         </dd>
 
