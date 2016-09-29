@@ -355,7 +355,7 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	tokenHeader := fmt.Sprintf("token %s", token)
 
 	// Perform the request against the VCS endpoint
-	req, err := http.NewRequest("GET", url, nil)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", tokenHeader)
 
 	var h http.Client
@@ -367,6 +367,7 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	resp, err := h.Do(req)
 	if err != nil {
 		logger.Errorf("Response from VCS contained an error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Response from VCS contained an error")
 	}
 
 	body, _ := ioutil.ReadAll(resp.Body)
