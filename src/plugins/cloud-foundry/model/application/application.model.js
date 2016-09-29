@@ -161,11 +161,7 @@
       _.each(apps, function (app) {
         // Update the state for the app to give it an initial state while we wait for the API call to return
         var cacheId = app.clusterId + '#' + app.metadata.guid;
-        if (that.data.appStateMap[cacheId]) {
-          app.state = that.data.appStateMap[cacheId];
-        } else {
-          app.state = that.appStateService.get(app.entity);
-        }
+        app.state = that.data.appStateMap[cacheId] || that.appStateService.get(app.entity);
 
         if (app.entity.state === 'STARTED') {
           // We need more information
@@ -173,7 +169,6 @@
             app.instances = stats.data;
             app.instanceCount = _.keys(app.instances).length;
             app.state = that.appStateService.get(app.entity, app.instances);
-            var cacheId = app.clusterId + '#' + app.metadata.guid;
             that.data.appStateMap[cacheId] = app.state;
             return stats.data;
           }));
