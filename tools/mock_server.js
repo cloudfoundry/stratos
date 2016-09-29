@@ -3,7 +3,6 @@
 var express = require('express');
 var http = require('http');
 var app = express();
-var server = http.createServer(app);
 var path = require('path');
 var _ = require('lodash');
 var config;
@@ -32,15 +31,16 @@ var staticFiles = path.join(__dirname, '..', 'dist');
 app.use(express.static(staticFiles));
 
 var httpProxy = require('http-proxy');
-var proxy = httpProxy.createProxyServer({
+var proxy = httpProxy.createServer({
   target: {
     host: config.portal_proxy.host,
     port: config.portal_proxy.port || 80
   }
 });
 
+
 var mockApi = require('../mock/api');
-mockApi.init(app, config);
+mockApi.init(app, config, proxy);
 
 if (delay > 0) {
   app.use(function (req, res, next) {
@@ -48,7 +48,6 @@ if (delay > 0) {
     setTimeout(next, delay);
   });
 }
-
 app.use(function (req, res, next) {
   if (unSupportedRequested(req.url)) {
     console.log('Forwarding to portal-proxy: ' + req.method + ' ' + req.url);
@@ -57,6 +56,9 @@ app.use(function (req, res, next) {
     return next();
   }
 });
+
+
+var server = http.createServer(app);
 
 server.on('upgrade', function (req, socket, head) {
   proxy.ws(req, socket, head);

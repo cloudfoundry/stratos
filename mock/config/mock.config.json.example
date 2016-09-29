@@ -1,0 +1,21 @@
+{
+  "portal_proxy": {
+    "host": "localhost",
+    "port": 80,
+    "path": "pp"
+  },
+  "serviceInstances": {
+    "hcf": 5,
+    "hce": 5
+  },
+  "hcf":{
+    "cnsi": "ff095d55-9831-409a-b6e5-3fb0d7fad509",
+    "user_id": "bc44ee38-4074-48ce-ad3b-95e6e691bc98"
+  },
+  "apps":{
+    "minCount": 50,
+    "maxCount": 150,
+    "fixedCount": -1
+  }
+}
+

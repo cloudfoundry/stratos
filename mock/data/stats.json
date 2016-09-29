@@ -1,6 +1,39 @@
 {
-	
-	"url":"http://localhost:3100/pp/v1/proxy/v2/apps/b079c730-b2e2-42ae-ac57-f9715495d2f4/stats",
-	"response":{"0":{"state":"RUNNING","stats":{"name":"ge-python-env","uris":["ge-python-env.hcf.helion.lol"],"host":"172.20.10.24","port":61434,"net_info":{"address":"172.20.10.24","ports":[{"container_port":8080,"host_port":61434},{"container_port":2222,"host_port":61435}]},"uptime":574939,"mem_quota":33554432,"disk_quota":1073741824,"fds_quota":16384,"usage":{"time":"2016-09-27T14:28:38.821241031Z","cpu":0.00013580323988798018,"mem":21004288,"disk":121556992}}}}
-	
+  "url": "http://localhost:3100/pp/v1/proxy/v2/apps/b079c730-b2e2-42ae-ac57-f9715495d2f4/stats",
+  "response": {
+    "0": {
+      "state": "RUNNING",
+      "stats": {
+        "name": "ge-python-env",
+        "uris": [
+          "ge-python-env.hcf.helion.lol"
+        ],
+        "host": "172.20.10.24",
+        "port": 61434,
+        "net_info": {
+          "address": "172.20.10.24",
+          "ports": [
+            {
+              "container_port": 8080,
+              "host_port": 61434
+            },
+            {
+              "container_port": 2222,
+              "host_port": 61435
+            }
+          ]
+        },
+        "uptime": 574939,
+        "mem_quota": 33554432,
+        "disk_quota": 1073741824,
+        "fds_quota": 16384,
+        "usage": {
+          "time": "2016-09-27T14:28:38.821241031Z",
+          "cpu": 0.00013580323988798018,
+          "mem": 21004288,
+          "disk": 121556992
+        }
+      }
+    }
+  }
 }

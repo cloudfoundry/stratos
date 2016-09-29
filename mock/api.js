@@ -5,10 +5,13 @@ var bodyParser = require('body-parser');
 
 // Mock APIs
 var serviceInstances = require('./api/cnsis');
+var infoEndpoints = require('./api/info');
+var authEndpoints = require('./api/auth');
+var appEndpoints = require('./api/apps');
 
 exports.init = init;
 
-function init(app, config) {
+function init(app, config, proxy) {
 
   console.log('\x1b[32mMock API Layer registering routes\x1b[0m');
 
@@ -18,6 +21,9 @@ function init(app, config) {
 
   //
   serviceInstances.init(mockApiRouter, config);
+  infoEndpoints.init(mockApiRouter, config);
+  authEndpoints.init(mockApiRouter, config, proxy);
+  appEndpoints.init(mockApiRouter, config, proxy);
 
   app.use('/', mockApiRouter);
 

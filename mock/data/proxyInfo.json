@@ -1,8 +1,0 @@
-{
-	
-	"url":"http://localhost:3100/pp/v1/proxy/v2/info",
-	"response":{"ef28c1bd-8d65-4d04-86b2-fe002e9e65de":{"name":"","build":"","support":"http://support.cloudfoundry.com","version":0,"description":"Helion Cloud Foundry","authorization_endpoint":"https://login.hcf.helion.lol","token_endpoint":"https://uaa.hcf.helion.lol","min_cli_version":null,"min_recommended_cli_version":null,"api_version":"2.58.0","app_ssh_endpoint":"ssh.hcf.helion.lol:2222","app_ssh_host_key_fingerprint":"33:0e:b8:43:cf:16:13:f9:cb:e7:df:ce:54:a3:6e:6c","app_ssh_oauth_client":"ssh-proxy","routing_endpoint":"https://api.hcf.helion.lol/routing","logging_endpoint":"wss://loggregator.hcf.helion.lol:4443","doppler_logging_endpoint":"wss://doppler.hcf.helion.lol:4443","user":"ae257571-e323-4cd9-bd97-2b21223d9b36"}}
-
-	
-	
-}

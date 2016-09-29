@@ -1,8 +1,23 @@
 {
-	
-	"url":"http://localhost:3100/pp/v1/cnsis/registered",
-	"response":[{"guid":"ef28c1bd-8d65-4d04-86b2-fe002e9e65de","name":"LOL","cnsi_type":"hcf","api_endpoint":{"Scheme":"http","Opaque":"","User":null,"Host":"api.hcf.helion.lol","Path":"","RawPath":"","RawQuery":"","Fragment":""},"account":"63ddbbe1-a185-465d-ba10-63d5c01f1a99","token_expiry":1474987087,"skip_ssl_validation":true}]
-
-	
-	
+  "url": "http://localhost:3100/pp/v1/cnsis/registered",
+  "response": [
+    {
+      "guid": "ef28c1bd-8d65-4d04-86b2-fe002e9e65de",
+      "name": "LOL",
+      "cnsi_type": "hcf",
+      "api_endpoint": {
+        "Scheme": "http",
+        "Opaque": "",
+        "User": null,
+        "Host": "api.hcf.helion.lol",
+        "Path": "",
+        "RawPath": "",
+        "RawQuery": "",
+        "Fragment": ""
+      },
+      "account": "63ddbbe1-a185-465d-ba10-63d5c01f1a99",
+      "token_expiry": 1474987087,
+      "skip_ssl_validation": true
+    }
+  ]
 }
