@@ -753,7 +753,7 @@
     {
       "name": "HTTP_CONNECTION_TIMEOUT_IN_SECS",
       "description": "HTTP connection timeout",
-      "default": "20",
+      "default": "10",
       "data_type": "string",
       "required": true,
       "secret": false
