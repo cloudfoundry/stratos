@@ -760,7 +760,7 @@
     },
     {
       "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
-      "description": "HTTP client timeoout",
+      "description": "HTTP client timeout",
       "default": "20",
       "data_type": "string",
       "required": true,
@@ -768,8 +768,8 @@
     },
     {
       "name": "SKIP_TLS_VERIFICATION",
-      "description": "To skip TLS or now?",
-      "default": "true",
+      "description": "Change this value to true if TLS verification should be skipped for UAA related connections. Otherwise, accept the default and they will be verified.",
+      "default": "false",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -830,7 +830,7 @@
     },
     {
       "name": "VCS_CLIENTS",
-      "description": "VCS Clients for OAuth",
+      "description": "VCS Clients for OAuth: VCS Provider (string),VCS URL (string),Client ID (string),Client Secret (string),Skip SSL (true|false)",
       "data_type": "string",
       "required": true,
       "secret": false
