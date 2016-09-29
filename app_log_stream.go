@@ -102,7 +102,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 		} else {
 			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
 			if err != nil {
-				logger.Errorf("Ooops Error writing data to WebSocket", err)
+				logger.Errorf("Error writing data to WebSocket, %v", err)
 			}
 		}
 	}

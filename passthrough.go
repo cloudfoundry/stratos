@@ -339,28 +339,38 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 
 	var (
 		uri         *url.URL
-		vcsEndpoint string
+		vcsUrlEndpoint string
+		vcsApiEndpoint string
 	)
 
 	uri = makeRequestURI(c)
-	vcsEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
-	url := fmt.Sprintf("%s/%s", vcsEndpoint, uri)
+	vcsUrlEndpoint = c.Request().Header().Get("x-cnap-vcs-url")
+	vcsApiEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
+	url := fmt.Sprintf("%s/%s", vcsApiEndpoint, uri)
 	logger.Debug("VCS Endpoint URL: %s", url)
 
 	token, ok := p.getVCSOAuthToken(c)
 	if !ok {
-		msg := fmt.Sprintf("Token not found for endpoint %s", vcsEndpoint)
+		msg := fmt.Sprintf("Token not found for endpoint %s", vcsApiEndpoint)
 		return echo.NewHTTPError(http.StatusUnauthorized, msg)
 	}
 
 	tokenHeader := fmt.Sprintf("token %s", token)
 
 	// Perform the request against the VCS endpoint
-	req, err := http.NewRequest("GET", url, nil)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", tokenHeader)
-	resp, err := httpClient.Do(req)
+
+	var h http.Client
+	if p.Config.VCSClientSkipSSLMap[VCSClientMapKey{vcsUrlEndpoint}] {
+		h = httpClientSkipSSL
+	} else {
+		h = httpClient
+	}
+	resp, err := h.Do(req)
 	if err != nil {
 		logger.Errorf("Response from VCS contained an error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Response from VCS contained an error")
 	}
 
 	body, _ := ioutil.ReadAll(resp.Body)

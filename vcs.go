@@ -44,50 +44,62 @@ type VCSClientMapKey struct {
 	Endpoint string
 }
 
-func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, error) {
+func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, map[VCSClientMapKey]bool, error) {
+	logger.Info("getVCSClients")
 	vcsClientMap := make(map[VCSClientMapKey]oauth2.Config)
+	vcsSkipSSLMap := make(map[VCSClientMapKey]bool)
+
 	if pc.VCSClients != "" {
 		for _, client := range strings.Split(pc.VCSClients, ";") {
 			clientData := strings.Split(client, ",")
-			if len(clientData) == 4 {
-				vcsType := strings.ToLower(clientData[0])
-				vcsClientType, err := getVCSType(vcsType)
-				if err != nil {
-					logger.Errorf("Unable to get VCS type %s: %v", vcsType, err)
-					continue
-				}
 
-				pathPrefix := getAuthPathPrefix(vcsType)
-				baseEndpoint := strings.TrimSpace(clientData[1])
-				baseEndpointURL, err := url.Parse(baseEndpoint)
-				if err != nil {
-					logger.Errorf("Unable to parse VCS endpoint URL: %s", baseEndpoint)
-					continue
-				}
-
-				authEndpoint := fmt.Sprintf("%s://%s%s/oauth/authorize", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-				tokenEndpoint := fmt.Sprintf("%s://%s%s/oauth/access_token", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-				//	apiEndpoint := fmt.Sprintf("%s://api.%s%s", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-
-				vcsConfig := oauth2.Config{
-					Endpoint: oauth2.Endpoint{
-						AuthURL:  authEndpoint,
-						TokenURL: tokenEndpoint,
-					},
-					ClientID:     clientData[2],
-					ClientSecret: clientData[3],
-				}
-
-				if vcsClientType == VCSGITHUB {
-					vcsConfig.Scopes = githubScopes
-				}
-
-				vcsClientMap[VCSClientMapKey{baseEndpoint}] = vcsConfig
+			clientDataLen := len(clientData)
+			if clientDataLen < 4 || clientDataLen > 5 {
+				logger.Errorf("Expected to have 4 or 5 elements for VCS entry: %s", clientData)
+				continue
 			}
+
+			vcsType := strings.ToLower(clientData[0])
+			vcsClientType, err := getVCSType(vcsType)
+			if err != nil {
+				logger.Errorf("Unable to get VCS type %s: %v", vcsType, err)
+				continue
+			}
+
+			pathPrefix := getAuthPathPrefix(vcsType)
+			baseEndpoint := strings.TrimSpace(clientData[1])
+			baseEndpointURL, err := url.Parse(baseEndpoint)
+			if err != nil {
+				logger.Errorf("Unable to parse VCS endpoint URL: %s", baseEndpoint)
+				continue
+			}
+
+			authEndpoint := fmt.Sprintf("%s://%s%s/oauth/authorize", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
+			tokenEndpoint := fmt.Sprintf("%s://%s%s/oauth/access_token", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
+
+			vcsConfig := oauth2.Config{
+				Endpoint: oauth2.Endpoint{
+					AuthURL:  authEndpoint,
+					TokenURL: tokenEndpoint,
+				},
+				ClientID:     clientData[2],
+				ClientSecret: clientData[3],
+			}
+
+			vcsSkipSSLMap[VCSClientMapKey{baseEndpoint}] = false
+			if clientDataLen == 5 && clientData[4] != "" && strings.ToLower(clientData[4]) == "true" {
+				vcsSkipSSLMap[VCSClientMapKey{baseEndpoint}] = true
+			}
+
+			if vcsClientType == VCSGITHUB {
+				vcsConfig.Scopes = githubScopes
+			}
+
+			vcsClientMap[VCSClientMapKey{baseEndpoint}] = vcsConfig
 		}
 	}
 
-	return vcsClientMap, nil
+	return vcsClientMap, vcsSkipSSLMap, nil
 }
 
 func getVCSType(vcs string) (VCSType, error) {
