@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
+var noCache = require('connect-nocache')();
 exports.init = init;
 
 var responseTemplate = require('../data/stackatoInfo.json').response;
@@ -9,18 +10,16 @@ var hceInfoTemplate = require('../data/hceInfo.json').response;
 
 function init(router, config) {
 
-  router.get('/pp/v1/stackato/info', function (request, response) {
-    request.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  router.get('/pp/v1/stackato/info', noCache, function (request, response) {
     response.json(mockStackatoInfo(config));
   });
 
-  router.get('/pp/v1/proxy/v2/info', function (request, response) {
-    request.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  router.get('/pp/v1/proxy/v2/info', noCache, function (request, response) {
     response.json(mockHcfProxyInfo(request));
   });
 
   router.get('/pp/v1/proxy/info', function (request, response) {
-    request.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    request.header('Cache-Control', noCache, 'private, no-cache, no-store, must-revalidate');
     response.json(mockHceProxyInfo(request));
   });
 

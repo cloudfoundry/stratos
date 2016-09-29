@@ -1,6 +1,8 @@
 'use strict';
 
 var _ = require('lodash');
+var noCache = require('connect-nocache')();
+
 exports.init = init;
 
 var responseTemplate = require('../data/cnsis.json').response;
@@ -8,13 +10,11 @@ var responseTemplateRegistered = require('../data/registered_cnsis.json').respon
 
 function init(router, config) {
 
-  router.get('/pp/v1/cnsis', function (request, response) {
-    request.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  router.get('/pp/v1/cnsis', noCache, function (request, response) {
     response.json(mockListServiceInstancesResponse(config));
   });
 
-  router.get('/pp/v1/cnsis/registered', function (request, response) {
-    request.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  router.get('/pp/v1/cnsis/registered', noCache, function (request, response) {
     response.json(mockListRegisteredServiceInstancesResponse(config));
   });
 
