@@ -24,18 +24,14 @@ function welcomeMessage() {
 
 function clickAddClusterInWelcomeMessage(serviceType) {
   if (serviceType === 'hcf') {
-    return driver.findElement(by.linkText('register Cloud Foundry clusters')).click();
+    return driver.findElement(by.linkText('register Helion Cloud Foundry clusters')).click();
   } else {
-    return driver.findElement(by.linkText('Code Engine endpoints')).click();
+    return driver.findElement(by.linkText('Helion Code Engine endpoints')).click();
   }
 }
 
 function clickAddClusterInTille(serviceType) {
-  if (serviceType === 'hcf') {
-    return driver.findElement(by.linkText('Register a Cluster')).click();
-  } else {
     return driver.findElement(by.linkText('Register an Endpoint')).click();
-  }
 }
 
 function registerCloudFoundryTile() {

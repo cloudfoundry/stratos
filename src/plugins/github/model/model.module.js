@@ -79,7 +79,7 @@
           return response;
         }, function (err) {
           that.onReposError();
-          return err;
+          throw err;
         });
     },
 

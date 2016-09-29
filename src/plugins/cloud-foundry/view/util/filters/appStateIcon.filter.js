@@ -30,6 +30,9 @@
         case 'ok':
           icon = 'helion-icon-Active_S text-primary';
           break;
+        case 'tentative':
+          icon = 'helion-icon-Active_S text-tentative';
+          break;
         case 'warning':
           icon = 'helion-icon-Warning_S text-warning';
           break;
