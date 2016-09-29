@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"crypto/sha256"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -103,12 +102,13 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 	if vcsConfig, ok := p.Config.VCSClientMap[vcsClientKey]; ok {
 		oauthConf := &vcsConfig
 
-		tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
+		var h http.Client
 		if p.Config.VCSClientSkipSSLMap[vcsClientKey] {
-			tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			h = httpClientSkipSSL
+		} else {
+			h = httpClient
 		}
-		client := &http.Client{Transport: tr}
-		ctx := context.WithValue(oauth2.NoContext, oauth2.HTTPClient, client)
+		ctx := context.WithValue(oauth2.NoContext, oauth2.HTTPClient, h)
 
 		code := c.FormValue("code")
 		token, err := oauthConf.Exchange(ctx, code)
