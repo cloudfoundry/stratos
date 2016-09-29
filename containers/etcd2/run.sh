@@ -47,7 +47,7 @@ echo "Strict reconfig check is set to: ${ETCD_STRICT_RECONFIG_CHECK}"
 echo "Configure logging to FlightRecorder"
 log_cmd=''
 if [[ -n "$HCP_FLIGHTRECORDER_HOST" && -n "$HCP_FLIGHTRECORDER_PORT" ]]; then
-  log_cmd="2>&1 | tee >(logger -t ${HOST_NAME} -n 127.0.0.1 -P 514)"
+  log_cmd="2>&1 | tee >(logger -n $HCP_FLIGHTRECORDER_HOST -P $HCP_FLIGHTRECORDER_PORT -t ${HOSTNAME} -u /tmp/ignored)"
   mkdir -p /etc/rsyslog.d
   echo "*.* @@${HCP_FLIGHTRECORDER_HOST}:${HCP_FLIGHTRECORDER_PORT}" > /etc/rsyslog.d/flight-recorder.conf
   service rsyslog start
