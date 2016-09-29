@@ -109,12 +109,12 @@
 
     eventTypes: {
       // Required to determine 'Last Build|Last Test|Last Deploy' summary at top of page
-      BUILDING: 'Building',
-      TESTING: 'Testing',
-      DEPLOYING: 'Deploying',
+      BUILDING: 'Building Completed',
+      TESTING: 'Testing Completed',
+      DEPLOYING: 'Deploying Completed',
       // Require to know if the execution has finished (execution state is not trustworthy)
       WATCHDOG_TERMINATED: 'watchdog',
-      PIPELINE_COMPLETED: 'pipeline_completed'
+      PIPELINE_COMPLETED: 'Pipeline Completed'
     },
 
     eventStates: {
