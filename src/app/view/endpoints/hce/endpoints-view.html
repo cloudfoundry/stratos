@@ -43,8 +43,9 @@
           table-inline-status="error">
         <td>{{endpoint.name}}</td>
         <td>{{endpoint.url}}</td>
-        <td ng-if="!endpoint.expired" translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
-        <td ng-if="endpoint.expired" translate>Expired</td>
+        <td ng-if="endpoint.error" translate>Unreachable</td>
+        <td ng-if="!endpoint.error && !endpoint.expired" translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
+        <td ng-if="!endpoint.error && endpoint.expired" translate>Expired</td>
         <td>
           <actions-menu actions="endpointsViewCtrl.getActions(endpoint)"
                         action-target="endpoint" menu-icon="helion-icon helion-icon-More"

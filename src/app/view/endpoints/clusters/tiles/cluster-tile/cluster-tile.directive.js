@@ -57,10 +57,12 @@
     this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.modelUtils = modelUtils;
+    var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
     this.actions = [];
     this.orgCount = null;
     this.userCount = null;
+    this.userService = {};
 
     var cardData = {};
     var expiredStatus = {
@@ -69,9 +71,17 @@
       description: gettext('Token has expired')
     };
 
+    var erroredStatus = {
+      classes: 'danger',
+      icon: 'helion-icon-lg helion-icon helion-icon-Critical_S',
+      description: gettext('Cannot contact endpoint')
+    };
+
     cardData.title = this.service.name;
     this.getCardData = function () {
-      if (that.service.hasExpired) {
+      if (this.userService.error) {
+        cardData.status = erroredStatus;
+      } else if (that.service.hasExpired) {
         cardData.status = expiredStatus;
       } else {
         delete cardData.status;
@@ -80,6 +90,8 @@
     };
 
     function init() {
+      that.userService = userServiceInstanceModel.serviceInstances[that.service.guid];
+
       $scope.$watch(function () { return that.service; }, function (newVal) {
         if (!newVal) {
           return;
@@ -143,7 +155,8 @@
     setUserCount: function () {
       this.userCount = 0;
 
-      if (!this.service.isConnected || !this.stackatoInfo.info.endpoints.hcf[this.service.guid].user.admin) {
+      if (!this.service.isConnected || this.userService.error ||
+        !this.stackatoInfo.info.endpoints.hcf[this.service.guid].user.admin) {
         this.userCount = undefined;
         return;
       }
@@ -166,7 +179,8 @@
     setOrganisationCount: function () {
       this.orgCount = 0;
 
-      if (!this.service.isConnected) {
+      if (!this.service.isConnected || this.userService.error) {
+        this.orgCount = undefined;
         return;
       }
       var that = this;
