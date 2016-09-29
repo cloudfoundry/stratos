@@ -34,7 +34,7 @@
    * @memberof app.view
    * @name AccountActionsController
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @property {app.model.account} account - the account model
+   * @property {app.model.stackatoInfo} stackatoInfo - the stackatoInfo model
    * @constructor
    */
   function AccountActionsController(modelManager) {

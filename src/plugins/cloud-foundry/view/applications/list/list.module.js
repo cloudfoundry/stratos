@@ -215,10 +215,11 @@
       this.paginationProperties.total = 0;
 
       return this.model.resetPagination()
-        .then(function () {
+        .then(function (cacheData) {
           // Only in the success case is the pagination model set correctly. If the call is rejected pagination is
           // likely to be undefined
           that.paginationProperties.total = that.model.pagination.totalPage;
+          return cacheData;
         })
         .finally(function () {
           that.loading = false;

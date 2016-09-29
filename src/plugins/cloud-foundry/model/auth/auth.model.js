@@ -27,13 +27,12 @@
    * @constructor
    */
   function AuthModel(modelManager, $q) {
+
     this.modelManager = modelManager;
-    this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.$q = $q;
 
     // Initialised authorization checkers for individual CNSIs
     this.principal = {};
-    this.$q = $q;
 
     this.resources = {
       space: 'space',
@@ -71,11 +70,12 @@
       // Initialise Auth Service
       var that = this;
       var authModelInitPromise = [];
-
-      var services = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true, error: false});
+      var userCnsiModel = this.modelManager.retrieve('app.model.serviceInstance.user');
+      var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
+      var services = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true, error: false});
       if (services.length > 0) {
         _.each(services, function (service) {
-          var endpointUser = _.get(that.stackatoInfo.info.endpoints.hcf, service.guid + '.user');
+          var endpointUser = _.get(stackatoInfo.info.endpoints.hcf, service.guid + '.user');
           if (_.isNull(endpointUser)) {
             // User hasn't connected to this endpoint
             return;

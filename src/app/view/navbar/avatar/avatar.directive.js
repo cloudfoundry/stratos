@@ -40,7 +40,7 @@
    * @param {object} $scope - angular $scope service
    * @param {object} $document - angular $document service
    * @param {object} $timeout - angular $timeout service
-   * @property {app.model.account} model - the account model
+   * @property {app.model.account} accountModel - the account model
    * @property {object} $scope - angular $scope service
    * @property {object} $document - angular $document service
    * @property {object} $timeout - angular $timeout service
@@ -48,7 +48,7 @@
    * @constructor
    */
   function AvatarController(modelManager, $scope, $document, $timeout) {
-    this.model = modelManager.retrieve('app.model.account');
+    this.accountModel = modelManager.retrieve('app.model.account');
     this.$scope = $scope;
     this.$document = $document;
     this.$timeout = $timeout;

@@ -30,8 +30,8 @@
 
       // property definitions
 
-      it('should have properties `model` defined', function () {
-        expect(avatarCtrl.model).toBeDefined();
+      it('should have properties `accountModel` defined', function () {
+        expect(avatarCtrl.accountModel).toBeDefined();
       });
 
       it('should have properties `showingActions` defined', function () {

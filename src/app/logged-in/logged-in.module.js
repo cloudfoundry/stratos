@@ -9,7 +9,8 @@
    */
   angular
     .module('app.logged-in', [
-      'app.event'
+      'app.event',
+      'app.model'
     ]);
 
 })();
