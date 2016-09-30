@@ -17,6 +17,10 @@
         margin-left: auto;
       }
 
+      & > dd {
+        clear: right;
+      }
+
       @media (min-width: 992px) {
         // Remove extra margin at bottom of lists (except for when lists are stacked)
         dt:last-of-type, dd:last-of-type {
