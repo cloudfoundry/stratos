@@ -57,7 +57,8 @@
     this.utils = utils;
 
     this.data = {
-      applications: []
+      applications: [],
+      appStateMap: {}
     };
 
     this.clearApplication();
@@ -159,13 +160,16 @@
       var tasks = [];
       _.each(apps, function (app) {
         // Update the state for the app to give it an initial state while we wait for the API call to return
-        app.state = that.appStateService.get(app.entity);
+        var cacheId = app.clusterId + '#' + app.metadata.guid;
+        app.state = that.data.appStateMap[cacheId] || that.appStateService.get(app.entity);
+
         if (app.entity.state === 'STARTED') {
           // We need more information
           tasks.push(that.returnAppStats(cnsiGuid, app.metadata.guid, null).then(function (stats) {
             app.instances = stats.data;
             app.instanceCount = _.keys(app.instances).length;
             app.state = that.appStateService.get(app.entity, app.instances);
+            that.data.appStateMap[cacheId] = app.state;
             return stats.data;
           }));
         } else {
@@ -225,8 +229,25 @@
           [].push.apply(that.data.applications, apps);
         });
 
+        that._updateAppStateMap();
         that.hasApps = that.pagination.totalPage > 0;
         that.appPage = that.hasApps ? pageNumber : 0;
+      });
+    },
+
+    /**
+     * @function _updateAppStateMap
+     * @description Update the application state cache
+     * @privatwe
+     */
+    _updateAppStateMap: function () {
+      var that = this;
+      this.data.appStateMap = {};
+      _.each(this.data.applications, function (app) {
+        if (app.state) {
+          var cacheId = app.clusterId + '#' + app.metadata.guid;
+          that.data.appStateMap[cacheId] = app.state;
+        }
       });
     },
 
@@ -261,6 +282,7 @@
         .catch(function (error) {
           // Clear everything
           that.data.applications.length = 0;
+          that._updateAppStateMap();
           that.appPage = 0;
           that.hasApps = false;
           return that.$q.reject(error);
@@ -375,6 +397,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetAppSummary(guid, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          response.data.clusterId = cnsiGuid;
           if (!includeStats || response.data.state !== 'STARTED') {
             that.onSummary(cnsiGuid, guid, response.data);
             return response;
@@ -936,6 +959,8 @@
 
     onAppStateChange: function () {
       this.application.state = this.appStateService.get(this.application.summary, this.application.instances);
+      var cacheId = this.application.summary.clusterId + '#' + this.application.summary.guid;
+      this.data.appStateMap[cacheId] = this.application.state;
     }
   });
 

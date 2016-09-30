@@ -233,7 +233,8 @@
       var counts = {};
       // Need to check based on additional state
       // Note that the app summary returned when we are getting all apps does not report running_instances
-      counts.running = getCount(summary.running_instances, appInstances, 'RUNNING');
+      // NOTE: running_instances does not mean that the instance states ar "RUNNING"
+      counts.running = getCount(undefined, appInstances, 'RUNNING');
       // If we know how many aer running and this is the same as the total # instances then
       // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
       if (counts.running === summary.instances) {
