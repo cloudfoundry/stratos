@@ -397,6 +397,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetAppSummary(guid, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          response.data.clusterId = cnsiGuid;
           if (!includeStats || response.data.state !== 'STARTED') {
             that.onSummary(cnsiGuid, guid, response.data);
             return response;
@@ -958,6 +959,8 @@
 
     onAppStateChange: function () {
       this.application.state = this.appStateService.get(this.application.summary, this.application.instances);
+      var cacheId = this.application.summary.clusterId + '#' + this.application.summary.guid;
+      this.data.appStateMap[cacheId] = this.application.state;
     }
   });
 
