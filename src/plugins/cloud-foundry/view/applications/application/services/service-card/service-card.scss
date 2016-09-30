@@ -11,6 +11,11 @@ service-card {
       display: block;
       padding: 0;
       padding-right: $hpe-unit-space;
+
+      img {
+        max-height: $hpe-unit-space * 4;
+        max-width: $hpe-unit-space * 4;
+      }
     }
 
     .service-block {

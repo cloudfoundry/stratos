@@ -1,8 +1,9 @@
 <div class="select-instance">
   <div class="service-description col-sm-12">
-    <img class="service-icon"
-      ng-src="{{ wizardCtrl.options.service.entity.extra.ImageURL }}"
-      default-image default-image-src="/plugins/cloud-foundry/view/assets/services/App_services_72.png"/>
+    <div class="service-icon">
+      <img ng-src="{{ wizardCtrl.options.service.entity.extra.ImageURL }}"
+        default-image default-image-src="/plugins/cloud-foundry/view/assets/services/App_services_72.png"/>
+    </div>
     <div>
       <h4 class="font-semi-bold">{{ wizardCtrl.options.service.entity.label }}</h4>
       <p>{{ wizardCtrl.options.service.entity.extra.LongDescription || wizardCtrl.options.service.entity.description }}</p>
