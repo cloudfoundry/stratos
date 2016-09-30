@@ -296,12 +296,16 @@
                             that.userServiceInstanceModel.serviceInstances[c.guid].valid;
           var isExpired = angular.isDefined(that.userServiceInstanceModel.serviceInstances[c.guid]) &&
                             !that.userServiceInstanceModel.serviceInstances[c.guid].valid;
+          var isError = angular.isDefined(that.userServiceInstanceModel.serviceInstances[c.guid]) &&
+                            that.userServiceInstanceModel.serviceInstances[c.guid].error;
+
           return {
             name: c.name,
             guid: c.guid,
             url: endpoint.Scheme + '://' + endpoint.Host,
             connected: isConnected,
             expired: isExpired,
+            error: isError,
             model: c
           };
         });
