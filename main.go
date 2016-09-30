@@ -38,6 +38,8 @@ const (
 	SessionExpiry   = 20 * 60 // Session cookies expire after 20 minutes
 )
 
+var appVersion string
+
 var (
 	httpClient        = http.Client{}
 	httpClientSkipSSL = http.Client{}
@@ -71,6 +73,10 @@ func main() {
 	}
 	logger.Info("Proxy configuration loaded.")
 
+	// Grab the Console Version from the executable
+	portalConfig.ConsoleVersion = appVersion
+	logger.Infof("Console Version loaded: %s", portalConfig.ConsoleVersion)
+
 	// Initialize the HTTP client
 	initializeHTTPClients(time.Duration(portalConfig.HTTPClientTimeoutInSecs) * time.Second)
 	logger.Info("HTTP client initialized.")
@@ -97,6 +103,8 @@ func main() {
 	portalConfig.VCSClientMap, portalConfig.VCSClientSkipSSLMap, err = getVCSClients(portalConfig)
 	if err != nil {
 		logger.Error("Error parsing VCS clients")
+	} else {
+		logger.Info("VCS Clients loaded.")
 	}
 
 	// Establish a Postgresql connection pool

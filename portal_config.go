@@ -27,4 +27,5 @@ type portalConfig struct {
 	EncryptionKeyInBytes    []byte
 	VCSClientMap            map[VCSClientMapKey]oauth2.Config
 	VCSClientSkipSSLMap     map[VCSClientMapKey]bool
+	ConsoleVersion          string
 }

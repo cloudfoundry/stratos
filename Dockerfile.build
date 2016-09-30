@@ -1,7 +1,5 @@
 FROM golang:1.6
-
 RUN mkdir -p /go/src/github.com/hpcloud/portal-proxy
-
 WORKDIR /go/src/github.com/hpcloud/portal-proxy
-
-CMD go build
+COPY /scripts/compile.sh /
+CMD ["/compile.sh"]
