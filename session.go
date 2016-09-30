@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
-	"github.com/gorilla/sessions"
 )
 
 const (
@@ -64,6 +64,13 @@ func (p *portalProxy) saveSession(c echo.Context, session *sessions.Session) err
 
 	expiresOn := time.Now().Add(time.Second * time.Duration(session.Options.MaxAge))
 	session.Values["expires_on"] = expiresOn
+
+	// Secure session cookies
+	session.Options.HttpOnly = true
+
+	// TODO (wchrisjohnson) HSC-1160 Determine how we can enable this option and yet
+	// not disrupt our UI development workflow, specifically wrt the use of gulp.
+	// session.Options.Secure = true
 
 	return p.SessionStore.Save(req, res, session)
 }
