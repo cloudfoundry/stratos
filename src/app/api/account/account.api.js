@@ -42,7 +42,6 @@
     this.$httpParamSerializer = $httpParamSerializer;
     this.$q = $q;
     this.$cookies = $cookies;
-    this.sessionName = 'stackato-console-session';
   }
 
   angular.extend(AccountApi.prototype, {
@@ -84,28 +83,11 @@
      * @public
      */
     verifySession: function () {
-      if (this.$cookies.get(this.sessionName)) {
-        return this.$http.get('/pp/v1/auth/session/verify');
-      }
-      return this.$q.reject(this.sessionName + ' cookie missing!');
-    },
-
-    /**
-     * @function hasSessionCookie
-     * @memberof app.api.account.AccountApi
-     * @description Check if the user has a session cookie
-     * @returns {boolean} Indicates if a session cookie exists
-     * @public
-     */
-    hasSessionCookie: function () {
-      return this.$cookies.get(this.sessionName);
+      return this.$http.get('/pp/v1/auth/session/verify');
     },
 
     userInfo: function () {
-      if (this.$cookies.get(this.sessionName)) {
-        return this.$http.get('/pp/v1/userinfo');
-      }
-      return this.$q.reject(this.sessionName + ' cookie missing!');
+      return this.$http.get('/pp/v1/userinfo');
     }
 
   });
