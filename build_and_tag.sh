@@ -54,7 +54,7 @@ while getopts ":hpr:t:" opt; do
 done
 
 echo " "
-echo "PRODUCTION BUILD/RELEASE RELEASE: $PROD_RELEASE"
+echo "PRODUCTION BUILD/RELEASE: $PROD_RELEASE"
 echo "REGISTRY: $DOCKER_REGISTRY"
 echo "TAG: $TAG"
 
@@ -127,7 +127,7 @@ function updateTagForRelease {
   pushd ${PORTAL_PROXY_PATH}
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: $GIT_HASH"
-  TAG="$TAG-$GIT_HASH"
+  TAG="$TAG-0-g$GIT_HASH"
   echo "New TAG: $TAG"
   popd
 }
