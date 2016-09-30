@@ -4,6 +4,12 @@
     flex-direction: column;
     padding-bottom: $hpe-unit-space / 2;
   }
+
+  .row {
+    // Override row class negative margin
+    margin-left: 0;
+    margin-right: 0;
+  }
   .ce-data-btn {
     font-weight: $hpe-font-weight-semibold;
   }
