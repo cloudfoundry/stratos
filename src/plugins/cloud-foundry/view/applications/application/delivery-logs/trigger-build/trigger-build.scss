@@ -2,14 +2,19 @@
 
   padding-top: $hpe-unit-space;
 
+  &.delivery-log-flex {
+    display: flex;
+  }
+
   .delivery-log-flex {
     @include flex-align(flex-start, stretch, column);
     flex: 1 1 auto;
   }
 
-
   .delivery-log-trigger-build-commits {
     flex: 1 1 auto;
+    display: flex;
+    overflow-y: scroll;
 
     table {
       th {
@@ -28,6 +33,7 @@
   .delivery-log-trigger-build-buttons {
     flex: 0 0 auto;
     align-self: flex-end;
+    margin-top: $hpe-unit-space;
 
     button {
       margin: 0px 10px 20px 10px;
