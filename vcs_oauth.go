@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -39,20 +40,28 @@ func (p *portalProxy) handleVCSAuth(c echo.Context) error {
 	logger.Debug("handle VCS OAuth")
 
 	endpoint := c.QueryParam("endpoint")
+	apiEndpoint := c.QueryParam("api_endpoint")
 	userGUID, err := getPortalUserGUID(c)
 	if err != nil {
 		logger.Errorf("Can't find portal user GUID: %s", err)
 		return c.HTML(http.StatusOK, templateToString(failureTpl))
 	}
 
+	tokenValid := false
 	// Check if this user + endpoint already has a token
 	vcsRepository, err := vcstokens.NewPgsqlVCSTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		logger.Errorf("Can't connect to VCS Token Repository: %s", err)
 		return c.HTML(http.StatusOK, templateToString(failureTpl))
 	}
+
 	vcsToken, err := vcsRepository.FindVCSToken(endpoint, userGUID, p.Config.EncryptionKeyInBytes)
-	if err != nil {
+	if err == nil {
+		// Check if the stored token is valid
+		tokenValid, _ = p.checkVCSOAuthToken(endpoint, apiEndpoint, vcsToken.AccessToken)
+	}
+
+	if !tokenValid {
 		vcsClientKey := VCSClientMapKey{endpoint}
 		if vcsConfig, ok := p.Config.VCSClientMap[vcsClientKey]; ok {
 			//oauthStateString := uuid.NewV4().String()
@@ -144,6 +153,40 @@ func (p *portalProxy) handleVCSAuthCallback(c echo.Context) error {
 
 	logger.Error("VCS Client not found")
 	return c.HTML(http.StatusOK, templateToString(notfoundTpl))
+}
+
+func (p *portalProxy) checkVCSOAuthToken(endpoint string, apiEndpoint string, token string) (bool, error) {
+	logger.Debug("checkVCSOAuthToken")
+
+	vcsClientKey := VCSClientMapKey{endpoint}
+	if vcsConfig, ok := p.Config.VCSClientMap[vcsClientKey]; ok {
+		var client http.Client
+		if p.Config.VCSClientSkipSSLMap[vcsClientKey] {
+			client = httpClientSkipSSL
+		} else {
+			client = httpClient
+		}
+
+		url := fmt.Sprintf("%s/applications/%s/tokens/%s", apiEndpoint, vcsConfig.ClientID, token)
+
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			logger.Errorf("Error creating request for checking VCS token: %v", err)
+			return false, nil
+		}
+		req.SetBasicAuth(vcsConfig.ClientID, vcsConfig.ClientSecret)
+
+		resp, err := client.Do(req)
+		if err != nil {
+			logger.Errorf("Error checking VCS token: %v", err)
+			return false, err
+		}
+		tokenExists := resp.StatusCode != http.StatusNotFound
+		return tokenExists, nil
+	}
+
+	logger.Error("VCS Client not found")
+	return false, errors.New("VCS Client not found")
 }
 
 func (p *portalProxy) verifyVCSOAuthToken(c echo.Context) error {
