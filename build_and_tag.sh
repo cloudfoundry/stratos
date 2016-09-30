@@ -123,7 +123,14 @@ function checkTag {
 }
 
 function updateTagForRelease {
-  # Reset the TAG variable for our release
+  # Reset the TAG variable for a release to be of the form:
+  #   <version>-<commit#>-<prefix><hash>
+  #   where:
+  #     <version> = semantic, in the form major#.minor#.patch#
+  #     <commit#> = number of commits since tag - always 0
+  #     <prefix> = git commit prefix - always 'g'
+  #     <hash> = git commit hash for the current branch
+  # Reference: See the examples section here -> https://git-scm.com/docs/git-describe
   pushd ${PORTAL_PROXY_PATH}
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: $GIT_HASH"
