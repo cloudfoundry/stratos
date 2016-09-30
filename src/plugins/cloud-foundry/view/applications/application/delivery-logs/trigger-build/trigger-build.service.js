@@ -73,24 +73,43 @@
 
   angular.extend(TriggerBuildsDetailViewController.prototype, {
 
-    build: function () {
+    build: function (skipUpdate) {
       var that = this;
 
       that.triggerError = false;
+      that.triggering = true;
 
-      that.hceModel.triggerPipelineExecution(that.context.guid, that.context.project.id, that.selectedCommit.sha)
+      return that.hceModel.triggerPipelineExecution(that.context.guid, that.context.project.id, that.selectedCommit.sha)
         .then(function () {
           // Success, cause successful promise for modal
           that.$uibModalInstance.close();
         })
         .catch(function () {
-          that.triggerError = true;
+          if (skipUpdate) {
+            that.triggerError = true;
+          } else {
+            that._updateAndBuild()
+              .catch(function () {
+                that.triggerError = true;
+              })
+              .finally(function () {
+                that.triggering = false;
+              });
+          }
+        });
+    },
+
+    _updateAndBuild: function () {
+      var that = this;
+      return this.hceModel.updateProject(this.context.guid, this.hceModel.data.vcsInstance.browse_url, this.context.project.id, this.context.project)
+        .then(function () {
+          return that.build(true);
         });
     },
 
     fetchCommits: function () {
       var that = this;
-      this.fetchError = undefined;
+      this.fetching = true;
 
       var githubOptions = {
         headers: {
@@ -100,22 +119,28 @@
       };
       that.githubModel.commits(that.context.project.repo.full_name, that.context.project.repo.branch, 20, githubOptions)
         .then(function () {
+          that.fetching = false;
           that.fetchError = false;
+          that.permissionError = false;
           that.selectedCommit =
             _.get(that, 'githubModel.data.commits.length') ? that.githubModel.data.commits[0] : null;
         })
         .catch(function (response) {
           if (response.status === 401) {
             that.isAuthenticated = false;
+          } else if (response.status === 404) {
+            that.permissionError = true;
           } else {
             that.fetchError = true;
           }
+
+          that.fetching = false;
         });
     },
 
     githubAuth: function () {
       var that = this;
-      this.githubOauthService.start(this.hceModel.data.vcsInstance.browse_url)
+      this.githubOauthService.start(this.hceModel.data.vcsInstance.browse_url, this.hceModel.data.vcsInstance.api_url)
         .then(function () {
           that.isAuthenticated = true;
           that.fetchCommits();

@@ -46,9 +46,9 @@
   }
 
   angular.extend(GithubOauthService.prototype, {
-    start: function (endpoint) {
+    start: function (endpoint, apiEndpoint) {
       var that = this;
-      var url = '/pp/v1/vcs/oauth/auth?endpoint=' + (endpoint || this.GITHUB_ENDPOINTS.URL);
+      var url = this._generateUrl(endpoint, apiEndpoint);
       var win = this.$window.open(url, '_blank');
       win.focus();
 
@@ -71,6 +71,11 @@
           that.$window.removeEventListener('message', onMessage);
         }
       });
+    },
+
+    _generateUrl: function (endpoint, apiEndpoint) {
+      return '/pp/v1/vcs/oauth/auth?endpoint=' + (endpoint || this.GITHUB_ENDPOINTS.URL) +
+        '&api_endpoint=' + (apiEndpoint || this.GITHUB_ENDPOINTS.API_URL);
     },
 
     cancel: function () {
