@@ -56,8 +56,8 @@ func (p *portalProxy) saveSession(c echo.Context, session *sessions.Session) err
 	// Secure session cookies
 	session.Options.HttpOnly = true
 
-	// TODO (wchrisjohnson) Determine how we can enable this option and yet not
-	//  disrupt our UI development workflow, specifically wrt the use of gulp.
+	// TODO (wchrisjohnson) HSC-1160 Determine how we can enable this option and yet
+	// not disrupt our UI development workflow, specifically wrt the use of gulp.
 	// session.Options.Secure = true
 
 	return p.SessionStore.Save(req, res, session)
