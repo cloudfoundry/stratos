@@ -15,4 +15,4 @@ RUN useradd -m --comment 'hcf user' vcap
 RUN (useradd --system --user-group --no-create-home syslog || true) && \
     usermod -G vcap syslog
 
-CMD ["/run.sh"]
+ENTRYPOINT ["/run.sh"]
