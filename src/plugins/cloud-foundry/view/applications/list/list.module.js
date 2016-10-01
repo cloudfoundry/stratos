@@ -78,8 +78,8 @@
       callback: function (page) {
         return that._loadPage(page);
       },
-      total: _.get(that.model, 'pagination.totalPage', 0),
-      pageNumber: _.get(that.model, 'appPage', 1),
+      total: Math.ceil(that.model.bufferedApplications.length / that.model.pageSize),
+      pageNumber: 1,
       text: {
         nextBtn: gettext('Next'),
         prevBtn: gettext('Previous')
@@ -94,7 +94,7 @@
       that._setClusters();
       that._setOrgs();
       that._setSpaces();
-      that._reload(true).finally(function () {
+      that._reload().finally(function () {
         // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
         that.ready = true;
       });
@@ -209,15 +209,14 @@
      * @function _loadPage
      * @description Retrieve apps with given page number
      * @param {number} page - page number
-     * @param {object} cachedData - cached page data
      * @returns {promise} A promise
      * @private
      */
-    _loadPage: function (page, cachedData) {
+    _loadPage: function (page) {
       var that = this;
       this.loading = true;
 
-      return this.model.loadPage(page, cachedData)
+      return this.model.loadPage(page)
         .finally(function () {
           that.loading = false;
           that._handleErrors();
@@ -227,51 +226,23 @@
     /**
      * @function _reload
      * @description Reload the application wall
-     * @param {boolean=} retainPage Attempt to retain the current page after pagination has reloaded
      * @returns {promise} A promise
      * @private
      */
-    _reload: function (retainPage) {
+    _reload: function () {
       var that = this;
-      var reloadPage = retainPage ? that.model.appPage : 1;
-
       this.loading = true;
 
-      // Recreate the pagination model
       return this.model.resetPagination()
-        .catch(function (error) {
-          // Clear everything
+        .then(function () {
+          that.paginationProperties.total = Math.ceil(that.model.bufferedApplications.length / that.model.pageSize);
+          that._loadPage(1);
+        })
+        .catch(function () {
           that.paginationProperties.total = 0;
           that.paginationProperties.pageNumber = 0;
-          return that.$q.reject(error);
         })
-        .then(function (cacheData) {
-          // Only in the success case is the pagination model set correctly. If the call is rejected pagination is
-          // likely to be undefined
-          that.paginationProperties.total = that.model.pagination.totalPage;
-
-          // If there are pages attempt to load one of them (either the previous page or first one, see above)
-          if (that.model.pagination.totalPage) {
-
-            //Ensure page number is valid
-            reloadPage = reloadPage < 1 ? 1 : reloadPage;
-            reloadPage = reloadPage > that.model.pagination.pages.length ? that.model.pagination.pages.length : reloadPage;
-
-            return that._loadPage(reloadPage, cacheData)
-              .then(function () {
-                // ensure the paginator shows the correct page
-                that.paginationProperties.pageNumber = reloadPage;
-              })
-              .finally(function () {
-                return cacheData;
-              });
-          } else {
-            that.paginationProperties.total = 0;
-            that.paginationProperties.pageNumber = 0;
-            that._handleErrors();
-            return cacheData;
-          }
-        }).finally(function () {
+        .finally(function () {
           that.loading = false;
         });
     },
