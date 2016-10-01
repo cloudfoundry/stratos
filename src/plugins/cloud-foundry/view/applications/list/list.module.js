@@ -78,7 +78,7 @@
       callback: function (page) {
         return that._loadPage(page);
       },
-      total: Math.ceil(that.model.bufferedApplications.length / that.model.pageSize),
+      total: _.ceil(that.model.bufferedApplications.length / that.model.pageSize),
       pageNumber: 1,
       text: {
         nextBtn: gettext('Next'),
@@ -235,7 +235,7 @@
 
       return this.model.resetPagination()
         .then(function () {
-          that.paginationProperties.total = Math.ceil(that.model.bufferedApplications.length / that.model.pageSize);
+          that.paginationProperties.total = _.ceil(that.model.bufferedApplications.length / that.model.pageSize);
           that._loadPage(1);
         })
         .catch(function () {

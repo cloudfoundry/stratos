@@ -160,6 +160,7 @@
       var start = (pageNumber - 1) * this.pageSize;
       var end = start + this.pageSize;
       this.data.applications = _.slice(this.bufferedApplications, start, end);
+      this._updateAppStateMap();
       this._fetchAppStatsForApps(this.data.applications);
 
       return this.$q.resolve();
@@ -199,7 +200,7 @@
      */
     _listAllApps: function () {
       var that = this;
-      this.bufferedApplications.length = 0;
+      this.bufferedApplications = [];
       return this.$q(function (resolve, reject) {
         that._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis(), resolve, reject);
       })
@@ -220,7 +221,7 @@
 
     /**
      * @function _updateCache
-     * @description update cache for the full application list.
+     * @description update cached application list.
      * @private
      */
     _updateCache: function () {
@@ -241,6 +242,7 @@
     /**
      * @function _injectSortingKey
      * @description inject a temporary sorting key for sorting.
+     * @param {Array} apps A list applications.
      * @private
      */
     _injectSortingKey: function (apps) {
@@ -252,6 +254,7 @@
     /**
      * @function _removeSortingKey
      * @description remove the temporary sorting key.
+     * @param {Array} apps A list applications.
      * @private
      */
     _removeSortingKey: function (apps) {
@@ -263,6 +266,7 @@
     /**
      * @function _onListAllAppsFailure
      * @description failure handler for listAllApps promise.
+     * @param {*} error An error.
      * @returns {object} promise object
      * @private
      */
@@ -280,7 +284,6 @@
      * @param {Array} cnsis An array of cluster IDs to load applications.
      * @param {Function} resolve A function to resolve the overall loading promise, get called when all applications are loaded.
      * @param {Function} reject A function to reject the overall loading promise, get called whenever there is a loading request in the sequence is failed.
-     * @returns {object} promise object
      * @private
      */
     _listAllAppsWithPage: function (page, pageSize, cnsis, resolve, reject) {
@@ -315,9 +318,9 @@
     /**
      * @function _onListAllAppsWithPageSuccess
      * @description success handler for _listAllAppsWithPage promise.
+     * @param {object} data The data set in map data structure that holds data of applications for each cluster.
      * @param {number} page The loading page number against API. This is not the displaying page number.
      * @param {number} pageSize The loading page size against API. This is not the displaying page side number.
-     * @param {Array} cnsis An array of cluster IDs to load applications.
      * @param {Function} resolve A function to resolve the overall loading promise, get called when all applications are loaded.
      * @param {Function} reject A function to reject the overall loading promise, get called whenever there is a loading request in the sequence is failed.
      * @private
@@ -353,6 +356,7 @@
      * @function _getRemainingClusters
      * @description get the cluster IDs that still has applications to load.
      * @param {object} data The data set in map data structure that holds data of applications for each cluster.
+     * @returns {Array} An array of clusters still need to retrieve applications from.
      * @private
      */
     _getRemainingClusters: function (data) {
