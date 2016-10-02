@@ -17,7 +17,7 @@ type SessionValueNotFound struct {
 	msg string
 }
 
-func (e SessionValueNotFound) Error() string {
+func (e *SessionValueNotFound) Error() string {
 	return fmt.Sprintf("Session value not found %s", e.msg)
 }
 
@@ -35,7 +35,7 @@ func (p *portalProxy) getSessionValue(c echo.Context, key string) (interface{}, 
 		return intf, nil
 	}
 
-	return nil, SessionValueNotFound{key}
+	return nil, &SessionValueNotFound{key}
 }
 
 func (p *portalProxy) getSessionInt64Value(c echo.Context, key string) (int64, error) {
