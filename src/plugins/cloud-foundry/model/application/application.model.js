@@ -74,7 +74,6 @@
     this.clusterCount = 0;
     this.hasApps = false;
     this.bufferedApplications = [];
-    this.cachedApplications = [];
     this.filteredApplications = [];
     // Page number (not zero based, used in UX)
     this.appPage = 1;
@@ -207,6 +206,11 @@
       this.bufferedApplications = [];
       return this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis())
         .then(_.bind(this._onListAllAppsSuccess, this))
+        .then(function () {
+          if (that.filterParams.cnsiGuid !== 'all') {
+            that.filterByCluster(that.filterParams.cnsiGuid);
+          }
+        })
         .catch(_.bind(this._onListAllAppsFailure, this));
     },
 
@@ -218,17 +222,7 @@
     _onListAllAppsSuccess: function () {
       this.hasApps = this.bufferedApplications.length > 0;
       this._sortApps();
-      this._updateCache();
       this.resetFilter();
-    },
-
-    /**
-     * @function _updateCache
-     * @description update cached application list.
-     * @private
-     */
-    _updateCache: function () {
-      this.cachedApplications = _.clone(this.bufferedApplications);
     },
 
     /**
@@ -318,13 +312,13 @@
     _listAllAppsWithPage: function (page, pageSize, cnsis) {
       var that = this;
       if (cnsis.length === 0) {
-        return $q.resolve();
+        return that.$q.resolve();
       }
 
       return this._listAllAppsWithPageHelper(page, pageSize, cnsis)
         .then(function (response) {
           if (!response.data) {
-            return $q.reject();
+            return that.$q.reject();
           } else {
             // We can further optimize the calls to be in parallel - after the first call, we know how many calls we need to make
             // Find the highest total number of page
@@ -407,18 +401,15 @@
      * @private
      */
     _getCurrentCnsis: function () {
-      var cnsis = [];
-      if (this.filterParams.cnsiGuid === 'all') {
-        // Ensure that we ignore any service that's invalid (session expired) or errored (cannot contact)
-        cnsis = _.chain(this._getUserCnsiModel().serviceInstances)
+      // Find cnsi's to reach out to
+      // - Ignore cnsi's that are invalid (session expired) or errored (cannot contact)
+      // - Fetch apps from all available cnsi's. Specifically important if we return to the page and pre-filter. Need
+      // to ignore this in order to have the correct cache
+      return _.chain(this._getUserCnsiModel().serviceInstances)
           .values()
           .filter({cnsi_type: 'hcf', valid: true, error: false})
           .map('guid')
           .value();
-      } else {
-        cnsis = [this.filterParams.cnsiGuid];
-      }
-      return cnsis;
     },
 
     /**
@@ -428,8 +419,9 @@
      * @public
      */
     filterByCluster: function (clusterId) {
-      var apps = _.clone(this.cachedApplications);
+      var apps = _.clone(this.bufferedApplications);
       this.filteredApplications = _.filter(apps, ['clusterId', clusterId]);
+      this.hasApps = this.filteredApplications.length > 0;
     },
 
     /**
@@ -438,7 +430,8 @@
      * @public
      */
     resetFilter: function () {
-      this.filteredApplications = _.clone(this.cachedApplications);
+      this.filteredApplications = _.clone(this.bufferedApplications);
+      this.hasApps = this.filteredApplications.length > 0;
     },
 
     /**

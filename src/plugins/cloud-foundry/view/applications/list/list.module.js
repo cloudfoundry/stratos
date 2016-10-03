@@ -78,7 +78,7 @@
       callback: function (page) {
         return that._loadPage(page);
       },
-      total: _.ceil(that.model.cachedApplications.length / that.model.pageSize),
+      total: _.ceil(that.model.bufferedApplications.length / that.model.pageSize),
       pageNumber: _.get(that.model, 'appPage', 1),
       text: {
         nextBtn: gettext('Next'),
@@ -302,11 +302,11 @@
       } else {
         if (this.filter.cnsiGuid === 'all') {
           this.model.resetFilter();
-
         } else {
           this.model.filterByCluster(this.filter.cnsiGuid);
         }
         this.paginationProperties.pageNumber = 1;
+        this.paginationProperties.total = _.ceil(this.model.filteredApplications.length / this.model.pageSize);
         this._loadPage(1);
       }
     },
