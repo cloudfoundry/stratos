@@ -75,6 +75,7 @@
     this.hasApps = false;
     this.bufferedApplications = [];
     this.cachedApplications = [];
+    this.filteredApplications = [];
   }
 
   angular.extend(Application.prototype, {
@@ -159,7 +160,7 @@
     loadPage: function (pageNumber) {
       var start = (pageNumber - 1) * this.pageSize;
       var end = start + this.pageSize;
-      this.data.applications = _.slice(this.bufferedApplications, start, end);
+      this.data.applications = _.slice(this.filteredApplications, start, end);
       this._updateAppStateMap();
       this._fetchAppStatsForApps(this.data.applications);
 
@@ -217,6 +218,7 @@
       this.hasApps = this.bufferedApplications.length > 0;
       this._sortApps();
       this._updateCache();
+      this.resetFilter();
     },
 
     /**
@@ -398,6 +400,26 @@
         cnsis = [this.filterParams.cnsiGuid];
       }
       return cnsis;
+    },
+
+    /**
+     * @function filterByCluster
+     * @description filter applications by cluster ID.
+     * @returns {string} clusterId The cluster ID to filter by.
+     * @public
+     */
+    filterByCluster: function (clusterId) {
+      var apps = _.clone(this.cachedApplications);
+      this.filteredApplications = _.filter(apps, ['clusterId', clusterId]);
+    },
+
+    /**
+     * @function resetFilter
+     * @description clean out applied filtering and reset the applications back;
+     * @public
+     */
+    resetFilter: function () {
+      this.filteredApplications = _.clone(this.cachedApplications);
     },
 
     /**
