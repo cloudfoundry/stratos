@@ -409,7 +409,7 @@
     /**
      * @function filterByCluster
      * @description filter applications by cluster ID.
-     * @returns {string} clusterId The cluster ID to filter by.
+     * @param {string} clusterId The cluster ID to filter by.
      * @public
      */
     filterByCluster: function (clusterId) {
