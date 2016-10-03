@@ -246,7 +246,7 @@ function generateNextUrl(pageNumber, appsPerPage, organizationGuid, spaceGuid) {
   return '/v2/apps?order-direction=asc&page=' + (pageNumber + 1) + '&results-per-page=' + appsPerPage;
 }
 
-function generatePrevUrl(pageNumber, appsPerPage) {
+function generatePrevUrl(pageNumber, appsPerPage, organizationGuid, spaceGuid)  {
 
   var q = null;
   if (spaceGuid) {
@@ -285,12 +285,22 @@ function determineAppsPerOrg(cnsi, index, config) {
   // distributing apps across all spaces evenly
   var numberOfAppsPerSpace = Math.floor(appCount / (numberOfOrgs * numberOfSpaces));
 
-  var remainderOfSpaceApps = Math.ceil((appCount - (numberOfAppsPerSpace * numberOfOrgs * numberOfSpaces)) / numberOfSpaces);
-
-  var numberOfAppsPerOrg = Math.floor(appCount / numberOfOrgs);
+  var lastSpaceApps = 0;
+  // check if there is a remainder for SpaceApps
+  var remainderForSpaces = appCount - Math.floor(numberOfAppsPerSpace * numberOfSpaces * numberOfOrgs);
+  if (remainderForSpaces === 0) {
+    // We are good
+  } else {
+    lastSpaceApps = remainderForSpaces;
+  }
 
   cnsi.orgs = {};
   cnsi.apps = [];
+
+
+  function isLast(index, total) {
+    return index === total - 1;
+  }
 
   var appIndex = 0;
   for (var i = 0; i < numberOfOrgs; i++) {
@@ -309,8 +319,8 @@ function determineAppsPerOrg(cnsi, index, config) {
         cnsi.apps.push(appName);
       }
       // Add remainder app to teh last space
-      if (remainderOfSpaceApps !== 0 && j === (numberOfSpaces - 1)) {
-        for (var g = 0; g < remainderOfSpaceApps; g++) {
+      if (lastSpaceApps !== 0 && isLast(j, numberOfSpaces) && isLast(i, numberOfOrgs)) {
+        for (var g = 0; g < lastSpaceApps; g++) {
           var appName = "mock_hcf_" + index + "_app_" + appIndex++;
           cnsi.orgs[orgGuid][spaceGuid].apps.push(appName);
           cnsi.orgs[orgGuid].apps.push(appName);
