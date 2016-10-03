@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -o pipefail
 
 echo "Stackato Console Stolon Startup Script"
 
@@ -29,5 +30,17 @@ if [ ! -z ${HTTP_PROXY} ] || [ ! -z ${HTTPS_PROXY} ]; then
   export NO_PROXY=${NO_PROXY}
 fi
 
+echo "Configure logging to FlightRecorder"
+log_cmd=''
+if [[ -n "$HCP_FLIGHTRECORDER_HOST" && -n "$HCP_FLIGHTRECORDER_PORT" ]]; then
+  log_cmd="2>&1 | tee >(logger -n $HCP_FLIGHTRECORDER_HOST -P $HCP_FLIGHTRECORDER_PORT -t ${HOSTNAME} -u /tmp/ignored)"
+  mkdir -p /etc/rsyslog.d
+  echo "*.* @@${HCP_FLIGHTRECORDER_HOST}:${HCP_FLIGHTRECORDER_PORT}" > /etc/rsyslog.d/flight-recorder.conf
+  /usr/sbin/rsyslogd
+fi
+
+cmd="/usr/local/bin/run.sh"
+echo "etcd startup command to be executed: $cmd $log_cmd"
+
 # Now run the Stolon start-up script
-/usr/local/bin/run.sh
+eval "$cmd $log_cmd"

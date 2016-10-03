@@ -11,7 +11,7 @@ COPY /containers/etcd2/run.sh /
 
 RUN chmod +x /usr/bin/logger
 RUN chmod +x /run.sh
-RUN useradd -m --comment 'hcf user' vcap
+RUN useradd -m --comment 'hsc user' vcap
 RUN (useradd --system --user-group --no-create-home syslog || true) && \
     usermod -G vcap syslog
 

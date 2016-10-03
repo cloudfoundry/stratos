@@ -1,8 +1,18 @@
 FROM sorintlab/stolon:master
-COPY /containers/stolon/initialClusterConfig.json /
 
+ENV TERM linux
+
+RUN dnf -y install rsyslog
+
+COPY /containers/stolon/rsyslog/rsyslog.conf /etc
+COPY /containers/stolon/initialClusterConfig.json /
 COPY /containers/stolon/run.sh /
 
+RUN chmod +x /usr/bin/logger
 RUN chmod +x /run.sh
+
+RUN useradd -m --comment 'hsc user' vcap
+RUN (useradd --system --user-group --no-create-home syslog || true) && \
+    usermod -G vcap syslog
 
 ENTRYPOINT ["/run.sh"]

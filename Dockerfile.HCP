@@ -8,10 +8,9 @@ WORKDIR /srv
 
 COPY templates/ templates/
 COPY portal-proxy portal-proxy
+COPY /containers/proxy/run.sh /
 
 RUN chmod +x portal-proxy
-
-COPY /containers/proxy/run.sh /
 RUN chmod +x /run.sh
 
 EXPOSE 443
