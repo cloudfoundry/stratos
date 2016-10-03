@@ -30,6 +30,7 @@
   ServiceRegistrationController.$inject = [
     '$scope',
     '$state',
+    '$q',
     'app.model.modelManager'
   ];
 
@@ -40,14 +41,16 @@
    * @constructor
    * @param {object} $scope - the Angular $scope service
    * @param {object} $state - the Angular $state service
+   * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @property {object} $q - the angular $q service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {Array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    * @property {app.model.stackatoInfo} stackatoInfoModel - the stackato info model containing connected service/user data
    */
-  function ServiceRegistrationController($scope, $state, modelManager) {
+  function ServiceRegistrationController($scope, $state, $q, modelManager) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
@@ -59,6 +62,7 @@
     this.currentEndpoints = [];
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.$state = $state;
+    this.$q = $q;
 
     $scope.$watchCollection(function () {
       return that.cnsiModel.serviceInstances;
@@ -141,15 +145,22 @@
     onConnectSuccess: function (serviceInstance) {
       var that = this;
       // Update stackato info to get connected user's name
-      this.stackatoInfoModel.getStackatoInfo().then(function () {
-        that.authModel.initializeForEndpoint(serviceInstance.guid, true).then(function () {
+      this.$q.all([this.cnsiModel.list(), this.userCnsiModel.list(), this.stackatoInfoModel.getStackatoInfo()])
+      .then(function () {
+        // Only for an HCF service, get the auth model
+        if (serviceInstance.cnsi_type === 'hcf') {
+          that.authModel.initializeForEndpoint(serviceInstance.guid, true).then(function () {
+            that.userCnsiModel.numValid += 1;
+            that.credentialsFormOpen = false;
+            that.activeServiceInstance = null;
+          });
+        } else {
           that.userCnsiModel.numValid += 1;
           that.credentialsFormOpen = false;
           that.activeServiceInstance = null;
-        });
+        }
       });
     }
-
   });
 
 })();
