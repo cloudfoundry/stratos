@@ -78,7 +78,7 @@
       callback: function (page) {
         return that._loadPage(page);
       },
-      total: _.ceil(that.model.bufferedApplications.length / that.model.pageSize),
+      total: _.ceil(that.model.cachedApplications.length / that.model.pageSize),
       pageNumber: 1,
       text: {
         nextBtn: gettext('Next'),
@@ -235,7 +235,8 @@
 
       return this.model.resetPagination()
         .then(function () {
-          that.paginationProperties.total = _.ceil(that.model.bufferedApplications.length / that.model.pageSize);
+          that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
+          that.paginationProperties.pageNumber = 1;
           that._loadPage(1);
         })
         .catch(function () {
@@ -281,9 +282,23 @@
     setCluster: function () {
       this.organizations.length = 1;
       this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
+      var needToReload = !_.isMatch(this.filter, {orgGuid: 'all', spaceGuid: 'all'});
       this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
       this._setOrgs();
-      this._reload();
+
+      if (needToReload) {
+        this._reload();
+
+      } else {
+        if (this.filter.cnsiGuid === 'all') {
+          this.model.resetFilter();
+
+        } else {
+          this.model.filterByCluster(this.filter.cnsiGuid);
+        }
+        this.paginationProperties.pageNumber = 1;
+        this._loadPage(1);
+      }
     },
 
     /**
