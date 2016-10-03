@@ -73,7 +73,12 @@
     // This state should be in the model
     this.clusterCount = 0;
     this.hasApps = false;
+    // Track the list of apps fetched from the back end. List may or may not be filtered.
     this.bufferedApplications = [];
+    // Track the list of apps from the last time we fetched. Used to ensure we have something to show if filters change
+    // whilst bufferedApplications is empty while loading.
+    this.cachedApplications = [];
+    // Track the list of apps filtered by local means
     this.filteredApplications = [];
     // Page number (not zero based, used in UX)
     this.appPage = 1;
@@ -222,7 +227,17 @@
     _onListAllAppsSuccess: function () {
       this.hasApps = this.bufferedApplications.length > 0;
       this._sortApps();
+      this._updateCache();
       this.resetFilter();
+    },
+
+    /**
+     * @function _updateCache
+     * @description update cached application list.
+     * @private
+     */
+    _updateCache: function () {
+      this.cachedApplications = _.clone(this.bufferedApplications);
     },
 
     /**
@@ -419,7 +434,7 @@
      * @public
      */
     filterByCluster: function (clusterId) {
-      var apps = _.clone(this.bufferedApplications);
+      var apps = _.clone(this.cachedApplications);
       this.filteredApplications = _.filter(apps, ['clusterId', clusterId]);
       this.hasApps = this.filteredApplications.length > 0;
     },
@@ -430,7 +445,7 @@
      * @public
      */
     resetFilter: function () {
-      this.filteredApplications = _.clone(this.bufferedApplications);
+      this.filteredApplications = _.clone(this.cachedApplications);
       this.hasApps = this.filteredApplications.length > 0;
     },
 

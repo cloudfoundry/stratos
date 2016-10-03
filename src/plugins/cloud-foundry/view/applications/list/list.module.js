@@ -78,7 +78,7 @@
       callback: function (page) {
         return that._loadPage(page);
       },
-      total: _.ceil(that.model.bufferedApplications.length / that.model.pageSize),
+      total: _.ceil(that.model.cachedApplications.length / that.model.pageSize),
       pageNumber: _.get(that.model, 'appPage', 1),
       text: {
         nextBtn: gettext('Next'),
