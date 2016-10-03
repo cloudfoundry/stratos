@@ -62,9 +62,8 @@ function mockAppsResponse(request, config) {
           cnsiApps[cnsi].appCount = Math.floor(Math.random() * maxAppCount) + minAppCount;
         }
       }
+      cnsiApps[cnsi] = determineAppsPerOrg(cnsiApps[cnsi], index, config);
     }
-
-    cnsiApps[cnsi] = determineAppsPerOrg(cnsiApps[cnsi], index, config);
 
     var cnsiResponse = _.clone(appsTemplate);
     cnsiResponse.total_pages = Math.ceil(cnsiApps[cnsi].appCount / appsPerPage);
