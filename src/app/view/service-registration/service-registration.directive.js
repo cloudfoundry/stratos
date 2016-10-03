@@ -150,12 +150,10 @@
         // Only for an HCF service, get the auth model
         if (serviceInstance.cnsi_type === 'hcf') {
           that.authModel.initializeForEndpoint(serviceInstance.guid, true).then(function () {
-            that.userCnsiModel.numValid += 1;
             that.credentialsFormOpen = false;
             that.activeServiceInstance = null;
           });
         } else {
-          that.userCnsiModel.numValid += 1;
           that.credentialsFormOpen = false;
           that.activeServiceInstance = null;
         }
