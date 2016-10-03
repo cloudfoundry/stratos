@@ -76,6 +76,8 @@
     this.bufferedApplications = [];
     this.cachedApplications = [];
     this.filteredApplications = [];
+    // Page number (not zero based, used in UX)
+    this.appPage = 1;
   }
 
   angular.extend(Application.prototype, {
@@ -161,6 +163,7 @@
       var start = (pageNumber - 1) * this.pageSize;
       var end = start + this.pageSize;
       this.data.applications = _.slice(this.filteredApplications, start, end);
+      this.appPage = pageNumber;
       this._updateAppStateMap();
       this._fetchAppStatsForApps(this.data.applications);
 
@@ -379,6 +382,7 @@
     _reset: function () {
       this.data.applications.length = 0;
       this.hasApps = false;
+      this.appPage = 0;
     },
 
     /**
@@ -390,10 +394,10 @@
     _getCurrentCnsis: function () {
       var cnsis = [];
       if (this.filterParams.cnsiGuid === 'all') {
-        // Ensure that we ignore any service that's invalid (cannot contact)
+        // Ensure that we ignore any service that's invalid (session expired) or errored (cannot contact)
         cnsis = _.chain(this._getUserCnsiModel().serviceInstances)
           .values()
-          .filter({cnsi_type: 'hcf', valid: true})
+          .filter({cnsi_type: 'hcf', valid: true, error: false})
           .map('guid')
           .value();
       } else {

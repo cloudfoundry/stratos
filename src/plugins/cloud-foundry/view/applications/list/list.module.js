@@ -79,7 +79,7 @@
         return that._loadPage(page);
       },
       total: _.ceil(that.model.cachedApplications.length / that.model.pageSize),
-      pageNumber: 1,
+      pageNumber: _.get(that.model, 'appPage', 1),
       text: {
         nextBtn: gettext('Next'),
         prevBtn: gettext('Previous')
@@ -94,7 +94,7 @@
       that._setClusters();
       that._setOrgs();
       that._setSpaces();
-      that._reload().finally(function () {
+      that._reload(true).finally(function () {
         // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
         that.ready = true;
       });
@@ -226,22 +226,32 @@
     /**
      * @function _reload
      * @description Reload the application wall
+     * @param {boolean=} retainPage Attempt to retain the current page after pagination has reloaded
      * @returns {promise} A promise
      * @private
      */
-    _reload: function () {
+    _reload: function (retainPage) {
       var that = this;
+      var reloadPage = retainPage ? that.model.appPage : 1;
       this.loading = true;
 
       return this.model.resetPagination()
         .then(function () {
           that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
-          that.paginationProperties.pageNumber = 1;
-          that._loadPage(1);
+
+          //Ensure page number is valid and load it
+          reloadPage = reloadPage < 1 ? 1 : reloadPage;
+          reloadPage = reloadPage > that.paginationProperties.total ? that.paginationProperties.total : reloadPage;
+          if (reloadPage) {
+            that._loadPage(reloadPage).then(function () {
+              that.paginationProperties.pageNumber = reloadPage;
+            });
+          }
         })
-        .catch(function () {
+        .catch(function (error) {
           that.paginationProperties.total = 0;
           that.paginationProperties.pageNumber = 0;
+          return that.$q.reject(error);
         })
         .finally(function () {
           that.loading = false;
