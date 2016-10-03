@@ -193,6 +193,9 @@ function generateApps(cnsiStruct, currentPage, appsPerPage, config, orgGuid, spa
 
     var app = utils.clone(appsTemplate.resources[0]);
     var guidVal = appsArray[offset + i];
+    if (_.isUndefined(guidVal)){
+      break;
+    }
     app.entity.name = guidVal;
     app.metadata.guid = guidVal;
 
@@ -234,8 +237,17 @@ function rewriteStatsRequest(request, config) {
 function determineAppsPerOrg(cnsi, index, config) {
 
   var appCount = cnsi.appCount;
-  var numberOfOrgs = config.serviceInstances.orgs.count;
-  var numberOfSpaces = config.serviceInstances.orgs.spacesCount;
+  var numberOfOrgs, numberOfSpaces;
+
+  if (_.isArray(config.serviceInstances.orgs)) {
+    numberOfOrgs = config.serviceInstances.orgs[index].count;
+    numberOfSpaces = config.serviceInstances.orgs[index].spacesCount;
+
+  } else {
+    // All HCF instances have equal number of orgs and spaces
+    numberOfOrgs = config.serviceInstances.orgs.count;
+    numberOfSpaces = config.serviceInstances.orgs.spacesCount;
+  }
 
   // distributing apps across all spaces evenly
   var numberOfAppsPerSpace = Math.floor(appCount / (numberOfOrgs * numberOfSpaces));
@@ -264,7 +276,7 @@ function determineAppsPerOrg(cnsi, index, config) {
         cnsi.apps.push(appName);
       }
       // Add remainder app to teh last space
-      if (remainderOfSpaceApps !== 0 && j == (numberOfSpaces -1)) {
+      if (remainderOfSpaceApps !== 0 && j === (numberOfSpaces - 1)) {
         for (var g = 0; g < remainderOfSpaceApps; g++) {
           var appName = "mock_hcf_" + index + "_app_" + appIndex++;
           cnsi.orgs[orgGuid][spaceGuid].apps.push(appName);
