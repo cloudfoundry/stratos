@@ -347,7 +347,7 @@
         }
       ],
       "min_instances": 1,
-      "max_instances": 1,
+      "max_instances": 50,
       "service_ports": [
         {
           "name": "proxy",
@@ -390,7 +390,7 @@
         }
       ],
       "min_instances": 1,
-      "max_instances": 1,
+      "max_instances": 50,
       "service_ports": [
         {
           "name": "https",
