@@ -89,6 +89,7 @@
     this.id = $stateParams.guid;
     // Do we have the application summary? If so ready = true. This should be renamed
     this.ready = false;
+    this.pipelineReady = false;
     this.warningMsg = gettext('The application needs to be restarted for highlighted variables to be added to the runtime.');
     this.UPDATE_INTERVAL = 5000; // milliseconds
     this.supportsVersions = false;
@@ -179,8 +180,8 @@
 
     $scope.$watch(function () {
       return that.model.application.state ? that.model.application.state.label : undefined;
-    }, function (newState) {
-      that.onAppStateChange(newState);
+    }, function () {
+      that.onAppStateChange();
     });
 
     $scope.$watch(function () {
@@ -267,6 +268,8 @@
           // Don't create timer when scope has been destroyed
           if (!that.scopeDestroyed) {
             return that.$q.all(blockUpdate).finally(function () {
+              that.pipelineReady = true;
+              that.onAppStateChange();
               that.startUpdate();
             });
           }
@@ -468,13 +471,27 @@
     },
 
     /**
+     * @function isActionDisabled
+     * @description Determine if an application action should be disabled
+     * @param {string} id - the ID of the action
+     * @returns {boolean} Whether or not the action should be disabled
+     */
+    isActionDisabled: function (id) {
+      if (id === 'delete') {
+        return !this.pipelineReady;
+      } else {
+        return false;
+      }
+    },
+
+    /**
      * @function onAppStateChange
      * @description invoked when the application state changes, so we can update action visibility
      */
     onAppStateChange: function () {
       var that = this;
       angular.forEach(this.appActions, function (appAction) {
-        appAction.disabled = false;
+        appAction.disabled = that.isActionDisabled(appAction.id);
         appAction.hidden = that.isActionHidden(appAction.id);
       });
       this.onAppRoutesChange();
