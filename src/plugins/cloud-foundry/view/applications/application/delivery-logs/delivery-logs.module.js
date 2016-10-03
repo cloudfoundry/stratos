@@ -230,6 +230,8 @@
         });
     },
 
+    /* eslint-disable complexity */
+    // NOTE - Complexity of 13, left in to improve readability.
     /**
      * @name ApplicationDeliveryLogsController.parseEvent
      * @description Update the event with the required information for the ux. This includes upfront momentising of
@@ -290,6 +292,7 @@
 
       this.determineLatestEvent(event);
     },
+    /* eslint-enable complexity */
 
     /**
      * @name ApplicationDeliveryLogsController.determineLatestEvent

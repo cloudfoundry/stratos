@@ -73,9 +73,15 @@
     // This state should be in the model
     this.clusterCount = 0;
     this.hasApps = false;
+    // Track the list of apps fetched from the back end. List may or may not be filtered.
     this.bufferedApplications = [];
+    // Track the list of apps from the last time we fetched. Used to ensure we have something to show if filters change
+    // whilst bufferedApplications is empty while loading.
     this.cachedApplications = [];
+    // Track the list of apps filtered by local means
     this.filteredApplications = [];
+    // Page number (not zero based, used in UX)
+    this.appPage = 1;
   }
 
   angular.extend(Application.prototype, {
@@ -161,6 +167,7 @@
       var start = (pageNumber - 1) * this.pageSize;
       var end = start + this.pageSize;
       this.data.applications = _.slice(this.filteredApplications, start, end);
+      this.appPage = pageNumber;
       this._updateAppStateMap();
       this._fetchAppStatsForApps(this.data.applications);
 
@@ -202,11 +209,14 @@
     _listAllApps: function () {
       var that = this;
       this.bufferedApplications = [];
-      return this.$q(function (resolve, reject) {
-        that._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis(), resolve, reject);
-      })
-      .then(_.bind(this._onListAllAppsSuccess, this))
-      .catch(_.bind(this._onListAllAppsFailure, this));
+      return this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis())
+        .then(_.bind(this._onListAllAppsSuccess, this))
+        .then(function () {
+          if (that.filterParams.cnsiGuid !== 'all') {
+            that.filterByCluster(that.filterParams.cnsiGuid);
+          }
+        })
+        .catch(_.bind(this._onListAllAppsFailure, this));
     },
 
     /**
@@ -279,22 +289,16 @@
     },
 
     /**
-     * @function _listAllAppsWithPage
-     * @description list apps with given loading page number and limitation.
+     * @function _listAllAppsWithPageHelper
+     * @description helper to call the list apps API with the correct params and options
      * @param {number} page The loading page number against API. This is not the displaying page number.
      * @param {number} pageSize The loading page size against API. This is not the displaying page side number.
      * @param {Array} cnsis An array of cluster IDs to load applications.
-     * @param {Function} resolve A function to resolve the overall loading promise, get called when all applications are loaded.
-     * @param {Function} reject A function to reject the overall loading promise, get called whenever there is a loading request in the sequence is failed.
+     * @returns {object} promise object
      * @private
      */
-    _listAllAppsWithPage: function (page, pageSize, cnsis, resolve, reject) {
+    _listAllAppsWithPageHelper: function (page, pageSize, cnsis) {
       var that = this;
-
-      if (cnsis.length === 0) {
-        resolve();
-        return;
-      }
       var options = angular.extend({
         'results-per-page': pageSize,
         page: page
@@ -305,33 +309,55 @@
         }
       };
 
-      this.applicationApi
-        .ListAllApps(options, config)
+      return this.applicationApi.ListAllApps(options, config).then(function (response) {
+        that._onListAllAppsWithPageSuccess(response.data);
+        return response;
+      });
+    },
+
+    /**
+     * @function _listAllAppsWithPage
+     * @description list apps with given loading page number and limitation.
+     * @param {number} page The loading page number against API. This is not the displaying page number.
+     * @param {number} pageSize The loading page size against API. This is not the displaying page side number.
+     * @param {Array} cnsis An array of cluster IDs to load applications.
+     * @returns {object} promise object
+     * @private
+     */
+    _listAllAppsWithPage: function (page, pageSize, cnsis) {
+      var that = this;
+      if (cnsis.length === 0) {
+        return that.$q.resolve();
+      }
+
+      return this._listAllAppsWithPageHelper(page, pageSize, cnsis)
         .then(function (response) {
           if (!response.data) {
-            reject();
+            return that.$q.reject();
           } else {
-            that._onListAllAppsWithPageSuccess(response.data, page, pageSize, resolve, reject);
+            // We can further optimize the calls to be in parallel - after the first call, we know how many calls we need to make
+            // Find the highest total number of page
+            var maxPage = _.max(_.map(response.data, function (hcfResponse) {
+              return hcfResponse.total_pages || 0;
+            }));
+            var tasks = [];
+            for (var i = 2; i <= maxPage; i++) {
+              var cnsis = that._getClustersWithPage(response.data, i);
+              tasks.push(that._listAllAppsWithPageHelper(i, pageSize, cnsis));
+            }
+            return that.$q.all(tasks);
           }
-        })
-        .catch(reject);
+        });
     },
 
     /**
      * @function _onListAllAppsWithPageSuccess
      * @description success handler for _listAllAppsWithPage promise.
      * @param {object} data The data set in map data structure that holds data of applications for each cluster.
-     * @param {number} page The loading page number against API. This is not the displaying page number.
-     * @param {number} pageSize The loading page size against API. This is not the displaying page side number.
-     * @param {Function} resolve A function to resolve the overall loading promise, get called when all applications are loaded.
-     * @param {Function} reject A function to reject the overall loading promise, get called whenever there is a loading request in the sequence is failed.
      * @private
      */
-    _onListAllAppsWithPageSuccess: function (data, page, pageSize, resolve, reject) {
+    _onListAllAppsWithPageSuccess: function (data) {
       this._accumulateApps(data);
-
-      // recursive call
-      this._listAllAppsWithPage(page + 1, pageSize, this._getRemainingClusters(data), resolve, reject);
     },
 
     /**
@@ -355,16 +381,17 @@
     },
 
     /**
-     * @function _getRemainingClusters
-     * @description get the cluster IDs that still has applications to load.
+     * @function _getClustersWithPage
+     * @description get the cluster IDs that still have applications to load.
      * @param {object} data The data set in map data structure that holds data of applications for each cluster.
-     * @returns {Array} An array of clusters still need to retrieve applications from.
+     * @param {number} page The page that is to be requested
+     * @returns {Array} An array of clusters still need to retrieve applications from that have the specified page
      * @private
      */
-    _getRemainingClusters: function (data) {
+    _getClustersWithPage: function (data, page) {
       var cnsis = [];
       _.each(data, function (value, key) {
-        if (value.next_url) {
+        if (value.total_pages >= page) {
           cnsis.push(key);
         }
       });
@@ -379,6 +406,7 @@
     _reset: function () {
       this.data.applications.length = 0;
       this.hasApps = false;
+      this.appPage = 0;
     },
 
     /**
@@ -388,29 +416,27 @@
      * @private
      */
     _getCurrentCnsis: function () {
-      var cnsis = [];
-      if (this.filterParams.cnsiGuid === 'all') {
-        // Ensure that we ignore any service that's invalid (cannot contact)
-        cnsis = _.chain(this._getUserCnsiModel().serviceInstances)
+      // Find cnsi's to reach out to
+      // - Ignore cnsi's that are invalid (session expired) or errored (cannot contact)
+      // - Fetch apps from all available cnsi's. Specifically important if we return to the page and pre-filter. Need
+      // to ignore this in order to have the correct cache
+      return _.chain(this._getUserCnsiModel().serviceInstances)
           .values()
-          .filter({cnsi_type: 'hcf', valid: true})
+          .filter({cnsi_type: 'hcf', valid: true, error: false})
           .map('guid')
           .value();
-      } else {
-        cnsis = [this.filterParams.cnsiGuid];
-      }
-      return cnsis;
     },
 
     /**
      * @function filterByCluster
      * @description filter applications by cluster ID.
-     * @returns {string} clusterId The cluster ID to filter by.
+     * @param {string} clusterId The cluster ID to filter by.
      * @public
      */
     filterByCluster: function (clusterId) {
       var apps = _.clone(this.cachedApplications);
       this.filteredApplications = _.filter(apps, ['clusterId', clusterId]);
+      this.hasApps = this.filteredApplications.length > 0;
     },
 
     /**
@@ -420,6 +446,7 @@
      */
     resetFilter: function () {
       this.filteredApplications = _.clone(this.cachedApplications);
+      this.hasApps = this.filteredApplications.length > 0;
     },
 
     /**
