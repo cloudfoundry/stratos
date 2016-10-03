@@ -55,18 +55,6 @@
 .application-details {
   padding-top: $hpe-unit-space;
   padding-bottom: $hpe-unit-space;
-
-  .summary {
-    .percent-gauge {
-      padding: 0;
-    }
-
-    .data-body dl.dl-horizontal {
-      dt:last-of-type, dd:last-of-type {
-        margin-bottom: 0;
-      }
-    }
-  }
 }
 
 .application-nav.nav.nav-tabs > li {

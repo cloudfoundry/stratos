@@ -1,7 +1,7 @@
 <div class="endpoints endpoints-view">
   <div class="header">
     <div ng-show="endpointsViewCtrl.showListView()" class="applications-header font-semi-bold pull-left" translate>
-      {{endpointsViewCtrl.isHcf() ? 'Cloud Foundry':'Code Engine'}} Endpoints
+      Helion {{endpointsViewCtrl.isHcf() ? 'Cloud Foundry':'Code Engine'}} Endpoints
     </div>
     <button class="btn btn-primary"
             ng-click="endpointsViewCtrl.showClusterAddForm()"
@@ -12,7 +12,7 @@
 
   <div class="empty-view-message" ng-show="endpointsViewCtrl.showEmptyView()">
     <div class="helion-icon helion-icon-3x helion-icon-3x helion-icon-Continuous_integration"></div>
-    <div class="view-msg" translate>You have no registered Code Engine endpoints.</div>
+    <div class="view-msg" translate>You have no registered Helion Code Engine endpoints.</div>
     <div class="view-cta" ng-show="endpointsViewCtrl.isUserAdmin()">
       <a class="btn btn-link" ng-click="endpointsViewCtrl.showClusterAddForm()"><span
         translate>Register an Endpoint</span></a><span translate>to make it available to developers.</span>
@@ -43,8 +43,9 @@
           table-inline-status="error">
         <td>{{endpoint.name}}</td>
         <td>{{endpoint.url}}</td>
-        <td ng-if="!endpoint.expired" translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
-        <td ng-if="endpoint.expired" translate>Expired</td>
+        <td ng-if="endpoint.error" translate>Unreachable</td>
+        <td ng-if="!endpoint.error && !endpoint.expired" translate>{{endpoint.connected ? 'Connected' : 'Disconnected'}}</td>
+        <td ng-if="!endpoint.error && endpoint.expired" translate>Expired</td>
         <td>
           <actions-menu actions="endpointsViewCtrl.getActions(endpoint)"
                         action-target="endpoint" menu-icon="helion-icon helion-icon-More"

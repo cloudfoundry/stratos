@@ -75,7 +75,7 @@
 
   <div ng-if="applicationsListCtrl.model.hasApps" ui-view></div>
 
-  <paginator ng-if="applicationsListCtrl.currentPage > 0"
+  <paginator ng-if="applicationsListCtrl.model.appPage > 0"
     properties="applicationsListCtrl.paginationProperties">
   </paginator>
 </div>

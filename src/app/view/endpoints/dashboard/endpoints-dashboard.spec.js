@@ -19,13 +19,16 @@
       $httpBackend = $injector.get('$httpBackend');
       $q = $injector.get('$q');
       var $state = $injector.get('$state');
+      var $scope = $injector.get('$rootScope').$new();
+      var $interpolate = $injector.get('$interpolate');
 
       modelManager = $injector.get('app.model.modelManager');
       var hceReg = $injector.get('app.view.hceRegistration');
       var hcfReg = $injector.get('app.view.hcfRegistration');
+      var errorService = $injector.get('app.error.errorService');
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController(modelManager, $state, hceReg, hcfReg, $q);
+      controller = new EndpointsDashboardController($scope, $interpolate, modelManager, $state, hceReg, hcfReg, errorService, $q);
 
       var items = [{
         id: 1,

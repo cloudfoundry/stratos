@@ -22,10 +22,13 @@
   }
 
   EndpointsDashboardController.$inject = [
+    '$scope',
+    '$interpolate',
     'app.model.modelManager',
     '$state',
     'app.view.hceRegistration',
     'app.view.hcfRegistration',
+    'app.error.errorService',
     '$q'
   ];
 
@@ -33,14 +36,17 @@
    * @namespace app.view.endpoints.hce
    * @memberof app.view.endpoints.hce
    * @name EndpointsDashboardController
+   * @param {object} $scope - the angular scope service
+   * @param {object} $interpolate - the angular interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {object} $state - the UI router $state service
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
    * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
+   * @param {app.error.errorService} errorService - service to show custom errors below title bar
    * @param {object} $q - the Angular $q service
    * @constructor
    */
-  function EndpointsDashboardController(modelManager, $state, hceRegistration, hcfRegistration, $q) {
+  function EndpointsDashboardController($scope, $interpolate, modelManager, $state, hceRegistration, hcfRegistration, errorService, $q) {
     var that = this;
     this.modelManager = modelManager;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -63,6 +69,11 @@
     // Show welcome message only if no endpoints are registered
     this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
     this.$q = $q;
+
+    // Ensure any app errors we have set are cleared when the scope is destroyed
+    $scope.$on('$destroy', function () {
+      errorService.clearAppError();
+    });
 
     _updateEndpoints();
 
@@ -141,17 +152,39 @@
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard
      * @description Is current user an admin?
-     * @returns {*}
+     * @returns {object} a promise
      * @private
      */
     function _updateEndpoints() {
       return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
         .then(function () {
+
+          var errors = _.filter(that.userServiceInstanceModel.serviceInstances, {error: true});
+          errors = _.map(errors, 'name');
+
+          var userServicesCount = Object.keys(that.userServiceInstanceModel.serviceInstances).length;
+
+          // Ensure the wording of any errors do not use 'connect' to avoid misleading 'connected' stats in tiles.
+          // (otherwise we need to add additional 'errored' line to tiles)
+          if (!userServicesCount || errors.length === 0) {
+            // If there are no services or no errors continue as normal
+            errorService.clearAppError();
+          } else if (errors.length === 1) {
+            var errorMessage = gettext('The Console could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
+            errorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
+          } else if (errors.length > 1) {
+            errorService.setAppError(gettext('The Console could not contact multiple endpoints.'));
+          }
+
+        })
+        .then(function () {
           that.listError = false;
           _updateLocalServiceInstances();
-        }).catch(function () {
+        })
+        .catch(function () {
           that.listError = true;
-        }).finally(function () {
+        })
+        .finally(function () {
           that.listPromiseResolved = true;
         });
     }

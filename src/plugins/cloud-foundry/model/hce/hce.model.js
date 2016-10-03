@@ -578,6 +578,31 @@
     },
 
     /**
+     * @function updateProject
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Update an existing project
+     * @param {string} guid - the HCE instance GUID
+     * @param {string} vcsUrl - the VCS browse URL
+     * @param {number} projectId - the HCE project ID to update
+     * @param {object} data - the new project data
+     * @returns {promise} A promise object
+     * @public
+     */
+    updateProject: function (guid, vcsUrl, projectId, data) {
+      // Special header to insert Github token
+      var headers = angular.extend(
+        {
+          'x-cnap-vcs-url': vcsUrl,
+          'x-cnap-vcs-token-required': true
+        },
+        this.hceProxyPassthroughConfig.headers
+      );
+
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .updateProject(guid, projectId, data, {}, {headers: headers});
+    },
+
+    /**
      * @function downloadArtifact
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Download the artifact associated with the artifact ID.
