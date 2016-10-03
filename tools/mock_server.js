@@ -25,7 +25,7 @@ try {
 var port = config.port || 4000;
 
 // Delay to simulate slower proxy API calls
-var delay = config.port || 0;
+var delay = config.delay || 0;
 
 var staticFiles = path.join(__dirname, '..', 'dist');
 app.use(express.static(staticFiles));

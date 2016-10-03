@@ -11,10 +11,16 @@ var appsTemplate = require('../data/apps.json').response;
 
 var cnsiApps = {};
 
+
+
 function init(router, config, proxy) {
 
+  var delay = config.apps.apiDelay || 0;
+
   router.get('/pp/v1/proxy/v2/apps', noCache, function (request, response) {
-    response.json(mockAppsResponse(request, config));
+    setTimeout(function () {
+      response.json(mockAppsResponse(request, config));
+    }, delay);
   });
 
   router.get('/pp/v1/proxy/v2/apps/:id/stats', noCache, function (request, response) {
@@ -29,19 +35,24 @@ function mockAppsResponse(request, config) {
   var minAppCount = config.apps.minCount;
   var maxAppCount = config.apps.maxCount;
   var fixedCount = config.apps.fixedCount;
+  var exactCounts = config.apps.exactCounts;
   var appsPerPage = parseInt(request.query['results-per-page']);
   var currentPage = parseInt(request.query['page']);
 
   var cnsiList = request.headers['x-cnap-cnsi-list'].split(',');
 
   var response = {};
-  _.each(cnsiList, function (cnsi) {
+  _.each(cnsiList, function (cnsi, index) {
 
     if (!_.has(cnsiApps, cnsi)) {
       if (fixedCount !== -1) {
         cnsiApps[cnsi] = fixedCount;
       } else {
-        cnsiApps[cnsi] = Math.floor(Math.random() * maxAppCount) + minAppCount;
+        if (exactCounts && exactCounts[index]) {
+          cnsiApps[cnsi] = exactCounts[index];
+        } else {
+          cnsiApps[cnsi] = Math.floor(Math.random() * maxAppCount) + minAppCount;
+        }
       }
     }
 
