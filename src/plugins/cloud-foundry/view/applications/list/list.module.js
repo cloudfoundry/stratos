@@ -117,6 +117,28 @@
   }
 
   angular.extend(ApplicationsListController.prototype, {
+
+    /**
+     * @function getNoAppsMessage
+     * @description Get the message to display when there are no apps
+     * @returns {string} No Apps message that is contextualised to the current filter
+     * @public
+     */
+    getNoAppsMessage: function () {
+      if (this.model.filterParams.cnsiGuid !== 'all') {
+        if (this.model.filterParams.orgGuid !== 'all') {
+          if (this.model.filterParams.spaceGuid !== 'all') {
+            return gettext('This space has no applications.');
+          } else {
+            return gettext('This organization has no applications.');
+          }
+        } else {
+          return gettext('This endpoint has no applications.');
+        }
+      }
+      return gettext('You have no applications.');
+    },
+
     /**
      * @function _setClusters
      * @description Set the cluster filter list

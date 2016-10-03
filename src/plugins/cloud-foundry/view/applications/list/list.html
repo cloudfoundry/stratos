@@ -66,7 +66,7 @@
     </div>
     <div ng-if="applicationsListCtrl.model.clusterCount > 0">
       <div class="helion-icon helion-icon-3x helion-icon-Application"></div>
-      <div class="applications-msg" translate>You have no applications.</div>
+      <div class="applications-msg" ng-bind="applicationsListCtrl.getNoAppsMessage()"></div>
       <div class="applications-cta">
         <a class="btn btn-link" ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')" ng-hide="!applicationsListCtrl.isSpaceDeveloper" translate><span>Add an application.</span></a>
       </div>
