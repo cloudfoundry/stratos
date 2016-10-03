@@ -240,6 +240,7 @@ function determineAppsPerOrg(cnsi, index, config) {
   // distributing apps across all spaces evenly
   var numberOfAppsPerSpace = Math.floor(appCount / (numberOfOrgs * numberOfSpaces));
 
+  var remainderOfSpaceApps = Math.ceil((appCount - (numberOfAppsPerSpace * numberOfOrgs * numberOfSpaces)) / numberOfSpaces);
 
   var numberOfAppsPerOrg = Math.floor(appCount / numberOfOrgs);
 
@@ -261,6 +262,15 @@ function determineAppsPerOrg(cnsi, index, config) {
         cnsi.orgs[orgGuid][spaceGuid].apps.push(appName);
         cnsi.orgs[orgGuid].apps.push(appName);
         cnsi.apps.push(appName);
+      }
+      // Add remainder app to teh last space
+      if (remainderOfSpaceApps !== 0 && j == (numberOfSpaces -1)) {
+        for (var g = 0; g < remainderOfSpaceApps; g++) {
+          var appName = "mock_hcf_" + index + "_app_" + appIndex++;
+          cnsi.orgs[orgGuid][spaceGuid].apps.push(appName);
+          cnsi.orgs[orgGuid].apps.push(appName);
+          cnsi.apps.push(appName);
+        }
       }
     }
   }
