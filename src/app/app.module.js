@@ -18,7 +18,7 @@
     .constant('app.basePath', 'app/')
     .constant('app.config', {
       pagination: {
-        pageSize: 4
+        pageSize: 48
       },
       loadingLimit: 100
     })
