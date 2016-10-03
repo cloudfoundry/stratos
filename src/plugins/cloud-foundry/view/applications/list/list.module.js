@@ -236,6 +236,7 @@
       return this.model.resetPagination()
         .then(function () {
           that.paginationProperties.total = _.ceil(that.model.bufferedApplications.length / that.model.pageSize);
+          that.paginationProperties.pageNumber = 1;
           that._loadPage(1);
         })
         .catch(function () {
