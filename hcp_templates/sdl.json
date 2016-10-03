@@ -310,6 +310,9 @@
           "name": "console-proxy-cert-key"
         },
         {
+          "name": "HTTP_CONNECTION_TIMEOUT_IN_SECS"
+        },
+        {
           "name": "HTTP_CLIENT_TIMEOUT_IN_SECS"
         },
         {
@@ -716,9 +719,17 @@
         }
     },
     {
+      "name": "HTTP_CONNECTION_TIMEOUT_IN_SECS",
+      "description": "HTTP connection timeout",
+      "default": "10",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
       "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
       "description": "HTTP client timeout",
-      "default": "100",
+      "default": "20",
       "data_type": "string",
       "required": true,
       "secret": false
