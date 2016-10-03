@@ -2,6 +2,7 @@ exports.getCnsiList = getCnsiList;
 exports.getResultsPerPage = getResultsPerPage;
 exports.clone = clone;
 exports.getCnsiName = getCnsiName;
+exports.getCnsiIdFromHeader = getCnsiIdFromHeader;
 
 
 function getCnsiList(request) {
@@ -19,4 +20,11 @@ function clone(object) {
 function getCnsiName(cnsiGuid) {
   var id = cnsiGuid.split('hcf')[1];
   return "mock_hcf_" + id;
+}
+
+function getCnsiIdFromHeader(request) {
+
+  var cnsiList = request.headers['x-cnap-cnsi-list'];
+  var index = cnsiList.indexOf('hcf');
+  return parseInt(cnsiList.substr(index+3, cnsiList.length));
 }

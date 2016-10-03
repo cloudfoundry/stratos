@@ -21,8 +21,20 @@ function init(router, config, proxy) {
 
 function mockOrgsResponse(request, config) {
 
-  var orgCount = config.serviceInstances.orgs.count;
-  var spacesCount = config.serviceInstances.orgs.spacesCount;
+
+  var orgCount;
+
+  var serviceInstance = config.serviceInstances.orgs;
+  if (_.isArray(config.serviceInstances.orgs)) {
+    var hcfIndex = utils.getCnsiIdFromHeader(request);
+    serviceInstance = config.serviceInstances.orgs[hcfIndex];
+  }
+
+  orgCount = serviceInstance.count;
+
+  if (serviceInstance.addEmpty) {
+    orgCount += 1;
+  }
 
   var template = appsTemplate;
 
@@ -30,7 +42,6 @@ function mockOrgsResponse(request, config) {
 
   var cnsiList = utils.getCnsiList(request);
   var resultsPerPages = utils.getResultsPerPage(request);
-
 
   _.each(cnsiList, function (cnsi) {
     var organisations = [];
@@ -42,7 +53,6 @@ function mockOrgsResponse(request, config) {
     template.resources = organisations;
   });
 
-
   return template;
 
 }
@@ -50,7 +60,19 @@ function mockOrgsResponse(request, config) {
 function mockSpacesResponse(request, config) {
 
   // TODO passthrough
-  var spacesCount = config.serviceInstances.orgs.spacesCount;
+  var spacesCount;
+
+  var serviceInstance = config.serviceInstances.orgs;
+  if (_.isArray(config.serviceInstances.orgs)) {
+    var hcfIndex = utils.getCnsiIdFromHeader(request);
+    serviceInstance = config.serviceInstances.orgs[hcfIndex];
+  }
+
+  spacesCount = serviceInstance.spacesCount;
+
+  if (serviceInstance.addEmpty) {
+    spacesCount += 1;
+  }
 
   var template = spacesTemplate;
 

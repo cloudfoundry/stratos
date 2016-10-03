@@ -118,37 +118,52 @@ function mockAppsResponseWithQ(request, config) {
   var response = {};
   _.each(cnsiList, function (cnsi, index) {
 
-    var appCount = 0;
-    if (spaceGuid) {
-      appCount = cnsiApps[cnsi].orgs[organizationGuid][spaceGuid].apps.length;
-    } else {
-      appCount = cnsiApps[cnsi].orgs[organizationGuid].apps.length;
-    }
+      var appCount = 0;
+      if (organizationGuid && _.isUndefined(cnsiApps[cnsi].orgs[organizationGuid])) {
+        appCount = 0;
 
-    var cnsiResponse = _.clone(appsTemplate);
-    cnsiResponse.total_pages = Math.ceil(appCount / appsPerPage);
-    cnsiResponse.total_results = appCount;
+      } else {
+        if (spaceGuid) {
 
-    // Calculate how many apps should there be in the current page
-    cnsiResponse.resources = generateApps(cnsiApps[cnsi], currentPage, appsPerPage, config, organizationGuid, spaceGuid);
+          var space = cnsiApps[cnsi].orgs[organizationGuid][spaceGuid];
+          if (_.isUndefined(space)) {
+            appCount = 0;
+          } else {
+            appCount = space.apps.length;
 
-    if (currentPage < cnsiResponse.total_pages) {
-      if (currentPage !== 1) {
-        cnsiResponse.prev_url = generatePrevUrl(currentPage, appsPerPage, organizationGuid, spaceGuid);
+          }
+        } else {
+          appCount = cnsiApps[cnsi].orgs[organizationGuid].apps.length;
+
+        }
       }
-      cnsiResponse.next_url = generateNextUrl(currentPage, appsPerPage, organizationGuid, spaceGuid);
-    } else {
-      if (currentPage !== 1) {
-        cnsiResponse.prev_url = generatePrevUrl(currentPage, appsPerPage, organizationGuid, spaceGuid);
+
+      var cnsiResponse = _.clone(appsTemplate);
+      cnsiResponse.total_pages = Math.ceil(appCount / appsPerPage);
+      cnsiResponse.total_results = appCount;
+
+      // Calculate how many apps should there be in the current page
+      cnsiResponse.resources = generateApps(cnsiApps[cnsi], currentPage, appsPerPage, config, organizationGuid, spaceGuid);
+
+      if (currentPage < cnsiResponse.total_pages) {
+        if (currentPage !== 1) {
+          cnsiResponse.prev_url = generatePrevUrl(currentPage, appsPerPage, organizationGuid, spaceGuid);
+        }
+        cnsiResponse.next_url = generateNextUrl(currentPage, appsPerPage, organizationGuid, spaceGuid);
+      } else {
+        if (currentPage !== 1) {
+          cnsiResponse.prev_url = generatePrevUrl(currentPage, appsPerPage, organizationGuid, spaceGuid);
+        }
+      }
+
+      if (request.headers['x-cnap-passthrough']) {
+        response = cnsiResponse;
+      } else {
+        response[cnsi] = cnsiResponse;
       }
     }
-
-    if (request.headers['x-cnap-passthrough']) {
-      response = cnsiResponse;
-    } else {
-      response[cnsi] = cnsiResponse;
-    }
-  });
+  )
+  ;
 
   return response;
 }
@@ -157,6 +172,14 @@ function generateApps(cnsiStruct, currentPage, appsPerPage, config, orgGuid, spa
 
   var appCount = 0;
 
+  // Empty org/space
+  if (orgGuid && _.isUndefined(cnsiStruct.orgs[orgGuid])) {
+    return [];
+  }
+  // Empty org/space
+  if (spaceGuid && _.isUndefined(cnsiStruct.orgs[orgGuid][spaceGuid])) {
+    return [];
+  }
   var appsArray = cnsiStruct.apps;
   var totalResults = cnsiStruct.appCount;
   if (spaceGuid) {
@@ -192,7 +215,7 @@ function generateApps(cnsiStruct, currentPage, appsPerPage, config, orgGuid, spa
 
     var app = utils.clone(appsTemplate.resources[0]);
     var guidVal = appsArray[offset + i];
-    if (_.isUndefined(guidVal)){
+    if (_.isUndefined(guidVal)) {
       break;
     }
     app.entity.name = guidVal;
@@ -212,7 +235,7 @@ function generateNextUrl(pageNumber, appsPerPage, organizationGuid, spaceGuid) {
   var q = null;
   if (spaceGuid) {
     q = "q=organization_guid:" + organizationGuid + "&space_guid:" + spaceGuid;
-  } else {
+  } else if (organizationGuid) {
     q = "q=organization_guid:" + organizationGuid;
 
   }
@@ -224,6 +247,18 @@ function generateNextUrl(pageNumber, appsPerPage, organizationGuid, spaceGuid) {
 }
 
 function generatePrevUrl(pageNumber, appsPerPage) {
+
+  var q = null;
+  if (spaceGuid) {
+    q = "q=organization_guid:" + organizationGuid + "&space_guid:" + spaceGuid;
+  } else if (organizationGuid) {
+    q = "q=organization_guid:" + organizationGuid;
+
+  }
+
+  if (q) {
+    return '/v2/apps?order-direction=asc' + q + '&page=' + (pageNumber - 1) + '&results-per-page=' + appsPerPage;
+  }
   return '/v2/apps?order-direction=asc&page=' + (pageNumber - 1) + '&results-per-page=' + appsPerPage;
 }
 
@@ -241,7 +276,6 @@ function determineAppsPerOrg(cnsi, index, config) {
   if (_.isArray(config.serviceInstances.orgs)) {
     numberOfOrgs = config.serviceInstances.orgs[index].count;
     numberOfSpaces = config.serviceInstances.orgs[index].spacesCount;
-
   } else {
     // All HCF instances have equal number of orgs and spaces
     numberOfOrgs = config.serviceInstances.orgs.count;
