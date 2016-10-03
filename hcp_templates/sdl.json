@@ -456,7 +456,7 @@
       ],
       "min_instances": 1,
       "max_instances": 1,
-      "timeout": 300,
+      "timeout": 1800,
       "retry_count": 100,
       "service_ports": [],
       "volume_mounts": [
