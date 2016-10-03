@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log/syslog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -78,7 +79,7 @@ func main() {
 	logger.Infof("Console Version loaded: %s", portalConfig.ConsoleVersion)
 
 	// Initialize the HTTP client
-	initializeHTTPClients(time.Duration(portalConfig.HTTPClientTimeoutInSecs) * time.Second)
+	initializeHTTPClients(portalConfig.HTTPClientTimeoutInSecs, portalConfig.HTTPConnectionTimeoutInSecs)
 	logger.Info("HTTP client initialized.")
 
 	// Get the encryption key we need for tokens in the database
@@ -294,17 +295,35 @@ func newPortalProxy(pc portalConfig, dcp *sql.DB, ss *pgstore.PGStore) *portalPr
 	return pp
 }
 
-func initializeHTTPClients(timeoutInSeconds time.Duration) {
+func initializeHTTPClients(timeout int64, connectionTimeout int64) {
 	logger.Debug("initializeHTTPClients")
-	tr := &http.Transport{Proxy: http.ProxyFromEnvironment}
-	tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: false}
-	httpClient.Transport = tr
-	httpClient.Timeout = time.Second * timeoutInSeconds
 
-	trSkipSSL := &http.Transport{Proxy: http.ProxyFromEnvironment}
-	trSkipSSL.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	// Common KeepAlive dialer shared by both transports
+	dial := (&net.Dialer{
+		Timeout:   time.Duration(connectionTimeout) * time.Second,
+		KeepAlive: 30 * time.Second, // should be less than any proxy connection timeout (typically 2-3 minutes)
+	}).Dial
+
+	tr := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		Dial: dial,
+		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+		MaxIdleConnsPerHost: 6, // (default is 2)
+	}
+	httpClient.Transport = tr
+	httpClient.Timeout = time.Duration(timeout) * time.Second
+
+	trSkipSSL := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		Dial: dial,
+		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		MaxIdleConnsPerHost: 6, // (default is 2)
+	}
+
 	httpClientSkipSSL.Transport = trSkipSSL
-	httpClientSkipSSL.Timeout = time.Second * timeoutInSeconds
+	httpClientSkipSSL.Timeout = time.Duration(timeout) * time.Second
 
 }
 

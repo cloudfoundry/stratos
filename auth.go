@@ -302,9 +302,11 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	req.SetBasicAuth(client, clientSecret)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
-	h := httpClient
+	var h http.Client
 	if skipSSLValidation {
 		h = httpClientSkipSSL
+	} else {
+		h = httpClient
 	}
 
 	res, err := h.Do(req)

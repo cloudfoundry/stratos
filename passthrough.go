@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine"
@@ -218,7 +217,6 @@ func (p *portalProxy) proxy(c echo.Context) error {
 
 	// send the request to each CNSI
 	done := make(chan CNSIRequest)
-	kill := make(chan struct{})
 	for _, cnsi := range cnsiList {
 		cnsiRequest := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
 
@@ -237,17 +235,13 @@ func (p *portalProxy) proxy(c echo.Context) error {
 				cnsiRequest.URL.Host = apiHost + cnsiRequest.URL.Host
 			}
 		}
-		go p.doRequest(cnsiRequest, done, kill)
+		go p.doRequest(cnsiRequest, done)
 	}
 
-	timeout := time.After(time.Duration(p.Config.HTTPClientTimeoutInSecs) * time.Second)
 	responses := make(map[string]CNSIRequest)
 	for range cnsiList {
-		select {
-		case res := <-done:
-			responses[res.GUID] = res
-		case <-timeout:
-		}
+		res := <-done
+		responses[res.GUID] = res
 	}
 
 	if shouldPassthrough {
@@ -297,7 +291,7 @@ func (p *portalProxy) addTokenToPayload(c echo.Context, body []byte) ([]byte, er
 	return b, nil
 }
 
-func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest, kill <-chan struct{}) {
+func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan <- CNSIRequest) {
 	logger.Debug("doRequest")
 	var body io.Reader
 	var res *http.Response
@@ -327,11 +321,8 @@ func (p *portalProxy) doRequest(cnsiRequest CNSIRequest, done chan<- CNSIRequest
 		defer res.Body.Close()
 	}
 
-End:
-	select {
-	case done <- cnsiRequest:
-	case <-kill:
-	}
+	End:
+	done <- cnsiRequest
 }
 
 func (p *portalProxy) vcsProxy(c echo.Context) error {

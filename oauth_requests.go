@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -34,11 +35,13 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 			}
 			tokenRec = refreshedTokenRec
 		}
-		req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
+		req.Header.Set("Authorization", "bearer " + tokenRec.AuthToken)
 
-		client := httpClient
+		var client http.Client
 		if cnsi.SkipSSLValidation {
 			client = httpClientSkipSSL
+		} else {
+			client = httpClient
 		}
 		res, err := client.Do(req)
 		if err != nil {
@@ -50,7 +53,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 		}
 
 		if got401 {
-			return res, fmt.Errorf("Failed to authorize")
+			return res, errors.New("Failed to authorize")
 		}
 		got401 = true
 	}
