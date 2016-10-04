@@ -7,6 +7,7 @@
     "build": "gulp clean:dist && gulp",
     "lint": "gulp lint",
     "gate-check": "gulp lint && npm test",
+    "test-backend": "node test_server.js",
     "pretest": "npm run update-webdriver",
     "test": "karma start karma.conf.js --single-run",
     "update-webdriver": "webdriver-manager update",
@@ -27,11 +28,14 @@
     "wiredep": "^3.0.0"
   },
   "devDependencies": {
+    "body-parser": "^1.15.2",
     "bower-files": "^3.14.1",
     "browser-sync": "^2.8.2",
+    "connect-nocache": "^1.1.0",
     "delete": "^0.3.2",
     "eslint": "^1.10.3",
     "eslint-plugin-angular": "^0.15.0",
+    "express": "^4.14.0",
     "fs-extra": "^0.30.0",
     "gulp-angular-filesort": "^1.1.1",
     "gulp-angular-gettext": "^2.1.0",
@@ -43,6 +47,7 @@
     "gulp-sort": "^2.0.0",
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
+    "http-proxy": "^1.15.1",
     "jasmine-core": "^2.4.1",
     "jsdoc": "^3.4.0",
     "karma": "^0.13.19",
@@ -59,6 +64,7 @@
     "protractor": "^3.0.0",
     "q": "^1.4.1",
     "request": "^2.69.0",
-    "shelljs": "^0.5.3"
+    "shelljs": "^0.5.3",
+    "transformer-proxy": "^0.3.3"
   }
 }

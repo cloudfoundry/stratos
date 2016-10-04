@@ -1,0 +1,23 @@
+{
+  "url": "/pp/v1/cnsis/registered",
+  "response": [
+    {
+      "guid": "ff095d55-9831-409a-b6e5-3fb0d7fad509",
+      "name": "HCF",
+      "cnsi_type": "hcf",
+      "api_endpoint": {
+        "Scheme": "https",
+        "Opaque": "",
+        "User": null,
+        "Host": "api.hcf.hsc.stacktest.io",
+        "Path": "/",
+        "RawPath": "",
+        "RawQuery": "",
+        "Fragment": ""
+      },
+      "account": "63ddbbe1-a185-465d-ba10-63d5c01f1a99",
+      "token_expiry": 1475066528,
+      "skip_ssl_validation": true
+    }
+  ]
+}

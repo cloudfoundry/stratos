@@ -1,0 +1,59 @@
+{
+  "url": "http://localhost:3100/pp/v1/proxy/v2/apps?page=1&results-per-page=48",
+  "response": {
+    "total_results": 1,
+    "total_pages": 1,
+    "prev_url": null,
+    "next_url": null,
+    "resources": [
+      {
+        "metadata": {
+          "guid": "7e083cbe-c4a7-4dd0-9322-b2c3ed0f77e5",
+          "url": "/v2/apps/7e083cbe-c4a7-4dd0-9322-b2c3ed0f77e5",
+          "created_at": "2016-08-26T19:04:33Z",
+          "updated_at": "2016-09-26T23:07:56Z"
+        },
+        "entity": {
+          "name": "goenv",
+          "production": false,
+          "space_guid": "c8b885aa-588a-4357-a194-77e157b5a1fc",
+          "stack_guid": "6e4a8145-f2e4-42bf-b747-5c912d0c7775",
+          "buildpack": "https://github.com/cloudfoundry/go-buildpack#v1.3.1",
+          "detected_buildpack": "",
+          "environment_json": {},
+          "memory": 64,
+          "instances": 1,
+          "disk_quota": 1024,
+          "state": "STARTED",
+          "version": "73ef0778-0924-4db1-898e-2e6ce5acbc8f",
+          "command": null,
+          "console": false,
+          "debug": null,
+          "staging_task_id": "fa72ed57d63d4e18b6538b1887bf31f9",
+          "package_state": "STAGED(N,0,0)",
+          "health_check_type": "port",
+          "health_check_timeout": null,
+          "staging_failed_reason": null,
+          "staging_failed_description": null,
+          "diego": true,
+          "docker_image": null,
+          "package_updated_at": "2016-08-26T19:04:35Z",
+          "detected_start_command": "bin/go-env",
+          "enable_ssh": true,
+          "docker_credentials_json": {
+            "redacted_message": "[PRIVATE DATA HIDDEN]"
+          },
+          "ports": [
+            8080
+          ],
+          "space_url": "/v2/spaces/c8b885aa-588a-4357-a194-77e157b5a1fc",
+          "stack_url": "/v2/stacks/6e4a8145-f2e4-42bf-b747-5c912d0c7775",
+          "routes_url": "/v2/apps/7e083cbe-c4a7-4dd0-9322-b2c3ed0f77e5/routes",
+          "events_url": "/v2/apps/7e083cbe-c4a7-4dd0-9322-b2c3ed0f77e5/events",
+          "service_bindings_url": "/v2/apps/7e083cbe-c4a7-4dd0-9322-b2c3ed0f77e5/service_bindings",
+          "route_mappings_url": "/v2/apps/7e083cbe-c4a7-4dd0-9322-b2c3ed0f77e5/route_mappings"
+        }
+      }
+    ]
+  }
+}
