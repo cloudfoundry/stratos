@@ -61,7 +61,7 @@ func (p *portalProxy) getHCPIdentityEndpoint() string {
 	return fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
 }
 
-func (p *portalProxy) checkEmptyCookie(c echo.Context) {
+func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 	req := c.Request().(*standard.Request).Request
 	cookieString := req.Header.Get("Cookie")
 	if cookieString == portalSessionName + "=" {
@@ -89,7 +89,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	sessionValues["user_id"] = u.UserGUID
 	sessionValues["exp"] = u.TokenExpiry
 
-	p.checkEmptyCookie(c)
+	p.removeEmptyCookie(c)
 
 	if err = p.setSessionValues(c, sessionValues); err != nil {
 		return err
@@ -268,7 +268,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 func (p *portalProxy) logout(c echo.Context) error {
 	logger.Debug("logout")
 
-	p.checkEmptyCookie(c)
+	p.removeEmptyCookie(c)
 
 	res := c.Response().(*standard.Response).ResponseWriter
 	cookie := &http.Cookie{

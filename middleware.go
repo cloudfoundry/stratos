@@ -28,7 +28,7 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		logger.Debug("sessionMiddleware")
 
-		p.checkEmptyCookie(c)
+		p.removeEmptyCookie(c)
 
 		userID, err := p.getSessionValue(c, "user_id")
 		if err == nil {
