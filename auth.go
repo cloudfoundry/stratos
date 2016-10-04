@@ -269,14 +269,6 @@ func (p *portalProxy) logout(c echo.Context) error {
 
 	p.removeEmptyCookie(c)
 
-	res := c.Response().(*standard.Response).ResponseWriter
-	cookie := &http.Cookie{
-		Name:   portalSessionName,
-		Value:  "",
-		MaxAge: -1,
-	}
-
-	http.SetCookie(res, cookie)
 	err := p.clearSession(c)
 	if err != nil {
 		logger.Errorf("Unable to clear session: %v", err)
