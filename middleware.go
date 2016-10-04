@@ -27,6 +27,9 @@ func handleSessionError(err error) error {
 func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		logger.Debug("sessionMiddleware")
+
+		p.checkEmptyCookie(c)
+
 		userID, err := p.getSessionValue(c, "user_id")
 		if err == nil {
 			c.Set("user_id", userID)
