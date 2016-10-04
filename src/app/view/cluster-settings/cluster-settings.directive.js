@@ -165,7 +165,6 @@
             // Remove principal for disconnected instance
             that.authModel.remove(id);
           });
-          that.cfModel.all();
         })
         .catch(function () {
           // Failed
