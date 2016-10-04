@@ -14,7 +14,7 @@ var unSupportedRequests = [
 
 try {
   // Need a JSON file named 'mock.config.json'
-  var configFileName = path.resolve(__dirname, '../mock/config/mock.config.json');
+  var configFileName = path.resolve(__dirname, './test-backend/config/mock.config.json');
   console.log(configFileName);
   config = require(configFileName);
 } catch (e) {
@@ -39,7 +39,7 @@ var proxy = httpProxy.createServer({
 });
 
 
-var mockApi = require('../mock/api');
+var mockApi = require('./test-backend/api');
 mockApi.init(app, config, proxy);
 
 if (delay > 0) {

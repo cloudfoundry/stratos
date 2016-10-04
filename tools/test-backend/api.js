@@ -14,7 +14,7 @@ exports.init = init;
 
 function init(app, config, proxy) {
 
-  console.log('\x1b[32mMock API Layer registering routes\x1b[0m');
+  console.log('\x1b[32mTest Backend API Layer registering routes\x1b[0m');
 
   /* Setup mock request for list instances */
   var mockApiRouter = express.Router();

@@ -1,8 +1,6 @@
 'use strict';
 
 var _ = require('lodash');
-var uuid = require('node-uuid');
-var randomstring = require("randomstring");
 var noCache = require('connect-nocache')();
 var utils = require('./utils');
 

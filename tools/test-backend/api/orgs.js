@@ -1,7 +1,6 @@
 'use strict';
 
 var _ = require('lodash');
-var randomstring = require("randomstring");
 var noCache = require('connect-nocache')();
 var utils = require('./utils');
 exports.init = init;
