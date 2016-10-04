@@ -31,11 +31,7 @@
 
         var model = modelManager.retrieve('cloud-foundry.model.application');
         var updateAppPromise = function (updatedAppSpec) {
-          return model.update(cnsiGuid, appGuid, updatedAppSpec)
-            .then(function () {
-              // Trigger update of Application View data
-              model.all();
-            });
+          return model.update(cnsiGuid, appGuid, updatedAppSpec);
         };
 
         var data = {
