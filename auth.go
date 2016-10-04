@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -57,20 +58,18 @@ const HCFAdminIdentifier = "cloud_controller.admin"
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
 
+// EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
+var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
+
 func (p *portalProxy) getHCPIdentityEndpoint() string {
 	return fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
 }
 
 func (p *portalProxy) removeEmptyCookie(c echo.Context) {
 	req := c.Request().(*standard.Request).Request
-	cookieString := req.Header.Get("Cookie")
-	if cookieString == portalSessionName + "=" {
-		req.Header.Set("Cookie", "")
-	} else {
-		var replace = portalSessionName + "=; "
-		newCookie := strings.Replace(cookieString, replace, "", -1);
-		req.Header.Set("Cookie", newCookie)
-	}
+	originalCookie := req.Header.Get("Cookie")
+	cleanCookie := EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
+	req.Header.Set("Cookie", cleanCookie)
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
