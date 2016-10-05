@@ -59,14 +59,18 @@
       $httpBackend.flush();
     });
 
-    it('should send POST request for register', function () {
-      var data = {
-        serviceInstances: ['url1', 'url2']
-      };
-      $httpBackend.expectPOST('/api/service-instances/user/register', data).respond(200, '');
-      userServiceInstanceApi.register(['url1', 'url2']);
+    it('should send request for connecting', function () {
+      var data = 'test';
+      $httpBackend.when('POST', '/pp/v1/auth/login/cnsi').respond(200, data);
+
+      userServiceInstanceApi.connect('TESTGUID', 'user', 'password')
+      .then(function (response) {
+        expect(response.data).toEqual('test');
+      });
+
       $httpBackend.flush();
     });
+
   });
 
 })();

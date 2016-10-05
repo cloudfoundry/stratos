@@ -33,7 +33,7 @@
    * @property {app.api.apiManager} apiManager - the application API manager
    * @property {object} $q - the $q service for promise/deferred objects
    * @property {boolean} loggedIn - a flag indicating if user logged in
-   * @property {object} data - the account data object
+   * @property {object} accountData - the account data object
    * @class
    */
   function Account($cookies, apiManager, $q) {
