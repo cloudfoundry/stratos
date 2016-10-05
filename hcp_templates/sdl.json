@@ -14,7 +14,7 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-etcd2:{{TAG}}",
+      "image": "hsc-etcd2:{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -82,7 +82,7 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-stolon:{{TAG}}",
+      "image": "hsc-stolon:{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -139,7 +139,7 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-stolon:{{TAG}}",
+      "image": "hsc-stolon:{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -224,7 +224,7 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-stolon:{{TAG}}",
+      "image": "hsc-stolon:{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -275,7 +275,7 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-proxy:{{TAG}}",
+      "image": "hsc-proxy:{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -378,7 +378,7 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-console:{{TAG}}",
+      "image": "hsc-console:{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -441,7 +441,7 @@
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-preflight-job:{{TAG}}",
+      "image": "hsc-preflight-job:{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
@@ -486,7 +486,7 @@
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-postflight-job:{{TAG}}",
+      "image": "hsc-postflight-job:{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
@@ -929,7 +929,7 @@
     {
       "name": "STSENTINEL_DEBUG",
       "description": "Turn on debug mode for Stolon sentinel",
-      "default": "false"
+      "default": "true"
     },
     {
       "name": "KEEPER",
@@ -999,7 +999,7 @@
     {
       "name": "STKEEPER_DEBUG",
       "description": "Turn on debug mode for Stolon keeper",
-      "default": "false"
+      "default": "true"
     },
     {
       "name": "PROXY",
@@ -1039,7 +1039,7 @@
     {
       "name": "STPROXY_DEBUG",
       "description": "Turn on debug mode for Stolon proxy",
-      "default": "false"
+      "default": "true"
     },
     {
       "name": "replication",

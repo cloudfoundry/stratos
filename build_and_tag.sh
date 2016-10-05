@@ -3,7 +3,7 @@ set -eu
 
 # set defaults
 PROD_RELEASE=false
-DOCKER_REGISTRY=docker-registry.helion.space:443
+DOCKER_REGISTRY=docker.io/stackatodev
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
 while getopts ":hpr:t:" opt; do
@@ -54,14 +54,13 @@ while getopts ":hpr:t:" opt; do
 done
 
 echo " "
-echo "PRODUCTION BUILD/RELEASE: $PROD_RELEASE"
-echo "REGISTRY: $DOCKER_REGISTRY"
-echo "TAG: $TAG"
+echo "PRODUCTION BUILD/RELEASE: ${PROD_RELEASE}"
+echo "REGISTRY: ${DOCKER_REGISTRY}"
+echo "TAG: ${TAG}"
 
 echo " "
 echo "Starting build"
 
-GROUP_NAME=hsc
 BUILD_ARGS=""
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -78,7 +77,8 @@ function buildAndPublishImage {
     exit 1
   fi
 
-  IMAGE_URL=${DOCKER_REGISTRY}/${GROUP_NAME}/${NAME}:${TAG}
+  # IMAGE_URL=${DOCKER_REGISTRY}/${NAME}:${TAG}
+  IMAGE_URL=${DOCKER_REGISTRY}/${NAME}:${TAG}
   echo Building Docker Image for $NAME
 
   pushd ${FOLDER}
@@ -192,9 +192,9 @@ function buildProxy {
   docker run -e "APP_VERSION=${TAG}" \
              -it \
              --rm \
-             --name console-proxy-builder \
+             --name hsc-console-proxy-builder \
              --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
-             ${DOCKER_REGISTRY}/${GROUP_NAME}/console-proxy-builder
+             ${DOCKER_REGISTRY}/hsc-console-proxy-builder
   popd
   popd
 
@@ -272,7 +272,7 @@ function generateSDL {
   mkdir -p ${__DIRNAME}/output
   for FILE in ${__DIRNAME}/hcp_templates/*.json ; do
     ofile=${__DIRNAME}/output/$(basename $FILE)
-    cat $FILE | sed s/{{TAG}}/$TAG/g | sed s/{{REGISTRY}}/$DOCKER_REGISTRY/g > $ofile
+    cat $FILE | sed s~{{TAG}}~${TAG}~g | sed -r s~{{REGISTRY}}~${DOCKER_REGISTRY}~g > $ofile
   done
   echo "-- Done."
 }
