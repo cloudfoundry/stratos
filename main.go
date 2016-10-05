@@ -129,9 +129,7 @@ func main() {
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = SessionExpiry
 	sessionStore.Options.HttpOnly = true
-	// TODO (wchrisjohnson) HSC-1160 Determine how we can enable this option and yet
-	// not disrupt our UI development workflow, specifically wrt the use of gulp.
-	// sessionStore.Options.Secure = true
+	sessionStore.Options.Secure = true
 
 	defer func() {
 		logger.Info(`--- Closing sessionStore`)
