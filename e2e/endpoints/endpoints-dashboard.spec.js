@@ -5,7 +5,7 @@ var resetTo = require('../po/resets.po');
 var loginPage = require('../po/login-page.po');
 var endpointsDashboardPage = require('../po/endpoints-dashboard.po.js');
 
-describe('Endpoints Dashboard', function () {
+xdescribe('Endpoints Dashboard', function () {
 
   describe('No clusters', function () {
 

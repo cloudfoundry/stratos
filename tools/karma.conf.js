@@ -86,7 +86,7 @@ module.exports = function (config) {
 
     proxies: {
       '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
-      '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/',
+      '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/'
     },
 
     reporters: ['progress', 'coverage']

@@ -8,10 +8,31 @@ var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
 var hostIp = browser.params.hostIp || sh.exec(CMD, { silent: true }).output.trim();
 var hostPort = browser.params.port || '';
 var host = hostIp + (hostPort ? ':' + hostPort : '');
+var hcfs = browser.params.cnsi.hcf || [{
+  api_endpoint: 'https://api.hcf.hsc.stacktest.io',
+  cnsi_name: 'hcf',
+  skip_ssl_validation: 'true'
+}];
+var hces = browser.params.cnsi.hce || [{
+  api_endpoint: 'https://api.hcf.hsc.stacktest.io',
+  cnsi_name: 'hcf',
+  skip_ssl_validation: 'true'
+}];
+var adminUser = browser.params.adminUser || 'admin@cnap.local';
+var adminPassword = browser.params.adminPassword || 'cnapadmin';
+var user = browser.params.credentials.user || 'user@cnap.local';
+var password = browser.params.credentials.password || 'cnapuser';
 
 module.exports = {
 
   getHost: getHost,
+  getHcfs: getHcfs,
+  getHces: getHces,
+  getAdminUser: getAdminUser,
+  getAdminPassword: getAdminPassword,
+  getUser: getUser,
+  getPassword: getPassword,
+
   newBrowser: newBrowser,
   loadApp: loadApp,
   setBrowserNormal: setBrowserNormal,
@@ -34,6 +55,30 @@ module.exports = {
 
 function getHost() {
   return host;
+}
+
+function getHcfs() {
+  return hcfs;
+}
+
+function getHces() {
+  return hces;
+}
+
+function getAdminUser() {
+  return adminUser;
+}
+
+function getAdminPassword() {
+  return adminPassword;
+}
+
+function getUser() {
+  return user;
+}
+
+function getPassword() {
+  return password;
 }
 
 function newBrowser() {

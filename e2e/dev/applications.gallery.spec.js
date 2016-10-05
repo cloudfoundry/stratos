@@ -5,7 +5,7 @@ var resetTo = require('../po/resets.po');
 var loginPage = require('../po/login-page.po');
 var galleryPage = require('../po/applications.po');
 
-describe('Applications - Gallery View', function () {
+xdescribe('Applications - Gallery View', function () {
   beforeAll(function () {
     browser.driver.wait(resetTo.devWorkflow(false))
       .then(function () {
