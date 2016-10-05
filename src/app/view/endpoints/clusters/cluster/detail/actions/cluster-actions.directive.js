@@ -59,6 +59,9 @@
 
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
+    // Depending on depth into endpoints these two might be null
+    this.organizationGuid = $stateParams.organization;
+    this.spaceGuid = $stateParams.space;
 
     function getOrgName(org) {
       return _.get(org, 'details.org.entity.name');
@@ -240,14 +243,33 @@
       // Organization access - enabled if user is either an admin or the appropriate flag is enabled
       that.clusterActions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.create);
 
-      // Space access - if user is an Org Manager in at least one organization then show slide in
-      that.clusterActions[1].disabled = !authModel.principal[that.clusterGuid].userSummary.organizations.managed.length > 0;
+      var canCreateSpace = false;
+      var canAssignUsers = false;
+      if (that.organizationGuid) {
+        // We're at least the 'organization' depth of a cluster. Check permissions against it.
+        canCreateSpace = authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.create, that.organizationGuid);
+        if (that.spaceGuid) {
+          // We're at least the 'space' depth of a cluster. Check permissions against it.
+          canAssignUsers =
+            authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, that.spaceGuid, that.organizationGuid, true);
+        } else {
+          // We're at the organization depth, check if user has any space manager roles within it
+          canAssignUsers =
+            authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, null, that.organizationGuid) ||
+            _.find(authModel.principal[that.clusterGuid].userSummary.spaces.managed, { entity: { organization_guid: that.organizationGuid}});
+        }
+      } else {
+        // We're at the top depth of a cluster, need to check if user has any permissions for orgs/spaces within it.
+        canCreateSpace = authModel.principal[that.clusterGuid].userSummary.organizations.managed.length > 0;
+        canAssignUsers =
+          authModel.principal[that.clusterGuid].userSummary.organizations.managed.length > 0 ||
+          authModel.principal[that.clusterGuid].userSummary.spaces.managed.length > 0;
+      }
 
-      // User Assignment access - if user is an Org Manager in at least one organization
-      // or a space manager in a space then show slide in
-      that.clusterActions[2].disabled = authModel.principal[that.clusterGuid].userSummary.organizations.managed.length === 0 &&
-        authModel.principal[that.clusterGuid].userSummary.spaces.managed.length === 0;
-
+      // Space access
+      that.clusterActions[1].disabled = !canCreateSpace;
+      // User Assignment access
+      that.clusterActions[2].disabled = !canAssignUsers;
     }
 
     function init() {

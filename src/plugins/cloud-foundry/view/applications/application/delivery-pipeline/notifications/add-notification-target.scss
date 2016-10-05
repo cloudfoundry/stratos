@@ -18,16 +18,12 @@
     }
 
     .title-bar {
-      display: flex;
-      flex-direction: row;
-      position: relative;
+        padding-top: 0 0 $hpe-unit-space * .5 0;
 
       .vert-center {
-        position: absolute;
-        top: 50%;
-        height: $hpe-unit-space * 2;
-        margin-top: -$hpe-unit-space;
-        margin-left: $hpe-unit-space * 2;
+        display: inline-block;
+        padding-top: $hpe-unit-space * .5;
+        margin: auto;
       }
     }
 

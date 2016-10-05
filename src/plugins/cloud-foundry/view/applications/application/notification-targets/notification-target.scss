@@ -1,36 +1,46 @@
 .notification-target-card {
 
-  .notification-actions {
+  &.notification-target-card-add-app-mode {
 
-    position: relative;
-
-    .link-info {
-      position: absolute;
-      top: 0;
-      right: 0;
+    > div:first-child {
+      padding: 0;
     }
-    .btn-link {
-      bottom: 0;
-      margin-top: auto;
-      padding-right: 0;
 
-      &:hover,
-      &:focus,
-      &:active {
-        text-decoration: none;
-        outline: 0;
+    .hpe-media-actions-col.notification-actions {
+      display: flex;
+      padding: 0;
+      margin-left: $hpe-unit-space * 5;
 
-        .add-icon {
-          border-color: $link-hover-color;
-        }
+      .link-info {
+        float: left;
+        padding-top: $hpe-unit-space / 6;
       }
 
-      .add-icon {
-        border: 2px solid $brand-primary;
-        font-size: $hpe-unit-space / 2;
-        border-radius: 50%;
-        padding: $hpe-unit-space / 6;
-        margin-left: $hpe-unit-space / 4;
+      .btn-link {
+        flex: 1 1 0;
+        bottom: 0;
+        margin-top: auto;
+        padding-right: 0;
+        text-align: right;
+
+        &:hover,
+        &:focus,
+        &:active {
+          text-decoration: none;
+          outline: 0;
+
+          .add-icon {
+            border-color: $link-hover-color;
+          }
+        }
+
+        .add-icon {
+          border: 2px solid $brand-primary;
+          font-size: $hpe-unit-space / 2;
+          border-radius: 50%;
+          padding: $hpe-unit-space / 6;
+          margin-left: $hpe-unit-space / 4;
+        }
       }
     }
   }

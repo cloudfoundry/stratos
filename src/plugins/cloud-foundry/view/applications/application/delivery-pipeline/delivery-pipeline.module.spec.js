@@ -3,7 +3,8 @@
 
   describe('Delivery Pipeline', function () {
 
-    var controller, eventService, $interpolate, $state, $stateParams, $rootScope, cnsiModel, modelManager, $httpBackend, account;
+    var controller, eventService, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel,
+      modelManager, $httpBackend, account;
 
     beforeEach(module('green-box-console'));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-pipeline'));
@@ -34,6 +35,7 @@
       var model = modelManager.retrieve('cloud-foundry.model.application');
       _.set(model, 'application', application);
       cnsiModel = modelManager.retrieve('app.model.serviceInstance');
+      userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       account = modelManager.retrieve('app.model.account');
     }));
 
@@ -51,11 +53,8 @@
 
     describe('Check HCE status', function () {
       it('Non-admin user with no services', function () {
-        $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, []);
-        $httpBackend.expectGET('/pp/v1/cnsis/registered');
-        account.data = {isAdmin: false};
+        account.accountData = {isAdmin: false};
         createController();
-        $httpBackend.flush();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(0);
         expect(controller.hceServices.available).toBe(0);
@@ -63,11 +62,8 @@
       });
 
       it('Admin user with no services', function () {
-        $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, []);
-        $httpBackend.expectGET('/pp/v1/cnsis/registered');
-        account.data = {isAdmin: true};
+        account.accountData = {isAdmin: true};
         createController();
-        $httpBackend.flush();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(0);
         expect(controller.hceServices.available).toBe(0);
@@ -75,19 +71,14 @@
       });
 
       it('User with valid services', function () {
-        $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, [
-          {
+        _.set(userCnsiModel, 'serviceInstances', {
+          guid: {
             cnsi_type: 'hce',
             valid: true
           }
-        ]);
-        $httpBackend.expectGET('/pp/v1/cnsis/registered');
-        $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, []);
-        $httpBackend.expectGET('/pp/v1/proxy/info');
-
-        account.data = {isAdmin: true};
+        });
+        account.accountData = {isAdmin: true};
         createController();
-        $httpBackend.flush();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(1);
         expect(controller.hceServices.available).toBe(0);
@@ -95,30 +86,26 @@
       });
 
       it('User with available and valid services', function () {
-        $httpBackend.whenGET('/pp/v1/cnsis').respond(200, [
-          {
+        _.set(cnsiModel, 'serviceInstances', {
+          guid_1: {
+            cnsi_type: 'hce'
+          },
+          guid_2: {
+            cnsi_type: 'hce'
+          }
+        });
+        _.set(userCnsiModel, 'serviceInstances', {
+          guid_1: {
             cnsi_type: 'hce',
             valid: true
           },
-          {
+          guid_2: {
             cnsi_type: 'hce',
-            valid: true
+            valid: false
           }
-        ]);
-        $httpBackend.expectGET('/pp/v1/cnsis');
-        cnsiModel.list();
-        $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, [
-          {
-            cnsi_type: 'hce',
-            valid: true
-          }
-        ]);
-        $httpBackend.expectGET('/pp/v1/cnsis/registered');
-        $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, []);
-        $httpBackend.expectGET('/pp/v1/proxy/info');
-        account.data = {isAdmin: true};
+        });
+        account.accountData = {isAdmin: true};
         createController();
-        $httpBackend.flush();
         expect(controller.hceServices.fetching).toBe(false);
         expect(controller.hceServices.valid).toBe(1);
         expect(controller.hceServices.available).toBe(2);

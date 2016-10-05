@@ -1,13 +1,16 @@
-<div class="notification-target-card">
+<div class="notification-target-card"
+  ng-class="{'notification-target-card-add-app-mode': notificationTargetCtrl.addAppMode}">
   <div class="media-left media-middle">
     <radio-input ng-model="notificationTargetCtrl.userInput.notificationTargetType"
                  input-value="notificationTargetCtrl.targetType"
-                 ng-show="!notificationTargetCtrl.addAppMode"
+                 ng-required="true"
+                 ng-if="!notificationTargetCtrl.addAppMode"
     ></radio-input>
   </div>
   <div class="media-left media-middle">
     <img class="media-object"
-         ng-src="/plugins/cloud-foundry/view/assets/hce/{{ notificationTargetCtrl.targetType.img }}"/>
+      ng-style="{'transform': 'scale({{notificationTargetCtrl.targetType.imgScale || 1}})'}"
+      ng-src="/plugins/cloud-foundry/view/assets/hce/{{ notificationTargetCtrl.targetType.img }}"/>
   </div>
   <div class="media-body">
     <h4 class="media-heading">{{ notificationTargetCtrl.targetType.title }}</h4>

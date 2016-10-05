@@ -55,21 +55,25 @@
         title: gettext('HipChat'),
         description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
         endpointLabel: gettext('Server URL with Room Number or Name'),
-        img: 'hipchat_logo.png'
+        img: 'hipchat_logo.png',
+        imgScale: 0.8
       },
       httpPost: {
         title: gettext('Http'),
         description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
         endpointLabel: gettext('Server URL'),
-        img: 'httppost_logo.png'
+        img: 'httppost_logo.png',
+        imgScale: 0.8
       },
       flowdock: {
         title: gettext('Flow Dock'),
         description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
         endpointLabel: gettext('API Endpoint'),
-        img: 'flowdock_logo.png'
+        img: 'flowdock_logo.png',
+        imgScale: 0.75
       },
       githubpullrequest: {
+        hidden: true,
         title: gettext('GitHub'),
         description: gettext('Send pipeline events (build, test, deploy) as statuses to Github'),
         endpointLabel: gettext('Target URL'),
@@ -77,11 +81,13 @@
       },
       slack: {
         title: gettext('Slack'),
-        description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack room.'),
+        description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack channel.'),
         endpointLabel: gettext('URL with optional Channel or User name'),
-        img: 'slack.png'
+        img: 'slack.png',
+        imgScale: 0.75
       },
       bitbucketpullrequest: {
+        hidden: true,
         title: gettext('BitBucket'),
         description: gettext('Send pipeline events (build, test, deploy) as statuses to BitBucket'),
         endpointLabel: gettext('Target URL'),
@@ -224,6 +230,26 @@
     },
 
     /**
+     * @function filterNotificationTargets
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Filter notification targets to include only those that should be shown
+     * @param {object} targets - Array of notification targets
+     * @returns {object} A filtered array of notification targets
+     * @public
+     */
+    filterNotificationTargets: function (targets) {
+      var that = this;
+      var filtered = [];
+      if (targets) {
+        filtered = _.filter(targets, function (target) {
+          return target.type && that.staticNotificationData[target.type] &&
+          !that.staticNotificationData[target.type].hidden;
+        });
+      }
+      return filtered;
+    },
+
+    /**
      * @function getPipelineTasks
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Get post-deploy pipeline tasks for project
@@ -303,7 +329,7 @@
     /**
      * @function getProject
      * @memberof cloud-foundry.model.hce.HceModel
-     * @description Get project by name
+     * @description Get project by ID
      * @param {string} guid - the HCE instance GUID
      * @param {number} projectId - the HCE project ID
      * @returns {promise} A promise object
@@ -312,6 +338,25 @@
     getProject: function (guid, projectId) {
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
         .getProject(guid, projectId, {}, this.hceProxyPassthroughConfig);
+    },
+
+    /**
+     * @function getProjectByName
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Get project by name
+     * @param {string} guid - the HCE instance GUID
+     * @param {number} name - the HCE project name
+     * @param {object} params - additional query params
+     * @returns {promise} A promise object
+     * @public
+     */
+    getProjectByName: function (guid, name, params) {
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .getProjects(guid, params, this.hceProxyPassthroughConfig)
+        .then(function (response) {
+          var projects = response.data || [];
+          return _.find(projects, {name: name});
+        });
     },
 
     /**
@@ -530,6 +575,31 @@
 
       return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
         .createProject(guid, newProject, {}, {headers: headers});
+    },
+
+    /**
+     * @function updateProject
+     * @memberof cloud-foundry.model.hce.HceModel
+     * @description Update an existing project
+     * @param {string} guid - the HCE instance GUID
+     * @param {string} vcsUrl - the VCS browse URL
+     * @param {number} projectId - the HCE project ID to update
+     * @param {object} data - the new project data
+     * @returns {promise} A promise object
+     * @public
+     */
+    updateProject: function (guid, vcsUrl, projectId, data) {
+      // Special header to insert Github token
+      var headers = angular.extend(
+        {
+          'x-cnap-vcs-url': vcsUrl,
+          'x-cnap-vcs-token-required': true
+        },
+        this.hceProxyPassthroughConfig.headers
+      );
+
+      return this.apiManager.retrieve('cloud-foundry.api.HceProjectApi')
+        .updateProject(guid, projectId, data, {}, {headers: headers});
     },
 
     /**
@@ -766,13 +836,12 @@
       var notificationTypes = response.data;
       var that = this;
       angular.forEach(notificationTypes, function (notificationType) {
-        if (that.staticNotificationData[notificationType.item_value]) {
-          var typeData = _.assign(notificationType, that.staticNotificationData[notificationType.item_value]);
+        var staticNotificationData = that.staticNotificationData[notificationType.item_value];
+        if (staticNotificationData && !staticNotificationData.hidden) {
+          var typeData = _.assign(notificationType, staticNotificationData);
           if (!_.find(that.data.notificationTargetTypes, {item_value: notificationType.item_value})) {
             that.data.notificationTargetTypes.push(typeData);
           }
-        } else {
-          that.$log('Static metadata about type not present: ' + angular.toJson(notificationType));
         }
       });
     }

@@ -29,7 +29,6 @@
    * @param {app.api.apiManager} apiManager - the API manager
    * @property {app.api.apiManager} apiManager - the API manager
    * @param {object} modelManager - the model manager
-   * @property {object} stackatoInfoModel - the stackatoInfoModel service
    * @param {cloud-foundry.model.service.serviceUtils} serviceUtils - the service utils service
    * @param {cloud-foundry.model.modelUtils} modelUtils - a service containing general hcf model helpers
    * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
@@ -38,12 +37,11 @@
   function Space($q, apiManager, modelManager, serviceUtils, modelUtils) {
     this.$q = $q;
     this.apiManager = apiManager;
+    this.modelManager = modelManager;
     this.serviceUtils = serviceUtils;
-    this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
-    this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     this.modelUtils = modelUtils;
-    this.data = {
-    };
+    this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
+    this.data = {};
 
   }
 
@@ -508,7 +506,8 @@
       }
 
       // Find our user's GUID
-      var userGuid = that.stackatoInfoModel.info;
+      var stackatoInfoModel = this.modelManager.retrieve('app.model.stackatoInfo');
+      var userGuid = stackatoInfoModel.info;
 
       // Space roles can be inlined
       if (space.entity.managers && space.entity.developers && space.entity.auditors) {
@@ -600,9 +599,9 @@
     createSpaces: function (cnsiGuid, orgGuid, spaceNames, params) {
       var that = this;
 
-      var userGuid = this.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
-      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
-
+      var stackatoInfoModel = this.modelManager.retrieve('app.model.stackatoInfo');
+      var userGuid = stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      var organizationModel = this._getOrganizationModel();
       var createPromises = [];
 
       function getSpaceDetails(response) {
@@ -618,7 +617,7 @@
           developer_guids: [userGuid]
         };
 
-        var createP = spaceApi.CreateSpace(newSpace, params, this.modelUtils.makeHttpConfig(cnsiGuid))
+        var createP = this.spaceApi.CreateSpace(newSpace, params, this.modelUtils.makeHttpConfig(cnsiGuid))
           .then(getSpaceDetails); // Cache the space details
 
         createPromises.push(createP);
@@ -626,37 +625,67 @@
 
       return that.$q.all(createPromises).then(function () {
         // Refresh the spaces
-        return that.organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+        return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
       });
 
     },
 
     deleteSpace: function (cnsiGuid, orgGuid, spaceGuid) {
-      var that = this;
       var params = {
         recursive: false,
         async: false
       };
-      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
-      return spaceApi.DeleteSpace(spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
+      var organizationModel = this._getOrganizationModel();
+      return this.spaceApi.DeleteSpace(spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
         // Refresh the spaces
-        return that.organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+        return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
       });
     },
 
     updateSpace: function (cnsiGuid, orgGuid, spaceGuid, spaceData) {
       var that = this;
-      var spaceApi = this.apiManager.retrieve('cloud-foundry.api.Spaces');
-      return spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
+      var organizationModel = this._getOrganizationModel();
+      return this.spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (val) {
           // Refresh the org spaces
-          var orgRefreshedP = that.organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+          var orgRefreshedP = organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
 
           // Refresh the space itself
           var spaceRefreshedP = that.getSpaceDetails(cnsiGuid, val.data, {});
 
           return that.$q.all([orgRefreshedP, spaceRefreshedP]);
         });
+    },
+
+    // Warning: this does not update the cache
+    removeManagerFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.RemoveManagerFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateManagerWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.AssociateManagerWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeAuditorFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.RemoveAuditorFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateAuditorWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.AssociateAuditorWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeDeveloperFromSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.RemoveDeveloperFromSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateDeveloperWithSpace: function (cnsiGuid, spaceGuid, userGuid) {
+      return this.spaceApi.AssociateDeveloperWithSpace(spaceGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    _getOrganizationModel: function () {
+      return this.modelManager.retrieve('cloud-foundry.model.organization');
     }
 
   });

@@ -54,7 +54,6 @@
     this.orgsQuotaApi = apiManager.retrieve('cloud-foundry.api.OrganizationQuotaDefinitions');
     this.appsApi = apiManager.retrieve('cloud-foundry.api.Apps');
     this.routesApi = apiManager.retrieve('cloud-foundry.api.Routes');
-    this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
 
     this.organizations = {};
     this.organizationNames = {};
@@ -339,11 +338,12 @@
 
       var that = this;
 
+      var stackatoInfoModel = this.modelManager.retrieve('app.model.stackatoInfo');
       var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
       var orgGuid = org.metadata.guid;
       var orgQuotaGuid = org.entity.quota_definition_guid;
       var createdDate = moment(org.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
-      var userGuid = that.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+      var userGuid = stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
       function getRoles(org) {
         // The users roles may be returned inline
@@ -582,11 +582,13 @@
 
     createOrganization: function (cnsiGuid, orgName) {
       var that = this;
+      var stackatoInfoModel = this.modelManager.retrieve('app.model.stackatoInfo');
+
       var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
       return that.orgsApi.CreateOrganization({name: orgName}, {}, httpConfig).then(function (res) {
         var org = res.data;
         var newOrgGuid = org.metadata.guid;
-        var userGuid = that.stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
+        var userGuid = stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
         var makeUserP = that.orgsApi.AssociateUserWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
         var makeManagerP = that.orgsApi.AssociateManagerWithOrganization(newOrgGuid, userGuid, {}, httpConfig);
         return that.$q.all([makeUserP, makeManagerP]).then(function () {
@@ -635,7 +637,56 @@
           _splitOrgRoles(that.organizations[cnsiGuid][orgGuid].details.org, allUsersRoles);
           return allUsersRoles;
         });
+    },
+
+    retrievingRolesOfAllUsersInOrganization: function (cnsiGuid, orgGuid, params, dePaginate) {
+      var that = this;
+      return this.orgsApi
+        .RetrievingRolesOfAllUsersInOrganization(orgGuid, this.modelUtils.makeListParams(params), this.modelUtils.makeHttpConfig(cnsiGuid))
+        .then(function (response) {
+          if (dePaginate) {
+            return that.hcfPagination.dePaginate(response.data, that.makeHttpConfig(cnsiGuid));
+          }
+          return response.data.resources;
+        });
+    },
+
+    // Warning: this does not update the cache
+    removeAuditorFromOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.RemoveAuditorFromOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateAuditorWithOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.AssociateAuditorWithOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeManagerFromOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.RemoveManagerFromOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateManagerWithOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.AssociateManagerWithOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeBillingManagerFromOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.RemoveBillingManagerFromOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateBillingManagerWithOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.AssociateBillingManagerWithOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    // Warning: this does not update the cache
+    removeUserFromOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.RemoveUserFromOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    associateUserWithOrganization: function (cnsiGuid, orgGuid, userGuid) {
+      return this.orgsApi.AssociateUserWithOrganization(orgGuid, userGuid, null, this.modelUtils.makeHttpConfig(cnsiGuid));
     }
+
   });
 
   var ORG_ROLE_TO_KEY = {

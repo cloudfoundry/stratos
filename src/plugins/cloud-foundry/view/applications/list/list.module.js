@@ -26,6 +26,7 @@
     '$interpolate',
     '$state',
     '$timeout',
+    '$q',
     'app.model.modelManager',
     'app.event.eventService',
     'app.error.errorService',
@@ -39,6 +40,7 @@
    * @param {object} $interpolate - the angular $interpolate service
    * @param {object} $state - the UI router $state service
    * @param {object} $timeout - the angular $timeout service
+   * @param {object} $q - the angular $q promise service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.error.errorService} errorService - the error service
@@ -50,18 +52,17 @@
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.error.errorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, modelManager, eventService, errorService, utils) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$timeout = $timeout;
+    this.$q = $q;
     this.modelManager = modelManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.eventService = eventService;
     this.errorService = errorService;
-    this.ready = false;
-    this.loading = false;
-    this.currentPage = 0;
+    this.loading = true;
     this.isSpaceDeveloper = false;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
@@ -77,28 +78,34 @@
       callback: function (page) {
         return that._loadPage(page);
       },
-      total: 0,
+      total: _.ceil(that.model.cachedApplications.length / that.model.pageSize),
+      pageNumber: _.get(that.model, 'appPage', 1),
       text: {
         nextBtn: gettext('Next'),
         prevBtn: gettext('Previous')
       }
     };
 
+    // If we have previous apps show the stale values from cache. This avoids showing a blank screen for the majority
+    // use case where nothing has changed.
+    this.ready = this.model.hasApps;
+
     function init() {
-      return that.userCnsiModel.list().then(function () {
-        that._setClusters();
-        that._setOrgs();
-        that._setSpaces();
-        that._reload();
-        var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
-        for (var i = 0; i < serviceInstances.length; i++) {
-          var cluster = serviceInstances[i];
-          if (that.authModel.doesUserHaveRole(cluster.guid, that.authModel.roles.space_developer)) {
-            that.isSpaceDeveloper = true;
-            break;
-          }
-        }
+      that._setClusters();
+      that._setOrgs();
+      that._setSpaces();
+      that._reload(true).finally(function () {
+        // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
+        that.ready = true;
       });
+      var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
+      for (var i = 0; i < serviceInstances.length; i++) {
+        var cluster = serviceInstances[i];
+        if (that.authModel.doesUserHaveRole(cluster.guid, that.authModel.roles.space_developer)) {
+          that.isSpaceDeveloper = true;
+          break;
+        }
+      }
     }
 
     utils.chainStateResolve('cf.applications.list', $state, init);
@@ -110,6 +117,28 @@
   }
 
   angular.extend(ApplicationsListController.prototype, {
+
+    /**
+     * @function getNoAppsMessage
+     * @description Get the message to display when there are no apps
+     * @returns {string} No Apps message that is contextualised to the current filter
+     * @public
+     */
+    getNoAppsMessage: function () {
+      if (this.model.filterParams.cnsiGuid !== 'all') {
+        if (this.model.filterParams.orgGuid !== 'all') {
+          if (this.model.filterParams.spaceGuid !== 'all') {
+            return gettext('This space has no applications.');
+          } else {
+            return gettext('This organization has no applications.');
+          }
+        } else {
+          return gettext('This endpoint has no applications.');
+        }
+      }
+      return gettext('You have no applications.');
+    },
+
     /**
      * @function _setClusters
      * @description Set the cluster filter list
@@ -153,6 +182,8 @@
               that.filter.orgGuid = that.model.filterParams.orgGuid;
             }
           });
+      } else {
+        return this.$q.resolve();
       }
     },
 
@@ -179,6 +210,8 @@
               that.filter.spaceGuid = that.model.filterParams.spaceGuid;
             }
           });
+      } else {
+        return this.$q.resolve();
       }
     },
 
@@ -195,25 +228,6 @@
     },
 
     /**
-     * @function _resetPagination
-     * @description reset pagination
-     * @returns {promise} A promise
-     * @private
-     */
-    _resetPagination: function () {
-      var that = this;
-      this.loading = true;
-      this.currentPage = 0;
-      this.paginationProperties.total = 0;
-
-      return this.model.resetPagination().
-        finally(function () {
-          that.paginationProperties.total = that.model.pagination.totalPage;
-          that.loading = false;
-        });
-    },
-
-    /**
      * @function _loadPage
      * @description Retrieve apps with given page number
      * @param {number} page - page number
@@ -226,59 +240,63 @@
 
       return this.model.loadPage(page)
         .finally(function () {
-          that.currentPage = page;
-          that.ready = true;
+          that.loading = false;
+          that._handleErrors();
+        });
+    },
+
+    /**
+     * @function _reload
+     * @description Reload the application wall
+     * @param {boolean=} retainPage Attempt to retain the current page after pagination has reloaded
+     * @returns {promise} A promise
+     * @private
+     */
+    _reload: function (retainPage) {
+      var that = this;
+      var reloadPage = retainPage ? that.model.appPage : 1;
+      this.loading = true;
+
+      return this.model.resetPagination()
+        .then(function () {
+          that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
+
+          //Ensure page number is valid and load it
+          reloadPage = reloadPage < 1 ? 1 : reloadPage;
+          reloadPage = reloadPage > that.paginationProperties.total ? that.paginationProperties.total : reloadPage;
+          if (reloadPage) {
+            that._loadPage(reloadPage).then(function () {
+              that.paginationProperties.pageNumber = reloadPage;
+            });
+          }
+        })
+        .catch(function (error) {
+          that.paginationProperties.total = 0;
+          that.paginationProperties.pageNumber = 0;
+          return that.$q.reject(error);
+        })
+        .finally(function () {
           that.loading = false;
         });
     },
 
     /**
-     * @function reloadPage
-     * @description Reload current page
-     * @returns {promise} A promise
-     * @public
-     */
-    reloadPage: function () {
-      return this._loadPage(this.currentPage);
-    },
-
-    /**
-     * @function _reload
-     * @description Reload
-     * @private
-     */
-    _reload: function () {
-      var that = this;
-
-      this._resetPagination().then(function () {
-        if (that.model.pagination.totalPage) {
-          return that._loadPage(1);
-        }
-      });
-    },
-
-    /**
      * @function _handleErrors
-     * @description Check the response to see if any of the calls returned an error
-     * @param {object} data - applications model data object
+     * @description Check the user's service instance data to see if any services returned an error
      * @returns {void}
      * @orivate
      */
-    _handleErrors: function (data) {
+    _handleErrors: function () {
       var that = this;
       var errors = [];
-      if (data.applications) {
-        _.each(data.applications, function (result, cnsiGuid) {
-          if (result.error) {
-            // This request failed
-            if (that.userCnsiModel.serviceInstances[cnsiGuid]) {
-              errors.push(that.userCnsiModel.serviceInstances[cnsiGuid].name);
-            }
-          }
-        });
-      }
+      var servicesWithErrors = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf', error: true});
+      _.each(servicesWithErrors, function (cnsi) {
+        if (that.filter.cnsiGuid === cnsi.guid || that.filter.cnsiGuid === 'all') {
+          errors.push(cnsi.name);
+        }
+      });
       if (errors.length === 1) {
-        var errorMessage = 'The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.';
+        var errorMessage = gettext('The Console could not connect to the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
         that.errorService.setAppError(that.$interpolate(errorMessage)({name: errors[0]}));
       } else if (errors.length > 1) {
         that.errorService.setAppError(gettext('The Console could not connect to multiple endpoints. Use the Endpoints dashboard to manage your endpoints.'));
@@ -296,9 +314,23 @@
     setCluster: function () {
       this.organizations.length = 1;
       this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
+      var needToReload = !_.isMatch(this.filter, {orgGuid: 'all', spaceGuid: 'all'});
       this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
       this._setOrgs();
-      this._reload();
+
+      if (needToReload) {
+        this._reload();
+
+      } else {
+        if (this.filter.cnsiGuid === 'all') {
+          this.model.resetFilter();
+        } else {
+          this.model.filterByCluster(this.filter.cnsiGuid);
+        }
+        this.paginationProperties.pageNumber = 1;
+        this.paginationProperties.total = _.ceil(this.model.filteredApplications.length / this.model.pageSize);
+        this._loadPage(1);
+      }
     },
 
     /**

@@ -121,6 +121,7 @@
           userServiceInstanceModel.serviceInstances = {};
           return $q.when(userServiceInstanceModel.serviceInstances);
         });
+        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.resolve());
 
         createCluster();
         // updateClusterList should have been called as part of creation.
@@ -201,6 +202,7 @@
     describe('refreshClusterModel', function () {
 
       it('Calls fail', function () {
+        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.reject());
         spyOn(serviceInstanceModel, 'list').and.returnValue($q.reject());
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.reject());
         createCluster();
@@ -263,15 +265,16 @@
 
     describe('disconnect', function () {
       beforeEach(function () {
+        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.resolve());
         createCluster();
       });
 
       it('success', function () {
+        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
         spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function (guid) {
           expect(guid).toEqual(hcfUserService.guid);
           return $q.when();
         });
-        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
         clusterTilesCtrl.disconnect(hcfUserService.guid);
         $scope.$digest();
         expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
@@ -293,6 +296,7 @@
 
     describe('register', function () {
       beforeEach(function () {
+        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.resolve());
         createCluster();
         spyOn(authModel, 'initializeForEndpoint').and.callFake(angular.noop);
       });
@@ -318,6 +322,7 @@
 
     describe('unregister', function () {
       beforeEach(function () {
+        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.resolve());
         createCluster();
       });
 

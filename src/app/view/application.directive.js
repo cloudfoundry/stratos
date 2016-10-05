@@ -102,13 +102,7 @@
      */
     verifySessionOrCheckUpgrade: function () {
       var that = this;
-      var api = this.modelManager.retrieve('app.model.account');
-      var infoApi = this.modelManager.retrieve('app.model.stackatoInfo');
-      // We need to make an API call to see if an upgrade is in progress
-      // If we have a session cookie, we will make a verifySession call anyway, so use that
-      // Otherwise, we need to make some call - so we use the version api to get the basic version metadata
-      var check = api.hasSessionCookie() ? this.verifySession() : infoApi.stackatoInfo.version();
-      check.catch(function (response) {
+      this.verifySession().catch(function (response) {
         // We only care about 503 - use upgrade service to determine if this is an upgrade
         if (that.upgradeCheck.isUpgrading(response)) {
           // Upgrade service will cause the upgrade page to be displayed to the user
@@ -205,6 +199,11 @@
         .then(function () {
           // Update stackatoInfo
           return that.modelManager.retrieve('app.model.stackatoInfo').getStackatoInfo();
+        })
+        .then(function () {
+          // Get the user registered services once at login - only refreshed in endpoints dashboard
+          var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
+          return userServiceInstanceModel.list();
         })
         .finally(function () {
           that.showGlobalSpinner = false;

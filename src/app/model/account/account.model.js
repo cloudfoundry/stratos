@@ -41,7 +41,7 @@
     this.apiManager = apiManager;
     this.$q = $q;
     this.loggedIn = false;
-    this.data = {};
+    this.accountData = {};
   }
 
   angular.extend(Account.prototype, {
@@ -88,18 +88,6 @@
     },
 
     /**
-     * @function hasSessionCookie
-     * @memberof app.model.account.Account
-     * @description Check if the user has a session cookie
-     * @returns {boolean} Indicates if a session cookie exists
-     * @public
-     */
-    hasSessionCookie: function () {
-      var accountApi = this.apiManager.retrieve('app.api.account');
-      return accountApi.hasSessionCookie();
-    },
-
-    /**
      * @function verifySession
      * @memberof app.model.account.Account
      * @description verify if current session
@@ -131,7 +119,7 @@
      * @returns {boolean} True if this user is an ITOps admin
      */
     isAdmin: function () {
-      return this.data && this.data.isAdmin;
+      return this.accountData && this.accountData.isAdmin;
     },
 
     /**
@@ -143,11 +131,13 @@
      */
     onLoggedIn: function (response) {
       this.loggedIn = true;
+      var sessionExpiresOnEpoch = response.headers()['x-cnap-session-expires-on'];
 
       var loginRes = response.data;
-      this.data = {
+      this.accountData = {
         username: loginRes.account,
-        isAdmin: loginRes.admin
+        isAdmin: loginRes.admin,
+        sessionExpiresOn: moment.unix(sessionExpiresOnEpoch)
       };
     },
 
@@ -158,10 +148,8 @@
      * @private
      */
     onLoggedOut: function () {
-      var sessionName = this.apiManager.retrieve('app.api.account').sessionName;
-      this.$cookies.remove(sessionName);
       this.loggedIn = false;
-      delete this.data;
+      delete this.accountData;
     }
 
   });

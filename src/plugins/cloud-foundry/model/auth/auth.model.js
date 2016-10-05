@@ -27,12 +27,12 @@
    * @constructor
    */
   function AuthModel(modelManager, $q) {
+
     this.modelManager = modelManager;
-    this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+    this.$q = $q;
 
     // Initialised authorization checkers for individual CNSIs
     this.principal = {};
-    this.$q = $q;
 
     this.resources = {
       space: 'space',
@@ -70,17 +70,22 @@
       // Initialise Auth Service
       var that = this;
       var authModelInitPromise = [];
-      if (Object.keys(this.stackatoInfo.info.endpoints.hcf).length > 0) {
-        _.each(that.stackatoInfo.info.endpoints.hcf, function (hcfEndpoint, guid) {
-          if (_.isNull(hcfEndpoint.user)) {
+      var userCnsiModel = this.modelManager.retrieve('app.model.serviceInstance.user');
+      var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
+      var services = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true, error: false});
+      if (services.length > 0) {
+        _.each(services, function (service) {
+          var endpointUser = _.get(stackatoInfo.info.endpoints.hcf, service.guid + '.user');
+          if (_.isNull(endpointUser)) {
             // User hasn't connected to this endpoint
             return;
-          } else if (that.isInitialized(guid, hcfEndpoint.user)) {
+          } else if (that.isInitialized(service.guid, endpointUser)) {
             // We have already initialised for this endpoint + user
             return;
           }
-          authModelInitPromise.push(that.initializeForEndpoint(guid, true).catch(angular.noop));
+          authModelInitPromise.push(that.initializeForEndpoint(service.guid, true).catch(angular.noop));
         });
+
         return that.$q.all(authModelInitPromise);
       }
 
@@ -108,64 +113,65 @@
       if (!useStackatoInfoCache) {
         stackatoInfoPromise = stackatoInfo.getStackatoInfo();
       }
-      return this.$q.all([featureFlagsPromise, stackatoInfoPromise])
-        .then(function (data) {
-          var featureFlags = _.transform(data[0], function (result, value) {
-            result[value.name] = value.enabled;
+
+      return stackatoInfoPromise.then(function (stackatoInfo) {
+        var userId = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
+        var isAdmin = stackatoInfo.endpoints.hcf[cnsiGuid].user.admin;
+        var promises = [
+          featureFlagsPromise
+        ];
+
+        if (isAdmin) {
+          // User is an admin, therefore, we will use the more efficient userSummary request
+          promises.push(userModel.getUserSummary(cnsiGuid, userId));
+        } else {
+          promises = promises.concat(that._addOrganisationRolePromisesForUser(cnsiGuid, userId));
+          promises = promises.concat(that._addSpaceRolePromisesForUser(cnsiGuid, userId));
+        }
+
+        return that.$q.all(promises)
+          .then(function (data) {
+            var featureFlags = _.transform(data[0], function (result, value) {
+              result[value.name] = value.enabled;
+            });
+            var mappedSummary;
+            if (isAdmin) {
+              var userSummary = data[1];
+              mappedSummary = {
+                organizations: {
+                  audited: userSummary.entity.audited_organizations,
+                  billingManaged: userSummary.entity.billing_managed_organizations,
+                  managed: userSummary.entity.managed_organizations,
+                  // User is a user in all these orgs
+                  all: userSummary.entity.organizations
+                },
+                spaces: {
+                  audited: userSummary.entity.audited_spaces,
+                  managed: userSummary.entity.managed_spaces,
+                  // User is a developer in this spaces
+                  all: userSummary.entity.spaces
+                }
+              };
+            } else {
+              mappedSummary = {
+                organizations: {
+                  audited: data[1],
+                  billingManaged: data[2],
+                  managed: data[3],
+                  // User is a user in all these orgs
+                  all: data[4]
+                },
+                spaces: {
+                  audited: data[5],
+                  managed: data[6],
+                  // User is a developer in this spaces
+                  all: data[7]
+                }
+              };
+            }
+            that.principal[cnsiGuid] = new Principal(stackatoInfo, mappedSummary, featureFlags, cnsiGuid);
           });
-          var stackatoInfo = data[1];
-          var userId = stackatoInfo.endpoints.hcf[cnsiGuid].user.guid;
-          var isAdmin = stackatoInfo.endpoints.hcf[cnsiGuid].user.admin;
-
-          if (isAdmin) {
-            // User is an admin, therefore, we will use the more efficient userSummary request
-            return userModel.getUserSummary(cnsiGuid, userId)
-              .then(function (userSummary) {
-                var mappedSummary = {
-                  organizations: {
-                    audited: userSummary.entity.audited_organizations,
-                    billingManaged: userSummary.entity.billing_managed_organizations,
-                    managed: userSummary.entity.managed_organizations,
-                    // User is a user in all these orgs
-                    all: userSummary.entity.organizations
-                  },
-                  spaces: {
-                    audited: userSummary.entity.audited_spaces,
-                    managed: userSummary.entity.managed_spaces,
-                    // User is a developer in this spaces
-                    all: userSummary.entity.spaces
-                  }
-                };
-                that.principal[cnsiGuid] = new Principal(stackatoInfo, mappedSummary, featureFlags, cnsiGuid);
-
-              });
-
-          } else {
-            var promises = that._addOrganisationRolePromisesForUser(cnsiGuid, userId);
-            promises = promises.concat(that._addSpaceRolePromisesForUser(cnsiGuid, userId));
-            return that.$q.all(promises)
-              .then(function (userRoles) {
-                var userSummary = {
-                  organizations: {
-                    audited: userRoles[0],
-                    billingManaged: userRoles[1],
-                    managed: userRoles[2],
-                    // User is a user in all these orgs
-                    all: userRoles[3]
-                  },
-                  spaces: {
-                    audited: userRoles[4],
-                    managed: userRoles[5],
-                    // User is a developer in this spaces
-                    all: userRoles[6]
-                  }
-                };
-                that.principal[cnsiGuid] = new Principal(stackatoInfo, userSummary, featureFlags, cnsiGuid);
-
-              });
-          }
-
-        });
+      });
     },
 
     /**
@@ -232,6 +238,36 @@
         hasRole = cnsiPrincipal.userSummary.spaces.all.length > 0;
       }
       return hasRole;
+    },
+
+    /**
+     * @name isOrgOrSpaceActionableByResource
+     * @description convenience method to determine if the user has rights to execute the action against the resource
+     * in the organization or any of the organization's spaces
+     * @param {string} cnsiGuid - Cluster GUID
+     * @param {object} org - console organization object
+     * @param {string} resourceType - Type of resource
+     * (organization, space, user, service_managed_instances, routes, applications)
+     * @param {string} action - action (create, delete, update..)
+     * @returns {boolean}
+     */
+    isOrgOrSpaceActionableByResource: function (cnsiGuid, org, resourceType, action) {
+      var that = this;
+      var orgGuid = org.details.org.metadata.guid;
+      // Is the organization valid?
+      if (this.isAllowed(cnsiGuid, resourceType, action, null, orgGuid)) {
+        return true;
+      } else {
+        // Is any of the organization's spaces valid?
+        for (var spaceGuid in org.spaces) {
+          if (!org.spaces.hasOwnProperty(spaceGuid)) { continue; }
+          var space = org.spaces[spaceGuid];
+          if (that.isAllowed(cnsiGuid, resourceType, action, space.metadata.guid, orgGuid, true)) {
+            return true;
+          }
+        }
+        return false;
+      }
     },
 
     /**

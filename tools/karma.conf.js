@@ -23,12 +23,19 @@ module.exports = function (config) {
       'lib/jquery/dist/jquery.js',
       'lib/angular-mocks/angular-mocks.js',
       'lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
+      '../tools/stackato-templates.js',
 
       'config.js',
       'plugins/*/plugin.config.js',
 
       'lib/helion-ui-framework/dist/**/*.html', {
         pattern: 'lib/helion-ui-framework/dist/images/*.png',
+        watched: false,
+        included: false,
+        served: true,
+        nocache: false
+      }, {
+        pattern: 'plugins/cloud-foundry/view/assets/**/*.png',
         watched: false,
         included: false,
         served: true,
@@ -78,7 +85,8 @@ module.exports = function (config) {
     },
 
     proxies: {
-      '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/'
+      '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
+      '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/',
     },
 
     reporters: ['progress', 'coverage']

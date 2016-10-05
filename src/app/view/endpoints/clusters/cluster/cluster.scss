@@ -49,7 +49,8 @@
 
   .cluster-actions-menu {
     position: absolute;
-    right: 24px; // ok with scroll bar on, no time find a way to satisfy both with and without the scrollbar
+    right: $hpe-unit-space / 2; // ok with scroll bar on, no time find a way to satisfy both with and without the scrollbar
+    top: $hpe-unit-space
   }
 
   .cluster-detail {

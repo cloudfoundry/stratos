@@ -129,8 +129,8 @@ function sendRequest(req, method, url, body) {
  * @function createSession
  * @description Create a session
  * @param {object} req - the request
- * @param {string} username - the Stratos username
- * @param {string} password - the Stratos password
+ * @param {string} username - the Stackato username
+ * @param {string} password - the Stackato password
  * @returns {Promise} A promise
  */
 function createSession(req, username, password) {
@@ -163,9 +163,9 @@ function resetClusters(req) {
   return new Promise(function (resolve, reject) {
     removeClusters(req).then(function () {
       var clustersToAdd = [
-        { url: 'api.15.126.233.29.xip.io', name: 'HPE Cloud Foundry_01' },
-        { url: 'api.12.163.29.3.xip.io', name: 'HPE Cloud Foundry_02' },
-        { url: 'api.15.13.32.22.xip.io', name: 'HPE Cloud Foundry_03' }
+        { url: 'api.15.126.233.29.xip.io', name: 'Helion Cloud Foundry_01' },
+        { url: 'api.12.163.29.3.xip.io', name: 'Helion Cloud Foundry_02' },
+        { url: 'api.15.13.32.22.xip.io', name: 'Helion Cloud Foundry_03' }
       ];
 
       var promises = clustersToAdd.map(function (c) {

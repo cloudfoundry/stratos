@@ -3,8 +3,13 @@
     display: flex;
     padding: $hpe-unit-space 0;
 
-    .helion-icon.service-icon {
+    .service-icon {
       padding: $hpe-unit-space;
+
+      img {
+        max-height: $hpe-unit-space * 4;
+        max-width: $hpe-unit-space * 4;
+      }
     }
   }
 

@@ -109,12 +109,15 @@
 
     eventTypes: {
       // Required to determine 'Last Build|Last Test|Last Deploy' summary at top of page
-      BUILDING: 'Building',
-      TESTING: 'Testing',
-      DEPLOYING: 'Deploying',
+      BUILDING: 'buildingstarted',
+      BUILT: 'building',
+      TESTING: 'testingstarted',
+      TESTED: 'testing',
+      DEPLOYING: 'deployingstarted',
+      DEPLOYED: 'deploying',
       // Require to know if the execution has finished (execution state is not trustworthy)
       WATCHDOG_TERMINATED: 'watchdog',
-      PIPELINE_COMPLETED: 'pipeline_completed'
+      PIPELINE_COMPLETED: 'pipelinecompleted'
     },
 
     eventStates: {
@@ -140,7 +143,16 @@
       });
 
       var pipeline = that.model.application.pipeline;
-      this.views.viewExecution.open(rawExecution, this.eventsPerExecution[execution.id], pipeline.hceCnsi.guid);
+
+      // Do not show the 'started' style events and 'completed' event
+      var filteredEvents = _.filter(this.eventsPerExecution[execution.id], function (event) {
+        return event.type !== that.eventTypes.BUILDING &&
+          event.type !== that.eventTypes.TESTING &&
+          event.type !== that.eventTypes.DEPLOYING &&
+          event.type !== that.eventTypes.PIPELINE_COMPLETED;
+      });
+
+      this.views.viewExecution.open(rawExecution, filteredEvents, pipeline.hceCnsi.guid);
     },
 
     viewEventForExecution: function (execution) {
@@ -218,6 +230,8 @@
         });
     },
 
+    /* eslint-disable complexity */
+    // NOTE - Complexity of 13, left in to improve readability.
     /**
      * @name ApplicationDeliveryLogsController.parseEvent
      * @description Update the event with the required information for the ux. This includes upfront momentising of
@@ -238,18 +252,34 @@
         event.durationString = gettext('Unknown');
       }
 
-      // Update event name such that they are set before the table filter is applied. Note the change in tense for
-      // building, testing and deploying (we get these events after they've actually finished). It would be good to do
-      // this directly in a language file, however these are auto generated.
+      // This is used as a key in a number of places. Sanitise to make viable.
+      event.type = _.replace(event.type, ' ', '').toLowerCase();
+
+      // The event name needs to be massaged into two forms
+      // - event.name will be the title and used without tense. this is used in slide outs and their titles
+      // - event.resultLabel will be the value shown in the main executions table as the 'status' and should show tense
+      // It would be good to do this directly in a language file, however these are auto generated.
       switch (event.type) {
         case this.eventTypes.BUILDING:
+          event.name = gettext('Building');
+          break;
+        case this.eventTypes.BUILT:
           event.name = gettext('Build');
+          event.resultLabel = gettext('Built');
           break;
         case this.eventTypes.TESTING:
+          event.name = gettext('Testing');
+          break;
+        case this.eventTypes.TESTED:
           event.name = gettext('Test');
+          event.resultLabel = gettext('Tested');
           break;
         case this.eventTypes.DEPLOYING:
+          event.name = gettext('Deploying');
+          break;
+        case this.eventTypes.DEPLOYED:
           event.name = gettext('Deploy');
+          event.resultLabel = gettext('Deployed');
           break;
         case this.eventTypes.WATCHDOG_TERMINATED:
           event.name = gettext('Terminated');
@@ -258,9 +288,11 @@
           event.name = gettext('Completed');
           break;
       }
+      event.resultLabel = event.resultLabel || event.name;
 
       this.determineLatestEvent(event);
     },
+    /* eslint-enable complexity */
 
     /**
      * @name ApplicationDeliveryLogsController.determineLatestEvent
@@ -268,7 +300,7 @@
      * @param {object} event - HCE event
      */
     determineLatestEvent: function (event) {
-      var type = event.type.toLowerCase();
+      var type = event.type;
       if (!this.last[type] ||
         event.state === this.eventStates.SUCCEEDED && event.id > this.last[type].id) {
         this.last[type] = event;
@@ -314,7 +346,7 @@
       var result = {
         completed: hasCompleted,
         state: hasCompleted ? event.state : this.eventStates.RUNNING,
-        label: event.name
+        label: event.resultLabel
       };
 
       // Override the label for this specific case. This is the real 'result' of the execution

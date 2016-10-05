@@ -51,7 +51,6 @@
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {app.model.utilsService} utils - the utils service
    */
-//  function ApplicationSummaryController($state, $log, $q, modelManager, $stateParams, addRoutesService, editAppService, utils,
   function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, modelManager, addRoutesService, editAppService, utils,
                                         routesService) {
 
@@ -63,7 +62,6 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.addRoutesService = addRoutesService;
     this.editAppService = editAppService;
-    this.userCnsiModel.list();
     this.utils = utils;
     this.$log = $log;
     this.$q = $q;
@@ -179,7 +177,7 @@
     /**
      * @function formatUptime
      * @description format an uptime in seconds into a days, hours, minutes, seconds string
-     * @param {number} uptime in seconsd
+     * @param {number} uptime in seconds
      * @returns {string} formatted uptime string
      */
     formatUptime: function (uptime) {
@@ -187,7 +185,7 @@
         return '-';
       }
       if (uptime === 0) {
-        return '0 ' + gettext('seconds');
+        return '0' + gettext('s');
       }
       var days = Math.floor(uptime / 86400);
       uptime = uptime % 86400;
@@ -200,16 +198,16 @@
         if (count === 0) {
           return '';
         } else if (count === 1) {
-          return count + ' ' + single + ' ';
+          return count + single + ' ';
         } else {
-          return count + ' ' + plural + ' ';
+          return count + plural + ' ';
         }
       }
 
-      return (formatPart(days, gettext('day'), gettext('days')) +
-      formatPart(hours, gettext('hour'), gettext('hours')) +
-      formatPart(minutes, gettext('minute'), gettext('minutes')) +
-      formatPart(seconds, gettext('second'), gettext('seconds'))).trim();
+      return (formatPart(days, gettext('d'), gettext('d')) +
+      formatPart(hours, gettext('h'), gettext('h')) +
+      formatPart(minutes, gettext('m'), gettext('m')) +
+      formatPart(seconds, gettext('s'), gettext('s'))).trim();
     }
   });
 

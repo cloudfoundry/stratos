@@ -43,6 +43,7 @@
       this.stackatoInfo = stackatoInfo;
       this.userSummary = userSummary;
       this.featureFlags = featureFlags;
+      this.checkers = [];
     }
 
     angular.extend(Principal.prototype, {
@@ -68,7 +69,7 @@
 
         var args = Array.prototype.slice.call(arguments);
         if (args.length > 2) {
-          // pass the reset of the arguments into accessChecker action
+          // pass the rest of the arguments into accessChecker action
           args = args.splice(2);
         }
 
@@ -115,8 +116,11 @@
        * @private
        */
       _getAccessChecker: function (resourceType) {
-        var checkers = this._createAccessCheckerList();
-        return _.find(checkers, function (checker) {
+
+        if (this.checkers.length === 0) {
+          this.checkers = this._createAccessCheckerList();
+        }
+        return _.find(this.checkers, function (checker) {
           return checker.canHandle(resourceType);
         });
       }

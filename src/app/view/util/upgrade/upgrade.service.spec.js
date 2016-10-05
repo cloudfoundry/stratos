@@ -86,8 +86,8 @@
       }));
 
       it('should show login page when no upgrade is in progress', function () {
-        $httpBackend.when('GET', '/pp/v1/version').respond(200, {});
-        $httpBackend.expectGET('/pp/v1/version');
+        $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(401, null);
+        $httpBackend.expectGET('/pp/v1/auth/session/verify');
         $timeout.flush();
         $httpBackend.flush();
         expect(applicationCtrl.ready).toBe(true);
@@ -99,8 +99,8 @@
       });
 
       it('should show upgrade page when an upgrade is in progress', function () {
-        $httpBackend.when('GET', '/pp/v1/version').respond(503, {}, {'Retry-After': 300});
-        $httpBackend.expectGET('/pp/v1/version');
+        $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(503, null, {'Retry-After': 300});
+        $httpBackend.expectGET('/pp/v1/auth/session/verify');
         $httpBackend.when('GET', '/app/view/console-error/console-error.html').respond(200, []);
         $httpBackend.expectGET('/app/view/console-error/console-error.html');
         $timeout.flush();
@@ -178,6 +178,7 @@
         beforeEach(function () {
           applicationCtrl.loggedIn = false;
           $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, { account: 'dev', scope: 'foo' });
+          $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
           $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, [
             { guid: 'service', cnsi_type: 'hcf', name: 'test', api_endpoint: testAptEndpoint }
           ]);

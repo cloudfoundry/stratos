@@ -48,8 +48,12 @@
 
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-    var usersModel = modelManager.retrieve('cloud-foundry.model.users');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    var usersModel = modelManager.retrieve('cloud-foundry.model.users');
+    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+
+    var promiseForUsers;
+
     this.changingRoles = false;
 
     // Some helper functions which list all org/space roles and also links them to their labels translations.
@@ -70,34 +74,44 @@
     var rolesToFunctions = {
       org: {
         add: {
-          org_manager: _.bind(usersModel.associateManagedOrganizationWithUser, usersModel),
-          org_auditor: _.bind(usersModel.associateAuditedOrganizationWithUser, usersModel),
-          billing_manager: _.bind(usersModel.associateBillingManagedOrganizationWithUser, usersModel),
-          org_user: _.bind(usersModel.associateOrganizationWithUser, usersModel)
+          org_manager: _.bind(organizationModel.associateManagerWithOrganization, organizationModel),
+          org_auditor: _.bind(organizationModel.associateAuditorWithOrganization, organizationModel),
+          billing_manager: _.bind(organizationModel.associateBillingManagerWithOrganization, organizationModel),
+          org_user: _.bind(organizationModel.associateUserWithOrganization, organizationModel)
 
         },
         remove: {
-          org_manager: _.bind(usersModel.removeManagedOrganizationFromUser, usersModel),
-          org_auditor: _.bind(usersModel.removeAuditedOrganizationFromUser, usersModel),
-          billing_manager: _.bind(usersModel.removeBillingManagedOrganizationFromUser, usersModel),
-          org_user: _.bind(usersModel.removeOrganizationFromUser, usersModel)
+          org_manager: _.bind(organizationModel.removeManagerFromOrganization, organizationModel),
+          org_auditor: _.bind(organizationModel.removeAuditorFromOrganization, organizationModel),
+          billing_manager: _.bind(organizationModel.removeBillingManagerFromOrganization, organizationModel),
+          org_user: _.bind(organizationModel.removeUserFromOrganization, organizationModel)
         }
       },
       space: {
         add: {
-          space_manager: _.bind(usersModel.associateManagedSpaceWithUser, usersModel),
-          space_auditor: _.bind(usersModel.associateAuditedSpaceWithUser, usersModel),
-          space_developer: _.bind(usersModel.associateSpaceWithUser, usersModel)
+          space_manager: _.bind(spaceModel.associateManagerWithSpace, spaceModel),
+          space_auditor: _.bind(spaceModel.associateAuditorWithSpace, spaceModel),
+          space_developer: _.bind(spaceModel.associateDeveloperWithSpace, spaceModel)
         },
         remove: {
-          space_manager: _.bind(usersModel.removeManagedSpaceFromUser, usersModel),
-          space_auditor: _.bind(usersModel.removeAuditedSpaceFromUser, usersModel),
-          space_developer: _.bind(usersModel.removeSpaceFromUser, usersModel)
+          space_manager: _.bind(spaceModel.removeManagerFromSpace, spaceModel),
+          space_auditor: _.bind(spaceModel.removeAuditorFromSpace, spaceModel),
+          space_developer: _.bind(spaceModel.removeDeveloperFromSpace, spaceModel)
         }
       }
     };
 
     this.canRemoveOrgRole = function (role, clusterGuid, orgGuid, userGuid) {
+
+      var isAllowed = authModel.isAllowed(clusterGuid,
+        authModel.resources.user,
+        authModel.actions.update, null,
+        orgGuid);
+
+      if (!isAllowed) {
+        return false;
+      }
+
       if (role !== 'org_user') {
         return true;
       }
@@ -378,6 +392,31 @@
       roles.organization.org_user = true;
     };
 
+    this.listUsers = function (clusterGuid, forceRefresh) {
+      var isAdmin = stackatoInfo.info.endpoints.hcf[clusterGuid].user.admin;
+      if (!forceRefresh && angular.isDefined(promiseForUsers)) {
+        return promiseForUsers;
+      }
+      if (isAdmin) {
+        promiseForUsers = usersModel.listAllUsers(clusterGuid);
+      } else {
+        var allUsersP = [];
+        _.forEach(organizationModel.organizations[clusterGuid], function (org) {
+          allUsersP.push(organizationModel.retrievingRolesOfAllUsersInOrganization(clusterGuid, org.details.guid));
+        });
+        promiseForUsers = $q.all(allUsersP).then(function (results) {
+          var allUsers = {};
+          _.forEach(results, function (usersArray) {
+            _.forEach(usersArray, function (aUser) {
+              allUsers[aUser.metadata.guid] = aUser;
+            });
+          });
+          return _.values(allUsers);
+        });
+      }
+      return promiseForUsers;
+    };
+
     function clearRoleArray(roleObject) {
       // Ensure that we flip any selected role. Do this instead of null/undefined/delete to ensure that the diff
       // between previous and current roles acts correctly (removed val from roles object would just be ignored and thus
@@ -565,18 +604,17 @@
             authModel.actions.update,
             null,
             orgGuid);
-          if (isUserAllowed) {
-            // For each organization role
-            _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
-              // Has there been a change in the org role?
-              var oldRoleSelected = _.get(oldOrgRolesPerUser, 'organization.' + roleKey) || false;
-              if (!!oldRoleSelected === !!selected) {
-                delete orgRolesPerUser.organization[roleKey];
-              } else {
-                changes = true;
-              }
-            });
-          }
+
+          // For each organization role
+          _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
+            // Has there been a change in the org role?
+            var oldRoleSelected = _.get(oldOrgRolesPerUser, 'organization.' + roleKey) || false;
+            if (!isUserAllowed || !!oldRoleSelected === !!selected) {
+              delete orgRolesPerUser.organization[roleKey];
+            } else {
+              changes = true;
+            }
+          });
 
           // For each space
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
@@ -584,18 +622,17 @@
             // calculate space role delta only for spaces for which user is allowed
             var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.user,
               authModel.actions.update, spaceGuid, orgGuid, true);
-            if (isAllowed) {
-              // For each space role
-              _.forEach(spaceRoles, function (selected, roleKey) {
-                // Has there been a change in the space role?
-                var oldRoleSelected = _.get(oldOrgRolesPerUser, 'spaces.' + spaceGuid + '.' + roleKey) || false;
-                if (oldRoleSelected === selected) {
-                  delete orgRolesPerUser.spaces[spaceGuid][roleKey];
-                } else {
-                  changes = true;
-                }
-              });
-            }
+
+            // For each space role
+            _.forEach(spaceRoles, function (selected, roleKey) {
+              // Has there been a change in the space role?
+              var oldRoleSelected = _.get(oldOrgRolesPerUser, 'spaces.' + spaceGuid + '.' + roleKey) || false;
+              if (!isAllowed || !!oldRoleSelected === !!selected) {
+                delete orgRolesPerUser.spaces[spaceGuid][roleKey];
+              } else {
+                changes = true;
+              }
+            });
           });
         });
       });

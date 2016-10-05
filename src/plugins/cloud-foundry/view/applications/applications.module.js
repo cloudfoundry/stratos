@@ -49,7 +49,6 @@
   function ApplicationsController($q, $state, utils, modelManager, eventService, loggedInService) {
 
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
-
     var initialized = $q.defer();
 
     if (loggedInService.isLoggedIn()) {
@@ -57,7 +56,8 @@
     }
 
     function init() {
-      return initialized.promise.then(function () {
+      return initialized.promise
+      .then(function () {
         return authService.initialize();
       });
     }

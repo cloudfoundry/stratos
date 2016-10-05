@@ -22,9 +22,9 @@
    */
   function HcfRegistrationFactory(registerService) {
 
-    var title = gettext('Register Cloud Foundry Endpoint');
-    var description = gettext('Enter the Cloud Foundry API endpoint URL and a name to use for this endpoint in the Console.');
-    var urlHint = gettext('Cloud Foundry API endpoint');
+    var title = gettext('Register Helion Cloud Foundry');
+    var description = gettext('Enter the Helion Cloud Foundry API endpoint URL and a name to use for this endpoint in the Console.');
+    var urlHint = gettext('Helion Cloud Foundry API endpoint');
 
     return {
       /**

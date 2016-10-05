@@ -8,15 +8,18 @@
 
   .side-bar {
     height: $hpe-unit-space *4;
-    width: 50%;
     margin-right: $hpe-unit-space *4;
-    display: inline-block;
+    display: flex;
     img {
       max-height: 100%;
+    }
+    .desc {
+      margin-left: $hpe-unit-space;
     }
   }
 
   .body {
     display: inline-block;
+    margin-left: $hpe-unit-space * 5;
   }
 }

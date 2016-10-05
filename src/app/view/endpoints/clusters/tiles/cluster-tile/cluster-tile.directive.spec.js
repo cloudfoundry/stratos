@@ -2,7 +2,7 @@
   'use strict';
 
   describe('endpoints clusters cluster-tile directive', function () {
-    var $scope, $q, $state, element, clusterTileCtrl, $compile, cfAPIUsers, cfAPIOrg;
+    var $scope, $q, $state, element, clusterTileCtrl, $compile, cfAPIUsers, cfAPIOrg, stackatoInfo;
 
     var initialService = {
       guid: "f7fbd0c7-1ce9-4e74-a891-7ffb16453af2",
@@ -30,6 +30,7 @@
       $state = $injector.get('$state');
       $compile = $injector.get('$compile');
       $scope = $injector.get('$rootScope').$new();
+      var modelManager = $injector.get('app.model.modelManager');
       $scope.service = angular.fromJson(angular.toJson(initialService));
       $scope.connect = angular.noop;
       $scope.disconnect = angular.noop;
@@ -38,7 +39,10 @@
       var apiManager = $injector.get('app.api.apiManager');
       cfAPIUsers = apiManager.retrieve('cloud-foundry.api.Users');
       cfAPIOrg = apiManager.retrieve('cloud-foundry.api.Organizations');
+      stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
 
+      userServiceInstanceModel.serviceInstances[$scope.service.guid] = {};
     }));
 
     function createCtrl() {
@@ -71,8 +75,8 @@
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
-        expect(clusterTileCtrl.userCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
+        expect(clusterTileCtrl.userCount).toBeUndefined();
         expect(clusterTileCtrl.getCardData()).toBeDefined();
         expect(clusterTileCtrl.getCardData().title).toEqual(initialService.name);
       });
@@ -81,6 +85,7 @@
         $scope.service.isConnected = true;
         spyOn(cfAPIUsers, 'ListAllUsers').and.returnValue($q.when({ data: { total_results: 1 }}));
         spyOn(cfAPIOrg, 'ListAllOrganizations').and.returnValue($q.when({ data: { total_results: 1 }}));
+        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
         createCtrl();
 
         expect(clusterTileCtrl.orgCount).toEqual(1);
@@ -145,12 +150,25 @@
         spyOn(cfAPIUsers, 'ListAllUsers');
         createCtrl();
 
-        expect(clusterTileCtrl.userCount).toBe(0);
+        expect(clusterTileCtrl.userCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = false;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.userCount).toBe(0);
+        expect(clusterTileCtrl.userCount).toBeUndefined();
+        expect(cfAPIUsers.ListAllUsers).not.toHaveBeenCalled();
+      });
+
+      it('Errored, so no call to backend', function () {
+        spyOn(cfAPIUsers, 'ListAllUsers');
+        createCtrl();
+
+        expect(clusterTileCtrl.userCount).toBeUndefined();
+        clusterTileCtrl.userService.error = false;
+        clusterTileCtrl.setUserCount();
+        $scope.$digest();
+
+        expect(clusterTileCtrl.userCount).toBeUndefined();
         expect(cfAPIUsers.ListAllUsers).not.toHaveBeenCalled();
       });
 
@@ -159,9 +177,10 @@
           expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
           return $q.when({ data: { total_results: 2 }});
         });
+        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
         createCtrl();
 
-        expect(clusterTileCtrl.userCount).toBe(0);
+        expect(clusterTileCtrl.userCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
@@ -175,9 +194,10 @@
           expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
           return $q.when({ data: { total_results: 0 }});
         });
+        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
         createCtrl();
 
-        expect(clusterTileCtrl.userCount).toBe(0);
+        expect(clusterTileCtrl.userCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
@@ -191,15 +211,30 @@
           expect(httpConfig.headers['x-cnap-cnsi-list']).toEqual(initialService.guid);
           return $q.reject();
         });
+        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', true);
         createCtrl();
 
-        expect(clusterTileCtrl.userCount).toBe(0);
+        expect(clusterTileCtrl.userCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
 
         expect(clusterTileCtrl.userCount).toBeUndefined();
         expect(cfAPIUsers.ListAllUsers).toHaveBeenCalled();
+      });
+
+      it('Not admin', function () {
+        spyOn(cfAPIUsers, 'ListAllUsers');
+        _.set(stackatoInfo, 'info.endpoints.hcf.' + initialService.guid + '.user.admin', false);
+        createCtrl();
+
+        expect(clusterTileCtrl.userCount).toBeUndefined();
+        clusterTileCtrl.service.isConnected = true;
+        clusterTileCtrl.setUserCount();
+        $scope.$digest();
+
+        expect(clusterTileCtrl.userCount).toBeUndefined();
+        expect(cfAPIUsers.ListAllUsers).not.toHaveBeenCalled();
       });
     });
 
@@ -216,12 +251,25 @@
         spyOn(cfAPIOrg, 'ListAllOrganizations');
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = false;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
+        expect(cfAPIOrg.ListAllOrganizations).not.toHaveBeenCalled();
+      });
+
+      it('Errored, so no call to backend', function () {
+        spyOn(cfAPIOrg, 'ListAllOrganizations');
+        createCtrl();
+
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
+        clusterTileCtrl.userService.error = true;
+        clusterTileCtrl.setOrganisationCount();
+        $scope.$digest();
+
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         expect(cfAPIOrg.ListAllOrganizations).not.toHaveBeenCalled();
       });
 
@@ -232,7 +280,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
@@ -248,7 +296,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
@@ -264,7 +312,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();

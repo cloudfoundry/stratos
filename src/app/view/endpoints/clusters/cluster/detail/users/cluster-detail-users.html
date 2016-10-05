@@ -9,16 +9,16 @@
     <div class="change-roles-buttons">
       <button class="btn btn-default"
               ng-if="clusterUsersController.selectedUsersCount() < 2"
-              ng-disabled="clusterUsersController.rolesService.changingRoles || clusterUsersController.selectedUsersCount() !== 1"
+              ng-disabled="clusterUsersController.disableManageRoles()"
               ng-click="clusterUsersController.manageSelectedUsers()"
               translate>Manage Roles</button>
       <button class="btn btn-default"
               ng-if="clusterUsersController.selectedUsersCount() > 1"
-              ng-disabled="clusterUsersController.rolesService.changingRoles"
+              ng-disabled="clusterUsersController.disableChangeRoles()"
               ng-click="clusterUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
-              ng-disabled="clusterUsersController.rolesService.changingRoles || clusterUsersController.selectedUsersCount() < 1"
+              ng-disabled="clusterUsersController.disableRemoveFromOrg()"
               ng-click="clusterUsersController.removeAllRoles()"
               translate>Remove All Roles</button>
     </div>
@@ -34,9 +34,13 @@
         </thead>
         <tbody>
         <tr class="" ng-repeat="user in clusterUsersController.visibleUsers">
-          <td><checkbox-input ng-model="clusterUsersController.selectedUsers[user.metadata.guid]"></checkbox-input>
+          <td>
+            <checkbox-input
+              ng-model="clusterUsersController.selectedUsers[user.metadata.guid]"
+              ng-if="user.entity.username">
+            </checkbox-input>
           </td>
-          <td class="user-name">{{ user.entity.username }}</td>
+          <td class="user-name">{{ user.entity.username || user.metadata.guid}}</td>
           <td class="roles-list">
             <div class="role-pill" ng-class="{'closable-pill': clusterUsersController.canRemoveOrgRole(user, orgRole)}"
                  ng-repeat="orgRole in clusterUsersController.getOrganizationsRoles(user)"
@@ -46,13 +50,17 @@
                  ng-click="clusterUsersController.removeOrgRole(user, orgRole)"
                  ng-if="clusterUsersController.canRemoveOrgRole(user, orgRole)"></i>
             </div>
-            <div ng-if="clusterUsersController.getOrganizationsRoles(user).length === 0" translate>None assigned</div>
+            <div ng-if="clusterUsersController.getOrganizationsRoles(user).length === 0" translate>
+              <span ng-if="user.entity.username" translate>None assigned</span>
+              <span ng-if="!user.entity.username" translate>Not Applicable</span>
+            </div>
           </td>
           <td>
-            <actions-menu actions="clusterUsersController.userActions"
+            <actions-menu actions="clusterUsersController.userActions[user.metadata.guid]"
                           action-target="user"
                           menu-icon="helion-icon helion-icon-More"
-                          menu-position="actions-menu-right">
+                          menu-position="actions-menu-right"
+                          ng-if="user.entity.username">
             </actions-menu>
           </td>
         </tr>

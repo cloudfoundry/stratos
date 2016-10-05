@@ -6,10 +6,15 @@
     .constant('cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype', {
 
       init: function () {
-        this.addingPipeline = false;
         var that = this;
+        this.addingPipeline = false;
+
         this.eventService.$on('cf.events.START_ADD_PIPELINE_WORKFLOW', function () {
           that.startWorkflow();
+        });
+
+        this.eventService.$on('cf.events.LOAD_MORE_REPOS', function () {
+          that.loadMoreRepos();
         });
 
         this.setWatchers();
@@ -50,11 +55,13 @@
           hceCnsis: [],
           notificationTargetTypes: [],
           notificationTargets: [],
+          notificationTargetsReady: false,
           sources: [],
           displayedRepos: [],
           repos: [],
           hasMoreRepos: false,
           loadingRepos: false,
+          repoStSearch: 'full_name',
           branches: [],
           buildContainers: [],
           notificationFormAppMode: true,
@@ -80,19 +87,28 @@
               templateUrl: path + 'select-source.html',
               formName: 'application-source-form',
               nextBtnText: gettext('Next'),
+              showBusyOnNext: true,
+              onNextCancellable: true,
+              onNextCancel: function () {
+                that.githubOauthService.cancel();
+              },
               onNext: function () {
                 var oauth;
                 if (that.userInput.source.vcs_type === 'GITHUB') {
-                  oauth = that.githubOauthService.start(that.userInput.source.browse_url);
+                  oauth = that.githubOauthService.start(that.userInput.source.browse_url, that.userInput.source.api_url);
                 } else {
-                  oauth = that.$q.defer();
-                  oauth.resolve();
-                  oauth = oauth.promise;
+                  oauth = that.$q.resolve();
                 }
 
                 return oauth
                   .then(function () {
-                    return that.getRepos();
+                    return that.getRepos().catch(function () {
+                      var msg = gettext('There was a problem retrieving your repositories. Please try again.');
+                      return that.$q.reject(msg);
+                    });
+                  }, function () {
+                    var msg = gettext('There was a problem authorizing with the selected source. Please try again.');
+                    return that.$q.reject(msg);
                   });
               }
             },
@@ -102,13 +118,15 @@
               templateUrl: path + 'select-repository.html',
               formName: 'application-repo-form',
               nextBtnText: gettext('Next'),
+              showBusyOnNext: true,
               onNext: function () {
+                that.options.repoStSearch = '';
                 that.getPipelineDetailsData();
                 var githubModel = that.modelManager.retrieve('github.model');
                 var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
 
                 if (that.userInput.repo) {
-                  hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
+                  return hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
                     var githubOptions = that._getVcsHeaders();
                     var usedBranches = _.chain(projects)
                                         .filter(function (p) {
@@ -129,7 +147,14 @@
                                               };
                                             });
                         [].push.apply(that.options.branches, branches);
+                      })
+                      .catch(function () {
+                        var msg = gettext('There was a problem retrieving the branches for your repository. Please try again.');
+                        return that.$q.reject(msg);
                       });
+                  }).catch(function (msg) {
+                    that.options.repoStSearch = 'full_name';
+                    return that.$q.reject(msg);
                   });
                 }
               }
@@ -140,17 +165,36 @@
               templateUrl: path + 'pipeline-details.html',
               formName: 'application-pipeline-details-form',
               nextBtnText: gettext('Create pipeline'),
+              showBusyOnNext: true,
               onNext: function () {
-                if (that.options.deploymentTarget) {
-                  return that.$q.when(that._updateDeploymentTarget(that.options.deploymentTarget))
-                    .then(function () {
-                      return that.createPipeline(that.options.deploymentTarget.deployment_target_id);
-                    });
-                } else {
-                  return that.createDeploymentTarget().then(function (newTarget) {
-                    return that.createPipeline(newTarget.deployment_target_id);
+                var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
+                // First verify if provided credentials are correct
+                return userServiceInstanceModel.verify(
+                  that.userInput.serviceInstance.guid,
+                  that.userInput.clusterUsername,
+                  that.userInput.clusterPassword)
+                  .then(function () {
+                    // Successfully validated
+                    if (that.options.deploymentTarget) {
+                      return that.$q.when(that._updateDeploymentTarget(that.options.deploymentTarget))
+                        .then(function () {
+                          return that.createPipeline(that.options.deploymentTarget.deployment_target_id);
+                        });
+                    } else {
+                      return that.createDeploymentTarget().then(function (newTarget) {
+                        that.options.deploymentTarget = newTarget;
+                        return that.createPipeline(newTarget.deployment_target_id);
+                      });
+                    }
+                  }, function () {
+                    // Failed to validate credentials
+                    var msg = gettext('The username and password combination provided is invalid. Please check and try again.');
+                    return that.$q.reject(msg);
+                  })
+                  .catch(function (err) {
+                    // Some other exception occurred
+                    return that.$q.reject(err);
                   });
-                }
               }
             },
             {
@@ -162,16 +206,23 @@
               nextBtnText: gettext('Next'),
               onEnter: function () {
                 var hceModel = that.modelManager.retrieve('cloud-foundry.model.hce');
+                that.options.notificationTargetsReady = false;
 
                 return hceModel.listNotificationTargetTypes(that.userInput.hceCnsi.guid)
                   .then(function () {
                     that.options.notificationTargetTypes = hceModel.data.notificationTargetTypes;
-                  }).then(function () {
+
                     // Fetch automatically associated notification targets (i.e. GitHub pull request)
                     return hceModel.getNotificationTargets(that.userInput.hceCnsi.guid, that.userInput.projectId)
                       .then(function (response) {
                         that.userInput.notificationTargets = response.data;
                       });
+                  })
+                  .catch(function () {
+                    that.options.notificationTargetsError = true;
+                  })
+                  .finally(function () {
+                    that.options.notificationTargetsReady = true;
                   });
               }
             },
@@ -217,6 +268,10 @@
         });
       },
 
+      redefineWorkflowWithoutHce: function () {},
+
+      reset: function () {},
+
       getVcsInstances: function () {
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
@@ -253,6 +308,8 @@
         this.options.loadingRepos = true;
         return githubModel.repos(false, githubOptions)
           .then(function (response) {
+            that.options.repos.length = 0;
+
             that.options.hasMoreRepos = angular.isDefined(response.links.next);
             [].push.apply(that.options.repos, response.repos);
           })
@@ -326,10 +383,11 @@
 
       createDeploymentTarget: function () {
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-        var name = this._getDeploymentTargetName();
         var endpoint = this.userInput.serviceInstance.api_endpoint;
         var url = endpoint.Scheme + '://' + endpoint.Host;
-        return hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid, name,
+        var name = this._getDeploymentTargetName(url);
+        return hceModel.createDeploymentTarget(this.userInput.hceCnsi.guid,
+                                               name,
                                                url,
                                                this.userInput.clusterUsername,
                                                this.userInput.clusterPassword,
@@ -349,9 +407,9 @@
         }
       },
 
-      _getDeploymentTargetName: function () {
+      _getDeploymentTargetName: function (url) {
         return [
-          this.userInput.serviceInstance.name,
+          url,
           this.userInput.organization.entity.name,
           this.userInput.space.entity.name,
           this.userInput.clusterUsername
@@ -391,31 +449,42 @@
       createPipeline: function (targetId) {
         var that = this;
         return this.createProject(targetId).then(function () {
-          return that.createCfBinding().then(angular.noop, function () {
-            return that.$q(function (resolve, reject) {
-              var msg = gettext('There was a problem creating the pipeline binding. Please check your username and password.');
-              reject(msg);
-            });
+          return that.createCfBinding().catch(function () {
+            return that.$q.when(that.deleteProject(that.userInput.projectId))
+              .then(function () {
+                that.userInput.projectId = null;
+              })
+              .finally(function () {
+                var msg = gettext('There was a problem creating the pipeline binding.');
+                return that.$q.reject(msg);
+              });
           });
         }, function () {
-          return that.$q(function (resolve, reject) {
+          return that.utils.retryRequest(function () {
+            return that.hceModel.getProjectByName(that.userInput.hceCnsi.guid, that.userInput.projectName);
+          })
+          .then(function (project) {
+            if (project) {
+              return that.deleteProject(project.id);
+            }
+          })
+          .finally(function () {
             var msg = gettext('There was a problem creating the pipeline. Please ensure the webhook limit has not been reached on your repository.');
-            reject(msg);
+            return that.$q.reject(msg);
           });
         });
       },
 
-      createProject:function (targetId) {
+      createProject: function (targetId) {
         if (this.userInput.projectId) {
-          var deferred = this.$q.defer();
-          deferred.resolve();
-          return deferred.promise;
+          return this.$q.resolve();
         } else {
           var that = this;
+          this.userInput.projectName = this._createProjectName();
           var githubUrl = this.userInput.source.browse_url;
           return this.hceModel.createProject(
             this.userInput.hceCnsi.guid,
-            this._createProjectName(),
+            this.userInput.projectName,
             this.userInput.source,
             targetId,
             this.userInput.buildContainer.build_container_id,
@@ -425,6 +494,15 @@
           ).then(function (response) {
             that.userInput.projectId = response.data.id;
           });
+        }
+      },
+
+      deleteProject: function (projectId) {
+        if (projectId) {
+          return this.hceModel.removeProject(
+            this.userInput.hceCnsi.guid,
+            projectId
+          );
         }
       },
 

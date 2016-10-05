@@ -1,9 +1,12 @@
 <div class="manage-instances">
   <div class="service-description col-sm-12">
-    <i class="helion-icon helion-icon-3x helion-icon-Service_business service-icon"></i>
+    <div class="service-icon">
+      <img ng-src="{{ detailViewCtrl.context.data.service.entity.extra.ImageURL }}"
+        default-image default-image-src="/plugins/cloud-foundry/view/assets/services/App_services_72.png"/>
+    </div>
     <div>
       <h4 class="font-semi-bold">{{ detailViewCtrl.context.data.service.entity.label }}</h4>
-      <p>{{ detailViewCtrl.context.data.service.entity.description }}</p>
+      <p>{{ detailViewCtrl.context.data.service.entity.extra.LongDescription || detailViewCtrl.context.data.service.entity.description }}</p>
     </div>
   </div>
   <table class="table table-outlined instances-table">
