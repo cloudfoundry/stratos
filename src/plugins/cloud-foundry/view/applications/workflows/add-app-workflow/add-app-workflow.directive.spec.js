@@ -652,7 +652,7 @@
             stateValue = state;
           });
           that.notify();
-          expect(stateValue).toBe('cf.applications.application.delivery-logs');
+          expect(stateValue).toBe('cf.applications.application.summary');
         });
 
         it('#notify - has no created', function () {
