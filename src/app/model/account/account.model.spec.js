@@ -2,22 +2,16 @@
   'use strict';
 
   describe('account model', function () {
-    var $httpBackend, accountModel, sessionName, $cookies;
+    var $httpBackend, accountModel;
 
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-
       var modelManager = $injector.get('app.model.modelManager');
       accountModel = modelManager.retrieve('app.model.account');
-
-      var apiManager = $injector.get('app.api.apiManager');
-      sessionName = apiManager.retrieve('app.api.account').sessionName;
-      $cookies = $injector.get('$cookies');
     }));
 
     afterEach(function () {
-      $cookies.remove(sessionName);
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
@@ -31,8 +25,8 @@
       expect(accountModel.apiManager).toBeDefined();
       expect(accountModel.loggedIn).toBeDefined();
       expect(accountModel.loggedIn).toBe(false);
-      expect(accountModel.data).toBeDefined();
-      expect(Object.keys(accountModel.data).length).toBe(0);
+      expect(accountModel.accountData).toBeDefined();
+      expect(Object.keys(accountModel.accountData).length).toBe(0);
     });
 
     it('should POST on logout', function () {
@@ -60,15 +54,6 @@
       expect(accountModel.loggedIn).toBe(false);
     });
 
-    it('should have session cookie', function () {
-      $cookies.put(sessionName, 'true');
-      expect(!!accountModel.hasSessionCookie()).toBe(true);
-    });
-
-    it('should not have session cookie', function () {
-      expect(!!accountModel.hasSessionCookie()).toBe(false);
-    });
-
     it('should not be an admin', function () {
       $httpBackend.when('POST', '/pp/v1/auth/login/uaa').respond(200, {});
       $httpBackend.expectPOST('/pp/v1/auth/login/uaa');
@@ -87,21 +72,20 @@
       expect(!!accountModel.isAdmin()).toBe(true);
     });
 
-    it('should fail session verification when there is no cookie', function () {
-      accountModel.loggedIn = true;
-      accountModel.data = 'test';
+    it('should fail session verification when no valid session', function () {
+      $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(401, {});
+      $httpBackend.expectGET('/pp/v1/auth/session/verify');
       accountModel.verifySession().then(function () {
         fail();
       }).finally(function () {
         expect(accountModel.loggedIn).toBe(false);
-        expect(accountModel.data).not.toBeDefined();
       });
+      $httpBackend.flush();
     });
 
     it('should pass session verification', function () {
       $httpBackend.when('GET', '/pp/v1/auth/session/verify').respond(200, {admin: true});
       $httpBackend.expectGET('/pp/v1/auth/session/verify');
-      $cookies.put(sessionName, 'true');
       accountModel.verifySession().catch(function () {
         fail();
       }).then(function () {

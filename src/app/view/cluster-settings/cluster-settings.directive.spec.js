@@ -2,7 +2,7 @@
   'use strict';
 
   describe('cluster-settings directive', function () {
-    var $compile, $httpBackend, $scope, sessionName, $cookies;
+    var $compile, $httpBackend, $scope;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -11,10 +11,6 @@
       $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-
-      var apiManager = $injector.get('app.api.apiManager');
-      sessionName = apiManager.retrieve('app.api.account').sessionName;
-      $cookies = $injector.get('$cookies');
     }));
 
     describe('basic', function () {
@@ -35,23 +31,16 @@
           }
         }];
 
-        $cookies.put(sessionName, 'session');
         var stackatoInfo = mock.stackatoInfoAPI.Routes.stackatoInfo();
         $httpBackend.when('GET', stackatoInfo.url).respond(200, stackatoInfo.response['200'].body);
         $httpBackend.expectGET(stackatoInfo.url);
 
         $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
         $httpBackend.expectGET('/pp/v1/cnsis/registered');
-        $httpBackend.when('GET', '/pp/v1/proxy/v2/config/feature_flags').respond(503, {});
-        $httpBackend.expectGET('/pp/v1/proxy/v2/config/feature_flags');
 
         $scope.$apply();
         $httpBackend.flush();
         clusterSettingsCtrl = element.controller('clusterSettings');
-      });
-
-      afterEach(function () {
-        $cookies.remove(sessionName);
       });
 
       it('should be defined', function () {
@@ -72,8 +61,8 @@
         expect(hcf4).toBeDefined();
         expect(hcf4.name).toBe('HCF_4');
         expect(clusterSettingsCtrl.isValid(hcf4)).toBe(true);
-        expect(clusterSettingsCtrl.getCnsiTypeText(hcf4)).toBe('Cloud Foundry');
-        expect(clusterSettingsCtrl.getCnsiTypeText(hce1)).toBe('Code Engine');
+        expect(clusterSettingsCtrl.getCnsiTypeText(hcf4)).toBe('Helion Cloud Foundry');
+        expect(clusterSettingsCtrl.getCnsiTypeText(hce1)).toBe('Helion Code Engine');
         expect(clusterSettingsCtrl.getCnsiTypeText(other)).toBe('other');
 
         //$httpBackend.when('GET', stackatoInfo.url).respond(200, stackatoInfo.response['200'].body);
