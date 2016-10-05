@@ -225,28 +225,36 @@ gulp.task('browsersync', function (callback) {
   try {
     // Need a JSON file named 'dev_config.json'
     var devOptions = require('./dev_config.json');
-    var target_url = node_url.parse(devOptions.pp);
+    var targetUrl = node_url.parse(devOptions.pp);
+    var https = devOptions.https;
+    if (https && https.cert && https.key) {
+      gutil.log('Serving HTTPS with the following certificate:', gutil.colors.magenta(https.cert));
+    } else {
+      https = true;
+      gutil.log('Serving HTTPS with the default BrowserSync certificate');
+    }
+
     gutil.log('Proxying API requests to:', gutil.colors.magenta(devOptions.pp));
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     /* For web proxy support - set options in dev_config - e.g.
       "options": {
         "proxy": "http://proxy.sdc.hp.com:8080"
       }
     */
 
-    devOptions.options = devOptions.options || {}; 
+    devOptions.options = devOptions.options || {};
     // Do NOT follow redirects - return them back to the browser
     devOptions.options.followRedirect = false;
     var proxiedRequest = request.defaults(devOptions.options);
     var proxyMiddleware = {
       route: '/pp',
-      handle: function (req, res, next) {
-        var url = node_url.format(target_url) + req.url;
+      handle: function (req, res) {
+        var url = node_url.format(targetUrl) + req.url;
         var method = (req.method + '        ').substring(0, 8);
         gutil.log(method, req.url);
         req.pipe(proxiedRequest(url)).pipe(res);
       }
-    }
+    };
     middleware.push(proxyMiddleware);
   } catch (e) {
     throw new gutil.PluginError('browsersync', 'dev_config.json file is required with portal-proxy(pp) endpoint' +
@@ -260,7 +268,8 @@ gulp.task('browsersync', function (callback) {
     },
     ghostMode: false,
     open: false,
-    port: 3100
+    port: 3100,
+    https: https
   }, function () {
     callback();
   });
