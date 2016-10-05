@@ -3,26 +3,26 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
 
 
 ### <a id="create-jumpbox"></a>1. Create an Ubuntu 14.04 Jumpbox
+* Use the Frankfurt region
+
 * Allocate a new Elastic IP address. Save this new address somewhere. It will be used in the next step.
 
 * Create a new keypair or upload an existing keypair.
 
-* Create an access key:
-  - Go to IAM > Users
-  - Click on your username
-  - Under "Security Credentials", click "Create Access Key"
+* If you don't have one, request an access key from Ben Jones \<benj@hpe.com\>
 
 * Add a new VPC using the "Start VPC Wizard" from the VPC dashboard.
-  - Make sure to select the "VPC with Public and Private Subnets" tab on the first step of the wizard.
+  - Make sure to select the "VPC with Public and Private Subnets" tab on the first step of the wizard
+  - On step two, give the VPC a name and select the Elastic IP you just created
 
 * Edit the public subnet created in the previous step to "Auto-assign Public IP"
   - Navigate to "Subnets"
-  - Select your public subnet
+  - Select your public subnet (you can search by name)
   - Click "Subnet Actions" and select "Modify Auto-Assign Public IP"
   - Make sure "Enable auto-assign Public IP" is checked
 
 * Create an instance
-  - AMI: Ubuntu Server 14.04 LTS (HVM), SSD Volume Type (ami-9abea4fb in Oregon region)
+  - AMI: Ubuntu Server 14.04 LTS (HVM), SSD Volume Type (ami-xxxxx in Frankfurt region)
   - Instance type: t2.micro
   - Subnet: *select public subnet of VPC*
   - Auto-assign Public IP: Enable
