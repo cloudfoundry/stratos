@@ -19,7 +19,7 @@
       abstract: true,
       template: '<ui-view/>',
       ncyBreadcrumb: {
-        label: gettext('Cloud Foundry Endpoints')
+        label: gettext('Helion Cloud Foundry Endpoints')
       }
     });
   }

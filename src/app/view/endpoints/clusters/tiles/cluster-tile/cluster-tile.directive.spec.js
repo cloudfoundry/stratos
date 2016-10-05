@@ -40,6 +40,9 @@
       cfAPIUsers = apiManager.retrieve('cloud-foundry.api.Users');
       cfAPIOrg = apiManager.retrieve('cloud-foundry.api.Organizations');
       stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+
+      userServiceInstanceModel.serviceInstances[$scope.service.guid] = {};
     }));
 
     function createCtrl() {
@@ -72,7 +75,7 @@
         expect(clusterTileCtrl.actions.length).toEqual(1);
         expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         expect(clusterTileCtrl.userCount).toBeUndefined();
         expect(clusterTileCtrl.getCardData()).toBeDefined();
         expect(clusterTileCtrl.getCardData().title).toEqual(initialService.name);
@@ -149,6 +152,19 @@
 
         expect(clusterTileCtrl.userCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = false;
+        clusterTileCtrl.setUserCount();
+        $scope.$digest();
+
+        expect(clusterTileCtrl.userCount).toBeUndefined();
+        expect(cfAPIUsers.ListAllUsers).not.toHaveBeenCalled();
+      });
+
+      it('Errored, so no call to backend', function () {
+        spyOn(cfAPIUsers, 'ListAllUsers');
+        createCtrl();
+
+        expect(clusterTileCtrl.userCount).toBeUndefined();
+        clusterTileCtrl.userService.error = false;
         clusterTileCtrl.setUserCount();
         $scope.$digest();
 
@@ -235,12 +251,25 @@
         spyOn(cfAPIOrg, 'ListAllOrganizations');
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = false;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
+        expect(cfAPIOrg.ListAllOrganizations).not.toHaveBeenCalled();
+      });
+
+      it('Errored, so no call to backend', function () {
+        spyOn(cfAPIOrg, 'ListAllOrganizations');
+        createCtrl();
+
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
+        clusterTileCtrl.userService.error = true;
+        clusterTileCtrl.setOrganisationCount();
+        $scope.$digest();
+
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         expect(cfAPIOrg.ListAllOrganizations).not.toHaveBeenCalled();
       });
 
@@ -251,7 +280,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
@@ -267,7 +296,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();
@@ -283,7 +312,7 @@
         });
         createCtrl();
 
-        expect(clusterTileCtrl.orgCount).toBe(0);
+        expect(clusterTileCtrl.orgCount).toBeUndefined();
         clusterTileCtrl.service.isConnected = true;
         clusterTileCtrl.setOrganisationCount();
         $scope.$digest();

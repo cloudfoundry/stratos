@@ -88,18 +88,6 @@
     },
 
     /**
-     * @function hasSessionCookie
-     * @memberof app.model.account.Account
-     * @description Check if the user has a session cookie
-     * @returns {boolean} Indicates if a session cookie exists
-     * @public
-     */
-    hasSessionCookie: function () {
-      var accountApi = this.apiManager.retrieve('app.api.account');
-      return accountApi.hasSessionCookie();
-    },
-
-    /**
      * @function verifySession
      * @memberof app.model.account.Account
      * @description verify if current session
@@ -160,8 +148,6 @@
      * @private
      */
     onLoggedOut: function () {
-      var sessionName = this.apiManager.retrieve('app.api.account').sessionName;
-      this.$cookies.remove(sessionName);
       this.loggedIn = false;
       delete this.accountData;
     }

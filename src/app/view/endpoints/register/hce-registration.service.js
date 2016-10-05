@@ -19,8 +19,8 @@
    */
   function HceRegistrationFactory(registerService) {
 
-    var title = gettext('Register Code Engine Endpoint');
-    var description = gettext('Enter the Code Engine endpoint URL and a name to use for this endpoint in the Console.');
+    var title = gettext('Register Helion Code Engine');
+    var description = gettext('Enter the Helion Code Engine endpoint URL and a name to use for this endpoint in the Console.');
 
     return {
       /**

@@ -8,12 +8,24 @@
     .service-title .service-text, .service-action-block .service-attached-msg {
       flex: 1 1 auto;
     }
+    
   }
 
   .cluster-gallery-card-container .cluster-gallery-card-parent {
     padding-left: 10px !important;
     padding-right: 10px !important;
   } 
+
+  app-error-bar.errorbar-without-navbar, app-error-bar.errorbar-with-navbar {
+    .app-error-bar .app-error-bar-icon {
+      line-height: 48px;
+      vertical-align: middle;
+    }
+
+    .app-error-bar {
+      display: inline;
+    }
+  }
 
 
 }

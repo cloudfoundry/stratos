@@ -95,7 +95,7 @@
               onNext: function () {
                 var oauth;
                 if (that.userInput.source.vcs_type === 'GITHUB') {
-                  oauth = that.githubOauthService.start(that.userInput.source.browse_url);
+                  oauth = that.githubOauthService.start(that.userInput.source.browse_url, that.userInput.source.api_url);
                 } else {
                   oauth = that.$q.resolve();
                 }

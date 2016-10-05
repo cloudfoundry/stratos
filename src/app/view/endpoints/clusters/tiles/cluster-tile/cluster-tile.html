@@ -1,10 +1,10 @@
 <gallery-card class="cluster-gallery-card cluster-tile"
-              ng-class="{'unlink': !clusterTile.service.isConnected }"
+              ng-class="{'unlink': !clusterTile.service.isConnected || clusterTile.userService.error }"
               card-data="clusterTile.getCardData()"
               card-actions="clusterTile.actions"
               card-actions-icon="helion-icon helion-icon-More"
               card-actions-position="actions-menu-right"
-              on-card-click="clusterTile.service.isConnected ? clusterTile.summary() : false">
+              on-card-click="clusterTile.service.isConnected && !clusterTile.userService.error ? clusterTile.summary() : false">
 
   <dl class="dl-horizontal" ng-if="clusterTile.service.isConnected">
     <dt translate>ENDPOINT URL</dt>

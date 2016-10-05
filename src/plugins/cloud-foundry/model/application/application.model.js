@@ -53,11 +53,13 @@
     this.applicationApi = this.apiManager.retrieve('cloud-foundry.api.Apps');
     this.$q = $q;
     this.pageSize = config.pagination.pageSize;
+    this.loadingLimit = config.loadingLimit;
     this.modelUtils = modelUtils;
     this.utils = utils;
 
     this.data = {
-      applications: []
+      applications: [],
+      appStateMap: {}
     };
 
     this.clearApplication();
@@ -71,7 +73,15 @@
     // This state should be in the model
     this.clusterCount = 0;
     this.hasApps = false;
-
+    // Track the list of apps fetched from the back end. List may or may not be filtered.
+    this.bufferedApplications = [];
+    // Track the list of apps from the last time we fetched. Used to ensure we have something to show if filters change
+    // whilst bufferedApplications is empty while loading.
+    this.cachedApplications = [];
+    // Track the list of apps filtered by local means
+    this.filteredApplications = [];
+    // Page number (not zero based, used in UX)
+    this.appPage = 1;
   }
 
   angular.extend(Application.prototype, {
@@ -115,156 +125,288 @@
       this.application.state = appSummaryMetadata.state || {};
 
       if (this.application.instances) {
-
-        /* eslint-disable no-warning-comments */
-        // TODO (HSC-1132): Instance display shows stats for only the first instance
-        /* eslint-enable no-warning-comments */
-        var keys = Object.keys(this.application.instances);
-        if (keys && keys.length) {
-          this.application.stats = this.application.instances[keys[0]].stats;
-        }
-
         var running = _.filter(this.application.instances, {state: 'RUNNING'});
         this.application.summary.running_instances = running.length;
       }
     },
 
-    /**
-     * @function all
-     * @memberof  cloud-foundry.model.application
-     * @description List all applications at the model layer
-     * @param {string} guid - CNSI guid
-     * @param {object} options - options for url building
-     * @param {boolean} sync - whether the response should wait for all app stats or just the app metadata
-     * @param {object} trim - tell how the result should be trimmed.
-     * @returns {promise} A promise object
-     * @public
-     **/
-    all: function (guid, options, sync, trim) {
-      var that = this;
-
-      options = angular.extend(options || {}, {}, this._buildFilter());
-
-      return this.applicationApi.ListAllApps(options, this.modelUtils.makeHttpConfig(guid))
-        .then(function (response) {
-          var tasks = that._fetchAppStatsForApps(guid, response.data.resources);
-          if (!sync) {
-            // Fire off the stats requests in parallel - don't wait for them to complete
-            that.$q.all(tasks);
-            return that.onAll(guid, response, trim);
-          } else {
-            return that.$q.all(tasks).then(function () {
-              return that.onAll(guid, response, trim);
-            });
-          }
-        });
-    },
-
-    _fetchAppStatsForApps: function (cnsiGuid, apps) {
+    _fetchAppStatsForApps: function (apps) {
       var that = this;
       // For all of the apps in the running state, we may need to get stats in order to be able to
       // determine the user-friendly state of the application
       var tasks = [];
       _.each(apps, function (app) {
+        // Update the state for the app to give it an initial state while we wait for the API call to return
+        var cacheId = app.clusterId + '#' + app.metadata.guid;
+        app.state = that.data.appStateMap[cacheId] || that.appStateService.get(app.entity);
+
         if (app.entity.state === 'STARTED') {
           // We need more information
-          tasks.push(that.returnAppStats(cnsiGuid, app.metadata.guid, null, true).then(function (stats) {
+          tasks.push(that.returnAppStats(app.clusterId, app.metadata.guid, null).then(function (stats) {
             app.instances = stats.data;
             app.instanceCount = _.keys(app.instances).length;
             app.state = that.appStateService.get(app.entity, app.instances);
+            that.data.appStateMap[cacheId] = app.state;
             return stats.data;
           }));
         } else {
           app.state = that.appStateService.get(app.entity);
         }
       });
+      return tasks;
     },
 
-    _applyTrim: function (trim) {
-      return function (apps) {
-        return apps.slice(trim.start, trim.resultsPerPage - trim.end);
-      };
+    /**
+     * @function loadPage
+     * @description make applications data set ready for the current displaying page
+     * @param {number} pageNumber The display page number
+     * @returns {object} promise object
+     * @public
+     */
+    loadPage: function (pageNumber) {
+      var start = (pageNumber - 1) * this.pageSize;
+      var end = start + this.pageSize;
+      this.data.applications = _.slice(this.filteredApplications, start, end);
+      this.appPage = pageNumber;
+      this._updateAppStateMap();
+      this._fetchAppStatsForApps(this.data.applications);
+
+      return this.$q.resolve();
     },
 
-    loadPage: function (pageNumber, cachedData) {
-      this.tempApplications = [];
+    /**
+     * @function _updateAppStateMap
+     * @description Update the application state cache
+     * @private
+     */
+    _updateAppStateMap: function () {
       var that = this;
-      var page = this.pagination.pages[pageNumber - 1];
-      var tasks = [];
-
-      // cached data currently always applies to page 1
-      angular.forEach(page, function (clusterLoad) {
-        var cnsiGuid = clusterLoad.cnsiGuid;
-
-        angular.forEach(clusterLoad.loads, function (load) {
-          if (load.resultsPerPage === 0) {
-            return;
-          }
-
-          var trim = {
-            start: load.trimStart,
-            end: load.trimEnd,
-            resultsPerPage: load.resultsPerPage
-          };
-          // We only support using cached data for page 1 for now
-          if (pageNumber === 1 && cachedData && cachedData[cnsiGuid]) {
-            tasks.push(that.$q.resolve(cachedData[cnsiGuid].resources)
-            .then(that._applyTrim(trim))
-            .then(function (needStats) {
-              that._fetchAppStatsForApps(cnsiGuid, needStats, false);
-              return needStats;
-            }));
-          } else {
-            tasks.push(that.all(cnsiGuid, {
-              page: load.number,
-              'results-per-page': load.resultsPerPage
-            }, false)
-              .catch(angular.noop)
-              .then(that._applyTrim(trim)));
-          }
-        });
-      });
-
-      return this.$q.all(tasks).then(function (allData) {
-        that.data.applications = [];
-        _.each(allData, function (apps) {
-          [].push.apply(that.data.applications, apps);
-        });
-
-        that.hasApps = that.pagination.totalPage > 0;
+      this.data.appStateMap = {};
+      _.each(this.data.applications, function (app) {
+        if (app.state) {
+          var cacheId = app.clusterId + '#' + app.metadata.guid;
+          that.data.appStateMap[cacheId] = app.state;
+        }
       });
     },
 
     /**
      * @function resetPagination
      * @description reset application wall pagination plan
-     * @returns {object} a promise object
+     * @returns {object} promise object
      * @public
      */
     resetPagination: function () {
-      var that = this;
-      var cnsis = this._getCurrentCnsis();
+      return this._listAllApps();
+    },
 
-      if (!cnsis || !cnsis.length) {
-        // Ensure the pagination object is initialised by running through the handler
-        return this.$q.resolve(that.onGetPaginationData({ data: {}}));
+    /**
+     * @function _listAllApps
+     * @description list all applications
+     * @returns {object} promise object
+     * @private
+     */
+    _listAllApps: function () {
+      var that = this;
+      this.bufferedApplications = [];
+      return this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis())
+        .then(_.bind(this._onListAllAppsSuccess, this))
+        .then(function () {
+          if (that.filterParams.cnsiGuid !== 'all') {
+            that.filterByCluster(that.filterParams.cnsiGuid);
+          }
+        })
+        .catch(_.bind(this._onListAllAppsFailure, this));
+    },
+
+    /**
+     * @function _onListAllAppsSuccess
+     * @description success handler for listAllApps promise.
+     * @private
+     */
+    _onListAllAppsSuccess: function () {
+      this.hasApps = this.bufferedApplications.length > 0;
+      this._sortApps();
+      this._updateCache();
+      this.resetFilter();
+    },
+
+    /**
+     * @function _updateCache
+     * @description update cached application list.
+     * @private
+     */
+    _updateCache: function () {
+      this.cachedApplications = _.clone(this.bufferedApplications);
+    },
+
+    /**
+     * @function _sortApps
+     * @description sort all applications by name.
+     * @private
+     */
+    _sortApps: function () {
+      this._injectSortingKey(this.bufferedApplications);
+      this.bufferedApplications = _.orderBy(this.bufferedApplications, ['__sortingKey__'], ['asc']);
+      this._removeSortingKey(this.bufferedApplications);
+    },
+
+    /**
+     * @function _injectSortingKey
+     * @description inject a temporary sorting key for sorting.
+     * @param {Array} apps A list applications.
+     * @private
+     */
+    _injectSortingKey: function (apps) {
+      _.each(apps, function (app) {
+        app.__sortingKey__ = _.get(app, 'entity.name', '_').toLowerCase();
+      });
+    },
+
+    /**
+     * @function _removeSortingKey
+     * @description remove the temporary sorting key.
+     * @param {Array} apps A list applications.
+     * @private
+     */
+    _removeSortingKey: function (apps) {
+      _.each(apps, function (app) {
+        delete app.__sortingKey__;
+      });
+    },
+
+    /**
+     * @function _onListAllAppsFailure
+     * @description failure handler for listAllApps promise.
+     * @param {*} error An error.
+     * @returns {object} promise object
+     * @private
+     */
+    _onListAllAppsFailure: function (error) {
+      this._updateAppStateMap();
+      this._reset();
+      return this.$q.reject(error);
+    },
+
+    /**
+     * @function _listAllAppsWithPageHelper
+     * @description helper to call the list apps API with the correct params and options
+     * @param {number} page The loading page number against API. This is not the displaying page number.
+     * @param {number} pageSize The loading page size against API. This is not the displaying page side number.
+     * @param {Array} cnsis An array of cluster IDs to load applications.
+     * @returns {object} promise object
+     * @private
+     */
+    _listAllAppsWithPageHelper: function (page, pageSize, cnsis) {
+      var that = this;
+      var options = angular.extend({
+        'results-per-page': pageSize,
+        page: page
+      }, this._buildFilter());
+      var config = {
+        headers: {
+          'x-cnap-cnsi-list': cnsis.join(',')
+        }
+      };
+
+      return this.applicationApi.ListAllApps(options, config).then(function (response) {
+        that._onListAllAppsWithPageSuccess(response.data);
+        return response;
+      });
+    },
+
+    /**
+     * @function _listAllAppsWithPage
+     * @description list apps with given loading page number and limitation.
+     * @param {number} page The loading page number against API. This is not the displaying page number.
+     * @param {number} pageSize The loading page size against API. This is not the displaying page side number.
+     * @param {Array} cnsis An array of cluster IDs to load applications.
+     * @returns {object} promise object
+     * @private
+     */
+    _listAllAppsWithPage: function (page, pageSize, cnsis) {
+      var that = this;
+      if (cnsis.length === 0) {
+        return that.$q.resolve();
       }
 
-      // If we are making an API call to get the total number of apps,
-      // the additional overhead to retrieve the metadata for those apps
-      // is small in comparison to the cost of another API call to later fetch this data
-      var options = angular.extend({
-        'results-per-page': this.pageSize,
-        page: 1
-      }, this._buildFilter());
-
-      this.data.applications.length = 0;
-
-      return this.applicationApi
-        .ListAllApps(options, {headers: {'x-cnap-cnsi-list': cnsis.join(',')}})
+      return this._listAllAppsWithPageHelper(page, pageSize, cnsis)
         .then(function (response) {
-          return that.onGetPaginationData(response);
+          if (!response.data) {
+            return that.$q.reject();
+          } else {
+            // We can further optimize the calls to be in parallel - after the first call, we know how many calls we need to make
+            // Find the highest total number of page
+            var maxPage = _.max(_.map(response.data, function (hcfResponse) {
+              return hcfResponse.total_pages || 0;
+            }));
+            var tasks = [];
+            for (var i = 2; i <= maxPage; i++) {
+              var cnsis = that._getClustersWithPage(response.data, i);
+              tasks.push(that._listAllAppsWithPageHelper(i, pageSize, cnsis));
+            }
+            return that.$q.all(tasks);
+          }
         });
+    },
+
+    /**
+     * @function _onListAllAppsWithPageSuccess
+     * @description success handler for _listAllAppsWithPage promise.
+     * @param {object} data The data set in map data structure that holds data of applications for each cluster.
+     * @private
+     */
+    _onListAllAppsWithPageSuccess: function (data) {
+      this._accumulateApps(data);
+    },
+
+    /**
+     * @function _accumulateApps
+     * @description accumulate sub data set to build up the whole buffered application list.
+     * @param {object} data The data set in map data structure that holds data of applications for each cluster.
+     * @private
+     */
+    _accumulateApps: function (data) {
+      var that = this;
+      _.each(data, function (value, key) {
+        var apps = value.resources;
+        if (!apps) {
+          return;
+        }
+        _.each(apps, function (app) {
+          app.clusterId = key;
+        });
+        that.bufferedApplications = that.bufferedApplications.concat(apps);
+      });
+    },
+
+    /**
+     * @function _getClustersWithPage
+     * @description get the cluster IDs that still have applications to load.
+     * @param {object} data The data set in map data structure that holds data of applications for each cluster.
+     * @param {number} page The page that is to be requested
+     * @returns {Array} An array of clusters still need to retrieve applications from that have the specified page
+     * @private
+     */
+    _getClustersWithPage: function (data, page) {
+      var cnsis = [];
+      _.each(data, function (value, key) {
+        if (value.total_pages >= page) {
+          cnsis.push(key);
+        }
+      });
+      return cnsis;
+    },
+
+    /**
+     * @function _reset
+     * @description reset the model state
+     * @private
+     */
+    _reset: function () {
+      this.data.applications.length = 0;
+      this.hasApps = false;
+      this.appPage = 0;
     },
 
     /**
@@ -274,18 +416,37 @@
      * @private
      */
     _getCurrentCnsis: function () {
-      var cnsis = [];
-      if (this.filterParams.cnsiGuid === 'all') {
-        // Ensure that we ignore any service that's invalid (cannot contact)
-        cnsis = _.chain(this._getUserCnsiModel().serviceInstances)
+      // Find cnsi's to reach out to
+      // - Ignore cnsi's that are invalid (session expired) or errored (cannot contact)
+      // - Fetch apps from all available cnsi's. Specifically important if we return to the page and pre-filter. Need
+      // to ignore this in order to have the correct cache
+      return _.chain(this._getUserCnsiModel().serviceInstances)
           .values()
-          .filter({cnsi_type: 'hcf', valid: true})
+          .filter({cnsi_type: 'hcf', valid: true, error: false})
           .map('guid')
           .value();
-      } else {
-        cnsis = [this.filterParams.cnsiGuid];
-      }
-      return cnsis;
+    },
+
+    /**
+     * @function filterByCluster
+     * @description filter applications by cluster ID.
+     * @param {string} clusterId The cluster ID to filter by.
+     * @public
+     */
+    filterByCluster: function (clusterId) {
+      var apps = _.clone(this.cachedApplications);
+      this.filteredApplications = _.filter(apps, ['clusterId', clusterId]);
+      this.hasApps = this.filteredApplications.length > 0;
+    },
+
+    /**
+     * @function resetFilter
+     * @description clean out applied filtering and reset the applications back;
+     * @public
+     */
+    resetFilter: function () {
+      this.filteredApplications = _.clone(this.cachedApplications);
+      this.hasApps = this.filteredApplications.length > 0;
     },
 
     /**
@@ -375,6 +536,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetAppSummary(guid, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
+          response.data.clusterId = cnsiGuid;
           if (!includeStats || response.data.state !== 'STARTED') {
             that.onSummary(cnsiGuid, guid, response.data);
             return response;
@@ -650,7 +812,7 @@
      */
     getAppStats: function (cnsiGuid, guid, params, noCache) {
       var that = this;
-      return that.returnAppStats(cnsiGuid, guid, params, noCache).then(function (response) {
+      return that.returnAppStats(cnsiGuid, guid, params).then(function (response) {
         if (!noCache) {
           var data = response.data;
           // Stats for all instances
@@ -668,22 +830,13 @@
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the app guid
      * @param {object} params - options for getting the stats of an app
-     * @param {boolean} noCache - Do not cache fetched data
      * @returns {promise} A promise object
      * @public
      */
-    returnAppStats: function (cnsiGuid, guid, params, noCache) {
-      var that = this;
+    returnAppStats: function (cnsiGuid, guid, params) {
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .GetDetailedStatsForStartedApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          if (!noCache) {
-            var data = response.data;
-            /* eslint-disable no-warning-comments */
-            // TODO (HSC-1132): Instance display shows stats for only the first instance
-            /* eslint-enable no-warning-comments */
-            that.application.stats = angular.isDefined(data['0']) ? data['0'].stats : {};
-          }
           return response;
         });
     },
@@ -809,56 +962,6 @@
     },
 
     /**
-     * @function onGetPaginationData
-     * @memberof  cloud-foundry.model.application
-     * @description onGetPaginationData handler at model layer
-     * @param {object} response - the response object returned from api call
-     * @returns {object} list of applications
-     * @private
-     */
-    onGetPaginationData: function (response) {
-      var clusters = response.data;
-
-      // We should in theory not reach here with error'd calls, but catch just in case
-      clusters = _.pickBy(clusters, function (cluster) {
-        return !cluster.error;
-      });
-
-      var totalAppNumber = 0;
-      angular.forEach(clusters, function (cluster, cnsiGuid) {
-        if (cluster.total_results) {
-          totalAppNumber += cluster.total_results;
-        }
-        angular.forEach(cluster.resources, function (app) {
-          app.clusterId = cnsiGuid;
-        });
-      });
-
-      this.pagination = new AppPagination(clusters, this.pageSize, Math.ceil(totalAppNumber / this.pageSize), totalAppNumber);
-
-      this.hasApps = this.pagination.totalPage > 0;
-
-      return clusters || [];
-    },
-
-    /**
-     * @function onAll
-     * @memberof  cloud-foundry.model.application
-     * @description onAll handler at model layer
-     * @param {string} guid - CNSI guid
-     * @param {string} response - the json return from the api call
-     * @returns {object} list of applications
-     * @private
-     */
-    onAll: function (guid, response) {
-      var apps = response.data.resources;
-      angular.forEach(apps, function (app) {
-        app.clusterId = guid;
-      });
-      return apps;
-    },
-
-    /**
      * @function onUsage
      * @memberof  cloud-foundry.model.application
      * @description onUsage handler at model layer
@@ -944,131 +1047,8 @@
 
     onAppStateChange: function () {
       this.application.state = this.appStateService.get(this.application.summary, this.application.instances);
-    }
-  });
-
-  /**
-   * @memberOf cloud-foundry.model.application
-   * @name AppPagination
-   * @param {array} clusters - available clusters.
-   * @param {number} pageSize - page size for pagination.
-   * @param {number} totalPage - total number of pages.
-   * @param {number} totalApps - total number of applications.
-   * @property {array} clusters - available clusters.
-   * @property {number} pageSize - page size for pagination.
-   * @property {number} totalPage - total number of pages.
-   * @property {array} pages - plan of how each page should be loaded.
-   * @property {number} totalApps - total number of applications.
-   * @class
-   */
-  function AppPagination(clusters, pageSize, totalPage, totalApps) {
-    this.clusters = clusters;
-    this.pageSize = pageSize;
-    this.totalPage = totalPage;
-    this.totalApps = totalApps;
-    this.pages = [];
-    this.init();
-  }
-
-  angular.extend(AppPagination.prototype, {
-
-    /**
-     * @function init
-     * @memberof  AppPagination
-     * @description calculate the how each page should be loaded.
-     * @private
-     */
-    init: function () {
-      var remaining, prevPage, cluster, from, to, loads, trimStart, page, cnsiGuid;
-      var clusterKeys = Object.keys(this.clusters);
-      var clusterIndex = 0;
-      var pageSize = this.pageSize;
-
-      for (var i = 0; i < this.totalPage; i++) {
-        this.pages[i] = [];
-        remaining = pageSize;
-        prevPage = this.pages[i - 1];
-
-        while (remaining && clusterIndex < clusterKeys.length) {
-          cnsiGuid = clusterKeys[clusterIndex];
-          cluster = this.clusters[cnsiGuid];
-          from = 0;
-          if (prevPage && prevPage[prevPage.length - 1].cnsiGuid === cnsiGuid) {
-            from = prevPage[prevPage.length - 1].to + 1;
-          }
-
-          if (cluster.total_results > pageSize) {
-            to = from + remaining - 1;
-            cluster.total_results -= remaining;
-            remaining = 0;
-
-          } else if (cluster.total_results === pageSize) {
-            to = from + pageSize - 1;
-            remaining = 0;
-
-            clusterIndex++;
-
-          } else {
-            to = from + Math.min(remaining, cluster.total_results) - 1;
-            remaining -= to - from + 1;
-
-            if (remaining > 0) {
-              clusterIndex++;
-            }
-          }
-
-          if (from === 0) {
-            loads = [{
-              number: 1,
-              resultsPerPage: to + 1,
-              trimStart: 0,
-              trimEnd: 0
-            }];
-
-          } else if (from + 1 < pageSize) {
-            loads = [{
-              number: 1,
-              resultsPerPage: from + pageSize,
-              trimStart: from,
-              trimEnd: 0
-            }];
-
-          } else {
-            page = Math.floor(from / pageSize) + 1;
-            trimStart = from % pageSize;
-
-            if (trimStart === 0) {
-              loads = [{
-                number: page,
-                resultsPerPage: pageSize,
-                trimStart: 0,
-                trimEnd: 0
-              }];
-
-            } else {
-              loads = [{
-                number: page,
-                resultsPerPage: pageSize,
-                trimStart: trimStart,
-                trimEnd: 0
-              }, {
-                number: page + 1,
-                resultsPerPage: pageSize,
-                trimStart: 0,
-                trimEnd: pageSize - trimStart
-              }];
-            }
-          }
-
-          this.pages[i].push({
-            cluster: cluster,
-            cnsiGuid: cnsiGuid,
-            from: from,
-            to: to,
-            loads: loads
-          });
-        } // end of while
-      } // end of for
+      var cacheId = this.application.summary.clusterId + '#' + this.application.summary.guid;
+      this.data.appStateMap[cacheId] = this.application.state;
     }
   });
 

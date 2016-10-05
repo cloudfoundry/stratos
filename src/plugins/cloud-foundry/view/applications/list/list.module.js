@@ -62,9 +62,7 @@
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.eventService = eventService;
     this.errorService = errorService;
-    this.ready = false;
     this.loading = true;
-    this.currentPage = 0;
     this.isSpaceDeveloper = false;
     this.clusters = [{label: 'All Endpoints', value: 'all'}];
     this.organizations = [{label: 'All Organizations', value: 'all'}];
@@ -80,18 +78,23 @@
       callback: function (page) {
         return that._loadPage(page);
       },
-      total: 0,
+      total: _.ceil(that.model.cachedApplications.length / that.model.pageSize),
+      pageNumber: _.get(that.model, 'appPage', 1),
       text: {
         nextBtn: gettext('Next'),
         prevBtn: gettext('Previous')
       }
     };
 
+    // If we have previous apps show the stale values from cache. This avoids showing a blank screen for the majority
+    // use case where nothing has changed.
+    this.ready = this.model.hasApps;
+
     function init() {
       that._setClusters();
       that._setOrgs();
       that._setSpaces();
-      that._reload().finally(function () {
+      that._reload(true).finally(function () {
         // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
         that.ready = true;
       });
@@ -114,6 +117,28 @@
   }
 
   angular.extend(ApplicationsListController.prototype, {
+
+    /**
+     * @function getNoAppsMessage
+     * @description Get the message to display when there are no apps
+     * @returns {string} No Apps message that is contextualised to the current filter
+     * @public
+     */
+    getNoAppsMessage: function () {
+      if (this.model.filterParams.cnsiGuid !== 'all') {
+        if (this.model.filterParams.orgGuid !== 'all') {
+          if (this.model.filterParams.spaceGuid !== 'all') {
+            return gettext('This space has no applications.');
+          } else {
+            return gettext('This organization has no applications.');
+          }
+        } else {
+          return gettext('This endpoint has no applications.');
+        }
+      }
+      return gettext('You have no applications.');
+    },
+
     /**
      * @function _setClusters
      * @description Set the cluster filter list
@@ -203,44 +228,18 @@
     },
 
     /**
-     * @function _resetPagination
-     * @description reset pagination
-     * @returns {promise} A promise
-     * @private
-     */
-    _resetPagination: function () {
-      var that = this;
-      this.loading = true;
-      this.currentPage = 0;
-      this.paginationProperties.total = 0;
-
-      return this.model.resetPagination()
-        .then(function (cacheData) {
-          // Only in the success case is the pagination model set correctly. If the call is rejected pagination is
-          // likely to be undefined
-          that.paginationProperties.total = that.model.pagination.totalPage;
-          return cacheData;
-        })
-        .finally(function () {
-          that.loading = false;
-        });
-    },
-
-    /**
      * @function _loadPage
      * @description Retrieve apps with given page number
      * @param {number} page - page number
-     * @param {object} cachedData - cached page data
      * @returns {promise} A promise
      * @private
      */
-    _loadPage: function (page, cachedData) {
+    _loadPage: function (page) {
       var that = this;
       this.loading = true;
 
-      return this.model.loadPage(page, cachedData)
+      return this.model.loadPage(page)
         .finally(function () {
-          that.currentPage = page;
           that.loading = false;
           that._handleErrors();
         });
@@ -248,19 +247,37 @@
 
     /**
      * @function _reload
-     * @description Reload
+     * @description Reload the application wall
+     * @param {boolean=} retainPage Attempt to retain the current page after pagination has reloaded
      * @returns {promise} A promise
      * @private
      */
-    _reload: function () {
+    _reload: function (retainPage) {
       var that = this;
-      return this._resetPagination().then(function (cachedData) {
-        if (that.model.pagination.totalPage) {
-          return that._loadPage(1, cachedData);
-        } else {
-          that._handleErrors();
-        }
-      });
+      var reloadPage = retainPage ? that.model.appPage : 1;
+      this.loading = true;
+
+      return this.model.resetPagination()
+        .then(function () {
+          that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
+
+          //Ensure page number is valid and load it
+          reloadPage = reloadPage < 1 ? 1 : reloadPage;
+          reloadPage = reloadPage > that.paginationProperties.total ? that.paginationProperties.total : reloadPage;
+          if (reloadPage) {
+            that._loadPage(reloadPage).then(function () {
+              that.paginationProperties.pageNumber = reloadPage;
+            });
+          }
+        })
+        .catch(function (error) {
+          that.paginationProperties.total = 0;
+          that.paginationProperties.pageNumber = 0;
+          return that.$q.reject(error);
+        })
+        .finally(function () {
+          that.loading = false;
+        });
     },
 
     /**
@@ -297,9 +314,23 @@
     setCluster: function () {
       this.organizations.length = 1;
       this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
+      var needToReload = !_.isMatch(this.filter, {orgGuid: 'all', spaceGuid: 'all'});
       this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
       this._setOrgs();
-      this._reload();
+
+      if (needToReload) {
+        this._reload();
+
+      } else {
+        if (this.filter.cnsiGuid === 'all') {
+          this.model.resetFilter();
+        } else {
+          this.model.filterByCluster(this.filter.cnsiGuid);
+        }
+        this.paginationProperties.pageNumber = 1;
+        this.paginationProperties.total = _.ceil(this.model.filteredApplications.length / this.model.pageSize);
+        this._loadPage(1);
+      }
     },
 
     /**

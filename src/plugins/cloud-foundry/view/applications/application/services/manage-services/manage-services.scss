@@ -5,6 +5,11 @@
 
     .service-icon {
       padding: $hpe-unit-space;
+
+      img {
+        max-height: $hpe-unit-space * 4;
+        max-width: $hpe-unit-space * 4;
+      }
     }
   }
 

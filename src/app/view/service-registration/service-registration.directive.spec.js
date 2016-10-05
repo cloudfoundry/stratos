@@ -81,6 +81,7 @@
 
         var data = { cnsi_guid: 'cnsi_guid' };
         $httpBackend.expectPOST('/pp/v1/auth/logout/cnsi', $httpParamSerializer(data)).respond(200, '');
+        $httpBackend.when('GET', '/pp/v1/stackato/info').respond(200, {});
 
         var serviceInstance = { guid: 'cnsi_guid', account: 'defined', token_expiry: 'defined', valid: 'defined' };
         expect(serviceInstance.account).toBeDefined();
