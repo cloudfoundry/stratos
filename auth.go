@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -57,8 +58,18 @@ const HCFAdminIdentifier = "cloud_controller.admin"
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cnap-Session-Expires-On"
 
+// EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
+var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
+
 func (p *portalProxy) getHCPIdentityEndpoint() string {
 	return fmt.Sprintf("%s://%s:%s/oauth/token", p.Config.HCPIdentityScheme, p.Config.HCPIdentityHost, p.Config.HCPIdentityPort)
+}
+
+func (p *portalProxy) removeEmptyCookie(c echo.Context) {
+	req := c.Request().(*standard.Request).Request
+	originalCookie := req.Header.Get("Cookie")
+	cleanCookie := EmptyCookieMatcher.ReplaceAllLiteralString(originalCookie, "")
+	req.Header.Set("Cookie", cleanCookie)
 }
 
 func (p *portalProxy) loginToUAA(c echo.Context) error {
@@ -76,6 +87,8 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = u.UserGUID
 	sessionValues["exp"] = u.TokenExpiry
+
+	p.removeEmptyCookie(c)
 
 	if err = p.setSessionValues(c, sessionValues); err != nil {
 		return err
@@ -253,14 +266,9 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 
 func (p *portalProxy) logout(c echo.Context) error {
 	logger.Debug("logout")
-	res := c.Response().(*standard.Response).ResponseWriter
-	cookie := &http.Cookie{
-		Name:   portalSessionName,
-		Value:  "",
-		MaxAge: -1,
-	}
 
-	http.SetCookie(res, cookie)
+	p.removeEmptyCookie(c)
+
 	err := p.clearSession(c)
 	if err != nil {
 		logger.Errorf("Unable to clear session: %v", err)
