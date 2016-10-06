@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  fdescribe('organization detail (users) module', function () {
+  describe('organization detail (users) module', function () {
 
     var $controller, $httpBackend, $scope;
 
