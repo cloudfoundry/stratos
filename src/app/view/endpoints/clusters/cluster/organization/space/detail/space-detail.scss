@@ -3,3 +3,16 @@
     margin-top: $hpe-unit-space * 3;
   }
 }
+
+.application-cell {
+  cursor: pointer;
+  color: $gossamer;
+  &:hover {
+    text-decoration: underline;
+    color: #01765b; // Could find this as a named colour anywhere...
+  }
+}
+
+.sortable {
+  cursor: pointer;
+}

@@ -3,6 +3,7 @@
 
   angular
     .module('app.view.endpoints.clusters.cluster.organization.space.detail', [
+      'app.view.endpoints.clusters.cluster.organization.space.detail.applications',
       'app.view.endpoints.clusters.cluster.organization.space.detail.services',
       'app.view.endpoints.clusters.cluster.organization.space.detail.routes',
       'app.view.endpoints.clusters.cluster.organization.space.detail.users'
