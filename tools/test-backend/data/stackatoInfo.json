@@ -1,0 +1,42 @@
+{
+  "url": "http://localhost:3100/pp/v1/stackato/info",
+  "response": {
+    "version": {
+      "proxy_version": "dev",
+      "database_version": 20160511195737
+    },
+    "user": {
+      "guid": "63ddbbe1-a185-465d-ba10-63d5c01f1a99",
+      "name": "admin@cnap.local",
+      "admin": true
+    },
+    "endpoints": {
+      "hce": {
+        "ff095d55-9831-409a-b6e5-3fb0d7fad50f": {
+          "guid": "ff095d55-9831-409a-b6e5-3fb0d7fad50f",
+          "name": "LOL",
+          "version": "",
+          "user": {
+            "guid": "ae257571-e323-4cd9-bd97-2b21223d9b36",
+            "name": "admin",
+            "admin": true
+          },
+          "type": ""
+        }
+      },
+      "hcf": {
+        "ff095d55-9831-409a-b6e5-3fb0d7fad509": {
+          "guid": "ff095d55-9831-409a-b6e5-3fb0d7fad509",
+          "name": "LOL",
+          "version": "",
+          "user": {
+            "guid": "ae257571-e323-4cd9-bd97-2b21223d9b36",
+            "name": "admin",
+            "admin": true
+          },
+          "type": ""
+        }
+      }
+    }
+  }
+}

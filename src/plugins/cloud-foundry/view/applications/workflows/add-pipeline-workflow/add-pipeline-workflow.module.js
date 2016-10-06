@@ -268,6 +268,10 @@
         });
       },
 
+      redefineWorkflowWithoutHce: function () {},
+
+      reset: function () {},
+
       getVcsInstances: function () {
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');

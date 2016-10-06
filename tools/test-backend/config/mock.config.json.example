@@ -1,0 +1,44 @@
+{
+  "portal_proxy": {
+    "host": "localhost",
+    "port": 80,
+    "path": "pp"
+  },
+  "serviceInstances": {
+    "hcf": 3,
+    "hce": 1,
+     "orgs":[
+       {
+         "count": 2,
+         "spacesCount": 4
+       },
+       {
+         "count": 1,
+         "spacesCount": 1,
+         "addEmpty": true
+       },
+       {
+         "count": 2,
+         "spacesCount": 1
+       }
+     ]
+  },
+  "hcf":{
+  #CNSI ID of your HCF instance
+    "cnsi": "ff095d55-9831-409a-b6e5-3fb0d7fad509",
+  #User ID of the Admin user, for auth passthrough
+    "user_id": "bc44ee38-4074-48ce-ad3b-95e6e691bc98",
+  #ID of an online application for stats
+    "app_id": "8247ebc9-94bd-441c-909b-e9124efda3a1"
+  },
+  "apps":{
+
+    # Specify the min/max number of application per cluster
+    "minCount": 50,
+    "maxCount": 150,
+
+    # If you want to create fixed number of applicatons per cluster
+    "fixedCount": -1
+  }
+}
+

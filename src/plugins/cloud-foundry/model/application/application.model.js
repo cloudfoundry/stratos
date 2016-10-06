@@ -779,7 +779,7 @@
       return applicationApi.UpdateApp(guid, newAppSpec, null, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
           if (response.data.metadata) {
-            that.getAppSummary(cnsiGuid, response.data.metadata.guid);
+            that.getAppSummary(cnsiGuid, response.data.metadata.guid, true);
           }
           return response.data;
         });

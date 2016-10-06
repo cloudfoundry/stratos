@@ -1,0 +1,10 @@
+{
+  "url": "/pp/v1/proxy/info",
+  "response": {
+    "f99021eb-fb8e-4819-813c-558c2311649b": {
+      "api_latest_version": 2,
+      "api_public_uri": "https://a2d908311822111e6ac740669ec078d9-2076574576.eu-central-1.elb.amazonaws.com:443/v2",
+      "auth_endpoint": "https://hce.identity.hscdemo.stacktest.io:443"
+    }
+  }
+}
