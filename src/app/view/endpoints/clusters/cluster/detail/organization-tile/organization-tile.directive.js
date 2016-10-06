@@ -164,7 +164,7 @@
       for (var i = 0; i < that.organization.org.entity.spaces.length; i++) {
         var space = that.organization.org.entity.spaces[i];
         if (authModel.isAllowed(that.organization.cnsiGuid,
-            authModel.resources.user,
+            authModel.resources.space,
             authModel.actions.update,
             space.metadata.guid,
             space.entity.organization_guid,
@@ -177,7 +177,10 @@
 
       that.actions.push({
         name: gettext('Assign User(s)'),
-        disabled: !authModel.isAllowed(that.organization.cnsiGuid, authModel.resources.user, authModel.actions.update, that.organization.guid) || !isSpaceManager,
+        // Disable action if user is:
+        // 1. Not allowed to update the organization (not an admin or an org-manager)
+        // 2. and not a manager of any space within the organization in question
+        disabled:  !authModel.isAllowed(that.organization.cnsiGuid, authModel.resources.organization, authModel.actions.update, that.organization.guid) && !isSpaceManager,
         execute: function () {
           assignUsers.assign({
             clusterGuid: that.organization.cnsiGuid,
