@@ -205,7 +205,7 @@ function buildProxy {
   buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 }
 
-function buildETCD {
+function buildETCD2 {
   # Build and publish the container image for etcd
   echo " "
   echo "-- Build & publish the runtime container image for etcd"
@@ -272,7 +272,7 @@ function generateSDL {
   mkdir -p ${__DIRNAME}/output
   for FILE in ${__DIRNAME}/hcp_templates/*.json ; do
     ofile=${__DIRNAME}/output/$(basename $FILE)
-    cat $FILE | sed s~{{TAG}}~${TAG}~g | sed -r s~{{REGISTRY}}~${DOCKER_REGISTRY}~g > $ofile
+    cat $FILE | sed "s@{{TAG}}@${TAG}@" | sed "s@{{REGISTRY}}@${DOCKER_REGISTRY}@" > $ofile
   done
   echo "-- Done."
 }
@@ -297,7 +297,7 @@ fi
 
 # Build all of the components that make up the Console
 buildProxy
-buildETCD
+buildETCD2
 buildStolon
 buildPreflightJob
 buildPostflightJob
