@@ -93,7 +93,7 @@
     });
 
     that.debouncedUpdateVisibleExecutions = _.debounce(function (visibleExecutions) {
-      that.updateVisibleExecutions(visibleExecutions);
+      //that.updateVisibleExecutions(visibleExecutions);
     }, 500);
 
     $scope.$on("$destroy", function () {

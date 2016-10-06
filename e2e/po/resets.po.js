@@ -64,7 +64,7 @@ function zeroClusterAdminWorkflow() {
       }, function (error) {
         console.log('Failed to remove all cnsi: ', error);
         reject(error);
-      });
+      }).catch(reject);;
     }, function(error) {
       reject(error);
     });
@@ -84,7 +84,7 @@ function resetAllCNSI(user, password) {
       }, function (error) {
         console.log('Failed to reset all cnsi: ', error);
         reject(error);
-      });
+      }).catch(reject);;
     }, function (error) {
       reject(error);
     });
@@ -168,6 +168,7 @@ function sendRequest(req, method, url, body, formData) {
           reject('failed to send request: ' + JSON.stringify(response));
           rejected = true;
         }
+
       })
       .on('end', function () {
         if (!rejected) {
@@ -216,19 +217,31 @@ function _resetAllCNSI(optionalReq) {
   var req = optionalReq || newRequest();
   return new Promise(function (resolve, reject) {
     removeAllCNSI(req).then(function () {
-      var hcfPromises = helpers.getHcfs().map(function (c) {
-        return sendRequest(req, 'POST', 'pp/v1/register/hcf', null, c);
-      });
-      var hcePromises = helpers.getHces().map(function (c) {
-        return sendRequest(req, 'POST', 'pp/v1/register/hce', null, c);
-      });
-      var promises = hcfPromises.concat(hcePromises);
+      console.log('starting add');
+      var hcfs = helpers.getHcfs();
+
+      var promises = [];
+      var c;
+      for (c in hcfs) {
+        if (!hcfs.hasOwnProperty(c)) {
+          continue;
+        }
+        promises.push(sendRequest(req, 'POST', 'pp/v1/register/hcf', null, hcfs[c].register));
+      }
+      var hces = helpers.getHcfs();
+      for (c in hces) {
+        if (!hcfs.hasOwnProperty(c)) {
+          continue;
+        }
+        promises.push(sendRequest(req, 'POST', 'pp/v1/register/hce', null, hces[c].register));
+      }
+
       Promise.all(promises).then(function () {
         resolve();
       }, function (error) {
         reject(error);
       });
-    }, reject);
+    }, reject).catch(reject);
   });
 }
 

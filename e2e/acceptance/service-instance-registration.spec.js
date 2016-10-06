@@ -5,6 +5,7 @@ var resetTo = require('../po/resets.po');
 var navbar = require('../po/navbar.po');
 var loginPage = require('../po/login-page.po');
 var registration = require('../po/service-instance-registration.po');
+var applications = require('../po/applications.po');
 
 describe('Service Instance Registration', function () {
 
@@ -17,8 +18,9 @@ describe('Service Instance Registration', function () {
       });
     });
 
-    //TODO: RC test to confir service instance registration is skipped and we land on endpoints page or app wall(with link
-    // to endpoints)?
+    it('Should reach application wall with \'no clusters\' message after log in', function () {
+      expect(applications.isApplicationWallNoClusters()).toBeTruthy();
+    });
   });
 
   describe('As Non-Admin', function () {
@@ -31,6 +33,67 @@ describe('Service Instance Registration', function () {
     });
 
     describe('service instances table', serviceInstanceTable);
+
+    fdescribe('service instance `Connect` clicked', function () {
+
+      var hcf = helpers.getHcfs()['hcf1'];
+
+
+      beforeAll(function () {
+        // Confirm the first row is the required one (to match creds later)
+        var serviceInstancesTable = registration.serviceInstancesTable();
+        var finderPromise = helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText();
+        expect(finderPromise).toBeDefined();
+        finderPromise.then(function (partUrl) {
+          var fullUrl = hcf.register.api_endpoint;
+          expect(fullUrl.slice(partUrl.length * -1)).toEqual(partUrl);
+        });
+
+        registration.connect(0);
+      });
+
+      it('should open the credentials form', function () {
+        expect(registration.credentialsForm().isDisplayed()).toBeTruthy();
+      });
+
+      it('should show the cluster name and URL as readonly in the credentials form', function () {
+        var serviceInstancesTable = registration.serviceInstancesTable();
+        var name = helpers.getTableCellAt(serviceInstancesTable, 0, 1).getText();
+        var url = helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText();
+
+        var fields = registration.credentialsFormFields();
+        expect(fields.get(0).getAttribute('value')).toBe(name);
+        expect(fields.get(1).getAttribute('value')).toBe(url);
+        expect(fields.get(2).getAttribute('value')).toBe('');
+        expect(fields.get(3).getAttribute('value')).toBe('');
+      });
+
+      it('should disable connect button if username and password are blank', function () {
+        expect(registration.connectButton().isEnabled()).toBeFalsy();
+      });
+
+      it('should enable connect button if username and password are not blank', function () {
+        registration.fillCredentialsForm(hcf.admin.username, hcf.admin.password);
+        expect(registration.connectButton().isEnabled()).toBeTruthy();
+      });
+
+      it('should update service instance data on register', function () {
+        registration.registerServiceInstance();
+
+        var serviceInstancesTable = registration.serviceInstancesTable();
+        expect(helpers.getTableCellAt(serviceInstancesTable, 0, 3).getText()).not.toBe('');
+        expect(helpers.getTableCellAt(serviceInstancesTable, 0, 4).getText()).toBe('DISCONNECT');
+        expect(registration.serviceInstanceStatus(0, 'helion-icon-Active_L').isDisplayed()).toBeTruthy();
+      });
+
+      it('should show `1 CLUSTER REGISTERED` next to `Done` button', function () {
+        expect(registration.registrationNotification().getText()).toBe('1 ENDPOINT REGISTERED');
+      });
+
+      it('should enable `Done` button', function () {
+        expect(registration.doneButton().isEnabled()).toBeTruthy();
+      });
+    });
   });
 
   function serviceInstanceTable() {
@@ -57,55 +120,6 @@ describe('Service Instance Registration', function () {
     });
   }
 
-  //TODO: RC Update
-  xdescribe('service instance `Connect` clicked', function () {
-    beforeAll(function () {
-      registration.connect(0);
-    });
-
-    it('should open the credentials form', function () {
-      expect(registration.credentialsForm().isDisplayed()).toBeTruthy();
-    });
-
-    it('should show the cluster name and URL as readonly in the credentials form', function () {
-      var serviceInstancesTable = registration.serviceInstancesTable();
-      var name = helpers.getTableCellAt(serviceInstancesTable, 0, 1).getText();
-      var url = helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText();
-
-      var fields = registration.credentialsFormFields();
-      expect(fields.get(0).getAttribute('value')).toBe(name);
-      expect(fields.get(1).getAttribute('value')).toBe(url);
-      expect(fields.get(2).getAttribute('value')).toBe('');
-      expect(fields.get(3).getAttribute('value')).toBe('');
-    });
-
-    it('should disable register button if username and password are blank', function () {
-      expect(registration.registerButton().isEnabled()).toBeFalsy();
-    });
-
-    it('should enable register button if username and password are not blank', function () {
-      registration.fillCredentialsForm('username', 'password');
-      expect(registration.registerButton().isEnabled()).toBeTruthy();
-    });
-
-    it('should update service instance data on register', function () {
-      registration.registerServiceInstance();
-
-      var serviceInstancesTable = registration.serviceInstancesTable();
-      expect(helpers.getTableCellAt(serviceInstancesTable, 0, 3).getText()).not.toBe('');
-      expect(helpers.getTableCellAt(serviceInstancesTable, 0, 4).getText()).not.toBe('');
-      expect(helpers.getTableCellAt(serviceInstancesTable, 0, 5).getText()).toBe('DISCONNECT');
-      expect(registration.serviceInstanceStatus(0, 'helion-icon-Active_L').isDisplayed()).toBeTruthy();
-    });
-
-    it('should show `1 CLUSTER REGISTERED` next to `Done` button', function () {
-      expect(registration.registrationNotification().getText()).toBe('1 CLUSTER REGISTERED');
-    });
-
-    it('should enable `Done` button', function () {
-      expect(registration.doneButton().isEnabled()).toBeTruthy();
-    });
-  });
 
   //TODO: RC Update
   xdescribe('service instance `Disconnect`', function () {

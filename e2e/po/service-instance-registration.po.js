@@ -21,7 +21,7 @@ module.exports = {
 
   credentialsForm: credentialsForm,
   credentialsFormFields: credentialsFormFields,
-  registerButton: registerButton,
+  connectButton: registerButton,
   cancel: cancel,
   fillCredentialsForm: fillCredentialsForm,
   registerServiceInstance: registerServiceInstance
@@ -37,12 +37,12 @@ function serviceInstancesTable() {
 
 function connectLink(rowIndex) {
   return helpers.getTableRowAt(serviceInstancesTable(), rowIndex)
-    .element(by.css('[ng-click="serviceRegistrationCtrl.connect(serviceInstance)"]'));
+    .element(by.css('[ng-click="serviceRegistrationCtrl.connect(cnsi)"]'));
 }
 
 function disconnectLink(rowIndex) {
   return helpers.getTableRowAt(serviceInstancesTable(), rowIndex)
-    .element(by.css('[ng-click="serviceRegistrationCtrl.disconnect(serviceInstance)"]'));
+    .element(by.css('[ng-click="serviceRegistrationCtrl.disconnect(serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid])"]'));
 }
 
 function connect(rowIndex) {
@@ -68,7 +68,7 @@ function serviceInstanceStatus(rowIndex, statusClass) {
 }
 
 function registrationNotification() {
-  return registrationOverlay().element(by.css('.fixed-footer .registration-notification'));
+  return registrationOverlay().element(by.css('.fixed-footer'));
 }
 
 /**
@@ -85,7 +85,7 @@ function credentialsFormFields() {
 
 function registerButton() {
   return helpers.getForm(credentialsFormName)
-    .element(by.buttonText('Register'));
+    .element(by.buttonText('Connect'));
 }
 
 function cancel() {

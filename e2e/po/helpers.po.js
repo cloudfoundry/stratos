@@ -1,31 +1,29 @@
 'use strict';
 
 var sh = require('../../tools/node_modules/shelljs');
-var request = require('../../tools/node_modules/request');
 
 // Get host IP
 var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
 var hostIp = browser.params.hostIp || sh.exec(CMD, { silent: true }).output.trim();
 var hostPort = browser.params.port || '';
 var host = hostIp + (hostPort ? ':' + hostPort : '');
-var hcfs = browser.params.cnsi.hcf || [{
-  api_endpoint: 'https://api.hcf.hsc.stacktest.io',
-  cnsi_name: 'hcf',
-  skip_ssl_validation: 'true'
-}];
-var hces = browser.params.cnsi.hce || [{
-  api_endpoint: 'https://api.hcf.hsc.stacktest.io',
-  cnsi_name: 'hcf',
-  skip_ssl_validation: 'true'
-}];
-var adminUser = browser.params.adminUser || 'admin@cnap.local';
-var adminPassword = browser.params.adminPassword || 'cnapadmin';
-var user = browser.params.credentials.user || 'user@cnap.local';
-var password = browser.params.credentials.password || 'cnapuser';
+
+var cnsis = browser.params.cnsi;
+var hcfs = cnsis.hcf;
+var hces = cnsis.hce;
+var adminUser = browser.params.credentials.admin.username || 'admin@cnap.local';
+var adminPassword = browser.params.credentials.admin.password || 'cnapadmin';
+var user = browser.params.credentials.user.username || 'user@cnap.local';
+var password = browser.params.credentials.user.password || 'cnapuser';
+
+//TODO: RC Test JSON args in params.x. Don't think this will work
+// var argv = require('minimist')(process.argv.slice(2));
+// browser.params = JSON.parse(argv.params);
 
 module.exports = {
 
   getHost: getHost,
+  getCNSIs: getCNSIs,
   getHcfs: getHcfs,
   getHces: getHces,
   getAdminUser: getAdminUser,
@@ -55,6 +53,10 @@ module.exports = {
 
 function getHost() {
   return host;
+}
+
+function getCNSIs() {
+  return cnsis;
 }
 
 function getHcfs() {

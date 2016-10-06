@@ -28,14 +28,46 @@ exports.config = {
     hostIp: '',
     port: '',
     credentials: {
-      adminUser: '',
-      adminPassword: '',
-      user: '',
-      password: ''
+      admin: {
+        username: '',
+        password: ''
+      },
+      user: {
+        username: '',
+        password: ''
+      }
     },
     cnsi: {
-      hcf: undefined,
-      hce: undefined
+      hcf: {
+        hcf1: {
+          register: {
+            api_endpoint: 'https://api.hcf.hsc.stacktest.io',
+            cnsi_name: 'hcf',
+            skip_ssl_validation: 'true'
+          },
+          admin: {
+            username: 'admin',
+            password: 'hscadmin'
+          },
+          user: {
+            username: 'rcox',
+            password: 'changeme'
+          }
+        }
+      },
+      hce: {
+        hce1: {
+          register: {
+            api_endpoint: 'https://api.hcf.hsc.stacktest.io',
+            cnsi_name: 'hcf',
+            skip_ssl_validation: 'true'
+          },
+          admin: {
+            username: 'hseadmin',
+            password: 'hscadmin'
+          }
+        }
+      }
     }
   },
 
