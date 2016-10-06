@@ -56,6 +56,7 @@
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
+
     this.stateName = $state.current.name;
     this.clusterGuid = $stateParams.guid;
     // Depending on depth into endpoints these two might be null
@@ -248,7 +249,7 @@
         // We're at least the 'organization' depth of a cluster. Check permissions against it.
         canCreateSpace = authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.create, that.organizationGuid);
         if (that.spaceGuid) {
-           // We're at least the 'space' depth of a cluster. Check permissions against it.
+          // We're at least the 'space' depth of a cluster. Check permissions against it.
           canAssignUsers =
             authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, that.spaceGuid, that.organizationGuid, true);
         } else {
@@ -268,7 +269,7 @@
       // Space access
       that.clusterActions[1].disabled = !canCreateSpace;
       // User Assignment access
-       that.clusterActions[2].disabled = !canAssignUsers;
+      that.clusterActions[2].disabled = !canAssignUsers;
     }
 
     function init() {

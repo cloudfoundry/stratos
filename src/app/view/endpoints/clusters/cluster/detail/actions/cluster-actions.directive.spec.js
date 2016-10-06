@@ -4,7 +4,7 @@
   describe('cluster-actions and unique-space-name directives', function () {
     var $httpBackend, element, $compile, clusterActionsCtrl;
 
-    var userGuid = '0c97cd5a-8ef8-4f80-af46-acfa8697824e';
+    var userGuid = 'userGuid';
     var runningAuthTests = false;
 
     beforeEach(module('templates'));

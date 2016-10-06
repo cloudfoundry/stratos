@@ -16,7 +16,7 @@
         }
       }
     };
-    var userGuid = '0c97cd5a-8ef8-4f80-af46-acfa8697824e';
+    var userGuid = 'userGuid';
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));

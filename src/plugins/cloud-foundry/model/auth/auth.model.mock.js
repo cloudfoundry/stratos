@@ -79,7 +79,7 @@
             guid: 'guid',
             name: 'myHCF',
             version: '',
-            user: {guid: '0c97cd5a-8ef8-4f80-af46-acfa8697824e', name: 'test', admin: isAdmin},
+            user: {guid: 'userGuid', name: 'test', admin: isAdmin},
             type: ''
           }
         }

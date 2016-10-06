@@ -10,7 +10,7 @@
 
     var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';
-    var userGuid = '0c97cd5a-8ef8-4f80-af46-acfa8697824e';
+    var userGuid = 'userGuid';
 
     function initController($injector, role) {
       $httpBackend = $injector.get('$httpBackend');
