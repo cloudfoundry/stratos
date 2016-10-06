@@ -24,52 +24,56 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
+    function initController($injector, role) {
+      $httpBackend = $injector.get('$httpBackend');
+
+      var $stateParams = $injector.get('$stateParams');
+      $stateParams.guid = clusterGuid;
+      $stateParams.organization = organizationGuid;
+
+      var modelManager = $injector.get('app.model.modelManager');
+
+      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+      _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, modelSpace);
+
+
+      mock.cloudFoundryModel.Auth.initAuthModel(role, userGuid, $injector);
+
+      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+      stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+        guid: 'user_guid',
+        admin: true
+      });
+
+      $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/routes?results-per-page=1')
+        .respond({
+          total_results: 0
+        });
+      $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/service_instances?results-per-page=1')
+        .respond({
+          total_results: 0
+        });
+
+      var $compile = $injector.get('$compile');
+
+      var contextScope = $injector.get('$rootScope').$new();
+      contextScope.space = space;
+
+      var markup = '<organization-space-tile ' +
+        'space="space">' +
+        '</organization-space-tile>';
+
+      element = angular.element(markup);
+      $compile(element)(contextScope);
+
+      contextScope.$apply();
+      controller = element.controller('organizationSpaceTile');
+    }
+
     describe('initialise as admin user', function () {
 
       beforeEach(inject(function ($injector) {
-        $httpBackend = $injector.get('$httpBackend');
-
-        var $stateParams = $injector.get('$stateParams');
-        $stateParams.guid = clusterGuid;
-        $stateParams.organization = organizationGuid;
-
-        var modelManager = $injector.get('app.model.modelManager');
-
-        var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-        _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, modelSpace);
-
-
-        mock.cloudFoundryModel.Auth.initAuthModel('admin', userGuid, $injector);
-
-        var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-        stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
-          guid: 'user_guid',
-          admin: true
-        });
-
-        $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/routes?results-per-page=1')
-          .respond({
-            total_results: 0
-          });
-        $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/service_instances?results-per-page=1')
-          .respond({
-            total_results: 0
-          });
-
-        var $compile = $injector.get('$compile');
-
-        var contextScope = $injector.get('$rootScope').$new();
-        contextScope.space = space;
-
-        var markup = '<organization-space-tile ' +
-          'space="space">' +
-          '</organization-space-tile>';
-
-        element = angular.element(markup);
-        $compile(element)(contextScope);
-
-        contextScope.$apply();
-        controller = element.controller('organizationSpaceTile');
+        initController($injector, 'admin');
       }));
 
       it('init', function () {
@@ -105,62 +109,8 @@
     describe('initialise as non-admin user', function () {
 
       beforeEach(inject(function ($injector) {
-        $httpBackend = $injector.get('$httpBackend');
-
-        var $stateParams = $injector.get('$stateParams');
-        $stateParams.guid = clusterGuid;
-        $stateParams.organization = organizationGuid;
-
-        var modelManager = $injector.get('app.model.modelManager');
-
-        var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-        _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, modelSpace);
-
-        mock.cloudFoundryModel.Auth.initAuthModel('space_developer', userGuid, $injector);
-
-        var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-        stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
-          guid: 'user_guid',
-          admin: true
-        });
-
-        $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/routes?results-per-page=1')
-          .respond({
-            total_results: 0
-          });
-        $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/service_instances?results-per-page=1')
-          .respond({
-            total_results: 0
-          });
-
-        var $compile = $injector.get('$compile');
-
-        var contextScope = $injector.get('$rootScope').$new();
-        contextScope.space = space;
-
-        var markup = '<organization-space-tile ' +
-          'space="space">' +
-          '</organization-space-tile>';
-
-        element = angular.element(markup);
-        $compile(element)(contextScope);
-
-        contextScope.$apply();
-        controller = element.controller('organizationSpaceTile');
+        initController($injector, 'space_developer');
       }));
-
-      it('init', function () {
-        expect(element).toBeDefined();
-        expect(controller).toBeDefined();
-        expect(controller.clusterGuid).toBe(clusterGuid);
-        expect(controller.organizationGuid).toBe(organizationGuid);
-        expect(controller.spaceGuid).toBe(space.metadata.guid);
-        expect(controller.actions).toBeDefined();
-        expect(controller.actions.length).toEqual(3);
-        expect(controller.summary).toBeDefined();
-        expect(controller.spaceDetail).toBeDefined();
-        expect(controller.orgDetails).toBeDefined();
-      });
 
       it('should have rename space disabled', function () {
         expect(controller.actions[0].disabled).toBeTruthy();
