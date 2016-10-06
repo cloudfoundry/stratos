@@ -149,14 +149,6 @@
       $httpBackend.flush();
     });
 
-    it('should POST correct data on register()', function () {
-      var data = {
-        serviceInstances: ['url1', 'url2']
-      };
-      $httpBackend.expectPOST('/api/service-instances/user/register', data).respond(200, '');
-      userServiceInstance.register(['url1', 'url2']);
-      $httpBackend.flush();
-    });
   });
 
 })();
