@@ -177,7 +177,7 @@
 
       that.actions.push({
         name: gettext('Assign User(s)'),
-        disabled: !authModel.isAllowed(that.organization.cnsiGuid, authModel.resources.user, authModel.actions.update, that.organization.guid) || !isSpaceManager,
+        disabled:  !authModel.isAllowed(that.organization.cnsiGuid, authModel.resources.organization, authModel.actions.update, that.organization.guid) && !isSpaceManager,
         execute: function () {
           assignUsers.assign({
             clusterGuid: that.organization.cnsiGuid,
