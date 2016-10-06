@@ -36,7 +36,6 @@
       var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, modelSpace);
 
-
       mock.cloudFoundryModel.Auth.initAuthModel(role, userGuid, $injector);
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');

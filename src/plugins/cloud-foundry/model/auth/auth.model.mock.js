@@ -4,7 +4,6 @@
   /* eslint-disable quote-props */
   mock.cloudFoundryModel = mock.cloudFoundryModel || {};
 
-
   function setupSpaces(userGuid, isSpaceManager, isSpaceDeveloper, $httpBackend) {
 
     $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllAuditedSpacesForUser(userGuid).url).respond(
@@ -120,7 +119,7 @@
       authModel.initializeForEndpoint('guid', true);
       $httpBackend.flush();
     }
-  }
+  };
 
   /* eslint-enable quote-props */
 })

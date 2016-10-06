@@ -68,13 +68,11 @@
      */
     initialize: function () {
       // Initialise Auth Service
-
       var that = this;
       var authModelInitPromise = [];
       var userCnsiModel = this.modelManager.retrieve('app.model.serviceInstance.user');
       var stackatoInfo = this.modelManager.retrieve('app.model.stackatoInfo');
       var services = _.filter(userCnsiModel.serviceInstances, {cnsi_type: 'hcf', valid: true, error: false});
-
       if (services.length > 0) {
         _.each(services, function (service) {
           var endpointUser = _.get(stackatoInfo.info.endpoints.hcf, service.guid + '.user');

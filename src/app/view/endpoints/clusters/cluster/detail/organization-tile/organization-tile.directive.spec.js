@@ -27,7 +27,6 @@
       var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);
 
-
       mock.cloudFoundryModel.Auth.initAuthModel('admin', userGuid, $injector);
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
