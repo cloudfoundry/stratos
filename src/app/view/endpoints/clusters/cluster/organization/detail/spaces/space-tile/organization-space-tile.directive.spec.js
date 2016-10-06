@@ -4,7 +4,7 @@
   describe('organization-space-tile directive', function () {
     var $httpBackend, element, controller;
 
-    var clusterGuid = 'clusterGuid';
+    var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';
     var space = {
       metadata: {
@@ -20,76 +20,160 @@
       }
     };
 
+    var userGuid = '0c97cd5a-8ef8-4f80-af46-acfa8697824e';
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
-    beforeEach(inject(function ($injector) {
-      $httpBackend = $injector.get('$httpBackend');
 
-      var $stateParams = $injector.get('$stateParams');
-      $stateParams.guid = clusterGuid;
-      $stateParams.organization = organizationGuid;
+    describe('initialise as admin user', function () {
 
-      var modelManager = $injector.get('app.model.modelManager');
+      beforeEach(inject(function ($injector) {
+        $httpBackend = $injector.get('$httpBackend');
 
-      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-      _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, modelSpace);
+        var $stateParams = $injector.get('$stateParams');
+        $stateParams.guid = clusterGuid;
+        $stateParams.organization = organizationGuid;
 
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
-        guid: 'user_guid',
-        admin: true
+        var modelManager = $injector.get('app.model.modelManager');
+
+        var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+        _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, modelSpace);
+
+
+        mock.cloudFoundryModel.Auth.initAuthModel('admin', userGuid, $injector);
+
+        var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+        stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+          guid: 'user_guid',
+          admin: true
+        });
+
+        $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/routes?results-per-page=1')
+          .respond({
+            total_results: 0
+          });
+        $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/service_instances?results-per-page=1')
+          .respond({
+            total_results: 0
+          });
+
+        var $compile = $injector.get('$compile');
+
+        var contextScope = $injector.get('$rootScope').$new();
+        contextScope.space = space;
+
+        var markup = '<organization-space-tile ' +
+          'space="space">' +
+          '</organization-space-tile>';
+
+        element = angular.element(markup);
+        $compile(element)(contextScope);
+
+        contextScope.$apply();
+        controller = element.controller('organizationSpaceTile');
+      }));
+
+      it('init', function () {
+        expect(element).toBeDefined();
+        expect(controller).toBeDefined();
+        expect(controller.clusterGuid).toBe(clusterGuid);
+        expect(controller.organizationGuid).toBe(organizationGuid);
+        expect(controller.spaceGuid).toBe(space.metadata.guid);
+        expect(controller.actions).toBeDefined();
+        expect(controller.actions.length).toEqual(3);
+        expect(controller.summary).toBeDefined();
+        expect(controller.spaceDetail).toBeDefined();
+        expect(controller.orgDetails).toBeDefined();
+
+        $httpBackend.flush();
+        $httpBackend.verifyNoOutstandingExpectation();
+        $httpBackend.verifyNoOutstandingRequest();
       });
 
-      $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/routes?results-per-page=1')
-        .respond({
-          total_results: 0
-        });
-      $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/service_instances?results-per-page=1')
-        .respond({
-          total_results: 0
-        });
+      it('should have rename space enabled', function () {
+        expect(controller.actions[0].disabled).toBeFalsy();
+      });
 
-      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      _.set(authModel, 'principal.' + clusterGuid + '.isAllowed.apply', _.noop);
-      _.set(authModel, 'principal.' + clusterGuid + '.userSummary.organizations.managed', []);
-      _.set(authModel, 'principal.' + clusterGuid + '.userSummary.spaces.managed', []);
+      it('should have delete space disabled', function () {
+        expect(controller.actions[1].disabled).toBeTruthy();
+      });
 
-      var $compile = $injector.get('$compile');
-
-      var contextScope = $injector.get('$rootScope').$new();
-      contextScope.space = space;
-
-      var markup = '<organization-space-tile ' +
-        'space="space">' +
-        '</organization-space-tile>';
-
-      element = angular.element(markup);
-      $compile(element)(contextScope);
-
-      contextScope.$apply();
-      controller = element.controller('organizationSpaceTile');
-    }));
-
-    afterEach(function () {
-      $httpBackend.verifyNoOutstandingExpectation();
-      $httpBackend.verifyNoOutstandingRequest();
+      it('should have assign users enabled', function () {
+        expect(controller.actions[2].disabled).toBeFalsy();
+      });
     });
 
-    it('init', function () {
-      expect(element).toBeDefined();
-      expect(controller).toBeDefined();
-      expect(controller.clusterGuid).toBe(clusterGuid);
-      expect(controller.organizationGuid).toBe(organizationGuid);
-      expect(controller.spaceGuid).toBe(space.metadata.guid);
-      expect(controller.actions).toBeDefined();
-      expect(controller.actions.length).toEqual(3);
-      expect(controller.summary).toBeDefined();
-      expect(controller.spaceDetail).toBeDefined();
-      expect(controller.orgDetails).toBeDefined();
+    describe('initialise as non-admin user', function () {
 
-      $httpBackend.flush();
+      beforeEach(inject(function ($injector) {
+        $httpBackend = $injector.get('$httpBackend');
+
+        var $stateParams = $injector.get('$stateParams');
+        $stateParams.guid = clusterGuid;
+        $stateParams.organization = organizationGuid;
+
+        var modelManager = $injector.get('app.model.modelManager');
+
+        var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+        _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, modelSpace);
+
+        mock.cloudFoundryModel.Auth.initAuthModel('space_developer', userGuid, $injector);
+
+        var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
+        stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+          guid: 'user_guid',
+          admin: true
+        });
+
+        $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/routes?results-per-page=1')
+          .respond({
+            total_results: 0
+          });
+        $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/service_instances?results-per-page=1')
+          .respond({
+            total_results: 0
+          });
+
+        var $compile = $injector.get('$compile');
+
+        var contextScope = $injector.get('$rootScope').$new();
+        contextScope.space = space;
+
+        var markup = '<organization-space-tile ' +
+          'space="space">' +
+          '</organization-space-tile>';
+
+        element = angular.element(markup);
+        $compile(element)(contextScope);
+
+        contextScope.$apply();
+        controller = element.controller('organizationSpaceTile');
+      }));
+
+      it('init', function () {
+        expect(element).toBeDefined();
+        expect(controller).toBeDefined();
+        expect(controller.clusterGuid).toBe(clusterGuid);
+        expect(controller.organizationGuid).toBe(organizationGuid);
+        expect(controller.spaceGuid).toBe(space.metadata.guid);
+        expect(controller.actions).toBeDefined();
+        expect(controller.actions.length).toEqual(3);
+        expect(controller.summary).toBeDefined();
+        expect(controller.spaceDetail).toBeDefined();
+        expect(controller.orgDetails).toBeDefined();
+      });
+
+      it('should have rename space disabled', function () {
+        expect(controller.actions[0].disabled).toBeTruthy();
+      });
+
+      it('should have delete space disabled', function () {
+        expect(controller.actions[1].disabled).toBeTruthy();
+      });
+
+      it('should have assign users disabled', function () {
+        expect(controller.actions[2].disabled).toBeTruthy();
+      });
     });
-
   });
 
 })();

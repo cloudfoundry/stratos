@@ -81,6 +81,6 @@
     it('should have assign users enabled', function () {
       expect(controller.actions[2].disabled).toBeFalsy();
     });
-  })
+  });
 
 })();
