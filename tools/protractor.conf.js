@@ -25,6 +25,7 @@ exports.config = {
   },
 
   params: {
+    hostProtocol: '',
     hostIp: '',
     port: '',
     credentials: {
@@ -63,7 +64,7 @@ exports.config = {
             skip_ssl_validation: 'true'
           },
           admin: {
-            username: 'hseadmin',
+            username: 'hceadmin',
             password: 'hscadmin'
           }
         }

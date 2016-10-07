@@ -20,7 +20,7 @@ xdescribe('Endpoints Dashboard', function () {
 
     it('should show welcome endpoints page', function () {
       endpointsDashboardPage.showEndpoints();
-      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications/endpoints-dashboard');
+      expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/endpoints-dashboard');
       expect(endpointsDashboardPage.welcomeMessage().isDisplayed()).toBeTruthy();
       expect(endpointsDashboardPage.registerCloudFoundryTile().isDisplayed()).toBeTruthy();
       expect(endpointsDashboardPage.registerCodeEngineTile().isDisplayed()).toBeTruthy();
@@ -65,7 +65,7 @@ xdescribe('Endpoints Dashboard', function () {
 
     it('should show welcome endpoints page', function () {
       endpointsDashboardPage.showEndpoints();
-      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications/endpoints-dashboard');
+      expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/endpoints-dashboard');
       expect(endpointsDashboardPage.welcomeMessage().isDisplayed()).toBeFalsy();
       expect(endpointsDashboardPage.registerCloudFoundryTile().isDisplayed()).toBeFalsy();
       expect(endpointsDashboardPage.registerCodeEngineTile().isDisplayed()).toBeFalsy();

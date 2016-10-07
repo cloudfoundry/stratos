@@ -2,6 +2,9 @@
 
 var request = require('../../tools/node_modules/request');
 var helpers = require('./helpers.po');
+var fs = require('fs');
+var path = require('path');
+
 var host = helpers.getHost();
 
 module.exports = {
@@ -64,7 +67,7 @@ function zeroClusterAdminWorkflow() {
       }, function (error) {
         console.log('Failed to remove all cnsi: ', error);
         reject(error);
-      }).catch(reject);;
+      }).catch(reject);
     }, function(error) {
       reject(error);
     });
@@ -84,7 +87,7 @@ function resetAllCNSI(user, password) {
       }, function (error) {
         console.log('Failed to reset all cnsi: ', error);
         reject(error);
-      }).catch(reject);;
+      }).catch(reject);
     }, function (error) {
       reject(error);
     });
@@ -126,7 +129,10 @@ function newRequest() {
   return request.defaults({
     headers: {
       'Content-Type': 'application/json',
-      Accept: 'application/json'
+      Accept: 'application/json',
+    },
+    agentOptions: {
+      ca: fs.readFileSync(path.join(__dirname, '..', '..', 'tools', 'ssl', 'stackatoCA.pem'))
     },
     jar: cookieJar
   });
@@ -146,7 +152,7 @@ function sendRequest(req, method, url, body, formData) {
   return new Promise(function (resolve, reject) {
     var options = {
       method: method,
-      url: 'http://' + host + '/' + url
+      url: host + '/' + url
     };
     if (body && body.length) {
       options.body = JSON.stringify(body);
@@ -194,7 +200,7 @@ function createSession(req, username, password) {
         password: password || 'dev'
       }
     };
-    req.post('http://' + host + '/pp/v1/auth/login/uaa', options)
+    req.post(host + '/pp/v1/auth/login/uaa', options)
       .on('error', reject)
       .on('response', function (response) {
         if (response.statusCode === 200) {

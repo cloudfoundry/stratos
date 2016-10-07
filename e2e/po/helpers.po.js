@@ -4,9 +4,10 @@ var sh = require('../../tools/node_modules/shelljs');
 
 // Get host IP
 var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
+var hostProtocol = browser.params.hostProtocol || 'https://';
 var hostIp = browser.params.hostIp || sh.exec(CMD, { silent: true }).output.trim();
 var hostPort = browser.params.port || '';
-var host = hostIp + (hostPort ? ':' + hostPort : '');
+var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
 
 var cnsis = browser.params.cnsi;
 var hcfs = cnsis.hcf;
@@ -15,10 +16,6 @@ var adminUser = browser.params.credentials.admin.username || 'admin@cnap.local';
 var adminPassword = browser.params.credentials.admin.password || 'cnapadmin';
 var user = browser.params.credentials.user.username || 'user@cnap.local';
 var password = browser.params.credentials.user.password || 'cnapuser';
-
-//TODO: RC Test JSON args in params.x. Don't think this will work
-// var argv = require('minimist')(process.argv.slice(2));
-// browser.params = JSON.parse(argv.params);
 
 module.exports = {
 
@@ -89,7 +86,7 @@ function newBrowser() {
 
 function loadApp() {
   browser.manage().deleteAllCookies();
-  browser.get('http://' + host);
+  browser.get(host);
 }
 
 function setBrowserNormal() {

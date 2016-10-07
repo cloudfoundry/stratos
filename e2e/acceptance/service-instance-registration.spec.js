@@ -34,10 +34,9 @@ describe('Service Instance Registration', function () {
 
     describe('service instances table', serviceInstanceTable);
 
-    fdescribe('service instance `Connect` clicked', function () {
+    describe('service instance `Connect` clicked', function () {
 
       var hcf = helpers.getHcfs()['hcf1'];
-
 
       beforeAll(function () {
         // Confirm the first row is the required one (to match creds later)
@@ -86,8 +85,8 @@ describe('Service Instance Registration', function () {
         expect(registration.serviceInstanceStatus(0, 'helion-icon-Active_L').isDisplayed()).toBeTruthy();
       });
 
-      it('should show `1 CLUSTER REGISTERED` next to `Done` button', function () {
-        expect(registration.registrationNotification().getText()).toBe('1 ENDPOINT REGISTERED');
+      it('should show `1 ENDPOINT REGISTERED` next to `Done` button', function () {
+        expect(registration.registrationNotification().getText()).toEqual('1 ENDPOINT REGISTERED');
       });
 
       it('should enable `Done` button', function () {
@@ -149,7 +148,7 @@ describe('Service Instance Registration', function () {
       registration.completeRegistration();
 
       expect(registration.registrationOverlay().isPresent()).toBeFalsy();
-      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications/list/gallery-view');
+      expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/list/gallery-view');
     });
 
     it('should go directly to applications view on logout and login', function () {
@@ -157,7 +156,7 @@ describe('Service Instance Registration', function () {
       loginPage.login('dev', 'dev');
 
       expect(registration.registrationOverlay().isPresent()).toBeFalsy();
-      expect(browser.getCurrentUrl()).toBe('http://' + helpers.getHost() + '/#/cf/applications/list/gallery-view');
+      expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/list/gallery-view');
     });
   });
 });
