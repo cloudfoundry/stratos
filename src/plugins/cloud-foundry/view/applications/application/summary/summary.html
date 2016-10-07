@@ -198,11 +198,11 @@
   </div>
   <div class="panel panel-default">
     <div class="panel-body"
-      ng-if="!appCtrl.model.application.summary.services.length" translate>
+      ng-if="!applicationSummaryCtrl.serviceInstances.length" translate>
       You have no service instances.
     </div>
     <table class="table table-actionable"
-      ng-if="appCtrl.model.application.summary.services.length">
+      ng-if="applicationSummaryCtrl.serviceInstances.length">
       <thead>
         <tr>
           <th translate>Name</th>
@@ -214,7 +214,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="service in appCtrl.model.application.summary.services">
+        <tr ng-repeat="service in applicationSummaryCtrl.serviceInstances">
           <td>{{ service.name }}</td>
           <td>{{ service.service_plan.service.label }}</td>
           <td>{{ service.service_plan.name }}</td>
