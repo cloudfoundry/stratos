@@ -28,23 +28,29 @@
     '$state',
     '$stateParams',
     '$q',
+    '$scope',
     'app.model.modelManager',
     'app.utils.utilsService',
     'cloud-foundry.model.application.stateService'
   ];
 
-  function SpaceApplicationsController($state, $stateParams, $q, modelManager, utils, appStateService) {
+  function SpaceApplicationsController($state, $stateParams, $q, $scope, modelManager, utils, appStateService) {
     var that = this;
 
     var clusterGuid = $stateParams.guid;
     var spaceGuid = $stateParams.space;
 
     function init() {
-      _.forEach(that.spaceDetail().apps, function (application) {
-        application.state = appStateService.get(application.entity);
-        var theMoment = moment(application.metadata.created_at);
-        application.invertedCreatedTimestamp = -theMoment.unix();
-        application.createdTimestampString = theMoment.format('L - LTS');
+      // Collection can change if the space is renamed
+      $scope.$watchCollection(function () {
+        return that.spaceDetail().apps;
+      }, function (apps) {
+        _.forEach(apps, function (application) {
+          application.state = appStateService.get(application.entity);
+          var theMoment = moment(application.metadata.created_at);
+          application.invertedCreatedTimestamp = -theMoment.unix();
+          application.createdTimestampString = theMoment.format('L - LTS');
+        });
       });
 
       return $q.resolve();

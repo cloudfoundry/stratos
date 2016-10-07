@@ -100,6 +100,11 @@
                   .then(function () {
                     notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
                       {name: spaceData.name});
+
+                    // If we've refreshed the space object we've lost these two custom values. Refresh them
+                    // asynchronously
+                    that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid);
+                    that.spaceModel.updateServiceCount(that.clusterGuid, that.spaceGuid);
                   });
               } else {
                 return $q.reject('Invalid Name!');
@@ -189,9 +194,9 @@
 
         // Update delete action when space info changes (requires authService which depends on chainStateResolve)
         $scope.$watch(function () {
-          return spaceDetail.details.totalRoutes === 0 &&
-            spaceDetail.details.totalServiceInstances === 0 &&
-            spaceDetail.details.totalApps === 0;
+          return !spaceDetail.details.totalRoutes &&
+            !spaceDetail.details.totalServiceInstances &&
+            !spaceDetail.details.totalApps;
         }, function () {
           enableActions();
         });
