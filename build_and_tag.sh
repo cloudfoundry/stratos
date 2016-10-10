@@ -3,10 +3,11 @@ set -eu
 
 # set defaults
 PROD_RELEASE=false
-DOCKER_REGISTRY=docker.io/stackatodev
+DOCKER_REGISTRY=docker.io
+DOCKER_ORG=stackatodev
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":hpr:t:" opt; do
+while getopts ":hopr:t:" opt; do
   case $opt in
     h)
       echo " "
@@ -39,6 +40,9 @@ while getopts ":hpr:t:" opt; do
     r)
       DOCKER_REGISTRY="$OPTARG"
       ;;
+    o)
+      DOCKER_ORG="$OPTARG"
+      ;;
     t)
       TAG="$OPTARG"
       ;;
@@ -56,6 +60,7 @@ done
 echo " "
 echo "PRODUCTION BUILD/RELEASE: ${PROD_RELEASE}"
 echo "REGISTRY: ${DOCKER_REGISTRY}"
+echo "ORG: ${DOCKER_ORG}"
 echo "TAG: ${TAG}"
 
 echo " "
@@ -77,8 +82,7 @@ function buildAndPublishImage {
     exit 1
   fi
 
-  # IMAGE_URL=${DOCKER_REGISTRY}/${NAME}:${TAG}
-  IMAGE_URL=${DOCKER_REGISTRY}/${NAME}:${TAG}
+  IMAGE_URL=${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:${TAG}
   echo Building Docker Image for $NAME
 
   pushd ${FOLDER}
@@ -194,7 +198,7 @@ function buildProxy {
              --rm \
              --name hsc-console-proxy-builder \
              --volume $(pwd):/go/src/github.com/hpcloud/portal-proxy \
-             ${DOCKER_REGISTRY}/hsc-console-proxy-builder
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/hsc-console-proxy-builder
   popd
   popd
 
@@ -205,18 +209,11 @@ function buildProxy {
   buildAndPublishImage hsc-proxy Dockerfile.HCP ${PORTAL_PROXY_PATH}
 }
 
-function buildETCD2 {
-  # Build and publish the container image for etcd
+function buildPostgres {
+  # Build and publish the container image for postgres
   echo " "
-  echo "-- Build & publish the runtime container image for etcd"
-  buildAndPublishImage hsc-etcd2 ./containers/etcd2/Dockerfile.HCP ${PORTAL_PROXY_PATH}
-}
-
-function buildStolon {
-  # Build and publish the container image for stolon
-  echo " "
-  echo "-- Build & publish the runtime container image for stolon"
-  buildAndPublishImage hsc-stolon ./containers/stolon/Dockerfile.HCP ${PORTAL_PROXY_PATH}
+  echo "-- Build & publish the runtime container image for postgres"
+  buildAndPublishImage hsc-postgres ./containers/postgres/Dockerfile.HCP ${PORTAL_PROXY_PATH}
 }
 
 function buildPreflightJob {
@@ -272,7 +269,7 @@ function generateSDL {
   mkdir -p ${__DIRNAME}/output
   for FILE in ${__DIRNAME}/hcp_templates/*.json ; do
     ofile=${__DIRNAME}/output/$(basename $FILE)
-    cat $FILE | sed "s@{{TAG}}@${TAG}@" | sed "s@{{REGISTRY}}@${DOCKER_REGISTRY}@" > $ofile
+    cat $FILE | sed "s@{{TAG}}@${TAG}@" | sed "s@{{REGISTRY}}@${DOCKER_REGISTRY}@" | sed "s@{{ORG}}@${DOCKER_ORG}@" > $ofile
   done
   echo "-- Done."
 }
@@ -297,8 +294,7 @@ fi
 
 # Build all of the components that make up the Console
 buildProxy
-buildETCD2
-buildStolon
+buildPostgres
 buildPreflightJob
 buildPostflightJob
 buildUI
@@ -329,5 +325,9 @@ fi
 
 # Done
 echo " "
-echo "Build complete. Tag is $TAG and HCP definitions are in ${__DIRNAME}/output/"
-echo "The definitions are using registry: $DOCKER_REGISTRY and tag: $TAG"
+echo "Build complete...."
+echo "Registry: $DOCKER_REGISTRY"
+echo "Org: ${DOCKER_ORG}"
+echo "Tag: $TAG"
+echo "SDL and config are located in ${__DIRNAME}/output/"
+echo ""

@@ -5,6 +5,50 @@
   "vendor": "HPE",
   "components": [
     {
+      "name": "hsc-postgres",
+      "version": "{{TAG}}",
+      "vendor": "HPE",
+      "min_RAM_mb": 1024,
+      "min_disk_gb": 1,
+      "min_VCPU": 1,
+      "platform": "linux-x86_64",
+      "capabilities": [],
+      "repository": "{{REGISTRY}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-postgres",
+      "tag": "{{TAG}}",
+      "workload_type": "container",
+      "entrypoint": [],
+      "parameters": [
+        {
+          "name": "POSTGRES_USER"
+        },
+        {
+          "name": "POSTGRES_PASSWORD_FILE"
+        },
+        {
+          "name": "PGDATA"
+        }
+      ],
+      "min_instances": 1,
+      "max_instances": 1,
+      "service_ports": [
+        {
+          "name": "postgres",
+          "protocol": "TCP",
+          "source_port": 5432,
+          "target_port": 5432,
+          "public": false
+        }
+      ],
+      "volume_mounts": [
+        {
+          "volume_name": "stolon-data-volume",
+          "mountpoint": "/stolon-data"
+        }
+      ]
+    },
+    {
       "name": "hsc-proxy",
       "version": "{{TAG}}",
       "vendor": "HPE",
@@ -14,7 +58,9 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc-proxy:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-proxy",
+      "tag": "{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -117,7 +163,9 @@
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc-console:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-console",
+      "tag": "{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
@@ -173,14 +221,16 @@
       "name": "hsc-preflight-job",
       "version": "{{TAG}}",
       "vendor": "HPE",
-      "min_RAM_mb": 512,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
+      "min_RAM_mb": 256,
+      "min_disk_gb": 0.5,
+      "min_VCPU": 0.5,
       "platform": "linux-x86_64",
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc-preflight-job:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-preflight-job",
+      "tag": "{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
@@ -219,26 +269,28 @@
       "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 512,
-      "min_disk_gb": 1,
+      "min_disk_gb": 0.5,
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc-postflight-job:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-postflight-job",
+      "tag": "{{TAG}}",
       "entrypoint": [],
       "parameters": [
         {
           "name": "PGSQL_HOST"
         },
         {
-          "name": "STPROXY_PORT"
+          "name": "PGSQL_PORT"
         },
         {
-          "name": "STKEEPER_PG_SU_USERNAME"
+          "name": "POSTGRES_USER"
         },
         {
-          "name": "STKEEPER_PG_SU_PASSWORDFILE"
+          "name": "POSTGRES_PASSWORD_FILE"
         },
         {
           "name": "PGSQL_DATABASE"
@@ -360,7 +412,7 @@
     {
       "name": "PGSQL_HOST",
       "description": "Postgres hostname",
-      "default": "hsc-stproxy-int",
+      "default": "hsc-postgres-int",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -388,6 +440,35 @@
       "data_type": "string",
       "required": true,
       "secret": false
+    },
+    {
+      "name": "PGDATA",
+      "description": "Postgres data directory location. This must be the same as the pgsql volume mount point.",
+      "default": "/stolon-data/postgres"
+    },
+    {
+      "name": "POSTGRES_USER",
+      "description": "PostgreSQL superuser username",
+      "default": "postgres"
+    },
+    {
+      "name": "POSTGRES_PASSWORD_FILE",
+      "description": "PostgreSQL superuser's password file",
+      "default": "/etc/secrets/stolon"
+    },
+    {
+      "name": "stolon",
+      "description": "PostgreSQL password for superuser",
+      "data_type": "string",
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "stolon_password",
+          "generate": {
+            "type": "Password"
+          }
+        }
     },
     {
       "name": "console-cert",
@@ -524,13 +605,6 @@
         }
     },
     {
-      "name": "VCS_CLIENTS",
-      "description": "VCS Clients for OAuth: VCS Provider (string),VCS URL (string),Client ID (string),Client Secret (string),Skip SSL (true|false)",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
-    {
       "name": "UPGRADE_VOLUME",
       "description": "The local shared volume mount for the upgrade lock file.",
       "data_type": "string",
@@ -563,18 +637,11 @@
       "secret": false
     },
     {
-      "name": "stolon",
-      "description": "PostgreSQL password for superuser",
+      "name": "VCS_CLIENTS",
+      "description": "VCS Clients for OAuth: VCS Provider (string),VCS URL (string),Client ID (string),Client Secret (string),Skip SSL (true|false)",
       "data_type": "string",
       "required": true,
-      "secret": true,
-      "generator":
-        {
-          "id": "stolon_password",
-          "generate": {
-            "type": "Password"
-          }
-        }
+      "secret": false
     }
   ]
 }
