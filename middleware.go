@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/context"
 	"github.com/labstack/echo"
@@ -17,6 +18,16 @@ func handleSessionError(err error) error {
 			"User session could not be found: %v", err,
 		)
 	}
+
+
+	if strings.Contains(err.Error(), "sql: no rows in result set") {
+		return newHTTPShadowError(
+			http.StatusUnauthorized,
+			"User session could not be found",
+			"User session could not be found: %v", err,
+		)
+	}
+
 	return newHTTPShadowError(
 		http.StatusServiceUnavailable,
 		"Service is currently unavailable",
