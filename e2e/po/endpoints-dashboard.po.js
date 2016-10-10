@@ -1,21 +1,32 @@
 'use strict';
 
 var navbar = require('./navbar.po');
+var helpers = require('../po/helpers.po');
 
 module.exports = {
   showEndpoints: showEndpoints,
+  goToEndpoints: goToEndpoints,
+  isEndpoints: isEndpoints,
   clickAddClusterInWelcomeMessage: clickAddClusterInWelcomeMessage,
-  clickAddClusterInTille: clickAddClusterInTille,
+  clickAddClusterInTile: clickAddClusterInTile,
   welcomeMessage: welcomeMessage,
   registerCloudFoundryTile: registerCloudFoundryTile,
   registerCodeEngineTile: registerCodeEngineTile,
-  getAddEndpointFlyout: getAddEndpointFlyout,
-  getAddClusterForm: getAddClusterForm,
-  getBaseTile: getBaseTile
+  getAddEndpoint: getAddEndpoint
 };
 
 function showEndpoints() {
   navbar.goToView('Endpoints');
+}
+
+function goToEndpoints() {
+  return browser.get(helpers.getHost() + '/#/endpoint');
+}
+
+function isEndpoints() {
+  return browser.getCurrentUrl().then(function (url) {
+    return expect(url).toBe(helpers.getHost() + '/#/endpoint');
+  });
 }
 
 function welcomeMessage() {
@@ -23,37 +34,33 @@ function welcomeMessage() {
 }
 
 function clickAddClusterInWelcomeMessage(serviceType) {
-  if (serviceType === 'hcf') {
-    return driver.findElement(by.linkText('register Helion Cloud Foundry clusters')).click();
-  } else {
-    return driver.findElement(by.linkText('Helion Code Engine endpoints')).click();
-  }
+  return element.all(by.css('#welcome-message span.tile-btn')).then(function(links) {
+    if (serviceType === 'hcf') {
+      return links[0].click();
+    } else {
+      return links[1].click();
+    }
+  });
 }
 
-function clickAddClusterInTille(serviceType) {
-    return driver.findElement(by.linkText('Register an Endpoint')).click();
+function clickAddClusterInTile(serviceType) {
+  return getNoInstanceTile(serviceType).element(by.linkText('Register An Endpoint')).click().then(function() {
+    return browser.driver.sleep('1000');
+  });
 }
 
 function registerCloudFoundryTile() {
-  return getNoInstanceTile('hcf)');
+  return getNoInstanceTile('hcf');
 }
 
 function registerCodeEngineTile() {
-  return getNoInstanceTile('hce)');
+  return getNoInstanceTile('hce');
 }
 
 function getNoInstanceTile(serviceType) {
-  return element(by.id(serviceType + '-no-instances-tile'));
+  return element(by.css('service-tile[service-type*="' + serviceType + '"]'));
 }
 
-function getAddEndpointFlyout() {
-  return element(by.tagName('add-cluster-form'));
-}
-
-function getAddClusterForm() {
-  return element(by.css('hce-registration'));
-}
-
-function getBaseTile(serviceType) {
-  return element(by.tagName('base-tile'));
+function getAddEndpoint() {
+  return element(by.css('form[name="form.regForm"]'));
 }

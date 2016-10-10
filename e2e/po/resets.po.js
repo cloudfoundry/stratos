@@ -10,10 +10,9 @@ var host = helpers.getHost();
 module.exports = {
 
   devWorkflow: devWorkflow,
-  zeroClusterAdminWorkflow: zeroClusterAdminWorkflow,
-  nClustersAdminWorkflow: nClustersAdminWorkflow,
 
-  resetAllCNSI: resetAllCNSI
+  resetAllCnsi: resetAllCnsi,
+  removeAllCnsi: removeAllCnsi
 
 };
 
@@ -55,26 +54,31 @@ function devWorkflow(firstTime) {
  * @function zeroClusterAdminWorkflow
  * @description Ensure the database is initialized for ITOps
  * admin workflow with no clusters registered.
- * @returns {Promise} A promise
+ * @param {string?} username the username used ot create a session token
+ * @param {string?} password the username used ot create a session token
+ * @returns {promise} A promise
  */
-function zeroClusterAdminWorkflow() {
+function removeAllCnsi(username, password) {
   var req = newRequest();
 
+  username = username || helpers.getAdminUser();
+  password = password || helpers.getAdminPassword();
+
   return new Promise(function (resolve, reject) {
-    createSession(req, adminUser, adminPassword).then(function () {
-      removeAllCNSI(req).then(function () {
+    createSession(req, username, password).then(function () {
+      _removeAllCnsi(req).then(function () {
         resolve();
       }, function (error) {
         console.log('Failed to remove all cnsi: ', error);
         reject(error);
       }).catch(reject);
-    }, function(error) {
+    }, function (error) {
       reject(error);
     });
   });
 }
 
-function resetAllCNSI(user, password) {
+function resetAllCnsi(user, password) {
   var req = newRequest();
 
   user = user || helpers.getAdminUser();
@@ -94,30 +98,6 @@ function resetAllCNSI(user, password) {
   });
 }
 
-/**
- * @function nClustersAdminWorkflow
- * @description Ensure the database is initialized for ITOps
- * admin workflow with clusters registered.
- * @returns {Promise} A promise
- */
-function nClustersAdminWorkflow() {
-  var req = newRequest();
-
-  return new Promise(function (resolve, reject) {
-    createSession(req, adminUser, adminPassword).then(function () {
-      var promises = [];
-      promises.push(resetCNSI(req));
-
-      Promise.all(promises).then(function () {
-        resolve();
-      }, function (error) {
-        reject(error);
-      });
-    }, function (error) {
-      reject(error);
-    });
-  });
-}
 
 /**
  * @function newRequest
@@ -222,8 +202,7 @@ function createSession(req, username, password) {
 function _resetAllCNSI(optionalReq) {
   var req = optionalReq || newRequest();
   return new Promise(function (resolve, reject) {
-    removeAllCNSI(req).then(function () {
-      console.log('starting add');
+    _removeAllCnsi(req).then(function () {
       var hcfs = helpers.getHcfs();
 
       var promises = [];
@@ -257,7 +236,7 @@ function _resetAllCNSI(optionalReq) {
  * @param {object?} optionalReq - the request
  * @returns {Promise} A promise
  */
-function removeAllCNSI(optionalReq) {
+function _removeAllCnsi(optionalReq) {
   var req = optionalReq || newRequest();
   return new Promise(function (resolve, reject) {
     sendRequest(req, 'GET', 'pp/v1/cnsis').then(function (data) {

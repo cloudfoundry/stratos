@@ -1,11 +1,17 @@
 'use strict';
 
+// Maintain Order
+var acceptanceTests = [
+  '../e2e/acceptance/login-page.spec.js',
+  '../e2e/acceptance/service-instance-registration.spec.js',
+  '../e2e/acceptance/endpoints-dashboard.spec.js'
+];
+
 exports.config = {
 
   suites: {
-    all: '../e2e/**/*.spec.js',
-    // Tests in the Acceptance suite are executed in order and depend on the state of the test system from previous tests
-    acceptance: '../e2e/acceptance/**/*.spec.js'
+    all: acceptanceTests.concat('../e2e/**/*.spec.js'),
+    acceptance: acceptanceTests
   },
 
   // Default suite to run
@@ -81,7 +87,12 @@ exports.config = {
 
     // Optional. Really nice to see the progress of the tests while executing
     var SpecReporter = require('jasmine-spec-reporter');
-    //{displayStacktrace: 'all'}
-    jasmine.getEnv().addReporter(new SpecReporter());
+    //
+    jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'specs'}));
+  },
+
+  jasmineNodeOpts: {
+    // disable default jasmine report (using jasmine-spec-reporter
+    print: function () { }
   }
 };
