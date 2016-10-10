@@ -3,11 +3,11 @@ set -e
 
 execStatement() {
     stmt=$1
-    PGPASSFILE=/tmp/pgpass psql -U $STKEEPER_PG_SU_USERNAME -h $PGSQL_HOST -p $STPROXY_PORT -d postgres -w -tc "$stmt"
+    PGPASSFILE=/tmp/pgpass psql -U $POSTGRES_USER -h $PGSQL_HOST -p $PGSQL_PORT -d postgres -w -tc "$stmt"
 }
 
 # Step 1 - Create the database if necessary
-echo "$PGSQL_HOST:$STPROXY_PORT:postgres:$STKEEPER_PG_SU_USERNAME:$(cat $STKEEPER_PG_SU_PASSWORDFILE)" > /tmp/pgpass
+echo "$PGSQL_HOST:$PGSQL_PORT:postgres:$POSTGRES_USER:$(cat $POSTGRES_PASSWORD_FILE)" > /tmp/pgpass
 chmod 0600 /tmp/pgpass
 
 # Get Stackato user password from secrets file

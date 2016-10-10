@@ -1,0 +1,5 @@
+FROM postgres:9.4
+
+COPY /containers/postgres/wrap-docker-entrypoint.sh /wrap-docker-entrypoint.sh
+ENTRYPOINT ["/wrap-docker-entrypoint.sh"]
+CMD ["postgres"]

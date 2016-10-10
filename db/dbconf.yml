@@ -1,6 +1,6 @@
 hcp:
     driver: postgres
-    open: host='$PGSQL_HOST' port=$STPROXY_PORT user='$PGSQL_USER' password='$PGSQL_PASSWORD' dbname='$PGSQL_DATABASE' sslmode='$PGSQL_SSL_MODE'
+    open: host='$PGSQL_HOST' port=$PGSQL_PORT user='$PGSQL_USER' password='$PGSQL_PASSWORD' dbname='$PGSQL_DATABASE' sslmode='$PGSQL_SSL_MODE'
 development:
     driver: postgres
     open: host='postgres' port=5432 user='stackato' password='stackato' dbname='stackato-db' sslmode='disable'
