@@ -33,14 +33,14 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
 * Once the jumpbox instance is running, SSH into it.
   Note: Select the instance from the list in the AWS Console and click "Connect". This will show you the correct command to use.
 
-* On the instance, install necessary tools:
+* On the instance, install necessary tools and download the bootstrap you want to install (0.9.11 at time of writing, [latest LKG links found here](https://github.com/hpcloud/cnap/wiki/HCP-Release-Notes)):
   ```
   sudo apt-get update && sudo apt-get install jq curl wget genisoimage -y
-  wget https://s3-us-west-2.amazonaws.com/hcp-concourse/hcp-bootstrap_1.2.18%2Bmaster.c8e429d.20160717011336_amd64.deb
+  wget https://dev.stackato.com/downloads/hcp/bootstrap/hcp-bootstrap_0.9.11-0-gecf5fae_amd64.deb
   sudo dpkg -i <debian bootstrap file name>
   ```
 
-* Create a `bootstrap.properties` file ([template](aws/bootstrap-1.2.18.properties)) and fill in the required properties. Note that if you're going to run HCF on HCP, you will need to upgrade the node instance type to something larger (ex. m4.xlarge).
+* Create a `bootstrap.properties` file ([template(https://github.com/hpcloud/hdp-resource-manager/blob/develop/cmd/bootstrap/sample_bootstrap.properties)]) and fill in the required properties. Note that if you're going to run HCF on HCP, you will need to upgrade the node instance type to something larger (ex. m4.xlarge).
 
 * Copy your keypair private key file to `/home/ubuntu/.ssh/id_rsa`. Ensure it only has read-only rights.
   ```
@@ -56,7 +56,7 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
 
 * Locate your `hcp-k8s-node` instance and note its private IP and instance ID. The best way is to filter instances by your VPC ID.
 
-* SSH into the "node" instance and perform an explicit Docker login:
+* SSH into the "node" instance and perform an explicit Docker login [is this still needed?]:
   ```
   ssh <NODE PRIVATE IP>
   sudo su
