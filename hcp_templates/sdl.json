@@ -320,7 +320,7 @@
   "volumes": [
     {
       "name": "stolon-data-volume",
-      "size_gb": 5,
+      "size_gb": 10,
       "filesystem": "ext4",
       "shared": false
     },
