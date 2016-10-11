@@ -3,7 +3,7 @@
 var helpers = require('../po/helpers.po');
 var loginPage = require('../po/login-page.po');
 
-describe('Login Page', function () {
+fdescribe('Login Page', function () {
   beforeAll(function () {
     helpers.setBrowserNormal();
     helpers.loadApp();

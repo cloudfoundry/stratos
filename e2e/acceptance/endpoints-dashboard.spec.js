@@ -6,7 +6,7 @@ var loginPage = require('../po/login-page.po');
 var endpointsDashboardPage = require('../po/endpoints-dashboard.po.js');
 var registerEndpoint = require('../po/register-endpoint.po.js');
 
-fdescribe('Endpoints Dashboard', function () {
+describe('Endpoints Dashboard', function () {
 
   function resetToDashboard() {
     return browser.driver.wait(resetTo.removeAllCnsi())
@@ -182,7 +182,6 @@ fdescribe('Endpoints Dashboard', function () {
           registerEndpoint.populateAndRegister(hcf.register.api_endpoint, hcf.register.cnsi_name,
             hcf.register.skip_ssl_validation);
 
-          // TODO: RC Add test for newly added hcf (tile contents changed, numbers correct, register slideout goes)
           registerEndpoint.close();
           fail('TODO: RC Add test for newly added hcf (tile contents changed and numbers correct');
         });
@@ -216,7 +215,6 @@ fdescribe('Endpoints Dashboard', function () {
       expect(endpointsDashboardPage.welcomeMessage().isDisplayed()).toBeFalsy();
       expect(endpointsDashboardPage.registerCloudFoundryTile().isDisplayed()).toBeFalsy();
       expect(endpointsDashboardPage.registerCodeEngineTile().isDisplayed()).toBeFalsy();
-      //TODO: RC test once hcf is back up
       fail('TODO: RC test once hcf is back up');
     });
 
