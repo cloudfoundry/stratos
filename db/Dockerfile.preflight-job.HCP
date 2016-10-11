@@ -3,6 +3,6 @@ RUN apt-get update && \
   apt-get -y upgrade && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y openssl
 RUN mkdir -p /usr/share/doc/stackato
-COPY /db/LICENSELICENSE.txt /usr/share/doc/stackato/LICENSE.txt
+COPY /db/LICENSE.txt /usr/share/doc/stackato/LICENSE.txt
 COPY /db/scripts/run-preflight-job.sh /run-preflight-job.sh
 CMD ["/run-preflight-job.sh"]
