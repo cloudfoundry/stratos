@@ -1,7 +1,7 @@
 FROM nginx
-
+RUN mkdir -p /usr/share/doc/stackato
+COPY ./LICENSE.txt /usr/share/doc/stackato/LICENSE.txt
 COPY ./conf/nginx.HCP.conf /etc/nginx/nginx.conf
 COPY ./dist/ /usr/share/nginx/html
-
 EXPOSE 80 443
 CMD [ "nginx", "-g", "daemon off;" ]

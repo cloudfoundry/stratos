@@ -1,0 +1,26 @@
+This software is governed by the terms and conditions of the Hewlett Packard Enterprise End User License Agreement found at: http://www.hpe.com/software/SWLicensing
+
+By downloading, copying, or using this software you agree to the terms and conditions of the Hewlett Packard Enterprise End User License Agreement.
+
+To the extent any component of this software is subject to any third party license terms, including open source license terms, then those third party license terms or open source license terms shall govern with respect to the subject component; otherwise, the terms of the Hewlett Packard Enterprise End User License Agreement and any applicable Additional License Authorizations shall govern.
+
+The license terms related to third party and open source software components are available at:
+http://docs.hpcloud.com/pdf/static/HPE_Stackato_4.0_OpenSource_and_3rd_Party_Licenses.pdf
+
+WARRANTY
+
+The only warranties for Hewlett Packard Enterprise ("HPE") products and services are set forth in the express warranty statements accompanying such HPE products and services. Nothing herein should be construed as constituting an additional warranty.
+
+HPE MAKES NO EXPRESS OR IMPLIED WARRANTY OF ANY KIND REGARDING THE THIRD-PARTY OR OPEN-SOURCE SOFTWARE CONTAINED IN THIS SOFTWARE INCLUDING ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR NON- INFRINGEMENT. HPE SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES, WHETHER BASED ON CONTRACT, TORT OR ANY OTHER LEGAL THEORY, IN CONNECTION WITH OR ARISING OUT OF THE FURNISHING, PERFORMANCE OR USE OF THE THIRD-PARTY OR OPEN-SOURCE SOFTWARE CONTAINED IN THIS SOFTWARE.
+
+NOTICE
+
+To the extent this software includes any software licensed under the GNU General Public License, the GNU Lesser General Public License, and/or other open source licenses (such software, the "Open Source Software") and HPE has an obligation under the applicable open source license to provide a complete machine-readable copy of the source code corresponding to the Open Source Software, such source code is available upon written request identifying the product and version to the address below, accompanied by a check made payable to Hewlett Packard Enterprise Company for $20.
+
+Send request to:
+
+Director, HPE Helion Stackato
+c/o Hewlett Packard Enterprise Company
+701 Pike Street
+Suite 900
+Seattle, WA 98101
