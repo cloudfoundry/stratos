@@ -13,9 +13,11 @@ RUN apt-get update && \
   curl -O https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz && \
   tar -xvf go1.6.linux-amd64.tar.gz && mv go /usr/local
 RUN go get 'bitbucket.org/liamstask/goose/cmd/goose'
+RUN mkdir -p /usr/share/doc/stackato
 
+COPY db/LICENSE.txt /usr/share/doc/stackato/LICENSE.txt
 COPY db/dbconf.yml db/dbconf.yml
 COPY db/migrations db/migrations
-COPY db/scripts/run-postflight-job.sh /
+COPY db/scripts/run-postflight-job.sh /run-postflight-job.sh
 
 CMD ["/run-postflight-job.sh"]

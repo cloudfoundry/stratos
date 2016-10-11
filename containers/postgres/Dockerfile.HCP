@@ -1,5 +1,6 @@
 FROM postgres:9.4
-
+RUN mkdir -p /usr/share/doc/stackato
+COPY /containers/LICENSE.txt /usr/share/doc/stackato/LICENSE.txt
 COPY /containers/postgres/wrap-docker-entrypoint.sh /wrap-docker-entrypoint.sh
 ENTRYPOINT ["/wrap-docker-entrypoint.sh"]
 CMD ["postgres"]
