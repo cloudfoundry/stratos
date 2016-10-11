@@ -23,10 +23,16 @@
     var userGuid = 'userGuid';
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
+    beforeEach(inject(function ($injector) {
+      $httpBackend = $injector.get('$httpBackend');
+    }));
+
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
 
     function initController($injector, role) {
-      $httpBackend = $injector.get('$httpBackend');
-
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       $stateParams.organization = organizationGuid;
@@ -34,7 +40,7 @@
       var modelManager = $injector.get('app.model.modelManager');
 
       var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-      _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, modelSpace);
+      _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, _.cloneDeep(modelSpace));
 
       mock.cloudFoundryModel.Auth.initAuthModel(role, userGuid, $injector);
 
@@ -75,6 +81,10 @@
         initController($injector, 'admin');
       }));
 
+      afterEach(function () {
+        $httpBackend.flush();
+      });
+
       it('init', function () {
         expect(element).toBeDefined();
         expect(controller).toBeDefined();
@@ -86,10 +96,6 @@
         expect(controller.summary).toBeDefined();
         expect(controller.spaceDetail).toBeDefined();
         expect(controller.orgDetails).toBeDefined();
-
-        $httpBackend.flush();
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
       });
 
       it('should have rename space enabled', function () {
