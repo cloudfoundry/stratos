@@ -79,11 +79,8 @@
 
       beforeEach(inject(function ($injector) {
         initController($injector, 'admin');
-      }));
-
-      afterEach(function () {
         $httpBackend.flush();
-      });
+      }));
 
       it('init', function () {
         expect(element).toBeDefined();
@@ -115,6 +112,7 @@
 
       beforeEach(inject(function ($injector) {
         initController($injector, 'space_developer');
+        $httpBackend.flush();
       }));
 
       it('should have rename space disabled', function () {
