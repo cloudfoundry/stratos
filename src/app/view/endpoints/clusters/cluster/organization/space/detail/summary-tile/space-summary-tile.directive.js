@@ -100,11 +100,6 @@
                   .then(function () {
                     notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
                       {name: spaceData.name});
-
-                    // If we've refreshed the space object we've lost these two custom values. Refresh them
-                    // asynchronously
-                    that.spaceModel.updateRoutesCount(that.clusterGuid, that.spaceGuid);
-                    that.spaceModel.updateServiceCount(that.clusterGuid, that.spaceGuid);
                   });
               } else {
                 return $q.reject('Invalid Name!');

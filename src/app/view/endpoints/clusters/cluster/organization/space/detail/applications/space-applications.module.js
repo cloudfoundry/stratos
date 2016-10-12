@@ -42,7 +42,7 @@
 
     function init() {
       // Collection can change if the space is renamed
-      $scope.$watchCollection(function () {
+      $scope.$watch(function () {
         return that.spaceDetail().apps;
       }, function (apps) {
         _.forEach(apps, function (application) {
