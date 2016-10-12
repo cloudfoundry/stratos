@@ -11,16 +11,7 @@ import (
 )
 
 func handleSessionError(err error) error {
-	if _, ok := err.(*SessionValueNotFound); ok {
-		return newHTTPShadowError(
-			http.StatusUnauthorized,
-			"User session could not be found",
-			"User session could not be found: %v", err,
-		)
-	}
-
-	// Catch database errors
-	if strings.Contains(err.Error(), "dial tcp:") {
+	if strings.Contains(err.Error(), "dial tcp") {
 		return newHTTPShadowError(
 			http.StatusServiceUnavailable,
 			"Service is currently unavailable",
@@ -33,7 +24,6 @@ func handleSessionError(err error) error {
 		"User session could not be found",
 		"User session could not be found: %v", err,
 	)
-
 }
 
 func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
