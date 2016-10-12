@@ -49,6 +49,8 @@
     "gulp-util": "^3.0.7",
     "http-proxy": "^1.15.1",
     "jasmine-core": "^2.4.1",
+    "jasmine-reporters": "^2.2.0",
+    "jasmine-spec-reporter": "^2.7.0",
     "jsdoc": "^3.4.0",
     "karma": "^0.13.19",
     "karma-cli": "^0.1.2",
