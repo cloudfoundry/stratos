@@ -2,8 +2,8 @@
 
 // Login page helpers
 var helpers = require('./helpers.po');
-var adminUser = browser.params.adminUser || 'admin@cnap.local';
-var adminPassword = browser.params.adminPassword || 'cnapadmin';
+var adminUser = browser.params.adminUser || 'hsctestadmin';
+var adminPassword = browser.params.adminPassword || 'hsctestadmin';
 
 module.exports = {
 
