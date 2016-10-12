@@ -18,9 +18,20 @@ exports.config = {
   },
 
   params: {
-    hostIp: '',
+    hostIp: 'localhost',
     port: '',
     adminUser: '',
     adminPassword: ''
+  },
+
+  onPrepare: function () {
+    // Optional. Really nice to see the progress of the tests while executing
+    var SpecReporter = require('jasmine-spec-reporter');
+    jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'specs'}));
+  },
+
+  jasmineNodeOpts: {
+    // disable default jasmine report (using jasmine-spec-reporter)
+    print: function () { }
   }
 };
