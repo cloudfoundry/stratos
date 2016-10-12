@@ -7,6 +7,7 @@ module.exports = {
   isVisible: isVisible,
   getEndpointType: getEndpointType,
   close: close,
+  safeClose: safeClose,
   populateAndRegister: populateAndRegister,
   getClose: getClose,
   closeEnabled: closeEnabled,
@@ -47,6 +48,20 @@ function close() {
     });
   });
 }
+
+function safeClose() {
+  var close = getClose();
+  return close.then(function (button) {
+    if (!button) {
+      return protractor.promise.fulfilled();
+    }
+    return button.click().then(function () {
+      // Allow time for animation to finish.. otherwise future clicks will be swallowed by glass background
+      return browser.driver.sleep(1000);
+    });
+  });
+}
+
 
 function getClose() {
   return element.all(by.css('.modal-footer > button')).then(function (buttons) {
@@ -93,7 +108,7 @@ function populateAndRegister(address, name, skipValidation) {
     })
     .then(register)
     .then(function () {
-      return browser.driver.sleep(2000);
+      return browser.driver.sleep(1000);
     });
 }
 
@@ -102,7 +117,9 @@ function _getInputAddress() {
 }
 
 function enterAddress(address) {
-  return _getInputAddress().sendKeys(address);
+  return _getInputAddress().sendKeys(address).then(function () {
+    return browser.driver.sleep(500);
+  });
 }
 
 function isAddressValid(required) {
@@ -117,7 +134,9 @@ function isAddressValid(required) {
 }
 
 function clearAddress() {
-  return _getInputAddress().clear();
+  return _getInputAddress().clear().then(function () {
+    return browser.driver.sleep(500);
+  });
 }
 
 function _getInputName() {
@@ -135,7 +154,9 @@ function isNameValid() {
 }
 
 function clearName() {
-  return _getInputName().clear();
+  return _getInputName().clear().then(function () {
+    return browser.driver.sleep(500);
+  });
 }
 
 function setSkipSllValidation(checked) {

@@ -213,9 +213,9 @@ function _resetAllCNSI(optionalReq) {
         }
         promises.push(sendRequest(req, 'POST', 'pp/v1/register/hcf', null, hcfs[c].register));
       }
-      var hces = helpers.getHcfs();
+      var hces = helpers.getHces();
       for (c in hces) {
-        if (!hcfs.hasOwnProperty(c)) {
+        if (!hces.hasOwnProperty(c)) {
           continue;
         }
         promises.push(sendRequest(req, 'POST', 'pp/v1/register/hce', null, hces[c].register));

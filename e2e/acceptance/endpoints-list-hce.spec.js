@@ -6,7 +6,7 @@
 // var endpointsDashboardPage = require('../po/endpoints-dashboard.po.js');
 // var registerEndpoint = require('../po/register-endpoint.po.js');
 
-describe('Endpoints - List HCEs', function () {
+xdescribe('Endpoints - List HCEs', function () {
 
 
 

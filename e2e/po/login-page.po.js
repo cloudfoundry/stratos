@@ -64,7 +64,7 @@ function enterLogin(username, password) {
 function login(username, password) {
   enterLogin(username, password);
   loginButton().click();
-  browser.driver.sleep(10000);
+  browser.driver.sleep(2000);
 }
 
 function loginAsAdmin() {

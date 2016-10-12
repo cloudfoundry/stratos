@@ -54,8 +54,8 @@ describe('Service Instance Registration', function () {
         });
       });
 
-      it('Should reach?????', function () {
-        fail('TODO');
+      it('Should not display service registration', function () {
+        expect(registration.registrationOverlay().isPresent()).toBeFalsy();
       });
     });
 
@@ -64,9 +64,8 @@ describe('Service Instance Registration', function () {
       function ConfirmFirstService(service) {
         // Confirm the first row is the required one (to match creds later)
         var serviceInstancesTable = registration.serviceInstancesTable();
-        var finderPromise = helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText();
-        expect(finderPromise).toBeDefined();
-        finderPromise.then(function (partUrl) {
+        // There's hidden warning tr, so actual row index is *2
+        helpers.getTableCellAt(serviceInstancesTable, 2, 2).getText().then(function (partUrl) {
           var fullUrl = service.register.api_endpoint;
           expect(fullUrl.slice(partUrl.length * -1)).toEqual(partUrl);
         });
@@ -103,13 +102,15 @@ describe('Service Instance Registration', function () {
         });
       });
 
+      var hcf = helpers.getHcfs().hcf1;
+      // Each cnsi has two rows (one normally hidden). So actual row is index * 2
+      var hcfRow = 2;
+
       describe('service instance `Connect` clicked', function () {
 
-        var hcf = helpers.getHcfs().hcf1;
-
-        beforeAll(function () {
+        beforeAll(function (done) {
           ConfirmFirstService(hcf);
-          registration.connect(0);
+          registration.connect(hcfRow).then(done);
         });
 
         it('should open the credentials form', function () {
@@ -118,8 +119,8 @@ describe('Service Instance Registration', function () {
 
         it('should show the cluster name and URL as readonly in the credentials form', function () {
           var serviceInstancesTable = registration.serviceInstancesTable();
-          var name = helpers.getTableCellAt(serviceInstancesTable, 0, 1).getText();
-          var url = helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText();
+          var name = helpers.getTableCellAt(serviceInstancesTable, hcfRow, 1).getText();
+          var url = helpers.getTableCellAt(serviceInstancesTable, hcfRow, 2).getText();
 
           var fields = registration.credentialsFormFields();
           expect(fields.get(0).getAttribute('value')).toBe(name);
@@ -138,12 +139,12 @@ describe('Service Instance Registration', function () {
         });
 
         it('should update service instance data on register', function () {
-          registration.registerServiceInstance();
-
-          var serviceInstancesTable = registration.serviceInstancesTable();
-          expect(helpers.getTableCellAt(serviceInstancesTable, 0, 3).getText()).not.toBe('');
-          expect(helpers.getTableCellAt(serviceInstancesTable, 0, 4).getText()).toBe('DISCONNECT');
-          expect(registration.serviceInstanceStatus(0, 'helion-icon-Active_L').isDisplayed()).toBeTruthy();
+          registration.registerServiceInstance().then(function () {
+            var serviceInstancesTable = registration.serviceInstancesTable();
+            expect(helpers.getTableCellAt(serviceInstancesTable, hcfRow, 3).getText()).not.toBe('');
+            expect(helpers.getTableCellAt(serviceInstancesTable, hcfRow, 4).getText()).toBe('DISCONNECT');
+            expect(registration.serviceInstanceStatus(hcfRow, 'helion-icon-Active_L').isDisplayed()).toBeTruthy();
+          });
         });
 
         it('should show `1 ENDPOINT REGISTERED` next to `Done` button', function () {
@@ -157,11 +158,12 @@ describe('Service Instance Registration', function () {
 
       describe('service instance `Disconnect`', function () {
         it('should update row in table when disconnected', function () {
-          var serviceInstancesTable = registration.serviceInstancesTable();
-          registration.disconnect(0);
-
-          expect(helpers.getTableCellAt(serviceInstancesTable, 0, 3).getText()).toBe('');
-          expect(helpers.getTableCellAt(serviceInstancesTable, 0, 4).getText()).toBe('CONNECT');
+          registration.disconnect(hcfRow)
+            .then(function () {
+              var serviceInstancesTable = registration.serviceInstancesTable();
+              expect(helpers.getTableCellAt(serviceInstancesTable, hcfRow, 3).getText()).toBe('');
+              expect(helpers.getTableCellAt(serviceInstancesTable, hcfRow, 4).getText()).toBe('CONNECT');
+            });
         });
 
         it('`Done` button should always be enabled', function () {
@@ -174,19 +176,25 @@ describe('Service Instance Registration', function () {
 
         beforeAll(function () {
           ConfirmFirstService(hcf);
-          registration.connect(0);
+          registration.connect(hcfRow);
         });
 
         it('should show applications view when `Done` clicked', function () {
           registration.fillCredentialsForm(hcf.admin.username, hcf.admin.password);
-          registration.registerServiceInstance();
-          registration.completeRegistration();
-
-          expect(registration.registrationOverlay().isPresent()).toBeFalsy();
-          expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/list/gallery-view');
+          registration.registerServiceInstance()
+            .then(function () {
+              return registration.completeRegistration();
+            })
+            .then(function () {
+              expect(registration.registrationOverlay().isPresent()).toBeFalsy();
+              expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#/cf/applications/list/gallery-view');
+            });
         });
 
         it('should go directly to applications view on logout and login', function () {
+          // Wait for the register service notification to go away
+          browser.driver.sleep(5000);
+
           navbar.logout();
           loginPage.login(helpers.getUser(), helpers.getPassword());
 
@@ -195,6 +203,9 @@ describe('Service Instance Registration', function () {
         });
 
         it('should go directly to applications view on logout and login (as admin)', function () {
+          // Wait for the register service notification to go away
+          browser.driver.sleep(5000);
+
           // This would be better in the 'non admin' section, however it's easier to test here with a service registered
           // This removes the need to go through/test the endpoint dashboard registration process alongside this test
           navbar.logout();

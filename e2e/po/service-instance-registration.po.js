@@ -46,12 +46,13 @@ function disconnectLink(rowIndex) {
 }
 
 function connect(rowIndex) {
-  connectLink(rowIndex).click();
-  browser.driver.sleep(2000);
+  return connectLink(rowIndex).click().then(function () {
+    return browser.driver.sleep(2000);
+  });
 }
 
 function disconnect(rowIndex) {
-  disconnectLink(rowIndex).click();
+  return disconnectLink(rowIndex).click();
 }
 
 function doneButton() {
@@ -59,7 +60,7 @@ function doneButton() {
 }
 
 function completeRegistration() {
-  doneButton().click();
+  return doneButton().click();
 }
 
 function serviceInstanceStatus(rowIndex, statusClass) {
@@ -68,7 +69,7 @@ function serviceInstanceStatus(rowIndex, statusClass) {
 }
 
 function registrationNotification() {
-  return registrationOverlay().element(by.css('.fixed-footer'));
+  return registrationOverlay().element(by.css('.fixed-footer .registration-notification'));
 }
 
 /**
@@ -103,6 +104,7 @@ function fillCredentialsForm(username, password) {
 }
 
 function registerServiceInstance() {
-  registerButton().click();
-  browser.driver.sleep(2000);
+  return registerButton().click().then(function () {
+    return browser.driver.sleep(1000);
+  });
 }

@@ -6,7 +6,7 @@
 // var endpointsDashboardPage = require('../po/endpoints-dashboard.po.js');
 // var registerEndpoint = require('../po/register-endpoint.po.js');
 
-describe('Endpoints - List HCFs', function () {
+xdescribe('Endpoints - List HCFs', function () {
 
   it('One hcf', function () {
     

@@ -35,8 +35,8 @@ describe('Endpoints Dashboard', function () {
       });
 
       beforeEach(function () {
-        endpointsDashboardPage.goToEndpoints();
-      })
+        registerEndpoint.safeClose();
+      });
 
       it('should show add form detail view when btn in welcome is pressed', function () {
         endpointsDashboardPage.showEndpoints();
@@ -55,7 +55,7 @@ describe('Endpoints Dashboard', function () {
       });
 
       describe('Form', function () {
-        var hcf = type === 'hcf' ? helpers.getHcfs().hcf1 : helpers.getHces().hce1;
+        var service = type === 'hcf' ? helpers.getHcfs().hcf1 : helpers.getHces().hce1;
 
         beforeEach(function () {
           endpointsDashboardPage.clickAddClusterInTile(type)
@@ -63,7 +63,7 @@ describe('Endpoints Dashboard', function () {
               expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
               expect(registerEndpoint.getEndpointType()).toBe(type);
 
-              browser.driver.sleep(1000);
+              browser.driver.sleep(500);
             });
         });
 
@@ -84,26 +84,27 @@ describe('Endpoints Dashboard', function () {
 
           beforeEach(function () {
             // Enter a name so the form will become valid on valid address
-            registerEndpoint.enterName('abc');
-
-            registerEndpoint.registerEnabled(false);
+            registerEndpoint.enterName('abc').then(function () {
+              return registerEndpoint.registerEnabled(false);
+            });
           });
 
           it('Incorrect format', function () {
             registerEndpoint.enterAddress(invalidUrl)
               .then(function () {
-
-                // browser.driver.sleep('2000');
-
-                registerEndpoint.isAddressValid(false);
+                return registerEndpoint.isAddressValid(false);
+              })
+              .then(function () {
                 registerEndpoint.registerEnabled(false);
               });
           });
 
-          it('Valid Valid', function () {
-            registerEndpoint.enterAddress(hcf.register.api_endpoint)
+          it('Valid format', function () {
+            registerEndpoint.enterAddress(service.register.api_endpoint)
               .then(function () {
-                registerEndpoint.isAddressValid(true);
+                return registerEndpoint.isAddressValid(true);
+              })
+              .then(function () {
                 registerEndpoint.registerEnabled(true);
               });
           });
@@ -111,18 +112,22 @@ describe('Endpoints Dashboard', function () {
           it('Invalid to valid to invalid', function () {
             registerEndpoint.enterAddress(invalidUrl)
               .then(function () {
-                registerEndpoint.isAddressValid(false);
-                registerEndpoint.registerEnabled(false);
+                return registerEndpoint.isAddressValid(false);
+              })
+              .then(function () {
+                return registerEndpoint.registerEnabled(false);
               })
               .then(function () {
                 return registerEndpoint.clearAddress();
               })
               .then(function () {
-                return registerEndpoint.enterAddress(hcf.register.api_endpoint);
+                return registerEndpoint.enterAddress(service.register.api_endpoint);
               })
               .then(function () {
-                registerEndpoint.isAddressValid(true);
-                registerEndpoint.registerEnabled(true);
+                return registerEndpoint.isAddressValid(true);
+              })
+              .then(function () {
+                return registerEndpoint.registerEnabled(true);
               })
               .then(function () {
                 return registerEndpoint.clearAddress();
@@ -131,23 +136,25 @@ describe('Endpoints Dashboard', function () {
                 return registerEndpoint.enterAddress(invalidUrl);
               })
               .then(function () {
-                registerEndpoint.isAddressValid(false);
-                registerEndpoint.registerEnabled(false);
+                return registerEndpoint.isAddressValid(false);
+              })
+              .then(function () {
+                return registerEndpoint.registerEnabled(false);
               });
           });
         });
 
-        it('Invalid name', function () {
+        describe('Invalid name', function () {
 
           beforeEach(function () {
             // Enter a url so the form will become valid on valid Name
-            registerEndpoint.enterAddress(hcf.register.api_endpoint);
-
-            registerEndpoint.registerEnabled(false);
+            registerEndpoint.enterAddress(service.register.api_endpoint).then(function () {
+              return registerEndpoint.registerEnabled(false);
+            });
           });
 
-          it('Valid Valid', function () {
-            registerEndpoint.enterName(hcf.register.cnsi_name)
+          it('Valid', function () {
+            registerEndpoint.enterName(service.register.cnsi_name)
               .then(function () {
                 registerEndpoint.isNameValid(true);
                 registerEndpoint.registerEnabled(true);
@@ -155,7 +162,7 @@ describe('Endpoints Dashboard', function () {
           });
 
           it('Invalid to valid to invalid', function () {
-            registerEndpoint.enterName(hcf.register.cnsi_name)
+            registerEndpoint.enterName(service.register.cnsi_name)
               .then(function () {
                 registerEndpoint.isNameValid(true);
                 registerEndpoint.registerEnabled(true);
@@ -168,7 +175,7 @@ describe('Endpoints Dashboard', function () {
                 registerEndpoint.registerEnabled(false);
               })
               .then(function () {
-                return registerEndpoint.enterName(hcf.register.cnsi_name);
+                return registerEndpoint.enterName(service.register.cnsi_name);
               })
               .then(function () {
                 registerEndpoint.isNameValid(true);
@@ -178,12 +185,19 @@ describe('Endpoints Dashboard', function () {
         });
 
         it('Successful register', function () {
+          expect(endpointsDashboardPage.hasRegisteredTypes(type)).toBeFalsy();
 
-          registerEndpoint.populateAndRegister(hcf.register.api_endpoint, hcf.register.cnsi_name,
-            hcf.register.skip_ssl_validation);
-
-          registerEndpoint.close();
-          fail('TODO: RC Add test for newly added hcf (tile contents changed and numbers correct');
+          registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
+            service.register.skip_ssl_validation)
+            .then(function () {
+              return registerEndpoint.safeClose();
+            })
+            .then(function () {
+              expect(endpointsDashboardPage.hasRegisteredTypes(type)).toBeTruthy();
+              endpointsDashboardPage.getTileStats(type).then(function (stats) {
+                expect(stats[1]).toEqual('1');
+              });
+            });
         });
       });
     }
@@ -210,12 +224,23 @@ describe('Endpoints Dashboard', function () {
     });
 
     it('should show welcome endpoints page', function () {
+      expect(endpointsDashboardPage.welcomeMessage().isPresent()).toBeFalsy();
+      expect(endpointsDashboardPage.registerCloudFoundryTile().isPresent()).toBeFalsy();
+      expect(endpointsDashboardPage.registerCodeEngineTile().isPresent()).toBeFalsy();
+
       endpointsDashboardPage.showEndpoints();
       endpointsDashboardPage.isEndpoints();
-      expect(endpointsDashboardPage.welcomeMessage().isDisplayed()).toBeFalsy();
-      expect(endpointsDashboardPage.registerCloudFoundryTile().isDisplayed()).toBeFalsy();
-      expect(endpointsDashboardPage.registerCodeEngineTile().isDisplayed()).toBeFalsy();
-      fail('TODO: RC test once hcf is back up');
+
+      expect(endpointsDashboardPage.hasRegisteredTypes('hcf')).toBeTruthy();
+      endpointsDashboardPage.getTileStats('hcf').then(function (stats) {
+        expect(stats[1]).toEqual('1');
+      });
+
+      expect(endpointsDashboardPage.hasRegisteredTypes('hce')).toBeTruthy();
+      endpointsDashboardPage.getTileStats('hce').then(function (stats) {
+        expect(stats[1]).toEqual('1');
+      });
+
     });
 
   });
