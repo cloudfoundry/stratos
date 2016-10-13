@@ -54,17 +54,45 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
 
 * It will take a while for HCP to install. When it is finished, it will output the locations for the HCP service, identity service, and service manager. You will need these locations to create instances.
 
-* Locate your `hcp-k8s-node` instance and note its private IP and instance ID. The best way is to filter instances by your VPC ID.
+* Locate your Kubernetes master `hcp-kubernetes-master-*` and node `hcp-kubernetes-node-*` instances and note their private IPs (normally 10.0.1.x) and instance IDs. The best way is to filter instances by your VPC ID.
 
-* SSH into the "node" instance and perform an explicit Docker login [is this still needed?]:
-  ```
-  ssh <NODE PRIVATE IP>
-  sudo su
-  docker login
-  ```
+### <a id="route53-1"></a>3. Establish DNS entries for HCP, HSM and UAA in Route53
 
+At the end of the bootstrap, you will be told to create DNS entries like such: 
+```
+INFO[2036] Please create the following DNS entries before installing any services in your Helion Stackato cluster:
+INFO[2036]
+INFO[2036] hcp.julbra.stacktest.io. IN A ac0e9021e8fce11e6832f06c67c409d5-876003093.eu-central-1.elb.amazonaws.com
+INFO[2036] identity.julbra.stacktest.io. IN A ac1de3e788fce11e6832f06c67c409d5-824478633.eu-central-1.elb.amazonaws.com
+INFO[2036] *.identity.julbra.stacktest.io. IN CNAME identity.julbra.stacktest.io.
+INFO[2036] hsm.julbra.stacktest.io. IN A ac34b8ea38fce11e6832f06c67c409d5-934430935.eu-central-1.elb.amazonaws.com
+```
+Head over to the [hosted zones](https://console.aws.amazon.com/route53/home?region=eu-central-1#hosted-zones:) in the Route53 section of the AWS console.
+If you don't own a hosted zone yet (e.g. it is the first time you deploy in AWS), create yourself a new hosted zone.
+Prefer **`.helionteam.com`** and avoid ~~`.stacktest.io`~~ as for some reason **the HSM CLI will not work fom behind the corporate proxy against `.stacktest.io`**.
+Choose something that describes the purpose of your deployment, for example `john-dev.helionteam.com`.
 
-### <a id="register-console"></a>3. Register the Console UI with Github
+Note: if you just created your hosted zone, ping the HCP folks (e.g. @kiall.macinnes) in Slack, they will need to perform some DNS magic before your hosted zone can function properly.
+Now click on your hosted zone.
+
+* For each `IN A` entry in the log, create a new record set as follows:
+Let's take `hcp.julbra.stacktest.io. IN A ac0e9021e8fce11e6832f06c67c409d5-876003093.eu-central-1.elb.amazonaws.com` as our example.
+
+    * The name should match the first part `hcp`
+    * Leave the default type (`A - IPv4 address`)
+    * Select Alias `Yes`
+    * Click in the alias target text box and wait for entries to populate, then type the first few characters of the ELB name, in our case `ac0e9`
+      This should narrow things down to a single result. Select it, leave the default Routing policy (`Simple`) and Evaluate target health (`false`) and click Create
+
+* For the `IN CNAME` entry in the log, create a new record set.
+Let's take `*.identity.julbra.stacktest.io. IN CNAME identity.julbra.stacktest.io` as our example.
+
+    * The name should match the first part `*.identity`
+    * Change the type to `CNAME - Canonical name`
+    * Select Alias `Yes`
+    * Type `identity.julbra.stacktest.io` for the Alias Target
+
+### <a id="register-console"></a>4. Register the Console UI with GitHub
 
 * Head over to: https://github.com/settings/developers
 
@@ -72,30 +100,35 @@ In this section, we describe how to set up the Helion Stackato v4.0 Console UI o
   - Homepage URL: `http://localhost`
   - Authorization callback URL: `http://localhost/pp/v1/github/oauth/callback`
 
-### <a id="install-console-lkg"></a>4a. Install the LKG of Console UI
+### <a id="install-console-lkg"></a>5. Install the Console UI via HSM
 
-You can now install the LKG version of the Console UI using the HSM CLI. Note: This version is not necessarily the latest build of the Console UI.
+You can now install the Stackato Console UI using the HSM CLI.
 
-* Download the [HSM CLI](https://helion-service-manager.s3.amazonaws.com/release/master/hsm-cli/dist/0.1.73/hsm-0.1.73-linux-amd64.tar.gz).
-
-* [Download](https://helion-service-manager.s3.amazonaws.com/release/master/instance-definition/console/instance.json) the Console instance definition file.
-
-* Set the `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` values in the `instance.json` file.
+* Download the latest [HSM CLI](https://github.com/hpcloud/cnap/wiki/HSM-Release-Notes) for your machine.
 
 * Set the HSM API: `hsm api <Service manager location from Step 1>`
+  (Note: if you chose a .stacktest.io hosted zone, this will not work from behind the firewall. As a workaround you can install the linux CLI will work on the jumpbox)
 
 * Log into HSM: `hsm login --skip-ssl-validation`
 
-* Create the Console instance: `hsm create-instance hpe-catalog.hpe.helion-console -i instance.json`
+* Create the Console instance: `hsm create-instance stackato.hpe.hsc 4.0.0`. HSM will prompt for:
+    - an instance name - I normally choose `hsc`
+    - the `VCS_CLIENTS` variable - we should all know what to put there but in case, this is a string in the following format:
+        * `VCS Provider (string),VCS URL (string),Client ID (string),Client Secret (string),Skip SSL Validation(true|false)`
+        * `Client ID` is the Client ID of the OAuth App you registered earlier for the console
+        * `Client Secret` is the Client Secret of the OAuth App you registered earlier for the console
+        * `Skip SSL Validation` is optional and should be set to true if the VCS uses self-signed certificates (defaults to false)
+    For example if you have public GitHub and a GitHub Enterprise:
+        ```github,https://github.com,ab546f29425d9b02af03,95b5723d4fd2b294774878dd59124d9e10b08178;github,https://ec2-52-24-175-73.us-west-2.compute.amazonaws.com,1b828b7466a5cf7548aa,c2f112f2fc22b6836a78a4087f26f23126e75de7,true```
+
 
 * Wait for all Console pods to be in the "Running" state. This may take a while.
-  - `ssh <master private IP>`
-  - `watch kubectl get pods --all-namespaces`
+    - `ssh <master private IP>`
+    - `watch -n1 kubectl get pods --all-namespaces`
 
 * (Optional) Add an alias (ex. console.stacktest.io) in Route53 using the Console load balancer endpoint. You can find this by filtering the list by your VPC ID. Then, locate the load balancer with a security group that contains Console service instance ID (ex. cnapconsole or hsc) within its description.
 
-
-### <a id="install-console-latest"></a>4b. Install the Latest Build of Console UI
+### <a id="install-console-latest"></a>5b. Install the Latest Build of Console UI (DEPRECATED)
 
 You can issue the same `curl` commands to install the Console UI using the HCP service location.
 
@@ -140,14 +173,14 @@ export token=$(cat $HOME/.hcp | jq -r .AccessToken)
   - Note the DNS name. This is used to update your developer application host in Github and establish a DNS entry in Route53.
 
 
-### <a id="update-github"></a>5. Update the Github developer application URLs
+### <a id="update-github"></a>6. Update the Github developer application URLs
 
 * Head over to: https://github.com/settings/developers
 
 * Edit the developer application you registered above and replace `localhost` with the DNS name you located in the previous step. Alternatively, you can establish a DNS entry in Route53 and use your chosen static URL.
 
 
-### <a id="route53"></a>A. Establish a DNS entry in Route53 (optional)
+### <a id="route53-2"></a>A. Establish a DNS entry in Route53 (optional)
 
 AWS provides support for DNS thru [Route 53](https://github.com/hpcloud/hdp-resource-manager/blob/develop/cmd/bootstrap/docs/bootstrap.md#load-balancer-support).
 
@@ -198,3 +231,19 @@ If you don't do this, you will need to update the callback URL with each and eve
   - `watch kubectl get pods --all-namespaces`
 
 * Add the alias (ex `*.helioncf.stacktest.io`) in Route53 using the HCF load balancer endpoint. You can find this by filtering the list by your VPC ID. Then, locate the load balancer with a security group having the HCF service instance ID within its description (ex. my-hcf-cluster/ha-proxy).
+
+### <a id="cleanup-after-yourself"></a>7. Cleanup once you're done
+
+AWS resources are expensive, a deployment like that above uses many nodes and volumes. Cleaning up involves several steps.
+
+* First, download the latest [cleanup.sh script](https://github.com/hpcloud/hdp-resource-manager/blob/develop/devtools/hcp-uninstall.sh) onto your jumpbox.
+Run it **twice** with the last deployment log as the argument, for example:
+  ```
+  ./hcp-uninstall.sh hcp-bootstrap_0.9.12-0-g28e2acc_amd64.deb
+  ./hcp-uninstall.sh hcp-bootstrap_0.9.12-0-g28e2acc_amd64.deb
+  ```
+  _(Note that the first run will fail to delete volumes as they are still attached, the second run will take care of the left-over volumes)_
+
+* Next you need to manually delete the ELB entries. The easiest way is to filter ELB entries by your VPC ID and delete all matches.
+
+* Finally cleanup all the security groups in your VPC that mention Kubernetes or HCP. That is, everything except the default and the first one you created to allow SSH to your jumpbox.
