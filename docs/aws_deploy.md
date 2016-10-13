@@ -118,9 +118,13 @@ You can now install the Stackato Console UI using the HSM CLI.
         * `Client ID` is the Client ID of the OAuth App you registered earlier for the console
         * `Client Secret` is the Client Secret of the OAuth App you registered earlier for the console
         * `Skip SSL Validation` is optional and should be set to true if the VCS uses self-signed certificates (defaults to false)
-    For example if you have public GitHub and a GitHub Enterprise:
-        ```github,https://github.com,ab546f29425d9b02af03,95b5723d4fd2b294774878dd59124d9e10b08178;github,https://ec2-52-24-175-73.us-west-2.compute.amazonaws.com,1b828b7466a5cf7548aa,c2f112f2fc22b6836a78a4087f26f23126e75de7,true```
-
+    
+    * VCS_CLIENTS examples:
+        - If you plan on only using only the public GitHub:
+          `github,https://github.com,ab546f29425d9b02af03,95b5723d4fd2b294774878dd59124d9e10b08178`
+    
+        - If you plan on only using the public GitHub and a private GitHub Enterprise:
+          `github,https://github.com,ab546f29425d9b02af03,95b5723d4fd2b294774878dd59124d9e10b08178;github,https://ec2-52-24-175-73.us-west-2.compute.amazonaws.com,1b828b7466a5cf7548aa,c2f112f2fc22b6836a78a4087f26f23126e75de7,true`
 
 * Wait for all Console pods to be in the "Running" state. This may take a while.
     - `ssh <master private IP>`
