@@ -4,8 +4,8 @@ var sh = require('../../tools/node_modules/shelljs');
 
 // Get host IP
 var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
-var hostProtocol = browser.params.hostProtocol || 'https://';
-var hostIp = browser.params.hostIp || sh.exec(CMD, { silent: true }).output.trim();
+var hostProtocol = browser.params.protocol || 'https://';
+var hostIp = browser.params.host || sh.exec(CMD, { silent: true }).output.trim();
 var hostPort = browser.params.port || '';
 var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
 

@@ -31,8 +31,8 @@ exports.config = {
   },
 
   params: {
-    hostProtocol: '',
-    hostIp: '',
+    protocol: '',
+    host: '',
     port: '',
     credentials: {
       admin: {

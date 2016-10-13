@@ -4,11 +4,11 @@ var helpers = require('../po/helpers.po');
 var resetTo = require('../po/resets.po');
 var loginPage = require('../po/login-page.po');
 var galleryPage = require('../po/applications.po');
-var deliveryLogs = require('../po/applications.deliver-log.po');
+var deliveryLogs = require('../po/applications.delivery-log.po');
 
 var Q = require('../../tools/node_modules/q');
 
-describe('Application - Delivery Logs', function () {
+xdescribe('Application - Delivery Logs', function () {
 
   function testPopulatedString(string) {
     expect(string).toEqual(jasmine.any(String));
