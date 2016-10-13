@@ -7,13 +7,15 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
+    beforeEach(inject(function ($injector) {
+      $httpBackend = $injector.get('$httpBackend');
+    }));
 
     var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';
     var userGuid = 'userGuid';
 
     function initController($injector, role) {
-      $httpBackend = $injector.get('$httpBackend');
 
       $scope = $injector.get('$rootScope').$new();
       var $state = $injector.get('$state');
@@ -46,17 +48,24 @@
         rolesService, eventService, userSelection);
     }
 
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
+
     describe('as admin', function () {
 
       beforeEach(inject(function ($injector) {
         initController($injector, 'admin');
+        // Didn't add flush here, because
+        // the initial state test requires
+        // an initialised controller.
       }));
 
       it('initial state', function () {
         expect($controller).toBeDefined();
         expect($controller.guid).toEqual(clusterGuid);
         expect($controller.organizationGuid).toEqual(organizationGuid);
-
         expect($controller.userRoles).toBeDefined();
         expect($controller.userActions).toBeDefined();
         expect($controller.stateInitialised).toBeFalsy();
@@ -76,16 +85,16 @@
         $httpBackend.flush();
 
         expect($controller.stateInitialised).toBeTruthy();
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
 
       });
 
       it('should have manage roles enabled', function () {
+        $httpBackend.flush();
         expect($controller.userActions[0].disabled).toBeFalsy();
       });
 
       it('should have remove from organization enabled', function () {
+        $httpBackend.flush();
         expect($controller.userActions[1].disabled).toBeFalsy();
       });
 
@@ -95,6 +104,7 @@
 
       beforeEach(inject(function ($injector) {
         initController($injector, 'space_developer');
+        $httpBackend.flush();
       }));
 
       it('should have manage roles disabled', function () {
