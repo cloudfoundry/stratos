@@ -115,10 +115,6 @@
         $httpBackend.flush();
       }));
 
-      afterEach(function () {
-        $httpBackend.flush();
-      });
-
       it('should have rename space disabled', function () {
         expect(controller.actions[0].disabled).toBeTruthy();
       });
