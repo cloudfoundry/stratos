@@ -1,14 +1,24 @@
 'use strict';
 
-var navbar = require('./navbar.po');
 var helpers = require('../po/helpers.po');
+var endpointDashboard = require('../po/endpoints-dashboard.po');
 
 module.exports = {
+  showHceEndpoints: showHceEndpoints,
   goToHceEndpoints: goToHceEndpoints,
   isHceEndpoints: isHceEndpoints,
   getTable: getTable,
-  getActionMenu: getActionMenu
+  getActionMenu: getActionMenu,
+  headerRegister: headerRegister,
+  headerRegisterVisible: headerRegisterVisible,
+  inlineRegister: inlineRegister
 };
+
+function showHceEndpoints() {
+  return endpointDashboard.showEndpoints().then(function () {
+    return endpointDashboard.registerCodeEngineTile().click();
+  });
+}
 
 function goToHceEndpoints() {
   return browser.get(helpers.getHost() + '/#/endpoint/hce');
@@ -30,3 +40,18 @@ function getActionMenu(row) {
   return getTable().all(by.css('tr')).get(rowIndex).element(by.css('actions-menu'));
 }
 
+function headerRegister() {
+  return getHeaderRegister().click();
+}
+
+function headerRegisterVisible() {
+  return getHeaderRegister().isDisplayed();
+}
+
+function getHeaderRegister() {
+  return element(by.css('.endpoints.endpoints-view .header button:first-of-type'));
+}
+
+function inlineRegister() {
+  return element(by.css('.empty-view-message a:first-of-type')).click();
+}

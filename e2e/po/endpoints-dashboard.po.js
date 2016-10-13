@@ -18,7 +18,7 @@ module.exports = {
 };
 
 function showEndpoints() {
-  navbar.goToView('Endpoints');
+  return navbar.goToView('Endpoints');
 }
 
 function goToEndpoints() {

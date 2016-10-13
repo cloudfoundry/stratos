@@ -1,16 +1,26 @@
 'use strict';
 
-var navbar = require('./navbar.po');
+var endpointDashboard = require('../po/endpoints-dashboard.po');
 var helpers = require('../po/helpers.po');
 
 module.exports = {
+  showHcfEndpoints: showHcfEndpoints,
   goToHcfEndpoints: goToHcfEndpoints,
   isHcfEndpoints: isHcfEndpoints,
   getTiles: getTiles,
   isTileConnected: isTileConnected,
   getTileTitle: getTileTitle,
-  getTileActionMenu: getTileActionMenu
+  getTileActionMenu: getTileActionMenu,
+  headerRegister: headerRegister,
+  headerRegisterVisible: headerRegisterVisible,
+  inlineRegister: inlineRegister
 };
+
+function showHcfEndpoints() {
+  return endpointDashboard.showEndpoints().then(function () {
+    return endpointDashboard.registerCloudFoundryTile().click();
+  });
+}
 
 function goToHcfEndpoints() {
   return browser.get(helpers.getHost() + '/#/endpoint/cluster');
@@ -24,7 +34,6 @@ function isHcfEndpoints() {
 
 function getTiles() {
   return element.all(by.repeater('(guid, service) in clustersCtrl.serviceInstances'));
-  // return element(by.css('.endpoints.endpoints-view')).element(by.css('table'));
 }
 
 function isTileConnected(index) {
@@ -39,3 +48,18 @@ function getTileActionMenu(index) {
   return getTiles().get(index).element(by.css('actions-menu'));
 }
 
+function headerRegister() {
+  return getHeaderRegister().click();
+}
+
+function headerRegisterVisible() {
+  return getHeaderRegister().isPresent();
+}
+
+function getHeaderRegister() {
+  return element(by.css('.endpoints.cluster-tiles .header button:first-of-type'));
+}
+
+function inlineRegister() {
+  return element(by.css('.empty-view-message a:first-of-type')).click();
+}
