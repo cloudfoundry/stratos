@@ -139,7 +139,7 @@ describe('Service Instance Registration', function () {
         });
 
         it('should update service instance data on register', function () {
-          registration.registerServiceInstance().then(function () {
+          registration.connectServiceInstance().then(function () {
             var serviceInstancesTable = registration.serviceInstancesTable();
             expect(helpers.getTableCellAt(serviceInstancesTable, hcfRow, 3).getText()).not.toBe('');
             expect(helpers.getTableCellAt(serviceInstancesTable, hcfRow, 4).getText()).toBe('DISCONNECT');
@@ -181,7 +181,7 @@ describe('Service Instance Registration', function () {
 
         it('should show applications view when `Done` clicked', function () {
           registration.fillCredentialsForm(hcf.admin.username, hcf.admin.password);
-          registration.registerServiceInstance()
+          registration.connectServiceInstance()
             .then(function () {
               return registration.completeRegistration();
             })

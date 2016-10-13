@@ -21,7 +21,7 @@ module.exports = {
  * @description Ensure the database is initialized for developer
  * workflow.
  * @param {boolean} firstTime - flag this as a first-time run
- * @returns {Promise} A promise
+ * @returns {promise} A promise
  */
 function devWorkflow(firstTime) {
   var req = newRequest();
@@ -43,7 +43,7 @@ function devWorkflow(firstTime) {
       }, function (error) {
         console.log('Failed to set dev workflow');
         reject(error);
-      }, function(error) {
+      }, function (error) {
         reject(error);
       });
     });
@@ -51,7 +51,7 @@ function devWorkflow(firstTime) {
 }
 
 /**
- * @function zeroClusterAdminWorkflow
+ * @function removeAllCnsi
  * @description Ensure the database is initialized for ITOps
  * admin workflow with no clusters registered.
  * @param {string?} username the username used ot create a session token
@@ -78,14 +78,22 @@ function removeAllCnsi(username, password) {
   });
 }
 
-function resetAllCnsi(user, password) {
+/**
+ * @function resetAllCnsi
+ * @description Ensure the database is initialized for ITOps
+ * admin workflow with the clusters provided as params.
+ * @param {string?} username the username used ot create a session token
+ * @param {string?} password the username used ot create a session token
+ * @returns {promise} A promise
+ */
+function resetAllCnsi(username, password) {
   var req = newRequest();
 
-  user = user || helpers.getAdminUser();
+  username = username || helpers.getAdminUser();
   password = password || helpers.getAdminPassword();
 
   return new Promise(function (resolve, reject) {
-    createSession(req, user, password).then(function () {
+    createSession(req, username, password).then(function () {
       _resetAllCNSI(req).then(function () {
         resolve();
       }, function (error) {
@@ -98,7 +106,6 @@ function resetAllCnsi(user, password) {
   });
 }
 
-
 /**
  * @function newRequest
  * @description Create a new request
@@ -109,7 +116,7 @@ function newRequest() {
   return request.defaults({
     headers: {
       'Content-Type': 'application/json',
-      Accept: 'application/json',
+      Accept: 'application/json'
     },
     agentOptions: {
       ca: fs.readFileSync(path.join(__dirname, '..', '..', 'tools', 'ssl', 'stackatoCA.pem'))

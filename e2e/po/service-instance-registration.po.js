@@ -1,10 +1,7 @@
 'use strict';
 
-// Service instances registration helpers
 var helpers = require('./helpers.po');
-var loginPage = require('./login-page.po');
-var navbar = require('./navbar.po');
-var credentialsFormName = 'credentialsFormCtrl.credentialsForm';
+var credentialsFormHelper = require('./credentials-form.po');
 
 module.exports = {
 
@@ -21,10 +18,10 @@ module.exports = {
 
   credentialsForm: credentialsForm,
   credentialsFormFields: credentialsFormFields,
-  connectButton: registerButton,
+  connectButton: connectButton,
   cancel: cancel,
   fillCredentialsForm: fillCredentialsForm,
-  registerServiceInstance: registerServiceInstance
+  connectServiceInstance: connectServiceInstance
 };
 
 function registrationOverlay() {
@@ -76,35 +73,25 @@ function registrationNotification() {
  * Credentials Form page objects
  */
 function credentialsForm() {
-  return element(by.id('registration-overlay')).element(by.css('flyout'))
-    .element(by.css('form[name="' + credentialsFormName + '"]'));
+  return credentialsFormHelper.credentialsForm(element(by.id('registration-overlay')).element(by.css('flyout')));
 }
 
 function credentialsFormFields() {
-  return helpers.getFormFields(credentialsFormName);
+  return credentialsFormHelper.credentialsFormFields();
 }
 
-function registerButton() {
-  return helpers.getForm(credentialsFormName)
-    .element(by.buttonText('Connect'));
+function connectButton() {
+  return credentialsFormHelper.connectButton();
 }
 
 function cancel() {
-  helpers.getForm(credentialsFormName)
-    .element(by.buttonText('Cancel')).click();
-  browser.driver.sleep(2000);
+  return credentialsFormHelper.cancel();
 }
 
 function fillCredentialsForm(username, password) {
-  var fields = credentialsFormFields();
-  fields.get(2).clear();
-  fields.get(3).clear();
-  fields.get(2).sendKeys(username || '');
-  fields.get(3).sendKeys(password || '');
+  return credentialsFormHelper.fillCredentialsForm(username, password);
 }
 
-function registerServiceInstance() {
-  return registerButton().click().then(function () {
-    return browser.driver.sleep(1000);
-  });
+function connectServiceInstance() {
+  return credentialsFormHelper.connect();
 }

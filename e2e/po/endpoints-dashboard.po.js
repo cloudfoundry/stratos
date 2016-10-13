@@ -36,11 +36,9 @@ function welcomeMessage() {
 }
 
 function clickAddClusterInWelcomeMessage(serviceType) {
-  return element.all(by.css('#welcome-message span.tile-btn')).then(function (links) {
-    var clickPromise = serviceType === 'hcf' ? links[0].click() : links[1].click();
-    return clickPromise.then(function () {
-      return browser.driver.sleep('500');
-    });
+  var index = serviceType === 'hcf' ? 0 : 1;
+  return element.all(by.css('#welcome-message span.tile-btn')).get(index).click().then(function () {
+    return browser.driver.sleep('500');
   });
 }
 

@@ -41,16 +41,14 @@ function getEndpointType() {
 }
 
 function close() {
-  return getClose().then(function (button) {
-    return button.click().then(function () {
-      // Allow time for animation to finish.. otherwise future clicks will be swallowed by glass background
-      return browser.driver.sleep(1000);
-    });
+  return getClose().click().then(function () {
+    // Allow time for animation to finish.. otherwise future clicks will be swallowed by glass background
+    return browser.driver.sleep(1000);
   });
 }
 
 function safeClose() {
-  var close = getClose();
+  var close = safeGetClose();
   return close.then(function (button) {
     if (!button) {
       return protractor.promise.fulfilled();
@@ -62,40 +60,37 @@ function safeClose() {
   });
 }
 
-
 function getClose() {
-  return element.all(by.css('.modal-footer > button')).then(function (buttons) {
-    return buttons[0];
+  return element.all(by.css('.modal-footer > button')).get(0);
+}
+
+function safeGetClose() {
+  var modalButtons = element.all(by.css('.modal-footer > button'));
+  return modalButtons.count().then(function (count) {
+    return count > 0 ? modalButtons.get(0) : null;
   });
 }
 
 function closeEnabled(shouldBeEnabled) {
-  return getClose().then(function (button) {
-    expect(button.isEnabled()).toBe(shouldBeEnabled);
-  });
+  expect(getClose().isEnabled()).toBe(shouldBeEnabled);
 }
 
 function register() {
-  return getRegister().then(function (button) {
-    expect(button.isEnabled()).toBeTruthy();
+  var button = getRegister();
+  expect(button.isEnabled()).toBeTruthy();
 
-    return button.click().then(function () {
-      // Allow time for animation to finish.. otherwise future clicks will be swallowed by glass background
-      return browser.driver.sleep(1000);
-    });
+  return button.click().then(function () {
+    // Allow time for animation to finish.. otherwise future clicks will be swallowed by glass background
+    return browser.driver.sleep(1000);
   });
 }
 
 function getRegister() {
-  return element.all(by.css('.modal-footer > button')).then(function (buttons) {
-    return buttons[1];
-  });
+  return element.all(by.css('.modal-footer > button')).get(1);
 }
 
 function registerEnabled(shouldBeEnabled) {
-  return getRegister().then(function (button) {
-    expect(button.isEnabled()).toBe(shouldBeEnabled);
-  });
+  expect(getRegister().isEnabled()).toBe(shouldBeEnabled);
 }
 
 function populateAndRegister(address, name, skipValidation) {

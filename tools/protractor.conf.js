@@ -4,7 +4,9 @@
 var acceptanceTests = [
   '../e2e/acceptance/login-page.spec.js',
   '../e2e/acceptance/service-instance-registration.spec.js',
-  '../e2e/acceptance/endpoints-dashboard.spec.js'
+  '../e2e/acceptance/endpoints-dashboard.spec.js',
+  '../e2e/acceptance/endpoints-list-hce.spec.js',
+  '../e2e/acceptance/endpoints-list-hcf.spec.js'
 ];
 
 exports.config = {

@@ -8,7 +8,7 @@ var registerEndpoint = require('../po/register-endpoint.po.js');
 
 describe('Endpoints Dashboard', function () {
 
-  function resetToDashboard() {
+  function resetToLoggedIn() {
     return browser.driver.wait(resetTo.removeAllCnsi())
       .then(function () {
         helpers.setBrowserNormal();
@@ -20,7 +20,7 @@ describe('Endpoints Dashboard', function () {
   describe('No clusters', function () {
 
     it('should show welcome endpoints page', function () {
-      resetToDashboard().then(function () {
+      resetToLoggedIn().then(function () {
         endpointsDashboardPage.showEndpoints();
         endpointsDashboardPage.isEndpoints();
         expect(endpointsDashboardPage.welcomeMessage().isDisplayed()).toBeTruthy();
@@ -31,7 +31,7 @@ describe('Endpoints Dashboard', function () {
 
     function registerTests(type) {
       beforeAll(function () {
-        resetToDashboard();
+        resetToLoggedIn();
       });
 
       beforeEach(function () {
