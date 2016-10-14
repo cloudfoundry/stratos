@@ -1,0 +1,38 @@
+<!doctype html>
+<html ng-app="e2e-loader">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- bower:css -->
+  <link rel="stylesheet" href="lib/helion-ui-framework/dist/helion.framework.css" />
+  <!-- endbower -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="index.css">
+  <!-- endinject -->
+
+  <title>Helion Stackato</title>
+  <script src="stackato-config.js"></script>
+
+  <link rel="icon" type="image/vnd.microsoft.icon" href="/lib/helion-ui-framework/dist/images/favicon.ico" />
+
+  <script src="lib/jquery/dist/jquery.js"></script>
+  <!-- bower:js -->
+  <!-- endbower -->
+  <!-- inject:js -->
+  <script src="lib/stackato-libs.js"></script>
+
+  <script src="lib/angular-mocks/angular-mocks.js"></script>
+  <script src="e2e/mocks.js"></script>
+  <script src="e2e/loader.js"></script>
+
+  <script src="stackato-console.js"></script>
+  <script src="stackato-templates.js"></script>
+
+  <!-- endinject -->
+</head>
+<body application
+  ng-class="{'modal-open': applicationCtrl.showRegistration}">
+  <inspector></inspector>
+</body>
+</html>
