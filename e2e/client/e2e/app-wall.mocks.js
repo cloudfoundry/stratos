@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('console-e2e-mocks', ['ngMockE2E'])
+    .module('console-e2e-mocks', [])
     .run(run);
 
   run.$inject = [
