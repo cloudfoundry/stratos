@@ -81,7 +81,11 @@ module.exports = function (config) {
       'app/**/*.html': ['ng-html2js'],
       'app/**/!(*.mock|*.spec).js': ['coverage'],
       'plugins/**/*.html': ['ng-html2js'],
-      'plugins/**/!(*.mock|*.spec).js': ['coverage']
+      'plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
+      'plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
+      '__plugins/cloud-foundry/api/hcf/Apps.js': ['coverage'],
+      '__plugins/cloud-foundry/api/hcf/FeatureFlags.js': ['coverage'],
+      'plugins/github/!(*.mock|*.spec).js': ['coverage']
     },
 
     proxies: {
