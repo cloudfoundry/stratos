@@ -14,7 +14,6 @@ describe('Application wall', function () {
   it('should show application message: "You cannot view any applications."', function () {
     utils.loadMock('app-wall');
     browser.get('http://localhost/index.e2e.html');
-    expect(true).toBe(true);
     var msgElem = element(by.css('.applications-msg'));
     expect(msgElem.isPresent()).toBeTruthy();
     expect(msgElem.getText()).toBe('You cannot view any applications.');

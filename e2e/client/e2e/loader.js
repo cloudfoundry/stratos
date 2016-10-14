@@ -7,7 +7,4 @@
       'green-box-console',
       'ngMockE2E'
     ]);
-
 })();
-
-
