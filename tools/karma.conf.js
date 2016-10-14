@@ -83,8 +83,6 @@ module.exports = function (config) {
       'plugins/**/*.html': ['ng-html2js'],
       'plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
       'plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
-      '__plugins/cloud-foundry/api/hcf/Apps.js': ['coverage'],
-      '__plugins/cloud-foundry/api/hcf/FeatureFlags.js': ['coverage'],
       'plugins/github/!(*.mock|*.spec).js': ['coverage']
     },
 
