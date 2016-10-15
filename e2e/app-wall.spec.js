@@ -2,7 +2,7 @@
 
 var utils = require('./utils');
 
-fdescribe('Application wall', function () {
+describe('Application wall', function () {
   beforeAll(function () {
     utils.loadE2eClient();
   });
