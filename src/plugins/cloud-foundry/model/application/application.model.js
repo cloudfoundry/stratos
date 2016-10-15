@@ -210,8 +210,6 @@
       var that = this;
       this.bufferedApplications = [];
 
-      console.log('_listAllApps');
-
       return this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis())
         .then(_.bind(this._onListAllAppsSuccess, this))
         .then(function () {
@@ -311,9 +309,6 @@
           'x-cnap-cnsi-list': cnsis.join(',')
         }
       };
-
-      console.log('API ListAllApps');
-
       return this.applicationApi.ListAllApps(options, config).then(function (response) {
         that._onListAllAppsWithPageSuccess(response.data);
         return response;
@@ -330,11 +325,6 @@
      * @private
      */
     _listAllAppsWithPage: function (page, pageSize, cnsis) {
-
-      console.log('_listAllAppsWithPage');
-      console.log(cnsis);
-
-
       var that = this;
       if (cnsis.length === 0) {
         return that.$q.resolve();
@@ -342,11 +332,6 @@
 
       return this._listAllAppsWithPageHelper(page, pageSize, cnsis)
         .then(function (response) {
-
-
-          console.log('_listAllAppsWithPage.then');
-
-
           if (!response.data) {
             return that.$q.reject();
           } else {
@@ -382,9 +367,6 @@
      * @private
      */
     _accumulateApps: function (data) {
-      console.log('_accumulateApps');
-      console.log(data);
-
       var that = this;
       _.each(data, function (value, key) {
         var apps = value.resources;
