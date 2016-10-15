@@ -41,15 +41,15 @@
 
   function expectGetClustersWithSuccess($httpBackend) {
     $httpBackend.whenGET('/pp/v1/cnsis').respond(200, [
-      { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf' },
-      { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'hce' }
+      { id: 1, name: 'hcf-1', url:' cluster1_url', cnsi_type: 'hcf', guid: 'hcf-1' },
+      { id: 2, name: 'hce-1', url:' cluster2_url', cnsi_type: 'hce', guid: 'hce-1' }
     ]);
   }
 
   function expectGetRegisterdClusters($httpBackend) {
     $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, [
-      { id: 1, name: 'cluster1', url:' cluster1_url', cnsi_type: 'hcf' },
-      { id: 2, name: 'cluster2', url:' cluster2_url', cnsi_type: 'hce' }
+      { id: 1, name: 'hcf-1', url:' cluster1_url', cnsi_type: 'hcf', guid: 'hcf-1' },
+      { id: 2, name: 'hce-1', url:' cluster2_url', cnsi_type: 'hce', guid: 'hce-1' }
     ]);
   }
 

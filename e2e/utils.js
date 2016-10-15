@@ -5,7 +5,8 @@ var sh = require('../tools/node_modules/shelljs');
 module.exports = {
   loadE2eClient: loadE2eClient,
   unloadE2eClient: unloadE2eClient,
-  loadMock: loadMock
+  loadMock: loadMock,
+  loadWith: loadWith
 };
 
 function loadE2eClient() {
@@ -19,5 +20,10 @@ function unloadE2eClient() {
 }
 
 function loadMock(path) {
-  sh.exec('mv ../dist/e2e/' + path + '.mocks.js ../dist/e2e/mocks.js', { silent: true });
+  sh.exec('mv ../dist/e2e/' + path + '.js ../dist/e2e/mocks.js', { silent: true });
+}
+
+function loadWith(path) {
+  browser.get('http://localhost/index.e2e.html');
+  loadMock(path);
 }
