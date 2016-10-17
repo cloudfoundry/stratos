@@ -67,7 +67,7 @@ exports.config = {
       hce: {
         hce1: {
           register: {
-            api_endpoint: 'https://hce.julbra.stacktest.io',
+            api_endpoint: 'https://hce.hscdemo.stacktest.io',
             cnsi_name: 'hce',
             skip_ssl_validation: 'true'
           },

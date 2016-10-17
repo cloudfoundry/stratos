@@ -80,7 +80,7 @@ describe('Endpoints Dashboard', function () {
 
         describe('Invalid address', function () {
 
-          var invalidUrl = 'Oxford Utd are a terrible football club';
+          var invalidUrl = 'This is an invalid URL';
 
           beforeEach(function () {
             // Enter a name so the form will become valid on valid address
