@@ -2,8 +2,6 @@
 
 // Login page helpers
 var helpers = require('./helpers.po');
-var adminUser = browser.params.adminUser || 'admin@cnap.local';
-var adminPassword = browser.params.adminPassword || 'cnapadmin';
 
 module.exports = {
 
@@ -16,6 +14,7 @@ module.exports = {
   enterLogin: enterLogin,
   login: login,
   loginAsAdmin: loginAsAdmin,
+  loginAsNonAdmin: loginAsNonAdmin,
   loginButton: loginButton,
   loginFormFields: loginFormFields,
   loginPanel: loginPanel
@@ -65,9 +64,13 @@ function enterLogin(username, password) {
 function login(username, password) {
   enterLogin(username, password);
   loginButton().click();
-  browser.driver.sleep(10000);
+  browser.driver.sleep(2000);
 }
 
 function loginAsAdmin() {
-  login(adminUser, adminPassword);
+  login(helpers.getAdminUser(), helpers.getAdminPassword());
+}
+
+function loginAsNonAdmin() {
+  login(helpers.getUser(), helpers.getPassword());
 }
