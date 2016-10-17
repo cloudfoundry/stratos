@@ -211,7 +211,7 @@
   angular.extend(OrganizationSpaceTileController.prototype, {
 
     summary: function () {
-      this.$state.go('endpoint.clusters.cluster.organization.space.detail.services', {space: this.space.metadata.guid});
+      this.$state.go('endpoint.clusters.cluster.organization.space.detail.applications', {space: this.space.metadata.guid});
     },
 
     spaceDetail: function () {
