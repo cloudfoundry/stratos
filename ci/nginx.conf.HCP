@@ -39,8 +39,8 @@ http {
     ssl_session_timeout             10m;
 
     server {
-        listen                       80;
-        return                       301 https://$host$request_uri;
+        listen                      80;
+        return                      301 https://$host$request_uri;
     }
 
     server {
