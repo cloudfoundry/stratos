@@ -646,14 +646,18 @@
       var that = this;
       var organizationModel = this._getOrganizationModel();
       return this.spaceApi.UpdateSpace(spaceGuid, spaceData, {}, this.modelUtils.makeHttpConfig(cnsiGuid))
-        .then(function (val) {
+        .then(function () {
           // Refresh the org spaces
-          var orgRefreshedP = organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
-
-          // Refresh the space itself
-          var spaceRefreshedP = that.getSpaceDetails(cnsiGuid, val.data, {});
-
-          return that.$q.all([orgRefreshedP, spaceRefreshedP]);
+          return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid)
+            .then(_.partialRight(_.find, ['metadata.guid', spaceGuid]))
+            .then(function (depthOneSpace) {
+              // Refresh the space itself
+              return that.getSpaceDetails(cnsiGuid, depthOneSpace);
+            })
+            .then(function () {
+              // Refresh service count (not inlined)
+              return that.updateServiceCount(cnsiGuid, spaceGuid);
+            });
         });
     },
 

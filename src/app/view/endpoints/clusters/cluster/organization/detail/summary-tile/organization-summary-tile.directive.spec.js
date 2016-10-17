@@ -4,7 +4,7 @@
   describe('organization-summary-tile directive', function () {
     var $httpBackend, element, controller;
 
-    var clusterGuid = 'clusterGuid';
+    var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';
 
     var modelOrganization = {
@@ -14,10 +14,12 @@
       spaces: []
     };
     var organizationNames = [];
+    var userGuid = 'userGuid';
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
-    beforeEach(inject(function ($injector) {
+
+    function initController($injector, role) {
       $httpBackend = $injector.get('$httpBackend');
 
       var $stateParams = $injector.get('$stateParams');
@@ -29,14 +31,13 @@
       var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, modelOrganization);
 
+      mock.cloudFoundryModel.Auth.initAuthModel(role, userGuid, $injector);
+
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });
-
-      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      _.set(authModel, 'principal.' + clusterGuid + '.isAllowed.apply', _.noop);
 
       var $compile = $injector.get('$compile');
 
@@ -56,30 +57,57 @@
 
       contextScope.$apply();
       controller = element.controller('organizationSummaryTile');
-    }));
+    }
 
-    afterEach(function () {
-      $httpBackend.verifyNoOutstandingExpectation();
-      $httpBackend.verifyNoOutstandingRequest();
+    describe('admin user', function () {
+
+      beforeEach(inject(function ($injector) {
+        initController($injector, 'admin');
+      }));
+
+      it('init', function () {
+        expect(element).toBeDefined();
+        expect(controller).toBeDefined();
+
+        expect(controller.clusterGuid).toBe(clusterGuid);
+        expect(controller.organizationGuid).toBe(organizationGuid);
+        expect(controller.organization).toBeDefined();
+        expect(controller.utils).toBeDefined();
+        expect(controller.cliCommands).toBeDefined();
+        expect(controller.cardData).toBeDefined();
+        expect(controller.getEndpoint).toBeDefined();
+        expect(controller.keys).toBeDefined();
+        expect(controller.actions).toBeDefined();
+        expect(controller.actions.length).toEqual(2);
+        $httpBackend.verifyNoOutstandingExpectation();
+        $httpBackend.verifyNoOutstandingRequest();
+
+      });
+
+      it('should have edit organization enabled', function () {
+        expect(controller.actions[0].disabled).toBeFalsy();
+      });
+
+      it('should have delete organization enabled', function () {
+        expect(controller.actions[1].disabled).toBeFalsy();
+      });
+
     });
 
-    it('init', function () {
-      expect(element).toBeDefined();
-      expect(controller).toBeDefined();
+    describe('non admin user', function () {
 
-      expect(controller.clusterGuid).toBe(clusterGuid);
-      expect(controller.organizationGuid).toBe(organizationGuid);
-      expect(controller.organization).toBeDefined();
-      expect(controller.utils).toBeDefined();
-      expect(controller.cliCommands).toBeDefined();
-      expect(controller.cardData).toBeDefined();
-      expect(controller.getEndpoint).toBeDefined();
-      expect(controller.keys).toBeDefined();
-      expect(controller.actions).toBeDefined();
-      expect(controller.actions.length).toEqual(2);
+      beforeEach(inject(function ($injector) {
+        initController($injector, 'space_developer');
+      }));
 
+      it('should have edit organization disabled', function () {
+        expect(controller.actions[0].disabled).toBeTruthy();
+      });
+
+      it('should have delete organization disabled', function () {
+        expect(controller.actions[1].disabled).toBeTruthy();
+      });
     });
-
   });
 
 })();

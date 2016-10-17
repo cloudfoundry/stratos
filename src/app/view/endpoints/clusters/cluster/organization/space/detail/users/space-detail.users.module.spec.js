@@ -8,7 +8,7 @@
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
 
-    var clusterGuid = 'clusterGuid';
+    var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';
     var spaceGuid = 'spaceGuid';
 
@@ -21,8 +21,9 @@
         }
       }
     };
+    var userGuid = 'userGuid';
 
-    beforeEach(inject(function ($injector) {
+    function initController($injector, role) {
       $httpBackend = $injector.get('$httpBackend');
 
       $scope = $injector.get('$rootScope').$new();
@@ -47,59 +48,91 @@
       // var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       // _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, {});
       //
+      mock.cloudFoundryModel.Auth.initAuthModel(role, userGuid, $injector);
+
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });
       // //
-      $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({ resources: []});
-      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      _.set(authModel, 'principal.' + clusterGuid + '.isAllowed.apply', _.noop);
-      // // _.set(authModel, 'principal.' + clusterGuid + '.userSummary.organizations.managed', []);
-      // _.set(authModel, 'principal.' + clusterGuid + '.userSummary.spaces.managed', []);
+      $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({resources: []});
 
       var SpaceUsersController = $state.get('endpoint.clusters.cluster.organization.space.detail.users').controller;
       $controller = new SpaceUsersController($scope, $state, $stateParams, $log, $q, modelManager, utils, manageUsers,
         rolesService, eventService, userSelection);
+    }
 
-    }));
+    describe('as admin', function () {
+      beforeEach(inject(function ($injector) {
+        initController($injector, 'admin');
+      }));
 
-    afterEach(function () {
-      $httpBackend.verifyNoOutstandingExpectation();
-      $httpBackend.verifyNoOutstandingRequest();
+      it('initial state', function () {
+        expect($controller).toBeDefined();
+        expect($controller.guid).toEqual(clusterGuid);
+        expect($controller.organizationGuid).toEqual(organizationGuid);
+        expect($controller.spaceGuid).toEqual(spaceGuid);
+        expect($controller.space).toEqual(space);
+        expect($controller.userActions).toBeDefined();
+        expect($controller.userActions.length).toEqual(3);
+        expect($controller.userRoles).toBeDefined();
+        expect($controller.stateInitialised).toBeFalsy();
+        expect($controller.canUserManageRoles).toBeDefined();
+        expect($controller.canUserRemoveFromOrg).toBeDefined();
+        expect($controller.canUserRemoveFromSpace).toBeDefined();
+
+        expect($controller.disableManageRoles).toBeDefined();
+        expect($controller.disableChangeRoles).toBeDefined();
+        expect($controller.disableRemoveFromOrg).toBeDefined();
+        expect($controller.disableRemoveFromSpace).toBeDefined();
+
+        expect($controller.getSpaceRoles).toBeDefined();
+        expect($controller.selectAllChanged).toBeDefined();
+        expect($controller.removeSpaceRole).toBeDefined();
+        expect($controller.selectedUsersCount).toBeDefined();
+        expect($controller.manageSelectedUsers).toBeDefined();
+        expect($controller.removeFromOrganization).toBeDefined();
+        expect($controller.removeFromSpace).toBeDefined();
+
+        $httpBackend.flush();
+
+        expect($controller.stateInitialised).toBeTruthy();
+        $httpBackend.verifyNoOutstandingExpectation();
+        $httpBackend.verifyNoOutstandingRequest();
+
+      });
+
+      it('should have manage roles enabled', function () {
+        expect($controller.userActions[0].disabled).toBeFalsy();
+      });
+
+      it('should have remove from organization enabled', function () {
+        expect($controller.userActions[1].disabled).toBeFalsy();
+      });
+
+      it('should have remove from space enabled', function () {
+        expect($controller.userActions[2].disabled).toBeFalsy();
+      });
+
     });
 
-    it('initial state', function () {
-      expect($controller).toBeDefined();
-      expect($controller.guid).toEqual(clusterGuid);
-      expect($controller.organizationGuid).toEqual(organizationGuid);
-      expect($controller.spaceGuid).toEqual(spaceGuid);
-      expect($controller.space).toEqual(space);
-      expect($controller.userActions).toBeDefined();
-      expect($controller.userActions.length).toEqual(3);
-      expect($controller.userRoles).toBeDefined();
-      expect($controller.stateInitialised).toBeFalsy();
-      expect($controller.canUserManageRoles).toBeDefined();
-      expect($controller.canUserRemoveFromOrg).toBeDefined();
-      expect($controller.canUserRemoveFromSpace).toBeDefined();
+    describe('as non-admin', function () {
+      beforeEach(inject(function ($injector) {
+        initController($injector, 'space_developer');
+      }));
 
-      expect($controller.disableManageRoles).toBeDefined();
-      expect($controller.disableChangeRoles).toBeDefined();
-      expect($controller.disableRemoveFromOrg).toBeDefined();
-      expect($controller.disableRemoveFromSpace).toBeDefined();
+      it('should have manage roles disabled', function () {
+        expect($controller.userActions[0].disabled).toBeTruthy();
+      });
 
-      expect($controller.getSpaceRoles).toBeDefined();
-      expect($controller.selectAllChanged).toBeDefined();
-      expect($controller.removeSpaceRole).toBeDefined();
-      expect($controller.selectedUsersCount).toBeDefined();
-      expect($controller.manageSelectedUsers).toBeDefined();
-      expect($controller.removeFromOrganization).toBeDefined();
-      expect($controller.removeFromSpace).toBeDefined();
+      it('should have remove from organization disabled', function () {
+        expect($controller.userActions[1].disabled).toBeTruthy();
+      });
 
-      $httpBackend.flush();
-
-      expect($controller.stateInitialised).toBeTruthy();
+      it('should have remove from space disabled', function () {
+        expect($controller.userActions[2].disabled).toBeTruthy();
+      });
 
     });
 

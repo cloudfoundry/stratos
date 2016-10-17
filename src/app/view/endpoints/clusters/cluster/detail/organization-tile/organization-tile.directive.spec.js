@@ -8,7 +8,7 @@
       spaces: []
     };
     var organization = {
-      cnsiGuid: 'clusterGuid',
+      cnsiGuid: 'guid',
       guid: 'orgGuid',
       org: {
         entity: {
@@ -16,6 +16,7 @@
         }
       }
     };
+    var userGuid = 'userGuid';
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -26,14 +27,13 @@
       var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);
 
+      mock.cloudFoundryModel.Auth.initAuthModel('admin', userGuid, $injector);
+
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + organization.cnsiGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });
-
-      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      _.set(authModel, 'principal.' + organization.cnsiGuid + '.isAllowed.apply', _.noop);
 
       var $compile = $injector.get('$compile');
 
@@ -69,6 +69,17 @@
       expect(controller.actions.length).toEqual(3);
     });
 
+    it('should have edit organisation enabled', function () {
+      expect(controller.actions[0].disabled).toBeFalsy();
+    });
+
+    it('should have delete organisation enabled', function () {
+      expect(controller.actions[1].disabled).toBeFalsy();
+    });
+
+    it('should have assign users enabled', function () {
+      expect(controller.actions[2].disabled).toBeFalsy();
+    });
   });
 
 })();

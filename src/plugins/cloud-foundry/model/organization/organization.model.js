@@ -317,7 +317,7 @@
         })
         .then(function (depthOneSpaces) {
           that.uncacheOrganizationSpaces(cnsiGuid, orgGuid);
-          that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces).then(function () {
+          return that.cacheOrganizationSpaces(cnsiGuid, orgGuid, depthOneSpaces).then(function () {
             return that.getOrganizationDetails(cnsiGuid, that.organizations[cnsiGuid][orgGuid].details.org).then(function () {
               return depthOneSpaces;
             });
