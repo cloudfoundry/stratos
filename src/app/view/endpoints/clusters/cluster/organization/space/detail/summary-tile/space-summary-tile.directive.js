@@ -189,9 +189,9 @@
 
         // Update delete action when space info changes (requires authService which depends on chainStateResolve)
         $scope.$watch(function () {
-          return spaceDetail.details.totalRoutes === 0 &&
-            spaceDetail.details.totalServiceInstances === 0 &&
-            spaceDetail.details.totalApps === 0;
+          return !spaceDetail.details.totalRoutes &&
+            !spaceDetail.details.totalServiceInstances &&
+            !spaceDetail.details.totalApps;
         }, function () {
           enableActions();
         });

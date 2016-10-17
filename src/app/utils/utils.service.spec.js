@@ -2,7 +2,7 @@
   'use strict';
 
   describe('utils service', function () {
-    var utils, mbToHumanSizeFilter, $q, $scope;
+    var utils, mbToHumanSizeFilter, $q, $scope, $timeout;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -12,6 +12,7 @@
       mbToHumanSizeFilter = $injector.get('mbToHumanSizeFilter');
       $q = $injector.get('$q');
       $scope = $injector.get('$rootScope');
+      $timeout = $injector.get('$timeout');
     }));
 
     it('should be defined', function () {
@@ -72,6 +73,59 @@
         expect(utils.sizeUtilization(1025, 2049)).toBe('1 / 2 GB');
       });
 
+    });
+
+    describe('retryRequest', function () {
+      var calls;
+      beforeEach(function () {
+        calls = 0;
+      });
+
+      function createRequestPromise(attemptsNeeded) {
+        var a = attemptsNeeded;
+        return function () {
+          calls++;
+          a = a - 1;
+          if (a > 0) {
+            return $q.reject('FAILED');
+          } else {
+            return $q.resolve('OK');
+          }
+        };
+      }
+
+      it('should not need to retry', function () {
+        var result = utils.retryRequest(createRequestPromise(0), 3, 0);
+        result.catch(function () {
+          fail();
+        });
+        $scope.$apply();
+        $timeout.flush();
+        expect(calls).toBe(1);
+      });
+
+      it('should need to retry', function () {
+        var result = utils.retryRequest(createRequestPromise(2), 3, 0);
+        result.catch(function () {
+          fail();
+        });
+
+        $scope.$apply();
+        $timeout.flush();
+        expect(calls).toBe(2);
+      });
+
+      it('should need to retry - needs 6 retries', function () {
+        var result = utils.retryRequest(createRequestPromise(6), 3, 0);
+        result.then(function () {
+          fail();
+        });
+        $scope.$apply();
+        $timeout.flush();
+        $scope.$apply();
+        $timeout.flush();
+        expect(calls).toBe(3);
+      });
     });
 
     describe('runInSequence', function () {

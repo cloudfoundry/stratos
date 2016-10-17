@@ -1,10 +1,7 @@
 'use strict';
 
-// Service instances registration helpers
 var helpers = require('./helpers.po');
-var loginPage = require('./login-page.po');
-var navbar = require('./navbar.po');
-var credentialsFormName = 'credentialsFormCtrl.credentialsForm';
+var credentialsFormHelper = require('./credentials-form.po');
 
 module.exports = {
 
@@ -21,10 +18,10 @@ module.exports = {
 
   credentialsForm: credentialsForm,
   credentialsFormFields: credentialsFormFields,
-  registerButton: registerButton,
+  connectButton: connectButton,
   cancel: cancel,
   fillCredentialsForm: fillCredentialsForm,
-  registerServiceInstance: registerServiceInstance
+  connectServiceInstance: connectServiceInstance
 };
 
 function registrationOverlay() {
@@ -37,21 +34,22 @@ function serviceInstancesTable() {
 
 function connectLink(rowIndex) {
   return helpers.getTableRowAt(serviceInstancesTable(), rowIndex)
-    .element(by.css('[ng-click="serviceRegistrationCtrl.connect(serviceInstance)"]'));
+    .element(by.css('[ng-click="serviceRegistrationCtrl.connect(cnsi)"]'));
 }
 
 function disconnectLink(rowIndex) {
   return helpers.getTableRowAt(serviceInstancesTable(), rowIndex)
-    .element(by.css('[ng-click="serviceRegistrationCtrl.disconnect(serviceInstance)"]'));
+    .element(by.css('[ng-click="serviceRegistrationCtrl.disconnect(serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid])"]'));
 }
 
 function connect(rowIndex) {
-  connectLink(rowIndex).click();
-  browser.driver.sleep(2000);
+  return connectLink(rowIndex).click().then(function () {
+    return browser.driver.sleep(2000);
+  });
 }
 
 function disconnect(rowIndex) {
-  disconnectLink(rowIndex).click();
+  return disconnectLink(rowIndex).click();
 }
 
 function doneButton() {
@@ -59,7 +57,7 @@ function doneButton() {
 }
 
 function completeRegistration() {
-  doneButton().click();
+  return doneButton().click();
 }
 
 function serviceInstanceStatus(rowIndex, statusClass) {
@@ -75,34 +73,25 @@ function registrationNotification() {
  * Credentials Form page objects
  */
 function credentialsForm() {
-  return element(by.id('registration-overlay')).element(by.css('flyout'))
-    .element(by.css('form[name="' + credentialsFormName + '"]'));
+  return credentialsFormHelper.credentialsForm(element(by.id('registration-overlay')).element(by.css('flyout')));
 }
 
 function credentialsFormFields() {
-  return helpers.getFormFields(credentialsFormName);
+  return credentialsFormHelper.credentialsFormFields();
 }
 
-function registerButton() {
-  return helpers.getForm(credentialsFormName)
-    .element(by.buttonText('Register'));
+function connectButton() {
+  return credentialsFormHelper.connectButton();
 }
 
 function cancel() {
-  helpers.getForm(credentialsFormName)
-    .element(by.buttonText('Cancel')).click();
-  browser.driver.sleep(2000);
+  return credentialsFormHelper.cancel();
 }
 
 function fillCredentialsForm(username, password) {
-  var fields = credentialsFormFields();
-  fields.get(2).clear();
-  fields.get(3).clear();
-  fields.get(2).sendKeys(username || '');
-  fields.get(3).sendKeys(password || '');
+  return credentialsFormHelper.fillCredentialsForm(username, password);
 }
 
-function registerServiceInstance() {
-  registerButton().click();
-  browser.driver.sleep(2000);
+function connectServiceInstance() {
+  return credentialsFormHelper.connect();
 }

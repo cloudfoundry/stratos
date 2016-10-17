@@ -1,21 +1,34 @@
 'use strict';
 
 var navbar = require('./navbar.po');
+var helpers = require('../po/helpers.po');
 
 module.exports = {
   showEndpoints: showEndpoints,
+  goToEndpoints: goToEndpoints,
+  isEndpoints: isEndpoints,
   clickAddClusterInWelcomeMessage: clickAddClusterInWelcomeMessage,
-  clickAddClusterInTille: clickAddClusterInTille,
+  clickAddClusterInTile: clickAddClusterInTile,
   welcomeMessage: welcomeMessage,
   registerCloudFoundryTile: registerCloudFoundryTile,
   registerCodeEngineTile: registerCodeEngineTile,
-  getAddEndpointFlyout: getAddEndpointFlyout,
-  getAddClusterForm: getAddClusterForm,
-  getBaseTile: getBaseTile
+  getAddEndpoint: getAddEndpoint,
+  hasRegisteredTypes: hasRegisteredTypes,
+  getTileStats: getTileStats
 };
 
 function showEndpoints() {
-  navbar.goToView('Endpoints');
+  return navbar.goToView('Endpoints');
+}
+
+function goToEndpoints() {
+  return browser.get(helpers.getHost() + '/#/endpoint');
+}
+
+function isEndpoints() {
+  return browser.getCurrentUrl().then(function (url) {
+    return expect(url).toBe(helpers.getHost() + '/#/endpoint');
+  });
 }
 
 function welcomeMessage() {
@@ -23,37 +36,48 @@ function welcomeMessage() {
 }
 
 function clickAddClusterInWelcomeMessage(serviceType) {
-  if (serviceType === 'hcf') {
-    return driver.findElement(by.linkText('register Helion Cloud Foundry clusters')).click();
-  } else {
-    return driver.findElement(by.linkText('Helion Code Engine endpoints')).click();
-  }
+  var index = serviceType === 'hcf' ? 0 : 1;
+  return element.all(by.css('#welcome-message span.tile-btn')).get(index).click().then(function () {
+    return browser.driver.sleep('500');
+  });
 }
 
-function clickAddClusterInTille(serviceType) {
-    return driver.findElement(by.linkText('Register an Endpoint')).click();
+function clickAddClusterInTile(serviceType) {
+  return getInstanceTile(serviceType).element(by.linkText('Register An Endpoint')).click().then(function() {
+    return browser.driver.sleep('500');
+  });
 }
 
 function registerCloudFoundryTile() {
-  return getNoInstanceTile('hcf)');
+  return getInstanceTile('hcf');
 }
 
 function registerCodeEngineTile() {
-  return getNoInstanceTile('hce)');
+  return getInstanceTile('hce');
 }
 
-function getNoInstanceTile(serviceType) {
-  return element(by.id(serviceType + '-no-instances-tile'));
+function getInstanceTile(serviceType) {
+  return element(by.css('service-tile[service-type*="' + serviceType + '"]'));
 }
 
-function getAddEndpointFlyout() {
-  return element(by.tagName('add-cluster-form'));
+function getAddEndpoint() {
+  return element(by.css('form[name="form.regForm"]'));
 }
 
-function getAddClusterForm() {
-  return element(by.css('hce-registration'));
+function hasRegisteredTypes(serviceType) {
+  return getInstanceTile(serviceType).element(by.css('ring-chart')).isPresent();
 }
 
-function getBaseTile(serviceType) {
-  return element(by.tagName('base-tile'));
+function getTileStats(serviceType) {
+  return getInstanceTile(serviceType).all(by.css('ul.ring-chart-labels li')).then(function (listOfLi) {
+    var promises = [];
+    for (var i = 0; i < listOfLi.length; i++) {
+      promises.push(listOfLi[i].element(by.css('.ring-chart-count')).getText().then(function (text) {
+        return text;
+      }));
+    }
+    return Promise.all(promises).then(function (result) {
+      return result;
+    });
+  });
 }
