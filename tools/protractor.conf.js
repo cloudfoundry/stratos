@@ -46,6 +46,8 @@ exports.config = {
         password: ''
       }
     },
+    skipSSlValidation: true,
+    caCert: 'ssl/stackatoCA.pem',
     cnsi: {
       hcf: {
         hcf1: {

@@ -113,13 +113,26 @@ function resetAllCnsi(username, password) {
  */
 function newRequest() {
   var cookieJar = request.jar();
+  var skipSSlValidation = browser.params.skipSSlValidation;
+  var ca;
+
+  if (skipSSlValidation) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  } else if (browser.params.caCert) {
+    var caCertFile = path.join(__dirname, '..', '..', 'tools');
+    caCertFile = path.join(caCertFile, browser.params.caCert);
+    if (fs.existsSync(caCertFile)) {
+      ca = fs.readFileSync(caCertFile);
+    }
+  }
+
   return request.defaults({
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json'
     },
     agentOptions: {
-      ca: fs.readFileSync(path.join(__dirname, '..', '..', 'tools', 'ssl', 'stackatoCA.pem'))
+      ca: ca
     },
     jar: cookieJar
   });
