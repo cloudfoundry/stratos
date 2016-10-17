@@ -81,12 +81,14 @@ module.exports = function (config) {
       'app/**/*.html': ['ng-html2js'],
       'app/**/!(*.mock|*.spec).js': ['coverage'],
       'plugins/**/*.html': ['ng-html2js'],
-      'plugins/**/!(*.mock|*.spec).js': ['coverage']
+      'plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
+      'plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
+      'plugins/github/!(*.mock|*.spec).js': ['coverage']
     },
 
     proxies: {
       '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
-      '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/',
+      '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/'
     },
 
     reporters: ['progress', 'coverage']

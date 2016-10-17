@@ -20,23 +20,28 @@ function goToView(viewName) {
 
 function accountActionsButton() {
   return element(by.css('avatar'))
-    .element(by.css('[ng-click="avatarCtrl.showActions()"]'))
+    .element(by.css('[ng-click="avatarCtrl.showActions()"]'));
 }
 
 function showAccountActions() {
-  accountActionsButton().click();
+  return accountActionsButton().click();
 }
 
 function showAccountSettings() {
-  showAccountActions();
-  element(by.css('account-actions'))
-    .element(by.css('[href="#/account/settings"]'))
-    .click();
+  return showAccountActions().then(function () {
+    return browser.driver.sleep(50000).then(function() {
+      return element(by.css('account-actions'))
+        .element(by.css('[href="#/account/settings"]'))
+        .click();
+    })
+
+  });
 }
 
 function logout() {
-  showAccountActions();
-  element(by.css('account-actions'))
-    .element(by.css('[ng-click="applicationCtrl.logout()"]'))
-    .click();
+  return showAccountActions().then(function () {
+    return element(by.css('account-actions'))
+      .element(by.css('[ng-click="applicationCtrl.logout()"]'))
+      .click();
+  });
 }

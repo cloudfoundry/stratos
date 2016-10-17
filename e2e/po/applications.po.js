@@ -1,6 +1,7 @@
 'use strict';
 
 var navbar = require('./navbar.po');
+var helpers = require('./helpers.po');
 
 module.exports = {
 
@@ -11,10 +12,14 @@ module.exports = {
   showApplicationDetails: showApplicationDetails,
   showServices: showServices,
   showDeliveryLogs: showDeliveryLogs,
-  applicationServiceFlyout: applicationServiceFlyout,
-  showServiceDetails: showServiceDetails,
-  serviceAddConfirm: serviceAddConfirm,
-  servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
+
+  isApplicationWall: isApplicationWall,
+  isApplicationWallNoClusters: isApplicationWallNoClusters
+  // ,
+  // applicationServiceFlyout: applicationServiceFlyout,
+  // showServiceDetails: showServiceDetails,
+  // serviceAddConfirm: serviceAddConfirm,
+  // servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
 
 };
 
@@ -51,43 +56,55 @@ function applicationAction(idx) {
   return applicationActionsBar().get(idx);
 }
 
-function servicePanelsAddServiceButtons() {
-  return element.all(by.css('div.service-panel div.service-actions button'));
+function isApplicationWall() {
+  return browser.getCurrentUrl().then(function (url) {
+    return url === helpers.getHost() + '/#/cf/applications/list/gallery-view';
+  });
 }
 
-function servicePanelsAddServiceButton(idx) {
-  return servicePanelsAddServiceButtons().get(idx);
+function isApplicationWallNoClusters() {
+  return isApplicationWall().then(function () {
+    return element(by.css('.applications-empty .applications-msg'));
+  });
 }
 
-function serviceDetailsActions() {
-  return element.all(by.css('div.service-detail-actions button'));
-}
+// function servicePanelsAddServiceButtons() {
+//   return element.all(by.css('div.service-panel div.service-actions button'));
+// }
 
-function serviceDetailsAction(idx) {
-  return serviceDetailsActions().get(idx);
-}
+// function servicePanelsAddServiceButton(idx) {
+//   return servicePanelsAddServiceButtons().get(idx);
+// }
+//
+// function serviceDetailsActions() {
+//   return element.all(by.css('div.service-detail-actions button'));
+// }
 
-function showServiceDetails() {
-  servicePanelsAddServiceButton(0).click();
-  browser.driver.sleep(1000);
-}
+// function serviceDetailsAction(idx) {
+//   return serviceDetailsActions().get(idx);
+// }
 
-function serviceDetailsAddAction() {
-  return serviceDetailsAction(1);
-}
+// function showServiceDetails() {
+//   servicePanelsAddServiceButton(0).click();
+//   browser.driver.sleep(1000);
+// }
 
-function serviceDetailsCancelAction() {
-  return serviceDetailsAction(0);
-}
+// function serviceDetailsAddAction() {
+//   return serviceDetailsAction(1);
+// }
+//
+// function serviceDetailsCancelAction() {
+//   return serviceDetailsAction(0);
+// }
 
-function applicationServiceFlyout() {
-  return element(by.css('add-service-workflow'));
-}
+// function applicationServiceFlyout() {
+//   return element(by.css('add-service-workflow'));
+// }
 
-function serviceAddConfirm() {
-  serviceDetailsAddAction().click();
-}
-
-function serviceAddCancel() {
-  serviceDetailsCancelAction().click();
-}
+// function serviceAddConfirm() {
+//   serviceDetailsAddAction().click();
+// }
+//
+// function serviceAddCancel() {
+//   serviceDetailsCancelAction().click();
+// }

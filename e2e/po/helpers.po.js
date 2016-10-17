@@ -1,17 +1,33 @@
 'use strict';
 
 var sh = require('../../tools/node_modules/shelljs');
-var request = require('../../tools/node_modules/request');
 
 // Get host IP
 var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
-var hostIp = browser.params.hostIp || sh.exec(CMD, { silent: true }).output.trim();
+var hostProtocol = browser.params.protocol || 'https://';
+var hostIp = browser.params.host || sh.exec(CMD, { silent: true }).output.trim();
 var hostPort = browser.params.port || '';
-var host = hostIp + (hostPort ? ':' + hostPort : '');
+var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
+
+var cnsis = browser.params.cnsi;
+var hcfs = cnsis.hcf;
+var hces = cnsis.hce;
+var adminUser = browser.params.credentials.admin.username || 'admin@cnap.local';
+var adminPassword = browser.params.credentials.admin.password || 'cnapadmin';
+var user = browser.params.credentials.user.username || 'user@cnap.local';
+var password = browser.params.credentials.user.password || 'cnapuser';
 
 module.exports = {
 
   getHost: getHost,
+  getCNSIs: getCNSIs,
+  getHcfs: getHcfs,
+  getHces: getHces,
+  getAdminUser: getAdminUser,
+  getAdminPassword: getAdminPassword,
+  getUser: getUser,
+  getPassword: getPassword,
+
   newBrowser: newBrowser,
   loadApp: loadApp,
   setBrowserNormal: setBrowserNormal,
@@ -36,13 +52,41 @@ function getHost() {
   return host;
 }
 
+function getCNSIs() {
+  return cnsis;
+}
+
+function getHcfs() {
+  return hcfs;
+}
+
+function getHces() {
+  return hces;
+}
+
+function getAdminUser() {
+  return adminUser;
+}
+
+function getAdminPassword() {
+  return adminPassword;
+}
+
+function getUser() {
+  return user;
+}
+
+function getPassword() {
+  return password;
+}
+
 function newBrowser() {
   return browser.forkNewDriverInstance(true);
 }
 
 function loadApp() {
   browser.manage().deleteAllCookies();
-  browser.get('http://' + host);
+  browser.get(host);
 }
 
 function setBrowserNormal() {
