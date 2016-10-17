@@ -6,7 +6,6 @@
       modelManager, userServiceInstanceModel, serviceInstanceModel, apiManager;
     var detailViewCalled = false;
 
-
     var items = [{
       guid: 1,
       name: 'c1',
@@ -24,7 +23,6 @@
         valid: true
       }
     }];
-
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -51,7 +49,6 @@
       var notificationService = $injector.get('app.view.notificationsService');
       var hceReg = $injector.get('app.view.hceRegistration');
       var log = $injector.get('$log');
-
 
       var confirmDialogMock = function (dialogSpecs) {
 
@@ -139,7 +136,6 @@
         expect(controller.credentialsFormOpen).toBeFalsy();
         expect(controller._updateCurrentEndpoints).toHaveBeenCalled();
 
-
       });
 
       // menu action tests
@@ -207,7 +203,6 @@
         var showEmpty = controller.showEmptyView();
         expect(showEmpty).toBeTruthy();
       });
-
 
       it('should show list view if endpoints are not empty', function () {
         controller.resolvedUpdateCurrentEndpoints = true;

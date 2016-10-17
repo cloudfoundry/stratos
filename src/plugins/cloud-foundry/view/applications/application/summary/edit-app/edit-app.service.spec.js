@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  fdescribe('Edit-App Service', function () {
+  describe('Edit-App Service', function () {
     var editAppFactory, $httpBackend;
 
     var cnsiGuid = 'guid';

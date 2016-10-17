@@ -92,7 +92,6 @@
 
     it('should successfully add a tcp route', function () {
 
-
       var expectedPostReq = {
         metadata: {
           guid: 'guid'
