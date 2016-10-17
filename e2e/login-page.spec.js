@@ -106,7 +106,7 @@ fdescribe('Login Page', function () {
     });
 
     it('should allow log in with correct credentials', function () {
-      loginPage.enterLogin('admin@cnap.local', 'cnapadmin');
+      loginPage.enterLogin('hsctestadmin', 'hsctestadmin');
 
       expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
