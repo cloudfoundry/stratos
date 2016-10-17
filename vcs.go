@@ -59,7 +59,7 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, map[VCSC
 				continue
 			}
 
-			vcsType := strings.ToLower(clientData[0])
+			vcsType := strings.ToLower(strings.TrimSpace(clientData[0]))
 			vcsClientType, err := getVCSType(vcsType)
 			if err != nil {
 				logger.Errorf("Unable to get VCS type %s: %v", vcsType, err)
@@ -82,12 +82,12 @@ func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, map[VCSC
 					AuthURL:  authEndpoint,
 					TokenURL: tokenEndpoint,
 				},
-				ClientID:     clientData[2],
-				ClientSecret: clientData[3],
+				ClientID:     strings.TrimSpace(clientData[2]),
+				ClientSecret: strings.TrimSpace(clientData[3]),
 			}
 
 			vcsSkipSSLMap[VCSClientMapKey{baseEndpoint}] = false
-			if clientDataLen == 5 && clientData[4] != "" && strings.ToLower(clientData[4]) == "true" {
+			if clientDataLen == 5 && clientData[4] != "" && strings.ToLower(strings.TrimSpace(clientData[4])) == "true" {
 				vcsSkipSSLMap[VCSClientMapKey{baseEndpoint}] = true
 			}
 
