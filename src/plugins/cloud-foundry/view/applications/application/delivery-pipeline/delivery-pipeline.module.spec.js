@@ -3,7 +3,7 @@
 
   describe('Delivery Pipeline', function () {
 
-    var controller, $interpolate, $q, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel,
+    var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel,
       modelManager, $httpBackend, account;
 
     beforeEach(module('green-box-console'));
@@ -44,7 +44,6 @@
       // Some generic vars needed in tests
       $rootScope = $injector.get('$rootScope');
       $httpBackend = $injector.get('$httpBackend');
-      $q = $injector.get('$q');
 
       // Store the model functions that the constructor calls out to. These functions will be monitored and overwritten
       var model = modelManager.retrieve('cloud-foundry.model.application');
@@ -132,7 +131,6 @@
 
       var pipelineTasks = mock.hceApi.HceProjectApi.getPipelineTasks(guid);
       $httpBackend.whenGET(pipelineTasks.url).respond(200, pipelineTasks.response['200']);
-
 
       createController();
       $httpBackend.flush();
