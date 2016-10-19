@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  fdescribe('endpoints user selection', function () {
+  describe('endpoints user selection', function () {
 
     var $httpBackend, usersSelection;
 
