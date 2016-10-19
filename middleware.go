@@ -11,27 +11,18 @@ import (
 )
 
 func handleSessionError(err error) error {
-	if _, ok := err.(*SessionValueNotFound); ok {
+	if strings.Contains(err.Error(), "dial tcp") {
 		return newHTTPShadowError(
-			http.StatusUnauthorized,
-			"User session could not be found",
-			"User session could not be found: %v", err,
-		)
-	}
-
-
-	if strings.Contains(err.Error(), "sql: no rows in result set") {
-		return newHTTPShadowError(
-			http.StatusUnauthorized,
-			"User session could not be found",
-			"User session could not be found: %v", err,
+			http.StatusServiceUnavailable,
+			"Service is currently unavailable",
+			"Service is currently unavailable: %v", err,
 		)
 	}
 
 	return newHTTPShadowError(
-		http.StatusServiceUnavailable,
-		"Service is currently unavailable",
-		"Service is currently unavailable: %v", err,
+		http.StatusUnauthorized,
+		"User session could not be found",
+		"User session could not be found: %v", err,
 	)
 }
 
