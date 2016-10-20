@@ -59,7 +59,7 @@
     this.listError = false;
 
     this.serviceInstances = {};
-    if (this.serviceInstanceModel.serviceInstances > 0) {
+    if (this.serviceInstanceModel.serviceInstances.length > 0) {
       // serviceInstanceModel has previously been updated
       // to decrease load time, we will use that data.
       // we will still refresh the data asyncronously and the UI will update to relect and changes

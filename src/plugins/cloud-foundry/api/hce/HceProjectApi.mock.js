@@ -29,6 +29,39 @@
           }
         }
       };
+    },
+    getPipelineTasks: function (projectId) {
+      return {
+        url: '/pp/v1/proxy/v2/pipelines/tasks?project_id=' + projectId,
+        response: {
+          200: [],
+          500: {
+            body: { guid: {} }
+          }
+        }
+      };
+    },
+    deleteProject: function (projectId) {
+      return {
+        url: '/pp/v1/proxy/v2/projects/' + projectId,
+        response: {
+          201: [],
+          500: {
+            body: { guid: {} }
+          }
+        }
+      };
+    },
+    getProjects: function () {
+      return {
+        url: '/pp/v1/proxy/v2/projects',
+        response: {
+          200: [],
+          500: {
+            body: { guid: {} }
+          }
+        }
+      };
     }
   };
 
