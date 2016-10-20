@@ -121,7 +121,7 @@
       };
 
       modalObj.actionTask(data, dialog).catch(function (err) {
-           expect(err.error).toEqual(mockErrorResponse.error);
+        expect(err.error).toEqual(mockErrorResponse.error);
       });
 
       // expect(modalObj.actionTask(data, dialog)).toThrow();
