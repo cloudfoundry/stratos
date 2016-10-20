@@ -118,7 +118,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]CNSIRequest) map[
 	return jsonResponse
 }
 
-func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req engine.Request, uri *url.URL, body []byte, header http.Header, passThrough bool) CNSIRequest {
+func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req engine.Request, uri *url.URL, body []byte, header http.Header, passThrough bool) (CNSIRequest, error) {
 	logger.Debug("buildCNSIRequest")
 	cnsiRequest := CNSIRequest{
 		GUID:     cnsiGUID,
@@ -131,9 +131,9 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req eng
 		PassThrough: passThrough,
 	}
 
-	cnsiRec, ok := p.getCNSIRecord(cnsiGUID)
-	if !ok {
-		panic("REFACTOR ME")
+	cnsiRec, err := p.getCNSIRecord(cnsiGUID)
+	if err != nil {
+		return cnsiRequest, err
 	}
 
 	cnsiRequest.URL = new(url.URL)
@@ -141,14 +141,14 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, req eng
 	cnsiRequest.URL.Path = uri.Path
 	cnsiRequest.URL.RawQuery = uri.RawQuery
 
-	return cnsiRequest
+	return cnsiRequest, nil
 }
 
 func (p *portalProxy) validateCNSIList(cnsiList []string) error {
 	logger.Debug("validateCNSIList")
 	for _, cnsiGUID := range cnsiList {
-		if _, ok := p.getCNSIRecord(cnsiGUID); !ok {
-			return errors.New("Invalid CNSI GUID")
+		if _, err := p.getCNSIRecord(cnsiGUID); err != nil {
+			return err
 		}
 	}
 
@@ -218,8 +218,10 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	// send the request to each CNSI
 	done := make(chan CNSIRequest)
 	for _, cnsi := range cnsiList {
-		cnsiRequest := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
-
+		cnsiRequest, err := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
 		// Allow the host part of the API URL to be overridden
 		apiHost := c.Request().Header().Get("x-cnap-api-host")
 		// Don't allow any '.' chars in the api name

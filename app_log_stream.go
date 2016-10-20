@@ -36,9 +36,9 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	userGUID = c.Get("user_id").(string)
 
 	// Extract the Doppler endpoint from the CNSI record
-	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
-	if !ok {
-		return fmt.Errorf("Failed to get record for CNSI %s", cnsiGUID)
+	cnsiRecord, err := p.getCNSIRecord(cnsiGUID)
+	if err != nil {
+		return fmt.Errorf("Failed to get record for CNSI %s: %s", cnsiGUID, err)
 	}
 
 	dopplerAddress = cnsiRecord.DopplerLoggingEndpoint

@@ -67,9 +67,9 @@ func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord
 		return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.GUID, r.UserGUID)
 	}
 
-	c, ok = p.getCNSIRecord(r.GUID)
-	if !ok {
-		return t, c, fmt.Errorf("Info could not be found for CNSI with GUID %s", r.GUID)
+	c, err = p.getCNSIRecord(r.GUID)
+	if err != nil {
+		return t, c, fmt.Errorf("Info could not be found for CNSI with GUID %s: %s", r.GUID, err)
 	}
 
 	return t, c, nil

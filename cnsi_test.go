@@ -28,8 +28,7 @@ func TestRegisterHCFCluster(t *testing.T) {
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
-	sql := `INSERT INTO cnsis`
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoCNSIs).
 		WithArgs(sqlmock.AnyArg(), "Some fancy HCF Cluster", "hcf", mockV2Info.URL, "https://login.127.0.0.1", "https://uaa.127.0.0.1", "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
@@ -157,8 +156,7 @@ func TestRegisterHCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
-	sql := `INSERT INTO cnsis`
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoCNSIs).
 		WillReturnError(errors.New("Unknown Database Error"))
 
 	if err := pp.registerHCFCluster(ctx); err == nil {
@@ -185,8 +183,7 @@ func TestRegisterHCECluster(t *testing.T) {
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
-	sql := `INSERT INTO cnsis`
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoCNSIs).
 		WithArgs(sqlmock.AnyArg(), "Some fancy HCE Cluster", "hce", mockInfo.URL, "", "", "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
@@ -315,8 +312,7 @@ func TestRegisterHCEClusterButCantSaveCNSIRecord(t *testing.T) {
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
-	sql := `INSERT INTO cnsis`
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoCNSIs).
 		WillReturnError(errors.New("Unknown Database Error"))
 
 	if err := pp.registerHCECluster(ctx); err == nil {
@@ -334,11 +330,8 @@ func TestListCNSIs(t *testing.T) {
 	defer db.Close()
 
 	// Mock the CNSIs in the database
-	expectedCNSIList := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-		AddRow(mockCNSIGUID, "Some fancy HCF Cluster", "hcf", urlMust(mockAPIEndpoint), mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint).
-		AddRow(mockCNSIGUID, "Some fancy HCE Cluster", "hce", urlMust(mockAPIEndpoint), mockAuthEndpoint, mockAuthEndpoint, "")
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
-	mock.ExpectQuery(sql).
+	expectedCNSIList := expectHCFAndHCERows()
+	mock.ExpectQuery(selectAnyFromCNSIs).
 		WillReturnRows(expectedCNSIList)
 
 	err := pp.listCNSIs(ctx)
@@ -360,8 +353,7 @@ func TestListCNSIsWhenListFails(t *testing.T) {
 	defer db.Close()
 
 	// Mock a database error
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
-	mock.ExpectQuery(sql).
+	mock.ExpectQuery(selectAnyFromCNSIs).
 		WillReturnError(errors.New("Unknown Database Error"))
 
 	err := pp.listCNSIs(ctx)

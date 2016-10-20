@@ -100,7 +100,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	expOn, err := p.getSessionValue(c, "expires_on")
 	if err != nil {
 		msg := "Could not get session expiry"
-		logger.Error(msg + " - ", err)
+		logger.Error(msg+" - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
@@ -190,13 +190,13 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 	}
 
 	endpoint := ""
-	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
+	cnsiRecord, err := p.getCNSIRecord(cnsiGUID)
 
-	if !ok {
+	if err != nil {
 		return nil, nil, nil, newHTTPShadowError(
 			http.StatusBadRequest,
 			"Requested endpoint not registered",
-			"No CNSI registered with GUID %s", cnsiGUID)
+			"No CNSI registered with GUID %s: %s", cnsiGUID, err)
 	}
 
 	endpoint = cnsiRecord.AuthorizationEndpoint
@@ -431,17 +431,17 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	tr, err := p.getUAATokenRecord(sessionUser)
 	if err != nil {
-		msg := "Unable to find UAA Token: %s"
+		msg := fmt.Sprintf("Unable to find UAA Token: %s", err)
 		logger.Error(msg, err)
-		return fmt.Errorf(msg, err)
+		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
 	// get the scope out of the JWT token data
 	userTokenInfo, err := getUserTokenInfo(tr.AuthToken)
 	if err != nil {
-		msg := "Unable to find scope information in the UAA Auth Token: %s"
+		msg := fmt.Sprintf("Unable to find scope information in the UAA Auth Token: %s", err)
 		logger.Error(msg, err)
-		return fmt.Errorf(msg, err)
+		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
 	// Check if UAA token has expired
@@ -482,7 +482,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	expOn, err := p.getSessionValue(c, "expires_on")
 	if err != nil {
 		msg := "Could not get session expiry"
-		logger.Error(msg + " - ", err)
+		logger.Error(msg+" - ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(SessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
@@ -558,10 +558,10 @@ func (p *portalProxy) getCNSIUser(cnsiGUID string, userGUID string) (*ConnectedU
 	}
 
 	// is the user an HCF admin?
-	cnsiRecord, ok := p.getCNSIRecord(cnsiGUID)
-	if !ok {
-		msg := "Unable to load CNSI record"
-		logger.Error(msg)
+	cnsiRecord, err := p.getCNSIRecord(cnsiGUID)
+	if err != nil {
+		msg := "Unable to load CNSI record: %s"
+		logger.Errorf(msg, err)
 		return nil, false
 	}
 	if cnsiRecord.CNSIType == cnsis.CNSIHCF {

@@ -39,12 +39,10 @@ func TestLoginToUAA(t *testing.T) {
 	pp.Config.HCPIdentityHost = s[0]
 	pp.Config.HCPIdentityPort = s[1]
 
-	sql := `SELECT .+ FROM tokens WHERE .+`
-	mock.ExpectQuery(sql).
+	mock.ExpectQuery(selectAnyFromTokens).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
-	sql = `INSERT INTO tokens`
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoTokens).
 		// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
@@ -130,14 +128,12 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 	pp.Config.HCPIdentityHost = s[0]
 	pp.Config.HCPIdentityPort = s[1]
 
-	sql := `SELECT .+ FROM tokens WHERE .+`
-	mock.ExpectQuery(sql).
+	mock.ExpectQuery(selectAnyFromTokens).
 		// WithArgs(mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 	// --- set up the database expectation for pp.saveUAAToken
-	sql = `INSERT INTO tokens`
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoTokens).
 		WillReturnError(errors.New("Unknown Database Error"))
 
 	if err := pp.loginToUAA(ctx); err == nil {
@@ -181,8 +177,7 @@ func TestLoginToCNSI(t *testing.T) {
 	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
 		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
 
-	sql := `SELECT (.+) FROM cnsis WHERE (.+)`
-	mock.ExpectQuery(sql).
+	mock.ExpectQuery(selectAnyFromCNSIs).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRow)
 
@@ -195,16 +190,13 @@ func TestLoginToCNSI(t *testing.T) {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
-	sql = `SELECT .+ FROM tokens WHERE .+`
-	mock.ExpectQuery(sql).
+	mock.ExpectQuery(selectAnyFromTokens).
 		WithArgs(mockCNSIGUID, mockUserGUID).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
 	// Setup expectation that the CNSI token will get saved
-	sql = `INSERT INTO tokens`
-
 	//encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoTokens).
 		//WithArgs(mockCNSIGUID, mockUserGUID, "cnsi", encryptedUAAToken, encryptedUAAToken, sessionValues["exp"]).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
@@ -248,8 +240,7 @@ func TestLoginToCNSIWithMissingCNSIRecord(t *testing.T) {
 	defer db.Close()
 
 	// Return nil from db call
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
-	mock.ExpectQuery(sql).
+	mock.ExpectQuery(selectAnyFromCNSIs).
 		WithArgs(mockCNSIGUID).
 		WillReturnError(errors.New("No match for that GUID"))
 
@@ -283,8 +274,7 @@ func TestLoginToCNSIWithMissingCreds(t *testing.T) {
 
 	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
 		AddRow(mockCNSIGUID, "mockHCF", "hcf", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockDopplerEndpoint)
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
-	mock.ExpectQuery(sql).
+	mock.ExpectQuery(selectAnyFromCNSIs).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRow)
 
@@ -327,8 +317,7 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 
 	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
 		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockDopplerEndpoint)
-	sql := `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint FROM cnsis`
-	mock.ExpectQuery(sql).
+	mock.ExpectQuery(selectAnyFromCNSIs).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRow)
 
@@ -381,8 +370,7 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
-	sql := `INSERT INTO tokens`
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoTokens).
 		WillReturnError(errors.New("Unknown Database Error"))
 
 	tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken)
@@ -402,8 +390,7 @@ func TestSetUAATokenRecord(t *testing.T) {
 	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
-	sql := `INSERT INTO tokens`
-	mock.ExpectExec(sql).
+	mock.ExpectExec(insertIntoTokens).
 		WillReturnError(errors.New("Unknown Database Error"))
 
 	err := pp.setUAATokenRecord(fakeKey, fakeTr)
@@ -511,8 +498,8 @@ func TestVerifySession(t *testing.T) {
 	encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 	expectedTokensRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
 		AddRow(encryptedUAAToken, encryptedUAAToken, newExpiry)
-	sql := `SELECT .+ FROM tokens WHERE .+`
-	mock.ExpectQuery(sql).
+
+	mock.ExpectQuery(selectAnyFromTokens).
 		WithArgs(mockUserGUID).
 		WillReturnRows(expectedTokensRow)
 
@@ -579,7 +566,7 @@ func TestVerifySessionExpired(t *testing.T) {
 		"username": "admin",
 		"password": "changeme",
 	})
-	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
 	// Set a dummy userid in session - normally the login to UAA would do this.
@@ -587,10 +574,18 @@ func TestVerifySessionExpired(t *testing.T) {
 	sessionValues["user_id"] = mockUserGUID
 	sessionValues["exp"] = time.Now().Add(-time.Hour).Unix()
 
+	mock.ExpectQuery(selectAnyFromTokens).
+		WillReturnRows(sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}))
+	mock.ExpectExec(insertIntoTokens).
+		WillReturnError(errors.New("Session has expired"))
+
 	if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
 		t.Error(errors.New("Unable to mock/stub user in session object."))
 	}
 
+	mock.ExpectQuery(selectAnyFromTokens).
+		WillReturnRows(sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
+			AddRow(mockUAAToken, mockUAAToken, sessionValues["exp"]))
 	err := pp.verifySession(ctx)
 	if err == nil {
 		t.Error("Expected an 403 error with 'Session has expired' string.")

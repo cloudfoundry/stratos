@@ -362,19 +362,19 @@ func getHCEInfo(apiEndpoint string, skipSSLValidation bool) (hceInfo, error) {
 	return infoReponse, nil
 }
 
-func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, bool) {
+func (p *portalProxy) getCNSIRecord(guid string) (cnsis.CNSIRecord, error) {
 	logger.Debug("getCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		return cnsis.CNSIRecord{}, false
+		return cnsis.CNSIRecord{}, err
 	}
 
 	rec, err := cnsiRepo.Find(guid)
 	if err != nil {
-		return cnsis.CNSIRecord{}, false
+		return cnsis.CNSIRecord{}, err
 	}
 
-	return rec, true
+	return rec, nil
 }
 
 func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
