@@ -12,7 +12,14 @@
       guid: 'orgGuid',
       org: {
         entity: {
-          spaces: []
+          spaces: [{
+            metadata: {
+              guid: 'spaceGuid'
+            },
+            entity: {
+              organization_guid: 'orgGuid'
+            }
+          }]
         }
       }
     };
@@ -20,12 +27,26 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
+    beforeEach(module({
+      'helion.framework.widgets.asyncTaskDialog': function (content, context, actionTask) {
+        return {
+          content: content,
+          context: context,
+          actionTask: actionTask
+        };
+      },
+      'helion.framework.widgets.dialog.confirm': function (spec) {
+        return spec.callback();
+      }
+    }));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('app.model.modelManager');
 
       var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);
+      _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid + '.details.org', '');
+      _.set(organizationModel, 'organizationNames.' + organization.cnsiGuid, ['orgGuid']);
 
       mock.cloudFoundryModel.Auth.initAuthModel('admin', userGuid, $injector);
 
@@ -80,6 +101,24 @@
     it('should have assign users enabled', function () {
       expect(controller.actions[2].disabled).toBeFalsy();
     });
+
+    it('should send request when user edited organization', function () {
+      $httpBackend.expectPUT('/pp/v1/proxy/v2/organizations/orgGuid').respond(201, {});
+      var editOrgAction = controller.actions[0];
+      var asynTaskDialog = editOrgAction.execute();
+      asynTaskDialog.actionTask({
+        name: 'org1'
+      });
+      $httpBackend.flush();
+    });
+
+    it('should send request when user deleted organization', function () {
+      $httpBackend.expectDELETE('/pp/v1/proxy/v2/organizations/orgGuid').respond(200, {});
+      var deleteOrgAction = controller.actions[1];
+      deleteOrgAction.execute();
+      $httpBackend.flush();
+    });
+
   });
 
 })();
