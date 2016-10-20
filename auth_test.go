@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
+	"github.com/hpcloud/portal-proxy/repository/crypto"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 	"github.com/labstack/echo"
 
@@ -495,7 +496,7 @@ func TestVerifySession(t *testing.T) {
 	}
 
 	newExpiry := 1234567
-	encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
+	encryptedUAAToken, _ := crypto.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 	expectedTokensRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry"}).
 		AddRow(encryptedUAAToken, encryptedUAAToken, newExpiry)
 

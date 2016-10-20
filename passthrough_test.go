@@ -55,7 +55,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 
 	err = pp.setCNSITokenRecord(mockHCFGUID, mockUserGUID, mockTokenRecord)
 	if err != nil {
-		t.Error("Unable to set CNSI Token record: %s", err)
+		t.Errorf("Unable to set CNSI Token record: %s", err)
 	}
 
 	/*	// verify expectations met

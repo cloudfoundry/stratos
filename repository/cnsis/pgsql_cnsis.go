@@ -37,7 +37,7 @@ type PostgresCNSIRepository struct {
 	db *sql.DB
 }
 
-// NewPostgresCNSIRepository will create a new instance of the PostgresInstanceRepository
+// NewPostgresCNSIRepository will create a new instance of the PostgresCNSIRepository
 func NewPostgresCNSIRepository(dcp *sql.DB) (Repository, error) {
 	log.Println("NewPostgresCNSIRepository")
 	return &PostgresCNSIRepository{db: dcp}, nil
@@ -68,7 +68,7 @@ func (p *PostgresCNSIRepository) List() ([]*CNSIRecord, error) {
 			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
 		}
 
-		if cnsi.CNSIType, err = getCNSIType(pCNSIType); err != nil {
+		if cnsi.CNSIType, err = GetCNSIType(pCNSIType); err != nil {
 			return nil, fmt.Errorf("Unable to get CNSI type: %v", err)
 		}
 
@@ -113,7 +113,7 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredClust
 			return nil, fmt.Errorf("Unable to scan cluster records: %v", err)
 		}
 
-		if cluster.CNSIType, err = getCNSIType(pCNSIType); err != nil {
+		if cluster.CNSIType, err = GetCNSIType(pCNSIType); err != nil {
 			return nil, fmt.Errorf("Unable to get CNSI type: %v", err)
 		}
 
@@ -158,7 +158,7 @@ func (p *PostgresCNSIRepository) Find(guid string) (CNSIRecord, error) {
 
 	// TODO(wchrisjohnson): discover a way to do this automagically
 	// These two fields need to be converted manually
-	if cnsi.CNSIType, err = getCNSIType(pCNSIType); err != nil {
+	if cnsi.CNSIType, err = GetCNSIType(pCNSIType); err != nil {
 		return CNSIRecord{}, fmt.Errorf("Unable to get CNSI type: %v", err)
 	}
 
@@ -193,7 +193,7 @@ func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (CNSIRecord,
 
 	// TODO(wchrisjohnson): discover a way to do this automagically
 	// These two fields need to be converted manually
-	if cnsi.CNSIType, err = getCNSIType(pCNSIType); err != nil {
+	if cnsi.CNSIType, err = GetCNSIType(pCNSIType); err != nil {
 		return CNSIRecord{}, fmt.Errorf("Unable to get CNSI type: %v", err)
 	}
 
@@ -225,8 +225,9 @@ func (p *PostgresCNSIRepository) Delete(guid string) error {
 	return nil
 }
 
-func getCNSIType(cnsi string) (CNSIType, error) {
-	log.Println("getCNSIType")
+// GetCNSIType - TBD
+func GetCNSIType(cnsi string) (CNSIType, error) {
+	log.Println("GetCNSIType")
 
 	var newType CNSIType
 
@@ -236,5 +237,5 @@ func getCNSIType(cnsi string) (CNSIType, error) {
 		"hce":
 		return CNSIType(cnsi), nil
 	}
-	return newType, errors.New("Invalid string passed to getCNSIType.")
+	return newType, errors.New("Invalid string passed to GetCNSIType.")
 }

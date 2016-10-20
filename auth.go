@@ -446,17 +446,18 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	// Check if UAA token has expired
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
-		// UAA Token has expired, refresh the token, if that fails, fail the request
 
-		uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.SkipTLSVerification, tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
-		if err != nil {
+		// UAA Token has expired, refresh the token, if that fails, fail the request
+		uaaRes, tokenErr := p.getUAATokenWithRefreshToken(p.Config.SkipTLSVerification, tr.RefreshToken, p.Config.ConsoleClient, p.Config.ConsoleClientSecret, p.getHCPIdentityEndpoint())
+		if tokenErr != nil {
 			msg := "Could not refresh UAA token"
-			logger.Error(msg, err)
+			logger.Error(msg, tokenErr)
 			return echo.NewHTTPError(http.StatusForbidden, msg)
 		}
-		u, err := getUserTokenInfo(uaaRes.AccessToken)
-		if err != nil {
-			return err
+
+		u, userTokenErr := getUserTokenInfo(uaaRes.AccessToken)
+		if userTokenErr != nil {
+			return userTokenErr
 		}
 
 		if err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken); err != nil {

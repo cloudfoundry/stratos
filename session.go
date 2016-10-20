@@ -13,6 +13,7 @@ const (
 	portalSessionName = "stackato-console-session"
 )
 
+// SessionValueNotFound = TBD
 type SessionValueNotFound struct {
 	msg string
 }

@@ -14,9 +14,10 @@ import (
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
-	"github.com/hpcloud/portal-proxy/repository/tokens"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+
+	"github.com/hpcloud/portal-proxy/repository/crypto"
 )
 
 type mockServer struct {
@@ -257,7 +258,7 @@ var rowFieldsForToken = []string{"auth_token", "refresh_token", "token_expiry"}
 var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}
 
 var mockEncryptionKey = make([]byte, 32)
-var mockEncryptedToken, _ = tokens.EncryptToken(mockEncryptionKey, mockUAAToken)
+var mockEncryptedToken, _ = crypto.EncryptToken(mockEncryptionKey, mockUAAToken)
 
 var mockV2InfoResponse = v2Info{
 	AuthorizationEndpoint:  mockAuthEndpoint,

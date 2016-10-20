@@ -20,7 +20,7 @@ import (
 
 	"github.com/antonlindstrom/pgstore"
 	"github.com/hpcloud/portal-proxy/datastore"
-	"github.com/hpcloud/portal-proxy/repository/tokens"
+	"github.com/hpcloud/portal-proxy/repository/crypto"
 	"github.com/hpcloud/ucpconfig"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -176,7 +176,7 @@ func getEncryptionKey(pc portalConfig) ([]byte, error) {
 	}
 
 	// Read the key from the shared volume
-	key, err := tokens.ReadKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
+	key, err := crypto.ReadEncryptionKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
 	if err != nil {
 		logger.Errorf("Unable to read the encryption key from the shared volume: %v", err)
 		return nil, err

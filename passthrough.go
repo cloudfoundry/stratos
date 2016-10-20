@@ -104,7 +104,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]CNSIRequest) map[
 		case cnsiResponse.Response != nil:
 			response = cnsiResponse.Response
 		}
-		// Check the HTTP Status code to make sure that it is actually a valid response 
+		// Check the HTTP Status code to make sure that it is actually a valid response
 		if cnsiResponse.StatusCode >= 400 {
 			response = []byte(fmt.Sprintf(`{"error": "Unexpected HTTP status code: %d"}`, cnsiResponse.StatusCode))
 		}
@@ -218,9 +218,9 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	// send the request to each CNSI
 	done := make(chan CNSIRequest)
 	for _, cnsi := range cnsiList {
-		cnsiRequest, err := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		cnsiRequest, buildErr := p.buildCNSIRequest(cnsi, portalUserGUID, req, uri, body, header, shouldPassthrough)
+		if buildErr != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 		}
 		// Allow the host part of the API URL to be overridden
 		apiHost := c.Request().Header().Get("x-cnap-api-host")
@@ -331,20 +331,20 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	logger.Debug("VCS proxy passthru ...")
 
 	var (
-		uri         *url.URL
-		vcsUrlEndpoint string
-		vcsApiEndpoint string
+		uri            *url.URL
+		vcsURLEndpoint string
+		vcsAPIEndpoint string
 	)
 
 	uri = makeRequestURI(c)
-	vcsUrlEndpoint = c.Request().Header().Get("x-cnap-vcs-url")
-	vcsApiEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
-	url := fmt.Sprintf("%s/%s", vcsApiEndpoint, uri)
+	vcsURLEndpoint = c.Request().Header().Get("x-cnap-vcs-url")
+	vcsAPIEndpoint = c.Request().Header().Get("x-cnap-vcs-api-url")
+	url := fmt.Sprintf("%s/%s", vcsAPIEndpoint, uri)
 	logger.Debug("VCS Endpoint URL: %s", url)
 
 	token, ok := p.getVCSOAuthToken(c)
 	if !ok {
-		msg := fmt.Sprintf("Token not found for endpoint %s", vcsApiEndpoint)
+		msg := fmt.Sprintf("Token not found for endpoint %s", vcsAPIEndpoint)
 		return echo.NewHTTPError(http.StatusUnauthorized, msg)
 	}
 
@@ -355,7 +355,7 @@ func (p *portalProxy) vcsProxy(c echo.Context) error {
 	req.Header.Add("Authorization", tokenHeader)
 
 	var h http.Client
-	if p.Config.VCSClientSkipSSLMap[VCSClientMapKey{vcsUrlEndpoint}] {
+	if p.Config.VCSClientSkipSSLMap[VCSClientMapKey{vcsURLEndpoint}] {
 		h = httpClientSkipSSL
 	} else {
 		h = httpClient

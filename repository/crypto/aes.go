@@ -1,4 +1,4 @@
-package tokens
+package crypto
 
 import (
 	"crypto/aes"
@@ -69,14 +69,10 @@ func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 	return
 }
 
-// ReadKey - Read the encryption key from the shared volume
-func ReadKey(v, f string) ([]byte, error) {
-	log.Println("ReadKey")
-	log.Printf("Volume: %s", v)
-	log.Printf("Filename: %s", f)
-
+// ReadEncryptionKey - Read the encryption key from the shared volume
+func ReadEncryptionKey(v, f string) ([]byte, error) {
+	log.Println("ReadEncryptionKey")
 	fname := fmt.Sprintf("/%s/%s", v, f)
-	log.Printf("Filename: %s", fname)
 	key64chars, err := ioutil.ReadFile(fname)
 	if err != nil {
 		log.Printf("Unable to read encryption key file: %+v\n", err)

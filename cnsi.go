@@ -16,6 +16,8 @@ import (
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
+const dbReferenceError = "Unable to establish a database reference: '%v'"
+
 type v2Info struct {
 	AuthorizationEndpoint  string `json:"authorization_endpoint"`
 	TokenEndpoint          string `json:"token_endpoint"`
@@ -396,9 +398,8 @@ func (p *portalProxy) setCNSIRecord(guid string, c cnsis.CNSIRecord) error {
 	logger.Debug("setCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		msg := "Unable to establish a database reference: '%v'"
-		logger.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		logger.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = cnsiRepo.Save(guid, c)
@@ -415,9 +416,8 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 	logger.Debug("unsetCNSIRecord")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		msg := "Unable to establish a database reference: '%v'"
-		logger.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		logger.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = cnsiRepo.Delete(guid)
@@ -464,9 +464,8 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t tok
 	logger.Debug("setCNSITokenRecord")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		msg := "Unable to establish a database reference: '%v'"
-		logger.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		logger.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t, p.Config.EncryptionKeyInBytes)

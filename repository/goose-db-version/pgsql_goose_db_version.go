@@ -16,7 +16,7 @@ type PostgresGooseDBVersionRepository struct {
 	db *sql.DB
 }
 
-// NewPostgresCNSIRepository will create a new instance of the PostgresInstanceRepository
+// NewPostgresGooseDBVersionRepository will create a new instance of the PostgresInstanceRepository
 func NewPostgresGooseDBVersionRepository(dcp *sql.DB) (Repository, error) {
 	log.Println("NewPostgresGooseDBVersionRepository")
 	return &PostgresGooseDBVersionRepository{db: dcp}, nil

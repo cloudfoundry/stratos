@@ -23,7 +23,7 @@ func getJSON(res *httptest.ResponseRecorder, outputJSON interface{}) error {
 	return json.NewDecoder(res.Body).Decode(outputJSON)
 }
 
-func VersionTestSetup() (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, error) {
+func versionTestSetup() (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, error) {
 	req := setupMockReq("GET", "", map[string]string{
 		"username": "admin",
 		"password": "changeme",
@@ -35,8 +35,8 @@ func VersionTestSetup() (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *
 	return res, e, ctx, pp, err
 }
 
-func VersionTestSetupWithErrorCheck(t *testing.T) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy) {
-	res, e, ctx, pp, err := VersionTestSetup()
+func versionTestSetupWithErrorCheck(t *testing.T) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy) {
+	res, e, ctx, pp, err := versionTestSetup()
 	if err != nil {
 		t.Errorf("getVersions returned an error: %s", err)
 	}
@@ -44,7 +44,7 @@ func VersionTestSetupWithErrorCheck(t *testing.T) (*httptest.ResponseRecorder, *
 }
 
 func VersionTestJSON(t *testing.T) *VersionJSON {
-	res, _, _, _ := VersionTestSetupWithErrorCheck(t)
+	res, _, _, _ := versionTestSetupWithErrorCheck(t)
 
 	receivedJSON := new(VersionJSON)
 	if err := getJSON(res, receivedJSON); err != nil {
@@ -59,7 +59,7 @@ func VersionTestJSON(t *testing.T) *VersionJSON {
 func TestVersionContentType(t *testing.T) {
 	t.Parallel()
 
-	res, _, _, _ := VersionTestSetupWithErrorCheck(t)
+	res, _, _, _ := versionTestSetupWithErrorCheck(t)
 
 	expectedContentType := "application/json; charset=utf-8"
 
@@ -72,7 +72,7 @@ func TestVersionContentType(t *testing.T) {
 func TestVersionStatusCode(t *testing.T) {
 	t.Parallel()
 
-	res, _, _, _ := VersionTestSetupWithErrorCheck(t)
+	res, _, _, _ := versionTestSetupWithErrorCheck(t)
 
 	expectedHTTPStatus := 200
 

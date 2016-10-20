@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/kat-co/vala"
-	_ "github.com/lib/pq"
 )
 
 // DatabaseConfig represents the connection configuration parameters

@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"github.com/hpcloud/portal-proxy/repository/crypto"
 )
 
 const (
@@ -80,13 +82,13 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 	}
 
 	log.Println("Encrypting Auth Token")
-	ciphertextAuthToken, err := EncryptToken(encryptionKey, tr.AuthToken)
+	ciphertextAuthToken, err := crypto.EncryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
 		return err
 	}
 
 	log.Println("Encrypting Refresh Token")
-	ciphertextRefreshToken, err := EncryptToken(encryptionKey, tr.RefreshToken)
+	ciphertextRefreshToken, err := crypto.EncryptToken(encryptionKey, tr.RefreshToken)
 	if err != nil {
 		return err
 	}
@@ -153,13 +155,13 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 	}
 
 	log.Println("Decrypting Auth Token")
-	plaintextAuthToken, err := decryptToken(encryptionKey, ciphertextAuthToken)
+	plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
 	if err != nil {
 		return TokenRecord{}, err
 	}
 
 	log.Println("Decrypting Refresh Token")
-	plaintextRefreshToken, err := decryptToken(encryptionKey, ciphertextRefreshToken)
+	plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
 	if err != nil {
 		return TokenRecord{}, err
 	}
@@ -201,13 +203,13 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	}
 
 	log.Println("Encrypting Auth Token")
-	ciphertextAuthToken, err := EncryptToken(encryptionKey, tr.AuthToken)
+	ciphertextAuthToken, err := crypto.EncryptToken(encryptionKey, tr.AuthToken)
 	if err != nil {
 		return err
 	}
 
 	log.Println("Encrypting Refresh Token")
-	ciphertextRefreshToken, err := EncryptToken(encryptionKey, tr.RefreshToken)
+	ciphertextRefreshToken, err := crypto.EncryptToken(encryptionKey, tr.RefreshToken)
 	if err != nil {
 		return err
 	}
@@ -278,13 +280,13 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 	}
 
 	log.Println("Decrypting Auth Token")
-	plaintextAuthToken, err := decryptToken(encryptionKey, ciphertextAuthToken)
+	plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
 	if err != nil {
 		return TokenRecord{}, err
 	}
 
 	log.Println("Decrypting Refresh Token")
-	plaintextRefreshToken, err := decryptToken(encryptionKey, ciphertextRefreshToken)
+	plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
 	if err != nil {
 		return TokenRecord{}, err
 	}
@@ -340,13 +342,13 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 		}
 
 		log.Println("Decrypting Auth Token")
-		plaintextAuthToken, err := decryptToken(encryptionKey, ciphertextAuthToken)
+		plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
 		if err != nil {
 			return nil, err
 		}
 
 		log.Println("Decrypting Refresh Token")
-		plaintextRefreshToken, err := decryptToken(encryptionKey, ciphertextRefreshToken)
+		plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
 		if err != nil {
 			return nil, err
 		}
@@ -388,53 +390,4 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 	}
 
 	return nil
-}
-
-// Note:
-// When it's time to store the encrypted token in PostgreSQL, it's gets a bit
-// hairy. The encrypted token is binary data, not really text data, which
-// typically has a character set, unlike binary data. Generally speaking, it
-// comes down to one of two choices: store it in a bytea column, and deal with
-// some funkiness; or store it in a text column and make sure to base64 encode
-// it going in and decode it coming out.
-// https://wiki.postgresql.org/wiki/BinaryFilesInDB
-// http://engineering.pivotal.io/post/ByteA_versus_TEXT_in_PostgreSQL/
-// I chose option 1.
-
-// encryptToken - TBD
-func EncryptToken(key []byte, t string) ([]byte, error) {
-	log.Println("encryptToken")
-	var plaintextToken = []byte(t)
-	ciphertextToken, err := Encrypt(key, plaintextToken)
-	if err != nil {
-		msg := "Unable to encrypt token: %v"
-		log.Printf(msg, err)
-		return nil, fmt.Errorf(msg, err)
-	}
-
-	return ciphertextToken, nil
-}
-
-// Note:
-// When it's time to store the encrypted token in PostgreSQL, it's gets a bit
-// hairy. The encrypted token is binary data, not really text data, which
-// typically has a character set, unlike binary data. Generally speaking, it
-// comes down to one of two choices: store it in a bytea column, and deal with
-// some funkiness; or store it in a text column and make sure to base64 encode
-// it going in and decode it coming out.
-// https://wiki.postgresql.org/wiki/BinaryFilesInDB
-// http://engineering.pivotal.io/post/ByteA_versus_TEXT_in_PostgreSQL/
-// I chose option 1.
-
-// decryptToken - TBD
-func decryptToken(key, t []byte) (string, error) {
-	log.Println("decryptToken")
-	plaintextToken, err := Decrypt(key, t)
-	if err != nil {
-		msg := "Unable to decrypt token: %v"
-		log.Printf(msg, err)
-		return "", fmt.Errorf(msg, err)
-	}
-
-	return string(plaintextToken), nil
 }

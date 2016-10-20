@@ -12,6 +12,7 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/hpcloud/portal-proxy/repository/cnsis"
+	"github.com/hpcloud/portal-proxy/repository/crypto"
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
@@ -72,7 +73,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
-	encryptedToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
+	encryptedToken, _ := crypto.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 	var mockTokenRecord = tokens.TokenRecord{
 		AuthToken:    mockUAAToken,
 		RefreshToken: mockUAAToken,
@@ -200,7 +201,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 
 	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
-	encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
+	encryptedUAAToken, _ := crypto.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 
 	// 1) Set up the database expectation for pp.setCNSITokenRecord
 	mock.ExpectQuery(selectAnyFromTokens).
@@ -346,7 +347,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 		RefreshToken: mockUAAToken,
 		TokenExpiry:  tokenExpiration,
 	}
-	encryptedUAAToken, _ := tokens.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
+	encryptedUAAToken, _ := crypto.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
 
 	mock.ExpectQuery(selectAnyFromTokens).
 		WithArgs(mockCNSIGUID, mockUserGUID).
