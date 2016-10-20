@@ -14,6 +14,11 @@
         guid: 'testGuid'
       }
     };
+    var mockErrorResponse = {
+      error: {
+        error_code: 'CF-RouteHostTaken'
+      }
+    };
     var data = {
       path: null,
       port: null,
@@ -24,6 +29,9 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
+    beforeEach(module(function ($exceptionHandlerProvider) {
+      $exceptionHandlerProvider.mode('log');
+    }));
     beforeEach(module({
       'helion.framework.widgets.asyncTaskDialog': function (content, context, actionTask) {
         return {
@@ -87,6 +95,36 @@
       };
 
       modalObj.actionTask(data, dialog);
+      expect(modalObj.context.routeExists()).toBe(false);
+      $httpBackend.flush();
+    });
+
+    it('should raise appropriate error on duplicate route', function () {
+
+      var expectedPostReq = {
+        domain_guid: domainGuid,
+        host: path,
+        space_guid: spaceGuid
+      };
+
+      var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
+
+      $httpBackend.expectGET('/pp/v1/proxy/v2/shared_domains?results-per-page=100').respond(200, {resources: []});
+      $httpBackend.whenPOST('/pp/v1/proxy/v2/routes', expectedPostReq).respond(200, mockErrorResponse);
+
+      var dialog = {
+        context: {
+          options: {
+            domainMap: {}
+          }
+        }
+      };
+
+      modalObj.actionTask(data, dialog).catch(function (err) {
+           expect(err.error).toEqual(mockErrorResponse.error);
+      });
+
+      // expect(modalObj.actionTask(data, dialog)).toThrow();
       $httpBackend.flush();
     });
 
