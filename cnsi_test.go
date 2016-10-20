@@ -21,15 +21,16 @@ func TestRegisterHCFCluster(t *testing.T) {
 	defer mockV2Info.Close()
 
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name":    "Some fancy HCF Cluster",
-		"api_endpoint": mockV2Info.URL,
+		"cnsi_name":           "Some fancy HCF Cluster",
+		"api_endpoint":        mockV2Info.URL,
+		"skip_ssl_validation": "true",
 	})
 
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
 	mock.ExpectExec(insertIntoCNSIs).
-		WithArgs(sqlmock.AnyArg(), "Some fancy HCF Cluster", "hcf", mockV2Info.URL, "https://login.127.0.0.1", "https://uaa.127.0.0.1", "").
+		WithArgs(sqlmock.AnyArg(), "Some fancy HCF Cluster", "hcf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.registerHCFCluster(ctx); err != nil {
@@ -176,15 +177,16 @@ func TestRegisterHCECluster(t *testing.T) {
 	defer mockInfo.Close()
 
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name":    "Some fancy HCE Cluster",
-		"api_endpoint": mockInfo.URL,
+		"cnsi_name":           "Some fancy HCE Cluster",
+		"api_endpoint":        mockInfo.URL,
+		"skip_ssl_validation": "true",
 	})
 
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
 	mock.ExpectExec(insertIntoCNSIs).
-		WithArgs(sqlmock.AnyArg(), "Some fancy HCE Cluster", "hce", mockInfo.URL, "", "", "").
+		WithArgs(sqlmock.AnyArg(), "Some fancy HCE Cluster", "hce", mockInfo.URL, "", "", "", true).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.registerHCECluster(ctx); err != nil {
@@ -269,7 +271,7 @@ func TestRegisterHCEClusterWithInvalidAPIEndpoint(t *testing.T) {
 }
 
 func TestRegisterHCEClusterWithBadV2Request(t *testing.T) {
-	t.Skip("TODO: fix this!")  // https://jira.hpcloud.net/browse/TEAMFOUR-637
+	t.Skip("TODO: fix this!") // https://jira.hpcloud.net/browse/TEAMFOUR-637
 	t.Parallel()
 
 	mockInfo := setupMockServer(t,
@@ -321,7 +323,7 @@ func TestRegisterHCEClusterButCantSaveCNSIRecord(t *testing.T) {
 }
 
 func TestListCNSIs(t *testing.T) {
-	t.Skip("TODO: fix this test")  // https://jira.hpcloud.net/browse/TEAMFOUR-637
+	t.Skip("TODO: fix this test") // https://jira.hpcloud.net/browse/TEAMFOUR-637
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)

@@ -101,8 +101,8 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 		WillReturnRows(expectedCNSITokenRow)
 
 	//  p.getCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
-	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-		AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
+	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}).
+		AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true)
 	mock.ExpectQuery(selectAnyFromCNSIs).
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRecordRow)
