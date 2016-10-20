@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  fdescribe('organization-summary-tile directive', function () {
+  describe('organization-summary-tile directive', function () {
     var $httpBackend, element, controller, notificationCalled;
 
     var clusterGuid = 'guid';
