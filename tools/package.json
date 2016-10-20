@@ -8,7 +8,7 @@
     "lint": "gulp lint",
     "gate-check": "gulp lint && npm test",
     "test-backend": "node test_server.js",
-    "pretest": "npm run update-webdriver",
+    "e2e": "npm run update-webdriver && echo e2e test runner TODO",
     "test": "karma start karma.conf.js --single-run",
     "update-webdriver": "webdriver-manager update",
     "watch": "gulp watch",
