@@ -40,7 +40,7 @@ func TestLoginToUAA(t *testing.T) {
 	pp.Config.HCPIdentityPort = s[1]
 
 	mock.ExpectQuery(selectAnyFromTokens).
-		WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+		WillReturnRows(expectNoRows())
 
 	mock.ExpectExec(insertIntoTokens).
 		// WithArgs(mockUserGUID, "uaa", mockTokenRecord.AuthToken, mockTokenRecord.RefreshToken, newExpiry).
@@ -174,8 +174,8 @@ func TestLoginToCNSI(t *testing.T) {
 		DopplerLoggingEndpoint: mockDopplerEndpoint,
 	}
 
-	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint)
+	expectedCNSIRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}).
+		AddRow(mockCNSIGUID, mockCNSI.Name, stringHCFType, mockUAA.URL, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true)
 
 	mock.ExpectQuery(selectAnyFromCNSIs).
 		WithArgs(mockCNSIGUID).

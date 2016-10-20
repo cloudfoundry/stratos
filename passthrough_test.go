@@ -251,8 +251,8 @@ func TestValidateCNSIListWithValidGUID(t *testing.T) {
 	_, _, _, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
-	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}).
-		AddRow("valid-guid-abc123", "mock-name", "hcf", "http://localhost", "http://localhost", "http://localhost", mockDopplerEndpoint)
+	expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}).
+		AddRow("valid-guid-abc123", "mock-name", "hcf", "http://localhost", "http://localhost", "http://localhost", mockDopplerEndpoint, true)
 	mock.ExpectQuery(selectAnyFromCNSIs).
 		WithArgs("valid-guid-abc123").
 		WillReturnRows(expectedCNSIRecordRow)

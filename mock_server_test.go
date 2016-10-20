@@ -119,6 +119,7 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 		HCPIdentityPort:      "50450",
 		SessionStoreSecret:   "hiddenraisinsohno!",
 		EncryptionKeyInBytes: mockEncryptionKey,
+		SkipTLSVerification:  true,
 	}
 
 	pp := newPortalProxy(pc, db, nil)
@@ -137,18 +138,18 @@ func expectOneRow() sqlmock.Rows {
 
 func expectHCFRow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockHCFGUID, "Some fancy HCF Cluster", "hcf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint)
+		AddRow(mockHCFGUID, "Some fancy HCF Cluster", "hcf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true)
 }
 
 func expectHCERow() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockHCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "")
+		AddRow(mockHCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true)
 }
 
 func expectHCFAndHCERows() sqlmock.Rows {
 	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockHCFGUID, "Some fancy HCF Cluster", "hcf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint).
-		AddRow(mockHCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "")
+		AddRow(mockHCFGUID, "Some fancy HCF Cluster", "hcf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true).
+		AddRow(mockHCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true)
 }
 
 func expectTokenRow() sqlmock.Rows {
@@ -253,14 +254,15 @@ const (
 )
 
 var rowFieldsForToken = []string{"auth_token", "refresh_token", "token_expiry"}
-var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint"}
+var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}
 
 var mockEncryptionKey = make([]byte, 32)
 var mockEncryptedToken, _ = tokens.EncryptToken(mockEncryptionKey, mockUAAToken)
 
 var mockV2InfoResponse = v2Info{
-	AuthorizationEndpoint: mockAuthEndpoint,
-	TokenEndpoint:         mockTokenEndpoint,
+	AuthorizationEndpoint:  mockAuthEndpoint,
+	TokenEndpoint:          mockTokenEndpoint,
+	DopplerLoggingEndpoint: mockDopplerEndpoint,
 }
 
 var mockInfoResponse = v2Info{
