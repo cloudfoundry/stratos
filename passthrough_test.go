@@ -65,7 +65,6 @@ func TestPassthroughDoRequest(t *testing.T) {
 	*/
 	// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers  https://jira.hpcloud.net/browse/TEAMFOUR-636
 	done := make(chan CNSIRequest)
-	kill := make(chan struct{})
 
 	// Set up database expectation for pp.doOauthFlowRequest
 	//  p.getCNSIRequestRecords(cnsiRequest) ->
@@ -80,7 +79,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		WithArgs(mockHCFGUID).
 		WillReturnRows(expectHCFRow())
 
-	go pp.doRequest(mockCNSIRequest, done, kill)
+	go pp.doRequest(mockCNSIRequest, done)
 
 	newCNSIRequest := <-done
 
