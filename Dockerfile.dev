@@ -7,7 +7,6 @@ ARG GROUP_ID
 RUN groupadd -r -g ${GROUP_ID} user && useradd -r -g user -u ${USER_ID} user
 USER user
 
-RUN echo "Running as user with ID $(id -u)" && mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 CMD bash provision.sh && cd tools && node_modules/.bin/gulp watch
