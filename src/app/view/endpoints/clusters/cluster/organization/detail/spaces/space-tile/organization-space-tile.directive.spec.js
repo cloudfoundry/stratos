@@ -2,13 +2,15 @@
   'use strict';
 
   describe('organization-space-tile directive', function () {
-    var $httpBackend, element, controller;
+    var $httpBackend, $uibModal, $q, element, controller, spaceModel, contextScope;
 
     var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';
+    var spaceGuid = 'spaceGuid';
+
     var space = {
       metadata: {
-        guid: 'spaceGuid'
+        guid: spaceGuid
       },
       entity: {
         name: 'spaceName'
@@ -19,12 +21,23 @@
         space: space
       }
     };
+    var organization = {
+      metadata: {
+        guid: organizationGuid
+      },
+      entity: {
+        name: 'orgName'
+      },
+      spaces: [ space ]
+    };
 
     var userGuid = 'userGuid';
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
+      $uibModal = $injector.get('$uibModal');
+      $q = $injector.get('$q');
     }));
 
     afterEach(function () {
@@ -39,7 +52,10 @@
 
       var modelManager = $injector.get('app.model.modelManager');
 
-      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+      var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(organization));
+
+      spaceModel = modelManager.retrieve('cloud-foundry.model.space');
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, _.cloneDeep(modelSpace));
 
       mock.cloudFoundryModel.Auth.initAuthModel(role, userGuid, $injector);
@@ -61,7 +77,7 @@
 
       var $compile = $injector.get('$compile');
 
-      var contextScope = $injector.get('$rootScope').$new();
+      contextScope = $injector.get('$rootScope').$new();
       contextScope.space = space;
 
       var markup = '<organization-space-tile ' +
@@ -105,6 +121,124 @@
 
       it('should have assign users enabled', function () {
         expect(controller.actions[2].disabled).toBeFalsy();
+      });
+
+      describe('Actions', function () {
+
+        it('Rename space - valid input', function () {
+          spyOn($uibModal, 'open').and.callFake(function (config) {
+            expect(config.resolve.context().data.name).toEqual(space.entity.name);
+            expect(config.resolve.context().data.spaceNames).toEqual([space.entity.name]);
+
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.reject('ERROR')
+            };
+          });
+
+          controller.actions[0].execute();
+        });
+
+        it('Rename Space - reject', function () {
+          spyOn(spaceModel, 'updateSpace');
+          expect(controller.cardData().title).toEqual(space.entity.name);
+          spyOn($uibModal, 'open').and.callFake(function () {
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.reject('ERROR')
+            };
+          });
+
+          controller.actions[0].execute();
+          contextScope.$digest();
+
+          expect(spaceModel.updateSpace).not.toHaveBeenCalled();
+          expect(controller.cardData().title).toEqual(space.entity.name);
+        });
+
+        it('Rename Space - invalid output', function () {
+          spyOn(spaceModel, 'updateSpace');
+          expect(controller.cardData().title).toEqual(space.entity.name);
+          spyOn($uibModal, 'open').and.callFake(function (config) {
+            config.resolve.context().submitAction({
+              name: ''
+            });
+
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.resolve()
+            };
+          });
+
+          controller.actions[0].execute();
+          contextScope.$digest();
+
+          expect(spaceModel.updateSpace).not.toHaveBeenCalled();
+          expect(controller.cardData().title).toEqual(space.entity.name);
+        });
+
+        it('Rename Space - valid output, failed update', function () {
+          spyOn(spaceModel, 'updateSpace').and.callFake(function (inClusterGuid, inOrgGuid, inSpaceGuid, inSpace) {
+            expect(inClusterGuid).toEqual(clusterGuid);
+            expect(inOrgGuid).toEqual(organizationGuid);
+            expect(inSpaceGuid).toEqual(spaceGuid);
+            expect(inSpace).toEqual({
+              name: 'NEW_SPACE'
+            });
+            return $q.reject();
+          });
+          expect(controller.cardData().title).toEqual(space.entity.name);
+          spyOn($uibModal, 'open').and.callFake(function (config) {
+            config.resolve.context().submitAction({
+              name: 'NEW_SPACE'
+            });
+
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.resolve()
+            };
+          });
+
+          controller.actions[0].execute();
+          contextScope.$digest();
+
+          expect(spaceModel.updateSpace).toHaveBeenCalled();
+          expect(controller.cardData().title).toEqual(space.entity.name);
+        });
+
+        it('Rename Space - valid output, successful update', function () {
+          spyOn(spaceModel, 'updateSpace').and.callFake(function () {
+            return $q.resolve();
+          });
+          expect(controller.cardData().title).toEqual(space.entity.name);
+          spyOn($uibModal, 'open').and.callFake(function (config) {
+            config.resolve.context().submitAction({
+              name: 'NEW_SPACE'
+            });
+
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.resolve()
+            };
+          });
+
+          controller.actions[0].execute();
+          contextScope.$digest();
+
+          expect(spaceModel.updateSpace).toHaveBeenCalled();
+          expect(controller.cardData().title).toEqual('NEW_SPACE');
+        });
+
       });
     });
 

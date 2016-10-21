@@ -392,6 +392,15 @@
       roles.organization.org_user = true;
     };
 
+    /**
+     * @name app.view.endpoints.clusters.cluster.rolesService.listUsers
+     * @description Fetch a list of users in all organizations the connected user can see. For a cluster admin this is
+     * done in a single call to listAllUsers, for non-cluster admin this is done via a call to each organization they
+     * can see
+     * @param {string} clusterGuid - HCF service guid
+     * @param {boolean} forceRefresh - set to true to always reach out to HCF instead of using cached version
+     * @returns {promise} Promise containing Array of users.
+     */
     this.listUsers = function (clusterGuid, forceRefresh) {
       var isAdmin = stackatoInfo.info.endpoints.hcf[clusterGuid].user.admin;
       if (!forceRefresh && angular.isDefined(promiseForUsers)) {

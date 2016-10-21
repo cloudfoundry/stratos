@@ -2,22 +2,35 @@
   'use strict';
 
   describe('space-summary-tile directive', function () {
-    var $httpBackend, element, controller;
+    var $httpBackend, $uibModal, $q, element, controller, spaceModel, contextScope;
 
     var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';
     var spaceGuid = 'spaceGuid';
 
     var space = {
-      details: {
-        space: {
-          metadata: {
-            guid: spaceGuid
-          }
-        },
-        totalApps: 0,
-        totalServiceInstances: 0
+      metadata: {
+        guid: spaceGuid
+      },
+      entity: {
+        name: 'spaceName'
       }
+    };
+    var modelSpace = {
+      details: {
+        space: space,
+        totalServiceInstances: 0,
+        totalApps: 0
+      }
+    };
+    var organization = {
+      metadata: {
+        guid: organizationGuid
+      },
+      entity: {
+        name: 'orgName'
+      },
+      spaces: [ space ]
     };
     var userGuid = 'userGuid';
 
@@ -25,6 +38,8 @@
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
+      $uibModal = $injector.get('$uibModal');
+      $q = $injector.get('$q');
     }));
 
     function initController($injector, role) {
@@ -37,8 +52,11 @@
 
       var modelManager = $injector.get('app.model.modelManager');
 
-      var spaceModel = modelManager.retrieve('cloud-foundry.model.space');
-      _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, _.cloneDeep(space));
+      var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
+      _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(organization));
+
+      spaceModel = modelManager.retrieve('cloud-foundry.model.space');
+      _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, _.cloneDeep(modelSpace));
 
       mock.cloudFoundryModel.Auth.initAuthModel(role, userGuid, $injector);
 
@@ -59,7 +77,7 @@
 
       var $compile = $injector.get('$compile');
 
-      var contextScope = $injector.get('$rootScope').$new();
+      contextScope = $injector.get('$rootScope').$new();
       contextScope.space = {};
 
       var markup = '<space-summary-tile ' +
@@ -107,6 +125,116 @@
 
       it('should have delete space enabled', function () {
         expect(controller.actions[1].disabled).toBeFalsy();
+      });
+
+      describe('Actions', function () {
+
+        it('Rename space - valid input', function () {
+          spyOn($uibModal, 'open').and.callFake(function (config) {
+            expect(config.resolve.context().data.name).toEqual(space.entity.name);
+            expect(config.resolve.context().data.spaceNames).toEqual([space.entity.name]);
+
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.reject('ERROR')
+            };
+          });
+
+          controller.actions[0].execute();
+        });
+
+        it('Rename Space - reject', function () {
+          spyOn(spaceModel, 'updateSpace');
+          spyOn($uibModal, 'open').and.callFake(function () {
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.reject('ERROR')
+            };
+          });
+
+          controller.actions[0].execute();
+          contextScope.$digest();
+
+          expect(spaceModel.updateSpace).not.toHaveBeenCalled();
+        });
+
+        it('Rename Space - invalid output', function () {
+          spyOn(spaceModel, 'updateSpace');
+          spyOn($uibModal, 'open').and.callFake(function (config) {
+            config.resolve.context().submitAction({
+              name: ''
+            });
+
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.resolve()
+            };
+          });
+
+          controller.actions[0].execute();
+          contextScope.$digest();
+
+          expect(spaceModel.updateSpace).not.toHaveBeenCalled();
+        });
+
+        it('Rename Space - failed update', function () {
+          spyOn(spaceModel, 'updateSpace').and.callFake(function (inClusterGuid, inOrgGuid, inSpaceGuid, inSpace) {
+            expect(inClusterGuid).toEqual(clusterGuid);
+            expect(inOrgGuid).toEqual(organizationGuid);
+            expect(inSpaceGuid).toEqual(spaceGuid);
+            expect(inSpace).toEqual({
+              name: 'NEW_SPACE'
+            });
+            return $q.reject();
+          });
+          spyOn($uibModal, 'open').and.callFake(function (config) {
+            config.resolve.context().submitAction({
+              name: 'NEW_SPACE'
+            });
+
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.resolve()
+            };
+          });
+
+          controller.actions[0].execute();
+          contextScope.$digest();
+
+          expect(spaceModel.updateSpace).toHaveBeenCalled();
+        });
+
+        it('Rename Space - successful update', function () {
+          spyOn(spaceModel, 'updateSpace').and.callFake(function () {
+            return $q.resolve();
+          });
+          spyOn($uibModal, 'open').and.callFake(function (config) {
+            config.resolve.context().submitAction({
+              name: 'NEW_SPACE'
+            });
+
+            return {
+              opened: $q.defer().promise,
+              closed: $q.defer().promise,
+              rendered: $q.defer().promise,
+              result: $q.resolve()
+            };
+          });
+
+          controller.actions[0].execute();
+          contextScope.$digest();
+
+          expect(spaceModel.updateSpace).toHaveBeenCalled();
+        });
+
       });
     });
 
