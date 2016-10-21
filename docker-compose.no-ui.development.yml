@@ -1,0 +1,33 @@
+version: '2'
+services:
+
+  # The development docker-compose file. Starts everything but the UI, useful to run with "gulp dev"
+
+  postgres:
+    extends:
+      file: common.yml
+      service: postgres
+
+
+  goose:
+    extends:
+      file: common.yml
+      service: goose
+    links:
+      - postgres:postgres
+
+
+  proxy:
+    extends:
+      file: common.yml
+      service: proxy
+    links:
+      - goose:goose
+
+
+  nginx:
+    extends:
+      file: common.yml
+      service: nginx
+    links:
+      - proxy:proxy
