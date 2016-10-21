@@ -37,7 +37,7 @@ else
 fi
 
 # Backup existing stackato-db database from stolon cluster and restore it to the single instance
-execBackupRestore
+#execBackupRestore
 
 # Migrate the database if necessary
 echo "Checking database to see if migration is necessary."
