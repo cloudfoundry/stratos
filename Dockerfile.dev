@@ -2,9 +2,10 @@ FROM node:6.9.1
 
 ARG USER_ID
 ARG GROUP_ID
+ARG USER_NAME
 
 # Run this as a normal with the specified ID
-RUN groupadd -r -g ${GROUP_ID} user && useradd -r -g user -u ${USER_ID} user
+RUN groupadd -r -g ${GROUP_ID} ${USER_NAME} && useradd -m -r -g user -u ${USER_ID} ${USER_NAME}
 USER user
 
 WORKDIR /usr/src/app
