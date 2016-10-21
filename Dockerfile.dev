@@ -6,7 +6,7 @@ ARG USER_NAME
 
 # Run this as a normal with the specified ID
 RUN groupadd -r -g ${GROUP_ID} ${USER_NAME} && useradd -m -r -g ${USER_NAME} -u ${USER_ID} ${USER_NAME}
-USER user
+USER ${USER_NAME}
 
 WORKDIR /usr/src/app
 
