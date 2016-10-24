@@ -28,10 +28,14 @@
     it('should invoke detailView', function () {
       cliCommandsFactory.show({
         organization: {
-          name: name
+          entity: {
+            name: name
+          }
         },
         space: {
-          name: name
+          entity: {
+            name: name
+          }
         },
         summary: {
           name: name
