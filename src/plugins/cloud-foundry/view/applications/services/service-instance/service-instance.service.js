@@ -147,7 +147,7 @@
        * @memberof cloud-foundry.view.applications.services.serviceInstanceService
        * @description Delete a service instance.
        * @param {string} cnsiGuid - the CNSI guid
-       * @param {Array} serviceInstanceGuid - the service instance GUID
+       * @param {string} serviceInstanceGuid - the service instance GUID
        * @param {string} serviceInstanceName - the service instance name
        * @param {function=} callbackFunc - an optional callback function
        * @returns {promise} The confirm dialog promise object
@@ -187,7 +187,7 @@
       /**
        * @function viewEnvVariables
        * @memberof cloud-foundry.view.applications.services.serviceInstanceService
-       * @description Unbind service instance from application
+       * @description view the environment variables of an app
        * @param {string} cnsiGuid - the CNSI guid
        * @param {object} appSummary - the application summary data
        * @param {string} serviceKey - the service label
