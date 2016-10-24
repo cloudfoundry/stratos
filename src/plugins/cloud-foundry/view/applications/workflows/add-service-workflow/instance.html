@@ -31,6 +31,10 @@
           <label class="control-label" required translate>
             Name
           </label>
+          <span class="control-message" >
+            <span translate ng-if="addInstanceForm.createNewForm.name.$error.required">Name is required</span>
+            <span translate ng-if="addInstanceForm.createNewForm.name.$error.helionUnique">Name must be unique</span>
+          </span>
           <input type="text" name="name" class="form-control" tabindex="0"
             ng-model="wizardCtrl.options.userInput.name" ng-trim="false"
             helion-unique items="wizardCtrl.options.instanceNames" ignore-case
