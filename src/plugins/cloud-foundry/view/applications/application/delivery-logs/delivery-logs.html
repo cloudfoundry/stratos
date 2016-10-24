@@ -74,7 +74,7 @@
           <tbody>
           <tr ng-repeat="execution in appDelLogsCtrl.displayedExecutions">
             <td><a href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
-            <td ng-if="!execution.result" class="row result-col"></td>
+            <td ng-if="!execution.result" class="row result-col"><div class="pull-left"><spinner></spinner></div></td>
             <td ng-if="execution.result" class="row result-col" id="build-result-col">
               <div ng-switch="execution.result.state" class="pull-left">
                 <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-primary"></span>
