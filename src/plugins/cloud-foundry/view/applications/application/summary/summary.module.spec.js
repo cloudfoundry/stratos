@@ -119,7 +119,6 @@
       });
     });
 
-
     describe('summary action permission', function () {
         // var roles = ['admin', 'space_developer'];
       var roles = ['space_developer'];
