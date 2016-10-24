@@ -77,11 +77,6 @@
       expect(appServicesCtrl.services.length).toBe(0);
     });
 
-    // it('should handle attached services', function () {
-    //   appServicesCtrl.appModel.application.summary = {
-    //     guid: 'app_123'
-    //   };
-    // });
   });
 
 })();
