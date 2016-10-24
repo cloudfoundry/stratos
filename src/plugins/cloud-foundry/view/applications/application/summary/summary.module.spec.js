@@ -178,7 +178,5 @@
         expect($controller.hideManageServices).toBe(true);
       });
     });
-
   });
-
 })();
