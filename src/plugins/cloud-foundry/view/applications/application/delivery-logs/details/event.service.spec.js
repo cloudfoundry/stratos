@@ -2,7 +2,7 @@
   'use strict';
 
   describe('variables manager service', function () {
-    var $controller, modelManager, dialogContext, promise, $httpBackend, $timeout, $log, moment, $q;
+    var $controller, modelManager, dialogContext, promise, $httpBackend, $timeout, $log, $q;
 
     var artifactId = 123;
     var guid = 321;
@@ -28,7 +28,6 @@
 
       $timeout = _$timeout_;
       $log = _$log_;
-      moment = $injector.get('moment');
       modelManager = $injector.get('app.model.modelManager');
 
       var viewEvent = $injector.get('viewEventDetailView');
@@ -46,7 +45,7 @@
       describe("open", function () {
         it("Plumbing", function () {
           /* eslint-disable */
-          new $controller($timeout, $log, dialogContext, undefined, moment, modelManager);
+          new $controller($timeout, $log, dialogContext, undefined, modelManager);
           /* eslint-enable */
           expect(dialogContext.guid).toEqual(guid);
           expect(dialogContext.event).toEqual(event);
@@ -58,10 +57,9 @@
       var controller;
 
       beforeEach(function () {
-        controller = new $controller($timeout, $log, dialogContext, undefined, moment, modelManager);
+        controller = new $controller($timeout, $log, dialogContext, undefined, modelManager);
         expect(controller).toBeDefined();
         expect(controller.log).toBeNull();
-        expect(controller.duration).toBe('a few seconds');
       });
 
       it('Fetch fails', function () {
