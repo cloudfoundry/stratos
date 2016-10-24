@@ -31,7 +31,7 @@
       </thead>
       <tbody>
         <tr ng-repeat="v in applicationVersionsCtrl.versions">
-          <td>{{ v.created_at | date : 'M/d/yy h:mm:ss a' }}</span></td>
+          <td>{{ v.created_at | amDateFormat: 'L - LTS' }}</span></td>
           <td>{{ v.guid }}</td>
           <td>
             <a class="btn-link" ng-click="applicationVersionsCtrl.rollback(v)"
