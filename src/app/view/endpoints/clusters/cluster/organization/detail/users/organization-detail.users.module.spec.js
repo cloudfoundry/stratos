@@ -40,7 +40,16 @@
         var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
         _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, {});
 
-        mock.cloudFoundryModel.Auth.initAuthModel(role, userGuid, $injector);
+        var spaceGuid = "spaceGuid";
+
+        var authModelOpts = {
+          role: role,
+          userGuid: userGuid,
+          cnsiGuid: clusterGuid,
+          spaceGuid: spaceGuid
+        };
+
+        mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
         var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
         stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {

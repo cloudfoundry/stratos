@@ -7,17 +7,21 @@
     var modelOrganization = {
       spaces: []
     };
+
+    var cnsiGuid = 'guid';
+    var orgGuid = 'orgGuid';
+    var spaceGuid = 'spaceGuid';
     var organization = {
-      cnsiGuid: 'guid',
-      guid: 'orgGuid',
+      cnsiGuid: cnsiGuid,
+      guid: orgGuid,
       org: {
         entity: {
           spaces: [{
             metadata: {
-              guid: 'spaceGuid'
+              guid: spaceGuid
             },
             entity: {
-              organization_guid: 'orgGuid'
+              organization_guid: orgGuid
             }
           }]
         }
@@ -48,7 +52,17 @@
       _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid + '.details.org', '');
       _.set(organizationModel, 'organizationNames.' + organization.cnsiGuid, ['orgGuid']);
 
-      mock.cloudFoundryModel.Auth.initAuthModel('admin', userGuid, $injector);
+      var spaceGuid = 'spaceGuid';
+
+      var authModelOpts = {
+        role: 'admin',
+        userGuid: userGuid,
+        cnsiGuid: cnsiGuid,
+        spaceGuid: spaceGuid,
+        orgGuid: orgGuid
+      };
+
+      mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + organization.cnsiGuid + '.user', {
