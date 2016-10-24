@@ -102,6 +102,9 @@
             },
             function (orgData) {
               if (orgData.name && orgData.name.length > 0) {
+                if (that.organization.details.org.entity.name === orgData.name) {
+                  return $q.resolve();
+                }
                 return that.organizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
                   {name: orgData.name})
                   .then(function () {
