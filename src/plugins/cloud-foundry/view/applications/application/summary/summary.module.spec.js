@@ -14,6 +14,7 @@
       var $stateParams = $injector.get('$stateParams');
       var $state = $injector.get('$state');
       var $scope = $injector.get('$rootScope');
+      var $filter = $injector.get('$filter');
       var $log = $injector.get('$log');
       var $q = $injector.get('$q');
       var addRoutesService = $injector.get('cloud-foundry.view.applications.application.summary.addRoutes');
@@ -40,7 +41,7 @@
       _.set(appModel, 'application.summary.space_guid', spaceGuid);
 
       var ApplicationSummaryController = $state.get('cf.applications.application.summary').controller;
-      $controller = new ApplicationSummaryController($state, $stateParams, $log, $q, $scope, modelManager, addRoutesService, editAppService, utils, routesService);
+      $controller = new ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter, modelManager, addRoutesService, editAppService, utils, routesService);
 
       expect($controller).toBeDefined();
       expect($controller).not.toBe(null);

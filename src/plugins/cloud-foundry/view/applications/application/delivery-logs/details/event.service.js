@@ -41,7 +41,6 @@
     '$log',
     'context',
     'content',
-    'moment',
     'app.model.modelManager'
   ];
 
@@ -52,14 +51,13 @@
    * @param {object} $log - the Angular $log service
    * @param {object} context - parameter object passed in to DetailView
    * @param {object} content - configuration object passed in to DetailView
-   * @param {object} moment - the moment timezone component
    * @param {app.model.modelManager} modelManager - the Model management service
    * @property {object} context - parameter object passed in to DetailView
    * @property {object} content - configuration object passed in to DetailView
    * @property {object} log - The log / artifact associated with the event
    * @property {string} duration - The duration of the event
    */
-  function EventDetailViewController($timeout, $log, context, content, moment, modelManager) {
+  function EventDetailViewController($timeout, $log, context, content, modelManager) {
     var vm = this;
     vm.context = context;
     vm.content = content;
@@ -88,11 +86,6 @@
           }
         });
     }, 400);
-
-    // The design shows this as a human readible but vague 'a few seconds' ago. Moment humanize matches this.
-    // Need to loop back and understand the requirement (only show this for a few seconds/show something more accurate
-    // for longer durations/etc)
-    vm.duration = moment.duration(event.duration, 'ms').humanize();
   }
 
 })();

@@ -3,7 +3,8 @@
 
   describe('cluster space detail (services) module', function () {
 
-    var $controller, $httpBackend, $scope, $state, $stateParams, $q, modelManager, serviceInstanceService, utils;
+    var $controller, $httpBackend, $scope, $state, $stateParams, $q, $filter, modelManager,
+      serviceInstanceService, utils;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -39,6 +40,7 @@
       $stateParams.organization = organizationGuid;
       $stateParams.space = spaceGuid;
       $q = $injector.get('$q');
+      $filter = $injector.get('$filter');
       modelManager = $injector.get('app.model.modelManager');
       serviceInstanceService = $injector.get('cloud-foundry.view.applications.services.serviceInstanceService');
       utils = $injector.get('app.utils.utilsService');
@@ -53,7 +55,8 @@
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + spaceGuid, space);
 
       var SpaceServicesController = $state.get('endpoint.clusters.cluster.organization.space.detail.services').controller;
-      $controller = new SpaceServicesController($scope, $state, $stateParams, $q, modelManager, serviceInstanceService, utils);
+      $controller = new SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager,
+        serviceInstanceService, utils);
     }
 
     afterEach(function () {
@@ -63,7 +66,7 @@
 
     it('initial state - fetch services', function () {
       createController({});
-      $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + spaceGuid + '/service_instances?include-relations=service_bindings,service_plan,service,app&inline-relations-depth=2&results-per-page=100&return_user_provided_service_instances=false')
+      $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + spaceGuid + '/service_instances?include-relations=service_bindings,service_plan,service,app&inline-relations-depth=2&results-per-page=100&return_user_provided_service_instances=true')
         .respond({
           resources: [service]
         });
