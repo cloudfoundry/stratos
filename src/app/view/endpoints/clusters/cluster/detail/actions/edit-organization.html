@@ -3,8 +3,8 @@
        ng-class="{'has-error': form.editOrganization.name.$invalid}">
     <label class="control-label" translate>Organization Name</label>
     <span class="control-message">
-      <span translate ng-if="editOrganizationForm.name.$error.required">Name is required</span>
-      <span translate ng-if="editOrganizationForm.name.$error.helionUnique">Name must be unique</span>
+      <span translate ng-if="form.editOrganization.name.$error.required">Name is required</span>
+      <span translate ng-if="form.editOrganization.name.$error.helionUnique">Name must be unique</span>
     </span>
     <input type="text" name="name" auto-focus class="form-control"
            helion-unique items="asyncTaskDialogCtrl.context.data.organizationNames"
