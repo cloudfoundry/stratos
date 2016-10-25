@@ -38,8 +38,8 @@
           },
           {
             apiEndpoint: utils.getClusterEndpoint(appModel.cluster),
-            orgName: appModel.organization.name,
-            spaceName: appModel.space.name,
+            orgName: appModel.organization.entity.name,
+            spaceName: appModel.space.entity.name,
             appName: appModel.summary.name,
             username: username
           }
