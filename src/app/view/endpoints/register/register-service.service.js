@@ -6,6 +6,7 @@
     .factory('app.view.registerService', ServiceRegistrationService);
 
   ServiceRegistrationService.$inject = [
+    '$q',
     'app.model.modelManager',
     'app.view.notificationsService',
     'helion.framework.widgets.asyncTaskDialog'
@@ -15,13 +16,14 @@
    * @name ServiceRegistrationService
    * @description Register a service via a slide out
    * @namespace app.view.registerService.ServiceRegistrationService
+   * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.view.notificationsService} notificationsService The console notification service
    * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
    * @property {function} add Opens slide out containing registration form
    * @constructor
    */
-  function ServiceRegistrationService(modelManager, notificationsService, asyncTaskDialog) {
+  function ServiceRegistrationService($q, modelManager, notificationsService, asyncTaskDialog) {
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
 
     function createInstances(serviceInstances, filter) {
@@ -50,6 +52,12 @@
           url: '',
           skipSslValidation: false
         };
+        var context = {
+          data: data,
+          instances: createInstances(serviceInstanceModel.serviceInstances, type),
+          description: description,
+          urlHint: urlHint
+        };
         return asyncTaskDialog(
           {
             title: title,
@@ -59,18 +67,19 @@
               submit: gettext('Register')
             }
           },
-          {
-            data: data,
-            instances: createInstances(serviceInstanceModel.serviceInstances, type),
-            description: description,
-            urlHint: urlHint
-          },
+          context,
           function () {
             return serviceInstanceModel.create(type, data.url, data.name, data.skipSslValidation).then(function (serviceInstance) {
               notificationsService.notify('success',
                 gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
                 {endpointType: type.toUpperCase(), name: data.name});
               return serviceInstance;
+            }).catch(function (response) {
+              if (response.status === 403) {
+                context.errorMsg = gettext('Endpoint uses a certificate signed by an unknown authority.' +
+                  ' Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.');
+              }
+              return $q.reject(response);
             });
           }
         ).result;
