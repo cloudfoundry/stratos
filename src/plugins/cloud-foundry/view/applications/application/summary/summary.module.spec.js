@@ -121,8 +121,7 @@
     });
 
     describe('summary action permission', function () {
-        // var roles = ['admin', 'space_developer'];
-      var roles = ['space_developer'];
+      var roles = ['admin', 'space_developer'];
 
       _.each(roles, function (role) {
 
