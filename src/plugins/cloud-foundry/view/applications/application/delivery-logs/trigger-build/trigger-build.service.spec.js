@@ -71,10 +71,10 @@
 
       describe('open', function () {
         it('Plumbing / Initial state', function () {
-          /* eslint-disable */
+          /* eslint-disable no-new */
           new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
             githubOauthService);
-          /* eslint-enable */
+          /* eslint-enable no-new */
           expect(dialogContext.project).toEqual(project);
           expect(dialogContext.guid).toEqual(cnsi);
         });

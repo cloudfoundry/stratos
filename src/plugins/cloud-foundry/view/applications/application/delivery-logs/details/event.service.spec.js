@@ -44,9 +44,9 @@
 
       describe('open', function () {
         it('Plumbing', function () {
-          /* eslint-disable */
+          /* eslint-disable no-new */
           new $controller($timeout, $log, dialogContext, undefined, modelManager);
-          /* eslint-enable */
+          /* eslint-enable no-new */
           expect(dialogContext.guid).toEqual(guid);
           expect(dialogContext.event).toEqual(event);
         });

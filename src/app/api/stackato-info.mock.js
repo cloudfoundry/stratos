@@ -25,5 +25,5 @@
     }
   };
 
-  /* eslint-enable quote-props */
+  /* eslint-enable quote-props, quotes */
 })(this.mock = this.mock || {});
