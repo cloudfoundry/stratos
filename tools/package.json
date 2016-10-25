@@ -61,7 +61,7 @@
     "karma-wiredep": "1.0.1",
     "lodash": "^4.13.1",
     "minimatch": "^3.0.2",
-    "phantomjs-prebuilt": "2.1.11",
+    "phantomjs-prebuilt": "^2.1.0",
     "prompt": "^0.2.14",
     "protractor": "^4.0.0",
     "q": "^1.4.1",
