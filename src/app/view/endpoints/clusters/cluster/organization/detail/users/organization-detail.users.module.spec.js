@@ -40,7 +40,7 @@
         var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
         _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, {});
 
-        var spaceGuid = "spaceGuid";
+        var spaceGuid = 'spaceGuid';
 
         var authModelOpts = {
           role: role,
