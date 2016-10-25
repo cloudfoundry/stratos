@@ -90,9 +90,7 @@
           return that.routeModel.createRoute(cnsiGuid, data, params)
             .then(function (response) {
               if (!(response.metadata && response.metadata.guid)) {
-                /* eslint-disable no-throw-literal */
                 throw response;
-                /* eslint-enable no-throw-literal */
               }
               var routeId = response.metadata.guid;
               return that.routeModel.associateAppWithRoute(cnsiGuid, routeId, applicationId);

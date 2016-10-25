@@ -21,10 +21,10 @@
 
     var notificationTarget = {
       id: 10,
-      name: "test2",
-      token: "5c424372c",
-      type: "slack1",
-      location: "test2",
+      name: 'test2',
+      token: '5c424372c',
+      type: 'slack1',
+      location: 'test2',
       createdDate: null
     };
 

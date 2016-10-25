@@ -342,7 +342,7 @@
       var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
       var orgGuid = org.metadata.guid;
       var orgQuotaGuid = org.entity.quota_definition_guid;
-      var createdDate = moment(org.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
+      var createdDate = moment(org.metadata.created_at, 'YYYY-MM-DDTHH:mm:ssZ');
       var userGuid = stackatoInfoModel.info.endpoints.hcf[cnsiGuid].user.guid;
 
       function getRoles(org) {

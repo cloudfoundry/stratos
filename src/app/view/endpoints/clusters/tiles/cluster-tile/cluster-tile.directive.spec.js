@@ -5,21 +5,21 @@
     var $scope, $q, $state, element, clusterTileCtrl, $compile, cfAPIUsers, cfAPIOrg, stackatoInfo;
 
     var initialService = {
-      guid: "f7fbd0c7-1ce9-4e74-a891-7ffb16453af2",
-      name: "lol",
-      cnsi_type: "hcf",
+      guid: 'f7fbd0c7-1ce9-4e74-a891-7ffb16453af2',
+      name: 'lol',
+      cnsi_type: 'hcf',
       api_endpoint: {
-        Scheme: "https",
-        Opaque: "",
+        Scheme: 'https',
+        Opaque: '',
         User: null,
-        Host: "api.hcf.helion.lol",
-        Path: "",
-        RawPath: "",
-        RawQuery: "",
-        Fragment: ""
+        Host: 'api.hcf.helion.lol',
+        Path: '',
+        RawPath: '',
+        RawQuery: '',
+        Fragment: ''
       },
-      authorization_endpoint: "https://login.hcf.helion.lol",
-      token_endpoint: "https://uaa.hcf.helion.lol"
+      authorization_endpoint: 'https://login.hcf.helion.lol',
+      token_endpoint: 'https://uaa.hcf.helion.lol'
     };
 
     beforeEach(module('templates'));
