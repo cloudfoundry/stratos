@@ -37,7 +37,8 @@
        st-safe-src="appDelLogsCtrl.parsedHceModel.pipelineExecutions"
        st-set-filter="deliveryLogsBuildFilter"
        >
-    <div id="delivery-logs-search" class="panel panel-default delivery-logs-search">
+    <div id="delivery-logs-search" class="panel panel-default delivery-logs-search"
+         ng-if="appDelLogsCtrl.displayedExecutions.length > 0">
       <form>
         <div class="form-group search-field" focusable-input>
           <label class="control-label" for="build-search" required translate>
@@ -60,7 +61,16 @@
           <span translate>Trigger Build</span>
         </a>
       </div>
-      <div class="panel panel-default">
+
+      <div ng-if="appDelLogsCtrl.displayedExecutions.length < 1"
+           class="panel panel-default">
+        <div class="panel-body" translate>
+          You have no builds
+        </div>
+      </div>
+
+      <div ng-if="appDelLogsCtrl.displayedExecutions.length > 0"
+           class="panel panel-default">
         <table class="table table-actionable" >
           <thead>
           <tr>
