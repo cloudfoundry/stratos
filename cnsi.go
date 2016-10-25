@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,6 +27,15 @@ type v2Info struct {
 
 type hceInfo struct {
 	AuthorizationEndpoint string `json:"auth_endpoint"`
+}
+
+func isUnknownAuthorityError(err error) bool {
+	if urlErr, ok := err.(*url.Error); ok {
+		if _, ok = urlErr.Err.(x509.UnknownAuthorityError); ok {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *portalProxy) registerHCFCluster(c echo.Context) error {
@@ -67,6 +77,13 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	v2InfoResponse, err := getHCFv2Info(apiEndpoint, skipSSLValidation)
 	if err != nil {
+		if isUnknownAuthorityError(err) {
+			return newHTTPShadowError(
+				http.StatusForbidden,
+				"Certificate issuer is unknown",
+				"Certificate issuer is unknown: %v",
+				err)
+		}
 		return newHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to get endpoint v2/info",
@@ -135,6 +152,13 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 
 	infoResponse, err := getHCEInfo(apiEndpoint, skipSSLValidation)
 	if err != nil {
+		if isUnknownAuthorityError(err) {
+			return newHTTPShadowError(
+				http.StatusForbidden,
+				"Certificate issuer is unknown",
+				"Certificate issuer is unknown: %v",
+				err)
+		}
 		return newHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to get endpoint 'info'",
