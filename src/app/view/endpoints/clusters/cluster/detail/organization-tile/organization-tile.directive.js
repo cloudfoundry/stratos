@@ -118,6 +118,9 @@
             },
             function (orgData) {
               if (orgData.name && orgData.name.length > 0) {
+                if (that.organization.org.entity.name === orgData.name) {
+                  return $q.resolve();
+                }
                 return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
                   {name: orgData.name})
                   .then(function () {

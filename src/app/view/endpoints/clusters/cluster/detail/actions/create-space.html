@@ -1,6 +1,6 @@
-<form class="create-space-form" name="createSpaceForm">
+<form class="create-space-form" name="form.createSpace">
   <div class="form-group organizations-drop-down" focusable-input
-       ng-class="{'has-error': createSpaceForm.name.$invalid && createSpaceForm.name.$dirty}">
+       ng-class="{'has-error': form.createSpace.name.$invalid}">
     <label class="control-label" translate>Organization</label>
     <select-input
       arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
@@ -11,7 +11,7 @@
   </div>
 
   <div ng-repeat="space in asyncTaskDialogCtrl.context.data.spaces track by $index" class="form-group" focusable-input
-       ng-class="{'has-error': createSpaceForm['name' + $index].$invalid && createSpaceForm['name' + $index].$dirty}">
+       ng-class="{'has-error': form.createSpace['name' + $index].$invalid && form.createSpace['name' + $index].$dirty}">
     <label class="control-label" translate>Space Name{{ $index > 0 ? ' ' + ($index + 1) : ''}}</label>
     <input type="text" name="name{{ $index }}" auto-focus class="form-control"
            ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]"
