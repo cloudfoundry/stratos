@@ -192,7 +192,7 @@
       };
     },
 
-    ListAllServicesForSpace: function(guid) {
+    ListAllServicesForSpace: function (guid) {
       return {
         url: '/pp/v1/proxy/v2/spaces/' + guid + '/services?results-per-page=100',
         response: {
