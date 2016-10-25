@@ -30,7 +30,7 @@
 
         <dt translate>MODIFIED</dt>
         <dd class="pull-right" ng-if="appCtrl.model.application.summary.package_updated_at">
-          {{ appCtrl.model.application.summary.package_updated_at | date : 'M/d/yy h:mm:ss a'}}
+          {{ appCtrl.model.application.summary.package_updated_at | amDateFormat: 'L - LTS' }}
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
 
