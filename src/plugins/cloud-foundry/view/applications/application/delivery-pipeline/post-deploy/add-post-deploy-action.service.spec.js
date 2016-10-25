@@ -59,7 +59,7 @@
         .respond(200, {credential_id: 2});
 
       var addPipelineRequest = {
-        task_type: "stormrunner",
+        task_type: 'stormrunner',
         task_label: data.actionName,
         project_id: hceProjectId,
         credential_id: 2,

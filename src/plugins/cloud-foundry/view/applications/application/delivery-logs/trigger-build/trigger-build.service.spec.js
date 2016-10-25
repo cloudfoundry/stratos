@@ -69,8 +69,8 @@
 
     describe('Factory', function () {
 
-      describe("open", function () {
-        it("Plumbing / Initial state", function () {
+      describe('open', function () {
+        it('Plumbing / Initial state', function () {
           /* eslint-disable */
           new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
             githubOauthService);

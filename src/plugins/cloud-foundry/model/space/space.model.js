@@ -479,7 +479,7 @@
       var spaceQuotaGuid = space.entity.space_quota_definition_guid;
 
       var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
-      var createdDate = moment(space.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
+      var createdDate = moment(space.metadata.created_at, 'YYYY-MM-DDTHH:mm:ssZ');
 
       var spaceQuotaApi = that.apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
 

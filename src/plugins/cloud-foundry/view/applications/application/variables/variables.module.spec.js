@@ -26,25 +26,25 @@
       expect($controller.isObject).toBeDefined();
     }));
 
-    it("isObject checks", function () {
+    it('isObject checks', function () {
       expect($controller.isObject(123)).toBe(false);
       expect($controller.isObject({name: true})).toBe(true);
       expect($controller.isObject(['name'])).toBe(true);
     });
 
-    describe("no variables checks", function () {
+    describe('no variables checks', function () {
       beforeEach(inject(function ($injector) {
         var modelManager = $injector.get('app.model.modelManager');
         var model = modelManager.retrieve('cloud-foundry.model.application');
         model.application = {variables: undefined};
       }));
 
-      it("should not have any variables", function () {
+      it('should not have any variables', function () {
         expect($controller.hasVariables()).toBe(false);
       });
     });
 
-    describe("with variables checks", function () {
+    describe('with variables checks', function () {
       beforeEach(inject(function ($injector) {
         var modelManager = $injector.get('app.model.modelManager');
         //variables.environment_json
@@ -60,18 +60,18 @@
         };
       }));
 
-      it("should have variables", function () {
+      it('should have variables', function () {
         expect($controller.hasVariables()).toBe(true);
       });
     });
 
-    describe("refresh", function () {
+    describe('refresh', function () {
       var $httpBackend;
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
       }));
 
-      it("should handle failure", function () {
+      it('should handle failure', function () {
         $httpBackend.when('GET', '/pp/v1/proxy/v2/apps/' + guid + '/env').respond(500, {error: 'Test 500'});
         $httpBackend.expectGET('/pp/v1/proxy/v2/apps/' + guid + '/env');
         $controller.refreshVariables();
@@ -80,7 +80,7 @@
         expect($controller.isBusy).toBe(false);
       });
 
-      it("should handle success", function () {
+      it('should handle success', function () {
         var data = {
           environment_json: {
             env_1: 'test1'
@@ -99,7 +99,7 @@
       });
     });
 
-    describe("add", function () {
+    describe('add', function () {
       var $httpBackend;
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
@@ -107,7 +107,7 @@
         $httpBackend.expectGET('/pp/v1/proxy/v2/apps/' + guid + '/env');
       }));
 
-      it("should not refresh when add fails", function () {
+      it('should not refresh when add fails', function () {
         var controller = createController({
           add: function () {
             return $q.reject();
@@ -120,7 +120,7 @@
         expect(controller.refreshVariables).not.toHaveBeenCalled();
       });
 
-      it("should refresh when add succeeds", function () {
+      it('should refresh when add succeeds', function () {
         var controller = createController({
           add: function () {
             return $q.resolve();
@@ -134,7 +134,7 @@
       });
     });
 
-    describe("edit", function () {
+    describe('edit', function () {
       var $httpBackend;
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
@@ -142,7 +142,7 @@
         $httpBackend.expectGET('/pp/v1/proxy/v2/apps/' + guid + '/env');
       }));
 
-      it("should not refresh when edit fails", function () {
+      it('should not refresh when edit fails', function () {
         var controller = createController({
           edit: function (cnsi, guid, name) {
             expect(name).toBe('test_123');
@@ -156,7 +156,7 @@
         expect(controller.refreshVariables).not.toHaveBeenCalled();
       });
 
-      it("should refresh when edit succeeds", function () {
+      it('should refresh when edit succeeds', function () {
         var controller = createController({
           edit: function (cnsi, guid, name) {
             expect(name).toBe('test_123');
@@ -171,7 +171,7 @@
       });
     });
 
-    describe("delete", function () {
+    describe('delete', function () {
       var $httpBackend;
       beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
@@ -179,7 +179,7 @@
         $httpBackend.expectGET('/pp/v1/proxy/v2/apps/' + guid + '/env');
       }));
 
-      it("should not refresh when delete fails", function () {
+      it('should not refresh when delete fails', function () {
         var controller = createController({
           delete: function (cnsi, guid, name) {
             expect(name).toBe('test_123');
@@ -196,7 +196,7 @@
         expect(controller.isBusy).toBe(false);
       });
 
-      it("should refresh when delete succeeds", function () {
+      it('should refresh when delete succeeds', function () {
         var controller = createController({
           delete: function (cnsi, guid, name) {
             expect(name).toBe('test_123');

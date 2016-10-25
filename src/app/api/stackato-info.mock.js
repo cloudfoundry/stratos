@@ -1,7 +1,7 @@
 (function (mock) {
   'use strict';
 
-  /* eslint-disable quote-props */
+  /* eslint-disable quote-props, quotes */
   mock.stackatoInfoAPI = mock.stackatoInfoAPI || {};
 
   mock.stackatoInfoAPI.Routes = {

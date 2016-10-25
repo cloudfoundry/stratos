@@ -42,8 +42,8 @@
 
     describe('Factory', function () {
 
-      describe("open", function () {
-        it("Plumbing", function () {
+      describe('open', function () {
+        it('Plumbing', function () {
           /* eslint-disable */
           new $controller($timeout, $log, dialogContext, undefined, modelManager);
           /* eslint-enable */
