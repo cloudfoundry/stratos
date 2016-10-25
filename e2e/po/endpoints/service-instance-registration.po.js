@@ -1,7 +1,7 @@
 'use strict';
 
-var helpers = require('./helpers.po');
-var credentialsFormHelper = require('./credentials-form.po');
+var helpers = require('../helpers.po');
+var credentialsFormHelper = require('../widgets/credentials-form.po');
 
 module.exports = {
 

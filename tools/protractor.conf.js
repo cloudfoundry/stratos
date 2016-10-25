@@ -6,7 +6,9 @@ var acceptanceTests = [
   '../e2e/acceptance/service-instance-registration.spec.js',
   '../e2e/acceptance/endpoints-dashboard.spec.js',
   '../e2e/acceptance/endpoints-list-hce.spec.js',
-  '../e2e/acceptance/endpoints-list-hcf.spec.js'
+  '../e2e/acceptance/endpoints-list-hcf.spec.js',
+  '../e2e/acceptance/applications.add-app.spec.js',
+  '../e2e/acceptance/applications.gallery.spec.js'
 ];
 
 exports.config = {
@@ -91,7 +93,6 @@ exports.config = {
 
     // Optional. Really nice to see the progress of the tests while executing
     var SpecReporter = require('jasmine-spec-reporter');
-    //
     jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'specs'}));
   },
 
