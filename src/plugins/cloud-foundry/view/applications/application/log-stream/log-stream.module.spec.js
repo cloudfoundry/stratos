@@ -2,13 +2,12 @@
   'use strict';
 
   describe('app details - log-stream view', function () {
-    var $httpBackend, $scope, appLogStreamController;
+    var $httpBackend, appLogStreamController;
 
     beforeEach(module('green-box-console'));
 
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      $scope = $injector.get('$rootScope').$new();
       var modelManager = $injector.get('app.model.modelManager');
       var $stateParams = $injector.get('$stateParams');
       var $location = $injector.get('$location');
