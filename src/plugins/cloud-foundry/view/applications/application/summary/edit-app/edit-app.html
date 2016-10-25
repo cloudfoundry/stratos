@@ -8,7 +8,7 @@
   <div class="form-group" focusable-input>
     <label class="control-label" translate>Memory Usage</label>
     <div class="input-group">
-      <input type="number" name="memory" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.memory"
+      <input type="number" min="1" name="memory" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.memory"
              required
       />
       <label class="input-group-addon rm-background" translate>MB</label>
@@ -16,7 +16,7 @@
   </div>
   <div class="form-group " focusable-input>
     <label class="control-label" translate>Instances</label>
-    <input type="number" name="instances" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.instances"
+    <input type="number" min="0" name="instances" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.instances"
            required
     />
   </div>
