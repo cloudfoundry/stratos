@@ -105,7 +105,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	// Graceful close of WebSocket, not really needed
 	//defer clientWebSocket.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Time{})
 
-	// HSC-1276 - handle ping messages and reset the read deadline
+	// HSC-1276 - handle pong messages and reset the read deadline
 	clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
 	clientWebSocket.SetPongHandler(func(string) error {
 		clientWebSocket.SetReadDeadline(time.Now().Add(pongWait));
