@@ -186,6 +186,9 @@
     /* eslint-disable no-unused-vars */
     isAllowed: function (cnsiGuid, resourceType, action) {
       var args = Array.prototype.slice.call(arguments);
+      if (!this.isInitialized(cnsiGuid)) {
+        return false;
+      }
       return this.principal[cnsiGuid].isAllowed.apply(this.principal[cnsiGuid], args.slice(1));
     },
     /* eslint-enable no-unused-vars */
@@ -227,15 +230,12 @@
     doesUserHaveRole: function (cnsiGuid, role) {
 
       // convenience method implemented for Application permissions
-      var cnsiPrincipal = this.principal[cnsiGuid];
-      if (_.isUndefined(cnsiPrincipal) || _.isNull(cnsiPrincipal)) {
-        // Principal object is probably being initialised
-        // Unable to ascertain is user has role now
+      if (!this.isInitialized(cnsiGuid)) {
         return false;
       }
       var hasRole = false;
       if (role === 'space_developer') {
-        hasRole = cnsiPrincipal.userSummary.spaces.all.length > 0;
+        hasRole = this.principal[cnsiGuid].userSummary.spaces.all.length > 0;
       }
       return hasRole;
     },
@@ -260,7 +260,9 @@
       } else {
         // Is any of the organization's spaces valid?
         for (var spaceGuid in org.spaces) {
-          if (!org.spaces.hasOwnProperty(spaceGuid)) { continue; }
+          if (!org.spaces.hasOwnProperty(spaceGuid)) {
+            continue;
+          }
           var space = org.spaces[spaceGuid];
           if (that.isAllowed(cnsiGuid, resourceType, action, space.metadata.guid, orgGuid, true)) {
             return true;
@@ -277,6 +279,9 @@
      * @returns {boolean}
      */
     isAdmin: function (cnsiGuid) {
+      if (!this.isInitialized(cnsiGuid)) {
+        return false;
+      }
       return this.principal[cnsiGuid].isAdmin;
     },
 
