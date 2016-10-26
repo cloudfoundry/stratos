@@ -108,7 +108,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	// HSC-1276 - handle pong messages and reset the read deadline
 	clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
 	clientWebSocket.SetPongHandler(func(string) error {
-		clientWebSocket.SetReadDeadline(time.Now().Add(pongWait));
+		clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
 
@@ -117,7 +117,7 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	defer ticker.Stop()
 	go func() {
 		for range ticker.C {
-			clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteTimeout));
+			clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteTimeout))
 		}
 	}()
 
