@@ -18,12 +18,14 @@ import (
 )
 
 const (
-	// Time allowed to read the next pong message from the peer.
+	// Time allowed to read the next pong message from the peer
 	pongWait = 30 * time.Second
 
-	// Send pings to peer with this period. Must be less than pongWait.
+	// Send ping messages to peer with this period (must be less than pongWait)
 	pingPeriod = (pongWait * 9) / 10
-	pingWriteDeadline = 10 * time.Second
+
+	// Time allowed to write a ping message
+	pingWriteTimeout = 10 * time.Second
 )
 
 // Allow connections from any Origin
@@ -103,12 +105,19 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	// Graceful close of WebSocket, not really needed
 	//defer clientWebSocket.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Time{})
 
+	// HSC-1276 - handle ping messages and reset the read deadline
+	clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
+	clientWebSocket.SetPongHandler(func(string) error {
+		clientWebSocket.SetReadDeadline(time.Now().Add(pongWait));
+		return nil
+	})
+
 	// HSC-1276 - send regular Pings to prevent the WebSocket being closed on us
 	ticker := time.NewTicker(pingPeriod)
 	defer ticker.Stop()
 	go func() {
 		for range ticker.C {
-			clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteDeadline));
+			clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteTimeout));
 		}
 	}()
 
