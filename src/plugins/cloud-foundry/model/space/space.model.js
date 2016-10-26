@@ -596,6 +596,13 @@
       });
     },
 
+    refreshSpaceAndAuth: function (cnsiGuid, organizationModel, orgGuid) {
+      var authModel = this.modelManager.retrieve('cloud-foundry.model.auth');
+      var initializeAuthModelPromise = authModel.initializeForEndpoint(cnsiGuid, true);
+      var refreshOrgSpacesPromise = organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+      return this.$q.all([initializeAuthModelPromise, refreshOrgSpacesPromise]);
+    },
+
     createSpaces: function (cnsiGuid, orgGuid, spaceNames, params) {
       var that = this;
 
@@ -625,12 +632,13 @@
 
       return that.$q.all(createPromises).then(function () {
         // Refresh the spaces
-        return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+        return that.refreshSpaceAndAuth(cnsiGuid, organizationModel, orgGuid);
       });
 
     },
 
     deleteSpace: function (cnsiGuid, orgGuid, spaceGuid) {
+      var that = this;
       var params = {
         recursive: false,
         async: false
@@ -638,7 +646,7 @@
       var organizationModel = this._getOrganizationModel();
       return this.spaceApi.DeleteSpace(spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
         // Refresh the spaces
-        return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+        return that.refreshSpaceAndAuth(cnsiGuid, organizationModel, orgGuid);
       });
     },
 
