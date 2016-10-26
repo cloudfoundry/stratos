@@ -121,7 +121,7 @@
       };
 
       modalObj.actionTask(data, dialog).catch(function (err) {
-        expect(err.error).toEqual(mockErrorResponse.data.error);
+        expect(err.data.error).toEqual(mockErrorResponse.error);
       });
 
       // expect(modalObj.actionTask(data, dialog)).toThrow();
@@ -177,4 +177,5 @@
     });
 
   });
-})();
+})
+();
