@@ -160,7 +160,7 @@ rules:
 
   # Require return statements to either always or never specify values
   # http://eslint.org/docs/rules/consistent-return
-  consistent-return: 2
+  consistent-return: 0
 
   # Specify curly brace conventions for all control statements
   # http://eslint.org/docs/rules/curly
@@ -203,8 +203,10 @@ rules:
   no-else-return: 0
 
   # Disallow use of labels for anything other then loops and switches
-  # http://eslint.org/docs/rules/no-empty-label
-  no-empty-label: 2
+  # http://eslint.org/docs/rules/no-labels
+  no-labels:
+    - 2
+    - {allowLoop: true, allowSwitch: true}
 
   # Disallow use of empty destructuring patterns
   # http://eslint.org/docs/rules/no-empty-pattern
@@ -249,10 +251,6 @@ rules:
   # Disallow usage of __iterator__ property
   # http://eslint.org/docs/rules/no-iterator
   no-iterator: 2
-
-  # Disallow use of labeled statements
-  # http://eslint.org/docs/rules/no-labels
-  no-labels: 2
 
   # Disallow unnecessary nested blocks
   # http://eslint.org/docs/rules/no-lone-blocks
@@ -712,7 +710,10 @@ rules:
 
   # Specify whether backticks, double or single quotes should be used
   # http://eslint.org/docs/rules/quotes
-  quotes: 0
+  quotes:
+    - 2
+    - single
+    - avoidEscape: true
 
   # Require JSDoc comment
   # http://eslint.org/docs/rules/require-jsdoc
@@ -736,8 +737,8 @@ rules:
   sort-vars: 0
 
   # Require a space after certain keywords
-  # http://eslint.org/docs/rules/space-after-keywords
-  space-after-keywords: 2
+  # http://eslint.org/docs/rules/keyword-spacing
+  keyword-spacing: 2
 
   # Require or disallow space before blocks
   # http://eslint.org/docs/rules/space-before-blocks
@@ -764,10 +765,6 @@ rules:
   # Require spaces around operators
   # http://eslint.org/docs/rules/space-infix-ops
   space-infix-ops: 2
-
-  # Require a space after return, throw, and case
-  # http://eslint.org/docs/rules/space-return-throw-case
-  space-return-throw-case: 2
 
   # Require or disallow spaces before/after unary operators
   # http://eslint.org/docs/rules/space-unary-ops

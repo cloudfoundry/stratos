@@ -96,7 +96,7 @@
       that.updateVisibleExecutions(visibleExecutions);
     }, 500);
 
-    $scope.$on("$destroy", function () {
+    $scope.$on('$destroy', function () {
       if (that.debouncedUpdateVisibleExecutions) {
         that.debouncedUpdateVisibleExecutions.cancel();
       }

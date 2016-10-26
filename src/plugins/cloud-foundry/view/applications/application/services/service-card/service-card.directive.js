@@ -101,7 +101,7 @@
      * @function init
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
      * @description Fetch service bindings for this app and update content
-     * @returns {promise} A promise object
+     * @returns {undefined}
      */
     init: function () {
       var serviceInstances = this.getServiceInstanceGuids();
@@ -158,7 +158,7 @@
      * @function addService
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
      * @description Show the add service detail view
-     * @returns {void}
+     * @returns {undefined}
      */
     addService: function () {
       var config = {
@@ -175,7 +175,7 @@
      * @function detach
      * @memberof cloud-foundry.view.applications.application.services.serviceCard.ServiceCardController
      * @description Detach service instance from app
-     * @returns {promise} A promise
+     * @returns {undefined}
      */
     detach: function () {
       if (this.serviceBindings.length === 1) {

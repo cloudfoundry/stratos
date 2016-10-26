@@ -70,7 +70,7 @@
       mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
       var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      stackatoInfo = _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
+      _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
         guid: 'user_guid',
         admin: true
       });

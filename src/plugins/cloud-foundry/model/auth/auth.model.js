@@ -183,12 +183,12 @@
      * @param {string} action - action (create, delete, update..)
      * @returns {*}
      */
-    /* eslint-disable */
+    /* eslint-disable no-unused-vars */
     isAllowed: function (cnsiGuid, resourceType, action) {
       var args = Array.prototype.slice.call(arguments);
       return this.principal[cnsiGuid].isAllowed.apply(this.principal[cnsiGuid], args.slice(1));
     },
-    /* eslint-enable */
+    /* eslint-enable no-unused-vars */
 
     /**
      * @name isInitialized

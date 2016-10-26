@@ -65,9 +65,8 @@
             // Reject the promise and change the status code to indicate a server error
             response.status = 500;
             return that.$q.reject(response);
-          } else {
-            that.onLoggedIn(response);
           }
+          that.onLoggedIn(response);
         });
     },
 

@@ -1,7 +1,7 @@
 (function (mock) {
   'use strict';
 
-  /* eslint-disable quote-props */
+  /* eslint-disable quote-props, quotes */
   mock.UserServiceInstanceApi = mock.UserServiceInstanceApi || {};
 
   mock.UserServiceInstanceApi = {
@@ -37,5 +37,5 @@
     }
   };
 
-  /* eslint-enable quote-props */
+  /* eslint-enable quote-props, quotes */
 })(this.mock = this.mock || {});
