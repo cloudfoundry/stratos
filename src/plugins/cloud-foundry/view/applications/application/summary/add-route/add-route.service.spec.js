@@ -110,7 +110,7 @@
       var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
 
       $httpBackend.expectGET('/pp/v1/proxy/v2/shared_domains?results-per-page=100').respond(200, {resources: []});
-      $httpBackend.whenPOST('/pp/v1/proxy/v2/routes', expectedPostReq).respond(200, mockErrorResponse);
+      $httpBackend.whenPOST('/pp/v1/proxy/v2/routes', expectedPostReq).respond(200, {data: mockErrorResponse});
 
       var dialog = {
         context: {
@@ -121,7 +121,7 @@
       };
 
       modalObj.actionTask(data, dialog).catch(function (err) {
-        expect(err.error).toEqual(mockErrorResponse.error);
+        expect(err.error).toEqual(mockErrorResponse.data.error);
       });
 
       // expect(modalObj.actionTask(data, dialog)).toThrow();
