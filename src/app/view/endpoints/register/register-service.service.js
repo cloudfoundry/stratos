@@ -69,6 +69,11 @@
           },
           context,
           function () {
+
+            if (context.customErrorMsg) {
+              delete context.errorMsg;
+              delete context.customErrorMsg;
+            }
             return serviceInstanceModel.create(type, data.url, data.name, data.skipSslValidation).then(function (serviceInstance) {
               notificationsService.notify('success',
                 gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
@@ -78,6 +83,8 @@
               if (response.status === 403) {
                 context.errorMsg = gettext('Endpoint uses a certificate signed by an unknown authority.' +
                   ' Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.');
+                // Set flag to indicate that we are setting an error message in code, should be unset upon next retry
+                context.customErrorMsg = true;
               }
               return $q.reject(response);
             });
