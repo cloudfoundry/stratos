@@ -17,6 +17,17 @@ import (
 	"github.com/labstack/echo/engine/standard"
 )
 
+const (
+	// Time allowed to read the next pong message from the peer
+	pongWait = 30 * time.Second
+
+	// Send ping messages to peer with this period (must be less than pongWait)
+	pingPeriod = (pongWait * 9) / 10
+
+	// Time allowed to write a ping message
+	pingWriteTimeout = 10 * time.Second
+)
+
 // Allow connections from any Origin
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
@@ -93,6 +104,22 @@ func (p *portalProxy) appStream(c echo.Context) error {
 	defer clientWebSocket.Close()
 	// Graceful close of WebSocket, not really needed
 	//defer clientWebSocket.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Time{})
+
+	// HSC-1276 - handle pong messages and reset the read deadline
+	clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
+	clientWebSocket.SetPongHandler(func(string) error {
+		clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
+	// HSC-1276 - send regular Pings to prevent the WebSocket being closed on us
+	ticker := time.NewTicker(pingPeriod)
+	defer ticker.Stop()
+	go func() {
+		for range ticker.C {
+			clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteTimeout))
+		}
+	}()
 
 	// Reusable closure to pump messages from Noaa to the client WebSocket
 	// N.B. We parse the messages as JSON for ease of use in the frontend
