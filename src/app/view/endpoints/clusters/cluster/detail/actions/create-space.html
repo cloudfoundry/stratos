@@ -14,9 +14,9 @@
        ng-class="{'has-error': form.createSpace['name' + $index].$invalid && form.createSpace['name' + $index].$dirty}">
     <label class="control-label" translate>Space Name{{ $index > 0 ? ' ' + ($index + 1) : ''}}</label>
     <span class="control-message">
-      <span translate ng-if="createSpaceForm['name' + $index].$error.required">Name is required</span>
-      <span translate ng-if="createSpaceForm['name' + $index].$error.helionUnique">Name must be unique</span>
-      <span translate ng-if="createSpaceForm['name' + $index].$error.dupeName">Name must be unique</span>
+      <span translate ng-if="form.createSpace['name' + $index].$error.required">Name is required</span>
+      <span translate ng-if="form.createSpace['name' + $index].$error.helionUnique">Name must be unique</span>
+      <span translate ng-if="form.createSpace['name' + $index].$error.dupeName">Name must be unique</span>
     </span>
     <input type="text" name="name{{ $index }}" auto-focus class="form-control"
            ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]"
