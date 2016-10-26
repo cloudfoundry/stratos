@@ -136,6 +136,9 @@
             routeExists: function () {
               return routeExists;
             },
+            resetRouteExists: function () {
+              routeExists = false;
+            },
             hideAsyncIndicatorContent: function () {
               return hideAsyncIndicatorContent;
             },

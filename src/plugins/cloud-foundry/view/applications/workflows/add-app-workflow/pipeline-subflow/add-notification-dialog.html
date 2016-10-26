@@ -5,23 +5,26 @@
     <div class="desc">{{ asyncTaskDialogCtrl.context.targetType.description }}</div>
   </div>
   <div class="body">
-    <form>
-      <div class="form-group " focusable-input>
+    <form name="form.addNotificationForm">
+      <div class="form-group " focusable-input ng-class="{'has-error': form.addNotificationForm.name.$invalid && form.addNotificationForm.name.$dirty}">
         <label class="control-label" translate>Notification Target Name</label>
+        <span class="control-message"><span translate ng-if="form.addNotificationForm.name.$error.required">Name is required</span></span>
         <input type="text" name="name" class="form-control"
                ng-model="asyncTaskDialogCtrl.context.data.name"
                required
         />
       </div>
-      <div class="form-group " focusable-input>
+      <div class="form-group " focusable-input ng-class="{'has-error': form.addNotificationForm.location.$invalid && form.addNotificationForm.location.$dirty}">
         <label class="control-label" translate>{{asyncTaskDialogCtrl.context.targetType.endpointLabel}}</label>
+        <span class="control-message"><span translate ng-if="form.addNotificationForm.location.$error.required">Endpoint is required</span></span>
         <input type="text" name="location" class="form-control"
                ng-model="asyncTaskDialogCtrl.context.data.location"
                required
         />
       </div>
-      <div class="form-group " focusable-input>
+      <div class="form-group " focusable-input ng-class="{'has-error': form.addNotificationForm.token.$invalid && form.addNotificationForm.token.$dirty}">
         <label class="control-label" translate>Token</label>
+        <span class="control-message"><span translate ng-if="form.addNotificationForm.token.$error.required">Token is required</span></span>
         <input type="text" name="token" class="form-control"
                ng-model="asyncTaskDialogCtrl.context.data.token"
                required
