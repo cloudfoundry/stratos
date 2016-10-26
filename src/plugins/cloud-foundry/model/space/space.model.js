@@ -598,9 +598,9 @@
 
     refreshSpaceAndAuth: function (cnsiGuid, organizationModel, orgGuid) {
       var authModel = this.modelManager.retrieve('cloud-foundry.model.auth');
-      var p1 = authModel.initializeForEndpoint(cnsiGuid, true);
-      var p2 = organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
-      return this.$q.all([p1, p2]);
+      var initializeAuthModelPromise = authModel.initializeForEndpoint(cnsiGuid, true);
+      var refreshOrgSpacesPromise = organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+      return this.$q.all([initializeAuthModelPromise, refreshOrgSpacesPromise]);
     },
 
     createSpaces: function (cnsiGuid, orgGuid, spaceNames, params) {

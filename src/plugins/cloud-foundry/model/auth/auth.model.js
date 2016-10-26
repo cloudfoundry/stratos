@@ -260,9 +260,7 @@
       } else {
         // Is any of the organization's spaces valid?
         for (var spaceGuid in org.spaces) {
-          if (!org.spaces.hasOwnProperty(spaceGuid)) {
-            continue;
-          }
+          if (!org.spaces.hasOwnProperty(spaceGuid)) { continue; }
           var space = org.spaces[spaceGuid];
           if (that.isAllowed(cnsiGuid, resourceType, action, space.metadata.guid, orgGuid, true)) {
             return true;

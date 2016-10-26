@@ -400,7 +400,7 @@
     /**
      * @function isAdminInAnyHcf
      * @description Helper to detect if user is an admin in any connected HCF
-     * @returns {boolean}
+     * @returns {boolean} true if the user is connected to any HCF as an admin
      */
     isAdminInAnyHcf: function () {
       for (var guid in this.userCnsiModel.serviceInstances) {
@@ -419,7 +419,7 @@
     /**
      * @function showAddApplicationButton
      * @description Implements the logic for showing the `Add Application` button
-     * @returns {boolean}
+     * @returns {boolean} true if the user is an admin or a Space developer to any HCF
      */
     showAddApplicationButton: function () {
       if (this.isAdminInAnyHcf()) {
@@ -431,7 +431,8 @@
     /**
      * @function disableAddApplicationButton
      * @description Implements the logic for disabling the `Add Application` button
-     * @returns {boolean}
+     * @returns {boolean} true is App module is initialising,
+     * there no connected endpoints or user is not a space developer
      */
     disableAddApplicationButton: function () {
       return !this.ready || this.model.clusterCount <= 0 || !this.isSpaceDeveloper;
