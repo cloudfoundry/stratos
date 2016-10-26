@@ -103,13 +103,13 @@
             .catch(function (error) {
               // check if error is CF-RouteHostTaken indicating that the route has already been created
               if (_.isPlainObject(error) &&
-                error.error_code &&
-                error.error_code === 'CF-RouteHostTaken') {
+                error.data.error_code &&
+                error.data.error_code === 'CF-RouteHostTaken') {
                 routeExists = true;
                 hideAsyncIndicatorContent = true;
               }
-              if (error.description) {
-                dialog.context.errorMsg = error.description;
+              if (error.data.description) {
+                dialog.context.errorMsg = error.data.description;
               }
               throw error;
             });
