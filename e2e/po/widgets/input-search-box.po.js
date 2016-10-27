@@ -1,22 +1,31 @@
 'use strict';
 
 var _ = require('../../../tools/node_modules/lodash');
+var Q = require('../../../tools/node_modules/q');
 
 module.exports = {
   wrap: wrap,
   isVisible: isVisible,
   addText: addText,
   clear: clear,
-  value: value
+  getValue: getValue,
+  getOptionsCount: getOptionsCount,
+  getOptions: getOptions,
+  selectOption: selectOption,
+  open: open
 };
 
 function wrap(element) {
-  // Element should be the input 'form group'?????????????????????????????????????????????????
+  // Element should be the element with 'form group'
   return {
     isVisible: _.partial(isVisible, element),
     addText: _.partial(addText, element),
     clear: _.partial(clear, element),
-    value: _.partial(value, element)
+    getValue: _.partial(getValue, element),
+    getOptionsCount: _.partial(getOptionsCount, element),
+    getOptions: _.partial(getOptions, element),
+    selectOption: _.partial(selectOption, element),
+    open: _.partial(open, element)
   };
 }
 
@@ -32,6 +41,41 @@ function clear(element) {
   return element.element(by.css('input')).clear();
 }
 
-function value(element) {
-  return element.element(by.css('input #placeholder')).getText();
+function getValue(element) {
+  return getOptions(element)
+    .filter(function (elem) {
+      return elem.getAttribute('class').then(function (classes) {
+        return classes.indexOf('selected') >= 0;
+      });
+    })
+    .first()
+    .getAttribute('innerText')
+    .then(function (text) {
+      return text.trim();
+    });
+}
+
+function getOptionsCount(element) {
+  // This includes the 'all' option
+  return getOptions(element).count();
+}
+
+function getOptions(element) {
+  // This includes the 'all' option
+  return element.all(by.css('.dropdown-menu li'));
+}
+
+function selectOption(element, index) {
+  return open(element)
+    .then(function () {
+      return getOptions(element).get(index).click();
+    })
+    .then(function () {
+      // Allow some time for the action, which probably contains a backend request, to execute
+      return browser.driver.sleep(1000);
+    });
+}
+
+function open(element) {
+  return element.element(by.css('input')).click();
 }

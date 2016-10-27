@@ -63,7 +63,7 @@ exports.config = {
             password: 'hscadmin'
           },
           user: {
-            username: 'rcox',
+            username: 'kdomico',
             password: 'changeme'
           }
         }

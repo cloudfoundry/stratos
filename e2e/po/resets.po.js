@@ -4,6 +4,8 @@ var request = require('../../tools/node_modules/request');
 var helpers = require('./helpers.po');
 var fs = require('fs');
 var path = require('path');
+var _ = require('../../tools/node_modules/lodash');
+var Q = require('../../tools/node_modules/q');
 
 var host = helpers.getHost();
 
@@ -12,8 +14,11 @@ module.exports = {
   devWorkflow: devWorkflow,
 
   resetAllCnsi: resetAllCnsi,
-  removeAllCnsi: removeAllCnsi
+  removeAllCnsi: removeAllCnsi,
+  connectAllCnsi: connectAllCnsi,
 
+  fetchCnsi: fetchCnsi,
+  fetchRegisteredCnsi: fetchRegisteredCnsi
 };
 
 /**
@@ -24,10 +29,8 @@ module.exports = {
  * @returns {promise} A promise
  */
 function devWorkflow(firstTime) {
-  var req = newRequest();
-
   return new Promise(function (resolve, reject) {
-    createSession(req, helpers.getUser(), helpers.getPassword()).then(function () {
+    _createReqAndSession(null, helpers.getUser(), helpers.getPassword()).then(function (req) {
       var promises = [];
       promises.push(setUser(req, !firstTime));
       promises.push(_resetAllCNSI(req));
@@ -59,13 +62,8 @@ function devWorkflow(firstTime) {
  * @returns {promise} A promise
  */
 function removeAllCnsi(username, password) {
-  var req = newRequest();
-
-  username = username || helpers.getAdminUser();
-  password = password || helpers.getAdminPassword();
-
   return new Promise(function (resolve, reject) {
-    createSession(req, username, password).then(function () {
+    _createReqAndSession(null, username, password).then(function (req) {
       _removeAllCnsi(req).then(function () {
         resolve();
       }, function (error) {
@@ -87,13 +85,8 @@ function removeAllCnsi(username, password) {
  * @returns {promise} A promise
  */
 function resetAllCnsi(username, password) {
-  var req = newRequest();
-
-  username = username || helpers.getAdminUser();
-  password = password || helpers.getAdminPassword();
-
   return new Promise(function (resolve, reject) {
-    createSession(req, username, password).then(function () {
+    _createReqAndSession(null, username, password).then(function (req) {
       _resetAllCNSI(req).then(function () {
         resolve();
       }, function (error) {
@@ -104,6 +97,76 @@ function resetAllCnsi(username, password) {
       reject(error);
     });
   });
+}
+
+function connectAllCnsi(username, password, isAdmin) {
+  var req;
+  return _createReqAndSession(null, username, password)
+    .then(function (createdReq) {
+      req = createdReq;
+    })
+    .then(function () {
+      return sendRequest(req, 'GET', 'pp/v1/cnsis');
+    })
+    .then(function (response) {
+      var cnsis = JSON.parse(response);
+
+      var promises = [];
+
+      _.forEach(cnsis, function (cnsi) {
+        var list;
+        switch (cnsi.cnsi_type) {
+          case 'hce':
+            list = helpers.getHces();
+            break;
+          case 'hcf':
+            list = helpers.getHcfs();
+            break;
+          default:
+            fail('Unknown cnsi');
+            break;
+        }
+        var found = _.find(list, function (configCnsi) {
+          return _.endsWith(configCnsi.register.api_endpoint, cnsi.api_endpoint.Host);
+        });
+        if (found) {
+          var user = isAdmin ? found.admin : found.user || found.admin;
+          promises.push(_connectCnsi(req, cnsi.guid, user.username, user.password));
+        }
+      });
+      return Q.all(promises);
+    });
+
+}
+
+/**
+ * @function fetchCnsi
+ * @description
+ * @param {object?} optionalReq - optional, should have authed session data
+ * @param {string?} username -
+ * @param {string?} password -
+ * @returns {Promise} A promise
+ */
+function fetchCnsi(optionalReq, username, password) {
+  return _createReqAndSession(optionalReq, username, password)
+    .then(function (req) {
+      return sendRequest(req, 'GET', 'pp/v1/cnsis');
+    });
+}
+
+/**
+ * @function fetchCnsi
+ * @description
+ * @param {object?} optionalReq - optional, should have authed session data
+ * @param {string?} username -
+ * @param {string?} password -
+ * @returns {Promise} A promise
+ */
+function fetchRegisteredCnsi(optionalReq, username, password) {
+  return _createReqAndSession(optionalReq, username, password)
+    .then(function (req) {
+      return sendRequest(req, 'GET', 'pp/v1/cnsis/registered');
+    });
 }
 
 /**
@@ -216,11 +279,10 @@ function createSession(req, username, password) {
 /**
  * @function resetClusters
  * @description Reset clusters to original state
- * @param {object?} optionalReq - the request
+ * @param {object} req - the request
  * @returns {promise} A promise
  */
-function _resetAllCNSI(optionalReq) {
-  var req = optionalReq || newRequest();
+function _resetAllCNSI(req) {
   return new Promise(function (resolve, reject) {
     _removeAllCnsi(req).then(function () {
       var hcfs = helpers.getHcfs();
@@ -253,11 +315,10 @@ function _resetAllCNSI(optionalReq) {
 /**
  * @function removeClusters
  * @description Remove all clusters
- * @param {object?} optionalReq - the request
+ * @param {object} req - the request
  * @returns {Promise} A promise
  */
-function _removeAllCnsi(optionalReq) {
-  var req = optionalReq || newRequest();
+function _removeAllCnsi(req) {
   return new Promise(function (resolve, reject) {
     sendRequest(req, 'GET', 'pp/v1/cnsis').then(function (data) {
       data = data.trim();
@@ -273,7 +334,14 @@ function _removeAllCnsi(optionalReq) {
       Promise.all(promises).then(resolve, reject);
 
     }, reject);
+  });
+}
 
+function _connectCnsi(req, cnsiGuid, username, password) {
+  return sendRequest(req, 'POST', 'pp/v1/auth/login/cnsi', null, {
+    cnsi_guid: cnsiGuid,
+    username: username,
+    password: password
   });
 }
 
@@ -374,4 +442,29 @@ function setUser(req, registered) {
   //     })
   //     .on('error', reject);
   // });
+}
+
+/**
+ * @function fetchRegisteredCnsi
+ * @description
+ * @param {object?} optionalReq - convenience, wraps in promise as if req did not exist
+ * @param {string?} username -
+ * @param {string?} password -
+ * @returns {Promise} A promise containing req
+ */
+function _createReqAndSession(optionalReq, username, password) {
+  var req;
+
+  if (!optionalReq) {
+    req = newRequest();
+
+    username = username || helpers.getAdminUser();
+    password = password || helpers.getAdminPassword();
+
+    return createSession(req, username, password).then(function () {
+      return req;
+    });
+  } else {
+    return Q.resolve(optionalReq);
+  }
 }

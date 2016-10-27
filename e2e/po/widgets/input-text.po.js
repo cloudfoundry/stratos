@@ -8,7 +8,7 @@ module.exports = {
   hasError: hasError,
   addText: addText,
   clear: clear,
-  value: value
+  getValue: getValue
 };
 
 function wrap(element) {
@@ -18,7 +18,7 @@ function wrap(element) {
     hasError: _.partial(hasError, element),
     addText: _.partial(addText, element),
     clear: _.partial(clear, element),
-    value: _.partial(value, element)
+    getValue: _.partial(getValue, element)
   };
 }
 
@@ -40,6 +40,7 @@ function clear(element) {
   return element.element(by.css('input')).clear();
 }
 
-function value(element) {
-  return element.element(by.css('input #inner-editor')).getText();
+function getValue(element) {
+  // Actual text is inside a shadow root, unable to use getText
+  return element.element(by.css('input')).getAttribute('value');
 }

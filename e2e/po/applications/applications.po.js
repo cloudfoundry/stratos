@@ -28,7 +28,7 @@ function applicationGalleryCards() {
 }
 
 function showApplications() {
-  navbar.goToView('Applications');
+  return navbar.goToView('Applications');
 }
 
 function showApplicationDetails(idx) {
@@ -48,11 +48,13 @@ function isApplicationWallNoClusters() {
 }
 
 function getAddApplicationButton() {
-  // element(by.css('.action-bar .btn.btn-primary'));
-  return element(by.buttonTest('Add Application'));
+  // element(by.buttonText('ADD APPLICATION'));
+  return element(by.css('.action-bar .btn.btn-primary'));
 }
 
-
 function addApplication() {
-  return getAddApplicationButton().click();
+  return getAddApplicationButton().click().then(function () {
+    // Allow some time for the animation
+    return browser.driver.sleep(1000);
+  });
 }

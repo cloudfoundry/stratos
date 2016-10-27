@@ -1,5 +1,7 @@
 'use strict';
 
+var _ = require('../../../tools/node_modules/lodash');
+
 module.exports = {
   getTitle: getTitle,
 
