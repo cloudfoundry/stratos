@@ -210,7 +210,9 @@
     cacheOrganizationDetails: function (cnsiGuid, orgGuid, details) {
       this.initOrganizationCache(cnsiGuid, orgGuid);
       this.organizations[cnsiGuid][orgGuid].details = details;
-      this.organizationNames[cnsiGuid].push(details.org.entity.name);
+      if (this.organizationNames[cnsiGuid].indexOf(details.org.entity.name) === -1) {
+        this.organizationNames[cnsiGuid].push(details.org.entity.name);
+      }
     },
 
     cacheOrganizationUsersRoles: function (cnsiGuid, orgGuid, allUsersRoles) {
@@ -612,15 +614,16 @@
       return that.orgsApi.UpdateOrganization(orgGuid, orgData, {}, that.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (val) {
           that.organizations[cnsiGuid][orgGuid].details.org = val.data;
-          var newName = _.get(val.data, 'entity.name');
-          if (oldName !== newName) {
-            var idx = that.organizationNames[cnsiGuid].indexOf(oldName);
-            if (idx > -1) {
-              that.organizationNames[cnsiGuid].splice(idx, 1);
+          return that.refreshOrganizationSpaces(cnsiGuid, orgGuid).then(function () {
+            var newName = _.get(val.data, 'entity.name');
+            if (oldName !== newName) {
+              var idx = that.organizationNames[cnsiGuid].indexOf(oldName);
+              if (idx > -1) {
+                that.organizationNames[cnsiGuid].splice(idx, 1);
+              }
+              that.organizationNames[cnsiGuid].push(newName);
             }
-            that.organizationNames[cnsiGuid].push(newName);
-          }
-          return val;
+          });
         });
     },
 
