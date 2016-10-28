@@ -2,10 +2,22 @@
   'use strict';
 
   describe('application module', function () {
-    var $httpBackend, controller;
+    var $httpBackend, controller, $interval;
+
+    var mocks = {};
 
     beforeEach(module('templates'));
-    beforeEach(module('green-box-console'));
+    angular.module('interval', []).factory('$interval', function () {
+      $interval = jasmine.createSpy().and.callFake(function (callback) {
+        callback();
+        return 'interval_created';
+      });
+      $interval.cancel = jasmine.createSpy();
+      mocks.$interval = $interval;
+      return $interval;
+    });
+
+    beforeEach(module('green-box-console', 'interval'));
     var userGuid = 'guid';
     var cnsiGuid = 'cnsiGuid';
     var appGuid = 'appGuid';
@@ -58,6 +70,9 @@
       var hceInfoRequest = mock.hceApi.HceInfoApi.info(cnsiGuid);
       $httpBackend.whenGET(hceInfoRequest.url).respond(200, hceInfoRequest.response['200'].body);
 
+      var userProvidedServiceRequest = mock.hceApi.UserProvidedServiceInstancesApi.RetrieveUserProvidedServiceInstance(appGuid);
+      $httpBackend.whenGET(userProvidedServiceRequest.url).respond(200, userProvidedServiceRequest.response['200']);
+
       var ApplicationController = $state.get('cf.applications.application').controller;
       controller = new ApplicationController(modelManager, eventService, confirmDialogMock,
         utils, cliCommands, $stateParams, $scope, $window, $q, $interval, $interpolate, $state);
@@ -90,6 +105,85 @@
           controller.model.application.state.actions[actionId] = true;
           expect(controller.isActionHidden(actionId)).toBe(false);
         });
+      });
+
+      it('should be able to view view application', function () {
+
+        var calledUrl;
+        var expectedUrl = 'http://host-20.domain-48.example.com/';
+        spyOn(controller.$window, 'open').and.callFake(function (url) {
+          calledUrl = url;
+        });
+
+        var viewAction = controller.appActions[0];
+        viewAction.execute();
+        expect(controller.$window.open).toHaveBeenCalled();
+        expect(calledUrl).toEqual(expectedUrl);
+      });
+
+      it('should be able to execute stop action', function () {
+        var updateApp = mock.cloudFoundryAPI.Apps.UpdateApp(appGuid, {name: 'nodeenv', state: 'STOPPED'});
+        $httpBackend.expectPUT(updateApp.url).respond(201, updateApp.response['201'].body);
+        var stopAction = controller.appActions[1];
+        stopAction.execute();
+        $httpBackend.flush();
+      });
+
+      it('should be able to execute restart action', function () {
+        var stopApp = mock.cloudFoundryAPI.Apps.UpdateApp(appGuid, {name: 'nodeenv', state: 'STOPPED'});
+        $httpBackend.expectPUT(stopApp.url).respond(201, stopApp.response['201'].body);
+
+        var startApp = mock.cloudFoundryAPI.Apps.UpdateApp(appGuid, {name: 'nodeenv', state: 'STARTED'});
+        $httpBackend.expectPUT(startApp.url).respond(201, startApp.response['201'].body);
+
+        var statCall = mock.cloudFoundryAPI.Apps.GetDetailedStatsForStartedApp(appGuid);
+        $httpBackend.whenGET(statCall.url).respond(200, statCall.response['200'].body);
+        var stopAction = controller.appActions[2];
+        stopAction.execute();
+        $httpBackend.flush();
+      });
+
+      it('should be able to execute delete action', function () {
+
+        var eventName;
+        spyOn(controller.eventService, '$emit').and.callFake(function (event) {
+          eventName = event;
+        });
+        var deleteAction = controller.appActions[3];
+        deleteAction.execute();
+        expect(controller.eventService.$emit).toHaveBeenCalled();
+        expect(eventName).toBe('cf.events.START_DELETE_APP_WORKFLOW');
+      });
+
+      it('should be able to start app', function () {
+        var startApp = mock.cloudFoundryAPI.Apps.UpdateApp(appGuid, {name: 'nodeenv', state: 'STARTED'});
+        $httpBackend.expectPUT(startApp.url).respond(201, startApp.response['201'].body);
+
+        var statCall = mock.cloudFoundryAPI.Apps.GetDetailedStatsForStartedApp(appGuid);
+        $httpBackend.whenGET(statCall.url).respond(200, statCall.response['200'].body);
+        var startAction = controller.appActions[4];
+        startAction.execute();
+        $httpBackend.flush();
+      });
+
+      it('should be able to view CLI instructions', function () {
+
+        spyOn(controller.cliCommands, 'show').and.callThrough();
+
+        var startAction = controller.appActions[5];
+        startAction.execute();
+        expect(controller.cliCommands.show).toHaveBeenCalled();
+
+      });
+
+      it('should stop polling when a modal interaction starts', function () {
+        controller.eventService.$emit(controller.eventService.events.MODAL_INTERACTION_START);
+        expect(_.isUndefined(controller.scheduledUpdate)).toBe(true);
+      });
+
+      it('should resume polling when a modal interaction starts', function () {
+        controller.eventService.$emit(controller.eventService.events.MODAL_INTERACTION_END);
+        expect(controller.scheduledUpdate).toBe('interval_created');
       });
     });
 
