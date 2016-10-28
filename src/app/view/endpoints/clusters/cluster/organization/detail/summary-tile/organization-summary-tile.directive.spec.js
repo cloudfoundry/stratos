@@ -7,14 +7,49 @@
     var clusterGuid = 'guid';
     var organizationGuid = 'organizationGuid';
 
+    var organization = {
+      metadata: {
+        guid: organizationGuid,
+        created_at: '2016-10-28T14:48:48Z',
+        updated_at: null
+      },
+      entity: {
+        name: organizationGuid,
+        billing_enabled: false,
+        quota_definition_guid: '84f213bb-ef1f-49ce-913b-3794905e32ee',
+        status: 'active',
+        quota_definition: {
+          metadata: {
+            guid: '84f213bb-ef1f-49ce-913b-3794905e32ee',
+            created_at: '2016-10-28T12:54:11Z',
+            updated_at: null
+          },
+          entity: {
+            name: 'default',
+            non_basic_services_allowed: true,
+            total_services: 100,
+            total_routes: 1000,
+            total_private_domains: -1,
+            memory_limit: 10240,
+            trial_db_allowed: false,
+            instance_memory_limit: -1,
+            app_instance_limit: -1,
+            app_task_limit: -1,
+            total_service_keys: -1,
+            total_reserved_route_ports: 0
+          }
+        },
+        spaces: [],
+        users: [],
+        managers: [],
+        billing_managers: [],
+        auditors: []
+      }
+    };
     var modelOrganization = {
       details: {
         guid: organizationGuid,
-        org: {
-          entity: {
-            name: organizationGuid
-          }
-        }
+        org: organization
       },
       spaces: ['test']
     };
@@ -138,11 +173,9 @@
       });
 
       it('should send request when user edited organization', function () {
-        $httpBackend.expectPUT('/pp/v1/proxy/v2/organizations/organizationGuid').respond(201, {
-          entity: {
-            name: organizationGuid
-          }
-        });
+        $httpBackend.expectPUT('/pp/v1/proxy/v2/organizations/organizationGuid').respond(201, organization);
+        $httpBackend.expectGET('/pp/v1/proxy/v2/organizations/organizationGuid/spaces?inline-relations-depth=1').respond(200, {resources: [] });
+
         var editOrgAction = controller.actions[0];
         var asynTaskDialog = editOrgAction.execute();
         asynTaskDialog.actionTask({

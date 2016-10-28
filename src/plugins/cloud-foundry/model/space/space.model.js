@@ -600,7 +600,7 @@
       var authModel = this.modelManager.retrieve('cloud-foundry.model.auth');
       return authModel.initializeForEndpoint(cnsiGuid, true).finally(function () {
         return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
-      })
+      });
     },
 
     createSpaces: function (cnsiGuid, orgGuid, spaceNames, params) {
