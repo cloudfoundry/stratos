@@ -12,6 +12,7 @@ module.exports = {
   getOptionsCount: getOptionsCount,
   getOptions: getOptions,
   selectOption: selectOption,
+  selectOptionByLabel: selectOptionByLabel,
   open: open
 };
 
@@ -25,6 +26,7 @@ function wrap(element) {
     getOptionsCount: _.partial(getOptionsCount, element),
     getOptions: _.partial(getOptions, element),
     selectOption: _.partial(selectOption, element),
+    selectOptionByLabel: _.partial(selectOptionByLabel, element), 
     open: _.partial(open, element)
   };
 }
@@ -69,6 +71,30 @@ function selectOption(element, index) {
   return open(element)
     .then(function () {
       return getOptions(element).get(index).click();
+    })
+    .then(function () {
+      // Allow some time for the action, which probably contains a backend request, to execute
+      return browser.driver.sleep(1000);
+    });
+}
+
+function selectOptionByLabel(element, label) {
+  return open(element)
+    .then(function () {
+      return getOptions(element);
+    })
+    .filter(function (elem) {
+      return elem.getAttribute('innerText')
+        .then(function (text) {
+          return text.trim();
+        })
+        .then(function (text) {
+          return text === label;
+        });
+    })
+    .first()
+    .then(function (elem) {
+      return elem.click();
     })
     .then(function () {
       // Allow some time for the action, which probably contains a backend request, to execute

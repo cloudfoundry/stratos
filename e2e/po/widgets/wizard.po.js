@@ -7,11 +7,17 @@ module.exports = {
 
   getSteps: getSteps,
   getStepNames: getStepNames,
-  getCurrentStep: getCurrentSteps,
+  getCurrentStep: getCurrentStep,
 
   getCancel: getCancel,
   getBack: getBack,
-  getContinue: getNext
+  getNext: getNext,
+
+  isCancelEnabled: isCancelEnabled,
+  isNextEnabled: isNextEnabled,
+  
+  cancel: cancel,
+  next: next
 };
 
 function getTitle() {
@@ -32,7 +38,7 @@ function getStepNames() {
   });
 }
 
-function getCurrentSteps() {
+function getCurrentStep() {
   return element(by.css('wizard-nav-item nav-item active'));
 }
 
@@ -48,3 +54,36 @@ function getNext() {
   return element(by.css('.wizard-foot .btn.next'));
 }
 
+function isCancelEnabled() {
+  return _buttonEnabled(getCancel());
+}
+
+function isNextEnabled() {
+  return _buttonEnabled(getNext());
+}
+
+
+function cancel() {
+  return getCancel().click();
+}
+
+function next() {
+  return getNext().click();
+}
+
+function _buttonEnabled(element) {
+  return element.getAttribute('disabled')
+    .then(function (isDisabled) {
+      if (isDisabled === 'true') {
+        return false;
+      }
+      if (isDisabled === 'false') {
+        return true;
+      }
+      return isDisabled !== 'disabled';
+    })
+    .catch(function () {
+      // no disabled attribute --> enabled button
+      return true;
+    });
+}

@@ -48,7 +48,6 @@ function isApplicationWallNoClusters() {
 }
 
 function getAddApplicationButton() {
-  // element(by.buttonText('ADD APPLICATION'));
   return element(by.css('.action-bar .btn.btn-primary'));
 }
 

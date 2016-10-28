@@ -1,6 +1,9 @@
 'use strict';
 
 var sh = require('../../tools/node_modules/shelljs');
+var request = require('../../tools/node_modules/request');
+var path = require('path');
+var fs = require('fs');
 
 // Get host IP
 var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
@@ -44,7 +47,12 @@ module.exports = {
   getTableRowAt: getTableRowAt,
   getTableCellAt: getTableCellAt,
 
-  closeFlyout: closeFlyout
+  closeFlyout: closeFlyout,
+
+  newRequest: newRequest,
+  sendRequest: sendRequest,
+  createSession: createSession,
+  createReqAndSession: createReqAndSession
 
 };
 
@@ -146,4 +154,135 @@ function closeFlyout() {
   element(by.css('flyout'))
     .element(by.css('.flyout-header button.close')).click();
   browser.driver.sleep(2000);
+}
+
+/**
+ * Manage requests + sessions
+ */
+
+/**
+ * @function createReqAndSession
+ * @description
+ * @param {object?} optionalReq - convenience, wraps in promise as if req did not exist
+ * @param {string?} username -
+ * @param {string?} password -
+ * @returns {Promise} A promise containing req
+ */
+function createReqAndSession(optionalReq, username, password) {
+  var req;
+
+  if (!optionalReq) {
+    req = newRequest();
+
+    username = username || getAdminUser();
+    password = password || getAdminPassword();
+
+    return createSession(req, username, password).then(function () {
+      return req;
+    });
+  } else {
+    return Q.resolve(optionalReq);
+  }
+}
+
+/**
+ * @function newRequest
+ * @description Create a new request
+ * @returns {object} A newly created request
+ */
+function newRequest() {
+  var cookieJar = request.jar();
+  var skipSSlValidation = browser.params.skipSSlValidation;
+  var ca;
+
+  if (skipSSlValidation) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  } else if (browser.params.caCert) {
+    var caCertFile = path.join(__dirname, '..', '..', 'tools');
+    caCertFile = path.join(caCertFile, browser.params.caCert);
+    if (fs.existsSync(caCertFile)) {
+      ca = fs.readFileSync(caCertFile);
+    }
+  }
+
+  return request.defaults({
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    agentOptions: {
+      ca: ca
+    },
+    jar: cookieJar
+  });
+}
+
+/**
+ * @function sendRequest
+ * @description Send request
+ * @param {object} req - the request
+ * @param {object} options -
+ * @param {object?} body - the request body
+ * @param {object?} formData - the form data
+ * @returns {Promise} A promise
+ */
+function sendRequest(req, options, body, formData) {
+  return new Promise(function (resolve, reject) {
+    options.url = getHost() + '/' + options.url;
+    if (body && body.length) {
+      options.body = JSON.stringify(body);
+    } else if (formData) {
+      options.formData = formData;
+    }
+
+    var data = '';
+    var rejected;
+    req(options)
+      .on('data', function (responseData) {
+        data += responseData;
+      })
+      .on('error', function (error) {
+        reject('send request failed: ', error);
+      })
+      .on('response', function (response) {
+        if (response.statusCode > 399) {
+          reject('failed to send request: ' + JSON.stringify(response));
+          rejected = true;
+        }
+      })
+      .on('end', function () {
+        if (!rejected) {
+          resolve(data);
+        }
+      });
+  });
+}
+
+/**
+ * @function createSession
+ * @description Create a session
+ * @param {object} req - the request
+ * @param {string} username - the Stackato username
+ * @param {string} password - the Stackato password
+ * @returns {Promise} A promise
+ */
+function createSession(req, username, password) {
+  return new Promise(function (resolve, reject) {
+    var options = {
+      formData: {
+        username: username || 'dev',
+        password: password || 'dev'
+      }
+    };
+    req.post(getHost() + '/pp/v1/auth/login/uaa', options)
+      .on('error', reject)
+      .on('response', function (response) {
+        if (response.statusCode === 200) {
+          resolve();
+        } else {
+          console.log('Failed to create session. ' + JSON.stringify(response));
+          reject('Failed to create session');
+        }
+      });
+  });
 }

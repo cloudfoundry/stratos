@@ -3,34 +3,67 @@
 var helpers = require('../po/helpers.po');
 var resetTo = require('../po/resets.po');
 var loginPage = require('../po/login-page.po');
-var endpointsDashboardPage = require('../po/endpoints/endpoints-dashboard.po');
-var registerEndpoint = require('../po/endpoints/register-endpoint.po');
 var gallaryWall = require('../po/applications/applications.po');
 var wizard = require('../po/widgets/wizard.po');
 var addAppWizard = require('../po/applications/add-application-wizard.po');
-var searchBox = require('../po/widgets/input-search-box.po');
+var addAppHcfApp = require('../po/applications/add-application-hcf-app.po');
+var addAppService = require('../po/applications/add-application-services.po');
 var _ = require('../../tools/node_modules/lodash');
+var cfModel = require('../po/models/cf-model.po');
+var proxyModel = require('../po/models/proxy-model.po');
+var Q = require('../../tools/node_modules/q');
 
 fdescribe('Applications - Add application', function () {
 
-  // The ORDER of when this test runs is IMPORTANT. Depends on endpoints-dashboard running first, which will register
-  // and connect HCF and HCE instances. To divorce these we just need to create a 'resetAndConnect' style function
-  // in resets.po
+  /**
+   * This test will create, if missing an e2e org + space then add an application containing a server.
+   * Once all tests are finished the app and any related servce, route, etc should be removed. The org + space will
+   * remain.
+   *
+   * THE ORDER OF TESTS IN THIS FILE IS IMPORTANT
+   */
 
-  // The ORDER of tests in this file is IMPORTANT.
+  // TODO: App account is non-admin, however every hcf interaction is admin.
+  // To fix this need to ensure that the non-admin hcf user gets the correct roles in the new org/space
 
-  // Need to have at least one connected HCF with at least one organization and one space
+  var testApp, testService, testCluster, clusterSearchBox, organizationSearchBox, spaceSearchBox, registeredCnsi,
+    selectedCluster, selectedOrg, selectedSpace;
+  var testOrgName = 'e2e';
+  var testSpaceName = 'e2e';
+  var testTime = (new Date()).getTime();
 
   function getSearchBoxes() {
     return element.all(by.css('.panel-body form .form-group'));
   }
 
-  var clusterSearchBox, organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace;
-
   beforeAll(function () {
-    // Connect to all cnsi as a standard non-admin user
-    return browser.driver.wait(resetTo.connectAllCnsi(helpers.getUser(), helpers.getPassword(), false))
+    // Setup the test environment
+    // - The required hcf is registered and connected
+    // - The app wall is showing
+    // - The app wall has the required hcf, organization and space filters set correctly
+
+    // return browser.driver.wait(resetTo.connectAllCnsi(helpers.getUser(), helpers.getPassword(), true))
+    return Q.resolve()
       .then(function () {
+        return proxyModel.fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword()).then(function (response) {
+          registeredCnsi = JSON.parse(response);
+          testCluster = _.find(registeredCnsi, {name: helpers.getHcfs().hcf1.register.cnsi_name});
+          expect(testCluster).toBeDefined();
+          console.log(registeredCnsi);
+          console.log(testCluster);
+          console.log(helpers.getHcfs().hcf1.register.cnsi_name);
+        });
+      })
+      .then(function () {
+        // Add required test organisation if it does not exist
+        return cfModel.addOrgIfMissing(testCluster.guid, testOrgName, helpers.getUser(), helpers.getPassword());
+      })
+      .then(function () {
+        // Add required test space if it does not exist
+        return cfModel.addSpaceIfMissing(testCluster.guid, testSpaceName, helpers.getUser(), helpers.getPassword());
+      })
+      .then(function () {
+        // Load the browser and navigate to app wall
         helpers.setBrowserNormal();
         helpers.loadApp();
         // Log in as a standard non-admin user
@@ -41,55 +74,63 @@ fdescribe('Applications - Add application', function () {
         expect(gallaryWall.isApplicationWall()).toBeTruthy();
       })
       .then(function () {
+        // Select the required HCF cluster
         clusterSearchBox = searchBox.wrap(getSearchBoxes().get(0));
         expect(clusterSearchBox).toBeDefined();
         expect(clusterSearchBox.getOptionsCount()).toBeGreaterThan(1);
-        return clusterSearchBox.selectOption(1);
+        return clusterSearchBox.selectOptionByLabel(testCluster.name);
       })
       .then(function () {
+        // Get the selected cluster
         return clusterSearchBox.getValue().then(function (text) {
           selectedCluster = text;
+          expect(selectedCluster).toEqual(testCluster.name);
         });
       })
       .then(function () {
+        // Select the required e2e organization
         organizationSearchBox = searchBox.wrap(getSearchBoxes().get(1));
         expect(organizationSearchBox).toBeDefined();
         expect(organizationSearchBox.getOptionsCount()).toBeGreaterThan(1);
-        return organizationSearchBox.selectOption(1);
+        return organizationSearchBox.selectOptionByLabel(testOrgName);
       })
       .then(function () {
+        // Get the selected organization
         return organizationSearchBox.getValue().then(function (text) {
           selectedOrg = text;
+          expect(selectedOrg).toEqual(testOrgName);
         });
       })
       .then(function () {
+        // Select the required e2e space
         spaceSearchBox = searchBox.wrap(getSearchBoxes().get(2));
         expect(spaceSearchBox).toBeDefined();
         expect(spaceSearchBox.getOptionsCount()).toBeGreaterThan(1);
-        return spaceSearchBox.selectOption(1);
+        return spaceSearchBox.selectOptionByLabel(testSpaceName);
       })
       .then(function () {
+        // Get the selected space
         return spaceSearchBox.getValue().then(function (text) {
           selectedSpace = text;
-        });
-      })
-      .then(function () {
-        return resetTo.fetchRegisteredCnsi().then(function (response) {
-          registeredCnsi = JSON.parse(response);
+          expect(selectedSpace).toEqual(testSpaceName);
         });
       });
   });
 
   afterAll(function () {
-    //TODO: RC
-    console.log('TODO!! TIDY UP');
+    if (testApp) {
+      cfModel.deleteAppIfExisting(testCluster.guid, testApp.entity.name, helpers.getUser(), helpers.getPassword())
+        .catch(function (error) {
+          fail('Failed to clean up after running e2e test, there may be a rogue app named: \'' + appName + '\'. Error:', error);
+        });
+    }
   });
 
   it('Add Application button should be visible', function () {
     expect(gallaryWall.getAddApplicationButton().isDisplayed()).toBeTruthy();
   });
 
-  it('Add Application button shows fly out with correct values', function () {
+  xit('Add Application button shows fly out with correct values', function () {
     var selectedHcf = _.find(registeredCnsi, {name: selectedCluster});
     var domain = selectedHcf.api_endpoint.Host.substring(4);
 
@@ -108,65 +149,123 @@ fdescribe('Applications - Add application', function () {
         expect(steps[2]).toBe('Delivery');
       });
 
-      addAppWizard.name().getValue().then(function (text) {
+      addAppHcfApp.name().getValue().then(function (text) {
         expect(text).toBe('');
       });
 
-      addAppWizard.hcf().getValue().then(function (text) {
+      addAppHcfApp.hcf().getValue().then(function (text) {
         expect(text).toBe(selectedCluster);
       });
-      addAppWizard.organization().getValue().then(function (text) {
+      addAppHcfApp.organization().getValue().then(function (text) {
         expect(text).toBe(selectedOrg);
       });
-      addAppWizard.space().getValue().then(function (text) {
+      addAppHcfApp.space().getValue().then(function (text) {
         expect(text).toBe(selectedSpace);
       });
 
-      addAppWizard.domain().getValue().then(function (text) {
+      addAppHcfApp.domain().getValue().then(function (text) {
         expect(text).toBe(domain);
       });
-      addAppWizard.host().getValue().then(function (text) {
+      addAppHcfApp.host().getValue().then(function (text) {
         expect(text).toBe('');
       });
 
-      addAppWizard.isCancelEnabled().then(function (enabled) {
+      wizard.isCancelEnabled().then(function (enabled) {
         expect(enabled).toBe(true);
       });
 
-      addAppWizard.isNextEnabled().then(function (enabled) {
+      wizard.isNextEnabled().then(function (enabled) {
         expect(enabled).toBe(false);
       });
 
     });
   });
 
-  var appName;
+  xit('Create hcf app', function () {
+    // Should be on the add hcf app step
+    expect(wizard.getCurrentStep.getText()).toBe('Name');
 
-  it('Add basic app', function () {
-    var epochTime = (new Date()).getTime();
-    appName = 'acceptance.e2e.' + epochTime;
+    var appName = 'acceptance.e2e.' + testTime;
     var hostName = appName.replace(/\./g, '_');
 
-    addAppWizard.name().addText(appName);
-    addAppWizard.host().getValue().then(function (text) {
+    addAppHcfApp.name().addText(appName);
+    addAppHcfApp.host().getValue().then(function (text) {
       expect(text).toBe(appName);
     });
 
-    addAppWizard.isNextEnabled().then(function (enabled) {
+    wizard.isNextEnabled().then(function (enabled) {
       expect(enabled).toBe(false);
     });
 
-    addAppWizard.host().clear();
-    addAppWizard.host().addText(hostName);
+    addAppHcfApp.host().clear();
+    addAppHcfApp.host().addText(hostName);
 
-    addAppWizard.isNextEnabled().then(function (enabled) {
+    wizard.isNextEnabled().then(function (enabled) {
       expect(enabled).toBe(true);
     });
 
-    addAppWizard.next();
+    wizard.next();
 
-    //TODO: RC App exists?
+    cfModel.fetchApp(appName, helpers.getUser(), helpers.getPassword()).then(function (app) {
+      testApp = app;
+      expect(app).toBeTruthy();
+    });
+  });
 
+  xit('Add basic service', function () {
+    var serviceName = 'acceptance.e2e.service.' + testTime;
+    // Should be on the services section of the wizard now
+    expect(wizard.getCurrentStep.getText()).toBe('Service');
+
+    // Should be able to skip services, so next should be enabled
+    wizard.isNextEnabled().then(function (enabled) {
+      expect(enabled).toBe(true);
+    });
+
+    // Ensure we have more than one service
+    expect(addAppService.getServices().count()).toBeGreaterThan(0);
+
+    // Add the second service
+    addAppService.addService(1);
+
+    // Are we on the correct service tab?
+    expect(addAppService.getSelectedAddServiceTab()).toBe('I DONT KNOW');
+
+    // Initial save should be disabled
+    addAppService.isSaveEnabled().then(function (enabled) {
+      expect(enabled).toBe(false);
+    });
+
+    // Entering junk should keep the save button disabled
+    addAppService.getCreateNewName().addText(serviceName);
+    addAppService.isSaveEnabled().then(function (enabled) {
+      expect(enabled).toBe(false);
+    });
+
+    // Fix the service name
+    serviceName = serviceName.replace(/\./g, '_');
+
+    // Enter a valid service name should enable save
+    addAppService.getCreateNewName().clear();
+    addAppService.getCreateNewName().addText(serviceName);
+    addAppService.isSaveEnabled().then(function (enabled) {
+      expect(enabled).toBe(true);
+    });
+
+    // Save the new service
+    addAppService.save();
+
+    // Move passed service screen
+    wizard.next();
+
+    cfModel.fetchServiceExist(serviceName, helpers.getUser(), helpers.getPassword()).then(function (service) {
+      expect(service).toBeTruthy();
+      testService = service;
+    });
+  });
+
+  xit('Arrive at pipeline section of wizard', function () {
+    expect(wizard.getCurrentStep.getText()).toBe('Delivery');
   });
 
 })

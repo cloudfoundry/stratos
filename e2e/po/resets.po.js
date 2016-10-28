@@ -1,13 +1,10 @@
 'use strict';
 
-var request = require('../../tools/node_modules/request');
 var helpers = require('./helpers.po');
-var fs = require('fs');
-var path = require('path');
 var _ = require('../../tools/node_modules/lodash');
 var Q = require('../../tools/node_modules/q');
 
-var host = helpers.getHost();
+
 
 module.exports = {
 
@@ -15,10 +12,7 @@ module.exports = {
 
   resetAllCnsi: resetAllCnsi,
   removeAllCnsi: removeAllCnsi,
-  connectAllCnsi: connectAllCnsi,
-
-  fetchCnsi: fetchCnsi,
-  fetchRegisteredCnsi: fetchRegisteredCnsi
+  connectAllCnsi: connectAllCnsi
 };
 
 /**
@@ -30,7 +24,7 @@ module.exports = {
  */
 function devWorkflow(firstTime) {
   return new Promise(function (resolve, reject) {
-    _createReqAndSession(null, helpers.getUser(), helpers.getPassword()).then(function (req) {
+    helpers.createReqAndSession(null, helpers.getUser(), helpers.getPassword()).then(function (req) {
       var promises = [];
       promises.push(setUser(req, !firstTime));
       promises.push(_resetAllCNSI(req));
@@ -63,7 +57,7 @@ function devWorkflow(firstTime) {
  */
 function removeAllCnsi(username, password) {
   return new Promise(function (resolve, reject) {
-    _createReqAndSession(null, username, password).then(function (req) {
+    helpers.createReqAndSession(null, username, password).then(function (req) {
       _removeAllCnsi(req).then(function () {
         resolve();
       }, function (error) {
@@ -86,7 +80,7 @@ function removeAllCnsi(username, password) {
  */
 function resetAllCnsi(username, password) {
   return new Promise(function (resolve, reject) {
-    _createReqAndSession(null, username, password).then(function (req) {
+    helpers.createReqAndSession(null, username, password).then(function (req) {
       _resetAllCNSI(req).then(function () {
         resolve();
       }, function (error) {
@@ -101,12 +95,12 @@ function resetAllCnsi(username, password) {
 
 function connectAllCnsi(username, password, isAdmin) {
   var req;
-  return _createReqAndSession(null, username, password)
+  return helpers.createReqAndSession(null, username, password)
     .then(function (createdReq) {
       req = createdReq;
     })
     .then(function () {
-      return sendRequest(req, 'GET', 'pp/v1/cnsis');
+      return helpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis'});
     })
     .then(function (response) {
       var cnsis = JSON.parse(response);
@@ -131,149 +125,13 @@ function connectAllCnsi(username, password, isAdmin) {
         });
         if (found) {
           var user = isAdmin ? found.admin : found.user || found.admin;
+          console.log('Connecting to cnsi with name: ', cnsi.name);
           promises.push(_connectCnsi(req, cnsi.guid, user.username, user.password));
         }
       });
       return Q.all(promises);
     });
 
-}
-
-/**
- * @function fetchCnsi
- * @description
- * @param {object?} optionalReq - optional, should have authed session data
- * @param {string?} username -
- * @param {string?} password -
- * @returns {Promise} A promise
- */
-function fetchCnsi(optionalReq, username, password) {
-  return _createReqAndSession(optionalReq, username, password)
-    .then(function (req) {
-      return sendRequest(req, 'GET', 'pp/v1/cnsis');
-    });
-}
-
-/**
- * @function fetchCnsi
- * @description
- * @param {object?} optionalReq - optional, should have authed session data
- * @param {string?} username -
- * @param {string?} password -
- * @returns {Promise} A promise
- */
-function fetchRegisteredCnsi(optionalReq, username, password) {
-  return _createReqAndSession(optionalReq, username, password)
-    .then(function (req) {
-      return sendRequest(req, 'GET', 'pp/v1/cnsis/registered');
-    });
-}
-
-/**
- * @function newRequest
- * @description Create a new request
- * @returns {object} A newly created request
- */
-function newRequest() {
-  var cookieJar = request.jar();
-  var skipSSlValidation = browser.params.skipSSlValidation;
-  var ca;
-
-  if (skipSSlValidation) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-  } else if (browser.params.caCert) {
-    var caCertFile = path.join(__dirname, '..', '..', 'tools');
-    caCertFile = path.join(caCertFile, browser.params.caCert);
-    if (fs.existsSync(caCertFile)) {
-      ca = fs.readFileSync(caCertFile);
-    }
-  }
-
-  return request.defaults({
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json'
-    },
-    agentOptions: {
-      ca: ca
-    },
-    jar: cookieJar
-  });
-}
-
-/**
- * @function sendRequest
- * @description Send request
- * @param {object} req - the request
- * @param {string} method - the request method (GET, POST, ...)
- * @param {string} url - the request URL
- * @param {object?} body - the request body
- * @param {object?} formData - the form data
- * @returns {Promise} A promise
- */
-function sendRequest(req, method, url, body, formData) {
-  return new Promise(function (resolve, reject) {
-    var options = {
-      method: method,
-      url: host + '/' + url
-    };
-    if (body && body.length) {
-      options.body = JSON.stringify(body);
-    } else if (formData) {
-      options.formData = formData;
-    }
-
-    var data = '';
-    var rejected;
-    req(options)
-      .on('data', function (responseData) {
-        data += responseData;
-      })
-      .on('error', function (error) {
-        reject('send request failed: ', error);
-      })
-      .on('response', function (response) {
-        if (response.statusCode > 399) {
-          reject('failed to send request: ' + JSON.stringify(response));
-          rejected = true;
-        }
-
-      })
-      .on('end', function () {
-        if (!rejected) {
-          resolve(data);
-        }
-      });
-  });
-}
-
-/**
- * @function createSession
- * @description Create a session
- * @param {object} req - the request
- * @param {string} username - the Stackato username
- * @param {string} password - the Stackato password
- * @returns {Promise} A promise
- */
-function createSession(req, username, password) {
-  return new Promise(function (resolve, reject) {
-    var options = {
-      formData: {
-        username: username || 'dev',
-        password: password || 'dev'
-      }
-    };
-    req.post(host + '/pp/v1/auth/login/uaa', options)
-      .on('error', reject)
-      .on('response', function (response) {
-        if (response.statusCode === 200) {
-          resolve();
-        } else {
-          console.log('Failed to create session. ' + JSON.stringify(response));
-          reject('Failed to create session');
-        }
-      });
-  });
 }
 
 /**
@@ -293,14 +151,14 @@ function _resetAllCNSI(req) {
         if (!hcfs.hasOwnProperty(c)) {
           continue;
         }
-        promises.push(sendRequest(req, 'POST', 'pp/v1/register/hcf', null, hcfs[c].register));
+        promises.push(helpers.sendRequest(req, { method: 'POST', url: 'pp/v1/register/hcf' }, null, hcfs[c].register));
       }
       var hces = helpers.getHces();
       for (c in hces) {
         if (!hces.hasOwnProperty(c)) {
           continue;
         }
-        promises.push(sendRequest(req, 'POST', 'pp/v1/register/hce', null, hces[c].register));
+        promises.push(helpers.sendRequest(req, { method: 'POST', url: 'pp/v1/register/hce' }, null, hces[c].register));
       }
 
       Promise.all(promises).then(function () {
@@ -320,7 +178,7 @@ function _resetAllCNSI(req) {
  */
 function _removeAllCnsi(req) {
   return new Promise(function (resolve, reject) {
-    sendRequest(req, 'GET', 'pp/v1/cnsis').then(function (data) {
+    helpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' }).then(function (data) {
       data = data.trim();
       data = JSON.parse(data);
 
@@ -329,7 +187,7 @@ function _removeAllCnsi(req) {
         return;
       }
       var promises = data.map(function (c) {
-        return sendRequest(req, 'POST', 'pp/v1/unregister', '', {cnsi_guid: c.guid});
+        return helpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, '', {cnsi_guid: c.guid});
       });
       Promise.all(promises).then(resolve, reject);
 
@@ -338,7 +196,7 @@ function _removeAllCnsi(req) {
 }
 
 function _connectCnsi(req, cnsiGuid, username, password) {
-  return sendRequest(req, 'POST', 'pp/v1/auth/login/cnsi', null, {
+  return helpers.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/cnsi' }, null, {
     cnsi_guid: cnsiGuid,
     username: username,
     password: password
@@ -363,7 +221,7 @@ function resetUserServiceInstances(req) {
   //     ];
   //     var postUrl = 'service-instances/user/connect';
   //     var promises = serviceInstancesToAdd.map(function (instanceUrl) {
-  //       return sendRequest(req, 'POST', postUrl, { url: instanceUrl });
+  //       return helpers.sendRequest(req, 'POST', postUrl, { url: instanceUrl });
   //     });
   //     Promise.all(promises).then(function () {
   //       resolve();
@@ -393,7 +251,7 @@ function removeUserServiceInstances(req) {
   //         if (items.length > 0) {
   //           var promises = items.map(function (c) {
   //             var url = 'service-instances/user/' + c.id;
-  //             return sendRequest(req, 'DELETE', url, {});
+  //             return helpers.sendRequest(req, 'DELETE', url, {});
   //           });
   //           Promise.all(promises).then(function () {
   //             resolve();
@@ -429,12 +287,12 @@ function setUser(req, registered) {
   //       var user = JSON.parse(data);
   //       var body = { registered: registered };
   //       if (Object.keys(user).length === 0) {
-  //         sendRequest(req, 'POST', 'users', body)
+  //         helpers.sendRequest(req, 'POST', 'users', body)
   //           .then(function () {
   //             resolve();
   //           }, reject);
   //       } else if (user.registered !== registered) {
-  //         sendRequest(req, 'PUT', 'users/' + user.id, body)
+  //         helpers.sendRequest(req, 'PUT', 'users/' + user.id, body)
   //           .then(function () {
   //             resolve();
   //           }, reject);
@@ -442,29 +300,4 @@ function setUser(req, registered) {
   //     })
   //     .on('error', reject);
   // });
-}
-
-/**
- * @function fetchRegisteredCnsi
- * @description
- * @param {object?} optionalReq - convenience, wraps in promise as if req did not exist
- * @param {string?} username -
- * @param {string?} password -
- * @returns {Promise} A promise containing req
- */
-function _createReqAndSession(optionalReq, username, password) {
-  var req;
-
-  if (!optionalReq) {
-    req = newRequest();
-
-    username = username || helpers.getAdminUser();
-    password = password || helpers.getAdminPassword();
-
-    return createSession(req, username, password).then(function () {
-      return req;
-    });
-  } else {
-    return Q.resolve(optionalReq);
-  }
 }
