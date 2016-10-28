@@ -620,7 +620,7 @@
             }
             that.organizationNames[cnsiGuid].push(newName);
           }
-          return val;
+          return that.refreshOrganizationSpaces(cnsiGuid, orgGuid);
         });
     },
 
