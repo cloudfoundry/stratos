@@ -244,7 +244,7 @@ function buildUI {
     -v ${__DIRNAME}/../stratos-ui:/usr/src/app \
     -v ${__DIRNAME}/../helion-ui-framework:/usr/src/helion-ui-framework \
     -w /usr/src/app \
-    node:4.2.3 \
+    node:6.9.1 \
     /bin/bash ./provision.sh
 
   # Copy the artifacts from the above to the nginx container
