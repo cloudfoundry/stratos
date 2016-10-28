@@ -621,7 +621,9 @@
               if (idx > -1) {
                 that.organizationNames[cnsiGuid].splice(idx, 1);
               }
-              that.organizationNames[cnsiGuid].push(newName);
+              if (that.organizationNames[cnsiGuid].indexOf(newName) === -1) {
+                that.organizationNames[cnsiGuid].push(newName);
+              }
             }
           });
         });
