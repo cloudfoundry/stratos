@@ -70,9 +70,14 @@
       that.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
     };
 
+    function organizationName() {
+      var org = that.organizationModel.organizations[that.organization.cnsiGuid][that.organization.guid];
+      return org ? org.details.org.entity.name : '';
+    }
+
     var cardData = {};
     this.getCardData = function () {
-      cardData.title = that.organization.org.entity.name;
+      cardData.title = organizationName();
       return cardData;
     };
 
@@ -112,13 +117,13 @@
             },
             {
               data: {
-                name: that.organization.org.entity.name,
+                name: organizationName(),
                 organizationNames: that.organizationNames
               }
             },
             function (orgData) {
               if (orgData.name && orgData.name.length > 0) {
-                if (that.organization.org.entity.name === orgData.name) {
+                if (organizationName() === orgData.name) {
                   return $q.resolve();
                 }
                 return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
@@ -143,18 +148,18 @@
         execute: function () {
           return confirmDialog({
             title: gettext('Delete Organization'),
-            description: gettext('Are you sure you want to delete organization') +
-            " '" + that.organization.org.entity.name + "'?",
+            description: gettext('Are you sure you want to delete organization') + " '" + organizationName() + "'?",
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
             },
             errorMessage: gettext('Failed to delete organization'),
             callback: function () {
+              var orgName = organizationName();
               return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
                 .then(function () {
                   notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
-                    {name: that.organization.org.entity.name});
+                    {name: orgName});
                 });
             }
           });

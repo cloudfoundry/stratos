@@ -80,7 +80,6 @@
 
       var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);
-      _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid + '.details.org', '');
       _.set(organizationModel, 'organizationNames.' + organization.cnsiGuid, ['orgGuid']);
 
       var authModelOpts = {
