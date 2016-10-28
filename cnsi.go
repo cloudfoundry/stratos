@@ -29,9 +29,15 @@ type hceInfo struct {
 	AuthorizationEndpoint string `json:"auth_endpoint"`
 }
 
-func isUnknownAuthorityError(err error) bool {
+func isSSLRelatedError(err error) bool {
 	if urlErr, ok := err.(*url.Error); ok {
 		if _, ok = urlErr.Err.(x509.UnknownAuthorityError); ok {
+			return true
+		}
+		if _, ok = urlErr.Err.(x509.HostnameError); ok {
+			return true
+		}
+		if _, ok = urlErr.Err.(x509.CertificateInvalidError); ok {
 			return true
 		}
 	}
@@ -77,11 +83,11 @@ func (p *portalProxy) registerHCFCluster(c echo.Context) error {
 
 	v2InfoResponse, err := getHCFv2Info(apiEndpoint, skipSSLValidation)
 	if err != nil {
-		if isUnknownAuthorityError(err) {
+		if isSSLRelatedError(err) {
 			return newHTTPShadowError(
 				http.StatusForbidden,
-				"Certificate issuer is unknown",
-				"Certificate issuer is unknown: %v",
+				"There is a problem with the server Certificate",
+				"There is a problem with the server Certificate: %v",
 				err)
 		}
 		return newHTTPShadowError(
@@ -152,11 +158,11 @@ func (p *portalProxy) registerHCECluster(c echo.Context) error {
 
 	infoResponse, err := getHCEInfo(apiEndpoint, skipSSLValidation)
 	if err != nil {
-		if isUnknownAuthorityError(err) {
+		if isSSLRelatedError(err) {
 			return newHTTPShadowError(
 				http.StatusForbidden,
-				"Certificate issuer is unknown",
-				"Certificate issuer is unknown: %v",
+				"There is a problem with the server Certificate",
+				"There is a problem with the server Certificate: %v",
 				err)
 		}
 		return newHTTPShadowError(
