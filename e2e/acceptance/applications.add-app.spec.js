@@ -4,7 +4,6 @@ var helpers = require('../po/helpers.po');
 var resetTo = require('../po/resets.po');
 var loginPage = require('../po/login-page.po');
 var gallaryWall = require('../po/applications/applications.po');
-// var wizard = require('../po/widgets/wizard.po');
 var addAppWizard = require('../po/applications/add-application-wizard.po');
 var addAppHcfApp = require('../po/applications/add-application-hcf-app.po');
 var addAppService = require('../po/applications/add-application-services.po');
@@ -12,59 +11,80 @@ var _ = require('../../tools/node_modules/lodash');
 var cfModel = require('../po/models/cf-model.po');
 var proxyModel = require('../po/models/proxy-model.po');
 var searchBox = require('../po/widgets/input-search-box.po');
-var Q = require('../../tools/node_modules/q');
 
 describe('Applications - Add application', function () {
 
   /**
-   * This test will create, if missing an e2e org + space then add an application containing a server.
-   * Once all tests are finished the app and any related servce, route, etc should be removed. The org + space will
-   * remain.
+   * This spec will ..
+   * - Create, if missing, an e2e org + space with roles for admin + non-admin
+   * - An application containing a service (but NO pipeline).
+   * - Remove the application, if created, and it associated routes and service instance
+   * - Will NOT remove the org + space. This will allow us to see any remaining test artifacts
    *
    * THE ORDER OF TESTS IN THIS FILE IS IMPORTANT
    */
 
-  // TODO: App account is non-admin, however every hcf interaction is admin.
-  // To fix this need to ensure that the non-admin hcf user gets the correct roles in the new org/space
-
-  var testApp, testService, testCluster, testOrgName, testSpaceName, clusterSearchBox, organizationSearchBox,
-    spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace;
+  var testApp, testCluster, testOrgName, testSpaceName, testUser, testAdminUser, clusterSearchBox,
+    organizationSearchBox, spaceSearchBox, registeredCnsi, selectedCluster, selectedOrg, selectedSpace;
   var testTime = (new Date()).getTime();
+  var hcfFromConfig = helpers.getHcfs().hcf1;
 
   function getSearchBoxes() {
     return element.all(by.css('.panel-body form .form-group'));
   }
 
   beforeAll(function () {
-    // Setup the test environment
-    // - The required hcf is registered and connected
+    // Setup the test environment. This will ensure....
+    // - The required hcf is registered and connected (for both admin and non-admin users)
     // - The app wall is showing
     // - The app wall has the required hcf, organization and space filters set correctly
 
-    //return Q.resolve()
-
+    // Reset all cnsi that exist in params
     var promise = resetTo.resetAllCnsi()
       .then(function () {
-        return resetTo.connectAllCnsi(helpers.getUser(), helpers.getPassword(), true);
+        // Connect the test non-admin user to all cnsis in params
+        return resetTo.connectAllCnsi(helpers.getUser(), helpers.getPassword(), false);
       })
       .then(function () {
-        testOrgName = helpers.getHcfs().hcf1.testOrgName;
-        testSpaceName = helpers.getHcfs().hcf1.testSpaceName;
+        // Connect the test admin user to all cnsis in params (required to ensure correct permissions are set when
+        // creating orgs + spaces)
+        return resetTo.connectAllCnsi(helpers.getAdminUser(), helpers.getAdminPassword(), true);
+      })
+      .then(function () {
+        // Fetch the e2e org and space names
+        testOrgName = hcfFromConfig.testOrgName;
+        testSpaceName = hcfFromConfig.testSpaceName;
         expect(testOrgName).toBeDefined();
         expect(testSpaceName).toBeDefined();
+        // Fetch the cnsi metadata
         return proxyModel.fetchRegisteredCnsi(null, helpers.getUser(), helpers.getPassword()).then(function (response) {
           registeredCnsi = JSON.parse(response);
-          testCluster = _.find(registeredCnsi, {name: helpers.getHcfs().hcf1.register.cnsi_name});
+          testCluster = _.find(registeredCnsi, {name: hcfFromConfig.register.cnsi_name});
           expect(testCluster).toBeDefined();
         });
       })
       .then(function () {
-        // Add required test organisation if it does not exist
-        return cfModel.addOrgIfMissing(testCluster.guid, testOrgName, helpers.getUser(), helpers.getPassword());
-      })
-      .then(function () {
-        // Add required test space if it does not exist
-        return cfModel.addSpaceIfMissing(testCluster.guid, testOrgName, testSpaceName, helpers.getUser(), helpers.getPassword());
+        // Set up/find the required organization and space
+
+        // Fetch the hcf admin + non-admin user guids. This will be used for org + space roles
+        return cfModel.fetchUsers(testCluster.guid)
+          .then(function (users) {
+            testUser = _.find(users, {entity: { username: hcfFromConfig.user.username}});
+            testAdminUser = _.find(users, {entity: { username: hcfFromConfig.admin.username}});
+            expect(testUser).toBeDefined();
+            expect(testAdminUser).toBeDefined();
+          }).then(function () {
+            // Add required test organisation if it does not exist
+            // POSSIBLE IMPROVEMENT - Ensure both admin + non-admin have correct roles
+            return cfModel.addOrgIfMissing(testCluster.guid, testOrgName, testAdminUser.metadata.guid,
+              testUser.metadata.guid);
+          })
+          .then(function (organization) {
+            // Add required test space if it does not exist
+            // POSSIBLE IMPROVEMENT - Ensure both admin + non-admin have correct roles
+            return cfModel.addSpaceIfMissing(testCluster.guid, organization.metadata.guid, testOrgName, testSpaceName,
+              testAdminUser.metadata.guid, testUser.metadata.guid);
+          });
       })
       .then(function () {
         // Load the browser and navigate to app wall
@@ -121,6 +141,7 @@ describe('Applications - Add application', function () {
         });
       });
 
+    // Ensure we don't continue until everything is set up
     return browser.driver.wait(promise);
   });
 
@@ -303,7 +324,6 @@ describe('Applications - Add application', function () {
         return cfModel.fetchServiceExist(testCluster.guid, serviceName, helpers.getUser(), helpers.getPassword())
           .then(function (service) {
             expect(service).toBeTruthy();
-            testService = service;
           })
           .catch(function () {
             fail('Failed to determine if service exists');
@@ -317,6 +337,4 @@ describe('Applications - Add application', function () {
     expect(addAppWizard.getWizard().getCurrentStep().getText()).toBe('Delivery');
   });
 
-})
-;
-
+});

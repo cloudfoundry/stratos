@@ -9,7 +9,8 @@ module.exports = {
   addSpaceIfMissing: addSpaceIfMissing,
   deleteAppIfExisting: deleteAppIfExisting,
   fetchApp: fetchApp,
-  fetchServiceExist: fetchServiceExist
+  fetchServiceExist: fetchServiceExist,
+  fetchUsers: fetchUsers
 };
 
 function createHeader(cnsiGuid) {
@@ -19,11 +20,11 @@ function createHeader(cnsiGuid) {
   };
 }
 
-function addOrgIfMissing(cnsiGuid, orgName, username, password) {
+function addOrgIfMissing(cnsiGuid, orgName, adminGuid, userGuid) {
 
-  var req;
+  var req, added;
 
-  return helpers.createReqAndSession(null, username, password)
+  return helpers.createReqAndSession(null)
     .then(function (inReq) {
       req = inReq;
       return helpers.sendRequest(req, {
@@ -35,39 +36,55 @@ function addOrgIfMissing(cnsiGuid, orgName, username, password) {
     .then(function (response) {
       var json = JSON.parse(response);
       if (json.total_results === 0) {
-        console.log('Adding org: ' + orgName);
+        added = true;
         return helpers.sendRequest(req, {
           headers: createHeader(cnsiGuid),
           method: 'POST',
           url: 'pp/v1/proxy/v2/organizations'
-        }, {name: orgName});
+        }, {name: orgName}).then(function (response) {
+          return JSON.parse(response);
+        });
       }
+      return Q.resolve(json.resources[0]);
+    })
+    .then(function (newOrg) {
+      if (!added) {
+        // No need to mess around with permissions, it exists already.
+        return Q.resolve(newOrg);
+      }
+      var orgGuid = newOrg.metadata.guid;
+
+      var addUsers = [];
+      addUsers.push(helpers.sendRequest(req, {
+        headers: createHeader(cnsiGuid),
+        method: 'PUT',
+        url: 'pp/v1/proxy/v2/organizations/' + orgGuid + '/users/' + adminGuid
+      }));
+      addUsers.push(helpers.sendRequest(req, {
+        headers: createHeader(cnsiGuid),
+        method: 'PUT',
+        url: 'pp/v1/proxy/v2/organizations/' + orgGuid + '/users/' + userGuid
+      }));
+
+      // Add user to org users
+      return Q.all(addUsers)
+        .then(function () {
+          return helpers.sendRequest(req, {
+            headers: createHeader(cnsiGuid),
+            method: 'PUT',
+            url: 'pp/v1/proxy/v2/organizations/' + orgGuid + '/managers/' + adminGuid
+          });
+        })
+        .then(function () {
+          return newOrg;
+        });
     });
 }
 
-function addSpaceIfMissing(cnsiGuid, orgName, spaceName, username, password) {
+function addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, adminGuid, userGuid) {
   var req;
 
-  //   developer_guids
-  //     :
-  //     ["9cd7966b-38b3-40b3-a29b-3d3ba59d3455"]
-  //   0
-  // :
-  //   "9cd7966b-38b3-40b3-a29b-3d3ba59d3455"
-  //   manager_guids
-  //     :
-  //     ["9cd7966b-38b3-40b3-a29b-3d3ba59d3455"]
-  //   0
-  // :
-  //   "9cd7966b-38b3-40b3-a29b-3d3ba59d3455"
-  //   name
-  //     :
-  //     "dsfsdf"
-  //   organization_guid
-  //     :
-  //     "d00adce1-37e4-4b09-a036-d3f31803b6cd"
-
-  return helpers.createReqAndSession(null, username, password)
+  return helpers.createReqAndSession()
     .then(function (inReq) {
       req = inReq;
       return helpers.sendRequest(req, {
@@ -78,25 +95,25 @@ function addSpaceIfMissing(cnsiGuid, orgName, spaceName, username, password) {
     })
     .then(function (response) {
       var json = JSON.parse(response);
-      console.log('Deciding on adding space: ');
       var add = false;
       if (json.total_results === 0) {
         add = true;
       } else if (json.total_results > 0) {
-        var exists = _.find(json.resources, {entity: {organization: {entity: {name: orgName}}}});
-        console.log(exists);
-        add = !exists;
+        add = !_.find(json.resources, {entity: {organization: {entity: {name: orgName}}}});
       }
 
       if (add) {
-        console.log('Adding space: ' + spaceName);
         return helpers.sendRequest(req, {
           headers: createHeader(cnsiGuid),
           method: 'POST',
           url: 'pp/v1/proxy/v2/spaces'
         }, {
-          name: spaceName
+          name: spaceName,
+          manager_guids: [adminGuid],
+          developer_guids: [userGuid, adminGuid],
+          organization_guid: orgGuid
         });
+        //
       }
     });
 }
@@ -175,5 +192,20 @@ function deleteAppIfExisting(cnsiGuid, appName, username, password) {
           url: 'pp/v1/proxy/v2/apps/' + app.metadata.guid
         }));
       });
+    });
+}
+
+function fetchUsers(cnsiGuid) {
+  return helpers.createReqAndSession(null, helpers.getAdminUser(), helpers.getAdminPassword())
+    .then(function (req) {
+      return helpers.sendRequest(req, {
+        headers: createHeader(cnsiGuid),
+        method: 'GET',
+        url: 'pp/v1/proxy/v2/users'
+      });
+    })
+    .then(function (response) {
+      var json = JSON.parse(response);
+      return json.resources;
     });
 }

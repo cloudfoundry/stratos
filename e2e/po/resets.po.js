@@ -125,7 +125,6 @@ function connectAllCnsi(username, password, isAdmin) {
         });
         if (found) {
           var user = isAdmin ? found.admin : found.user || found.admin;
-          console.log('Connecting to cnsi with name: ', cnsi.name);
           promises.push(_connectCnsi(req, cnsi.guid, user.username, user.password));
         }
       });
