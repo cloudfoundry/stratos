@@ -140,7 +140,8 @@ describe('Endpoints - List HCEs', function () {
           .then(function () {
             expect(confirmationModalHelper.isVisible()).toBeTruthy();
             // Click on modal unregister
-            return confirmationModalHelper.primary();
+            confirmationModalHelper.primary();
+            return browser.driver.sleep(10000);
           })
           .then(function () {
             // Should now have no entries
