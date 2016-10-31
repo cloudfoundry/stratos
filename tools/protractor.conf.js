@@ -7,8 +7,7 @@ var acceptanceTests = [
   '../e2e/acceptance/endpoints-dashboard.spec.js',
   '../e2e/acceptance/endpoints-list-hce.spec.js',
   '../e2e/acceptance/endpoints-list-hcf.spec.js',
-  '../e2e/acceptance/applications.add-app.spec.js',
-  '../e2e/acceptance/applications.gallery.spec.js'
+  '../e2e/acceptance/applications.add-app.spec.js'
 ];
 
 exports.config = {

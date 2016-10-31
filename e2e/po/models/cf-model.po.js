@@ -113,7 +113,6 @@ function addSpaceIfMissing(cnsiGuid, orgGuid, orgName, spaceName, adminGuid, use
           developer_guids: [userGuid, adminGuid],
           organization_guid: orgGuid
         });
-        //
       }
     });
 }
