@@ -13,7 +13,7 @@ var cfModel = require('../po/models/cf-model.po');
 var proxyModel = require('../po/models/proxy-model.po');
 var Q = require('../../tools/node_modules/q');
 
-fdescribe('Applications - Add application', function () {
+describe('Applications - Add application', function () {
 
   /**
    * This test will create, if missing an e2e org + space then add an application containing a server.

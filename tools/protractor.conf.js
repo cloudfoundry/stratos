@@ -40,12 +40,12 @@ exports.config = {
     port: '',
     credentials: {
       admin: {
-        username: '',
-        password: ''
+        username: 'admin',
+        password: 'hscadmin'
       },
       user: {
-        username: '',
-        password: ''
+        username: 'user',
+        password: 'hscuser'
       }
     },
     skipSSlValidation: true,

@@ -15,10 +15,10 @@ var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
 var cnsis = browser.params.cnsi;
 var hcfs = cnsis.hcf;
 var hces = cnsis.hce;
-var adminUser = browser.params.credentials.admin.username || 'admin@cnap.local';
-var adminPassword = browser.params.credentials.admin.password || 'cnapadmin';
-var user = browser.params.credentials.user.username || 'user@cnap.local';
-var password = browser.params.credentials.user.password || 'cnapuser';
+var adminUser = browser.params.credentials.admin.username;
+var adminPassword = browser.params.credentials.admin.password;
+var user = browser.params.credentials.user.username;
+var password = browser.params.credentials.user.password;
 
 module.exports = {
 
