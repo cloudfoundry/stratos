@@ -8,21 +8,23 @@
     <p ng-if="!appVarCtrl.isEdit" translate>New variables will not be applied until the application is manually restarted.</p>
     <p ng-if="appVarCtrl.isEdit" translate>Changes to this variable will not be applied until the application is manually restarted.</p>
     <form name="appVarCtrl.addVariableForm" ng-submit="appVarCtrl.applyChange()">
-      <div class="form-group" focusable-input>
+      <div class="form-group" focusable-input ng-class="{'has-error': appVarCtrl.addVariableForm.var_name.$invalid && appVarCtrl.addVariableForm.var_name.$dirty}">
         <label class="control-label" translate>Name</label>
+        <span class="control-message"><span translate ng-if="appVarCtrl.addVariableForm.var_name.$error.required">Name is required</span></span>
         <input type="text" name="var_name" class="form-control" ng-model="appVarCtrl.varName" required ng-readonly="appVarCtrl.isEdit"/>
       </div>
-      <div class="form-group" focusable-input>
+      <div class="form-group" focusable-input ng-class="{'has-error': appVarCtrl.addVariableForm.var_value.$invalid && appVarCtrl.addVariableForm.var_value.$dirty}">
         <label class="control-label" translate>Value</label>
-        <input type="text" class="form-control" ng-model="appVarCtrl.varValue" required/>
+        <span class="control-message"><span translate ng-if="appVarCtrl.addVariableForm.var_value.$error.required">Value is required</span></span>
+        <input type="text" name="var_value" class="form-control" ng-model="appVarCtrl.varValue" required/>
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn-default"
                 ng-click="$dismiss()" translate>Cancel</button>
         <button ng-if="!appVarCtrl.isEdit" type="submit" class="btn btn-primary"
-                ng-disabled="appVarCtrl.addVariableForm.$invalid" translate>Add Variable</button>
+                ng-disabled="appVarCtrl.addVariableForm.$invalid" translate>Add</button>
         <button ng-if="appVarCtrl.isEdit" type="submit" class="btn btn-primary"
-                ng-disabled="appVarCtrl.addVariableForm.$invalid" translate>Update Variable</button>
+                ng-disabled="appVarCtrl.addVariableForm.$invalid" translate>Update</button>
       </div>
     </form>
     <div ng-if="appVarCtrl.addError" class="alert alert-danger">

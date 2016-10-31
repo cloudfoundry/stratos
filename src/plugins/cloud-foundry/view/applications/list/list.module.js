@@ -46,6 +46,7 @@
    * @param {app.error.errorService} errorService - the error service
    * @param {object} utils - the utils service
    * @property {object} $interpolate - the angular $interpolate service
+   * @property {object} $state - the UI router $state service
    * @property {object} $timeout - the angular $timeout service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {object} model - the Cloud Foundry Applications Model
@@ -55,6 +56,7 @@
   function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils) {
     var that = this;
     this.$interpolate = $interpolate;
+    this.$state = $state;
     this.$timeout = $timeout;
     this.$q = $q;
     this.modelManager = modelManager;
@@ -137,6 +139,17 @@
         }
       }
       return gettext('You have no applications.');
+    },
+
+    getEndpointsLink: function () {
+      if (this.model.clusterCount === 0) {
+        return this.$state.go('endpoint.dashboard');
+      }
+      var hcfs = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf'});
+      if (hcfs.length === 1) {
+        return this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: hcfs[0].guid});
+      }
+      return this.$state.go('endpoint.clusters.tiles');
     },
 
     /**
@@ -384,15 +397,45 @@
       };
     },
 
-    showAddApplicationButton: function () {
-
-      // If we're not ready or there is no
-      // connected cluster, hide the button
-      if (this.ready && this.model.clusterCount > 0) {
-        return this.isSpaceDeveloper;
+    /**
+     * @function isAdminInAnyHcf
+     * @description Helper to detect if user is an admin in any connected HCF
+     * @returns {boolean} true if the user is connected to any HCF as an admin
+     */
+    isAdminInAnyHcf: function () {
+      for (var guid in this.userCnsiModel.serviceInstances) {
+        if (!this.userCnsiModel.serviceInstances.hasOwnProperty(guid)) {
+          continue;
+        }
+        if (this.userCnsiModel.serviceInstances[guid].cnsi_type !== 'hcf') {
+          continue;
+        }
+        if (this.authModel.isAdmin(guid)) {
+          return true;
+        }
       }
+    },
 
-      return false;
+    /**
+     * @function showAddApplicationButton
+     * @description Implements the logic for showing the `Add Application` button
+     * @returns {boolean} true if the user is an admin or a Space developer to any HCF
+     */
+    showAddApplicationButton: function () {
+      if (this.isAdminInAnyHcf()) {
+        return true;
+      }
+      return !this.disableAddApplicationButton();
+    },
+
+    /**
+     * @function disableAddApplicationButton
+     * @description Implements the logic for disabling the `Add Application` button
+     * @returns {boolean} true is App module is initialising,
+     * there no connected endpoints or user is not a space developer
+     */
+    disableAddApplicationButton: function () {
+      return !this.ready || this.model.clusterCount <= 0 || !this.isSpaceDeveloper;
     }
   });
 })();

@@ -479,7 +479,7 @@
       var spaceQuotaGuid = space.entity.space_quota_definition_guid;
 
       var httpConfig = this.modelUtils.makeHttpConfig(cnsiGuid);
-      var createdDate = moment(space.metadata.created_at, "YYYY-MM-DDTHH:mm:ssZ");
+      var createdDate = moment(space.metadata.created_at, 'YYYY-MM-DDTHH:mm:ssZ');
 
       var spaceQuotaApi = that.apiManager.retrieve('cloud-foundry.api.SpaceQuotaDefinitions');
 
@@ -596,6 +596,13 @@
       });
     },
 
+    refreshSpaceAndAuth: function (cnsiGuid, organizationModel, orgGuid) {
+      var authModel = this.modelManager.retrieve('cloud-foundry.model.auth');
+      return authModel.initializeForEndpoint(cnsiGuid, true).finally(function () {
+        return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+      });
+    },
+
     createSpaces: function (cnsiGuid, orgGuid, spaceNames, params) {
       var that = this;
 
@@ -625,12 +632,13 @@
 
       return that.$q.all(createPromises).then(function () {
         // Refresh the spaces
-        return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+        return that.refreshSpaceAndAuth(cnsiGuid, organizationModel, orgGuid);
       });
 
     },
 
     deleteSpace: function (cnsiGuid, orgGuid, spaceGuid) {
+      var that = this;
       var params = {
         recursive: false,
         async: false
@@ -638,7 +646,7 @@
       var organizationModel = this._getOrganizationModel();
       return this.spaceApi.DeleteSpace(spaceGuid, params, this.modelUtils.makeHttpConfig(cnsiGuid)).then(function () {
         // Refresh the spaces
-        return organizationModel.refreshOrganizationSpaces(cnsiGuid, orgGuid);
+        return that.refreshSpaceAndAuth(cnsiGuid, organizationModel, orgGuid);
       });
     },
 

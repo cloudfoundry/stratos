@@ -40,7 +40,16 @@
 
     function initAuthModel(type, $injector) {
       // Initialise auth model appropriately
-      mock.cloudFoundryModel.Auth.initAuthModel(type, userGuid, $injector);
+      var spaceGuid = 'spaceGuid';
+
+      var authModelOpts = {
+        role: type,
+        userGuid: userGuid,
+        cnsiGuid: inputClusterGuid,
+        spaceGuid: spaceGuid
+      };
+
+      mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
       $scope = $injector.get('$rootScope').$new();
       var $stateParams = $injector.get('$stateParams');

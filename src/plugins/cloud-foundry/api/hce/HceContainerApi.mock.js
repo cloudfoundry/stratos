@@ -40,14 +40,14 @@
           200: {
             build_container_id: id,
             build_container_image_id: 2,
-            build_container_label: "NodeJS build container",
+            build_container_label: 'NodeJS build container',
             retain_build_artifacts: false,
             image: {
               image_id: 2,
               image_registry_id: 2,
-              image_repo: "hce-base-nodejs",
-              image_tag: "1.1.30-674c3ba9",
-              image_label: "hce_nodejs_base",
+              image_repo: 'hce-base-nodejs',
+              image_tag: '1.1.30-674c3ba9',
+              image_label: 'hce_nodejs_base',
               credential_id: null
             }
           },

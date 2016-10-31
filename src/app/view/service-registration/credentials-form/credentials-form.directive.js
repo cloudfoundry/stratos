@@ -95,7 +95,7 @@
       this.authenticating = true;
       this.userServiceInstanceModel.connect(this.cnsi.guid, this.cnsi.name, this._data.username, this._data.password)
         .then(function success(response) {
-          that.notificationsService.notify('success', gettext('Credentials validated'));
+          that.notificationsService.notify('success', gettext('Successfully connected to "') + that.cnsi.name + '"');
           that.reset();
           if (angular.isDefined(that.onSubmit)) {
             that.onSubmit({ serviceInstance: response.data });

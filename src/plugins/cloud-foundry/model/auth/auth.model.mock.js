@@ -4,7 +4,7 @@
   /* eslint-disable quote-props */
   mock.cloudFoundryModel = mock.cloudFoundryModel || {};
 
-  function setupSpaces(userGuid, isSpaceManager, isSpaceDeveloper, $httpBackend) {
+  function setupSpaces(userGuid, isSpaceManager, isSpaceDeveloper, $httpBackend, orgGuid, spaceGuid) {
 
     $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllAuditedSpacesForUser(userGuid).url).respond(
       mock.cloudFoundryAPI.Users.ListAllAuditedOrganizationsForUser(userGuid).success.code,
@@ -21,11 +21,11 @@
     }
 
     if (isSpaceDeveloper) {
-      $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllSpacesForUser(userGuid).url).respond(
+      $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllSpacesForUser(userGuid, spaceGuid, orgGuid).url).respond(
         mock.cloudFoundryAPI.Users.ListAllSpacesForUser(userGuid).success.code,
         mock.cloudFoundryAPI.Users.ListAllSpacesForUser(userGuid).success.is_developer.response.data);
     } else {
-      $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllSpacesForUser(user_guid).url).respond(
+      $httpBackend.whenGET(mock.cloudFoundryAPI.Users.ListAllSpacesForUser(userGuid, spaceGuid, orgGuid).url).respond(
         mock.cloudFoundryAPI.Users.ListAllSpacesForUser(userGuid).success.code,
         mock.cloudFoundryAPI.Users.ListAllSpacesForUser(userGuid).success.is_not_developer.response.data);
     }
@@ -60,63 +60,66 @@
   function setupFeatureFlagsRequest($httpBackend) {
     $httpBackend.whenGET(mock.cloudFoundryAPI.FeatureFlags.GetAllFeatureFlags().url).respond(
       mock.cloudFoundryAPI.FeatureFlags.GetAllFeatureFlags().success.code,
-      mock.cloudFoundryAPI.FeatureFlags.GetAllFeatureFlags().success.response);
+      mock.cloudFoundryAPI.FeatureFlags.GetAllFeatureFlags().success.response.data);
   }
 
-  function setupSummary(userGuid, $httpBackend) {
-    $httpBackend.whenGET(mock.cloudFoundryAPI.Users.GetUserSummary(userGuid).url).respond(
-      mock.cloudFoundryAPI.Users.GetUserSummary(userGuid).success.code,
-      mock.cloudFoundryAPI.Users.GetUserSummary(userGuid).success.response);
+  function setupSummary(userGuid, spaceGuid, $httpBackend) {
+
+    $httpBackend.whenGET(mock.cloudFoundryAPI.Users.GetUserSummary(userGuid, spaceGuid).url).respond(
+      mock.cloudFoundryAPI.Users.GetUserSummary(userGuid, spaceGuid).success.code,
+      mock.cloudFoundryAPI.Users.GetUserSummary(userGuid, spaceGuid).success.response);
   }
 
-  function setupStackatoInfo(isAdmin, modelManager) {
+  function setupStackatoInfo(isAdmin, userGuid, cnsiGuid, modelManager) {
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-    stackatoInfo.info = {
-      endpoints: {
-        hcf: {
-          guid: {
-            guid: 'guid',
-            name: 'myHCF',
-            version: '',
-            user: {guid: 'userGuid', name: 'test', admin: isAdmin},
-            type: ''
-          }
-        }
-      }
-    };
+    stackatoInfo.info = {};
+    _.set(stackatoInfo.info, 'endpoints.hcf.' + cnsiGuid, {
+      guid: cnsiGuid,
+      name: 'myHCF',
+      version: '',
+      user: {guid: userGuid, name: 'test', admin: isAdmin},
+      type: ''
+    });
   }
 
   mock.cloudFoundryModel.Auth = {
 
-    initAuthModel: function (role, userGuid, $injector) {
+    initAuthModel: function ($injector, opts) {
 
       var isAdmin = false;
       var isOrgManager = false;
       var isSpaceManager = true;
       var isSpaceDeveloper = true;
-      if (role === 'admin' || role === 'org_manager') {
-        isAdmin = role === 'admin';
-        isOrgManager = role === 'org_manager';
-      } else if (role === 'space_manager') {
+      if (opts.role === 'admin' || opts.role === 'org_manager') {
+        isAdmin = opts.role === 'admin';
+        isOrgManager = opts.role === 'org_manager';
+      } else if (opts.role === 'space_manager') {
         isSpaceManager = true;
+        isSpaceDeveloper = false;
       } else {
         isSpaceDeveloper = true;
         isOrgManager = false;
         isSpaceManager = false;
       }
+
+      opts.cnsiGuid = opts.cnsiGuid || 'cnsiGuid';
+      opts.userGuid = opts.userGuid || 'userGuid';
+
       var $httpBackend = $injector.get('$httpBackend');
       var modelManager = $injector.get('app.model.modelManager');
-      setupStackatoInfo(isAdmin, modelManager);
+      setupStackatoInfo(isAdmin, opts.userGuid, opts.cnsiGuid, modelManager);
       setupFeatureFlagsRequest($httpBackend);
       if (isAdmin) {
-        setupSummary(userGuid, $httpBackend);
+        // Need to pass known space GUID for application ACL tests
+        setupSummary(opts.userGuid, opts.spaceGuid, $httpBackend);
       } else {
-        setupOrganizations(userGuid, isOrgManager, $httpBackend);
-        setupSpaces(userGuid, isSpaceManager, isSpaceDeveloper, $httpBackend);
+        setupOrganizations(opts.userGuid, isOrgManager, $httpBackend);
+        setupSpaces(opts.userGuid, isSpaceManager, isSpaceDeveloper, $httpBackend, opts.orgGuid, opts.spaceGuid);
       }
 
       var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-      authModel.initializeForEndpoint('guid', true);
+      authModel.initializeForEndpoint(opts.cnsiGuid, true);
+
       $httpBackend.flush();
     }
   };

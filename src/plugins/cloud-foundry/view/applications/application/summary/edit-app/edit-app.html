@@ -1,12 +1,19 @@
-<form name="editAppForm" class="edit-app">
-  <div class="form-group " focusable-input>
+<form name="form.editAppForm" class="edit-app">
+  <div class="form-group " focusable-input ng-class="{'has-error': form.editAppForm.name.$invalid}">
     <label class="control-label" translate>Application Name</label>
+    <span class="control-message">
+      <span translate ng-if="form.editAppForm.name.$error.required">Name is required</span>
+    </span>
     <input type="text" name="name" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.name"
            required
     />
   </div>
-  <div class="form-group" focusable-input>
+  <div class="form-group" focusable-input ng-class="{'has-error': form.editAppForm.memory.$invalid}">
     <label class="control-label" translate>Memory Usage</label>
+    <span class="control-message">
+      <span translate ng-if="form.editAppForm.memory.$error.required">Memory is required</span>
+      <span translate ng-if="form.editAppForm.memory.$error.min">Memory must be higher than 0</span>
+    </span>
     <div class="input-group">
       <input type="number" min="1" name="memory" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.memory"
              required
@@ -14,9 +21,14 @@
       <label class="input-group-addon rm-background" translate>MB</label>
     </div>
   </div>
-  <div class="form-group " focusable-input>
+  <div class="form-group " focusable-input ng-class="{'has-error': form.editAppForm.instances.$invalid}">
     <label class="control-label" translate>Instances</label>
-    <input type="number" min="0" name="instances" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.instances"
+    <span class="control-message">
+      <span translate ng-if="form.editAppForm.instances.$error.required">Instances is required</span>
+      <span translate ng-if="form.editAppForm.instances.$error.min">Instances must be 0 or more</span>
+      <span translate ng-if="form.editAppForm.instances.$error.pattern && !form.editAppForm.instances.$error.min">Instances must be whole number</span>
+    </span>
+    <input type="number" min="0" pattern="\d*" name="instances" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.instances"
            required
     />
   </div>
