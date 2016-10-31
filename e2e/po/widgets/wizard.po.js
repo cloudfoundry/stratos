@@ -3,6 +3,8 @@
 var _ = require('../../../tools/node_modules/lodash');
 
 module.exports = {
+  wrap: wrap,
+
   getTitle: getTitle,
 
   getSteps: getSteps,
@@ -15,21 +17,41 @@ module.exports = {
 
   isCancelEnabled: isCancelEnabled,
   isNextEnabled: isNextEnabled,
-  
+
   cancel: cancel,
   next: next
 };
 
-function getTitle() {
-  return element(by.css('.wizard-head h4')).getText();
+function wrap(element) {
+  return {
+    getTitle:  _.partial(getTitle, element),
+
+    getSteps:  _.partial(getSteps, element),
+    getStepNames:  _.partial(getStepNames, element),
+    getCurrentStep:  _.partial(getCurrentStep, element),
+
+    getCancel:  _.partial(getCancel, element),
+    getBack:  _.partial(getBack, element),
+    getNext:  _.partial(getNext, element),
+
+    isCancelEnabled:  _.partial(isCancelEnabled, element),
+    isNextEnabled:  _.partial(isNextEnabled, element),
+
+    cancel:  _.partial(cancel, element),
+    next:  _.partial(next, element)
+  };
 }
 
-function getSteps() {
-  return element.all(by.css('.wizard-nav-item'));
+function getTitle(ele) {
+  return ele.element(by.css('.wizard-head h4')).getText();
 }
 
-function getStepNames() {
-  return getSteps().then(function (steps) {
+function getSteps(ele) {
+  return ele.all(by.css('.wizard-nav-item'));
+}
+
+function getStepNames(element) {
+  return getSteps(element).then(function (steps) {
     var promises = [];
     _.forEach(steps, function (step) {
       promises.push(step.getText());
@@ -38,37 +60,37 @@ function getStepNames() {
   });
 }
 
-function getCurrentStep() {
-  return element(by.css('wizard-nav-item nav-item active'));
+function getCurrentStep(ele) {
+  return ele.element(by.css('.wizard-nav-item.nav-item.active'));
 }
 
-function getCancel() {
-  return element(by.css('.wizard-foot .btn.cancel'));
+function getCancel(ele) {
+  return ele.element(by.css('.wizard-foot .btn.cancel'));
 }
 
-function getBack() {
-  return element(by.css('.wizard-foot .btn.back'));
+function getBack(ele) {
+  return ele.element(by.css('.wizard-foot .btn.back'));
 }
 
-function getNext() {
-  return element(by.css('.wizard-foot .btn.next'));
+function getNext(ele) {
+  return ele.element(by.css('.wizard-foot .btn.next'));
 }
 
-function isCancelEnabled() {
-  return _buttonEnabled(getCancel());
+function isCancelEnabled(element) {
+  return _buttonEnabled(getCancel(element));
 }
 
-function isNextEnabled() {
-  return _buttonEnabled(getNext());
+function isNextEnabled(element) {
+  return _buttonEnabled(getNext(element));
 }
 
 
-function cancel() {
-  return getCancel().click();
+function cancel(element) {
+  return getCancel(element).click();
 }
 
-function next() {
-  return getNext().click();
+function next(element) {
+  return getNext(element).click();
 }
 
 function _buttonEnabled(element) {

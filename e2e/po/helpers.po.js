@@ -229,7 +229,7 @@ function newRequest() {
 function sendRequest(req, options, body, formData) {
   return new Promise(function (resolve, reject) {
     options.url = getHost() + '/' + options.url;
-    if (body && body.length) {
+    if (body) {
       options.body = JSON.stringify(body);
     } else if (formData) {
       options.formData = formData;

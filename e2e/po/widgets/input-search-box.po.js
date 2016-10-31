@@ -5,7 +5,7 @@ var Q = require('../../../tools/node_modules/q');
 
 module.exports = {
   wrap: wrap,
-  isVisible: isVisible,
+  isDisplayed: isDisplayed,
   addText: addText,
   clear: clear,
   getValue: getValue,
@@ -19,20 +19,20 @@ module.exports = {
 function wrap(element) {
   // Element should be the element with 'form group'
   return {
-    isVisible: _.partial(isVisible, element),
+    isDisplayed: _.partial(isDisplayed, element),
     addText: _.partial(addText, element),
     clear: _.partial(clear, element),
     getValue: _.partial(getValue, element),
     getOptionsCount: _.partial(getOptionsCount, element),
     getOptions: _.partial(getOptions, element),
     selectOption: _.partial(selectOption, element),
-    selectOptionByLabel: _.partial(selectOptionByLabel, element), 
+    selectOptionByLabel: _.partial(selectOptionByLabel, element),
     open: _.partial(open, element)
   };
 }
 
-function isVisible(element) {
-  return element.element(by.css('search-box')).isVisible();
+function isDisplayed(element) {
+  return element.element(by.css('search-box')).isDisplayed();
 }
 
 function addText(element, keys) {
@@ -81,18 +81,18 @@ function selectOption(element, index) {
 function selectOptionByLabel(element, label) {
   return open(element)
     .then(function () {
-      return getOptions(element);
-    })
-    .filter(function (elem) {
-      return elem.getAttribute('innerText')
-        .then(function (text) {
-          return text.trim();
+      return getOptions(element)
+        .filter(function (elem) {
+          return elem.getAttribute('innerText')
+            .then(function (text) {
+              return text.trim();
+            })
+            .then(function (text) {
+              return text === label;
+            });
         })
-        .then(function (text) {
-          return text === label;
-        });
+        .first();
     })
-    .first()
     .then(function (elem) {
       return elem.click();
     })
@@ -103,5 +103,6 @@ function selectOptionByLabel(element, label) {
 }
 
 function open(element) {
+  expect(element.isDisplayed()).toBe(true);
   return element.element(by.css('input')).click();
 }

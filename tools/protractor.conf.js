@@ -65,7 +65,9 @@ exports.config = {
           user: {
             username: 'rcox',
             password: 'changeme'
-          }
+          },
+          testOrgName:  'e2e',
+          testSpaceName: 'e2e'
         }
       },
       hce: {

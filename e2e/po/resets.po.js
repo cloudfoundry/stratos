@@ -187,7 +187,7 @@ function _removeAllCnsi(req) {
         return;
       }
       var promises = data.map(function (c) {
-        return helpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, '', {cnsi_guid: c.guid});
+        return helpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, null, {cnsi_guid: c.guid});
       });
       Promise.all(promises).then(resolve, reject);
 
