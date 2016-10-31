@@ -4,28 +4,59 @@
   describe('organization-tile directive', function () {
     var $httpBackend, element, controller;
 
-    var modelOrganization = {
-      spaces: []
-    };
-
     var cnsiGuid = 'guid';
     var orgGuid = 'orgGuid';
     var spaceGuid = 'spaceGuid';
+
     var organization = {
       cnsiGuid: cnsiGuid,
       guid: orgGuid,
       org: {
+        metadata: {
+          guid: orgGuid,
+          created_at: '2016-10-28T14:48:48Z',
+          updated_at: null
+        },
         entity: {
-          spaces: [{
+          name: 'delete-me',
+          billing_enabled: false,
+          quota_definition_guid: '84f213bb-ef1f-49ce-913b-3794905e32ee',
+          status: 'active',
+          quota_definition: {
             metadata: {
-              guid: spaceGuid
+              guid: '84f213bb-ef1f-49ce-913b-3794905e32ee',
+              created_at: '2016-10-28T12:54:11Z',
+              updated_at: null
             },
             entity: {
-              organization_guid: orgGuid
+              name: 'default',
+              non_basic_services_allowed: true,
+              total_services: 100,
+              total_routes: 1000,
+              total_private_domains: -1,
+              memory_limit: 10240,
+              trial_db_allowed: false,
+              instance_memory_limit: -1,
+              app_instance_limit: -1,
+              app_task_limit: -1,
+              total_service_keys: -1,
+              total_reserved_route_ports: 0
             }
-          }]
+          },
+          spaces: [],
+          apps: [],
+          users: [],
+          managers: [],
+          billing_managers: [],
+          auditors: []
         }
       }
+    };
+    var modelOrganization = {
+      details: {
+        org: organization.org
+      },
+      spaces: []
     };
     var userGuid = 'userGuid';
 
@@ -49,10 +80,7 @@
 
       var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
       _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid, modelOrganization);
-      _.set(organizationModel, 'organizations.' + organization.cnsiGuid + '.' + organization.guid + '.details.org', '');
       _.set(organizationModel, 'organizationNames.' + organization.cnsiGuid, ['orgGuid']);
-
-      var spaceGuid = 'spaceGuid';
 
       var authModelOpts = {
         role: 'admin',
@@ -117,7 +145,9 @@
     });
 
     it('should send request when user edited organization', function () {
-      $httpBackend.expectPUT('/pp/v1/proxy/v2/organizations/orgGuid').respond(201, {});
+      $httpBackend.expectPUT('/pp/v1/proxy/v2/organizations/orgGuid').respond(201, organization.org);
+      $httpBackend.expectGET('/pp/v1/proxy/v2/organizations/orgGuid/spaces?inline-relations-depth=1').respond(200, {resources: [] });
+
       var editOrgAction = controller.actions[0];
       var asynTaskDialog = editOrgAction.execute();
       asynTaskDialog.actionTask({
