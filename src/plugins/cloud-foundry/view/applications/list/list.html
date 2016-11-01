@@ -1,6 +1,14 @@
 <div class="action-bar app-actions-bar panel-less">
   <div class="applications-header font-semi-bold pull-left" translate>
     Applications
+    <span class="applications-count"
+          ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.unfilteredApplicationCount">
+      ( {{ applicationsListCtrl.unfilteredApplicationCount }} )
+    </span>
+    <span class="applications-count"
+          ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.unfilteredApplicationCount">
+      ( {{ applicationsListCtrl.model.filteredApplications.length }} / {{ applicationsListCtrl.unfilteredApplicationCount }} )
+    </span>
     <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
   </div>
   <div class="pull-right">

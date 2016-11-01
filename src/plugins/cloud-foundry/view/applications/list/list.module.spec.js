@@ -17,6 +17,7 @@
       var $timeout = $injector.get('$timeout');
       var $q = $injector.get('$q');
       var modelManager = $injector.get('app.model.modelManager');
+      var apiManager = $injector.get('app.api.apiManager');
       eventService = $injector.get('app.event.eventService');
       var errorService = $injector.get('app.error.errorService');
       var utils = $injector.get('app.utils.utilsService');
@@ -38,7 +39,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsListController = $state.get('cf.applications.list').controller;
-      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils);
+      $controller = new ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, apiManager, eventService, errorService, utils);
       expect($controller).toBeDefined();
     }
 
@@ -132,15 +133,19 @@
         $controller.setCluster();
         $httpBackend.flush();
         expect($controller.organizations.length).toBe(2);
+        expect($controller.unfilteredApplicationCount).toBe(0);
       });
 
       it('should correctly set spaces when an organisation is selected', function () {
+        var ListAllApps = mock.cloudFoundryAPI.Apps.ListAllApps();
+        $httpBackend.whenGET(ListAllApps.url).respond(200, ListAllApps.response[200].body);
 
         $controller.filter.orgGuid = orgGuid;
         $controller.model.filterParams.cnsiGuid = cnsiGuid;
         $controller.setOrganization();
         $httpBackend.flush();
         expect($controller.spaces.length).toBe(2);
+        expect($controller.unfilteredApplicationCount).toBe(4);
       });
 
     });

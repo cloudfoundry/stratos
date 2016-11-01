@@ -5,6 +5,11 @@ $applications-msg-height: 50px;
 .applications-header {
   font-size: $hpe-unit-space;
 
+  .applications-count {
+    font-size: $hpe-unit-space - $hpe-unit-space / 4;
+    padding-left: $hpe-unit-space / 4;
+  }
+
   .bounce-spinner-sm {
     margin-left: $hpe-unit-space;
   }

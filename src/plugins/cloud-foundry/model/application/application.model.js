@@ -209,7 +209,7 @@
     _listAllApps: function () {
       var that = this;
       this.bufferedApplications = [];
-      return this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis())
+      return this._listAllAppsWithPage(1, that.loadingLimit, that.getCurrentCnsis())
         .then(_.bind(this._onListAllAppsSuccess, this))
         .then(function () {
           if (that.filterParams.cnsiGuid !== 'all') {
@@ -415,7 +415,7 @@
      * @returns {Array} collection of valid CF cnsis
      * @private
      */
-    _getCurrentCnsis: function () {
+    getCurrentCnsis: function () {
       // Find cnsi's to reach out to
       // - Ignore cnsi's that are invalid (session expired) or errored (cannot contact)
       // - Fetch apps from all available cnsi's. Specifically important if we return to the page and pre-filter. Need
