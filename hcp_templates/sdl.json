@@ -1,218 +1,40 @@
 {
   "name": "hsc",
-  "product_version": "4.0",
+  "product_version": "4.0.1",
   "sdl_version": "{{TAG}}",
   "vendor": "HPE",
   "components": [
     {
-      "name": "hsc-etcd",
-      "version": "1.0.0",
+      "name": "hsc-postgres",
+      "version": "{{TAG}}",
       "vendor": "HPE",
-      "min_RAM_mb": 512,
+      "min_RAM_mb": 1024,
       "min_disk_gb": 1,
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-etcd2:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-postgres",
+      "tag": "{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
         {
-          "name": "CONSOLE_VERSION"
+          "name": "POSTGRES_USER"
         },
         {
-          "name": "ETCD_DATA_DIR"
+          "name": "POSTGRES_PASSWORD_FILE"
         },
         {
-          "name": "ETCD_WAL_DIR"
-        },
-        {
-          "name": "ETCD_LISTEN_PEER_URLS"
-        },
-        {
-          "name": "ETCD_LISTEN_CLIENT_URLS"
-        },
-        {
-          "name": "ETCD_INITIAL_CLUSTER_TOKEN"
-        },
-        {
-          "name": "ETCD_INITIAL_CLUSTER_STATE"
-        },
-        {
-          "name": "ETCD_INITIAL_CLUSTER"
-        },
-        {
-          "name": "ETCD_STRICT_RECONFIG_CHECK"
+          "name": "PGDATA"
         }
       ],
-      "affinity": [],
-      "min_instances": 5,
-      "max_instances": 5,
-      "service_ports": [
-        {
-          "name": "etcd-client",
-          "protocol": "TCP",
-          "source_port": 2379,
-          "target_port": 2379,
-          "public": false
-        },
-        {
-          "name": "etcd-peer",
-          "protocol": "TCP",
-          "source_port": 2380,
-          "target_port": 2380,
-          "public": false
-        }
-      ],
-      "volume_mounts": [
-        {
-          "volume_name": "hsc-etcd-data-volume",
-          "mountpoint": "/etcd_data"
-        },
-        {
-          "volume_name": "hsc-etcd-wal-volume",
-          "mountpoint": "/etcd_wal"
-        }
-      ]
-    },
-    {
-      "name": "hsc-stsentinel",
-      "version": "1.0.0",
-      "vendor": "HPE",
-      "min_RAM_mb": 512,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
-      "platform": "linux-x86_64",
-      "capabilities": [],
-      "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-stolon:{{TAG}}",
-      "workload_type": "container",
-      "entrypoint": [],
-      "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
-        {
-          "name": "SENTINEL"
-        },
-        {
-          "name": "STSENTINEL_STORE_BACKEND"
-        },
-        {
-          "name": "STSENTINEL_STORE_ENDPOINTS"
-        },
-        {
-          "name": "STSENTINEL_CLUSTER_NAME"
-        },
-        {
-          "name": "STSENTINEL_LISTEN_ADDRESS"
-        },
-        {
-          "name": "STSENTINEL_PORT"
-        },
-        {
-          "name": "STSENTINEL_KEEPER_PORT"
-        },
-        {
-          "name": "STSENTINEL_INITIAL_CLUSTER_CONFIG"
-        },
-        {
-          "name": "STSENTINEL_DISCOVERY_TYPE"
-        },
-        {
-          "name": "STSENTINEL_DEBUG"
-        }
-      ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
       "service_ports": [
         {
-          "name": "listen-port",
-          "protocol": "TCP",
-          "source_port": 6431,
-          "target_port": 6431,
-          "public": false
-        }
-      ]
-    },
-    {
-      "name": "hsc-stkeeper",
-      "version": "1.0.0",
-      "vendor": "HPE",
-      "min_RAM_mb": 512,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
-      "platform": "linux-x86_64",
-      "capabilities": [],
-      "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-stolon:{{TAG}}",
-      "workload_type": "container",
-      "entrypoint": [],
-      "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
-        {
-          "name": "KEEPER"
-        },
-        {
-          "name": "STKEEPER_STORE_BACKEND"
-        },
-        {
-          "name": "STKEEPER_STORE_ENDPOINTS"
-        },
-        {
-          "name": "STKEEPER_DATA_DIR"
-        },
-        {
-          "name": "STKEEPER_CLUSTER_NAME"
-        },
-        {
-          "name": "STKEEPER_LISTEN_ADDRESS"
-        },
-        {
-          "name": "STKEEPER_PORT"
-        },
-        {
-          "name": "STKEEPER_PG_LISTEN_ADDRESS"
-        },
-        {
-          "name": "STKEEPER_PG_PORT"
-        },
-        {
-          "name": "STKEEPER_PG_REPL_USERNAME"
-        },
-        {
-          "name": "STKEEPER_PG_REPL_PASSWORDFILE"
-        },
-        {
-          "name": "STKEEPER_PG_SU_USERNAME"
-        },
-        {
-          "name": "STKEEPER_PG_SU_PASSWORDFILE"
-        },
-        {
-          "name": "STKEEPER_DEBUG"
-        },
-        {
-          "name": "stolon"
-        }
-      ],
-      "affinity": [],
-      "min_instances": 3,
-      "max_instances": 3,
-      "service_ports": [
-        {
-          "name": "keeper-port",
-          "protocol": "TCP",
-          "source_port": 5431,
-          "target_port": 5431,
-          "public": false
-        },
-        {
-          "name": "pgsql-port",
+          "name": "postgres",
           "protocol": "TCP",
           "source_port": 5432,
           "target_port": 5432,
@@ -227,77 +49,21 @@
       ]
     },
     {
-      "name": "hsc-stproxy",
-      "version": "1.0.0",
-      "vendor": "HPE",
-      "min_RAM_mb": 512,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
-      "platform": "linux-x86_64",
-      "capabilities": [],
-      "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-stolon:{{TAG}}",
-      "workload_type": "container",
-      "entrypoint": [],
-      "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
-        {
-          "name": "PROXY"
-        },
-        {
-          "name": "STPROXY_STORE_BACKEND"
-        },
-        {
-          "name": "STPROXY_STORE_ENDPOINTS"
-        },
-        {
-          "name": "STPROXY_CLUSTER_NAME"
-        },
-        {
-          "name": "STPROXY_LISTEN_ADDRESS"
-        },
-        {
-          "name": "STPROXY_PORT"
-        },
-        {
-          "name": "STPROXY_STOP_LISTENING"
-        },
-        {
-          "name": "STPROXY_DEBUG"
-        }
-      ],
-      "affinity": [],
-      "min_instances": 1,
-      "max_instances": 1,
-      "service_ports": [
-        {
-          "name": "stolon-proxy",
-          "protocol": "TCP",
-          "source_port": 5432,
-          "target_port": 5432,
-          "public": false
-        }
-      ]
-    },
-    {
       "name": "hsc-proxy",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
-      "min_RAM_mb": 256,
+      "min_RAM_mb": 1024,
       "min_disk_gb": 1,
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-proxy:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-proxy",
+      "tag": "{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
         {
           "name": "PGSQL_USER"
         },
@@ -327,6 +93,9 @@
         },
         {
           "name": "console-proxy-cert-key"
+        },
+        {
+          "name": "HTTP_CONNECTION_TIMEOUT_IN_SECS"
         },
         {
           "name": "HTTP_CLIENT_TIMEOUT_IN_SECS"
@@ -362,9 +131,8 @@
           "name": "ENCRYPTION_KEY_FILENAME"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
-      "max_instances": 1,
+      "max_instances": 50,
       "service_ports": [
         {
           "name": "proxy",
@@ -387,21 +155,20 @@
     },
     {
       "name": "hsc-console",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
-      "min_RAM_mb": 256,
+      "min_RAM_mb": 1024,
       "min_disk_gb": 1,
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-console:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-console",
+      "tag": "{{TAG}}",
       "workload_type": "container",
       "entrypoint": [],
       "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
         {
           "name": "console-cert"
         },
@@ -409,9 +176,8 @@
           "name": "console-cert-key"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
-      "max_instances": 1,
+      "max_instances": 50,
       "service_ports": [
         {
           "name": "http",
@@ -460,21 +226,20 @@
   "preflight": [
     {
       "name": "hsc-preflight-job",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
-      "min_RAM_mb": 512,
-      "min_disk_gb": 1,
-      "min_VCPU": 1,
+      "min_RAM_mb": 256,
+      "min_disk_gb": 0.5,
+      "min_VCPU": 0.5,
       "platform": "linux-x86_64",
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-preflight-job:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-preflight-job",
+      "tag": "{{TAG}}",
       "entrypoint": [],
       "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
         {
           "name": "UPGRADE_VOLUME"
         },
@@ -488,9 +253,9 @@
           "name": "ENCRYPTION_KEY_FILENAME"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
+      "timeout": 1800,
       "retry_count": 100,
       "service_ports": [],
       "volume_mounts": [
@@ -508,32 +273,31 @@
   "postflight": [
     {
       "name": "hsc-postflight-job",
-      "version": "1.0.0",
+      "version": "{{TAG}}",
       "vendor": "HPE",
       "min_RAM_mb": 512,
-      "min_disk_gb": 1,
+      "min_disk_gb": 0.5,
       "min_VCPU": 1,
       "platform": "linux-x86_64",
       "workload_type": "container",
       "capabilities": [],
       "repository": "{{REGISTRY}}",
-      "image": "hsc/hsc-postflight-job:{{TAG}}",
+      "organization": "{{ORG}}",
+      "image": "hsc-postflight-job",
+      "tag": "{{TAG}}",
       "entrypoint": [],
       "parameters": [
-        {
-          "name": "CONSOLE_VERSION"
-        },
         {
           "name": "PGSQL_HOST"
         },
         {
-          "name": "STPROXY_PORT"
+          "name": "PGSQL_PORT"
         },
         {
-          "name": "STKEEPER_PG_SU_USERNAME"
+          "name": "POSTGRES_USER"
         },
         {
-          "name": "STKEEPER_PG_SU_PASSWORDFILE"
+          "name": "POSTGRES_PASSWORD_FILE"
         },
         {
           "name": "PGSQL_DATABASE"
@@ -557,9 +321,9 @@
           "name": "UPGRADE_LOCK_FILENAME"
         }
       ],
-      "affinity": [],
       "min_instances": 1,
       "max_instances": 1,
+      "timeout": 1800,
       "retry_count": 100,
       "service_ports": [],
       "volume_mounts": [
@@ -586,29 +350,9 @@
       "name": "hsc-encryption-key-volume",
       "size_gb": 1,
       "shared": true
-    },
-    {
-      "name": "hsc-etcd-data-volume",
-      "size_gb": 10,
-      "filesystem": "ext4",
-      "shared": false
-    },
-    {
-      "name": "hsc-etcd-wal-volume",
-      "size_gb": 1,
-      "filesystem": "ext4",
-      "shared": false
     }
   ],
   "parameters": [
-    {
-      "name": "CONSOLE_VERSION",
-      "description": "The current version of the Helion Stackato Console. This param will be automatically incremented with each release of the Console so as to allow HCP to properly restart each component at the time of upgrade. This should not be changed manually.",
-      "default": "{{TAG}}",
-      "data_type": "string",
-      "required": true,
-      "secret": false
-    },
     {
       "name": "CONSOLE_CA_CERT",
       "description": "CA Cert that is used to sign other SSL Certificates",
@@ -675,7 +419,7 @@
     {
       "name": "PGSQL_HOST",
       "description": "Postgres hostname",
-      "default": "hsc-stproxy-int",
+      "default": "hsc-postgres-int",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -703,6 +447,35 @@
       "data_type": "string",
       "required": true,
       "secret": false
+    },
+    {
+      "name": "PGDATA",
+      "description": "Postgres data directory location. This must be the same as the pgsql volume mount point.",
+      "default": "/stolon-data/postgres"
+    },
+    {
+      "name": "POSTGRES_USER",
+      "description": "PostgreSQL superuser username",
+      "default": "postgres"
+    },
+    {
+      "name": "POSTGRES_PASSWORD_FILE",
+      "description": "PostgreSQL superuser's password file",
+      "default": "/etc/secrets/stolon"
+    },
+    {
+      "name": "stolon",
+      "description": "PostgreSQL password for superuser",
+      "data_type": "string",
+      "required": true,
+      "secret": true,
+      "generator":
+        {
+          "id": "stolon_password",
+          "generate": {
+            "type": "Password"
+          }
+        }
     },
     {
       "name": "console-cert",
@@ -761,17 +534,25 @@
         }
     },
     {
+      "name": "HTTP_CONNECTION_TIMEOUT_IN_SECS",
+      "description": "HTTP connection timeout",
+      "default": "10",
+      "data_type": "string",
+      "required": true,
+      "secret": false
+    },
+    {
       "name": "HTTP_CLIENT_TIMEOUT_IN_SECS",
-      "description": "HTTP client timeoout",
-      "default": "100",
+      "description": "HTTP client timeout",
+      "default": "20",
       "data_type": "string",
       "required": true,
       "secret": false
     },
     {
       "name": "SKIP_TLS_VERIFICATION",
-      "description": "To skip TLS or now?",
-      "default": "true",
+      "description": "Change this value to true if TLS verification should be skipped for UAA related connections. Otherwise, accept the default and they will be verified.",
+      "default": "false",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -795,7 +576,7 @@
     {
       "name": "HCE_CLIENT",
       "description": "HCE client",
-      "default": "code-engine-renamed",
+      "default": "hce",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -810,8 +591,8 @@
     },
     {
       "name": "ALLOWED_ORIGINS",
-      "description": "Allowed origins - WHAT DOES THIS NEED TO BE SET TO ?!?!?!?!?!?!??",
-      "default": "https://localhost,https://127.0.0.1,http://192.168.200.2,https://192.168.200.2,http://192.168.200.3,https://192.168.200.3,http://172.17.27.1,https://172.17.27.1",
+      "description": "Allowed origins for the Console proxy.",
+      "default": "https://hsc-proxy-int",
       "data_type": "string",
       "required": true,
       "secret": false
@@ -829,13 +610,6 @@
             "type": "Password"
           }
         }
-    },
-    {
-      "name": "VCS_CLIENTS",
-      "description": "VCS Clients for OAuth",
-      "data_type": "string",
-      "required": true,
-      "secret": false
     },
     {
       "name": "UPGRADE_VOLUME",
@@ -870,238 +644,11 @@
       "secret": false
     },
     {
-      "name": "ETCD_DATA_DIR",
-      "description": "Path to the etcd data directory.",
+      "name": "VCS_CLIENTS",
+      "description": "VCS Clients for OAuth: VCS Provider (string),VCS URL (string),Client ID (string),Client Secret (string),Skip SSL (true|false)",
       "data_type": "string",
-      "default": "/etcd_data/data",
       "required": true,
       "secret": false
-    },
-    {
-      "name": "ETCD_WAL_DIR",
-      "description": "Path to the etcd wal directory.",
-      "data_type": "string",
-      "default": "/etcd_wal/wal",
-      "required": true,
-      "secret": false
-    },
-    {
-      "name": "ETCD_LISTEN_PEER_URLS",
-      "description": "List of URLs to listen on for peer traffic. ",
-      "default": "http://0.0.0.0:2380"
-    },
-    {
-      "name": "ETCD_LISTEN_CLIENT_URLS",
-      "description": "List of URLs to listen on for client traffic.",
-      "default": "http://0.0.0.0:2379"
-    },
-    {
-      "name": "ETCD_INITIAL_CLUSTER_TOKEN",
-      "description": "Initial cluster token for the etcd cluster during bootstrap.",
-      "default": "hsc-etcd-cluster-1"
-    },
-    {
-      "name": "ETCD_INITIAL_CLUSTER_STATE",
-      "description": "Initial cluster state ('new' or 'existing').",
-      "default": "new"
-    },
-    {
-      "name": "ETCD_INITIAL_CLUSTER",
-      "description": "A comma delimited list of nodes that make up the initial cluster for etcd.",
-      "default": "hsc-etcd-0-int=http://hsc-etcd-0-int:2380,hsc-etcd-1-int=http://hsc-etcd-1-int:2380,hsc-etcd-2-int=http://hsc-etcd-2-int:2380,hsc-etcd-3-int=http://hsc-etcd-3-int:2380,hsc-etcd-4-int=http://hsc-etcd-4-int:2380"
-    },
-    {
-      "name": "ETCD_STRICT_RECONFIG_CHECK",
-      "description": "Reject etcd reconfiguration requests that would cause quorum loss.",
-      "default": "true"
-    },
-    {
-      "name": "SENTINEL",
-      "description": "Stolon sentinel",
-      "default": "true"
-    },
-    {
-      "name": "STSENTINEL_STORE_BACKEND",
-      "description": "Stolon sentinel store backend",
-      "default": "etcd"
-    },
-    {
-      "name": "STSENTINEL_STORE_ENDPOINTS",
-      "description": "Stolon sentinel store endpoints",
-      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379,hsc-etcd-3-int:2379,hsc-etcd-4-int:2379"
-    },
-    {
-      "name": "STSENTINEL_CLUSTER_NAME",
-      "description": "Stolon sentinel cluster name",
-      "default": "hsc-stolon-cluster-1"
-    },
-    {
-      "name": "STSENTINEL_LISTEN_ADDRESS",
-      "description": "Stolon sentinel listening address",
-      "default": "localhost"
-    },
-    {
-      "name": "STSENTINEL_PORT",
-      "description": "Stolon sentinel listening port",
-      "default": "6431"
-    },
-    {
-      "name": "STSENTINEL_KEEPER_PORT",
-      "description": "stolon-keeper(s) listening port (used by kubernetes discovery) (deprecated)",
-      "default": "5431"
-    },
-    {
-      "name": "STSENTINEL_INITIAL_CLUSTER_CONFIG",
-      "description": "A file providing the initial cluster config, used only at cluster initialization, ignored if cluster is already initialized",
-      "default": "/initialClusterConfig.json"
-    },
-    {
-      "name": "STSENTINEL_DISCOVERY_TYPE",
-      "description": "Dicovery type (store, kubernetes, detected)",
-      "default": "store"
-    },
-    {
-      "name": "STSENTINEL_DEBUG",
-      "description": "Turn on debug mode for Stolon sentinel",
-      "default": "false"
-    },
-    {
-      "name": "KEEPER",
-      "description": "Stolon keeper",
-      "default": "true"
-    },
-    {
-      "name": "STKEEPER_STORE_BACKEND",
-      "description": "Stolon keeper store backend",
-      "default": "etcd"
-    },
-    {
-      "name": "STKEEPER_STORE_ENDPOINTS",
-      "description": "Stolon keeper store endpoints",
-      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379,hsc-etcd-3-int:2379,hsc-etcd-4-int:2379"
-    },
-    {
-      "name": "STKEEPER_DATA_DIR",
-      "description": "Stolon keeper data directory (volume)",
-      "default": "/stolon-data/postgres"
-    },
-    {
-      "name": "STKEEPER_CLUSTER_NAME",
-      "description": "Stolon keeper cluster name",
-      "default": "hsc-stolon-cluster-1"
-    },
-    {
-      "name": "STKEEPER_LISTEN_ADDRESS",
-      "description": "Stolon keeper listen address",
-      "default": "localhost"
-    },
-    {
-      "name": "STKEEPER_PORT",
-      "description": "Stolon keeper listen port",
-      "default": "5431"
-    },
-    {
-      "name": "STKEEPER_PG_LISTEN_ADDRESS",
-      "description": "Postgresql instance listening address",
-      "default": "localhost"
-    },
-    {
-      "name": "STKEEPER_PG_PORT",
-      "description": "Postgresql instance listening port",
-      "default": "5432"
-    },
-    {
-      "name": "STKEEPER_PG_REPL_USERNAME",
-      "description": "PostgreSQL replication username to use for the Stolon keeper",
-      "default": "replication"
-    },
-    {
-      "name": "STKEEPER_PG_REPL_PASSWORDFILE",
-      "description": "PostgreSQL replication password file to use for the Stolon keeper",
-      "default": "/etc/secrets/replication"
-    },
-    {
-      "name": "STKEEPER_PG_SU_USERNAME",
-      "description": "PostgreSQL username to use for the Stolon keeper",
-      "default": "stolon"
-    },
-    {
-      "name": "STKEEPER_PG_SU_PASSWORDFILE",
-      "description": "PostgreSQL password file to use for the Stolon keeper",
-      "default": "/etc/secrets/stolon"
-    },
-    {
-      "name": "STKEEPER_DEBUG",
-      "description": "Turn on debug mode for Stolon keeper",
-      "default": "false"
-    },
-    {
-      "name": "PROXY",
-      "description": "Stolon proxy",
-      "default": "true"
-    },
-    {
-      "name": "STPROXY_STORE_BACKEND",
-      "description": "Stolon proxy store backend",
-      "default": "etcd"
-    },
-    {
-      "name": "STPROXY_STORE_ENDPOINTS",
-      "description": "Stolon proxy store endpoints",
-      "default": "hsc-etcd-0-int:2379,hsc-etcd-1-int:2379,hsc-etcd-2-int:2379,hsc-etcd-3-int:2379,hsc-etcd-4-int:2379"
-    },
-    {
-      "name": "STPROXY_CLUSTER_NAME",
-      "description": "Stolon proxy cluster name",
-      "default": "hsc-stolon-cluster-1"
-    },
-    {
-      "name": "STPROXY_LISTEN_ADDRESS",
-      "description": "Stolon proxy listening address",
-      "default": "localhost"
-    },
-    {
-      "name": "STPROXY_PORT",
-      "description": "Stolon proxy listening port",
-      "default": "5432"
-    },
-    {
-      "name": "STPROXY_STOP_LISTENING",
-      "description": "Stop listening on store error",
-      "default": "true"
-    },
-    {
-      "name": "STPROXY_DEBUG",
-      "description": "Turn on debug mode for Stolon proxy",
-      "default": "false"
-    },
-    {
-      "name": "replication",
-      "description": "PostgreSQL password for replication user (replication)",
-      "data_type": "string",
-      "required": true,
-      "secret": true,
-      "generator":
-        {
-          "id": "replication_password",
-          "generate": {
-            "type": "Password"
-          }
-        }
-    },
-    {
-      "name": "stolon",
-      "description": "PostgreSQL password for stolon superuser (stolon)",
-      "data_type": "string",
-      "required": true,
-      "secret": true,
-      "generator":
-        {
-          "id": "stolon_password",
-          "generate": {
-            "type": "Password"
-          }
-        }
     }
   ]
 }

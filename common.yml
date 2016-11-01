@@ -73,7 +73,10 @@ services:
     build:
       context: ../stratos-ui
       dockerfile: Dockerfile.dev
-
+      args:
+        - USER_ID
+        - GROUP_ID
+        - USER_NAME
     volumes:
       - ../stratos-ui:/usr/src/app
       - ../helion-ui-framework:/usr/src/helion-ui-framework
