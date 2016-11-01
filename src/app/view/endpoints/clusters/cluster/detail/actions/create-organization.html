@@ -6,7 +6,7 @@
       <span translate ng-if="form.createOrganization.name.$error.required">Name is required</span>
       <span translate ng-if="form.createOrganization.name.$error.helionUnique">Name must be unique</span>
     </span>
-    <input type="text" name="name" auto-focus class="form-control"
+    <input type="text" name="name" auto-focus="300" class="form-control"
            helion-unique items="asyncTaskDialogCtrl.context.data.organizationNames"
            ng-model="asyncTaskDialogCtrl.context.data.name" required/>
   </div>
