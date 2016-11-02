@@ -3,7 +3,8 @@
 var helpers = require('../po/helpers.po');
 var resetTo = require('../po/resets.po');
 var loginPage = require('../po/login-page.po');
-var galleryPage = require('../po/applications.po');
+var galleryPage = require('../po/applications/applications.po');
+var applicationPage = require('../po/applications/application.po');
 
 xdescribe('Application - Services', function () {
   beforeAll(function () {
@@ -14,7 +15,7 @@ xdescribe('Application - Services', function () {
         loginPage.login('dev', 'dev');
         galleryPage.showApplications();
         galleryPage.showApplicationDetails(0);
-        galleryPage.showServices();
+        applicationPage.showServices();
       });
   });
 

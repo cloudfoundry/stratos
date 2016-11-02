@@ -6,7 +6,8 @@ var acceptanceTests = [
   '../e2e/acceptance/service-instance-registration.spec.js',
   '../e2e/acceptance/endpoints-dashboard.spec.js',
   '../e2e/acceptance/endpoints-list-hce.spec.js',
-  '../e2e/acceptance/endpoints-list-hcf.spec.js'
+  '../e2e/acceptance/endpoints-list-hcf.spec.js',
+  '../e2e/acceptance/applications.add-app.spec.js'
 ];
 
 exports.config = {
@@ -38,12 +39,12 @@ exports.config = {
     port: '',
     credentials: {
       admin: {
-        username: '',
-        password: ''
+        username: 'admin',
+        password: 'hscadmin'
       },
       user: {
-        username: '',
-        password: ''
+        username: 'user',
+        password: 'hscuser'
       }
     },
     skipSSlValidation: true,
@@ -63,7 +64,9 @@ exports.config = {
           user: {
             username: 'rcox',
             password: 'changeme'
-          }
+          },
+          testOrgName:  'e2e',
+          testSpaceName: 'e2e'
         }
       },
       hce: {
@@ -91,7 +94,6 @@ exports.config = {
 
     // Optional. Really nice to see the progress of the tests while executing
     var SpecReporter = require('jasmine-spec-reporter');
-    //
     jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'specs'}));
   },
 

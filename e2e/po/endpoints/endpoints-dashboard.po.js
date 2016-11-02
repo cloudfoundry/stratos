@@ -1,7 +1,7 @@
 'use strict';
 
-var navbar = require('./navbar.po');
-var helpers = require('../po/helpers.po');
+var navbar = require('../navbar.po');
+var helpers = require('../helpers.po');
 
 module.exports = {
   showEndpoints: showEndpoints,
@@ -43,7 +43,7 @@ function clickAddClusterInWelcomeMessage(serviceType) {
 }
 
 function clickAddClusterInTile(serviceType) {
-  return getInstanceTile(serviceType).element(by.linkText('Register An Endpoint')).click().then(function() {
+  return getInstanceTile(serviceType).element(by.linkText('Register An Endpoint')).click().then(function () {
     return browser.driver.sleep('500');
   });
 }

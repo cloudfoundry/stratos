@@ -1,7 +1,7 @@
 'use strict';
 
-var endpointDashboard = require('../po/endpoints-dashboard.po');
-var helpers = require('../po/helpers.po');
+var endpointDashboard = require('./endpoints-dashboard.po');
+var helpers = require('../helpers.po');
 
 module.exports = {
   showHcfEndpoints: showHcfEndpoints,

@@ -1,7 +1,7 @@
 'use strict';
 
-var navbar = require('./navbar.po');
-var helpers = require('../po/helpers.po');
+var navbar = require('../navbar.po');
+var helpers = require('../helpers.po');
 
 module.exports = {
   isVisible: isVisible,

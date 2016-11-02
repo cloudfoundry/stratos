@@ -1,15 +1,15 @@
 'use strict';
 
 var helpers = require('../po/helpers.po');
-var credentialsFormHelper = require('../po/credentials-form.po');
+var credentialsFormHelper = require('../po/widgets/credentials-form.po');
 var resetTo = require('../po/resets.po');
 var loginPage = require('../po/login-page.po');
-var actionsMenuHelper = require('../po/actions-menu.po');
-var confirmationModalHelper = require('../po/confirmation-modal.po');
-var registerEndpoint = require('../po/register-endpoint.po');
-var serviceRegistation = require('../po/service-instance-registration.po');
+var actionsMenuHelper = require('../po/widgets/actions-menu.po');
+var confirmationModalHelper = require('../po/widgets/confirmation-modal.po');
+var registerEndpoint = require('../po/endpoints/register-endpoint.po');
+var serviceRegistation = require('../po/endpoints/service-instance-registration.po');
 
-var endpointsHce = require('../po/endpoints-list-hce.po');
+var endpointsHce = require('../po/endpoints/endpoints-list-hce.po');
 
 describe('Endpoints - List HCEs', function () {
 
@@ -140,7 +140,8 @@ describe('Endpoints - List HCEs', function () {
           .then(function () {
             expect(confirmationModalHelper.isVisible()).toBeTruthy();
             // Click on modal unregister
-            return confirmationModalHelper.primary();
+            confirmationModalHelper.primary();
+            return browser.driver.sleep(10000);
           })
           .then(function () {
             // Should now have no entries

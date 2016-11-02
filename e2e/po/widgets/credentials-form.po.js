@@ -1,7 +1,7 @@
 'use strict';
 
 // Service instances registration helpers
-var helpers = require('./helpers.po');
+var helpers = require('../helpers.po');
 var credentialsFormName = 'credentialsFormCtrl.credentialsForm';
 
 module.exports = {
