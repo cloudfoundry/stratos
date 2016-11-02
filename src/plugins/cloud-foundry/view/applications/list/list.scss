@@ -8,6 +8,7 @@ $applications-msg-height: 50px;
   .applications-count {
     font-size: $hpe-unit-space - $hpe-unit-space / 4;
     padding-left: $hpe-unit-space / 4;
+    display: inline;
   }
 
   .bounce-spinner-sm {

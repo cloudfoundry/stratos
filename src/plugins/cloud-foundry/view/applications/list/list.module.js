@@ -28,7 +28,6 @@
     '$timeout',
     '$q',
     'app.model.modelManager',
-    'app.api.apiManager',
     'app.event.eventService',
     'app.error.errorService',
     'app.utils.utilsService'
@@ -43,7 +42,6 @@
    * @param {object} $timeout - the angular $timeout service
    * @param {object} $q - the angular $q promise service
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {app.api.apiManager} apiManager - the api management service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.error.errorService} errorService - the error service
    * @param {object} utils - the utils service
@@ -55,7 +53,7 @@
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.error.errorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, apiManager, eventService, errorService, utils) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;
@@ -77,7 +75,6 @@
       spaceGuid: 'all'
     };
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.applicationApi = apiManager.retrieve('cloud-foundry.api.Apps');
 
     this.paginationProperties = {
       callback: function (page) {
@@ -284,26 +281,6 @@
             that._loadPage(reloadPage).then(function () {
               that.paginationProperties.pageNumber = reloadPage;
             });
-          }
-        })
-        .then(function () {
-          // Only update the unfiltered application count once. If an app is added the user is taken away
-          // from this page, if an app is deleted the user is returned afresh to this page. Otherwise this count is
-          // static.
-          if (angular.isDefined(that.unfilteredApplicationCount)) {
-            return;
-          }
-
-          if (!_.isMatch(that.filter, {orgGuid: 'all', spaceGuid: 'all'})) {
-            // We cannot use the cached application count as this has been filtered by org or space
-            that.applicationApi.ListAllApps({'results-per-page': 1},
-              {headers: {'x-cnap-cnsi-list': that.model.getCurrentCnsis().join(',')}})
-              .then(function (response) {
-                that.unfilteredApplicationCount = _.sum(_.map(response.data, 'total_results'));
-              });
-          } else {
-            // No filter applied, the cached application count contains all apps
-            that.unfilteredApplicationCount = that.model.cachedApplications.length;
           }
         })
         .catch(function (error) {
