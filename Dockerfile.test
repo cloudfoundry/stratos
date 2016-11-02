@@ -7,4 +7,4 @@ ARG USER_NAME
 
 WORKDIR /usr/src/app
 
-CMD bash provision.sh && cd tools && xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
+CMD bash e2e/provision.sh && cd tools && xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
