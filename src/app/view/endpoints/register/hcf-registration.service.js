@@ -1,6 +1,3 @@
-/**
- * Created by ubuntu on 25/08/16.
- */
 (function () {
   'use strict';
 

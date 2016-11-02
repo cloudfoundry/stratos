@@ -231,7 +231,7 @@
               onNext: function () {
                 return that.validateNewRoute().then(function () {
                   return that.createApp().then(function () {
-                    var msg = gettext('A new app tile, name and route have been created and saved for "{{appName}}".');
+                    var msg = gettext("A new application and route have been created for '{{ appName }}'");
                     that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
                       message: that.$interpolate(msg)({appName: that.userInput.name})
                     });

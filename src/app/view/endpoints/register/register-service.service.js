@@ -75,9 +75,10 @@
               delete context.customErrorMsg;
             }
             return serviceInstanceModel.create(type, data.url, data.name, data.skipSslValidation).then(function (serviceInstance) {
+              var typeString = 'Helion ' + (type === 'hcf' ? 'Cloud Foundry' : 'Code Engine');
               notificationsService.notify('success',
                 gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
-                {endpointType: type.toUpperCase(), name: data.name});
+                {endpointType: typeString, name: data.name});
               return serviceInstance;
             }).catch(function (response) {
               if (response.status === 403) {
