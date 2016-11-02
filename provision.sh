@@ -1,5 +1,6 @@
 #!/bin/sh
 export
+ping nginx -c 3
 WORK_DIR=$(pwd)
 TOOLS_DIR="$WORK_DIR/tools"
 cd ${TOOLS_DIR}
