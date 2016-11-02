@@ -1,5 +1,5 @@
 #!/bin/sh
-
+export
 WORK_DIR=$(pwd)
 TOOLS_DIR="$WORK_DIR/tools"
 cd ${TOOLS_DIR}

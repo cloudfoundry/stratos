@@ -7,4 +7,4 @@ ARG USER_NAME
 
 WORKDIR /usr/src/app
 
-CMD bash env && e2e/provision.sh && cd tools && npm run headless-e2e -- --params.host=nginx --params.port=443 --params.protocol=https://
+CMD bash e2e/provision.sh && cd tools && npm run headless-e2e -- --params.host=nginx --params.port=443 --params.protocol=https://
