@@ -1,17 +1,5 @@
-FROM node:4.2.3
-
-RUN apt-get update && \
-    apt-get install -y openjdk-7-jre-headless && \
-    apt-get install -y xvfb wget openjdk-7-jre && \
-    apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic && \
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    dpkg --unpack google-chrome-stable_current_amd64.deb && \
-    apt-get install -f -y && \
-    apt-get clean && \
-    rm google-chrome-stable_current_amd64.deb && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /usr/src/app
+FROM stackatotest/hsc-concourse-ui:latest
 
 WORKDIR /usr/src/app
 
-CMD bash provision.sh && cd tools && npm run gate-check && xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
+CMD bash provision.sh && cd tools && xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
