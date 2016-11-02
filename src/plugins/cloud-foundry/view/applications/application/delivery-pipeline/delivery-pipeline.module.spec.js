@@ -3,7 +3,7 @@
 
   describe('Delivery Pipeline', function () {
 
-    var controller, eventService, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel,
+    var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel,
       modelManager, $httpBackend, account;
 
     beforeEach(module('green-box-console'));
@@ -19,9 +19,23 @@
       }
     };
 
+    var notificationTarget = {
+      id: 10,
+      name: 'test2',
+      token: '5c424372c',
+      type: 'slack1',
+      location: 'test2',
+      createdDate: null
+    };
+
+    var postDeployAction = {
+      id: 10
+    };
+
+    var guid = '1';
+
     beforeEach(inject(function ($injector) {
       // Create the parameters required by the ctor
-      eventService = $injector.get('app.event.eventService');
       $interpolate = $injector.get('$interpolate');
       $state = $injector.get('$state');
       $stateParams = $injector.get('$stateParams');
@@ -41,8 +55,85 @@
 
     function createController() {
       var ApplicationDeliveryPipelineController = $state.get('cf.applications.application.delivery-pipeline').controller;
-      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, $interpolate, $stateParams, $rootScope.$new(), null);
+
+      var confirmDialog = function () {
+        return {
+          result: {
+            then: function (callback) {
+              return callback();
+            }
+          }
+        };
+      };
+
+      var addNotificationService = {
+        add: function () {
+          return {
+            result: {
+              then: function (callback) {
+                return callback(notificationTarget);
+              }
+            }
+          };
+        }
+      };
+
+      var postDeployActionService = {
+        add: function () {
+          return {
+            result: {
+              then: function (callback) {
+                return callback(postDeployAction);
+              }
+            }
+          };
+        }
+      };
+
+      var eventService = {
+        $emit: angular.noop
+      };
+
+      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, $interpolate, $stateParams, $rootScope.$new(), confirmDialog, addNotificationService, postDeployActionService);
       expect(controller).toBeDefined();
+    }
+
+    function createControllerWithPipelineMetadata() {
+      account.accountData = {isAdmin: true};
+      var application = {
+        summary: {
+          name: 'appName'
+        },
+        pipeline: {
+          fetching: false,
+          valid: true,
+          hceCnsi: {
+            guid: 'guid'
+          },
+          hceServiceGuid: guid
+        },
+        project: {
+          id: guid,
+          build_container_id: guid
+        }
+      };
+      var model = modelManager.retrieve('cloud-foundry.model.application');
+      _.set(model, 'application', application);
+
+      var buildContainer = mock.hceApi.HceContainerApi.getBuildContainer(guid);
+      $httpBackend.whenGET(buildContainer.url).respond(200, buildContainer.response['200']);
+
+      var notificationTargets = mock.hceApi.HceNotificationApi.getNotificationTargets(guid);
+      $httpBackend.whenGET(notificationTargets.url).respond(200, notificationTargets.response['200']);
+
+      var notificationTargetTypes = mock.hceApi.HceNotificationApi.getNotificationTargetTypes();
+      $httpBackend.whenGET(notificationTargetTypes.url).respond(200, notificationTargetTypes.response['200']);
+
+      var pipelineTasks = mock.hceApi.HceProjectApi.getPipelineTasks(guid);
+      $httpBackend.whenGET(pipelineTasks.url).respond(200, pipelineTasks.response['200']);
+
+      createController();
+      $httpBackend.flush();
     }
 
     afterEach(function () {
@@ -110,6 +201,67 @@
         expect(controller.hceServices.valid).toBe(1);
         expect(controller.hceServices.available).toBe(2);
         expect(controller.hceServices.isAdmin).toBe(true);
+      });
+    });
+
+    describe('notification target & post-deploy', function () {
+
+      beforeEach(function () {
+        createControllerWithPipelineMetadata();
+      });
+
+      it('Pipeline data should be populated', function () {
+
+        expect(controller.project.buildContainer).toBeDefined();
+        expect(controller.notificationTargets.length).toBe(1);
+        expect(controller.postDeployActions).toBeDefined();
+      });
+
+      it('should be able to add a new notification-target', function () {
+
+        expect(controller.notificationTargets.length).toBe(1);
+        controller.addNotificationTarget();
+        expect(controller.notificationTargets.length).toBe(2);
+      });
+
+      it('should be able to add a new post-deploy task', function () {
+
+        expect(controller.postDeployActions.length).toBe(0);
+        controller.addPostDeployAction();
+        expect(controller.postDeployActions.length).toBe(1);
+      });
+    });
+
+    describe('delete pipleine', function () {
+
+      beforeEach(function () {
+        createControllerWithPipelineMetadata();
+      });
+
+      it('should be able to delete a pipeline', function () {
+
+        // Expecting a DELETE project
+        var deleteProject = mock.hceApi.HceProjectApi.deleteProject(guid);
+        $httpBackend.expectDELETE(deleteProject.url).respond(201, deleteProject.response['201']);
+
+        // List Projects after deleting
+        var getProjects = mock.hceApi.HceProjectApi.getProjects();
+        $httpBackend.expectGET(getProjects.url).respond(200, getProjects.response['200']);
+
+        // Get Service bindings
+        var listServiceBindings = mock.hceApi.UserProvidedServiceInstancesApi.ListAllServiceBindingsForUserProvidedServiceInstance(guid);
+        $httpBackend.expectGET(listServiceBindings.url).respond(200, listServiceBindings.response['200']);
+
+        // Delete service bindings
+        var deleteServiceBinding = mock.cloudFoundryAPI.ServiceBindings.DeleteServiceBinding(guid);
+        $httpBackend.expectDELETE(deleteServiceBinding.url).respond(200, deleteServiceBinding.response['200']);
+
+        // Finally delete user-provided-service instance
+        var deleteUserProvidedServiceBinding = mock.hceApi.UserProvidedServiceInstancesApi.DeleteUserProvidedServiceInstance(guid);
+        $httpBackend.expectDELETE(deleteUserProvidedServiceBinding.url).respond(201, deleteUserProvidedServiceBinding.response['200']);
+
+        controller.deletePipeline();
+        $httpBackend.flush();
       });
     });
   });

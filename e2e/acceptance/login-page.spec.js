@@ -1,7 +1,7 @@
 'use strict';
 
-var helpers = require('./po/helpers.po');
-var loginPage = require('./po/login-page.po');
+var helpers = require('../po/helpers.po');
+var loginPage = require('../po/login-page.po');
 
 describe('Login Page', function () {
   beforeAll(function () {
@@ -106,7 +106,7 @@ describe('Login Page', function () {
     });
 
     it('should allow log in with correct credentials', function () {
-      loginPage.enterLogin('admin@cnap.local', 'cnapadmin');
+      loginPage.enterLogin(helpers.getUser(), helpers.getPassword());
 
       expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 

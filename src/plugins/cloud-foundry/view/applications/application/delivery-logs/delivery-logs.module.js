@@ -96,7 +96,7 @@
       that.updateVisibleExecutions(visibleExecutions);
     }, 500);
 
-    $scope.$on("$destroy", function () {
+    $scope.$on('$destroy', function () {
       if (that.debouncedUpdateVisibleExecutions) {
         that.debouncedUpdateVisibleExecutions.cancel();
       }
@@ -243,11 +243,17 @@
       event.mEndDate = event.end_date ? moment(event.end_date) : undefined;
 
       if (!event.duration && (event.start_date && event.end_date)) {
-        event.duration = moment(event.start_date).diff(event.end_date);
+        // Duration should be a positive integer
+        event.duration = moment(event.end_date).diff(event.start_date);
       }
 
       if (angular.isDefined(event.duration)) {
-        event.durationString = moment.duration(event.duration, 'ms').humanize();
+        // We're not interested in showing time to the ms, so 'round' to nearest second
+        if (event.duration < 1000) {
+          event.durationString = gettext('Less than a second');
+        } else {
+          event.durationString = moment.duration(event.duration, 'ms').format('h[h] m[m] s[s]');
+        }
       } else {
         event.durationString = gettext('Unknown');
       }

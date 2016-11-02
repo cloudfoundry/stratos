@@ -95,6 +95,9 @@
             },
             function (spaceData) {
               if (spaceData.name && spaceData.name.length > 0) {
+                if (that.spaceDetail().details.space.entity.name === spaceData.name) {
+                  return $q.resolve();
+                }
                 return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
                   {name: spaceData.name})
                   .then(function () {
@@ -189,9 +192,9 @@
 
         // Update delete action when space info changes (requires authService which depends on chainStateResolve)
         $scope.$watch(function () {
-          return spaceDetail.details.totalRoutes === 0 &&
-            spaceDetail.details.totalServiceInstances === 0 &&
-            spaceDetail.details.totalApps === 0;
+          return !spaceDetail.details.totalRoutes &&
+            !spaceDetail.details.totalServiceInstances &&
+            !spaceDetail.details.totalApps;
         }, function () {
           enableActions();
         });

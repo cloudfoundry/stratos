@@ -3,8 +3,26 @@
 
   describe('endpoint view tests', function () {
     var $httpBackend, $q, controller,
-      modelManager, userServiceInstanceModel, serviceInstanceModel, items, apiManager;
+      modelManager, userServiceInstanceModel, serviceInstanceModel, apiManager;
     var detailViewCalled = false;
+
+    var items = [{
+      guid: 1,
+      name: 'c1',
+      url: 'c1_url',
+      cnsi_type: 'hce',
+      api_endpoint: {
+        Scheme: 'http',
+        Host: 'api.foo.com'
+      },
+      model: {
+        guid: '1',
+        cnsi_type: 'hce',
+        account: {},
+        token_expiry: {},
+        valid: true
+      }
+    }];
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -23,31 +41,31 @@
 
       modelManager = $injector.get('app.model.modelManager');
       apiManager = $injector.get('app.api.apiManager');
+      var accountModel = modelManager.retrieve('app.model.account');
+      accountModel.isAdmin = function () {
+        return true;
+      };
+
       var notificationService = $injector.get('app.view.notificationsService');
       var hceReg = $injector.get('app.view.hceRegistration');
       var log = $injector.get('$log');
 
+      var confirmDialogMock = function (dialogSpecs) {
+
+        dialogSpecs.callback();
+      };
       var EndpointsViewController = $state.get('endpoint.hce').controller;
-      controller = new EndpointsViewController(log, $q, modelManager, apiManager, hceReg, notificationService);
-
-      items = [{
-        guid: 1,
-        name: 'c1',
-        url: 'c1_url',
-        api_endpoint: {
-          Scheme: 'http',
-          Host: 'api.foo.com'
-        }
-      }];
-
+      controller = new EndpointsViewController(log, $q, modelManager, apiManager, hceReg, notificationService, confirmDialogMock);
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       spyOn(userServiceInstanceModel, 'disconnect').and.callThrough();
       spyOn(serviceInstanceModel, 'remove').and.callThrough();
+      spyOn(controller, '_updateCurrentEndpoints').and.callThrough();
 
       $httpBackend.when('GET', '/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
+      $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, {});
     }));
 
     describe('controller tests', function () {
@@ -78,6 +96,121 @@
           expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
         });
       });
+
+      it('should open credentials form on connect', function () {
+        controller.connect({});
+        expect(controller.credentialsFormOpen).toBeTruthy();
+        expect(controller.activeServiceInstance).toBeDefined();
+      });
+
+      it('should return correct submenu when instance has not expired and connected', function () {
+        var endpoint = {
+          expxired: false,
+          connected: true
+        };
+        var menu = controller.getActions(endpoint);
+        expect(menu[0].name).toEqual('Disconnect');
+      });
+
+      it('should return  correct submenu when instance has not expired and disconnected', function () {
+        var endpoint = {
+          expxired: false,
+          connected: false
+        };
+        var menu = controller.getActions(endpoint);
+        expect(menu[0].name).toEqual('Connect');
+      });
+
+      it('should return  correct submenu when instance has expired', function () {
+        var endpoint = {
+          expxired: true
+        };
+        var menu = controller.getActions(endpoint);
+        expect(menu[0].name).toEqual('Connect');
+      });
+
+      it('should dismiss modal when connect succeeds', function () {
+
+        controller.onConnectSuccess();
+        $httpBackend.flush();
+        expect(controller.credentialsFormOpen).toBeFalsy();
+        expect(controller._updateCurrentEndpoints).toHaveBeenCalled();
+
+      });
+
+      // menu action tests
+      it('should invoke disconnect action', function () {
+        var endpoint = {
+          expxired: false,
+          connected: true,
+          model: {
+            guid: 'guid',
+            cnsi_type: 'hce',
+            account: {},
+            token_expiry: {},
+            valid: true
+          }
+        };
+
+        controller.userServiceInstanceModel.serviceInstances.guid = endpoint.model;
+        var menu = controller.getActions(endpoint);
+        menu[0].execute(endpoint);
+        $httpBackend.expectPOST('/pp/v1/auth/logout/cnsi').respond(200, {});
+        $httpBackend.expectGET('/pp/v1/proxy/info').respond(200, {});
+        $httpBackend.flush();
+
+      });
+
+      it('should have Unregister action', function () {
+
+        var endpoint = {
+          expxired: false
+        };
+
+        controller.serviceInstanceModel.serviceInstances = items;
+
+        var menu = controller.getActions(endpoint);
+        expect(menu[1].name).toEqual('Unregister');
+
+        spyOn(controller, 'unregister').and.callThrough();
+        menu[1].execute(items[0]);
+        expect(controller.unregister).toHaveBeenCalled();
+
+        $httpBackend.expectPOST('/pp/v1/unregister').respond(200, {});
+        $httpBackend.expectGET('/pp/v1/proxy/info').respond(200, {});
+        $httpBackend.flush();
+
+      });
+
+      it('should not show empty view if endpoints are present', function () {
+
+        controller.resolvedUpdateCurrentEndpoints = true;
+        controller.currentEndpoints = items;
+        var showEmpty = controller.showEmptyView();
+        expect(showEmpty).toBeFalsy();
+      });
+
+      it('should not show list view if endpoints are empty', function () {
+        controller.currentEndpoints = [];
+        var showListView = controller.showListView();
+        expect(showListView).toBeFalsy();
+      });
+
+      it('should show empty view if endpoints are empty', function () {
+
+        controller.resolvedUpdateCurrentEndpoints = true;
+        controller.currentEndpoints = [];
+        var showEmpty = controller.showEmptyView();
+        expect(showEmpty).toBeTruthy();
+      });
+
+      it('should show list view if endpoints are not empty', function () {
+        controller.resolvedUpdateCurrentEndpoints = true;
+        controller.currentEndpoints = items;
+        var showListView = controller.showListView();
+        expect(showListView).toBeTruthy();
+      });
+
     });
   });
 

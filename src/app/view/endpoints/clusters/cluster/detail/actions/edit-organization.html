@@ -1,8 +1,12 @@
-<form name="editOrganizationForm">
+<form name="form.editOrganization">
   <div class="form-group" focusable-input
-       ng-class="{'has-error': editOrganizationForm.name.$invalid && editOrganizationForm.name.$dirty}">
+       ng-class="{'has-error': form.editOrganization.name.$invalid}">
     <label class="control-label" translate>Organization Name</label>
-    <input type="text" name="name" auto-focus class="form-control"
+    <span class="control-message">
+      <span translate ng-if="form.editOrganization.name.$error.required">Name is required</span>
+      <span translate ng-if="form.editOrganization.name.$error.helionUnique">Name must be unique</span>
+    </span>
+    <input type="text" name="name" auto-focus="300" class="form-control"
            helion-unique items="asyncTaskDialogCtrl.context.data.organizationNames"
            ng-model="asyncTaskDialogCtrl.context.data.name" required/>
   </div>

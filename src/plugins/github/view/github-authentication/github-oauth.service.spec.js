@@ -1,7 +1,6 @@
 (function () {
   'use strict';
-  /* eslint-disable angular/no-private-call */
-  /* eslint-disable angular/timeout-service */
+  /* eslint-disable angular/no-private-call, angular/timeout-service */
 
   describe('github.view.githubOauthService - ', function () {
     var that;
@@ -77,7 +76,6 @@
     expect(promise.$$state.value).toBe(value);
   }
 
-  /* eslint-enable angular/timeout-service */
-  /* eslint-enable angular/no-private-call */
+  /* eslint-enable angular/timeout-service, angular/no-private-call */
 
 })();

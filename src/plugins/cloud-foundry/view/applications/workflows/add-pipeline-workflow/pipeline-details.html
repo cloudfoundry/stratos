@@ -22,19 +22,22 @@
 </div>
 
 <p class="control-title" translate>Connect Pipeline to HCF Endpoint</p>
-<div class="form-group">
+<div class="form-group" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].serviceName.$invalid && wizardForm['application-pipeline-details-form'].serviceName.$dirty}">
   <label class="control-label" translate>Endpoint Selected</label>
-  <input class="form-control" type="text"
+  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].serviceName.$error.required">Username is required</span></span>
+  <input class="form-control" name="serviceName" type="text"
     ng-value="wizardCtrl.options.userInput.serviceInstance.name" readonly>
 </div>
-<div class="form-group">
+<div class="form-group" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].username.$invalid && wizardForm['application-pipeline-details-form'].username.$dirty}">
   <label class="control-label" translate>Username</label>
-  <input type="text" class="form-control"
+  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].username.$error.required">Username is required</span></span>
+  <input type="text" name="username"  class="form-control"
     ng-model="wizardCtrl.options.userInput.clusterUsername" required/>
 </div>
-<div class="form-group has-feedback">
+<div class="form-group has-feedback" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].password.$invalid && wizardForm['application-pipeline-details-form'].password.$dirty}">
   <label class="control-label" translate>Password</label>
-  <input type="password" class="form-control"
+  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].password.$error.required">Password is required</span></span>
+  <input type="password" name="password" class="form-control"
     ng-model="wizardCtrl.options.userInput.clusterPassword"
     password-reveal password-reveal-icon="'helion-icon helion-icon-View'" required/>
 </div>

@@ -1,14 +1,14 @@
 <div class="space-services-table">
-  <div ng-if="spaceSrvsCtrl.spaceDetail().instances.length < 1"
+  <div ng-if="spaceSrvsCtrl.serviceInstances.length < 1"
        class="panel panel-default cluster-empty-list">
     <div class="panel-body" translate>
       You have no service instances
     </div>
   </div>
 
-  <div ng-if="spaceSrvsCtrl.spaceDetail().instances.length > 0"
+  <div ng-if="spaceSrvsCtrl.serviceInstances.length > 0"
        st-table="spaceSrvsCtrl.visibleServiceInstances"
-       st-safe-src="spaceSrvsCtrl.spaceDetail().instances">
+       st-safe-src="spaceSrvsCtrl.serviceInstances">
 
     <div>
       <div class="panel panel-default">
@@ -39,11 +39,11 @@
           </tr>
           </tbody>
           <tfoot ng-init="spaceSrvsCtrl.showInstances = 5"
-                 ng-show="spaceSrvsCtrl.showInstances < spaceSrvsCtrl.spaceDetail().instances.length">
+                 ng-show="spaceSrvsCtrl.showInstances < spaceSrvsCtrl.serviceInstances.length">
           <tr>
             <td colspan="5" class="text-center">
-              <a ng-click="spaceSrvsCtrl.showInstances = spaceSrvsCtrl.spaceDetail().instances.length">
-                <span translate>Show All</span> ({{spaceSrvsCtrl.spaceDetail().instances.length}})
+              <a ng-click="spaceSrvsCtrl.showInstances = spaceSrvsCtrl.serviceInstances.length">
+                <span translate>Show All</span> ({{spaceSrvsCtrl.serviceInstances.length}})
               </a>
               <div ng-show="false" st-pagination="" st-items-by-page="spaceSrvsCtrl.showInstances"></div>
             </td>

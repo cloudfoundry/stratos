@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('Add-route controller test', function () {
+  describe('Add-route service test', function () {
     var $httpBackend, addRoutesFactory;
 
     var spaceGuid = 'testSpace';
@@ -14,6 +14,11 @@
         guid: 'testGuid'
       }
     };
+    var mockErrorResponse = {
+      error: {
+        error_code: 'CF-RouteHostTaken'
+      }
+    };
     var data = {
       path: null,
       port: null,
@@ -24,6 +29,9 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
+    beforeEach(module(function ($exceptionHandlerProvider) {
+      $exceptionHandlerProvider.mode('log');
+    }));
     beforeEach(module({
       'helion.framework.widgets.asyncTaskDialog': function (content, context, actionTask) {
         return {
@@ -73,7 +81,7 @@
 
       var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
 
-      $httpBackend.expectGET('/pp/v1/proxy/v2/shared_domains?results-per-page=100').respond(200, { resources: [] });
+      $httpBackend.expectGET('/pp/v1/proxy/v2/shared_domains?results-per-page=100').respond(200, {resources: []});
       $httpBackend.expectPOST('/pp/v1/proxy/v2/routes', expectedPostReq).respond(200, mockAddRouteResponse);
       $httpBackend.expectPUT('/pp/v1/proxy/v2/routes/testGuid/apps/testApplicationId').respond(200, {});
       $httpBackend.expectGET('/pp/v1/proxy/v2/apps/' + applicationId + '/summary').respond(200, {});
@@ -86,6 +94,84 @@
         }
       };
 
+      modalObj.actionTask(data, dialog);
+      expect(modalObj.context.routeExists()).toBe(false);
+      $httpBackend.flush();
+    });
+
+    it('should raise appropriate error on duplicate route', function () {
+
+      var expectedPostReq = {
+        domain_guid: domainGuid,
+        host: path,
+        space_guid: spaceGuid
+      };
+
+      var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
+
+      $httpBackend.expectGET('/pp/v1/proxy/v2/shared_domains?results-per-page=100').respond(200, {resources: []});
+      $httpBackend.whenPOST('/pp/v1/proxy/v2/routes', expectedPostReq).respond(200, {data: mockErrorResponse});
+
+      var dialog = {
+        context: {
+          options: {
+            domainMap: {}
+          }
+        }
+      };
+
+      modalObj.actionTask(data, dialog).catch(function (err) {
+        expect(err.data.error).toEqual(mockErrorResponse.error);
+      });
+
+      // expect(modalObj.actionTask(data, dialog)).toThrow();
+      $httpBackend.flush();
+    });
+
+    it('should successfully add a tcp route', function () {
+
+      var expectedPostReq = {
+        metadata: {
+          guid: 'guid'
+        },
+        entity: {
+          domain_guid: domainGuid,
+          host: path,
+          space_guid: spaceGuid,
+          port: 4000
+        }
+      };
+
+      var domains = [{
+        metadata: {
+          guid: 'testDomain',
+          type: 'tcp'
+        },
+        entity: {
+          router_group_tupe: 'http'
+        }
+      }];
+      var modalObj = addRoutesFactory.add(cnsiGuid, applicationId);
+
+      $httpBackend.expectPOST('/pp/v1/proxy/v2/routes?generate_port=true').respond(200, expectedPostReq);
+
+      $httpBackend.whenGET('/pp/v1/proxy/v2/shared_domains?results-per-page=100').respond(200, {resources: domains});
+      $httpBackend.whenPUT('/pp/v1/proxy/v2/routes/guid/apps/testApplicationId').respond(200, {});
+      $httpBackend.whenGET('/pp/v1/proxy/v2/apps/' + applicationId + '/summary').respond(200, {});
+
+      var dialog = {
+        context: {
+          options: {
+            domainMap: {
+              testDomain: {
+                type: 'tcp'
+              }
+            }
+          }
+        }
+      };
+
+      data.useRandomPort = true;
       modalObj.actionTask(data, dialog);
       $httpBackend.flush();
     });

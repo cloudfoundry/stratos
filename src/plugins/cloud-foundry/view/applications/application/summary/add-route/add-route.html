@@ -1,11 +1,15 @@
 <div class="add-route">
   <form name="form.addRouteForm">
-    <fieldset> 
-    <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists()}" focusable-input>
+    <fieldset>
+    <div class="form-group " ng-class="{'has-error':asyncTaskDialogCtrl.context.routeExists() || (form.addRouteForm.host.$invalid && form.addRouteForm.host.$dirty)}" focusable-input>
       <label class="control-label" translate>Host</label>
-      <span class="control-message" translate>A route with this name already exists. Choose a new one</span>
+      <span class="control-message" translate>
+        <span translate ng-if="asyncTaskDialogCtrl.context.routeExists()">A route with this name already exists. Choose a new one</span>
+        <span translate ng-if="form.addRouteForm.host.$error.required">Host is required</span>
+      </span>
       <input type="text" name="host" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.host"
         ng-required="asyncTaskDialogCtrl.context.isType('http')"
+        ng-change="asyncTaskDialogCtrl.context.resetRouteExists()"
         placeholder="{{'a unique identifier for this route' | translate}}"
       />
     </div>
@@ -47,6 +51,6 @@
         />
       </div>
     </div>
-    </fieldset> 
+    </fieldset>
   </form>
 </div>

@@ -1,8 +1,8 @@
-<div ng-if="!clusterSpaceController.stateInitialised" class="cluster-loading col-md-9 col-sm-12">
+<div ng-if="!clusterSpaceController.stateInitialised" class="cluster-loading col-md-9 col-sm-11 col-xs-11">
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 
-<div ng-if="clusterSpaceController.stateInitialised" class="cluster-detail col-md-9 col-sm-12">
+<div ng-if="clusterSpaceController.stateInitialised" class="cluster-detail col-md-9 col-sm-11 col-xs-11">
   <h3>Space : {{ clusterSpaceController.space().details.space.entity.name }}</h3>
   <space-summary-tile ng-if="clusterSpaceController.space()"
                       cluster-guid="clusterSpaceController.clusterGuid"
@@ -10,6 +10,11 @@
   </space-summary-tile>
 
   <ul class="application-nav nav nav-tabs col-sm-12">
+    <li class="nav-item" ui-sref-active="active">
+      <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.applications" translate>
+        Applications
+      </a>
+    </li>
     <li class="nav-item" ui-sref-active="active">
       <a class="nav-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.services" translate>
         Service Instances
@@ -28,4 +33,4 @@
   </ul>
   <ui-view></ui-view>
 </div>
-<cluster-actions></cluster-actions>
+<cluster-actions class="col-md-3 col-sm-1 col-xs-1"></cluster-actions>

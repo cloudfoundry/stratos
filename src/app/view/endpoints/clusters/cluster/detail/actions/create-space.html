@@ -1,6 +1,6 @@
-<form class="create-space-form" name="createSpaceForm">
+<form class="create-space-form" name="form.createSpace">
   <div class="form-group organizations-drop-down" focusable-input
-       ng-class="{'has-error': createSpaceForm.name.$invalid && createSpaceForm.name.$dirty}">
+       ng-class="{'has-error': form.createSpace.name.$invalid}">
     <label class="control-label" translate>Organization</label>
     <select-input
       arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
@@ -11,9 +11,14 @@
   </div>
 
   <div ng-repeat="space in asyncTaskDialogCtrl.context.data.spaces track by $index" class="form-group" focusable-input
-       ng-class="{'has-error': createSpaceForm['name' + $index].$invalid && createSpaceForm['name' + $index].$dirty}">
+       ng-class="{'has-error': form.createSpace['name' + $index].$invalid && form.createSpace['name' + $index].$dirty}">
     <label class="control-label" translate>Space Name{{ $index > 0 ? ' ' + ($index + 1) : ''}}</label>
-    <input type="text" name="name{{ $index }}" auto-focus class="form-control"
+    <span class="control-message">
+      <span translate ng-if="form.createSpace['name' + $index].$error.required">Name is required</span>
+      <span translate ng-if="form.createSpace['name' + $index].$error.helionUnique">Name must be unique</span>
+      <span translate ng-if="form.createSpace['name' + $index].$error.dupeName">Name must be unique</span>
+    </span>
+    <input type="text" name="name{{ $index }}" auto-focus="300" class="form-control"
            ng-model="asyncTaskDialogCtrl.context.data.spaces[$index]"
            helion-unique items="asyncTaskDialogCtrl.context.data.existingSpaceNames"
            unique-space-name="{{ $index }}"

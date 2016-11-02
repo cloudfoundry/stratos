@@ -283,7 +283,7 @@
 
       var data = {
         // NOTE: Currently `stormrunner` is the only post-deploy action supported
-        task_type: "stormrunner",
+        task_type: 'stormrunner',
         task_label: taskLabel,
         project_id: projectId,
         credential_id: credentialId,

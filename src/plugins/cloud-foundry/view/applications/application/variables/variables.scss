@@ -13,6 +13,7 @@
       padding: 0;
       line-height: inherit;
       margin: 0;
+      overflow-x: hidden;
     }
   }
 }
@@ -26,9 +27,11 @@
   .form-actions {
     clear: both;
     margin-top: $hpe-unit-space * 2;
+    padding: $hpe-unit-space / 2;
+    text-align: right;
 
     button:not(:first-child) {
-      margin-left: $hpe-unit-space;
+      margin-left: $hpe-unit-space / 2;
     }
   }
 }

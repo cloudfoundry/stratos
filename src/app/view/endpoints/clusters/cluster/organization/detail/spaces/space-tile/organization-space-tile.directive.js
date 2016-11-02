@@ -143,6 +143,9 @@
             },
             function (spaceData) {
               if (spaceData.name && spaceData.name.length > 0) {
+                if (that.spaceDetail().details.space.entity.name === spaceData.name) {
+                  return $q.resolve();
+                }
                 return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
                   {name: spaceData.name})
                   .then(function () {
@@ -211,7 +214,7 @@
   angular.extend(OrganizationSpaceTileController.prototype, {
 
     summary: function () {
-      this.$state.go('endpoint.clusters.cluster.organization.space.detail.services', {space: this.space.metadata.guid});
+      this.$state.go('endpoint.clusters.cluster.organization.space.detail.applications', {space: this.space.metadata.guid});
     },
 
     spaceDetail: function () {

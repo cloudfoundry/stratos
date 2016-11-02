@@ -362,19 +362,20 @@
         expect(event.mEndDate).toBeDefined();
         expect(event.duration).toBeDefined();
         expect(event.durationString).toBeDefined();
-        expect(event.durationString).not.toEqual('Unknown');
+        expect(event.durationString).toEqual('Less than a second');
         expect(event.name).toBeDefined();
       });
 
       it('Populated event - calculate duration', function () {
         var event = {
-          start_date: moment().subtract(100, 's').format(),
+          start_date: moment().subtract(1, 'm').format(),
           end_date: moment().format()
         };
         controller.parseEvent(event);
         expect(event.mEndDate).toBeDefined();
         expect(event.duration).toBeDefined();
         expect(event.durationString).toBeDefined();
+        expect(event.durationString).not.toEqual('Less than a second');
         expect(event.durationString).not.toEqual('Unknown');
       });
 

@@ -24,6 +24,7 @@
     '$log',
     '$q',
     '$scope',
+    '$filter',
     'app.model.modelManager',
     'cloud-foundry.view.applications.application.summary.addRoutes',
     'cloud-foundry.view.applications.application.summary.editApp',
@@ -39,6 +40,7 @@
    * @param {object} $log - the angular $log service
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the Angular $scope service
+   * @param {object} $filter - the Angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
@@ -51,7 +53,8 @@
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {app.model.utilsService} utils - the utils service
    */
-  function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, modelManager, addRoutesService, editAppService, utils,
+  function ApplicationSummaryController($state, $stateParams, $log, $q, $scope, $filter,
+                                        modelManager, addRoutesService, editAppService, utils,
                                         routesService) {
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
@@ -97,6 +100,8 @@
     ];
 
     function init() {
+      // Filter out the stackato hce service
+      that.serviceInstances = $filter('removeHceServiceInstance')(that.model.application.summary.services, that.id);
 
       // Unmap from app
       that.routesActionMenu[0].disabled = !that.authModel.isAllowed(that.cnsiGuid,

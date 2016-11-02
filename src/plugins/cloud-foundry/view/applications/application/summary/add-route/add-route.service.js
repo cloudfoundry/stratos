@@ -90,9 +90,7 @@
           return that.routeModel.createRoute(cnsiGuid, data, params)
             .then(function (response) {
               if (!(response.metadata && response.metadata.guid)) {
-                /* eslint-disable no-throw-literal */
                 throw response;
-                /* eslint-enable no-throw-literal */
               }
               var routeId = response.metadata.guid;
               return that.routeModel.associateAppWithRoute(cnsiGuid, routeId, applicationId);
@@ -105,13 +103,13 @@
             .catch(function (error) {
               // check if error is CF-RouteHostTaken indicating that the route has already been created
               if (_.isPlainObject(error) &&
-                error.error_code &&
-                error.error_code === 'CF-RouteHostTaken') {
+                error.data.error_code &&
+                error.data.error_code === 'CF-RouteHostTaken') {
                 routeExists = true;
                 hideAsyncIndicatorContent = true;
               }
-              if (error.description) {
-                dialog.context.errorMsg = error.description;
+              if (error.data.description) {
+                dialog.context.errorMsg = error.data.description;
               }
               throw error;
             });
@@ -137,6 +135,9 @@
             options: options,
             routeExists: function () {
               return routeExists;
+            },
+            resetRouteExists: function () {
+              routeExists = false;
             },
             hideAsyncIndicatorContent: function () {
               return hideAsyncIndicatorContent;

@@ -34,9 +34,7 @@
         </td>
         <td></td>
         <td class="row result-col" ng-if="typeof(event.durationString) !== 'undefined'">
-          <span translate>Duration: </span>
-          <span ng-if="event.duration < 1000" translate>Less than a second</span>
-          <span ng-if="event.duration >= 1000"> {{ event.durationString }}</span>
+          <span translate>Duration: </span> {{ event.durationString }}
         </td>
         <td class="row result-col" ng-if="typeof(event.durationString) === 'undefined'"></td>
         <td ng-switch="event.state == 'succeeded' || event.state == 'failed'" class="event-view">

@@ -29,12 +29,14 @@
     '$state',
     '$stateParams',
     '$q',
+    '$filter',
     'app.model.modelManager',
     'cloud-foundry.view.applications.services.serviceInstanceService',
     'app.utils.utilsService'
   ];
 
-  function SpaceServicesController($scope, $state, $stateParams, $q, modelManager, serviceInstanceService, utils) {
+  function SpaceServicesController($scope, $state, $stateParams, $q, $filter, modelManager, serviceInstanceService,
+                                   utils) {
     var that = this;
 
     this.clusterGuid = $stateParams.guid;
@@ -42,6 +44,8 @@
     this.spaceGuid = $stateParams.space;
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
     this.serviceInstanceService = serviceInstanceService;
+    this.serviceInstances = [];
+    this.$filter = $filter;
 
     this.actionsPerSI = {};
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -60,6 +64,8 @@
         return that.update();
       }
 
+      that.updateLocalServiceInstances();
+
       return $q.resolve();
     }
 
@@ -67,11 +73,19 @@
   }
 
   angular.extend(SpaceServicesController.prototype, {
+
+    updateLocalServiceInstances: function () {
+      // Filter out the stackato hce service
+      this.serviceInstances = this.$filter('removeHceServiceInstance')(this.spaceDetail().instances);
+    },
+
     update: function (serviceInstance) {
       var that = this;
       return this.spaceModel.listAllServiceInstancesForSpace(this.clusterGuid, this.spaceGuid, {
-        return_user_provided_service_instances: false
+        return_user_provided_service_instances: true
       }).then(function () {
+        that.updateLocalServiceInstances();
+
         if (serviceInstance) {
           that.updateActions([serviceInstance]);
           that.spaceModel.updateServiceInstanceCount(that.clusterGuid, that.spaceGuid, _.keys(that.spaceDetail().instances).length);

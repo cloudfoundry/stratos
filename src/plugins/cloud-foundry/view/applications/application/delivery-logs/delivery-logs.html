@@ -37,7 +37,8 @@
        st-safe-src="appDelLogsCtrl.parsedHceModel.pipelineExecutions"
        st-set-filter="deliveryLogsBuildFilter"
        >
-    <div id="delivery-logs-search" class="panel panel-default delivery-logs-search">
+    <div id="delivery-logs-search" class="panel panel-default delivery-logs-search"
+         ng-if="appDelLogsCtrl.displayedExecutions.length > 0">
       <form>
         <div class="form-group search-field" focusable-input>
           <label class="control-label" for="build-search" required translate>
@@ -60,7 +61,16 @@
           <span translate>Trigger Build</span>
         </a>
       </div>
-      <div class="panel panel-default">
+
+      <div ng-if="appDelLogsCtrl.displayedExecutions.length < 1"
+           class="panel panel-default">
+        <div class="panel-body" translate>
+          You have no builds
+        </div>
+      </div>
+
+      <div ng-if="appDelLogsCtrl.displayedExecutions.length > 0"
+           class="panel panel-default">
         <table class="table table-actionable" >
           <thead>
           <tr>
@@ -74,7 +84,7 @@
           <tbody>
           <tr ng-repeat="execution in appDelLogsCtrl.displayedExecutions">
             <td><a href="" ng-click="appDelLogsCtrl.viewExecution(execution)">{{ execution.message }}</a></td>
-            <td ng-if="!execution.result" class="row result-col"></td>
+            <td ng-if="!execution.result" class="row result-col"><spinner></spinner></td>
             <td ng-if="execution.result" class="row result-col" id="build-result-col">
               <div ng-switch="execution.result.state" class="pull-left">
                 <span ng-switch-when="succeeded" class="helion-icon helion-icon-Active_S text-primary"></span>
@@ -83,13 +93,6 @@
                 <span ng-switch-default class="helion-icon helion-icon-Active_S"></span>
               </div>
               <span translate>{{ execution.result.label }}</span>
-              <a translate
-                 ng-if="execution.result.state === appDelLogsCtrl.eventStates.SUCCEEDED &&
-                        appCtrl.model.application.summary.routes[0]"
-                 rel="noopener noreferrer"
-                 target="_blank"
-                 ng-init="route=appCtrl.model.application.summary.routes[0]"
-                 ng-href="http://{{ route.host + '.' + route.domain.name + (route.port ? ':' + route.port : '') + route.path }}">view app</a>
             </td>
             <td>{{ execution.reason.created_date | amDateFormat:'L - LTS' }}</td>
             <td>{{ execution.reason.author }}</td>

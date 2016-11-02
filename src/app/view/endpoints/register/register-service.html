@@ -24,6 +24,9 @@
     <div class="form-group" focusable-input
          ng-class="{'has-error': form.regForm.name.$invalid && form.regForm.name.$dirty}">
       <label class="control-label" translate>Name</label>
+      <span class="control-message">
+        <span translate ng-if="form.regForm.name.$error.required">Name is required</span>
+      </span>
       <input type="text" name="name" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.name" required/>
     </div>
     <div class="form-group skip-ssl-validation-checkbox" focusable-input>

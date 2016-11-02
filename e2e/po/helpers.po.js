@@ -2,16 +2,36 @@
 
 var sh = require('../../tools/node_modules/shelljs');
 var request = require('../../tools/node_modules/request');
+var path = require('path');
+var fs = require('fs');
+var Q = require('../../tools/node_modules/q');
 
 // Get host IP
 var CMD = "/sbin/ip route|awk '/default/ { print $3 }'";
-var hostIp = browser.params.hostIp || sh.exec(CMD, { silent: true }).output.trim();
+var hostProtocol = browser.params.protocol || 'https://';
+var hostIp = browser.params.host || sh.exec(CMD, { silent: true }).output.trim();
 var hostPort = browser.params.port || '';
-var host = hostIp + (hostPort ? ':' + hostPort : '');
+var host = hostProtocol + hostIp + (hostPort ? ':' + hostPort : '');
+
+var cnsis = browser.params.cnsi;
+var hcfs = cnsis.hcf;
+var hces = cnsis.hce;
+var adminUser = browser.params.credentials.admin.username;
+var adminPassword = browser.params.credentials.admin.password;
+var user = browser.params.credentials.user.username;
+var password = browser.params.credentials.user.password;
 
 module.exports = {
 
   getHost: getHost,
+  getCNSIs: getCNSIs,
+  getHcfs: getHcfs,
+  getHces: getHces,
+  getAdminUser: getAdminUser,
+  getAdminPassword: getAdminPassword,
+  getUser: getUser,
+  getPassword: getPassword,
+
   newBrowser: newBrowser,
   loadApp: loadApp,
   setBrowserNormal: setBrowserNormal,
@@ -28,12 +48,45 @@ module.exports = {
   getTableRowAt: getTableRowAt,
   getTableCellAt: getTableCellAt,
 
-  closeFlyout: closeFlyout
+  closeFlyout: closeFlyout,
+
+  newRequest: newRequest,
+  sendRequest: sendRequest,
+  createSession: createSession,
+  createReqAndSession: createReqAndSession
 
 };
 
 function getHost() {
   return host;
+}
+
+function getCNSIs() {
+  return cnsis;
+}
+
+function getHcfs() {
+  return hcfs;
+}
+
+function getHces() {
+  return hces;
+}
+
+function getAdminUser() {
+  return adminUser;
+}
+
+function getAdminPassword() {
+  return adminPassword;
+}
+
+function getUser() {
+  return user;
+}
+
+function getPassword() {
+  return password;
 }
 
 function newBrowser() {
@@ -42,7 +95,7 @@ function newBrowser() {
 
 function loadApp() {
   browser.manage().deleteAllCookies();
-  browser.get('http://' + host);
+  browser.get(host);
 }
 
 function setBrowserNormal() {
@@ -102,4 +155,135 @@ function closeFlyout() {
   element(by.css('flyout'))
     .element(by.css('.flyout-header button.close')).click();
   browser.driver.sleep(2000);
+}
+
+/**
+ * Manage requests + sessions
+ */
+
+/**
+ * @function createReqAndSession
+ * @description
+ * @param {object?} optionalReq - convenience, wraps in promise as if req did not exist
+ * @param {string?} username -
+ * @param {string?} password -
+ * @returns {Promise} A promise containing req
+ */
+function createReqAndSession(optionalReq, username, password) {
+  var req;
+
+  if (!optionalReq) {
+    req = newRequest();
+
+    username = username || getAdminUser();
+    password = password || getAdminPassword();
+
+    return createSession(req, username, password).then(function () {
+      return req;
+    });
+  } else {
+    return Q.resolve(optionalReq);
+  }
+}
+
+/**
+ * @function newRequest
+ * @description Create a new request
+ * @returns {object} A newly created request
+ */
+function newRequest() {
+  var cookieJar = request.jar();
+  var skipSSlValidation = browser.params.skipSSlValidation;
+  var ca;
+
+  if (skipSSlValidation) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  } else if (browser.params.caCert) {
+    var caCertFile = path.join(__dirname, '..', '..', 'tools');
+    caCertFile = path.join(caCertFile, browser.params.caCert);
+    if (fs.existsSync(caCertFile)) {
+      ca = fs.readFileSync(caCertFile);
+    }
+  }
+
+  return request.defaults({
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    agentOptions: {
+      ca: ca
+    },
+    jar: cookieJar
+  });
+}
+
+/**
+ * @function sendRequest
+ * @description Send request
+ * @param {object} req - the request
+ * @param {object} options -
+ * @param {object?} body - the request body
+ * @param {object?} formData - the form data
+ * @returns {Promise} A promise
+ */
+function sendRequest(req, options, body, formData) {
+  return new Promise(function (resolve, reject) {
+    options.url = getHost() + '/' + options.url;
+    if (body) {
+      options.body = JSON.stringify(body);
+    } else if (formData) {
+      options.formData = formData;
+    }
+
+    var data = '';
+    var rejected;
+    req(options)
+      .on('data', function (responseData) {
+        data += responseData;
+      })
+      .on('error', function (error) {
+        reject('send request failed: ', error);
+      })
+      .on('response', function (response) {
+        if (response.statusCode > 399) {
+          reject('failed to send request: ' + JSON.stringify(response));
+          rejected = true;
+        }
+      })
+      .on('end', function () {
+        if (!rejected) {
+          resolve(data);
+        }
+      });
+  });
+}
+
+/**
+ * @function createSession
+ * @description Create a session
+ * @param {object} req - the request
+ * @param {string} username - the Stackato username
+ * @param {string} password - the Stackato password
+ * @returns {Promise} A promise
+ */
+function createSession(req, username, password) {
+  return new Promise(function (resolve, reject) {
+    var options = {
+      formData: {
+        username: username || 'dev',
+        password: password || 'dev'
+      }
+    };
+    req.post(getHost() + '/pp/v1/auth/login/uaa', options)
+      .on('error', reject)
+      .on('response', function (response) {
+        if (response.statusCode === 200) {
+          resolve();
+        } else {
+          console.log('Failed to create session. ' + JSON.stringify(response));
+          reject('Failed to create session');
+        }
+      });
+  });
 }
