@@ -1,4 +1,4 @@
-FROM stackatotest/hsc-concourse-ui:latest
+FROM stackatotest/hsc-concourse-e2e:latest
 
 WORKDIR /usr/src/app
 
