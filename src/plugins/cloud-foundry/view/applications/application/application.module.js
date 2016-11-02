@@ -179,7 +179,8 @@
     this.onAppStateChange();
 
     $scope.$watch(function () {
-      return that.model.application.state ? that.model.application.state.label : undefined;
+      return that.model.application.state
+        ? that.model.application.state.label + that.model.application.state.subLabel : undefined;
     }, function () {
       that.onAppStateChange();
     });
@@ -500,7 +501,7 @@
     /**
      * @function onAppRoutesChange
      * @description invoked when the application routes change, so we can update action visibility
-     * @param {object} newRoutes - application route metadata
+     * @param {object=} newRoutes - application route metadata
      */
     onAppRoutesChange: function (newRoutes) {
       // Must have a route to be able to view an application

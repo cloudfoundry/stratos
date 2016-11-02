@@ -6,7 +6,7 @@
       <span translate ng-if="form.editSpace.spaceName.$error.required">Name is required</span>
       <span translate ng-if="form.editSpace.spaceName.$error.helionUnique">Name must be unique</span>
     </span>
-    <input type="text" name="spaceName" auto-focus class="form-control"
+    <input type="text" name="spaceName" auto-focus="300" class="form-control"
            helion-unique items="asyncTaskDialogCtrl.context.data.spaceNames"
            ng-model="asyncTaskDialogCtrl.context.data.name" required/>
     <br><br>
