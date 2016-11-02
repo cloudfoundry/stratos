@@ -1,16 +1,16 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var gallaryWall = require('../po/applications/applications.po');
-var addAppWizard = require('../po/applications/add-application-wizard.po');
-var addAppHcfApp = require('../po/applications/add-application-hcf-app.po');
-var addAppService = require('../po/applications/add-application-services.po');
-var _ = require('../../tools/node_modules/lodash');
-var cfModel = require('../po/models/cf-model.po');
-var proxyModel = require('../po/models/proxy-model.po');
-var searchBox = require('../po/widgets/input-search-box.po');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var gallaryWall = require('../../po/applications/applications.po');
+var addAppWizard = require('../../po/applications/add-application-wizard.po');
+var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
+var addAppService = require('../../po/applications/add-application-services.po');
+var _ = require('../../../tools/node_modules/lodash');
+var cfModel = require('../../po/models/cf-model.po');
+var proxyModel = require('../../po/models/proxy-model.po');
+var searchBox = require('../../po/widgets/input-search-box.po');
 
 describe('Applications - Add application', function () {
 

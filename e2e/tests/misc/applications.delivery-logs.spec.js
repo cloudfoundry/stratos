@@ -1,11 +1,11 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var galleryPage = require('../po/applications/applications.po');
-var deliveryLogs = require('../po/applications/applications.delivery-log.po');
-var applicationPage = require('../po/applications/application.po');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var galleryPage = require('../../po/applications/applications.po');
+var deliveryLogs = require('../../po/applications/applications.delivery-log.po');
+var applicationPage = require('../../po/applications/application.po');
 
 var Q = require('../../tools/node_modules/q');
 

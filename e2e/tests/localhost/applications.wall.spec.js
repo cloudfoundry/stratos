@@ -1,14 +1,15 @@
 'use strict';
 
-var utils = require('./utils');
+var utils = require('../../utils');
+var loginPage = require('../../po/login-page.po');
 
-describe('Application wall', function () {
+fdescribe('Application wall', function () {
   beforeAll(function () {
     utils.loadE2eClient();
   });
 
   afterAll(function () {
-   //utils.unloadE2eClient();
+    utils.unloadE2eClient();
   });
 
   describe('When cluster is not ready', function () {
@@ -40,10 +41,10 @@ describe('Application wall', function () {
       expect(element(by.css('.applications-header')).getText()).toBe('Applications');
     });
 
-    it('should show application message: "You have no applications."', function () {
+    it('should show application message: "You have no applications and cannot add any."', function () {
       var msgElem = element(by.css('.applications-msg'));
       expect(msgElem.isPresent()).toBeTruthy();
-      expect(msgElem.getText()).toBe('You have no applications.');
+      expect(msgElem.getText()).toBe('You have no applications and cannot add any.');
     });
   });
 
@@ -56,7 +57,7 @@ describe('Application wall', function () {
       expect(element(by.css('.applications-header')).getText()).toBe('Applications');
     });
 
-    it('should see an ADD APPLICATION botton.', function () {
+    it('should see an ADD APPLICATION button.', function () {
       var btn = element(by.css('.btn.btn-primary'));
       expect(btn.isPresent()).toBeTruthy();
       expect(btn.getText()).toBe('ADD APPLICATION');

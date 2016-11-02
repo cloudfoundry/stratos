@@ -1,14 +1,14 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var credentialsFormHelper = require('../po/widgets/credentials-form.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var actionsMenuHelper = require('../po/widgets/actions-menu.po');
-var confirmationModalHelper = require('../po/widgets/confirmation-modal.po');
-var registerEndpoint = require('../po/endpoints/register-endpoint.po');
-var endpointsHcf = require('../po/endpoints/endpoints-list-hcf.po');
-var serviceRegistration = require('../po/endpoints/service-instance-registration.po');
+var helpers = require('../../po/helpers.po');
+var credentialsFormHelper = require('../../po/widgets/credentials-form.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var actionsMenuHelper = require('../../po/widgets/actions-menu.po');
+var confirmationModalHelper = require('../../po/widgets/confirmation-modal.po');
+var registerEndpoint = require('../../po/endpoints/register-endpoint.po');
+var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
+var serviceRegistration = require('../../po/endpoints/service-instance-registration.po');
 
 describe('Endpoints - List HCFs', function () {
 

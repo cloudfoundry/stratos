@@ -1,11 +1,11 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var navbar = require('../po/navbar.po');
-var loginPage = require('../po/login-page.po');
-var registration = require('../po/endpoints/service-instance-registration.po');
-var applications = require('../po/applications/applications.po');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var navbar = require('../../po/navbar.po');
+var loginPage = require('../../po/login-page.po');
+var registration = require('../../po/endpoints/service-instance-registration.po');
+var applications = require('../../po/applications/applications.po');
 
 describe('Service Instance Registration', function () {
 
