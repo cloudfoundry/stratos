@@ -28,13 +28,13 @@
        * @description Show a toast notification
        * @param {string} toastType - the toast notification type (i.e. success, warning)
        * @param {string} message - the toast message
-       * @param {object=} messageInterpolate - optional object used in interpolation
+       * @param {object=} interpolateScope - optional scope used for interpolating message
        * @param {object=} toastOptions - optional override options for toast
        * @returns {object} The toast object
        * @public
        */
-      notify: function (toastType, message, messageInterpolate, toastOptions) {
-        var interpolatedMessage = messageInterpolate ? $interpolate(message)(messageInterpolate) : message;
+      notify: function (toastType, message, interpolateScope, toastOptions) {
+        var interpolatedMessage = interpolateScope ? $interpolate(message)(interpolateScope) : message;
         switch (toastType) {
           case 'busy':
             return toaster.busy(interpolatedMessage, toastOptions);

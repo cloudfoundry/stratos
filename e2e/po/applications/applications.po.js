@@ -54,6 +54,6 @@ function getAddApplicationButton() {
 function addApplication() {
   return getAddApplicationButton().click().then(function () {
     // Allow some time for the animation
-    return browser.driver.sleep(1000);
+    return browser.driver.sleep(500);
   });
 }
