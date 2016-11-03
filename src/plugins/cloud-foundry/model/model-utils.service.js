@@ -80,17 +80,16 @@
         return $q.resolve(list);
       }
 
-      function concat(response) {
-        list = list.concat(response.data.resources);
-      }
-
       // Make all calls in parallel
       var tasks = [];
       for (var i = 2; i <= pageOneResponseData.total_pages; i++) {
-        tasks.push(
-          $http.get('/pp/v1/proxy' + url.replace('page=2', 'page=' + i), httpConfigOptions).then(_.partial(concat)));
+        tasks.push($http.get('/pp/v1/proxy' + url.replace('page=2', 'page=' + i), httpConfigOptions));
       }
-      return $q.all(tasks).then(function () {
+      return $q.all(tasks).then(function (results) {
+        // Maintain order
+        for (var i = 0; i < results.length; i++) {
+          Array.prototype.push.apply(list, results[i].data.resources);
+        }
         return list;
       });
     }
