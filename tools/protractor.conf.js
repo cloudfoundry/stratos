@@ -2,17 +2,20 @@
 
 // Maintain Order
 var acceptanceTests = [
-  '../e2e/acceptance/login-page.spec.js',
-  '../e2e/acceptance/service-instance-registration.spec.js',
-  '../e2e/acceptance/endpoints-dashboard.spec.js',
-  '../e2e/acceptance/endpoints-list-hce.spec.js',
-  '../e2e/acceptance/endpoints-list-hcf.spec.js'
+  '../e2e/tests/acceptance/login-page.spec.js',
+  '../e2e/tests/acceptance/service-instance-registration.spec.js',
+  '../e2e/tests/acceptance/endpoints-dashboard.spec.js',
+  '../e2e/tests/acceptance/endpoints-list-hce.spec.js',
+  '../e2e/tests/acceptance/endpoints-list-hcf.spec.js',
+  '../e2e/tests/acceptance/applications.add-app.spec.js'
 ];
 
 exports.config = {
 
   suites: {
-    all: acceptanceTests.concat('../e2e/**/*.spec.js'),
+    all: '../e2e/tests/**/*.spec.js',
+    localhost: '../e2e/tests/localhost/**/*.spec.js',
+    other: '../e2e/tests/other/**/*.spec.js',
     acceptance: acceptanceTests
   },
 
@@ -38,12 +41,12 @@ exports.config = {
     port: '3100',
     credentials: {
       admin: {
-        username: '',
-        password: ''
+        username: 'admin',
+        password: 'hscadmin'
       },
       user: {
-        username: '',
-        password: ''
+        username: 'user',
+        password: 'hscuser'
       }
     },
     skipSSlValidation: true,
@@ -63,7 +66,9 @@ exports.config = {
           user: {
             username: 'rcox',
             password: 'changeme'
-          }
+          },
+          testOrgName:  'e2e',
+          testSpaceName: 'e2e'
         }
       },
       hce: {
@@ -91,7 +96,11 @@ exports.config = {
 
     // Optional. Really nice to see the progress of the tests while executing
     var SpecReporter = require('jasmine-spec-reporter');
-    jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'specs'}));
+    jasmine.getEnv().addReporter(new SpecReporter({
+      displayPendingSpec: false,
+      displayPendingSummary: false,
+      displayStacktrace: 'specs'
+    }));
   },
 
   jasmineNodeOpts: {
