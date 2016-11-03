@@ -1,10 +1,10 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var endpointsDashboardPage = require('../po/endpoints/endpoints-dashboard.po.js');
-var registerEndpoint = require('../po/endpoints/register-endpoint.po.js');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var endpointsDashboardPage = require('../../po/endpoints/endpoints-dashboard.po.js');
+var registerEndpoint = require('../../po/endpoints/register-endpoint.po.js');
 
 describe('Endpoints Dashboard', function () {
 
@@ -190,7 +190,9 @@ describe('Endpoints Dashboard', function () {
           registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
             service.register.skip_ssl_validation)
             .then(function () {
-              return registerEndpoint.safeClose();
+              var toastText = new RegExp("Helion (?:Code Engine|Cloud Foundry) endpoint '" +
+                service.register.cnsi_name + "' successfully registered");
+              return helpers.checkAndCloseToast(toastText);
             })
             .then(function () {
               expect(endpointsDashboardPage.hasRegisteredTypes(type)).toBeTruthy();

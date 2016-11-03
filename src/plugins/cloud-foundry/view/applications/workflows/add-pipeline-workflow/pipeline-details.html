@@ -28,16 +28,16 @@
   <input class="form-control" name="serviceName" type="text"
     ng-value="wizardCtrl.options.userInput.serviceInstance.name" readonly>
 </div>
-<div class="form-group" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].username.$invalid && wizardForm['application-pipeline-details-form'].username.$dirty}">
+<div class="form-group" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].hcfUsername.$invalid && wizardForm['application-pipeline-details-form'].hcfUsername.$dirty}">
   <label class="control-label" translate>Username</label>
-  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].username.$error.required">Username is required</span></span>
-  <input type="text" name="username"  class="form-control"
+  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].hcfUsername.$error.required">Username is required</span></span>
+  <input type="text" name="hcfUsername"  class="form-control"
     ng-model="wizardCtrl.options.userInput.clusterUsername" required/>
 </div>
-<div class="form-group has-feedback" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].password.$invalid && wizardForm['application-pipeline-details-form'].password.$dirty}">
+<div class="form-group has-feedback" focusable-input ng-class="{'has-error': wizardForm['application-pipeline-details-form'].hcfPassword.$invalid && wizardForm['application-pipeline-details-form'].hcfPassword.$dirty}">
   <label class="control-label" translate>Password</label>
-  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].password.$error.required">Password is required</span></span>
-  <input type="password" name="password" class="form-control"
+  <span class="control-message"><span translate ng-if="wizardForm['application-pipeline-details-form'].hcfPassword.$error.required">Password is required</span></span>
+  <input type="password" name="hcfPassword" class="form-control"
     ng-model="wizardCtrl.options.userInput.clusterPassword"
     password-reveal password-reveal-icon="'helion-icon helion-icon-View'" required/>
 </div>

@@ -1,16 +1,16 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var gallaryWall = require('../po/applications/applications.po');
-var addAppWizard = require('../po/applications/add-application-wizard.po');
-var addAppHcfApp = require('../po/applications/add-application-hcf-app.po');
-var addAppService = require('../po/applications/add-application-services.po');
-var _ = require('../../tools/node_modules/lodash');
-var cfModel = require('../po/models/cf-model.po');
-var proxyModel = require('../po/models/proxy-model.po');
-var searchBox = require('../po/widgets/input-search-box.po');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var gallaryWall = require('../../po/applications/applications.po');
+var addAppWizard = require('../../po/applications/add-application-wizard.po');
+var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
+var addAppService = require('../../po/applications/add-application-services.po');
+var _ = require('../../../tools/node_modules/lodash');
+var cfModel = require('../../po/models/cf-model.po');
+var proxyModel = require('../../po/models/proxy-model.po');
+var searchBox = require('../../po/widgets/input-search-box.po');
 
 describe('Applications - Add application', function () {
 
@@ -242,6 +242,9 @@ describe('Applications - Add application', function () {
         return addAppWizard.getWizard().next();
       })
       .then(function () {
+        helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/);
+      })
+      .then(function () {
         return cfModel.fetchApp(testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
           .then(function (app) {
             testApp = app;
@@ -313,7 +316,9 @@ describe('Applications - Add application', function () {
         // Save the new service
         return serviceWizard.getWizard().next().then(function () {
           // Give some time for the animation to finish, otherwise wrong element gets click
-          return browser.driver.sleep(1000);
+          return browser.driver.sleep(500);
+        }).then(function () {
+          helpers.checkAndCloseToast(/The '[^']+' service has been successfully attached to application '[^']+'/);
         });
       })
       .then(function () {

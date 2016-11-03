@@ -1,14 +1,14 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var credentialsFormHelper = require('../po/widgets/credentials-form.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var actionsMenuHelper = require('../po/widgets/actions-menu.po');
-var confirmationModalHelper = require('../po/widgets/confirmation-modal.po');
-var registerEndpoint = require('../po/endpoints/register-endpoint.po');
-var endpointsHcf = require('../po/endpoints/endpoints-list-hcf.po');
-var serviceRegistration = require('../po/endpoints/service-instance-registration.po');
+var helpers = require('../../po/helpers.po');
+var credentialsFormHelper = require('../../po/widgets/credentials-form.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var actionsMenuHelper = require('../../po/widgets/actions-menu.po');
+var confirmationModalHelper = require('../../po/widgets/confirmation-modal.po');
+var registerEndpoint = require('../../po/endpoints/register-endpoint.po');
+var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
+var serviceRegistration = require('../../po/endpoints/service-instance-registration.po');
 
 describe('Endpoints - List HCFs', function () {
 
@@ -64,6 +64,7 @@ describe('Endpoints - List HCFs', function () {
             return credentialsFormHelper.connect();
           })
           .then(function () {
+            helpers.checkAndCloseToast("Successfully connected to 'hcf'");
             // Should now show as 'connected'
             expect(endpointsHcf.isTileConnected(0)).toBeTruthy();
           });
@@ -86,6 +87,7 @@ describe('Endpoints - List HCFs', function () {
             return actionsMenuHelper.clickItem(actionMenu, 0);
           })
           .then(function () {
+            helpers.checkAndCloseToast('Helion Cloud Foundry endpoint successfully disconnected');
             // Should now show as 'Disconnected'
             expect(endpointsHcf.isTileConnected(0)).toBeFalsy();
           });
@@ -136,10 +138,10 @@ describe('Endpoints - List HCFs', function () {
           .then(function () {
             expect(confirmationModalHelper.isVisible()).toBeTruthy();
             // Click on modal unregister
-            confirmationModalHelper.primary();
-            return browser.driver.sleep(10000);
+            return confirmationModalHelper.primary();
           })
           .then(function () {
+            helpers.checkAndCloseToast('Helion Cloud Foundry endpoint successfully unregistered');
             expect(endpointsHcf.getTiles().count()).toBe(0);
           });
       });
@@ -157,6 +159,7 @@ describe('Endpoints - List HCFs', function () {
               hcf.register.skip_ssl_validation);
           })
           .then(function () {
+            helpers.checkAndCloseToast("Helion Cloud Foundry endpoint '" + hcf.register.cnsi_name + "' successfully registered");
             expect(endpointsHcf.getTiles().count()).toBe(1);
           });
       });

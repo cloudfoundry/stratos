@@ -1,9 +1,9 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var galleryPage = require('../po/applications/applications.po');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var galleryPage = require('../../po/applications/applications.po');
 
 describe('Applications - Gallery View', function () {
   beforeAll(function () {

@@ -31,48 +31,48 @@
     <div class="form-separator">
       <span>Connect to StormRunner</span>
     </div>
-    <div class="form-group" focusable-input ng-class="{'has-error': form.postDeployForm.userName.$invalid && form.postDeployForm.userName.$dirty}">
+    <div class="form-group" focusable-input ng-class="{'has-error': form.postDeployForm.actionUserName.$invalid && form.postDeployForm.actionUserName.$dirty}">
       <div class="input-control">
         <label class="control-label" translate>Username</label>
-        <span class="control-message"><span translate ng-if="form.postDeployForm.userName.$error.required">Username is required</span></span>
-        <input type="text" name="userName" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.userName"
+        <span class="control-message"><span translate ng-if="form.postDeployForm.actionUserName.$error.required">Username is required</span></span>
+        <input type="text" name="actionUserName" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.userName"
                required
         />
       </div>
     </div>
-    <div class="form-group has-feedback" focusable-input ng-class="{'has-error': form.postDeployForm.password.$invalid && form.postDeployForm.password.$dirty}">
+    <div class="form-group has-feedback" focusable-input ng-class="{'has-error': form.postDeployForm.actionPassword.$invalid && form.postDeployForm.actionPassword.$dirty}">
       <div class="input-control">
         <label class="control-label" translate>Password</label>
-        <span class="control-message"><span translate ng-if="form.postDeployForm.password.$error.required">Password is required</span></span>
-        <input type="password" name="password" class="form-control"
+        <span class="control-message"><span translate ng-if="form.postDeployForm.actionPassword.$error.required">Password is required</span></span>
+        <input type="password" name="actionPassword" class="form-control"
                ng-model="asyncTaskDialogCtrl.context.data.password"
                required password-reveal password-reveal-icon="'helion-icon helion-icon-View'"
         />
       </div>
     </div>
-    <div class="form-group" focusable-input ng-class="{'has-error': form.postDeployForm.tenantId.$invalid && form.postDeployForm.tenantId.$dirty}">
+    <div class="form-group" focusable-input ng-class="{'has-error': form.postDeployForm.actionTenantId.$invalid && form.postDeployForm.actionTenantId.$dirty}">
       <div class="input-control">
         <label class="control-label" translate>Tenant ID</label>
-        <span class="control-message"><span translate ng-if="form.postDeployForm.tenantId.$error.required">Tenant ID is required</span></span>
-        <input type="text" name="tenantId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.tenantId"
+        <span class="control-message"><span translate ng-if="form.postDeployForm.actionTenantId.$error.required">Tenant ID is required</span></span>
+        <input type="text" name="actionTenantId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.tenantId"
                required
         />
       </div>
     </div>
-    <div class="form-group" focusable-input ng-class="{'has-error': form.postDeployForm.projectId.$invalid && form.postDeployForm.projectId.$dirty}">
+    <div class="form-group" focusable-input ng-class="{'has-error': form.postDeployForm.actionProjectId.$invalid && form.postDeployForm.actionProjectId.$dirty}">
       <div class="input-control">
         <label class="control-label" translate>StormRunner Project ID</label>
-        <span class="control-message"><span translate ng-if="form.postDeployForm.projectId.$error.required">Project ID is required</span></span>
-        <input type="text" name="projectId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.projectId"
+        <span class="control-message"><span translate ng-if="form.postDeployForm.actionProjectId.$error.required">Project ID is required</span></span>
+        <input type="text" name="actionProjectId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.projectId"
                required
         />
       </div>
     </div>
-    <div class="form-group" focusable-input ng-class="{'has-error': form.postDeployForm.testId.$invalid && form.postDeployForm.testId.$dirty}">
+    <div class="form-group" focusable-input ng-class="{'has-error': form.postDeployForm.actionTestId.$invalid && form.postDeployForm.actionTestId.$dirty}">
       <div class="input-control">
         <label class="control-label" translate>Test ID</label>
-        <span class="control-message"><span translate ng-if="form.postDeployForm.testId.$error.required">Test ID is required</span></span>
-        <input type="text" name="testId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.testId"
+        <span class="control-message"><span translate ng-if="form.postDeployForm.actionTestId.$error.required">Test ID is required</span></span>
+        <input type="text" name="actionTestId" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.testId"
                required
         />
       </div>

@@ -146,13 +146,13 @@
       var userServiceInstance = that.userServiceInstanceModel.serviceInstances[endpoint.guid];
       this.userServiceInstanceModel.disconnect(endpoint.guid)
         .catch(function (error) {
-          that.notificationsService.notify('error', gettext('Failed to disconnect HCE endpoint'), {
+          that.notificationsService.notify('error', gettext('Failed to disconnect Helion Code Engine endpoint'), {
             timeOut: 10000
           });
           return $q.reject(error);
         })
         .then(function success() {
-          that.notificationsService.notify('success', gettext('HCE endpoint successfully disconnected'));
+          that.notificationsService.notify('success', gettext('Helion Code Engine endpoint successfully disconnected'));
           delete userServiceInstance.account;
           delete userServiceInstance.token_expiry;
           delete userServiceInstance.valid;
@@ -182,7 +182,7 @@
         },
         callback: function () {
           return that.serviceInstanceModel.remove(endpoint.model).then(function success() {
-            that.notificationsService.notify('success', gettext('HCE endpoint successfully unregistered'));
+            that.notificationsService.notify('success', gettext('Helion Code Engine endpoint successfully unregistered'));
             that._updateCurrentEndpoints(true);
           });
         }

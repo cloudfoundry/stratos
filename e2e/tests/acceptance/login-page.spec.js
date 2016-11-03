@@ -1,7 +1,7 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var loginPage = require('../po/login-page.po');
+var helpers = require('../../po/helpers.po');
+var loginPage = require('../../po/login-page.po');
 
 describe('Login Page', function () {
   beforeAll(function () {
@@ -32,7 +32,7 @@ describe('Login Page', function () {
     it('should go to next section if next arrow clicked', function () {
       loginPage.nextArrow().click();
 
-      browser.driver.sleep(2000);
+      browser.driver.sleep(1300);
       browser.executeScript('return window.scrollY;').then(function (pos) {
         loginPage.contentSections().get(1).getLocation().then(function (loc) {
           expect(pos).toBe(loc.y);
@@ -43,7 +43,7 @@ describe('Login Page', function () {
     it('should go to previous section if previous arrow clicked', function () {
       loginPage.prevArrow().click();
 
-      browser.driver.sleep(2000);
+      browser.driver.sleep(1300);
       browser.executeScript('return window.scrollY;').then(function (pos) {
         expect(pos).toBe(0);
       });
