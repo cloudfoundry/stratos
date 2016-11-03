@@ -2,20 +2,17 @@
 
 // Maintain Order
 var acceptanceTests = [
-  '../e2e/tests/acceptance/login-page.spec.js',
-  '../e2e/tests/acceptance/service-instance-registration.spec.js',
-  '../e2e/tests/acceptance/endpoints-dashboard.spec.js',
-  '../e2e/tests/acceptance/endpoints-list-hce.spec.js',
-  '../e2e/tests/acceptance/endpoints-list-hcf.spec.js',
-  '../e2e/tests/acceptance/applications.add-app.spec.js'
+  '../e2e/acceptance/login-page.spec.js',
+  '../e2e/acceptance/service-instance-registration.spec.js',
+  '../e2e/acceptance/endpoints-dashboard.spec.js',
+  '../e2e/acceptance/endpoints-list-hce.spec.js',
+  '../e2e/acceptance/endpoints-list-hcf.spec.js'
 ];
 
 exports.config = {
 
   suites: {
-    all: '../e2e/tests/**/*.spec.js',
-    localhost: '../e2e/tests/localhost/**/*.spec.js',
-    other: '../e2e/tests/other/**/*.spec.js',
+    all: acceptanceTests.concat('../e2e/**/*.spec.js'),
     acceptance: acceptanceTests
   },
 
@@ -38,15 +35,15 @@ exports.config = {
   params: {
     protocol: 'https://',
     host: 'localhost',
-    port: '443',
+    port: '3100',
     credentials: {
       admin: {
-        username: 'admin',
-        password: 'hscadmin'
+        username: '',
+        password: ''
       },
       user: {
-        username: 'user',
-        password: 'hscuser'
+        username: '',
+        password: ''
       }
     },
     skipSSlValidation: true,
@@ -66,9 +63,7 @@ exports.config = {
           user: {
             username: 'rcox',
             password: 'changeme'
-          },
-          testOrgName:  'e2e',
-          testSpaceName: 'e2e'
+          }
         }
       },
       hce: {
@@ -96,11 +91,7 @@ exports.config = {
 
     // Optional. Really nice to see the progress of the tests while executing
     var SpecReporter = require('jasmine-spec-reporter');
-    jasmine.getEnv().addReporter(new SpecReporter({
-      displayPendingSpec: false,
-      displayPendingSummary: false,
-      displayStacktrace: 'specs'
-    }));
+    jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'specs'}));
   },
 
   jasmineNodeOpts: {

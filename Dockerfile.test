@@ -6,4 +6,4 @@ ARG GROUP_ID
 ARG USER_NAME
 
 WORKDIR /usr/src/app
-CMD bash e2e/provision.sh && cd tools && npm run headless-e2e -- --params.host=nginx --params.protocol=https://
+CMD bash e2e/provision.sh && cd tools && npm run headless-e2e -- --params.host=nginx --params.port=
