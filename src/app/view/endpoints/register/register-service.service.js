@@ -56,7 +56,9 @@
           data: data,
           instances: createInstances(serviceInstanceModel.serviceInstances, type),
           description: description,
-          urlHint: urlHint
+          urlHint: urlHint,
+          urlFormName: type + 'Url',
+          nameFormName: type + 'Name'
         };
         return asyncTaskDialog(
           {

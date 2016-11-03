@@ -6,14 +6,14 @@
       Username
     </label>
     <input type="text" class="form-control"
-      id="login-form-username" name="username"
+      id="login-form-username" name="consoleUsername"
       ng-model="loginFormCtrl.username" required autofocus/>
   </div>
   <div class="form-group has-feedback" focusable-input ng-class="applicationCtrl.failedLogin ? 'has-error' : ''">
     <label class="control-label required" for="login-form-password" translate>
       Password
     </label>
-    <input type="password" class="form-control" id="login-form-password" name="password"
+    <input type="password" class="form-control" id="login-form-password" name="consolePassword"
       ng-model="loginFormCtrl.password" required
       password-reveal password-reveal-icon="'helion-icon helion-icon-View'"/>
   </div>

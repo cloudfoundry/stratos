@@ -21,6 +21,7 @@
 
     var title = gettext('Register Helion Code Engine');
     var description = gettext('Enter the Helion Code Engine endpoint URL and a name to use for this endpoint in the Console.');
+    var urlHint = gettext('Helion Cloud Engine endpoint');
 
     return {
       /**
@@ -30,7 +31,7 @@
        * @returns {promise}
        */
       add: function () {
-        return registerService.add('hce', title, description);
+        return registerService.add('hce', title, description, urlHint);
       }
     };
   }

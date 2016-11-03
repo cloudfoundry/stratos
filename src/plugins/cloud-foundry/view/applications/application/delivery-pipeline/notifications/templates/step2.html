@@ -4,26 +4,26 @@
   <h2 class="vert-center">{{wizardCtrl.options.userInput.notificationTargetType.title}}</h2>
 </div>
 <div class="desc">{{wizardCtrl.options.userInput.notificationTargetType.description}}</div>
-<div class="form-group " focusable-input ng-class="{'has-error': wizardForm['form2'].name.$invalid && wizardForm['form2'].name.$dirty}">
+<div class="form-group " focusable-input ng-class="{'has-error': wizardForm['form2'].notificationName.$invalid && wizardForm['form2'].notificationName.$dirty}">
   <label class="control-label" translate>Notification Target Name</label>
-  <span class="control-message"><span translate ng-if="wizardForm['form2'].name.$error.required">Name is required</span></span>
-  <input type="text" name="name" class="form-control"
+  <span class="control-message"><span translate ng-if="wizardForm['form2'].notificationName.$error.required">Name is required</span></span>
+  <input type="text" name="notificationName" class="form-control"
          ng-model="wizardCtrl.options.userInput.notificationTargetDetails.name"
          required
   />
 </div>
-<div class="form-group " focusable-input ng-class="{'has-error': wizardForm['form2'].location.$invalid && wizardForm['form2'].location.$dirty}">
+<div class="form-group " focusable-input ng-class="{'has-error': wizardForm['form2'].notificationLocation.$invalid && wizardForm['form2'].notificationLocation.$dirty}">
   <label class="control-label" translate>{{wizardCtrl.options.userInput.notificationTargetType.endpointLabel}}</label>
-  <span class="control-message"><span translate ng-if="wizardForm['form2'].location.$error.required">Endpoint is required</span></span>
-  <input type="text" name="location" class="form-control"
+  <span class="control-message"><span translate ng-if="wizardForm['form2'].notificationLocation.$error.required">Endpoint is required</span></span>
+  <input type="text" name="notificationLocation" class="form-control"
          ng-model="wizardCtrl.options.userInput.notificationTargetDetails.location"
          required
   />
 </div>
-<div class="form-group " focusable-input ng-class="{'has-error': wizardForm['form2'].token.$invalid && wizardForm['form2'].token.$dirty}">
+<div class="form-group " focusable-input ng-class="{'has-error': wizardForm['form2'].notificationToken.$invalid && wizardForm['form2'].notificationToken.$dirty}">
   <label class="control-label" translate>Token</label>
-  <span class="control-message"><span translate ng-if="wizardForm['form2'].token.$error.required">Token is required</span></span>
-  <input type="text" name="token" class="form-control"
+  <span class="control-message"><span translate ng-if="wizardForm['form2'].notificationToken.$error.required">Token is required</span></span>
+  <input type="text" name="notificationToken" class="form-control"
          ng-model="wizardCtrl.options.userInput.notificationTargetDetails.token"
          required
   />
