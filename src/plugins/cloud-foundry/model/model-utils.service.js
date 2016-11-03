@@ -64,24 +64,34 @@
     /**
      * @function dePaginate
      * @memberof cloud-foundry.model.modelUtils
-     * @description Given a HCF response from a 'list' style call return a collection containing all results, not just
-     * for the page in the response (the page in the response should be the first)
-     * @param {Array} responseData - Response from a HCF 'list' request. This will contain pagination data
+     * @description Given a HCF response from a 'list' style call return a collection containing all resources
+     * @param {Array} pageOneResponseData - Response from a HCF 'list' request. This must be page 1 and will contain pagination
+     * data
      * @param {object} httpConfigOptions - Any special http configuration options
-     * @returns {promise} promise when complete containing the entire array
+     * @returns {promise} promise when complete containing all list entries regardless of page
      * @public
      */
-    function dePaginate(responseData, httpConfigOptions) {
-      return _dePaginate([].concat(responseData.resources), responseData.next_url, httpConfigOptions);
-    }
-
-    function _dePaginate(list, nextUrl, httpConfigOptions) {
-      if (!nextUrl) {
-        return $q.when(list);
+    function dePaginate(pageOneResponseData, httpConfigOptions) {
+      var list = pageOneResponseData.resources;
+      // Be sure to use the next_url as a basis for other calls, this can include the original params and any pagination
+      // specific ones added by HCF (such as order-direction)
+      var url = pageOneResponseData.next_url;
+      if (!url) {
+        return $q.resolve(list);
       }
 
-      return $http.get('/pp/v1/proxy' + nextUrl, httpConfigOptions).then(function (response) {
-        return _dePaginate(list.concat(response.data.resources), response.data.next_url, httpConfigOptions);
+      function concat(response) {
+        list = list.concat(response.data.resources);
+      }
+
+      // Make all calls in parallel
+      var tasks = [];
+      for (var i = 2; i <= pageOneResponseData.total_pages; i++) {
+        tasks.push(
+          $http.get('/pp/v1/proxy' + url.replace('page=2', 'page=' + i), httpConfigOptions).then(_.partial(concat)));
+      }
+      return $q.all(tasks).then(function () {
+        return list;
       });
     }
 
