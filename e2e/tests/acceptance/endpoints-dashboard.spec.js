@@ -1,10 +1,10 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var endpointsDashboardPage = require('../po/endpoints/endpoints-dashboard.po.js');
-var registerEndpoint = require('../po/endpoints/register-endpoint.po.js');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var endpointsDashboardPage = require('../../po/endpoints/endpoints-dashboard.po.js');
+var registerEndpoint = require('../../po/endpoints/register-endpoint.po.js');
 
 describe('Endpoints Dashboard', function () {
 

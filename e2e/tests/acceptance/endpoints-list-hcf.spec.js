@@ -1,17 +1,16 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var credentialsFormHelper = require('../po/widgets/credentials-form.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var actionsMenuHelper = require('../po/widgets/actions-menu.po');
-var confirmationModalHelper = require('../po/widgets/confirmation-modal.po');
-var registerEndpoint = require('../po/endpoints/register-endpoint.po');
-var serviceRegistation = require('../po/endpoints/service-instance-registration.po');
+var helpers = require('../../po/helpers.po');
+var credentialsFormHelper = require('../../po/widgets/credentials-form.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var actionsMenuHelper = require('../../po/widgets/actions-menu.po');
+var confirmationModalHelper = require('../../po/widgets/confirmation-modal.po');
+var registerEndpoint = require('../../po/endpoints/register-endpoint.po');
+var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
+var serviceRegistration = require('../../po/endpoints/service-instance-registration.po');
 
-var endpointsHce = require('../po/endpoints/endpoints-list-hce.po');
-
-describe('Endpoints - List HCEs', function () {
+describe('Endpoints - List HCFs', function () {
 
   function resetToLoggedIn(loginAsFunc) {
     return browser.driver.wait(resetTo.resetAllCnsi())
@@ -22,25 +21,27 @@ describe('Endpoints - List HCEs', function () {
       });
   }
 
-  var hce = helpers.getHces().hce1;
+  var hcf = helpers.getHcfs().hcf1;
 
   describe('Admin', function () {
     beforeAll(function () {
-      resetToLoggedIn(loginPage.loginAsAdmin).then(function () {
-        endpointsHce.showHceEndpoints();
-        endpointsHce.isHceEndpoints();
+      resetToLoggedIn(loginPage.loginAsAdmin)
+        .then(function () {
+          return endpointsHcf.showHcfEndpoints();
+        })
+        .then(function () {
+          endpointsHcf.isHcfEndpoints();
 
-        // Confirm the first row is the required one (to match creds later)
-        var serviceInstancesTable = endpointsHce.getTable();
-        expect(helpers.getTableCellAt(serviceInstancesTable, 0, 1).getText()).toEqual(hce.register.api_endpoint);
-        expect(helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText()).toEqual('Disconnected');
-      });
+          // Confirm the first tile is the required one (to match creds later)
+          expect(endpointsHcf.getTileTitle(0)).toEqual(hcf.register.cnsi_name.toUpperCase());
+          expect(endpointsHcf.isTileConnected(0)).toBeFalsy();
+        });
     });
 
     describe('Connect + Disconnect', function () {
 
       it('Correct action menu items - before connect', function () {
-        var actionMenu = endpointsHce.getActionMenu(0);
+        var actionMenu = endpointsHcf.getTileActionMenu(0);
         expect(actionsMenuHelper.getItems(actionMenu).count()).toBe(2);
         expect(actionsMenuHelper.getItemText(actionMenu, 0)).toEqual('Connect');
         expect(actionsMenuHelper.getItemText(actionMenu, 1)).toEqual('Unregister');
@@ -49,7 +50,7 @@ describe('Endpoints - List HCEs', function () {
       it('Execute Connect', function () {
         // More detailed tests for the credentials form can be found in service-instance-registration.spec
 
-        var actionMenu = endpointsHce.getActionMenu(0);
+        var actionMenu = endpointsHcf.getTileActionMenu(0);
         // Open the action menu
         actionsMenuHelper.click(actionMenu)
           .then(function () {
@@ -59,19 +60,18 @@ describe('Endpoints - List HCEs', function () {
           .then(function () {
             // Run through the credentials form + register
             expect(credentialsFormHelper.credentialsForm().isDisplayed()).toBeTruthy();
-            credentialsFormHelper.fillCredentialsForm(hce.admin.username, hce.admin.password);
+            credentialsFormHelper.fillCredentialsForm(hcf.admin.username, hcf.admin.password);
             return credentialsFormHelper.connect();
           })
           .then(function () {
-            helpers.checkAndCloseToast("Successfully connected to 'hce'");
+            helpers.checkAndCloseToast("Successfully connected to 'hcf'");
             // Should now show as 'connected'
-            var serviceInstancesTable = endpointsHce.getTable();
-            expect(helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText()).toEqual('Connected');
+            expect(endpointsHcf.isTileConnected(0)).toBeTruthy();
           });
       });
 
       it('Correct action menu items - before disconnect', function () {
-        var actionMenu = endpointsHce.getActionMenu(0);
+        var actionMenu = endpointsHcf.getTileActionMenu(0);
         expect(actionsMenuHelper.getItems(actionMenu).count()).toBe(2);
         expect(actionsMenuHelper.getItemText(actionMenu, 0)).toEqual('Disconnect');
         expect(actionsMenuHelper.getItemText(actionMenu, 1)).toEqual('Unregister');
@@ -79,7 +79,7 @@ describe('Endpoints - List HCEs', function () {
 
       it('Execute Disconnect', function () {
 
-        var actionMenu = endpointsHce.getActionMenu(0);
+        var actionMenu = endpointsHcf.getTileActionMenu(0);
         // Open the action menu
         actionsMenuHelper.click(actionMenu)
           .then(function () {
@@ -87,15 +87,14 @@ describe('Endpoints - List HCEs', function () {
             return actionsMenuHelper.clickItem(actionMenu, 0);
           })
           .then(function () {
-            helpers.checkAndCloseToast('Helion Code Engine endpoint successfully disconnected');
+            helpers.checkAndCloseToast('Helion Cloud Foundry endpoint successfully disconnected');
             // Should now show as 'Disconnected'
-            var serviceInstancesTable = endpointsHce.getTable();
-            expect(helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText()).toEqual('Disconnected');
+            expect(endpointsHcf.isTileConnected(0)).toBeFalsy();
           });
       });
 
       it('Correct action menu items - after disconnect', function () {
-        var actionMenu = endpointsHce.getActionMenu(0);
+        var actionMenu = endpointsHcf.getTileActionMenu(0);
         expect(actionsMenuHelper.getItems(actionMenu).count()).toBe(2);
         expect(actionsMenuHelper.getItemText(actionMenu, 0)).toEqual('Connect');
         expect(actionsMenuHelper.getItemText(actionMenu, 1)).toEqual('Unregister');
@@ -105,21 +104,18 @@ describe('Endpoints - List HCEs', function () {
 
     describe('Unregister + Register', function () {
       it('Correct state - before unregister', function () {
-        var actionMenu = endpointsHce.getActionMenu(0);
+        var actionMenu = endpointsHcf.getTileActionMenu(0);
         expect(actionsMenuHelper.getItems(actionMenu).count()).toBe(2);
         expect(actionsMenuHelper.getItemText(actionMenu, 0)).toEqual('Connect');
         expect(actionsMenuHelper.getItemText(actionMenu, 1)).toEqual('Unregister');
 
-        // Add row for header
-        expect(helpers.getTableRows(endpointsHce.getTable()).count()).toBe(1 + 1);
+        expect(endpointsHcf.getTiles().count()).toBe(1);
       });
 
       it('Execute Unregister', function () {
-        var serviceInstancesTable = endpointsHce.getTable();
-        // Add row for header
-        expect(helpers.getTableRows(serviceInstancesTable).count()).toBe(1 + 1);
+        expect(endpointsHcf.getTiles().count()).toBe(1);
 
-        var actionMenu = endpointsHce.getActionMenu(0);
+        var actionMenu = endpointsHcf.getTileActionMenu(0);
         // Open the action menu
         actionsMenuHelper.click(actionMenu)
           .then(function () {
@@ -145,30 +141,26 @@ describe('Endpoints - List HCEs', function () {
             return confirmationModalHelper.primary();
           })
           .then(function () {
-            helpers.checkAndCloseToast('Helion Code Engine endpoint successfully unregistered');
-            // Should now have no entries
-            expect(helpers.getTableRows(serviceInstancesTable).count()).toBe(0);
+            helpers.checkAndCloseToast('Helion Cloud Foundry endpoint successfully unregistered');
+            expect(endpointsHcf.getTiles().count()).toBe(0);
           });
       });
 
       it('Execute Register', function () {
-        var serviceInstancesTable = endpointsHce.getTable();
-        // Add row for header
-        expect(helpers.getTableRows(serviceInstancesTable).count()).toBe(0);
+        expect(endpointsHcf.getTiles().count()).toBe(0);
 
         // Click register that's now appeared in centre screen message
-        endpointsHce.inlineRegister()
+        endpointsHcf.inlineRegister()
           .then(function () {
             // Validate the register slide out is shown, add details and continue
             expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-            expect(registerEndpoint.getEndpointType()).toBe('hce');
-            return registerEndpoint.populateAndRegister(hce.register.api_endpoint, hce.register.cnsi_name,
-              hce.register.skip_ssl_validation);
+            expect(registerEndpoint.getEndpointType()).toBe('hcf');
+            return registerEndpoint.populateAndRegister(hcf.register.api_endpoint, hcf.register.cnsi_name,
+              hcf.register.skip_ssl_validation);
           })
           .then(function () {
-            helpers.checkAndCloseToast("Helion Code Engine endpoint '" + hce.register.cnsi_name + "' successfully registered");
-            // Add row for header
-            expect(helpers.getTableRows(serviceInstancesTable).count()).toBe(1 + 1);
+            helpers.checkAndCloseToast("Helion Cloud Foundry endpoint '" + hcf.register.cnsi_name + "' successfully registered");
+            expect(endpointsHcf.getTiles().count()).toBe(1);
           });
       });
 
@@ -176,7 +168,7 @@ describe('Endpoints - List HCEs', function () {
 
     describe('Permissions', function () {
       it('Register should be visible to console admins', function () {
-        expect(endpointsHce.headerRegisterVisible()).toBeTruthy();
+        expect(endpointsHcf.headerRegisterVisible()).toBeTruthy();
       });
     });
   });
@@ -184,17 +176,21 @@ describe('Endpoints - List HCEs', function () {
   describe('Non-Admin', function () {
 
     beforeAll(function () {
-      resetToLoggedIn(loginPage.loginAsNonAdmin).then(function () {
-        serviceRegistation.completeRegistration().then(function() {
-          endpointsHce.showHceEndpoints();
-          endpointsHce.isHceEndpoints();
+      resetToLoggedIn(loginPage.loginAsNonAdmin)
+        .then(function () {
+          return serviceRegistration.completeRegistration();
+        })
+        .then(function () {
+          return endpointsHcf.showHcfEndpoints();
+        })
+        .then(function () {
+          endpointsHcf.isHcfEndpoints();
         });
-      });
     });
 
     describe('Permissions', function () {
       it('Register should not be visible to non-console admins', function () {
-        expect(endpointsHce.headerRegisterVisible()).toBeFalsy();
+        expect(endpointsHcf.headerRegisterVisible()).toBeFalsy();
       });
     });
   });

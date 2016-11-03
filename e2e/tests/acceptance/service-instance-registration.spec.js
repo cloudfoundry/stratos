@@ -1,14 +1,14 @@
 'use strict';
 
-var Q = require('../../tools/node_modules/q');
-var _ = require('../../tools/node_modules/lodash');
+var Q = require('../../../tools/node_modules/q');
+var _ = require('../../../tools/node_modules/lodash');
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var navbar = require('../po/navbar.po');
-var loginPage = require('../po/login-page.po');
-var registration = require('../po/endpoints/service-instance-registration.po');
-var applications = require('../po/applications/applications.po');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var navbar = require('../../po/navbar.po');
+var loginPage = require('../../po/login-page.po');
+var registration = require('../../po/endpoints/service-instance-registration.po');
+var applications = require('../../po/applications/applications.po');
 
 describe('Service Instance Registration', function () {
 
