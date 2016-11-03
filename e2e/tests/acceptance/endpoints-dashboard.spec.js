@@ -190,7 +190,9 @@ describe('Endpoints Dashboard', function () {
           registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
             service.register.skip_ssl_validation)
             .then(function () {
-              return registerEndpoint.safeClose();
+              var toastText = new RegExp("Helion (?:Code Engine|Cloud Foundry) endpoint '" +
+                service.register.cnsi_name + "' successfully registered");
+              return helpers.checkAndCloseToast(toastText);
             })
             .then(function () {
               expect(endpointsDashboardPage.hasRegisteredTypes(type)).toBeTruthy();

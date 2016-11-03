@@ -355,7 +355,8 @@
         this.addService().then(function () {
           that.addBinding().then(function () {
             // show notification for successful binding
-            var successMsg = gettext('The {{service}} service has been attached to your {{appName}} application');
+            var successMsg = gettext("The '{{ service }}'" +
+              " service has been successfully attached to application '{{ appName }}'");
             var context = {
               service: that.options.serviceInstance.entity.name,
               appName: that.data.app.summary.name

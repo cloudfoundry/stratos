@@ -1,11 +1,14 @@
 'use strict';
 
-var helpers = require('../../po/helpers.po');
-var resetTo = require('../../po/resets.po');
-var navbar = require('../../po/navbar.po');
-var loginPage = require('../../po/login-page.po');
-var registration = require('../../po/endpoints/service-instance-registration.po');
-var applications = require('../../po/applications/applications.po');
+var Q = require('../../tools/node_modules/q');
+var _ = require('../../tools/node_modules/lodash');
+
+var helpers = require('../po/helpers.po');
+var resetTo = require('../po/resets.po');
+var navbar = require('../po/navbar.po');
+var loginPage = require('../po/login-page.po');
+var registration = require('../po/endpoints/service-instance-registration.po');
+var applications = require('../po/applications/applications.po');
 
 describe('Service Instance Registration', function () {
 
@@ -140,6 +143,7 @@ describe('Service Instance Registration', function () {
 
         it('should update service instance data on register', function () {
           registration.connectServiceInstance().then(function () {
+            helpers.checkAndCloseToast(/Successfully connected to '(?:hcf|hce)'/);
             var serviceInstancesTable = registration.serviceInstancesTable();
             expect(helpers.getTableCellAt(serviceInstancesTable, hcfRow, 3).getText()).not.toBe('');
             expect(helpers.getTableCellAt(serviceInstancesTable, hcfRow, 4).getText()).toBe('DISCONNECT');
@@ -183,6 +187,7 @@ describe('Service Instance Registration', function () {
           registration.fillCredentialsForm(hcf.admin.username, hcf.admin.password);
           registration.connectServiceInstance()
             .then(function () {
+              helpers.checkAndCloseToast(/Successfully connected to '(?:hcf|hce)'/);
               return registration.completeRegistration();
             })
             .then(function () {
@@ -192,9 +197,6 @@ describe('Service Instance Registration', function () {
         });
 
         it('should go directly to applications view on logout and login', function () {
-          // Wait for the register service notification to go away
-          browser.driver.sleep(5000);
-
           navbar.logout();
           loginPage.login(helpers.getUser(), helpers.getPassword());
 
@@ -203,9 +205,6 @@ describe('Service Instance Registration', function () {
         });
 
         it('should go directly to applications view on logout and login (as admin)', function () {
-          // Wait for the register service notification to go away
-          browser.driver.sleep(5000);
-
           // This would be better in the 'non admin' section, however it's easier to test here with a service registered
           // This removes the need to go through/test the endpoint dashboard registration process alongside this test
           navbar.logout();

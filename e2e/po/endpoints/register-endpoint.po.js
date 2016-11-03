@@ -43,7 +43,7 @@ function getEndpointType() {
 function close() {
   return getClose().click().then(function () {
     // Allow time for animation to finish.. otherwise future clicks will be swallowed by glass background
-    return browser.driver.sleep(1000);
+    return browser.driver.sleep(500);
   });
 }
 
@@ -55,7 +55,7 @@ function safeClose() {
     }
     return button.click().then(function () {
       // Allow time for animation to finish.. otherwise future clicks will be swallowed by glass background
-      return browser.driver.sleep(1000);
+      return browser.driver.sleep(500);
     });
   });
 }
@@ -81,7 +81,7 @@ function register() {
 
   return button.click().then(function () {
     // Allow time for animation to finish.. otherwise future clicks will be swallowed by glass background
-    return browser.driver.sleep(1000);
+    return browser.driver.sleep(500);
   });
 }
 
@@ -101,10 +101,7 @@ function populateAndRegister(address, name, skipValidation) {
     .then(function () {
       return setSkipSllValidation(skipValidation);
     })
-    .then(register)
-    .then(function () {
-      return browser.driver.sleep(1000);
-    });
+    .then(register);
 }
 
 function _getInputAddress() {

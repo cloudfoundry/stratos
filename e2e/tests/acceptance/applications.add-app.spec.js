@@ -242,6 +242,9 @@ describe('Applications - Add application', function () {
         return addAppWizard.getWizard().next();
       })
       .then(function () {
+        helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/);
+      })
+      .then(function () {
         return cfModel.fetchApp(testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
           .then(function (app) {
             testApp = app;
@@ -313,7 +316,9 @@ describe('Applications - Add application', function () {
         // Save the new service
         return serviceWizard.getWizard().next().then(function () {
           // Give some time for the animation to finish, otherwise wrong element gets click
-          return browser.driver.sleep(1000);
+          return browser.driver.sleep(500);
+        }).then(function () {
+          helpers.checkAndCloseToast(/The '[^']+' service has been successfully attached to application '[^']+'/);
         });
       })
       .then(function () {

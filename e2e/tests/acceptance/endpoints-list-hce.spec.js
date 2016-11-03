@@ -63,6 +63,7 @@ describe('Endpoints - List HCEs', function () {
             return credentialsFormHelper.connect();
           })
           .then(function () {
+            helpers.checkAndCloseToast("Successfully connected to 'hce'");
             // Should now show as 'connected'
             var serviceInstancesTable = endpointsHce.getTable();
             expect(helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText()).toEqual('Connected');
@@ -86,6 +87,7 @@ describe('Endpoints - List HCEs', function () {
             return actionsMenuHelper.clickItem(actionMenu, 0);
           })
           .then(function () {
+            helpers.checkAndCloseToast('Helion Code Engine endpoint successfully disconnected');
             // Should now show as 'Disconnected'
             var serviceInstancesTable = endpointsHce.getTable();
             expect(helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText()).toEqual('Disconnected');
@@ -140,10 +142,10 @@ describe('Endpoints - List HCEs', function () {
           .then(function () {
             expect(confirmationModalHelper.isVisible()).toBeTruthy();
             // Click on modal unregister
-            confirmationModalHelper.primary();
-            return browser.driver.sleep(10000);
+            return confirmationModalHelper.primary();
           })
           .then(function () {
+            helpers.checkAndCloseToast('Helion Code Engine endpoint successfully unregistered');
             // Should now have no entries
             expect(helpers.getTableRows(serviceInstancesTable).count()).toBe(0);
           });
@@ -164,6 +166,7 @@ describe('Endpoints - List HCEs', function () {
               hce.register.skip_ssl_validation);
           })
           .then(function () {
+            helpers.checkAndCloseToast("Helion Code Engine endpoint '" + hce.register.cnsi_name + "' successfully registered");
             // Add row for header
             expect(helpers.getTableRows(serviceInstancesTable).count()).toBe(1 + 1);
           });
