@@ -3,7 +3,7 @@
 var utils = require('../../utils');
 var loginPage = require('../../po/login-page.po');
 
-fdescribe('Application wall', function () {
+describe('Application wall', function () {
   beforeAll(function () {
     utils.loadE2eClient();
   });

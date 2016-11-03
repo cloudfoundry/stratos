@@ -15,6 +15,7 @@ exports.config = {
   suites: {
     all: '../e2e/tests/**/*.spec.js',
     localhost: '../e2e/tests/localhost/**/*.spec.js',
+    other: '../e2e/tests/other/**/*.spec.js',
     acceptance: acceptanceTests
   },
 
