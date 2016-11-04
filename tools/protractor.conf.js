@@ -36,9 +36,9 @@ exports.config = {
   },
 
   params: {
-    protocol: '',
-    host: '',
-    port: '',
+    protocol: 'https://',
+    host: 'localhost',
+    port: '3100',
     credentials: {
       admin: {
         username: 'admin',
