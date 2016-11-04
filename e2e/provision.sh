@@ -11,8 +11,6 @@ else
   echo -e "\033[32mpackage.json has not changed. Skipping npm install\033[0m"
 fi
 PATH=$PATH:$TOOLS_DIR/node_modules/.bin
-date
 bower install --allow-root --force
-date
 npm run update-webdriver
 npm run build
