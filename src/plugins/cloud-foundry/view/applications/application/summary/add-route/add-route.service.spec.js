@@ -55,7 +55,6 @@
     }));
 
     it('should be defined', function () {
-      expect(true).toBe(false);
       expect(addRoutesFactory).toBeDefined();
     });
 
