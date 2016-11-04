@@ -1,4 +1,4 @@
-# TEST Helion Stackato Console UI
+# Helion Stackato Console UI
 The Helion Stackato Console UI is written in JavaScript and runs in a Docker container. It also uses Angular 1.4.x to maintain compatibility with Angular UI Bootstrap.
 
 For more implementation details, please see the following pages:
