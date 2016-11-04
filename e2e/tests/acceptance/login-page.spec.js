@@ -12,6 +12,7 @@ describe('Login Page', function () {
   describe('content', function () {
     it('should have at least one section', function () {
       loginPage.contentSections().then(function (sections) {
+        expect(true).toBe(false);
         expect(sections.length).toBeGreaterThan(0);
       });
     });
