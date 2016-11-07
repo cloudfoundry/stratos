@@ -7,8 +7,7 @@ RUN dpkg-reconfigure --frontend noninteractive tzdata
 # Due to a conflict in Gulp 3, we need to run this again
 RUN npm install
 RUN apt-get update && \
-    apt-get install -y openjdk-7-jre-headless && \
-    apt-get install -y xvfb wget openjdk-7-jre && \
+    apt-get install -y xvfb wget && \
     apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic && \
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
     dpkg --unpack google-chrome-stable_current_amd64.deb && \
