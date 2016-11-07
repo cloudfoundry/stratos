@@ -11,9 +11,6 @@
   var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
   var endpointDashboard = require('../../po/endpoints/endpoints-dashboard.po');
 
-  var _ = require('../../../tools/node_modules/lodash');
-  var Q = require('../../../tools/node_modules/q');
-
   describe('HCF - Manage Organizations', function () {
 
     /**
@@ -72,40 +69,19 @@
       element(by.buttonText('Create')).click();
       helpers.checkAndCloseToast(/Organisation '.*' successfully created/);
 
-      function returnIfMatch(tile) {
-        return function (titleText) {
-          if (titleText === testOrgName) {
-            return tile;
-          }
-        };
-      }
-
-      element.all(by.repeater('organization in clusterDetailController.organizations')).then(function (tiles) {
-        var promises = [];
-        for (var i = 0; i < tiles.length; i++) {
-          var tile = tiles[i];
-          var title = tile.element(by.css('.panel-heading span:first-of-type')).getText();
-          promises.push(title.then(returnIfMatch(tile)));
-        }
-        return Q.all(promises).then(function (tileMatch) {
-          var theTile;
-          for (var i = 0; i < tileMatch.length; i++) {
-            theTile = tileMatch[i];
-            if (theTile) {
-              break;
-            }
-          }
-          expect(theTile).toBeDefined();
-          var actionMenu = theTile.element(by.css('.actions-menu'));
-          actionsMenuHelper.click(actionMenu);
-          actionsMenuHelper.clickItem(actionMenu, 1);
-          expect(confirmationModalHelper.isVisible()).toBeTruthy();
-          return confirmationModalHelper.primary().then(function () {
-            return helpers.checkAndCloseToast(/Organization '.*' successfully deleted/);
-          });
+      var theTile = element.all(by.repeater('organization in clusterDetailController.organizations')).filter(function (tile) {
+        return tile.element(by.css('.panel-heading span:first-of-type')).getText().then(function (title) {
+          return title === testOrgName;
         });
-      });
+      }).first();
 
+      var actionMenu = theTile.element(by.css('.actions-menu'));
+      actionsMenuHelper.click(actionMenu);
+      actionsMenuHelper.clickItem(actionMenu, 1);
+      expect(confirmationModalHelper.isVisible()).toBeTruthy();
+      return confirmationModalHelper.primary().then(function () {
+        return helpers.checkAndCloseToast(/Organization '.*' successfully deleted/);
+      });
     });
 
   });
