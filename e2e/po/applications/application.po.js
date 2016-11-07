@@ -48,7 +48,6 @@ function applicationAction(idx) {
 
 // function showServiceDetails() {
 //   servicePanelsAddServiceButton(0).click();
-//   browser.driver.sleep(1000);
 // }
 
 // function serviceDetailsAddAction() {

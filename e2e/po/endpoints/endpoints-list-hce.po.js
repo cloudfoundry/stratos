@@ -16,7 +16,7 @@ module.exports = {
 
 function showHceEndpoints() {
   return endpointDashboard.showEndpoints().then(function () {
-    return endpointDashboard.registerCodeEngineTile().click();
+    return endpointDashboard.getCodeEngineTile().click();
   });
 }
 

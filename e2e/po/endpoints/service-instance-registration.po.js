@@ -43,9 +43,7 @@ function disconnectLink(rowIndex) {
 }
 
 function connect(rowIndex) {
-  return connectLink(rowIndex).click().then(function () {
-    return browser.driver.sleep(1000);
-  });
+  return connectLink(rowIndex).click();
 }
 
 function disconnect(rowIndex) {

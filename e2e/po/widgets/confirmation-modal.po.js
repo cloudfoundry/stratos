@@ -11,10 +11,7 @@ function isVisible() {
 }
 
 function cancel() {
-  return element(by.css('.modal-footer button.btn.btn-default')).click().then(function() {
-    // give some time for the animation to finish
-    browser.driver.sleep(500);
-  });
+  return element(by.css('.modal-footer button.btn.btn-default')).click();
 }
 
 function primary() {

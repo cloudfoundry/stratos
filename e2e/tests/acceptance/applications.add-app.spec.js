@@ -3,7 +3,7 @@
 var helpers = require('../../po/helpers.po');
 var resetTo = require('../../po/resets.po');
 var loginPage = require('../../po/login-page.po');
-var gallaryWall = require('../../po/applications/applications.po');
+var galleryWall = require('../../po/applications/applications.po');
 var addAppWizard = require('../../po/applications/add-application-wizard.po');
 var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
 var addAppService = require('../../po/applications/add-application-services.po');
@@ -92,10 +92,10 @@ describe('Applications - Add application', function () {
         helpers.loadApp();
         // Log in as a standard non-admin user
         loginPage.loginAsNonAdmin();
-        return gallaryWall.showApplications();
+        return galleryWall.showApplications();
       })
       .then(function () {
-        expect(gallaryWall.isApplicationWall()).toBeTruthy();
+        expect(galleryWall.isApplicationWall()).toBeTruthy();
       })
       .then(function () {
         // Select the required HCF cluster
@@ -156,14 +156,14 @@ describe('Applications - Add application', function () {
   });
 
   it('Add Application button should be visible', function () {
-    expect(gallaryWall.getAddApplicationButton().isDisplayed()).toBeTruthy();
+    expect(galleryWall.getAddApplicationButton().isDisplayed()).toBeTruthy();
   });
 
   it('Add Application button shows fly out with correct values', function () {
     var selectedHcf = _.find(registeredCnsi, {name: selectedCluster});
     var domain = selectedHcf.api_endpoint.Host.substring(4);
 
-    gallaryWall.addApplication().then(function () {
+    galleryWall.addApplication().then(function () {
       expect(addAppWizard.isDisplayed()).toBeTruthy();
 
       expect(addAppWizard.getWizard().getTitle()).toBe('Add Application');
@@ -315,9 +315,6 @@ describe('Applications - Add application', function () {
       .then(function () {
         // Save the new service
         return serviceWizard.getWizard().next().then(function () {
-          // Give some time for the animation to finish, otherwise wrong element gets click
-          return browser.driver.sleep(500);
-        }).then(function () {
           helpers.checkAndCloseToast(/The '[^']+' service has been successfully attached to application '[^']+'/);
         });
       })

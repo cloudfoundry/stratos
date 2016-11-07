@@ -7,7 +7,8 @@ var acceptanceTests = [
   '../e2e/tests/acceptance/endpoints-dashboard.spec.js',
   '../e2e/tests/acceptance/endpoints-list-hce.spec.js',
   '../e2e/tests/acceptance/endpoints-list-hcf.spec.js',
-  '../e2e/tests/acceptance/applications.add-app.spec.js'
+  '../e2e/tests/acceptance/applications.add-app.spec.js',
+  '../e2e/tests/acceptance/hcf.organizations.spaces.spec.js'
 ];
 
 exports.config = {
@@ -93,6 +94,26 @@ exports.config = {
     // jasmine.getEnv().addReporter(new jasmineReporters.JUnitXmlReporter({
     //   savePath: 'e2e-results'
     // }));
+
+    // Disable animations so e2e tests run more quickly
+    var disableNgAnimate = function() {
+      angular.module('disableNgAnimate', []).run(['$animate', function ($animate) {
+        $animate.enabled(false);
+        // disable css animations
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = '* {' +
+          '-webkit-transition: none !important;' +
+          '-moz-transition: none !important;' +
+          '-o-transition: none !important;' +
+          '-ms-transition: none !important;' +
+          'transition: none !important;' +
+          '}';
+        document.getElementsByTagName('head')[0].appendChild(style);
+      }]);
+    };
+
+    browser.addMockModule('disableNgAnimate', disableNgAnimate);
 
     // Optional. Really nice to see the progress of the tests while executing
     var SpecReporter = require('jasmine-spec-reporter');

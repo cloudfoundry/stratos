@@ -1,7 +1,6 @@
 'use strict';
 
 var _ = require('../../../tools/node_modules/lodash');
-var Q = require('../../../tools/node_modules/q');
 
 module.exports = {
   wrap: wrap,
@@ -71,10 +70,6 @@ function selectOption(element, index) {
   return open(element)
     .then(function () {
       return getOptions(element).get(index).click();
-    })
-    .then(function () {
-      // Allow some time for the action, which probably contains a backend request, to execute
-      return browser.driver.sleep(1000);
     });
 }
 
@@ -95,10 +90,6 @@ function selectOptionByLabel(element, label) {
     })
     .then(function (elem) {
       return elem.click();
-    })
-    .then(function () {
-      // Allow some time for the action, which probably contains a backend request, to execute
-      return browser.driver.sleep(1000);
     });
 }
 
