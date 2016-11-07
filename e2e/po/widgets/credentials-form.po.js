@@ -31,7 +31,6 @@ function connectButton() {
 function cancel() {
   helpers.getForm(credentialsFormName)
     .element(by.buttonText('Cancel')).click();
-  browser.driver.sleep(500);
 }
 
 function fillCredentialsForm(username, password) {
@@ -43,7 +42,5 @@ function fillCredentialsForm(username, password) {
 }
 
 function connect() {
-  return connectButton().click().then(function () {
-    return browser.driver.sleep(500);
-  });
+  return connectButton().click();
 }

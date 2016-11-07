@@ -158,7 +158,6 @@
   function closeFlyout() {
     element(by.css('flyout'))
       .element(by.css('.flyout-header button.close')).click();
-    browser.driver.sleep(500);
   }
 
   /*

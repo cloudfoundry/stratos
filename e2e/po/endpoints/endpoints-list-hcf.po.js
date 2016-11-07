@@ -18,7 +18,7 @@ module.exports = {
 
 function showHcfEndpoints() {
   return endpointDashboard.showEndpoints().then(function () {
-    return endpointDashboard.registerCloudFoundryTile().click();
+    return endpointDashboard.getCloudFoundryTile().click();
   });
 }
 

@@ -13,14 +13,14 @@
     'app.model.modelManager',
     'app.api.apiManager',
     'app.utils.utilsService',
+    'cloud-foundry.model.modelUtils',
     '$q',
-    '$log',
-    'cloud-foundry.model.modelUtils'
+    '$log'
   ];
 
-  function registerOrgModel(modelManager, apiManager, utils, $q, $log, modelUtils) {
+  function registerOrgModel(modelManager, apiManager, utils, modelUtils, $q, $log) {
     modelManager.register('cloud-foundry.model.organization',
-      new Organization(modelManager, apiManager, utils, $q, $log, modelUtils));
+      new Organization(modelManager, apiManager, utils, modelUtils, $q, $log));
   }
 
   /**
@@ -30,24 +30,26 @@
    * @property {object} modelManager - the app's model manager
    * @param {object} apiManager - the API manager
    * @param {object} utils - the utils service
+   * @param {object} modelUtils - service containing general hcf model helpers
    * @param {object} $q - angular $q service
    * @param {object} $log - angular $log service
-   * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
+
    * @property {object} modelManager - the model manager
    * @property {object} apiManager - the API manager
    * @property {object} utils - the utils service
+   * @property {object} modelUtils - service containing general hcf model helpers
    * @property {object} $q - angular $q service
    * @property {object} $log - angular $log service
-   * @property {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @class
    */
-  function Organization(modelManager, apiManager, utils, $q, $log, modelUtils) {
-    this.apiManager = apiManager;
+  function Organization(modelManager, apiManager, utils, modelUtils, $q, $log) {
     this.modelManager = modelManager;
-    this.$q = $q;
-    this.$log = $log;
+    this.apiManager = apiManager;
     this.utils = utils;
     this.modelUtils = modelUtils;
+
+    this.$q = $q;
+    this.$log = $log;
 
     this.spaceApi = apiManager.retrieve('cloud-foundry.api.Spaces');
     this.orgsApi = apiManager.retrieve('cloud-foundry.api.Organizations');
