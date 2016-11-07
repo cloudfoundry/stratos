@@ -175,9 +175,6 @@
    * */
   function checkAndCloseToast(matchStringOrRegex) {
 
-    // Allow time for the animated toaster to become visible
-    browser.driver.sleep(250);
-
     var testMatch;
     if (_.isRegExp(matchStringOrRegex)) {
       testMatch = function (testString) {
