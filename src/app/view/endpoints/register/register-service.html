@@ -2,19 +2,23 @@
   <p ng-if="asyncTaskDialogCtrl.context.description">{{asyncTaskDialogCtrl.context.description}}</p>
   <form name="form.regForm">
     <div class="form-group" focusable-input
-         ng-class="{'has-error': form.regForm.url.$invalid && form.regForm.url.$dirty}">
+         ng-class="{'has-error': form.regForm[asyncTaskDialogCtrl.context.urlFormName].$invalid && form.regForm[asyncTaskDialogCtrl.context.urlFormName].$dirty}">
       <label class="control-label" translate>Endpoint Address</label>
       <span class="control-message">
         <span translate
-              ng-if="form.regForm.url.$error.pattern && form.regForm.url.$dirty">
+              ng-if="form.regForm[asyncTaskDialogCtrl.context.urlFormName].$error.required && form.regForm[asyncTaskDialogCtrl.context.urlFormName].$dirty">
+          Url is required
+        </span>
+        <span translate
+              ng-if="form.regForm[asyncTaskDialogCtrl.context.urlFormName].$error.pattern && form.regForm[asyncTaskDialogCtrl.context.urlFormName].$dirty">
           Invalid url format
         </span>
         <span translate
-              ng-if="form.regForm.url.$error.helionUnique && form.regForm.url.$dirty">
+              ng-if="form.regForm[asyncTaskDialogCtrl.context.urlFormName].$error.helionUnique && form.regForm[asyncTaskDialogCtrl.context.urlFormName].$dirty">
           Url is not unique
         </span>
       </span>
-      <input type="text" name="url" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.url"
+      <input type="text" name="{{asyncTaskDialogCtrl.context.urlFormName}}" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.url"
              required
              placeholder="{{ asyncTaskDialogCtrl.context.urlHint }}"
              ng-pattern="/^http(s)?://(.)+$/"
@@ -22,12 +26,12 @@
              ignore-case/>
     </div>
     <div class="form-group" focusable-input
-         ng-class="{'has-error': form.regForm.name.$invalid && form.regForm.name.$dirty}">
+         ng-class="{'has-error': form.regForm[asyncTaskDialogCtrl.context.nameFormName].$invalid && form.regForm[asyncTaskDialogCtrl.context.nameFormName].$dirty}">
       <label class="control-label" translate>Name</label>
       <span class="control-message">
-        <span translate ng-if="form.regForm.name.$error.required">Name is required</span>
+        <span translate ng-if="form.regForm[asyncTaskDialogCtrl.context.nameFormName].$error.required">Name is required</span>
       </span>
-      <input type="text" name="name" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.name" required/>
+      <input type="text" name="{{asyncTaskDialogCtrl.context.nameFormName}}" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.name" required/>
     </div>
     <div class="form-group skip-ssl-validation-checkbox" focusable-input>
       <checkbox-input ng-model="asyncTaskDialogCtrl.context.data.skipSslValidation"

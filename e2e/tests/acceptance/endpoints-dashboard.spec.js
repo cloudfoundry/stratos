@@ -1,10 +1,10 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var endpointsDashboardPage = require('../po/endpoints-dashboard.po.js');
-var registerEndpoint = require('../po/register-endpoint.po.js');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var endpointsDashboardPage = require('../../po/endpoints/endpoints-dashboard.po.js');
+var registerEndpoint = require('../../po/endpoints/register-endpoint.po.js');
 
 describe('Endpoints Dashboard', function () {
 
@@ -24,8 +24,8 @@ describe('Endpoints Dashboard', function () {
         endpointsDashboardPage.showEndpoints();
         endpointsDashboardPage.isEndpoints();
         expect(endpointsDashboardPage.welcomeMessage().isDisplayed()).toBeTruthy();
-        expect(endpointsDashboardPage.registerCloudFoundryTile().isDisplayed()).toBeTruthy();
-        expect(endpointsDashboardPage.registerCodeEngineTile().isDisplayed()).toBeTruthy();
+        expect(endpointsDashboardPage.getCloudFoundryTile().isDisplayed()).toBeTruthy();
+        expect(endpointsDashboardPage.getCodeEngineTile().isDisplayed()).toBeTruthy();
       });
     });
 
@@ -62,8 +62,6 @@ describe('Endpoints Dashboard', function () {
             .then(function () {
               expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
               expect(registerEndpoint.getEndpointType()).toBe(type);
-
-              browser.driver.sleep(500);
             });
         });
 
@@ -184,13 +182,23 @@ describe('Endpoints Dashboard', function () {
           });
         });
 
+        it('Should hint at SSL errors', function () {
+          expect(endpointsDashboardPage.hasRegisteredTypes(type)).toBeFalsy();
+          registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name, false)
+            .then(function () {
+              return registerEndpoint.checkError(/SSL/);
+            });
+        });
+
         it('Successful register', function () {
           expect(endpointsDashboardPage.hasRegisteredTypes(type)).toBeFalsy();
 
           registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
             service.register.skip_ssl_validation)
             .then(function () {
-              return registerEndpoint.safeClose();
+              var toastText = new RegExp("Helion (?:Code Engine|Cloud Foundry) endpoint '" +
+                service.register.cnsi_name + "' successfully registered");
+              return helpers.checkAndCloseToast(toastText);
             })
             .then(function () {
               expect(endpointsDashboardPage.hasRegisteredTypes(type)).toBeTruthy();
@@ -199,6 +207,7 @@ describe('Endpoints Dashboard', function () {
               });
             });
         });
+
       });
     }
 
@@ -225,8 +234,8 @@ describe('Endpoints Dashboard', function () {
 
     it('should show welcome endpoints page', function () {
       expect(endpointsDashboardPage.welcomeMessage().isPresent()).toBeFalsy();
-      expect(endpointsDashboardPage.registerCloudFoundryTile().isPresent()).toBeFalsy();
-      expect(endpointsDashboardPage.registerCodeEngineTile().isPresent()).toBeFalsy();
+      expect(endpointsDashboardPage.getCloudFoundryTile().isPresent()).toBeFalsy();
+      expect(endpointsDashboardPage.getCodeEngineTile().isPresent()).toBeFalsy();
 
       endpointsDashboardPage.showEndpoints();
       endpointsDashboardPage.isEndpoints();

@@ -29,12 +29,9 @@ function showAccountActions() {
 
 function showAccountSettings() {
   return showAccountActions().then(function () {
-    return browser.driver.sleep(50000).then(function b() {
-      return element(by.css('account-actions'))
-        .element(by.css('[href="#/account/settings"]'))
-        .click();
-    });
-
+    return element(by.css('account-actions'))
+      .element(by.css('[href="#/account/settings"]'))
+      .click();
   });
 }
 

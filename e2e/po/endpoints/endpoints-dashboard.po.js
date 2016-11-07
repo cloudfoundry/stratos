@@ -1,7 +1,7 @@
 'use strict';
 
-var navbar = require('./navbar.po');
-var helpers = require('../po/helpers.po');
+var navbar = require('../navbar.po');
+var helpers = require('../helpers.po');
 
 module.exports = {
   showEndpoints: showEndpoints,
@@ -10,8 +10,8 @@ module.exports = {
   clickAddClusterInWelcomeMessage: clickAddClusterInWelcomeMessage,
   clickAddClusterInTile: clickAddClusterInTile,
   welcomeMessage: welcomeMessage,
-  registerCloudFoundryTile: registerCloudFoundryTile,
-  registerCodeEngineTile: registerCodeEngineTile,
+  getCloudFoundryTile: getCloudFoundryTile,
+  getCodeEngineTile: getCodeEngineTile,
   getAddEndpoint: getAddEndpoint,
   hasRegisteredTypes: hasRegisteredTypes,
   getTileStats: getTileStats
@@ -37,22 +37,18 @@ function welcomeMessage() {
 
 function clickAddClusterInWelcomeMessage(serviceType) {
   var index = serviceType === 'hcf' ? 0 : 1;
-  return element.all(by.css('#welcome-message span.tile-btn')).get(index).click().then(function () {
-    return browser.driver.sleep('500');
-  });
+  return element.all(by.css('#welcome-message span.tile-btn')).get(index).click();
 }
 
 function clickAddClusterInTile(serviceType) {
-  return getInstanceTile(serviceType).element(by.linkText('Register An Endpoint')).click().then(function() {
-    return browser.driver.sleep('500');
-  });
+  return getInstanceTile(serviceType).element(by.linkText('Register An Endpoint')).click();
 }
 
-function registerCloudFoundryTile() {
+function getCloudFoundryTile() {
   return getInstanceTile('hcf');
 }
 
-function registerCodeEngineTile() {
+function getCodeEngineTile() {
   return getInstanceTile('hce');
 }
 

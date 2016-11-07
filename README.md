@@ -47,7 +47,11 @@ $ npm test
 ```
 $ cd tools
 $ npm run update-webdriver
-$ xvfb-run --server-args='-screen 0 1280x1024x24' ./node_modules/.bin/protractor protractor.conf.js
+$ npm run e2e
+```
+By default tests will execute against the local machine's ip address. To run against, for example, the gulp dev instance use
+```
+$ npm run e2e -- --params.host=localhost --params.port=3100
 ```
 
 ### Running ESLint in container

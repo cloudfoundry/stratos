@@ -1,7 +1,7 @@
 'use strict';
 
 // Service instances registration helpers
-var helpers = require('./helpers.po');
+var helpers = require('../helpers.po');
 var credentialsFormName = 'credentialsFormCtrl.credentialsForm';
 
 module.exports = {
@@ -31,7 +31,6 @@ function connectButton() {
 function cancel() {
   helpers.getForm(credentialsFormName)
     .element(by.buttonText('Cancel')).click();
-  browser.driver.sleep(2000);
 }
 
 function fillCredentialsForm(username, password) {
@@ -43,7 +42,5 @@ function fillCredentialsForm(username, password) {
 }
 
 function connect() {
-  return connectButton().click().then(function () {
-    return browser.driver.sleep(1000);
-  });
+  return connectButton().click();
 }

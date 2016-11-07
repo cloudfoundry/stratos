@@ -124,6 +124,10 @@
      * @public
      */
     login: function (username, password) {
+      this.serverFailedToRespond = false;
+      this.serverErrorOnLogin = false;
+      this.failedLogin = false;
+
       var that = this;
       this.modelManager.retrieve('app.model.account')
         .login(username, password)

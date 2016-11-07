@@ -1,17 +1,17 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var galleryPage = require('../po/applications.po');
+var helpers = require('../../po/helpers.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var galleryPage = require('../../po/applications/applications.po');
 
-xdescribe('Applications - Gallery View', function () {
+describe('Applications - Gallery View', function () {
   beforeAll(function () {
-    browser.driver.wait(resetTo.devWorkflow(false))
+    browser.driver.wait(resetTo.removeAllCnsi())
       .then(function () {
         helpers.setBrowserNormal();
         helpers.loadApp();
-        loginPage.login('dev', 'dev');
+        loginPage.loginAsNonAdmin();
       });
   });
 

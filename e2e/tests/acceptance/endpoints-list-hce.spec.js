@@ -1,15 +1,15 @@
 'use strict';
 
-var helpers = require('../po/helpers.po');
-var credentialsFormHelper = require('../po/credentials-form.po');
-var resetTo = require('../po/resets.po');
-var loginPage = require('../po/login-page.po');
-var actionsMenuHelper = require('../po/actions-menu.po');
-var confirmationModalHelper = require('../po/confirmation-modal.po');
-var registerEndpoint = require('../po/register-endpoint.po');
-var serviceRegistation = require('../po/service-instance-registration.po');
+var helpers = require('../../po/helpers.po');
+var credentialsFormHelper = require('../../po/widgets/credentials-form.po');
+var resetTo = require('../../po/resets.po');
+var loginPage = require('../../po/login-page.po');
+var actionsMenuHelper = require('../../po/widgets/actions-menu.po');
+var confirmationModalHelper = require('../../po/widgets/confirmation-modal.po');
+var registerEndpoint = require('../../po/endpoints/register-endpoint.po');
+var serviceRegistation = require('../../po/endpoints/service-instance-registration.po');
 
-var endpointsHce = require('../po/endpoints-list-hce.po');
+var endpointsHce = require('../../po/endpoints/endpoints-list-hce.po');
 
 describe('Endpoints - List HCEs', function () {
 
@@ -63,6 +63,7 @@ describe('Endpoints - List HCEs', function () {
             return credentialsFormHelper.connect();
           })
           .then(function () {
+            helpers.checkAndCloseToast("Successfully connected to 'hce'");
             // Should now show as 'connected'
             var serviceInstancesTable = endpointsHce.getTable();
             expect(helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText()).toEqual('Connected');
@@ -86,6 +87,7 @@ describe('Endpoints - List HCEs', function () {
             return actionsMenuHelper.clickItem(actionMenu, 0);
           })
           .then(function () {
+            helpers.checkAndCloseToast('Helion Code Engine endpoint successfully disconnected');
             // Should now show as 'Disconnected'
             var serviceInstancesTable = endpointsHce.getTable();
             expect(helpers.getTableCellAt(serviceInstancesTable, 0, 2).getText()).toEqual('Disconnected');
@@ -143,6 +145,7 @@ describe('Endpoints - List HCEs', function () {
             return confirmationModalHelper.primary();
           })
           .then(function () {
+            helpers.checkAndCloseToast('Helion Code Engine endpoint successfully unregistered');
             // Should now have no entries
             expect(helpers.getTableRows(serviceInstancesTable).count()).toBe(0);
           });
@@ -163,6 +166,7 @@ describe('Endpoints - List HCEs', function () {
               hce.register.skip_ssl_validation);
           })
           .then(function () {
+            helpers.checkAndCloseToast("Helion Code Engine endpoint '" + hce.register.cnsi_name + "' successfully registered");
             // Add row for header
             expect(helpers.getTableRows(serviceInstancesTable).count()).toBe(1 + 1);
           });

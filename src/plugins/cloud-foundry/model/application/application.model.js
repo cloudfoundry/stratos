@@ -212,6 +212,7 @@
     _listAllApps: function () {
       var that = this;
       this.bufferedApplications = [];
+
       return this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis())
         .then(_.bind(this._onListAllAppsSuccess, this))
         .then(function () {
@@ -331,7 +332,6 @@
           'x-cnap-cnsi-list': cnsis.join(',')
         }
       };
-
       return this.applicationApi.ListAllApps(options, config).then(function (response) {
         that._onListAllAppsWithPageSuccess(response.data);
         return response;

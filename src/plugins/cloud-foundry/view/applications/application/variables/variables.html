@@ -28,7 +28,9 @@
           <td>{{ applicationVariablesCtrl.model.application.variables.environment_json[name] }}</td>
           <td>
             <actions-menu actions="applicationVariablesCtrl.variableActions"
-                          action-target="name" menu-icon="helion-icon helion-icon-More"></actions-menu>
+                          action-target="name"
+                          menu-icon="helion-icon helion-icon-More"
+                          menu-position="actions-menu-right"></actions-menu>
           </td>
         </tr>
         <tr ng-repeat-end ng-if="name === applicationVariablesCtrl.deleteError"
