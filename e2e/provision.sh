@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# TODO: combine with the stratos-ui/provision.sh, the only difference is the conditional
 WORK_DIR=$(pwd)
 TOOLS_DIR="$WORK_DIR/tools"
 cd ${TOOLS_DIR}

@@ -1,4 +1,4 @@
-FROM stackatotest/hsc-concourse:test
+FROM stackatotest/hsc-concourse:latest
 
 # These args need to be consumed, otherwise build fails
 ARG USER_ID
