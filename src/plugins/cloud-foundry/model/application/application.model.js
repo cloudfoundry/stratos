@@ -80,6 +80,9 @@
     this.cachedApplications = [];
     // Track the list of apps filtered by local means
     this.filteredApplications = [];
+    // The unfiltered application count. Normally this is fetched by default in a ListAllApps request, however sometimes
+    // this is filtered by org or space
+    this.unfilteredApplicationCount = undefined;
     // Page number (not zero based, used in UX)
     this.appPage = 1;
   }
@@ -212,6 +215,26 @@
 
       return this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis())
         .then(_.bind(this._onListAllAppsSuccess, this))
+        .then(function () {
+          if (_.isMatch(that.filterParams, {orgGuid: 'all', spaceGuid: 'all'})) {
+            // No org/space filter applied, the app count can be found in the cached applications
+            that.unfilteredApplicationCount = that.cachedApplications.length;
+          } else {
+            // Filter applied. Reach out and call again without filters and only retrieve a single app per cnsi.
+
+            // This will run every time the user changes the org or space filters. Tested with 1001 apps and it takes
+            // about 60ms to complete (HCF in AWS)
+            that.applicationApi.ListAllApps({
+              'results-per-page': 1
+            }, {
+              headers: {
+                'x-cnap-cnsi-list': that._getCurrentCnsis().join(',')
+              }
+            }).then(function (response) {
+              that.unfilteredApplicationCount = _.sum(_.map(response.data, 'total_results'));
+            });
+          }
+        })
         .then(function () {
           if (that.filterParams.cnsiGuid !== 'all') {
             that.filterByCluster(that.filterParams.cnsiGuid);

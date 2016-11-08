@@ -6,6 +6,70 @@
 
   mock.cloudFoundryAPI.Apps = {
 
+    ListAllApps: function () {
+      return {
+        url: '/pp/v1/proxy/v2/apps?results-per-page=1',
+
+        response: {
+          200: {
+            body: {
+              'caf2bccb-b594-4d78-bd60-4d4947a74182': {
+                'total_results': 4,
+                'total_pages': 4,
+                'prev_url': null,
+                'next_url': '/v2/apps?order-direction=asc\u0026page=2\u0026results-per-page=1',
+                'resources': [{
+                  'metadata': {
+                    'guid': '0a66e4e0-bf59-43f9-8f62-203fe504e2f7',
+                    'url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7',
+                    'created_at': '2016-10-28T13:55:48Z',
+                    'updated_at': '2016-11-01T14:38:37Z'
+                  },
+                  'entity': {
+                    'name': 'rc-test-1',
+                    'production': false,
+                    'space_guid': '4e102665-1138-46ea-9bf3-5766070fb8bd',
+                    'stack_guid': 'b55ebf93-a0b7-4f27-b30f-5273c37af661',
+                    'buildpack': null,
+                    'detected_buildpack': 'node.js 1.5.18',
+                    'detected_buildpack_guid': '37f697af-47e1-47c0-adcc-30609e98769d',
+                    'environment_json': {'sadasd': 'asdasd'},
+                    'memory': 32,
+                    'instances': 1,
+                    'disk_quota': 1024,
+                    'state': 'STARTED',
+                    'version': 'f150f598-8b45-4f4e-afa4-6b52bc37137d',
+                    'command': null,
+                    'console': false,
+                    'debug': null,
+                    'staging_task_id': '229923080a4c457b9503e310807e32b5',
+                    'package_state': 'STAGED',
+                    'health_check_type': 'port',
+                    'health_check_timeout': null,
+                    'staging_failed_reason': null,
+                    'staging_failed_description': null,
+                    'diego': true,
+                    'docker_image': null,
+                    'package_updated_at': '2016-10-28T14:02:08Z',
+                    'detected_start_command': 'node server.js',
+                    'enable_ssh': true,
+                    'docker_credentials_json': {'redacted_message': '[PRIVATE DATA HIDDEN]'},
+                    'ports': [8080],
+                    'space_url': '/v2/spaces/4e102665-1138-46ea-9bf3-5766070fb8bd',
+                    'stack_url': '/v2/stacks/b55ebf93-a0b7-4f27-b30f-5273c37af661',
+                    'routes_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/routes',
+                    'events_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/events',
+                    'service_bindings_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/service_bindings',
+                    'route_mappings_url': '/v2/apps/0a66e4e0-bf59-43f9-8f62-203fe504e2f7/route_mappings'
+                  }
+                }]
+              }
+            }
+          }
+        }
+      };
+    },
+
     GetAppSummary: function (guid, spaceGuid) {
 
       spaceGuid = spaceGuid || 'spaceGuid';

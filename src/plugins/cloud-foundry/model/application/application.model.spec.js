@@ -2,14 +2,15 @@
   'use strict';
 
   describe('cloud-foundry application model', function () {
-    var $httpBackend, applicationModel;
+    var $httpBackend, $timeout, modelManager, applicationModel;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      var modelManager = $injector.get('app.model.modelManager');
+      modelManager = $injector.get('app.model.modelManager');
       applicationModel = modelManager.retrieve('cloud-foundry.model.application');
+      $timeout = $injector.get('$timeout');
     }));
 
     afterEach(function () {
@@ -135,6 +136,208 @@
       applicationModel.getAppStats('guid', guid, params);
       $httpBackend.flush();
       expect(GetDetailedStatsForStartedApp.response['200'].body['0'].state).toBe('RUNNING');
+    });
+
+    describe('listAllApps', function () {
+
+      var userServiceInstancesModel;
+
+      var cnsiGuid1 = 'cnsiGuid1';
+      var cnsiGuid2 = 'cnsiGuid2';
+      var serviceInstances = _.set({}, cnsiGuid1, {
+        guid: cnsiGuid1,
+        name: 'hcf',
+        cnsi_type: 'hcf',
+        valid: true,
+        error: false
+      });
+      _.set(serviceInstances, cnsiGuid2, {
+        guid: cnsiGuid2,
+        name: 'hcf',
+        cnsi_type: 'hcf',
+        valid: true,
+        error: false
+      });
+
+      beforeEach(function () {
+        userServiceInstancesModel = modelManager.retrieve('app.model.serviceInstance.user');
+      });
+
+      function createResponse(resultsPerPage, results, pages) {
+        var appsInResponse = resultsPerPage <= results ? resultsPerPage : results;
+        var apps = [];
+        for (var i = 0; i < appsInResponse; i++) {
+          apps.push({
+
+          });
+        }
+        return {
+          total_results: results,
+          total_pages: pages,
+          resources: apps
+        };
+      }
+
+      it('no connected cnsi', function () {
+        applicationModel._listAllApps().then(function () {
+          expect(applicationModel.hasApps).toBe(false);
+          expect(applicationModel.filteredApplications.length).toBe(0);
+          expect(applicationModel.bufferedApplications.length).toBe(0);
+          expect(applicationModel.unfilteredApplicationCount).toBe(0);
+        });
+      });
+
+      it('one connected cnsi and no filters', function () {
+        userServiceInstancesModel.serviceInstances = _.set({}, cnsiGuid1, _.cloneDeep(serviceInstances.cnsiGuid1));
+
+        var cnsi1AppCount = 3;
+        // One cnsi in response
+        var response = _.set({}, cnsiGuid1, createResponse(100, cnsi1AppCount, 1));
+        $httpBackend.expectGET('/pp/v1/proxy/v2/apps?page=1&results-per-page=100').respond(200, response);
+
+        applicationModel._listAllApps().then(function () {
+          expect(applicationModel.hasApps).toBe(true);
+          expect(applicationModel.filteredApplications.length).toBe(cnsi1AppCount);
+          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCount);
+          expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount);
+        });
+
+        $httpBackend.flush();
+      });
+
+      it('two connected cnsi and no filters', function () {
+        userServiceInstancesModel.serviceInstances = _.cloneDeep(serviceInstances);
+
+        var cnsi1AppCount = 3;
+        var cnsi2AppCount = 4;
+        // Two cnsi in response
+        var response = _.set({}, cnsiGuid1, createResponse(100, cnsi1AppCount, 1));
+        _.set(response, cnsiGuid2, createResponse(100, cnsi2AppCount, 1));
+        $httpBackend.expectGET('/pp/v1/proxy/v2/apps?page=1&results-per-page=100').respond(200, response);
+
+        applicationModel._listAllApps().then(function () {
+          expect(applicationModel.hasApps).toBe(true);
+          expect(applicationModel.filteredApplications.length).toBe(cnsi1AppCount + cnsi2AppCount);
+          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCount + cnsi2AppCount);
+          expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount + cnsi2AppCount);
+        });
+
+        $httpBackend.flush();
+      });
+
+      it('one connected cnsi and cnsi filter (no results)', function () {
+        userServiceInstancesModel.serviceInstances = _.set({}, cnsiGuid1, _.cloneDeep(serviceInstances.cnsiGuid1));
+
+        var cnsi1AppCount = 6;
+        // One cnsi in response
+        var response = _.set({}, cnsiGuid1, createResponse(100, cnsi1AppCount, 1));
+        $httpBackend.expectGET('/pp/v1/proxy/v2/apps?page=1&results-per-page=100').respond(200, response);
+
+        // filter by a cnsi not in the response
+        applicationModel.filterParams.cnsiGuid = cnsiGuid2;
+        applicationModel._listAllApps().then(function () {
+          expect(applicationModel.hasApps).toBe(false);
+          expect(applicationModel.filteredApplications.length).toBe(0);
+          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCount);
+          expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount);
+        });
+
+        $httpBackend.flush();
+      });
+
+      it('two connected cnsi and cnsi filter', function () {
+        userServiceInstancesModel.serviceInstances = _.set({}, cnsiGuid1, _.cloneDeep(serviceInstances.cnsiGuid1));
+
+        var cnsi1AppCount = 8;
+        var cnsi2AppCount = 2;
+        // Two cnsi in response
+        var response = _.set({}, cnsiGuid1, createResponse(100, cnsi1AppCount, 1));
+        _.set(response, cnsiGuid2, createResponse(100, cnsi2AppCount, 1));
+        $httpBackend.expectGET('/pp/v1/proxy/v2/apps?page=1&results-per-page=100').respond(200, response);
+
+        // filter by a cnsi in the response
+        applicationModel.filterParams.cnsiGuid = cnsiGuid2;
+        applicationModel._listAllApps().then(function () {
+          expect(applicationModel.hasApps).toBe(true);
+          expect(applicationModel.filteredApplications.length).toBe(cnsi2AppCount);
+          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCount + cnsi2AppCount);
+          expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount + cnsi2AppCount);
+        });
+
+        $httpBackend.flush();
+      });
+
+      it('one connected cnsi and org filter', function (done) {
+        userServiceInstancesModel.serviceInstances = _.set({}, cnsiGuid1, _.cloneDeep(serviceInstances.cnsiGuid1));
+
+        var orgGuid = 'orgGuid';
+        var cnsi1AppCount = 10;
+        var cnsi1AppCountFiltered = cnsi1AppCount - 2;
+
+        // Expect one call to ListAllApps for the initial request. This contains an org filter
+        var response1 = _.set({}, cnsiGuid1, createResponse(100, cnsi1AppCountFiltered, 1));
+        $httpBackend.expectGET('/pp/v1/proxy/v2/apps?page=1&q=organization_guid:' + orgGuid + '&results-per-page=100').respond(200, response1);
+
+        // Expect a second call to ListAllApps without a filter to determine the total apps
+        var response2 = _.set({}, cnsiGuid1, createResponse(1, cnsi1AppCount, 1));
+        $httpBackend.expectGET('/pp/v1/proxy/v2/apps?results-per-page=1').respond(200, response2);
+
+        applicationModel.filterParams.cnsiGuid = cnsiGuid1;
+        applicationModel.filterParams.orgGuid = orgGuid;
+
+        applicationModel._listAllApps().then(function () {
+          expect(applicationModel.hasApps).toBe(true);
+          expect(applicationModel.filteredApplications.length).toBe(cnsi1AppCountFiltered);
+          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCountFiltered);
+        });
+
+        // The second request to ListAllApps is not part of the promise chain, so give it a cycle to complete
+        $timeout(function () {
+          expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount);
+          done();
+        });
+
+        $httpBackend.flush();
+        $timeout.flush();
+      });
+
+      it('two connected cnsi and org filter', function (done) {
+        userServiceInstancesModel.serviceInstances = _.set({}, cnsiGuid1, _.cloneDeep(serviceInstances.cnsiGuid1));
+
+        var orgGuid = 'orgGuid';
+        var cnsi1AppCount = 11;
+        var cnsi1AppCountFiltered = cnsi1AppCount - 2;
+        var cnsi2AppCount = 6;
+
+        // Expect one call to ListAllApps for the initial request. This contains an org filter
+        var response1 = _.set({}, cnsiGuid1, createResponse(100, cnsi1AppCountFiltered, 1));
+        _.set(response1, cnsiGuid2, createResponse(100, 0, 1));
+        $httpBackend.expectGET('/pp/v1/proxy/v2/apps?page=1&q=organization_guid:' + orgGuid + '&results-per-page=100').respond(200, response1);
+
+        // Expect a second call to ListAllApps without a filter to determine the total apps
+        var response2 = _.set({}, cnsiGuid1, createResponse(1, cnsi1AppCount, 1));
+        _.set(response2, cnsiGuid2, createResponse(100, cnsi2AppCount, 1));
+        $httpBackend.expectGET('/pp/v1/proxy/v2/apps?results-per-page=1').respond(200, response2);
+
+        applicationModel.filterParams.cnsiGuid = cnsiGuid1;
+        applicationModel.filterParams.orgGuid = orgGuid;
+
+        applicationModel._listAllApps().then(function () {
+          expect(applicationModel.hasApps).toBe(true);
+          expect(applicationModel.filteredApplications.length).toBe(cnsi1AppCountFiltered);
+          expect(applicationModel.bufferedApplications.length).toBe(cnsi1AppCountFiltered);
+        });
+
+        // The second request to ListAllApps is not part of the promise chain, so give it a cycle to complete
+        $timeout(function () {
+          expect(applicationModel.unfilteredApplicationCount).toBe(cnsi1AppCount + cnsi2AppCount);
+          done();
+        });
+
+        $httpBackend.flush();
+        $timeout.flush();
+      });
+
     });
   });
 
