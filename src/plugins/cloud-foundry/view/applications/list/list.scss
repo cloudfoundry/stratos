@@ -6,6 +6,7 @@ $applications-msg-height: 50px;
   font-size: $hpe-unit-space;
 
   .applications-count {
+    word-spacing: -2px;
     font-size: $hpe-unit-space - $hpe-unit-space / 4;
     padding-left: $hpe-unit-space / 4;
     display: inline;
