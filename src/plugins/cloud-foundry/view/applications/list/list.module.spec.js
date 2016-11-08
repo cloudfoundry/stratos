@@ -51,6 +51,9 @@
 
       beforeEach(inject(function ($injector) {
         createController($injector);
+
+        var ListAllApps = mock.cloudFoundryAPI.Apps.ListAllApps();
+        $httpBackend.whenGET(ListAllApps.url).respond(200, ListAllApps.response[200].body);
       }));
 
       it('should return correct message when no filters have been set', function () {
@@ -68,6 +71,7 @@
         $controller.model.filterParams.cnsiGuid = 'test';
         $controller.model.filterParams.orgGuid = 'test';
         expect($controller.getNoAppsMessage()).toBe('This organization has no applications.');
+        $httpBackend.flush();
       });
 
       it('should return the correct message when a space filter has been set', function () {
@@ -75,6 +79,7 @@
         $controller.model.filterParams.orgGuid = 'test';
         $controller.model.filterParams.spaceGuid = 'test';
         expect($controller.getNoAppsMessage()).toBe('This space has no applications.');
+        $httpBackend.flush();
       });
 
     });
@@ -124,6 +129,9 @@
 
         var listAllSpacesForOrg = mock.cloudFoundryAPI.Organizations.ListAllSpacesForOrganization(orgGuid);
         $httpBackend.whenGET(listAllSpacesForOrg.url).respond(200, listAllSpacesForOrg.response[200].body);
+
+        var ListAllApps = mock.cloudFoundryAPI.Apps.ListAllApps();
+        $httpBackend.whenGET(ListAllApps.url).respond(200, ListAllApps.response[200].body);
       }));
 
       it('should correctly set organisations when a cluster is selected', function () {
@@ -132,6 +140,7 @@
         $controller.setCluster();
         $httpBackend.flush();
         expect($controller.organizations.length).toBe(2);
+        expect($controller.model.unfilteredApplicationCount).toBe(0);
       });
 
       it('should correctly set spaces when an organisation is selected', function () {
@@ -141,6 +150,7 @@
         $controller.setOrganization();
         $httpBackend.flush();
         expect($controller.spaces.length).toBe(2);
+        expect($controller.model.unfilteredApplicationCount).toBe(4);
       });
 
     });
