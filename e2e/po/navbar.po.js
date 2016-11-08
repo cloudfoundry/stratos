@@ -39,6 +39,8 @@ function logout() {
   return showAccountActions().then(function () {
     return element(by.css('account-actions'))
       .element(by.css('[ng-click="applicationCtrl.logout()"]'))
-      .click();
+      .click().then(function () {
+        browser.driver.sleep(50);
+      });
   });
 }
