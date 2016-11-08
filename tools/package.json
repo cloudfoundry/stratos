@@ -10,6 +10,8 @@
     "test-backend": "node test_server.js",
     "pree2e": "npm run update-webdriver",
     "e2e": "protractor protractor.conf.js",
+    "preheadless-e2e": "npm run pree2e",
+    "headless-e2e": "xvfb-run --server-args='-screen 0 1280x1024x24' protractor protractor.conf.js",
     "test": "karma start karma.conf.js --single-run",
     "update-webdriver": "webdriver-manager update",
     "watch": "gulp watch",
