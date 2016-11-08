@@ -7,6 +7,33 @@ page-footer, [page-footer] {
   background: $page-footer-color-bg;
   font-size: 16px;
 
+  &.login-footer {
+    background-color: transparent;
+
+    .copyright {
+      left: 24px;
+      width: auto;
+
+      .secondary {
+        color: $gray-darker;
+      }
+    }
+
+    .links {
+      left: 24px;
+      bottom: 16px;
+      padding: 0;
+
+      li a {
+        color: $gray-darker;
+      }
+
+      li:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+
   .copyright {
     position: absolute;
     left: 40px;
