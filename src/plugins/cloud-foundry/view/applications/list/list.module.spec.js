@@ -48,10 +48,22 @@
     });
 
     describe('`no app message` tests', function () {
+      // Matches org from ListAllOrganizations
+      var orgGuid = 'dbc9862e-6e71-4bb8-a768-8d6597b5bd89';
 
       beforeEach(inject(function ($injector) {
         createController($injector);
+
+        var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');
+        $httpBackend.whenGET(listAllOrgs.url).respond(200, listAllOrgs.response[200].body);
+
+        var listAllSpacesForOrg = mock.cloudFoundryAPI.Organizations.ListAllSpacesForOrganization(orgGuid);
+        $httpBackend.whenGET(listAllSpacesForOrg.url).respond(200, listAllSpacesForOrg.response[200].body);
       }));
+
+      afterEach(function () {
+        $httpBackend.flush();
+      });
 
       it('should return correct message when no filters have been set', function () {
         expect($controller.getNoAppsMessage()).toBe('You have no applications.');
@@ -66,13 +78,13 @@
 
       it('should return the correct message when an org filter has been set', function () {
         $controller.model.filterParams.cnsiGuid = 'test';
-        $controller.model.filterParams.orgGuid = 'test';
+        $controller.model.filterParams.orgGuid = orgGuid;
         expect($controller.getNoAppsMessage()).toBe('This organization has no applications.');
       });
 
       it('should return the correct message when a space filter has been set', function () {
         $controller.model.filterParams.cnsiGuid = 'test';
-        $controller.model.filterParams.orgGuid = 'test';
+        $controller.model.filterParams.orgGuid = orgGuid;
         $controller.model.filterParams.spaceGuid = 'test';
         expect($controller.getNoAppsMessage()).toBe('This space has no applications.');
       });
@@ -81,17 +93,27 @@
 
     describe('endpoints link tests', function () {
 
+      // Matches org from ListAllOrganizations
+      var orgGuid = 'dbc9862e-6e71-4bb8-a768-8d6597b5bd89';
+
       beforeEach(inject(function ($injector) {
         createController($injector);
         spyOn($state, 'go').and.callFake(function (state) {
           return state;
         });
+
+        var listAllOrgs = mock.cloudFoundryAPI.Organizations.ListAllOrganizations('default');
+        $httpBackend.whenGET(listAllOrgs.url).respond(200, listAllOrgs.response[200].body);
+
+        var listAllSpacesForOrg = mock.cloudFoundryAPI.Organizations.ListAllSpacesForOrganization(orgGuid);
+        $httpBackend.whenGET(listAllSpacesForOrg.url).respond(200, listAllSpacesForOrg.response[200].body);
       }));
 
       it('should forward to `Endpoints Dashboard` when no clusters are available', function () {
         $controller.model.clusterCount = 0;
         var endpointsLink = $controller.getEndpointsLink();
         expect(endpointsLink).toBe('endpoint.dashboard');
+        $httpBackend.flush();
       });
 
       it('should forward to `cluster view` when a singular cluster is connected', function () {
@@ -102,6 +124,7 @@
         $controller.model.clusterCount = 1;
         var endpointsLink = $controller.getEndpointsLink();
         expect(endpointsLink).toBe('endpoint.clusters.cluster.detail.organizations');
+        $httpBackend.flush();
       });
 
       it('should take to `Clusters view` when clusters are available ', function () {
@@ -114,7 +137,9 @@
 
     describe('filter tests', function () {
 
-      var orgGuid = 'orgGuid';
+      // Matches org from ListAllOrganizations
+      var orgGuid = 'dbc9862e-6e71-4bb8-a768-8d6597b5bd89';
+
       beforeEach(inject(function ($injector) {
 
         createController($injector);
