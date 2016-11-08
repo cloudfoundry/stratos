@@ -32,9 +32,8 @@ resources:
     private_key: {{github-private-key}}
 
 jobs:
-- name: console-ui-tests
+- name: console-tests
   plan:
-  # get dependencies
   - get: stratos-deploy
   - get: portal-proxy
   - get: helion-ui-framework
@@ -47,26 +46,34 @@ jobs:
       path: stratos-ui
       status: pending
 
-  # Build the Portal Proxy image
-  - task: build-proxy-image
-    file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
-    params:
-      VCS_CLIENTS: {{vcs-clients}}
+  - do:
+    - task: run-unit-tests
+      privileged: true
+      timeout: 5m
+      file: stratos-deploy/ci/tasks/stratos-ui/run-unit-tests.yml
+      on_failure:
+        put: stratos-ui
+        params:
+          path: stratos-ui
+          status: failure
+    - task: build-proxy-image
+      file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
+      params:
+        VCS_CLIENTS: {{vcs-clients}}
+    - task: run-e2e-tests
+      privileged: true
+      timeout: 10m
+      file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml
+      params:
+        VCS_CLIENTS: {{vcs-clients}}
+      on_success:
+        put: stratos-ui
+        params:
+          path: stratos-ui
+          status: success
+      on_failure:
+        put: stratos-ui
+        params:
+          path: stratos-ui
+          status: failure
 
-  # install libraries and run tests
-  - task: run-tests
-    privileged: true
-    timeout: 45m
-    file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml
-    params:
-      VCS_CLIENTS: {{vcs-clients}}
-    on_success:
-      put: stratos-ui
-      params:
-        path: stratos-ui
-        status: success
-    on_failure:
-      put: stratos-ui
-      params:
-        path: stratos-ui
-        status: failure

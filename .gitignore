@@ -7,3 +7,5 @@ ci/local-creds.yml
 data/
 output/
 development.rc
+ci/secrets.yml
+ci/images/

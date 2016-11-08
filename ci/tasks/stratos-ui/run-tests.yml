@@ -8,7 +8,7 @@ inputs:
 - name: helion-ui-framework
 image_resource:
   type: docker-image
-  source: {repository: "mumoshu/dcind", tag: "latest"}
+  source: {repository: "stackatotest/hsc-dcind", tag: "latest"}
 run:
   path: sh
   args:
@@ -16,8 +16,13 @@ run:
     - |
       source /docker-lib.sh
       start_docker
+      docker info
       export GOPATH=$PWD
       cd stratos-deploy
+      # Load images from image
+      for image in $(ls /docker-images); do
+        docker load -i /docker-images/${image};
+      done
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml build
       COMPOSE_HTTP_TIMEOUT=300 docker-compose -f docker-compose.test.yml up -d
       docker logs -f stratosdeploy_ui_1
