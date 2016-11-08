@@ -1,8 +1,8 @@
-FROM ubuntu:14.04
+FROM debian:jessie
 
-RUN apt-get update && \
-    apt-get install -y --reinstall ca-certificates ca-certificates-java && \
-    mkdir -p /srv
+RUN apt-get update &&\
+ apt-get install -y --reinstall ca-certificates &&\
+ mkdir -p /srv
 
 WORKDIR /srv
 COPY portal-proxy portal-proxy

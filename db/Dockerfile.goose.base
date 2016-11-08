@@ -1,0 +1,3 @@
+FROM golang:1.6
+
+RUN go get bitbucket.org/liamstask/goose/cmd/goose
