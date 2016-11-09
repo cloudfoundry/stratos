@@ -1,73 +1,22 @@
-<div class="scroll scroll-up col-sm-8 col-xs-12 text-center"
-	ng-class="{'scroll-has-bg' : loginPageCtrl.currentSectionIdx === 0}"
-  ng-show="loginPageCtrl.prevArrowVisible" ng-click="loginPageCtrl.goToPrevSection()">
-  <span class="helion-icon helion-icon-Up helion-icon-lg scroll-arrow"></span>
-</div>
-<div id="section-login-panel" class="col-sm-4 login-panel">
-  <login-form></login-form>
-	<div class="login-panel-helion-logo">
-		<img class="hpe-logo" ng-src="/lib/helion-ui-framework/dist/images/hpe_helion_grn_pos_rgb.png"/>
-	</div>
-</div>
-<article wheel-handler="loginPageCtrl.debouncedOnMouseWheel(delta)" class="col-sm-8 content login-background">
-  <section id="section-introduction" class="clearfix introduction">
+<div class="login-page">
+  <div class="login-background">
     <div>
       <h1 class="text-center" translate>Helion Stackato Web Console</h1>
-      <p class="section-info text-center" translate>
-        Use this Web console to develop, compose, and manage Cloud Native workloads. This interface enables you to perform common management tasks, in an integrated experience.
+      <p class="text-center" translate>
+        Use this Web console to develop, compose, and manage Cloud Native workloads. This interface enables you to
+        perform
+        common management tasks, in an integrated experience.
       </p>
     </div>
-		<div class="login-panel-hpe-logo">
-			<img ng-src="/lib/helion-ui-framework/dist/images/hpe_pri_grn_rev_rgb@2x.png"/>
-		</div>
-  </section>
-  <section id="section-learning" class="clearfix">
-    <div>
-      <p class="text-center">
-        <span class="helion-icon helion-icon-Code helion-icon-4x"></span>
-      </p>
-      <h1 class="text-center" translate>Develop</h1>
-      <p class="section-info text-center" translate>
-        Use this Web Console to create and deploy applications that are designed for Helion Cloud Foundry. You'll be able to set up a delivery pipeline that automates your build, test, and deployment cycles.
-      </p>
+    <div class="login-panel-hpe-logo">
+      <img ng-src="/lib/helion-ui-framework/dist/images/hpe_pri_grn_rev_rgb@2x.png"/>
     </div>
-  </section>
-  <section id="section-develop" class="clearfix">
-    <div>
-      <p class="text-center">
-        <span class="helion-icon helion-icon-SOA helion-icon-4x"></span>
-      </p>
-      <h1 class="text-center" translate>Compose</h1>
-      <p class="section-info text-center" translate>
-        You will find application services that you can bind to your Helion Cloud Foundry apps. Use this Web Console to enable storage, messaging, and data processing services.
-      </p>
+  </div>
+  <div id="section-login-panel" class="login-panel">
+    <login-form></login-form>
+    <div class="login-panel-helion-logo">
+      <img class="hpe-logo" ng-src="/lib/helion-ui-framework/dist/images/hpe_helion_grn_pos_rgb.png"/>
     </div>
-  </section>
-  <section id="section-getting-started" class="clearfix">
-    <div>
-      <p class="text-center">
-        <span class="helion-icon helion-icon-Configuration helion-icon-4x"></span>
-      </p>
-      <h1 class="text-center" translate>Manage</h1>
-      <p class="section-info text-center" translate>
-        As a Helion Stackato admin, you'll be able to register and manage the platform services your development teams rely on.
-      </p>
-    </div>
-
-    <page-footer class="position-bottom"></page-footer>
-
-  </section>
-</article>
-<div class="scroll scroll-down col-sm-8 col-xs-12 text-center"
-	ng-class="{'scroll-has-bg' : loginPageCtrl.currentSectionIdx === 0}"
-  ng-show="loginPageCtrl.nextArrowVisible" ng-click="loginPageCtrl.goToNextSection()">
-  <span class="helion-icon helion-icon-Down helion-icon-lg scroll-arrow"></span>
-</div>
-<div class="section-status col-sm-8 col-xs-12"
-	ng-class="{'scroll-has-bg' : loginPageCtrl.currentSectionIdx === 0}">
-  <ul>
-    <li ng-repeat="section in loginPageCtrl.sections track by section.id"
-      ng-class="{'selected': loginPageCtrl.currentSectionIdx === $index}"
-      scroll-to="{{section.id}}"></li>
-  </ul>
+    <page-footer mode="footer" class="position-bottom login-footer"></page-footer>
+  </div>
 </div>

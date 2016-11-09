@@ -19,7 +19,10 @@
    */
   function pageFooter(path) {
     return {
-      templateUrl: path + 'view/page-footer/page-footer.html'
+      templateUrl: path + 'view/page-footer/page-footer.html',
+      scope: {
+        mode: '@'
+      }
     };
   }
 

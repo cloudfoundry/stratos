@@ -1,5 +1,5 @@
 <navbar ng-if="applicationCtrl.ready && applicationCtrl.loggedIn"></navbar>
-<login-page ng-if="applicationCtrl.ready && !applicationCtrl.loggedIn"></login-page>
+<ng-include src="applicationCtrl.path + 'view/login-page/login-page.html'" ng-if="applicationCtrl.ready && !applicationCtrl.loggedIn"></ng-include>
 <app-error-bar displayed="applicationCtrl.showAppErrorBar" ng-class="{'errorbar-with-navbar': applicationCtrl.loggedIn, 'errorbar-without-navbar': !applicationCtrl.loggedIn}"></app-error-bar>
 <console-view ng-class="{'with-app-error-bar': applicationCtrl.showAppErrorBar}" ng-if="applicationCtrl.ready && applicationCtrl.loggedIn"></console-view>
 <service-registration id="registration-overlay"

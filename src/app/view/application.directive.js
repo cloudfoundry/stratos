@@ -28,41 +28,54 @@
   }
 
   ApplicationController.$inject = [
-    '$timeout',
     'app.event.eventService',
     'app.model.modelManager',
-    '$state',
-    '$window',
+    'app.basePath',
     'app.view.upgradeCheck',
-    'app.logged-in.loggedInService'
+    'app.logged-in.loggedInService',
+    '$timeout',
+    '$state',
+    '$window'
   ];
 
   /**
    * @namespace app.view.application.ApplicationController
    * @memberof app.view.application
    * @name ApplicationController
-   * @param {function} $timeout - angular $timeout service
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {$state} $state - Angular ui-router $state service
-   * @param {$window} $window - Angular $window service
+   * @param {app.basePath} path - the base path serving our app (i.e. /app)
    * @param {app.view.upgradeCheck} upgradeCheck - the upgrade check service
    * @param {object} loggedInService - the Logged In Service
+   * @param {object} $timeout - Angular $timeout service
+   * @param {$state} $state - Angular ui-router $state service
+   * @param {$window} $window - Angular $window service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
+   * @property {app.basePath} path - the base path serving our app (i.e. /app)
+   * @property {app.view.upgradeCheck} upgradeCheck - the upgrade check service
+   * @property {object} loggedInService - the Logged In Service
+   * @property {$state} $state - Angular ui-router $state service
+   * @property {$window} $window - Angular $window service
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController($timeout, eventService, modelManager, $state, $window, upgradeCheck, loggedInService) {
+  function ApplicationController(eventService, modelManager, path, upgradeCheck, loggedInService,
+                                 $timeout, $state, $window) {
     var that = this;
+
     this.eventService = eventService;
     this.modelManager = modelManager;
+    this.path = path;
+    this.upgradeCheck = upgradeCheck;
+    this.loggedInService = loggedInService;
+
     this.$state = $state;
     this.$window = $window;
-    this.upgradeCheck = upgradeCheck;
+
     this.loggedIn = false;
     this.failedLogin = false;
     this.serverErrorOnLogin = false;
@@ -70,7 +83,6 @@
     this.showGlobalSpinner = false;
     this.showRegistration = false;
     this.ready = false;
-    this.loggedInService = loggedInService;
 
     $timeout(function () {
       that.verifySessionOrCheckUpgrade();
