@@ -1,93 +1,58 @@
 @import "login-form/login-form";
 
-login-page {
-  article {
-    section {
-      background-color: white;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1em 3em;
+.login-page {
 
-      &:nth-of-type(2n) {
-        background-color: $seashell;
-      }
-
-      p {
-        margin-top: 24px;
-        margin-bottom: 24px;
-        max-width: 576px;
-      }
-
-      &.introduction {
-        h1 {
-          font-size: 42px;
-        }
-        p {
-          max-width: none;
-
-          > span {
-            max-width: 90%;
-            margin-left: auto;
-            margin-right: auto;
-            font-size: 20px;
-          }
-        }
-      }
-      p.section-info {
-        font-size: 20px;
-      } 
-    }
-  }
-
-  .login-form {
-    > h1 {
-      text-align: left;
-    }
-  }
-
-  .login-panel-hpe-logo {
-    position: absolute;
-    width: 100%;
-    height: 100vh;
-    top: 0;
-    left: 0;
-
-    > img {
-      position: absolute;
-      bottom: 2 * $hpe-unit-space;
-      left: $hpe-unit-space;
-    }
-  }
-
-  .login-panel-helion-logo {
-    width: 100%;
-
-    .hpe-logo {
-      flex: 0 0 auto;
-      padding: 0 0 3 * $hpe-unit-space $hpe-unit-space;
-    }
-  }
+  display: flex;
+  flex-flow: row nowrap;
 
   .login-background {
-
-    .introduction {
-      background: url('app/view/assets/login-page-bg.jpg') no-repeat center center;
-      background-size: cover;
-    }
-  }
-
-  .content {
-    padding: 0;
-  }
-
-  .introduction {
-    background-color: $limed-spruce;
+    flex: 8 1 0px;
+    background: url('app/view/assets/login-page-bg.jpg') no-repeat center center;
+    background-size: cover;
     color: white;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em 3em;
+
+    h1 {
+      font-size: 42px;
+    }
+
+    p {
+      font-size: 20px;
+      margin-top: 24px;
+      margin-bottom: 24px;
+
+      > span {
+        max-width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 20px;
+      }
+    }
+
+    .login-panel-hpe-logo {
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+      top: 0;
+      left: 0;
+
+      > img {
+        position: absolute;
+        bottom: 2 * $hpe-unit-space;
+        left: $hpe-unit-space;
+      }
+    }
+
   }
 
   .login-panel {
+    position: relative;
+    flex: 4 0 0px;
+    min-width: 362px;
     display: flex;
     flex-direction: column;
     background-color: white;
@@ -98,80 +63,27 @@ login-page {
     border-left: 1px solid black;
     overflow-y: auto;
     padding: 0;
-  }
 
-  @media (min-width: $screen-sm-min) {
-    .login-panel {
-      position: fixed;
-      right: 0;
-      top: 0;
+    .login-form {
+      > h1 {
+        text-align: left;
+      }
     }
-  }
 
-  .scroll {
-    position: fixed;
-    z-index: 2;
-    color: red;
+    .login-panel-helion-logo {
+      width: 100%;
 
-    &.scroll-has-bg {
-      .scroll-arrow {
-        color: $white;
-
-        &:hover {
-          color: black;
-        }
+      .hpe-logo {
+        flex: 0 0 auto;
+        padding: 0 0 3 * $hpe-unit-space $hpe-unit-space;
       }
     }
   }
 
-  .scroll-arrow {
-    color: #999999;
-    opacity: 0.75;
-    cursor: pointer;
-    font-size: 1.5em;
-
-    &:hover {
-      color: black;
+  @media (max-width: $screen-sm-min) {
+    .login-background {
+      display: none;
     }
   }
 
-  .scroll-up {
-    top: 1em;
-  }
-
-  .scroll-down {
-    bottom: 1em;
-  }
-
-  .section-status {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-
-    ul {
-      position: absolute;
-      right: 1em;
-
-      li {
-        background-color: #999999;
-        opacity: 0.3;
-        list-style: none;
-        height: 8px;
-        width: 8px;
-        margin: 8px 8px 8px 0px;
-        cursor: pointer;
-
-        &.selected {
-          opacity: 1;
-        }
-      }
-    }
-
-    &.scroll-has-bg {
-      ul > li {
-        background-color: $white;
-      }
-    }
-  }
 }
