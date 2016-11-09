@@ -6,7 +6,9 @@
     var paths = {
       dist: '../dist/',
       src: '../src/',
-      translations: '../translations/'
+      translations: '../translations/',
+      tools: '../tools/',
+      e2e: '../e2e/'
     };
 
     return {
@@ -83,6 +85,15 @@
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
         '!' + paths.src + 'plugins/**/*.spec.js'
+      ],
+
+      lintFiles: [
+        paths.src + '**/*.js',
+        '!' + paths.src + 'lib/**/*',
+        '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*',
+        paths.tools + '*.js',
+        paths.tools + 'test-backend/*.js',
+        paths.e2e + '**/*.js'
       ],
 
       scssFiles: [

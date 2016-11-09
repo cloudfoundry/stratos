@@ -1,46 +1,48 @@
-'use strict';
+(function () {
+  'use strict';
 
-var helpers = require('../../po/helpers.po');
-var loginPage = require('../../po/login-page.po');
+  var helpers = require('../../po/helpers.po');
+  var loginPage = require('../../po/login-page.po');
 
-describe('Login Page', function () {
-  beforeAll(function () {
-    helpers.setBrowserNormal();
-    helpers.loadApp();
-  });
-
-  describe('login panel', function () {
-    it('should be present', function () {
-      expect(loginPage.loginPanel().isDisplayed()).toBeTruthy();
-    });
-
-    it('should not show the console-view', function () {
-      expect(element(by.css('.login-page')).isPresent()).toBeTruthy();
-      expect(element(by.css('console-view')).isPresent()).toBeFalsy();
-    });
-
-    it('should not allow log in with incorrect credentials', function () {
+  describe('Login Page', function () {
+    beforeAll(function () {
+      helpers.setBrowserNormal();
       helpers.loadApp();
-      loginPage.enterLogin('badusername', 'badpassword');
-
-      expect(loginPage.loginButton().isEnabled()).toBeTruthy();
-
-      loginPage.loginButton().click();
-
-      expect(element(by.css('.login-page')).isPresent()).toBeTruthy();
-      expect(element(by.css('console-view')).isPresent()).toBeFalsy();
     });
 
-    it('should allow log in with correct credentials', function () {
-      loginPage.enterLogin(helpers.getUser(), helpers.getPassword());
+    describe('login panel', function () {
+      it('should be present', function () {
+        expect(loginPage.loginPanel().isDisplayed()).toBeTruthy();
+      });
 
-      expect(loginPage.loginButton().isEnabled()).toBeTruthy();
+      it('should not show the console-view', function () {
+        expect(element(by.css('.login-page')).isPresent()).toBeTruthy();
+        expect(element(by.css('console-view')).isPresent()).toBeFalsy();
+      });
 
-      loginPage.loginButton().click();
+      it('should not allow log in with incorrect credentials', function () {
+        helpers.loadApp();
+        loginPage.enterLogin('badusername', 'badpassword');
 
-      expect(element(by.css('login-page')).isPresent()).toBeFalsy();
-      expect(element(by.css('console-view')).isPresent()).toBeTruthy();
+        expect(loginPage.loginButton().isEnabled()).toBeTruthy();
+
+        loginPage.loginButton().click();
+
+        expect(element(by.css('.login-page')).isPresent()).toBeTruthy();
+        expect(element(by.css('console-view')).isPresent()).toBeFalsy();
+      });
+
+      it('should allow log in with correct credentials', function () {
+        loginPage.enterLogin(helpers.getUser(), helpers.getPassword());
+
+        expect(loginPage.loginButton().isEnabled()).toBeTruthy();
+
+        loginPage.loginButton().click();
+
+        expect(element(by.css('login-page')).isPresent()).toBeFalsy();
+        expect(element(by.css('console-view')).isPresent()).toBeTruthy();
+      });
     });
+
   });
-
-});
+})();

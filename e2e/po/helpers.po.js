@@ -1,3 +1,4 @@
+/* eslint-disable angular/json-functions,angular/log,no-console */
 (function () {
   'use strict';
 
@@ -242,8 +243,9 @@
     var skipSSlValidation = browser.params.skipSSlValidation;
     var ca;
 
+    /* eslint-disable no-sync,no-process-env */
     if (skipSSlValidation) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     } else if (browser.params.caCert) {
       var caCertFile = path.join(__dirname, '..', '..', 'tools');
       caCertFile = path.join(caCertFile, browser.params.caCert);
@@ -251,6 +253,7 @@
         ca = fs.readFileSync(caCertFile);
       }
     }
+    /* eslint-enable no-sync,no-process-env */
 
     return request.defaults({
       headers: {
