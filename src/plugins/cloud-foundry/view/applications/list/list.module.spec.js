@@ -55,6 +55,9 @@
 
       var listAllSpacesForOrg = mock.cloudFoundryAPI.Organizations.ListAllSpacesForOrganization(orgGuid);
       $httpBackend.whenGET(listAllSpacesForOrg.url).respond(200, listAllSpacesForOrg.response[200].body);
+
+      var ListAllApps = mock.cloudFoundryAPI.Apps.ListAllApps();
+      $httpBackend.whenGET(ListAllApps.url).respond(200, ListAllApps.response[200].body);
     }
 
     afterEach(function () {
@@ -172,7 +175,7 @@
 
           createController(injector);
 
-          $scope.$digest();
+          $httpBackend.flush();
         });
 
         it('should automatically select', function () {
@@ -254,7 +257,7 @@
           $controller.filter.orgGuid = orgGuid;
           $controller.setOrganization();
 
-          $scope.$digest();
+          $httpBackend.flush();
 
           expect($controller.model.filterParams.cnsiGuid).toBe(cnsiGuid);
           expect($controller.filter.cnsiGuid).toBe(cnsiGuid);
@@ -280,7 +283,7 @@
           $controller.filter.spaceGuid = spaceGuid;
           $controller.setSpace();
 
-          $scope.$digest();
+          $httpBackend.flush();
 
           expect($controller.model.filterParams.cnsiGuid).toBe(cnsiGuid);
           expect($controller.filter.cnsiGuid).toBe(cnsiGuid);
