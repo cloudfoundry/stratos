@@ -9,21 +9,13 @@ describe('Login Page', function () {
     helpers.loadApp();
   });
 
-  describe('content', function () {
-    it('should have at least one section', function () {
-      loginPage.contentSections().then(function (sections) {
-        expect(sections.length).toBeGreaterThan(0);
-      });
-    });
-  });
-
   describe('login panel', function () {
     it('should be present', function () {
       expect(loginPage.loginPanel().isDisplayed()).toBeTruthy();
     });
 
     it('should not show the console-view', function () {
-      expect(element(by.css('login-page')).isPresent()).toBeTruthy();
+      expect(element(by.css('.login-page')).isPresent()).toBeTruthy();
       expect(element(by.css('console-view')).isPresent()).toBeFalsy();
     });
 
@@ -35,7 +27,7 @@ describe('Login Page', function () {
 
       loginPage.loginButton().click();
 
-      expect(element(by.css('login-page')).isPresent()).toBeTruthy();
+      expect(element(by.css('.login-page')).isPresent()).toBeTruthy();
       expect(element(by.css('console-view')).isPresent()).toBeFalsy();
     });
 
