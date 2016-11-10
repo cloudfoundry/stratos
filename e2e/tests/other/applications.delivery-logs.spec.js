@@ -8,7 +8,7 @@
   var deliveryLogs = require('../../po/applications/applications.delivery-log.po');
   var applicationPage = require('../../po/applications/application.po');
 
-  var Q = require('../../tools/node_modules/q');
+  var Q = require('../../../tools/node_modules/q');
 
   xdescribe('Application - Delivery Logs', function () {
 

@@ -87,12 +87,17 @@
         '!' + paths.src + 'plugins/**/*.spec.js'
       ],
 
+      // Sacrifice all inclusive with exclusions for explicit declaration of directories saves ~10s per run
       lintFiles: [
-        paths.src + '**/*.js',
-        '!' + paths.src + 'lib/**/*',
+        paths.src + '*.js',
+        paths.src + 'app/**/*.js',
+        paths.src + 'plugins/**/*.js',
         '!' + paths.src + 'plugins/cloud-foundry/api/hcf/**/*',
         paths.tools + '*.js',
         paths.tools + 'test-backend/*.js',
+        paths.tools + 'test-backend/api/**/*.js',
+        paths.tools + 'test-backend/config/**/*.js',
+        paths.tools + 'test-backend/data/**/*.js',
         paths.e2e + '**/*.js'
       ],
 

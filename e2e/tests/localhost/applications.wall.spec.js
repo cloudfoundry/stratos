@@ -18,7 +18,7 @@
       });
 
       it('The page should have title Applications.', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+        expect(element(by.css('.applications-header')).getText()).toBe('Applications ( 0 )');
       });
 
       it('should show application message: "You cannot view any applications."', function () {
@@ -38,7 +38,7 @@
       });
 
       it('The page should have title Applications.', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+        expect(element(by.css('.applications-header')).getText()).toBe('Applications ( 0 )');
       });
 
       it('should show application message: "You have no applications and cannot add any."', function () {
@@ -54,7 +54,7 @@
       });
 
       it('The page should have title Applications.', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+        expect(element(by.css('.applications-header')).getText()).toBe('Applications ( 3 )');
       });
 
       it('should see an ADD APPLICATION button.', function () {
@@ -87,7 +87,7 @@
       });
 
       it('The page should have title Applications.', function () {
-        expect(element(by.css('.applications-header')).getText()).toBe('Applications');
+        expect(element(by.css('.applications-header')).getText()).toBe('Applications ( 500 )');
       });
 
       it('should see paginator.', function () {
