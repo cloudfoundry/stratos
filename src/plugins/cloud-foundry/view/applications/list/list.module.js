@@ -158,7 +158,7 @@
     /**
      * @function _setClusters
      * @description Set the cluster filter list
-     * @returns {void}
+     * @returns {promise}
      * @private
      */
     _setClusters: function () {
@@ -180,6 +180,8 @@
         this.model.filterParams.cnsiGuid = clusters[0].value;
         this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
       }
+
+      return this.$q.resolve();
     },
 
     /**
