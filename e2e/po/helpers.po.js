@@ -57,7 +57,12 @@
     newRequest: newRequest,
     sendRequest: sendRequest,
     createSession: createSession,
-    createReqAndSession: createReqAndSession
+    createReqAndSession: createReqAndSession,
+
+    forceDate: forceDate,
+    resetDate: resetDate,
+
+    getCnsiForUrl: getCnsiForUrl
 
   };
 
@@ -333,4 +338,50 @@
         });
     });
   }
+
+  /**
+   * @function forceDate
+   * @description Force the Date constructor to always return a given YEAR/MONTH/DAY
+   * @param {number} year - the year
+   * @param {number} month - the month
+   * @param {number} day - the day
+   */
+  function forceDate(year, month, day) {
+    browser.driver.executeScript('' +
+      '__forceDate_oldDate=Date; Date = function(){ return new __forceDate_oldDate(' + year + ', ' + month + ',' + day + ')};'
+    );
+  }
+
+  /**
+   * @function resetDate
+   * @description Reset the Date constructor back to normal
+   */
+  function resetDate() {
+    browser.driver.executeScript('' +
+      'Date=__forceDate_oldDate; delete __forceDate_oldDate;'
+    );
+  }
+
+  /**
+   * @function getCnsiForUrl
+   * @param {string} url - url
+   * @description Find the CNSI for the given URL - usefult for gettign right credentials
+   */
+  function getCnsiForUrl(url) {
+    var cnsiType, cnsiId;
+    for (cnsiType in cnsis) {
+      if (cnsis.hasOwnProperty(cnsiType)) {
+        for (cnsiId in cnsis[cnsiType]) {
+          if (cnsis[cnsiType].hasOwnProperty(cnsiId)) {
+            var cnsi = cnsis[cnsiType][cnsiId];
+            if (cnsi.register.api_endpoint.indexOf(url) >= 0) {
+              return cnsi;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
 })();

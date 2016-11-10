@@ -75,11 +75,15 @@
         expect(clusterSettingsCtrl.activeServiceInstance).toBe(null);
         clusterSettingsCtrl.reconnect(hcf4);
         expect(clusterSettingsCtrl.activeServiceInstance).toBe(hcf4);
-        expect(clusterSettingsCtrl.credentialsFormOpen).toBe(true);
+        expect(clusterSettingsCtrl.dialog).toBeDefined();
         clusterSettingsCtrl.onConnectCancel();
-        expect(clusterSettingsCtrl.credentialsFormOpen).toBe(false);
+        expect(clusterSettingsCtrl.activeServiceInstance).not.toBeDefined();
+        expect(clusterSettingsCtrl.dialog).not.toBeDefined();
+        clusterSettingsCtrl.reconnect(hcf4);
+        expect(clusterSettingsCtrl.activeServiceInstance).toBe(hcf4);
+        expect(clusterSettingsCtrl.dialog).toBeDefined();
         clusterSettingsCtrl.onConnectSuccess();
-        expect(clusterSettingsCtrl.credentialsFormOpen).toBe(false);
+        expect(clusterSettingsCtrl.dialog).not.toBeDefined();
         expect(clusterSettingsCtrl.activeServiceInstance).not.toBeDefined();
       });
 
