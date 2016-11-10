@@ -365,7 +365,8 @@
   /**
    * @function getCnsiForUrl
    * @param {string} url - url
-   * @description Find the CNSI for the given URL - usefult for gettign right credentials
+   * @description Find the CNSI for the given URL - useful for getting right credentials
+   * @returns {object} cnsi config object
    */
   function getCnsiForUrl(url) {
     var cnsiType, cnsiId;
