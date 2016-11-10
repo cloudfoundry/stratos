@@ -118,7 +118,7 @@
         <th translate>Memory</th>
         <th translate>Disk</th>
         <th translate>Uptime</th>
-        <!--<th></th>-->
+        <th translate class="instance-actions">Actions</th>
       </tr>
       </tr>
       </thead>
@@ -135,7 +135,12 @@
                          value-text="{{ [instance.stats.usage.disk, instance.stats.disk_quota] | usageBytes }}" />
         </td>
         <td class="instance-uptime-td">{{ applicationSummaryCtrl.formatUptime(instance.stats.uptime) }}</td>
-        <!--<td></td>-->
+        <td class="instance-actions">
+          <actions-menu actions="applicationSummaryCtrl.instancesActionMenu"
+                        action-target="$index"
+                        menu-position="actions-menu-right"
+                        menu-icon="helion-icon helion-icon-More"></actions-menu>
+        </td>
       </tr>
       </tbody>
       <tfoot ng-show="applicationSummaryCtrl.instanceViewLimit < appCtrl.model.application.instanceCount">
