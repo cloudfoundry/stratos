@@ -4,6 +4,7 @@
 var acceptanceTests = [
   '../e2e/tests/acceptance/login-page.spec.js',
   '../e2e/tests/acceptance/service-instance-registration.spec.js',
+  '../e2e/tests/acceptance/service-reconnect.spec.js',
   '../e2e/tests/acceptance/endpoints-dashboard.spec.js',
   '../e2e/tests/acceptance/endpoints-list-hce.spec.js',
   '../e2e/tests/acceptance/endpoints-list-hcf.spec.js',

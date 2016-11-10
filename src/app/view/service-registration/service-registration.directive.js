@@ -31,7 +31,8 @@
     '$scope',
     '$state',
     '$q',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.view.credentialsDialog'
   ];
 
   /**
@@ -43,26 +44,28 @@
    * @param {object} $state - the Angular $state service
    * @param {object} $q - the angular $q service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @property {object} $q - the angular $q service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
    * @property {Array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    * @property {app.model.stackatoInfo} stackatoInfoModel - the stackato info model containing connected service/user data
+   * @property {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    */
-  function ServiceRegistrationController($scope, $state, $q, modelManager) {
+  function ServiceRegistrationController($scope, $state, $q, modelManager, credentialsDialog) {
     var that = this;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.serviceInstances = {};
-    this.credentialsFormOpen = false;
     this.warningMsg = gettext('Authentication failed, please try to reconnect.');
     this.currentEndpoints = [];
     this.stackatoInfoModel = modelManager.retrieve('app.model.stackatoInfo');
     this.$state = $state;
     this.$q = $q;
+    this.credentialsDialog = credentialsDialog;
 
     $scope.$watchCollection(function () {
       return that.cnsiModel.serviceInstances;
@@ -114,7 +117,7 @@
      */
     connect: function (serviceInstance) {
       this.activeServiceInstance = serviceInstance;
-      this.credentialsFormOpen = true;
+      this.dialog = this.credentialsDialog.show(this);
     },
 
     /**
@@ -139,7 +142,11 @@
     },
 
     onConnectCancel: function () {
-      this.credentialsFormOpen = false;
+      if (this.dialog) {
+        this.dialog.close();
+        this.dialog = undefined;
+      }
+      this.activeServiceInstance = null;
     },
 
     onConnectSuccess: function (serviceInstance) {
@@ -150,12 +157,10 @@
         // Only for an HCF service, get the auth model
         if (serviceInstance.cnsi_type === 'hcf') {
           that.authModel.initializeForEndpoint(serviceInstance.guid, true).then(function () {
-            that.credentialsFormOpen = false;
-            that.activeServiceInstance = null;
+            that.onConnectCancel();
           });
         } else {
-          that.credentialsFormOpen = false;
-          that.activeServiceInstance = null;
+          that.onConnectCancel();
         }
       });
     }
