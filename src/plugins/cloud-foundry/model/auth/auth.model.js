@@ -255,7 +255,7 @@
       var that = this;
       var orgGuid = org.details.org.metadata.guid;
       // Is the organization valid?
-      if (this.isAllowed(cnsiGuid, resourceType, action, null, orgGuid)) {
+      if (this.isAllowed(cnsiGuid, resourceType, action, orgGuid)) {
         return true;
       } else {
         // Is any of the organization's spaces valid?

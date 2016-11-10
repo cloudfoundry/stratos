@@ -84,7 +84,7 @@
               roleLabel: that.organizationModel.organizationRoleToString(role)
             });
             unEditableOrg = unEditableOrg ||
-                !that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null, orgGuid);
+                !that.authModel.isAllowed(that.guid, that.authModel.resources.organization, that.authModel.actions.update, orgGuid);
           });
         });
 

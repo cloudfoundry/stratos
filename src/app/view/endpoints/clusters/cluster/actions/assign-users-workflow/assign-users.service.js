@@ -101,7 +101,7 @@
         // Create a collection to support the organization drop down
         var organizations = _.omitBy(that.organizationModel.organizations[that.data.clusterGuid], function (org) {
           return !that.authModel.isOrgOrSpaceActionableByResource(that.data.clusterGuid, org,
-            that.authModel.resources.user, that.authModel.actions.update);
+            that.authModel.resources.organization, that.authModel.actions.update);
         });
 
         that.data.organizations = _.chain(organizations)
@@ -231,9 +231,8 @@
                   return false;
                 }
                 return that.authModel.isAllowed(context.clusterGuid,
-                  that.authModel.resources.user,
-                  that.authModel.actions.update, null,
-                  org.details.guid);
+                  that.authModel.resources.organization,
+                  that.authModel.actions.update, org.details.guid);
               }
             },
             table: {
