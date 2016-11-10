@@ -22,6 +22,7 @@
   }
 
   DeleteAppWorkflowController.$inject = [
+    '$scope',
     '$filter',
     'app.model.modelManager',
     'app.event.eventService',
@@ -34,6 +35,7 @@
    * @memberof cloud-foundry.view.applications
    * @name DeleteAppWorkflowController
    * @constructor
+   * @param {object} $scope - angular $scope service
    * @param {object} $filter - angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
@@ -50,7 +52,7 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController($filter, modelManager, eventService, $q, $interpolate, utils) {
+  function DeleteAppWorkflowController($scope, $filter, modelManager, eventService, $q, $interpolate, utils) {
     var that = this;
 
     this.eventService = eventService;
@@ -66,9 +68,11 @@
     this.hceCnsiGuid = null;
     this.$filter = $filter;
 
-    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (event, data) {
+    var startDeleteAppListener = this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (event, data) {
       that.startWorkflow(data);
     });
+
+    $scope.$on('$destroy', startDeleteAppListener);
   }
 
   angular.extend(DeleteAppWorkflowController.prototype, {

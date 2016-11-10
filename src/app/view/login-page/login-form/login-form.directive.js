@@ -26,6 +26,7 @@
   }
 
   LoginFormController.$inject = [
+    '$scope',
     '$timeout',
     'app.event.eventService'
   ];
@@ -35,6 +36,7 @@
    * @memberof app.view.loginForm
    * @name LoginFormController
    * @constructor
+   * @param {object} $scope - the Angular $scope service
    * @param {object} $timeout - the Angular $timeout service
    * @param {app.event.eventService} eventService - the event bus service
    * @property {object} $timeout - the Angular $timeout service
@@ -42,27 +44,35 @@
    * @property {boolean} loggingIn - flag indicating app is still authenticating
    * @property {object} loginTimeout - the promise returned by $timeout for loggingIn
    */
-  function LoginFormController($timeout, eventService) {
+  function LoginFormController($scope, $timeout, eventService) {
     var that = this;
     this.$timeout = $timeout;
     this.eventService = eventService;
     this.loggingIn = false;
     this.loginTimeout = null;
 
-    this.eventService.$on(this.eventService.events.LOGGED_IN, function () {
+    var logInListener = this.eventService.$on(this.eventService.events.LOGGED_IN, function () {
       that.loggingIn = false;
     });
-    this.eventService.$on(this.eventService.events.LOGIN_FAILED, function () {
+    var logOutListener = this.eventService.$on(this.eventService.events.LOGIN_FAILED, function () {
       that.clearPassword();
     });
-    this.eventService.$on(this.eventService.events.LOGIN_TIMEOUT, function () {
+    var logTimeoutListener = this.eventService.$on(this.eventService.events.LOGIN_TIMEOUT, function () {
       that.clearPassword();
     });
-    this.eventService.$on(this.eventService.events.HTTP_5XX_ON_LOGIN, function () {
+    var http500Listener = this.eventService.$on(this.eventService.events.HTTP_5XX_ON_LOGIN, function () {
       that.clearPassword();
     });
-    this.eventService.$on(this.eventService.events['HTTP_-1'], function () {
+    var httpFailureListener = this.eventService.$on(this.eventService.events['HTTP_-1'], function () {
       that.clearPassword();
+    });
+
+    $scope.$on('$destroy', function () {
+      logInListener();
+      logOutListener();
+      logTimeoutListener();
+      http500Listener();
+      httpFailureListener();
     });
   }
 

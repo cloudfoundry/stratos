@@ -55,7 +55,7 @@
       return this.$q(function (resolve, reject) {
         that.$window.addEventListener('message', onMessage);
 
-        that.eventService.$on(that.eventService.events.VCS_OAUTH_CANCELLED, function () {
+        var cancelledListener = that.eventService.$on(that.eventService.events.VCS_OAUTH_CANCELLED, function () {
           removeListeners();
           reject('VCS_OAUTH_CANCELLED');
         });
@@ -74,6 +74,7 @@
 
         function removeListeners() {
           that.$window.removeEventListener('message', onMessage);
+          cancelledListener();
         }
       });
     },

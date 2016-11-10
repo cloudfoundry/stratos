@@ -236,12 +236,14 @@
       return rolesService.removeFromOrganization(that.guid, that.organizationGuid, guidsToUsers());
     };
 
-    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+    var rolesUpdatedListener = eventService.$on(eventService.events.ROLES_UPDATED, function () {
       refreshUsers();
     });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.users', $state, init);
+
+    $scope.$on('$destroy', rolesUpdatedListener);
   }
 
 })();

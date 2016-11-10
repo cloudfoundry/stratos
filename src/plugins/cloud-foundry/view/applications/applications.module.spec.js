@@ -24,7 +24,7 @@
       $scope = $injector.get('$rootScope').$new();
 
       var ApplicationsController = $state.get('cf.applications').controller;
-      $controller = new ApplicationsController($q, $state, utils, modelManager, eventService, loggedInService);
+      $controller = new ApplicationsController($scope, $q, $state, utils, modelManager, eventService, loggedInService);
 
       expect($controller).toBeDefined();
     }));
