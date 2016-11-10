@@ -73,7 +73,7 @@
         serviceRegistrationCtrl.connect(serviceInstance);
 
         expect(serviceRegistrationCtrl.activeServiceInstance).toBeDefined();
-        expect(serviceRegistrationCtrl.credentialsFormOpen).toBe(true);
+        expect(serviceRegistrationCtrl.dialog).toBeDefined();
       });
 
       it('should call disconnect on model on disconnect()', function () {
@@ -98,9 +98,9 @@
       });
 
       it('should hide credentials form flyout `onConnectCancel`', function () {
-        serviceRegistrationCtrl.credentialsFormOpen = true;
+        serviceRegistrationCtrl.dialog = { close: function () {} };
         serviceRegistrationCtrl.onConnectCancel();
-        expect(serviceRegistrationCtrl.credentialsFormOpen).toBe(false);
+        expect(serviceRegistrationCtrl.dialog).not.toBeDefined();
       });
     });
 

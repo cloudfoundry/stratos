@@ -69,7 +69,7 @@
   }
 
   function credentialsForm() {
-    return credentialsFormHelper.credentialsForm(element(by.id('registration-overlay')).element(by.css('flyout')));
+    return credentialsFormHelper.credentialsForm(element(by.css('.detail-view-content')).element(by.css('.credentials-form')));
   }
 
   function credentialsFormFields() {

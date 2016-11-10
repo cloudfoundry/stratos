@@ -32,7 +32,7 @@
       controller: CredentialsFormController,
       controllerAs: 'credentialsFormCtrl',
       scope: {},
-      templateUrl: path + 'view/service-registration/credentials-form/credentials-form.html'
+      templateUrl: path + 'view/service-registration/credentials/credentials-form.html'
     };
   }
 

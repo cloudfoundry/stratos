@@ -29,7 +29,8 @@
     'app.model.modelManager',
     'app.view.hcfRegistration',
     'app.view.notificationsService',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'app.view.credentialsDialog'
   ];
 
   /**
@@ -40,12 +41,14 @@
    * @param {object} hcfRegistration - hcfRegistration - HCF Registration detail view service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    */
-  function ClusterTilesController($q, modelManager, hcfRegistration, notificationsService, confirmDialog) {
+  function ClusterTilesController($q, modelManager, hcfRegistration, notificationsService, confirmDialog, credentialsDialog) {
     this.$q = $q;
     this.hcfRegistration = hcfRegistration;
     this.notificationsService = notificationsService;
     this.confirmDialog = confirmDialog;
+    this.credentialsDialog = credentialsDialog;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.currentUserAccount = modelManager.retrieve('app.model.account');
@@ -115,7 +118,8 @@
      * @param {string} cnsiGUID identifier of cluster
      */
     connect: function (cnsiGUID) {
-      this.credentialsFormCNSI = cnsiGUID;
+      this.activeServiceInstance = cnsiGUID;
+      this.dialog = this.credentialsDialog.show(this);
     },
 
     /**
@@ -125,7 +129,11 @@
      * @description Handle the cancel from connecting to a cluster
      */
     onConnectCancel: function () {
-      this.credentialsFormCNSI = false;
+      if (this.dialog) {
+        this.dialog.close();
+        this.dialog = undefined;
+      }
+      this.activeServiceInstance = undefined;
     },
 
     /**
@@ -136,7 +144,8 @@
      * @description Handle the success from connecting to a cluster
      */
     onConnectSuccess: function (serviceInstance) {
-      this.credentialsFormCNSI = false;
+      // Close the dialog
+      this.onConnectCancel();
       var that = this;
       this.refreshClusterModel().then(function () {
         // Initialise AuthModel for service
