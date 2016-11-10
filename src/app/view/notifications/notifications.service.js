@@ -35,16 +35,18 @@
        */
       notify: function (toastType, message, interpolateScope, toastOptions) {
 
-        // escape possible HTML properties in interpolateScope
+        var interpolatedMessage;
         if (interpolateScope) {
-          for (var key in interpolateScope) {
-            if (!interpolateScope.hasOwnProperty(key)) {
-              continue;
+          // Escape possible HTML properties in interpolateScope
+          _.forEach(interpolateScope, function (val, key) {
+            if (_.isString(val)) {
+              interpolateScope[key] = _.escape(val);
             }
-            interpolateScope[key] = _.escape(interpolateScope[key]);
-          }
+          });
+          interpolatedMessage = $interpolate(message)(interpolateScope);
+        } else {
+          interpolatedMessage = message;
         }
-        var interpolatedMessage = interpolateScope ? $interpolate(message)(interpolateScope) : message;
         switch (toastType) {
           case 'busy':
             return toaster.busy(interpolatedMessage, toastOptions);
