@@ -577,7 +577,8 @@
           yes: gettext('Yes'),
           no: gettext('No')
         },
-        windowClass: 'roles-conf-dialog'
+        windowClass: 'roles-conf-dialog',
+        noHtmlEscape: true
       };
     }
 
