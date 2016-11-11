@@ -48,7 +48,7 @@
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
    * @param {app.model.utilsService} utils - the utils service
    * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
-   * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @property {cloud-foundry.model.application} model - the Cloud Foundry Applications Model
    * @property {app.model.serviceInstance.user} userCnsiModel - the user service instance model
@@ -125,7 +125,7 @@
                 .then(function () {
                   that.notificationsService.notify('success', gettext('Instance successfully terminated'));
                   that.update();
-                })
+                });
             }
           });
         }
