@@ -54,7 +54,7 @@
         if (organizationGuid) {
           return organizationGuid !== orgGuid;
         }
-        return !authModel.isOrgOrSpaceActionableByResource(clusterGuid, org, authModel.resources.user,
+        return !authModel.isOrgOrSpaceActionableByResource(clusterGuid, org, authModel.resources.organization,
           authModel.actions.update);
       });
 
@@ -65,9 +65,9 @@
       _.forEach(organizations, function (organization) {
         selectedRoles[organization.details.org.metadata.guid] = {};
         disableClearAll = disableClearAll || !authModel.isAllowed(clusterGuid,
-            authModel.resources.user,
+            authModel.resources.organization,
             authModel.actions.update,
-            null, organization.details.org.metadata.guid);
+            organization.details.org.metadata.guid);
       });
 
       // Async refresh roles
