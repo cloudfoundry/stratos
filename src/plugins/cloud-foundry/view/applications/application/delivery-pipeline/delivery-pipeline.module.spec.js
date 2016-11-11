@@ -4,9 +4,16 @@
   describe('Delivery Pipeline', function () {
 
     var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel,
-      modelManager, $httpBackend, account;
+      modelManager, $httpBackend, account, utils, $q;
 
     beforeEach(module('green-box-console'));
+    beforeEach(module({
+      'app.utils.utilsService': {
+        chainStateResolve: function (state, $state, init) {
+          init();
+        }
+      }
+    }));
     beforeEach(module('cloud-foundry.view.applications.application.delivery-pipeline'));
 
     // Define some common properties used throughout tests
@@ -44,6 +51,7 @@
       // Some generic vars needed in tests
       $rootScope = $injector.get('$rootScope');
       $httpBackend = $injector.get('$httpBackend');
+      $q = $injector.get('$q');
 
       // Store the model functions that the constructor calls out to. These functions will be monitored and overwritten
       var model = modelManager.retrieve('cloud-foundry.model.application');
@@ -51,6 +59,7 @@
       cnsiModel = modelManager.retrieve('app.model.serviceInstance');
       userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       account = modelManager.retrieve('app.model.account');
+      utils = $injector.get('app.utils.utilsService');
     }));
 
     function createController() {
@@ -94,7 +103,7 @@
         $emit: angular.noop
       };
 
-      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, $interpolate, $stateParams, $rootScope.$new(), confirmDialog, addNotificationService, postDeployActionService);
+      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, $interpolate, $stateParams, $rootScope.$new(), $q, $state);
       expect(controller).toBeDefined();
     }
 
