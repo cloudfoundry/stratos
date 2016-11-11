@@ -112,11 +112,10 @@
         name: gettext('Terminate Instance'),
         disabled: true,
         execute: function (instanceIndex) {
-          var deferred = that.$q.defer();
-          var dialog = that.confirmDialog({
+          that.confirmDialog({
             title: gettext('Terminate Instance'),
-            description: gettext('Are you sure you want to delete Instance ') + instanceIndex + '?',
-            errorMessage: gettext('There was a problem deleting this instance. Please try again. If this error persists, please contact the Administrator.'),
+            description: gettext('Are you sure you want to terminate Instance ') + instanceIndex + '?',
+            errorMessage: gettext('There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.'),
             buttonText: {
               yes: gettext('Delete'),
               no: gettext('Cancel')
@@ -125,20 +124,9 @@
               return that.model.terminateRunningAppInstanceAtGivenIndex(that.cnsiGuid, that.id, instanceIndex)
                 .then(function () {
                   that.notificationsService.notify('success', gettext('Instance successfully deleted'));
-                  deferred.resolve();
-                })
-                .catch(function (error) {
-                  deferred.reject(error);
-                  return that.$q.reject();
-                })
-                .finally(function () {
                   that.update();
-                });
+                })
             }
-          });
-          return dialog.result.catch(function () {
-            deferred.reject();
-            return that.$q.reject();
           });
         }
       }

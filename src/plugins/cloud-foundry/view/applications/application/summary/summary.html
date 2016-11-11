@@ -110,7 +110,7 @@
     <div class="panel-body" ng-if="appCtrl.model.application.summary.running_instances === 0" translate>
       This application has no running instances.
     </div>
-    <table class="table" ng-if="appCtrl.model.application.summary.running_instances > 0" >
+    <table class="table table-actionable" ng-if="appCtrl.model.application.summary.running_instances > 0" >
       <thead>
       <tr>
         <th translate>Index</th>
@@ -118,8 +118,7 @@
         <th translate>Memory</th>
         <th translate>Disk</th>
         <th translate>Uptime</th>
-        <th translate class="instance-actions">Actions</th>
-      </tr>
+        <th translate>Actions</th>
       </tr>
       </thead>
       <tbody>
@@ -135,7 +134,7 @@
                          value-text="{{ [instance.stats.usage.disk, instance.stats.disk_quota] | usageBytes }}" />
         </td>
         <td class="instance-uptime-td">{{ applicationSummaryCtrl.formatUptime(instance.stats.uptime) }}</td>
-        <td class="instance-actions">
+        <td>
           <actions-menu actions="applicationSummaryCtrl.instancesActionMenu"
                         action-target="$index"
                         menu-position="actions-menu-right"
