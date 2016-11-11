@@ -102,7 +102,7 @@
         var that = this;
         var $scope = this.$scope;
 
-        this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
+        var startAddAppListener = this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
           that.startWorkflow();
         });
 
@@ -153,6 +153,8 @@
         });
 
         addPipelineWorkflowPrototype.setWatchers.apply(this);
+
+        $scope.$on('$destroy', startAddAppListener);
       },
 
       reset: function () {
