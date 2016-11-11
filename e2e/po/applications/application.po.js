@@ -1,34 +1,34 @@
-'use strict';
+(function () {
+  'use strict';
 
-var navbar = require('../navbar.po');
+  module.exports = {
 
-module.exports = {
+    showServices: showServices,
+    showDeliveryLogs: showDeliveryLogs
 
-  showServices: showServices,
-  showDeliveryLogs: showDeliveryLogs
+    // applicationServiceFlyout: applicationServiceFlyout,
+    // showServiceDetails: showServiceDetails,
+    // serviceAddConfirm: serviceAddConfirm,
+    // servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
 
-  // applicationServiceFlyout: applicationServiceFlyout,
-  // showServiceDetails: showServiceDetails,
-  // serviceAddConfirm: serviceAddConfirm,
-  // servicePanelsAddServiceButtons: servicePanelsAddServiceButtons
+  };
 
-};
+  function showServices() {
+    applicationAction(2).click();
+  }
 
-function showServices() {
-  applicationAction(2).click();
-}
+  function showDeliveryLogs() {
+    applicationAction(3).click();
+  }
 
-function showDeliveryLogs() {
-  applicationAction(3).click();
-}
+  function applicationActionsBar() {
+    return element.all(by.css('ul.nav.nav-tabs li a'));
+  }
 
-function applicationActionsBar() {
-  return element.all(by.css('ul.nav.nav-tabs li a'));
-}
-
-function applicationAction(idx) {
-  return applicationActionsBar().get(idx);
-}
+  function applicationAction(idx) {
+    return applicationActionsBar().get(idx);
+  }
+})();
 
 // function servicePanelsAddServiceButtons() {
 //   return element.all(by.css('div.service-panel div.service-actions button'));

@@ -73,18 +73,17 @@
     this.disableAssignSpaceRoles = function (spaceKey) {
       var space = that.organization.spaces[spaceKey];
       return !that.authModel.isAllowed(that.config.clusterGuid,
-        that.authModel.resources.user,
+        that.authModel.resources.space,
         that.authModel.actions.update,
-        space.metadata.guid, space.entity.organization_guid,
-        true);
+        space.metadata.guid, space.entity.organization_guid);
     };
 
     // Helper to enable/disable org role checkbox inputs
     this.disableAssignOrgRoles = function (org) {
       return !that.authModel.isAllowed(that.config.clusterGuid,
-        that.authModel.resources.user,
+        that.authModel.resources.organization,
         that.authModel.actions.update,
-        null, org.metadata.guid);
+        org.metadata.guid);
     };
 
     function refresh() {

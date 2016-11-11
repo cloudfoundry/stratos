@@ -1,1 +1,4 @@
-angular.module('stackato-templates', []);
+(function () {
+  'use strict';
+  angular.module('stackato-templates', []);
+})();

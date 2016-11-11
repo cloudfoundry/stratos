@@ -250,7 +250,7 @@
           {}
         ]);
         _.set(authModel, 'principal.' + clusterGuid + '.userSummary.spaces.managed', []);
-        spyOn(authModel, 'isAllowed').and.callFake(function (cnsiGuid, resource, action, something, orgGuid) {
+        spyOn(authModel, 'isAllowed').and.callFake(function (cnsiGuid, resource, action, orgGuid) {
           expect(cnsiGuid).toEqual(clusterGuid);
           expect(orgGuid).toEqual(organizationGuid);
           return true;

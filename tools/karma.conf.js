@@ -1,96 +1,98 @@
-'use strict';
+(function () {
+  'use strict';
 
-module.exports = function (config) {
+  module.exports = function (config) {
 
-  config.set({
+    config.set({
 
-    autoWatch: true,
+      autoWatch: true,
 
-    basePath: '../src/',
+      basePath: '../src/',
 
-    browserDisconnectTimeout: 10000,
+      browserDisconnectTimeout: 10000,
 
-    browserNoActivityTimeout: 20000,
+      browserNoActivityTimeout: 20000,
 
-    browsers: ['PhantomJS'],
+      browsers: ['PhantomJS'],
 
-    coverageReporter: {
-      type: 'html',
-      dir: '../tools/.coverage-karma/'
-    },
-
-    files: [
-      'lib/jquery/dist/jquery.js',
-      'lib/angular-mocks/angular-mocks.js',
-      'lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
-      '../tools/stackato-templates.js',
-
-      'config.js',
-      'plugins/*/plugin.config.js',
-
-      'lib/helion-ui-framework/dist/**/*.html', {
-        pattern: 'lib/helion-ui-framework/dist/images/*.png',
-        watched: false,
-        included: false,
-        served: true,
-        nocache: false
-      }, {
-        pattern: 'plugins/cloud-foundry/view/assets/**/*.png',
-        watched: false,
-        included: false,
-        served: true,
-        nocache: false
+      coverageReporter: {
+        type: 'html',
+        dir: '../tools/.coverage-karma/'
       },
 
-      'index.module.js',
-      'app/**/*.module.js',
-      'app/**/!(*.mock|*.spec).js',
-      'app/**/*.mock.js',
-      'app/**/*.spec.js',
-      'app/**/*.html',
-      'plugins/**/*.module.js',
-      'plugins/**/!(*.mock|*.spec).js',
-      'plugins/**/*.mock.js',
-      'plugins/**/*.spec.js',
-      'plugins/**/*.html'
-    ],
+      files: [
+        'lib/jquery/dist/jquery.js',
+        'lib/angular-mocks/angular-mocks.js',
+        'lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
+        '../tools/stackato-templates.js',
 
-    frameworks: ['wiredep', 'jasmine'],
+        'config.js',
+        'plugins/*/plugin.config.js',
 
-    ngHtml2JsPreprocessor: {
-      stripPrefix: 'lib/helion-ui-framework/dist/',
-      moduleName: 'templates'
-    },
+        'lib/helion-ui-framework/dist/**/*.html', {
+          pattern: 'lib/helion-ui-framework/dist/images/*.png',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        }, {
+          pattern: 'plugins/cloud-foundry/view/assets/**/*.png',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
 
-    phantomjsLauncher: {
-      // Have phantomjs exit if a ResourceError is encountered
-      // (useful if karma exits without killing phantom)
-      exitOnResourceError: true
-    },
+        'index.module.js',
+        'app/**/*.module.js',
+        'app/**/!(*.mock|*.spec).js',
+        'app/**/*.mock.js',
+        'app/**/*.spec.js',
+        'app/**/*.html',
+        'plugins/**/*.module.js',
+        'plugins/**/!(*.mock|*.spec).js',
+        'plugins/**/*.mock.js',
+        'plugins/**/*.spec.js',
+        'plugins/**/*.html'
+      ],
 
-    plugins: [
-      'karma-phantomjs-launcher',
-      'karma-jasmine',
-      'karma-ng-html2js-preprocessor',
-      'karma-coverage',
-      'karma-wiredep'
-    ],
+      frameworks: ['wiredep', 'jasmine'],
 
-    preprocessors: {
-      'lib/helion-ui-framework/dist/**/*.html': ['ng-html2js'],
-      'app/**/*.html': ['ng-html2js'],
-      'app/**/!(*.mock|*.spec).js': ['coverage'],
-      'plugins/**/*.html': ['ng-html2js'],
-      'plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
-      'plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
-      'plugins/github/!(*.mock|*.spec).js': ['coverage']
-    },
+      ngHtml2JsPreprocessor: {
+        stripPrefix: 'lib/helion-ui-framework/dist/',
+        moduleName: 'templates'
+      },
 
-    proxies: {
-      '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
-      '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/'
-    },
+      phantomjsLauncher: {
+        // Have phantomjs exit if a ResourceError is encountered
+        // (useful if karma exits without killing phantom)
+        exitOnResourceError: true
+      },
 
-    reporters: ['progress', 'coverage']
-  });
-};
+      plugins: [
+        'karma-phantomjs-launcher',
+        'karma-jasmine',
+        'karma-ng-html2js-preprocessor',
+        'karma-coverage',
+        'karma-wiredep'
+      ],
+
+      preprocessors: {
+        'lib/helion-ui-framework/dist/**/*.html': ['ng-html2js'],
+        'app/**/*.html': ['ng-html2js'],
+        'app/**/!(*.mock|*.spec).js': ['coverage'],
+        'plugins/**/*.html': ['ng-html2js'],
+        'plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
+        'plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
+        'plugins/github/!(*.mock|*.spec).js': ['coverage']
+      },
+
+      proxies: {
+        '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
+        '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/'
+      },
+
+      reporters: ['progress', 'coverage']
+    });
+  };
+})();
