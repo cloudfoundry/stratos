@@ -78,7 +78,9 @@
     this.$q = $q;
     this.instanceViewLimit = 5;
 
-    this.update = _.get($scope, '$parent.appCtrl.updateSummary') || angular.noop;
+    this.update = function () {
+      return this.appCtrl.update();
+    };
 
     // Hide these options by default until we can ascertain that user can perform them
     this.hideAddRoutes = true;
