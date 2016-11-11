@@ -251,11 +251,11 @@
         if (that.spaceGuid) {
           // We're at least the 'space' depth of a cluster. Check permissions against it.
           canAssignUsers =
-            authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, that.spaceGuid, that.organizationGuid, true);
+            authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.update, that.spaceGuid, that.organizationGuid);
         } else {
           // We're at the organization depth, check if user has any space manager roles within it
           canAssignUsers =
-            authModel.isAllowed(that.clusterGuid, authModel.resources.user, authModel.actions.update, null, that.organizationGuid) ||
+            authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update, that.organizationGuid) ||
             _.find(authModel.principal[that.clusterGuid].userSummary.spaces.managed, { entity: { organization_guid: that.organizationGuid}});
         }
       } else {

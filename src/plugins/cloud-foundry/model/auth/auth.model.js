@@ -246,23 +246,22 @@
      * in the organization or any of the organization's spaces
      * @param {string} cnsiGuid - Cluster GUID
      * @param {object} org - console organization object
-     * @param {string} resourceType - Type of resource
      * (organization, space, user, service_managed_instances, routes, applications)
      * @param {string} action - action (create, delete, update..)
      * @returns {boolean}
      */
-    isOrgOrSpaceActionableByResource: function (cnsiGuid, org, resourceType, action) {
+    isOrgOrSpaceActionableByResource: function (cnsiGuid, org, action) {
       var that = this;
       var orgGuid = org.details.org.metadata.guid;
       // Is the organization valid?
-      if (this.isAllowed(cnsiGuid, resourceType, action, null, orgGuid)) {
+      if (this.isAllowed(cnsiGuid, this.resources.organization, action, orgGuid)) {
         return true;
       } else {
         // Is any of the organization's spaces valid?
         for (var spaceGuid in org.spaces) {
           if (!org.spaces.hasOwnProperty(spaceGuid)) { continue; }
           var space = org.spaces[spaceGuid];
-          if (that.isAllowed(cnsiGuid, resourceType, action, space.metadata.guid, orgGuid, true)) {
+          if (that.isAllowed(cnsiGuid, this.resources.space, action, space.metadata.guid, orgGuid)) {
             return true;
           }
         }

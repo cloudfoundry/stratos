@@ -104,9 +104,8 @@
     this.canRemoveOrgRole = function (role, clusterGuid, orgGuid, userGuid) {
 
       var isAllowed = authModel.isAllowed(clusterGuid,
-        authModel.resources.user,
-        authModel.actions.update, null,
-        orgGuid);
+        authModel.resources.organization,
+        authModel.actions.update, orgGuid);
 
       if (!isAllowed) {
         return false;
@@ -609,10 +608,8 @@
 
           // Calculate org role delta only for organizations for which user is allowed to
           var isUserAllowed = authModel.isAllowed(clusterGuid,
-            authModel.resources.user,
-            authModel.actions.update,
-            null,
-            orgGuid);
+            authModel.resources.organization,
+            authModel.actions.update, orgGuid);
 
           // For each organization role
           _.forEach(orgRolesPerUser.organization, function (selected, roleKey) {
@@ -629,8 +626,8 @@
           _.forEach(orgRolesPerUser.spaces, function (spaceRoles, spaceGuid) {
 
             // calculate space role delta only for spaces for which user is allowed
-            var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.user,
-              authModel.actions.update, spaceGuid, orgGuid, true);
+            var isAllowed = authModel.isAllowed(clusterGuid, authModel.resources.space,
+              authModel.actions.update, spaceGuid, orgGuid);
 
             // For each space role
             _.forEach(spaceRoles, function (selected, roleKey) {
