@@ -17,7 +17,13 @@
     return {
       controller: DeleteAppWorkflowController,
       controllerAs: 'deleteAppWorkflowCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-app-workflow.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-app-workflow.html',
+      scope: {
+        closeDialog: '=',
+        dismissDialog: '=',
+        guids: '='
+      },
+      bindToController: true
     };
   }
 
@@ -66,9 +72,7 @@
     this.hceCnsiGuid = null;
     this.$filter = $filter;
 
-    this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (event, data) {
-      that.startWorkflow(data);
-    });
+    this.startWorkflow(this.guids || {});
   }
 
   angular.extend(DeleteAppWorkflowController.prototype, {
@@ -98,7 +102,6 @@
           });
         },
         allowCancelAtLastStep: true,
-        title: gettext('Delete App, Pipeline, and Selected Items'),
         hideStepNavStack: true,
         steps: [
           {
@@ -380,6 +383,7 @@
      */
     stopWorkflow: function () {
       this.deletingApplication = false;
+      this.closeDialog();
     },
 
     /**
@@ -407,6 +411,7 @@
       })
       .finally(function () {
         that.options.isDeleting = false;
+        that.dismissDialog();
       });
     }
   });
