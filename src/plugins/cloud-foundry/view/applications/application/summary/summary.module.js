@@ -117,13 +117,13 @@
             description: gettext('Are you sure you want to terminate Instance ') + instanceIndex + '?',
             errorMessage: gettext('There was a problem terminating this instance. Please try again. If this error persists, please contact the Administrator.'),
             buttonText: {
-              yes: gettext('Delete'),
+              yes: gettext('Terminate'),
               no: gettext('Cancel')
             },
             callback: function () {
               return that.model.terminateRunningAppInstanceAtGivenIndex(that.cnsiGuid, that.id, instanceIndex)
                 .then(function () {
-                  that.notificationsService.notify('success', gettext('Instance successfully deleted'));
+                  that.notificationsService.notify('success', gettext('Instance successfully terminated'));
                   that.update();
                 })
             }
