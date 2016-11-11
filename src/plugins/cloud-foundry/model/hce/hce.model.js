@@ -50,8 +50,6 @@
     };
 
     var baseNotificationData = {
-      endpointLabel: gettext('Endpoint URL'),
-      endpointErrorLabel: gettext('Endpoint URL is required'),
       tokenLabel: gettext('Token'),
       tokenErrorLabel: gettext('Token is required')
     };

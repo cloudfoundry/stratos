@@ -13,16 +13,16 @@
   />
 </div>
 <div class="form-group " focusable-input ng-class="{'has-error': wizardForm['form2'].notificationLocation.$invalid && wizardForm['form2'].notificationLocation.$dirty}">
-  <label class="control-label" translate>{{wizardCtrl.options.userInput.notificationTargetType.endpointLabel}}</label>
-  <span class="control-message"><span translate ng-if="wizardForm['form2'].notificationLocation.$error.required">{{wizardCtrl.options.userInput.notificationTargetType.endpointErrorLabel}}</span></span>
+  <label class="control-label" translate>{{ wizardCtrl.options.userInput.notificationTargetType.endpointLabel }}</label>
+  <span class="control-message"><span translate ng-if="wizardForm['form2'].notificationLocation.$error.required">{{ wizardCtrl.options.userInput.notificationTargetType.endpointErrorLabel }}</span></span>
   <input type="text" name="notificationLocation" class="form-control"
          ng-model="wizardCtrl.options.userInput.notificationTargetDetails.location"
          required
   />
 </div>
 <div class="form-group " focusable-input ng-class="{'has-error': wizardForm['form2'].notificationToken.$invalid && wizardForm['form2'].notificationToken.$dirty}">
-  <label class="control-label" translate>{{wizardCtrl.options.userInput.notificationTargetType.tokenLabel}}</label>
-  <span class="control-message"><span translate ng-if="wizardForm['form2'].notificationToken.$error.required">{{wizardCtrl.options.userInput.notificationTargetType.tokenErrorLabel}}</span></span>
+  <label class="control-label" translate>{{ wizardCtrl.options.userInput.notificationTargetType.tokenLabel }}</label>
+  <span class="control-message"><span translate ng-if="wizardForm['form2'].notificationToken.$error.required">{{ wizardCtrl.options.userInput.notificationTargetType.tokenErrorLabel }}</span></span>
   <input type="text" name="notificationToken" class="form-control"
          ng-model="wizardCtrl.options.userInput.notificationTargetDetails.token"
          required
