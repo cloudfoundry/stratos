@@ -16,15 +16,15 @@
       </div>
       <div class="form-group " focusable-input ng-class="{'has-error': form.addNotificationForm.notificationLocation.$invalid && form.addNotificationForm.notificationLocation.$dirty}">
         <label class="control-label" translate>{{asyncTaskDialogCtrl.context.targetType.endpointLabel}}</label>
-        <span class="control-message"><span translate ng-if="form.addNotificationForm.notificationLocation.$error.required">Endpoint is required</span></span>
+        <span class="control-message"><span translate ng-if="form.addNotificationForm.notificationLocation.$error.required">{{asyncTaskDialogCtrl.context.targetType.endpointErrorLabel}}</span></span>
         <input type="text" name="notificationLocation" class="form-control"
                ng-model="asyncTaskDialogCtrl.context.data.location"
                required
         />
       </div>
       <div class="form-group " focusable-input ng-class="{'has-error': form.addNotificationForm.notificationToken.$invalid && form.addNotificationForm.notificationToken.$dirty}">
-        <label class="control-label" translate>Token</label>
-        <span class="control-message"><span translate ng-if="form.addNotificationForm.notificationToken.$error.required">Token is required</span></span>
+        <label class="control-label" translate>{{asyncTaskDialogCtrl.context.targetType.tokenLabel}}</label>
+        <span class="control-message"><span translate ng-if="form.addNotificationForm.notificationToken.$error.required">{{asyncTaskDialogCtrl.context.targetType.tokenErrorLabel}}</span></span>
         <input type="text" name="notificationToken" class="form-control"
                ng-model="asyncTaskDialogCtrl.context.data.token"
                required

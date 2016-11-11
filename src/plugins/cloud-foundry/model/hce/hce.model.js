@@ -49,12 +49,20 @@
       notificationTargetTypes: []
     };
 
+    var baseNotificationData = {
+      endpointLabel: gettext('Endpoint URL'),
+      endpointErrorLabel: gettext('Endpoint URL is required'),
+      tokenLabel: gettext('Token'),
+      tokenErrorLabel: gettext('Token is required')
+    };
+
     // This will be provided by HCE in future
     this.staticNotificationData = {
       hipchat: {
         title: gettext('HipChat'),
         description: gettext('Connect a HipChat instance to receive pipeline events (build, test, deploy) in a  Hipchat room.'),
         endpointLabel: gettext('Server URL with Room Number or Name'),
+        endpointErrorLabel: gettext('Server URL is required'),
         img: 'hipchat_logo.png',
         imgScale: 0.8
       },
@@ -62,6 +70,7 @@
         title: gettext('Http'),
         description: gettext('Specify an endpoint where pipeline events should be sent (e.g. URL of an internal website, a communication tool, or an RSS feed).'),
         endpointLabel: gettext('Server URL'),
+        endpointErrorLabel: gettext('Server URL is required'),
         img: 'httppost_logo.png',
         imgScale: 0.8
       },
@@ -69,31 +78,26 @@
         title: gettext('Flow Dock'),
         description: gettext('Connect a Flowdock instance to receive pipeline events (build, test, deploy) in a specific Flow.'),
         endpointLabel: gettext('API Endpoint'),
+        endpointErrorLabel: gettext('API Endpoint is required'),
         img: 'flowdock_logo.png',
         imgScale: 0.75
-      },
-      githubpullrequest: {
-        hidden: true,
-        title: gettext('GitHub'),
-        description: gettext('Send pipeline events (build, test, deploy) as statuses to Github'),
-        endpointLabel: gettext('Target URL'),
-        img: 'github_octocat.png'
       },
       slack: {
         title: gettext('Slack'),
         description: gettext('Send pipeline events (build, test, deploy) as messages to a Slack channel.'),
-        endpointLabel: gettext('URL with optional Channel or User name'),
+        endpointLabel: gettext('Webhook URL'),
+        endpointErrorLabel: gettext('Webhook URL is required'),
+        tokenLabel: gettext('Provide #<Channel Name> or @<Username>'),
+        tokenErrorLabel: gettext('Channel or user name is required'),
         img: 'slack.png',
         imgScale: 0.75
-      },
-      bitbucketpullrequest: {
-        hidden: true,
-        title: gettext('BitBucket'),
-        description: gettext('Send pipeline events (build, test, deploy) as statuses to BitBucket'),
-        endpointLabel: gettext('Target URL'),
-        img: 'bitbucket.png'
       }
     };
+
+    // Fill in defaults
+    _.each(this.staticNotificationData, function (val, key) {
+      that.staticNotificationData[key] = _.defaults(val, baseNotificationData);
+    });
 
     this.eventService.$on(this.eventService.events.LOGOUT, function () {
       that.onLogout();
