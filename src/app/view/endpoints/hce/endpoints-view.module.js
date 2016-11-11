@@ -25,7 +25,8 @@
     'app.api.apiManager',
     'app.view.hceRegistration',
     'app.view.notificationsService',
-    'helion.framework.widgets.dialog.confirm'
+    'helion.framework.widgets.dialog.confirm',
+    'app.view.credentialsDialog'
   ];
 
   /**
@@ -41,9 +42,10 @@
    * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {object} confirmDialog - the confirm dialog service
+   * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    */
   function EndpointsViewController($log, $q, modelManager, apiManager, hceRegistration, notificationsService,
-                                   confirmDialog) {
+                                   confirmDialog, credentialsDialog) {
 
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
@@ -66,6 +68,7 @@
     this.$log = $log;
     this.$q = $q;
     this.confirmDialog = confirmDialog;
+    this.credentialsDialog = credentialsDialog;
 
     this._updateCurrentEndpoints();
     var that = this;
@@ -131,7 +134,7 @@
      */
     connect: function (serviceInstance) {
       this.activeServiceInstance = serviceInstance;
-      this.credentialsFormOpen = true;
+      this.dialog = this.credentialsDialog.show(this);
     },
 
     /**
@@ -221,7 +224,11 @@
      * @description Check if endpoint view instance is an HCF instance
      */
     onConnectCancel: function () {
-      this.credentialsFormOpen = false;
+      if (this.dialog) {
+        this.dialog.close();
+        this.dialog = undefined;
+      }
+      this.activeServiceInstance = undefined;
     },
 
     /**
@@ -232,8 +239,7 @@
      */
     onConnectSuccess: function () {
       this.userServiceInstanceModel.numValid += 1;
-      this.credentialsFormOpen = false;
-      this.activeServiceInstance = null;
+      this.onConnectCancel();
       this._updateCurrentEndpoints();
     },
 

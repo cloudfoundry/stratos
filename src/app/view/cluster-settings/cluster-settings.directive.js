@@ -30,7 +30,8 @@
   ClusterSettingsController.$inject = [
     '$scope',
     'app.model.modelManager',
-    'app.api.apiManager'
+    'app.api.apiManager',
+    'app.view.credentialsDialog'
   ];
 
   /**
@@ -41,13 +42,16 @@
    * @param {object} $scope - the Angular $scope service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.api.apiManager} apiManager - the application API manager
+   * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @property {boolean} overlay - flag to show or hide this component
    * @property {app.model.serviceInstance} serviceInstanceModel - the service instance model
+   * @property {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @property {Array} serviceInstances - the service instances available to user
    * @property {string} warningMsg - the warning message to show if expired
    */
-  function ClusterSettingsController($scope, modelManager, apiManager) {
+  function ClusterSettingsController($scope, modelManager, apiManager, credentialsDialog) {
     var that = this;
+    this.credentialsDialog = credentialsDialog;
     this.overlay = angular.isDefined(this.showOverlayRegistration);
     this.cnsiModel = modelManager.retrieve('app.model.serviceInstance');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
@@ -118,7 +122,7 @@
      */
     reconnect: function (serviceInstance) {
       this.activeServiceInstance = serviceInstance;
-      this.credentialsFormOpen = true;
+      this.dialog = this.credentialsDialog.show(this);
     },
 
     /**
@@ -127,7 +131,11 @@
      * @description Handle the cancel from connecting to a cluster
      */
     onConnectCancel: function () {
-      this.credentialsFormOpen = false;
+      if (this.dialog) {
+        this.dialog.close();
+        this.dialog = undefined;
+      }
+      this.activeServiceInstance = undefined;
     },
 
     /**
@@ -136,8 +144,7 @@
      * @description Handle the success from connecting to a cluster
      */
     onConnectSuccess: function () {
-      this.credentialsFormOpen = false;
-      this.activeServiceInstance = undefined;
+      this.onConnectCancel();
       this.stackatoInfo.getStackatoInfo();
     },
 

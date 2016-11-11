@@ -3,7 +3,7 @@
 
   describe('endpoint clusters', function () {
     var $q, $state, $scope, modelManager, confirmModal, clusterTilesCtrl, hcfRegistration, serviceInstanceModel,
-      userServiceInstanceModel, $uibModal, stackatoInfo, notificationService, authModel;
+      userServiceInstanceModel, $uibModal, stackatoInfo, notificationService, authModel, credentialsDialog;
 
     var hceService = {
       guid: '817ef115-7ae6-4591-a883-8f1c3447e012',
@@ -68,6 +68,7 @@
       hcfRegistration = $injector.get('app.view.hcfRegistration');
       notificationService = $injector.get('app.view.notificationsService');
       confirmModal = $injector.get('helion.framework.widgets.dialog.confirm');
+      credentialsDialog = $injector.get('app.view.credentialsDialog');
       $uibModal = $injector.get('$uibModal');
 
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
@@ -83,7 +84,7 @@
 
     function createCluster() {
       var ClusterTilesCtrl = $state.get('endpoint.clusters.tiles').controller;
-      clusterTilesCtrl = new ClusterTilesCtrl($q, modelManager, hcfRegistration, notificationService, confirmModal);
+      clusterTilesCtrl = new ClusterTilesCtrl($q, modelManager, hcfRegistration, notificationService, confirmModal, credentialsDialog);
     }
 
     describe('Init', function () {
@@ -247,19 +248,19 @@
 
       it('on cancel', function () {
         clusterTilesCtrl.onConnectCancel(hcfService);
-        expect(clusterTilesCtrl.credentialsFormCNSI).toBeFalsy();
+        expect(clusterTilesCtrl.activeServiceInstance).toBeFalsy();
       });
 
       it('on success', function () {
         spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
         clusterTilesCtrl.onConnectSuccess(hcfService);
-        expect(clusterTilesCtrl.credentialsFormCNSI).toBeFalsy();
+        expect(clusterTilesCtrl.activeServiceInstance).toBeFalsy();
         expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
       });
 
       it('correct param', function () {
         clusterTilesCtrl.connect(hcfService.guid);
-        expect(clusterTilesCtrl.credentialsFormCNSI).toEqual(hcfService.guid);
+        expect(clusterTilesCtrl.activeServiceInstance).toEqual(hcfService.guid);
       });
     });
 

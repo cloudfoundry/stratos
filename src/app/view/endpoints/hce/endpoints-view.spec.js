@@ -50,12 +50,13 @@
       var hceReg = $injector.get('app.view.hceRegistration');
       var log = $injector.get('$log');
 
+      var credentialsDialog = $injector.get('app.view.credentialsDialog');
       var confirmDialogMock = function (dialogSpecs) {
 
         dialogSpecs.callback();
       };
       var EndpointsViewController = $state.get('endpoint.hce').controller;
-      controller = new EndpointsViewController(log, $q, modelManager, apiManager, hceReg, notificationService, confirmDialogMock);
+      controller = new EndpointsViewController(log, $q, modelManager, apiManager, hceReg, notificationService, confirmDialogMock, credentialsDialog);
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       spyOn(userServiceInstanceModel, 'disconnect').and.callThrough();
@@ -99,7 +100,7 @@
 
       it('should open credentials form on connect', function () {
         controller.connect({});
-        expect(controller.credentialsFormOpen).toBeTruthy();
+        expect(controller.dialog).toBeTruthy();
         expect(controller.activeServiceInstance).toBeDefined();
       });
 
@@ -133,7 +134,7 @@
 
         controller.onConnectSuccess();
         $httpBackend.flush();
-        expect(controller.credentialsFormOpen).toBeFalsy();
+        expect(controller.dialog).toBeFalsy();
         expect(controller._updateCurrentEndpoints).toHaveBeenCalled();
 
       });
