@@ -54,8 +54,7 @@
         if (organizationGuid) {
           return organizationGuid !== orgGuid;
         }
-        return !authModel.isOrgOrSpaceActionableByResource(clusterGuid, org, authModel.resources.organization,
-          authModel.actions.update);
+        return !authModel.isOrgOrSpaceActionableByResource(clusterGuid, org, authModel.actions.update);
       });
 
       // Ensure that the selected roles objects are initialised correctly. The roles table will then fiddle faddle
