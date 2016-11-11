@@ -4,7 +4,8 @@ var wizard = require('../widgets/wizard.po');
 module.exports = {
   isDisplayed: isDisplayed,
   getElement: getElement,
-  getWizard: getWizard
+  getWizard: getWizard,
+  getTitle: getTitle
 };
 
 function isDisplayed() {
@@ -17,4 +18,8 @@ function getElement() {
 
 function getWizard() {
   return wizard.wrap(getElement());
+}
+
+function getTitle() {
+  return element(by.css('.detail-view-header h4')).getText();
 }

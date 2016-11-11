@@ -30,7 +30,8 @@
     'app.model.modelManager',
     'app.event.eventService',
     'app.error.errorService',
-    'app.utils.utilsService'
+    'app.utils.utilsService',
+    'helion.framework.widgets.detailView'
   ];
 
   /**
@@ -45,6 +46,7 @@
    * @param {app.event.eventService} eventService - the event bus service
    * @param {app.error.errorService} errorService - the error service
    * @param {object} utils - the utils service
+   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
    * @property {object} $interpolate - the angular $interpolate service
    * @property {object} $state - the UI router $state service
    * @property {object} $timeout - the angular $timeout service
@@ -53,13 +55,14 @@
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.error.errorService} errorService - the error service
    */
-  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils) {
+  function ApplicationsListController($scope, $interpolate, $state, $timeout, $q, modelManager, eventService, errorService, utils, detailView) {
     var that = this;
     this.$interpolate = $interpolate;
     this.$state = $state;
     this.$timeout = $timeout;
     this.$q = $q;
     this.modelManager = modelManager;
+    this.detailView = detailView;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
     this.eventService = eventService;
@@ -426,6 +429,19 @@
         return true;
       }
       return !this.disableAddApplicationButton();
+    },
+
+    /**
+     * @function addApplication
+     * @description Shows the Add Application dialog
+     */
+    addApplication: function () {
+      this.detailView(
+        {
+          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
+          title: gettext('Add Application')
+        }
+      );
     },
 
     /**

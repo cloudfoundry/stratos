@@ -21,11 +21,18 @@
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
 
-      var markup = '<add-app-workflow></add-app-workflow>';
+      $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, {});
+      $httpBackend.expectGET('/pp/v1/cnsis/registered');
+
+      $scope.testDismiss = function () {};
+      $scope.testClose = function () {};
+
+      var markup = '<add-app-workflow close-dialog="testClose" dismiss-dialog="testDismiss"></add-app-workflow>';
       var element = angular.element(markup);
       $compile(element)($scope);
       $scope.$apply();
       that = element.controller('addAppWorkflow');
+      $httpBackend.flush();
     }));
 
     afterEach(function () {
@@ -39,12 +46,6 @@
 
     describe('- after init', function () {
       beforeEach(function () {
-      });
-
-      it('should listen on cf.events.START_ADD_APP_WORKFLOW', function () {
-        spyOn(that, 'startWorkflow');
-        that.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW');
-        expect(that.startWorkflow).toHaveBeenCalled();
       });
 
       it('should watch userInput.serviceInstance', function () {
