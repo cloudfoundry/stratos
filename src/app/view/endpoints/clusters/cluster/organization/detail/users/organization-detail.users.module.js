@@ -108,8 +108,7 @@
     };
 
     this.canUserRemoveFromOrg = function () {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null,
-        that.organizationGuid);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.organization, that.authModel.actions.update, that.organizationGuid);
     };
 
     this.disableManageRoles = function () {
@@ -200,8 +199,8 @@
     };
 
     this.canRemoveSpaceRole = function (spaceGuid) {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update,
-        spaceGuid, that.organizationGuid, true);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.space, that.authModel.actions.update,
+        spaceGuid, that.organizationGuid);
     };
 
     this.removeSpaceRole = function (user, spaceRole) {
