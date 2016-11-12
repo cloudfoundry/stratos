@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source ${DIRPATH}/build_common.sh
+
 mkdir images
 cd images
 images=( stackatotest/hsc-concourse:latest stackatotest/goose debian:jessie postgres:latest  nginx )
@@ -17,6 +20,6 @@ for image in $(ls images/); do
   echo COPY images/$image /docker-images/$image >> Dockerfile.dcind
 done
 
-docker build -f Dockerfile.dcind ./ -t stackatotest/hsc-dcind:latest --build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy}
+docker build -f Dockerfile.dcind ./ -t stackatotest/hsc-dcind:${TAG} ${BUILD_ARGS}
 rm -rf images
 rm -f Dockerfile.dcind

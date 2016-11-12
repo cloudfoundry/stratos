@@ -1,0 +1,28 @@
+resources:
+- name: stratos-deploy
+  type: git
+  source:
+    uri: git@github.com:hpcloud/stratos-deploy.git
+    branch: master
+    private_key: {{github-private-key}}
+- name: stratos-ui
+  type: git
+  source:
+    branch: master
+    private_key: {{github-private-key}}
+    uri: git@github.com:hpcloud/stratos-ui.git
+
+jobs:
+- name: console-build-images
+  plan:
+  - get: stratos-deploy
+  - get: stratos-ui
+  - task: build-images
+    privileged: true
+    timeout: 30m
+    file: stratos-deploy/ci/tasks/stratos-ui/run-build-images.yml
+    params:
+      DOCKER_USERNAME: {{docker-username}}
+      DOCKER_PASSWORD: {{docker-password}}
+      DOCKER_REPOSITORY: {{docker-repository}}
+      TAG: {{tag}}
