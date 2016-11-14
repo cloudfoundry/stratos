@@ -22,6 +22,6 @@
   }
 
   function getTitle() {
-    return element(by.css('.detail-view-header h4')).getText();
+    return element(by.css('add-app-workflow .wizard-head h4')).getText();
   }
 })();
