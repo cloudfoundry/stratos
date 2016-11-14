@@ -5,7 +5,8 @@
   module.exports = {
     isDisplayed: isDisplayed,
     getElement: getElement,
-    getWizard: getWizard
+    getWizard: getWizard,
+    getTitle: getTitle
   };
 
   function isDisplayed() {
@@ -18,5 +19,9 @@
 
   function getWizard() {
     return wizard.wrap(getElement());
+  }
+
+  function getTitle() {
+    return element(by.css('add-app-workflow .wizard-head h4')).getText();
   }
 })();
