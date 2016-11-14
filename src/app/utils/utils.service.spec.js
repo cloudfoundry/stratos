@@ -182,6 +182,30 @@
       });
     });
 
+    describe('URL Validation tests', function () {
+
+      var regExp;
+
+      beforeEach(function () {
+        regExp = utils.urlValidationExpression;
+      });
+
+      it('should validate these urls', function () {
+        expect(regExp.test('https://api.hcf.hscdemo.com')).toBe(true);
+        expect(regExp.test('https://api.hcf.hscdemo.com:8080')).toBe(true);
+        expect(regExp.test('https://hce.hscdemo.com:8080')).toBe(true);
+        expect(regExp.test('https://api.192.168.20.nip.io')).toBe(true);
+      });
+
+      it('should fail these urls', function () {
+        expect(regExp.test('https://api.hcf.hscdemo.c')).toBe(false);
+        expect(regExp.test('https://api.hcf.hscdemo.com:7:')).toBe(false);
+        expect(regExp.test('https://.....hce.hscdemo.com:8080')).toBe(false);
+        expect(regExp.test('https://api.192.168.20.nip.io....')).toBe(false);
+      });
+
+    });
+
   });
 
 })();
