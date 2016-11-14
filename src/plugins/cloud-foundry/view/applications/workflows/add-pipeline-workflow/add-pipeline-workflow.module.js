@@ -191,9 +191,23 @@
                     var msg = gettext('The username and password combination provided is invalid. Please check and try again.');
                     return that.$q.reject(msg);
                   })
-                  .catch(function (err) {
+                  .catch(function (error) {
                     // Some other exception occurred
-                    return that.$q.reject(err);
+                    var message = gettext('There was a problem creating the pipeline. Please try again. ' +
+                      'If problem persists, please contact your administrator.');
+
+                    if (error.data && error.data.message) {
+                      error = error.data;
+                    }
+                    if (error.message) {
+                      message = gettext('Failed to create the pipeline due to following exception: ') + error.message;
+                      if (error.details || error.detail) {
+                        message = message + ', ' + (error.details || error.detail);
+                      }
+                      message = message + gettext(' Please try again. If problem persists, please contact your administrator. ');
+                    }
+
+                    return that.$q.reject(message);
                   });
               }
             },
