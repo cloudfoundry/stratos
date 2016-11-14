@@ -464,8 +464,7 @@
     addApplication: function () {
       this.detailView(
         {
-          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
-          title: gettext('Add Application')
+          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html'
         }
       );
     },
