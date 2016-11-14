@@ -39,8 +39,6 @@
 
       that = element.controller('deleteAppWorkflow');
       $httpBackend.flush();
-
-      
     }));
 
     afterEach(function () {

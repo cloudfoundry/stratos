@@ -57,8 +57,6 @@
    * @property {object} userInput - user's input about new application
    */
   function DeleteAppWorkflowController($filter, modelManager, eventService, $q, $interpolate, utils) {
-    var that = this;
-
     this.eventService = eventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
