@@ -202,10 +202,15 @@
             that.serviceInstanceModel.list = function () {
               return that.$q.resolve(mockData);
             };
+            spyOn(that, 'getOrganizations');
+            that.getDomains = getResolved;
+            spyOn(that, 'getDomains').and.callThrough();
             spyOn(that.serviceInstanceModel, 'list').and.callThrough();
             step.onEnter();
             $scope.$apply();
 
+            expect(that.getOrganizations).toHaveBeenCalled();
+            expect(that.getDomains).toHaveBeenCalled();
             expect(that.serviceInstanceModel.list).toHaveBeenCalled();
             expect(that.options.serviceInstances.length).toBe(1);
             expect(that.options.serviceInstances[0].label).toBe('cluster1');
