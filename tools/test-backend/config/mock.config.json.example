@@ -1,8 +1,12 @@
 {
   "portal_proxy": {
     "host": "localhost",
-    "port": 80,
+    "port": 443,
     "path": "pp"
+  },
+  "ssl": {
+    "key": "ssl/pproxy.key",
+    "cert": "ssl/pproxy.crt"
   },
   "serviceInstances": {
     "hcf": 3,

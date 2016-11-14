@@ -1,12 +1,14 @@
-/* eslint-disable no-throw-literal,angular/log,no-console,angular/json-functions,angular/timeout-service */
+/* eslint-disable no-throw-literal,angular/log,no-console,angular/json-functions,angular/timeout-service,no-process-exit,no-sync */
 (function () {
   'use strict';
 
   var express = require('express');
-  var http = require('http');
+  var https = require('https');
   var app = express();
   var path = require('path');
   var _ = require('lodash');
+  var fs = require('fs');
+  var process = require('process');
   var config;
 
   var unSupportedRequests = [
@@ -22,6 +24,15 @@
     throw 'Can not find the required mock.config.json configuration file:' + JSON.stringify(e);
   }
 
+  if (!(fs.existsSync(config.ssl.key) || fs.existsSync(config.ssl.cert))) {
+    console.log('SSL key and cert don\'t exist! If you are using the defaults, please run the createCert.sh script in tools/ssl.');
+    process.exit(1);
+  }
+  var sslCredentials = {
+    key: fs.readFileSync(config.ssl.key, 'utf8'),
+    cert: fs.readFileSync(config.ssl.cert, 'utf8')
+  };
+
   var port = config.port || 4000;
 
   // Delay to simulate slower proxy API calls
@@ -32,10 +43,9 @@
 
   var httpProxy = require('http-proxy');
   var proxy = httpProxy.createServer({
-    target: {
-      host: config.portal_proxy.host,
-      port: config.portal_proxy.port || 80
-    }
+    target: 'https://' + config.portal_proxy.host + ':' + config.portal_proxy.port || 443,
+    ssl: sslCredentials,
+    secure: false
   });
 
   var mockApi = require('./test-backend/api');
@@ -56,7 +66,7 @@
     }
   });
 
-  var server = http.createServer(app);
+  var server = https.createServer(sslCredentials, app);
 
   server.on('upgrade', function (req, socket, head) {
     proxy.ws(req, socket, head);
