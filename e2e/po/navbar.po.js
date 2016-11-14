@@ -1,46 +1,48 @@
-'use strict';
+(function () {
+  'use strict';
 
-// Navbar helpers
-module.exports = {
+  // Navbar helpers
+  module.exports = {
 
-  goToView: goToView,
+    goToView: goToView,
 
-  accountActionsButton: accountActionsButton,
-  showAccountActions: showAccountActions,
-  showAccountSettings: showAccountSettings,
-  logout: logout
+    accountActionsButton: accountActionsButton,
+    showAccountActions: showAccountActions,
+    showAccountSettings: showAccountSettings,
+    logout: logout
 
-};
+  };
 
-function goToView(viewName) {
-  return element(by.css('navigation'))
-    .element(by.linkText(viewName))
-    .click();
-}
-
-function accountActionsButton() {
-  return element(by.css('avatar'))
-    .element(by.css('[ng-click="avatarCtrl.showActions()"]'));
-}
-
-function showAccountActions() {
-  return accountActionsButton().click();
-}
-
-function showAccountSettings() {
-  return showAccountActions().then(function () {
-    return element(by.css('account-actions'))
-      .element(by.css('[href="#/account/settings"]'))
+  function goToView(viewName) {
+    return element(by.css('navigation'))
+      .element(by.linkText(viewName))
       .click();
-  });
-}
+  }
 
-function logout() {
-  return showAccountActions().then(function () {
-    return element(by.css('account-actions'))
-      .element(by.css('[ng-click="applicationCtrl.logout()"]'))
-      .click().then(function () {
-        browser.driver.sleep(50);
-      });
-  });
-}
+  function accountActionsButton() {
+    return element(by.css('avatar'))
+      .element(by.css('[ng-click="avatarCtrl.showActions()"]'));
+  }
+
+  function showAccountActions() {
+    return accountActionsButton().click();
+  }
+
+  function showAccountSettings() {
+    return showAccountActions().then(function () {
+      return element(by.css('account-actions'))
+        .element(by.css('[href="#/account/settings"]'))
+        .click();
+    });
+  }
+
+  function logout() {
+    return showAccountActions().then(function () {
+      return element(by.css('account-actions'))
+        .element(by.css('[ng-click="applicationCtrl.logout()"]'))
+        .click().then(function () {
+          browser.driver.sleep(50);
+        });
+    });
+  }
+})();

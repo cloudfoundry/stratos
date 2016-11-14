@@ -823,6 +823,21 @@
     },
 
     /**
+     * @function terminateRunningAppInstanceAtGivenIndex
+     * @memberof cloud-foundry.model.application
+     * @description Terminate an application instance
+     * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
+     * @param {string} guid - Application identifier
+     * @param {string} index - Instance index
+     * @returns {promise}
+     * @public
+     */
+    terminateRunningAppInstanceAtGivenIndex: function (cnsiGuid, guid, index) {
+      return this.apiManager.retrieve('cloud-foundry.api.Apps')
+        .TerminateRunningAppInstanceAtGivenIndex(guid, index, {}, this.modelUtils.makeHttpConfig(cnsiGuid));
+    },
+
+    /**
      * @function getAppStats
      * @memberof cloud-foundry.model.application
      * @description Returns the stats for the STARTED app

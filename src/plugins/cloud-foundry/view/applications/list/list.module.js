@@ -96,13 +96,6 @@
     this.ready = this.model.hasApps;
 
     function init() {
-      that._setClusters();
-      that._setOrgs();
-      that._setSpaces();
-      that._reload(true).finally(function () {
-        // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
-        that.ready = true;
-      });
       var serviceInstances = _.values(that.userCnsiModel.serviceInstances);
       for (var i = 0; i < serviceInstances.length; i++) {
         var cluster = serviceInstances[i];
@@ -111,6 +104,16 @@
           break;
         }
       }
+
+      return $q.resolve()
+        .then(_.bind(that._setClusters, that))
+        .then(_.bind(that._setOrgs, that))
+        .then(_.bind(that._setSpaces, that))
+        .then(_.bind(that._reload, that, true))
+        .finally(function () {
+          // Ensure ready is always set after initial load. Ready will show filters, no services/app message, etc
+          that.ready = true;
+        });
     }
 
     utils.chainStateResolve('cf.applications.list', $state, init);
@@ -158,7 +161,7 @@
     /**
      * @function _setClusters
      * @description Set the cluster filter list
-     * @returns {void}
+     * @returns {promise}
      * @private
      */
     _setClusters: function () {
@@ -176,7 +179,12 @@
 
       if (this.model.filterParams.cnsiGuid !== 'all') {
         this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
+      } else if (this.model.clusterCount === 1) {
+        this.model.filterParams.cnsiGuid = clusters[0].value;
+        this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
       }
+
+      return this.$q.resolve();
     },
 
     /**
@@ -187,6 +195,7 @@
      */
     _setOrgs: function () {
       var that = this;
+      this.organizations.length = 1;
       if (this.model.filterParams.cnsiGuid !== 'all') {
         var orgModel = this.modelManager.retrieve('cloud-foundry.model.organization');
         return orgModel.listAllOrganizations(this.model.filterParams.cnsiGuid)
@@ -195,6 +204,9 @@
             [].push.apply(that.organizations, orgs);
 
             if (that.model.filterParams.orgGuid !== 'all') {
+              that.filter.orgGuid = that.model.filterParams.orgGuid;
+            } else if (orgs.length === 1) {
+              that.model.filterParams.orgGuid = orgs[0].value;
               that.filter.orgGuid = that.model.filterParams.orgGuid;
             }
           });
@@ -211,6 +223,7 @@
      */
     _setSpaces: function () {
       var that = this;
+      this.spaces.length = 1;
       if (this.model.filterParams.cnsiGuid !== 'all' &&
         this.model.filterParams.orgGuid !== 'all') {
         var orgModel = this.modelManager.retrieve('cloud-foundry.model.organization');
@@ -223,6 +236,9 @@
             [].push.apply(that.spaces, spaces);
 
             if (that.model.filterParams.spaceGuid !== 'all') {
+              that.filter.spaceGuid = that.model.filterParams.spaceGuid;
+            } else if (spaces.length === 1) {
+              that.model.filterParams.spaceGuid = spaces[0].value;
               that.filter.spaceGuid = that.model.filterParams.spaceGuid;
             }
           });
@@ -328,25 +344,33 @@
      * @public
      */
     setCluster: function () {
+      var that = this;
       this.organizations.length = 1;
       this.model.filterParams.cnsiGuid = this.filter.cnsiGuid;
+      // Reload if we're coming FROM a situation where we won't have all apps (previously filtered by org/space)
       var needToReload = !_.isMatch(this.filter, {orgGuid: 'all', spaceGuid: 'all'});
       this._setFilter({orgGuid: 'all', spaceGuid: 'all'});
-      this._setOrgs();
+      this.$q.resolve()
+        .then(_.bind(this._setOrgs, this))
+        .then(_.bind(this._setSpaces, this))
+        .then(function () {
+          // Reload if we're going TO a situation where we won't have all apps (filtered by org/space). _setOrg may have
+          // changed the org and space filter
+          needToReload = needToReload || !_.isMatch(that.filter, {orgGuid: 'all', spaceGuid: 'all'});
 
-      if (needToReload) {
-        this._reload();
-
-      } else {
-        if (this.filter.cnsiGuid === 'all') {
-          this.model.resetFilter();
-        } else {
-          this.model.filterByCluster(this.filter.cnsiGuid);
-        }
-        this.paginationProperties.pageNumber = 1;
-        this.paginationProperties.total = _.ceil(this.model.filteredApplications.length / this.model.pageSize);
-        this._loadPage(1);
-      }
+          if (needToReload) {
+            that._reload();
+          } else {
+            if (that.filter.cnsiGuid === 'all') {
+              that.model.resetFilter();
+            } else {
+              that.model.filterByCluster(that.filter.cnsiGuid);
+            }
+            that.paginationProperties.pageNumber = 1;
+            that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
+            that._loadPage(1);
+          }
+        });
     },
 
     /**
@@ -356,11 +380,13 @@
      * @public
      */
     setOrganization: function () {
+      var that = this;
       this.spaces.length = 1;
       this.model.filterParams.orgGuid = this.filter.orgGuid;
       this._setFilter({spaceGuid: 'all'});
-      this._setSpaces();
-      this._reload();
+      this._setSpaces().then(function () {
+        that._reload();
+      });
     },
 
     setSpace: function () {

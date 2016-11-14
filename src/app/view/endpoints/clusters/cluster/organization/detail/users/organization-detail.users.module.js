@@ -108,8 +108,7 @@
     };
 
     this.canUserRemoveFromOrg = function () {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update, null,
-        that.organizationGuid);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.organization, that.authModel.actions.update, that.organizationGuid);
     };
 
     this.disableManageRoles = function () {
@@ -200,8 +199,8 @@
     };
 
     this.canRemoveSpaceRole = function (spaceGuid) {
-      return that.authModel.isAllowed(that.guid, that.authModel.resources.user, that.authModel.actions.update,
-        spaceGuid, that.organizationGuid, true);
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.space, that.authModel.actions.update,
+        spaceGuid, that.organizationGuid);
     };
 
     this.removeSpaceRole = function (user, spaceRole) {
@@ -236,12 +235,14 @@
       return rolesService.removeFromOrganization(that.guid, that.organizationGuid, guidsToUsers());
     };
 
-    eventService.$on(eventService.events.ROLES_UPDATED, function () {
+    var rolesUpdatedListener = eventService.$on(eventService.events.ROLES_UPDATED, function () {
       refreshUsers();
     });
 
     // Ensure the parent state is fully initialised before we start our own init
     utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.users', $state, init);
+
+    $scope.$on('$destroy', rolesUpdatedListener);
   }
 
 })();
