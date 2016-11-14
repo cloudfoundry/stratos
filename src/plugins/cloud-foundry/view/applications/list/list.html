@@ -17,7 +17,7 @@
             ng-if="applicationsListCtrl.showAddApplicationButton()"
             ng-disabled="applicationsListCtrl.disableAddApplicationButton()"
             translate
-            ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')">
+            ng-click="applicationsListCtrl.addApplication()">
       add application
     </button>
   </div>
