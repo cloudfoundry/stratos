@@ -62,6 +62,9 @@
     this.space = that.spaceModel.spaces[that.guid][that.spaceGuid];
 
     function refreshUsers() {
+      var user = that.stackatoInfo.info.endpoints.hcf[that.guid].user;
+      that.isAdmin = user.admin;
+
       that.userRoles = {};
 
       // For each user, get its roles in this space
@@ -126,16 +129,58 @@
       return this.selectedUsersCount() < 1 || !that.canUserRemoveFromSpace();
     };
 
+    this.showManageRoles = function () {
+      return that.canUserManageRoles() || that.isAdmin;
+    };
+
+    this.showRemoveFromSpace = function () {
+      return that.canUserRemoveFromSpace() || that.isAdmin;
+    };
+
+    this.showRemoveFromOrg = function () {
+      return that.canUserRemoveFromOrg() || that.isAdmin;
+    };
+
+    this.canAction = function () {
+      return that.showManageRoles() || that.showRemoveFromOrg() || that.showRemoveFromSpace();
+    };
+    var manageRoles = {
+      name: gettext('Manage Roles'),
+      disabled: true,
+      execute: function (aUser) {
+        return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
+      }
+    };
+    var removeFromOrg = {
+      name: gettext('Remove from Organization'),
+      disabled: true,
+      execute: function (aUser) {
+        return rolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
+          [aUser]);
+      }
+    };
+    var removeFromSpace = {
+      name: gettext('Remove from Space'),
+      disabled: true,
+      execute: function (aUser) {
+        return rolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,
+          that.space.details.space.metadata.guid, [aUser]);
+      }
+    };
+
     function init() {
+      if (that.canAction()) {
+        that.userActions = [manageRoles, removeFromOrg, removeFromSpace];
 
-      // Manage Roles - show slide in if user is an admin, org manager or the space manager
-      that.userActions[0].disabled = !that.canUserManageRoles();
+        // Manage Roles - show slide in if user is an admin, org manager or the space manager
+        that.userActions[0].disabled = !that.canUserManageRoles();
 
-      //Remove from Organization - remove user from organization if user is an admin or org manager
-      that.userActions[1].disabled = !that.canUserRemoveFromOrg();
+        //Remove from Organization - remove user from organization if user is an admin or org manager
+        that.userActions[1].disabled = !that.canUserRemoveFromOrg();
 
-      // Remove from Space - remove if user is an admin, org manager or the space manager
-      that.userActions[2].disabled = !that.canUserManageRoles();
+        // Remove from Space - remove if user is an admin, org manager or the space manager
+        that.userActions[2].disabled = !that.canUserManageRoles();
+      }
 
       $scope.$watchCollection(function () {
         return that.visibleUsers;
@@ -159,32 +204,6 @@
         });
 
     }
-
-    this.userActions = [
-      {
-        name: gettext('Manage Roles'),
-        disabled: true,
-        execute: function (aUser) {
-          return manageUsers.show(that.guid, that.space.details.space.entity.organization_guid, [aUser]).result;
-        }
-      },
-      {
-        name: gettext('Remove from Organization'),
-        disabled: true,
-        execute: function (aUser) {
-          return rolesService.removeFromOrganization(that.guid, that.space.details.space.entity.organization_guid,
-            [aUser]);
-        }
-      },
-      {
-        name: gettext('Remove from Space'),
-        disabled: true,
-        execute: function (aUser) {
-          return rolesService.removeFromSpace(that.guid, that.space.details.space.entity.organization_guid,
-            that.space.details.space.metadata.guid, [aUser]);
-        }
-      }
-    ];
 
     this.getSpaceRoles = function (aUser) {
       return that.userRoles[aUser.metadata.guid];

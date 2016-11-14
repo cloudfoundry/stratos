@@ -8,33 +8,37 @@
   <div>
     <div class="change-roles-buttons">
       <button class="btn btn-default"
-              ng-if="organizationUsersController.selectedUsersCount() < 2"
+              ng-if="organizationUsersController.selectedUsersCount() < 2 && organizationUsersController.showManageRoles()"
               ng-disabled="organizationUsersController.disableManageRoles()"
               ng-click="organizationUsersController.manageSelectedUsers()"
               translate>Manage Roles</button>
       <button class="btn btn-default"
-              ng-if="organizationUsersController.selectedUsersCount() > 1"
+              ng-if="organizationUsersController.selectedUsersCount() > 1 && organizationUsersController.showManageRoles()"
               ng-disabled="organizationUsersController.disableChangeRoles()"
               ng-click="organizationUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
+              ng-if="organizationUsersController.showRemoveFromOrg()"
               ng-disabled="organizationUsersController.disableRemoveFromOrg()"
               ng-click="organizationUsersController.removeFromOrganization()"
-              translate>Remove From Organization</button>
+              translate>Remove From Organization</button><br>
     </div>
     <div class="panel panel-default">
-      <table class="table table-actionable table-selectable">
+      <table class="table"
+             ng-class="{'table-actionable table-selectable': organizationUsersController.canAction()}">
         <thead>
         <tr>
-          <th><checkbox-input class="select-all-checkbox" ng-change="organizationUsersController.selectAllChanged()" ng-model="organizationUsersController.selectAllUsers"></checkbox-input></th>
+          <th ng-if="organizationUsersController.canAction()">
+            <checkbox-input class="select-all-checkbox" ng-change="organizationUsersController.selectAllChanged()" ng-model="organizationUsersController.selectAllUsers"></checkbox-input>
+          </th>
           <th class="sortable" translate st-sort-default="true" st-sort="entity.username">USERS({{ organizationUsersController.users.length }})</th>
           <th translate>Space Roles</th>
-          <th translate>ACTION</th>
+          <th ng-if="organizationUsersController.canAction()" translate>ACTION</th>
         </tr>
         </thead>
         <tbody>
         <tr class="" ng-repeat="user in organizationUsersController.visibleUsers">
-          <td>
+          <td ng-if="organizationUsersController.canAction()">
             <checkbox-input
               ng-model="organizationUsersController.selectedUsers[user.metadata.guid]"
               ng-if="user.entity.username">
@@ -55,7 +59,7 @@
               <span ng-if="!user.entity.username" translate>Not Applicable</span>
             </div>
           </td>
-          <td>
+          <td ng-if="organizationUsersController.canAction()">
             <actions-menu actions="organizationUsersController.userActions"
                           action-target="user"
                           menu-icon="helion-icon helion-icon-More"
@@ -68,7 +72,7 @@
         <tfoot ng-init="organizationUsersController.showUsers = 6"
                ng-show="organizationUsersController.showUsers < organizationUsersController.users.length">
         <tr>
-          <td colspan="4" class="text-center">
+          <td colspan="{{organizationUsersController.canAction() ? 4 : 3}}" class="text-center">
             <a ng-click="organizationUsersController.showUsers = organizationUsersController.users.length">
               <span translate>Show All</span> ({{ organizationUsersController.users.length }})
             </a>

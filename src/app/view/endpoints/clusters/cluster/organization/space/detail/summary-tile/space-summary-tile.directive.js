@@ -63,7 +63,7 @@
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var user = stackatoInfo.info.endpoints.hcf[this.clusterGuid].user;
-    that.isAdmin = user.admin;
+    this.isAdmin = user.admin;
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
     var spaceDetail;
 
@@ -71,81 +71,79 @@
       title: gettext('Summary')
     };
 
-    this.actions = [
-      {
-        name: gettext('Rename Space'),
-        disabled: true,
-        execute: function () {
-          return asyncTaskDialog(
-            {
-              title: gettext('Rename Space'),
-              templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
-              buttonTitles: {
-                submit: gettext('Save')
-              },
-              class: 'detail-view-thin'
+    var renameAction = {
+      name: gettext('Rename Space'),
+      disabled: true,
+      execute: function () {
+        return asyncTaskDialog(
+          {
+            title: gettext('Rename Space'),
+            templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-space.html',
+            buttonTitles: {
+              submit: gettext('Save')
             },
-            {
-              data: {
-                name: that.spaceDetail().details.space.entity.name,
-                spaceNames: _.map(that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
-                  return space.entity.name;
-                })
-              }
-            },
-            function (spaceData) {
-              if (spaceData.name && spaceData.name.length > 0) {
-                if (that.spaceDetail().details.space.entity.name === spaceData.name) {
-                  return $q.resolve();
-                }
-                return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
-                  {name: spaceData.name})
-                  .then(function () {
-                    notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
-                      {name: spaceData.name});
-                  });
-              } else {
-                return $q.reject('Invalid Name!');
-              }
+            class: 'detail-view-thin'
+          },
+          {
+            data: {
+              name: that.spaceDetail().details.space.entity.name,
+              spaceNames: _.map(that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].spaces, function (space) {
+                return space.entity.name;
+              })
             }
-          );
-        }
-      },
-      {
-        name: gettext('Delete Space'),
-        disabled: true,
-        execute: function () {
-          return confirmDialog({
-            title: gettext('Delete Space'),
-            description: gettext('Are you sure you want to delete space') +
-            " '" + that.spaceDetail().details.space.entity.name + "'?",
-            buttonText: {
-              yes: gettext('Delete'),
-              no: gettext('Cancel')
-            },
-            errorMessage: gettext('Failed to delete space'),
-            callback: function () {
-              return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
+          },
+          function (spaceData) {
+            if (spaceData.name && spaceData.name.length > 0) {
+              if (that.spaceDetail().details.space.entity.name === spaceData.name) {
+                return $q.resolve();
+              }
+              return that.spaceModel.updateSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid,
+                {name: spaceData.name})
                 .then(function () {
-                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
-                    {name: that.spaceDetail().details.space.entity.name});
-                  // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
-                  return $state.go($state.current.ncyBreadcrumb.parent());
+                  notificationsService.notify('success', gettext('Space \'{{name}}\' successfully updated'),
+                    {name: spaceData.name});
                 });
+            } else {
+              return $q.reject('Invalid Name!');
             }
-          });
-        }
+          }
+        );
       }
-    ];
+    };
+    var deleteAction = {
+      name: gettext('Delete Space'),
+      disabled: true,
+      execute: function () {
+        return confirmDialog({
+          title: gettext('Delete Space'),
+          description: gettext('Are you sure you want to delete space') +
+          " '" + that.spaceDetail().details.space.entity.name + "'?",
+          buttonText: {
+            yes: gettext('Delete'),
+            no: gettext('Cancel')
+          },
+          errorMessage: gettext('Failed to delete space'),
+          callback: function () {
+            return that.spaceModel.deleteSpace(that.clusterGuid, that.organizationGuid, that.spaceGuid)
+              .then(function () {
+                notificationsService.notify('success', gettext('Space \'{{name}}\' successfully deleted'),
+                  {name: that.spaceDetail().details.space.entity.name});
+                // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
+                return $state.go($state.current.ncyBreadcrumb.parent());
+              });
+          }
+        });
+      }
+    };
 
     this.getEndpoint = function () {
       return utils.getClusterEndpoint(that.userServiceInstance.serviceInstances[that.clusterGuid]);
     };
 
     this.showCliCommands = function () {
-      cliCommands.show(this.getEndpoint(), this.userName,
-        that.organizationModel.organizations[that.clusterGuid][that.organizationGuid].details.org.entity.name,
-        that.spaceDetail().details.space.entity.name);
+      cliCommands.show(this.getEndpoint(), this.userName, that.clusterGuid,
+        that.organizationModel.organizations[that.clusterGuid][that.organizationGuid],
+        that.spaceDetail());
     };
 
     $scope.$watchCollection(function () {
@@ -159,18 +157,30 @@
     });
 
     function enableActions() {
-      var canDelete = spaceDetail.details.totalRoutes === 0 &&
-        spaceDetail.details.totalServiceInstances === 0 &&
-        spaceDetail.details.totalApps === 0;
+      that.actions = [];
 
       // Rename Space
-      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
+      var canRename = authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
         spaceDetail.details.guid);
+      if (canRename || that.isAdmin) {
+        renameAction.disabled = false;
+        that.actions.push(renameAction);
+      }
 
       // Delete Space
-      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.space,
-          authModel.actions.delete, spaceDetail.details.guid);
+      var isSpaceEmpty = spaceDetail.details.totalRoutes === 0 &&
+        spaceDetail.details.totalServiceInstances === 0 &&
+        spaceDetail.details.totalApps === 0;
+      var canDelete = authModel.isAllowed(that.clusterGuid, authModel.resources.space,
+        authModel.actions.delete, spaceDetail.details.guid);
+      if (canDelete || that.isAdmin) {
+        deleteAction.disabled = !isSpaceEmpty;
+        that.actions.push(deleteAction);
+      }
 
+      if (that.actions.length < 1) {
+        delete that.actions;
+      }
     }
 
     function init() {
@@ -192,9 +202,7 @@
 
         // Update delete action when space info changes (requires authService which depends on chainStateResolve)
         $scope.$watch(function () {
-          return !spaceDetail.details.totalRoutes &&
-            !spaceDetail.details.totalServiceInstances &&
-            !spaceDetail.details.totalApps;
+          return !spaceDetail.details.totalRoutes && !spaceDetail.details.totalServiceInstances && !spaceDetail.details.totalApps;
         }, function () {
           enableActions();
         });

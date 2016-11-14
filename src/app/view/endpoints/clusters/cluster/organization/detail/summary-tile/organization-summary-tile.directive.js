@@ -80,73 +80,74 @@
     that.isAdmin = user.admin;
     that.userName = user.name;
 
-    this.actions = [
-      {
-        name: gettext('Edit Organization'),
-        disabled: true,
-        execute: function () {
-          return asyncTaskDialog(
-            {
-              title: gettext('Edit Organization'),
-              templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
-              buttonTitles: {
-                submit: gettext('Save')
-              },
-              class: 'detail-view-thin'
+    var renameAction = {
+      name: gettext('Edit Organization'),
+      disabled: true,
+      execute: function () {
+        return asyncTaskDialog(
+          {
+            title: gettext('Edit Organization'),
+            templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
+            buttonTitles: {
+              submit: gettext('Save')
             },
-            {
-              data: {
-                name: that.organization.details.org.entity.name,
-                organizationNames: that.organizationNames
-              }
-            },
-            function (orgData) {
-              if (orgData.name && orgData.name.length > 0) {
-                if (that.organization.details.org.entity.name === orgData.name) {
-                  return $q.resolve();
-                }
-                return that.organizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
-                  {name: orgData.name})
-                  .then(function () {
-                    notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
-                      {name: orgData.name});
-                  });
-              } else {
-                return $q.reject('Invalid Name!');
-              }
+            class: 'detail-view-thin'
+          },
+          {
+            data: {
+              name: that.organization.details.org.entity.name,
+              organizationNames: that.organizationNames
             }
-          );
-        }
-      },
-      {
-        name: gettext('Delete Organization'),
-        disabled: true,
-        execute: function () {
-          confirmDialog({
-            title: gettext('Delete Organization'),
-            description: gettext('Are you sure you want to delete organization') +
-            " '" + that.organization.details.org.entity.name + "'?",
-            buttonText: {
-              yes: gettext('Delete'),
-              no: gettext('Cancel')
-            },
-            errorMessage: gettext('Failed to delete organization'),
-            callback: function () {
-              var name = that.organization.details.org.entity.name;
-              return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
+          },
+          function (orgData) {
+            if (orgData.name && orgData.name.length > 0) {
+              if (that.organization.details.org.entity.name === orgData.name) {
+                return $q.resolve();
+              }
+              return that.organizationModel.updateOrganization(that.clusterGuid, that.organizationGuid,
+                {name: orgData.name})
                 .then(function () {
-                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
-                    {name: name});
-                  // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
-                  return $state.go($state.current.ncyBreadcrumb.parent());
+                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                    {name: orgData.name});
                 });
+            } else {
+              return $q.reject('Invalid Name!');
             }
-          });
-        }
+          }
+        );
       }
-    ];
+    };
+
+    var deleteAction = {
+      name: gettext('Delete Organization'),
+      disabled: true,
+      execute: function () {
+        confirmDialog({
+          title: gettext('Delete Organization'),
+          description: gettext('Are you sure you want to delete organization') +
+          " '" + that.organization.details.org.entity.name + "'?",
+          buttonText: {
+            yes: gettext('Delete'),
+            no: gettext('Cancel')
+          },
+          errorMessage: gettext('Failed to delete organization'),
+          callback: function () {
+            var name = that.organization.details.org.entity.name;
+            return that.organizationModel.deleteOrganization(that.clusterGuid, that.organizationGuid)
+              .then(function () {
+                notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
+                  {name: name});
+                // After a successful delete, go up the breadcrumb tree (the current org no longer exists)
+                return $state.go($state.current.ncyBreadcrumb.parent());
+              });
+          }
+        });
+      }
+    };
 
     function enableActions() {
+      that.actions = [renameAction, deleteAction];
+
       var canDelete = _.keys(that.organization.spaces).length === 0;
 
       that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update,
@@ -154,6 +155,10 @@
 
       that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.organization,
           authModel.actions.delete, that.organization.details.guid);
+
+      if (!_.find(that.actions, {disabled: false})) {
+        delete that.actions;
+      }
     }
 
     $scope.$watch(function () {
