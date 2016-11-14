@@ -21,12 +21,15 @@
   ApplicationDeliveryPipelineController.$inject = [
     'app.event.eventService',
     'app.model.modelManager',
+    'helion.framework.widgets.dialog.confirm',
+    'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
+    'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
+    'app.utils.utilsService',
     '$interpolate',
     '$stateParams',
     '$scope',
-    'helion.framework.widgets.dialog.confirm',
-    'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
-    'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService'
+    '$q',
+    '$state'
   ];
 
   /**
@@ -34,16 +37,19 @@
    * @constructor
    * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} $interpolate - the Angular $interpolate service
-   * @param {object} $stateParams - the UI router $stateParams service
-   * @param {object} $scope  - the Angular $scope
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
+   * @param {app.utils.utilsService} utils - the console utils service
+   * @param {object} $interpolate - the Angular $interpolate service
+   * @param {object} $stateParams - the UI router $stateParams service
+   * @param {object} $scope  - the Angular $scope
+   * @param {object} $q - the Angular $q service
+   * @param {object} $state - the UI router $state service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, $interpolate, $stateParams, $scope, confirmDialog, addNotificationService, postDeployActionService) {
+  function ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, $interpolate, $stateParams, $scope, $q, $state) {
     var that = this;
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
@@ -80,10 +86,15 @@
       isAdmin: this.account.isAdmin()
     };
 
-    // Fetch HCE service metadata so that we can show the appropriate message
-    that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
-    that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
-    that.hceServices.fetching = false;
+    function init() {
+      // Fetch HCE service metadata so that we can show the appropriate message
+      that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
+      that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
+      that.hceServices.fetching = false;
+      return $q.resolve();
+    }
+
+    utils.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
 
     this.notificationTargetActions = [
       {

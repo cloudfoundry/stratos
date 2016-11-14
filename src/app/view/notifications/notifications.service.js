@@ -34,7 +34,19 @@
        * @public
        */
       notify: function (toastType, message, interpolateScope, toastOptions) {
-        var interpolatedMessage = interpolateScope ? $interpolate(message)(interpolateScope) : message;
+
+        var interpolatedMessage;
+        if (interpolateScope) {
+          // Escape possible HTML properties in interpolateScope
+          _.forEach(interpolateScope, function (val, key) {
+            if (_.isString(val)) {
+              interpolateScope[key] = _.escape(val);
+            }
+          });
+          interpolatedMessage = $interpolate(message)(interpolateScope);
+        } else {
+          interpolatedMessage = message;
+        }
         switch (toastType) {
           case 'busy':
             return toaster.busy(interpolatedMessage, toastOptions);

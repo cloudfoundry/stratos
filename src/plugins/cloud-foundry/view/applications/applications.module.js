@@ -27,6 +27,7 @@
   }
 
   ApplicationsController.$inject = [
+    '$scope',
     '$q',
     '$state',
     'app.utils.utilsService',
@@ -38,6 +39,7 @@
   /**
    * @name ApplicationsController
    * @description   Controller for applications module
+   * @param {object} $scope - the angular $scope service
    * @param {object} $q - the angular $q service
    * @param {object} $state - the UI router $state service
    * @param {object} utils - the utils service
@@ -46,7 +48,7 @@
    * @param {object} loggedInService - Logged In Service
    * @constructor
    */
-  function ApplicationsController($q, $state, utils, modelManager, eventService, loggedInService) {
+  function ApplicationsController($scope, $q, $state, utils, modelManager, eventService, loggedInService) {
 
     var authService = modelManager.retrieve('cloud-foundry.model.auth');
     var initialized = $q.defer();
@@ -68,10 +70,11 @@
       initialized.resolve();
     }
 
-    eventService.$on(eventService.events.LOGIN, function () {
+    var logInListener = eventService.$on(eventService.events.LOGIN, function () {
       onLoggedIn();
     });
 
+    $scope.$on('$destroy', logInListener);
   }
 
 })();

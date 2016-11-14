@@ -29,7 +29,7 @@
             show-table-inline-message="{{ serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false ? serviceRegistrationCtrl.warningMsg : ''}}">
             <td class="text-center registration-status">
               <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid"></span>
+                ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid && !serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].error"></span>
               <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
                 ng-if="serviceRegistrationCtrl.userCnsiModel.serviceInstances[cnsi.guid].valid === false"></span>
               <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-warning"
