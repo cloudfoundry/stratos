@@ -2,17 +2,13 @@
   'use strict';
 
   describe('delivery-pipeline-status directive', function () {
-    var element, $httpBackend, controller, eventEmitted;
+    var element, $httpBackend, controller, detailViewSpy;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(module({
       'app.event.eventService': {
-        $emit: function (event) {
-
-          if (event === 'cf.events.START_ADD_PIPELINE_WORKFLOW') {
-            eventEmitted = true;
-          }
+        $emit: function () {
         },
         $on: angular.noop,
         events: {
@@ -20,22 +16,30 @@
         }
       }
     }));
-    beforeEach(inject(function ($injector) {
-      var $compile = $injector.get('$compile');
-      var contextScope = $injector.get('$rootScope').$new();
-      contextScope.pipeline = {};
-      contextScope.hce = {};
-      $httpBackend = $injector.get('$httpBackend');
 
-      var markup = '<delivery-pipeline-status>' +
-        '</delivery-pipeline-status>';
+    beforeEach(function () {
+      module(function ($provide) {
+        detailViewSpy = jasmine.createSpy();
+        $provide.constant('helion.framework.widgets.detailView', detailViewSpy);
+      });
 
-      element = angular.element(markup);
-      $compile(element)(contextScope);
+      inject(function ($injector) {
+        var $compile = $injector.get('$compile');
+        var contextScope = $injector.get('$rootScope').$new();
+        contextScope.pipeline = {};
+        contextScope.hce = {};
+        $httpBackend = $injector.get('$httpBackend');
 
-      contextScope.$apply();
-      controller = element.controller('deliveryPipelineStatus');
-    }));
+        var markup = '<delivery-pipeline-status>' +
+          '</delivery-pipeline-status>';
+
+        element = angular.element(markup);
+        $compile(element)(contextScope);
+
+        contextScope.$apply();
+        controller = element.controller('deliveryPipelineStatus');
+      });
+    });
 
     afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
@@ -49,7 +53,7 @@
 
     it('should emit event when setting up pipeline', function () {
       controller.setupPipeline();
-      expect(eventEmitted).toBe(true);
+      expect(detailViewSpy).toHaveBeenCalled();
     });
 
   });

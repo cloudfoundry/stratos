@@ -26,17 +26,17 @@
   }
 
   ApplicationSetupPipelineController.$inject = [
-    'app.event.eventService'
+    'helion.framework.widgets.detailView'
   ];
 
   /**
    * @name ApplicationSetupPipelineController
    * @constructor
-   * @param {app.event.eventService} eventService - the Event management service
-   * @property {app.event.eventService} eventService - the Event management service
+   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
    */
-  function ApplicationSetupPipelineController(eventService) {
-    this.eventService = eventService;
+  function ApplicationSetupPipelineController(detailView) {
+    this.detailView = detailView;
   }
 
   angular.extend(ApplicationSetupPipelineController.prototype, {
@@ -46,7 +46,11 @@
      * @description trigger add pipeline workflow
      */
     setupPipeline: function () {
-      this.eventService.$emit('cf.events.START_ADD_PIPELINE_WORKFLOW');
+      this.detailView(
+        {
+          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
+        }
+      );
     }
   });
 
