@@ -68,7 +68,7 @@
               password: 'hscadmin'
             },
             user: {
-              username: 'rcox',
+              username: 'e2e',
               password: 'changeme'
             },
             testOrgName: 'e2e',

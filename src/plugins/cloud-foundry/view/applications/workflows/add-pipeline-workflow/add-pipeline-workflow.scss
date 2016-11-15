@@ -1,6 +1,8 @@
 add-app-workflow,
 add-pipeline-workflow {
   table.table {
+    border: 1px solid transparent;
+    
     tbody, tr:nth-child(2) {
       border: 1px solid $table-border-color;
     }

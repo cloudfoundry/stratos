@@ -71,6 +71,12 @@
         }
       },
       STARTED: {
+        NO_INSTANCES: {
+          label: gettext('Deployed'),
+          subLabel: gettext('No Instances'),
+          indicator: 'ok',
+          actions: 'stop,restart,cli'
+        },
         PENDING: {
           label: gettext('Staging App'),
           indicator: 'busy',
@@ -82,6 +88,12 @@
           actions: 'stop,restart,cli'
         },
         'STAGED(0,0,0)': {
+          label: gettext('Deployed'),
+          subLabel: gettext('Starting App'),
+          indicator: 'busy',
+          actions: 'stop,restart,cli'
+        },
+        'STAGED(N,0,0,N)': {
           label: gettext('Deployed'),
           subLabel: gettext('Starting App'),
           indicator: 'busy',
@@ -178,14 +190,26 @@
           if (appStateMatch['?']) {
             return appStateMatch['?'];
           } else {
+
+            // Special case for when the desired app instance counf is 0
+            if (summary && summary.instances === 0) {
+              return appStateMatch.NO_INSTANCES;
+            }
+
             var extState;
             // Do the best we can if we do not have app instance metadata
             if (appInstances) {
               var counts = getCounts(summary, appInstances);
-              extState = pkgState + '(' +
-              formatCount(counts.running) + ',' +
-              formatCount(counts.crashed) + ',' +
-              formatCount(counts.flapping) + ')';
+
+              // Special case: App instances only in running and starting state
+              if (counts.starting > 0 && counts.okay === summary.instances) {
+                extState = pkgState + '(N,0,0,N)';
+              } else {
+                extState = pkgState + '(' +
+                formatCount(counts.running) + ',' +
+                formatCount(counts.crashed) + ',' +
+                formatCount(counts.flapping) + ')';
+              }
             } else {
               extState = pkgState + '(?,?,?)';
             }
@@ -235,6 +259,9 @@
       // Note that the app summary returned when we are getting all apps does not report running_instances
       // NOTE: running_instances does not mean that the instance states ar "RUNNING"
       counts.running = getCount(undefined, appInstances, 'RUNNING');
+      counts.starting = getCount(undefined, appInstances, 'STARTING');
+      counts.okay = counts.running + counts.starting;
+
       // If we know how many aer running and this is the same as the total # instances then
       // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
       if (counts.running === summary.instances) {
