@@ -18,7 +18,12 @@
     return {
       controller: AddAppWorkflowController,
       controllerAs: 'addAppWorkflowCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-workflow.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-workflow.html',
+      scope: {
+        closeDialog: '=',
+        dismissDialog: '='
+      },
+      bindToController: true
     };
   }
 
@@ -45,6 +50,7 @@
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
+   * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -102,10 +108,6 @@
         var that = this;
         var $scope = this.$scope;
 
-        var startAddAppListener = this.eventService.$on('cf.events.START_ADD_APP_WORKFLOW', function () {
-          that.startWorkflow();
-        });
-
         this.stopWatchServiceInstance = $scope.$watch(function () {
           return that.userInput.serviceInstance;
         }, function (serviceInstance) {
@@ -154,7 +156,8 @@
 
         addPipelineWorkflowPrototype.setWatchers.apply(this);
 
-        $scope.$on('$destroy', startAddAppListener);
+        // Start the workflow
+        this.startWorkflow();
       },
 
       reset: function () {
@@ -600,11 +603,13 @@
       stopWorkflow: function () {
         this.notify();
         this.addingApplication = false;
+        this.closeDialog();
       },
 
       finishWorkflow: function () {
         this.notify();
         this.addingApplication = false;
+        this.dismissDialog();
       }
     });
   }

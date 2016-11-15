@@ -69,6 +69,8 @@
       F.prototype = this.addPipelineWorkflowPrototype;
 
       this.instance = new F();
+      this.instance.closeDialog = jasmine.createSpy();
+      this.instance.dismissDialog = jasmine.createSpy();
       this.instance.data = {
         workflow: {}
       };
@@ -562,11 +564,13 @@
       it('#stopWorkflow', function () {
         this.instance.stopWorkflow();
         expect(this.instance.addingPipeline).toBe(false);
+        expect(this.instance.closeDialog).toHaveBeenCalled();
       });
 
       it('#finishWorkflow', function () {
         this.instance.finishWorkflow();
         expect(this.instance.addingPipeline).toBe(false);
+        expect(this.instance.dismissDialog).toHaveBeenCalled();
       });
     });
   });

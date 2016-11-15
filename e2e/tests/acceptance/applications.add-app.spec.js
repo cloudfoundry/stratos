@@ -168,7 +168,7 @@
       galleryWall.addApplication().then(function () {
         expect(addAppWizard.isDisplayed()).toBeTruthy();
 
-        expect(addAppWizard.getWizard().getTitle()).toBe('Add Application');
+        expect(addAppWizard.getTitle()).toBe('Add Application');
 
         addAppWizard.getWizard().getStepNames().then(function (names) {
           expect(names.length).toBe(3);

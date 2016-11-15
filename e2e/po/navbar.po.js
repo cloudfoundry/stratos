@@ -41,7 +41,7 @@
       return element(by.css('account-actions'))
         .element(by.css('[ng-click="applicationCtrl.logout()"]'))
         .click().then(function () {
-          browser.driver.sleep(50);
+          browser.driver.sleep(100);
         });
     });
   }

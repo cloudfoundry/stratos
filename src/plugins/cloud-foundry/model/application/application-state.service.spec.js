@@ -103,8 +103,20 @@
       });
 
       it('After successful push', function () {
-        var testData = makeTestData('STARTED', 'STAGED', []);
+        var testData = makeTestData('STARTED', 'STAGED', ['STARTING']);
         var res = appStateService.get(testData.summary, testData.instances);
+        expect(res.indicator).toBe('busy');
+        expect(res.label).toBe('Deployed');
+        expect(res.subLabel).toBe('Starting App');
+        expect(_.keys(res.actions).length).toBe(3);
+        expect(res.actions.stop).toBe(true);
+        expect(res.actions.restart).toBe(true);
+      });
+
+      it('Starting', function () {
+        var testData = makeTestData('STARTED', 'STAGED', ['STARTING', 'RUNNING']);
+        var res = appStateService.get(testData.summary, testData.instances);
+
         expect(res.indicator).toBe('busy');
         expect(res.label).toBe('Deployed');
         expect(res.subLabel).toBe('Starting App');
@@ -218,7 +230,7 @@
         expect(res.actions.launch).toBe(true);
       });
 
-      it('Started, but not stats available', function () {
+      it('Started, but no stats available', function () {
         var testData = makeTestData('STARTED', 'STAGED');
         var res = appStateService.get(testData.summary, undefined);
         expect(res.indicator).toBe('tentative');
@@ -226,6 +238,13 @@
         expect(res.subLabel).not.toBeDefined();
       });
 
+      it('Started, but have instance counf set to 0', function () {
+        var testData = makeTestData('STARTED', 'STAGED');
+        var res = appStateService.get(testData.summary, testData.instances);
+        expect(res.indicator).toBe('tentative');
+        expect(res.label).toBe('Deployed');
+        expect(res.subLabel).not.toBeDefined();
+      });
     });
 
   });

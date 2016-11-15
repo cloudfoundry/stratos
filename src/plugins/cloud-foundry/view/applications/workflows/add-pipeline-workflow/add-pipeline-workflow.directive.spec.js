@@ -10,7 +10,18 @@
       var $compile = $injector.get('$compile');
       $httpBackend = $injector.get('$httpBackend');
       $scope = $injector.get('$rootScope').$new();
-      var markup = '<add-pipeline-workflow></add-pipeline-workflow>';
+      $scope.testDismiss = function () {};
+      $scope.testClose = function () {};
+
+      var modelManager = $injector.get('app.model.modelManager');
+      var application = modelManager.retrieve('cloud-foundry.model.application').application;
+      application.summary = {
+        routes: [{}]
+      };
+
+      $httpBackend.whenGET('/pp/v1/cnsis/registered').respond(200, {});
+      $httpBackend.expectGET('/pp/v1/cnsis/registered');
+      var markup = '<add-pipeline-workflow close-dialog="testClose" dismiss-dialog="testDismiss"></add-pipeline-workflow>';
       var element = angular.element(markup);
       $compile(element)($scope);
       $scope.$apply();
@@ -18,6 +29,7 @@
       var mockAppsApi = mock.cloudFoundryAPI.Apps;
       var GetAppSummary = mockAppsApi.GetAppSummary('app_123');
       mockApp = GetAppSummary.response['200'].body;
+      $httpBackend.flush();
     }));
 
     afterEach(function () {
@@ -25,7 +37,7 @@
       $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should hace controller', function () {
+    it('should have controller', function () {
       expect(addPipelineWorkflowCtrl).toBeDefined();
     });
 
