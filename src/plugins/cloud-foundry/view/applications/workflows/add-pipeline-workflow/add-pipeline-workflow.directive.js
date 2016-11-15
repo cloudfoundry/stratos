@@ -18,7 +18,12 @@
     return {
       controller: AddPipelineWorkflowController,
       controllerAs: 'addPipelineWorkflowCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-workflow.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-workflow.html',
+      scope: {
+        closeDialog: '=',
+        dismissDialog: '='
+      },
+      bindToController: true
     };
   }
 
@@ -69,6 +74,7 @@
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
 
     this.init();
+    this.startWorkflow();
   }
 
   run.$inject = [
