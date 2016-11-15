@@ -167,9 +167,18 @@
 
     function init() {
       if (that.canAction()) {
-        that.userActions = [manageRoles, removeFromOrg];
-        that.userActions[0].disabled = !that.canUserManageRoles();
-        that.userActions[1].disabled = !that.canUserRemoveFromOrg();
+        that.userActions = [];
+        if (that.showManageRoles()) {
+          manageRoles.disabled = !that.canUserManageRoles();
+          that.userActions.push(manageRoles);
+        }
+        if (that.showRemoveFromOrg()) {
+          removeFromOrg.disabled = !that.canUserRemoveFromOrg();
+          that.userActions.push(removeFromOrg);
+        }
+        if (that.userActions.length < 1) {
+          delete that.userActions;
+        }
       }
 
       $scope.$watchCollection(function () {

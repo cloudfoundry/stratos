@@ -213,6 +213,10 @@
     if (canAssignUsers || this.user.admin) {
       that.actions.push(assignUsersAction);
     }
+
+    if (that.actions.length < 1) {
+      delete that.actions;
+    }
   }
 
 })();

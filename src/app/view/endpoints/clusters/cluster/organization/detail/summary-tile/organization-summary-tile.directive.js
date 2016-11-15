@@ -146,17 +146,23 @@
     };
 
     function enableActions() {
-      that.actions = [renameAction, deleteAction];
+      that.actions = [];
 
-      var canDelete = _.keys(that.organization.spaces).length === 0;
-
-      that.actions[0].disabled = !authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update,
+      var canUpdate = authModel.isAllowed(that.clusterGuid, authModel.resources.organization, authModel.actions.update,
         that.organization.details.guid);
+      if (canUpdate || that.isAdmin) {
+        renameAction.disabled = false;
+        that.actions.push(renameAction);
+      }
 
-      that.actions[1].disabled = !canDelete || !authModel.isAllowed(that.clusterGuid, authModel.resources.organization,
-          authModel.actions.delete, that.organization.details.guid);
+      var canDelete = authModel.isAllowed(that.clusterGuid, authModel.resources.organization,
+        authModel.actions.delete, that.organization.details.guid);
+      if (canDelete || that.isAdmin) {
+        deleteAction.disabled = _.keys(that.organization.spaces).length !== 0;
+        that.actions.push(deleteAction);
+      }
 
-      if (!_.find(that.actions, {disabled: false})) {
+      if (that.actions.length < 1) {
         delete that.actions;
       }
     }

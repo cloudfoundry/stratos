@@ -161,7 +161,7 @@
 
       // Rename Space
       var canRename = authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
-        spaceDetail.details.guid);
+        spaceDetail.details.guid, that.organizationGuid);
       if (canRename || that.isAdmin) {
         renameAction.disabled = false;
         that.actions.push(renameAction);
@@ -172,7 +172,7 @@
         spaceDetail.details.totalServiceInstances === 0 &&
         spaceDetail.details.totalApps === 0;
       var canDelete = authModel.isAllowed(that.clusterGuid, authModel.resources.space,
-        authModel.actions.delete, spaceDetail.details.guid);
+        authModel.actions.delete, that.organizationGuid);
       if (canDelete || that.isAdmin) {
         deleteAction.disabled = !isSpaceEmpty;
         that.actions.push(deleteAction);

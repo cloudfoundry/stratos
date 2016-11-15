@@ -186,7 +186,7 @@
 
       // Rename Space
       var canRename = authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.rename,
-        that.spaceDetail().details.guid);
+        that.spaceDetail().details.guid, that.organizationGuid);
       if (canRename || isAdmin) {
         renameAction.disabled = false;
         that.actions.push(renameAction);
@@ -194,7 +194,7 @@
 
       // Delete Space
       var canDelete = authModel.isAllowed(that.clusterGuid, authModel.resources.space, authModel.actions.delete,
-        that.spaceDetail().details.guid);
+        that.organizationGuid);
       if (canDelete || isAdmin) {
         deleteAction.disabled = !that.canDelete;
         that.actions.push(deleteAction);

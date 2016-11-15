@@ -170,16 +170,25 @@
 
     function init() {
       if (that.canAction()) {
-        that.userActions = [manageRoles, removeFromOrg, removeFromSpace];
-
-        // Manage Roles - show slide in if user is an admin, org manager or the space manager
-        that.userActions[0].disabled = !that.canUserManageRoles();
-
-        //Remove from Organization - remove user from organization if user is an admin or org manager
-        that.userActions[1].disabled = !that.canUserRemoveFromOrg();
-
-        // Remove from Space - remove if user is an admin, org manager or the space manager
-        that.userActions[2].disabled = !that.canUserManageRoles();
+        that.userActions = [];
+        if (that.showManageRoles()) {
+          // Manage Roles - show slide in if user is an admin, org manager or the space manager
+          manageRoles.disabled = !that.canUserManageRoles();
+          that.userActions.push(manageRoles);
+        }
+        if (that.showRemoveFromOrg()) {
+          //Remove from Organization - remove user from organization if user is an admin or org manager
+          removeFromOrg.disabled = !that.canUserRemoveFromOrg();
+          that.userActions.push(removeFromOrg);
+        }
+        if (that.showRemoveFromSpace()) {
+          // Remove from Space - remove if user is an admin, org manager or the space manager
+          removeFromSpace.disabled = !that.canUserManageRoles();
+          that.userActions.push(removeFromSpace);
+        }
+        if (that.userActions.length < 1) {
+          delete that.userActions;
+        }
       }
 
       $scope.$watchCollection(function () {
