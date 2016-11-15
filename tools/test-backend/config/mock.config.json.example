@@ -1,8 +1,12 @@
 {
   "portal_proxy": {
     "host": "localhost",
-    "port": 80,
+    "port": 443,
     "path": "pp"
+  },
+  "ssl": {
+    "key": "ssl/browser-sync.key",
+    "cert": "ssl/browser-sync.crt"
   },
   "serviceInstances": {
     "hcf": 3,
