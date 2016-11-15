@@ -5,8 +5,8 @@
     "path": "pp"
   },
   "ssl": {
-    "key": "ssl/pproxy.key",
-    "cert": "ssl/pproxy.crt"
+    "key": "ssl/browser-sync.key",
+    "cert": "ssl/browser-sync.crt"
   },
   "serviceInstances": {
     "hcf": 3,
