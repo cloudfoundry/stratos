@@ -139,10 +139,12 @@
 
         it('should have `Unmap route from app` enabled for ' + role, function () {
           expect($controller.routesActionMenu[0].disabled).toBe(false);
+          expect($controller.routesActionMenu[0].hidden).toBe(false);
         });
 
         it('should have `delete route` enabled for ' + role, function () {
           expect($controller.routesActionMenu[1].disabled).toBe(false);
+          expect($controller.routesActionMenu[1].hidden).toBe(false);
         });
 
         it('should have `manage services` enabled for ' + role, function () {
@@ -167,11 +169,11 @@
       });
 
       it('should have `Unmap route from app` disabled', function () {
-        expect($controller.routesActionMenu[0].disabled).toBe(true);
+        expect($controller.routesActionMenu[0].hidden).toBe(true);
       });
 
       it('should have `delete route` disabled', function () {
-        expect($controller.routesActionMenu[1].disabled).toBe(true);
+        expect($controller.routesActionMenu[1].hidden).toBe(true);
       });
 
       it('should have `manage services` disabled', function () {
