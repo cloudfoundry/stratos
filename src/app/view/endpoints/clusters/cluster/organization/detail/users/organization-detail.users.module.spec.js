@@ -38,7 +38,7 @@
         var userSelection = $injector.get('app.view.userSelection');
 
         var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, {});
+        _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organizationGuid, { details: {guid: organizationGuid } });
 
         var spaceGuid = 'spaceGuid';
 
@@ -51,13 +51,11 @@
 
         mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
-        var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
-          guid: 'user_guid',
-          admin: true
-        });
-        //
-        $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({resources: []});
+        if (role === 'admin') {
+          $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({resources: []});
+        } else {
+          $httpBackend.expectGET('/pp/v1/proxy/v2/organizations/' + organizationGuid + '/user_roles?results-per-page=100').respond({resources: []});
+        }
 
         var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
         $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
@@ -118,12 +116,12 @@
           $httpBackend.flush();
         }));
 
-        it('should have manage roles disabled', function () {
-          expect($controller.userActions[0].disabled).toBeTruthy();
-        });
-
-        it('should have remove from organization disabled', function () {
-          expect($controller.userActions[1].disabled).toBeTruthy();
+        it('should have no actions', function () {
+          if ($controller.actions) {
+            expect($controller.actions.length).toBe(0);
+          } else {
+            expect($controller.actions).not.toBeDefined();
+          }
         });
 
       });

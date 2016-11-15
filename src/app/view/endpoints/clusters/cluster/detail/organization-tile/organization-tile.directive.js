@@ -46,8 +46,8 @@
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, $q, $scope, utils, assignUsers, notificationsService,
-                                      confirmDialog, asyncTaskDialog) {
+  function OrganizationTileController(modelManager, $state, $q, $scope, utils, // eslint-disable-line complexity
+                                      assignUsers, notificationsService, confirmDialog, asyncTaskDialog) {
     var that = this;
     this.$state = $state;
 

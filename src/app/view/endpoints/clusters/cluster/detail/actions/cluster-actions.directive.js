@@ -229,7 +229,7 @@
       icon: 'helion-icon-lg helion-icon helion-icon-Add_user'
     };
 
-    function enableActions() {
+    function enableActions() { // eslint-disable-line complexity
       var isAdmin = stackatoInfo.info.endpoints.hcf[that.clusterGuid].user.admin;
 
       // Organization access - enabled if user is either an admin or the appropriate flag is enabled
