@@ -24,7 +24,7 @@
     throw 'Can not find the required mock.config.json configuration file:' + JSON.stringify(e);
   }
 
-  if (!(fs.existsSync(config.ssl.key) || fs.existsSync(config.ssl.cert))) {
+  if (!config.ssl || !(fs.existsSync(config.ssl.key) || fs.existsSync(config.ssl.cert))) {
     console.log('SSL key and cert don\'t exist! If you are using the defaults, please run the createCert.sh script in tools/ssl.');
     process.exit(1);
   }
