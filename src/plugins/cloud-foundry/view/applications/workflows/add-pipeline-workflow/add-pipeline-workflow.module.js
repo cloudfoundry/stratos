@@ -564,10 +564,12 @@
 
       stopWorkflow: function () {
         this.addingPipeline = false;
+        this.closeDialog();
       },
 
       finishWorkflow: function () {
         this.addingPipeline = false;
+        this.dismissDialog();
       }
     });
 
