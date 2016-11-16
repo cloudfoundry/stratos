@@ -78,7 +78,7 @@
       return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
         .then(function () {
           that.createClusterList();
-
+          // Redirect to Cf's state
           if (_.keys(that.serviceInstances).length === 1) {
             that.$state.go('clusters.cluster.detail.organizations', {guid: _.keys(that.serviceInstances)[0]});
           }
@@ -105,9 +105,8 @@
         if (cloned.isConnected) {
           cloned.hasExpired = false;
         } else {
-          var tokenExpiry =
-            _.get(that.userServiceInstanceModel.serviceInstances[cloned.guid], 'token_expiry', Number.MAX_VALUE);
-          cloned.hasExpired = new Date().getTime() > tokenExpiry * 1000;
+          // Skip disconnected HCF
+          return;
         }
         that.serviceInstances[cloned.guid] = cloned;
       });
@@ -181,18 +180,6 @@
         });
     },
 
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name register
-     * @description Add a cluster to the console
-     */
-    register: function () {
-      var that = this;
-      this.hcfRegistration.add().then(function () {
-        return that.refreshClusterModel();
-      });
-    },
 
     /**
      * @namespace app.view.endpoints.clusters

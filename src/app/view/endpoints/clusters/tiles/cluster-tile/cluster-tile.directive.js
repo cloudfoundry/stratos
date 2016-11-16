@@ -58,7 +58,6 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.modelUtils = modelUtils;
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.actions = [];
     this.orgCount = null;
     this.userCount = null;
     this.userService = {};
@@ -94,7 +93,6 @@
           return;
         }
         that.userService = userServiceInstanceModel.serviceInstances[that.service.guid] || {};
-        that.setActions();
         that.setOrganisationCount();
         that.setUserCount();
       });
@@ -106,43 +104,6 @@
 
   angular.extend(ClusterTileController.prototype, {
 
-    /**
-     * @namespace app.view.endpoints.clusters
-     * @memberof app.view.endpoints.clusters
-     * @name setActions
-     * @description Set the contents of the tile's action menu
-     */
-    setActions: function () {
-      var that = this;
-      this.actions = [];
-
-      if (!this.service.isConnected) {
-        this.actions.push({
-          name: gettext('Connect'),
-          execute: function () {
-            that.connect(that.service);
-          }
-        });
-      }
-
-      if (this.service.isConnected || this.service.hasExpired) {
-        this.actions.push({
-          name: gettext('Disconnect'),
-          execute: function () {
-            that.disconnect(that.service.guid);
-          }
-        });
-      }
-
-      if (this.currentUserAccount.isAdmin()) {
-        this.actions.push({
-          name: gettext('Unregister'),
-          execute: function () {
-            that.unregister(that.service);
-          }
-        });
-      }
-    },
 
     /**
      * @namespace app.view.endpoints.clusters

@@ -22,12 +22,6 @@
         <div class="applications-header font-semi-bold pull-left" translate>
           Helion Cloud Foundry Endpoints
         </div>
-        <button ng-if="clustersCtrl.currentUserAccount.isAdmin()" class="btn btn-primary"
-                ng-click="clustersCtrl.register()" translate>Register Endpoint</button>
-      </div>
-      <div id="welcome-message" class="welcome-message panel panel-default">
-        <span class="helion-icon helion-icon-Information"></span>
-        <span translate>You must connect to an endpoint with your credentials to access and manage the endpoint.</span>
       </div>
       <div class="cluster-gallery-card-container">
         <div class="cluster-gallery-card-parent clusters-card col-md-4 col-sm-1" ng-repeat="(guid, service) in clustersCtrl.serviceInstances">
