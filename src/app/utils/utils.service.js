@@ -31,7 +31,9 @@
       mbToHumanSize: mbToHumanSize,
       retryRequest: retryRequest,
       runInSequence: runInSequence,
-      sizeUtilization: sizeUtilization
+      sizeUtilization: sizeUtilization,
+      extractCloudFoundryError: extractCloudFoundryError,
+      extractCodeEngineError: extractCodeEngineError
     };
 
     /**
@@ -210,5 +212,54 @@
     return function (input) {
       return utilsService.mbToHumanSize(input);
     };
+  }
+
+  function extractCloudFoundryError(errorResponse) {
+    /*
+     Cloud Foundry errors have the following format:
+     data: {
+     description: 'some text',
+     errorCode: 1000,
+     error_code: 'UnknownHostException'
+     }
+     */
+    var errorText;
+    if (errorResponse.data && errorResponse.data.error_code) {
+      errorResponse = errorResponse.data;
+    }
+
+    if (errorResponse.description && _.isString(errorResponse.description)) {
+      errorText = errorResponse.description;
+    }
+
+    if (errorResponse.error_code && _.isString(errorResponse.error_code)) {
+      errorText = errorText + gettext(', Error Code: ') + errorResponse.error_code;
+    }
+
+    return errorText;
+  }
+
+  function extractCodeEngineError(errorResponse) {
+
+    /*
+     Code Engine errors have the following format
+     data: {
+     message: 'some text',
+     detail: 'more text',
+     }
+     */
+    var errorText;
+    if (errorResponse.data && errorResponse.data.message) {
+      errorResponse = errorResponse.data;
+    }
+
+    if (errorResponse.message && _.isString(errorResponse.message)) {
+      errorText = errorResponse.message;
+      if (errorResponse.details || errorResponse.detail) {
+        errorText = errorText + ', ' + (error.details || error.detail);
+      }
+    }
+
+    return errorText;
   }
 })();
