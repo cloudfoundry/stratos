@@ -300,7 +300,10 @@
     if (errorResponse.message && _.isString(errorResponse.message)) {
       errorText = errorResponse.message;
       if (errorResponse.details || errorResponse.detail) {
-        errorText = errorText + ', ' + (error.details || error.detail);
+        var detail = errorResponse.details || errorResponse.detail;
+        if (_.isString(detail)) {
+          errorText = errorText + ', ' + detail;
+        }
       }
     }
 
