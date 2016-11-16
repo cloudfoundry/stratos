@@ -9,7 +9,8 @@
     '$q',
     'app.model.modelManager',
     'app.view.notificationsService',
-    'helion.framework.widgets.asyncTaskDialog'
+    'helion.framework.widgets.asyncTaskDialog',
+    'app.utils.utilsService'
   ];
 
   /**
@@ -20,10 +21,11 @@
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.view.notificationsService} notificationsService The console notification service
    * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
+   * @param {app.utils.utilsService} utilsService - the console utils service
    * @property {function} add Opens slide out containing registration form
    * @constructor
    */
-  function ServiceRegistrationService($q, modelManager, notificationsService, asyncTaskDialog) {
+  function ServiceRegistrationService($q, modelManager, notificationsService, asyncTaskDialog, utilsService) {
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
 
     function createInstances(serviceInstances, filter) {
@@ -58,7 +60,8 @@
           description: description,
           urlHint: urlHint,
           urlFormName: type + 'Url',
-          nameFormName: type + 'Name'
+          nameFormName: type + 'Name',
+          urlValidationExpr: utilsService.urlValidationExpression
         };
         return asyncTaskDialog(
           {
