@@ -21,7 +21,7 @@
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.view.notificationsService} notificationsService The console notification service
    * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
-   * @param {app.utils.utilsService} utils - the console utils service
+   * @param {app.utils.utilsService} utilsService - the console utils service
    * @property {function} add Opens slide out containing registration form
    * @constructor
    */
