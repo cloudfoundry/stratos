@@ -58,7 +58,6 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.modelUtils = modelUtils;
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-
     this.actions = [];
     this.orgCount = null;
     this.userCount = null;
@@ -102,7 +101,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.tiles', $state, init);
+    utils.chainStateResolve('clusters.tiles', $state, init);
   }
 
   angular.extend(ClusterTileController.prototype, {
@@ -201,7 +200,7 @@
      * @description Navigate to the cluster summary page for this cluster
      */
     summary: function () {
-      this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: this.service.guid});
+      this.$state.go('clusters.cluster.detail.organizations', {guid: this.service.guid});
     }
 
   });

@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint.clusters.cluster.organization.detail.users', {
+    $stateProvider.state('clusters.cluster.organization.detail.users', {
       url: '/users',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/users/organization-detail-users.html',
       controller: OrganizationUsersController,
@@ -20,7 +20,7 @@
         'clusterOrgController.organizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
         '"..." }}',
         parent: function () {
-          return 'endpoint.clusters.cluster.detail.users';
+          return 'clusters.cluster.detail.users';
         }
       }
     });
@@ -240,7 +240,7 @@
     });
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.users', $state, init);
+    utils.chainStateResolve('clusters.cluster.organization.detail.users', $state, init);
 
     $scope.$on('$destroy', rolesUpdatedListener);
   }

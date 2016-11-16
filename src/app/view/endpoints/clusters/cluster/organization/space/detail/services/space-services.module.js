@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.services', {
+    $stateProvider.state('clusters.cluster.organization.space.detail.services', {
       url: '/services',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/space/detail/services/space-services.html',
       controller: SpaceServicesController,
@@ -18,7 +18,7 @@
       ncyBreadcrumb: {
         label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
         parent: function () {
-          return 'endpoint.clusters.cluster.organization.detail.spaces';
+          return 'clusters.cluster.organization.detail.spaces';
         }
       }
     });
@@ -69,7 +69,7 @@
       return $q.resolve();
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.routes', $state, init);
+    utils.chainStateResolve('clusters.cluster.organization.space.detail.routes', $state, init);
   }
 
   angular.extend(SpaceServicesController.prototype, {

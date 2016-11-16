@@ -13,7 +13,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint.clusters.cluster.detail', {
+    $stateProvider.state('clusters.cluster.detail', {
       url: '',
       abstract: true,
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail.html',
@@ -85,7 +85,7 @@
       return $q.resolve(that.organizations);
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
+    utils.chainStateResolve('clusters.cluster.detail', $state, init);
   }
 
 })();

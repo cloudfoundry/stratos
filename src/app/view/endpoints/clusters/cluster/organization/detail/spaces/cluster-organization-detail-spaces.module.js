@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint.clusters.cluster.organization.detail.spaces', {
+    $stateProvider.state('clusters.cluster.organization.detail.spaces', {
       url: '/spaces',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/spaces/cluster-organization-detail-spaces.html',
       controller: ClusterDetailSpacesController,
@@ -20,7 +20,7 @@
         'clusterOrgController.organizationModel.organizations[clusterOrgController.clusterGuid][clusterOrgController.organizationGuid].details.org.entity.name || ' +
         '"..." }}',
         parent: function () {
-          return 'endpoint.clusters.cluster.detail.organizations';
+          return 'clusters.cluster.detail.organizations';
         }
       }
     });
@@ -49,7 +49,7 @@
       return $q.resolve();
     }
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
+    utils.chainStateResolve('clusters.cluster.organization.detail.spaces', $state, init);
   }
 
   angular.extend(ClusterDetailSpacesController.prototype, {

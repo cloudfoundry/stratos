@@ -15,7 +15,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint.clusters.cluster.organization.space.detail', {
+    $stateProvider.state('clusters.cluster.organization.space.detail', {
       url: '',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/space/detail/cluster-space-detail.html',
       controller: ClusterSpaceController,
@@ -47,7 +47,7 @@
       return $q.resolve();
     }
 
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail', $state, init);
+    utils.chainStateResolve('clusters.cluster.organization.space.detail', $state, init);
   }
 
   angular.extend(ClusterSpaceController.prototype, {

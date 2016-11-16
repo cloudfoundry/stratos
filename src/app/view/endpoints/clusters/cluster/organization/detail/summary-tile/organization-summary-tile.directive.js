@@ -190,7 +190,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
+    utils.chainStateResolve('clusters.cluster.organization.detail', $state, init);
   }
 
 })();

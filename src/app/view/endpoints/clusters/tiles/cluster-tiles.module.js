@@ -10,22 +10,20 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint.clusters.tiles', {
+    $stateProvider.state('clusters.tiles', {
       url: '',
       templateUrl: 'app/view/endpoints/clusters/tiles/cluster-tiles.html',
       controller: ClusterTilesController,
       controllerAs: 'clustersCtrl',
       ncyBreadcrumb: {
-        label: gettext('Helion Cloud Foundry Endpoints'),
-        parent: function () {
-          return 'endpoint.dashboard';
-        }
+        label: gettext('Helion Cloud Foundry Endpoints')
       }
     });
   }
 
   ClusterTilesController.$inject = [
     '$q',
+    '$state',
     'app.model.modelManager',
     'app.view.hcfRegistration',
     'app.view.notificationsService',
@@ -37,14 +35,16 @@
    * @name ClusterTilesController
    * @constructor
    * @param {object} $q - the angular $q service
+   * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {object} hcfRegistration - hcfRegistration - HCF Registration detail view service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    */
-  function ClusterTilesController($q, modelManager, hcfRegistration, notificationsService, confirmDialog, credentialsDialog) {
+  function ClusterTilesController($q, $state, modelManager, hcfRegistration, notificationsService, confirmDialog, credentialsDialog) {
     this.$q = $q;
+    this.$state = $state;
     this.hcfRegistration = hcfRegistration;
     this.notificationsService = notificationsService;
     this.confirmDialog = confirmDialog;
@@ -78,6 +78,10 @@
       return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
         .then(function () {
           that.createClusterList();
+
+          if (_.keys(that.serviceInstances).length === 1) {
+            that.$state.go('clusters.cluster.detail.organizations', {guid: _.keys(that.serviceInstances)[0]});
+          }
         })
         .catch(function () {
           that.updateState(false, true);

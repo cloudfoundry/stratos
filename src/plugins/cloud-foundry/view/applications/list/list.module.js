@@ -153,9 +153,9 @@
       }
       var hcfs = _.filter(this.userCnsiModel.serviceInstances, {cnsi_type: 'hcf'});
       if (hcfs.length === 1) {
-        return this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: hcfs[0].guid});
+        return this.$state.go('clusters.cluster.detail.organizations', {guid: hcfs[0].guid});
       }
-      return this.$state.go('endpoint.clusters.tiles');
+      return this.$state.go('clusters.tiles');
     },
 
     /**

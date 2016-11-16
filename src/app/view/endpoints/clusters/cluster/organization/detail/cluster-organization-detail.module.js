@@ -13,7 +13,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('endpoint.clusters.cluster.organization.detail', {
+    $stateProvider.state('clusters.cluster.organization.detail', {
       url: '',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/cluster-organization-detail.html',
       controller: ClusterOrgDetailController,
@@ -43,7 +43,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail', $state, init);
+    utils.chainStateResolve('clusters.cluster.organization.detail', $state, init);
   }
 
   angular.extend(ClusterOrgDetailController.prototype, {
