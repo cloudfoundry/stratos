@@ -21,7 +21,7 @@
       <input type="text" name="{{asyncTaskDialogCtrl.context.urlFormName}}" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.url"
              required
              placeholder="{{ asyncTaskDialogCtrl.context.urlHint }}"
-             ng-pattern="/^http(s)?://(.)+$/"
+             ng-pattern="asyncTaskDialogCtrl.context.urlValidationExpr"
              helion-unique items="asyncTaskDialogCtrl.context.instances"
              ignore-case/>
     </div>
