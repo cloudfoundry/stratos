@@ -268,6 +268,10 @@
      }
      */
     var errorText;
+
+    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+      return;
+    }
     if (errorResponse.data && errorResponse.data.error_code) {
       errorResponse = errorResponse.data;
     }
@@ -292,6 +296,10 @@
      detail: 'more text',
      }
      */
+
+    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+      return;
+    }
     var errorText;
     if (errorResponse.data && errorResponse.data.message) {
       errorResponse = errorResponse.data;
