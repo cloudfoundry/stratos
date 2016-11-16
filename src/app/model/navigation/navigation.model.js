@@ -146,25 +146,62 @@
         href: href,
         text: text,
         icon: icon,
+        position: pos,
         // baseState is used to work out which menu entry is active based on any child state
         baseState: baseState || name, // defaults to name
         items: new Menu()   // sub-menu
       };
-      if (angular.isNumber(pos)) {
-        // Fill in the array to have the required number of items
-        // This allows out of order addMenuItem calls to work as expected
-        while (this.length <= pos) {
-          this.push(null);
-        }
-        if (this[pos] !== null) {
-          this.$log.error('addMenuItem: items named ' + "'" + item.name + "' and '" + this[pos].name +
-            "' have the same position '" + pos + "'");
-        }
-        this.splice(pos, 1, item);
-      } else {
-        this.push(item);
-      }
 
+      return this._addMenuItem(item);
+    },
+
+    /**
+     * @function addMenuItemFunction
+     * @memberof app.model.navigation.Menu
+     * @description Appends a new menu item into the menu list, where the menu item has a click handler.
+     * @param {string} name - the name/ID of the menu item
+     * @param {string} fn - the click handlerfor the menu item
+     * @param {string} text - the displayed text of the menu item
+     * @param {number=} pos - optional position in the menu to insert at
+     * @param {string=} icon - the icon of the menu item
+     * @returns {app.model.navigation.Menu} The navigation's Menu object
+     */
+    addMenuItemFunction: function (name, fn, text, pos, icon) {
+      var item = {
+        name: name,
+        text: text,
+        icon: icon,
+        position: pos,
+        onClick: fn,
+        baseState: name,
+        items: new Menu()   // sub-menu
+      };
+
+      return this._addMenuItem(item);
+    },
+
+    /**
+     * @function _addMenuItem
+     * @memberof app.model.navigation.Menu
+     * @description Appends a new menu item into the menu list.
+     * @param {object} item - the menu item
+     * @returns {app.model.navigation.Menu} The navigation's Menu object
+     * @private
+     */
+    _addMenuItem: function (item) {
+
+      item.alignBottom = item.position < 0;
+      if (item.position < 0) {
+        item.position = 100 - item.position;
+      }
+      // Add item to the end
+      var that = this;
+      this.push(item);
+      var sorted = _.sortBy(this, ['position', 'text']);
+      this.length = 0;
+      _.each(sorted, function (item) {
+        that.push(item);
+      });
       return this;
     },
 

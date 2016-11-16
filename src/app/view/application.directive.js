@@ -87,6 +87,10 @@
     $timeout(function () {
       that.verifySessionOrCheckUpgrade();
     }, 0);
+
+    eventService.$on(eventService.events.LOGIN, function () {
+      that.addMenuItem();
+    });
   }
 
   angular.extend(ApplicationController.prototype, {
@@ -272,6 +276,17 @@
         this.failedLogin = true;
       }
       this.loggedIn = false;
+    },
+
+    /**
+     * @function addMenuItem
+     * @memberof app.view.application.ApplicationController
+     * @description Add menu item for the user to log out
+     * @private
+     */
+    addMenuItem: function () {
+      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+      menu.addMenuItemFunction('logout', _.bind(this.logout, this), gettext('Sign out'), -1, 'helion-icon-Logout');
     },
 
     /**

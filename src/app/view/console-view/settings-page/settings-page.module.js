@@ -3,7 +3,8 @@
 
   angular
     .module('app.view.settings-page', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(register);
 
   registerRoute.$inject = [
     '$stateProvider'
@@ -40,5 +41,29 @@
   }
 
   angular.extend(SettingsController.prototype, {});
+
+  register.$inject = [
+    'app.model.modelManager',
+    'app.event.eventService'
+  ];
+
+  function register(modelManager, eventService) {
+    return new UserSettings(modelManager, eventService);
+  }
+
+  function UserSettings(modelManager, eventService) {
+    var that = this;
+    this.modelManager = modelManager;
+    eventService.$on(eventService.events.LOGIN, function () {
+      that.onLoggedIn();
+    });
+  }
+
+  angular.extend(UserSettings.prototype, {
+    onLoggedIn: function () {
+      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+      menu.addMenuItem('settings', 'account-settings', gettext('Settings'), 99, 'helion-icon-Actions');
+    }
+  });
 
 })();

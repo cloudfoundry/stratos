@@ -1,4 +1,4 @@
-<nav class="navbar navbar-fixed-top">
+<nav class="main-nav navbar navbar-fixed-top" ng-class="{'navbar-icons-only' : applicationCtrl.navbarIconsOnly}">
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button"
@@ -12,13 +12,13 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
+      <div class="navbar-toggle-labels">
+        <i ng-click="applicationCtrl.navbarIconsOnly = !applicationCtrl.navbarIconsOnly" class="helion-icon helion-icon-Menu"></i>
+      </div>
       <span class="navbar-brand" translate>Helion Stackato</span>
     </div>
     <div id="navbar" class="collapse navbar-collapse">
       <navigation ng-if="!navBarCtrl.hideNavigation"></navigation>
-      <icons class="pull-right">
-        <avatar ng-if="!navBarCtrl.hideAccount"></avatar>
-      </icons>
     </div><!--/.nav-collapse -->
   </div>
 </nav>
