@@ -260,10 +260,10 @@
 
       that.clusterActions = [];
 
-      if (canCreateOrg || isAdmin) {
+      if (canCreateOrg) {
         that.clusterActions.push(createOrg);
       }
-      if (canCreateSpace || isAdmin) {
+      if (canCreateSpace) {
         that.clusterActions.push(createSpace);
       }
       if (canAssignUsers || isAdmin) {

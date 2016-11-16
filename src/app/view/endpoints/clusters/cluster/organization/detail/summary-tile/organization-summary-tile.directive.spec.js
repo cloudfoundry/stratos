@@ -150,7 +150,7 @@
         expect(controller.organizationGuid).toBe(organizationGuid);
         expect(controller.organization).toBeDefined();
         expect(controller.utils).toBeDefined();
-        expect(controller.cliCommands).toBeDefined();
+        expect(controller.showCliCommands).toBeDefined();
         expect(controller.cardData).toBeDefined();
         expect(controller.getEndpoint).toBeDefined();
         expect(controller.keys).toBeDefined();

@@ -127,11 +127,11 @@
     };
 
     this.showManageRoles = function () {
-      return that.canUserManageRoles() || that.isAdmin;
+      return that.canUserManageRoles();
     };
 
     this.showRemoveFromOrg = function () {
-      return that.canUserRemoveFromOrg() || that.isAdmin;
+      return that.canUserRemoveFromOrg();
     };
 
     this.canAction = function () {

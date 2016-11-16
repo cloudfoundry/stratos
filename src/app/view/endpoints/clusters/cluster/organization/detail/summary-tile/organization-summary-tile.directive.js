@@ -61,7 +61,6 @@
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
     this.utils = utils;
-    this.cliCommands = cliCommands;
 
     this.cardData = {
       title: gettext('Summary')
@@ -73,6 +72,10 @@
 
     this.keys = function (obj) {
       return _.keys(obj);
+    };
+
+    this.showCliCommands = function () {
+      cliCommands.show(that.getEndpoint(), that.userName, that.clusterGuid, that.organization);
     };
 
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
