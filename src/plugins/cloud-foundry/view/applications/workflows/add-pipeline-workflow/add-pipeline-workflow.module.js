@@ -188,24 +188,19 @@
                     }
                   }, function () {
                     // Failed to validate credentials
-                    var msg = gettext('The username and password combination provided is invalid. Please check and try again.');
+                    var msg = gettext('The username and password combination provided is invalid.');
                     return that.$q.reject(msg);
                   })
                   .catch(function (error) {
                     // Some other exception occurred
-                    var message = gettext('There was a problem creating the pipeline. Please try again. ' +
-                      'If problem persists, please contact your administrator.');
 
-                    if (error.data && error.data.message) {
-                      error = error.data;
+                    var message = gettext('There was a problem creating the pipeline.');
+
+                    var codeEngineErrorDetails = that.utils.extractCodeEngineError(error);
+                    if (codeEngineErrorDetails || _.isString(error)) {
+                      message = gettext('Failed to create the pipeline due to following exception: ') + (codeEngineErrorDetails || error);
                     }
-                    if (error.message) {
-                      message = gettext('Failed to create the pipeline due to following exception: ') + error.message;
-                      if (error.details || error.detail) {
-                        message = message + ', ' + (error.details || error.detail);
-                      }
-                      message = message + gettext(' Please try again. If problem persists, please contact your administrator. ');
-                    }
+                    message = message + gettext(' Please try again. If problem persists, please contact your administrator. ');
 
                     return that.$q.reject(message);
                   });
@@ -306,9 +301,17 @@
             }, function (reason) {
               deferred.reject(reason);
             });
-        }, function () {
-          var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
-          deferred.reject(msg);
+        }, function (error) {
+          // Some other exception occurred
+          var message = gettext('There was a problem retrieving VCS instances.');
+
+          var codeEngineErrorDetails = that.utils.extractCodeEngineError(error);
+          if (codeEngineErrorDetails || _.isString(error)) {
+            message = gettext('Failed to retrieve VCS instances due to following exception: ') + (codeEngineErrorDetails || error);
+          }
+          message = message + gettext(' Please try again. If problem persists, please contact your administrator. ');
+
+          deferred.reject(message);
         });
 
         return deferred.promise;
