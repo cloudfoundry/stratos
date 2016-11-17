@@ -15,12 +15,12 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters', {
+    $stateProvider.state('endpoint.clusters', {
       url: '/cluster',
       abstract: true,
       template: '<ui-view/>',
       data: {
-        activeMenuState: 'clusters'
+        activeMenuState: 'endpoint.clusters'
       },
       ncyBreadcrumb: {
         label: gettext('Helion Cloud Foundry Endpoints')
@@ -55,14 +55,14 @@
       that.onLoggedIn();
     });
 
-    utils.chainStateResolve('clusters', $state, init);
+    utils.chainStateResolve('endpoint.clusters', $state, init);
   }
 
   angular.extend(Clusters.prototype, {
 
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('clusters', 'clusters.router', gettext('Helion Cloud Foundry Endpoints'), 1);
+      menu.addMenuItem('clusters', 'endpoint.clusters.router', gettext('Helion Cloud Foundry Endpoints'), 1);
       this.initialized.resolve();
     }
   });

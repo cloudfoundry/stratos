@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.cluster.organization.space.detail.users', {
+    $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.users', {
       url: '/users',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/space/detail/users/space-detail-users.html',
       controller: SpaceUsersController,
@@ -18,7 +18,7 @@
       ncyBreadcrumb: {
         label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
         parent: function () {
-          return 'clusters.cluster.organization.detail.users';
+          return 'endpoint.clusters.cluster.organization.detail.users';
         }
       }
     });
@@ -245,7 +245,7 @@
     });
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('clusters.cluster.organization.space.detail.users', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.users', $state, init);
 
     $scope.$on('$destroy', rolesUpdatedListener);
   }

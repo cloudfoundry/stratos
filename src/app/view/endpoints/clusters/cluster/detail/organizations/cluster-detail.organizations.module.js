@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.cluster.detail.organizations', {
+    $stateProvider.state('endpoint.clusters.cluster.detail.organizations', {
       url: '/organizations',
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/organizations/cluster-detail-organizations.html',
       controller: ClusterOrganizationsController,
@@ -18,7 +18,7 @@
       ncyBreadcrumb: {
         label: '{{ clusterController.userServiceInstanceModel.serviceInstances[clusterController.guid].name ||"..." }}',
         parent: function () {
-          return 'clusters.router.tiles';
+          return 'endpoint.clusters.router.tiles';
         }
       }
     });

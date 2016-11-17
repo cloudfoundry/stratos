@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.cluster.organization.space.detail.applications', {
+    $stateProvider.state('endpoint.clusters.cluster.organization.space.detail.applications', {
       url: '/applications',
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/space/detail/applications/space-applications.html',
       controller: SpaceApplicationsController,
@@ -18,7 +18,7 @@
       ncyBreadcrumb: {
         label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
         parent: function () {
-          return 'clusters.cluster.organization.detail.spaces';
+          return 'endpoint.clusters.cluster.organization.detail.spaces';
         }
       }
     });
@@ -71,6 +71,6 @@
       });
     };
 
-    utils.chainStateResolve('clusters.cluster.organization.space.detail.applications', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.space.detail.applications', $state, init);
   }
 })();

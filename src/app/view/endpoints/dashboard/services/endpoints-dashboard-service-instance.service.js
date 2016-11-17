@@ -141,7 +141,7 @@
           connected: isConnected,
           type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine'),
           visit: isConnected && serviceInstance.cnsi_type === 'hcf' ? function () {
-            return $state.href('clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
+            return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
           } : undefined,
           url: utilsService.getClusterEndpoint(serviceInstance),
           actions: _createInstanceActions(endpoints, isConnected, hasExpired),

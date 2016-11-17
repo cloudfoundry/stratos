@@ -207,14 +207,14 @@
     });
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('clusters.cluster.organization.detail.spaces', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.organization.detail.spaces', $state, init);
 
   }
 
   angular.extend(OrganizationSpaceTileController.prototype, {
 
     summary: function () {
-      this.$state.go('clusters.cluster.organization.space.detail.applications', {space: this.space.metadata.guid});
+      this.$state.go('endpoint.clusters.cluster.organization.space.detail.applications', {space: this.space.metadata.guid});
     },
 
     spaceDetail: function () {

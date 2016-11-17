@@ -13,7 +13,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.cluster.detail', {
+    $stateProvider.state('endpoint.clusters.cluster.detail', {
       url: '',
       abstract: true,
       params: {
@@ -107,7 +107,7 @@
       return $q.resolve(that.organizations);
     }
 
-    utils.chainStateResolve('clusters.cluster.detail', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.detail', $state, init);
 
     function update(value) {
       // Can be `0` if user quickly navigates from the Clusters tile page

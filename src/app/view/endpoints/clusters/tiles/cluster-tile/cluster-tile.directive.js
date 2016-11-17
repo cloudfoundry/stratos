@@ -99,7 +99,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('clusters.router.tiles', $state, init);
+    utils.chainStateResolve('endpoint.clusters.router.tiles', $state, init);
   }
 
   angular.extend(ClusterTileController.prototype, {
@@ -161,7 +161,7 @@
      * @description Navigate to the cluster summary page for this cluster
      */
     summary: function () {
-      this.$state.go('clusters.cluster.detail.organizations', {guid: this.service.guid, orgCount: this.orgCount, userCount: this.userCount});
+      this.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: this.service.guid, orgCount: this.orgCount, userCount: this.userCount});
     }
 
   });

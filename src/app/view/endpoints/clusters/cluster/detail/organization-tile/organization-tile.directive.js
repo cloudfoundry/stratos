@@ -67,7 +67,7 @@
     this.instances = instancesUsed + ' / ' + appInstanceQuota;
 
     this.summary = function () {
-      that.$state.go('clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
+      that.$state.go('endpoint.clusters.cluster.organization.detail.spaces', {organization: that.organization.guid});
     };
 
     function organizationName() {

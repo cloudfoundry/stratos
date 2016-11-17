@@ -64,7 +64,7 @@
 
         <dt translate>ENDPOINT</dt>
         <dd class="pull-right">
-          <a class="btn btn-link" ui-sref="clusters.cluster.detail.organizations({
+          <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.detail.organizations({
                   guid: applicationSummaryCtrl.cnsiGuid
           })">
             {{ applicationSummaryCtrl.userCnsiModel.serviceInstances[applicationSummaryCtrl.cnsiGuid].name }}
@@ -73,7 +73,7 @@
 
         <dt translate>ORGANIZATION</dt>
         <dd class="pull-right">
-          <a class="btn btn-link" ui-sref="clusters.cluster.organization.detail.spaces({
+          <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.detail.spaces({
                   guid: applicationSummaryCtrl.cnsiGuid,
                   organization: applicationSummaryCtrl.model.application.organization.metadata.guid,
           })">
@@ -83,7 +83,7 @@
 
         <dt translate>SPACE</dt>
         <dd class="pull-right">
-          <a class="btn btn-link" ui-sref="clusters.cluster.organization.space.detail.applications({
+          <a class="btn btn-link" ui-sref="endpoint.clusters.cluster.organization.space.detail.applications({
                   guid: applicationSummaryCtrl.cnsiGuid,
                   organization: applicationSummaryCtrl.model.application.organization.metadata.guid,
                   space: applicationSummaryCtrl.model.application.space.metadata.guid

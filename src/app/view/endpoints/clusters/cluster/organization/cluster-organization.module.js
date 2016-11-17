@@ -13,7 +13,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.cluster.organization', {
+    $stateProvider.state('endpoint.clusters.cluster.organization', {
       url: '/:organization',
       abstract: true,
       template: '<ui-view/>',
@@ -66,7 +66,7 @@
       return $q.all(initPromises);
     }
 
-    utils.chainStateResolve('clusters.cluster.organization', $state, init);
+    utils.chainStateResolve('endpoint.clusters.cluster.organization', $state, init);
   }
 
 })();

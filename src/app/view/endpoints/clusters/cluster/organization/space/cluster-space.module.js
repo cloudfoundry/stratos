@@ -12,7 +12,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.cluster.organization.space', {
+    $stateProvider.state('endpoint.clusters.cluster.organization.space', {
       url: '/space/:space',
       abstract: true,
       template: '<ui-view/>',

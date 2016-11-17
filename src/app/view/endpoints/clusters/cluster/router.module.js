@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.router', {
+    $stateProvider.state('endpoint.clusters.router', {
       url: '',
       template: '<ui-view/>',
       controller: ClustersRouterController,
@@ -44,16 +44,16 @@
       return that.refreshClusterModel()
         .then(function () {
           that.createClusterList();
-          // // Redirect to Cf's state
           if (_.keys(that.serviceInstances).length === 1) {
-             that.$state.go('clusters.cluster.detail.organizations', {guid: _.keys(that.serviceInstances)[0]});
+            // that.$state.get('clusters.router.tiles').abstract = true;
+            that.$state.go('endpoint.clusters.cluster.detail.organizations', {guid: _.keys(that.serviceInstances)[0]});
           } else {
-            that.$state.go('clusters.router.tiles');
+            that.$state.go('endpoint.clusters.router.tiles');
           }
         });
     }
 
-    utils.chainStateResolve('clusters.router', $state, init);
+    utils.chainStateResolve('endpoint.clusters.router', $state, init);
 
   }
 

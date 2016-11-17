@@ -10,22 +10,22 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.router.tiles', {
+    $stateProvider.state('endpoint.clusters.router.tiles', {
       url: '/endpoints',
       templateUrl: 'app/view/endpoints/clusters/tiles/cluster-tiles.html',
       controller: ClusterTilesController,
       controllerAs: 'clustersCtrl',
       ncyBreadcrumb: {
-        label: gettext('Helion Cloud Foundry Endpoints')
+        label: gettext('Helion Cloud Foundry Endpoints'),
+        parent: 'endpoint.dashboard'
       }
     });
   }
 
   ClusterTilesController.$inject = [];
 
-  function ClusterTilesController() {}
+  function ClusterTilesController() {
+  }
 
-  angular.extend(ClusterTilesController.prototype, {
-
-  });
+  angular.extend(ClusterTilesController.prototype, {});
 })();
