@@ -2,7 +2,7 @@
   'use strict';
 
   describe('application module', function () {
-    var $httpBackend, controller, $interval;
+    var $httpBackend, controller, $interval, detailViewMock;
 
     var mocks = {};
 
@@ -44,6 +44,8 @@
       var confirmDialogMock = function (dialogSpecs) {
         dialogSpecs.callback();
       };
+      detailViewMock = jasmine.createSpy('detailView');
+
       var authModelOpts = {
         role: role,
         userGuid: userGuid,
@@ -75,7 +77,7 @@
 
       var ApplicationController = $state.get('cf.applications.application').controller;
       controller = new ApplicationController(modelManager, eventService, confirmDialogMock,
-        utils, cliCommands, $stateParams, $scope, $window, $q, $interval, $interpolate, $state);
+        utils, cliCommands, detailViewMock, $stateParams, $scope, $window, $q, $interval, $interpolate, $state);
       $httpBackend.flush();
     }
 
@@ -144,15 +146,9 @@
       });
 
       it('should be able to execute delete action', function () {
-
-        var eventName;
-        spyOn(controller.eventService, '$emit').and.callFake(function (event) {
-          eventName = event;
-        });
         var deleteAction = controller.appActions[3];
         deleteAction.execute();
-        expect(controller.eventService.$emit).toHaveBeenCalled();
-        expect(eventName).toBe('cf.events.START_DELETE_APP_WORKFLOW');
+        expect(detailViewMock).toHaveBeenCalled();
       });
 
       it('should be able to start app', function () {
