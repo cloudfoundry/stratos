@@ -281,6 +281,7 @@ navbar > nav.main-nav {
 
   navbar > nav.main-nav {
     background-color: transparent;
+    z-index: 1030;
     
     .navbar-header {
       > button {
