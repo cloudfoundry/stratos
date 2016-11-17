@@ -14,7 +14,7 @@
     font-size: $font-size-large;
     text-transform: none;
     height: auto;
-    padding: 0 $hpe-unit-space;
+    padding: $hpe-unit-space * 0.5 $hpe-unit-space;
 
     &:active,
     &:focus,
