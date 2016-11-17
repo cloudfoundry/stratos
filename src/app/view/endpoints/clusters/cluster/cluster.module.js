@@ -43,7 +43,8 @@
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-
+    console.log('Loading clusters.cluster state')
+    console.log(that.userServiceInstanceModel.serviceInstances);
     userSelection.deselectAllUsers(this.guid);
 
     this.getEndpoint = function () {

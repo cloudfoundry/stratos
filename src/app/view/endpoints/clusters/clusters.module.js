@@ -4,7 +4,8 @@
   angular
     .module('app.view.endpoints.clusters', [
       'app.view.endpoints.clusters.cluster',
-      'app.view.endpoints.clusters.tiles'
+      'app.view.endpoints.clusters.tiles',
+      'app.view.endpoints.clusters.router'
     ])
     .config(registerRoute)
     .run(register);
@@ -61,7 +62,7 @@
 
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('clusters', 'clusters.tiles', gettext('Helion Cloud Foundry Endpoints'), 1);
+      menu.addMenuItem('clusters', 'clusters.router', gettext('Helion Cloud Foundry Endpoints'), 1);
       this.initialized.resolve();
     }
   });
