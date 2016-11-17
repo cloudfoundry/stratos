@@ -1,8 +1,5 @@
 @import "avatar/avatar";
 
-$main-nav-width: 260px;
-$main-nav-title-height: $hpe-unit-space * 3;
-$main-nav-icons-width: 70px;
 $main-nav-background-color: #444;
 $main-nav-item-height: 52px;
 $main-nav-item-active-bg-color: #737373;
@@ -14,6 +11,32 @@ navbar > nav.main-nav {
   width: $main-nav-width;
   height: 100%;
   background-color: $main-nav-background-color;
+  z-index: initial;
+  
+  &.navbar-hidden {
+    background-color: $hpe-primary-bg;
+    height: $main-nav-title-height;
+    width: 100%;
+
+    .container-fluid {
+      .navbar-brand {
+        padding-left: $hpe-unit-space;
+      }
+
+      .navbar-signout {
+        position: absolute;
+        right: $hpe-unit-space;
+        top: 0;
+        height: $main-nav-title-height;;
+        line-height: $main-nav-title-height;
+        cursor: pointer;
+
+        > i {
+          line-height: inherit;
+        }
+      }
+    }
+  }
 
   &.navbar-icons-only {
     width: $main-nav-icons-width;
@@ -52,27 +75,26 @@ navbar > nav.main-nav {
         .navitem-icon {
           line-height: $main-nav-item-height;
           vertical-align: middle;
-          //color: #fff;
           display: inline-block;
           width: $main-nav-icons-width;
           text-align: center;
 
           > i {
             vertical-align: middle;
-            font-size: 28px;
+            font-size: 24px;
 
             // Correct some icons sizes when used in the nav menu
             &.helion-icon-Application {
-              font-size: 34px;
+              font-size: 32px;
             }
-
           }
         }
 
         .navitem-label {
           line-height: $main-nav-item-height;
           vertical-align: middle;
-          //color: #fff;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
       }
     }
@@ -111,10 +133,8 @@ navbar > nav.main-nav {
     .navbar-brand {
       font-size: 24px;
       font-weight: 500;
-      //height: 84px;
       padding: 0 0 0 64px;
       line-height: $main-nav-title-height;
-//      background-color: #fff;
       width: 100%;
       margin-left: 0;
     }
@@ -128,14 +148,14 @@ navbar > nav.main-nav {
 
     li {
       > a {
-        font-size: 18px;
-        color: #fff;
+        font-size: $main-nav-label-size;
+        color: $white;
         background: transparent;
 
         &:hover,
         &:focus,
         &.active {
-          color: hpe-primary;
+          color: $white;
           background: transparent;
           text-decoration: none;
         }
@@ -147,8 +167,12 @@ navbar > nav.main-nav {
 
       &.active {
         > a {
-          color: #fff;
+          color: $white;
         }
+      }
+
+      &:hover {
+        background-color: $hpe-primary;
       }
     }
   }
@@ -260,21 +284,34 @@ navbar > nav.main-nav {
     
     .navbar-header {
       > button {
-        float: left;
-        margin-left: 12px;
-        margin-top: 18px;
+        height: $main-nav-title-height;
+        margin: 0;
+        padding: 0;
+        line-height: $main-nav-title-height;
+        position: absolute;
+        text-align: center;
+        width: $main-nav-icons-width;
+        left: 0;
+        top: 0;
+        border:0;
+
+        > i {
+          line-height: inherit;
+        }
+
+        &:hover {
+          color: $hpe-primary;
+        }
       }
 
       width: 100%;
       background-color: transparent;
-      height: 72px;
+      height: $main-nav-title-height;
     }
 
   }
 
   .navbar-brand {
     display: none;
-    
   }
-
 }

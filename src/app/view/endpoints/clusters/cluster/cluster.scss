@@ -5,7 +5,12 @@
 .cluster {
   .cluster-breadcrumb {
     //width: 100%;
-    margin-top: 1px;
+    margin-top: 0;
+    height: $main-nav-title-height;
+    line-height: $main-nav-title-height;
+    vertical-align: middle;
+    padding: 0;
+    border: 0;
 
     &.breadcrumb {
       //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs

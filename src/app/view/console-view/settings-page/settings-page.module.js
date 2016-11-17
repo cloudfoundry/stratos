@@ -15,7 +15,10 @@
       url: '/account/settings',
       templateUrl: '/app/view/console-view/settings-page/settings-page.html',
       controller: SettingsController,
-      controllerAs: 'settingsCtrl'
+      controllerAs: 'settingsCtrl',
+      data: {
+        activeMenuState: 'account-settings'
+      }
     });
   }
 
@@ -62,7 +65,7 @@
   angular.extend(UserSettings.prototype, {
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('settings', 'account-settings', gettext('Settings'), 99, 'helion-icon-Actions');
+      menu.addMenuItem('account-settings', 'account-settings', gettext('Settings'), 99, 'helion-icon-User_settings');
     }
   });
 

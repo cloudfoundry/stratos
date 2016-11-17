@@ -33,9 +33,13 @@
     'app.basePath',
     'app.view.upgradeCheck',
     'app.logged-in.loggedInService',
+    'app.view.localStorage',
     '$timeout',
     '$state',
-    '$window'
+    '$stateParams',
+    '$window',
+    '$rootScope',
+    '$scope'
   ];
 
   /**
@@ -47,9 +51,13 @@
    * @param {app.basePath} path - the base path serving our app (i.e. /app)
    * @param {app.view.upgradeCheck} upgradeCheck - the upgrade check service
    * @param {object} loggedInService - the Logged In Service
+   * @param {object} localStorage - the Local Storage In Service
    * @param {object} $timeout - Angular $timeout service
    * @param {$state} $state - Angular ui-router $state service
+   * @param {$stateParams} $stateParams - Angular ui-router $stateParams service
    * @param {$window} $window - Angular $window service
+   * @param {$rootScope} $rootScope - Angular $rootScope service
+   * @param {$scope} $scope - Angular $scope service
    * @property {app.event.eventService} eventService - the event bus service
    * @property {app.model.modelManager} modelManager - the application model manager
    * @property {app.basePath} path - the base path serving our app (i.e. /app)
@@ -63,8 +71,8 @@
    * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
-  function ApplicationController(eventService, modelManager, path, upgradeCheck, loggedInService,
-                                 $timeout, $state, $window) {
+  function ApplicationController(eventService, modelManager, path, upgradeCheck, loggedInService, localStorage,
+                                 $timeout, $state, $stateParams, $window, $rootScope, $scope) {
     var that = this;
 
     this.eventService = eventService;
@@ -90,6 +98,24 @@
 
     eventService.$on(eventService.events.LOGIN, function () {
       that.addMenuItem();
+    });
+
+    // Navigation options
+    this.hideNavigation = $stateParams.hideNavigation;
+    this.hideAccount = $stateParams.hideAccount;
+    $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams) {  // eslint-disable-line angular/on-watch
+      that.hideNavigation = toParams.hideNavigation;
+      that.hideAccount = toParams.hideAccount;
+    });
+
+    // Read back and persist the state of the navigation bar to local storage
+    this.navbarIconsOnly = localStorage.getItem('navbarIconsOnly', 'false') === 'true';
+    $scope.$watch(function () {
+      return that.navbarIconsOnly;
+    }, function (nv, ov) {
+      if (nv !== ov) {
+        localStorage.setItem('navbarIconsOnly', nv);
+      }
     });
   }
 
@@ -297,6 +323,7 @@
      */
     logout: function () {
       var that = this;
+      this.showGlobalSpinner = true;
       this.modelManager.retrieve('app.model.account')
         .logout()
         .then(function () {

@@ -1,11 +1,11 @@
 <ul class="nav navbar-nav">
   <li ng-repeat="menuItem in navigationCtrl.navigationModel.menu"
       ng-class="{ 'navitem-bottom': menuItem.alignBottom, active: navigationCtrl.navigationModel.menu.currentState === menuItem.baseState }">
-    <a ng-if="menuItem.href" ui-sref="{{ menuItem.href }}" ui-sref-opts="{reload: true}">
+    <a id="navbar-item-{{menuItem.name}}" ng-if="menuItem.href" ui-sref="{{ menuItem.href }}" ui-sref-opts="{reload: true}">
       <div class="navitem-icon"><i class="helion-icon {{ menuItem.icon }}"></i></div>
       <span class="navitem-label" >{{ menuItem.text }}</span>
     </a>
-    <a ng-if="menuItem.onClick" ng-click="menuItem.onClick()">
+    <a id="navbar-item-{{menuItem.name}}" ng-if="menuItem.onClick" ng-click="menuItem.onClick()">
       <div class="navitem-icon"><i class="helion-icon {{ menuItem.icon }}"></i></div>
       <span class="navitem-label" >{{ menuItem.text }}</span>
     </a>

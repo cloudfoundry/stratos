@@ -4,17 +4,21 @@ console-view {
   position: relative;
   display: flex;
   flex-direction: column;
-  //padding-top: $page-header-height;
   padding-top: 0;
   min-height: 100vh;
   height: 100vh;
   overflow-x: hidden;
-  width: calc(100vw - 260px);
-  margin-left: 260px;
+  width: calc(100vw - #{$main-nav-width});
+  margin-left: $main-nav-width;
 
   &.navbar-icons-only {
-    width: calc(100vw - 70px);
-    margin-left: 70px;
+    width: calc(100vw - #{$main-nav-icons-width});
+    margin-left: $main-nav-icons-width;
+  }
+
+  &.navbar-hidden {
+    width: 100vw;
+    margin-left: 0;
   }
 
   & > * {
@@ -37,5 +41,9 @@ console-view {
   console-view, console-view.navbar-icons-only {
     width: 100vw;
     margin-left: 0;
+
+    .app-top-bar {
+      margin-left: $hpe-unit-space * 1.5;
+    }
   }
 }
