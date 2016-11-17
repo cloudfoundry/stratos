@@ -21,8 +21,7 @@
       </div>
       <div class="cluster-gallery-card-container">
         <div class="cluster-gallery-card-parent clusters-card col-md-4 col-sm-1" ng-repeat="(guid, service) in clustersRouterCtrl.serviceInstances">
-          <cluster-tile service="service" connect="clustersRouterCtrl.boundConnect" disconnect="clustersRouterCtrl.boundDisconnect"
-                      unregister="clustersRouterCtrl.boundUnregister"></cluster-tile>
+          <cluster-tile service="service"/>
         </div>
       </div>
     </div>

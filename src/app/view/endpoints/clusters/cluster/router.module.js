@@ -14,8 +14,10 @@
       url: '',
       template: '<ui-view/>',
       controller: ClustersRouterController,
-      controllerAs: 'clustersRouterCtrl'
-
+      controllerAs: 'clustersRouterCtrl',
+      ncyBreadcrumb: {
+        skip: true
+      }
     });
   }
 
@@ -34,27 +36,31 @@
     this.$state = $state;
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
-    this.boundUnregister = angular.bind(this, this.unregister);
-    this.boundConnect = angular.bind(this, this.connect);
-    this.boundDisconnect = angular.bind(this, this.disconnect);
-
-    this.createClusterList();
-    this.refreshClusterModel();
 
     function init() {
 
       return that.refreshClusterModel()
         .then(function () {
-          return that.createClusterList();
+          that.createClusterList();
+          // // Redirect to Cf's state
+          if (_.keys(that.serviceInstances).length === 1) {
+            // var clusterTilesState = that.$state.get('clusters.router.tiles');
+            // clusterTilesState.abstract = true;
+            // clusterTilesState.force = true;
+
+            // Make clusters.router.list state abstract
+            that.$state.go('clusters.cluster.detail.organizations', {guid: _.keys(that.serviceInstances)[0]});
+          } else {
+
+            that.$state.go('clusters.router.tiles');
+          }
         });
     }
 
     utils.chainStateResolve('clusters.router', $state, init);
-
 
   }
 
@@ -98,10 +104,6 @@
       return this.$q.all([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list(), this.stackatoInfo.getStackatoInfo()])
         .then(function () {
           that.createClusterList();
-          // // Redirect to Cf's state
-          if (_.keys(that.serviceInstances).length === 1) {
-            that.$state.go('clusters.cluster.detail.organizations', {guid: _.keys(that.serviceInstances)[0]});
-          }
         })
         .catch(function () {
           that.updateState(false, true);

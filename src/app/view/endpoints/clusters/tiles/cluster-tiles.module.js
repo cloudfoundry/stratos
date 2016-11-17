@@ -10,7 +10,7 @@
   ];
 
   function registerRoute($stateProvider) {
-    $stateProvider.state('clusters.tiles', {
+    $stateProvider.state('clusters.router.tiles', {
       url: '/endpoints',
       templateUrl: 'app/view/endpoints/clusters/tiles/cluster-tiles.html',
       controller: ClusterTilesController,
@@ -25,5 +25,7 @@
 
   function ClusterTilesController() {}
 
-  angular.extend(ClusterTilesController.prototype, {});
+  angular.extend(ClusterTilesController.prototype, {
+
+  });
 })();

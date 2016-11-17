@@ -99,7 +99,7 @@
     }
 
     // Ensure the parent state is fully initialised before we start our own init
-    utils.chainStateResolve('clusters.tiles', $state, init);
+    utils.chainStateResolve('clusters.router.tiles', $state, init);
   }
 
   angular.extend(ClusterTileController.prototype, {
