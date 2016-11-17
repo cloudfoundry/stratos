@@ -39,7 +39,6 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
 
-
     function init() {
 
       return that.refreshClusterModel()
@@ -47,14 +46,8 @@
           that.createClusterList();
           // // Redirect to Cf's state
           if (_.keys(that.serviceInstances).length === 1) {
-            // var clusterTilesState = that.$state.get('clusters.router.tiles');
-            // clusterTilesState.abstract = true;
-            // clusterTilesState.force = true;
-
-            // Make clusters.router.list state abstract
-            that.$state.go('clusters.cluster.detail.organizations', {guid: _.keys(that.serviceInstances)[0]});
+             that.$state.go('clusters.cluster.detail.organizations', {guid: _.keys(that.serviceInstances)[0]});
           } else {
-
             that.$state.go('clusters.router.tiles');
           }
         });

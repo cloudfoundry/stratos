@@ -161,7 +161,7 @@
      * @description Navigate to the cluster summary page for this cluster
      */
     summary: function () {
-      this.$state.go('clusters.cluster.detail.organizations', {guid: this.service.guid});
+      this.$state.go('clusters.cluster.detail.organizations', {guid: this.service.guid, orgCount: this.orgCount, userCount: this.userCount});
     }
 
   });
