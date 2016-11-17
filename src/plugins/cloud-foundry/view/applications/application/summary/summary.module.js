@@ -91,7 +91,7 @@
     this.routesActionMenu = [
       {
         name: gettext('Unmap from App'),
-        disabled: true,
+        disabled: false,
         execute: function (route) {
           routesService.unmapAppRoute(that.cnsiGuid, route, route.guid, that.id).finally(function () {
             that.update();
@@ -100,7 +100,7 @@
       },
       {
         name: gettext('Delete Route'),
-        disable: true,
+        disabled: false,
         execute: function (route) {
           routesService.deleteRoute(that.cnsiGuid, route, route.guid).finally(function () {
             that.update();
@@ -112,7 +112,7 @@
     this.instancesActionMenu = [
       {
         name: gettext('Terminate Instance'),
-        disabled: true,
+        disabled: false,
         execute: function (instanceIndex) {
           that.confirmDialog({
             title: gettext('Terminate Instance'),
@@ -139,42 +139,44 @@
       that.serviceInstances = $filter('removeHceServiceInstance')(that.model.application.summary.services, that.id);
 
       // Unmap from app
-      that.routesActionMenu[0].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+      that.routesActionMenu[0].hidden = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.application,
         that.authModel.actions.update,
         that.model.application.summary.space_guid
       );
-      that.$log.debug('Auth Action: Unmap from app disabled: ' + that.routesActionMenu[0].disabled);
+      that.$log.debug('Auth Action: Unmap from app hidden: ' + that.routesActionMenu[0].hidden);
       // delete route
-      that.routesActionMenu[1].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+      that.routesActionMenu[1].hidden = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.route,
         that.authModel.actions.delete,
         that.model.application.summary.space_guid
       );
-      that.$log.debug('Auth Action: Delete from app disabled: ' + that.routesActionMenu[1].disabled);
+      that.$log.debug('Auth Action: Delete from app hidden: ' + that.routesActionMenu[1].hidden);
+      that.hideRouteActions = !_.find(that.routesActionMenu, { hidden: false });
 
       // hide Add Routes
       that.hideAddRoutes = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.route,
         that.authModel.actions.create, that.model.application.summary.space_guid);
-      that.$log.debug('Auth Action: Hide Add routes disabled: ' + that.hideAddRoutes);
+      that.$log.debug('Auth Action: Hide Add routes hidden: ' + that.hideAddRoutes);
 
       // hide Edit App
       that.hideEditApp = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.application,
         that.authModel.actions.update, that.model.application.summary.space_guid);
-      that.$log.debug('Auth Action: Hide Edit App disabled: ' + that.hideEditApp);
+      that.$log.debug('Auth Action: Hide Edit App hidden: ' + that.hideEditApp);
 
       // hide Manage Services
       that.hideManageServices = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.managed_service_instance,
         that.authModel.actions.create, that.model.application.summary.space_guid);
-      that.$log.debug('Auth Action: Hide Manage Services disabled: ' + that.hideEditApp);
+      that.$log.debug('Auth Action: Hide Manage Services hidden: ' + that.hideEditApp);
 
       // Terminate instance action
-      that.instancesActionMenu[0].disabled = !that.authModel.isAllowed(that.cnsiGuid,
+      that.instancesActionMenu[0].hidden = !that.authModel.isAllowed(that.cnsiGuid,
         that.authModel.resources.application,
         that.authModel.actions.update, that.model.application.summary.space_guid);
+      that.hideInstanceActions = !_.find(that.instancesActionMenu, { hidden: false });
 
       return that.$q.resolve();
     }
