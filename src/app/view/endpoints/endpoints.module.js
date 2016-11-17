@@ -4,8 +4,7 @@
   angular
     .module('app.view.endpoints', [
       'app.view.endpoints.clusters',
-      'app.view.endpoints.dashboard',
-      'app.view.endpoints.hce'
+      'app.view.endpoints.dashboard'
     ])
     .config(registerRoute)
     .run(register);

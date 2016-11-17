@@ -27,27 +27,25 @@
     '$state',
     'app.model.modelManager',
     'app.utils.utilsService',
-    'app.view.hceRegistration',
-    'app.view.hcfRegistration',
+    'app.view.registerService',
     'app.view.endpoints.dashboard.serviceInstanceService'
   ];
 
   /**
-   * @namespace app.view.endpoints.hce
-   * @memberof app.view.endpoints.hce
+   * @namespace app.view.endpoints.dashboard
+   * @memberof app.view.endpoints.dashboard
    * @name EndpointsDashboardController
    * @param {object} $q - the Angular $q service
    * @param {object} $scope - the angular scope service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.utilsService} utilsService - the utils service
-   * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
-   * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
+   * @param {app.view.registerService} registerService register service to display the core slide out
    * @param {app.view.endpoints.dashboard.serviceInstanceService} serviceInstanceService - service to support dashboard with cnsi type endpoints
    * @constructor
    */
-  function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, hceRegistration,
-                                        hcfRegistration, serviceInstanceService) {
+  function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, registerService,
+                                        serviceInstanceService) {
     var that = this;
     var currentUserAccount = modelManager.retrieve('app.model.account');
 
@@ -75,22 +73,16 @@
 
     utilsService.chainStateResolve('endpoint.dashboard', $state, init);
 
-    var temphceRegistration = hceRegistration;
-    var temphcfRegistration = hcfRegistration;
-    var tempFlip = true;
-    this.tempRegister = function () {
-      tempFlip = !tempFlip;
-      if (tempFlip) {
-        temphceRegistration.add()
-          .then(function () {
-            return _updateEndpoints();
-          });
-      } else {
-        temphcfRegistration.add()
-          .then(function () {
-            return _updateEndpoints();
-          });
-      }
+    /**
+     * @namespace app.view.endpoints.dashboard
+     * @memberof app.view.endpoints.dashboard
+     * @name register
+     * @description Register a service endpoint
+     */
+    this.register = function () {
+      registerService.add($scope).then(function () {
+        _updateEndpoints();
+      });
     };
 
     /**
