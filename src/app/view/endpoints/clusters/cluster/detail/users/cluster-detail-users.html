@@ -8,33 +8,37 @@
   <div>
     <div class="change-roles-buttons">
       <button class="btn btn-default"
-              ng-if="clusterUsersController.selectedUsersCount() < 2"
+              ng-if="clusterUsersController.selectedUsersCount() < 2 && clusterUsersController.showTopAction()"
               ng-disabled="clusterUsersController.disableManageRoles()"
               ng-click="clusterUsersController.manageSelectedUsers()"
               translate>Manage Roles</button>
       <button class="btn btn-default"
-              ng-if="clusterUsersController.selectedUsersCount() > 1"
+              ng-if="clusterUsersController.selectedUsersCount() > 1 && clusterUsersController.showTopAction()"
               ng-disabled="clusterUsersController.disableChangeRoles()"
               ng-click="clusterUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
+              ng-if="clusterUsersController.showTopAction()"
               ng-disabled="clusterUsersController.disableRemoveFromOrg()"
               ng-click="clusterUsersController.removeAllRoles()"
-              translate>Remove All Roles</button>
+              translate>Remove All Roles</button><br>
     </div>
     <div class="panel panel-default">
-      <table class="table table-actionable table-selectable" >
+      <table class="table"
+             ng-class="{'table-actionable table-selectable': clusterUsersController.haveShownAnAction}">
         <thead>
         <tr>
-          <th><checkbox-input class="select-all-checkbox" ng-change="clusterUsersController.selectAllChanged(clusterDetailController.selectedUsers)" ng-model="clusterUsersController.selectAllUsers"></checkbox-input></th>
+          <th ng-if="clusterUsersController.haveShownAnAction">
+            <checkbox-input class="select-all-checkbox" ng-change="clusterUsersController.selectAllChanged(clusterDetailController.selectedUsers)" ng-model="clusterUsersController.selectAllUsers"></checkbox-input>
+          </th>
           <th class="sortable" st-sort-default="true" st-sort="entity.username">USERS({{ clusterUsersController.users.length }})</th>
           <th translate>Organization Roles</th>
-          <th translate>ACTION</th>
+          <th translate ng-if="clusterUsersController.haveShownAnAction">ACTION</th>
         </tr>
         </thead>
         <tbody>
         <tr class="" ng-repeat="user in clusterUsersController.visibleUsers">
-          <td>
+          <td ng-if="clusterUsersController.userActions[user.metadata.guid]">
             <checkbox-input
               ng-model="clusterUsersController.selectedUsers[user.metadata.guid]"
               ng-if="user.entity.username">
@@ -55,7 +59,7 @@
               <span ng-if="!user.entity.username" translate>Not Applicable</span>
             </div>
           </td>
-          <td>
+          <td ng-if="clusterUsersController.userActions[user.metadata.guid]">
             <actions-menu actions="clusterUsersController.userActions[user.metadata.guid]"
                           action-target="user"
                           menu-icon="helion-icon helion-icon-More"
@@ -68,7 +72,7 @@
         <tfoot ng-init="clusterUsersController.showUsers = 6"
                ng-show="clusterUsersController.showUsers < clusterUsersController.users.length">
         <tr>
-          <td colspan="4" class="text-center">
+          <td colspan="{{clusterUsersController.haveShownAnAction ? 4 : 3}}" class="text-center">
             <a ng-click="clusterUsersController.showUsers = clusterUsersController.users.length">
               <span translate>Show All</span> ({{ clusterUsersController.users.length }})
             </a>

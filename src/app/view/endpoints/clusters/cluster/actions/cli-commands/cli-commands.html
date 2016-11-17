@@ -24,8 +24,8 @@ OK
     <dl>
       <dt translate>List</dt>
       <dd translate>To list all orgs<code-block>cf orgs</code-block></dd>
-      <dt translate>Rename</dt>
-      <dd translate>To rename an org<code-block>cf rename-org {{context.orgName || '[organization name]'}} [name]</code-block></dd>
+      <dt ng-if="context.canUpdateOrg" translate>Rename</dt>
+      <dd ng-if="context.canUpdateOrg" translate>To rename an org<code-block>cf rename-org {{context.orgName || '[organization name]'}} [name]</code-block></dd>
       <dt translate>Information</dt>
       <dd translate>To fetch org information<code-block>cf org {{context.orgName || '[organization name]'}}</code-block></dd>
       <dt translate>Users</dt>
@@ -35,8 +35,8 @@ OK
     <dl>
       <dt translate>List</dt>
       <dd translate>To list the spaces in the targeted org<code-block>cf spaces</code-block></dd>
-      <dt translate>Rename</dt>
-      <dd translate>To rename a space<code-block>cf rename-space {{context.spaceName || '[space name]'}} [name]</code-block></dd>
+      <dt ng-if="context.canUpdateSpace" translate>Rename</dt>
+      <dd ng-if="context.canUpdateSpace" translate>To rename a space<code-block>cf rename-space {{context.spaceName || '[space name]'}} [name]</code-block></dd>
       <dt translate>Information</dt>
       <dd translate>To fetch space information<code-block>cf space {{context.spaceName || '[space name]'}}</code-block></dd>
       <dt translate>Users</dt>
