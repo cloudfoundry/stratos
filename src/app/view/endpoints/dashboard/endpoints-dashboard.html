@@ -1,18 +1,20 @@
-<div class="endpoints endpoints-dashboard">
-  <div class="action-bar app-actions-bar col-md-12 panel-less">
-    <div class="applications-header font-semi-bold pull-left" translate>
-      Endpoints
-      <bounce-spinner classes="bounce-spinner-sm" ng-show="!endpointsDashboardCtrl.listPromiseResolved"></bounce-spinner>
+<div class="endpoints">
+    <div class="header">
+      <div class="applications-header font-semi-bold pull-left" translate>
+        Endpoints
+        <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
+      </div>
+      <button ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.isUserAdmin()" class="btn btn-primary" stlye="position: absolute;    right: 0px;"
+              ng-click="endpointsDashboardCtrl.tempRegister()" translate>Register Endpoint</button>
     </div>
-  </div>
-  <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.listPromiseResolved && endpointsDashboardCtrl.listError">
+  <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
     <div>
       <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
       <div class="applications-msg" translate>The Console could not retrieve Endpoint information.</div>
       <button ng-click="endpointsDashboardCtrl.reload()" class="btn btn-primary" translate>Retry</button>
     </div>
   </div>
-  <div ng-show="endpointsDashboardCtrl.listPromiseResolved && !endpointsDashboardCtrl.listError">
+  <div ng-show="endpointsDashboardCtrl.initialised && !endpointsDashboardCtrl.listError">
     <div id="welcome-message" class="welcome-message"
          ng-if="endpointsDashboardCtrl.showWelcomeMessage"
          ng-show="endpointsDashboardCtrl.isUserAdmin()">
@@ -27,12 +29,8 @@
           <span translate>
             To enable developers to use this Web console to interact with Helion Stackato, please
           </span>
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.showClusterAddForm(true)" translate>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.registerEndpoint()" translate>
             Register Helion Cloud Foundry endpoints
-          </span>
-            and
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.showClusterAddForm()" translate>
-            Helion Code Engine endpoints
           </span>
           <span translate>
             here. The process of registering these endpoints will make them discoverable for anyone who logs into this
@@ -41,8 +39,43 @@
         </div>
       </div>
     </div>
-
-    <service-tile use-cached-data="true" service-type="hcf" class="endpoint-tile col-md-4 col-sm-1"></service-tile>
-    <service-tile use-cached-data="true" service-type="hce" class="endpoint-tile col-md-4 col-sm-1"></service-tile>
+      <table class="table table-actionable"
+             st-table="endpointsDashboardCtrl.stTableEndpoints"
+             st-safe-src="endpointsDashboardCtrl.endpoints">
+        <thead>
+        <tr>
+          <th translate st-sort="entity.name" st-sort-default="true">Name</th>
+          <th translate st-sort="entity.connected">Connection</th>
+          <th translate st-sort="entity.type">Type</th>
+          <th translate st-sort="entity.url">Address</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints"
+            show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
+            table-inline-status="endpoint.error.status">
+          <td ng-if="endpoint.visit" class="text-uppercase">
+            <a ng-href="{{endpoint.visit()}}">{{endpoint.name}}</a>
+          </td>
+          <td ng-if="!endpoint.visit" class="text-uppercase">{{endpoint.name}}</td>
+          <td>
+            <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+                  ng-if="endpoint.connected === true"></span>
+            <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+                  ng-if="endpoint.connected === undefined"></span>
+            <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
+                  ng-if="endpoint.connected === false"></span>
+          </td>
+          <td class="text-uppercase">{{endpoint.type}}</td>
+          <td>{{endpoint.url}}</td>
+          <td>
+            <actions-menu actions="endpoint.actions"
+                          action-target="endpoint.actionsTarget" menu-icon="helion-icon helion-icon-More"
+                          menu-position="actions-menu-right"></actions-menu>
+          </td>
+        </tr>
+        </tbody>
+      </table>
   </div>
 </div>
