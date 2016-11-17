@@ -402,6 +402,7 @@
         var message = that.$interpolate(successMsg)({appName: appName});
         that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+        that.dismissDialog();
       })
       .catch(function () {
         that.options.hasError = true;
@@ -409,7 +410,6 @@
       })
       .finally(function () {
         that.options.isDeleting = false;
-        that.dismissDialog();
       });
     }
   });
