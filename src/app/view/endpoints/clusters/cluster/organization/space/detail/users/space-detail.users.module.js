@@ -130,15 +130,15 @@
     };
 
     this.showManageRoles = function () {
-      return that.canUserManageRoles() || that.isAdmin;
+      return that.canUserManageRoles();
     };
 
     this.showRemoveFromSpace = function () {
-      return that.canUserRemoveFromSpace() || that.isAdmin;
+      return that.canUserRemoveFromSpace();
     };
 
     this.showRemoveFromOrg = function () {
-      return that.canUserRemoveFromOrg() || that.isAdmin;
+      return that.canUserRemoveFromOrg();
     };
 
     this.canAction = function () {

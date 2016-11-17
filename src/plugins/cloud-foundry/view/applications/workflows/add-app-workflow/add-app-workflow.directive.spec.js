@@ -250,7 +250,7 @@
             var p = step.onNext();
             $scope.$apply();
             expect(p.$$state.status).toBe(2);
-            expect(p.$$state.value).toBe(gettext('There was problem creating your application. Please try again.'));
+            expect(p.$$state.value).toBe(gettext('There was a problem creating your application. Please try again or contact your administrator if the problem persists.'));
           });
 
           it('onNext - valid route - without service extra property', function () {
@@ -489,7 +489,7 @@
 
           expect(that.routeModel.checkRouteExists).toHaveBeenCalled();
           expect(p.$$state.status).toBe(2);
-          expect(p.$$state.value).toBe(gettext('There was a problem validating your route. Please try again.'));
+          expect(p.$$state.value).toBe(gettext('There was a problem validating your route. Please try again or contact your administrator if the problem persists.'));
         });
 
         describe('#getOrganizations', function () {
