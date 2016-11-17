@@ -111,7 +111,7 @@
 
     this.instancesActionMenu = [
       {
-        name: gettext('Terminate Instance'),
+        name: gettext('Terminate'),
         disabled: true,
         execute: function (instanceIndex) {
           that.confirmDialog({
