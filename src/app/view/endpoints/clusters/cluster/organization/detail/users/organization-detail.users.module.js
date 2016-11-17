@@ -62,6 +62,9 @@
     this.stateInitialised = false;
 
     function refreshUsers() {
+      var user = that.stackatoInfo.info.endpoints.hcf[that.guid].user;
+      that.isAdmin = user.admin;
+
       that.userRoles = {};
 
       // For each user, get its roles in all spaces
@@ -103,7 +106,7 @@
     }
 
     this.canUserManageRoles = function () {
-      return that.canUserRemoveFromOrg() ||
+      return that.authModel.isAllowed(that.guid, that.authModel.resources.organization, that.authModel.actions.update, that.organizationGuid) ||
         _.find(that.authModel.principal[that.guid].userSummary.spaces.managed, { entity: { organization_guid: that.organizationGuid}});
     };
 
@@ -123,6 +126,18 @@
       return this.selectedUsersCount() < 1 || !that.canUserRemoveFromOrg();
     };
 
+    this.showManageRoles = function () {
+      return that.canUserManageRoles();
+    };
+
+    this.showRemoveFromOrg = function () {
+      return that.canUserRemoveFromOrg();
+    };
+
+    this.canAction = function () {
+      return that.showManageRoles() || that.showRemoveFromOrg();
+    };
+
     var debouncedUpdateSelection = _.debounce(function () {
       userSelection.deselectInvisibleUsers(that.guid, that.visibleUsers);
       $scope.$apply();
@@ -135,9 +150,36 @@
       }));
     }
 
+    var manageRoles = {
+      name: gettext('Manage Roles'),
+      disabled: true,
+      execute: function (aUser) {
+        return manageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
+      }
+    };
+    var removeFromOrg = {
+      name: gettext('Remove from Organization'),
+      disabled: true,
+      execute: function (aUser) {
+        return rolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);
+      }
+    };
+
     function init() {
-      that.userActions[0].disabled = !that.canUserManageRoles();
-      that.userActions[1].disabled = !that.canUserRemoveFromOrg();
+      if (that.canAction()) {
+        that.userActions = [];
+        if (that.showManageRoles()) {
+          manageRoles.disabled = !that.canUserManageRoles();
+          that.userActions.push(manageRoles);
+        }
+        if (that.showRemoveFromOrg()) {
+          removeFromOrg.disabled = !that.canUserRemoveFromOrg();
+          that.userActions.push(removeFromOrg);
+        }
+        if (that.userActions.length < 1) {
+          delete that.userActions;
+        }
+      }
 
       $scope.$watchCollection(function () {
         return that.visibleUsers;
@@ -165,23 +207,6 @@
         });
 
     }
-
-    this.userActions = [
-      {
-        name: gettext('Manage Roles'),
-        disabled: true,
-        execute: function (aUser) {
-          return manageUsers.show(that.guid, that.organizationGuid, [aUser]).result;
-        }
-      },
-      {
-        name: gettext('Remove from Organization'),
-        disabled: true,
-        execute: function (aUser) {
-          return rolesService.removeFromOrganization(that.guid, that.organizationGuid, [aUser]);
-        }
-      }
-    ];
 
     this.getSpaceRoles = function (aUser) {
       return that.userRoles[aUser.metadata.guid];

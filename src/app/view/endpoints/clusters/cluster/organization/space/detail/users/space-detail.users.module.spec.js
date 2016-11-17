@@ -55,12 +55,6 @@
 
         mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
-        var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-        _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
-          guid: 'user_guid',
-          admin: true
-        });
-        // //
         $httpBackend.expectGET('/pp/v1/proxy/v2/users?results-per-page=100').respond({resources: []});
 
         var SpaceUsersController = $state.get('endpoint.clusters.cluster.organization.space.detail.users').controller;
@@ -92,16 +86,12 @@
           initController($injector, 'space_developer');
         }));
 
-        it('should have manage roles disabled', function () {
-          expect($controller.userActions[0].disabled).toBeTruthy();
-        });
-
-        it('should have remove from organization disabled', function () {
-          expect($controller.userActions[1].disabled).toBeTruthy();
-        });
-
-        it('should have remove from space disabled', function () {
-          expect($controller.userActions[2].disabled).toBeTruthy();
+        it('should have no actions', function () {
+          if ($controller.actions) {
+            expect($controller.actions.length).toBe(0);
+          } else {
+            expect($controller.actions).not.toBeDefined();
+          }
         });
 
       });

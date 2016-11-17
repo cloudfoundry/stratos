@@ -350,17 +350,10 @@
         expect(clusterActionsCtrl).toBeDefined();
       });
 
-      it('should have create organization disabled', function () {
-        expect(clusterActionsCtrl.clusterActions[0].disabled).toBe(true);
+      it('should contain no actions', function () {
+        expect(clusterActionsCtrl.clusterActions.length).toBe(0);
       });
 
-      it('should have create space disabled', function () {
-        expect(clusterActionsCtrl.clusterActions[1].disabled).toBe(true);
-      });
-
-      it('should have assign users disabled', function () {
-        expect(clusterActionsCtrl.clusterActions[2].disabled).toBe(true);
-      });
     });
 
   });

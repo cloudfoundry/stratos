@@ -5,7 +5,7 @@
         <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
       </div>
       <button ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.isUserAdmin()" class="btn btn-primary" stlye="position: absolute;    right: 0px;"
-              ng-click="endpointsDashboardCtrl.tempRegister()" translate>Register Endpoint</button>
+              ng-click="endpointsDashboardCtrl.register()" translate>Register Endpoint</button>
     </div>
   <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
     <div>
@@ -28,7 +28,7 @@
           <span translate>
             To enable developers to use this Web console to interact with Helion Stackato, please
           </span>
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.tempRegister()" translate>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
             Register Helion Cloud Foundry endpoints
           </span>
           <span translate>
