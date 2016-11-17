@@ -27,8 +27,13 @@
       },
       entity: {
         name: 'orgName'
-      },
-      spaces: [ space ]
+      }
+    };
+    var modelOrganization = {
+      spaces: [ space ],
+      details: {
+        org: organization
+      }
     };
 
     var userGuid = 'userGuid';
@@ -53,7 +58,7 @@
       var modelManager = $injector.get('app.model.modelManager');
 
       var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
-      _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(organization));
+      _.set(organizationModel, 'organizations.' + clusterGuid + '.' + organization.metadata.guid, _.cloneDeep(modelOrganization));
 
       spaceModel = modelManager.retrieve('cloud-foundry.model.space');
       _.set(spaceModel, 'spaces.' + clusterGuid + '.' + space.metadata.guid, _.cloneDeep(modelSpace));
@@ -68,12 +73,6 @@
       };
 
       mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
-
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
-        guid: 'user_guid',
-        admin: true
-      });
 
       $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + space.metadata.guid + '/routes?results-per-page=1')
         .respond({
@@ -258,17 +257,14 @@
         $httpBackend.flush();
       }));
 
-      it('should have rename space disabled', function () {
-        expect(controller.actions[0].disabled).toBeTruthy();
+      it('should have no actions', function () {
+        if (controller.actions) {
+          expect(controller.actions.length).toBe(0);
+        } else {
+          expect(controller.actions).not.toBeDefined();
+        }
       });
 
-      it('should have delete space disabled', function () {
-        expect(controller.actions[1].disabled).toBeTruthy();
-      });
-
-      it('should have assign users disabled', function () {
-        expect(controller.actions[2].disabled).toBeTruthy();
-      });
     });
   });
 

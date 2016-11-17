@@ -75,7 +75,9 @@
       retryRequest: retryRequest,
       runInSequence: runInSequence,
       sizeUtilization: sizeUtilization,
-      urlValidationExpression: urlValidationExpression
+      urlValidationExpression: urlValidationExpression,
+      extractCloudFoundryError: extractCloudFoundryError,
+      extractCodeEngineError: extractCodeEngineError
     };
 
     /**
@@ -254,5 +256,65 @@
     return function (input) {
       return utilsService.mbToHumanSize(input);
     };
+  }
+
+  function extractCloudFoundryError(errorResponse) {
+    /*
+     Cloud Foundry errors have the following format:
+     data: {
+     description: 'some text',
+     errorCode: 1000,
+     error_code: 'UnknownHostException'
+     }
+     */
+    var errorText;
+
+    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+      return;
+    }
+    if (errorResponse.data && errorResponse.data.error_code) {
+      errorResponse = errorResponse.data;
+    }
+
+    if (errorResponse.description && _.isString(errorResponse.description)) {
+      errorText = errorResponse.description;
+    }
+
+    if (errorResponse.error_code && _.isString(errorResponse.error_code)) {
+      errorText = errorText + gettext(', Error Code: ') + errorResponse.error_code;
+    }
+
+    return errorText;
+  }
+
+  function extractCodeEngineError(errorResponse) {
+
+    /*
+     Code Engine errors have the following format
+     data: {
+     message: 'some text',
+     detail: 'more text',
+     }
+     */
+
+    if (_.isUndefined(errorResponse) || _.isNull(errorResponse)) {
+      return;
+    }
+    var errorText;
+    if (errorResponse.data && errorResponse.data.message) {
+      errorResponse = errorResponse.data;
+    }
+
+    if (errorResponse.message && _.isString(errorResponse.message)) {
+      errorText = errorResponse.message;
+      if (errorResponse.details || errorResponse.detail) {
+        var detail = errorResponse.details || errorResponse.detail;
+        if (_.isString(detail)) {
+          errorText = errorText + ', ' + detail;
+        }
+      }
+    }
+
+    return errorText;
   }
 })();

@@ -128,14 +128,18 @@
 
     updateActions: function (routes) {
       var that = this;
+      var space = that.spaceDetail().details.space;
+      var canDelete = that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.route, that.authModel.actions.delete, space.metadata.guid);
+      var canUnmap = that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.route, that.authModel.actions.update, space.metadata.guid);
+      that.canDeleteOrUnmap = canDelete || canUnmap;
       _.forEach(routes, function (route) {
-
-        var space = that.spaceDetail().details.space;
-        that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
-        // Delete route
-        that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) > 0 || !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.route, that.authModel.actions.delete, space.metadata.guid);
-        // Unmap route
-        that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 || !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.route, that.authModel.actions.update, space.metadata.guid);
+        if (that.canDeleteOrUnmap) {
+          that.actionsPerRoute[route.metadata.guid] = that.actionsPerRoute[route.metadata.guid] || that.getInitialActions();
+          that.actionsPerRoute[route.metadata.guid][0].disabled = _.get(route.entity.apps, 'length', 0) > 0 || !canDelete;
+          that.actionsPerRoute[route.metadata.guid][1].disabled = _.get(route.entity.apps, 'length', 0) < 1 || !canUnmap;
+        } else {
+          delete that.actionsPerRoute[route.metadata.guid];
+        }
       });
     },
 

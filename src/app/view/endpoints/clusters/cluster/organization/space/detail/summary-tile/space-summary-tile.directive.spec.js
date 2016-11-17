@@ -67,12 +67,6 @@
 
       mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
-        guid: 'user_guid',
-        admin: true
-      });
-
       $httpBackend.expectGET('/pp/v1/proxy/v2/spaces/' + spaceGuid + '/routes?results-per-page=1')
         .respond({
           total_results: 0
@@ -252,12 +246,12 @@
         $httpBackend.flush();
       }));
 
-      it('should have rename space disabled', function () {
-        expect(controller.actions[0].disabled).toBeTruthy();
-      });
-
-      it('should have delete space disabled', function () {
-        expect(controller.actions[1].disabled).toBeTruthy();
+      it('should have no actions', function () {
+        if (controller.actions) {
+          expect(controller.actions.length).toBe(0);
+        } else {
+          expect(controller.actions).not.toBeDefined();
+        }
       });
     });
   });

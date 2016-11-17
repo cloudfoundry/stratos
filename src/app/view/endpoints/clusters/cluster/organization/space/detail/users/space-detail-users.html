@@ -8,37 +8,42 @@
   <div>
     <div class="change-roles-buttons">
       <button class="btn btn-default"
-              ng-if="spaceUsersController.selectedUsersCount() < 2"
+              ng-if="spaceUsersController.selectedUsersCount() < 2 && spaceUsersController.showManageRoles()"
               ng-disabled="spaceUsersController.disableManageRoles()"
               ng-click="spaceUsersController.manageSelectedUsers()"
               translate>Manage Roles</button>
       <button class="btn btn-default"
-              ng-if="spaceUsersController.selectedUsersCount() > 1"
+              ng-if="spaceUsersController.selectedUsersCount() > 1 && spaceUsersController.showManageRoles()"
               ng-disabled="spaceUsersController.disableChangeRoles()"
               ng-click="spaceUsersController.manageSelectedUsers()"
               translate>Change Roles</button>
       <button class="btn btn-default"
+              ng-if="spaceUsersController.showRemoveFromSpace()"
               ng-disabled="spaceUsersController.disableRemoveFromSpace()"
               ng-click="spaceUsersController.removeFromSpace()"
               translate>Remove From Space</button>
       <button class="btn btn-default"
+              ng-if="spaceUsersController.showRemoveFromOrg()"
               ng-disabled="spaceUsersController.disableRemoveFromOrg()"
               ng-click="spaceUsersController.removeFromOrganization()"
               translate>Remove From Organization</button>
     </div>
     <div class="panel panel-default">
-      <table class="table table-actionable table-selectable" >
+      <table class="table"
+             ng-class="{'table-actionable table-selectable': spaceUsersController.canAction()}">
         <thead>
         <tr>
-          <th><checkbox-input class="select-all-checkbox" ng-change="spaceUsersController.selectAllChanged()" ng-model="spaceUsersController.selectAllUsers"></checkbox-input></th>
+          <th ng-if="spaceUsersController.canAction()">
+            <checkbox-input class="select-all-checkbox" ng-change="spaceUsersController.selectAllChanged()" ng-model="spaceUsersController.selectAllUsers"></checkbox-input>
+          </th>
           <th class="sortable" translate st-sort-default="true" st-sort="entity.username">USERS({{ spaceUsersController.users.length }})</th>
           <th translate>Space Roles</th>
-          <th translate>ACTION</th>
+          <th ng-if="spaceUsersController.canAction()" translate>ACTION</th>
         </tr>
         </thead>
         <tbody>
         <tr class="" ng-repeat="user in spaceUsersController.visibleUsers">
-          <td>
+          <td ng-if="spaceUsersController.canAction()">
             <checkbox-input
               ng-model="spaceUsersController.selectedUsers[user.metadata.guid]"
               ng-if="user.entity.username">
@@ -59,7 +64,7 @@
               <span ng-if="!user.entity.username" translate>Not Applicable</span>
             </div>
           </td>
-          <td>
+          <td ng-if="spaceUsersController.canAction()">
             <actions-menu actions="spaceUsersController.userActions"
                           action-target="user"
                           menu-icon="helion-icon helion-icon-More"
@@ -72,7 +77,7 @@
         <tfoot ng-init="spaceUsersController.showUsers = 6"
                ng-show="spaceUsersController.showUsers < spaceUsersController.users.length">
         <tr>
-          <td colspan="4" class="text-center">
+          <td colspan="{{spaceUsersController.canAction() ? 4 : 3}}" class="text-center">
             <a ng-click="spaceUsersController.showUsers = spaceUsersController.users.length">
               <span translate>Show All</span> ({{ spaceUsersController.users.length }})
             </a>

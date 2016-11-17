@@ -111,12 +111,6 @@
 
       mock.cloudFoundryModel.Auth.initAuthModel($injector, authModelOpts);
 
-      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-      _.set(stackatoInfo, 'info.endpoints.hcf.' + clusterGuid + '.user', {
-        guid: 'user_guid',
-        admin: true
-      });
-
       var $compile = $injector.get('$compile');
 
       var contextScope = $injector.get('$rootScope').$new();
@@ -156,7 +150,7 @@
         expect(controller.organizationGuid).toBe(organizationGuid);
         expect(controller.organization).toBeDefined();
         expect(controller.utils).toBeDefined();
-        expect(controller.cliCommands).toBeDefined();
+        expect(controller.showCliCommands).toBeDefined();
         expect(controller.cardData).toBeDefined();
         expect(controller.getEndpoint).toBeDefined();
         expect(controller.keys).toBeDefined();
@@ -199,12 +193,12 @@
         initController($injector, 'space_developer');
       }));
 
-      it('should have edit organization disabled', function () {
-        expect(controller.actions[0].disabled).toBe(true);
-      });
-
-      it('should have delete organization disabled', function () {
-        expect(controller.actions[1].disabled).toBe(true);
+      it('should have no actions', function () {
+        if (controller.actions) {
+          expect(controller.actions.length).toBe(0);
+        } else {
+          expect(controller.actions).not.toBeDefined();
+        }
       });
 
     });
