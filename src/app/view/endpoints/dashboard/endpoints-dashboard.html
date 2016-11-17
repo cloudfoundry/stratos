@@ -1,4 +1,4 @@
-<div class="endpoints">
+<div class="endpoints endpoints-dashboard">
     <div class="header">
       <div class="applications-header font-semi-bold pull-left" translate>
         Endpoints
@@ -16,8 +16,7 @@
   </div>
   <div ng-show="endpointsDashboardCtrl.initialised && !endpointsDashboardCtrl.listError">
     <div id="welcome-message" class="welcome-message"
-         ng-if="endpointsDashboardCtrl.showWelcomeMessage"
-         ng-show="endpointsDashboardCtrl.isUserAdmin()">
+         ng-if="endpointsDashboardCtrl.showWelcomeMessage">
       <div class="panel panel-default">
         <div class="action-header">
           <span translate>Welcome to Helion Stackato</span>
@@ -25,11 +24,11 @@
                   ng-click="endpointsDashboardCtrl.hideWelcomeMessage()">
           </button>
         </div>
-        <div class=" panel-body">
+        <div class=" panel-body" ng-show="endpointsDashboardCtrl.isUserAdmin()">
           <span translate>
             To enable developers to use this Web console to interact with Helion Stackato, please
           </span>
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.registerEndpoint()" translate>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.tempRegister()" translate>
             Register Helion Cloud Foundry endpoints
           </span>
           <span translate>
@@ -37,8 +36,21 @@
             console. Once you register an endpoint, we recommend connecting it to your account so you can manage it.
           </span>
         </div>
+        <div class=" panel-body" ng-show="!endpointsDashboardCtrl.isUserAdmin()">
+          <span translate>
+            To get started, setup your account by connecting to endpoints and other services.
+          </span>
+        </div>
       </div>
     </div>
+    <div ng-if="!endpointsDashboardCtrl.showWelcomeMessage && !endpointsDashboardCtrl.endpoints.length"
+         class="panel panel-default endpoints-empty-table">
+      <div class="panel-body" translate>
+        You have no endpoints
+      </div>
+    </div>
+    <div ng-if="endpointsDashboardCtrl.endpoints.length"
+          class="endpoints-table">
       <table class="table table-actionable"
              st-table="endpointsDashboardCtrl.stTableEndpoints"
              st-safe-src="endpointsDashboardCtrl.endpoints">
@@ -54,18 +66,20 @@
         <tbody>
         <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints"
             show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
-            table-inline-status="endpoint.error.status">
+            table-inline-status="{{endpoint.error.status}}">
           <td ng-if="endpoint.visit" class="text-uppercase">
             <a ng-href="{{endpoint.visit()}}">{{endpoint.name}}</a>
           </td>
           <td ng-if="!endpoint.visit" class="text-uppercase">{{endpoint.name}}</td>
-          <td>
+          <td ng-switch="endpoint.connected">
             <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                  ng-if="endpoint.connected === true"></span>
+                  ng-switch-when="connected"></span>
+            <span class="helion-icon helion-icon-lg helion-icon-Connect text-info"
+                  ng-switch-when="unconnected"></span>
             <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
-                  ng-if="endpoint.connected === undefined"></span>
+                  ng-switch-when="expired"></span>
             <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
-                  ng-if="endpoint.connected === false"></span>
+                  ng-switch-when="error"></span>
           </td>
           <td class="text-uppercase">{{endpoint.type}}</td>
           <td>{{endpoint.url}}</td>
@@ -77,5 +91,6 @@
         </tr>
         </tbody>
       </table>
+    </div>
   </div>
 </div>

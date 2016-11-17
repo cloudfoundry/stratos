@@ -38,7 +38,7 @@
    * @param {object} $state - the angular $state service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.api.apiManager} apiManager - the API management service
-   * @param {app.model.utilsService} utils - the utils service
+   * @param {app.utils.utilsService} utils - the utils service
    * @param {cloud-foundry.model.modelUtils} modelUtils - service containing general hcf model helpers
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    * @property {number} orgCount - organisation count
