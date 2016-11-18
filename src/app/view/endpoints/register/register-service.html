@@ -31,7 +31,8 @@
              placeholder="{{ asyncTaskDialogCtrl.context.urlHint }}"
              ng-pattern="asyncTaskDialogCtrl.context.urlValidationExpr"
              helion-unique items="asyncTaskDialogCtrl.context.instances"
-             ignore-case/>
+             ignore-case
+             auto-focus="300"/>
     </div>
     <div class="form-group" focusable-input
          ng-class="{'has-error': form.regForm[asyncTaskDialogCtrl.context.nameFormName].$invalid && form.regForm[asyncTaskDialogCtrl.context.nameFormName].$dirty}">

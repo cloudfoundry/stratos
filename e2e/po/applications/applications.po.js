@@ -16,7 +16,8 @@
     isApplicationWallNoClusters: isApplicationWallNoClusters,
 
     getAddApplicationButton: getAddApplicationButton,
-    addApplication: addApplication
+    addApplication: addApplication,
+    clickEndpointsDashboard: clickEndpointsDashboard
   };
 
   function applicationGalleryCard(idx) {
@@ -54,5 +55,9 @@
 
   function addApplication() {
     return getAddApplicationButton().click();
+  }
+
+  function clickEndpointsDashboard() {
+    return element(by.css('.applications-cta a')).click();
   }
 })();

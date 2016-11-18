@@ -40,16 +40,16 @@
 
       // Credentials form should be shown
       expect(registration.credentialsForm().isDisplayed()).toBeTruthy();
-      expect(registration.connectButton().isEnabled()).toBeFalsy();
+      expect(registration.credentialsFormConnectButton().isEnabled()).toBeFalsy();
 
       registration.credentialsFormFields().get(1).getAttribute('value').then(function (url) {
         var creds = helpers.getCnsiForUrl(url);
         expect(creds).toBeTruthy();
-        registration.fillCredentialsForm(creds.admin.username, creds.admin.password);
-        expect(registration.connectButton().isEnabled()).toBeTruthy();
+        registration.credentialsFormFill(creds.admin.username, creds.admin.password);
+        expect(registration.credentialsFormConnectButton().isEnabled()).toBeTruthy();
       });
 
-      registration.connectServiceInstance().then(function () {
+      registration.credentialsFormEndpointConnect().then(function () {
         helpers.checkAndCloseToast(/Successfully connected to '(?:hcf|hce)'/);
         var item = clusterSettings.getItem(settings, 0);
         expect(clusterSettings.isExpired(item)).toBeFalsy();

@@ -9,7 +9,6 @@
   var confirmationModalHelper = require('../../po/widgets/confirmation-modal.po');
   var registerEndpoint = require('../../po/endpoints/register-endpoint.po');
   var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
-  var serviceRegistration = require('../../po/endpoints/service-instance-registration.po');
 
   describe('Endpoints - List HCFs', function () {
 
@@ -61,7 +60,7 @@
             .then(function () {
               // Run through the credentials form + register
               expect(credentialsFormHelper.credentialsForm().isDisplayed()).toBeTruthy();
-              credentialsFormHelper.fillCredentialsForm(hcf.admin.username, hcf.admin.password);
+              credentialsFormHelper.credentialsFormFill(hcf.admin.username, hcf.admin.password);
               return credentialsFormHelper.connect();
             })
             .then(function () {
@@ -126,7 +125,7 @@
             .then(function () {
               expect(confirmationModalHelper.isVisible()).toBeTruthy();
               // click on modal cancel
-              return confirmationModalHelper.cancel();
+              return confirmationModalHelper.credentialsFormCancel();
             })
             .then(function () {
               // Open the action menu
@@ -179,7 +178,7 @@
       beforeAll(function () {
         resetToLoggedIn(loginPage.loginAsNonAdmin)
           .then(function () {
-            return serviceRegistration.completeRegistration();
+            // return serviceRegistration.completeRegistration();
           })
           .then(function () {
             return endpointsHcf.showHcfEndpoints();

@@ -71,8 +71,8 @@
               context.urlHint = gettext('Helion Cloud Foundry API endpoint');
               break;
             case 'hce':
-              context.typeLabel = gettext('Helion Cloud Engine');
-              context.urlHint = gettext('Helion Cloud Engine endpoint');
+              context.typeLabel = gettext('Helion Code Engine');
+              context.urlHint = gettext('Helion Code Engine endpoint');
               break;
             default:
               context.typeLabel = gettext('Service Endpoint');
