@@ -45,7 +45,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {object} githubOauthService - github oauth service
-   * @param {app.model.utilsService} utils - the utils service
+   * @param {app.utils.utilsService} utils - the utils service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
@@ -53,7 +53,7 @@
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
    * @property {github.view.githubOauthService} githubOauthService - github oauth service
-   * @property {app.model.utilsService} utils - the utils service
+   * @property {app.utils.utilsService} utils - the utils service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
    * @property {object} $timeout - the Angular $timeout service

@@ -131,13 +131,18 @@
 
     updateActions: function (serviceInstances) {
       var that = this;
+      var space = that.spaceDetail().details.space;
+      var canDelete = that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.delete, space.metadata.guid);
+      var canUnbind = that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.update, space.metadata.guid);
+      that.canDeleteOrUnbind = canDelete || canUnbind;
       _.forEach(serviceInstances, function (si) {
-        that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
-        var space = that.spaceDetail().details.space;
-        // Delete Services
-        that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.delete, space.metadata.guid);
-        // Unbind Services
-        that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !that.authModel.isAllowed(that.clusterGuid, that.authModel.resources.managed_service_instance, that.authModel.actions.update, space.metadata.guid);
+        if (that.canDeleteOrUnbind) {
+          that.actionsPerSI[si.metadata.guid] = that.actionsPerSI[si.metadata.guid] || that.getInitialActions();
+          that.actionsPerSI[si.metadata.guid][0].disabled = _.get(si.entity.service_bindings, 'length', 0) > 0 || !canDelete;
+          that.actionsPerSI[si.metadata.guid][1].disabled = _.get(si.entity.service_bindings, 'length', 0) < 1 || !canUnbind;
+        } else {
+          delete that.actionsPerSI[si.metadata.guid];
+        }
       });
     }
 

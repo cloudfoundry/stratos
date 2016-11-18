@@ -495,6 +495,7 @@
         appAction.disabled = that.isActionDisabled(appAction.id);
         appAction.hidden = that.isActionHidden(appAction.id);
       });
+      this.visibleActions = _.find(this.appActions, { hidden: false });
       this.onAppRoutesChange();
     },
 

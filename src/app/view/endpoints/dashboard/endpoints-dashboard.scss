@@ -1,0 +1,19 @@
+.endpoints-dashboard {
+  .action-header {
+    position: relative;
+    padding-top: $hpe-unit-space;
+    button {
+      position: absolute;
+      top: $hpe-unit-space;
+      right: $hpe-unit-space;
+    }
+  }
+
+  .endpoints-empty-table {
+    margin: 0 $hpe-unit-space;
+  }
+
+  .endpoints-table {
+    padding: 0 $hpe-unit-space;
+  }
+}

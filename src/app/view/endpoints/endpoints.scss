@@ -1,5 +1,6 @@
+@import "credentials/credentials-form";
+@import "dashboard/endpoints-dashboard";
 @import "clusters/clusters";
-@import "hce/endpoints-view";
 
 .endpoints {
 
@@ -9,17 +10,16 @@
   align-items: stretch;
 
   .header {
-    padding: $hpe-unit-space 0px;
+    padding: $hpe-unit-space;
     position: relative;
     button {
       position: absolute;
-      right: 0px;
+      right: $hpe-unit-space;
     }
   }
 
   .welcome-message {
-    padding: $hpe-unit-space * 0.5;
-    margin-top: $hpe-unit-space * 0.5;
+    padding: 0 $hpe-unit-space;
 
     > .helion-icon {
       font-size: $hpe-unit-space;

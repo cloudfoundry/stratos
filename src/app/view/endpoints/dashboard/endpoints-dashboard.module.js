@@ -26,25 +26,26 @@
     '$scope',
     '$state',
     'app.model.modelManager',
-    'app.view.hceRegistration',
-    'app.view.hcfRegistration',
+    'app.utils.utilsService',
+    'app.view.registerService',
     'app.view.endpoints.dashboard.serviceInstanceService'
   ];
 
   /**
-   * @namespace app.view.endpoints.hce
-   * @memberof app.view.endpoints.hce
+   * @namespace app.view.endpoints.dashboard
+   * @memberof app.view.endpoints.dashboard
    * @name EndpointsDashboardController
    * @param {object} $q - the Angular $q service
    * @param {object} $scope - the angular scope service
    * @param {object} $state - the UI router $state service
    * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
-   * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
+   * @param {app.utils.utilsService} utilsService - the utils service
+   * @param {app.view.registerService} registerService register service to display the core slide out
    * @param {app.view.endpoints.dashboard.serviceInstanceService} serviceInstanceService - service to support dashboard with cnsi type endpoints
    * @constructor
    */
-  function EndpointsDashboardController($q, $scope, $state, modelManager, hceRegistration, hcfRegistration, serviceInstanceService) {
+  function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, registerService,
+                                        serviceInstanceService) {
     var that = this;
     var currentUserAccount = modelManager.retrieve('app.model.account');
 
@@ -64,24 +65,24 @@
       serviceInstanceService.clear();
     });
 
-    _updateEndpoints();
+    function init() {
+      _updateEndpoints().then(function () {
+        _updateWelcomeMessage();
+      });
+    }
 
-    var temphceRegistration = hceRegistration;
-    var temphcfRegistration = hcfRegistration;
-    var tempFlip = true;
-    this.tempRegister = function () {
-      tempFlip = !tempFlip;
-      if (tempFlip) {
-        temphceRegistration.add()
-          .then(function () {
-            return _updateEndpoints();
-          });
-      } else {
-        temphcfRegistration.add()
-          .then(function () {
-            return _updateEndpoints();
-          });
-      }
+    utilsService.chainStateResolve('endpoint.dashboard', $state, init);
+
+    /**
+     * @namespace app.view.endpoints.dashboard
+     * @memberof app.view.endpoints.dashboard
+     * @name register
+     * @description Register a service endpoint
+     */
+    this.register = function () {
+      registerService.add($scope).then(function () {
+        _updateEndpoints();
+      });
     };
 
     /**
@@ -113,6 +114,18 @@
       $state.reload();
     };
 
+    function _updateWelcomeMessage() {
+      // Show the welcome message if either...
+      if (that.isUserAdmin()) {
+        // The user is admin and there are no endpoints registered
+        that.showWelcomeMessage = that.endpoints.length === 0;
+      } else {
+        // The user is not admin and there are no connected endpoints (note - they should never reach here if there
+        // are no registered endpoints)
+        that.showWelcomeMessage = !_.find(that.endpoints, { connected: 'connected' });
+      }
+    }
+
     function _haveCachedEndpoints() {
       return serviceInstanceService.haveInstances();
     }
@@ -127,7 +140,7 @@
 
         if (!that.initialised) {
           // Show welcome message only if this is the first time around and there no endpoints
-          that.showWelcomeMessage = that.endpoints.length === 0;
+          _updateWelcomeMessage();
         }
 
         that.initialised = true;

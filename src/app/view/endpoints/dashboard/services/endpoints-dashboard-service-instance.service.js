@@ -10,8 +10,8 @@
     '$state',
     '$interpolate',
     'app.model.modelManager',
-    'app.error.errorService',
     'app.utils.utilsService',
+    'app.error.errorService',
     'app.view.notificationsService',
     'app.view.credentialsDialog',
     'helion.framework.widgets.dialog.confirm'
@@ -26,14 +26,14 @@
    * @param {object} $state - the UI router $state service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.utils.utilsService} utilsService - the utils service
    * @param {app.error.errorService} errorService - service to show custom errors below title bar
-   * @param {app.model.utilsService} utilsService - the utils service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
    * @param {app.view.credentialsDialog} credentialsDialog - the credentials dialog service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @returns {object} the service instance service
    */
-  function serviceInstanceServiceFactory($q, $state, $interpolate, modelManager, errorService, utilsService,
+  function serviceInstanceServiceFactory($q, $state, $interpolate, modelManager, utilsService, errorService,
                                          notificationsService, credentialsDialog, confirmDialog) {
     var that = this;
 
@@ -68,7 +68,6 @@
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard.serviceInstanceService
      * @description Refresh the cnsi service instances within the model
-     * @param {Array} endpoints - collection of existing endpoints
      * @returns {object} a promise
      * @public
      */
@@ -104,7 +103,6 @@
      * @public
      */
     function updateInstancesCache(endpoints) {
-
       // First remove any stale data. Any digests should be unaffected by flip-flopping as this is all sync
       _.remove(endpoints, function (endpoint) {
         return endpoint.key.indexOf(endpointPrefix) === 0;
@@ -138,7 +136,7 @@
         var endpoint = {
           key: endpointPrefix + serviceInstance.guid,
           name: serviceInstance.name,
-          connected: isConnected,
+          connected: isConnected ? 'connected' : 'unconnected',
           type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine'),
           visit: isConnected && serviceInstance.cnsi_type === 'hcf' ? function () {
             return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
@@ -153,26 +151,24 @@
           // Service could not be contacted
           endpoint.error = {
             message: gettext('The Console could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'),
-            state: 'error'
+            status: 'error'
           };
-          endpoint.connected = false;
+          endpoint.connected = 'error';
         } else if (hasExpired) {
           // Service token has expired
           endpoint.error = {
-            message: gettext('Token has expired'),
-            state: 'warning'
+            message: gettext('Token has expired. Try reconnecting to this endpoint to resolve this problem.'),
+            status: 'warning'
           };
-          endpoint.connected = undefined;
+          endpoint.connected = 'expired';
+        } else if (endpoint.connected === 'unconnected') {
+          // Service token has expired
+          endpoint.error = {
+            message: gettext('The Console has no credentials for this endpoint. Connect to resolve this problem.'),
+            status: 'info'
+          };
         }
         serviceEndpoints.push(endpoint);
-        // // Update or add endpoint to endpoints collection
-        // var existingEndpoint = _.find(endpoints, {key: endpoint.key});
-        // if (existingEndpoint) {
-        //   var index = _.indexOf(endpoints, existingEndpoint);
-        //   endpoints.splice(index, 1, endpoint);
-        // } else {
-        //   endpoints.push(endpoint);
-        // }
       });
       return serviceEndpoints;
     }
