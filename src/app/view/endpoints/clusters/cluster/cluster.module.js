@@ -43,6 +43,7 @@
     this.initialized = false;
     this.guid = $stateParams.guid;
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+
     userSelection.deselectAllUsers(this.guid);
 
     this.getEndpoint = function () {

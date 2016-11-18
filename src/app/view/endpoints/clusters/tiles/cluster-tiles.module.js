@@ -35,6 +35,20 @@
     'app.utils.utilsService'
   ];
 
+  /**
+   * @name ClusterTilesController
+   * @constructor
+   * @param {object} $q - the angular $q service
+   * @param {object} $state - the UI router $state service
+   * @param  {$stateParams} $stateParams - UI Router state params
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.utils.utilsService} utils - the utils service
+   * @property {object} $q - the angular $q service
+   * @property {object} $state - the UI router $state service
+   * @property  {$stateParams} $stateParams - UI Router state params
+   * @property {app.model.modelManager} modelManager - the Model management service
+   * @property {app.utils.utilsService} utils - the utils service
+   */
   function ClusterTilesController($q, $state, $stateParams, modelManager, utils) {
     var that = this;
     this.modelManager = modelManager;
@@ -77,11 +91,8 @@
 
         if (cloned.isConnected) {
           cloned.hasExpired = false;
-        } else {
-          // Skip disconnected HCF
-          return;
+          that.serviceInstances[cloned.guid] = cloned;
         }
-        that.serviceInstances[cloned.guid] = cloned;
       });
       this.updateState(false, false);
     },

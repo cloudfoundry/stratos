@@ -57,7 +57,6 @@
     var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     var organizationApi = apiManager.retrieve('cloud-foundry.api.Organizations');
 
-
     this.updateTotalApps = function () {
       that.totalApps = 0;
       var totalMemoryMb = 0;

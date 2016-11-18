@@ -21,9 +21,6 @@
       template: '<ui-view/>',
       data: {
         activeMenuState: 'endpoint.clusters'
-      },
-      ncyBreadcrumb: {
-        label: gettext('Helion Cloud Foundry Endpoints')
       }
     });
   }
