@@ -18,7 +18,8 @@
       abstract: true,
       params: {
         userCount: undefined,
-        orgCount: undefined
+        orgCount: undefined,
+        singleInstance: undefined
       },
       templateUrl: 'app/view/endpoints/clusters/cluster/detail/cluster-detail.html',
       controller: ClusterDetailController,
@@ -50,6 +51,7 @@
     this.orgCount = $stateParams.orgCount;
     this.service = {};
     this.userService = {};
+    this.singleInstance = false;
     var organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     var userApi = apiManager.retrieve('cloud-foundry.api.Users');
@@ -102,6 +104,14 @@
       });
 
       that.initialized = true;
+
+      var singleInstance = _.filter(userServiceInstanceModel.serviceInstances, {
+          cnsi_type: 'hcf',
+          valid: true
+        }).length === 1;
+      that.singleInstance = singleInstance;
+      console.log('Set value: ' + that.singleInstance);
+      $stateParams.singleInstance = singleInstance;
 
       // init functions should return a promise
       return $q.resolve(that.organizations);

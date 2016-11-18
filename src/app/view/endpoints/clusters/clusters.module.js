@@ -62,7 +62,7 @@
 
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('clusters', 'endpoint.clusters.router', gettext('Helion Cloud Foundry Endpoints'), 1);
+      menu.addMenuItem('clusters', 'endpoint.clusters.router', gettext('Helion Cloud Foundry'), 1);
       this.initialized.resolve();
     }
   });

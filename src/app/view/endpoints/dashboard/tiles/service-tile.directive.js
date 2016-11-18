@@ -135,7 +135,7 @@
      */
     goToEndpointsView: function () {
       if (this.isHcf()) {
-        this.$state.go('endpoint.clusters.router.tiles');
+        this.$state.go('endpoint.clusters.tiles');
       } else {
         this.$state.go('endpoint.hce', {
           serviceType: 'hce'
