@@ -2,8 +2,8 @@
   'use strict';
 
   describe('endpoint clusters', function () {
-    var $q, $state, $scope, modelManager, confirmModal, clusterTilesCtrl, hcfRegistration, serviceInstanceModel,
-      userServiceInstanceModel, $uibModal, stackatoInfo, notificationService, authModel, credentialsDialog;
+    var $q, $state, $scope, modelManager, utilsService, clusterTilesCtrl, serviceInstanceModel,
+      userServiceInstanceModel, stackatoInfo, $stateParams;
 
     var hceService = {
       guid: '817ef115-7ae6-4591-a883-8f1c3447e012',
@@ -58,22 +58,24 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
+    beforeEach(module({
+      'app.utils.utilsService': {
+        chainStateResolve: function (state, $state, init) {
+          init();
+        }
+      }
+    }));
 
     beforeEach(inject(function ($injector) {
       $q = $injector.get('$q');
       $state = $injector.get('$state');
       $scope = $injector.get('$rootScope').$new();
+      $stateParams = $injector.get('$stateParams');
 
       modelManager = $injector.get('app.model.modelManager');
-      hcfRegistration = $injector.get('app.view.hcfRegistration');
-      notificationService = $injector.get('app.view.notificationsService');
-      confirmModal = $injector.get('helion.framework.widgets.dialog.confirm');
-      credentialsDialog = $injector.get('app.view.credentialsDialog');
-      $uibModal = $injector.get('$uibModal');
-
+      utilsService = $injector.get('app.utils.utilsService');
       serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-      authModel = modelManager.retrieve('cloud-foundry.model.auth');
       stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
 
       var $httpBackend = $injector.get('$httpBackend');
@@ -84,7 +86,7 @@
 
     function createCluster() {
       var ClusterTilesCtrl = $state.get('endpoint.clusters.tiles').controller;
-      clusterTilesCtrl = new ClusterTilesCtrl($q, modelManager, hcfRegistration, notificationService, confirmModal, credentialsDialog);
+      clusterTilesCtrl = new ClusterTilesCtrl($q, $state, $stateParams, modelManager, utilsService);
     }
 
     describe('Init', function () {
@@ -100,10 +102,6 @@
         spyOn(userServiceInstanceModel, 'list');
 
         createCluster();
-
-        expect(clusterTilesCtrl.boundUnregister).toBeDefined();
-        expect(clusterTilesCtrl.boundConnect).toBeDefined();
-        expect(clusterTilesCtrl.boundDisconnect).toBeDefined();
 
         expect(serviceInstanceModel.list).toHaveBeenCalled();
         expect(userServiceInstanceModel.list).toHaveBeenCalled();
@@ -139,23 +137,6 @@
         expect(clusterTilesCtrl.serviceInstances).toEqual({});
       });
 
-      it('cluster - disconnected', function () {
-        serviceInstanceModel.serviceInstances = [hceService, hcfService];
-        userServiceInstanceModel.serviceInstances = {};
-        userServiceInstanceModel.serviceInstances[hcfUserService.guid] = hcfUserService;
-
-        clusterTilesCtrl.createClusterList();
-
-        expect(clusterTilesCtrl.serviceInstances).toBeDefined();
-        expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid]).not.toBe(hcfService);
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toBeDefined();
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(false);
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toBeDefined();
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(false);
-        expect(clusterTilesCtrl.state).toEqual('');
-      });
-
       it('cluster - connected + not expired token', function () {
         serviceInstanceModel.serviceInstances = [hceService, hcfService];
         var cloned = angular.fromJson(angular.toJson(hcfUserService));
@@ -169,22 +150,6 @@
         expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(true);
         expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(false);
-        expect(clusterTilesCtrl.state).toEqual('');
-      });
-
-      it('clusters - disconnected + expired token', function () {
-        serviceInstanceModel.serviceInstances = [hceService, hcfService];
-        var cloned = angular.fromJson(angular.toJson(hcfUserService));
-        cloned.token_expiry = Number.MIN_VALUE;
-        userServiceInstanceModel.serviceInstances = {};
-        userServiceInstanceModel.serviceInstances[cloned.guid] = cloned;
-
-        clusterTilesCtrl.createClusterList();
-
-        expect(clusterTilesCtrl.serviceInstances).toBeDefined();
-        expect(_.keys(clusterTilesCtrl.serviceInstances).length).toEqual(1);
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].isConnected).toEqual(false);
-        expect(clusterTilesCtrl.serviceInstances[hcfService.guid].hasExpired).toEqual(true);
         expect(clusterTilesCtrl.state).toEqual('');
       });
 
@@ -208,7 +173,6 @@
         spyOn(userServiceInstanceModel, 'list').and.returnValue($q.reject());
         createCluster();
         $scope.$digest();
-
         spyOn(clusterTilesCtrl, 'refreshClusterModel').and.callThrough();
         spyOn(clusterTilesCtrl, 'createClusterList');
 
@@ -237,128 +201,6 @@
         $scope.$digest();
         expect(clusterTilesCtrl.state).toEqual('noClusters');
         expect(clusterTilesCtrl.createClusterList).toHaveBeenCalled();
-      });
-    });
-
-    describe('connect', function () {
-
-      beforeEach(function () {
-        createCluster();
-      });
-
-      it('on cancel', function () {
-        clusterTilesCtrl.onConnectCancel(hcfService);
-        expect(clusterTilesCtrl.activeServiceInstance).toBeFalsy();
-      });
-
-      it('on success', function () {
-        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
-        clusterTilesCtrl.onConnectSuccess(hcfService);
-        expect(clusterTilesCtrl.activeServiceInstance).toBeFalsy();
-        expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
-      });
-
-      it('correct param', function () {
-        clusterTilesCtrl.connect(hcfService.guid);
-        expect(clusterTilesCtrl.activeServiceInstance).toEqual(hcfService.guid);
-      });
-    });
-
-    describe('disconnect', function () {
-      beforeEach(function () {
-        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.resolve());
-        createCluster();
-      });
-
-      it('success', function () {
-        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
-        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function (guid) {
-          expect(guid).toEqual(hcfUserService.guid);
-          return $q.when();
-        });
-        clusterTilesCtrl.disconnect(hcfUserService.guid);
-        $scope.$digest();
-        expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
-        expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
-      });
-
-      it('failure', function () {
-        spyOn(userServiceInstanceModel, 'disconnect').and.callFake(function (guid) {
-          expect(guid).toEqual(hcfUserService.guid);
-          return $q.reject();
-        });
-        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
-        clusterTilesCtrl.disconnect(hcfUserService.guid);
-        $scope.$digest();
-        expect(userServiceInstanceModel.disconnect).toHaveBeenCalled();
-        expect(clusterTilesCtrl.refreshClusterModel).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('register', function () {
-      beforeEach(function () {
-        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.resolve());
-        createCluster();
-        spyOn(authModel, 'initializeForEndpoint').and.callFake(angular.noop);
-      });
-
-      it('success', function () {
-        spyOn(hcfRegistration, 'add').and.returnValue($q.resolve(hcfService));
-        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
-        clusterTilesCtrl.register();
-        $scope.$digest();
-        expect(hcfRegistration.add).toHaveBeenCalled();
-        expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
-      });
-
-      it('failure', function () {
-        spyOn(hcfRegistration, 'add').and.returnValue($q.reject());
-        spyOn(clusterTilesCtrl, 'refreshClusterModel');
-        clusterTilesCtrl.register();
-        $scope.$digest();
-        expect(hcfRegistration.add).toHaveBeenCalled();
-        expect(clusterTilesCtrl.refreshClusterModel).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('unregister', function () {
-      beforeEach(function () {
-        spyOn(stackatoInfo, 'getStackatoInfo').and.returnValue($q.resolve());
-        createCluster();
-      });
-
-      it('success', function () {
-        spyOn($uibModal, 'open').and.callFake(function (config) {
-          config.resolve.confirmDialogContext().callback();
-        });
-        spyOn(serviceInstanceModel, 'remove').and.callFake(function (serviceInstance) {
-          expect(serviceInstance).toBe(hcfService);
-          return $q.when();
-        });
-        spyOn(clusterTilesCtrl, 'refreshClusterModel').and.returnValue($q.resolve());
-
-        clusterTilesCtrl.unregister(hcfService);
-        $scope.$digest();
-
-        expect(serviceInstanceModel.remove).toHaveBeenCalled();
-        expect(clusterTilesCtrl.refreshClusterModel).toHaveBeenCalled();
-      });
-
-      it('failure', function () {
-        spyOn($uibModal, 'open').and.returnValue({
-          result: $q.reject()
-        });
-        spyOn(serviceInstanceModel, 'remove').and.callFake(function (serviceInstance) {
-          expect(serviceInstance).toBe(hcfService);
-          return $q.when();
-        });
-        spyOn(clusterTilesCtrl, 'refreshClusterModel');
-
-        clusterTilesCtrl.unregister(hcfService);
-        $scope.$digest();
-
-        expect(serviceInstanceModel.remove).not.toHaveBeenCalled();
-        expect(clusterTilesCtrl.refreshClusterModel).not.toHaveBeenCalled();
       });
     });
 

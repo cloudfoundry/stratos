@@ -70,10 +70,7 @@
       it('check initial state - null', function () {
         createCtrl();
 
-        expect(clusterTileCtrl.actions).toBeDefined();
         expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeFalsy();
-        expect(clusterTileCtrl.actions.length).toEqual(1);
-        expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
 
         expect(clusterTileCtrl.orgCount).toBeUndefined();
         expect(clusterTileCtrl.userCount).toBeUndefined();
@@ -91,50 +88,6 @@
         expect(clusterTileCtrl.orgCount).toEqual(1);
         expect(clusterTileCtrl.userCount).toEqual(1);
       });
-    });
-
-    describe('setActions', function () {
-
-      beforeEach(function () {
-        createCtrl();
-      });
-
-      it('Connected', function () {
-        clusterTileCtrl.service.isConnected = true;
-        clusterTileCtrl.setActions();
-
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeFalsy();
-        expect(clusterTileCtrl.actions.length).toEqual(1);
-        expect(clusterTileCtrl.actions[0].name).toEqual('Disconnect');
-      });
-
-      it('Not connected', function () {
-        clusterTileCtrl.service.isConnected = false;
-        clusterTileCtrl.setActions();
-
-        expect(clusterTileCtrl.currentUserAccount.isAdmin()).toBeFalsy();
-        expect(clusterTileCtrl.actions.length).toEqual(1);
-        expect(clusterTileCtrl.actions[0].name).toEqual('Connect');
-      });
-
-      it('Is admin', function () {
-        spyOn(clusterTileCtrl.currentUserAccount, 'isAdmin').and.returnValue(true);
-        clusterTileCtrl.setActions();
-
-        expect(clusterTileCtrl.currentUserAccount.isAdmin).toHaveBeenCalled();
-        expect(clusterTileCtrl.actions.length).toEqual(2);
-        expect(clusterTileCtrl.actions[1].name).toEqual('Unregister');
-      });
-
-      it('Is not admin', function () {
-        spyOn(clusterTileCtrl.currentUserAccount, 'isAdmin').and.returnValue(true);
-        clusterTileCtrl.setActions();
-
-        expect(clusterTileCtrl.currentUserAccount.isAdmin).toHaveBeenCalled();
-        expect(clusterTileCtrl.actions.length).toEqual(2);
-        expect(clusterTileCtrl.actions[1].name).toEqual('Unregister');
-      });
-
     });
 
     describe('setUserCount', function () {
@@ -328,59 +281,12 @@
 
         spyOn($state, 'go');
         clusterTileCtrl.summary();
-        expect($state.go.calls.argsFor(0)).toEqual(['clusters.cluster.detail.organizations', {guid: initialService.guid}]);
+        expect($state.go.calls.argsFor(0)).toEqual(['endpoint.clusters.cluster.detail.organizations', {guid: initialService.guid, orgCount: undefined, userCount: undefined}]);
         expect($state.go.calls.count()).toEqual(1);
 
       });
     });
 
-    describe('action call plumbing', function () {
-      beforeEach(function () {
-        createCtrl();
-      });
-
-      it('connect', function () {
-        var connect = _.find(clusterTileCtrl.actions, {name: 'Connect'});
-        expect(connect).toBeDefined();
-        expect(connect.execute).toBeDefined();
-
-        connect.execute();
-
-        expect(clusterTileCtrl.connect).toHaveBeenCalled();
-        expect(clusterTileCtrl.connect.calls.count()).toEqual(1);
-        expect(clusterTileCtrl.connect.calls.argsFor(0)).toEqual([initialService]);
-      });
-
-      it('disconnect', function () {
-        clusterTileCtrl.service.isConnected = true;
-        clusterTileCtrl.setActions();
-
-        var disconnect = _.find(clusterTileCtrl.actions, {name: 'Disconnect'});
-        expect(disconnect).toBeDefined();
-        expect(disconnect.execute).toBeDefined();
-
-        disconnect.execute();
-
-        expect(clusterTileCtrl.disconnect).toHaveBeenCalled();
-        expect(clusterTileCtrl.disconnect.calls.count()).toEqual(1);
-        expect(clusterTileCtrl.disconnect.calls.argsFor(0)).toEqual([initialService.guid]);
-      });
-
-      it('unregister', function () {
-        spyOn(clusterTileCtrl.currentUserAccount, 'isAdmin').and.returnValue(true);
-        clusterTileCtrl.setActions();
-
-        var unregister = _.find(clusterTileCtrl.actions, {name: 'Unregister'});
-        expect(unregister).toBeDefined();
-        expect(unregister.execute).toBeDefined();
-
-        unregister.execute();
-
-        expect(clusterTileCtrl.unregister).toHaveBeenCalled();
-        expect(clusterTileCtrl.unregister.calls.count()).toEqual(1);
-        expect(clusterTileCtrl.unregister.calls.argsFor(0)).toEqual([initialService]);
-      });
-    });
   });
 
 })();

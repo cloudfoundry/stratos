@@ -124,7 +124,7 @@
         }];
         $controller.model.clusterCount = 1;
         var endpointsLink = $controller.getEndpointsLink();
-        expect(endpointsLink).toBe('clusters.cluster.detail.organizations');
+        expect(endpointsLink).toBe('endpoint.clusters.cluster.detail.organizations');
         $httpBackend.flush();
       });
 

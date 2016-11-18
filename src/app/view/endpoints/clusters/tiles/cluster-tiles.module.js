@@ -60,14 +60,11 @@
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.serviceInstances = {};
+    this.state = '';
 
     function init() {
-
-      return that.refreshClusterModel()
-        .then(function () {
-          that.createClusterList();
-
-        });
+      return that.refreshClusterModel();
     }
 
     utils.chainStateResolve('endpoint.clusters.tiles', $state, init);
@@ -110,7 +107,7 @@
 
       var promises = [this.stackatoInfo.getStackatoInfo()];
       if (!that.$stateParams.instancesListed) {
-        promises.concat([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()]);
+        promises = promises.concat([this.serviceInstanceModel.list(), this.userServiceInstanceModel.list()]);
       }
       return this.$q.all(promises)
         .then(function () {

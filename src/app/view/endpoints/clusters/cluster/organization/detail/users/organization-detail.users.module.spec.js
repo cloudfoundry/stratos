@@ -57,7 +57,7 @@
           $httpBackend.expectGET('/pp/v1/proxy/v2/organizations/' + organizationGuid + '/user_roles?results-per-page=100').respond({resources: []});
         }
 
-        var OrganizationUsersController = $state.get('clusters.cluster.organization.detail.users').controller;
+        var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
         $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
           rolesService, eventService, userSelection);
       }
@@ -217,7 +217,7 @@
       var organizations = _.set({}, org1.details.org.metadata.guid, org1);
 
       function createController() {
-        var OrganizationUsersController = $state.get('clusters.cluster.organization.detail.users').controller;
+        var OrganizationUsersController = $state.get('endpoint.clusters.cluster.organization.detail.users').controller;
         $controller = new OrganizationUsersController($scope, $state, $stateParams, $q, modelManager, utils, manageUsers,
           rolesService, eventService, userSelection);
       }

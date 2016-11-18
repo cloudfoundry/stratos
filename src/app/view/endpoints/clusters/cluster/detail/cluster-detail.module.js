@@ -27,18 +27,18 @@
   }
 
   ClusterDetailController.$inject = [
-    'app.model.modelManager',
-    'app.api.apiManager',
     '$stateParams',
     '$scope',
-    'app.utils.utilsService',
     '$state',
     '$q',
+    'app.model.modelManager',
+    'app.api.apiManager',
+    'app.utils.utilsService',
     'app.view.endpoints.clusters.cluster.cliCommands',
     'cloud-foundry.model.modelUtils'
   ];
 
-  function ClusterDetailController(modelManager, apiManager, $stateParams, $scope, utils, $state, $q, cliCommands, modelUtils) {
+  function ClusterDetailController($stateParams, $scope, $state, $q, modelManager, apiManager, utils, cliCommands, modelUtils) {
     var that = this;
     this.guid = $stateParams.guid;
     this.cliCommands = cliCommands;

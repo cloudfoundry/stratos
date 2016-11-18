@@ -48,7 +48,7 @@
     }));
 
     function createController() {
-      var SpaceapplicationsController = $state.get('clusters.cluster.organization.space.detail.applications').controller;
+      var SpaceapplicationsController = $state.get('endpoint.clusters.cluster.organization.space.detail.applications').controller;
       $controller = new SpaceapplicationsController($state, $stateParams, $q, $scope, modelManager, utils, appStateService);
     }
 

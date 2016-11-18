@@ -7,6 +7,13 @@
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
+    beforeEach(module({
+      'app.utils.utilsService': {
+        chainStateResolve: function (state, $state, init) {
+          init();
+        }
+      }
+    }));
     beforeEach(module('app.view.endpoints.dashboard'));
     beforeEach(module(function ($provide) {
       var mock = function () {
@@ -21,12 +28,12 @@
       $q = $injector.get('$q');
       var $state = $injector.get('$state');
       var $scope = $injector.get('$rootScope').$new();
-      var $interpolate = $injector.get('$interpolate');
 
       modelManager = $injector.get('app.model.modelManager');
-      var hceReg = $injector.get('app.view.hceRegistration');
-      var hcfReg = $injector.get('app.view.hcfRegistration');
+      var registerService = $injector.get('app.view.registerService');
       var errorService = $injector.get('app.error.errorService');
+      var utils = $injector.get('app.utils.utilsService');
+      var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.serviceInstanceService');
 
       // Patch user account model
       var userModel = modelManager.retrieve('app.model.account');
@@ -54,7 +61,7 @@
       }
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($scope, $interpolate, modelManager, $state, hceReg, hcfReg, errorService, $q);
+      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, serviceInstanceService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
@@ -67,38 +74,8 @@
         createController($injector, false);
       }));
 
-      it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
-        controller.showClusterAddForm();
-        expect(detailViewCalled).toBe(true);
-      });
-
-      it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
-        controller.showClusterAddForm();
-        expect(detailViewCalled).toBe(true);
-      });
-
-      it('should show cluster registration detail view when showClusterAddForm is invoked for hce', function () {
-        controller.showClusterAddForm();
-        expect(detailViewCalled).toBe(true);
-      });
-
-      it('should show cluster registration detail view when showClusterAddForm is invoked for hcf', function () {
-
-        controller.showClusterAddForm(true);
-        expect(detailViewCalled).toBe(true);
-      });
-
-      it('should update serviceInstances', function () {
-        $httpBackend.flush();
-        expect(true).toBe(true);
-      });
-
       it('should say if user is an admin', function () {
         expect(controller.isUserAdmin()).toBe(true);
-      });
-
-      it('should show `serviceInstances` uninitialized', function () {
-        expect(controller.serviceInstances).toEqual({});
       });
 
       it('should set showWelcomeMessage flag to false', function () {
@@ -113,9 +90,6 @@
         createController($injector, true);
       }));
 
-      it('should show `serviceInstances` initialized', function () {
-        expect(_.keys(controller.serviceInstances).length).toBe(1);
-      });
     });
   });
 
