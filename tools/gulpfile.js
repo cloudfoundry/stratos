@@ -30,11 +30,11 @@
   var config = require('./gulp.config')();
   var paths = config.paths;
   var assetFiles = config.assetFiles;
+  var themeFiles = config.themeFiles;
   var jsSourceFiles = config.jsSourceFiles;
   var jsLibs = config.jsLibs;
   var plugins = config.plugins;
   var jsFiles = config.jsFiles;
-  var scssSourceFiles = config.scssSourceFiles;
   var scssFiles = config.scssFiles;
   var cssFiles = config.cssFiles;
   var partials = config.partials;
@@ -44,6 +44,10 @@
   var bowerFiles = gulpBowerFiles({
     overrides: config.bower.overrides
   });
+
+  // Pull in the gulp tasks for the ui framework examples
+  var examples = require('./examples.gulp');
+  examples(config);
 
   // Clear the 'dist' folder
   gulp.task('clean:dist', function (next) {
@@ -79,10 +83,44 @@
       .pipe(gulp.dest(paths.dist));
   });
 
+  gulp.task('copy:framework:js', function () {
+    return gulp.src(jsLibs)
+      .pipe(sort())
+      .pipe(angularFilesort())
+      .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
+      .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+      .pipe(gulp.dest(paths.frameworkDist));
+  });
+
+  gulp.task('copy:framework:templates', function () {
+    return gulp.src(config.frameworkTemplates)
+      .pipe(gulp.dest(paths.dist));
+  });
+
+  gulp.task('js:combine', ['copy:js'], function () {
+    return gulp.src([
+      paths.frameworkDist + config.jsFrameworkFile,
+      paths.dist + config.jsFile
+    ], {base: paths.dist})
+      .pipe(concat(config.jsFile))
+      .pipe(gulp.dest(paths.dist));
+  });
+
+  gulp.task('postbuild', function (next) {
+    if (gutil.env.devMode) {
+      del(paths.frameworkDist + config.jsFrameworkFile, {force: true}, next);
+    } else {
+      del(paths.frameworkDist, {force: true}, next);
+    }
+  });
+
   // Copy JavaScript source files to 'dist'
-  gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs'], function () {
-    return gulp
-      .src(jsSourceFiles, {base: paths.src})
+  gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs', 'copy:framework:js'], function () {
+    var sources = gulp.src(jsSourceFiles, {base: paths.src});
+    if (gutil.env.devMode) {
+      jsSourceFiles = jsSourceFiles.concat(jsLibs);
+    }
+    return sources
       .pipe(sort())
       .pipe(angularFilesort())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFile))
@@ -103,6 +141,12 @@
       .pipe(gulp.dest(paths.dist));
   });
 
+  gulp.task('copy:theme', function () {
+    return gulp
+      .src(themeFiles, {base: paths.theme})
+      .pipe(gulp.dest(paths.dist));
+  });
+
   // Copy 'translations' folder to 'dist'
   gulp.task('copy:translations', function () {
     return gulp
@@ -113,7 +157,7 @@
   // Compile SCSS to CSS
   gulp.task('css', ['inject:scss'], function () {
     return gulp
-      .src(scssSourceFiles, {base: paths.src})
+      .src(config.scssSourceFiles, {base: paths.src})
       .pipe(gulpif(usePlumber, plumber({
         errorHandler: function (err) {
           console.log(err);
@@ -144,8 +188,7 @@
   // Inject JavaScript and SCSS source file references in index.html
   gulp.task('inject:index', ['copy:index'], function () {
     var sources = gulp.src(
-      jsLibs
-        .concat(plugins)
+        plugins
         .concat(jsFiles)
         .concat(paths.dist + config.jsFile)
         .concat(paths.dist + config.jsTemplatesFile)
@@ -162,9 +205,9 @@
   // Automatically inject SCSS file imports from Bower packages
   gulp.task('inject:scss', function () {
     return gulp
-      .src(paths.src + 'index.tmpl.scss')
+      .src(paths.src + 'framework.tmpl.scss')
       .pipe(wiredep(config.bowerDev))
-      .pipe(rename('index.scss'))
+      .pipe(rename('framework.scss'))
       .pipe(gulp.dest(paths.src));
   });
 
@@ -217,6 +260,7 @@
     gulp.watch(scssFiles, ['css', callback]);
     gulp.watch(partials, ['copy:html', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
+    gulp.watch(jsLibs, {interval: 1000, usePoll: true}, ['copy:framework:js', callback]);
   });
 
   gulp.task('browsersync', function (callback) {
@@ -283,12 +327,15 @@
       'clean:dist',
       'plugin',
       'translate:compile',
+      'copy:framework:templates',
       'copy:js',
       'copy:lib',
       'css',
       'dev-template-cache',
       'copy:html',
       'copy:assets',
+      'copy:theme',
+      'postbuild',
       'inject:index',
       next
     );
@@ -309,12 +356,15 @@
       'clean:dist',
       'plugin',
       'translate:compile',
-      'copy:js',
+      'copy:framework:templates',
+      'js:combine',
       'copy:lib',
       'css',
       'template-cache',
       'copy:html',
       'copy:assets',
+      'copy:theme',
+      'postbuild',
       'inject:index',
       next
     );

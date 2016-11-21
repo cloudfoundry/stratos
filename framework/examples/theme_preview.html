@@ -1,0 +1,1267 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="framework.css">
+    <script src="lib/jquery/dist/jquery.js"></script>
+    <script src="lib/stackato-libs.js"></script>
+    <script src="lib/stackato-framework.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only" translate=""><span>Toggle navigation</span></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" translate="">
+            <span>Helion Theme Preview</span>
+          </a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown"
+                role="button" aria-haspopup="true" aria-expanded="true">
+                Components <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="#alerts">Alerts</a></li>
+                <li><a href="#buttons">Buttons</a></li>
+                <li><a href="#cards">Cards</a></li>
+                <li><a href="#code">Code</a></li>
+                <li><a href="#divider">Divider and Page Header</a></li>
+                <li><a href="#forms">Forms</a></li>
+                <li><a href="#icons">Icons & Spinners</a></li>
+                <li><a href="#lists">Lists</a></li>
+                <li><a href="#message-box">Message Box</a></li>
+                <li><a href="#navs">Navs</a></li>
+                <li><a href="#panels">Panels</a></li>
+                <li><a href="#percentage-gauges">Percentage Gauges</a></li>
+                <li><a href="#popovers">Popovers</a></li>
+                <li><a href="#progress-bars">Progress Bars</a></li>
+                <li><a href="#tables">Tables</a></li>
+                <li><a href="#typography">Typography</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div id="typography" class="container">
+      <div class="row">
+        <h3 class="page-header">Typography</h3>
+
+        <div class="col-md-6 col-sm-12">
+          <h4 class="font-thin">100 Thin</h4>
+          <h4 class="font-light">300, Light</h4>
+          <h4 class="font-normal">400, Regular</h4>
+          <h4 class="font-medium">500, Medium</h4>
+          <h4 class="font-semi-bold">600, Semibold</h4>
+          <h4 class="font-bold">700, Bold</h4>
+          <h4 class="font-black">900, Black</h4>
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <h4 class="font-thin"><em>100 Thin, Italicized</em></h4>
+          <h4 class="font-light"><em>300, Light, Italicized</em></h4>
+          <h4 class="font-normal"><em>400, Regular, Italicized</em></h4>
+          <h4 class="font-medium"><em>500, Medium, Italicized</em></h4>
+          <h4 class="font-semi-bold"><em>600, Semibold, Italicized</em></h4>
+          <h4 class="font-bold"><em>700, Bold, Italicized</em></h4>
+          <h4 class="font-black"><em>900, Black, Italicized</em></h4>
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+          <h1 class="font-thin">h1. heading</h1>
+          <h2 class="font-light">h2. heading</h2>
+          <h3 class="font-normal">h3. heading</h3>
+          <h4 class="font-medium">h4. heading</h4>
+          <h5 class="font-semi-bold">h5. heading</h5>
+          <h6 class="font-bold">h6. heading</h6>
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <h4>Paragraph with Base Font Size</h4>
+          <p>
+            This is the base font size. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="icons" class="container">
+      <div class="row">
+        <h3 class="page-header">Icons & Spinners</h3>
+
+        <p>Use class <code>helion-icon</code> and <code>helion-icon-*</code> to specify icon. Available sizes (prefix with <code>helion-icon-</code>): lg, 2x, 3x, 4x, 5x</p>
+        <span class="helion-icon helion-icon-User helion-icon-sm"></span>
+        <span class="helion-icon helion-icon-User"></span>
+        <span class="helion-icon helion-icon-User helion-icon-lg"></span>
+        <span class="helion-icon helion-icon-User helion-icon-2x"></span>
+        <span class="helion-icon helion-icon-User helion-icon-3x"></span>
+        <span class="helion-icon helion-icon-User helion-icon-4x"></span>
+        <span class="helion-icon helion-icon-User helion-icon-5x"></span>
+        <p>
+          <pre class="hpe-pre-dark">&#x3C;span class="helion-icon helion-icon-User helion-icon-lg"&#x3E;&#x3C;/span&#x3E;</pre>
+        </p>
+        <h4>Status Icons</h4>
+        <p>
+          <div style="display: flex; align-items: center;">
+            Online <span class="helion-icon helion-icon-Active_S text-primary" style="padding-left: 6px;"></span>
+          </div>
+          <div style="display: flex; align-items: center;">
+            Offline <span class="helion-icon helion-icon-Critical_S text-danger" style="padding-left: 6px;"></span>
+          </div>
+        </p>
+        <h4>Bounce Spinner</h4>
+        <p>
+          Use class <code>bounce-spinner</code> and <code>bounce-spinner-*</code> to specify icon.
+          Available sizes (prefix with <code>bounce-spinner-</code>): sm, med <i>(default)</i>, lg.
+          For a light background, use <code>bounce-spinner-light</code>.</p>
+        <p>
+          <pre class="hpe-pre-dark">&#x3C;div class="bounce-spinner bounce-spinner-sm"&#x3E;
+  &#x3C;div class="bounce1"&#x3E;&#x3C;/div&#x3E;
+  &#x3C;div class="bounce2"&#x3E;&#x3C;/div&#x3E;
+  &#x3C;div class="bounce3"&#x3E;&#x3C;/div&#x3E;
+&#x3C;/div&#x3E;</pre>
+        </p>
+        <div style="display: flex; align-items: center;">
+          <div class="bounce-spinner bounce-spinner-sm" style="padding: 0 20px;">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+          </div>
+          <div class="bounce-spinner" style="padding: 0 20px;">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+          </div>
+          <div class="bounce-spinner bounce-spinner-lg bounce-spinner-light" style="padding: 0 20px;">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+          </div>
+      </div>
+      </div>
+    </div>
+
+    <div id="code" class="container">
+      <div class="row">
+        <h3 class="page-header">Code</h3>
+
+        <div class="col-sm-12 col-md-6">
+          <p>Default with copy icon</p>
+          <pre>&lt;div class="hpe-copy"&gt;
+    &lt;pre&gt;...code...&lt;/pre&gt;
+  &lt;/div&gt;</pre>
+          <div class="hpe-copy">
+            <pre>
+  applications:
+    services:
+      meteor-cloudant:
+        host: meteor-cloudant-rocks
+        name: meteor-cloudant-rocks
+        descriptions: this application demonstrates how to use Cloudant with Meteor
+        memory: 512M
+        buildpack: http://github.com/cloudfoundry-community/cf-meteor-buildpack.git
+        env:
+          MONGO_URL: nope</pre>
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-6">
+          <p>Dark theme with copy icon</p>
+          <pre>&lt;div class="hpe-copy hpe-copy-dark"&gt;
+    &lt;pre class="hpe-pre-dark"&gt;...code...&lt;/pre&gt;
+  &lt;/div&gt;</pre>
+          <div class="hpe-copy hpe-copy-dark">
+            <pre class="hpe-pre-dark">
+  applications:
+    services:
+      meteor-cloudant:
+        host: meteor-cloudant-rocks
+        name: meteor-cloudant-rocks
+        descriptions: this application demonstrates how to use Cloudant with Meteor
+        memory: 512M
+        buildpack: http://github.com/cloudfoundry-community/cf-meteor-buildpack.git
+        env:
+          MONGO_URL: nope</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="divider" class="container">
+      <div class="row">
+        <h3 class="page-header">Divider & Page Header</h3>
+
+        <div>
+          Check out the page header ^^.
+          Now, DIVIDE THIS
+        </div>
+        <hr>
+        <div>
+          FROM THIS!
+        </div>
+      </div>
+    </div>
+
+    <div id="lists" class="container">
+      <div class="row">
+        <h3 class="page-header">Lists</h3>
+
+        <div class="col-md-6 col-sm-12">
+          <h5>Description List</h5>
+          <dl class="dl-horizontal">
+            <dt>MEMORY QUOTA</dt>
+            <dd>128 MB</dd>
+            <dt>DISK QUOTA</dt>
+            <dd>30 GB</dd>
+            <dt>INSTANCES</dt>
+            <dd>3</dd>
+          </dl>
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+          <div class="card panel panel-default">
+            <div class="panel-heading">Description List in Card</div>
+            <div class="panel-body">
+              <dl class="dl-horizontal">
+                <dt>MEMORY QUOTA</dt>
+                <dd>128 MB</dd>
+                <dt>DISK QUOTA</dt>
+                <dd>30 GB</dd>
+                <dt>INSTANCES</dt>
+                <dd>3</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h4>Add Option List</h4>
+      <ul class="media-list hpe-add-option-list">
+        <li class="media">
+          <div class="hpe-media-select-col">
+            <input type="radio" name="media-radio"/>
+          </div>
+          <div class="media-left media-middle">
+            <img class="media-object" src="images/images/hpe_helion_grn_pos_rgb.png"/>
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading">HPE Helion</h4>
+            <p>
+              Media description. Bacon ipsum dolor amet shankle shank salami kevin jowl. Porchetta
+              drumstick short ribs cow frankfurter picanha venison. Pork chop
+              brisket flank shankle short ribs, pancetta boudin. Hamburger drumstick
+              bacon ground round, capicola sausage strip steak picanha meatball ham
+              hock beef.
+            </p>
+          </div>
+          <div class="hpe-media-actions-col">
+            <button type="text" class="btn btn-sm btn-link hpe-media-add-link">
+              <i class="helion-icon helion-icon-Next_link"></i>
+              Add Option
+            </button>
+          </div>
+        </li>
+        <li class="media">
+          <div class="hpe-media-select-col">
+            <input type="radio" name="media-radio"/>
+          </div>
+          <div class="media-left media-middle">
+            <i class="media-icon helion-icon helion-icon-Deployment"></i>
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading">Hewlett Packard Enterprise</h4>
+            <p>
+              Media description. Bacon ipsum dolor amet shankle shank salami kevin jowl. Porchetta
+              drumstick short ribs cow frankfurter picanha venison. Pork chop
+              brisket flank shankle short ribs, pancetta boudin. Hamburger drumstick
+              bacon ground round, capicola sausage strip steak picanha meatball ham
+              hock beef.
+            </p>
+          </div>
+          <div class="hpe-media-actions-col">
+            <button type="text" class="btn btn-sm btn-link hpe-media-add-link">
+              <i class="helion-icon helion-icon-Next_link"></i>
+              Add Option
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div id="buttons" class="container">
+      <div class="row">
+        <h3 class="page-header">Buttons</h3>
+
+        <p>
+          <button class="btn btn-default">Default</button>
+          <button class="btn btn-primary">Primary</button>
+          <button class="btn btn-commit">commit</button>
+          <button class="btn btn-success">Success</button>
+          <button class="btn btn-info">Info</button>
+          <button class="btn btn-warning">Warning</button>
+          <button class="btn btn-danger">Danger</button>
+          <button class="btn btn-link">Link</button>
+        </p>
+
+        <p>
+          <button class="btn btn-default" disabled>Default</button>
+          <button class="btn btn-primary" disabled>Primary</button>
+          <button class="btn btn-commit" disabled>commit</button>
+          <button class="btn btn-success" disabled>Success</button>
+          <button class="btn btn-info" disabled>Info</button>
+          <button class="btn btn-warning" disabled>Warning</button>
+          <button class="btn btn-danger" disabled>Danger</button>
+          <button class="btn btn-link" disabled>Link</button>
+        </p>
+
+        <p>
+          <div class="btn-group">
+            <button class="btn btn-default">Default</button>
+            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a>Action</a></li>
+              <li><a>Another action</a></li>
+              <li><a>Something else here</a></li>
+              <li class="divider"></li>
+              <li><a>Separated link</a></li>
+            </ul>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a>Action</a></li>
+              <li><a>Another action</a></li>
+              <li><a>Something else here</a></li>
+              <li class="divider"></li>
+              <li><a>Separated link</a></li>
+            </ul>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-commit">commit</button>
+            <button class="btn btn-commit dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a>Action</a></li>
+              <li><a>Another action</a></li>
+              <li><a>Something else here</a></li>
+              <li class="divider"></li>
+              <li><a>Separated link</a></li>
+            </ul>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-success">Success</button>
+            <button class="btn btn-success dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a>Action</a></li>
+              <li><a>Another action</a></li>
+              <li><a>Something else here</a></li>
+              <li class="divider"></li>
+              <li><a>Separated link</a></li>
+            </ul>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-info">Info</button>
+            <button class="btn btn-info dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a>Action</a></li>
+              <li><a>Another action</a></li>
+              <li><a>Something else here</a></li>
+              <li class="divider"></li>
+              <li><a>Separated link</a></li>
+            </ul>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-warning">Warning</button>
+            <button class="btn btn-warning dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a>Action</a></li>
+              <li><a>Another action</a></li>
+              <li><a>Something else here</a></li>
+              <li class="divider"></li>
+              <li><a>Separated link</a></li>
+            </ul>
+          </div>
+        </p>
+
+        <p>
+          <button class="btn btn-default btn-lg">Large button</button>
+          <button class="btn btn-default">Default button</button>
+          <button class="btn btn-default btn-sm">Small button</button>
+          <button class="btn btn-default btn-xs">Mini button</button>
+        </p>
+      </div>
+    </div>
+
+    <div id="tables" class="container">
+      <div class="row">
+        <h3 class="page-header">Tables</h3>
+
+        <div class="col-md-12">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Column Heading</th>
+                <th>Column Heading</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Column Content</td>
+                <td>Column Content</td>
+                <td class="text-center">
+                  <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"></span>
+                </td>
+              </tr>
+              <tr>
+                <td>Column Content</td>
+                <td>Column Content</td>
+                <td class="text-center">
+                  <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"></span>
+                </td>
+              </tr>
+              <tr>
+                <td>Column Content</td>
+                <td>Column Content</td>
+                <td class="text-center">
+                  <span class="helion-icon helion-icon-lg helion-icon-Unknown_L"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-md-12">
+          <h4>with inline messages</h4>
+          <table class="table table-actionable">
+            <thead>
+              <tr>
+                <th class="text-center registration-status" style="width: 72px"></th>
+                <th translate=""><span>Name</span></th>
+                <th translate=""><span>URL</span></th>
+                <th translate=""><span>User Account</span></th>
+                <th translate=""><span>Valid Until</span></th>
+                <th class="registration-actions">
+                  <span class="btn-wrapper">
+                    <button class="btn btn-primary">A button</button>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center registration-status">
+                  <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary" style="font-size: 24px">
+                  </span>
+                </td>
+                <td>HPE Cloud Foundry_01</td>
+                <td>api.15.126.233.29.xip.io</td>
+                <td>HPE Cloud Foundry_01_user</td>
+                <td>Mar 11 2016, 3:00:22 pm</td>
+                <td>
+                  <a class="btn btn-link btn-sm">
+                    <span>Disconnect</span>
+                  </a>
+                </td>
+              </tr>
+
+              <tr table-inline-message>
+                <td colspan="100" class="table-inline-message">
+                  <div class="hpe-popover-alert hpe-popover-alert-success popover bottom in">
+                    <div class="arrow"></div>
+                    <div class="popover-content">
+                      Success: class="hpe-popover-alert hpe-popover-alert-success popover bottom in"
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="text-center registration-status">
+                  <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning" style="font-size: 24px"></span>
+                </td>
+                <td>HPE Cloud Foundry_02</td>
+                <td>api.12.163.29.3.xip.io</td>
+                <td>HPE Cloud Foundry_02_user</td>
+                <td>Mar 11 2016, 2:15:36 pm</td>
+                <td>
+                  <a class="btn btn-link btn-sm">
+                    <span>Reconnect</span>
+                  </a>
+                </td>
+              </tr>
+
+              <tr table-inline-message>
+                <td colspan="100" class="table-inline-message">
+                  <div class="hpe-popover-alert hpe-popover-alert-warning popover bottom in">
+                    <div class="arrow"></div>
+                    <div class="popover-content">
+                      Warning: class="hpe-popover-alert hpe-popover-alert-warning popover bottom in. Warning: class="hpe-popover-alert hpe-popover-alert-warning popover bottom in. Warning: class="hpe-popover-alert hpe-popover-alert-warning popover bottom in. Warning: class="hpe-popover-alert hpe-popover-alert-warning popover bottom in"
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="text-center registration-status">
+                </td>
+                <td>HPE Cloud Foundry_03</td>
+                <td>api.15.13.32.22.xip.io</td>
+                <td></td>
+                <td></td>
+                <td>
+                  <a class="btn btn-link btn-sm">
+                    <span>Connect</span>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="alerts" class="container">
+      <div class="row">
+        <h3 class="page-header">Alerts</h3>
+
+        <div class="row show-grid">
+          <div class="col-lg-6">
+            <div class="bs-component">
+              <div class="alert alert-warning alert-no-bg">
+                <h4>Warning!</h4>
+                <p>This alert with no background and border doesn't have padding on the left and right. Praesent commodo cursus magna, <a href="#" class="alert-link">vel scelerisque nisl consectetur et</a>.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="bs-component">
+              <div class="alert alert-warning alert-no-bg alert-bordered">
+                <h4>Warning!</h4>
+                <p>Best check yo self, you're not looking too good. Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, <a href="#" class="alert-link">vel scelerisque nisl consectetur et</a>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row show-grid">
+          <div class="col-lg-12">
+            <div>
+              <div class="alert alert-warning">
+                <h4>Warning!</h4>
+                <p>Best check yo self, you're not looking too good. Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, <a href="#" class="alert-link">vel scelerisque nisl consectetur et</a>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row show-grid">
+          <div class="col-lg-12">
+            <div class="bs-component">
+              <div class="alert alert-dismissible alert-info">
+                <button type="button" class="close helion-icon helion-icon-Close" data-dismiss="alert"></button>
+                <p>Best check yo self, you're not looking too good. Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, <a href="#" class="alert-link">vel scelerisque nisl consectetur et</a>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row show-grid">
+          <div class="col-lg-4">
+            <div>
+              <div class="alert alert-dismissible alert-danger">
+                <button type="button" class="close helion-icon helion-icon-Close" data-dismiss="alert"></button>
+                <strong>Oh snap!</strong> <a href="#" class="alert-link">Change a few things up</a> and try submitting again.
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div>
+              <div class="alert alert-dismissible alert-success">
+                <button type="button" class="close helion-icon helion-icon-Close" data-dismiss="alert"></button>
+                <strong>Well done!</strong> You successfully read <a href="#" class="alert-link">this important alert message</a>.
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div>
+              <div class="alert alert-dismissible alert-info">
+                <button type="button" class="close helion-icon helion-icon-Close" data-dismiss="alert"></button>
+                <strong>Heads up!</strong> This <a href="#" class="alert-link">alert needs your attention</a>, but it's not super important.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h4>as popovers</h4>
+        <div class="hpe-popover-alert-container" style="margin-top: -20px;">
+          <div class="hpe-popover-alert popover bottom in">
+            <div class="arrow"></div>
+            <div class="popover-content">Basic: class="hpe-popover-alert popover bottom in"</div>
+          </div>
+        </div>
+
+        <div class="hpe-popover-alert-container">
+          <div class="hpe-popover-alert hpe-popover-alert-success popover bottom in">
+            <div class="arrow"></div>
+            <div class="popover-content">Success: class="hpe-popover-alert hpe-popover-alert-success popover bottom in"</div>
+          </div>
+        </div>
+
+        <div class="hpe-popover-alert-container">
+          <div class="hpe-popover-alert hpe-popover-alert-info popover bottom in">
+            <div class="arrow"></div>
+            <div class="popover-content">Info: class="hpe-popover-alert hpe-popover-alert-info popover bottom in"</div>
+          </div>
+        </div>
+
+        <div class="hpe-popover-alert-container">
+          <div class="hpe-popover-alert hpe-popover-alert-warning popover bottom in">
+            <div class="arrow"></div>
+            <div class="popover-content">Warning: class="hpe-popover-alert hpe-popover-alert-warning popover bottom in"</div>
+          </div>
+        </div>
+
+        <div class="hpe-popover-alert-container">
+          <div class="hpe-popover-alert hpe-popover-alert-danger popover bottom in">
+            <div class="arrow"></div>
+            <div class="popover-content">Danger: class="hpe-popover-alert hpe-popover-alert-danger popover bottom in"</div>
+          </div>
+        </div>
+
+        <style>
+          .hpe-popover-alert-container {
+            position: relative;
+            height: 55px;
+          }
+
+          .show-grid {
+            margin-bottom: 15px;
+          }
+        </style>
+      </div>
+    </div>
+
+    <div id="popovers" class="container">
+      <div class="row">
+        <h3 class="page-header">Popovers</h3>
+
+        <div class="popover bottom fade in" style="position: relative; display: inline-block">
+          <div class="arrow"></div>
+          <div class="popover-inner">
+            <div class="popover-content">The application needs to be restarted for highlighted variables to be added to the runtime.</div>
+          </div>
+        </div>
+
+        <div class="popover-trigger">
+          <div class="popover hpe-popover bottom in">
+            <div class="arrow"></div>
+            <div class="popover-content">
+              <account-actions>
+                <div>
+                  <div class="account-info">
+                    <span translate>
+                      Signed in as:
+                    </span>
+                    <span class="font-semi-bold">
+                      dev
+                    </span>
+                  </div>
+
+                  <div class="actions">
+                    <span class="action">
+                    <a class="btn-border-less" href="#/account/settings">
+                      <i class="helion-icon helion-icon-Actions"></i>
+                      <div translate>
+                        Account Settings
+                      </div>
+                    </a>
+                    </span>
+
+                    <span class="action">
+                      <a class="btn-border-less" href="#/account/help">
+                        <i class="helion-icon helion-icon-Help"></i>
+                        <div translate>
+                          Help
+                        </div>
+                      </a>
+                    </span>
+
+                    <span class="action">
+                      <a class="btn-border-less" href="#"
+                        ng-click="applicationCtrl.logout()">
+                        <i class="helion-icon helion-icon-Logout"></i>
+                        <div translate>
+                          Sign Out
+                        </div>
+                      </a>
+                    </span>
+                  </div>
+                </div>
+              </account-actions>
+            </div>
+          </div>
+        </div>
+        <style>
+          .popover-trigger {
+            position: relative;
+            width: 100%;
+            height: 400px;
+          }
+
+          .popover-trigger .helion-icon {
+            font-size: 24px;
+          }
+
+          account-actions {
+            display: block;
+            width: 557px;
+            height: 162px;
+          }
+
+          account-actions .account-info {
+            height: 80px;
+          }
+
+          account-actions .actions {
+            display: table;
+            width: 100%;
+          }
+
+          account-actions .action {
+            display: table-cell;
+            width: 33.3%;
+            text-align: center;
+          }
+        </style>
+      </div>
+    </div>
+
+    <div id="forms" class="container">
+      <div class="row">
+        <h3 class="page-header">Forms</h3>
+
+        <div class="col-md-4 col-sm-12">
+          <form>
+            <div class="form-group focus">
+              <label class="control-label" for="focusedInput">Focused input</label>
+              <input class="form-control" id="focusedInput" type="text" value="This is focused..." autofocus>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="disabledInput">Disabled input</label>
+              <input class="form-control" id="disabledInput" type="text" placeholder="Disabled input here..." disabled="">
+            </div>
+
+            <div class="form-group has-warning">
+              <label class="control-label" for="inputWarning">Input warning</label>
+              <input type="text" class="form-control" id="inputWarning">
+            </div>
+
+            <div class="form-group has-error">
+              <label class="control-label" for="inputError">Input error</label>
+              <span class="control-message">something is wrong</span>
+              <input type="text" class="form-control" id="inputError">
+            </div>
+
+            <div class="form-group has-success">
+              <label class="control-label" for="inputSuccess">Input success</label>
+              <input type="text" class="form-control" id="inputSuccess">
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="inputLarge">Large input</label>
+              <input class="form-control input-lg" type="text" id="inputLarge">
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="inputDefault">Default input</label>
+              <input type="text" class="form-control" id="inputDefault">
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="inputSmall">Small input</label>
+              <input class="form-control input-sm" type="text" id="inputSmall">
+            </div>
+          </form>
+        </div>
+
+        <div class="col-md-4 col-sm-12">
+          <form>
+            <div class="form-group addon-form-group">
+              <div class="input-group">
+                <span class="input-group-addon">
+                  <i class="helion-icon helion-icon-Filter helion-icon-lg"></i>
+                </span>
+                <input type="search" class="form-control" placeholder="Enter filter term..."/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label">Select</label>
+              <select-input>
+                <div class="dropdown">
+                  <div class="select-input-field" style="display: flex; align-items: center;">
+                    <span class="select-input-value text-muted">
+                      Select a color
+                    </span>
+                    <i class="dropdown-toggle helion-icon helion-icon-Up_tab helion-icon-r180"
+                      style="margin-left: auto;"></i>
+                  </div>
+                </div>
+              </select-input>
+            </div>
+            <div class="form-group">
+              <label class="control-label">Select</label>
+              <select-input>
+                <div class="dropdown open">
+                  <div class="select-input-field" style="display: flex; align-items: center;">
+                    <span class="select-input-value">
+                      Green
+                    </span>
+                    <i class="dropdown-toggle helion-icon helion-icon-Up_tab helion-icon-r180"
+                      style="margin-left: auto;"></i>
+                  </div>
+                  <ul class="dropdown-menu" style="min-width: 100%;">
+                    <li class="dropdown-menu-header">
+                      Select a color
+                    </li>
+                    <li class="select-option">
+                      Black
+                    </li>
+                    <li class="select-option selected">
+                      Green
+                    </li>
+                    <li class="select-option" disabled>
+                      Blue
+                    </li>
+                    <li class="select-option select-add-option">
+                      <i class="helion-icon helion-icon-Add"></i>
+                      Add Color
+                    </li>
+                  </ul>
+                </div>
+              </select-input>
+            </div>
+          </form>
+        </div>
+
+        <div class="col-md-12">
+          <h4>Horizontal Forms</h4>
+          <form class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label">Select</label>
+              <select-input>
+                <div class="dropdown">
+                  <div class="select-input-field" style="display: flex; align-items: center;">
+                    <span class="select-input-value text-muted">
+                      Select a color
+                    </span>
+                    <i class="dropdown-toggle helion-icon helion-icon-Up_tab helion-icon-r180"
+                      style="margin-left: auto;"></i>
+                  </div>
+                </div>
+              </select-input>
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="inputDefault">Default input</label>
+              <input type="text" class="form-control" id="inputDefault">
+            </div>
+            <div class="form-group has-error">
+              <label class="control-label" for="inputError">Input error</label>
+              <span class="control-message">something is wrong</span>
+              <input type="text" class="form-control" id="inputError">
+            </div>
+          </form>
+        </div>
+
+
+        <div class="col-md-12">
+
+          <h4>Large form controls:</h4>
+          <form>
+            <div class="form-group form-group-large">
+              <label class="control-label" for="disabledInput2">Disabled input</label>
+              <input class="form-control" id="disabledInput2" type="text" placeholder="Disabled input here..." disabled="">
+            </div>
+
+            <div class="form-group form-group-large has-warning">
+              <label class="control-label" for="inputWarning2">Input warning</label>
+              <input type="text" class="form-control" id="inputWarning2">
+            </div>
+
+            <div class="form-group form-group-large has-error">
+              <label class="control-label" for="inputError2">Input error</label>
+              <span class="control-message">something is wrong</span>
+              <input type="text" class="form-control" id="inputError2">
+            </div>
+
+            <div class="form-group form-group-large has-success">
+              <label class="control-label" for="inputSuccess2">Input success</label>
+              <input type="text" class="form-control" id="inputSuccess2">
+            </div>
+
+            <div class="form-group form-group-large">
+              <label class="control-label" for="inputLarge2">Large input</label>
+              <input class="form-control input-lg" type="text" id="inputLarge2">
+            </div>
+
+            <div class="form-group form-group-large">
+              <label class="control-label" for="inputDefault2">Default input</label>
+              <input type="text" class="form-control" id="inputDefault2">
+            </div>
+
+            <div class="form-group form-group-large">
+              <label class="control-label" for="inputSmall2">Small input</label>
+              <input class="form-control input-sm" type="text" id="inputSmall2">
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="panels" class="container">
+      <div class="row">
+        <h3 class="page-header">Panels</h3>
+
+        <div class="col-md-4 col-sm-12">
+          <div>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                Basic panel
+              </div>
+            </div>
+
+            <div>
+              <div class="action-header">
+                Panel heading
+                <button class="btn btn-link">
+                  <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
+                  Link
+                </button>
+              </div>
+              <div class="panel panel-default">
+                <table class="table">
+                  <thead>
+                    <tr><th>Key</th><th>Value</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Instances</td><td class="text-right">3</td></tr>
+                    <tr><td>Memory Quota</td><td class="text-right">1024</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel panel-default">
+              <div class="panel-heading action-header">
+                Panel heading
+                <button class="btn btn-link">
+                  <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
+                  Link
+                </button>
+              </div>
+              <div class="panel-body">
+                Panel content
+              </div>
+            </div>
+
+            <div class="panel panel-default">
+              <div class="panel-body">
+                Panel content
+              </div>
+              <div class="panel-footer">Panel footer</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+          <div>
+            <div class="panel panel-primary">
+              <div class="panel-heading">
+                <h3 class="panel-title">Panel primary</h3>
+              </div>
+              <div class="panel-body">
+                Panel content
+              </div>
+            </div>
+
+            <div class="panel panel-success">
+              <div class="panel-heading">
+                <h3 class="panel-title">Panel success</h3>
+              </div>
+              <div class="panel-body">
+                Panel content
+              </div>
+            </div>
+
+            <div class="panel panel-warning">
+              <div class="panel-heading">
+                <h3 class="panel-title">Panel warning</h3>
+              </div>
+              <div class="panel-body">
+                Panel content
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+          <div>
+            <div class="panel panel-danger">
+              <div class="panel-heading">
+                <h3 class="panel-title">Panel danger</h3>
+              </div>
+              <div class="panel-body">
+                Panel content
+              </div>
+            </div>
+
+            <div class="panel panel-info">
+              <div class="panel-heading">
+                <h3 class="panel-title">Panel info</h3>
+              </div>
+              <div class="panel-body">
+                Panel content
+              </div>
+            </div>
+
+            <div class="panel panel-bordered">
+              <div class="panel-heading action-header">
+                Panel bordered
+                <button class="btn btn-link">
+                  <i class="helion-icon helion-icon-Right_Arrow" style="margin-right: 5px;"></i>
+                  Link
+                </button>
+              </div>
+              <div class="panel-body">
+                Panel content
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="cards" class="container">
+      <div class="row">
+        <h3 class="page-header">Cards</h3>
+
+        <div class="col-md-4 col-sm-12">
+          <div>
+            <div class="card panel panel-default">
+              <div class="panel-heading" style="display: flex; align-items: center;">
+                CARD HEADING
+                <actions-menu class="gallery-card-actions" style="line-height: inherit; margin-left: auto;">
+                  <div class="actions-menu dropdown open" tabindex="0">
+                    <i class="actions-menu-icon dropdown-toggle helion-icon helion-icon-lg helion-icon-More"
+                      style="cursor: pointer;"></i>
+                    <ul class="actions-menu-list dropdown-menu">
+                      <li class="actions-menu-item">Start</li>
+                      <li class="actions-menu-item">Stop</li>
+                    </ul>
+                  </div>
+                </actions-menu>
+              </div>
+              <div class="panel-body">
+                Card content
+              </div>
+              <div class="panel-footer" style="line-height: normal; display: flex; align-items: center;">
+                <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"></span>
+                <span style="font-size: 18px; margin-left: 10px;">DANGER</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <style>
+          .actions-menu-item {
+            padding: 10px 15px;
+          }
+
+          .actions-menu-item:hover {
+            background: #01a982;
+            color: #fff;
+            cursor: pointer;
+          }
+        </style>
+      </div>
+    </div>
+
+    <div id="progress-bars" class="container">
+      <div class="row">
+        <h3 class="page-header">Progress Bars</h3>
+        <div>
+          <div class="progress">
+            <div class="progress-bar" style="width: 60%;"></div>
+          </div>
+
+          <div class="progress">
+            <div class="progress-bar progress-bar-success" style="width: 40%"></div>
+          </div>
+
+          <div class="progress">
+            <div class="progress-bar progress-bar-warning" style="width: 60%"></div>
+          </div>
+
+          <div class="progress">
+            <div class="progress-bar progress-bar-danger" style="width: 80%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="percentage-gauges" class="container">
+      <div class="row">
+        <h3 class="page-header">Percentage Gauges</h3>
+        <div style="background-color: #ffffff; padding: 10px;">
+          <div class="percent-gauge">
+            <div class="gauge-label">
+              <div class="gauge-info">15%</div>
+              Bar Title
+            </div>
+            <div class="progress percent-gauge-quota-bar">
+              <div class="progress-bar percent-gauge-utilized-bar" style="width: 15%;"></div>
+            </div>
+          </div>
+
+          <div class="percent-gauge">
+            <div class="gauge-label">
+              <div class="gauge-info">60 / 100 GB</div>
+              Bar Title
+            </div>
+            <div class="progress percent-gauge-quota-bar">
+              <div class="progress-bar percent-gauge-utilized-bar" style="width: 60%;"></div>
+            </div>
+          </div>
+
+          <div class="percent-gauge percent-gauge-at-max">
+            <div class="gauge-label">
+              <div class="gauge-info">100%</div>
+              Bar Title
+            </div>
+            <div class="progress percent-gauge-quota-bar">
+              <div class="progress-bar percent-gauge-utilized-bar" style="width: 100%;"></div>
+            </div>
+          </div>
+
+          <div class="percent-gauge percent-gauge-at-max percent-gauge-over-max">
+            <div class="gauge-label">
+              <div class="gauge-info">125%</div>
+              Bar Title
+            </div>
+            <div class="progress percent-gauge-quota-bar">
+              <div class="progress-bar percent-gauge-utilized-bar" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="navs" class="container">
+      <div class="row">
+        <h3 class="page-header">Navs</h3>
+
+        <h4>Breadcrumbs:</h4>
+        <div style="padding: 20px;">
+          <ol class="breadcrumb">
+            <li>
+              <a href="#cf">cloud foundry</a>
+            </li>
+            <li>
+              <a href="#cf/applications">applications</a>
+            </li>
+            <li class="active">
+              <span>gallery</span>
+            </li>
+          </ol>
+        </div>
+
+        <h4>Left-hand navigation:</h4>
+        <div style="padding: 20px;">
+          <ul class="nav nav-pills nav-stacked" style="width: 300px;">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#">Profile</a></li>
+            <li class="disabled"><a href="#">Disabled</a></li>
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                Dropdown <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <h4>Tab navigation:</h4>
+        <div style="padding: 20px;">
+          <ul class="nav nav-tabs">
+            <li class="uib-tab nav-item active">
+              <a href="" class="nav-link">Active title</a>
+            </li>
+            <li class="uib-tab nav-item">
+              <a href="" class="nav-link">Inactive title one</a>
+            </li>
+            <li class="uib-tab nav-item">
+              <a href="" class="nav-link">Inactive title two</a>
+            </li>
+            <li class="uib-tab nav-item">
+              <a href="" class="nav-link">Inactive title three</a>
+            </li>
+            <li class="uib-tab nav-item disabled">
+              <a href="" class="nav-link">Disabled Title</a>
+            </li>
+          </ul>
+          <div class="tab-content" style="margin-top: 10px;">
+            <div class="tab-pane active">
+              <span>Visible content</span>
+            </div>
+            <div class="tab-pane">
+              <span>Hidden content</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="message-box" class="container">
+      <div class="row">
+        <h3 class="page-header">Message Box</h3>
+        <div class="message-box">
+          <p>
+            Bacon ipsum dolor amet shankle shank salami kevin jowl. Porchetta
+            drumstick short ribs cow frankfurter picanha venison. Pork chop
+            brisket flank shankle short ribs, pancetta boudin. Hamburger drumstick
+            bacon ground round, capicola sausage strip steak picanha meatball ham
+            hock beef.
+          </p>
+          <button class="btn btn-primary">A Button</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fixed-footer">
+      <span style="padding-right: 20px; font-style: italic;">
+        This is a fixed footer
+      </span>
+      <button type="button" class="btn btn-primary">Next</button>
+      <style>
+        body {
+          padding-bottom: 80px;
+        }
+      </style>
+    </div>
+  </body>
+</html>

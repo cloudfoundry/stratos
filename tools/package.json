@@ -45,6 +45,7 @@
     "gulp-angular-templatecache": "^2.0.0",
     "gulp-eslint": "^3.0.1",
     "gulp-if": "^2.0.0",
+    "gulp-inject-string": "^1.1.0",
     "gulp-plumber": "^1.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-sort": "^2.0.0",

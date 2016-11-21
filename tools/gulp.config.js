@@ -8,7 +8,13 @@
       src: '../src/',
       translations: '../translations/',
       tools: '../tools/',
-      e2e: '../e2e/'
+      e2e: '../e2e/',
+      theme: '../framework/theme/',
+      framework: '../framework/',
+      frameworkDist: '../dist/framework/',
+      examples: '../framework/examples/',
+      examplesScripts: '../framework/examples/scripts/',
+      examplesDist: '../framework/examples/dist/'
     };
 
     return {
@@ -46,6 +52,11 @@
         paths.src + 'plugins/**/assets/**/*'
       ],
 
+      themeFiles: [
+        paths.theme + '**/*',
+        '!' + paths.theme + '**/*.scss'
+      ],
+
       cssFiles: [
         paths.dist + 'index.css'
       ],
@@ -53,11 +64,13 @@
       templatePaths: [
         paths.src + '**/app/**/*.html',
         paths.src + '**/plugins/**/*.html',
-        paths.src + '**/helion-ui-framework/**/*.html'
+        paths.src + '../framework/src/**/*.html'
       ],
 
       jsFiles: [
         paths.dist + 'lib/*.js',
+        paths.dist + 'framework/**/*.module.js',
+        paths.dist + 'framework/**/*.js',
         paths.dist + 'plugins/**/plugin.config.js',
         paths.dist + 'index.module.js',
         paths.dist + 'app/**/*.module.js',
@@ -72,9 +85,13 @@
 
       jsTemplatesFile: 'stackato-templates.js',
 
+      jsFrameworkFile: 'stackato-framework.js',
+
       jsLibs: [
-        paths.dist + 'lib/helion-ui-framework/src/**/*.module.js',
-        paths.dist + 'lib/helion-ui-framework/src/**/*.js'
+        paths.framework + 'src/**/*.module.js',
+        paths.framework + 'src/**/*.js',
+        '!' + paths.framework + 'src/**/*.spec.js',
+        '!' + paths.framework + 'src/**/*.mock.js'
       ],
 
       jsSourceFiles: [
@@ -98,7 +115,17 @@
         paths.tools + 'test-backend/api/**/*.js',
         paths.tools + 'test-backend/config/**/*.js',
         paths.tools + 'test-backend/data/**/*.js',
-        paths.e2e + '**/*.js'
+        paths.e2e + '**/*.js',
+        paths.framework + 'src/**/*.js'
+      ],
+
+      frameworkFiles: [
+        paths.framework + 'theme/**/*',
+        paths.examples + 'scripts/**/*'
+      ],
+
+      frameworkTemplates: [
+        paths.framework + 'src/**/*.html'
       ],
 
       scssFiles: [
