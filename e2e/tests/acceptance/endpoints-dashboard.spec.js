@@ -129,6 +129,7 @@
               var endpointsTable = endpointsDashboardPage.getEndpointTable();
               var endpointsRows = helpers.getTableRows(endpointsTable);
               for (var i = 0; i < endpointsRows.count(); i++) {
+                //TODO: RC Replace with each()
                 expect(endpointsDashboardPage.endpointConnectLink(i).isDisplayed()).toBeTruthy();
                 expect(endpointsDashboardPage.endpointError(i).isDisplayed()).toBeTruthy();
               }

@@ -105,7 +105,7 @@
 
   function loadApp() {
     browser.manage().deleteAllCookies();
-    browser.get(host);
+    return browser.get(host);
   }
 
   function setBrowserNormal() {

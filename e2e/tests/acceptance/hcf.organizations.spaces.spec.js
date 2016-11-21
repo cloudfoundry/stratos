@@ -41,12 +41,11 @@
           helpers.setBrowserNormal();
           helpers.loadApp();
           loginPage.loginAsAdmin();
-          navBar.goToView('Endpoints');
-          endpointDashboard.getCloudFoundryTile().click();
-          expect(endpointsHcf.getTileTitle(0).then(function (title) {
-            return title.toLowerCase();
-          })).toBe(hcfFromConfig.register.cnsi_name.toLowerCase());
-          return endpointsHcf.getTiles().get(0).click();
+          return navBar.goToView('Endpoints');
+        }).then(function () {
+          var requiredRowIndex = endpointDashboard.getRowWithEndpointName(hcfFromConfig.register.cnsi_name);
+          expect(requiredRowIndex).toBeDefined();
+          return endpointDashboard.endpointNameClick(requiredRowIndex);
         });
       // Ensure we don't continue until everything is set up
       return browser.driver.wait(init);

@@ -4,6 +4,7 @@
   var navbar = require('../navbar.po');
   var helpers = require('../helpers.po');
   var credentialsFormHelper = require('../widgets/credentials-form.po');
+  var Q = require('../../../tools/node_modules/q');
 
   module.exports = {
     showEndpoints: showEndpoints,
@@ -16,6 +17,9 @@
     welcomeMessageNonAdmin: welcomeMessageNonAdmin,
 
     getEndpointTable: getEndpointTable,
+    getRowWithEndpointName: getRowWithEndpointName,
+    endpointNameClick: endpointNameClick,
+    endpointName: endpointName,
     endpointConnectLink: endpointConnectLink,
     endpointDisconnectLink: endpointDisconnectLink,
     endpointStatus: endpointStatus,
@@ -63,13 +67,50 @@
     return panels.get(1).isDisplayed();
   }
 
-
   function clickAddClusterInWelcomeMessage() {
     return element.all(by.css('#welcome-message span.tile-btn')).click();
   }
 
   function getEndpointTable() {
     return element(by.css('.endpoints-table table'));
+  }
+
+  function getRowWithEndpointName(name) {
+    var endpointsRows = helpers.getTableRows(getEndpointTable());
+    var rowIndex;
+    return endpointsRows.each(function (element, index) {
+      return endpointIsErrorRow(index).then(function (isError) {
+        if (isError) {
+          return;
+        }
+        return endpointName(index).then(function (endpointName) {
+          if (endpointName.toLowerCase() === name.toLowerCase()) {
+            rowIndex = index;
+          }
+        });
+      })
+    }).then(function () {
+      return rowIndex;
+    });
+  }
+
+  function endpointName(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 0).getText();
+  }
+
+  function endpointNameClick(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 0).element(by.css('a')).click();
+  }
+
+  function endpointIsConnected(row) {
+    //TODO: RC refactor
+    return endpointStatus(row, 'helion-icon-Connect').isPresent();
+  }
+
+  function endpointIsErrorRow(row) {
+    return helpers.getTableRowAt(getEndpointTable(), row).getAttribute('table-inline-message').then(function (text) {
+      return !!text;
+    });
   }
 
   function endpointConnectLink(row) {
@@ -95,7 +136,6 @@
     expect(row.getAttribute('table-inline-message')).toBeDefined();
     return row;
   }
-
 
   function getHeaderRegister() {
     return element(by.css('.endpoints-dashboard .header button'));
