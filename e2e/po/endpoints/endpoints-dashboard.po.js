@@ -8,6 +8,7 @@
 
   module.exports = {
     showEndpoints: showEndpoints,
+    showHcfEndpoints: showHcfEndpoints,
     goToEndpoints: goToEndpoints,
     isEndpoints: isEndpoints,
 
@@ -39,6 +40,9 @@
 
   function showEndpoints() {
     return navbar.goToView('Endpoints');
+  }
+  function showHcfEndpoints() {
+    return navbar.goToView('Helion Cloud Foundry');
   }
 
   function goToEndpoints() {

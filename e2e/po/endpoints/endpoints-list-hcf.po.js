@@ -8,6 +8,7 @@
     showHcfEndpoints: showHcfEndpoints,
     goToHcfEndpoints: goToHcfEndpoints,
     isHcfEndpoints: isHcfEndpoints,
+    isHcfOganizationsDetails: isHcfOganizationsDetails,
     getTiles: getTiles,
     isTileConnected: isTileConnected,
     getTileTitle: getTileTitle,
@@ -18,9 +19,7 @@
   };
 
   function showHcfEndpoints() {
-    return endpointDashboard.showEndpoints().then(function () {
-      return endpointDashboard.getCloudFoundryTile().click();
-    });
+    return endpointDashboard.showHcfEndpoints();
   }
 
   function goToHcfEndpoints() {
@@ -29,7 +28,13 @@
 
   function isHcfEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
-      return expect(url).toBe(helpers.getHost() + '/#/endpoint/cluster');
+      return expect(url).toBe(helpers.getHost() + '/#/endpoint/cluster/list');
+    });
+  }
+  function isHcfOganizationsDetails() {
+    browser.debugger();
+    return browser.getCurrentUrl().then(function (url) {
+      return expect(url).toMatch(helpers.getHost() + '/#/endpoint/.*/organizations');
     });
   }
 
