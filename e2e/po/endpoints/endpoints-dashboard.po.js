@@ -3,8 +3,8 @@
 
   var navbar = require('../navbar.po');
   var helpers = require('../helpers.po');
+  var actionMenu = require('../widgets/actions-menu.po');
   var credentialsFormHelper = require('../widgets/credentials-form.po');
-  var Q = require('../../../tools/node_modules/q');
 
   module.exports = {
     showEndpoints: showEndpoints,
@@ -21,9 +21,13 @@
     getRowWithEndpointName: getRowWithEndpointName,
     endpointNameClick: endpointNameClick,
     endpointName: endpointName,
-    endpointConnectLink: endpointConnectLink,
-    endpointDisconnectLink: endpointDisconnectLink,
-    endpointStatus: endpointStatus,
+    endpointIsDisconnected: endpointIsDisconnected,
+    endpointIsConnected: endpointIsConnected,
+    endpointType: endpointType,
+    endpointUrl: endpointUrl,
+    endpointConnectLink: endpointConnectButton,
+    endpointDisconnectLink: endpointDisconnectButton,
+    endpointActionMenu: endpointActionMenu,
     endpointError: endpointError,
 
     headerRegister: headerRegister,
@@ -92,7 +96,7 @@
             rowIndex = index;
           }
         });
-      })
+      });
     }).then(function () {
       return rowIndex;
     });
@@ -106,9 +110,20 @@
     return helpers.getTableCellAt(getEndpointTable(), row, 0).element(by.css('a')).click();
   }
 
+  function endpointIsDisconnected(row) {
+    return endpointGetStatus(row, 'helion-icon-Connect').isPresent();
+  }
+
   function endpointIsConnected(row) {
-    //TODO: RC refactor
-    return endpointStatus(row, 'helion-icon-Connect').isPresent();
+    return endpointGetStatus(row, 'helion-icon-Active_L').isPresent();
+  }
+
+  function endpointGetStatus(rowIndex, statusClass) {
+    return helpers.getTableCellAt(getEndpointTable(), rowIndex, 1).element(by.css('.' + statusClass));
+  }
+
+  function endpointType(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 2).getText();
   }
 
   function endpointIsErrorRow(row) {
@@ -117,26 +132,46 @@
     });
   }
 
-  function endpointConnectLink(row) {
-    //TODO: RC THis will only work for non-admin. Admin users have an action menu instead of single 'connect/disconnect' link
-    var anchor = helpers.getTableCellAt(getEndpointTable(), row, 4).element(by.css('a'));
-    expect(anchor.element(by.css('span')).getText()).toEqual('CONNECT');
-    return anchor;
+  function endpointConnectButton(row) {
+    var actionMenuElement = endpointActionMenu(row);
+    return actionMenu.isSingleButton(actionMenuElement).then(function (isSingleButton) {
+      if (isSingleButton) {
+        // Non-admin will only have connect or disconnected (ok maybe also reconnect)
+        var anchor = actionMenu.getSingleButton(actionMenuElement);
+        expect(anchor.element(by.css('span')).getText()).toEqual('CONNECT');
+        return actionMenu.getSingleButton(actionMenuElement);
+      } else {
+        // Admin will have an action menu. Need to implement iterating over action menu item tests for 'connect'
+        fail('Not implemented');
+      }
+    });
   }
 
-  function endpointDisconnectLink(row) {
-    //TODO: RC THis will only work for non-admin. Admin users have an action menu instead of single 'connect/disconnect' link
-    var anchor = helpers.getTableCellAt(getEndpointTable(), row, 4).element(by.css('a'));
-    expect(anchor.element(by.css('span')).getText()).toEqual('DISCONNECT');
-    return anchor;
+  function endpointDisconnectButton(row) {
+    var actionMenuElement = endpointActionMenu(row);
+    return actionMenu.isSingleButton(actionMenuElement).then(function (isSingleButton) {
+      if (isSingleButton) {
+        // Non-admin will only have connect or disconnected (ok maybe also reconnect)
+        var anchor = actionMenu.getSingleButton(actionMenuElement);
+        expect(anchor.element(by.css('span')).getText()).toEqual('DISCONNECT');
+        return actionMenu.getSingleButton(actionMenuElement);
+      } else {
+        // Admin will have an action menu. Need to implement iterating over action menu item tests for 'connect'
+        fail('Not implemented');
+      }
+    });
   }
 
-  function endpointStatus(rowIndex, statusClass) {
-    return helpers.getTableCellAt(getEndpointTable(), rowIndex, 1).element(by.css('.' + statusClass));
+  function endpointActionMenu(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 4).element(by.css('actions-menu'));
+  }
+
+  function endpointUrl(rowIndex) {
+    return helpers.getTableCellAt(getEndpointTable(), rowIndex, 1).getText();
   }
 
   function endpointError(rowIndex) {
-    var row = helpers.getTableRowAt(getEndpointTable(), rowIndex+1);
+    var row = helpers.getTableRowAt(getEndpointTable(), rowIndex + 1);
     expect(row.getAttribute('table-inline-message')).toBeDefined();
     return row;
   }
@@ -152,7 +187,6 @@
   function headerRegisterVisible() {
     return getHeaderRegister().isPresent();
   }
-
 
   function credentialsForm() {
     return credentialsFormHelper.credentialsForm(element(by.css('.detail-view-content')).element(by.css('.credentials-form')));

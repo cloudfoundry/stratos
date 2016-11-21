@@ -3,7 +3,6 @@
 
   describe('endpoint dashboard tests', function () {
     var $httpBackend, $q, controller, modelManager;
-    var detailViewCalled = false;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -17,7 +16,6 @@
     beforeEach(module('app.view.endpoints.dashboard'));
     beforeEach(module(function ($provide) {
       var mock = function () {
-        detailViewCalled = true;
         return {rendered: $q.resolve(), result: $q.reject()};
       };
       $provide.value('helion.framework.widgets.detailView', mock);
@@ -31,7 +29,6 @@
 
       modelManager = $injector.get('app.model.modelManager');
       var registerService = $injector.get('app.view.registerService');
-      var errorService = $injector.get('app.error.errorService');
       var utils = $injector.get('app.utils.utilsService');
       var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.serviceInstanceService');
 

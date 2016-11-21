@@ -8,7 +8,6 @@
   var inputText = require('../../po/widgets/input-text.po');
   var actionsMenuHelper = require('../../po/widgets/actions-menu.po');
   var confirmationModalHelper = require('../../po/widgets/confirmation-modal.po');
-  var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
   var endpointDashboard = require('../../po/endpoints/endpoints-dashboard.po');
 
   describe('HCF - Manage Organizations', function () {
