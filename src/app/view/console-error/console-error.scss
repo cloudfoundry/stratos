@@ -9,7 +9,7 @@
 
 .console-error.console-error-block {
   padding-top: 100px;
-  width: 75%;
+  @include flex-align(center, center, column);
 
   .btn {
     margin-top: $hpe-unit-space;
