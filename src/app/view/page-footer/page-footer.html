@@ -2,8 +2,11 @@
 <a ng-if="mode !== 'footer'" rel="noopener noreferrer" ng-href="{{ 'https://www.hpe.com/us/en/home.html' | translate}}" target="_blank"><img class="hpe-logo" src="/lib/helion-ui-framework/dist/images/HPElogo.png"/></a>
 
 <div class="copyright">
-  <span ng-if="mode !== 'footer'" class="font-semi-bold"translate>Helion Stackato 4.0</span>
-  <span class="secondary" translate><span ng-if="mode !== 'footer'"> | </span>&copy; 2016 Hewlett Packard Enterprise Company, L.P.</span>
+  <span ng-if="mode !== 'footer'" class="font-semi-bold">
+    <span translate>Helion Stackato</span> <span translate>Product_Version</span>
+  <span class="secondary">
+    <span ng-if="mode !== 'footer'"> | </span>&copy; 2016 <span translate>Hewlett Packard Enterprise Company, L.P.</span>
+  </span>
 </div>
 
 <ul class="links">
