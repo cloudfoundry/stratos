@@ -55,6 +55,28 @@
       it('should be the HCF Organizations details page', function () {
         endpointsHcf.isHcfOganizationsDetails();
       });
+
+      it('should have breadcrumb to `Endpoints`', function () {
+        expect(endpointsHcf.getBreadcrumb(0).getText()).toBe('Endpoints');
+      });
+
+      it('should go to Endpoints page when appropriate breadcrumb is clicked', function () {
+        endpointsHcf.clickBreadcrumb(0).then(function () {
+          endpointsHcf.isEndpoints();
+          // Go back
+          endpointsHcf.showHcfEndpoints();
+        });
+      });
+
+      it('should have breadcrumb to `Helion Cloud Foundry`', function () {
+        expect(endpointsHcf.getBreadcrumb(1).getText()).toBe('Helion Cloud Foundry');
+      });
+
+      it('should go to `Helion Cloud Foundry` page when appropriate breadcrumb is clicked', function () {
+        endpointsHcf.clickBreadcrumb(1).then(function () {
+          endpointsHcf.isHcfEndpoints();
+        });
+      });
     });
 
     describe('Multiple endpoints', function () {
