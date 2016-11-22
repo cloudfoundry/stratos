@@ -343,7 +343,6 @@
               });
             }
 
-
             it('Should hint at SSL errors', function () {
               registerEndpoint.populateAndRegister(type, service.register.api_endpoint, service.register.cnsi_name, false)
                 .then(function () {
