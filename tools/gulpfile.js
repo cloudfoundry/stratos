@@ -86,7 +86,9 @@
     if (gutil.env.devMode) {
       del(paths.frameworkDist + config.jsFrameworkFile, {force: true}, next);
     } else {
-      del(paths.frameworkDist, {force: true}, next);
+      del(paths.frameworkDist, {force: true}, function () {
+        del(paths.dist + 'scss', {force: true}, next);
+      });
     }
   });
 

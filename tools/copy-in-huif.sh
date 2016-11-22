@@ -31,7 +31,9 @@ if [ $command != "-c" ]; then
   cp -r $UIF_DIR/examples/scripts $FRAMEWORK_DIR/examples/scripts
 
   rm $FRAMEWORK_DIR/src/*.scss
-  rm  $FRAMEWORK_DIR/theme/*.scss
+  rm $FRAMEWORK_DIR/theme/*.scss
+  rm -rf $FRAMEWORK_DIR/theme/helion.framework.js
+  rm -rf $FRAMEWORK_DIR/theme/helion.framework.css
 
   echo "Copied helion-ui-framework assets into startos-ui"
 fi
