@@ -28,6 +28,16 @@
     'app.utils.utilsService'
   ];
 
+  /**
+   * @name ClustersRouterController
+   * @description Redirects the user to either the Organizations Detail page or
+   * the Cluster tiles page depending on the number of HCF instances connected.
+   * @param {object} $q - the Angular $q service
+   * @param {object} $state - the UI router $state service
+   * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.utils.utilsService} utils - the utils service
+   * @constructor
+   */
   function ClustersRouterController($q, $state, modelManager, utils) {
     var that = this;
     this.modelManager = modelManager;
