@@ -121,7 +121,6 @@
   });
 
   gulp.task('copy:framework:js', function () {
-    console.log(paths.frameworkDist);
     return gulp.src(jsLibs)
       .pipe(sort())
       .pipe(angularFilesort())
