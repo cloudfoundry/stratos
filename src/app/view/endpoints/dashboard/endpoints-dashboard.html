@@ -1,14 +1,15 @@
 <div class="endpoints endpoints-dashboard">
-    <div class="header">
-      <div class="applications-header font-semi-bold pull-left" translate>
-        Endpoints
-        <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
-      </div>
-      <button ng-if="endpointsDashboardCtrl.initialised &&
-                     endpointsDashboardCtrl.isUserAdmin()"
-              class="btn btn-primary" stlye="position: absolute; right: 0px;"
-              ng-click="endpointsDashboardCtrl.register()" translate>Register Endpoint</button>
+  <div class="header">
+    <div class="applications-header font-semi-bold pull-left" translate>
+      Endpoints
+      <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
     </div>
+    <button ng-if="endpointsDashboardCtrl.initialised &&
+                     endpointsDashboardCtrl.isUserAdmin()"
+            class="btn btn-primary" stlye="position: absolute; right: 0px;"
+            ng-click="endpointsDashboardCtrl.register()" translate>Register Endpoint
+    </button>
+  </div>
   <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
     <div>
       <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
@@ -54,15 +55,17 @@
       </div>
     </div>
     <div ng-if="endpointsDashboardCtrl.endpoints && endpointsDashboardCtrl.endpoints.length === 0"
-         class="console-error-block console-error">
+         class="empty-view-message">
+
+         <!--class="console-error-block console-error">-->
       <div class="helion-icon helion-icon-3x helion-icon-Inherit helion-icon-r270"></div>
-      <div class="applications-msg" translate>There are no registered endpoints.</div>
-      <div ng-if="endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+      <div class="view-msg" translate>There are no registered endpoints.</div>
+      <div ng-if="endpointsDashboardCtrl.isUserAdmin()" class="view-cta" translate>
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
             Register an endpoint
           </span> to make it available to developers
       </div>
-      <div ng-if="!endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+      <div ng-if="!endpointsDashboardCtrl.isUserAdmin()" class="view-cta" translate>
         Please contact your administrator.
       </div>
     </div>

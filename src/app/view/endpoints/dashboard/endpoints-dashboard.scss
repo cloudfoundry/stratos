@@ -1,19 +1,17 @@
-.endpoints-dashboard {
-  .action-header {
-    position: relative;
-    padding-top: $hpe-unit-space;
-    button {
-      position: absolute;
-      top: $hpe-unit-space;
-      right: $hpe-unit-space;
+.endpoints {
+  &.endpoints-dashboard {
+    .action-header {
+      position: relative;
+      padding-top: $hpe-unit-space;
+      button {
+        position: absolute;
+        top: $hpe-unit-space;
+        right: $hpe-unit-space;
+      }
     }
-  }
 
-  .console-error-block {
-    padding-top: $hpe-unit-space*2;
-  }
-
-  .endpoints-table {
-    padding: 0 $hpe-unit-space;
+    .empty-view-message {
+      padding-top: $hpe-unit-space;
+    }
   }
 }

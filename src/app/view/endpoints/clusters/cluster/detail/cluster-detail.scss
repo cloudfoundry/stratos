@@ -3,10 +3,11 @@
 
 .cluster-detail {
 
+  .application-nav {
+    margin-bottom: 15px;
+  }
+
   .cluster-users-table {
-    > div {
-      padding-top: 54px;
-    }
 
     .change-roles-buttons {
       display: inline;
@@ -70,5 +71,11 @@
       }
     }
 
+  }
+
+   .cluster-summary-tile, organization-summary-tile, space-summary-tile  {
+     .card.panel-default {
+       margin-bottom: $hpe-unit-space / 4;
+     }
   }
 }

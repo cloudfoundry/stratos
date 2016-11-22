@@ -4,22 +4,24 @@
 
 .endpoints {
 
+  padding: 0 $hpe-unit-space;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
 
   .header {
-    padding: $hpe-unit-space;
+    padding-top: $hpe-unit-space;
+    padding-bottom: $hpe-unit-space;
     position: relative;
     button {
       position: absolute;
-      right: $hpe-unit-space;
+      right: 0;
     }
   }
 
   .welcome-message {
-    padding: 0 $hpe-unit-space;
 
     > .helion-icon {
       font-size: $hpe-unit-space;
@@ -35,9 +37,9 @@
   .empty-view-message {
     clear: both;
     text-align: center;
-    padding: $hpe-unit-space*4 0;
-    //width: 70%;
+    @include flex-align(center, center, column);
     margin: auto;
+    padding-top: $hpe-unit-space*2;
 
     .helion-icon{
       color: $dove-gray;
@@ -55,6 +57,8 @@
     .view-cta {
       font-size: 24px;
       vertical-align: bottom;
+      font-weight: 600;
+      color: $dove-gray;
     }
 
     .btn{
@@ -65,7 +69,11 @@
       text-transform: none;
       font-size: $hpe-unit-space;
     }
+    .btn-link {
+      font-weight: 600;
+    }
   }
+
 }
 
 .form-group.skip-ssl-validation-checkbox {

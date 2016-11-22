@@ -6,7 +6,7 @@
 </div>
 
 <div ng-if="clusterSpaceController.stateInitialised"
-     class="cluster-detail"
+     class="cluster-detail endpoints"
      ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterSpaceController.hasActions !== false}">
   <h3>Space : {{ clusterSpaceController.space().details.space.entity.name }}</h3>
   <space-summary-tile ng-if="clusterSpaceController.space()"
