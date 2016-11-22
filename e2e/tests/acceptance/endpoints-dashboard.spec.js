@@ -82,7 +82,7 @@
           it('Should not display endpoint dashboard', function () {
             endpointsPage.isEndpoints().then(function (isEndpoints) {
               expect(isEndpoints).toBe(false);
-              expect(element(by.css('.applications-msg')).getText()).toBe('Helion Stackato has not yet been configured for you.');
+              expect(element(by.css('.applications-msg')).getText()).toBe('There are no registered endpoints.');
               expect(navbar.navBarElement().isPresent()).toBeFalsy();
             });
           });
@@ -224,122 +224,125 @@
                 });
             });
 
-            describe('Initial button state', function () {
+            if (type === 'hcf') {
+              describe('Initial button state', function () {
 
-              it('Cancel is enabled', function () {
-                registerEndpoint.closeEnabled(true);
-              });
+                it('Cancel is enabled', function () {
+                  registerEndpoint.closeEnabled(true);
+                });
 
-              it('Register is initially disabled', function () {
-                registerEndpoint.registerEnabled(false);
-              });
-            });
-
-            describe('Invalid address', function () {
-
-              var invalidUrl = 'This is an invalid URL';
-
-              beforeEach(function () {
-                // Enter a name so the form will become valid on valid address
-                registerEndpoint.enterName('abc').then(function () {
-                  return registerEndpoint.registerEnabled(false);
+                it('Register is initially disabled', function () {
+                  registerEndpoint.registerEnabled(false);
                 });
               });
 
-              it('Incorrect format', function () {
-                registerEndpoint.enterAddress(invalidUrl)
-                  .then(function () {
-                    return registerEndpoint.isAddressValid(false);
-                  })
-                  .then(function () {
-                    registerEndpoint.registerEnabled(false);
-                  });
-              });
+              describe('Invalid address', function () {
 
-              it('Valid format', function () {
-                registerEndpoint.enterAddress(service.register.api_endpoint)
-                  .then(function () {
-                    return registerEndpoint.isAddressValid(true);
-                  })
-                  .then(function () {
-                    registerEndpoint.registerEnabled(true);
-                  });
-              });
+                var invalidUrl = 'This is an invalid URL';
 
-              it('Invalid to valid to invalid', function () {
-                registerEndpoint.enterAddress(invalidUrl)
-                  .then(function () {
-                    return registerEndpoint.isAddressValid(false);
-                  })
-                  .then(function () {
-                    return registerEndpoint.registerEnabled(false);
-                  })
-                  .then(function () {
-                    return registerEndpoint.clearAddress();
-                  })
-                  .then(function () {
-                    return registerEndpoint.enterAddress(service.register.api_endpoint);
-                  })
-                  .then(function () {
-                    return registerEndpoint.isAddressValid(true);
-                  })
-                  .then(function () {
-                    return registerEndpoint.registerEnabled(true);
-                  })
-                  .then(function () {
-                    return registerEndpoint.clearAddress();
-                  })
-                  .then(function () {
-                    return registerEndpoint.enterAddress(invalidUrl);
-                  })
-                  .then(function () {
-                    return registerEndpoint.isAddressValid(false);
-                  })
-                  .then(function () {
+                beforeEach(function () {
+                  // Enter a name so the form will become valid on valid address
+                  registerEndpoint.enterName('abc').then(function () {
                     return registerEndpoint.registerEnabled(false);
                   });
-              });
-            });
+                });
 
-            describe('Invalid name', function () {
+                it('Incorrect format', function () {
+                  registerEndpoint.enterAddress(invalidUrl)
+                    .then(function () {
+                      return registerEndpoint.isAddressValid(false);
+                    })
+                    .then(function () {
+                      registerEndpoint.registerEnabled(false);
+                    });
+                });
 
-              beforeEach(function () {
-                // Enter a url so the form will become valid on valid Name
-                registerEndpoint.enterAddress(service.register.api_endpoint).then(function () {
-                  return registerEndpoint.registerEnabled(false);
+                it('Valid format', function () {
+                  registerEndpoint.enterAddress(service.register.api_endpoint)
+                    .then(function () {
+                      return registerEndpoint.isAddressValid(true);
+                    })
+                    .then(function () {
+                      registerEndpoint.registerEnabled(true);
+                    });
+                });
+
+                it('Invalid to valid to invalid', function () {
+                  registerEndpoint.enterAddress(invalidUrl)
+                    .then(function () {
+                      return registerEndpoint.isAddressValid(false);
+                    })
+                    .then(function () {
+                      return registerEndpoint.registerEnabled(false);
+                    })
+                    .then(function () {
+                      return registerEndpoint.clearAddress();
+                    })
+                    .then(function () {
+                      return registerEndpoint.enterAddress(service.register.api_endpoint);
+                    })
+                    .then(function () {
+                      return registerEndpoint.isAddressValid(true);
+                    })
+                    .then(function () {
+                      return registerEndpoint.registerEnabled(true);
+                    })
+                    .then(function () {
+                      return registerEndpoint.clearAddress();
+                    })
+                    .then(function () {
+                      return registerEndpoint.enterAddress(invalidUrl);
+                    })
+                    .then(function () {
+                      return registerEndpoint.isAddressValid(false);
+                    })
+                    .then(function () {
+                      return registerEndpoint.registerEnabled(false);
+                    });
                 });
               });
 
-              it('Valid', function () {
-                registerEndpoint.enterName(service.register.cnsi_name)
-                  .then(function () {
-                    registerEndpoint.isNameValid(true);
-                    registerEndpoint.registerEnabled(true);
-                  });
-              });
+              describe('Invalid name', function () {
 
-              it('Invalid to valid to invalid', function () {
-                registerEndpoint.enterName(service.register.cnsi_name)
-                  .then(function () {
-                    registerEndpoint.isNameValid(true);
-                    registerEndpoint.registerEnabled(true);
-                  })
-                  .then(function () {
-                    return registerEndpoint.clearName();
-                  })
-                  .then(function () {
-                    registerEndpoint.isNameValid(false);
-                    registerEndpoint.registerEnabled(false);
-                  })
-                  .then(function () {
-                    return registerEndpoint.enterName(service.register.cnsi_name);
-                  })
-                  .then(function () {
-                    registerEndpoint.isNameValid(true);
-                    registerEndpoint.registerEnabled(true);
+                beforeEach(function () {
+                  // Enter a url so the form will become valid on valid Name
+                  registerEndpoint.enterAddress(service.register.api_endpoint).then(function () {
+                    return registerEndpoint.registerEnabled(false);
                   });
+                });
+
+                it('Valid', function () {
+                  registerEndpoint.enterName(service.register.cnsi_name)
+                    .then(function () {
+                      registerEndpoint.isNameValid(true);
+                      registerEndpoint.registerEnabled(true);
+                    });
+                });
+
+                it('Invalid to valid to invalid', function () {
+                  registerEndpoint.enterName(service.register.cnsi_name)
+                    .then(function () {
+                      registerEndpoint.isNameValid(true);
+                      registerEndpoint.registerEnabled(true);
+                    })
+                    .then(function () {
+                      return registerEndpoint.clearName();
+                    })
+                    .then(function () {
+                      registerEndpoint.isNameValid(false);
+                      registerEndpoint.registerEnabled(false);
+                    })
+                    .then(function () {
+                      return registerEndpoint.enterName(service.register.cnsi_name);
+                    })
+                    .then(function () {
+                      registerEndpoint.isNameValid(true);
+                      registerEndpoint.registerEnabled(true);
+                    });
+                });
               });
-            });
+            }
+
 
             it('Should hint at SSL errors', function () {
               registerEndpoint.populateAndRegister(type, service.register.api_endpoint, service.register.cnsi_name, false)

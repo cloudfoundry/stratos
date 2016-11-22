@@ -51,7 +51,6 @@
 
     this.initialised = true;
     this.listError = false;
-    this.endpoints = [];
 
     if (_haveCachedEndpoints()) {
       // serviceInstanceModel has previously been updated
@@ -65,22 +64,15 @@
       serviceInstanceService.clear();
     });
 
-    function init() {
-      _updateEndpoints().then(function () {
-        _updateWelcomeMessage();
-      });
-    }
-
-    utilsService.chainStateResolve('endpoint.dashboard', $state, init);
-
     /**
      * @namespace app.view.endpoints.dashboard
      * @memberof app.view.endpoints.dashboard
      * @name register
      * @description Register a service endpoint
+     * @param {string} type - type of endpoint being registered. selects the initial 'type' drop down value
      */
-    this.register = function () {
-      registerService.add($scope).then(function () {
+    this.register = function (type) {
+      registerService.add($scope, type).then(function () {
         _updateEndpoints();
       });
     };
@@ -114,6 +106,15 @@
       $state.reload();
     };
 
+    function init() {
+      _updateEndpoints().then(function () {
+        _updateWelcomeMessage();
+      });
+      that.showWelcomeMessage = true;
+    }
+
+    utilsService.chainStateResolve('endpoint.dashboard', $state, init);
+
     function _updateWelcomeMessage() {
       // Show the welcome message if either...
       if (that.isUserAdmin()) {
@@ -131,7 +132,11 @@
     }
 
     function _updateEndpointsFromCache() {
-      that.endpoints.length = 0;
+      if (that.endpoints) {
+        that.endpoints.length = 0;
+      } else {
+        that.endpoints = [];
+      }
       return $q.all([serviceInstanceService.createEndpointEntries(that.endpoints)]).then(function (results) {
 
         _.forEach(results, function (result) {

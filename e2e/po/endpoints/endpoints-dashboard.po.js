@@ -76,7 +76,7 @@
   }
 
   function clickAddClusterInWelcomeMessage() {
-    return element.all(by.css('#welcome-message span.tile-btn')).click();
+    return element.all(by.css('#welcome-message span.tile-btn')).first().click();
   }
 
   function getEndpointTable() {

@@ -38,10 +38,11 @@
        * @name add
        * @description Opens slide out containing registration form
        * @namespace app.view.registerService.ServiceRegistrationService
-       * @param {object} $scope the angular scope object
+       * @param {object} $scope - the angular scope object
+       * @param {string} type - the default starting endpoint type
        * @returns {promise}
        */
-      add: function ($scope) {
+      add: function ($scope, type) {
         var serviceTypes = [{
           label: gettext('Helion Cloud Foundry'),
           value: 'hcf'
@@ -49,9 +50,11 @@
           label: gettext('Helion Code Engine'),
           value: 'hce'
         }];
+        var startingType = _.find(serviceTypes, { value: type });
+        startingType = startingType ? startingType : serviceTypes[0];
         var data = {
           name: '',
-          type: serviceTypes[0].value,
+          type: startingType.value,
           url: '',
           skipSslValidation: false
         };
@@ -59,8 +62,8 @@
           data: data,
           types: serviceTypes,
           description: gettext('Select an endpoint type, then enter it\'s URL and a name to use for this endpoint in the Console.'),
-          urlFormName: serviceTypes[0].value + 'Url',
-          nameFormName: serviceTypes[0].value + 'Name',
+          urlFormName: startingType.value + 'Url',
+          nameFormName: startingType.value + 'Name',
           urlValidationExpr: utilsService.urlValidationExpression
         };
         $scope.$watch(function () { return data.type; }, function (type) {

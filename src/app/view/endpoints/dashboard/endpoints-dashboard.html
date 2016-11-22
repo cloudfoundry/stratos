@@ -4,7 +4,9 @@
         Endpoints
         <bounce-spinner classes="bounce-spinner-sm" ng-if="!endpointsDashboardCtrl.initialised"></bounce-spinner>
       </div>
-      <button ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.isUserAdmin()" class="btn btn-primary" stlye="position: absolute;    right: 0px;"
+      <button ng-if="endpointsDashboardCtrl.initialised &&
+                     endpointsDashboardCtrl.isUserAdmin()"
+              class="btn btn-primary" stlye="position: absolute; right: 0px;"
               ng-click="endpointsDashboardCtrl.register()" translate>Register Endpoint</button>
     </div>
   <div class="console-error console-error-block" ng-if="endpointsDashboardCtrl.initialised && endpointsDashboardCtrl.listError">
@@ -14,7 +16,7 @@
       <button ng-click="endpointsDashboardCtrl.reload()" class="btn btn-primary" translate>Retry</button>
     </div>
   </div>
-  <div ng-show="endpointsDashboardCtrl.initialised && !endpointsDashboardCtrl.listError">
+  <div ng-if="endpointsDashboardCtrl.initialised && !endpointsDashboardCtrl.listError">
     <div id="welcome-message" class="welcome-message"
          ng-if="endpointsDashboardCtrl.showWelcomeMessage">
       <div class="panel panel-default">
@@ -26,27 +28,42 @@
         </div>
         <div class=" panel-body" ng-show="endpointsDashboardCtrl.isUserAdmin()">
           <span translate>
-            To enable developers to use this Web console to interact with Helion Stackato, please
+            To enable developers to use this Web console to interact with Helion Stackato, please register
           </span>
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
-            Register Helion Cloud Foundry endpoints
+            Helion Cloud Foundry
+          </span>
+          <span translate> and </span>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register('hce')" translate>
+            Helion Code Engine
           </span>
           <span translate>
-            here. The process of registering these endpoints will make them discoverable for anyone who logs into this
-            console. Once you register an endpoint, we recommend connecting it to your account so you can manage it.
+            endpoints here. The process of registering these endpoints will make them discoverable for anyone who logs
+            into this console. Once you register an endpoint, we recommend connecting it to your account so you can
+            manage it.
           </span>
         </div>
         <div class=" panel-body" ng-show="!endpointsDashboardCtrl.isUserAdmin()">
           <span translate>
-            To get started, setup your account by connecting to endpoints and other services.
+            Rapidly develop, deploy, and scale cloud applications across clouds. Connect to registered system services
+            that you need to create and deploy a pipeline, view and access clusters where your cloud native workloads
+            exist, and connect to your preferred version control system. Registered systems service are provided by your
+            systems administrator
           </span>
         </div>
       </div>
     </div>
-    <div ng-if="!endpointsDashboardCtrl.showWelcomeMessage && !endpointsDashboardCtrl.endpoints.length"
-         class="panel panel-default endpoints-empty-table">
-      <div class="panel-body" translate>
-        You have no endpoints
+    <div ng-if="endpointsDashboardCtrl.endpoints && endpointsDashboardCtrl.endpoints.length === 0"
+         class="console-error-block console-error">
+      <div class="helion-icon helion-icon-3x helion-icon-Inherit helion-icon-r270"></div>
+      <div class="applications-msg" translate>There are no registered endpoints.</div>
+      <div ng-if="endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
+            Register an endpoint
+          </span> to make it available to developers
+      </div>
+      <div ng-if="!endpointsDashboardCtrl.isUserAdmin()" class="applications-cta" translate>
+        Please contact your administrator.
       </div>
     </div>
     <div ng-if="endpointsDashboardCtrl.endpoints.length"

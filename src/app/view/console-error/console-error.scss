@@ -1,5 +1,14 @@
+.console-welcome-message {
+  position: relative;
+  top: 48px;
+  .action-header {
+    padding-top: 24px;
+    padding-bottom: 0;
+  }
+}
+
 .console-error.console-error-block {
-  padding-top: 110px;
+  padding-top: 100px;
   width: 75%;
 
   .btn {
