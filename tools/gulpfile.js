@@ -68,30 +68,6 @@
       .pipe(gulp.dest(paths.dist));
   });
 
-  // Copy 'lib' folder to 'dist'
-  gulp.task('copy:lib', function (done) {
-    utils.copyBowerFolder(paths.src + 'lib', paths.dist + 'lib');
-    done();
-  });
-
-  // Copy JavaScript source files to 'dist'
-  gulp.task('copy:configjs', function () {
-    return gulp
-      .src(paths.src + 'config.js')
-      .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(rename('stackato-config.js'))
-      .pipe(gulp.dest(paths.dist));
-  });
-
-  gulp.task('copy:framework:js', function () {
-    return gulp.src(jsLibs)
-      .pipe(sort())
-      .pipe(angularFilesort())
-      .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
-      .pipe(gutil.env.devMode ? gutil.noop() : uglify())
-      .pipe(gulp.dest(paths.frameworkDist));
-  });
-
   gulp.task('copy:framework:templates', function () {
     return gulp.src(config.frameworkTemplates)
       .pipe(gulp.dest(paths.dist));
@@ -116,16 +92,42 @@
 
   // Copy JavaScript source files to 'dist'
   gulp.task('copy:js', ['copy:configjs', 'copy:bowerjs', 'copy:framework:js'], function () {
-    var sources = gulp.src(jsSourceFiles, {base: paths.src});
-    if (gutil.env.devMode) {
-      jsSourceFiles = jsSourceFiles.concat(jsLibs);
+    var sourceFiles = jsSourceFiles;
+    if (!gutil.env.devMode) {
+      sourceFiles = jsSourceFiles.concat(jsLibs);
     }
+    var sources = gulp.src(sourceFiles, {base: paths.src});
     return sources
       .pipe(sort())
       .pipe(angularFilesort())
       .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFile))
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.dist));
+  });
+
+  // Copy 'lib' folder to 'dist'
+  gulp.task('copy:lib', function (done) {
+    utils.copyBowerFolder(paths.src + 'lib', paths.dist + 'lib');
+    done();
+  });
+
+  // Copy JavaScript source files to 'dist'
+  gulp.task('copy:configjs', function () {
+    return gulp
+      .src(paths.src + 'config.js')
+      .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+      .pipe(rename('stackato-config.js'))
+      .pipe(gulp.dest(paths.dist));
+  });
+
+  gulp.task('copy:framework:js', function () {
+    console.log(paths.frameworkDist);
+    return gulp.src(jsLibs)
+      .pipe(sort())
+      .pipe(angularFilesort())
+      .pipe(gutil.env.devMode ? gutil.noop() : concat(config.jsFrameworkFile))
+      .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+      .pipe(gulp.dest(paths.frameworkDist));
   });
 
   gulp.task('copy:bowerjs', function () {
@@ -256,7 +258,8 @@
   gulp.task('watch', function () {
     var callback = browserSync.active ? browserSync.reload : function () {
     };
-    gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true}, ['copy:js', callback]);
+
+    gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     gulp.watch(scssFiles, ['css', callback]);
     gulp.watch(partials, ['copy:html', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
