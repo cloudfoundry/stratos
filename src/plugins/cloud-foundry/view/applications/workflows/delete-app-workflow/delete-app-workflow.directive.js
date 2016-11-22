@@ -17,12 +17,17 @@
     return {
       controller: DeleteAppWorkflowController,
       controllerAs: 'deleteAppWorkflowCtrl',
-      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-app-workflow.html'
+      templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-app-workflow.html',
+      scope: {
+        closeDialog: '=',
+        dismissDialog: '=',
+        guids: '='
+      },
+      bindToController: true
     };
   }
 
   DeleteAppWorkflowController.$inject = [
-    '$scope',
     '$filter',
     'app.model.modelManager',
     'app.event.eventService',
@@ -35,7 +40,6 @@
    * @memberof cloud-foundry.view.applications
    * @name DeleteAppWorkflowController
    * @constructor
-   * @param {object} $scope - angular $scope service
    * @param {object} $filter - angular $filter service
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
@@ -52,9 +56,7 @@
    * @property {object} data - a data bag
    * @property {object} userInput - user's input about new application
    */
-  function DeleteAppWorkflowController($scope, $filter, modelManager, eventService, $q, $interpolate, utils) {
-    var that = this;
-
+  function DeleteAppWorkflowController($filter, modelManager, eventService, $q, $interpolate, utils) {
     this.eventService = eventService;
     this.$q = $q;
     this.$interpolate = $interpolate;
@@ -68,11 +70,7 @@
     this.hceCnsiGuid = null;
     this.$filter = $filter;
 
-    var startDeleteAppListener = this.eventService.$on('cf.events.START_DELETE_APP_WORKFLOW', function (event, data) {
-      that.startWorkflow(data);
-    });
-
-    $scope.$on('$destroy', startDeleteAppListener);
+    this.startWorkflow(this.guids || {});
   }
 
   angular.extend(DeleteAppWorkflowController.prototype, {
@@ -102,7 +100,6 @@
           });
         },
         allowCancelAtLastStep: true,
-        title: gettext('Delete App, Pipeline, and Selected Items'),
         hideStepNavStack: true,
         steps: [
           {
@@ -384,6 +381,7 @@
      */
     stopWorkflow: function () {
       this.deletingApplication = false;
+      this.closeDialog();
     },
 
     /**
@@ -404,6 +402,7 @@
         var message = that.$interpolate(successMsg)({appName: appName});
         that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
         that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');
+        that.dismissDialog();
       })
       .catch(function () {
         that.options.hasError = true;
