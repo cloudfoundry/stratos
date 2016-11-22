@@ -110,7 +110,6 @@
       _updateEndpoints().then(function () {
         _updateWelcomeMessage();
       });
-      that.showWelcomeMessage = true;
     }
 
     utilsService.chainStateResolve('endpoint.dashboard', $state, init);
