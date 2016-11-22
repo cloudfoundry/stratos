@@ -22,12 +22,12 @@
           <dd>
             {{ clusterDetailController.totalMemoryUsed }}
           </dd>
-          <dt translate>Total Organizations</dt>
-          <dd>
+          <dt ng-if="clusterDetailController.orgCount >= 0" translate>Total Organizations</dt>
+          <dd ng-if="clusterDetailController.orgCount >= 0">
             {{ clusterDetailController.orgCount }}
           </dd>
-          <dt translate>Total Users</dt>
-          <dd>
+          <dt ng-if="clusterDetailController.userCount >= 0" translate>Total Users</dt>
+          <dd ng-if="clusterDetailController.userCount >= 0">
             {{ clusterDetailController.userCount }}
           </dd>
         </dl>
