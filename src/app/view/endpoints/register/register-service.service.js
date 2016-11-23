@@ -7,6 +7,7 @@
 
   ServiceRegistrationService.$inject = [
     '$q',
+    '$interpolate',
     'app.model.modelManager',
     'app.view.notificationsService',
     'helion.framework.widgets.asyncTaskDialog',
@@ -18,6 +19,7 @@
    * @description Register a service via a slide out
    * @namespace app.view.registerService.ServiceRegistrationService
    * @param {object} $q - the Angular $q service
+   * @param {object} $interpolate - the Angular $interpolate service
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {app.view.notificationsService} notificationsService The console notification service
    * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
@@ -25,7 +27,7 @@
    * @property {function} add Opens slide out containing registration form
    * @constructor
    */
-  function ServiceRegistrationService($q, modelManager, notificationsService, asyncTaskDialog, utilsService) {
+  function ServiceRegistrationService($q, $interpolate, modelManager, notificationsService, asyncTaskDialog, utilsService) {
     var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
 
     function createInstances(serviceInstances, filter) {
@@ -44,13 +46,13 @@
        */
       add: function ($scope, type) {
         var serviceTypes = [{
-          label: gettext('Helion Cloud Foundry'),
+          label: utilsService.getProductStrings().HELION_CLOUD_FOUNDRY,
           value: 'hcf'
-        },{
-          label: gettext('Helion Code Engine'),
+        }, {
+          label: utilsService.getProductStrings().HELION_CODE_ENGINE,
           value: 'hce'
         }];
-        var startingType = _.find(serviceTypes, { value: type });
+        var startingType = _.find(serviceTypes, {value: type});
         startingType = startingType ? startingType : serviceTypes[0];
         var data = {
           name: '',
@@ -66,16 +68,21 @@
           nameFormName: startingType.value + 'Name',
           urlValidationExpr: utilsService.urlValidationExpression
         };
-        $scope.$watch(function () { return data.type; }, function (type) {
+        $scope.$watch(function () {
+          return data.type;
+        }, function (type) {
           context.instances = createInstances(serviceInstanceModel.serviceInstances, type);
+          var scope = {};
           switch (data.type) {
             case 'hcf':
-              context.typeLabel = gettext('Helion Cloud Foundry');
-              context.urlHint = gettext('Helion Cloud Foundry API endpoint');
+              context.typeLabel = utilsService.getProductStrings().HELION_CLOUD_FOUNDRY;
+              scope.endpoint = utilsService.getProductStrings().HELION_CLOUD_FOUNDRY;
+              context.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
               break;
             case 'hce':
-              context.typeLabel = gettext('Helion Code Engine');
-              context.urlHint = gettext('Helion Code Engine endpoint');
+              context.typeLabel = utilsService.getProductStrings().HELION_CODE_ENGINE;
+              scope.endpoint = utilsService.getProductStrings().HELION_CODE_ENGINE;
+              context.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
               break;
             default:
               context.typeLabel = gettext('Service Endpoint');

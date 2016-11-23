@@ -26,17 +26,23 @@
   }
 
   ApplicationSetupPipelineController.$inject = [
-    'helion.framework.widgets.detailView'
+    '$scope',
+    'helion.framework.widgets.detailView',
+    'app.utils.utilsService'
   ];
 
   /**
    * @name ApplicationSetupPipelineController
    * @constructor
+   * @param {object} $scope - Angular $scope
    * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {app.utils.utilsService} utilsService - the console utils service
    * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
+   * @param {app.utils.utilsService} utilsService - the console utils service
    */
-  function ApplicationSetupPipelineController(detailView) {
+  function ApplicationSetupPipelineController($scope, detailView, utilsService) {
     this.detailView = detailView;
+    $scope.PRODUCT_STRINGS = utilsService.getProductStrings();
   }
 
   angular.extend(ApplicationSetupPipelineController.prototype, {

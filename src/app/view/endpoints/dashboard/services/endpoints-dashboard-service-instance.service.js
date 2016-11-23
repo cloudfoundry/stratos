@@ -86,10 +86,10 @@
             // If there are no services or no errors continue as normal
             errorService.clearAppError();
           } else if (errors.length === 1) {
-            var errorMessage = gettext('The Console could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
+            var errorMessage = $interpolate(gettext('The {{ console }} could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.'))({console: utilsService.getProductStrings().CONSOLE});
             errorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
           } else if (errors.length > 1) {
-            errorService.setAppError(gettext('The Console could not contact multiple endpoints.'));
+            errorService.setAppError($interpolate(gettext('The {{ console }} could not contact multiple endpoints.'))({console: utilsService.getProductStrings().CONSOLE}));
           }
 
         });
@@ -137,7 +137,7 @@
           key: endpointPrefix + serviceInstance.guid,
           name: serviceInstance.name,
           connected: isConnected ? 'connected' : 'unconnected',
-          type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine'),
+          type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getProductStrings().HELION_CLOUD_FOUNDRY : utilsService.getProductStrings().HELION_CODE_ENGINE,
           visit: isConnected && serviceInstance.cnsi_type === 'hcf' ? function () {
             return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
           } : undefined,
@@ -150,7 +150,8 @@
         if (serviceInstance.error) {
           // Service could not be contacted
           endpoint.error = {
-            message: gettext('The Console could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'),
+            //TODO
+            message: $interpolate(gettext('The {{ console }} could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'))({console: utilsService.getProductStrings().CONSOLE}),
             status: 'error'
           };
           endpoint.connected = 'error';
@@ -164,7 +165,7 @@
         } else if (endpoint.connected === 'unconnected') {
           // Service token has expired
           endpoint.error = {
-            message: gettext('The Console has no credentials for this endpoint. Connect to resolve this problem.'),
+            message: $interpolate(gettext('The {{ console }} has no credentials for this endpoint. Connect to resolve this problem.'))({console: utilsService.getProductStrings().CONSOLE}),
             status: 'info'
           };
         }

@@ -1,7 +1,7 @@
 <h4 translate>Notifications</h4>
 <div ng-if="wizardCtrl.options.notificationTargetsReady && !wizardCtrl.options.notificationTargetsError && wizardCtrl.options.notificationTargetTypes.length === 0">
   <div class="alert alert-info alert-no-bg alert-bordered">
-    <p translate>There are no notification targets available for this Helion Code Engine instance. Please contact your Administrator to add notification targets.</p>
+    <p translate>There are no notification targets available for this {{ PRODUCT_STRINGS.HELION_CODE_ENGINE }} instance. Please contact your Administrator to add notification targets.</p>
   </div>
 </div>
 <div ng-if="wizardCtrl.options.notificationTargetsReady && wizardCtrl.options.notificationTargetsError">

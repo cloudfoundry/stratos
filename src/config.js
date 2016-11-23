@@ -12,12 +12,22 @@
     HELION_UI_FRAMEWORK_BASE_PATH: 'lib/helion-ui-framework/dist/',
 
     DEFAULT_PRODUCT_STRINGS: {
-      _PRODUCT_VERSION: '4.0',
-      _TERMS_HREF: '',
-      _PRIVACY_HREF: ''
+      PRODUCT_VERSION: '4.0',
+      TERMS_OF_USE_HREF: 'http://docs.hpcloud.com/permalink/helion-openstack/3.0/eula',
+      PRIVACY_HREF: 'https://www.hpe.com/us/en/legal/privacy.html',
+      HELION_STACKATO_WEB_CONSOLE: 'Helion Stackato Web Console',
+      WEB_CONSOLE: 'Web Console',
+      CONSOLE: 'Console',
+      HELION_STACKATO: 'Helion Stackato',
+      COMPANY_NAME: 'Hewlett Packard Enterprise Company, L.P.',
+      TERMS_OF_USE: 'Terms of Use',
+      PRIVACY: 'Privacy',
+      HELION_CODE_ENGINE: 'Helion Code Engine',
+      HELION_CLOUD_FOUNDRY: 'Helion Cloud Foundry'
     },
 
     PRODUCT_STRINGS: {}
+
   };
 
   expose({

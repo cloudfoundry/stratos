@@ -2,7 +2,7 @@
 <p translate>You are almost done!</p>
 <p translate>To deploy your app, follow these steps:</p>
 <p translate>1. Download and install the CLI - see  <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">here</a></p>
-<p translate>2. Add a manifest.yml to your source code or update your existing one by <strong>copying & pasting</strong> the code below. Helion Cloud Foundry uses the manifest file to set the application's name and route. Since the application and its route has been created for you, please ensure that the name, host and domain of your manifest file matches the example below. If the application name and route is not correct in the manifest file, two applications and routes will get created.</p>
+<p translate>2. Add a manifest.yml to your source code or update your existing one by <strong>copying & pasting</strong> the code below. {{ PRODUCT_STRINGS.HELION_CODE_ENGINE }} uses the manifest file to set the application's name and route. Since the application and its route has been created for you, please ensure that the name, host and domain of your manifest file matches the example below. If the application name and route is not correct in the manifest file, two applications and routes will get created.</p>
 <div class="row">
   <div class="col-sm-12 col-md-12">
     <code-block>---
@@ -20,12 +20,15 @@ applications:
 </div>
 <br/>
 <p translate>3. Enter the following commands in the CLI:</p>
-<br><h5 translate>Target the Helion Cloud Foundry API endpoint</h5>
-<code-block>cf api {{wizardCtrl.options.userInput.hcfApiEndpoint || '[Helion Cloud Foundry API endpoint]'}}</code-block>
+<br><h5 translate>Target the Cloud Foundry API endpoint</h5>
+<code-block ng-if="{{wizardCtrl.options.userInput.hcfApiEndpoint}}">cf api {{wizardCtrl.options.userInput.hcfApiEndpoint}}</code-block>
+<code-block ng-if="!{{wizardCtrl.options.userInput.hcfApiEndpoint}}">cf api [Cloud Foundry API endpoint]</code-block>
 
-<br><h5 translate>Login to Helion Cloud Foundry endpoint</h5>
+
+<br><h5 translate>Login to Cloud Foundry endpoint</h5>
 <code-block hide-copy="true">$ cf login
-  API endpoint: {{wizardCtrl.options.userInput.hcfApiEndpoint || '[Helion Cloud Foundry API endpoint]'}}
+  API endpoint: <span ng-if="{{wizardCtrl.options.userInput.hcfApiEndpoint}}">{{wizardCtrl.options.userInput.hcfApiEndpoint}}</span>
+  < ng-if="!{{wizardCtrl.options.userInput.hcfApiEndpoint}}">[Cloud Foundry API endpoint]'}}
 
   Email> {{ wizardCtrl.options.userInput.hcfUserName || '[username]'}}
 
@@ -34,7 +37,7 @@ applications:
   OK
 </code-block>
 
-<br><h5 translate>Push to Helion Cloud Foundry endpoint</h5>
+<br><h5 translate>Push to Cloud Foundry endpoint</h5>
 <p translate>Navigate to the project directory and execute the following.</p>
 <code-block>cf push {{wizardCtrl.options.userInput.name || '[Application Name]'}}</code-block></p>
 

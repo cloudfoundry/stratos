@@ -20,10 +20,21 @@
   function pageFooter(path) {
     return {
       templateUrl: path + 'view/page-footer/page-footer.html',
+      controller: PageFooterController,
+      controllerAs: 'pageFooterCtrl',
       scope: {
         mode: '@'
       }
     };
+  }
+
+  PageFooterController.$inject = [
+    '$scope',
+    'app.utils.utilsService'
+  ];
+
+  function PageFooterController($scope, utilsService) {
+    $scope.PRODUCT_STRINGS = utilsService.getProductStrings();
   }
 
 })();

@@ -34,7 +34,8 @@ PS_REGEX=""
 PRODUCT_STRINGS=$(jq . -c -j ${BRAND_FOLDER}/product_strings.json)
 
 # Replace inline in the config.js file
-sed -i 's/PRODUCT_STRINGS:.*}};/PRODUCT_STRINGS:'"$PRODUCT_STRINGS"'};/g' ${CONFIG_FILE}  
+
+sed -i 's#PRODUCT_STRINGS:.*#PRODUCT_STRINGS:'"$PRODUCT_STRINGS"'#g' ${CONFIG_FILE}
 
 FAVICON="favicon.ico"
 

@@ -34,22 +34,11 @@
   }
 
   setOEMTranslations.$inject = [
-    '$window', 'gettextCatalog'
+    '$window', '$rootScope'
   ];
 
-  function setOEMTranslations($window, gettextCatalog) {
-    if ($window.env) {
-      if ($window.env.DEFAULT_PRODUCT_STRINGS) {
-        gettextCatalog.setStrings('en', DEFAULT_PRODUCT_STRINGS);
-      }
-
-      if ($window.env.PRODUCT_STRINGS) {
-        var PRODUCT_STRINGS = $window.env.PRODUCT_STRINGS;
-        if (PRODUCT_STRINGS !== '$PRODUCT_STRINGS$') {
-          gettextCatalog.setStrings('en', PRODUCT_STRINGS);
-        }
-      }
-    }
+  function setOEMTranslations($window, $rootScope) {
+    $rootScope.PRODUCT_STRINGS = _.defaults($window.env.PRODUCT_STRINGS, $window.env.DEFAULT_PRODUCT_STRINGS);
   }
 
 })();

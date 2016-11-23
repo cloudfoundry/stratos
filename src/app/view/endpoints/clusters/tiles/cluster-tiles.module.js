@@ -21,7 +21,7 @@
         instancesListed: false
       },
       ncyBreadcrumb: {
-        label: gettext('Helion Cloud Foundry'),
+        label: gettext('Cloud Foundry'),
         parent: 'endpoint.dashboard'
       }
     });
