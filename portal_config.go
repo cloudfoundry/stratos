@@ -1,7 +1,5 @@
 package main
 
-import "golang.org/x/oauth2"
-
 type portalConfig struct {
 	HTTPClientTimeoutInSecs     int64    `ucp:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
 	HTTPConnectionTimeoutInSecs int64    `ucp:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
@@ -26,7 +24,5 @@ type portalConfig struct {
 	EncryptionKeyFilename       string   `ucp:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey               string   `ucp:"ENCRYPTION_KEY"`
 	EncryptionKeyInBytes        []byte
-	VCSClientMap                map[VCSClientMapKey]oauth2.Config
-	VCSClientSkipSSLMap         map[VCSClientMapKey]bool
 	ConsoleVersion              string
 }

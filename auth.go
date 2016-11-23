@@ -149,6 +149,16 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 
 	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken)
 
+
+	if cnsiRecord.CNSIType == cnsis.CNSIHCE {
+		// Get the list VCS clients supported by this Code Engine instance
+		logger.Debug("loginToCNSI (Code Engine), getting list of VCS...")
+		err := p.autoRegisterCodeEngineVcs(c, cnsiGUID)
+		if err != nil {
+			logger.Warnf("loginToCNSI Failed to auto register Code Engine VCS! %#v", err)
+		}
+	}
+
 	hcfAdmin := strings.Contains(uaaRes.Scope, HCFAdminIdentifier)
 
 	resp := &LoginRes{

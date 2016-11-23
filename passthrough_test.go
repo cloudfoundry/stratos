@@ -64,7 +64,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		}
 	*/
 	// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers  https://jira.hpcloud.net/browse/TEAMFOUR-636
-	done := make(chan CNSIRequest)
+	done := make(chan *CNSIRequest)
 
 	// Set up database expectation for pp.doOauthFlowRequest
 	//  p.getCNSIRequestRecords(cnsiRequest) ->
@@ -79,7 +79,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		WithArgs(mockHCFGUID).
 		WillReturnRows(expectHCFRow())
 
-	go pp.doRequest(mockCNSIRequest, done)
+	go pp.doRequest(&mockCNSIRequest, done)
 
 	newCNSIRequest := <-done
 
@@ -223,7 +223,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 		WithArgs(mockHCFGUID).
 		WillReturnRows(expectHCFRow())
 
-	cr, err := pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r, ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header, false)
+	cr, err := pp.buildCNSIRequest(expectedCNSIRequest.GUID, expectedCNSIRequest.UserGUID, r.Method(), ur, expectedCNSIRequest.Body, expectedCNSIRequest.Header)
 	if err != nil {
 		t.Errorf("Couldn't build CNSI request: %s", err)
 	}

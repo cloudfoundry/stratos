@@ -108,7 +108,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 		WithArgs(mockCNSIGUID).
 		WillReturnRows(expectedCNSIRecordRow)
 
-	res, err := pp.doOauthFlowRequest(CNSIRequest{
+	res, err := pp.doOauthFlowRequest(&CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
@@ -254,7 +254,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	//
-	res, err := pp.doOauthFlowRequest(CNSIRequest{
+	res, err := pp.doOauthFlowRequest(&CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
@@ -387,7 +387,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 		WillReturnError(errors.New("Unknown Database Error"))
 
 	//
-	_, err := pp.doOauthFlowRequest(CNSIRequest{
+	_, err := pp.doOauthFlowRequest(&CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
@@ -428,7 +428,7 @@ func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
 	}
 	pp.setCNSITokenRecord("not-the-right-guid", mockUserGUID, mockTokenRecord)
 
-	_, err := pp.doOauthFlowRequest(CNSIRequest{
+	_, err := pp.doOauthFlowRequest(&CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
@@ -466,7 +466,7 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 
 	pp := setupPortalProxy(nil)
 
-	invalidCNSIRequest := CNSIRequest{
+	invalidCNSIRequest := &CNSIRequest{
 		GUID:     "",
 		UserGUID: "",
 	}
@@ -632,7 +632,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 	mock.ExpectExec(updateTokens).
 		WillReturnError(errors.New("Unknown Database Error"))
 	//
-	_, err := pp.doOauthFlowRequest(CNSIRequest{
+	_, err := pp.doOauthFlowRequest(&CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
