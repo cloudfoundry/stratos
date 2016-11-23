@@ -4,12 +4,17 @@
   // Navbar helpers
   module.exports = {
 
+    navBarElement: navBarElement,
     goToView: goToView,
 
     showAccountSettings: showAccountSettings,
     logout: logout
 
   };
+
+  function navBarElement() {
+    return element(by.css('navigation'));
+  }
 
   function goToView(viewName) {
     var id = 'navbar-item-' + viewName.toLowerCase();

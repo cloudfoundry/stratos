@@ -33,19 +33,20 @@
     fields.get(0).clear();
     fields.get(1).clear();
     fields.get(0).sendKeys(username);
-    fields.get(1).sendKeys(password);
+    return fields.get(1).sendKeys(password);
   }
 
   function login(username, password) {
-    enterLogin(username, password);
-    loginButton().click();
+    return enterLogin(username, password).then(function () {
+      return loginButton().click();
+    });
   }
 
   function loginAsAdmin() {
-    login(helpers.getAdminUser(), helpers.getAdminPassword());
+    return login(helpers.getAdminUser(), helpers.getAdminPassword());
   }
 
   function loginAsNonAdmin() {
-    login(helpers.getUser(), helpers.getPassword());
+    return login(helpers.getUser(), helpers.getPassword());
   }
 })();

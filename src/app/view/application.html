@@ -2,10 +2,6 @@
 <ng-include src="applicationCtrl.path + 'view/login-page/login-page.html'" ng-if="applicationCtrl.ready && !applicationCtrl.loggedIn"></ng-include>
 <app-error-bar displayed="applicationCtrl.showAppErrorBar" ng-class="{'errorbar-with-navbar': applicationCtrl.loggedIn, 'errorbar-without-navbar': !applicationCtrl.loggedIn, 'navbar-icons-only' : applicationCtrl.navbarIconsOnly}"></app-error-bar>
 <console-view ng-class="{'with-app-error-bar': applicationCtrl.showAppErrorBar, 'navbar-hidden' : applicationCtrl.hideNavigation, 'navbar-icons-only' : applicationCtrl.navbarIconsOnly}" ng-if="applicationCtrl.ready && applicationCtrl.loggedIn"></console-view>
-<service-registration id="registration-overlay"
-  ng-if="applicationCtrl.showRegistration"
-  show-overlay-registration="applicationCtrl.showRegistration">
-</service-registration>
 <global-spinner class="application-global-spinner"
   spinner-active="applicationCtrl.showGlobalSpinner"
   spinner-type="bounce-spinner">

@@ -3,36 +3,6 @@
 @import 'actions/actions';
 
 .cluster {
-  .cluster-breadcrumb {
-    //width: 100%;
-    margin-top: 0;
-    height: $main-nav-title-height;
-    line-height: $main-nav-title-height;
-    vertical-align: middle;
-    padding: 0;
-    border: 0;
-
-    &.breadcrumb {
-      //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
-      margin-left: -15px;
-      width: calc(100% + 30px);
-
-      li {
-        text-transform: none;
-        font-weight: inherit;
-
-        //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
-        &:first-of-type {
-          padding-left: $hpe-unit-space / 2;
-        }
-
-        // No way to hide current location in angular-breadcrumbs, do this via css
-        &:last-of-type {
-          display: none;
-        }
-      }
-    }
-  }
 
   // Give the headers a uniform padding
   h3 {
@@ -56,16 +26,6 @@
     position: absolute;
     right: $hpe-unit-space / 2; // ok with scroll bar on, no time find a way to satisfy both with and without the scrollbar
     top: $hpe-unit-space
-  }
-
-  .cluster-detail {
-
-    padding-left: $hpe-unit-space;
-    padding-right: $hpe-unit-space;
-
-    .application-nav {
-      margin-bottom: 15px;
-    }
   }
 
   .cluster-empty-list {

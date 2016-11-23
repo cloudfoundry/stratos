@@ -1,11 +1,12 @@
-<div class="col-md-9 col-sm-12">
-  <div class="app-top-bar application-header font-semi-bold text-uppercase">
+<div ng-class="{ 'col-md-9 col-sm-12': appCtrl.visibleActions !== false}">
+  <div class="application-header font-semi-bold text-uppercase">
     {{ appCtrl.model.application.summary.name }}
     <app-state-icon class="action-target-state" state="appCtrl.model.application.state.indicator"></app-state-icon>
     <actions-menu class="application-nav-menu visible-sm visible-xs" actions="appCtrl.appActions"
       menu-icon="helion-icon helion-icon-2x helion-icon-More"
       menu-position="actions-menu-right"
-      ng-show="appCtrl.ready">
+      ng-show="appCtrl.ready"
+      ng-if="appCtrl.visibleActions">
     </actions-menu>
   </div>
 
@@ -51,8 +52,9 @@
     <div ui-view class="row"></div>
   </div>
 </div>
-
-<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col" ng-show="appCtrl.ready">
+<ul class="col-md-3 hidden-sm hidden-xs list-unstyled application-action-col"
+    ng-show="appCtrl.ready"
+    ng-if="appCtrl.visibleActions">
   <li ng-repeat="appAction in appCtrl.appActions">
     <button class="btn btn-link btn-border-less"
       ng-disabled="appAction.disabled"

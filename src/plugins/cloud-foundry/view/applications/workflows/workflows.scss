@@ -1,6 +1,7 @@
 @import "add-app-workflow/add-app-workflow";
 @import "add-pipeline-workflow/add-pipeline-workflow";
 @import "add-service-workflow/add-service-workflow";
+@import "delete-app-workflow/delete-app-workflow";
 
 .control-title {
   margin-top: $hpe-unit-space;

@@ -68,7 +68,6 @@
    * @property {boolean} loggedIn - a flag indicating if user logged in
    * @property {boolean} failedLogin - a flag indicating if user login failed due to bad credentials.
    * @property {boolean} serverErrorOnLogin - a flag indicating if user login failed because of a server error.
-   * @property {boolean} showRegistration - a flag indicating if the registration page should be shown
    * @class
    */
   function ApplicationController(eventService, modelManager, path, upgradeCheck, loggedInService, localStorage,
@@ -89,7 +88,6 @@
     this.serverErrorOnLogin = false;
     this.serverFailedToRespond = false;
     this.showGlobalSpinner = false;
-    this.showRegistration = false;
     this.ready = false;
 
     $timeout(function () {
@@ -233,7 +231,9 @@
               // Need to get the user's service list to determine if they have any connected
               return userServiceInstanceModel.list().then(function () {
                 // Developer - allow user to connect services, if we have some and none are connected
-                that.showRegistration = userServiceInstanceModel.numValid === 0;
+                if (userServiceInstanceModel.numValid === 0) {
+                  that.redirectState = 'endpoint.dashboard';
+                }
               });
             }
           }
@@ -343,7 +343,6 @@
     onLoggedOut: function () {
       this.eventService.$emit(this.eventService.events.LOGOUT);
       this.loggedIn = false;
-      this.showRegistration = false;
     }
   });
 

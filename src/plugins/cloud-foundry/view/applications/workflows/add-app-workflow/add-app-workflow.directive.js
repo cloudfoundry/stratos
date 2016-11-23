@@ -272,8 +272,15 @@
                     .finally(function () {
                       that.options.servicesReady = true;
                     });
-                  }, function () {
-                    var msg = gettext('There was problem creating your application. Please try again.');
+                  }, function (error) {
+                    var msg = gettext('There was a problem creating your application. ');
+                    var cloudFoundryException = that.utils.extractCloudFoundryError(error);
+                    if (cloudFoundryException || _.isString(error)) {
+                      msg = gettext('The following exception occurred when creating your application: ') + (cloudFoundryException || error) + '. ';
+                    }
+
+                    msg = msg + gettext('Please try again or contact your administrator if the problem persists.');
+
                     return that.$q.reject(msg);
                   });
                 });
@@ -426,7 +433,15 @@
               return that.$q.reject(gettext('This route already exists. Choose a new one.'));
             }
 
-            return that.$q.reject(gettext('There was a problem validating your route. Please try again.'));
+            var msg = gettext('There was a problem validating your route. ');
+            var cloudFoundryException = that.utils.extractCloudFoundryError(error);
+            if (cloudFoundryException || _.isString(error)) {
+              msg = gettext('The following exception occurred when validating your route: ') + (cloudFoundryException || error) + '. ';
+            }
+
+            msg = msg + gettext('Please try again or contact your administrator if the problem persists.');
+
+            return that.$q.reject(msg);
           });
       },
 

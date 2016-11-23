@@ -46,11 +46,10 @@
    * @param {object} asyncTaskDialog - our async dialog service
    * @property {Array} actions - collection of relevant actions that can be executed against cluster
    */
-  function OrganizationTileController(modelManager, $state, $q, $scope, utils, assignUsers, notificationsService,
-                                      confirmDialog, asyncTaskDialog) {
+  function OrganizationTileController(modelManager, $state, $q, $scope, utils, // eslint-disable-line complexity
+                                      assignUsers, notificationsService, confirmDialog, asyncTaskDialog) {
     var that = this;
     this.$state = $state;
-    this.actions = [];
 
     this.organizationModel = modelManager.retrieve('cloud-foundry.model.organization');
     var authModel = modelManager.retrieve('cloud-foundry.model.auth');
@@ -96,106 +95,127 @@
       that.roles = that.organizationModel.organizationRolesToStrings(roles);
     });
 
-    setActions();
+    var canEditOrg = authModel.isAllowed(that.organization.cnsiGuid,
+      authModel.resources.organization,
+      authModel.actions.update,
+      that.organization.guid);
 
-    function setActions() {
-      that.actions.push({
-        name: gettext('Edit Organization'),
-        disabled: !authModel.isAllowed(that.organization.cnsiGuid,
-          authModel.resources.organization,
+    var canDeleteOrg = canDelete && authModel.isAllowed(that.organization.cnsiGuid,
+        authModel.resources.organization,
+        authModel.actions.delete,
+        that.organization.guid);
+
+    var isSpaceManager = false;
+    // Iterate through all spaces in the organization to determine if user is a space manager
+    for (var i = 0; i < that.organization.org.entity.spaces.length; i++) {
+      var space = that.organization.org.entity.spaces[i];
+      if (authModel.isAllowed(that.organization.cnsiGuid,
+          authModel.resources.space,
           authModel.actions.update,
-          that.organization.guid),
-        execute: function () {
-          return asyncTaskDialog(
-            {
-              title: gettext('Edit Organization'),
-              templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
-              buttonTitles: {
-                submit: gettext('Save')
-              },
-              class: 'detail-view-thin'
-            },
-            {
-              data: {
-                name: organizationName(),
-                organizationNames: that.organizationNames
-              }
-            },
-            function (orgData) {
-              if (orgData.name && orgData.name.length > 0) {
-                if (organizationName() === orgData.name) {
-                  return $q.resolve();
-                }
-                return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
-                  {name: orgData.name})
-                  .then(function () {
-                    notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
-                      {name: orgData.name});
-                  });
-              } else {
-                return $q.reject('Invalid Name!');
-              }
-            }
-          );
-        }
-      });
-      that.actions.push({
-        name: gettext('Delete Organization'),
-        disabled: !canDelete || !authModel.isAllowed(that.organization.cnsiGuid,
-          authModel.resources.organization,
-          authModel.actions.delete,
-          that.organization.guid),
-        execute: function () {
-          return confirmDialog({
-            title: gettext('Delete Organization'),
-            description: gettext('Are you sure you want to delete organization') + " '" + organizationName() + "'?",
-            buttonText: {
-              yes: gettext('Delete'),
-              no: gettext('Cancel')
-            },
-            errorMessage: gettext('Failed to delete organization'),
-            callback: function () {
-              var orgName = organizationName();
-              return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
-                .then(function () {
-                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
-                    {name: orgName});
-                });
-            }
-          });
+          space.metadata.guid,
+          space.entity.organization_guid,
+          true)) {
 
-        }
-      });
-
-      var isSpaceManager = false;
-      // Iterate through all spaces in the organization to determine if user is a space manager
-      for (var i = 0; i < that.organization.org.entity.spaces.length; i++) {
-        var space = that.organization.org.entity.spaces[i];
-        if (authModel.isAllowed(that.organization.cnsiGuid,
-            authModel.resources.space,
-            authModel.actions.update,
-            space.metadata.guid,
-            space.entity.organization_guid,
-            true)) {
-
-          isSpaceManager = true;
-          break;
-        }
+        isSpaceManager = true;
+        break;
       }
+    }
 
-      that.actions.push({
-        name: gettext('Assign User(s)'),
-        // Disable action if user is:
-        // 1. Not allowed to update the organization (not an admin or an org-manager)
-        // 2. and not a manager of any space within the organization in question
-        disabled:  !authModel.isAllowed(that.organization.cnsiGuid, authModel.resources.organization, authModel.actions.update, that.organization.guid) && !isSpaceManager,
-        execute: function () {
-          assignUsers.assign({
-            clusterGuid: that.organization.cnsiGuid,
-            organizationGuid: that.organization.guid
-          });
-        }
-      });
+    // Cannot delete if user is:
+    // 1. Not allowed to update the organization (not an admin or an org-manager)
+    // 2. and not a manager of any space within the organization in question
+    var canAssignUsers = authModel.isAllowed(that.organization.cnsiGuid,
+        authModel.resources.organization,
+        authModel.actions.update,
+        that.organization.guid) || isSpaceManager;
+
+    var editOrgAction = {
+      name: gettext('Edit Organization'),
+      disabled: !canEditOrg,
+      execute: function () {
+        return asyncTaskDialog(
+          {
+            title: gettext('Edit Organization'),
+            templateUrl: 'app/view/endpoints/clusters/cluster/detail/actions/edit-organization.html',
+            buttonTitles: {
+              submit: gettext('Save')
+            },
+            class: 'detail-view-thin'
+          },
+          {
+            data: {
+              name: organizationName(),
+              organizationNames: that.organizationNames
+            }
+          },
+          function (orgData) {
+            if (orgData.name && orgData.name.length > 0) {
+              if (organizationName() === orgData.name) {
+                return $q.resolve();
+              }
+              return that.organizationModel.updateOrganization(that.organization.cnsiGuid, that.organization.guid,
+                {name: orgData.name})
+                .then(function () {
+                  notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully updated'),
+                    {name: orgData.name});
+                });
+            } else {
+              return $q.reject('Invalid Name!');
+            }
+          }
+        );
+      }
+    };
+
+    var deleteOrgAction = {
+      name: gettext('Delete Organization'),
+      disabled: !canDeleteOrg,
+      execute: function () {
+        return confirmDialog({
+          title: gettext('Delete Organization'),
+          description: gettext('Are you sure you want to delete organization') + " '" + organizationName() + "'?",
+          buttonText: {
+            yes: gettext('Delete'),
+            no: gettext('Cancel')
+          },
+          errorMessage: gettext('Failed to delete organization'),
+          callback: function () {
+            var orgName = organizationName();
+            return that.organizationModel.deleteOrganization(that.organization.cnsiGuid, that.organization.guid)
+              .then(function () {
+                notificationsService.notify('success', gettext('Organization \'{{name}}\' successfully deleted'),
+                  {name: orgName});
+              });
+          }
+        });
+
+      }
+    };
+
+    var assignUsersAction = {
+      name: gettext('Assign User(s)'),
+      disabled: !canAssignUsers,
+      execute: function () {
+        assignUsers.assign({
+          clusterGuid: that.organization.cnsiGuid,
+          organizationGuid: that.organization.guid
+        });
+      }
+    };
+
+    that.actions = [];
+    if (canEditOrg || this.user.admin) {
+      that.actions.push(editOrgAction);
+    }
+    if (canDeleteOrg || this.user.admin) {
+      that.actions.push(deleteOrgAction);
+    }
+    if (canAssignUsers || this.user.admin) {
+      that.actions.push(assignUsersAction);
+    }
+
+    if (that.actions.length < 1) {
+      delete that.actions;
     }
   }
 

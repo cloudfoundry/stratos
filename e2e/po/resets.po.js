@@ -76,12 +76,13 @@
    * admin workflow with the clusters provided as params.
    * @param {string?} username the username used ot create a session token
    * @param {string?} password the username used ot create a session token
+   * @param {boolean?} registerMultipleHcf - register multiple HCF instance
    * @returns {promise} A promise
    */
-  function resetAllCnsi(username, password) {
+  function resetAllCnsi(username, password, registerMultipleHcf) {
     return new Promise(function (resolve, reject) {
       helpers.createReqAndSession(null, username, password).then(function (req) {
-        _resetAllCNSI(req).then(function () {
+        _resetAllCNSI(req, registerMultipleHcf).then(function () {
           resolve();
         }, function (error) {
           console.log('Failed to reset all cnsi: ', error);
@@ -137,13 +138,19 @@
    * @function resetClusters
    * @description Reset clusters to original state
    * @param {object} req - the request
+   * @param {boolean} registerMultipleHcf - registers multiple HCF instances
    * @returns {promise} A promise
    */
-  function _resetAllCNSI(req) {
+  function _resetAllCNSI(req, registerMultipleHcf) {
     return new Promise(function (resolve, reject) {
       _removeAllCnsi(req).then(function () {
-        var hcfs = helpers.getHcfs();
 
+        var hcfs = helpers.getHcfs();
+        if (registerMultipleHcf) {
+          // duplicates the current definition
+          var key = _.keys(hcfs)[0];
+          hcfs[key + '_test'] = hcfs[key];
+        }
         var promises = [];
         var c;
         for (c in hcfs) {
