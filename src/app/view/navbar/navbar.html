@@ -1,8 +1,8 @@
-<nav class="main-nav navbar navbar-fixed-top"
+<nav class="main-nav-header navbar navbar-fixed-top"
   ng-class="{'navbar-icons-only' : applicationCtrl.navbarIconsOnly, 'navbar-hidden': applicationCtrl.hideNavigation}">
   <div class="container-fluid">
-    <div ng-if="!applicationCtrl.hideNavigation" class="navbar-header">
-      <button type="button"
+    <div class="navbar-header">
+      <button ng-if="!applicationCtrl.hideNavigation" type="button"
               class="navbar-toggle collapsed"
               data-toggle="collapse"
               data-target="#navbar"
@@ -10,19 +10,19 @@
               aria-controls="navbar">
         <i class="helion-icon helion-icon-Menu"></i>
       </button>
-      <div class="navbar-toggle-labels">
+      <div ng-if="!applicationCtrl.hideNavigation" class="navbar-toggle-labels">
         <i ng-click="applicationCtrl.navbarIconsOnly = !applicationCtrl.navbarIconsOnly" class="helion-icon helion-icon-Menu"></i>
       </div>
-      <span class="navbar-brand" translate>Helion Stackato</span>
-    </div>
-    <div ng-if="applicationCtrl.hideNavigation" class="navbar-header">
       <span class="navbar-brand" translate>Helion Stackato</span>
       <div id="navbar-item-logout" ng-click="applicationCtrl.logout()" ng-if="!applicationCtrl.hideAccount" class="navbar-signout">
         <i class="helion-icon helion-icon-Logout"></i>
       </div>
     </div>
-    <div ng-if="!applicationCtrl.hideNavigation" id="navbar" class="collapse navbar-collapse">
-      <navigation ></navigation>
-    </div>
   </div>
 </nav>
+<div id="navbar" class="main-nav-menu navbar navbar-fixed-top"
+  ng-class="{'navbar-icons-only' : applicationCtrl.navbarIconsOnly, 'navbar-hidden': applicationCtrl.hideNavigation}">
+  <div ng-if="!applicationCtrl.hideNavigation" class="navbar-menu">
+    <navigation ></navigation>
+  </div>
+</div>

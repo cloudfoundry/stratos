@@ -4,7 +4,7 @@ console-view {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding-top: 0;
+  padding-top: $page-header-height;
   min-height: 100vh;
   height: 100vh;
   overflow-x: hidden;
@@ -43,7 +43,7 @@ console-view {
     margin-left: 0;
 
     .app-top-bar {
-      margin-left: $hpe-unit-space * 1.5;
+      margin-left: 0;
     }
   }
 }

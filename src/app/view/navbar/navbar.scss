@@ -4,7 +4,80 @@ $main-nav-background-color: #444;
 $main-nav-item-height: 52px;
 $main-nav-item-active-bg-color: #737373;
 
-navbar > nav.main-nav {
+// Nav Bar Header
+
+navbar > nav.main-nav-header {
+  color: $page-header-fg;
+  background: $page-header-bg;
+  padding: 0;
+  width: 100%;
+  height: $page-header-height;
+  min-height: $page-header-height;
+  border: 0;
+
+  .container-fluid {
+    padding: 0;
+    .navbar-header {
+      margin: 0;
+    }
+    .navbar-brand {
+      font-size: 24px;
+      font-weight: 500;
+      padding: 0 0 0 $main-nav-icons-width;
+      height: $page-header-height;
+      line-height: $page-header-height;
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .navbar-signout {
+      position: absolute;
+      right: $hpe-unit-space;
+      top: 0;
+      height: $page-header-height;
+      line-height: $page-header-height;
+      cursor: pointer;
+
+      > i {
+        line-height: inherit;
+        &:hover {
+          color: $hpe-primary;
+        }
+      }
+    }
+
+    .navbar-toggle-labels {
+      height: $page-header-height;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: $main-nav-icons-width;
+      text-align: center; 
+
+      > i {
+        line-height: $page-header-height;
+        padding-left: 0;
+        cursor: pointer;
+
+        &:hover {
+          color: $hpe-primary;
+        }
+      }
+    }
+  }
+
+  &.navbar-hidden {
+    .container-fluid {
+      .navbar-brand {
+        padding-left: $hpe-unit-space;
+      }
+    }
+  }
+}
+
+// Nav Bar Menu
+
+navbar > .main-nav-menu {
   color: $page-header-fg;
   background: $page-header-bg;
   padding: 0;
@@ -12,31 +85,17 @@ navbar > nav.main-nav {
   height: 100%;
   background-color: $main-nav-background-color;
   z-index: initial;
-  
+  display: block;
+  overflow: hidden;
+
   &.navbar-hidden {
-    background-color: $hpe-primary-bg;
-    height: $main-nav-title-height;
-    width: 100%;
-
-    .container-fluid {
-      .navbar-brand {
-        padding-left: $hpe-unit-space;
-      }
-
-      .navbar-signout {
-        position: absolute;
-        right: $hpe-unit-space;
-        top: 0;
-        height: $main-nav-title-height;;
-        line-height: $main-nav-title-height;
-        cursor: pointer;
-
-        > i {
-          line-height: inherit;
-        }
-      }
-    }
+    display: none;
   }
+
+  &.collapse {
+    height: 100% !important;
+  }
+
 
   &.navbar-icons-only {
     width: $main-nav-icons-width;
@@ -54,7 +113,7 @@ navbar > nav.main-nav {
 
   .nav.navbar-nav {
     overflow-x: hidden;
-    height: calc(100% - #{$main-nav-title-height});
+    height: calc(100% - #{$page-header-height});
 
     li {
       height: $main-nav-item-height;
@@ -104,24 +163,6 @@ navbar > nav.main-nav {
     padding: 0;
   }
 
-  .navbar-toggle-labels {
-    height: $main-nav-title-height;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: $main-nav-icons-width;
-    text-align: center; 
-
-    > i {
-      line-height: $main-nav-title-height;
-      padding-left: 0;
-      cursor: pointer;
-
-      &:hover {
-        color: $hpe-primary;
-      }
-    }
-  }
 
   .navbar-header {
     width: 100%;
@@ -142,7 +183,7 @@ navbar > nav.main-nav {
 
   .nav.navbar-nav {
     position: absolute;
-    top: $main-nav-title-height;
+    top: $page-header-height;
     left: 0;
     width: 100%;
 
@@ -209,30 +250,6 @@ navbar > nav.main-nav {
     display: none;
   }
 
-  .container-fluid > .navbar-header, .container-fluid > .navbar-collapse {
-    margin-right: 0;
-    margin-left: 0;
-  }
-
-  .navbar-fixed-top .navbar-collapse {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .navbar-collapse.collapse {
-    display: block;
-    height: auto;
-    padding-bottom: 0;
-    overflow: visible;
-  }
-
-  .navbar-collapse {
-    width: auto;
-    border-top: 0;
-    box-shadow: none;
-  }
-
-
   .navbar-nav {
     float: left;
     margin: 0;
@@ -249,24 +266,35 @@ navbar > nav.main-nav {
     display: none;
   }
 
-  navbar > nav.main-nav.navbar-icons-only .nav.navbar-nav li a .navitem-label {
+  navbar > nav.main-nav-menu.navbar-icons-only .nav.navbar-nav li a .navitem-label {
     display: inline-block;
+  }
+
+  #navbar {
+    display: none;
   }
 
   #navbar[aria-expanded="true"] {
     display: block;
     position: fixed;
-    top: 72px;
+    top: $page-header-height;
     left: 0px;
     width: 100vw;
     margin: 0px;
+    z-index: 1030;
+    height: auto !important;
 
-    > navigation > ul.nav.navbar-nav {
+    navigation > ul.nav.navbar-nav {
       width: 100%;
       position: relative;
-      margin: 0 -15px;
+      margin: 0;
       top: 0;
       background-color: $main-nav-background-color;
+
+      .navitem-label {
+        display: inline-block;
+      }
+      
 
       li.navitem-bottom {
         position: relative;
@@ -279,16 +307,13 @@ navbar > nav.main-nav {
     display: none;
   }
 
-  navbar > nav.main-nav {
-    background-color: transparent;
-    z-index: 1030;
-    
+  navbar > nav.main-nav-header {
     .navbar-header {
       > button {
-        height: $main-nav-title-height;
+        height: $page-header-height;
         margin: 0;
         padding: 0;
-        line-height: $main-nav-title-height;
+        line-height: $page-header-height;
         position: absolute;
         text-align: center;
         width: $main-nav-icons-width;
@@ -304,15 +329,6 @@ navbar > nav.main-nav {
           color: $hpe-primary;
         }
       }
-
-      width: 100%;
-      background-color: transparent;
-      height: $main-nav-title-height;
     }
-
-  }
-
-  .navbar-brand {
-    display: none;
   }
 }
