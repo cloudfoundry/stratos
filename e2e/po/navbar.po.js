@@ -28,8 +28,9 @@
   }
 
   function logout() {
-    return goToView('logout').then(function () {
-      browser.driver.sleep(100);
-    });
+    return element(by.id('navbar-item-logout'))
+      .click().then(function () {
+        browser.driver.sleep(100);
+      });
   }
 })();
