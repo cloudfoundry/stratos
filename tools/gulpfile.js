@@ -13,6 +13,7 @@
   var plumber = require('gulp-plumber');
   var rename = require('gulp-rename');
   var runSequence = require('run-sequence');
+  var autoprefixer = require('gulp-autoprefixer');
   var sass = require('gulp-sass');
   var sh = require('shelljs');
   var browserSync = require('browser-sync').create();
@@ -168,6 +169,7 @@
         }
       })))
       .pipe(sass())
+      .pipe(autoprefixer({browsers: ['last 2 versions'], cascade: false}))
       .pipe(gulp.dest(paths.dist));
   });
 
