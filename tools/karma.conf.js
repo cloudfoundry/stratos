@@ -73,7 +73,7 @@
           if (filePath.indexOf('src/') === 0) {
             return filePath.substr(4);
           } else if (filePath.indexOf('framework/src/') === 0) {
-            return filePath .substr(13);
+            return filePath.substr(14);
           } else {
             return filePath;
           }
