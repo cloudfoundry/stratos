@@ -8,28 +8,51 @@
     showHcfEndpoints: showHcfEndpoints,
     goToHcfEndpoints: goToHcfEndpoints,
     isHcfEndpoints: isHcfEndpoints,
+    isHcfOganizationsDetails: isHcfOganizationsDetails,
     getTiles: getTiles,
     isTileConnected: isTileConnected,
     getTileTitle: getTileTitle,
     getTileActionMenu: getTileActionMenu,
     headerRegister: headerRegister,
     headerRegisterVisible: headerRegisterVisible,
-    inlineRegister: inlineRegister
+    inlineRegister: inlineRegister,
+    getBreadcrumb: getBreadcrumb,
+    clickBreadcrumb: clickBreadcrumb,
+    isEndpoints: isEndpoints
   };
 
   function showHcfEndpoints() {
-    return endpointDashboard.showEndpoints().then(function () {
-      return endpointDashboard.getCloudFoundryTile().click();
-    });
+    return endpointDashboard.showHcfEndpoints();
   }
 
   function goToHcfEndpoints() {
     return browser.get(helpers.getHost() + '/#/endpoint/cluster');
   }
 
+  function isEndpoints() {
+    return browser.getCurrentUrl().then(function (url) {
+      return expect(url).toBe(helpers.getHost() + '/#/endpoint');
+    });
+  }
+
   function isHcfEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
-      return expect(url).toBe(helpers.getHost() + '/#/endpoint/cluster');
+      return expect(url).toBe(helpers.getHost() + '/#/endpoint/cluster/list');
+    });
+  }
+
+  function getBreadcrumb(index) {
+    return element(by.repeater('step in steps').row(index));
+  }
+
+  function clickBreadcrumb(index) {
+    return getBreadcrumb(index).click();
+  }
+
+  function isHcfOganizationsDetails() {
+    browser.debugger();
+    return browser.getCurrentUrl().then(function (url) {
+      return expect(url).toMatch(helpers.getHost() + '/#/endpoint/.*/organizations');
     });
   }
 

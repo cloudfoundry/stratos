@@ -9,9 +9,9 @@
 
     credentialsForm: credentialsForm,
     credentialsFormFields: credentialsFormFields,
-    connectButton: connectButton,
-    cancel: cancel,
-    fillCredentialsForm: fillCredentialsForm,
+    credentialsFormConnectButton: connectButton,
+    credentialsFormCancel: cancel,
+    credentialsFormFill: fillCredentialsForm,
     connect: connect
   };
 

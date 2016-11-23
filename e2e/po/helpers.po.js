@@ -63,8 +63,9 @@
     forceDate: forceDate,
     resetDate: resetDate,
 
-    getCnsiForUrl: getCnsiForUrl
+    getCnsiForUrl: getCnsiForUrl,
 
+    hasClass: hasClass
   };
 
   function getHost() {
@@ -105,7 +106,7 @@
 
   function loadApp() {
     browser.manage().deleteAllCookies();
-    browser.get(host);
+    return browser.get(host);
   }
 
   function setBrowserNormal() {
@@ -386,6 +387,13 @@
       }
     }
     return null;
+  }
+
+  function hasClass(element, cls) {
+    return element.getAttribute('class')
+      .then(function (classes) {
+        return classes.split(' ').indexOf(cls) !== -1;
+      });
   }
 
 })();

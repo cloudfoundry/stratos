@@ -2,11 +2,26 @@
   'use strict';
 
   module.exports = {
+    isSingleButton: isSingleButton,
+    getSingleButton: getSingleButton,
+    getSingleButtonText: getSingleButtonText,
     getItems: getItems,
     getItemText: getItemText,
     clickItem: clickItem,
     click: click
   };
+
+  function isSingleButton(actionMenu) {
+    return actionMenu.element(by.css('.action-button')).isDisplayed();
+  }
+
+  function getSingleButton(actionMenu) {
+    return actionMenu.element(by.css('.action-button a'));
+  }
+
+  function getSingleButtonText(actionMenu) {
+    return actionMenu.element(by.css('.action-button a span')).getText();
+  }
 
   function getItems(actionMenu) {
     return actionMenu.all(by.repeater('action in actionsMenuCtrl.actions'));
