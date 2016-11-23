@@ -13,3 +13,5 @@ tools/.coverage-karma/
 tools/dev_config.json
 translations/js
 translations/**/*.mo
+oem/scss
+oem/tmp

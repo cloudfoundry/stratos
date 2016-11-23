@@ -45,6 +45,9 @@
     overrides: config.bower.overrides
   });
 
+  var oem = require('./oem.gulp.js');
+  oem(config);
+
   // Clear the 'dist' folder
   gulp.task('clean:dist', function (next) {
     del(paths.dist + '**/*', {force: true}, next);
@@ -290,6 +293,7 @@
       'copy:html',
       'copy:assets',
       'inject:index',
+      'oem',
       next
     );
   });
@@ -316,6 +320,7 @@
       'copy:html',
       'copy:assets',
       'inject:index',
+      'oem',
       next
     );
   });

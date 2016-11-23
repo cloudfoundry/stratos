@@ -47,3 +47,19 @@ if [ -d ${BRAND_FOLDER}/images ]; then
   echo "Copying brand images"
   cp -rf ${BRAND_FOLDER}/images/*.* ${DEST_FOLDER}/images
 fi
+
+echo "Compiling stylesheet"
+
+rm -rf ./tmp
+mkdir ./tmp
+
+if [ -f ${BRAND_FOLDER}/brand.scss ]; then
+  echo "@import \"${BRAND_FOLDER}/brand.scss\";" >> ./tmp/index.scss
+fi
+
+echo "@import \"../scss/index.scss\";" >> ./tmp/index.scss
+
+gulp oem
+cp ./tmp/index.css ${DEST_FOLDER}
+
+#rm -rf tmp

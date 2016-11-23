@@ -8,7 +8,8 @@
       src: '../src/',
       translations: '../translations/',
       tools: '../tools/',
-      e2e: '../e2e/'
+      e2e: '../e2e/',
+      oem: '../oem/'
     };
 
     return {
