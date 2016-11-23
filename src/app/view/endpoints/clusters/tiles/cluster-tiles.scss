@@ -34,11 +34,6 @@
       &:first-of-type {
         padding-left: $hpe-unit-space / 2;
       }
-
-      //// No way to hide current location in angular-breadcrumbs, do this via css
-      //&:last-of-type {
-      //  display: none;
-      //}
     }
   }
 }
