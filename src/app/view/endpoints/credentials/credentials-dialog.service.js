@@ -20,7 +20,7 @@
       show: function (context) {
         return detailView(
           {
-            templateUrl: 'app/view/service-registration/credentials/credentials-dialog.html',
+            templateUrl: 'app/view/endpoints/credentials/credentials-dialog.html',
             class: 'detail-view-thin'
           },
           context

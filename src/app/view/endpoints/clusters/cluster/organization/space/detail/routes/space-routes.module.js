@@ -16,7 +16,7 @@
       controller: SpaceRoutesController,
       controllerAs: 'spaceRoutesCtrl',
       ncyBreadcrumb: {
-        label: '{{ clusterSpaceController.space().details.entity.name || "..." }}',
+        label: '{{ clusterSpaceController.space().details.space.entity.name || "..." }}',
         parent: function () {
           return 'endpoint.clusters.cluster.organization.detail.spaces';
         }

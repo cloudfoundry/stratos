@@ -2,7 +2,7 @@
 
 .cluster-tiles {
   .header {
-    margin-bottom: $hpe-unit-space*2;
+    margin-bottom: $hpe-unit-space;
   }
   .clusters-card {
     min-height: 250px;
@@ -13,6 +13,27 @@
       width: 564px;
       min-width: 564px;
       max-width: 564px;
+    }
+  }
+}
+
+.cluster-breadcrumb {
+  //width: 100%;
+  margin-top: 1px;
+
+  &.breadcrumb {
+    //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
+    margin-left: -15px;
+    width: calc(100% + 30px);
+
+    li {
+      text-transform: none;
+      font-weight: inherit;
+
+      //TODO (TEAMFOUR-778): Long term fix for position + home of endpoints breadcrumbs
+      &:first-of-type {
+        padding-left: $hpe-unit-space / 2;
+      }
     }
   }
 }

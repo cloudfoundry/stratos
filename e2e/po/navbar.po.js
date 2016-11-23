@@ -4,6 +4,7 @@
   // Navbar helpers
   module.exports = {
 
+    navBarElement: navBarElement,
     goToView: goToView,
 
     accountActionsButton: accountActionsButton,
@@ -12,6 +13,10 @@
     logout: logout
 
   };
+
+  function navBarElement() {
+    return element(by.css('navigation'));
+  }
 
   function goToView(viewName) {
     return element(by.css('navigation'))

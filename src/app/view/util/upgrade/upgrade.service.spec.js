@@ -191,7 +191,7 @@
           expect(applicationCtrl.failedLogin).toBe(false);
           expect(applicationCtrl.serverErrorOnLogin).toBe(false);
           expect(applicationCtrl.serverFailedToRespond).toBe(false);
-          expect($state.current.name).toBe('cf.applications.list.gallery-view');
+          expect($state.current.name).toBe('endpoint.dashboard');
         });
 
         it('503 is not an upgrade', function () {
@@ -199,15 +199,15 @@
           $httpBackend.expectGET('/pp/v1/cnsis/test');
           $http.get('/pp/v1/cnsis/test');
           $httpBackend.flush();
-          expect($state.current.name).toBe('cf.applications.list.gallery-view');
+          expect($state.current.name).toBe('endpoint.dashboard');
         });
 
-        it('503 is not an protal proxy request', function () {
+        it('503 is not an portal proxy request', function () {
           $httpBackend.when('GET', '/github/v1/cnsis/test').respond(503, {}, {});
           $httpBackend.expectGET('/github/v1/cnsis/test');
           $http.get('/github/v1/cnsis/test');
           $httpBackend.flush();
-          expect($state.current.name).toBe('cf.applications.list.gallery-view');
+          expect($state.current.name).toBe('endpoint.dashboard');
         });
 
         it('503 is upgrade', function () {

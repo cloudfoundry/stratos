@@ -1,30 +1,17 @@
-@import "tiles/service-tile";
-
-.endpoints-dashboard {
-  $gallery-card-side-margins: 30px;
-  $gallery-card-max-width: 400px;
-  $gallery-card-layout-steps: 4;
-
-  .action-header{
-    position: relative;
-    padding-top: $hpe-unit-space;
-    button{
-      position: absolute;
-      top: $hpe-unit-space;
-      right: $hpe-unit-space;
-    }
-  }
-  .tile-btn {
-    text-transform: capitalize;
-    font-size: 16px;
-    font-weight: 600;
-  }
-
-  @for $i from 1 through $gallery-card-layout-steps {
-    @media (min-width: $gallery-card-side-margins + $i * $gallery-card-max-width) {
-      .endpoint-tile.col-md-4.col-sm-1 {
-        width: percentage(1/$i);
+.endpoints {
+  &.endpoints-dashboard {
+    .action-header {
+      position: relative;
+      padding-top: $hpe-unit-space;
+      button {
+        position: absolute;
+        top: $hpe-unit-space;
+        right: $hpe-unit-space;
       }
+    }
+
+    .empty-view-message {
+      padding-top: $hpe-unit-space;
     }
   }
 }
