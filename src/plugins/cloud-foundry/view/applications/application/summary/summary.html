@@ -1,4 +1,26 @@
+<div id="new-app-panel" ng-if="applicationSummaryCtrl.newlyCreated" class="new-app-panel">
+  <div class="new-app-title-box">
+    <span class="new-app-okay helion-icon helion-icon-lg helion-icon-Active_L text-primary"></span>
+    <span class="new-app-headline" translate>Your application has been created.</span>
+    <button type="button" class="close helion-icon helion-icon-Close"
+      ng-click="applicationSummaryCtrl.newlyCreated = false">
+    </button>
+  </div>
+  <div class="new-app-nextsteps" ng-if="appCtrl.ready && (applicationSummaryCtrl.canSetupPipeline || !applicationSummaryCtrl.hideManageServices)">
+    <span translate>You may want to:</span>
+    <ul>
+      <li ng-if="applicationSummaryCtrl.canSetupPipeline" >
+        <a id="new-app-setup-pipeline" translate ui-sref="cf.applications.application.delivery-pipeline({guid: appCtrl.id, showSetup: true})">Setup a Delivery Pipeline for your application</a>
+      </li>
+      <li ng-if="!applicationSummaryCtrl.hideManageServices">
+        <a id="new-app-add-services" translate ui-sref="cf.applications.application.services({guid: appCtrl.id})">Add services to your application</a>
+       </li>
+    </ul>
+  </div>
+</div>
+
 <div class="panel panel-default summary" ng-init="applicationSummaryCtrl.appCtrl = appCtrl">
+
   <div class="panel-heading action-header">
     <span translate>Summary</span>
     <a class="btn btn-link" ng-click="applicationSummaryCtrl.editApp()" ng-hide="applicationSummaryCtrl.hideEditApp">

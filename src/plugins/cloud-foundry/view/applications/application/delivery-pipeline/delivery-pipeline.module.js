@@ -12,6 +12,9 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.delivery-pipeline', {
       url: '/delivery-pipeline',
+      params: {
+        showSetup: false
+      },
       templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-pipeline/delivery-pipeline.html',
       controller: ApplicationDeliveryPipelineController,
       controllerAs: 'applicationDeliveryPipelineCtrl'
@@ -25,6 +28,7 @@
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
     'app.utils.utilsService',
+    'helion.framework.widgets.detailView',
     '$interpolate',
     '$stateParams',
     '$scope',
@@ -41,6 +45,7 @@
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
    * @param {app.utils.utilsService} utils - the console utils service
+   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
@@ -48,8 +53,9 @@
    * @param {object} $state - the UI router $state service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
+   * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, $interpolate, $stateParams, $scope, $q, $state) {
+  function ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, detailView, $interpolate, $stateParams, $scope, $q, $state) {
     var that = this;
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
@@ -59,6 +65,7 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.detailView = detailView;
 
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
@@ -95,6 +102,10 @@
     }
 
     utils.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
+
+    if ($stateParams.showSetup) {
+      this.setupPipeline();
+    }
 
     this.notificationTargetActions = [
       {
@@ -166,6 +177,18 @@
   }
 
   angular.extend(ApplicationDeliveryPipelineController.prototype, {
+
+    /**
+     * @name setupPipeline
+     * @description Show the delivvery pipeline workflow in a slide-in
+     **/
+    setupPipeline: function () {
+      this.detailView(
+        {
+          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
+        }
+      );
+    },
 
     deletePipeline: function () {
       var that = this;

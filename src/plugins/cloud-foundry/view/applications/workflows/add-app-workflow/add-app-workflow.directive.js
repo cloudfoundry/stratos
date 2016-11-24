@@ -571,13 +571,11 @@
 
         var params = {
           cnsiGuid: this.userInput.serviceInstance.guid,
-          guid: this.userInput.application.summary.guid
+          guid: this.userInput.application.summary.guid,
+          newlyCreated: true
         };
-        if (this.userInput.projectId) {
-          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.delivery-logs', params);
-        } else {
-          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.summary', params);
-        }
+
+        this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.summary', params);
       },
 
       startWorkflow: function () {
