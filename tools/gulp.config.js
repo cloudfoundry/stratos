@@ -82,6 +82,7 @@
         paths.src + '*.js',
         paths.src + 'app/**/*.js',
         paths.src + 'plugins/**/*.js',
+        '!' + paths.src + 'config.js',
         '!' + paths.src + 'app/**/*.mock.js',
         '!' + paths.src + 'app/**/*.spec.js',
         '!' + paths.src + 'plugins/**/*.mock.js',
