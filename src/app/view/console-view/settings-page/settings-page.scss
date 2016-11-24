@@ -1,3 +1,7 @@
+$about-title-font-size: 24px;
+$about-color-bg: $page-footer-color-bg;
+$about-color-fg: $page-footer-color-fg;
+
 .cluster-settings.user-summary {
   .cluster.row {
     margin: 0;
@@ -78,7 +82,55 @@
     :after {
       clear: both;
     }
+  }
+}
 
+.about-panel {
+  .cluster-settings.user-summary.about-summary {
+    .about-title {
+      background: $about-color-bg;
+      color: $about-color-fg;
+      height: $hpe-unit-space * 3;
+      line-height: $hpe-unit-space * 3;
+      padding: 0 10px;
+      font-size: $about-title-font-size;
+    }
+  }
 
+  .cluster.row {
+    box-shadow: none;
+    border: 0;
+
+    &:last-child {
+      margin: 0;
+      padding: $hpe-unit-space 0;
+    }
+  }
+
+  page-footer {
+    .copyright {
+      width: auto;
+      bottom: $hpe-unit-space * 2;
+    }
+
+    .links {
+      left: 0;
+      right: initial;
+      bottom: $hpe-unit-space * .75;
+
+      li:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+}
+
+@media(max-width: 560px) {
+  .about-panel {
+    page-footer {
+      .helion-logo {
+        display: none;
+      }
+    }
   }
 }
