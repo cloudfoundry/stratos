@@ -138,9 +138,9 @@
             url: utilsService.getClusterEndpoint(serviceInstance),
             actionsTarget: serviceInstance
           };
-        } else {
-          console.log('Reusing endpoint from array');
+          endpoints.push(endpoint);
         }
+        activeEndpoints.push(endpoint.key);
 
         endpoint.actions = _createInstanceActions(endpoints, isValid, hasExpired);
         endpoint.visit = isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
@@ -174,10 +174,6 @@
             message: gettext('The Console has no credentials for this endpoint. Connect to resolve this problem.'),
             status: 'info'
           };
-        }
-        activeEndpoints.push(endpoint);
-        if (!reuse) {
-          endpoints.push(endpoint);
         }
       });
       return activeEndpoints;
@@ -265,7 +261,6 @@
             that.dialog = undefined;
           }
           updateInstances().then(function () {
-            console.log('onConnectSuccess: after updateInstances');
             updateInstancesCache(endpoints);
             switch (serviceInstance.cnsi_type) {
               case 'hcf':
@@ -273,13 +268,11 @@
                 authModel.initializeForEndpoint(serviceInstance.guid);
                 break;
               case 'hce':
-                console.log('onConnectSuccess: hce case');
                 var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
                 vcsModel.listVcsClients().then(function (res) {
-                  console.log('onConnectSuccess: listVcsClients', res);
                   _.forEach(res, function (aVcs) {
-                    console.log('onConnectSuccess: aVcs', aVcs);
                     if (aVcs.browse_url === 'https://github.com') {
+
                       var goodToken = vcsModel.registerVcsToken(aVcs.guid, 'Julbra', '3b6440a73c2c601c25e96f315cb8661d9a1fb56e')
                         .then(function (res) {
                           console.log('Register response!', res);

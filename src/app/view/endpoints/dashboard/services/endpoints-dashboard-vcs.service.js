@@ -24,6 +24,7 @@
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     var validTokens = {};
+    var validCheckInFlight = false;
     var endpointPrefix = 'vcs_';
 
     return {
@@ -74,8 +75,8 @@
     }
 
     function _checkTokensValidity() {
-      console.log('checkTokensValidity');
       var promises = [];
+      validCheckInFlight = true;
       for (var i = 0; i < vcsModel.vcsTokens.length; i++) {
         var vcsToken = vcsModel.vcsTokens[i];
         var check = vcsModel.checkVcsToken(vcsToken.token.guid).then(function (res) {
@@ -87,11 +88,26 @@
         });
         promises.push(check);
       }
-      return $q.all(promises);
+      // Cleanup stale tokens
+      for (var tokenGuid in validTokens) {
+        if (!validTokens.hasOwnProperty(tokenGuid)) { continue; }
+        if (!_.find(vcsModel.vcsTokens, function (token) {
+            return token.token.guid === tokenGuid;
+          })) {
+          delete validTokens[tokenGuid];
+        }
+      }
+      return $q.all(promises).finally(function () {
+        validCheckInFlight = false;
+      });
     }
 
     function getStatus(vcsGuid) {
       return function () {
+
+        if (validCheckInFlight) {
+          return 'unconnected';
+        }
 
         var filtered = _.filter(vcsModel.vcsTokens, function (token) {
           return token.vcs.guid === vcsGuid;
@@ -128,7 +144,7 @@
      * @public
      */
     function createEndpointEntries(endpoints) {
-      var added = [];
+      var activeEndpoints = [];
       // Create or update the generic 'endpoint' object used to populate the dashboard table
       _.forEach(vcsModel.vcsClients, function (vcs) {
         var endpoint = _.find(endpoints, function (e) { return e.guid === vcs.guid; });
@@ -140,20 +156,17 @@
             connected: 'unconnected',
             getStatus: getStatus(vcs.guid)
           };
+          endpoints.push(endpoint);
         }
+        activeEndpoints.push(endpoint.key);
+
         endpoint.name = vcs.label;
         endpoint.type = gettext(vcs.vcs_type);
         endpoint.url = vcs.browse_url;
         endpoint.actionsTarget = vcs;
         endpoint.actions = _createInstanceActions(endpoints);
-
-        if (!reuse) {
-          endpoints.push(endpoint);
-        }
-
-        added.push(endpoint.guid);
       });
-      return added;
+      return activeEndpoints;
     }
 
     /**

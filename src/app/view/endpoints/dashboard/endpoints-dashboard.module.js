@@ -58,8 +58,8 @@
 
     /*
      * Call method on all service providers, forwarding the passed arguments
-     * If the called method returns a promise, we return a Q.all() on all the returned promises
-     * Otherwise we return an array of returned values
+     * If the called method returns a promise, we return a $q.all() on all the returned promises,
+     * otherwise we return an array of the returned values
      * */
     function callForAllProviders(method) {
       Array.prototype.shift.apply(arguments);
@@ -83,7 +83,7 @@
           if (isPromise === null) {
             isPromise = false;
           } else if (isPromise) {
-            throw new Error('callForAllProviders: Cannot mix promise and value returning');
+            throw new Error('callForAllProviders: Cannot mix promise and value returning functions');
           }
           values.push(ret);
         }
@@ -174,8 +174,20 @@
       return false;
     }
 
+    function _cleanupStaleEndpoints(activeEndpoints) {
+      for (var i = that.endpoints.length - 1; i >= 0; i--) {
+        var endpoint = that.endpoints[i];
+        if (activeEndpoints.indexOf(endpoint.key) < 0) {
+          console.log('Deleting stale endpoint: ' + endpoint.name);
+          that.endpoints.splice(i, 1);
+        }
+      }
+    }
+
     function _updateEndpointsFromCache() {
-      var activeEndpoints = callForAllProviders('createEndpointEntries', that.endpoints);
+      var activeEndpoints = _.flatten(callForAllProviders('createEndpointEntries', that.endpoints));
+      _cleanupStaleEndpoints(activeEndpoints);
+
       if (!that.initialised) {
         // Show welcome message only if this is the first time around and there no endpoints
         _updateWelcomeMessage();
