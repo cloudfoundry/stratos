@@ -242,6 +242,7 @@
 
   // Generate the POT file to be translated
   gulp.task('translate:extract', function () {
+    //TODO: Need to include framework templates + js
     var sources = config.partials
       .concat(config.jsSourceFiles);
 
@@ -265,8 +266,10 @@
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
     gulp.watch(scssFiles, ['css', callback]);
     gulp.watch(partials, ['copy:html', callback]);
+    gulp.watch(config.frameworkTemplates, ['copy:framework:templates', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
     gulp.watch(jsLibs, {interval: 1000, usePoll: true}, ['copy:framework:js', callback]);
+
   });
 
   gulp.task('browsersync', function (callback) {
