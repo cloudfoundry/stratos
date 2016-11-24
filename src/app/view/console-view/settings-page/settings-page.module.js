@@ -65,7 +65,7 @@
   angular.extend(UserSettings.prototype, {
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('account-settings', 'account-settings', gettext('Settings'), 99, 'helion-icon-User_settings');
+      menu.addMenuItem('account-settings', 'account-settings', gettext('About'), 99, 'helion-icon-Unknown_L');
     }
   });
 
