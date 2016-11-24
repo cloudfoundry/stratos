@@ -65,6 +65,10 @@
     function createController() {
       var ApplicationDeliveryPipelineController = $state.get('cf.applications.application.delivery-pipeline').controller;
 
+      var detailView = function () {
+        return {};
+      };
+
       var confirmDialog = function () {
         return {
           result: {
@@ -103,7 +107,7 @@
         $emit: angular.noop
       };
 
-      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, $interpolate, $stateParams, $rootScope.$new(), $q, $state);
+      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, detailView, $interpolate, $stateParams, $rootScope.$new(), $q, $state);
       expect(controller).toBeDefined();
     }
 

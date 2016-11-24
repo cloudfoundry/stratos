@@ -198,6 +198,7 @@
           hideStepNavStack: true,
           allowJump: false,
           allowBack: false,
+          allowCancelAtLastStep: true,
           title: gettext('Add Application'),
           btnText: {
             cancel: gettext('Cancel')
@@ -232,7 +233,6 @@
                       var preSelectedService = _.find(that.options.serviceInstances, { value: { guid: that.appModel.filterParams.cnsiGuid}}) || {};
                       that.options.userInput.serviceInstance = preSelectedService.value;
                     }
-
                   });
               },
               onNext: function () {
