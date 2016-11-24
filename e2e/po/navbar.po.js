@@ -28,9 +28,12 @@
   }
 
   function logout() {
-    return element(by.id('navbar-item-logout'))
+    return element(by.id('navbar-user-menu-dropdown'))
       .click().then(function () {
         browser.driver.sleep(100);
+        return element(by.id('navbar-item-logout')).click().then(function () {
+          browser.driver.sleep(100);
+        });
       });
   }
 })();

@@ -3,6 +3,8 @@
 $main-nav-background-color: #444;
 $main-nav-item-height: 52px;
 $main-nav-item-active-bg-color: #737373;
+$user-avatar-size: 48px;
+$user-avatar-image-size: 36px;
 
 // Nav Bar Header
 
@@ -332,4 +334,43 @@ navbar > .main-nav-menu {
       }
     }
   }
+}
+
+// User Avatar
+
+div.user-avatar {
+  position: absolute;
+  right: 24px;
+  height: $user-avatar-size;
+  top: ($page-header-height - $user-avatar-size) / 2;
+  width: $user-avatar-size;
+
+  .actions-menu.dropdown {
+    height: $user-avatar-size;
+    width: $user-avatar-size;
+
+    &.open {
+      background-color: $hpe-primary;
+    }
+  }
+
+  ul.actions-menu-list.dropdown-menu {
+    top: $page-header-height;
+    margin-top: 0;
+  }
+
+  img.user-avatar {
+    position: absolute;
+    right: ($user-avatar-size - $user-avatar-image-size) / 2;
+    top: ($user-avatar-size - $user-avatar-image-size) / 2;;
+    border-radius: $user-avatar-image-size / 2;
+    border: 1px solid #777;
+    height: $user-avatar-image-size;
+    width: $user-avatar-image-size;
+
+    &:hover {
+      border-color: $hpe-primary;
+    } 
+  }
+  
 }
