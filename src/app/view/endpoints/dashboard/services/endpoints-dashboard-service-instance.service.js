@@ -135,16 +135,17 @@
             key: eKey,
             name: serviceInstance.name,
             type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine'),
-            visit: isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
-              return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
-            } : undefined,
             url: utilsService.getClusterEndpoint(serviceInstance),
-            actions: _createInstanceActions(endpoints, isValid, hasExpired),
             actionsTarget: serviceInstance
           };
         } else {
           console.log('Reusing endpoint from array');
         }
+
+        endpoint.actions = _createInstanceActions(endpoints, isValid, hasExpired);
+        endpoint.visit = isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
+          return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
+        } : undefined;
 
         endpoint.getStatus = isValid ? function () {
           return 'connected';

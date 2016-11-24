@@ -92,7 +92,7 @@
 
     function getStatus(vcsGuid) {
       return function () {
-        console.log('getStatus');
+
         var filtered = _.filter(vcsModel.vcsTokens, function (token) {
           return token.vcs.guid === vcsGuid;
         });
@@ -108,6 +108,7 @@
           allValid = allValid && !!validTokens[tokenGuid];
           allInvalid = allInvalid && !validTokens[tokenGuid];
         }
+
         if (allValid) {
           return 'connected';
         }

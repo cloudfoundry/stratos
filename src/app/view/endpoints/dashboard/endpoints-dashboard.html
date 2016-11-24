@@ -84,7 +84,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints"
+        <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints track by endpoint.key"
             show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
             table-inline-status="{{endpoint.error.status}}">
           <td ng-if="endpoint.visit" class="text-uppercase">
@@ -100,6 +100,8 @@
                   ng-switch-when="expired"></span>
             <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
                   ng-switch-when="error"></span>
+            <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
+                  ng-switch-when="complicated"></span>
           </td>
           <td class="text-uppercase">{{endpoint.type}}</td>
           <td>{{endpoint.url}}</td>
