@@ -30,7 +30,6 @@
   AddPipelineWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
-    'github.view.githubOauthService',
     'app.utils.utilsService',
     '$scope',
     '$q',
@@ -44,7 +43,6 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
-   * @param {object} githubOauthService - github oauth service
    * @param {app.utils.utilsService} utils - the utils service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
@@ -52,7 +50,6 @@
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
-   * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {app.utils.utilsService} utils - the utils service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -60,10 +57,9 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, utils, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, eventService, utils, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
     this.eventService = eventService;
-    this.githubOauthService = githubOauthService;
     this.utils = utils;
     this.$scope = $scope;
     this.$q = $q;

@@ -2,8 +2,7 @@
   'use strict';
 
   describe('trigger build service', function () {
-    var promise, dialogContext, $controller, $q, modelManager, hceModel, $httpBackend, $uibModalInstance,
-      githubOauthService, $timeout;
+    var promise, dialogContext, $controller, $q, modelManager, hceModel, $httpBackend, $uibModalInstance, $timeout;
 
     var cnsi = 1234;
     var project = {
@@ -55,7 +54,6 @@
       hceModel.data.vcsInstance = vcsInstance;
 
       $uibModalInstance = jasmine.createSpyObj('$uibModalInstance', ['close', 'dismiss']);
-      githubOauthService = $injector.get('github.view.githubOauthService');
 
       var triggerBuild = $injector.get('triggerBuildDetailView');
       promise = triggerBuild.open(project, cnsi);
@@ -72,8 +70,7 @@
       describe('open', function () {
         it('Plumbing / Initial state', function () {
           /* eslint-disable no-new */
-          new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
-            githubOauthService);
+          new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager);
           /* eslint-enable no-new */
           expect(dialogContext.project).toEqual(project);
           expect(dialogContext.guid).toEqual(cnsi);
@@ -85,8 +82,8 @@
       var controller;
 
       beforeEach(function () {
-        controller = new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
-          githubOauthService);
+        // FIXME: this needs to be updated
+        controller = new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager);
         expect(controller).toBeDefined();
         expect(controller.selectedCommit).not.toBeDefined();
         expect(controller.fetchError).not.toBeDefined();

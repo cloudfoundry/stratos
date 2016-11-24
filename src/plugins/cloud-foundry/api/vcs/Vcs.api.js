@@ -7,11 +7,12 @@
 
   registerVcsApi.$inject = [
     '$http',
+    '$httpParamSerializer',
     'app.api.apiManager'
   ];
 
-  function registerVcsApi($http, apiManager) {
-    apiManager.register('cloud-foundry.api.Vcs', new VcsApi($http));
+  function registerVcsApi($http, $httpParamSerializer, apiManager) {
+    apiManager.register('cloud-foundry.api.Vcs', new VcsApi($http, $httpParamSerializer));
   }
 
   /**
@@ -22,8 +23,9 @@
    * @property {string} vcsApiUrl - the VCS API endpoint
    * @class
    */
-  function VcsApi($http) {
+  function VcsApi($http, $httpParamSerializer) {
     this.$http = $http;
+    this.$httpParamSerializer = $httpParamSerializer;
     this.vcsApiUrl = '/pp/v1/vcs/';
   }
 
@@ -38,7 +40,46 @@
     listVcsClients: function () {
       var url = this.vcsApiUrl + 'clients';
       return this.$http.get(url);
+    },
+
+    registerVcsToken: function (vcsGuid, tokenName, tokenValue) {
+      var url = this.vcsApiUrl + 'pat';
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var data = this.$httpParamSerializer({
+        name: tokenName,
+        vcs_guid: vcsGuid,
+        token: tokenValue
+      });
+      return this.$http.post(url, data, config);
+    },
+
+    renameVcsToken: function (tokenGuid, tokenName) {
+      var url = this.vcsApiUrl + 'pat/' + tokenGuid;
+      var config = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      };
+      var data = this.$httpParamSerializer({name: tokenName});
+      return this.$http.put(url, data, config);
+    },
+
+    checkVcsToken: function (tokenGuid) {
+      return this.$http.get(this.vcsApiUrl + 'pat/' + tokenGuid + '/check');
+    },
+
+    deleteVcsToken: function (tokenGuid) {
+      return this.$http.delete(this.vcsApiUrl + 'pat/' + tokenGuid);
+    },
+
+    listVcsTokens: function () {
+      return this.$http.get(this.vcsApiUrl + 'pat');
     }
+
   });
 
 })();

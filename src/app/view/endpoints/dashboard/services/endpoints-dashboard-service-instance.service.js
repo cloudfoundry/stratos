@@ -3,9 +3,9 @@
 
   angular
     .module('app.view.endpoints.dashboard')
-    .factory('app.view.endpoints.dashboard.serviceInstanceService', serviceInstanceServiceFactory);
+    .factory('app.view.endpoints.dashboard.cnsiService', cnsiServiceFactory);
 
-  serviceInstanceServiceFactory.$inject = [
+  cnsiServiceFactory.$inject = [
     '$q',
     '$state',
     '$interpolate',
@@ -20,7 +20,7 @@
   /**
    * @namespace app.view.endpoints.dashboard
    * @memberOf app.view.endpoints.dashboard
-   * @name serviceInstanceService
+   * @name cnsiService
    * @description provide functionality to support cnsi service instances (cnsisi..) in the endpoints dashboard
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
@@ -33,7 +33,7 @@
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @returns {object} the service instance service
    */
-  function serviceInstanceServiceFactory($q, $state, $interpolate, modelManager, utilsService, errorService,
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, utilsService, errorService,
                                          notificationsService, credentialsDialog, confirmDialog) {
     var that = this;
 
@@ -103,12 +103,7 @@
      * @public
      */
     function updateInstancesCache(endpoints) {
-      // First remove any stale data. Any digests should be unaffected by flip-flopping as this is all sync
-      _.remove(endpoints, function (endpoint) {
-        return endpoint.key.indexOf(endpointPrefix) === 0;
-      });
-
-      Array.prototype.push.apply(endpoints, createEndpointEntries(endpoints));
+      return createEndpointEntries(endpoints);
     }
 
     /**
@@ -120,7 +115,7 @@
      * @public
      */
     function createEndpointEntries(endpoints) {
-      var serviceEndpoints = [];
+      var activeEndpoints = [];
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
 
@@ -132,17 +127,29 @@
           hasExpired = _.get(userServiceInstanceModel.serviceInstances[serviceInstance.guid], 'token_expiry');
         }
 
-        var endpoint = {
-          key: endpointPrefix + serviceInstance.guid,
-          name: serviceInstance.name,
-          connected: isValid ? 'connected' : 'unconnected',
-          type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine'),
-          visit: isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
-            return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
-          } : undefined,
-          url: utilsService.getClusterEndpoint(serviceInstance),
-          actions: _createInstanceActions(endpoints, isValid, hasExpired),
-          actionsTarget: serviceInstance
+        var eKey = endpointPrefix + serviceInstance.guid;
+        var endpoint = _.find(endpoints, function (e) { return e.key === eKey; });
+        var reuse = !!endpoint;
+        if (!reuse) {
+          endpoint = {
+            key: eKey,
+            name: serviceInstance.name,
+            type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine'),
+            visit: isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
+              return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
+            } : undefined,
+            url: utilsService.getClusterEndpoint(serviceInstance),
+            actions: _createInstanceActions(endpoints, isValid, hasExpired),
+            actionsTarget: serviceInstance
+          };
+        } else {
+          console.log('Reusing endpoint from array');
+        }
+
+        endpoint.getStatus = isValid ? function () {
+          return 'connected';
+        } : function () {
+          return 'unconnected';
         };
 
         //Error states
@@ -167,9 +174,12 @@
             status: 'info'
           };
         }
-        serviceEndpoints.push(endpoint);
+        activeEndpoints.push(endpoint);
+        if (!reuse) {
+          endpoints.push(endpoint);
+        }
       });
-      return serviceEndpoints;
+      return activeEndpoints;
     }
 
     /**
@@ -254,10 +264,85 @@
             that.dialog = undefined;
           }
           updateInstances().then(function () {
+            console.log('onConnectSuccess: after updateInstances');
             updateInstancesCache(endpoints);
-            if (serviceInstance.cnsi_type === 'hcf') {
-              // Initialise AuthModel for service
-              authModel.initializeForEndpoint(serviceInstance.guid);
+            switch (serviceInstance.cnsi_type) {
+              case 'hcf':
+                // Initialise AuthModel for service
+                authModel.initializeForEndpoint(serviceInstance.guid);
+                break;
+              case 'hce':
+                console.log('onConnectSuccess: hce case');
+                var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+                vcsModel.listVcsClients().then(function (res) {
+                  console.log('onConnectSuccess: listVcsClients', res);
+                  _.forEach(res, function (aVcs) {
+                    console.log('onConnectSuccess: aVcs', aVcs);
+                    if (aVcs.browse_url === 'https://github.com') {
+                      var goodToken = vcsModel.registerVcsToken(aVcs.guid, 'Julbra', '3b6440a73c2c601c25e96f315cb8661d9a1fb56e')
+                        .then(function (res) {
+                          console.log('Register response!', res);
+                        }, function (error) {
+                          console.log('Register failed! ', error);
+                        });
+
+                      var badToken = vcsModel.registerVcsToken(aVcs.guid, 'Julbra 2', '1b6440a73c2c601c25e96f315cb8661d9a1fb67f')
+                        .then(function (res) {
+                          console.log('Register response!', res);
+                        }, function (error) {
+                          console.log('Register failed! ', error);
+                        });
+
+                      $q.all([goodToken, badToken])
+                        .then(function () {
+                          return vcsModel.listVcsTokens();
+                        })
+                        .then(function (res) {
+                          console.log('List response!', res);
+                          _.forEach(res, function (tokenAndVcs) {
+                            var token = tokenAndVcs.token;
+                            console.log('Checking token!', token.name);
+                            vcsModel.checkVcsToken(token.guid).then(function (res) {
+                              console.log(token.name + ' valid? ', res.valid);
+                              if (!res.valid) {
+                                console.log('Renaming invalid token!');
+                                vcsModel.renameVcsToken(token.guid, token.name + '-invalid').then(function (res) {
+                                  console.log('Rename response ', res);
+                                  // console.log('Deleting invalid token!');
+                                  // vcsModel.deleteVcsToken(token.guid).then(function (res) {
+                                  //   console.log('Delete response ', res);
+                                  // }).catch(function (cause) {
+                                  //   console.log('Failed to delete token: ', cause);
+                                  // });
+                                }).catch(function (cause) {
+                                  console.log('Failed to rename token: ', cause);
+                                });
+                              }
+                            }).catch(function (cause) {
+                              console.log('Failed to check token: ' + token.name, cause);
+                            });
+                          });
+                          console.log('Checking bogus token!');
+                          vcsModel.checkVcsToken('invalid').then(function (res) {
+                            console.log('Bogus token valid? ', res.valid);
+                          }).catch(function (cause) {
+                            console.log('Failed to check bogus token: ', cause);
+                          });
+
+                          console.log('Deleting bogus token!');
+                          vcsModel.deleteVcsToken('invalid').then(function (res) {
+                            console.log('Delete bogus response ', res);
+                          }).catch(function (cause) {
+                            console.log('Failed to delete bogus token: ', cause);
+                          });
+                        });
+
+                    }
+                  });
+                }).catch(function (cause) {
+                  console.log('onConnectSuccess: hce ERROR: ', cause);
+                });
+                break;
             }
           });
         }

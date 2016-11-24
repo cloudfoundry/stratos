@@ -18,7 +18,6 @@
         this.modelManager = $injector.get('app.model.modelManager');
         this.eventService = $injector.get('app.event.eventService');
         this.$q = $injector.get('$q');
-        this.githubOauthService = $injector.get('github.view.githubOauthService');
         this.utils = $injector.get('app.utils.utilsService');
         this.$scope = $injector.get('$rootScope').$new();
         this.$timeout = $injector.get('$timeout');
@@ -194,54 +193,15 @@
           expect(this.instance.data.workflow).toBeDefined();
         });
 
-        it('step 1 - onNextCancel', function () {
-          var step = this.instance.data.workflow.steps[0];
-          expect(step).toBeDefined();
-          spyOn(this.instance.githubOauthService, 'cancel');
-          step.onNextCancel();
-          expect(this.instance.githubOauthService.cancel).toHaveBeenCalled();
-        });
-
         it('step 1 - onNext:GITHUB -> success -> failed', function () {
           var that = this.instance;
           var step = that.data.workflow.steps[0];
           that.userInput.source.vcs_type = 'GITHUB';
-          that.githubOauthService.start = function () {
-            return that.$q.resolve();
-          };
           that.getRepos = function () {
             return that.$q.reject();
           };
-          spyOn(that.githubOauthService, 'start').and.callThrough();
           var p = step.onNext();
           that.$scope.$apply();
-          expect(that.githubOauthService.start).toHaveBeenCalled();
-          expect(p.$$state.status).toBe(2);
-        });
-
-        it('step 1 - onNext -> success -> failed', function () {
-          var that = this.instance;
-          var step = that.data.workflow.steps[0];
-          that.githubOauthService.start = function () {
-            return that.$q.resolve();
-          };
-          spyOn(that.githubOauthService, 'start').and.callThrough();
-          step.onNext();
-          that.$scope.$apply();
-          expect(that.githubOauthService.start).not.toHaveBeenCalled();
-        });
-
-        it('step 1 - onNext -> failed', function () {
-          var that = this.instance;
-          var step = that.data.workflow.steps[0];
-          that.userInput.source.vcs_type = 'GITHUB';
-          that.githubOauthService.start = function () {
-            return that.$q.reject();
-          };
-          spyOn(that.githubOauthService, 'start').and.callThrough();
-          var p = step.onNext();
-          that.$scope.$apply();
-          expect(that.githubOauthService.start).toHaveBeenCalled();
           expect(p.$$state.status).toBe(2);
         });
 

@@ -39,10 +39,11 @@
   TriggerBuildsDetailViewController.$inject = [
     '$timeout',
     '$uibModalInstance',
+    '$q',
+    'PAT_DELIMITER',
     'context',
     'content',
-    'app.model.modelManager',
-    'github.view.githubOauthService'
+    'app.model.modelManager'
   ];
 
   /**
@@ -50,13 +51,13 @@
    * @constructor
    * @param {object} $timeout - the angular timeout service
    * @param {object} $uibModalInstance - the modal object which is associated with this controller
+   * @param {object} $q - the angular $q service
+   * @param {string} PAT_DELIMITER - the PAT guid delimiter in project names
    * @param {object} context - parameter object passed in to DetailView
    * @param {object} content - configuration object passed in to DetailView
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} githubOauthService - Service to obtain github auth creds
    */
-  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, context, content, modelManager,
-                                             githubOauthService) {
+  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, PAT_DELIMITER, context, content, modelManager) {
     var that = this;
     that.context = context;
     that.content = content;
@@ -64,7 +65,9 @@
     that.githubModel = modelManager.retrieve('github.model');
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
-    that.githubOauthService = githubOauthService;
+    that.$q = $q;
+    that.PAT_DELIMITER = PAT_DELIMITER;
+    // TODO: remove this
     that.isAuthenticated = true;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
@@ -99,9 +102,28 @@
         });
     },
 
+    _getPatGuid: function () {
+      var projectName = this.context.project.name;
+      if (!projectName) {
+        return null;
+      }
+      var delimIndex = projectName.indexOf(this.PAT_DELIMITER);
+      if (delimIndex < 0) {
+        return null;
+      }
+      return projectName.slice(delimIndex + this.PAT_DELIMITER.length);
+
+    },
+
     _updateAndBuild: function () {
       var that = this;
-      return this.hceModel.updateProject(this.context.guid, this.hceModel.data.vcsInstance.browse_url, this.context.project.id, this.context.project)
+
+      var patGuid = this._getPatGuid();
+      if (!patGuid) {
+        return this.$q.reject('You must associate a valid PAT before triggering a build');
+      }
+
+      return this.hceModel.updateProject(this.context.guid, patGuid, this.context.project.id, this.context.project)
         .then(function () {
           return that.build(true);
         });
@@ -113,8 +135,7 @@
 
       var githubOptions = {
         headers: {
-          'x-cnap-vcs-url': this.hceModel.data.vcsInstance.browse_url,
-          'x-cnap-vcs-api-url': this.hceModel.data.vcsInstance.api_url
+          'x-cnap-vcs-token-guid': this._getPatGuid()
         }
       };
       that.githubModel.commits(that.context.project.repo.full_name, that.context.project.repo.branch, 20, githubOptions)
@@ -139,15 +160,9 @@
     },
 
     githubAuth: function () {
-      var that = this;
-      this.githubOauthService.start(this.hceModel.data.vcsInstance.browse_url, this.hceModel.data.vcsInstance.api_url)
-        .then(function () {
-          that.isAuthenticated = true;
-          that.fetchCommits();
-        })
-        .catch(function () {
-          that.githubAuthFailed = true;
-        });
+      // TODO: remove this
+      this.isAuthenticated = true;
+      this.fetchCommits();
     }
   });
 

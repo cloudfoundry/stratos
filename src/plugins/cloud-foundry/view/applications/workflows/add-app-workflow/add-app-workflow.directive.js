@@ -30,7 +30,6 @@
   AddAppWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
-    'github.view.githubOauthService',
     'app.utils.utilsService',
     '$interpolate',
     '$scope',
@@ -44,7 +43,6 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
-   * @param {object} githubOauthService - github oauth service
    * @param {object} utils - Utils service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
@@ -58,7 +56,6 @@
    * @property {boolean} addingApplication - flag for adding app
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
-   * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model
@@ -71,7 +68,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, utils, $interpolate, $scope, $q, $timeout) {
+  function AddAppWorkflowController(modelManager, eventService, utils, $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$q = $q;
@@ -79,7 +76,6 @@
     this.addingApplication = false;
     this.modelManager = modelManager;
     this.eventService = eventService;
-    this.githubOauthService = githubOauthService;
     this.utils = utils;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');

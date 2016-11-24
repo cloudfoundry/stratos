@@ -1,8 +1,11 @@
 (function () {
   'use strict';
 
+  var PAT_DELIMITER = ';PAT:';
+
   angular
     .module('cloud-foundry.view.applications.workflows.add-pipeline-workflow', [])
+    .constant('PAT_DELIMITER', PAT_DELIMITER)
     .constant('cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype', {
 
       init: function () {
@@ -89,27 +92,12 @@
               nextBtnText: gettext('Next'),
               showBusyOnNext: true,
               onNextCancellable: true,
-              onNextCancel: function () {
-                that.githubOauthService.cancel();
-              },
+              onNextCancel: function () {},
               onNext: function () {
-                var oauth;
-                if (that.userInput.source.vcs_type === 'GITHUB') {
-                  oauth = that.githubOauthService.start(that.userInput.source.browse_url, that.userInput.source.api_url);
-                } else {
-                  oauth = that.$q.resolve();
-                }
-
-                return oauth
-                  .then(function () {
-                    return that.getRepos().catch(function () {
-                      var msg = gettext('There was a problem retrieving your repositories. Please try again.');
-                      return that.$q.reject(msg);
-                    });
-                  }, function () {
-                    var msg = gettext('There was a problem authorizing with the selected source. Please try again.');
-                    return that.$q.reject(msg);
-                  });
+                return that.getRepos().catch(function () {
+                  var msg = gettext('There was a problem retrieving your repositories. Please try again.');
+                  return that.$q.reject(msg);
+                });
               }
             },
             {
@@ -285,21 +273,17 @@
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
         var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
-        var deferred = this.$q.defer();
 
-        hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
-          vcsModel.getSupportedVcsInstances(hceModel.data.vcsInstances)
+        return hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
+          return vcsModel.getSupportedVcsInstances(hceModel.data.vcsInstances)
             .then(function (sources) {
               if (sources.length > 0) {
                 [].push.apply(that.options.sources, sources);
                 that.userInput.source = sources[0].value;
-                deferred.resolve();
               } else {
                 var msg = gettext('No VCS instances were available for the selected delivery pipeline instance.');
-                deferred.reject(msg);
+                return that.$q.reject(msg);
               }
-            }, function (reason) {
-              deferred.reject(reason);
             });
         }, function (error) {
           // Some other exception occurred
@@ -311,10 +295,9 @@
           }
           message = message + gettext(' Please try again. If problem persists, please contact your administrator. ');
 
-          deferred.reject(message);
+          return that.$q.reject(message);
         });
 
-        return deferred.promise;
       },
 
       getRepos: function () {
@@ -498,7 +481,6 @@
         } else {
           var that = this;
           this.userInput.projectName = this._createProjectName();
-          var githubUrl = this.userInput.source.browse_url;
           return this.hceModel.createProject(
             this.userInput.hceCnsi.guid,
             this.userInput.projectName,
@@ -507,7 +489,7 @@
             this.userInput.buildContainer.build_container_id,
             this.userInput.repo,
             this.userInput.branch,
-            githubUrl
+            this.userInput.source.guid
           ).then(function (response) {
             that.userInput.projectId = response.data.id;
           });
@@ -544,6 +526,8 @@
           this.userInput.application.summary.guid
         ].join('-');
 
+        name += PAT_DELIMITER + this.userInput.source.guid;
+
         return name;
       },
 
@@ -551,8 +535,7 @@
         var githubOptions = {};
         if (this.userInput.source) {
           githubOptions.headers = {
-            'x-cnap-vcs-url': this.userInput.source.browse_url,
-            'x-cnap-vcs-api-url': this.userInput.source.api_url
+            'x-cnap-vcs-token-guid': this.userInput.source.guid
           };
         }
 

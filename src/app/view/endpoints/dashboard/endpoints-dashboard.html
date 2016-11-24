@@ -91,7 +91,7 @@
             <a ng-href="{{endpoint.visit()}}">{{endpoint.name}}</a>
           </td>
           <td ng-if="!endpoint.visit" class="text-uppercase">{{endpoint.name}}</td>
-          <td ng-switch="endpoint.connected">
+          <td ng-switch="endpoint.getStatus()">
             <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                   ng-switch-when="connected"></span>
             <span class="helion-icon helion-icon-lg helion-icon-Connect text-info"

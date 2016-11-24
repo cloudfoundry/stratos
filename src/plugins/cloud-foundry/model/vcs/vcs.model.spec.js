@@ -28,7 +28,7 @@
         $httpBackend.expect('GET', '/pp/v1/vcs/clients').respond(200, vcsClients);
 
         vcsModel.listVcsClients().then(function (response) {
-          expect(response.data).toEqual(vcsClients);
+          expect(response).toEqual(vcsClients);
         });
 
         $httpBackend.flush();
@@ -38,8 +38,8 @@
       it('force, but nothing cached', function () {
         $httpBackend.expect('GET', '/pp/v1/vcs/clients').respond(200, vcsClients);
 
-        vcsModel.listVcsClients(true).then(function (response) {
-          expect(response.data).toEqual(vcsClients);
+        vcsModel.listVcsClients().then(function (response) {
+          expect(response).toEqual(vcsClients);
         });
 
         $httpBackend.flush();
@@ -50,7 +50,7 @@
         $httpBackend.expect('GET', '/pp/v1/vcs/clients').respond(500, {});
         vcsModel.vcsClients = 'should not change';
 
-        vcsModel.listVcsClients(true).then(function () {
+        vcsModel.listVcsClients().then(function () {
           fail('Failed call should not result in resolved promise');
         });
 
@@ -62,7 +62,7 @@
         vcsModel.vcsClients = vcsClients;
 
         vcsModel.listVcsClients().then(function (response) {
-          expect(response.data).toEqual(vcsClients);
+          expect(response).toEqual(vcsClients);
           expect(vcsModel.vcsClients).toEqual(vcsClients);
         });
       });

@@ -545,7 +545,7 @@
      * @returns {promise} A promise object
      * @public
      */
-    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch, vcsUrl) {
+    createProject: function (guid, name, vcs, targetId, buildContainerId, repo, branch, tokenGuid) {
       var newProject = {
         name: name,
         vcs_id: vcs.vcs_id,
@@ -569,8 +569,7 @@
       // Special header to insert Github token
       var headers = angular.extend(
         {
-          'x-cnap-vcs-url': vcsUrl,
-          'x-cnap-vcs-token-required': true
+          'x-cnap-vcs-token-guid': tokenGuid
         },
         this.hceProxyPassthroughConfig.headers
       );
@@ -584,18 +583,17 @@
      * @memberof cloud-foundry.model.hce.HceModel
      * @description Update an existing project
      * @param {string} guid - the HCE instance GUID
-     * @param {string} vcsUrl - the VCS browse URL
+     * @param {string} tokenGuid - the ID of the VCS token to use
      * @param {number} projectId - the HCE project ID to update
      * @param {object} data - the new project data
      * @returns {promise} A promise object
      * @public
      */
-    updateProject: function (guid, vcsUrl, projectId, data) {
+    updateProject: function (guid, tokenGuid, projectId, data) {
       // Special header to insert Github token
       var headers = angular.extend(
         {
-          'x-cnap-vcs-url': vcsUrl,
-          'x-cnap-vcs-token-required': true
+          'x-cnap-vcs-token-guid': tokenGuid
         },
         this.hceProxyPassthroughConfig.headers
       );
