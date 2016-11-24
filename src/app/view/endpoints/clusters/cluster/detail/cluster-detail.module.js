@@ -78,6 +78,10 @@
       that.updateTotalApps();
     }
 
+    this.showCliCommands = function () {
+      cliCommands.show(utils.getClusterEndpoint(that.userService), this.userName, that.guid);
+    };
+
     function init() {
       that.organizations = [];
 
