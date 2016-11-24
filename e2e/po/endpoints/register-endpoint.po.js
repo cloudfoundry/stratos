@@ -3,10 +3,10 @@
 
   var _ = require('../../../tools/node_modules/lodash');
   var Q = require('../../../tools/node_modules/q');
+  var inputSelectInput = require('../widgets/input-select-input.po');
 
   module.exports = {
     isVisible: isVisible,
-    getEndpointType: getEndpointType,
     close: close,
     safeClose: safeClose,
     populateAndRegister: populateAndRegister,
@@ -20,6 +20,8 @@
     enterName: enterName,
     isNameValid: isNameValid,
     clearName: clearName,
+    enterType: enterType,
+    getType: getType,
     setSkipSllValidation: setSkipSllValidation,
     checkError: checkError
   };
@@ -28,18 +30,43 @@
     return element(by.css('.registration-form')).isDisplayed();
   }
 
-  function getEndpointType() {
-    return element(by.css('.detail-view-header')).getText().then(function (headerText) {
-      switch (headerText) {
-        case 'Register Helion Cloud Foundry':
-          return 'hcf';
-        case 'Register Helion Code Engine':
-          return 'hce';
-        default:
-          fail('Unrecognised tile of register endpoint (neither hce or hcf): ' + headerText);
-          break;
-      }
+  function _getTypeElement() {
+    return element.all(by.css('.registration-form .form-group')).get(0);
+  }
+
+  function enterType(type) {
+    var label = _typeValueToLabel(type);
+    return inputSelectInput.selectOptionByLabel(_getTypeElement(), label);
+  }
+
+  function getType() {
+    return inputSelectInput.getValue(_getTypeElement()).then(function (label) {
+      return _typeLabelToValue(label);
     });
+  }
+
+  function _typeValueToLabel(type) {
+    switch (type) {
+      case 'hcf':
+        return 'Helion Cloud Foundry';
+      case 'hce':
+        return 'Helion Code Engine';
+      default:
+        fail('Unrecognised endpoint type: ' + type);
+        break;
+    }
+  }
+
+  function _typeLabelToValue(label) {
+    switch (label) {
+      case 'Helion Cloud Foundry':
+        return 'hcf';
+      case 'Helion Code Engine':
+        return 'hce';
+      default:
+        fail('Unrecognised endpoint label: ' + label);
+        break;
+    }
   }
 
   function close() {
@@ -86,8 +113,11 @@
     expect(getRegister().isEnabled()).toBe(shouldBeEnabled);
   }
 
-  function populateAndRegister(address, name, skipValidation) {
-    return enterAddress(address)
+  function populateAndRegister(type, address, name, skipValidation) {
+    return enterType(type)
+      .then(function () {
+        return enterAddress(address);
+      })
       .then(function () {
         return enterName(name);
       })

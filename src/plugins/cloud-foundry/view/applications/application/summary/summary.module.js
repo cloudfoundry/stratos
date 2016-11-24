@@ -46,7 +46,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @param {cloud-foundry.view.applications.application.summary.editapp} editAppService - edit Application
-   * @param {app.model.utilsService} utils - the utils service
+   * @param {app.utils.utilsService} utils - the utils service
    * @param {app.view.endpoints.clusters.routesService} routesService - the Service management service
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @param {app.view.notificationsService} notificationsService - the toast notification service
@@ -55,7 +55,7 @@
    * @property {string} id - the application GUID
    * @property {cloud-foundry.view.applications.application.summary.addRoutes} addRoutesService - add routes service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
-   * @property {app.model.utilsService} utils - the utils service
+   * @property {app.utils.utilsService} utils - the utils service
    * @property {helion.framework.widgets.dialog.confirm} confirmDialog - the confirm dialog service
    * @property {app.view.notificationsService} notificationsService - the toast notification service
    */
@@ -111,7 +111,7 @@
 
     this.instancesActionMenu = [
       {
-        name: gettext('Terminate Instance'),
+        name: gettext('Terminate'),
         disabled: false,
         execute: function (instanceIndex) {
           that.confirmDialog({

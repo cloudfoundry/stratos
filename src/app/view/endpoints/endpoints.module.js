@@ -4,8 +4,7 @@
   angular
     .module('app.view.endpoints', [
       'app.view.endpoints.clusters',
-      'app.view.endpoints.dashboard',
-      'app.view.endpoints.hce'
+      'app.view.endpoints.dashboard'
     ])
     .config(registerRoute)
     .run(register);
@@ -62,7 +61,7 @@
 
     onLoggedIn: function () {
       var menu = this.modelManager.retrieve('app.model.navigation').menu;
-      menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'), 1);
+      menu.addMenuItem('endpoints', 'endpoint.dashboard', gettext('Endpoints'), 2);
       this.initialized.resolve();
     }
 

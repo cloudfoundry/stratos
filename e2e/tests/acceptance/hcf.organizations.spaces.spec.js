@@ -8,7 +8,6 @@
   var inputText = require('../../po/widgets/input-text.po');
   var actionsMenuHelper = require('../../po/widgets/actions-menu.po');
   var confirmationModalHelper = require('../../po/widgets/confirmation-modal.po');
-  var endpointsHcf = require('../../po/endpoints/endpoints-list-hcf.po');
   var endpointDashboard = require('../../po/endpoints/endpoints-dashboard.po');
 
   describe('HCF - Manage Organizations', function () {
@@ -41,12 +40,11 @@
           helpers.setBrowserNormal();
           helpers.loadApp();
           loginPage.loginAsAdmin();
-          navBar.goToView('Endpoints');
-          endpointDashboard.getCloudFoundryTile().click();
-          expect(endpointsHcf.getTileTitle(0).then(function (title) {
-            return title.toLowerCase();
-          })).toBe(hcfFromConfig.register.cnsi_name.toLowerCase());
-          return endpointsHcf.getTiles().get(0).click();
+          return navBar.goToView('Endpoints');
+        }).then(function () {
+          var requiredRowIndex = endpointDashboard.getRowWithEndpointName(hcfFromConfig.register.cnsi_name);
+          expect(requiredRowIndex).toBeDefined();
+          return endpointDashboard.endpointNameClick(requiredRowIndex);
         });
       // Ensure we don't continue until everything is set up
       return browser.driver.wait(init);
