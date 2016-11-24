@@ -49,7 +49,7 @@
     var that = this;
     var currentUserAccount = modelManager.retrieve('app.model.account');
 
-    this.initialised = true;
+    this.initialised = false;
     this.listError = false;
 
     if (_haveCachedEndpoints()) {
