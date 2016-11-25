@@ -176,7 +176,7 @@
         });
 
         that.supportedVcsInstances = _.map(supported, function (supportedVcs) {
-          var vcs = _.clone(VCS_TYPES[that._expandVcsType(supportedVcs)]);
+          var vcs = _.clone(VCS_TYPES[that._expandVcsType(supportedVcs.vcs)]);
 
           var hceVcs = _.find(hceVcsInstances, function (hceVcs) {
             return hceVcs.browse_url === supportedVcs.vcs.browse_url;
@@ -185,8 +185,7 @@
           vcs.label = supportedVcs.vcs.label;
           vcs.browse_url = supportedVcs.vcs.browse_url;
           vcs.value = supportedVcs;
-          vcs.token_name = supportedVcs.name;
-          vcs.token_guid = supportedVcs.guid;
+          vcs.token_name = supportedVcs.token.name;
           vcs.value.vcs_id = hceVcs.vcs_id;
           return vcs;
         });

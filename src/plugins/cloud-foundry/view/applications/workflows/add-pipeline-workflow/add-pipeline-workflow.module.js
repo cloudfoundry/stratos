@@ -489,7 +489,7 @@
             this.userInput.buildContainer.build_container_id,
             this.userInput.repo,
             this.userInput.branch,
-            this.userInput.source.guid
+            this.userInput.source.token.guid
           ).then(function (response) {
             that.userInput.projectId = response.data.id;
           });
@@ -526,7 +526,7 @@
           this.userInput.application.summary.guid
         ].join('-');
 
-        name += PAT_DELIMITER + this.userInput.source.guid;
+        name += PAT_DELIMITER + this.userInput.source.token.guid;
 
         return name;
       },
@@ -535,7 +535,7 @@
         var githubOptions = {};
         if (this.userInput.source) {
           githubOptions.headers = {
-            'x-cnap-vcs-token-guid': this.userInput.source.guid
+            'x-cnap-vcs-token-guid': this.userInput.source.token.guid
           };
         }
 

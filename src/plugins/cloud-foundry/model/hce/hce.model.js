@@ -541,7 +541,7 @@
      * @param {number} buildContainerId - the build container ID
      * @param {object} repo - the repo to use
      * @param {string} branch - the branch to use
-     * @param {string} vcsUrl - the VCS browse URL
+     * @param {string} tokenGuid - the guid of the VCS token to use
      * @returns {promise} A promise object
      * @public
      */
