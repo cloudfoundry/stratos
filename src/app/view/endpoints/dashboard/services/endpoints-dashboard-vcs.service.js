@@ -23,8 +23,6 @@
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
-    var validTokens = {};
-    var validCheckInFlight = false;
     var endpointPrefix = 'vcs_';
 
     return {
@@ -55,7 +53,7 @@
      */
     function updateInstances() {
       return $q.all([vcsModel.listVcsTokens().then(function () {
-        _checkTokensValidity();
+        vcsModel.checkTokensValidity();
       }), vcsModel.listVcsClients()]);
     }
 
@@ -74,40 +72,8 @@
       createEndpointEntries(endpoints);
     }
 
-    function _checkTokensValidity() {
-      var promises = [];
-      validCheckInFlight = true;
-      for (var i = 0; i < vcsModel.vcsTokens.length; i++) {
-        var vcsToken = vcsModel.vcsTokens[i];
-        var check = vcsModel.checkVcsToken(vcsToken.token.guid).then(function (res) {
-          if (res.valid === true) {
-            validTokens[vcsToken.token.guid] = true;
-          } else {
-            delete validTokens[vcsToken.token.guid];
-          }
-        });
-        promises.push(check);
-      }
-      // Cleanup stale tokens
-      for (var tokenGuid in validTokens) {
-        if (!validTokens.hasOwnProperty(tokenGuid)) { continue; }
-        if (!_.find(vcsModel.vcsTokens, function (token) {
-            return token.token.guid === tokenGuid;
-          })) {
-          delete validTokens[tokenGuid];
-        }
-      }
-      return $q.all(promises).finally(function () {
-        validCheckInFlight = false;
-      });
-    }
-
     function getStatus(vcsGuid) {
       return function () {
-
-        if (validCheckInFlight) {
-          return 'unconnected';
-        }
 
         var filtered = _.filter(vcsModel.vcsTokens, function (token) {
           return token.vcs.guid === vcsGuid;
@@ -121,8 +87,8 @@
         var allInvalid = true;
         for (var i = 0; i < filtered.length; i++) {
           var tokenGuid = filtered[i].token.guid;
-          allValid = allValid && !!validTokens[tokenGuid];
-          allInvalid = allInvalid && !validTokens[tokenGuid];
+          allValid = allValid && !!vcsModel.validTokens[tokenGuid];
+          allInvalid = allInvalid && !vcsModel.validTokens[tokenGuid];
         }
 
         if (allValid) {

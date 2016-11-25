@@ -51,6 +51,7 @@
     this.apiManager = apiManager;
     this.vcsClients = null;
     this.supportedVcsInstances = [];
+    this.validTokens = {};
   }
 
   angular.extend(VcsModel.prototype, {
@@ -90,6 +91,45 @@
         .checkVcsToken(tokenGuid).then(function (res) {
           return res.data;
         });
+    },
+
+    _cacheValid: function (vcsToken) {
+      var that = this;
+      return function (res) {
+        if (res.valid === true) {
+          that.validTokens[vcsToken.token.guid] = true;
+        } else {
+          delete that.validTokens[vcsToken.token.guid];
+        }
+      };
+    },
+
+    _tokenFinder: function (tokenGuid) {
+      return function (token) {
+        return token.token.guid === tokenGuid;
+      };
+    },
+
+    checkTokensValidity: function () {
+
+      // Cleanup stale tokens
+      for (var tokenGuid in this.validTokens) {
+        if (!this.validTokens.hasOwnProperty(tokenGuid)) {
+          continue;
+        }
+        if (!_.find(this.vcsTokens, this._tokenFinder(tokenGuid))) {
+          delete this.validTokens[tokenGuid];
+        }
+      }
+
+      var promises = [];
+      for (var i = 0; i < this.vcsTokens.length; i++) {
+        var vcsToken = this.vcsTokens[i];
+        var check = this.checkVcsToken(vcsToken.token.guid).then(this._cacheValid(vcsToken));
+        promises.push(check);
+      }
+
+      return this.$q.all(promises);
     },
 
     renameVcsToken: function (tokenGuid, tokenName) {
