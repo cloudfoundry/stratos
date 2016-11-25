@@ -86,7 +86,7 @@ navbar > .main-nav-menu {
   width: $main-nav-width;
   height: 100%;
   background-color: $main-nav-background-color;
-  z-index: initial;
+  z-index: auto;
   display: block;
   overflow: hidden;
 
@@ -120,6 +120,7 @@ navbar > .main-nav-menu {
     li {
       height: $main-nav-item-height;
       width: 100%;
+      display: flex;
 
       &.navitem-bottom {
         position: absolute;
@@ -132,9 +133,11 @@ navbar > .main-nav-menu {
 
       > a {
         padding: 0;
+        margin: auto 0;
+        display: flex;
+        align-items: center;
 
         .navitem-icon {
-          line-height: $main-nav-item-height;
           vertical-align: middle;
           display: inline-block;
           width: $main-nav-icons-width;
@@ -156,7 +159,6 @@ navbar > .main-nav-menu {
         }
 
         .navitem-label {
-          line-height: $main-nav-item-height;
           vertical-align: middle;
           text-transform: uppercase;
           letter-spacing: 1px;

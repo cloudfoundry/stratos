@@ -42,7 +42,7 @@ app-error-bar {
 	&.errorbar-with-navbar {
 		.app-error-bar {
 			position: absolute;
-			top: 0;
+			top: $app-error-bar-height;
 			margin-left: $main-nav-width;
 		}
 
@@ -55,5 +55,5 @@ app-error-bar {
 }
 
 console-view.with-app-error-bar {
-	padding-top: $app-error-bar-height;
+	padding-top: $app-error-bar-height + $page-header-height;
 }
