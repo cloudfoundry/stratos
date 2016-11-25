@@ -38,7 +38,7 @@
        st-set-filter="deliveryLogsBuildFilter"
        >
     <div id="delivery-logs-search" class="panel panel-default delivery-logs-search"
-         ng-if="appDelLogsCtrl.displayedExecutions.length > 0">
+         ng-if="appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
       <form>
         <div class="form-group search-field" focusable-input>
           <label class="control-label" for="build-search" required translate>
@@ -65,7 +65,8 @@
       <div ng-if="appDelLogsCtrl.displayedExecutions.length < 1"
            class="panel panel-default">
         <div class="panel-body" translate>
-          You have no builds
+          <span ng-if="appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">No builds found</span>
+          <span ng-if="!appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">You have no builds</span>
         </div>
       </div>
 
