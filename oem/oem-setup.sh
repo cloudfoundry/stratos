@@ -4,6 +4,7 @@
 
 # Need brand folder and output folder
 
+echo $@
 red=`tput setaf 1`
 green=`tput setaf 2`
 orange=`tput setaf 3`
@@ -17,10 +18,32 @@ reset=`tput sgr0`
 
 BRAND_FOLDER=examples/suse
 DEST_FOLDER=../dist
+BASE_CONSOLE_IMAGE=stackato/hsc-console:latest
 
-if [ -n "$1" ]; then
-  BRAND_FOLDER=$1
-fi
+while getopts ":b:d:pst:c:" opt ; do
+    case $opt in
+        b)
+            BRAND_FOLDER=${OPTARG}
+            ;;
+        d)
+            DEST_FOLDER=${OPTARG}
+            ;;
+        p)
+            PRODUCE_PRODUCT_STRINGS_FILE=true
+            ;;
+        s)
+            GENERATE_PATCH_SCRIPT=true
+            ;;
+        c)
+            BASE_CONSOLE_IMAGE=${OPTARG}
+            ;;
+        \?)
+            echo "Invalid option -$OPTARG" >&2
+            usage
+            ;;
+    esac
+done
+
 
 echo "${cyan}Stackato Console Branding Setup${reset}"
 echo "Using brand folder ${BRAND_FOLDER}"
@@ -33,11 +56,18 @@ CONFIG_FILE=${DEST_FOLDER}/stackato-config.js
 PS_REGEX=""
 PRODUCT_STRINGS=$(jq . -c -j ${BRAND_FOLDER}/product_strings.json)
 
-# Replace inline in the config.js file
-
-sed -i 's#PRODUCT_STRINGS:.*#PRODUCT_STRINGS:'"$PRODUCT_STRINGS"'#g' ${CONFIG_FILE}
+if [ ! -z ${PRODUCE_PRODUCT_STRINGS_FILE} ]; then
+  echo "${cyan}Outputting product_strings file${reset}"
+  echo ${PRODUCT_STRINGS} > ${DEST_FOLDER}/product_strings
+else
+  echo "${cyan}Running SED instruction${reset}"
+  # Replace inline in the config.js file
+  sed -i 's#,PRODUCT_STRINGS:.*};#,PRODUCT_STRINGS:'"$PRODUCT_STRINGS"'};#g' ${CONFIG_FILE}
+fi
 
 FAVICON="favicon.ico"
+
+mkdir -p ${DEST_FOLDER}/images
 
 if [ -f ${BRAND_FOLDER}/${FAVICON} ]; then
   echo "Copying brand favicon"
@@ -63,4 +93,16 @@ echo "@import \"../scss/index.scss\";" >> ./tmp/index.scss
 gulp oem
 cp ./tmp/index.css ${DEST_FOLDER}
 
-#rm -rf tmp
+if [ ! -z ${GENERATE_PATCH_SCRIPT} ]; then
+
+  #Output Dockerfile
+  echo "" > ${DEST_FOLDER}/Dockerfile
+  cat << EOF >> ${DEST_FOLDER}/Dockerfile
+FROM ${BASE_CONSOLE_IMAGE}
+ADD index.css /usr/share/nginx/html/index.css
+ADD images /usr/share/nginx/html/images
+ADD product_strings /tmp
+RUN PRODUCT_STRINGS=\$(cat /tmp/product_strings) && \
+ sed -i 's#,PRODUCT_STRINGS:.*};#,PRODUCT_STRINGS:'"\$PRODUCT_STRINGS"'};#g' usr/share/nginx/html/stackato-config.js
+EOF
+fi
