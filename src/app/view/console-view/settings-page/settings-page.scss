@@ -1,22 +1,136 @@
+$about-title-font-size: 24px;
+$about-color-bg: $page-footer-color-bg;
+$about-color-fg: $page-footer-color-fg;
+
 .cluster-settings.user-summary {
-	.cluster.row {
-		margin: 0;
-		padding: 0;
+  .cluster.row {
+    margin: 0;
+    padding: 0;
 
-		&:first-child {
-			padding-top: $hpe-unit-space;
-			border-bottom: 1px solid #ccc;
-			padding-bottom: $hpe-unit-space * .5;
-		}
+    padding-top: $hpe-unit-space;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: $hpe-unit-space * .5;
+    .cluster-info {
+      margin-left: 0;
+    }
+  }
+  .registration-content {
+    padding: $page-header-height 40px 80px;
+  }
 
-		&:last-child {
-			padding-bottom: $hpe-unit-space;
-			padding-top: $hpe-unit-space * .5;
-			margin-bottom: $hpe-unit-space;
-		}
+  .cluster {
+    background-color: #fff;
+    padding: 24px 0;
+    margin: 12px 0;
+    vertical-align: top;
+    box-shadow: 2px 2px 0px 2px rgba(0,0,0,0.05);
 
-		.cluster-info {
-			margin-left: 0;
-		}
-	}
+    &:last-child {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      padding-top: 12px;
+    }
+
+    &.row {
+      .col-md-6 {
+        padding: 0 24px;
+      }
+    }
+
+    .cluster-icon, .cluster-info {
+      display: inline-block;
+
+      &.cluster-block {
+        display: block;
+      }
+    }
+
+    .cluster-info {
+      margin-left: 24px;
+      vertical-align: top;
+
+      .cluster-name {
+        font-weight: 700;
+        font-size: 18px;
+      }
+    }
+
+    .cluster-properties {
+      display: table;
+      .cluster-property {
+        display: table-row;
+        > div {
+          display: table-cell;
+          padding-top: 12px;
+        }
+        > div:first-child {
+          text-transform: uppercase;
+          padding-right: 24px;
+        }
+        .cluster-expired {
+          color: $status-critical;
+          display: inline-block;
+        }
+
+        .btn-link {
+          margin-left: $hpe-unit-space;
+          font-weight: 600;
+        }
+      }
+    }
+
+    :after {
+      clear: both;
+    }
+  }
+}
+
+.about-panel {
+  .cluster-settings.user-summary.about-summary {
+    .about-title {
+      background: $about-color-bg;
+      color: $about-color-fg;
+      height: $hpe-unit-space * 3;
+      line-height: $hpe-unit-space * 3;
+      padding: 0 10px;
+      font-size: $about-title-font-size;
+    }
+  }
+
+  .cluster.row {
+    box-shadow: none;
+    border: 0;
+
+    &:last-child {
+      margin: 0;
+      padding: $hpe-unit-space 0;
+    }
+  }
+
+  page-footer {
+    .copyright {
+      width: auto;
+      bottom: $hpe-unit-space * 2;
+    }
+
+    .links {
+      left: 0;
+      right: initial;
+      bottom: $hpe-unit-space * .75;
+
+      li:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+}
+
+@media(max-width: 560px) {
+  .about-panel {
+    page-footer {
+      .helion-logo {
+        display: none;
+      }
+    }
+  }
 }

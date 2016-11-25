@@ -3,23 +3,50 @@
 
   var navbar = require('../navbar.po');
   var helpers = require('../helpers.po');
+  var actionMenu = require('../widgets/actions-menu.po');
+  var credentialsFormHelper = require('../widgets/credentials-form.po');
 
   module.exports = {
     showEndpoints: showEndpoints,
+    showHcfEndpoints: showHcfEndpoints,
     goToEndpoints: goToEndpoints,
     isEndpoints: isEndpoints,
+
     clickAddClusterInWelcomeMessage: clickAddClusterInWelcomeMessage,
-    clickAddClusterInTile: clickAddClusterInTile,
     welcomeMessage: welcomeMessage,
-    getCloudFoundryTile: getCloudFoundryTile,
-    getCodeEngineTile: getCodeEngineTile,
-    getAddEndpoint: getAddEndpoint,
-    hasRegisteredTypes: hasRegisteredTypes,
-    getTileStats: getTileStats
+    welcomeMessageAdmin: welcomeMessageAdmin,
+    welcomeMessageNonAdmin: welcomeMessageNonAdmin,
+
+    getEndpointTable: getEndpointTable,
+    getRowWithEndpointName: getRowWithEndpointName,
+    endpointNameClick: endpointNameClick,
+    endpointName: endpointName,
+    endpointIsDisconnected: endpointIsDisconnected,
+    endpointIsConnected: endpointIsConnected,
+    endpointType: endpointType,
+    endpointUrl: endpointUrl,
+    endpointConnectLink: endpointConnectButton,
+    endpointDisconnectLink: endpointDisconnectButton,
+    endpointActionMenu: endpointActionMenu,
+    endpointError: endpointError,
+
+    headerRegister: headerRegister,
+    headerRegisterVisible: headerRegisterVisible,
+
+    credentialsForm: credentialsForm,
+    credentialsFormFields: credentialsFormFields,
+    credentialsFormConnectButton: connectButton,
+    credentialsFormCancel: credentialsFormCancel,
+    credentialsFormFill: fillCredentialsForm,
+    credentialsFormEndpointConnect: connectServiceInstance
+
   };
 
   function showEndpoints() {
     return navbar.goToView('Endpoints');
+  }
+  function showHcfEndpoints() {
+    return navbar.goToView('Helion Cloud Foundry');
   }
 
   function goToEndpoints() {
@@ -28,54 +55,161 @@
 
   function isEndpoints() {
     return browser.getCurrentUrl().then(function (url) {
-      return expect(url).toBe(helpers.getHost() + '/#/endpoint');
+      return url === helpers.getHost() + '/#/endpoint';
     });
   }
 
   function welcomeMessage() {
-    return element(by.id('welcome-message'));
+    return element(by.css('#welcome-message'));
   }
 
-  function clickAddClusterInWelcomeMessage(serviceType) {
-    var index = serviceType === 'hcf' ? 0 : 1;
-    return element.all(by.css('#welcome-message span.tile-btn')).get(index).click();
+  function welcomeMessageAdmin() {
+    var panels = welcomeMessage().all(by.css('.panel-body'));
+    // First message should be visible
+    return panels.get(0).isDisplayed();
   }
 
-  function clickAddClusterInTile(serviceType) {
-    return getInstanceTile(serviceType).element(by.linkText('Register An Endpoint')).click();
+  function welcomeMessageNonAdmin() {
+    var panels = welcomeMessage().all(by.css('.panel-body'));
+    // Second message should be visible
+    return panels.get(1).isDisplayed();
   }
 
-  function getCloudFoundryTile() {
-    return getInstanceTile('hcf');
+  function clickAddClusterInWelcomeMessage() {
+    return element.all(by.css('#welcome-message span.tile-btn')).first().click();
   }
 
-  function getCodeEngineTile() {
-    return getInstanceTile('hce');
+  function getEndpointTable() {
+    return element(by.css('.endpoints-table table'));
   }
 
-  function getInstanceTile(serviceType) {
-    return element(by.css('service-tile[service-type*="' + serviceType + '"]'));
-  }
-
-  function getAddEndpoint() {
-    return element(by.css('form[name="form.regForm"]'));
-  }
-
-  function hasRegisteredTypes(serviceType) {
-    return getInstanceTile(serviceType).element(by.css('ring-chart')).isPresent();
-  }
-
-  function getTileStats(serviceType) {
-    return getInstanceTile(serviceType).all(by.css('ul.ring-chart-labels li')).then(function (listOfLi) {
-      var promises = [];
-      for (var i = 0; i < listOfLi.length; i++) {
-        promises.push(listOfLi[i].element(by.css('.ring-chart-count')).getText().then(function (text) {
-          return text;
-        }));
-      }
-      return Promise.all(promises).then(function (result) {
-        return result;
+  function getRowWithEndpointName(name) {
+    var endpointsRows = helpers.getTableRows(getEndpointTable());
+    var rowIndex;
+    return endpointsRows.each(function (element, index) {
+      return endpointIsErrorRow(index).then(function (isError) {
+        if (isError) {
+          return;
+        }
+        return endpointName(index).then(function (endpointName) {
+          if (endpointName.toLowerCase() === name.toLowerCase()) {
+            rowIndex = index;
+          }
+        });
       });
+    }).then(function () {
+      return rowIndex;
     });
   }
+
+  function endpointName(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 0).getText();
+  }
+
+  function endpointNameClick(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 0).element(by.css('a')).click();
+  }
+
+  function endpointIsDisconnected(row) {
+    return endpointGetStatus(row, 'helion-icon-Connect').isPresent();
+  }
+
+  function endpointIsConnected(row) {
+    return endpointGetStatus(row, 'helion-icon-Active_L').isPresent();
+  }
+
+  function endpointGetStatus(rowIndex, statusClass) {
+    return helpers.getTableCellAt(getEndpointTable(), rowIndex, 1).element(by.css('.' + statusClass));
+  }
+
+  function endpointType(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 2).getText();
+  }
+
+  function endpointIsErrorRow(row) {
+    return helpers.getTableRowAt(getEndpointTable(), row).getAttribute('table-inline-message').then(function (text) {
+      return !!text;
+    });
+  }
+
+  function endpointConnectButton(row) {
+    var actionMenuElement = endpointActionMenu(row);
+    return actionMenu.isSingleButton(actionMenuElement).then(function (isSingleButton) {
+      if (isSingleButton) {
+        // Non-admin will only have connect or disconnected (ok maybe also reconnect)
+        var anchor = actionMenu.getSingleButton(actionMenuElement);
+        expect(anchor.element(by.css('span')).getText()).toEqual('CONNECT');
+        return actionMenu.getSingleButton(actionMenuElement);
+      } else {
+        // Admin will have an action menu. Need to implement iterating over action menu item tests for 'connect'
+        fail('Not implemented');
+      }
+    });
+  }
+
+  function endpointDisconnectButton(row) {
+    var actionMenuElement = endpointActionMenu(row);
+    return actionMenu.isSingleButton(actionMenuElement).then(function (isSingleButton) {
+      if (isSingleButton) {
+        // Non-admin will only have connect or disconnected (ok maybe also reconnect)
+        var anchor = actionMenu.getSingleButton(actionMenuElement);
+        expect(anchor.element(by.css('span')).getText()).toEqual('DISCONNECT');
+        return actionMenu.getSingleButton(actionMenuElement);
+      } else {
+        // Admin will have an action menu. Need to implement iterating over action menu item tests for 'connect'
+        fail('Not implemented');
+      }
+    });
+  }
+
+  function endpointActionMenu(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 4).element(by.css('actions-menu'));
+  }
+
+  function endpointUrl(rowIndex) {
+    return helpers.getTableCellAt(getEndpointTable(), rowIndex, 1).getText();
+  }
+
+  function endpointError(rowIndex) {
+    var row = helpers.getTableRowAt(getEndpointTable(), rowIndex + 1);
+    expect(row.getAttribute('table-inline-message')).toBeDefined();
+    return row;
+  }
+
+  function getHeaderRegister() {
+    return element(by.css('.endpoints-dashboard .header button'));
+  }
+
+  function headerRegister() {
+    return getHeaderRegister().click();
+  }
+
+  function headerRegisterVisible() {
+    return getHeaderRegister().isPresent();
+  }
+
+  function credentialsForm() {
+    return credentialsFormHelper.credentialsForm(element(by.css('.detail-view-content')).element(by.css('.credentials-form')));
+  }
+
+  function credentialsFormFields() {
+    return credentialsFormHelper.credentialsFormFields();
+  }
+
+  function connectButton() {
+    return credentialsFormHelper.credentialsFormConnectButton();
+  }
+
+  function credentialsFormCancel() {
+    return credentialsFormHelper.credentialsFormCancel();
+  }
+
+  function fillCredentialsForm(username, password) {
+    return credentialsFormHelper.credentialsFormFill(username, password);
+  }
+
+  function connectServiceInstance() {
+    return credentialsFormHelper.connect();
+  }
+
 })();

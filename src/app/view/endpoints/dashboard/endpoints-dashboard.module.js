@@ -22,81 +22,59 @@
   }
 
   EndpointsDashboardController.$inject = [
+    '$q',
     '$scope',
-    '$interpolate',
-    'app.model.modelManager',
     '$state',
-    'app.view.hceRegistration',
-    'app.view.hcfRegistration',
-    'app.error.errorService',
-    '$q'
+    'app.model.modelManager',
+    'app.utils.utilsService',
+    'app.view.registerService',
+    'app.view.endpoints.dashboard.serviceInstanceService'
   ];
 
   /**
-   * @namespace app.view.endpoints.hce
-   * @memberof app.view.endpoints.hce
+   * @namespace app.view.endpoints.dashboard
+   * @memberof app.view.endpoints.dashboard
    * @name EndpointsDashboardController
-   * @param {object} $scope - the angular scope service
-   * @param {object} $interpolate - the angular interpolate service
-   * @param {app.model.modelManager} modelManager - the application model manager
-   * @param {object} $state - the UI router $state service
-   * @param {app.view.hceRegistration} hceRegistration - HCE Registration detail view service
-   * @param {app.view.hcfRegistration} hcfRegistration - HCF Registration detail view service
-   * @param {app.error.errorService} errorService - service to show custom errors below title bar
    * @param {object} $q - the Angular $q service
+   * @param {object} $scope - the angular scope service
+   * @param {object} $state - the UI router $state service
+   * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.utils.utilsService} utilsService - the utils service
+   * @param {app.view.registerService} registerService register service to display the core slide out
+   * @param {app.view.endpoints.dashboard.serviceInstanceService} serviceInstanceService - service to support dashboard with cnsi type endpoints
    * @constructor
    */
-  function EndpointsDashboardController($scope, $interpolate, modelManager, $state, hceRegistration, hcfRegistration, errorService, $q) {
+  function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, registerService,
+                                        serviceInstanceService) {
     var that = this;
-    this.modelManager = modelManager;
-    this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    this.currentUserAccount = modelManager.retrieve('app.model.account');
-    this.$state = $state;
-    this.hceRegistration = hceRegistration;
-    this.hcfRegistration = hcfRegistration;
-    this.listPromiseResolved = false;
+    var currentUserAccount = modelManager.retrieve('app.model.account');
+
+    this.initialised = false;
     this.listError = false;
 
-    this.serviceInstances = {};
-    if (this.serviceInstanceModel.serviceInstances.length > 0) {
+    if (_haveCachedEndpoints()) {
       // serviceInstanceModel has previously been updated
       // to decrease load time, we will use that data.
-      // we will still refresh the data asyncronously and the UI will update to relect and changes
-      this.listPromiseResolved = true;
-      _updateLocalServiceInstances();
+      // we will still refresh the data asynchronously and the UI will update to reflect changes
+      _updateEndpointsFromCache();
     }
-    // Show welcome message only if no endpoints are registered
-    this.showWelcomeMessage = this.serviceInstanceModel.serviceInstances.length === 0;
-    this.$q = $q;
 
     // Ensure any app errors we have set are cleared when the scope is destroyed
     $scope.$on('$destroy', function () {
-      errorService.clearAppError();
+      serviceInstanceService.clear();
     });
-
-    _updateEndpoints();
 
     /**
      * @namespace app.view.endpoints.dashboard
      * @memberof app.view.endpoints.dashboard
-     * @name showClusterAddForm
-     * @description Show cluster add form
-     * @param {boolean} isHcf  when true show cluster add form for HCF
+     * @name register
+     * @description Register a service endpoint
+     * @param {string} type - type of endpoint being registered. selects the initial 'type' drop down value
      */
-    this.showClusterAddForm = function (isHcf) {
-      var that = this;
-      if (isHcf) {
-        this.hcfRegistration.add()
-          .then(function () {
-            return that._updateEndpoints;
-          });
-      } else {
-        this.hceRegistration.add()
-          .then(function () {
-            return that._updateEndpoints;
-          });
-      }
+    this.register = function (type) {
+      registerService.add($scope, type).then(function () {
+        _updateEndpoints();
+      });
     };
 
     /**
@@ -116,76 +94,83 @@
      * @returns {Boolean}
      */
     this.isUserAdmin = function () {
-      return that.currentUserAccount.isAdmin();
+      return currentUserAccount.isAdmin();
     };
 
     /**
      * @function reload
      * @memberOf app.view.endpoints.dashboard
-     * @description Reload the curent view (used if there was an error loading the dashboard)
+     * @description Reload the current view (used if there was an error loading the dashboard)
      */
     this.reload = function () {
       $state.reload();
     };
 
-    /**
-     * @function _updateLocalServiceInstances
-     * @memberOf app.view.endpoints.dashboard
-     * @description Updates local service instances
-     * @private
-     */
-    function _updateLocalServiceInstances() {
-      if (that.showWelcomeMessage && that.serviceInstanceModel.serviceInstances.length > 0) {
-        that.showWelcomeMessage = false;
+    function init() {
+      _updateEndpoints().then(function () {
+        _updateWelcomeMessage();
+      });
+    }
+
+    utilsService.chainStateResolve('endpoint.dashboard', $state, init);
+
+    function _updateWelcomeMessage() {
+      // Show the welcome message if either...
+      if (that.isUserAdmin()) {
+        // The user is admin and there are no endpoints registered
+        that.showWelcomeMessage = that.endpoints.length === 0;
+      } else {
+        // The user is not admin and there are no connected endpoints (note - they should never reach here if there
+        // are no registered endpoints)
+        that.showWelcomeMessage = !_.find(that.endpoints, { connected: 'connected' });
       }
-      _.forEach(that.serviceInstanceModel.serviceInstances, function (serviceInstance) {
-        var guid = serviceInstance.guid;
-        if (angular.isUndefined(that.serviceInstances[guid])) {
-          that.serviceInstances[guid] = serviceInstance;
-        } else {
-          angular.extend(that.serviceInstances[guid], serviceInstance);
+    }
+
+    function _haveCachedEndpoints() {
+      return serviceInstanceService.haveInstances();
+    }
+
+    function _updateEndpointsFromCache() {
+      if (that.endpoints) {
+        that.endpoints.length = 0;
+      } else {
+        that.endpoints = [];
+      }
+      return $q.all([serviceInstanceService.createEndpointEntries(that.endpoints)]).then(function (results) {
+
+        _.forEach(results, function (result) {
+          Array.prototype.push.apply(that.endpoints, result);
+        });
+
+        if (!that.initialised) {
+          // Show welcome message only if this is the first time around and there no endpoints
+          _updateWelcomeMessage();
         }
+
+        that.initialised = true;
       });
     }
 
     /**
      * @function _updateEndpoints
      * @memberOf app.view.endpoints.dashboard
-     * @description Is current user an admin?
+     * @description update the models supporting the endpoints dashboard and refresh the local endpoints list
      * @returns {object} a promise
      * @private
      */
     function _updateEndpoints() {
-      return that.$q.all([that.serviceInstanceModel.list(), that.userServiceInstanceModel.list()])
-        .then(function () {
-
-          var errors = _.filter(that.userServiceInstanceModel.serviceInstances, {error: true});
-          errors = _.map(errors, 'name');
-
-          var userServicesCount = Object.keys(that.userServiceInstanceModel.serviceInstances).length;
-
-          // Ensure the wording of any errors do not use 'connect' to avoid misleading 'connected' stats in tiles.
-          // (otherwise we need to add additional 'errored' line to tiles)
-          if (!userServicesCount || errors.length === 0) {
-            // If there are no services or no errors continue as normal
-            errorService.clearAppError();
-          } else if (errors.length === 1) {
-            var errorMessage = gettext('The Console could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.');
-            errorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
-          } else if (errors.length > 1) {
-            errorService.setAppError(gettext('The Console could not contact multiple endpoints.'));
-          }
-
-        })
+      return $q.all([serviceInstanceService.updateInstances()])
         .then(function () {
           that.listError = false;
-          _updateLocalServiceInstances();
         })
         .catch(function () {
           that.listError = true;
         })
+        .then(function () {
+          return _updateEndpointsFromCache(that.endpoints);
+        })
         .finally(function () {
-          that.listPromiseResolved = true;
+          that.intialised = true;
         });
     }
   }

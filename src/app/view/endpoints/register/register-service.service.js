@@ -30,11 +30,7 @@
 
     function createInstances(serviceInstances, filter) {
       var filteredInstances = _.filter(serviceInstances, {cnsi_type: filter});
-      return _.map(filteredInstances,
-        function (c) {
-          var endpoint = c.api_endpoint;
-          return endpoint.Scheme + '://' + endpoint.Host;
-        });
+      return _.map(filteredInstances, utilsService.getClusterEndpoint);
     }
 
     return {
@@ -42,30 +38,55 @@
        * @name add
        * @description Opens slide out containing registration form
        * @namespace app.view.registerService.ServiceRegistrationService
-       * @param {string} type The type of service. For example hce or hcf
-       * @param {string} title The title of the detail view
-       * @param {string=} description optional description to add in the detail view
-       * @param {string=} urlHint optional hint to use for the URL field
+       * @param {object} $scope - the angular scope object
+       * @param {string} type - the default starting endpoint type
        * @returns {promise}
        */
-      add: function (type, title, description, urlHint) {
+      add: function ($scope, type) {
+        var serviceTypes = [{
+          label: gettext('Helion Cloud Foundry'),
+          value: 'hcf'
+        },{
+          label: gettext('Helion Code Engine'),
+          value: 'hce'
+        }];
+        var startingType = _.find(serviceTypes, { value: type });
+        startingType = startingType ? startingType : serviceTypes[0];
         var data = {
           name: '',
+          type: startingType.value,
           url: '',
           skipSslValidation: false
         };
         var context = {
           data: data,
-          instances: createInstances(serviceInstanceModel.serviceInstances, type),
-          description: description,
-          urlHint: urlHint,
-          urlFormName: type + 'Url',
-          nameFormName: type + 'Name',
+          types: serviceTypes,
+          description: gettext('Select an endpoint type, then enter it\'s URL and a name to use for this endpoint in the Console.'),
+          urlFormName: startingType.value + 'Url',
+          nameFormName: startingType.value + 'Name',
           urlValidationExpr: utilsService.urlValidationExpression
         };
+        $scope.$watch(function () { return data.type; }, function (type) {
+          context.instances = createInstances(serviceInstanceModel.serviceInstances, type);
+          switch (data.type) {
+            case 'hcf':
+              context.typeLabel = gettext('Helion Cloud Foundry');
+              context.urlHint = gettext('Helion Cloud Foundry API endpoint');
+              break;
+            case 'hce':
+              context.typeLabel = gettext('Helion Code Engine');
+              context.urlHint = gettext('Helion Code Engine endpoint');
+              break;
+            default:
+              context.typeLabel = gettext('Service Endpoint');
+              context.urlHint = gettext('');
+              break;
+          }
+        });
+
         return asyncTaskDialog(
           {
-            title: title,
+            title: gettext('Register Service Endpoint'),
             templateUrl: 'app/view/endpoints/register/register-service.html',
             class: 'detail-view-thin',
             buttonTitles: {
@@ -79,11 +100,10 @@
               delete context.errorMsg;
               delete context.customErrorMsg;
             }
-            return serviceInstanceModel.create(type, data.url, data.name, data.skipSslValidation).then(function (serviceInstance) {
-              var typeString = 'Helion ' + (type === 'hcf' ? 'Cloud Foundry' : 'Code Engine');
+            return serviceInstanceModel.create(data.type, data.url, data.name, data.skipSslValidation).then(function (serviceInstance) {
               notificationsService.notify('success',
                 gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
-                {endpointType: typeString, name: data.name});
+                {endpointType: context.typeLabel, name: data.name});
               return serviceInstance;
             }).catch(function (response) {
               if (response.status === 403) {

@@ -14,6 +14,7 @@
       $httpBackend = $injector.get('$httpBackend');
 
       var modelManager = $injector.get('app.model.modelManager');
+      var apiManager = $injector.get('app.api.apiManager');
       var $stateParams = $injector.get('$stateParams');
       $stateParams.guid = clusterGuid;
       var $scope = $injector.get('$rootScope').$new();
@@ -30,7 +31,7 @@
       });
 
       var ClusterController = $state.get('endpoint.clusters.cluster.detail').controller;
-      $controller = new ClusterController(modelManager, $stateParams, $scope, utils, $state, $q, cliCommands);
+      $controller = new ClusterController($stateParams, $scope, $state, $q, modelManager, apiManager,utils, cliCommands);
 
     }));
 

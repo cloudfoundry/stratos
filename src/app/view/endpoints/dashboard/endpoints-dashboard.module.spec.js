@@ -1,120 +1,167 @@
+/* eslint-disable angular/json-functions */
 (function () {
   'use strict';
 
   describe('endpoint dashboard tests', function () {
-    var $httpBackend, $q, controller, modelManager;
-    var detailViewCalled = false;
+    var $httpBackend, $q, controller, modelManager, registerServiceCalled, registerServiceType, $scope;
+
+    var validService = {
+      api_endpoint: {
+        Scheme: 'http',
+        Host: 'api.foo.com'
+      },
+      cnsi_type: 'hcf',
+      guid: '1',
+      name: 'c1',
+      token_expiry: Number.MAX_VALUE
+    };
+    var validServicesEndpoint = {
+      key: 'cnsi_1',
+      name: 'c1',
+      connected: 'connected',
+      type: 'Helion Cloud Foundry'
+    };
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
+    beforeEach(module({
+      'app.utils.utilsService': {
+        chainStateResolve: function (state, $state, init) {
+          init();
+        },
+        getClusterEndpoint: function () {
+          return '';
+        }
+      }
+    }));
     beforeEach(module('app.view.endpoints.dashboard'));
     beforeEach(module(function ($provide) {
-      var mock = function () {
-        detailViewCalled = true;
+      var mock = function (config, context) {
+        registerServiceCalled = true;
+        expect(context.data.type).toBe(registerServiceType);
         return {rendered: $q.resolve(), result: $q.reject()};
       };
       $provide.value('helion.framework.widgets.detailView', mock);
     }));
 
-    function createController($injector, initializeServiceInstances) {
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
+
+    function createController($injector, isAdmin) {
+      registerServiceCalled = false;
       $httpBackend = $injector.get('$httpBackend');
       $q = $injector.get('$q');
       var $state = $injector.get('$state');
-      var $scope = $injector.get('$rootScope').$new();
-      var $interpolate = $injector.get('$interpolate');
+      $scope = $injector.get('$rootScope').$new();
 
       modelManager = $injector.get('app.model.modelManager');
-      var hceReg = $injector.get('app.view.hceRegistration');
-      var hcfReg = $injector.get('app.view.hcfRegistration');
-      var errorService = $injector.get('app.error.errorService');
+      var registerService = $injector.get('app.view.registerService');
+      var utils = $injector.get('app.utils.utilsService');
+      var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.serviceInstanceService');
 
       // Patch user account model
       var userModel = modelManager.retrieve('app.model.account');
       userModel.accountData = {
-        isAdmin: true
+        isAdmin: isAdmin
       };
 
-      var items = [{
-        guid: '1',
-        name: 'c1',
-        url: 'c1_url',
-        api_endpoint: {
-          Scheme: 'http',
-          Host: 'api.foo.com'
-        }
-      }];
+      var items = [validService];
 
       modelManager.register('app.model.account', userModel);
 
-      if (initializeServiceInstances) {
-         // Initialise serviceInstance Model
-        var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-        serviceInstanceModel.serviceInstances = items;
-        modelManager.register('app.model.serviceInstance', serviceInstanceModel);
-      }
-
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($scope, $interpolate, modelManager, $state, hceReg, hcfReg, errorService, $q);
+      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, serviceInstanceService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
       $httpBackend.whenGET('/pp/v1/proxy/v2/info').respond(200, {});
+      $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, {});
+      $httpBackend.whenGET('/pp/v1/stackato/info').respond(200, {});
     }
 
     describe('controller tests', function () {
 
       beforeEach(inject(function ($injector) {
-        createController($injector, false);
+        createController($injector, true);
       }));
 
-      it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
-        controller.showClusterAddForm();
-        expect(detailViewCalled).toBe(true);
-      });
-
-      it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
-        controller.showClusterAddForm();
-        expect(detailViewCalled).toBe(true);
+      it('should set showWelcomeMessage flag to false', function () {
+        controller.showWelcomeMessage = true;
+        expect(controller.showWelcomeMessage).toBeTruthy();
+        controller.hideWelcomeMessage();
+        expect(controller.showWelcomeMessage).toBeFalsy();
+        $httpBackend.flush();
       });
 
       it('should show cluster registration detail view when showClusterAddForm is invoked for hce', function () {
-        controller.showClusterAddForm();
-        expect(detailViewCalled).toBe(true);
+        registerServiceType = 'hce';
+        controller.register(registerServiceType);
+        $scope.$digest();
+        expect(registerServiceCalled).toBe(true);
+        $httpBackend.flush();
       });
 
       it('should show cluster registration detail view when showClusterAddForm is invoked for hcf', function () {
-
-        controller.showClusterAddForm(true);
-        expect(detailViewCalled).toBe(true);
-      });
-
-      it('should update serviceInstances', function () {
+        registerServiceType = 'hcf';
+        controller.register();
+        $scope.$digest();
+        expect(registerServiceCalled).toBe(true);
         $httpBackend.flush();
-        expect(true).toBe(true);
       });
 
-      it('should say if user is an admin', function () {
-        expect(controller.isUserAdmin()).toBe(true);
+      it('should be uninitialised', function () {
+        expect(controller.endpoints).toBeUndefined();
+        expect(controller.initialised).toBe(false);
+        $httpBackend.flush();
       });
 
-      it('should show `serviceInstances` uninitialized', function () {
-        expect(controller.serviceInstances).toEqual({});
+      it('should be initialised', function () {
+        $httpBackend.flush();
+        expect(controller.initialised).toBe(true);
+        expect(controller.endpoints).toBeDefined();
+        expect(controller.endpoints.length).toBe(1);
+        if (!_.some(controller.endpoints, validServicesEndpoint)) {
+          fail('Could not find endpoint with values: ' + JSON.stringify(validServicesEndpoint));
+        }
       });
 
-      it('should set showWelcomeMessage flag to false', function () {
-        controller.hideWelcomeMessage();
-        expect(controller.showWelcomeMessage).toBe(false);
+      it('initialisation fails', function () {
+        $httpBackend.expect('GET', '/pp/v1/cnsis').respond(500, {});
+        $httpBackend.flush();
+        expect(controller.initialised).toBe(true);
+        expect(controller.endpoints).toBeDefined();
+        expect(controller.endpoints.length).toBe(0);
+        expect(controller.listError).toBeTruthy();
       });
     });
 
-    describe('extended controller tests', function () {
+    describe('non admin', function () {
+      beforeEach(inject(function ($injector) {
+        createController($injector, false);
+      }));
 
+      afterEach(function () {
+        $httpBackend.flush();
+      });
+
+      it('should say if user is an admin', function () {
+        expect(controller.isUserAdmin()).toBe(false);
+      });
+    });
+
+    describe('admin', function () {
       beforeEach(inject(function ($injector) {
         createController($injector, true);
       }));
 
-      it('should show `serviceInstances` initialized', function () {
-        expect(_.keys(controller.serviceInstances).length).toBe(1);
+      afterEach(function () {
+        $httpBackend.flush();
+      });
+
+      it('should say if user is an admin', function () {
+        expect(controller.isUserAdmin()).toBe(true);
       });
     });
   });
