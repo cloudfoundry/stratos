@@ -2,6 +2,35 @@
 
 $applications-msg-height: 50px;
 
+.application-wall-header {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.application-header-centre {
+  flex-grow: 1;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  .form-group {
+    height: 40px;
+  }
+  .search-field {
+    display: flex;
+    div {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      input {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
 .applications-header {
   font-size: $hpe-unit-space;
 

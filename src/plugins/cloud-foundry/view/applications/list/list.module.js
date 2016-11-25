@@ -106,6 +106,9 @@
       }
 
       return $q.resolve()
+        .then(function () {
+          that.filter.text = that.model.filterParams.text;
+        })
         .then(_.bind(that._setClusters, that))
         .then(_.bind(that._setOrgs, that))
         .then(_.bind(that._setSpaces, that))
@@ -281,15 +284,16 @@
      * @function _reload
      * @description Reload the application wall
      * @param {boolean=} retainPage Attempt to retain the current page after pagination has reloaded
+     * @param {boolean=} fromCache Reset pagination (and apps) from cache instead of service
      * @returns {promise} A promise
      * @private
      */
-    _reload: function (retainPage) {
+    _reload: function (retainPage, fromCache) {
       var that = this;
       var reloadPage = retainPage ? that.model.appPage : 1;
       this.loading = true;
 
-      return this.model.resetPagination()
+      return this.model.resetPagination(fromCache)
         .then(function () {
           that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
 
@@ -392,6 +396,11 @@
     setSpace: function () {
       this.model.filterParams.spaceGuid = this.filter.spaceGuid;
       this._reload();
+    },
+
+    setText: function () {
+      this.model.filterParams.text = this.filter.text;
+      this._reload(true, true);
     },
 
     /**
