@@ -14,7 +14,7 @@
     font-size: $font-size-large;
     text-transform: none;
     height: auto;
-    padding: $hpe-unit-space/2 $hpe-unit-space;
+    padding: $hpe-unit-space * 0.5 $hpe-unit-space;
 
     &:active,
     &:focus,
@@ -39,8 +39,8 @@
 .application-header {
   @include flex-vertical-centered();
   font-size: $hpe-unit-space;
-  padding-top: $hpe-unit-space;
-  padding-bottom: $hpe-unit-space * 0.5;
+  padding: 0;
+  height: $main-nav-title-height;
 
   .action-target-state, .bounce-spinner {
     margin-left: $hpe-unit-space;
