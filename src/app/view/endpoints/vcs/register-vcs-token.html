@@ -1,0 +1,31 @@
+<div style="display: flex; flex-flow: row nowrap" class="register-token">
+  <div style="flex: 1 0 250px" class="register-token-description" ng-bind-html="asyncTaskDialogCtrl.context.description"></div>
+  <div style="width: 50px"></div>
+  <form style="flex: 3 1 0" name="form.registerVcsToken">
+    <div style="width: 100%" class="form-group" focusable-input
+         ng-class="{'has-error': form.registerVcsToken.tokenName.$dirty && form.registerVcsToken.tokenName.$invalid}">
+      <label class="control-label" translate>Token Name</label>
+      <span class="control-message">
+      <span translate ng-if="form.registerVcsToken.tokenName.$error.required">Token Name is required</span>
+      <span translate ng-if="form.registerVcsToken.tokenName.$error.helionUnique">Token Name must be unique within a VCS</span>
+    </span>
+      <input type="text" name="tokenName" auto-focus="300" class="form-control"
+             helion-unique items="asyncTaskDialogCtrl.context.data.tokenNames"
+             ng-model="asyncTaskDialogCtrl.context.data.name" required/>
+      <br><br>
+    </div>
+    <div style="width: 100%" class="form-group" focusable-input
+         ng-class="{'has-error': form.registerVcsToken.tokenValue.$dirty && form.registerVcsToken.tokenValue.$invalid}">
+      <label class="control-label" translate>Personal Access Token</label>
+      <span class="control-message">
+      <span translate ng-if="form.registerVcsToken.tokenValue.$error.required">Token Value is required</span>
+      <span translate ng-if="form.registerVcsToken.tokenValue.$error.pattern">Token Value must be a valid GitHub Personal Access Token</span>
+    </span>
+      <input type="text" name="tokenValue" class="form-control"
+             ng-model="asyncTaskDialogCtrl.context.data.value" required
+             ng-pattern="asyncTaskDialogCtrl.context.tokenPattern"/>
+      <br><br>
+    </div>
+  </form>
+
+</div>

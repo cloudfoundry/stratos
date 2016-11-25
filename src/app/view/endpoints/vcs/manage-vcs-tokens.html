@@ -1,0 +1,52 @@
+<div>
+  <div class="manage-tokens">
+    <p>
+      You can connect to the {{ asyncTaskDialogCtrl.context.vcs.label }} by creating a
+      <a href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>
+      and providing the given string here.
+    </p>
+    <p>
+      Personal access tokens work the same as OAuth tokens. These tokens allow Stackato to access GitHub on your behalf to build your applications.
+    </p>
+    <p style="font-style: italic">
+      If you have revoked a token or mistyped its value, you can delete it using the action menu.
+    </p>
+    <p>
+
+    </p>
+  </div>
+  <div ng-if="asyncTaskDialogCtrl.context.tokens.length"
+       class="endpoints-table">
+    <table class="table table-actionable"
+           st-table="asyncTaskDialogCtrl.context.stTableTokens"
+           st-safe-src="asyncTaskDialogCtrl.context.tokens">
+      <thead>
+      <tr>
+        <th translate st-sort="entity.name" st-sort-default="true">Name</th>
+        <th translate st-sort="entity.connected">Connection</th>
+        <th translate st-sort="entity.url">Token</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="vcsToken in asyncTaskDialogCtrl.context.stTableTokens track by vcsToken.token.guid"
+          show-table-inline-message="{{ vcsToken.error ? vcsToken.error.message : '' }}"
+          table-inline-status="{{vcsToken.error.status}}">
+        <td>{{ vcsToken.token.name }}</td>
+        <td ng-switch="asyncTaskDialogCtrl.context.isTokenValid(vcsToken)">
+            <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
+                  ng-switch-when="true"></span>
+          <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
+                ng-switch-when="false"></span>
+        </td>
+        <td style="letter-spacing: 0.05em;">{{ vcsToken.token.token }}</td>
+        <td>
+          <actions-menu actions="asyncTaskDialogCtrl.context.actions"
+                        action-target="vcsToken" menu-icon="helion-icon helion-icon-More"
+                        menu-position="actions-menu-right" enable-button-mode="true"></actions-menu>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

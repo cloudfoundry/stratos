@@ -60,23 +60,23 @@
      * @function listVcsClients
      * @memberof cloud-foundry.model.vcs.VcsModel
      * @description Get the list of valid VCS clients
-     * @param {boolean} forceFetch - force fetch VCS clients
      * @returns {promise} A promise object
      * @public
      */
-    listVcsClients: function (forceFetch) {
-      // FIXME: this should always fetch
-      if (forceFetch || this.vcsClients === null) {
-        var that = this;
-        return this.apiManager.retrieve('cloud-foundry.api.Vcs')
-          .listVcsClients()
-          .then(function (res) {
-            that.vcsClients = res.data;
-            return res.data;
+    listVcsClients: function () {
+      var that = this;
+      return this.apiManager.retrieve('cloud-foundry.api.Vcs')
+        .listVcsClients()
+        .then(function (res) {
+
+          // Filter out unsupported clients
+          var supported = _.filter(res.data, function (vcs) {
+            return VCS_TYPES[that._expandVcsType(vcs)];
           });
-      }
-      // Re-use cached data
-      return this.$q.resolve(this.vcsClients);
+
+          that.vcsClients = supported;
+          return supported;
+        });
     },
 
     registerVcsToken: function (vcsGuid, tokenName, tokenValue) {
@@ -169,7 +169,7 @@
       var that = this;
       return this.listVcsTokens().then(function () {
         var supported = _.filter(that.vcsTokens, function (vcsToken) {
-          var vcsInfo = VCS_TYPES[that._expandVcsType(vcsToken)];
+          var vcsInfo = VCS_TYPES[that._expandVcsType(vcsToken.vcs)];
           return vcsInfo && vcsInfo.supported && _.find(hceVcsInstances, function (hceVcs) {
             return hceVcs.browse_url === vcsToken.vcs.browse_url;
           });
@@ -202,16 +202,15 @@
     /**
      * @function _expandVcsType
      * @memberof cloud-foundry.model.vcs.VcsModel
-     * @description Returns more detailed CS type name from VCS instance metadata
+     * @description Returns more detailed VCS type name from VCS instance metadata
      * @param {object} vcs - VCS Instance Metadata
      * @returns {string} VCS type - expanded to split types like GitHub to GitHub and GitHub Enterprise
      * @private
      */
     _expandVcsType: function (vcs) {
-      // FIXME: sort this out
-      var expType = vcs.vcs.vcs_type;
+      var expType = vcs.vcs_type;
       if (expType === 'github') {
-        if (vcs.vcs.browse_url && vcs.vcs.browse_url.indexOf('https://github.com') === -1) {
+        if (vcs.browse_url && vcs.browse_url.indexOf('https://github.com') === -1) {
           expType = 'GITHUB_ENTERPRISE';
         } else {
           expType = 'GITHUB';

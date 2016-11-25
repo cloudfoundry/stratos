@@ -7,19 +7,19 @@
 
   vcsServiceFactory.$inject = [
     '$q',
-    'app.model.modelManager'
+    'app.model.modelManager',
+    'app.view.manageVcsTokens'
   ];
 
   /**
-   * @namespace app.view.endpoints.dashboard
-   * @memberOf app.view.endpoints.dashboard
-   * @name serviceInstanceService
-   * @description provide functionality to support cnsi service instances (cnsisi..) in the endpoints dashboard
+   * @name vcsService
+   * @description provide functionality to view and manage VCS endpoints in the endpoints dashboard
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {object} manageVcsTokens - the manage VCS tokens service
    * @returns {object} the vcs instance service
    */
-  function vcsServiceFactory($q, modelManager) {
+  function vcsServiceFactory($q, modelManager, manageVcsTokens) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
@@ -153,7 +153,9 @@
     }
 
     function _manage(endpoints, vcs) {
-      console.log('TODO: manage VCS: ', vcs);
+      return manageVcsTokens.manage(vcs).then(function () {
+        console.log('After manage, TODO: refresh VCS');
+      });
     }
 
   }
