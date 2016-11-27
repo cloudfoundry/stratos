@@ -52,6 +52,7 @@
     this.vcsClients = null;
     this.supportedVcsInstances = [];
     this.validTokens = {};
+    this.vcsTokens = [];
   }
 
   angular.extend(VcsModel.prototype, {

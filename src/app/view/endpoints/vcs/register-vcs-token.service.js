@@ -18,12 +18,14 @@
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
+   * @param {app.view.notificationsService} notificationsService - the Console toast notification service
    * @property {function} add Opens slide out containing registration form
    * @constructor
    */
   function RegisterVcsTokenService($q, asyncTaskDialog, notificationsService, modelManager) {
 
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+
     return {
       /**
        * @name registerToken
@@ -36,12 +38,18 @@
         if (vcs.vcs_type === 'github') {
           tokenPattern = /[0-9a-f]{40}/;
         }
+        var tokenNames = _.map(_.filter(vcsModel.vcsTokens, function (t) {
+          return t.vcs.guid === vcs.guid;
+        }), function (t) {
+          return t.token.name;
+        });
         var context = {
           vcs: vcs,
           description: gettext('<p>To connect to the ' +
             vcs.label + ', register a <a href="' + vcs.browse_url + '/settings/tokens" target="_blank">Personal Access Token</a>.</p>' +
             '<p>Choose a name to help you identify the Token later on as the full token value will not be visible once you close this form.</p>'),
-          tokenPattern: tokenPattern
+          tokenPattern: tokenPattern,
+          tokenNames: tokenNames
         };
 
         return asyncTaskDialog(
