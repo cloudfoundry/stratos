@@ -38,7 +38,7 @@
    * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
    * @param {app.utils.utilsService} utilsService - the console utils service
    * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
-   * @param {app.utils.utilsService} utilsService - the console utils service
+   * @property {app.utils.utilsService} utilsService - the console utils service
    */
   function ApplicationSetupPipelineController($scope, detailView, utilsService) {
     this.detailView = detailView;
