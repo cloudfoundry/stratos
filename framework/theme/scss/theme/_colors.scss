@@ -44,6 +44,7 @@ $mortar:                $purple;
 // Status Colors
 $status-alert:          $seashell;
 $status-okay:           $gossamer;
+$status-success:        $gossamer;
 $status-warning:        $sunglow;
 $status-unknown:        $rule;
 $status-critical:       $carnation;
@@ -68,7 +69,7 @@ $gray-light:            $rule !default;
 $gray-lighter:          $seashell !default;
 
 $brand-primary:         $hpe-primary !default;
-$brand-success:         $turquoise !default;
+$brand-success:         $gossamer !default;
 $brand-info:            $cutty-sark !default;
 $brand-warning:         $sunglow !default;
 $brand-danger:          $carnation !default;

@@ -8,4 +8,20 @@
       margin-top: 100px;
     }
   }
+  /*
+  div.user-avatar div.actions-menu-icon .press-to-open {
+    border-color: #000;
+  }
+  */
 }
+
+$suse-primary: #02D35F;
+
+$page-header-fg: #fff !default;
+$page-header-bg: $suse-primary !default;
+
+$hpe-primary: $suse-primary !default;
+
+$page-header-active-fg: #000 !default;
+
+$actions-menu-hover-bg: $suse-primary;

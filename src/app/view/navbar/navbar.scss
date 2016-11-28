@@ -1,10 +1,15 @@
 @import "avatar/avatar";
 
-$main-nav-background-color: #444;
-$main-nav-item-height: 52px;
-$main-nav-item-active-bg-color: #737373;
-$user-avatar-size: 48px;
-$user-avatar-image-size: 36px;
+$main-nav-background-color: #444 !default;
+$main-nav-item-height: 52px !default;
+$user-avatar-size: 48px !default;
+$user-avatar-image-size: 36px !default;
+$page-header-active-fg: $brand-primary !default;
+
+$navbar-hover-fg: $white !default;
+$navbar-hover-bg: $brand-primary !default;
+$navbar-active-fg: $white !default;
+$navbar-active-bg: #737373 !default;
 
 // Nav Bar Header
 
@@ -62,7 +67,7 @@ navbar > nav.main-nav-header {
         cursor: pointer;
 
         &:hover {
-          color: $hpe-primary;
+          color: $page-header-active-fg;
         }
       }
     }
@@ -128,7 +133,8 @@ navbar > .main-nav-menu {
       }
 
       &.active {
-        background-color: $main-nav-item-active-bg-color;
+        background-color: $navbar-active-bg;
+        color: $navbar-active-fg;
       }
 
       > a {
@@ -214,14 +220,9 @@ navbar > .main-nav-menu {
         }
       }
 
-      &.active {
-        > a {
-          color: $white;
-        }
-      }
-
       &:hover {
-        background-color: $hpe-primary;
+        color: $navbar-hover-fg;
+        background-color: $navbar-hover-bg;
       }
     }
   }
@@ -345,7 +346,7 @@ navbar > .main-nav-menu {
 
 div.user-avatar {
   position: absolute;
-  right: 24px;
+  right: $hpe-unit-space;
   height: $user-avatar-size;
   top: ($page-header-height - $user-avatar-size) / 2;
   width: $user-avatar-size;
@@ -357,6 +358,7 @@ div.user-avatar {
     &.open .press-to-open {
       opacity: 1;
       transition: opacity .25s ease-in-out;
+      border: 1px solid $page-header-active-fg;
     }
   }
 
@@ -370,7 +372,6 @@ div.user-avatar {
     right: ($user-avatar-size - $user-avatar-image-size) / 2;
     top: ($user-avatar-size - $user-avatar-image-size) / 2;;
     border-radius: $user-avatar-image-size / 2;
-    border: 1px solid #777;
     height: $user-avatar-image-size;
     width: $user-avatar-image-size;
     background-image: url(app/view/assets/user-icon.png);
@@ -379,7 +380,6 @@ div.user-avatar {
       height: $user-avatar-image-size;
       width: $user-avatar-image-size;
       border-radius: $user-avatar-image-size / 2;
-      border: 1px solid $hpe-primary;
       opacity: 0;
       transition: opacity .25s ease-in-out;
       background-color: $hpe-primary;
@@ -392,18 +392,14 @@ div.user-avatar {
         font-family: "helion-icons";
         content: "\e980";
         text-align: center;
-        line-height: 36px;
-        margin-right: 1px;        
+        line-height: $user-avatar-image-size;
       }
 
       &:hover {
         opacity: 1;
         transition: opacity .25s ease-in-out;
+        border: 1px solid $page-header-active-fg;
       }
     }
-
-    &:hover {
-      border-color: $hpe-primary;
-    } 
   }
 }

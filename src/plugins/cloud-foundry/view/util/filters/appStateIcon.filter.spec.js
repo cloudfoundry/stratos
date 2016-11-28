@@ -9,8 +9,8 @@
       appStateIconFilter = $injector.get('appStateIconFilter');
     }));
 
-    it('should return `helion-icon-Active_S text-primary` for STARTED', function () {
-      var classes = 'helion-icon-Active_S text-primary';
+    it('should return `helion-icon-Active_S text-success` for STARTED', function () {
+      var classes = 'helion-icon-Active_S text-success';
       expect(appStateIconFilter('STARTED')).toBe(classes);
     });
 
@@ -32,7 +32,7 @@
     });
 
     it('should return icon for ok', function () {
-      var classes = 'helion-icon-Active_S text-primary';
+      var classes = 'helion-icon-Active_S text-success';
       expect(appStateIconFilter('ok')).toBe(classes);
     });
 

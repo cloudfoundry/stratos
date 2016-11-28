@@ -22,13 +22,13 @@
       var icon = '';
       switch (input) {
         case 'STARTED':
-          icon = 'helion-icon-Active_S text-primary';
+          icon = 'helion-icon-Active_S text-success';
           break;
         case 'STOPPED':
           icon = 'helion-icon-Critical_S text-danger';
           break;
         case 'ok':
-          icon = 'helion-icon-Active_S text-primary';
+          icon = 'helion-icon-Active_S text-success';
           break;
         case 'tentative':
           icon = 'helion-icon-Active_S text-tentative';
