@@ -11,7 +11,7 @@
       <img class="media-object" ng-src="/plugins/cloud-foundry/view/assets/hce/{{source.img}}"/>
     </div>
     <div class="media-body">
-      <h4 class="media-heading">{{ ::source.label }}</h4>
+      <h4 class="media-heading">{{ ::source.label }} - {{ ::source.token_name }}</h4>
       <h5 ng-if="source.browse_url"><a target="_blank" href="{{ ::source.browse_url }}">{{ ::source.browse_url }}</a></h5>
       <h5 ng-if="source.token_name">Token Name: {{ ::source.token_name }}</h5>
       <p>{{ ::source.description }}</p>
