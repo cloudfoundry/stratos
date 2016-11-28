@@ -85,14 +85,20 @@
 
         var allValid = true;
         var allInvalid = true;
+        var anyUnknown = false;
         for (var i = 0; i < filtered.length; i++) {
           var tokenGuid = filtered[i].token.guid;
           allValid = allValid && !!vcsModel.validTokens[tokenGuid];
           allInvalid = allInvalid && !vcsModel.validTokens[tokenGuid];
+          anyUnknown = anyUnknown || angular.isUndefined(vcsModel.validTokens[tokenGuid]);
         }
 
         if (allValid) {
           return 'connected';
+        }
+        // Show disconnected until the check comes back
+        if (anyUnknown) {
+          return 'unconnected';
         }
         if (allInvalid) {
           return 'error';

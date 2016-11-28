@@ -97,11 +97,7 @@
     _cacheValid: function (vcsToken) {
       var that = this;
       return function (res) {
-        if (res.valid === true) {
-          that.validTokens[vcsToken.token.guid] = true;
-        } else {
-          delete that.validTokens[vcsToken.token.guid];
-        }
+        that.validTokens[vcsToken.token.guid] = res.valid === true;
       };
     },
 
