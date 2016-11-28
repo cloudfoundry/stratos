@@ -64,6 +64,10 @@
     overflow-y: auto;
     padding: 0;
 
+    login-form {
+      flex: 1 1 auto;
+    }
+
     .login-form {
       > h1 {
         text-align: left;

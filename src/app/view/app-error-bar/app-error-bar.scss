@@ -42,12 +42,18 @@ app-error-bar {
 	&.errorbar-with-navbar {
 		.app-error-bar {
 			position: absolute;
-			top: $page-header-height;
-			left: 0;
+			top: $app-error-bar-height;
+			margin-left: $main-nav-width;
+		}
+
+		&.navbar-icons-only {
+			.app-error-bar {
+				margin-left: $main-nav-icons-width;
+			}
 		}
 	}
 }
 
 console-view.with-app-error-bar {
-	padding-top: $page-header-height  + $app-error-bar-height;
+	padding-top: $app-error-bar-height + $page-header-height;
 }

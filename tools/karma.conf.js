@@ -29,14 +29,23 @@
         'config.js',
         'plugins/*/plugin.config.js',
 
-        'lib/helion-ui-framework/dist/**/*.html', {
+        'lib/helion-ui-framework/dist/**/*.html',
+        {
           pattern: 'lib/helion-ui-framework/dist/images/*.png',
           watched: false,
           included: false,
           served: true,
           nocache: false
-        }, {
+        },
+        {
           pattern: 'plugins/cloud-foundry/view/assets/**/*.png',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
+        {
+          pattern: 'app/view/assets/**/*.png',
           watched: false,
           included: false,
           served: true,
@@ -89,7 +98,8 @@
 
       proxies: {
         '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
-        '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/'
+        '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/',
+        '/app/view/assets/': '/base/app/view/assets/'
       },
 
       reporters: ['progress', 'coverage']

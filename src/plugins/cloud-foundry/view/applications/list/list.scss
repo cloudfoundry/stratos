@@ -57,6 +57,12 @@ $applications-msg-height: 50px;
       margin-right: $hpe-unit-space / 2;
     }
 
+    .form-group {
+      width: 30%;
+      max-width: 324px;
+      min-width: 210px;
+    }
+
     .reset-link {
       align-self: center;
       flex-grow: 1;
