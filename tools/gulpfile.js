@@ -242,7 +242,9 @@
 
   // Generate the POT file to be translated
   gulp.task('translate:extract', function () {
+    /* eslint-disable no-warning-comments */
     //TODO: Need to include framework templates + js
+    /* eslint-enable  no-warning-comments */
     var sources = config.partials
       .concat(config.jsSourceFiles);
 
