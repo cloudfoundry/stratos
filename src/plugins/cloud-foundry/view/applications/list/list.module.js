@@ -136,18 +136,19 @@
      * @public
      */
     getNoAppsMessage: function () {
+      var text = gettext('You have no applications');
       if (this.model.filterParams.cnsiGuid !== 'all') {
         if (this.model.filterParams.orgGuid !== 'all') {
           if (this.model.filterParams.spaceGuid !== 'all') {
-            return gettext('This space has no applications.');
+            text = gettext('This space has no applications');
           } else {
-            return gettext('This organization has no applications.');
+            text = gettext('This organization has no applications');
           }
         } else {
-          return gettext('This endpoint has no applications.');
+          text = gettext('This endpoint has no applications');
         }
       }
-      return gettext('You have no applications.');
+      return text + (this.model.filterParams.text.length ? ' matching the search term.' : '.');
     },
 
     getEndpointsLink: function () {
@@ -416,7 +417,7 @@
       this.clusters = [];
       this.$timeout(function () {
         that.clusters = clusters;
-        that._setFilter({cnsiGuid: 'all'});
+        that._setFilter({cnsiGuid: 'all', text: ''});
         that.setCluster();
       }, 100);
     },
