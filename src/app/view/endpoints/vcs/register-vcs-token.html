@@ -1,11 +1,16 @@
-<div style="display: flex; flex-flow: row nowrap" class="register-token">
-  <div style="flex: 1 0 250px" class="register-token-description">
-    <p>To connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}', register a <a ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>.</p>
-    <p>Choose a name to help you identify the Token later on as the full token value will not be shown again once you submit this form.</p>
+<div class="register-token">
+  <div class="register-token-description">
+    <p translate>
+      To connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}', register a
+      <a ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>.
+    </p>
+    <p translate>
+      Choose a name to help you identify the Token later on as the full token value will not be shown again once you submit this form.
+    </p>
   </div>
-  <div style="width: 50px"></div>
-  <form style="flex: 3 1 0" name="form.registerVcsToken">
-    <div style="width: 100%" class="form-group" focusable-input
+  <div class="separator"></div>
+  <form name="form.registerVcsToken" class="register-form">
+    <div class="input-container form-group" focusable-input
          ng-class="{'has-error': form.registerVcsToken.tokenName.$dirty && form.registerVcsToken.tokenName.$invalid}">
       <label class="control-label" translate>Token Name</label>
       <span class="control-message">
@@ -17,7 +22,7 @@
              ng-model="asyncTaskDialogCtrl.context.data.name" required/>
       <br><br>
     </div>
-    <div style="width: 100%" class="form-group" focusable-input
+    <div class="input-container form-group" focusable-input
          ng-class="{'has-error': form.registerVcsToken.tokenValue.$dirty && form.registerVcsToken.tokenValue.$invalid}">
       <label class="control-label" translate>Personal Access Token</label>
       <span class="control-message">

@@ -145,7 +145,7 @@
 
     function _createInstanceActions(endpoints) {
       return [{
-        name: gettext('Manage'),
+        name: gettext('Manage Tokens'),
         execute: function (vcs) {
           _manage(endpoints, vcs);
         }
@@ -153,9 +153,7 @@
     }
 
     function _manage(endpoints, vcs) {
-      return manageVcsTokens.manage(vcs).then(function () {
-        console.log('After manage, TODO: refresh VCS');
-      });
+      return manageVcsTokens.manage(vcs);
     }
 
   }

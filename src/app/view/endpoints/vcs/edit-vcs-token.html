@@ -1,10 +1,11 @@
-<div style="display: flex; flex-flow: row nowrap" class="edit-token">
-  <div style="flex: 1 0 250px" class="edit-token-description">
-    Rename the '{{ asyncTaskDialogCtrl.context.token.token.name }}' Personal Access Token
+<div class="edit-token">
+  <div class="edit-token-description" translate>
+    <p translate>Rename the '{{ asyncTaskDialogCtrl.context.token.token.name }}' GitHub Personal Access Token.</p>
+    <p class="italic" translate>Note: Token names must be unique within each VCS</p>
   </div>
-  <div style="width: 50px"></div>
-  <form style="flex: 3 1 0" name="form.editVcsToken">
-    <div style="width: 100%" class="form-group" focusable-input
+  <div class="separator"></div>
+  <form name="form.editVcsToken" class="edit-form">
+    <div class="form-group" focusable-input
          ng-class="{'has-error': form.editVcsToken.tokenName.$dirty && form.editVcsToken.tokenName.$invalid}">
       <label class="control-label" translate>New Token Name</label>
       <span class="control-message">

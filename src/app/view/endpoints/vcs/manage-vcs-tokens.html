@@ -1,18 +1,16 @@
-<div>
-  <div class="manage-tokens">
-    <p>
-      You can connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}' by creating a
+<div class="manage-tokens">
+  <div class="manage-tokens-description">
+    <p translate>
+      You can connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}' by creating a GitHub
       <a ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>
-      and providing the given string here.
+      and providing the given token string here.
     </p>
-    <p>
-      Personal access tokens work are like traditional OAuth tokens but do not expire unless you manually revoke them. These tokens allow Stackato to access GitHub on your behalf to build your applications.
+    <p translate>
+      Personal access tokens work like traditional OAuth tokens but do not expire (unless you manually revoke them).
+      These tokens allow Stackato to access GitHub on your behalf to build your applications.
     </p>
-    <p style="font-style: italic">
+    <p class="italic" translate>
       If you have revoked a token or mistyped its value, you should delete it and register a new one.
-    </p>
-    <p>
-
     </p>
   </div>
   <div ng-if="asyncTaskDialogCtrl.context.tokens.length"
@@ -39,7 +37,7 @@
           <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
                 ng-switch-when="false"></span>
         </td>
-        <td style="letter-spacing: 0.05em;">{{ vcsToken.token.token }}</td>
+        <td class="token-value">{{ vcsToken.token.token }}</td>
         <td>
           <actions-menu actions="asyncTaskDialogCtrl.context.actions"
                         action-target="vcsToken" menu-icon="helion-icon helion-icon-More"

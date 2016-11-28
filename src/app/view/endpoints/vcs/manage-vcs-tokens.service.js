@@ -110,7 +110,7 @@
               templateUrl: 'app/view/endpoints/vcs/manage-vcs-tokens.html',
               class: 'detail-view',
               buttonTitles: {
-                submit: gettext('Connect Account'),
+                submit: gettext('Register New Token'),
                 cancel: gettext('Done')
               }
             },

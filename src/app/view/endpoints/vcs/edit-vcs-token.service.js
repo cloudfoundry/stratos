@@ -46,7 +46,7 @@
 
         return asyncTaskDialog(
           {
-            title: gettext('Edit a GitHub Personal Access Token'),
+            title: gettext('Rename a GitHub Personal Access Token'),
             templateUrl: 'app/view/endpoints/vcs/edit-vcs-token.html',
             class: 'detail-view',
             buttonTitles: {

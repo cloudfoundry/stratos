@@ -1,0 +1,53 @@
+.manage-tokens {
+  .italic {
+    font-style: italic;
+  }
+
+  .token-value {
+    letter-spacing: 0.05em;
+  }
+}
+
+.register-token {
+  display: flex;
+  flex-flow: row nowrap;
+
+  .register-token-description {
+    flex: 1 0 250px;
+  }
+
+  .separator {
+    flex: 0 0 40px;
+  }
+
+  .register-form {
+    flex: 3 1 0;
+    .form-group {
+      width: 100%;
+    }
+  }
+}
+
+.edit-token {
+  display: flex;
+  flex-flow: row nowrap;
+
+  .italic {
+    font-style: italic;
+  }
+
+  .edit-token-description {
+    flex: 1 0 250px;
+  }
+
+  .separator {
+    flex: 0 0 40px;
+  }
+
+  .edit-form {
+    flex: 3 1 0;
+    .form-group {
+      width: 100%;
+    }
+  }
+}
