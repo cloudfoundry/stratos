@@ -88,17 +88,16 @@
     },
 
     checkVcsToken: function (tokenGuid) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Vcs')
         .checkVcsToken(tokenGuid).then(function (res) {
+          that._cacheValid(tokenGuid, res.data.valid === true);
           return res.data;
         });
     },
 
-    _cacheValid: function (vcsToken) {
-      var that = this;
-      return function (res) {
-        that.validTokens[vcsToken.token.guid] = res.valid === true;
-      };
+    _cacheValid: function (tokenGuid, valid) {
+      this.validTokens[tokenGuid] = valid;
     },
 
     _tokenFinder: function (tokenGuid) {
@@ -109,7 +108,7 @@
 
     checkTokensValidity: function () {
 
-      // Cleanup stale tokens
+      // Cleanup cached validity of stale tokens
       for (var tokenGuid in this.validTokens) {
         if (!this.validTokens.hasOwnProperty(tokenGuid)) {
           continue;
@@ -121,9 +120,7 @@
 
       var promises = [];
       for (var i = 0; i < this.vcsTokens.length; i++) {
-        var vcsToken = this.vcsTokens[i];
-        var check = this.checkVcsToken(vcsToken.token.guid).then(this._cacheValid(vcsToken));
-        promises.push(check);
+        promises.push(this.checkVcsToken(this.vcsTokens[i].token.guid));
       }
 
       return this.$q.all(promises);

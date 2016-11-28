@@ -28,14 +28,16 @@
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     var tokenActions = [];
     var context = {
-      refreshTokens: function () {
-        return vcsModel.listVcsTokens().then(function (tokens) {
-          context.tokens = _.filter(tokens, function (t) {
-            return t.vcs.guid === context.vcs.guid;
-          });
-          vcsModel.checkTokensValidity();
+      tokens: []
+    };
+
+    context.refreshTokens = function () {
+      return vcsModel.listVcsTokens().then(function (tokens) {
+        context.tokens = _.filter(tokens, function (t) {
+          return t.vcs.guid === context.vcs.guid;
         });
-      }
+        vcsModel.checkTokensValidity();
+      });
     };
 
     function _edit(token) {
@@ -76,7 +78,8 @@
     }
 
     context.isTokenValid = function isTokenValid(token) {
-      return !!vcsModel.validTokens[token.token.guid];
+      token.valid = vcsModel.validTokens[token.token.guid];
+      return token.valid;
     };
     context.actions = tokenActions;
     context.disableAsyncIndicator = true;

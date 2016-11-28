@@ -13,16 +13,16 @@
       Note: if you have revoked or regenerated a token, you should delete it and register a new token.
     </p>
   </div>
-  <div ng-if="asyncTaskDialogCtrl.context.tokens.length"
+  <div ng-show="asyncTaskDialogCtrl.context.tokens.length"
        class="endpoints-table">
     <table class="table table-actionable"
            st-table="asyncTaskDialogCtrl.context.stTableTokens"
            st-safe-src="asyncTaskDialogCtrl.context.tokens">
       <thead>
       <tr>
-        <th translate st-sort="entity.name" st-sort-default="true">Name</th>
-        <th translate st-sort="entity.connected">Connection</th>
-        <th translate st-sort="entity.url">Token</th>
+        <th translate st-sort="token.name" st-sort-default="true">Name</th>
+        <th translate st-sort="valid">Connection</th>
+        <th translate>Token</th>
         <th></th>
       </tr>
       </thead>
