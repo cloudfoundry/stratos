@@ -1,0 +1,11 @@
+//== Ring Chart
+
+$ring-chart-svg-height: 140px;
+$ring-chart-svg-width: $ring-chart-svg-height;
+
+$ring-chart-unit-space: $hpe-unit-space;
+
+$ring-chart-ok-color: $status-okay;
+$ring-chart-warning-color: $status-warning;
+$ring-chart-critical-color: $status-critical;
+$ring-chart-unknown-color: $cutty-sark;

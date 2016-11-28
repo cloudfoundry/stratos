@@ -1,0 +1,19 @@
+@mixin hpe-box-shadow-small() {
+  box-shadow: $hpe-box-shadow-shape-small $hpe-box-shadow-color;
+}
+
+@mixin hpe-four-stepped-gradient($color-1: $gradient-default-color-1,
+                                 $color-2: $gradient-default-color-2,
+                                 $color-3: $gradient-default-color-3,
+                                 $color-4: $gradient-default-color-4) {
+  background-image: linear-gradient(to right,
+                                    $color-1,
+                                    $color-1 25%,
+                                    $color-2 25%,
+                                    $color-2 50%,
+                                    $color-3 50%,
+                                    $color-3 75%,
+                                    $color-4 75%,
+                                    $color-4 100%
+                                   );
+}

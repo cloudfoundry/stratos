@@ -1,0 +1,9 @@
+@mixin hpe-popover-alert($color, $bg-color) {
+  &.bottom > .arrow {
+    border-bottom-color: $bg-color;
+  }
+  .popover-content {
+    color: $color;
+    background: $bg-color;
+  }
+}

@@ -1,0 +1,13 @@
+.wizard-nav-item.complete {
+  a:after {
+    color: $hpe-primary;
+    content: $helion-icon-Checkmark;
+    font-family: 'helion-icons';
+    float: right;
+  }
+}
+
+.wizard-message {
+  margin-bottom: $hpe-unit-space / 2;
+  z-index: 2;
+}

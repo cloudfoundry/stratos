@@ -1,0 +1,23 @@
+.message-box {
+  background-color: $message-box-bg;
+  margin: $message-box-margin-vertical auto;
+  max-width: $message-box-max-width;
+  min-width: $message-box-min-width;
+  padding: $message-box-padding;
+  text-align: center;
+  width: $message-box-width;
+
+  &.message-box-no-bg {
+    background-color: transparent;
+  }
+
+  p,
+  .btn {
+    margin: $message-box-content-margin;
+  }
+
+  .message-box-busy {
+    font-size: 20px;
+    margin-bottom: $hpe-unit-space;
+  }
+}

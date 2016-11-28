@@ -1,0 +1,38 @@
+//
+// Breadcrumbs
+// --------------------------------------------------
+
+.breadcrumb {
+  border-bottom: $breadcrumb-border-width $breadcrumb-border-style $breadcrumb-border-color;
+  border-top: $breadcrumb-border-width $breadcrumb-border-style $breadcrumb-border-color;
+  height: $breadcrumb-container-height;
+  line-height: 1;
+  margin: 0;
+  width: 100%;
+
+  > li {
+    font-size: $breadcrumb-font-size;
+    font-weight: $breadcrumb-font-weight;
+    text-transform: capitalize;
+    vertical-align: middle;
+
+    > a {
+      color: $breadcrumb-color;
+
+      &:hover {
+        color: $breadcrumb-hover-color;
+        text-decoration: none;
+      }
+    }
+
+    + li:before {
+      font-weight: $breadcrumb-active-font-weight;
+      padding: 0 $breadcrumb-separator-padding;
+    }
+
+    &.active {
+      //color defaults to $breadcrumb-active-color
+      font-weight: $breadcrumb-active-font-weight;
+    }
+  }
+}

@@ -1,0 +1,112 @@
+// Detail View dialog
+
+.modal.detail-view.detail-view-dialog {
+  display: flex !important;
+  justify-content: center;
+  overflow: auto;
+  bottom: 0;
+
+  &.fade {
+
+    .modal-dialog {
+      transition: bottom 0.25s ease-in;
+      bottom: 50vw;
+    }
+
+    &.in .modal-dialog {
+      transition: bottom 0.25s ease-in;
+      bottom: 0;
+    }
+  }
+
+  // Standard dialog widths
+
+  &.dialog-form > .modal-dialog .detail-view-content {
+    width: $hpe-input-width + 2 * $hpe-unit-space;
+  }
+
+  &.dialog-form-large > .modal-dialog .detail-view-content {
+    width: $hpe-input-width * 1.25 + 2 * $hpe-unit-space;
+  }
+
+  > .modal-dialog {
+    left: 0;
+    height: auto;
+    align-self: center;
+    max-height: 100%;
+    width: auto;
+    box-shadow: 0px 0px 32px 2px rgba(0,0,0,0.5);
+
+    > .modal-content {
+      > .async-dialog {
+        margin: 0;
+
+        .detail-view-content {
+          ng-include {
+            margin: 0 $hpe-unit-space;
+          }
+        }
+
+        .async-indicator {
+          margin-top: $hpe-unit-space;
+          min-height: $hpe-unit-space;
+        }
+
+        .form-actions.modal-footer {
+          padding-top: $hpe-unit-space * 0.5;
+          margin-top: $hpe-unit-space;
+
+          .btn-default {
+            float: left;
+          }
+        }
+      }
+
+      .detail-view-content {
+        margin: 0;
+
+        .detail-view-header, .wizard-head {
+          margin: 0 $hpe-unit-space * 0.5;
+          padding: $hpe-unit-space * 0.5;
+          flex: 0 1 $hpe-unit-space * 3;
+          height: $hpe-unit-space * 3;
+        }
+
+        .detail-view-close {
+          top: $hpe-unit-space;
+          right: $hpe-unit-space;
+        }
+
+        wizard {
+          .wizard-foot {
+            min-height: initial;
+            height: initial;
+            padding: $hpe-unit-space;
+            display: block;
+            text-align: right;
+
+            .btn-default {
+              float: left;
+            }
+          }
+          .wizard-body {
+            margin: 0 $hpe-unit-space;
+            margin-bottom: $hpe-unit-space * 0.5;
+          }
+
+          .wizard-step {
+            padding: 0;
+
+            &.wizard-step-full {
+              width: 100%;
+
+              .message-box {
+                margin: $hpe-unit-space * 0.5 auto;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

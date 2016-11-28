@@ -1,0 +1,94 @@
+// buttons
+// =======
+
+// Base styles
+// -----------
+
+.btn {
+  border-width: $button-border-width;
+  font-weight: $button-font-weight;
+  height: $button-height;
+  text-transform: $button-text-transform;
+  @include button-size($padding-base-vertical, $button-horizontal-padding, $button-font-size, $button-line-height, $btn-border-radius-base);
+
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    @include opacity(.3);
+  }
+}
+
+// Alternate buttons
+// -----------------
+
+.btn-commit {
+  @include helion-button-variant($hpe-primary-bg, $brand-primary, $brand-primary, $button-focus-outline-width);
+}
+
+.btn-primary {
+  @include helion-button-variant(inherit, transparent, $brand-primary, $button-focus-outline-width);
+}
+
+.btn-default {
+  @include helion-button-variant(inherit, transparent, $gray-darker, $button-focus-outline-width);
+}
+
+.btn-success {
+  @include helion-button-variant(inherit, transparent, $btn-success-bg, $button-focus-outline-width);
+}
+
+.btn-info {
+  @include helion-button-variant(inherit, transparent, $btn-info-bg, $button-focus-outline-width);
+}
+
+.btn-warning {
+  @include helion-button-variant(inherit, transparent, $btn-warning-bg, $button-focus-outline-width);
+}
+
+.btn-danger {
+  @include helion-button-variant(inherit, transparent, $btn-danger-bg, $button-focus-outline-width);
+}
+
+.btn-link {
+  &[disabled],
+  fieldset[disabled] & {
+    &:hover,
+    &:focus {
+      color: $brand-primary;
+    }
+  }
+}
+
+// Button Sizes
+// ------------
+
+.btn-lg {
+  height: $button-height + 18px;
+  @include button-size($padding-large-vertical, $button-horizontal-padding-lg, $button-font-size-lg, $button-line-height-lg, $btn-border-radius-large);
+}
+.btn-sm {
+  height: $button-height - 8px;
+  @include button-size($padding-small-vertical, $button-horizontal-padding-sm, $button-font-size-sm, $button-line-height-sm, $btn-border-radius-small);
+}
+.btn-xs {
+  height: $button-height - 16px;
+  @include button-size($padding-xs-vertical, $button-horizontal-padding-xs, $button-font-size-xs, $button-line-height-xs, $btn-border-radius-small);
+}
+
+.btn-border-less {
+  display: inline-block;
+  color: $text-color;
+  text-decoration: none;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: $brand-primary;
+    text-decoration: none;
+  }
+}
+
+// Ensure the close cross doesn't have a focus outline
+button.close:focus {
+  outline: none;
+}

@@ -9,9 +9,11 @@ lib
 tools/test-backend/config/mock.config.json
 src/index.scss
 src/plugins/.plugins.scss
+src/framework.scss
 tools/.coverage-karma/
 tools/dev_config.json
 translations/js
 translations/**/*.mo
+framework/examples/dist/
 oem/scss
 oem/tmp
