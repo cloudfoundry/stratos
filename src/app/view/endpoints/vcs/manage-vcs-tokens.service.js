@@ -3,7 +3,7 @@
 
   angular
     .module('app.view')
-    .factory('app.view.manageVcsTokens', ManageVcsTokensService);
+    .factory('app.view.vcs.manageVcsTokens', ManageVcsTokensService);
 
   ManageVcsTokensService.$inject = [
     '$q',
@@ -11,7 +11,8 @@
     'helion.framework.widgets.asyncTaskDialog',
     'helion.framework.widgets.dialog.confirm',
     'app.view.notificationsService',
-    'app.view.registerVcsToken'
+    'app.view.vcs.registerVcsToken',
+    'app.view.vcs.editVcsToken'
   ];
 
   /**
@@ -23,7 +24,7 @@
    * @property {function} add Opens slide out containing registration form
    * @constructor
    */
-  function ManageVcsTokensService($q, modelManager, asyncTaskDialog, confirmDialog, notificationsService, registerVcsToken) {
+  function ManageVcsTokensService($q, modelManager, asyncTaskDialog, confirmDialog, notificationsService, registerVcsToken, editVcsToken) {
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     var tokenActions = [];
     var context = {
@@ -38,12 +39,22 @@
     };
 
     function _edit(token) {
-      console.log('TODO: edit token');
+      return editVcsToken.editToken(token).then(function (newName) {
+        if (newName === token.token.name) {
+          return;
+        }
+        notificationsService.notify('success', gettext("Personal Access Token '{{ name }}' successfully renamed to '{{ newName }}'"),
+          {
+            name: token.token.name,
+            newName: newName
+          });
+        // After a successful rename, refresh the list of tokens
+        return context.refreshTokens();
+      });
     }
 
     function _delete(token) {
-      console.log('TODO: delete token');
-      confirmDialog({
+      return confirmDialog({
         title: gettext('Delete Personal Access Token'),
         description: gettext('Are you sure you want to delete the') +
         " '" + token.token.name + "' Personal Access Token?",

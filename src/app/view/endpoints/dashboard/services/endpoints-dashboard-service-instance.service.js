@@ -10,6 +10,7 @@
     '$state',
     '$interpolate',
     'app.model.modelManager',
+    'app.view.endpoints.dashboard.vcsService',
     'app.utils.utilsService',
     'app.error.errorService',
     'app.view.notificationsService',
@@ -33,7 +34,7 @@
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @returns {object} the service instance service
    */
-  function cnsiServiceFactory($q, $state, $interpolate, modelManager, utilsService, errorService,
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, vcsService, utilsService, errorService,
                                          notificationsService, credentialsDialog, confirmDialog) {
     var that = this;
 
@@ -268,73 +269,8 @@
                 authModel.initializeForEndpoint(serviceInstance.guid);
                 break;
               case 'hce':
-                var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
-                vcsModel.listVcsClients().then(function (res) {
-                  _.forEach(res, function (aVcs) {
-                    if (aVcs.browse_url === 'https://github.com') {
-
-                      var goodToken = vcsModel.registerVcsToken(aVcs.guid, 'Julbra', '3b6440a73c2c601c25e96f315cb8661d9a1fb56e')
-                        .then(function (res) {
-                          console.log('Register response!', res);
-                        }, function (error) {
-                          console.log('Register failed! ', error);
-                        });
-
-                      var badToken = vcsModel.registerVcsToken(aVcs.guid, 'Julbra 2', '1b6440a73c2c601c25e96f315cb8661d9a1fb67f')
-                        .then(function (res) {
-                          console.log('Register response!', res);
-                        }, function (error) {
-                          console.log('Register failed! ', error);
-                        });
-
-                      $q.all([goodToken, badToken])
-                        .then(function () {
-                          return vcsModel.listVcsTokens();
-                        })
-                        .then(function (res) {
-                          console.log('List response!', res);
-                          _.forEach(res, function (tokenAndVcs) {
-                            var token = tokenAndVcs.token;
-                            console.log('Checking token!', token.name);
-                            vcsModel.checkVcsToken(token.guid).then(function (res) {
-                              console.log(token.name + ' valid? ', res.valid);
-                              if (!res.valid) {
-                                console.log('Renaming invalid token!');
-                                vcsModel.renameVcsToken(token.guid, token.name + '-invalid').then(function (res) {
-                                  console.log('Rename response ', res);
-                                  // console.log('Deleting invalid token!');
-                                  // vcsModel.deleteVcsToken(token.guid).then(function (res) {
-                                  //   console.log('Delete response ', res);
-                                  // }).catch(function (cause) {
-                                  //   console.log('Failed to delete token: ', cause);
-                                  // });
-                                }).catch(function (cause) {
-                                  console.log('Failed to rename token: ', cause);
-                                });
-                              }
-                            }).catch(function (cause) {
-                              console.log('Failed to check token: ' + token.name, cause);
-                            });
-                          });
-                          console.log('Checking bogus token!');
-                          vcsModel.checkVcsToken('invalid').then(function (res) {
-                            console.log('Bogus token valid? ', res.valid);
-                          }).catch(function (cause) {
-                            console.log('Failed to check bogus token: ', cause);
-                          });
-
-                          console.log('Deleting bogus token!');
-                          vcsModel.deleteVcsToken('invalid').then(function (res) {
-                            console.log('Delete bogus response ', res);
-                          }).catch(function (cause) {
-                            console.log('Failed to delete bogus token: ', cause);
-                          });
-                        });
-
-                    }
-                  });
-                }).catch(function (cause) {
-                  console.log('onConnectSuccess: hce ERROR: ', cause);
+                vcsService.updateInstances().then(function () {
+                  vcsService.updateInstancesCache(endpoints);
                 });
                 break;
             }

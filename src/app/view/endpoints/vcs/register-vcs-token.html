@@ -1,5 +1,8 @@
 <div style="display: flex; flex-flow: row nowrap" class="register-token">
-  <div style="flex: 1 0 250px" class="register-token-description" ng-bind-html="asyncTaskDialogCtrl.context.description"></div>
+  <div style="flex: 1 0 250px" class="register-token-description">
+    <p>To connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}', register a <a ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>.</p>
+    <p>Choose a name to help you identify the Token later on as the full token value will not be shown again once you submit this form.</p>
+  </div>
   <div style="width: 50px"></div>
   <form style="flex: 3 1 0" name="form.registerVcsToken">
     <div style="width: 100%" class="form-group" focusable-input
@@ -10,7 +13,7 @@
       <span translate ng-if="form.registerVcsToken.tokenName.$error.helionUnique">Token Name must be unique within a VCS</span>
     </span>
       <input type="text" name="tokenName" auto-focus="300" class="form-control"
-             helion-unique items="asyncTaskDialogCtrl.context.data.tokenNames"
+             helion-unique items="asyncTaskDialogCtrl.context.tokenNames"
              ng-model="asyncTaskDialogCtrl.context.data.name" required/>
       <br><br>
     </div>

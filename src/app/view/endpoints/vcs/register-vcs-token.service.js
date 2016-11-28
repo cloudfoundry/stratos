@@ -3,7 +3,7 @@
 
   angular
     .module('app.view')
-    .factory('app.view.registerVcsToken', RegisterVcsTokenService);
+    .factory('app.view.vcs.registerVcsToken', RegisterVcsTokenService);
 
   RegisterVcsTokenService.$inject = [
     '$q',
@@ -45,9 +45,6 @@
         });
         var context = {
           vcs: vcs,
-          description: gettext('<p>To connect to the ' +
-            vcs.label + ', register a <a href="' + vcs.browse_url + '/settings/tokens" target="_blank">Personal Access Token</a>.</p>' +
-            '<p>Choose a name to help you identify the Token later on as the full token value will not be visible once you close this form.</p>'),
           tokenPattern: tokenPattern,
           tokenNames: tokenNames
         };

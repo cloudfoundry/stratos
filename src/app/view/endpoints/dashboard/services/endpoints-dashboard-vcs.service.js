@@ -8,7 +8,7 @@
   vcsServiceFactory.$inject = [
     '$q',
     'app.model.modelManager',
-    'app.view.manageVcsTokens'
+    'app.view.vcs.manageVcsTokens'
   ];
 
   /**

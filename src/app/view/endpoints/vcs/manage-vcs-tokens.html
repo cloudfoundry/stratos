@@ -1,15 +1,15 @@
 <div>
   <div class="manage-tokens">
     <p>
-      You can connect to the {{ asyncTaskDialogCtrl.context.vcs.label }} by creating a
-      <a href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>
+      You can connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}' by creating a
+      <a ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>
       and providing the given string here.
     </p>
     <p>
-      Personal access tokens work the same as OAuth tokens. These tokens allow Stackato to access GitHub on your behalf to build your applications.
+      Personal access tokens work are like traditional OAuth tokens but do not expire unless you manually revoke them. These tokens allow Stackato to access GitHub on your behalf to build your applications.
     </p>
     <p style="font-style: italic">
-      If you have revoked a token or mistyped its value, you can delete it using the action menu.
+      If you have revoked a token or mistyped its value, you should delete it and register a new one.
     </p>
     <p>
 
