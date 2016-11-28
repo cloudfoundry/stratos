@@ -177,7 +177,7 @@
       [].push.apply(this.clusters, clusters);
       this.model.clusterCount = clusters.length;
 
-      // Reset filtered cluster if it's not longer valid
+      // Reset filtered cluster if it's no longer valid
       if (!_.find(this.clusters, { value: this.model.filterParams.cnsiGuid})) {
         this.model.filterParams.cnsiGuid = 'all';
       }
@@ -209,7 +209,7 @@
             var orgs = _.map(newOrgs, that._selectMapping);
             [].push.apply(that.organizations, orgs);
 
-            // Reset filtered organization if it's not longer valid
+            // Reset filtered organization if it's no longer valid
             if (!_.find(that.organizations, { value: that.model.filterParams.orgGuid})) {
               that.model.filterParams.orgGuid = 'all';
             }
@@ -247,7 +247,7 @@
             var spaces = _.map(newSpaces, that._selectMapping);
             [].push.apply(that.spaces, spaces);
 
-            // Reset filtered space if it's not longer valid
+            // Reset filtered space if it's no longer valid
             if (!_.find(that.spaces, { value: that.model.filterParams.spaceGuid})) {
               that.model.filterParams.spaceGuid = 'all';
             }
