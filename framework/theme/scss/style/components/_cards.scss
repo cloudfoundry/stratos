@@ -1,0 +1,55 @@
+.card {
+  &.panel {
+    color: $card-fg-color;
+
+    .panel-heading {
+      font-size: $card-heading-font-size;
+      padding: $card-padding;
+      position: relative;
+
+      .actions-menu {
+        position: inherit;
+
+        &.open .actions-menu-icon {
+          color: $brand-primary;
+        }
+      }
+
+      .actions-menu-icon {
+        font-size: 1.75em;
+        line-height: 0;
+        vertical-align: middle;
+      }
+
+      .actions-menu-list {
+        @include hpe-box-shadow-small();
+        border: none;
+        left: 100%;
+        top: 0;
+        margin-top: 0;
+        margin-left: 1px;
+        padding: 0;
+      }
+    }
+
+    .panel-body {
+      padding: $card-padding;
+    }
+  }
+
+  .dl-horizontal {
+    font-size: $card-list-font-size;
+    margin-bottom: 0;
+    text-transform: uppercase;
+
+    dt {
+      font-weight: 400;
+    }
+
+    @media (min-width: $dl-horizontal-breakpoint) {
+      dd {
+        text-align: right;
+      }
+    }
+  }
+}

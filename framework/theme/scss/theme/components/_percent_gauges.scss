@@ -1,0 +1,11 @@
+//== Percent Gauges
+//
+//##
+$percent-gauge-margin-vertical:     6px !default;
+
+$percent-gauge-bar-color:           $dove-gray !default;
+$percent-gauge-bar-max-color:       $carnation !default;
+
+$percent-gauge-alert-color:         $percent-gauge-bar-max-color !default;
+$percent-gauge-alert-size:          8px !default;
+$percent-gauge-alert-box-width:     $percent-gauge-alert-size + 4px !default;

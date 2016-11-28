@@ -1,0 +1,1175 @@
+<!doctype html>
+<html ng-strict-di>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="icon" type="image/vnd.microsoft.icon" href="images/favicon.ico" />
+  <style>
+    body {
+      padding-top: 50px;
+      padding-bottom: 20px;
+      text-decoration: none;
+    }
+
+    .headerlink {
+      display: none;
+    }
+
+    .header:hover .headerlink {
+      display: inline;
+      color: #c7254e;
+      text-decoration: none;
+    }
+  </style>
+
+  <!-- inject:css -->
+  <link rel="stylesheet" href="framework.css">
+  <!-- endinject -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <!-- bower:js -->
+  <!-- endbower -->
+
+  <!-- inject:js -->
+  <!-- endinject -->
+  <script src="lib/stackato-libs.js"></script>
+  <script src="lib/stackato-framework.js"></script>
+
+  <script src="scripts/examples.module.js"></script>
+  <script src="scripts/flyout/flyout-example.controller.js"></script>
+  <script src="scripts/long-running/long-running-example.js"></script>
+  <script src="scripts/table-inline-message/table-inline-message-example.js"></script>
+  <script src="scripts/tabbed-nav/tabbed-nav.module.js"></script>
+  <script src="scripts/tabs/tabs.module.js"></script>
+  <script src="scripts/paginator/my-paginator.directive.js"></script>
+  <script src="scripts/search-box/my-search-box.directive.js"></script>
+  <script src="scripts/wizard/my-workflow.directive.js"></script>
+</head>
+
+<body ng-app="helionFrameworkExamples" ng-controller="ExampleController as exampleCtrl">
+
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+        aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">
+          <img src="images/hpe_helion_grn_pos_rgb.png" height="36" style="position: relative; bottom: 10px;">
+        </a>
+      </div>
+      <div id="navbar" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="theme_preview.html">Theme</a></li>
+          <li><a href="icons.html">Icons</a></li>
+
+          <li><a href="#filters">Filters</a></li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown"
+              role="button" aria-haspopup="true" aria-expanded="true">
+              Utils<span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="#focusable-input" target="_self">Focusable Input</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown"
+              role="button" aria-haspopup="true" aria-expanded="true">
+              Widgets<span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="#actionsMenu" target="_self">Actions Menu</a></li>
+              <li><a href="#breadcrumbs" target="_self">Breadcrumbs</a></li>
+              <li><a href="#default-image" target="_self">Default Image</a></li>
+              <li><a href="#flyout" target="_self">Flyout</a></li>
+              <li><a href="#galleryCard" target="_self">Gallery Card</a></li>
+              <li><a href="#passwordReveal" target="_self">Password Reveal</a></li>
+              <li><a href="#radioInput" target="_self">Radio Input</a></li>
+              <li><a href="#checkboxInput" target="_self">Checkbox Input</a></li>
+              <li><a href="#selectInput" target="_self">Select Input Field</a></li>
+              <li><a href="#smartTable" target="_self">Smart Table</a></li>
+              <li><a href="#spinner" target="_self">Spinner</a></li>
+              <li><a href="#bounce-spinner" target="_self">Bounce Spinner</a></li>
+              <li><a href="#globalSpinner" target="_self">Spinner - Global</a></li>
+              <li><a href="#tabbedNav" target="_self">Tabbed Nav</a></li>
+              <li><a href="#tabs" target="_self">Tabs</a></li>
+              <li><a href="#long-running-example" target="_self">Long Running Service</a></li>
+              <li><a href="#table-inline-message-example" target="_self">Table Inline Message</a></li>
+              <li><a href="#percent-gauge" target="_self">Percent Gauge</a></li>
+              <li><a href="#paginator" target="_self">Paginator</a></li>
+              <li><a href="#search-box" target="_self">Search Box</a></li>
+              <li><a href="#wizard" target="_self">Wizard</a></li>
+              <li><a href="#confirm-modal" target="_self">Confirmation Dialog Service</a></li>
+              <li><a href="#log-viewer" target="_self">Log Viewer</a></li>
+              <li><a href="#ring-chart" target="_self">Ring Chart</a></li>
+              <li><a href="#code-block" target="_self">Code Block</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown"
+              role="button" aria-haspopup="true" aria-expanded="true">
+              Validators<span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="#validator-unique" target="_self">Unique Value</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <!--/.nav-collapse -->
+    </div>
+  </nav>
+
+  <div class="jumbotron">
+    <div class="container">
+      <h1>Helion UI Framework</h1>
+      <p>A collection of reusable Angular-based Helion UI components.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <h2 id="filters" class="header page-header">
+          Filters
+          <a class="headerlink" href="#filters" title="Permalink to filters">¶</a>
+        </h2>
+        <dl>
+
+          <dt>min</dt>
+          <dd>
+            <code ng-non-bindable>{{ 10 | max:5 }}</code> -> {{ 10 | max:5 }}<br/>
+            <code ng-non-bindable>{{ 2 | max:5 }}</code> -> {{ 2 | max:5 }}<br/>
+            <code ng-non-bindable>{{ 2 | max:5:6 }}</code> -> {{ 2 | max:5:6 }}<br/>
+          </dd>
+
+          <dt>min</dt>
+          <dd>
+            <code ng-non-bindable>{{ 10 | min:5 }}</code> -> {{ 10 | min:5 }}<br/>
+            <code ng-non-bindable>{{ 2 | min:5 }}</code> -> {{ 2 | min:5 }}<br/>
+            <code ng-non-bindable>{{ 2 | min:5:6 }}</code> -> {{ 2 | min:5:6 }}<br/>
+          </dd>
+
+          <dt>percentage</dt>
+          <dd>
+            <code ng-non-bindable>{{ .25 | percentage }}</code> -> {{ .25 | percentage }}<br/>
+            <code ng-non-bindable>{{ .1234 | percentage:2 }}</code> -> {{ .1234 | percentage:2 }}<br/>
+          </dd>
+
+          <dt>bytes</dt>
+          <dd>
+            <code ng-non-bindable>{{ 43 | bytes }}</code> -> {{ 43 | bytes }}<br/>
+            <code ng-non-bindable>{{ 43 | bytes:0 }}</code> -> {{ 43 | bytes:0 }}<br/>
+            <code ng-non-bindable>{{ 33.3333 * 1024 | bytes }}</code> -> {{ 33.3333 * 1024 | bytes }}<br/>
+            <code ng-non-bindable>{{ 42 * 1024 * 1024  | bytes }}</code> -> {{ 42 * 1024 * 1024 | bytes }}<br/>
+          </dd>
+
+          <dt>usageBytes</dt>
+          <dd>
+            <code ng-non-bindable>{{ [512, 2048] | usageBytes }}</code> -> {{ [512, 2048] | usageBytes }}<br/>
+            <code ng-non-bindable>{{ [7158278827, 21474836480] | usageBytes:3 }}</code> -> {{ [7158278827, 21474836480] | usageBytes:3 }}<br/>
+          </dd>
+
+          <dt>byProperties</dt>
+          <dd>
+            <code ng-non-bindable>{{ [{'one': 'value'}, {'two': 'value'}] | byProperties:'value':['one'] }}</code> -> {{ [{'one': 'value'}, {'two': 'value'}] | byProperties:'value':['one'] }}<br/>
+            <code ng-non-bindable>{{ [{'one': 'value'}, {'two': 'value'}] | byProperties:'value':['two'] }}</code> -> {{ [{'one': 'value'}, {'two': 'value'}] | byProperties:'value':['two'] }}<br/>
+          </dd>
+
+        </dl>
+      </dt>
+    </div>
+  </div>
+
+  <div class="container" id="default-image">
+    <!-- Example row of columns -->
+    <div class="row">
+      <div class="col-lg-12">
+        <h2 class="header page-header">
+          Default Image
+          <a class="headerlink" href="#default-image" title="Permalink to default-image">¶</a>
+        </h2>
+
+        <p>
+          <pre>&#x3C;img default-image ng-src="badsource"/&#x3E;</pre>
+          <img default-image ng-src="badsource" style="height: 100px;"/>
+        </p>
+        <p>
+          <pre>&#x3C;img default-image ng-src="badsource" default-image-src="images/hpe_helion_grn_pos_rgb.png"/&#x3E;</pre>
+          <img default-image ng-src="badsource" default-image-src="images/hpe_helion_grn_pos_rgb.png"/>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Example row of columns -->
+    <div class="row">
+      <div class="col-lg-12">
+
+        <h2 class="header page-header">
+          Focusable Input
+          <a class="headerlink" href="#focusable-input" title="Permalink to focusable-input">¶</a>
+        </h2>
+
+        <p>
+          This will add the <code>focus</code> class (default) to the <code>div</code> element. To add a custom class instead:
+          <code>focusable-input="myCustomClass"</code>.
+        </p>
+        <pre>&#x3C;div focusable-input&#x3E;
+  &#x3C;input type="text" autofocus value="This is focusable"/&#x3E;
+&#x3C;/div&#x3E;</pre>
+        <pre>&#x3C;div focusable-input="myCustomClass"&#x3E;
+  &#x3C;input type="text" autofocus value="This is focusable"/&#x3E;
+&#x3C;/div&#x3E;</pre>
+        <div focusable-input>
+          <input type="text" autofocus value="This is focusable" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+
+        <h2 id="validator-unique" class="header page-header">
+          Unique Value
+          <a class="headerlink" href="#validator-unique" title="Permalink to unique validator">¶</a>
+        </h2>
+        <p>
+          This will validate the input to be unique within a set of <code>items</code>.
+          <h4>Options</h4>
+          <ul>
+            <li><code>items - {array}, required, the items to validate value against</code></li>
+            <li><code>key - {string}, optional, the key to use for each item. Use if items is an array of objects</code></li>
+            <li><code>ignore-case - optional attribute, ignore case when checking uniqueness</code></li>
+          </ul>
+        </p>
+        <form name="exampleCtrl.uniqueValueForm">
+          <pre>&#x3C;input type="text" ng-model="name" items="names" key="'name'" ignore-case helion-unique/&#x3E;</pre>
+          <div class="form-group" ng-class="{'has-error': exampleCtrl.uniqueValueForm.ignoreCaseUnique.$invalid}">
+            <label class="control-label">Enter a non-unique name to see error (i.e. RoR, NodeJS), case insensitive</label>
+            <input type="text" name="ignoreCaseUnique" class="form-control" ng-model="exampleCtrl.ignoreCaseUniqueValue"
+              items="exampleCtrl.mockTableData" key="'name'" ignore-case helion-unique/>
+          </div>
+          <pre>&#x3C;input type="text" ng-model="name" items="names" key="'name'" helion-unique/&#x3E;</pre>
+          <div class="form-group" ng-class="{'has-error': exampleCtrl.uniqueValueForm.unique.$invalid}">
+            <label class="control-label">Enter a non-unique name to see error (i.e. RoR, NodeJS)</label>
+            <input type="text" name="unique" class="form-control" ng-model="exampleCtrl.uniqueValue"
+              items="exampleCtrl.mockTableData" key="'name'" helion-unique/>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="flyout" class="header page-header">
+          Flyout
+          <a class="headerlink" href="#flyout" title="Permalink to flyout">¶</a>
+        </h2>
+        <div ng-controller="flyoutExampleController as flyoutExampleCtrl">
+          <p>
+            This shows a flyout that slides in and out from the right of the window. The flyout includes a close icon that can be clicked to dismiss the flyout.
+          </p>
+          <pre>&#x3C;flyout flyout-active="flyoutActiveFlag"&#x3E;
+  My transcluded content
+&#x3C;/flyout&#x3E;</pre>
+          <pre>&#x3C;flyout flyout-active="flyoutActiveFlag" flyout-close-icon="'helion-icon helion-icon-Close'"&#x3E;
+  My transcluded content with custom close icon
+&#x3C;/flyout&#x3E;</pre>
+          <button type="button" class="btn btn-primary" ng-click="flyoutExampleCtrl.open()">Show Flyout</button>
+          <flyout flyout-active="flyoutExampleCtrl.flyoutActive">
+            <ng-include src="flyoutExampleCtrl.flyoutTemplateUrl"></ng-include>
+          </flyout>
+        </div>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="spinner" class="header page-header">
+          Spinner
+          <a class="headerlink" href="#spinner" title="Permalink to spinner">¶</a>
+        </h2>
+        <p>A loading spinner that can be scalable by setting the width and height of the container. Default height and width is 50px.</p>
+        <pre>&#x3C;spinner&#x3E;&#x3C;/spinner&#x3E;</pre>
+        <spinner></spinner>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="bounce-spinner" class="header page-header">
+          Bounce Spinner
+          <a class="headerlink" href="#spinner" title="Permalink to spinner">¶</a>
+        </h2>
+        <p>A three bounce spinner with optional classes passed in</p>
+        <pre>&#x3C;bounce-spinner classes="bounce-spinner-lg" &#x3E;&#x3C;/bounce-spinner&#x3E;</pre>
+        <bounce-spinner></bounce-spinner>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="globalSpinner" class="header page-header">
+          Global Spinner
+          <a class="headerlink" href="#globalSpinner" title="Permalink to global spinner">¶</a>
+        </h2>
+        <p>A global loading spinner with background the covers entire view. Content can be transcluded above spinner.</p>
+        <div>
+          <h4>Options</h4>
+          <ul>
+            <li><code>spinner-active - {boolean}, required, flag to show/hide the spinner</code></li>
+            <li><code>spinner-type - {string}, optional, use 'bounce-spinner' to show bounce spinner</code></li>
+            <li><code>classes - {string}, optional, additional CSS classes to add</code></li>
+          </ul>
+        </div>
+        <pre>&#x3C;global-spinner spinner-active="exampleCtrl.globalSpinnerActive"&#x3E;
+  My transcluded content
+&#x3C;/global-spinner&#x3E;</pre>
+        <button type="button" class="btn btn-primary" ng-click="exampleCtrl.showGlobalSpinner()">Show Global Spinner</button>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="passwordReveal" class="header page-header">
+          Password Reveal
+          <a class="headerlink" href="#passwordReveal" title="Permalink to password-reveal">¶</a>
+        </h2>
+        <div>
+          <p>
+            This shows an eye icon in an input field that allows user to show password in plain text.
+          </p>
+          <pre>&#x3C;input type="password" password-reveal/&#x3E;</pre>
+          <form>
+            <div class="form-group has-feedback">
+              <label class="control-label">
+                Password
+              </label>
+              <input type="password" class="form-control" password-reveal/>
+            </div>
+          </form>
+          <pre>&#x3C;input type="password" password-reveal password-reveal-icon="'glyphicon glyphicon-star'"/&#x3E;</pre>
+          <form>
+            <div class="form-group has-feedback">
+              <label class="control-label">
+                Password Again
+              </label>
+              <input type="password" class="form-control" password-reveal password-reveal-icon="'glyphicon glyphicon-star'"/>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="radioInput" class="header page-header">
+          Radio Input
+          <a class="headerlink" href="#radioInput" title="Permalink to radio-input">¶</a>
+        </h2>
+        <div>
+          <p>
+            This is a radio input field that allows the <code>required</code> validation. In the example below, the radio
+            input is required. Click to make a selection. Alternatively, you can tab to the radio input and make a selection
+            either by pressing space or enter.
+          </p>
+          <div>
+            <h4>Options</h4>
+            <ul>
+              <li><code>ng-model - {any}, required, the input field model</code></li>
+              <li><code>input-value - {any}, required, the input field value</code></li>
+              <li><code>input-label - {string}, optional, the input field label</code></li>
+              <li><code>input-disabled - {boolean}, optional, input field is disabled</code></li>
+            </ul>
+          </div>
+          <pre ng-non-bindable>&#x3C;radio-input ng-repeat="option in radioOptions"
+  ng-model="myColor" input-value="option.value"
+  input-label="{{option.label}}" input-disabled="option.disabled" required&#x3E;&#x3C;/radio-input&#x3E;</pre>
+          <form name="exampleCtrl.radioInputForm" style="display: block; width: 200px;">
+            <radio-input ng-repeat="option in exampleCtrl.selectOptions"
+                ng-model="exampleCtrl.radioCheckedValue"
+                input-value="option.value"
+                input-label="{{option.label}}"
+                input-disabled="option.disabled" required></radio-input>
+          </form>
+          <p>
+            The value selected is: {{ exampleCtrl.radioCheckedValue || '- nothing checked -' }}.<br/>
+            The form is <code>{{exampleCtrl.radioInputForm.$invalid ? 'INVALID' : 'VALID'}}</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="checkboxInput" class="header page-header">
+          Checkbox Input
+          <a class="headerlink" href="#checkboxInput" title="Permalink to checkbox-input">¶</a>
+        </h2>
+        <div>
+          <p>
+            This is a checkbox input field that allows the <code>required</code> validation. Click to make a selection.
+            Alternatively, you can tab to the checkbox input and make a selection either by pressing space or enter.
+          </p>
+          <div>
+            <h4>Options</h4>
+            <ul>
+              <li><code>ng-model - {any}, required, the input field model</code></li>
+              <li><code>input-value - {any}, required, the input field value</code></li>
+              <li><code>input-label - {string}, optional, the input field label</code></li>
+              <li><code>input-disabled - {boolean}, optional, input field is disabled</code></li>
+            </ul>
+          </div>
+          <pre ng-non-bindable>&#x3C;checkbox-input ng-repeat="option in checkboxOptions"
+  ng-model="isChecked[option.value]" input-value="option.value"
+  input-label="{{option.label}}" input-disabled="option.disabled" required&#x3E;&#x3C;/checkbox-input&#x3E;</pre>
+          <form name="exampleCtrl.checkboxInputForm" style="display: block; width: 200px;">
+            <checkbox-input ng-repeat="option in exampleCtrl.selectOptions"
+                ng-model="exampleCtrl.cbCheckedValue[option.value]"
+                input-value="option.value"
+                input-label="{{option.label}}"
+                input-disabled="option.disabled"></checkbox-input>
+          </form>
+          <p>
+            <ul>
+              <li ng-repeat="option in exampleCtrl.selectOptions">
+                {{ option.value }}: {{ exampleCtrl.cbCheckedValue[option.value] }}
+              </li>
+            </ul>
+            The form is <code>{{exampleCtrl.checkboxInputForm.$invalid ? 'INVALID' : 'VALID'}}</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="selectInput" class="header page-header">
+          Select Input Field
+          <a class="headerlink" href="#selectInput" title="Permalink to select-input">¶</a>
+        </h2>
+        <div>
+          <p>
+            This is a select input field. The value selected is: {{ exampleCtrl.selectValue || '- nothing selected -' }}<br/>
+            The form is <code>{{exampleCtrl.selectInputForm.$invalid ? 'INVALID' : 'VALID'}}</code>.
+          </p>
+          <div>
+            <h4>Options</h4>
+            <ul>
+              <li><code>ng-model - {any}, required, the input field value</code></li>
+              <li><code>input-options - {array}, required, the input field options</code></li>
+              <li><code>arrow-icon - {string}, optional, the arrow icon</code></li>
+              <li><code>placeholder - {string}, optional, the placeholder text</code></li>
+              <li><code>add-action - {object}, optional, the add action definition</code></li>
+            </ul>
+          </div>
+          <pre>&#x3C;select-input ng-model="myColor" input-options="colorOptions"
+  placeholder="Select a color" add-action="addTextColorAction"&#x3E;&#x3C;/select-input&#x3E;</pre>
+          <form name="exampleCtrl.selectInputForm">
+            <div class="form-group" focusable-input>
+              <label class="control-label">Text Color</label>
+              <select-input
+                add-action="exampleCtrl.addTextColorAction"
+                ng-model="exampleCtrl.selectValue"
+                input-options="exampleCtrl.selectOptions"
+                placeholder="Select a color" tabindex="0"
+                required style="width: 324px;">
+              </select-input>
+            </div>
+          </form>
+          <p>
+            Long values in the select box are truncated:
+          </p>
+          <form name="exampleCtrl.selectInputFormTwo">
+            <div class="form-group" focusable-input>
+              <label class="control-label">Text Color</label>
+              <select-input
+                add-action="exampleCtrl.addTextColorAction"
+                ng-model="exampleCtrl.selectValueLong"
+                input-options="exampleCtrl.selectOptionsLong"
+                placeholder="Select a color" tabindex="0"
+                required style="width: 324px;">
+              </select-input>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="paginator" class="header page-header">
+          Paginator
+          <a class="headerlink" href="#paginator" title="Permalink to paginator">¶</a>
+        </h2>
+        <p>
+          An angular-based paginator widget
+        </p>
+        <my-paginator />
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="search-box" class="header page-header">
+          Search Box
+          <a class="headerlink" href="#search-box" title="Permalink to search box">¶</a>
+        </h2>
+        <p>
+          An angular-based search-box widget
+        </p>
+        <my-search-box />
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="wizard" class="header page-header">
+          Wizard
+          <a class="headerlink" href="#wizard" title="Permalink to Wizard">¶</a>
+        </h2>
+        <p>
+          An angular-based wizard widget
+        </p>
+        <my-workflow />
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="actionsMenu" class="header page-header">
+          Actions Menu
+          <a class="headerlink" href="#actionsMenu" title="Permalink to actions menu">¶</a>
+        </h2>
+        <div>
+          <p>
+            This is the actions menu.
+          </p>
+          <div>
+            <h4>Options</h4>
+            <ul>
+              <li>actions - required, the actions this menu displays</li>
+              <li>action-target - optional, the target for executing action</li>
+              <li>menu-icon - optional, the actions menu icon</li>
+              <li>menu-label - optional, the actions menu label</li>
+            </ul>
+          </div>
+          <pre>var actions = [
+  { name: 'Start', execute: function (target) { alert('Start ' + target); } },
+  { name: 'Stop', execute: function (target) { alert('Stop ' + target); } }
+];
+var actionTarget = 'Target';
+
+&#x3C;actions-menu actions="actions" action-target="actionTarget"
+  menu-label="Select Item"&#x3E;&#x3C;/actions-menu&#x3E;
+
+&#x3C;actions-menu actions="actions" action-target="actionTarget"
+  menu-position="actions-menu-right"&#x3E;&#x3C;/actions-menu&#x3E;</pre>
+          <div class="panel panel-default" style="width: 200px; display: inline-block;">
+            <div class="panel-heading">
+              Actions Menu
+              <actions-menu class="pull-right"
+                actions="exampleCtrl.actions" action-target="exampleCtrl.target"
+                menu-label="Select Item"></actions-menu>
+            </div>
+            <div class="panel-body">
+              Click on the ellipsis icon to see actions menu in action!
+            </div>
+          </div>
+          <div class="panel panel-default" style="width: 200px; display: inline-block;">
+            <div class="panel-heading">
+              Actions Menu
+              <actions-menu class="pull-right"
+                actions="exampleCtrl.actions" action-target="exampleCtrl.target"
+                menu-position="actions-menu-right"></actions-menu>
+            </div>
+            <div class="panel-body">
+              Click on the ellipsis icon to see the action menu appear right-aligned!
+            </div>
+          </div>
+          <p><button class="btn btn-primary"
+            ng-click="exampleCtrl.toggleStopAction()">Show/hide Stop Action</button></p>
+        </div>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="galleryCard" class="header page-header">
+          Gallery Card
+          <a class="headerlink" href="#galleryCard" title="Permalink to gallery-card">¶</a>
+        </h2>
+        <div>
+          <p>
+            This is a gallery card component that includes a title, an actions dropdown,
+            main content, and a status notification bar. The main content is transcluded.
+            The card data should include a `title` value. If provided, the main content
+            container and status notification bar is clickable and will redirect to user
+            to another page. See below for examples.
+          </p>
+          <div>
+            <h4>Options</h4>
+            <ul>
+              <li>card-data - required, the card data</li>
+              <li>card-actions-icon - optional, the card actions dropdown icon</li>
+            </ul>
+          </div>
+          <pre>var cardData1 = { title: 'App 1', link: '#focusable-input' };
+&#x3C;gallery-card card-data="cardData1"&#x3E;
+... transcluded content ...
+&#x3C;/gallery-card&#x3E;
+
+var cardData2 = { title: 'App 2',
+  status: {
+    description: 'Danger!',
+    classes: 'danger',
+    icon: 'glyphicon glyphicon-exclamation-sign',
+    link: '#flyout'
+  }
+};
+&#x3C;gallery-card card-data="cardData2" card-actions-icon="glyphicon glyphicon-chevron-down"&#x3E;
+... transcluded content ...
+&#x3C;/gallery-card&#x3E;</pre>
+          <gallery-card class="col-md-4" card-data="exampleCtrl.mockArrayData[1]">
+            <table style="width: 100%;">
+              <tbody>
+                <tr><td>Instances</td><td class="text-right">3</td></tr>
+                <tr><td>Memory Quota</td><td class="text-right">1024</td></tr>
+              </tbody>
+            </table>
+          </gallery-card>
+          <gallery-card class="col-md-4" card-data="exampleCtrl.mockArrayData[0]"
+            card-actions="exampleCtrl.actions" on-card-click="exampleCtrl.cardClicked(card)">
+            <table style="width: 100%;">
+              <tbody>
+                <tr><td>Instances</td><td class="text-right">2</td></tr>
+                <tr><td>Memory Quota</td><td class="text-right">128</td></tr>
+              </tbody>
+            </table>
+          </gallery-card>
+          <gallery-card class="col-md-4" card-data="exampleCtrl.mockArrayData[1]"
+            card-actions="exampleCtrl.actions" on-notification-click="exampleCtrl.notificationClicked(card)"
+            card-actions-icon="glyphicon glyphicon-chevron-down">
+            <table style="width: 100%;">
+              <tbody>
+                <tr><td>Instances</td><td class="text-right">3</td></tr>
+                <tr><td>Memory Quota</td><td class="text-right">1024</td></tr>
+              </tbody>
+            </table>
+          </gallery-card>
+        </div>
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="smartTable" class="header page-header">
+          Smart Table
+          <a class="headerlink" href="#smartTable" title="Permalink to Smart Table">¶</a>
+        </h2>
+        <p>
+          A third-party lightweight Angular module to display tabular data with built-in sorting,
+          pagination, filtering and selection. If using the built-in row selection feature, please
+          note that Smart Table will add a <code>isSelected</code> key-value pair to the row object.
+          If the row object originally contained a <code>isSelected</code> key-value pair, it will
+          be overwritten. The code can be viewed at:
+          <a href="https://github.com/lorenzofox3/Smart-Table/blob/master/src/stTable.js#L145" target="_blank">
+          https://github.com/lorenzofox3/Smart-Table/blob/master/src/stTable.js#L145</a>.
+          It is also recommended to use the <code>st-safe-src</code> attribute so that the
+          original collection is not modified as the table is filtered, sorted, paginated, etc.
+        </p>
+        <p>
+          Please refer to the website for documentation and more examples:
+          <a href="http://lorenzofox3.github.io/smart-table-website" target="_blank">
+            http://lorenzofox3.github.io/smart-table-website
+          </a>
+        </p>
+
+        <h4>Example 1: A plain read-only table to simply display a list of data.</h4>
+        <pre ng-non-bindable>&#x3C;table class="table" st-table="exampleCtrl.mockTableDisplayData" st-safe-src="exampleCtrl.mockTableData"&#x3E;
+  &#x3C;thead&#x3E;
+    &#x3C;tr&#x3E;
+      &#x3C;th&#x3E;Name&#x3C;/th&#x3E;
+      &#x3C;th&#x3E;Description&#x3C;/th&#x3E;
+      &#x3C;th&#x3E;AZ&#x3C;/th&#x3E;
+    &#x3C;/tr&#x3E;
+  &#x3C;/thead&#x3E;
+ &#x3C;tbody&#x3E;
+   &#x3C;tr ng-repeat="row in exampleCtrl.mockTableDisplayData"&#x3E;
+     &#x3C;td&#x3E;{{ row.name }}&#x3C;/td&#x3E;
+     &#x3C;td&#x3E;{{ row.description }}&#x3C;/td&#x3E;
+     &#x3C;td&#x3E;{{ row.az }}&#x3C;/td&#x3E;
+   &#x3C;/tr&#x3E;
+ &#x3C;/tbody&#x3E;
+&#x3C;/table&#x3E;</pre>
+        <table st-table="exampleCtrl.mockTableDisplayData" st-safe-src="exampleCtrl.mockTableData" class="table">
+          <thead>
+            <tr>
+               <th>Name</th>
+               <th>Description</th>
+               <th>AZ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="row in exampleCtrl.mockTableDisplayData">
+              <td>{{ row.name }}</td>
+              <td>{{ row.description }}</td>
+              <td>{{ row.az }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <h4>Example 2: A table of items where a single row can be selected.</h4>
+        <pre ng-non-bindable>&#x3C;table class="table" st-table="exampleCtrl.mockTableDisplayData" st-safe-src="exampleCtrl.mockTableData"&#x3E;
+  &#x3C;thead&#x3E;
+    &#x3C;tr&#x3E;
+      &#x3C;th&#x3E;&#x3C;/th&#x3E;
+      &#x3C;th&#x3E;Name&#x3C;/th&#x3E;
+      &#x3C;th&#x3E;Description&#x3C;/th&#x3E;
+      &#x3C;th&#x3E;AZ&#x3C;/th&#x3E;
+    &#x3C;/tr&#x3E;
+  &#x3C;/thead&#x3E;
+ &#x3C;tbody&#x3E;
+   &#x3C;tr ng-repeat="row in exampleCtrl.mockTableDisplayData"&#x3E;
+     &#x3C;td&#x3E;
+       &#x3C;input type="radio" ng-model="exampleCtrl.singleSelectedRow" ng-value="row"/&#x3E;
+     &#x3C;/td&#x3E;
+     &#x3C;td&#x3E;{{ row.name }}&#x3C;/td&#x3E;
+     &#x3C;td&#x3E;{{ row.description }}&#x3C;/td&#x3E;
+     &#x3C;td&#x3E;{{ row.az }}&#x3C;/td&#x3E;
+   &#x3C;/tr&#x3E;
+ &#x3C;/tbody&#x3E;
+&#x3C;/table&#x3E;</pre>
+        <table st-table="exampleCtrl.mockTableDisplayData" st-safe-src="exampleCtrl.mockTableData" list-table class="table">
+          <thead>
+            <tr>
+               <th></th>
+               <th>Name</th>
+               <th>Description</th>
+               <th>AZ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="row in exampleCtrl.mockTableDisplayData">
+              <td>
+                <input type="radio" ng-model="exampleCtrl.singleSelectedRow" ng-value="row"/>
+              </td>
+              <td>{{ row.name }}</td>
+              <td>{{ row.description }}</td>
+              <td>{{ row.az }}</td>
+            </tr>
+          </tbody>
+        </table>
+        SELECTED VALUE: {{ exampleCtrl.singleSelectedRow }}
+      </div>
+
+      <div class="col-sm-12">
+        <h2 id="tabbedNav" class="header page-header">
+          Tabbed Nav
+          <a class="headerlink" href="#tabbedNav" title="Permalink to tabbed-nav">¶</a>
+        </h2>
+        <div>
+          <p>
+            This is a tabbed navigation component that uses UI Router to switch views.
+            Each route should include a `label` and a `state`. The states should be
+            configured in your module:
+            <pre>$stateProvider.state('route1', {
+    url: '/route1',
+    views: {
+      myView: {
+        templateUrl: 'tab-content.html',
+        controller: function () {
+        }
+      }
+    }
+  });</pre>
+          </p>
+          <div>
+            <h4>Options</h4>
+            <ul>
+              <li>routes - required, the routes (label and state)</li>
+              <li>viewName - required, the view name</li>
+            </ul>
+          </div>
+          <pre>var routes = [ { label: 'Route 1', state: 'route1' }, ... ];
+    &#x3C;tabbed-nav routes="routes" view-name="myView"&#x3E;&#x3C;/tabbed-nav&#x3E;</pre>
+          <tabbed-nav routes="exampleCtrl.routes" view-name="exampleView"></tabbed-nav>
+        </div>
+      </div> <!-- class="col-sm-12" -->
+
+      <div class="col-sm-12">
+        <h2 id="breadcrumbs" class="header page-header">
+          Breadcrumbs - http://ncuillery.github.io/angular-breadcrumb
+          <a class="headerlink" href="#breadcrumbs" title="Permalink to breadcrumbs">¶</a>
+        </h2>
+        <p>
+          To use, add dependency to your module: <code>ncy-angular-breadcrumb</code>. To see
+          working example, click on the tabbed navigation above.
+        </p>
+        <pre>$stateProvider.state('route1', {
+  url: '/route1',
+  templateUrl: 'tab-content.html',
+  ncyBreadcrumb: {
+    label: 'Tab Number 3'
+  }
+});
+&#x3C;div ncy-breadcrumb&#x3E;&#x3C;/div&#x3E;</pre>
+        <div ncy-breadcrumb></div>
+      </div> <!-- class="col-sm-12" -->
+
+      <div class="col-sm-12" ng-controller="TabsDemoController">
+        <h2 id="tabs" class="header page-header">
+          Tabs
+          <a class="headerlink" href="#tabs" title="Permalink to tabs">¶</a>
+        </h2>
+        <p>
+          To use, add dependency to your module: <code>ui.bootstrap</code>.
+        </p>
+        <pre>&#x3C;uib-tabset active="active"&#x3E;
+  &#x3C;uib-tab index="0" heading="Static title"&#x3E;Static content&#x3C;/uib-tab&#x3E;
+  &#x3C;uib-tab index="$index + 1" ng-repeat="tab in tabs"
+           heading="{{tab.title}}" active="tab.active"
+           disable="tab.disabled"&#x3E;
+    {{tab.content}}
+  &#x3C;/uib-tab&#x3E;
+  &#x3C;uib-tab index="3" select="alertMe()"&#x3E;
+    &#x3C;uib-tab-heading&#x3E;
+      &#x3C;i class="glyphicon glyphicon-bell"&#x3E;&#x3C;/i&#x3E; Alert!
+    &#x3C;/uib-tab-heading&#x3E;
+    I've got an HTML heading, and a select callback. Pretty cool!
+  &#x3C;/uib-tab&#x3E;
+&#x3C;/uib-tabset&#x3E;</pre>
+        <p>And here's the associated javascript block:</p>
+        <pre>(function () {
+  'use strict';
+
+  angular
+    .module('helionFrameworkExamples.tabs', ['ui.bootstrap'])
+    .controller('TabsDemoController', function ($scope, $window) {
+
+      $scope.tabs = [
+        {title: 'Dynamic Title 1', content: 'This is dynamic content 1'},
+        {title: 'Dynamic Title 2', content: 'This is dynamic content 2', disabled: true}
+      ];
+
+      $scope.alertMe = function () {
+        setTimeout(function () {
+          $window.alert("You've selected the alert tab!");
+        });
+      };
+
+      $scope.model = {
+        name: 'Tabs'
+      };
+    });
+
+})();</pre>
+        <uib-tabset active="active">
+          <uib-tab index="0" heading="Static title">Static content</uib-tab>
+          <uib-tab index="$index + 1" ng-repeat="tab in tabs"
+                   heading="{{tab.title}}" active="tab.active"
+                   disable="tab.disabled">
+            {{tab.content}}
+          </uib-tab>
+          <uib-tab index="3" select="alertMe()">
+            <uib-tab-heading>
+              <i class="glyphicon glyphicon-bell"></i> Alert!
+            </uib-tab-heading>
+            I've got an HTML heading, and a select callback. Pretty cool!
+          </uib-tab>
+        </uib-tabset>
+        <!-- TODO:  Add demo-code here! -->
+      </div> <!-- class="col-sm-12" -->
+
+    </div>  <!-- class="row" -->
+
+    <div class="row">
+      <div class="col-lg-12">
+        <h2 id="percent-gauge" class="header page-header">
+          Percent Gauge
+          <a class="headerlink" href="#percent-gauge" title="Permalink to percent-gauge">¶</a>
+        </h2>
+        <p>This will add a percent-gauge display to your page.  This consists of title and info fields as well as a progress bar.
+        The percent gauge supports <b>two</b> different modes.</p>
+        <h3>Quota Mode</h3>
+        <p>
+          This is the default mode if you don't specify one, or if you specify a mode of 'quota'. It presents the gauge as a quota or usage style -
+          where the user expects to see less than 100% on the gauge. When the gauge shows 100% or more, this is an alert state that the user
+          is made aware of.
+        </p>
+        <pre>&#x3C;percent-gauge title="This one's a third" value=".33"&#x3E;&#x3C;/percent-gauge&#x3E;
+&#x3C;percent-gauge title="This one's a full bar" value="1" value-text="40 / 40 GB"&#x3E;&#x3C;/percent-gauge&#x3E;
+&#x3C;percent-gauge title="This one's more than the alert threshold" value="1.33"&#x3E;&#x3C;/percent-gauge&#x3E;</pre>
+        <p>
+          Note: When reaching 100% a "percent-gauge-at-max" class is added to the div child of the percent-gauge; and when exceeding 100% a "percent-gauge-over-max" class is added.
+        </p>
+        <percent-gauge title="This one's a third" value=".33"></percent-gauge>
+        <percent-gauge title="This one's a full bar" value="1" value-text="40 / 40 GB"></percent-gauge>
+        <percent-gauge title="This one's more than the alert threshold" value="1.33"></percent-gauge>
+
+        <h3>Instance Mode</h3>
+        <p>
+          Specify the mode as "instance" for this mode. It presents the gauge as an instance style - where the user expects to see 100% on the gauge
+          representing the expected state; less than this indicates an alert state.
+        </p>
+        <pre>&#x3C;percent-gauge mode="instance" title="Instances as expected" value-text="1/1" value="1"&#x3E;&#x3C;/percent-gauge&#x3E;
+&#x3C;percent-gauge mode="instance" title="Instances less than expected" value-text="1/3" value=".33" &#x3E;&#x3C;/percent-gauge&#x3E;
+&#x3C;percent-gauge mode="instance" title="No instances" value="0"  value-text="0/3"&#x3E;&#x3C;/percent-gauge&#x3E;</pre>
+        <percent-gauge mode="instance" title="Instances as expected" value-text="1/1" value="1"></percent-gauge>
+        <percent-gauge mode="instance" title="Instances less than expected" value-text="1/3" value=".33"></percent-gauge>
+        <percent-gauge mode="instance" title="No instances" value="0"  value-text="0/3"></percent-gauge>
+      </div> <!-- class="col-sm-12" -->
+    </div>  <!-- class="row" -->
+
+    <table-inline-message-example></table-inline-message-example>
+    <long-running-example></long-running-example>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="confirm-modal" class="header page-header">
+          Confirmation Dialog Service
+          <a class="headerlink" href="#confirm-modal" title="Permalink to Confirm Modal">¶</a>
+        </h2>
+        <p>This is a angular service that can be used to show user a customizable confirmation dialog before a certain execution</p>
+        <pre>// inject 'helion.framework.widgets.dialog.confirm' as 'confirmDialog', and then
+confirmDialog({
+  title: 'Are you sure?',
+  description: 'Please confirm.',
+  busyDescription: 'Please wait',
+  buttonText: {
+    yes: 'Yes, I am sure',
+    no: 'No'
+  },
+  callback: function () {
+    // callback when 'Yes' button is clicked.
+  }
+});</pre>
+        <button type="button" class="btn btn-primary" ng-click="exampleCtrl.openConfirmModal()">
+          Open confirmation modal
+        </button>
+        <button type="button" class="btn btn-danger" ng-click="exampleCtrl.openConfirmModalWithError()">
+          Open confirmation modal with error
+        </button>
+      </div> <!-- class="col-sm-12" -->
+    </div>  <!-- class="row" -->
+
+  </div>  <!-- class="container" -->
+
+  <global-spinner spinner-active="exampleCtrl.globalSpinnerActive">
+    <button type="button" class="btn btn-success" style="margin: 10px;"
+      ng-click="exampleCtrl.hideGlobalSpinner()">
+      Hide Global Spinner
+    </button>
+  </global-spinner>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="detail-view" class="header page-header">
+          Detail View Service
+          <a class="headerlink" href="#detail-view" title="Permalink to Detail View">¶</a>
+        </h2>
+        <p>This is a angular service that can be used to show a right-hand slide-in dialog. You can open multiple detail views
+          and the service will take care of applying styles so that open detail views will stack appropriately. This control
+          uses the Angular Bootstrap dialog framework, so it correctly deals with a scroll bars and supports the ESCape key
+           to close.</p>
+        <p>The detailView service returns a promise that can be used to hook in methods for when the Detail View is closed
+        or dismissed.</p>
+        <pre>// inject 'helion.framework.widgets.detailView' as 'detailView', and then
+detailView({
+          title: 'Optional title',
+          templateUrl: 'path/to/html/template/for/view.html'
+          },
+          {
+          data: 'second argument is context that is available through the detail view controller'
+          }
+});</pre>
+        <button type="button" class="btn btn-primary" ng-click="exampleCtrl.openDetailView()">
+          Open detail view
+        </button>
+        <button type="button" class="btn btn-primary" ng-click="exampleCtrl.openDetailViewWizard('Detail view Title')">
+          Wizard inside a detail view (with Detail View Title)
+        </button>
+        <button type="button" class="btn btn-primary" ng-click="exampleCtrl.openDetailViewWizard()">
+          Wizard inside a detail view (without Detail View Title)
+        </button>
+      </div> <!-- class="col-sm-12" -->
+    </div>  <!-- class="row" -->
+
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="log-viewer" class="header page-header">
+          Log Viewer
+          <a class="headerlink" href="#detail-view" title="Permalink to Detail View">¶</a>
+        </h2>
+        <p>This is an AngularJS directive that can be used to show logs.
+          Logs can be colorized using terminal escape sequences. Examples of such logs are Ansible stdout logs in a terminal
+          Streaming logs are also supported but not yet wired-up correctly as they require a WebSocket</p>
+        <pre>
+// For simple use, add a log-viewer tag in your markup and bind the logText attribute
+&#x3C;log-viewer style="height: 300px; margin-bottom: 100px;" auto-scroll-on="true" log-text="'Hello'"/&#x3E;
+        </pre>
+        <log-viewer style="height: 300px; margin-bottom: 100px;" colorize="true" auto-scroll-on="true" streaming="true" log-text="exampleCtrl.getLogText()"/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="ring-chart" class="header page-header">
+          Ring Chart
+          <a class="headerlink" href="#ring-chart" title="Permalink to Ring Chart">¶</a>
+        </h2>
+        <p>This is an AngularJS directive that can be used to show a ring chart.</p>
+        <p>
+          You need to supply the data and labels.
+        </p>
+        <pre>
+          var ringChartData = {
+            ok: 5,
+            critical: 2,
+            warning: 3,
+            unknown: 6
+          };
+
+          var ringChartLabels = {
+            ok: 'OK',
+            critical: 'Errors',
+            warning: 'Warnings',
+            unknown: 'Unknown',
+            total: 'Items',
+            totalOne: 'Item'
+          };
+
+          &#x3C;ring-chart data="ringChartData" labels="ringChartLabels"/&#x3E;
+        </pre>
+        <ring-chart data="exampleCtrl.ringChartData" labels="exampleCtrl.ringChartLabels"></ring-chart>
+        <button type="button" class="btn btn-success" style="margin: 10px;"
+          ng-click="exampleCtrl.updateRingChartData()">
+          Update Ring Chart Data
+        </button>
+        <ring-chart data="exampleCtrl.ringChartData2" labels="exampleCtrl.ringChartLabels"></ring-chart>
+    <div class="row">
+    </div>
+  </div>
+      <div class="col-sm-12">
+        <h2 id="toast" class="header page-header">
+          Toast
+          <a class="headerlink" href="#toast" title="Permalink to Toast">¶</a>
+        </h2>
+        <p>This is an AngularJS directive that can be used to show toast notifications.</p>
+        <p>
+          There are 3 standard notification types, a custom type (supporting a custom icon) and a busy indiactor. To use, inject
+          'helion.framework.widgets.toaster' as 'toaster', then you can use:
+        </p>
+        <pre>
+          toaster.success('success message');
+          toaster.warniong('warning message');
+          toaster.error('error message');
+          toaster.show('custom icon message', 'helion-icon-');
+          toaster.busy('Busy doing something');
+        </pre>
+        <p>
+          Note that all notifications will automatically dismiss after <b>5</b> seconds, apart from the bust toast notification, which will
+          stay shown indefinately - you are repsonsible for dismissing this yourself, using the close() method of the toast object returned. The
+          close() method returns a promise that can be used to chain functionality to be invoked once the busy notification has dismissed, as illustarted below:
+        </p>
+        <pre>
+          var toast = toaster.busy('Busy working away');
+          .. do something .... maybe async task ....
+          toast.close().then(function () {
+            toaster.sucess('Completed okay');
+          });
+        </pre>
+        <p>
+          Click on the buttons below for demonsrations of the different types of toast notification.
+        </p>
+
+        <button type="button" class="btn btn-success" style="margin: 10px;"
+          ng-click="exampleCtrl.showToast('success', 'This is a success message that should split across more than one line.')">Success</button>
+        <button type="button" class="btn btn-success" style="margin: 10px;"
+          ng-click="exampleCtrl.showToast('warning', 'This is a warning message that should split across more than one line.')">Warning</button>
+        <button type="button" class="btn btn-success" style="margin: 10px;"
+          ng-click="exampleCtrl.showToast('error', 'This is an error  message')">Error</button>
+        <button type="button" class="btn btn-success" style="margin: 10px;"
+          ng-click="exampleCtrl.showBusyToast('Deleting application')">Busy</button>
+        <button type="button" class="btn btn-success" style="margin: 10px;"
+          ng-click="exampleCtrl.showCustomToast('Custom icon', 'helion-icon-Notification')">Custom Icon</button>
+        <button type="button" class="btn btn-success" style="margin: 10px;"
+          ng-click="exampleCtrl.showToastNoAutoClose('success', 'This toast needs to be closed manually.')">Sticky Toast</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="async-task-dialog" class="header page-header">
+          Async Task Dialog
+          <a class="headerlink" href="#async-task-dialog" title="Permalink to Async Task Dialog">¶</a>
+        </h2>
+        <p>This is an angular service that can be used to show a right-hand slide-in dialog. It extends the detail view and
+        shows an indication when a task is running. The task that should be executed is supplied as a promise returning function.</p>
+        <pre>// inject 'helion.framework.widgets.asyncTaskDialog' as 'asyncTaskDialog', and then
+asyncTaskDialog({
+          title: 'Optional title',
+          templateUrl: 'path/to/html/template/for/view.html'
+          },
+          {
+          data: 'second argument is context that is available through the async task controller'
+          },
+          function(){ // promise for task }
+});</pre>
+        <button type="button" class="btn btn-primary" ng-click="exampleCtrl.showAsyncTaskDialog()">
+          Open Async Task Dialog
+        </button>
+      </div> <!-- class="col-sm-12" -->
+    </div>  <!-- class="row" -->
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="code-block" class="header page-header">
+          Code Block
+          <a class="headerlink" href="#code-block" title="Permalink to Code block">¶</a>
+        </h2>
+        <p>
+          Shows text in a code block style and allows this to be copied to the user's clipboard for easy use (where supported in the browser).
+        </p>
+        <p>
+          There are two properties you can set:
+          <ul>
+            <li>theme - set to "light" to use the light theme. The default is to use the dark theme.</li>
+            <li>hide-copy - set to true or false to hide or show the copy button. Copy buitton is shown by default.</li>
+          </ul>
+        </p>
+        <p>
+          Dark mode (default)
+        </p>
+		<pre>&#x3C;code-block&#x3E;// This is an example of our code.
+You should be able to copy this to your browser if it supports it&#x3C;/code-block&#x3E;
+</pre>
+        <code-block>// This is an example of our code.
+You should be able to copy this to your browser if it supports it</code-block>
+<p>
+  Light mode
+</p>
+<pre>&#x3C;code-block theme="light"&#x3E;// This is an example of our code.
+You should be able to copy this to your browser if it supports it&#x3C;/code-block&#x3E;
+</pre>
+<code-block theme="light">// This is an example of our code.
+You should be able to copy this to your browser if it supports it</code-block>
+<p>
+  Without copy button
+</p>
+<pre>&#x3C;code-block hide-copy="true"&#x3E;// This is an example of our code.
+Copy for this block has been disabled&#x3C;/code-block&#x3E;</pre>
+<code-block hide-copy="true">// This is an example of our code.
+Copy for this block has been disabled</code-block>
+      </div> <!-- class="col-sm-12" -->
+    </div>  <!-- class="row" -->
+
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 id="auto-populate-input" class="header page-header">
+          Audo Populate Input Directive
+          <a class="headerlink" href="#auto-populate-input" title="Auto Populate Input Directive">¶</a>
+        </h2>
+        <p>This is an angular directive to auto-populate the contents of one input field with the value from another.</p>
+        <pre>
+          &#x3C;auto-populate-input form="myForm" from="srcField" to="destField"&#x3E;&#x3C;/auto-populate-input&#x3E;
+        </pre>
+        <form name="myForm">
+          <input required type="text" class="form-control" placeholder="Type in this field to popualte the other field below" name="srcField" ng-model="exampleCtrl.autoPopulate.src" />
+		  <br/>
+          <input required type="text" class="form-control" name="destField" ng-model="exampleCtrl.autoPopulate.dest" />
+          <auto-populate-input form="myForm" from="srcField" to="destField"></auto-populate-input>
+        </form>
+      </div> <!-- class="col-sm-12" -->
+    </div>  <!-- class="row" -->
+
+
+
+  </div>  <!-- class="container" -->
+
+</body>
+
+</html>

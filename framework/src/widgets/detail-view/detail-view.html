@@ -1,0 +1,8 @@
+<div class="detail-view-content" ng-class="{'detail-view-with-title': detailViewCtrl.content.title}">
+  <div ng-if="detailViewCtrl.content.title" class="detail-view-header">
+    <h4>{{detailViewCtrl.content.title}}</h4>
+  </div>
+  <ng-include ng-if="detailViewCtrl.content.templateUrl" src="detailViewCtrl.content.templateUrl"></ng-include>
+  <detail-view-template ng-if="detailViewCtrl.content.template" template="detailViewCtrl.content.template"></detail-view-template> 
+  <button type="button" class="detail-view-close close" ng-click="$dismiss()"></button>
+</div>

@@ -1,0 +1,37 @@
+<div class="async-dialog">
+  <div class="detail-view-content no-margin" ng-keydown="$event.keyCode === 13 && !asyncTaskDialogCtrl.disableSubmit() && asyncTaskDialogCtrl.invokeAction()">
+    <div ng-if="asyncTaskDialogCtrl.content.title" class="detail-view-header">
+      <h4>{{asyncTaskDialogCtrl.content.title}}</h4>
+    </div>
+    <ng-include src="asyncTaskDialogCtrl.content.templateUrl"></ng-include>
+    <button type="button" class="detail-view-close close" ng-click="$dismiss()"></button>
+    <ng-include src="asyncTaskDialogCtrl.config.templateUrl"></ng-include>
+    <div class="async-indicator" ng-if="!asyncTaskDialogCtrl.context.disableAsyncIndicator">
+      <div ng-if="!asyncTaskDialogCtrl.context.hideAsyncIndicatorContent()">
+        <div class="spinner" ng-show="asyncTaskDialogCtrl.showSpinner">
+          <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+        </div>
+        <div ng-show="asyncTaskDialogCtrl.context.showErrorBar" class="alert alert-danger">
+          <p ng-if="!asyncTaskDialogCtrl.hasErrorMessage()" translate>
+            There was a problem carrying out the action. Please try again. If this error persists,
+            please contact the administrator.
+          </p>
+          <p ng-if="asyncTaskDialogCtrl.hasErrorMessage()">
+            {{ asyncTaskDialogCtrl.context.showErrorBar }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions modal-footer" ng-class="{ 'disable-margin': asyncTaskDialogCtrl.disableMargin() } ">
+    <button ng-disabled="asyncTaskDialogCtrl.disableButtons || asyncTaskDialogCtrl.showSpinner" type="button" class="btn btn-default"
+            ng-click="$dismiss()">{{ asyncTaskDialogCtrl.context.buttonTitles.cancel }}
+    </button>
+    <button class="btn btn-primary"
+            ng-click="asyncTaskDialogCtrl.invokeAction()"
+            ng-disabled="asyncTaskDialogCtrl.disableSubmit()">
+      {{ asyncTaskDialogCtrl.context.buttonTitles.submit }}
+    </button>
+  </div>
+</div>
+

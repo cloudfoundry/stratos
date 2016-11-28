@@ -7,7 +7,7 @@
 
       autoWatch: true,
 
-      basePath: '../src/',
+      basePath: '../',
 
       browserDisconnectTimeout: 10000,
 
@@ -17,28 +17,28 @@
 
       coverageReporter: {
         type: 'html',
-        dir: '../tools/.coverage-karma/'
+        dir: 'tools/.coverage-karma/'
       },
 
       files: [
-        'lib/jquery/dist/jquery.js',
-        'lib/angular-mocks/angular-mocks.js',
-        'lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
-        '../tools/stackato-templates.js',
+        'src/lib/jquery/dist/jquery.js',
+        'src/lib/angular-mocks/angular-mocks.js',
+        'src/lib/angular-link-header-parser/release/angular-link-header-parser.min.js',
+        'tools/stackato-templates.js',
 
-        'config.js',
-        'plugins/*/plugin.config.js',
+        'src/config.js',
+        'src/plugins/*/plugin.config.js',
 
-        'lib/helion-ui-framework/dist/**/*.html',
+        'framework/**/*.html',
         {
-          pattern: 'lib/helion-ui-framework/dist/images/*.png',
+          pattern: 'framework/theme/images/*.png',
           watched: false,
           included: false,
           served: true,
           nocache: false
         },
         {
-          pattern: 'plugins/cloud-foundry/view/assets/**/*.png',
+          pattern: 'src/plugins/cloud-foundry/view/assets/**/*.png',
           watched: false,
           included: false,
           served: true,
@@ -52,24 +52,39 @@
           nocache: false
         },
 
-        'index.module.js',
-        'app/**/*.module.js',
-        'app/**/!(*.mock|*.spec).js',
-        'app/**/*.mock.js',
-        'app/**/*.spec.js',
-        'app/**/*.html',
-        'plugins/**/*.module.js',
-        'plugins/**/!(*.mock|*.spec).js',
-        'plugins/**/*.mock.js',
-        'plugins/**/*.spec.js',
-        'plugins/**/*.html'
+        'framework/src/**/*.module.js',
+        'framework/src/**/!(*.mock|*.spec).js',
+        // Ignore for now - suppresses warning when running tests as we don't have any mocks'
+        //'framework/src/**/*.mock.js',
+        'framework/src/**/*.spec.js',
+
+        'src/index.module.js',
+        'src/app/**/*.module.js',
+        'src/app/**/!(*.mock|*.spec).js',
+        'src/app/**/*.mock.js',
+        'src/app/**/*.spec.js',
+        'src/app/**/*.html',
+        'src/plugins/**/*.module.js',
+        'src/plugins/**/!(*.mock|*.spec).js',
+        'src/plugins/**/*.mock.js',
+        'src/plugins/**/*.spec.js',
+        'src/plugins/**/*.html'
       ],
 
       frameworks: ['wiredep', 'jasmine'],
 
       ngHtml2JsPreprocessor: {
-        stripPrefix: 'lib/helion-ui-framework/dist/',
-        moduleName: 'templates'
+        moduleName: 'templates',
+
+        cacheIdFromPath: function (filePath) {
+          if (filePath.indexOf('src/') === 0) {
+            return filePath.substr(4);
+          } else if (filePath.indexOf('framework/src/') === 0) {
+            return filePath.substr(14);
+          } else {
+            return filePath;
+          }
+        }
       },
 
       phantomjsLauncher: {
@@ -87,18 +102,19 @@
       ],
 
       preprocessors: {
-        'lib/helion-ui-framework/dist/**/*.html': ['ng-html2js'],
-        'app/**/*.html': ['ng-html2js'],
-        'app/**/!(*.mock|*.spec).js': ['coverage'],
-        'plugins/**/*.html': ['ng-html2js'],
-        'plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
-        'plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
-        'plugins/github/!(*.mock|*.spec).js': ['coverage']
+        'framework/src/**/*.html': ['ng-html2js'],
+        'framework/src/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/app/**/*.html': ['ng-html2js'],
+        'src/app/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/plugins/**/*.html': ['ng-html2js'],
+        'src/plugins/cloud-foundry/!(api)/**/!(*.mock|*.spec).js': ['coverage'],
+        'src/plugins/cloud-foundry/api/vcs/*.js': ['coverage'],
+        'src/plugins/github/!(*.mock|*.spec).js': ['coverage']
       },
 
       proxies: {
-        '/lib/helion-ui-framework/dist/images/': '/base/lib/helion-ui-framework/dist/images/',
-        '/plugins/cloud-foundry/view/assets/': '/base/plugins/cloud-foundry/view/assets/',
+        '/images/': '/base/framework/theme/images/',
+        '/plugins/cloud-foundry/view/assets/': '/base/src/plugins/cloud-foundry/view/assets/',
         '/app/view/assets/': '/base/app/view/assets/'
       },
 

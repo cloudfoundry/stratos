@@ -1,0 +1,35 @@
+.action-header {
+  @include flex-vertical-centered();
+  color: $gray-darker;
+  padding: $action-header-padding;
+  font-weight: $hpe-font-weight-semibold;
+
+  .btn.btn-link {
+    @include flex-vertical-centered();
+    font-size: inherit;
+    margin-left: auto;
+    padding: 0;
+    height: auto;
+
+    &:hover,
+    &:focus,
+    &:active {
+      text-decoration: none;
+      outline: none;
+    }
+
+    .helion-icon {
+      font-weight: $button-font-weight;
+    }
+  }
+}
+
+.fixed-footer {
+  @include fixed-bottom();
+  @include flex-align(flex-end, center);
+
+  background-color: $fixed-footer-bg-color;
+  height: $fixed-footer-height;
+  padding: $fixed-footer-padding;
+  z-index: $zindex-navbar-fixed - 1;
+}

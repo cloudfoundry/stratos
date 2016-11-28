@@ -1,0 +1,9 @@
+<div class="percent-gauge" ng-class="{'percent-gauge-over-max': pgCtrl.value > 1}">
+  <div ng-if="!pgCtrl.barOnly" class="gauge-label">
+    <div class="gauge-info">{{ pgCtrl.valueText || (pgCtrl.value | percentage) }}</div>
+    {{ pgCtrl.title }}
+  </div>
+  <div class="progress percent-gauge-bar" ng-class="{'percent-gauge-quota' : pgCtrl.mode == 'quota', 'percent-gauge-instance' : pgCtrl.mode == 'instance'}">
+    <div ng-class="{'percent-gauge-at-max': pgCtrl.value >= 1}" class="percent-gauge-progress-bar percent-gauge-utilized-bar" style="width: {{ (pgCtrl.value | min:1) * 100 }}%;"></div>
+  </div>
+</div>

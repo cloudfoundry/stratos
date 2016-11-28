@@ -1,0 +1,24 @@
+//=== Shared nav styles
+//
+//## Define colors for Nav and Tabs.
+
+$nav-disabled-link-color:                   $gray-light !default;
+$nav-disabled-link-hover-color:             $gray-light !default;
+
+//## Tabs
+$nav-tabs-padding:                          14px !default;
+$nav-tabs-item-left-padding:                $hpe-unit-space !default;
+
+$nav-tabs-underline-width:                  2px !default;
+
+$nav-tabs-active-color:                     $mine-shaft !default;
+$nav-tabs-active-border-color:              $nav-tabs-active-color !default;
+
+$nav-tabs-inactive-color:                   $gray-dark !default;
+$nav-tabs-inactive-border-color:            $nav-tabs-inactive-color !default;
+
+$nav-tabs-disabled-color:                   $gray-light !default;
+$nav-tabs-disabled-border-color:            transparent !default;
+
+// Nav bar
+$navbar-height:															96px !default;

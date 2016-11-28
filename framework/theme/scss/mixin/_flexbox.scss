@@ -1,0 +1,23 @@
+@mixin fixed-bottom() {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+@mixin flex-align($justify-content: flex-start,
+                  $align-items: stretch,
+                  $flex-direction: row) {
+  display: flex;
+  flex-direction: $flex-direction;
+  justify-content: $justify-content;
+  align-items: $align-items;
+}
+
+@mixin flex-centered() {
+  @include flex-align(center);
+}
+
+@mixin flex-vertical-centered() {
+  @include flex-align($align-items: center);
+}

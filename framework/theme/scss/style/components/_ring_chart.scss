@@ -1,0 +1,120 @@
+//
+// Ring Chart
+// --------------------------------------------------
+
+ring-chart {
+  display: block;
+
+  div.ring-chart-chart {
+    width: $ring-chart-svg-width;
+
+    .ring-chart-total {
+    	position: absolute;
+    	width: $ring-chart-svg-width;
+    	height: $ring-chart-svg-height;
+    	display: flex;
+
+      > div {
+      	margin: auto;
+
+        .ring-chart-total-number {
+        	font-size: 34px;
+        	color: $dove-gray2;
+        	line-height: 1;
+        }
+
+        .ring-chart-total-label {
+        	font-size: $font-size-base;
+          color: $dove-gray2;
+        	line-height: 1;
+        }
+      }
+    }
+  }
+
+  div.ring-chart-chart, div.ring-chart-labels {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  div.ring-chart-labels {
+
+  ul.ring-chart-labels {
+    list-style: none;
+    display: table;
+    border-spacing: $ring-chart-unit-space / 2;
+    margin: 0;
+    padding: 0;
+    margin-left: $ring-chart-unit-space / 2;
+    li {
+      display: table-row;
+      > span {
+        display: table-cell;
+        vertical-align: middle;
+      }
+      .ring-chart-title {
+          text-align: left;
+          padding: 0 $ring-chart-unit-space / 2 0 $ring-chart-unit-space / 4;
+        }
+        .ring-chart-count {
+            font-weight: bold;
+            font-size: 18px;
+        }
+      }
+
+      .ring-chart-square {
+        width: 16px;
+        height: 16px;
+        margin: auto;
+        display: block;
+
+        &.ring-chart-unknown {
+          background-color: $ring-chart-unknown-color;
+        }
+        &.ring-chart-warning {
+          background-color: $ring-chart-warning-color;
+        }
+        &.ring-chart-critical {
+          background-color: $ring-chart-critical-color;
+        }
+        &.ring-chart-ok {
+          background-color: $ring-chart-ok-color;
+        }
+      }
+
+    }
+  }
+
+  svg {
+      display: inline-block;
+      position: relative;
+      opacity: 1;
+      width: $ring-chart-svg-width;
+      height: $ring-chart-svg-height;
+  }
+  .arcOk {
+      stroke: $ring-chart-ok-color;
+      stroke-width: 2px;
+      fill: none;
+      position: absolute;
+  }
+  .arcWarning {
+      stroke: $ring-chart-warning-color;
+      stroke-width: 12px;
+      fill: none;
+      position: absolute;
+  }
+  .arcCritical {
+      stroke: $ring-chart-critical-color;
+      stroke-width: 18px;
+      fill: none;
+      position: absolute;
+  }
+  .arcUnknown {
+      stroke: $ring-chart-unknown-color;
+      stroke-width: 6px;
+      fill: none;
+      position: absolute;
+  }
+
+}
