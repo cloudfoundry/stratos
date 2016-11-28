@@ -44,6 +44,13 @@
           served: true,
           nocache: false
         },
+        {
+          pattern: 'app/view/assets/**/*.png',
+          watched: false,
+          included: false,
+          served: true,
+          nocache: false
+        },
 
         'framework/src/**/*.module.js',
         'framework/src/**/!(*.mock|*.spec).js',
@@ -108,6 +115,7 @@
       proxies: {
         '/images/': '/base/framework/theme/images/',
         '/plugins/cloud-foundry/view/assets/': '/base/src/plugins/cloud-foundry/view/assets/'
+        '/app/view/assets/': '/base/app/view/assets/'
       },
 
       reporters: ['progress', 'coverage']

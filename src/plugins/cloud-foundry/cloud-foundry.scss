@@ -15,12 +15,12 @@
   height: $hpe-unit-space * 3;
   line-height: $hpe-unit-space * 3;
   vertical-align: middle;
-  margin-top: $hpe-unit-space;
+  margin-top: 0;
   padding-left: 0;
   padding-right: $hpe-unit-space;
 
   &.panel-less {
-    margin-top: $hpe-unit-space / 2;
+    margin-top: 0;
     padding-left: 20px;
     padding-right: 16px;
 

@@ -3,7 +3,8 @@
 
   angular
     .module('app.view.settings-page', [])
-    .config(registerRoute);
+    .config(registerRoute)
+    .run(register);
 
   registerRoute.$inject = [
     '$stateProvider'
@@ -14,7 +15,10 @@
       url: '/account/settings',
       templateUrl: '/app/view/console-view/settings-page/settings-page.html',
       controller: SettingsController,
-      controllerAs: 'settingsCtrl'
+      controllerAs: 'settingsCtrl',
+      data: {
+        activeMenuState: 'account-settings'
+      }
     });
   }
 
@@ -40,5 +44,29 @@
   }
 
   angular.extend(SettingsController.prototype, {});
+
+  register.$inject = [
+    'app.model.modelManager',
+    'app.event.eventService'
+  ];
+
+  function register(modelManager, eventService) {
+    return new UserSettings(modelManager, eventService);
+  }
+
+  function UserSettings(modelManager, eventService) {
+    var that = this;
+    this.modelManager = modelManager;
+    eventService.$on(eventService.events.LOGIN, function () {
+      that.onLoggedIn();
+    });
+  }
+
+  angular.extend(UserSettings.prototype, {
+    onLoggedIn: function () {
+      var menu = this.modelManager.retrieve('app.model.navigation').menu;
+      menu.addMenuItem('account-settings', 'account-settings', gettext('About'), 99, 'helion-icon-Unknown_L');
+    }
+  });
 
 })();
