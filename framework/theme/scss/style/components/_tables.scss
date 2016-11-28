@@ -3,6 +3,9 @@ table {
   letter-spacing: $hpe-letter-spacing;
 
   thead > tr {
+    th[st-sort] {
+      cursor: pointer;
+    }
     th.st-sort-ascent, th.st-sort-descent {
       border-bottom: 2px solid $hpe-primary;
     }

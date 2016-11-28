@@ -1,17 +1,40 @@
+.endpoint-notification.alert {
+
+  margin-top:40px;
+
+  .helion-icon {
+    position: absolute;
+    left: $hpe-unit-space;
+    top: $hpe-unit-space;
+  }
+
+  &.endpoint-notification-slim {
+    width: 80%;
+    margin: auto;
+    margin-top: 40px;
+  }
+}
+.endpoint-notification-error {
+
+}
+
 .endpoints {
+
+
+
   &.endpoints-dashboard {
-    .action-header {
-      position: relative;
-      padding-top: $hpe-unit-space;
-      button {
-        position: absolute;
-        top: $hpe-unit-space;
-        right: $hpe-unit-space;
-      }
-    }
+    //.action-header {
+    //  position: relative;
+    //  padding-top: $hpe-unit-space;
+    //  button {
+    //    position: absolute;
+    //    top: $hpe-unit-space;
+    //    right: $hpe-unit-space;
+    //  }
+    //}
 
     .empty-view-message {
-      padding-top: $hpe-unit-space;
+      //padding-top: $hpe-unit-space;
     }
   }
 }

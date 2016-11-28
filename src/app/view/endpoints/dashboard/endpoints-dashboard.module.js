@@ -72,7 +72,8 @@
      * @param {string} type - type of endpoint being registered. selects the initial 'type' drop down value
      */
     this.register = function (type) {
-      registerService.add($scope, type).then(function () {
+      //TODO: RC search for uses
+      registerService.show($scope, type).then(function () {
         _updateEndpoints();
       });
     };
@@ -142,10 +143,8 @@
           Array.prototype.push.apply(that.endpoints, result);
         });
 
-        if (!that.initialised) {
-          // Show welcome message only if this is the first time around and there no endpoints
-          _updateWelcomeMessage();
-        }
+        //TODO: RC Ensure service calls back to this?
+        _updateWelcomeMessage();
 
         that.initialised = true;
       });

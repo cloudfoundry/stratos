@@ -1,10 +1,6 @@
-.console-welcome-message {
+.endpoint-notification-error {
   position: relative;
-  top: 48px;
-  .action-header {
-    padding-top: 24px;
-    padding-bottom: 0;
-  }
+  top: $hpe-unit-space*2;
 }
 
 .console-error.console-error-block {
