@@ -7,8 +7,6 @@
     navBarElement: navBarElement,
     goToView: goToView,
 
-    accountActionsButton: accountActionsButton,
-    showAccountActions: showAccountActions,
     showAccountSettings: showAccountSettings,
     logout: logout
 
@@ -19,35 +17,23 @@
   }
 
   function goToView(viewName) {
+    var id = 'navbar-item-' + viewName.toLowerCase();
     return element(by.css('navigation'))
-      .element(by.linkText(viewName))
+      .element(by.id(id))
       .click();
   }
 
-  function accountActionsButton() {
-    return element(by.css('avatar'))
-      .element(by.css('[ng-click="avatarCtrl.showActions()"]'));
-  }
-
-  function showAccountActions() {
-    return accountActionsButton().click();
-  }
-
   function showAccountSettings() {
-    return showAccountActions().then(function () {
-      return element(by.css('account-actions'))
-        .element(by.css('[href="#/account/settings"]'))
-        .click();
-    });
+    return goToView('account-settings');
   }
 
   function logout() {
-    return showAccountActions().then(function () {
-      return element(by.css('account-actions'))
-        .element(by.css('[ng-click="applicationCtrl.logout()"]'))
-        .click().then(function () {
+    return element(by.id('navbar-user-menu-dropdown'))
+      .click().then(function () {
+        browser.driver.sleep(100);
+        return element(by.id('navbar-item-logout')).click().then(function () {
           browser.driver.sleep(100);
         });
-    });
+      });
   }
 })();

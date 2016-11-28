@@ -46,7 +46,7 @@
     return navbar.goToView('Endpoints');
   }
   function showHcfEndpoints() {
-    return navbar.goToView('Helion Cloud Foundry');
+    return navbar.goToView('endpoint.clusters');
   }
 
   function goToEndpoints() {

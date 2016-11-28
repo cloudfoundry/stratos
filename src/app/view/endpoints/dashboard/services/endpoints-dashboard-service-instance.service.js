@@ -61,7 +61,7 @@
      * @public
      */
     function haveInstances() {
-      return serviceInstanceModel.serviceInstances.length > 0;
+      return serviceInstanceModel.serviceInstances && serviceInstanceModel.serviceInstances.length > 0;
     }
 
     /**
@@ -124,25 +124,24 @@
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
 
-        var isConnected = _.get(userServiceInstanceModel.serviceInstances[serviceInstance.guid], 'valid', false);
+        var isValid = _.get(userServiceInstanceModel.serviceInstances[serviceInstance.guid], 'valid', false);
         var hasExpired = false;
 
-        if (!isConnected) {
-          var tokenExpiry =
-            _.get(userServiceInstanceModel.serviceInstances[serviceInstance.guid], 'token_expiry', Number.MAX_VALUE);
-          hasExpired = new Date().getTime() > tokenExpiry * 1000;
+        if (!isValid) {
+          // If we're not valid but have a token expiry it must have expired
+          hasExpired = _.get(userServiceInstanceModel.serviceInstances[serviceInstance.guid], 'token_expiry');
         }
 
         var endpoint = {
           key: endpointPrefix + serviceInstance.guid,
           name: serviceInstance.name,
-          connected: isConnected ? 'connected' : 'unconnected',
+          connected: isValid ? 'connected' : 'unconnected',
           type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getProductStrings().HELION_CLOUD_FOUNDRY : utilsService.getProductStrings().HELION_CODE_ENGINE,
-          visit: isConnected && serviceInstance.cnsi_type === 'hcf' ? function () {
+          visit: isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
             return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
           } : undefined,
           url: utilsService.getClusterEndpoint(serviceInstance),
-          actions: _createInstanceActions(endpoints, isConnected, hasExpired),
+          actions: _createInstanceActions(endpoints, isValid, hasExpired),
           actionsTarget: serviceInstance
         };
 
@@ -150,7 +149,6 @@
         if (serviceInstance.error) {
           // Service could not be contacted
           endpoint.error = {
-            //TODO
             message: $interpolate(gettext('The {{ console }} could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'))({console: utilsService.getProductStrings().CONSOLE}),
             status: 'error'
           };

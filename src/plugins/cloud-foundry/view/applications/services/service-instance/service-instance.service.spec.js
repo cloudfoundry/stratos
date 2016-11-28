@@ -31,7 +31,10 @@
         $httpBackend.when('GET', '/pp/v1/proxy/v2/apps/app_123/summary').respond(200, {});
 
         spyOn($uibModal, 'open').and.callFake(function (config) {
-          return { result:  config.resolve.confirmDialogContext().callback() };
+          return {
+            result:  config.resolve.confirmDialogContext().callback(),
+            rendered: $q.resolve().promise
+          };
         });
 
         serviceInstance.unbindServiceFromApp('guid', 'app_123', 'binding_123', 'service_123');
@@ -73,8 +76,8 @@
           expect(config.resolve.context().variables).toEqual(appAutoscaler);
           return {
             opened: $q.defer().promise,
-            closed: $q.defer().promise
-            // rendered: $q.defer().promise
+            closed: $q.defer().promise,
+            rendered: $q.defer().promise
           };
         });
 
