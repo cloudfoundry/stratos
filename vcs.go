@@ -43,7 +43,10 @@ func (p *portalProxy) listVcsTokens(c echo.Context) error {
 	}
 	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
 	if list, err := vcsTokensRepository.ListVcsTokenByUser(userGuid, p.Config.EncryptionKeyInBytes); err != nil {
-		return err
+		return newHTTPShadowError(
+			http.StatusInternalServerError,
+			"Listing VCS tokens failed",
+			"Listing VCS tokens failed: %v", err)
 	} else {
 		c.JSON(http.StatusOK, list)
 		return nil

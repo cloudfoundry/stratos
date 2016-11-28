@@ -208,7 +208,7 @@ func (p *PgsqlVcsTokenRepository) ListVcsTokenByUser(userGuid string, encryption
 	}
 	defer rows.Close()
 
-	var vcsTokensList []*UserVcsToken
+	vcsTokensList := make([]*UserVcsToken, 0)
 	for rows.Next() {
 
 		// Reconstruct both the VCS and Token records in one query

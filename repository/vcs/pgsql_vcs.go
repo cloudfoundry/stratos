@@ -71,7 +71,7 @@ func (p *PostgresVcsRepository) List() ([]*VcsRecord, error) {
 	}
 	defer rows.Close()
 
-	var vcsList []*VcsRecord
+	vcsList := make([]*VcsRecord, 0)
 	for rows.Next() {
 		vr, err := scanRow(rows)
 		if err != nil {
@@ -96,7 +96,7 @@ func (p *PostgresVcsRepository) ListByUser(userGuid string) ([]*VcsRecord, error
 	}
 	defer rows.Close()
 
-	var vcsList []*VcsRecord
+	vcsList := make([]*VcsRecord, 0)
 	for rows.Next() {
 		vr, err := scanRow(rows)
 		if err != nil {
