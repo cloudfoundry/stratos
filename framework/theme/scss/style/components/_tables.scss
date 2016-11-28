@@ -1,0 +1,115 @@
+table {
+  color: $gray-darker;
+  letter-spacing: $hpe-letter-spacing;
+
+  thead > tr {
+    th.st-sort-ascent, th.st-sort-descent {
+      border-bottom: 2px solid $hpe-primary;
+    }
+  }
+
+  th {
+    font-weight: $hpe-font-weight-semibold;
+    text-transform: uppercase;
+  }
+
+  tr.vertical-centered > td {
+    vertical-align: middle;
+  }
+}
+
+table.table {
+  &.table-selectable {
+    th:first-child, td:first-child {
+      width: $hpe-unit-space * 2.5;
+      position: relative;
+
+      checkbox-input {
+        position: absolute;
+        top: $hpe-unit-space * 2 / 3;
+      }
+    }
+  }
+
+  &.table-actionable {
+    > thead > tr > th,
+    > tbody > tr:not([table-inline-message]) > td,
+    > tfoot > tr > td {
+      &:last-child:not(.text-center) {
+        text-align: right;
+        a.btn.btn-link {
+          text-transform: uppercase;
+        }
+
+      }
+    }
+  }
+
+  &.table-outlined {
+    border: 2px solid $table-border-color;
+
+    th {
+      border-width: 1px;
+    }
+  }
+
+  > thead > tr > th,
+  > tbody > tr:not([table-inline-message]) > td,
+  > tfoot > tr > td {
+
+    line-height: 1;
+    padding-top: $hpe-unit-space * .8;
+    padding-bottom: $hpe-unit-space * .8;
+
+    &:first-child:not(.text-center) {
+      padding-left: $hpe-unit-space;
+    }
+
+    &:last-child:not(.text-center) {
+      padding-right: $hpe-unit-space;
+    }
+
+    .btn-link {
+      line-height: 1;
+      height: auto;
+      padding: 0;
+    }
+
+    .btn-wrapper {
+      position: relative;
+      display: inline-block;
+
+      > .btn {
+        position: absolute;
+        bottom: -$hpe-unit-space / 3;
+        right: 0;
+      }
+    }
+
+    .icon-link {
+      color: $text-color;
+      text-decoration: none;
+
+      &:hover,
+      &:active {
+        color: $link-color;
+        text-decoration: none;
+      }
+    }
+
+    .helion-icon {
+      line-height: 0;
+      font-size: $hpe-unit-space;
+      vertical-align: middle;
+    }
+  }
+
+  thead tr:first-child th {
+    padding-top: $hpe-unit-space * 1.1;
+    padding-bottom: $hpe-unit-space * .5;
+  }
+
+  tfoot tr:last-child td {
+    padding-bottom: $hpe-unit-space;
+  }
+}

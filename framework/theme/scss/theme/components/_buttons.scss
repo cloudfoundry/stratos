@@ -1,0 +1,40 @@
+// buttons
+// =======
+
+// Colors
+// ------
+
+// Default button
+$btn-default-border:              $brand-primary !default;
+$btn-default-bg:                  transparent !default;
+
+// Primary button
+$btn-primary-color:               $hpe-primary-bg !default;
+$btn-primary-bg:                  $brand-primary !default;
+$btn-primary-border:              $brand-primary !default;
+
+
+// Shapes
+// ------
+
+$button-border-width:             2px !default;
+$button-focus-outline-width:      2px !default;
+$button-font-weight:              600 !default;
+$button-height:                   40px !default;
+
+$button-horizontal-padding:       22px !default;
+$button-horizontal-padding-lg:    60px !default;
+$button-horizontal-padding-sm:    20px !default;
+$button-horizontal-padding-xs:    10px !default;
+
+$button-text-transform:           uppercase !default;
+
+$button-font-size:                19px !default;
+$button-font-size-lg:             27px !default;
+$button-font-size-sm:             15px !default;
+$button-font-size-xs:             12px !default;
+
+$button-line-height:              24px !default;
+$button-line-height-lg:           36 / 27 !default;
+$button-line-height-sm:           18 / 15 !default;
+$button-line-height-xs:           15 / 12 !default;

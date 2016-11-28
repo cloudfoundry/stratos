@@ -119,7 +119,7 @@
         <th translate>Memory</th>
         <th translate>Disk</th>
         <th translate>Uptime</th>
-        <th translate ng-if="!applicationSummaryCtrl.hideInstanceActions">Actions</th>
+        <th translate ng-if="!applicationSummaryCtrl.hideInstanceActions">Action</th>
       </tr>
       </thead>
       <tbody>
@@ -139,7 +139,8 @@
           <actions-menu actions="applicationSummaryCtrl.instancesActionMenu"
                         action-target="$index"
                         menu-position="actions-menu-right"
-                        menu-icon="helion-icon helion-icon-More"></actions-menu>
+                        menu-icon="helion-icon helion-icon-More"
+                        enable-button-mode="true"></actions-menu>
         </td>
       </tr>
       </tbody>
@@ -185,7 +186,8 @@
           <actions-menu actions="applicationSummaryCtrl.routesActionMenu"
                         action-target="route"
                         menu-position="actions-menu-right"
-                        menu-icon="helion-icon helion-icon-More"></actions-menu>
+                        menu-icon="helion-icon helion-icon-More"
+                        enable-button-mode="true"></actions-menu>
         </td>
       </tr>
       </tbody>

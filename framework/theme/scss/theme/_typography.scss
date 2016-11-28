@@ -1,0 +1,21 @@
+// typography
+// ==========
+
+// HPE semantic names
+// ------------------
+$hpe-font-family:             Metric, sans-serif !default;
+$hpe-letter-spacing:          0.025em;
+$hpe-font-weight-semibold:    600;
+
+// Bootstrap binding names
+// -----------------------
+$font-family-base:            $hpe-font-family !default;
+
+$font-size-base:              16px !default;
+$font-size-large:             18px !default;
+$font-size-small:             12px !default;
+
+$font-size-h1:                36px !default;
+
+$line-height-base:            1.375 !default;
+$line-height-computed:        floor(($font-size-base * $line-height-base)) !default;

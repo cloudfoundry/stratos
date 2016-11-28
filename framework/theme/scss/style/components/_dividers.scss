@@ -1,0 +1,11 @@
+hr {
+  border-top-width: $divider-border-width;
+  margin-top: $divider-margin-top;
+  margin-bottom: $divider-margin-bottom;
+}
+
+.page-header {
+  border-bottom-width: $divider-border-width;
+  margin-bottom: $divider-margin-bottom;
+  padding-bottom: $divider-margin-top;
+}

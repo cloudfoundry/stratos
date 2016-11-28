@@ -1,0 +1,7 @@
+<div class="global-spinner" ng-if="globalSpinnerCtrl.spinnerActive">
+  <ng-transclude></ng-transclude>
+  <spinner ng-if="globalSpinnerCtrl.spinnerType === 'spinner'"></spinner>
+  <bounce-spinner ng-if="globalSpinnerCtrl.spinnerType === 'bounce-spinner'"
+    ng-class="'{{ globalSpinnerCtrl.classes }}'">
+  </bounce-spinner>
+</div>

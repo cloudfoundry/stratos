@@ -1,0 +1,30 @@
+.flyout-content {
+  background-color: $flyout-bg-color;
+  padding: 0 15px;
+  height: 100%;
+  overflow-y: auto;
+  position: fixed;
+  right: -100%;
+  top: 0;
+  z-index: $flyout-z-index;
+  transition-property: right;
+  transition-duration: $flyout-transition-duration;
+  width: $flyout-width;
+  min-width: $flyout-width;
+  max-width: $flyout-width;
+
+  &.active {
+    right: 0;
+  }
+
+  .flyout-body {
+    padding-bottom: 15px;
+  }
+
+  .flyout-header {
+    background-color: $flyout-bg-color;
+    display: table;
+    padding: 15px 0;
+    width: 100%;
+  }
+}

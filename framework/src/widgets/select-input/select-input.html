@@ -1,0 +1,22 @@
+<div class="dropdown" ng-class="{ 'open': selectInputCtrl.open }">
+  <div class="select-input-field">
+    <span class="select-input-value"
+      ng-class="{ 'text-muted': !selectInputCtrl.ngModelCtrl.$modelValue }">
+      {{ selectInputCtrl.modelLabel || selectInputCtrl.placeholder }}
+    </span>
+    <i class="dropdown-toggle" ng-class="selectInputCtrl.arrowIcon"></i>
+  </div>
+  <ul class="dropdown-menu">
+    <li class="dropdown-menu-header" disabled>{{ selectInputCtrl.placeholder }}</li>
+    <li class="select-option" ng-repeat="option in selectInputCtrl.inputOptions"
+      ng-click="selectInputCtrl.setValue(option)" ng-disabled="option.disabled"
+      ng-class="{ 'selected': option.value === selectInputCtrl.ngModelCtrl.$modelValue }">
+      {{ option.label }}
+    </li>
+    <li class="select-option select-add-option" ng-if="selectInputCtrl.addAction"
+      ng-click="selectInputCtrl.addAction.execute()">
+      <i ng-class="selectInputCtrl.addAction.icon || 'glyphicon glyphicon-plus'"></i>
+      <span translate>{{ selectInputCtrl.addAction.label }}</span>
+    </li>
+  </ul>
+</div>

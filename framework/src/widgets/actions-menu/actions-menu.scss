@@ -1,0 +1,65 @@
+.action-menu-wrapper {
+  .action-button {
+    a.btn.btn-link {
+      text-transform: none;
+      text-decoration: none;
+      outline: none;
+      padding: 0;
+      line-height: 0;
+      height: 0;
+      font-size: inherit;
+    }
+  }
+
+  .actions-menu {
+    outline: none;
+    position: relative;
+
+    .actions-menu-icon {
+      cursor: pointer;
+      line-height: inherit;
+    }
+
+    .actions-menu-list {
+      border: $actions-menu-border;
+      border-radius: $actions-menu-border-radius;
+      box-shadow: $actions-menu-box-shadow;
+      position: absolute;
+      padding: 0;
+
+      &.actions-menu-right {
+        left: 100%;
+        transform: translate(-100%, 0);
+        margin-left: 2px;
+      }
+
+      .actions-menu-label {
+        color: $actions-menu-label-fg;
+        font-size: inherit;
+        padding: $actions-menu-item-padding;
+      }
+
+      .actions-menu-item {
+        background: $actions-menu-bg;
+        color: $actions-menu-fg;
+        cursor: pointer;
+        padding: $actions-menu-item-padding;
+        outline: none;
+
+        &:not([disabled]) {
+          &:hover,
+          &:focus,
+          &:active {
+            background: $actions-menu-hover-bg;
+            color: $actions-menu-hover-fg;
+          }
+        }
+
+        &[disabled] {
+          color: $actions-menu-item-disabled-fg;
+          cursor: default;
+        }
+      }
+    }
+  }
+}

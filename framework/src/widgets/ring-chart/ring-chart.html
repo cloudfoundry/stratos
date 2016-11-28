@@ -1,0 +1,51 @@
+<div class="ring-chart">
+  <div class="ring-chart-chart">
+    <div class="ring-chart-total">
+      <div>
+        <div class="ring-chart-total-number">{{rcCtrl.total}}</div>
+        <div class="ring-chart-total-label" translate>{{(rcCtrl.total===1 ? rcCtrl.labels.totalOne : rcCtrl.labels.total)}}</div>
+      </div>
+    </div>
+    <svg xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg">
+      <g class="arcOk" ng-if="rcCtrl.derivedData.ok.eAngle">
+        <path ng-attr-d="{{rcCtrl.getPath('ok')}}"></path>
+      </g>
+
+      <g class="arcWarning" ng-if="rcCtrl.derivedData.warning.eAngle">
+        <path ng-attr-d="{{rcCtrl.getPath('warning')}}"></path>
+      </g>
+
+      <g class="arcCritical" ng-if="rcCtrl.derivedData.critical.eAngle">
+        <path ng-attr-d="{{rcCtrl.getPath('critical')}}"></path>
+      </g>
+
+      <g class="arcUnknown" ng-if="rcCtrl.derivedData.unknown.eAngle">
+        <path ng-attr-d="{{rcCtrl.getPath('unknown')}}"></path>
+      </g>
+    </svg>
+  </div>
+  <div ng-if="!rcCtrl.hideLegend" class="ring-chart-labels">
+    <ul class="ring-chart-labels">
+      <li ng-if="rcCtrl.hasMetric('critical')">
+        <span><span class="ring-chart-square ring-chart-critical"></span></span>
+        <span translate class="ring-chart-title">{{ rcCtrl.labels.critical | uppercase }}</span>
+        <span class="ring-chart-count">{{ rcCtrl.data.critical }}</span>
+      </li>
+      <li ng-if="rcCtrl.hasMetric('warning')">
+        <span><span class="ring-chart-square ring-chart-warning"></span></span>
+        <span translate class="ring-chart-title" >{{ rcCtrl.labels.warning | uppercase }}</span>
+        <span class="ring-chart-count">{{ rcCtrl.data.warning }}</span>
+      </li>
+      <li ng-if="rcCtrl.hasMetric('unknown')">
+        <span><span class="ring-chart-square ring-chart-unknown"></span></span>
+        <span translate class="ring-chart-title">{{ rcCtrl.labels.unknown | uppercase }}</span>
+        <span class="ring-chart-count">{{ rcCtrl.data.unknown }}</span>
+      </li>
+      <li ng-if="rcCtrl.hasMetric('ok')">
+        <span><span class="ring-chart-square ring-chart-ok"></span></span>
+        <span translate class="ring-chart-title">{{ rcCtrl.labels.ok | uppercase }}</span>
+        <span class="ring-chart-count">{{ rcCtrl.data.ok }}</span>
+      </li>
+    </ul>
+  </div>
+</div>

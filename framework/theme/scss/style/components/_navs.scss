@@ -1,0 +1,95 @@
+// All the Navs
+// -------------------------
+.nav:not(.navbar-nav) {
+  & > li > a {
+    font-size: $font-size-large;
+    padding: $padding-large-vertical $padding-large-horizontal;
+  }
+
+  &:not(.nav-pills) > li > a {
+    font-weight: $hpe-font-weight-semibold;
+  }
+}
+
+// Stacked Nav
+// -------------------------
+.nav-stacked {
+  background: $hpe-primary-bg;
+
+  & > li:not(.active):not(.disabled) > a {
+    color: $nav-tabs-inactive-color;
+
+    &:hover {
+      color: $nav-tabs-active-color;
+    }
+  }
+
+  & > li.disabled > a {
+    &,
+    &:hover {
+      color: $nav-disabled-link-color;
+    }
+  }
+
+  & > li > a {
+    padding-left: $hpe-unit-space;
+    padding-right: $hpe-unit-space;
+    letter-spacing: $hpe-letter-spacing;
+    font-weight: normal;
+  }
+}
+
+// Tabs
+// -------------------------
+.nav.nav-tabs {
+  > li {
+    border: none;
+    border-bottom: $nav-tabs-underline-width solid transparent;
+    letter-spacing: $hpe-letter-spacing;
+    margin: 0 0 0 $nav-tabs-item-left-padding;
+    padding-bottom: $nav-tabs-padding - $nav-tabs-underline-width;
+    padding-top: $nav-tabs-padding;
+    text-transform: capitalize;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
+
+    > a,
+    > a:focus,
+    > a:hover {
+      border: none;
+      color: $nav-tabs-inactive-color;
+      padding: 0;
+    }
+
+    &:focus,
+    &:hover {
+      border-bottom-color: $nav-tabs-inactive-border-color;
+    }
+
+    &.disabled,
+    &.disabled:focus,
+    &.disabled:hover {
+      border-bottom-color: $nav-tabs-disabled-border-color;
+
+      > a,
+      > a:focus,
+      > a:hover {
+        color: $nav-tabs-disabled-color;
+      }
+    }
+
+    &.active,
+    &.active:focus,
+    &.active:hover {
+      border-bottom-color: $nav-tabs-active-border-color;
+
+      > a,
+      > a:focus,
+      > a:hover {
+        color: $nav-tabs-active-color
+      }
+    }
+  }
+}
