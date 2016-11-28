@@ -148,7 +148,8 @@
           text = gettext('This endpoint has no applications');
         }
       }
-      return text + (this.model.filterParams.text.length ? ' matching the search term.' : '.');
+      return text +
+        (this.model.filterParams.text && this.model.filterParams.text.length ? ' matching the search term.' : '.');
     },
 
     getEndpointsLink: function () {
