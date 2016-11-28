@@ -1,0 +1,16 @@
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+
+  ring-chart div.ring-chart-chart .ring-chart-total > div {
+    height: 60px;
+  }
+
+  #toast-container div[toast] {
+    .toast-body, .toast-icon {
+      flex-direction: column;
+    }
+  }
+
+  .modal.detail-view .detail-view-content .detail-view-header {
+    max-height: $hpe-unit-space * 4;
+  }
+}

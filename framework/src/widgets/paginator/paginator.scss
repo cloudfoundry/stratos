@@ -1,0 +1,109 @@
+.paginator {
+  display: flex;
+  justify-content: space-between;
+  height: $button-height;
+  margin-top: $hpe-unit-space / 2;
+  margin-bottom: $hpe-unit-space / 2;
+  user-select: none;
+
+  > * {
+    display: inline-block;
+    height: $button-height;
+
+    &.btn-prev:before {
+      content: $helion-icon-Left_Arrow;
+      font-family: 'helion-icons';
+      font-size: $hpe-unit-space;
+      padding-right: $hpe-unit-space / 4;
+    }
+
+    &.btn-next:after {
+      content: $helion-icon-Right_Arrow;
+      font-family: 'helion-icons';
+      font-size: $hpe-unit-space;
+      padding-left: $hpe-unit-space / 4;
+    }
+
+    &.btn-prev,
+    &.btn-next {
+      display: inline-flex;
+      align-items: center;
+      height: $button-height;
+      cursor: pointer;
+      font-size: $font-size-large;
+      font-weight: $hpe-font-weight-semibold;
+
+      &:hover,
+      &:active {
+        text-decoration: none;
+      }
+
+      &[disabled] {
+        color: $gray-light;
+        cursor: not-allowed;
+      }
+    }
+
+    &.page-links {
+      display: inline-flex;
+
+      span {
+        display: inline-block;
+        height: $button-height;
+        width: $button-height;
+        line-height: $button-height - 2 * $button-border-width;
+        text-align: center;
+        font-size: $font-size-large;
+        font-weight: $hpe-font-weight-semibold;
+        color: $gray-light;
+        cursor: pointer;
+        border: $button-border-width transparent solid;
+
+        &:hover {
+          background: $alto;
+          color: $text-color;
+        }
+
+        &.current {
+          border: $button-border-width $text-color solid;
+          color: $text-color;
+
+          &:hover {
+            background: none;
+            color: $text-color;
+          }
+        }
+
+        &.ellipsis {
+          cursor: default;
+
+          &:hover {
+            background: none;
+            color: $gray-light;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .paginator {
+    justify-content: center;
+  }
+
+  .btn-next,
+  .btn-prev {
+    width: $button-height;
+
+    &:after,
+    &:before {
+      padding: 0;
+      text-align: center;
+    }
+
+    .text {
+      display: none;
+    }
+  }
+}

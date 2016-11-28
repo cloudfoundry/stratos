@@ -36,6 +36,11 @@
             main: [
               './lodash.js'
             ]
+          },
+          'bootstrap-sass': {
+            main: [
+              'assets/stylesheets/_bootstrap.scss'
+            ]
           }
         }
       },

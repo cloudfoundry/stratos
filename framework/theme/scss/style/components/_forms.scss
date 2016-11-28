@@ -1,0 +1,251 @@
+.has-error .form-control,
+.has-warning .form-control,
+.has-success .form-control,
+.form-control {
+  &, &:focus {
+    @include box-shadow(none);
+  }
+}
+
+form, [ng-form] {
+  .form-group {
+    height: $hpe-input-height;
+    position: relative;
+  }
+}
+
+form, [ng-form] {
+  .form-group {
+    position: relative;
+    border: 1px solid $input-border;
+    background-color: $input-bg;
+    padding: 0 $padding-large-horizontal;
+    width: $hpe-input-width;
+
+    &.form-group-large {
+      width: $hpe-input-width * 1.25;
+    }
+
+    label {
+      color: $hpe-input-label-fg;
+      font-weight: normal;
+      font-size: $font-size-small;
+      margin-bottom: 0;
+    }
+
+    .helion-icon.form-control-feedback {
+      line-height: normal;
+    }
+
+    .input-group-addon {
+      border: none;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="datetime"],
+    input[type="datetime-local"],
+    input[type="date"],
+    input[type="month"],
+    input[type="time"],
+    input[type="week"],
+    input[type="number"],
+    input[type="email"],
+    input[type="url"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="color"],
+    select-input {
+      border: none;
+      background-color: transparent;
+      padding: 0;
+      margin-bottom: $padding-base-vertical;
+      height: $line-height-computed;
+      line-height: $line-height-computed; // Required for bug in Chrome
+
+      &:not(.input-lg):not(.input-sm) {
+        font-size: $font-size-base;
+      }
+    }
+
+    &.focus {
+      position: relative;
+      border-color: $hpe-input-select-fg;
+      z-index: 2;
+    }
+
+    &.has-warning {
+      border-color: $brand-warning;
+    }
+
+    &.has-error {
+      border-color: $brand-danger;
+      z-index: 1;
+
+      .control-message {
+        display: block;
+        color: $brand-danger;
+      }
+    }
+
+    &.has-success {
+      border-color: $brand-success;
+    }
+
+    &.addon-form-group {
+      padding: 0;
+
+      input {
+        margin-bottom: 0;
+      }
+    }
+
+    .control-message {
+      position: absolute;
+      top: $hpe-unit-space / 8;
+      right: $hpe-unit-space / 3;
+      font-size: $font-size-small;
+      display: none;
+    }
+  }
+}
+
+form:not(.form-horizontal), [ng-form]:not(.form-horizontal) {
+  .form-group {
+    margin-bottom: $form-group-margin-bottom;
+  }
+}
+
+form.form-horizontal, [ng-form].form-horizontal {
+  display: flex;
+
+  .form-group {
+    display: inline-block;
+    margin-left: 0;
+    margin-right: $form-group-margin-bottom;
+  }
+}
+
+// Webkit only
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+
+  // This next bit of trickery is used to change the input
+  // text caret color, but not change the text color itself
+  // This is only possible on webkit
+  input[type="text"],
+  input[type="password"],
+  input[type="datetime"],
+  input[type="datetime-local"],
+  input[type="date"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"],
+  input[type="number"],
+  input[type="email"],
+  input[type="url"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="color"] {
+    color: $hpe-input-select-fg;
+    text-shadow: 0 0 0 $input-color-placeholder;
+    -webkit-text-fill-color: $input-color;
+
+    &::-webkit-input-placeholder{
+      color: $input-color-placeholder;
+      text-shadow: none;
+      -webkit-text-fill-color: initial;
+    }
+  }
+}
+
+@include hpe-placeholder {
+  color: inherit;
+  opacity: 0.54;
+}
+
+.addon-form-group {
+  background-color: $input-bg;
+  border: 1px solid $input-border;
+  padding: 0;
+
+  .input-group {
+    @include flex-vertical-centered();
+    padding: 0 $padding-large-horizontal;
+    height: $hpe-input-height;
+    width: 100%;
+
+    .input-group-addon {
+      background: transparent;
+      border: none;
+      padding: 0;
+      width: auto;
+
+      & + input.form-control {
+        margin-left: $hpe-unit-space / 2;
+      }
+    }
+
+    input.form-control {
+      border: none;
+      padding: 0;
+
+      & + .input-group-addon {
+        margin-left: $hpe-unit-space / 2;
+      }
+    }
+  }
+}
+
+select-input,
+search-box {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: 0;
+  outline: none;
+
+  .dropdown-menu {
+    @include box-shadow(none);
+    margin-top: $padding-base-vertical;
+    padding: 0;
+    top: 100%;
+
+    .dropdown-menu-header {
+      color: $select-input-menu-header-color;
+      padding: $select-input-menu-header-padding;
+    }
+  }
+
+  .select-input-field {
+    margin-left: $padding-large-horizontal + 1;
+    margin-right: $padding-large-horizontal + 1;
+  }
+
+  .select-option {
+    padding: $select-input-option-padding;
+
+
+    &.selected {
+      font-weight: 600;
+    }
+
+    &.select-add-option {
+      @include flex-vertical-centered();
+
+      i {
+        margin-right: $hpe-unit-space / 4;
+      }
+    }
+
+    &[disabled] {
+      cursor: not-allowed;
+      color: $select-input-disabled-color;
+      background: $white;
+    }
+  }
+}
+
+fieldset[disabled] select-input.form-control {
+  background-color: transparent;
+  opacity: 0.53;
+}

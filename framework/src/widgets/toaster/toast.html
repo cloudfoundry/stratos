@@ -1,0 +1,11 @@
+<div class="{{toastClass}} {{toastType}}" ng-click="tapToast()">
+  <div class="toast-icon" ng-if="!extraData.busy">
+    <span class="toast-icon-icon helion-icon helion-icon-lg {{titleClass}}"></span>
+  </div>
+  <div class="toast-progress" ng-if="extraData.busy">
+  	<bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+  <div class="toast-body">
+    <div class="toast-message" ng-bind-html="message"></div>
+  </div>
+</div>

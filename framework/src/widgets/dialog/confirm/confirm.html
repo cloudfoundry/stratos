@@ -1,0 +1,30 @@
+<div class="modal-header">
+  <h3 class="modal-title">
+    {{ ::confirmCtrl.confirmDialogContext.title }}
+  </h3>
+</div>
+<div class="modal-body">
+  <p ng-show="!confirmCtrl.isBusy" ng-bind-html="confirmCtrl.getDescription()"></p>
+  <div class="spinner" ng-show="confirmCtrl.isBusy">
+    <p>{{ ::confirmCtrl.confirmDialogContext.busyDescription }}</p>
+    <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
+  </div>
+</div>
+<div class="modal-error" ng-if="confirmCtrl.hasError">
+  <div class="alert alert-danger">
+    {{ confirmCtrl.errorMessage }}
+  </div>
+</div>
+<div class="modal-footer" ng-class="{'single-button': confirmCtrl.confirmDialogContext.hideNo}">
+  <button class="btn btn-default"
+    ng-click="confirmCtrl.confirmDialogContext.modalInstance.dismiss()"
+    ng-disabled="confirmCtrl.isBusy"
+    ng-show="!confirmCtrl.confirmDialogContext.hideNo">
+    {{ ::confirmCtrl.confirmDialogContext.buttonText.no || 'No' }}
+  </button>
+  <button class="btn btn-primary"
+    ng-click="confirmCtrl.confirmed()"
+    ng-disabled="confirmCtrl.isBusy">
+    {{ ::confirmCtrl.confirmDialogContext.buttonText.yes || 'Yes' }}
+  </button>
+</div>

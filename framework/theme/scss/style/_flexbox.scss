@@ -1,0 +1,17 @@
+.flex-container-row-wrap {
+  @include flex-align();
+  flex-wrap: wrap;
+}
+
+.flex-container-row {
+  @include flex-align();
+}
+
+.flex-container-col {
+  @include flex-align();
+  flex-direction: column;
+}
+
+.flex-center {
+  @include flex-align(center, center);
+}

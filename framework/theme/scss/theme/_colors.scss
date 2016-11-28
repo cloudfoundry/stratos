@@ -1,0 +1,110 @@
+// Colors
+// ======
+
+// value names
+// -----------
+
+// Primary
+$gossamer:              #01a982; // HPE Green
+$mine-shaft:            #333333; // HPE Black
+$white:                 #ffffff; // HPE White
+
+// Neutrals
+$slate:                 #425563; // Limed Spruce
+$bronze:                #80746e; // Americano
+$dark-steel:            #5f7a76; // Cutty-Sark
+$dove-gray:             #666666; // Gray40
+$dove-gray2:            #555555;
+$charcoal:              #767676; // Boulder (Frame)
+$silver-sand:           #c6c9ca; // Gray (or, more correctly, Grey)
+$rule:                  #cccccc; // The real rule, not that silver-sand pretender!
+$alto:                  #d9d9d9;
+$mercury:               #e6e6e6;
+$concrete:              #f2f2f2; // (Background)
+$silver:                #f0f0f0; // Seashell (Hover)
+
+// Vibrants
+$turquoise:             #2ad2c9; // Turquoise (Selection)
+$purple:                #614767; // Mortar
+
+// Application Status
+// NOTE:  These names differ from the style guide because overwriting "red" is a bad idea.
+$carnation:             #ff454f; // Red (Warning)
+$sunglow:               #ffd042; // Yellow (Notification)
+$salmon:                #ff8d6d; // Orange (Accent)
+
+// Color name aliases
+$limed-spruce:          $slate;
+$americano:             $bronze;
+$cutty-sark:            $dark-steel;
+$boulder:               $charcoal;
+$seashell:              $silver;
+$mortar:                $purple;
+
+// Status Colors
+$status-alert:          $seashell;
+$status-okay:           $gossamer;
+$status-warning:        $sunglow;
+$status-unknown:        $rule;
+$status-critical:       $carnation;
+$status-open:           $turquoise;
+$status-acknowledged:   #877b75;
+$status-resolved:       $silver-sand;
+
+
+// HPE semantic names
+// ------------------
+$hpe-primary:           $gossamer !default;
+$hpe-primary-bg:        $concrete !default;
+$hpe-primary-fg:        $mine-shaft !default;
+
+
+// Bootstrap binding names
+// -----------------------
+$gray-darker:           $dove-gray !default;
+$gray-dark:             $charcoal !default;
+$gray:                  $silver-sand !default;
+$gray-light:            $rule !default;
+$gray-lighter:          $seashell !default;
+
+$brand-primary:         $hpe-primary !default;
+$brand-success:         $turquoise !default;
+$brand-info:            $cutty-sark !default;
+$brand-warning:         $sunglow !default;
+$brand-danger:          $carnation !default;
+
+$body-bg:               $hpe-primary-bg !default;
+$text-color:            $hpe-primary-fg !default;
+$link-color:            $hpe-primary !default;
+$link-hover-color:      darken($link-color, 10%) !default;
+$input-color:           $gray-darker !default;
+
+
+//== Form states and alerts
+//
+//## Define colors for form feedback states and, by default, alerts.
+
+$state-success-text:    $brand-success !default;
+$state-success-bg:      $status-okay !default;
+$state-success-border:  transparent !default;
+
+$state-info-text:       $brand-info !default;
+$state-info-bg:         $status-unknown !default;
+$state-info-border:     transparent !default;
+
+$state-warning-text:    $brand-warning !default;
+$state-warning-bg:      $status-warning !default;
+$state-warning-border:  transparent !default;
+
+$state-danger-text:     $brand-danger !default;
+$state-danger-bg:       $status-critical !default;
+$state-danger-border:   transparent !default;
+
+
+//== Gradient defaults
+//
+//## Define colors for common stepped gradients
+$gradient-default-color-1: $concrete !default;
+$gradient-default-color-2: $mercury !default;
+$gradient-default-color-3: $alto !default;
+$gradient-default-color-4: $rule !default;

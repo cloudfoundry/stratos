@@ -1,0 +1,22 @@
+<div class="card panel panel-default">
+  <div class="panel-heading" ng-class="{'linked': galleryCardCtrl.cardClickable }"
+    ng-click="galleryCardCtrl.onCardClick({ card: galleryCardCtrl.cardData })">
+    <span class="gallery-card-title">{{ galleryCardCtrl.cardData.title }}</span>
+    <actions-menu class="gallery-card-actions" ng-if="galleryCardCtrl.cardActions"
+      actions="galleryCardCtrl.cardActions" action-target="galleryCardCtrl.cardData"
+      menu-icon="{{galleryCardCtrl.actionsIcon}}" menu-position="{{galleryCardCtrl.actionsPosition}}">
+    </actions-menu>
+  </div>
+  <div class="panel-body" ng-class="{'linked': galleryCardCtrl.cardClickable }"
+    ng-click="galleryCardCtrl.onCardClick({ card: galleryCardCtrl.cardData })">
+    <ng-transclude></ng-transclude>
+  </div>
+  <div class="panel-footer" ng-if="galleryCardCtrl.cardData.status"
+    ng-class="{ 'linked': galleryCardCtrl.notificationClickable }"
+    ng-click="galleryCardCtrl.onNotificationClick({ card: galleryCardCtrl.cardData })">
+    <div class="gallery-card-status" ng-class="galleryCardCtrl.cardData.status.classes">
+      <span ng-class="galleryCardCtrl.cardData.status.icon"></span>
+    </div>
+    <div class="gallery-card-status-text">{{ galleryCardCtrl.cardData.status.description }}</div>
+  </div>
+</div>
