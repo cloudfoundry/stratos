@@ -39,7 +39,7 @@
       });
 
       it('should return correct URL', function () {
-        var urlString = applicationsTableDirectiveCtrl.getAppLink(apps[0]);
+        var urlString = applicationsTableDirectiveCtrl.getAppSummaryLink(apps[0]);
         expect(urlString).toEqual('#/cf/applications/testGuid/app/appGuid/summary');
       });
 

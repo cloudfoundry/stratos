@@ -26,12 +26,12 @@
   angular.extend(ApplicationsTableController.prototype, {
 
     /**
-     * @function getAppLink
+     * @name getAppSummaryLink
      * @description Get link to application summary page
      * @param {object} app The application object
      * @returns {string} returns the link to the app summary page
      */
-    getAppLink: function (app) {
+    getAppSummaryLink: function (app) {
       return '#/cf/applications/' + app.clusterId + '/app/' + app.metadata.guid + '/summary';
     }
   });

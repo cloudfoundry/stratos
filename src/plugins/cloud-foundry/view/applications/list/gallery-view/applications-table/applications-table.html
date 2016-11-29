@@ -15,7 +15,8 @@
     <tbody>
     <tr ng-repeat="app in applicationsTableCtrl.stApps">
       <td class="text-uppercase">
-        <a ng-href="{{applicationsTableCtrl.getAppLink(app)}}">{{app.entity.name}}</td>
+        <a ng-href="{{applicationsTableCtrl.getAppSummaryLink(app)}}">{{app.entity.name}}</a>
+      </td>
       <td>
         <app-state-icon state="app.state.indicator"></app-state-icon>
         {{ app.state.label }}
