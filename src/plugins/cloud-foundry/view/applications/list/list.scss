@@ -14,20 +14,13 @@ $applications-msg-height: 50px;
   justify-content: flex-end;
   align-items: center;
 
-  .form-group {
+  .form-group.search-field {
     height: 40px;
-  }
-  .search-field {
     display: flex;
     margin-top: -1px;
-    div {
-      width: 100%;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      input {
-        margin-bottom: 0;
-      }
+    align-items: center;
+    input {
+      margin-bottom: 0;
     }
   }
 }
