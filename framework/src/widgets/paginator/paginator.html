@@ -1,0 +1,34 @@
+<div class="paginator"
+     ng-if="paginatorCtrl.properties.total > 1">
+  <a class="btn-link btn-prev"
+     ng-click="paginatorCtrl.loadPage(paginatorCtrl.currentPageNumber - 1)"
+     ng-disabled="paginatorCtrl.currentPageNumber === 1">
+    <span class="text">{{ paginatorCtrl.properties.text.prevBtn }}</span>
+  </a>
+
+  <span class="page-links">
+    <span ng-class="{ 'current': paginatorCtrl.currentPageNumber === 1 }"
+          ng-click="paginatorCtrl.loadPage(1)">
+      1
+    </span>
+    <span class="ellipsis"
+          ng-if="paginatorCtrl.left !== 2">...</span>
+    <span ng-class="{ 'current': paginatorCtrl.currentPageNumber === paginatorCtrl.left + $index }"
+          ng-click="paginatorCtrl.loadPage(paginatorCtrl.left  + $index)"
+          ng-repeat="pageNumber in paginatorCtrl.range">
+      {{ pageNumber }}
+    </span>
+    <span class="ellipsis"
+          ng-if="paginatorCtrl.right !== paginatorCtrl.properties.total - 1">...</span>
+    <span ng-class="{ 'current': paginatorCtrl.currentPageNumber === paginatorCtrl.properties.total }"
+          ng-click="paginatorCtrl.loadPage(paginatorCtrl.properties.total)">
+      {{ paginatorCtrl.properties.total }}
+    </span>
+  </span>
+
+  <a class="btn-link btn-next"
+     ng-click="paginatorCtrl.loadPage(paginatorCtrl.currentPageNumber + 1)"
+     ng-disabled="paginatorCtrl.currentPageNumber === paginatorCtrl.properties.total">
+    <span class="text">{{ paginatorCtrl.properties.text.nextBtn }}</span>
+  </a>
+</div>

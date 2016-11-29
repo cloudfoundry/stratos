@@ -1,0 +1,40 @@
+.hpe-code-block {
+  position: relative;
+
+  > pre {
+    min-height: 2.5 * $hpe-unit-space;
+    padding: 0.5 * $hpe-unit-space;
+    margin: 0;
+  }
+
+  .hpe-copy {
+    position: absolute;
+    right: 0.5 * $hpe-unit-space;
+    top: 0.5 * $hpe-unit-space;
+    cursor: pointer;
+
+    &:after {
+      position: relative;
+      top: auto;
+      right: auto;
+    }
+  }
+
+  &.hpe-code-block-dark {
+    > pre {
+      background-color: $hpe-primary-fg;
+      color: $silver;
+    }
+
+    .hpe-copy {
+      color: $silver;
+    }
+  }
+}
+
+.hpe-code-block-temp {
+  position: relative;
+  width: 0px;
+  height: 0px;
+  border: 0;
+}

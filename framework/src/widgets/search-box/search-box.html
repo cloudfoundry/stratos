@@ -1,0 +1,30 @@
+<div ng-click="searchBoxCtrl.openIt()" class="search-box" ng-class="{ open: searchBoxCtrl.open }">
+  <input type="text"
+         ng-change="searchBoxCtrl.onChange()"
+         ng-model="searchBoxCtrl.searchText"
+         ng-keydown="searchBoxCtrl.onKeyDown($event)"
+         placeholder="{{ searchBoxCtrl.placeholder }}" />
+  <i class="search-icon"
+     ng-class="searchBoxCtrl.searchIcon || 'helion-icon helion-icon-Search'"></i>
+
+  <ul ng-show="searchBoxCtrl.open" class="dropdown-menu">
+    <li class="select-option"
+        ng-repeat="suggestion in searchBoxCtrl.suggestions"
+        ng-class="{
+          selected: suggestion.value === searchBoxCtrl.ngModelCtrl.$modelValue,
+          'pre-selected': searchBoxCtrl.preSelected === $index
+        }"
+        ng-mousemove="searchBoxCtrl.onMouseMove($index)"
+        ng-click="searchBoxCtrl.pick(suggestion, $event)">
+      {{ suggestion.label }}
+    </li>
+    <li class="select-option select-add-option"
+        ng-if="searchBoxCtrl.addAction"
+        ng-click="selectInputCtrl.addAction.execute()">
+      <i ng-class="searchBoxCtrl.addAction.icon || 'glyphicon glyphicon-plus'"></i>
+      <span>
+        {{ searchBoxCtrl.addAction.label }}
+      </span>
+    </li>
+  </ul>
+</div>

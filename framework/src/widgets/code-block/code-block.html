@@ -1,0 +1,6 @@
+<div class="hpe-code-block"
+  ng-class="{'hpe-code-block-light': codeBlockCtrl.theme === 'light', 'hpe-code-block-dark': codeBlockCtrl.theme !== 'light'}">
+  <pre ng-transclude>
+	</pre>
+	<div ng-if="codeBlockCtrl.canCopy && !codeBlockCtrl.hideCopy" ng-click="codeBlockCtrl.copyToClipboard({event: $event})" class="hpe-copy"></div>
+</div>

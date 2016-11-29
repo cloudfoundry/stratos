@@ -1,0 +1,52 @@
+// Button variants
+//
+// Easily pump out default styles, as well as :hover, :focus, :active,
+// and disabled options for all buttons
+
+@mixin helion-button-variant($color, $background, $border-color, $outline-width) {
+  &,
+  &:focus,
+  &.focus,
+  &:hover,
+  &:active,
+  &.active,
+  &.disabled,
+  &[disabled],
+  fieldset[disabled],
+  .open > &.dropdown-toggle,
+  .badge {
+    &,
+    &:focus,
+    &.focus,
+    &:hover {
+      color: $color;
+      background: $background none;
+      border-color: $border-color;
+    }
+  }
+
+  &:active,
+  &.active {
+    box-shadow: none;
+  }
+
+  &:hover,
+  &:focus,
+  &.focus {
+    outline: $outline-width solid $border-color;
+    outline-offset: 0;
+
+    &[disabled] {
+      outline: none;
+    }
+
+    &:active,&.active {
+      outline: $outline-width solid $border-color;
+      outline-offset: 0;
+
+      &[disabled] {
+        outline: none;
+      }
+    }
+  }
+}

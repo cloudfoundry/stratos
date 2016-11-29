@@ -1,0 +1,32 @@
+@mixin hpe-alert($color, $icon, $bg-color, $no-bg-icon, $fg-color: $white) {
+  border-width: $hpe-alert-border-width;
+  background-color: $bg-color;
+  color: $fg-color;
+
+  &:before {
+    @extend .helion-icon;
+    background-color: $color;
+    color: $fg-color;
+    font-size: $hpe-alert-icon-size;
+    content: $icon;
+  }
+
+  .alert-link {
+    color: $fg-color;
+  }
+
+  &.alert-no-bg {
+    background-color: transparent;
+    color: $text-color;
+
+    &:before {
+      background-color: transparent;
+      color: $color;
+      content: $no-bg-icon;
+    }
+
+    .alert-link {
+      color: $brand-primary;
+    }
+  }
+}

@@ -1,0 +1,20 @@
+tabbed-nav {
+  display: flex;
+
+  &.tabbed-nav-right {
+    flex-direction: row-reverse;
+  }
+
+  .tabbed-nav {
+    min-width: $tabbed-nav-min-width;
+  }
+
+  .tabbed-nav-view {
+    padding: $tabbed-nav-padding;
+    width: 100%;
+  }
+
+  li {
+    cursor: pointer;
+  }
+}

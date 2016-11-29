@@ -1,0 +1,76 @@
+$hpe-popover-top                  : $hpe-unit-space * 4.5 !default;
+$hpe-popover-right                : 4px !default;
+$hpe-popover-border-color         : rgba(0, 0, 0, 0.1) !default;
+$hpe-popover-arrow-border-color   : rgba(0, 0, 0, 0.2) !default;
+$popover-border-color             : $gray-light;
+$popover-border-width             : 2px;
+
+.popover {
+  box-shadow: $hpe-unit-space * 1/3 $hpe-unit-space * 1/3 0 $hpe-box-shadow-color;
+  border-color: $popover-border-color;
+  border-radius: 0;
+  border-width: $popover-border-width;
+  z-index: 1;
+
+  &.bottom > .arrow {
+    border-bottom-color: $popover-border-color;
+    top: -$hpe-unit-space * 2 / 3;
+    right: auto;
+    left: $hpe-unit-space;
+    border-width: $hpe-unit-space / 2;
+    border-top-width: 0;
+    border-bottom-width: $hpe-unit-space * 2 / 3;
+
+    &:after {
+      position: relative;
+      top: 3px;
+      left: -2px;
+      border-width: $hpe-unit-space / 2;
+      border-top-width: 0;
+      border-bottom-width: $hpe-unit-space * 2 / 3;
+    }
+  }
+
+  .popover-content {
+    color: $gray-darker;
+    padding: $hpe-unit-space / 2 $hpe-unit-space / 3 ;
+    font-size: $font-size-base;
+    line-height: $hpe-unit-space;
+  }
+}
+
+
+.popover.hpe-popover {
+  @include hpe-box-shadow-small();
+
+  box-sizing: border-box;
+  border-color: $hpe-popover-border-color;
+  left: auto;
+  top: $hpe-popover-top;
+  right: $hpe-popover-right;
+  display: block;
+  max-width: none;
+
+  &.bottom > .arrow {
+    border-bottom-color: $hpe-popover-arrow-border-color;
+    left: auto;
+    top: -$hpe-unit-space * 3;
+    right: $hpe-unit-space;
+    border-width: $hpe-unit-space;
+    border-bottom-width: $hpe-unit-space * 2;
+
+    &:after {
+      left: 0;
+      margin-left: -$hpe-unit-space;
+      border-width: $hpe-unit-space;
+      border-top-width: 0;
+      border-bottom-width: $hpe-unit-space * 2;
+    }
+  }
+
+  .popover-content {
+    padding: $hpe-unit-space;
+    font-size: $font-size-base;
+    line-height: $hpe-unit-space;
+  }
+}

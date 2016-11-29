@@ -1,0 +1,8 @@
+<ul class="tabbed-nav nav nav-pills nav-stacked">
+  <li ui-sref-active="active" ng-repeat="route in tabbedNavCtrl.routes">
+    <a ui-sref="{{ ::route.state }}">
+      {{ ::route.label }}
+    </a>
+  </li>
+</ul>
+<div class="tabbed-nav-view" ui-view="{{ ::tabbedNavCtrl.viewName }}"/>
