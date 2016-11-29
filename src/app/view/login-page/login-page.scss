@@ -1,5 +1,8 @@
 @import "login-form/login-form";
 
+$login-page-text-panel-align: flex-start !default;
+$login-page-text-panel-display: block !default;
+
 .login-page {
 
   display: flex;
@@ -12,7 +15,7 @@
     color: white;
     height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: $login-page-text-panel-align;
     justify-content: center;
     padding: 1em 3em;
 
@@ -31,6 +34,10 @@
         margin-right: auto;
         font-size: 20px;
       }
+    }
+
+    .login-page-text {
+      display: $login-page-text-panel-display;
     }
 
     .login-panel-hpe-logo {

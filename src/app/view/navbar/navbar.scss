@@ -37,22 +37,6 @@ navbar > nav.main-nav-header {
       margin-left: 0;
     }
 
-    .navbar-signout {
-      position: absolute;
-      right: $hpe-unit-space;
-      top: 0;
-      height: $page-header-height;
-      line-height: $page-header-height;
-      cursor: pointer;
-
-      > i {
-        line-height: inherit;
-        &:hover {
-          color: $hpe-primary;
-        }
-      }
-    }
-
     .navbar-toggle-labels {
       height: $page-header-height;
       position: absolute;
@@ -382,13 +366,13 @@ div.user-avatar {
       border-radius: $user-avatar-image-size / 2;
       opacity: 0;
       transition: opacity .25s ease-in-out;
-      background-color: $hpe-primary;
+      background-color: $page-header-bg;
       display: flex;
+      color: $page-header-active-fg;
       
       &:after {
         height: $user-avatar-image-size;
         width: $user-avatar-image-size;
-        color: $white;
         font-family: "helion-icons";
         content: "\e980";
         text-align: center;
