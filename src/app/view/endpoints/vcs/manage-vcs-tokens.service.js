@@ -31,8 +31,14 @@
       tokens: []
     };
 
-    context.refreshTokens = function () {
-      return vcsModel.listVcsTokens().then(function (tokens) {
+    context.refreshTokens = function (fetchFresh) {
+      var promise;
+      if (fetchFresh) {
+        promise = vcsModel.listVcsTokens();
+      } else {
+        promise = $q.resolve(vcsModel.vcsTokens);
+      }
+      return promise.then(function (tokens) {
         context.tokens = _.filter(tokens, function (t) {
           return t.vcs.guid === context.vcs.guid;
         });
@@ -50,8 +56,7 @@
             name: token.token.name,
             newName: newName
           });
-        // After a successful rename, refresh the list of tokens
-        return context.refreshTokens();
+        // After a successful rename, no need to do anything as entry is updated in place
       });
     }
 
@@ -70,8 +75,8 @@
             .then(function () {
               notificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully deleted'),
                 {name: token.token.name});
-              // After a successful delete, refresh the list of tokens
-              return context.refreshTokens();
+              // After a successful delete, no need to fetch as the cache is updated
+              return context.refreshTokens(false);
             });
         }
       });
@@ -105,7 +110,9 @@
        */
       manage: function (vcs) {
         context.vcs = vcs;
-        return context.refreshTokens().then(function () {
+
+        // Refresh before fetching
+        return context.refreshTokens(true).then(function () {
 
           return asyncTaskDialog(
             {
@@ -120,8 +127,8 @@
             context,
             function () {
               return registerVcsToken.registerToken(vcs).then(function () {
-                // Update tokens
-                return context.refreshTokens().then(function () {
+                // Update tokens (need to fetch)
+                return context.refreshTokens(true).then(function () {
                   // Keep the dialog open
                   return $q.reject('Keep this dialog open!');
                 });

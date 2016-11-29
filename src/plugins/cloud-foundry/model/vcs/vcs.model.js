@@ -108,7 +108,6 @@
     },
 
     getToken: function (tokenGuid) {
-      console.log('getToken tokenGuid ' + tokenGuid, JSON.stringify(this.vcsTokens));
       return _.find(this.vcsTokens, this._tokenFinder(tokenGuid));
     },
 
@@ -133,8 +132,15 @@
     },
 
     renameVcsToken: function (tokenGuid, tokenName) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Vcs')
-        .renameVcsToken(tokenGuid, tokenName);
+        .renameVcsToken(tokenGuid, tokenName).then(function () {
+          // Update cache after successful rename
+          var cachedToken = that.getToken(tokenGuid);
+          if (cachedToken) {
+            cachedToken.token.name = tokenName;
+          }
+        });
     },
 
     deleteVcsToken: function (tokenGuid) {
