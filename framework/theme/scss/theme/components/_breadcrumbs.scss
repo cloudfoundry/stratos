@@ -13,7 +13,7 @@ $breadcrumb-font-weight:         $hpe-font-weight-semibold !default;
 $breadcrumb-active-color:        $gray-darker !default;
 $breadcrumb-active-font-weight:  normal !default;
 
-$breadcrumb-hover-color:         $hpe-primary !default;
+$breadcrumb-hover-color:         $link-color !default;
 
 $breadcrumb-padding-vertical:    (($breadcrumb-container-height - $breadcrumb-font-size) / 2) !default;
 $breadcrumb-padding-horizontal:  $hpe-unit-space !default;
