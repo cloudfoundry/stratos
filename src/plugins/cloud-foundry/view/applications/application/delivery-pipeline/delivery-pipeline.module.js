@@ -25,6 +25,7 @@
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
     'app.utils.utilsService',
+    'PAT_DELIMITER',
     '$interpolate',
     '$stateParams',
     '$scope',
@@ -49,7 +50,8 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, $interpolate, $stateParams, $scope, $q, $state) {
+  function ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, PAT_DELIMITER,
+                                                 $interpolate, $stateParams, $scope, $q, $state) {
     var that = this;
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
@@ -59,6 +61,7 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
@@ -68,6 +71,8 @@
     this.confirmDialog = confirmDialog;
     this.addNotificationService = addNotificationService;
     this.postDeployActionService = postDeployActionService;
+    this.PAT_DELIMITER = PAT_DELIMITER;
+
     this.hceCnsi = null;
 
     this.project = null;
@@ -91,6 +96,12 @@
       that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
       that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
       that.hceServices.fetching = false;
+
+      // List tokens if needed
+      if (!that.vcsModel.vcsTokensFetched) {
+        return that.vcsModel.listVcsTokens();
+      }
+
       return $q.resolve();
     }
 
@@ -233,7 +244,38 @@
             that.postDeployActions.length = 0;
             [].push.apply(that.postDeployActions, response.data);
           });
+
       }
+    },
+
+    // TODO: refactor common code used in trigger-build.service
+    _getPatGuid: function () {
+      if (!this.project) {
+        return null;
+      }
+      var projectName = this.project.name;
+      if (!projectName) {
+        return null;
+      }
+      var delimIndex = projectName.indexOf(this.PAT_DELIMITER);
+      if (delimIndex < 0) {
+        return null;
+      }
+      return projectName.slice(delimIndex + this.PAT_DELIMITER.length);
+    },
+
+    getTokenName: function () {
+      var patGuid = this._getPatGuid();
+      if (!patGuid) {
+        // the project uses a legacy OAuth token
+        return 'legacy';
+      }
+      var tokenInUse = this.vcsModel.getToken(patGuid);
+      if (!tokenInUse) {
+        // The user deleted the token from the Console...
+        return 'token deleted';
+      }
+      return tokenInUse.token.name;
     },
 
     addNotificationTarget: function () {

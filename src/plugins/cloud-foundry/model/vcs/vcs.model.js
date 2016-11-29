@@ -53,6 +53,7 @@
     this.supportedVcsInstances = [];
     this.validTokens = {};
     this.vcsTokens = [];
+    this.vcsTokensFetched = false;
   }
 
   angular.extend(VcsModel.prototype, {
@@ -106,6 +107,11 @@
       };
     },
 
+    getToken: function (tokenGuid) {
+      console.log('getToken tokenGuid ' + tokenGuid, JSON.stringify(this.vcsTokens));
+      return _.find(this.vcsTokens, this._tokenFinder(tokenGuid));
+    },
+
     checkTokensValidity: function () {
 
       // Cleanup cached validity of stale tokens
@@ -113,7 +119,7 @@
         if (!this.validTokens.hasOwnProperty(tokenGuid)) {
           continue;
         }
-        if (!_.find(this.vcsTokens, this._tokenFinder(tokenGuid))) {
+        if (!this.getToken(tokenGuid)) {
           delete this.validTokens[tokenGuid];
         }
       }
@@ -132,8 +138,17 @@
     },
 
     deleteVcsToken: function (tokenGuid) {
+      var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Vcs')
-        .deleteVcsToken(tokenGuid);
+        .deleteVcsToken(tokenGuid).then(function () {
+          // Remove token from cache on successful delete
+          var index = _.findIndex(that.vcsTokens, function (vcsToken) {
+            return vcsToken.token.guid === tokenGuid;
+          });
+          if (index > -1) {
+            that.vcsTokens.splice(index, 1);
+          }
+        });
     },
 
     listVcsTokens: function () {
@@ -141,6 +156,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.Vcs')
         .listVcsTokens().then(function (res) {
           that.vcsTokens = res.data;
+          that.vcsTokensFetched = true;
           return res.data;
         });
     },

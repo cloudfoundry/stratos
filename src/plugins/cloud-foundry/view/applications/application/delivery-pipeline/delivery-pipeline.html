@@ -26,6 +26,10 @@
           <dd>
             {{ applicationDeliveryPipelineCtrl.hceModel.data.vcsInstance.label | uppercase}}
           </dd>
+          <dt translate>token</dt>
+          <dd>
+            {{ applicationDeliveryPipelineCtrl.getTokenName() | uppercase}}
+          </dd>
           <dt translate>repo</dt>
           <dd>
             <a href="{{ applicationDeliveryPipelineCtrl.project.repo.http_url }}" rel="noopener noreferrer" target="_blank">{{ applicationDeliveryPipelineCtrl.project.repo.full_name }}</a>

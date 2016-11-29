@@ -67,8 +67,6 @@
     that.$timeout = $timeout;
     that.$q = $q;
     that.PAT_DELIMITER = PAT_DELIMITER;
-    // TODO: remove this
-    that.isAuthenticated = true;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -148,7 +146,7 @@
         })
         .catch(function (response) {
           if (response.status === 401) {
-            that.isAuthenticated = false;
+            that.tokenInvalid = true;
           } else if (response.status === 404) {
             that.permissionError = true;
           } else {
@@ -157,13 +155,8 @@
 
           that.fetching = false;
         });
-    },
-
-    githubAuth: function () {
-      // TODO: remove this
-      this.isAuthenticated = true;
-      this.fetchCommits();
     }
+
   });
 
 })();
