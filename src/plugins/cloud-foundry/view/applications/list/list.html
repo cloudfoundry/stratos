@@ -12,7 +12,19 @@
 
     <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
   </div>
-  <div class="pull-right">
+  <div class="pull-right application-actions">
+    <div class="pull-left view-buttons">
+      <button class="btn btn-link btn-border-less"
+              ng-class="applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
+              type="button" ng-click="applicationsListCtrl.goToGalleryView(true)">
+        <div class="helion-icon helion-icon-lg helion-icon-Card_Sort"></div>
+      </button>
+      <button class="btn btn-link btn-border-less"
+              ng-class="!applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
+              type="button" ng-click="applicationsListCtrl.goToGalleryView(false)">
+        <div class="helion-icon helion-icon-lg helion-icon-r90 helion-icon-Divide_to_four"></div>
+      </button>
+    </div>
     <button class="btn btn-primary"
             ng-if="applicationsListCtrl.showAddApplicationButton()"
             ng-disabled="applicationsListCtrl.disableAddApplicationButton()"

@@ -17,6 +17,28 @@ $applications-msg-height: 50px;
   }
 }
 
+.application-actions {
+  .view-buttons {
+
+    button:focus {
+      outline: none;
+    }
+
+    .btn {
+      padding-left: 0;
+      padding-right: 0;
+      margin-right: 0;
+      margin-left: 0;
+    }
+    .btn-active {
+      color: $hpe-primary;
+    }
+    .btn-disabled {
+      color: $actions-menu-item-disabled-fg;
+    }
+  }
+}
+
 .applications-filter {
   padding-left: 16px;
   padding-right: 16px;
