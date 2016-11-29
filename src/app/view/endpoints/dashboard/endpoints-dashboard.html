@@ -90,8 +90,22 @@
           <td ng-switch="endpoint.connected">
             <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                   ng-switch-when="connected"></span>
-            <span class="helion-icon helion-icon-lg helion-icon-Connect text-info"
-                  ng-switch-when="unconnected"></span>
+            <!--class="helion-icon helion-icon-lg helion-icon-Connect"-->
+            <!--mouseenter hpe-popover-->
+            <img class="" ng-src="/svg/NoConnection_Info.svg" style="width: 24px;"
+                  ng-switch-when="unconnected"
+                 uib-popover="{{ 'Disconnected' | translate}}"
+                 popover-trigger="'mouseenter'"
+                 popover-placement="top-left"
+                 popover-class=""
+                 popover-popup-delay="1000"
+                 data-placement='left' />
+            <!--<div class="popover bottom fade in" style="position: relative; display: inline-block">-->
+              <!--<div class="arrow"></div>-->
+              <!--<div class="popover-inner">-->
+                <!--<div class="popover-content">The application needs to be restarted for highlighted variables to be added to the runtime.</div>-->
+              <!--</div>-->
+            <!--</div>-->
             <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
                   ng-switch-when="expired"></span>
             <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
