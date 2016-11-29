@@ -1,51 +1,68 @@
-<div class="registration-form">
-  <p ng-if="asyncTaskDialogCtrl.context.description">{{asyncTaskDialogCtrl.context.description}}</p>
-  <form name="form.regForm">
-    <div class="form-group">
-      <label class="control-label" translate>Endpoint Type</label>
-      <select-input
-        arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-        ng-model="asyncTaskDialogCtrl.context.data.type"
-        input-options="asyncTaskDialogCtrl.context.types">
-      </select-input>
-    </div>
-    <div class="form-group" focusable-input
-         ng-class="{'has-error': form.regForm[asyncTaskDialogCtrl.context.urlFormName].$invalid && form.regForm[asyncTaskDialogCtrl.context.urlFormName].$dirty}">
-      <label class="control-label" translate>Endpoint Address</label>
+<div class="register-service-details">
+  <div translate class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hcf'">
+    <p><a href="https://www.cloudfoundry.org/" rel="noopener noreferrer" target="_blank">Cloud Foundry</a> supports the
+      full lifecycle, from initial development, through all testing stages, to deployment.</p>
+    <p>Allow you and your development team to access their applications on a known Cloud Foundry cluster by registering
+      the existing endpoint.</p>
+    <p>Create a unique recongizable name so that your developers can recognize and provide the endpoint's instance
+      address to register your endpoint.</p>
+  </div>
+  <div translate class="register-content-left" ng-if="wizardCtrl.options.userInput.type === 'hce'">
+    <p><a href="https://www.cloudfoundry.org/" rel="noopener noreferrer" target="_blank">Cloud Foundry</a> supports the
+      full lifecycle, from initial development, through all testing stages, to deployment.</p>
+    <p>Allow you and your development team to access their applications on a known Cloud Foundry cluster by registering
+      the existing endpoint.</p>
+    <p>Create a unique recongizable name so that your developers can recognize and provide the endpoint's instance
+      address to register your endpoint.</p>
+  </div>
+  <div translate class="register-content-right">
+    <h4>{{step.title}}</h4>
+    <form name="form.regForm">
+      <div class="form-group" focusable-input
+           ng-class="{'has-error': form.regForm[step.nameOfUrlInput].$invalid && form.regForm[step.nameOfUrlInput].$dirty}">
+        <label class="control-label" translate>Endpoint Address</label>
       <span class="control-message">
         <span translate
-              ng-if="form.regForm[asyncTaskDialogCtrl.context.urlFormName].$error.required && form.regForm[asyncTaskDialogCtrl.context.urlFormName].$dirty">
+              ng-if="form.regForm[step.nameOfUrlInput].$error.required && form.regForm[step.nameOfUrlInput].$dirty">
           Url is required
         </span>
         <span translate
-              ng-if="form.regForm[asyncTaskDialogCtrl.context.urlFormName].$error.pattern && form.regForm[asyncTaskDialogCtrl.context.urlFormName].$dirty">
+              ng-if="form.regForm[step.nameOfUrlInput].$error.pattern && form.regForm[step.nameOfUrlInput].$dirty">
           Invalid url format
         </span>
         <span translate
-              ng-if="form.regForm[asyncTaskDialogCtrl.context.urlFormName].$error.helionUnique && form.regForm[asyncTaskDialogCtrl.context.urlFormName].$dirty">
+              ng-if="form.regForm[step.nameOfUrlInput].$error.helionUnique && form.regForm[step.nameOfUrlInput].$dirty">
           Url is not unique
         </span>
       </span>
-      <input type="text" name="{{asyncTaskDialogCtrl.context.urlFormName}}" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.url"
-             required
-             placeholder="{{ asyncTaskDialogCtrl.context.urlHint }}"
-             ng-pattern="asyncTaskDialogCtrl.context.urlValidationExpr"
-             helion-unique items="asyncTaskDialogCtrl.context.instances"
-             ignore-case
-             auto-focus="300"/>
-    </div>
-    <div class="form-group" focusable-input
-         ng-class="{'has-error': form.regForm[asyncTaskDialogCtrl.context.nameFormName].$invalid && form.regForm[asyncTaskDialogCtrl.context.nameFormName].$dirty}">
-      <label class="control-label" translate>Name</label>
+        <input type="text" name="{{step.nameOfUrlInput}}" class="form-control" ng-model="wizardCtrl.options.userInput.url"
+               required
+               placeholder="{{ step.urlHint }}"
+               ng-pattern="step.urlValidationExpr"
+               helion-unique items="step.instances"
+               ignore-case
+               auto-focus/>
+      </div>
+      <div class="form-group" focusable-input
+           ng-class="{'has-error': form.regForm[step.nameOfNameInput].$invalid && form.regForm[step.nameOfNameInput].$dirty}">
+        <label class="control-label" translate>Name</label>
       <span class="control-message">
-        <span translate ng-if="form.regForm[asyncTaskDialogCtrl.context.nameFormName].$error.required">Name is required</span>
+        <span translate ng-if="form.regForm[step.nameOfNameInput].$error.required">Name is required</span>
       </span>
-      <input type="text" name="{{asyncTaskDialogCtrl.context.nameFormName}}" class="form-control" ng-model="asyncTaskDialogCtrl.context.data.name" required/>
+        <input type="text" name="{{step.nameOfNameInput}}" class="form-control" ng-model="wizardCtrl.options.userInput.name" required/>
+      </div>
+      <div class="form-group skip-ssl-validation-checkbox" focusable-input>
+        <checkbox-input ng-model="wizardCtrl.options.userInput.skipSslValidation"
+                        input-label="{{'Skip SSL validation for the endpoint' | translate}}">
+        </checkbox-input>
+      </div>
+    </form>
+    <div class="register-service-details-buttons">
+      <button class="btn btn-default"
+              ng-click="wizardCtrl.cancel()">Cancel</button>
+      <button class="btn btn-commit"
+              ng-click="wizardCtrl.resetMessage();wizardCtrl.next()"
+              ng-disabled="form.regForm.$invalid">Register</button>
     </div>
-    <div class="form-group skip-ssl-validation-checkbox" focusable-input>
-      <checkbox-input ng-model="asyncTaskDialogCtrl.context.data.skipSslValidation"
-                      input-label="{{'Skip SSL validation for the endpoint' | translate}}">
-      </checkbox-input>
-    </div>
-  </form>
+  </div>
 </div>

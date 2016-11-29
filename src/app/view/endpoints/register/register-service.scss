@@ -1,4 +1,94 @@
 .register-service-wizard .wizard {
-  padding-left: 96px;
-  padding-right: 96px;
+  h4 {
+    margin-top: 0;
+  }
+
+  .register-service-type {
+    display: flex;
+    flex-direction: row;
+
+    .register-content-left {
+      flex: 3 1 0;
+      padding-right: 40px
+    }
+
+    .register-content-right {
+      flex: 5 1 0;
+      display: flex;
+      flex-direction: column;
+
+      .media-list .media {
+        &.register-type-hce {
+          .media-left {
+            .media-object {
+              text-align: center;
+              img {
+                width: 77px;
+                padding-left: 6px;
+              }
+            }
+          }
+        }
+
+        .media-body {
+          width: 0;
+        }
+
+        .media-right {
+          vertical-align: bottom;
+
+          .btn-link {
+            padding-right: 0;
+
+            &:hover,
+            &:focus,
+            &:active {
+              text-decoration: none;
+              outline: 0;
+
+              .add-icon {
+                border-color: $link-hover-color;
+              }
+            }
+
+            .add-icon {
+              border: 2px solid $brand-primary;
+              font-size: $hpe-unit-space / 2;
+              border-radius: 50%;
+              padding: $hpe-unit-space / 6;
+              margin-left: $hpe-unit-space / 4;
+            }
+          }
+        }
+      }
+
+      .btn-default {
+        align-self: flex-end;
+        margin-top: 24px;
+      }
+    }
+  }
+
+  .register-service-details {
+    display: flex;
+    flex-direction: row;
+
+    .register-content-left {
+      flex: 1 1 auto;
+      padding-right: 40px
+    }
+
+    .register-content-right {
+      flex: 1 1 auto;
+    }
+
+    .register-service-details-buttons {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      button {
+        margin: $hpe-unit-space 0 $hpe-unit-space/2 $hpe-unit-space/2;
+      }
+    }
+  }
 }
