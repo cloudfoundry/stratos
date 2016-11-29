@@ -26,7 +26,7 @@
   angular.extend(ApplicationsTableController.prototype, {
 
     /**
-     * @name getAppLink
+     * @function getAppLink
      * @description Get link to application summary page
      * @param {object} app The application object
      * @returns {string} returns the link to the app summary page
