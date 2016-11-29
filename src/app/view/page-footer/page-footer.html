@@ -1,14 +1,14 @@
-<a ng-if="mode !== 'footer'" rel="noopener noreferrer" ng-href="{{ 'http://www.hpe.com/us/en/solutions/cloud.html' | translate}}" target="_blank"><img class="helion-logo" src="images/brand_product_family_logo.png"/></a>
-<a ng-if="mode !== 'footer'" rel="noopener noreferrer" ng-href="{{ 'https://www.hpe.com/us/en/home.html' | translate}}" target="_blank"><img class="hpe-logo" src="images/brand_company_logo.png"/></a>
+<a ng-if="pageFooterCtrl.mode !== 'footer' && !!pageFooterCtrl.PRODUCT_STRINGS.ABOUT_PRODUCT_FAMILY_LOGO_HREF" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.PRODUCT_STRINGS.PRODUCT_FAMILY_HREF | translate}}" target="_blank"><img class="helion-logo" ng-src="{{ pageFooterCtrl.PRODUCT_STRINGS.ABOUT_PRODUCT_FAMILY_LOGO_HREF }}"/></a>
+<a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.PRODUCT_STRINGS.COMPANY_HREF | translate}}" target="_blank"><img class="hpe-logo" ng-src="{{ pageFooterCtrl.PRODUCT_STRINGS.ABOUT_COMPANY_LOGO_HREF }}"/></a>
 <div class="copyright">
   <span ng-if="mode !== 'footer'" class="font-semi-bold">
-    {{ PRODUCT_STRINGS.HELION_STACKATO }} {{ PRODUCT_STRINGS.PRODUCT_VERSION }}
+    {{ pageFooterCtrl.PRODUCT_STRINGS.HELION_STACKATO }} {{ pageFooterCtrl.PRODUCT_STRINGS.PRODUCT_VERSION }}
   <span class="secondary">
-    <span ng-if="mode !== 'footer'"> | </span>&copy; 2016 {{ PRODUCT_STRINGS.COMPANY }}
+    <span ng-if="mode !== 'footer'"> | </span>&copy; 2016 {{ pageFooterCtrl.PRODUCT_STRINGS.COMPANY }}
   </span>
 </div>
 
 <ul class="links">
-  <li><a rel="noopener noreferrer" target="_blank" href="{{ PRODUCT_STRINGS.TERMS_OF_USE_HREF | translate }}" translate>{{ PRODUCT_STRINGS.TERMS_OF_USE }}</a></li>
-  <li><a rel="noopener noreferrer" target="_blank" href="{{ PRODUCT_STRINGS.PRIVACY_HREF | translate }}" translate>{{ PRODUCT_STRINGS.PRIVACY }}</a></li>
+  <li><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.PRODUCT_STRINGS.TERMS_OF_USE_HREF | translate }}" translate>{{ pageFooterCtrl.PRODUCT_STRINGS.TERMS_OF_USE }}</a></li>
+  <li><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.PRODUCT_STRINGS.PRIVACY_HREF | translate }}" translate>{{ pageFooterCtrl.PRODUCT_STRINGS.PRIVACY }}</a></li>
 </ul>

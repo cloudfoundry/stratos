@@ -352,7 +352,6 @@
       'copy:theme',
       'postbuild',
       'inject:index',
-      'oem',
       next
     );
   });

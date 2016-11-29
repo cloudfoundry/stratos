@@ -24,7 +24,8 @@
       controllerAs: 'pageFooterCtrl',
       scope: {
         mode: '@'
-      }
+      },
+      bindToController: true
     };
   }
 
@@ -34,7 +35,7 @@
   ];
 
   function PageFooterController($scope, utilsService) {
-    $scope.PRODUCT_STRINGS = utilsService.getProductStrings();
+    this.PRODUCT_STRINGS = utilsService.getProductStrings();
   }
 
 })();

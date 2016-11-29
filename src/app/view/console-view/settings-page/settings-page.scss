@@ -88,12 +88,11 @@ $about-color-fg: $page-footer-color-fg;
 .about-panel {
   .cluster-settings.user-summary.about-summary {
     .about-title {
-      background: $about-color-bg;
-      color: $about-color-fg;
       height: $hpe-unit-space * 3;
       line-height: $hpe-unit-space * 3;
       padding: 0 10px;
       font-size: $about-title-font-size;
+      font-weight: 500;
     }
   }
 
@@ -103,7 +102,7 @@ $about-color-fg: $page-footer-color-fg;
 
     &:last-child {
       margin: 0;
-      padding: $hpe-unit-space 0;
+      padding: $hpe-unit-space 0 $hpe-unit-space * 2 0;
     }
   }
 

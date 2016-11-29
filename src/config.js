@@ -15,6 +15,8 @@
       PRODUCT_VERSION: '4.0',
       TERMS_OF_USE_HREF: 'http://docs.hpcloud.com/permalink/helion-openstack/3.0/eula',
       PRIVACY_HREF: 'https://www.hpe.com/us/en/legal/privacy.html',
+      PRODUCT_FAMILY_HREF: 'http://www.hpe.com/us/en/solutions/cloud.html',
+      COMPANY_HREF: 'http://www.hpe.com',
       HELION_STACKATO_WEB_CONSOLE: 'Helion Stackato Web Console',
       WEB_CONSOLE: 'Web Console',
       CONSOLE: 'Console',
@@ -23,7 +25,11 @@
       TERMS_OF_USE: 'Terms of Use',
       PRIVACY: 'Privacy',
       HELION_CODE_ENGINE: 'Helion Code Engine',
-      HELION_CLOUD_FOUNDRY: 'Helion Cloud Foundry'
+      HELION_CLOUD_FOUNDRY: 'Helion Cloud Foundry',
+      COMPANY_LOGO_HREF: 'images/brand_company_logo.png',
+      PRODUCT_FAMILY_LOGO_HREF: 'images/brand_product_family_logo.png',
+      ABOUT_COMPANY_LOGO_HREF: 'images/brand_company_logo.png',
+      ABOUT_PRODUCT_FAMILY_LOGO_HREF: 'images/brand_product_family_logo_rev.png'
     },
 
     PRODUCT_STRINGS: {}
