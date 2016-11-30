@@ -136,6 +136,8 @@ navbar > .main-nav-menu {
         margin: auto 0;
         display: flex;
         align-items: center;
+        height: $main-nav-item-height;
+        width: 100%;
 
         .navitem-icon {
           vertical-align: middle;

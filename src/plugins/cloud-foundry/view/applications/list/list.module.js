@@ -177,6 +177,12 @@
       [].push.apply(this.clusters, clusters);
       this.model.clusterCount = clusters.length;
 
+      // Reset filtered cluster if it's no longer valid
+      if (!_.find(this.clusters, { value: this.model.filterParams.cnsiGuid})) {
+        this.model.filterParams.cnsiGuid = 'all';
+      }
+
+      // Select the previous filter value or first cluster in list
       if (this.model.filterParams.cnsiGuid !== 'all') {
         this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
       } else if (this.model.clusterCount === 1) {
@@ -203,6 +209,12 @@
             var orgs = _.map(newOrgs, that._selectMapping);
             [].push.apply(that.organizations, orgs);
 
+            // Reset filtered organization if it's no longer valid
+            if (!_.find(that.organizations, { value: that.model.filterParams.orgGuid})) {
+              that.model.filterParams.orgGuid = 'all';
+            }
+
+            // Select the previous filter value or first organization in list
             if (that.model.filterParams.orgGuid !== 'all') {
               that.filter.orgGuid = that.model.filterParams.orgGuid;
             } else if (orgs.length === 1) {
@@ -235,6 +247,12 @@
             var spaces = _.map(newSpaces, that._selectMapping);
             [].push.apply(that.spaces, spaces);
 
+            // Reset filtered space if it's no longer valid
+            if (!_.find(that.spaces, { value: that.model.filterParams.spaceGuid})) {
+              that.model.filterParams.spaceGuid = 'all';
+            }
+
+            // Select the previous filter value or first space in list
             if (that.model.filterParams.spaceGuid !== 'all') {
               that.filter.spaceGuid = that.model.filterParams.spaceGuid;
             } else if (spaces.length === 1) {

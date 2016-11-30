@@ -3,6 +3,6 @@
     <h4>{{detailViewCtrl.content.title}}</h4>
   </div>
   <ng-include ng-if="detailViewCtrl.content.templateUrl" src="detailViewCtrl.content.templateUrl"></ng-include>
-  <detail-view-template ng-if="detailViewCtrl.content.template" template="detailViewCtrl.content.template"></detail-view-template>
+  <detail-view-template ng-if="detailViewCtrl.content.template" detail-view-ctrl="detailViewCtrl" template="{{ detailViewCtrl.content.template }}"></detail-view-template>
   <button type="button" class="detail-view-close close" ng-click="$dismiss()"></button>
 </div>

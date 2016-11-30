@@ -301,6 +301,115 @@
 
       });
 
+      describe('Repopulate filters with previously selected cluster/org/space', function () {
+        var filteredCnsiGuid = 'cnsiGuid2';
+        var filteredOrgGuid = 'orgGuid2';
+        var filteredSpaceGuid = 'spaceGuid2';
+
+        function setUp() {
+
+          // Return multiple entries
+          userCnsiModel.serviceInstances = {
+            cnsiGuid1: {
+              cnsi_type: 'hcf',
+              guid: cnsiGuid
+            },
+            cnsiGuid2: {
+              cnsi_type: 'hcf',
+              guid: filteredCnsiGuid
+            }
+          };
+          spyOn(orgModel, 'listAllOrganizations').and.returnValue($q.resolve([
+            createOrgOrSpace(orgGuid),
+            createOrgOrSpace(filteredOrgGuid)
+          ]));
+          spyOn(orgModel, 'listAllSpacesForOrganization').and.returnValue($q.resolve([
+            createOrgOrSpace(spaceGuid),
+            createOrgOrSpace(filteredSpaceGuid)
+          ]));
+
+          createController(injector);
+        }
+
+        function check(expectedCnsiGuid, cnsiCount, expectedOrgGuid, orgCount, expectedSpaceGuid, spaceCount) {
+          if (expectedCnsiGuid) {
+            expect($controller.filter.cnsiGuid).toBe(expectedCnsiGuid);
+            // The count will be clusters + 1 (for the 'all' options)
+            expect($controller.clusters.length).toBe(cnsiCount);
+          }
+
+          if (expectedOrgGuid) {
+            expect($controller.filter.orgGuid).toBe(expectedOrgGuid);
+            // The count will be orgs + 1 (for the 'all' options)
+            expect($controller.organizations.length).toBe(orgCount);
+          }
+
+          if (expectedSpaceGuid) {
+            expect($controller.filter.spaceGuid).toBe(expectedSpaceGuid);
+            // The count will be spaces + 1 (for the 'all' options)
+            expect($controller.spaces.length).toBe(spaceCount);
+          }
+        }
+
+        it('successfully sets all', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = filteredCnsiGuid;
+          appModel.filterParams.orgGuid = filteredOrgGuid;
+          appModel.filterParams.spaceGuid = filteredSpaceGuid;
+
+          setUp();
+          $httpBackend.flush();
+
+          check(filteredCnsiGuid, 3, filteredOrgGuid, 3, filteredSpaceGuid, 3);
+        });
+
+        it('avoids bad values - all', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = 'junk1';
+          appModel.filterParams.orgGuid = 'junk2';
+          appModel.filterParams.spaceGuid = 'junk3';
+
+          setUp();
+          $httpBackend.flush();
+
+          check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
+        });
+
+        it('avoids bad value - cluster', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = 'junk1';
+
+          setUp();
+          $scope.$digest();
+
+          check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
+        });
+
+        it('avoids bad value - org', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = cnsiGuid;
+          appModel.filterParams.orgGuid = 'junk2';
+
+          setUp();
+          $scope.$digest();
+
+          check(cnsiGuid, 3, allFilterValue, 3, allFilterValue, 1);
+        });
+
+        it('avoids bad value - space', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = cnsiGuid;
+          appModel.filterParams.orgGuid = orgGuid;
+          appModel.filterParams.spaceGuid = 'junk3';
+
+          setUp();
+          $httpBackend.flush();
+
+          check(cnsiGuid, 3, orgGuid, 3, allFilterValue, 3);
+        });
+
+      });
+
     });
 
     describe('auth model tests for admin', function () {
