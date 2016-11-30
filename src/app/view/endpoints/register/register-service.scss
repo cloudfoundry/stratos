@@ -18,13 +18,16 @@
       flex-direction: column;
 
       .media-list .media {
+        .media-object {
+          width: 77px;
+        }
         &.register-type-hce {
           .media-left {
             .media-object {
               text-align: center;
               img {
-                width: 77px;
-                padding-left: 6px;
+                width: 68px;
+                padding-left: 3px;
               }
             }
           }
@@ -64,7 +67,7 @@
 
       .btn-default {
         align-self: flex-end;
-        margin-top: 24px;
+        margin: $hpe-unit-space 2px;
       }
     }
   }

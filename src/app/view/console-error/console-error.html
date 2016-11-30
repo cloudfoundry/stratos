@@ -1,40 +1,9 @@
 <div class="container-fluid">
   <div class="content clearfix">
     <div class="container-fluid">
-
-
-      <!--<div ng-if="endpointsDashboardCtrl.showWelcomeMessage"-->
-           <!--class="endpoint-notification panel panel-default alert">-->
-        <!--<span class="helion-icon-lg helion-icon helion-icon-Information"></span>-->
-        <!--<div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">-->
-          <!--<span translate>-->
-            <!--To enable developers to use this Web console to interact with Helion Stackato, please register-->
-          <!--</span>-->
-          <!--<span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>-->
-            <!--Helion Cloud Foundry-->
-          <!--</span>-->
-          <!--<span translate> and </span>-->
-          <!--<span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register('hce')" translate>-->
-            <!--Helion Code Engine-->
-          <!--</span>-->
-          <!--<span translate>-->
-            <!--endpoints here. The process of registering these endpoints will make them discoverable for anyone who logs-->
-            <!--into this console. Once you register an endpoint, we recommend connecting it to your account so you can-->
-            <!--manage it.-->
-          <!--</span>-->
-        <!--</div>-->
-        <!--<div class="" ng-show="!endpointsDashboardCtrl.isUserAdmin()">-->
-          <!--<span translate>-->
-            <!--To access your cloud native workloads and other related third party services, connect with your personal-->
-            <!--credentials to the corresponding registered services. Registered services are provided by your systems administrator.-->
-          <!--</span>-->
-        <!--</div>-->
-      <!--</div>-->
-
-
       <div ng-if="errPageCtrl.error === 'notSetup'"
            class="endpoint-notification endpoint-notification-slim endpoint-notification-error panel panel-default alert">
-        <span class="helion-icon-lg helion-icon helion-icon-Information"></span>
+          <img class="endpoint-notification-icon" svg-image src="/svg/Info_Black.svg"/>
           <span translate>
             In order to use the Stackato console you must connect to a registered service endpoint. Registered service
             endpoints are provided by your system administrator. Please contact your administrator about registering

@@ -1,17 +1,23 @@
 .endpoint-notification.alert {
 
-  margin-top:40px;
+  margin-bottom: $hpe-unit-space;
+  font-size: 18px;
 
-  .helion-icon {
+  .endpoint-notification-icon {
     position: absolute;
     left: $hpe-unit-space;
     top: $hpe-unit-space;
+    width: $hpe-unit-space;
+    path, rect {
+      fill: $charcoal;
+    }
   }
 
   &.endpoint-notification-slim {
     width: 80%;
     margin: auto;
     margin-top: 40px;
+    margin-bottom: 0;
   }
 }
 .endpoint-notification-error {
@@ -21,9 +27,22 @@
 .endpoints {
   &.endpoints-dashboard {
     .endpoints-table {
-      img {
-        width: 24px;
+
+      .endpoint-table-connected {
+        padding-top: 3px;
+        padding-bottom: 0;
+        vertical-align: middle;
+        svg {
+          width: 24px;
+          path {
+            fill: grey;
+          }
+          polygon {
+            fill: red;
+          }
+        }
       }
+
     }
   }
 }

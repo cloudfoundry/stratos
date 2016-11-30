@@ -21,7 +21,7 @@
     <div ng-if="endpointsDashboardCtrl.showWelcomeMessage"
          class="endpoint-notification panel panel-default alert"
           ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
-      <span class="helion-icon-lg helion-icon helion-icon-Information"></span>
+      <img class="endpoint-notification-icon" svg-image src="/svg/Info_Black.svg"/>
       <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
           <span translate>
             To enable developers to use this Web console to interact with Helion Stackato, please register
@@ -30,7 +30,7 @@
             Helion Cloud Foundry
           </span>
         <span translate> and </span>
-          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register('hce')" translate>
+          <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
             Helion Code Engine
           </span>
           <span translate>
@@ -83,15 +83,16 @@
             <a ng-href="{{endpoint.visit()}}">{{endpoint.name}}</a>
           </td>
           <td ng-if="!endpoint.visit" class="text-uppercase">{{endpoint.name}}</td>
-          <td ng-switch="endpoint.connected">
+          <td ng-switch="endpoint.connected" class="endpoint-table-connected">
             <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                   ng-switch-when="connected"></span>
-            <img ng-switch-when="unconnected"
-                 ng-src="/svg/NoConnection_Info.svg"
+            <div ng-switch-when="unconnected"
                  uib-popover="{{ 'Disconnected' | translate}}"
                  popover-trigger="'mouseenter'"
                  popover-placement="top-left"
-                 popover-popup-delay="1000"/>
+                 popover-popup-delay="1000">
+              <img svg-image src="/svg/NoConnection_White.svg"/>
+            </div>
             <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
                   ng-switch-when="expired"></span>
             <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
