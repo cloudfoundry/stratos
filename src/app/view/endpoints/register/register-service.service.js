@@ -78,7 +78,6 @@
                   showBusyOnNext: true,
                   isLastStep: true,
                   onNext: function () {
-                    console.log('UPDATING');
                     var userInput = context.wizardOptions.userInput;
                     var stepTwo = context.wizardOptions.workflow.steps[1];
                     return serviceInstanceModel.create(userInput.type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {

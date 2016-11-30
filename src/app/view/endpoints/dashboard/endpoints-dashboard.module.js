@@ -69,11 +69,9 @@
      * @memberof app.view.endpoints.dashboard
      * @name register
      * @description Register a service endpoint
-     * @param {string} type - type of endpoint being registered. selects the initial 'type' drop down value
      */
-    this.register = function (type) {
-      //TODO: RC search for uses
-      registerService.show($scope, type).then(function () {
+    this.register = function () {
+      registerService.show($scope).then(function () {
         _updateEndpoints();
       });
     };
@@ -143,7 +141,6 @@
           Array.prototype.push.apply(that.endpoints, result);
         });
 
-        //TODO: RC Ensure service calls back to this?
         _updateWelcomeMessage();
 
         that.initialised = true;
