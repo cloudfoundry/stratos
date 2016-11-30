@@ -76,7 +76,7 @@ $brand-danger:          $carnation !default;
 
 $body-bg:               $hpe-primary-bg !default;
 $text-color:            $hpe-primary-fg !default;
-$link-color:            $hpe-primary !default;
+$link-color:            $brand-primary !default;
 $link-hover-color:      darken($link-color, 10%) !default;
 $input-color:           $gray-darker !default;
 

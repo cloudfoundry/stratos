@@ -1,16 +1,16 @@
 $suse-primary: #02D35F;
 
+// Colours for the header bar
 $page-header-fg: #fff !default;
 $page-header-bg: $suse-primary !default;
 $page-header-active-fg: #000 !default;
-$actions-menu-hover-bg: $suse-primary;
+//$actions-menu-hover-bg: $suse-primary;
 
+// Set the primary brand colour
 $brand-primary: $suse-primary;
-$link-color: $suse-primary;
-$input-select-fg: $brand-primary;
+//$link-color: $suse-primary;
+//$input-select-fg: $brand-primary;
 
-// Align text panel at top
-//$login-page-text-panel-align: flex-start;
-// Allow text panel to be hidden
+// Hide welcome text panel on the login page
 $login-page-text-panel-display: none;
 

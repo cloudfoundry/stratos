@@ -136,7 +136,7 @@
           key: endpointPrefix + serviceInstance.guid,
           name: serviceInstance.name,
           connected: isValid ? 'connected' : 'unconnected',
-          type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getProductStrings().HELION_CLOUD_FOUNDRY : utilsService.getProductStrings().HELION_CODE_ENGINE,
+          type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getProductStrings().CLOUD_FOUNDRY : utilsService.getProductStrings().CODE_ENGINE,
           visit: isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
             return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
           } : undefined,

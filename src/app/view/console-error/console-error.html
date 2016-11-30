@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div ng-if="errPageCtrl.error === 'notSetup'" class="panel panel-default console-welcome-message">
         <div class="action-header">
-          <span translate>Welcome to {{ PRODUCT_STRINGS.HELION_STACKATO }}</span>
+          <span translate>Welcome to {{ PRODUCT_STRINGS.PRODUCT_NAME }}</span>
         </div>
         <div class="panel-body">
           <span translate>
@@ -19,17 +19,17 @@
           <!-- It would be grand to fold this state into the endpoints dashboard, however hiding the nav bar content
           becomes a real PITA -->
           <div class="helion-icon helion-icon-3x helion-icon-Configuration"></div>
-          <div class="applications-msg" translate>{{ PRODUCT_STRINGS.HELION_STACKATO }} has not yet been configured for you.</div>
+          <div class="applications-msg" translate>{{ PRODUCT_STRINGS.PRODUCT_NAME }} has not yet been configured for you.</div>
           <div class="applications-cta" translate>Please contact your administrator.</div>
         </div>
         <div ng-if="errPageCtrl.error === 'unknown'">
           <div class="helion-icon helion-icon-3x helion-icon-Critical_L"></div>
-          <div class="applications-msg" translate>{{ PRODUCT_STRINGS.HELION_STACKATO }} encountered an unexpected error.</div>
+          <div class="applications-msg" translate>{{ PRODUCT_STRINGS.PRODUCT_NAME }} encountered an unexpected error.</div>
           <div class="applications-cta" translate>Please contact your administrator.</div>
         </div>
         <div ng-if="errPageCtrl.error === 'upgrading'">
           <div class="helion-icon helion-icon-3x helion-icon-Install"></div>
-          <div class="applications-msg" translate>The {{ PRODUCT_STRINGS.HELION_STACKATO_WEB_CONSOLE }} is being upgraded.</div>
+          <div class="applications-msg" translate>The {{ PRODUCT_STRINGS.CONSOLE }} is being upgraded.</div>
           <div class="applications-cta" translate>Please wait for the upgrade to complete and then refresh or contact your administrator for further information.</div>
         </div>
       </div>

@@ -48,21 +48,31 @@ done
 echo "${cyan}Stackato Console Branding Setup${reset}"
 echo "Using brand folder ${BRAND_FOLDER}"
 
-echo "Applying Brand Product Strings"
 
 CONFIG_FILE=${DEST_FOLDER}/stackato-config.js
 
 # Format product strings onto one line without any line feeds/carriage returns
 PS_REGEX=""
-PRODUCT_STRINGS=$(jq . -c -j ${BRAND_FOLDER}/product_strings.json)
+
+PRODUCT_STRINGS="{}"
+
+# Process product strings if file present
+if [ -f ${BRAND_FOLDER}/product_strings.json ]; then
+    echo "Applying Brand Product Strings"
+    PRODUCT_STRINGS=$(jq . -c -j ${BRAND_FOLDER}/product_strings.json)
+else
+    echo "${orange}No Brand Product Strings detected${reset}"
+fi
+
+echo ${PRODUCT_STRINGS}
 
 if [ ! -z ${PRODUCE_PRODUCT_STRINGS_FILE} ]; then
-  echo "${cyan}Outputting product_strings file${reset}"
-  echo ${PRODUCT_STRINGS} > ${DEST_FOLDER}/product_strings
+echo "${cyan}Outputting product_strings file${reset}"
+echo ${PRODUCT_STRINGS} > ${DEST_FOLDER}/product_strings
 else
-  echo "${cyan}Running SED instruction${reset}"
-  # Replace inline in the config.js file
-  sed -i 's#,PRODUCT_STRINGS:.*};#,PRODUCT_STRINGS:'"$PRODUCT_STRINGS"'};#g' ${CONFIG_FILE}
+echo "${cyan}Running SED instruction${reset}"
+# Replace inline in the config.js file
+sed -i 's#,PRODUCT_STRINGS:.*};#,PRODUCT_STRINGS:'"$PRODUCT_STRINGS"'};#g' ${CONFIG_FILE}
 fi
 
 FAVICON="favicon.ico"

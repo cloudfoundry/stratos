@@ -22,21 +22,21 @@
          ng-if="endpointsDashboardCtrl.showWelcomeMessage">
       <div class="panel panel-default">
         <div class="action-header">
-          <span translate>Welcome to {{ PRODUCT_STRINGS.HELION_STACKATO }}</span>
+          <span translate>Welcome to {{ PRODUCT_STRINGS.PRODUCT_NAME }}</span>
           <button type="button" class="close helion-icon helion-icon-Close"
                   ng-click="endpointsDashboardCtrl.hideWelcomeMessage()">
           </button>
         </div>
         <div class=" panel-body" ng-show="endpointsDashboardCtrl.isUserAdmin()">
           <span translate>
-            To enable developers to use this Web console to interact with {{ PRODUCT_STRINGS.HELION_STACKATO }}, please register
+            To enable developers to use this Web console to interact with {{ PRODUCT_STRINGS.PRODUCT_NAME }}, please register
           </span>
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register()" translate>
-            {{ PRODUCT_STRINGS.HELION_CLOUD_FOUNDRY }}
+            {{ PRODUCT_STRINGS.CLOUD_FOUNDRY }}
           </span>
           <span translate> and </span>
           <span class="btn-link tile-btn" ng-click="endpointsDashboardCtrl.register('hce')" translate>
-           {{ PRODUCT_STRINGS.HELION_CODE_ENGINE }}
+           {{ PRODUCT_STRINGS.CODE_ENGINE }}
           </span>
           <span translate>
             endpoints here. The process of registering these endpoints will make them discoverable for anyone who logs
