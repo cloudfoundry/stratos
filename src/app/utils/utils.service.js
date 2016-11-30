@@ -80,7 +80,7 @@
       urlValidationExpression: urlValidationExpression,
       extractCloudFoundryError: extractCloudFoundryError,
       extractCodeEngineError: extractCodeEngineError,
-      getProductStrings: getProductStrings
+      getOemConfiguration: getOemConfiguration
     };
 
     /**
@@ -250,8 +250,8 @@
       return cluster.api_endpoint.Scheme + '://' + cluster.api_endpoint.Host;
     }
 
-    function getProductStrings() {
-      return _.defaults($window.env.PRODUCT_STRINGS, $window.env.DEFAULT_PRODUCT_STRINGS);
+    function getOemConfiguration() {
+      return _.defaults($window.env.OEM_CONFIG, $window.env.DEFAULT_OEM_CONFIG);
     }
   }
 

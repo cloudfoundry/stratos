@@ -11,7 +11,7 @@
 
     HELION_UI_FRAMEWORK_BASE_PATH: '',
 
-    DEFAULT_PRODUCT_STRINGS: {
+    DEFAULT_OEM_CONFIG: {
       PRODUCT_VERSION: '4.0',
       TERMS_OF_USE_HREF: 'http://docs.hpcloud.com/permalink/helion-openstack/3.0/eula',
       PRIVACY_HREF: 'https://www.hpe.com/us/en/legal/privacy.html',
@@ -31,7 +31,7 @@
       ABOUT_PRODUCT_FAMILY_LOGO_HREF: 'images/brand_product_family_logo_rev.png'
     },
 
-    PRODUCT_STRINGS: {}
+    OEM_CONFIG: {}
 
   };
 

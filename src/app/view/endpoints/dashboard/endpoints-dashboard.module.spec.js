@@ -32,7 +32,7 @@
         getClusterEndpoint: function () {
           return '';
         },
-        getProductStrings: function () {
+        getOemConfiguration: function () {
           return {
             PRODUCT_VERSION: '4.0',
             TERMS_OF_USE_HREF: 'http://docs.hpcloud.com/permalink/helion-openstack/3.0/eula',

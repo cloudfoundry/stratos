@@ -38,7 +38,7 @@
   ];
 
   function setOEMTranslations($window, $rootScope) {
-    $rootScope.PRODUCT_STRINGS = _.defaults($window.env.PRODUCT_STRINGS, $window.env.DEFAULT_PRODUCT_STRINGS);
+    $rootScope.OEM_CONFIG = _.defaults($window.env.OEM_CONFIG, $window.env.DEFAULT_OEM_CONFIG);
   }
 
 })();

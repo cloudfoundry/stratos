@@ -86,10 +86,10 @@
             // If there are no services or no errors continue as normal
             errorService.clearAppError();
           } else if (errors.length === 1) {
-            var errorMessage = $interpolate(gettext('The {{ console }} could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.'))({console: utilsService.getProductStrings().CONSOLE});
+            var errorMessage = $interpolate(gettext('The {{ console }} could not contact the endpoint named "{{name}}". Try reconnecting to this endpoint to resolve this problem.'))({console: utilsService.getOemConfiguration().CONSOLE});
             errorService.setAppError($interpolate(errorMessage)({name: errors[0]}));
           } else if (errors.length > 1) {
-            errorService.setAppError($interpolate(gettext('The {{ console }} could not contact multiple endpoints.'))({console: utilsService.getProductStrings().CONSOLE}));
+            errorService.setAppError($interpolate(gettext('The {{ console }} could not contact multiple endpoints.'))({console: utilsService.getOemConfiguration().CONSOLE}));
           }
 
         });
@@ -136,7 +136,7 @@
           key: endpointPrefix + serviceInstance.guid,
           name: serviceInstance.name,
           connected: isValid ? 'connected' : 'unconnected',
-          type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getProductStrings().CLOUD_FOUNDRY : utilsService.getProductStrings().CODE_ENGINE,
+          type: serviceInstance.cnsi_type === 'hcf' ? utilsService.getOemConfiguration().CLOUD_FOUNDRY : utilsService.getOemConfiguration().CODE_ENGINE,
           visit: isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
             return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
           } : undefined,
@@ -149,7 +149,7 @@
         if (serviceInstance.error) {
           // Service could not be contacted
           endpoint.error = {
-            message: $interpolate(gettext('The {{ console }} could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'))({console: utilsService.getProductStrings().CONSOLE}),
+            message: $interpolate(gettext('The {{ console }} could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'))({console: utilsService.getOemConfiguration().CONSOLE}),
             status: 'error'
           };
           endpoint.connected = 'error';
@@ -163,7 +163,7 @@
         } else if (endpoint.connected === 'unconnected') {
           // Service token has expired
           endpoint.error = {
-            message: $interpolate(gettext('The {{ console }} has no credentials for this endpoint. Connect to resolve this problem.'))({console: utilsService.getProductStrings().CONSOLE}),
+            message: $interpolate(gettext('The {{ console }} has no credentials for this endpoint. Connect to resolve this problem.'))({console: utilsService.getOemConfiguration().CONSOLE}),
             status: 'info'
           };
         }

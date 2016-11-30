@@ -46,10 +46,10 @@
        */
       add: function ($scope, type) {
         var serviceTypes = [{
-          label: utilsService.getProductStrings().CLOUD_FOUNDRY,
+          label: utilsService.getOemConfiguration().CLOUD_FOUNDRY,
           value: 'hcf'
         }, {
-          label: utilsService.getProductStrings().CODE_ENGINE,
+          label: utilsService.getOemConfiguration().CODE_ENGINE,
           value: 'hce'
         }];
         var startingType = _.find(serviceTypes, {value: type});
@@ -75,13 +75,13 @@
           var scope = {};
           switch (data.type) {
             case 'hcf':
-              context.typeLabel = utilsService.getProductStrings().CLOUD_FOUNDRY;
-              scope.endpoint = utilsService.getProductStrings().CLOUD_FOUNDRY;
+              context.typeLabel = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
+              scope.endpoint = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
               context.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
               break;
             case 'hce':
-              context.typeLabel = utilsService.getProductStrings().CODE_ENGINE;
-              scope.endpoint = utilsService.getProductStrings().CODE_ENGINE;
+              context.typeLabel = utilsService.getOemConfiguration().CODE_ENGINE;
+              scope.endpoint = utilsService.getOemConfiguration().CODE_ENGINE;
               context.urlHint = $interpolate(gettext('{{ endpoint }} endpoint'))(scope);
               break;
             default:

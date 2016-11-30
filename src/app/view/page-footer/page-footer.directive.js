@@ -35,7 +35,7 @@
   ];
 
   function PageFooterController($scope, utilsService) {
-    this.PRODUCT_STRINGS = utilsService.getProductStrings();
+    this.OEM_CONFIG = utilsService.getOemConfiguration();
   }
 
 })();

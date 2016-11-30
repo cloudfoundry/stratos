@@ -42,7 +42,7 @@
    */
   function ApplicationSetupPipelineController($scope, detailView, utilsService) {
     this.detailView = detailView;
-    $scope.PRODUCT_STRINGS = utilsService.getProductStrings();
+    $scope.OEM_CONFIG = utilsService.getOemConfiguration();
   }
 
   angular.extend(ApplicationSetupPipelineController.prototype, {

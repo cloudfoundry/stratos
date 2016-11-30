@@ -1,14 +1,14 @@
-<a ng-if="pageFooterCtrl.mode !== 'footer' && !!pageFooterCtrl.PRODUCT_STRINGS.ABOUT_PRODUCT_FAMILY_LOGO_HREF" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.PRODUCT_STRINGS.PRODUCT_FAMILY_HREF | translate}}" target="_blank"><img class="helion-logo" ng-src="{{ pageFooterCtrl.PRODUCT_STRINGS.ABOUT_PRODUCT_FAMILY_LOGO_HREF }}"/></a>
-<a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.PRODUCT_STRINGS.COMPANY_HREF | translate}}" target="_blank"><img class="hpe-logo" ng-src="{{ pageFooterCtrl.PRODUCT_STRINGS.ABOUT_COMPANY_LOGO_HREF }}"/></a>
+<a ng-if="pageFooterCtrl.mode !== 'footer' && !!pageFooterCtrl.OEM_CONFIG.ABOUT_PRODUCT_FAMILY_LOGO_HREF" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.OEM_CONFIG.PRODUCT_FAMILY_HREF | translate}}" target="_blank"><img class="helion-logo" ng-src="{{ pageFooterCtrl.OEM_CONFIG.ABOUT_PRODUCT_FAMILY_LOGO_HREF }}"/></a>
+<a ng-if="pageFooterCtrl.mode !== 'footer'" rel="noopener noreferrer" ng-href="{{ pageFooterCtrl.OEM_CONFIG.COMPANY_HREF | translate}}" target="_blank"><img class="hpe-logo" ng-src="{{ pageFooterCtrl.OEM_CONFIG.ABOUT_COMPANY_LOGO_HREF }}"/></a>
 <div class="copyright">
   <span ng-if="mode !== 'footer'" class="product-name font-semi-bold">
-    {{ pageFooterCtrl.PRODUCT_STRINGS.PRODUCT_NAME }} {{ pageFooterCtrl.PRODUCT_STRINGS.PRODUCT_VERSION }}
+    {{ pageFooterCtrl.OEM_CONFIG.PRODUCT_NAME }} {{ pageFooterCtrl.OEM_CONFIG.PRODUCT_VERSION }}
   <span class="secondary">
-    <span ng-if="mode !== 'footer'"> | </span>&copy; 2016 {{ pageFooterCtrl.PRODUCT_STRINGS.COMPANY }}
+    <span ng-if="mode !== 'footer'"> | </span>&copy; 2016 {{ pageFooterCtrl.OEM_CONFIG.COMPANY }}
   </span>
 </div>
 
 <ul class="links">
-  <li><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.PRODUCT_STRINGS.TERMS_OF_USE_HREF | translate }}" translate>{{ pageFooterCtrl.PRODUCT_STRINGS.TERMS_OF_USE }}</a></li>
-  <li><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.PRODUCT_STRINGS.PRIVACY_HREF | translate }}" translate>{{ pageFooterCtrl.PRODUCT_STRINGS.PRIVACY }}</a></li>
+  <li><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE_HREF | translate }}" translate>{{ pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE }}</a></li>
+  <li><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.OEM_CONFIG.PRIVACY_HREF | translate }}" translate>{{ pageFooterCtrl.OEM_CONFIG.PRIVACY }}</a></li>
 </ul>
