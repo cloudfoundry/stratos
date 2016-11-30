@@ -18,10 +18,6 @@
     </div>
   </div>
   <div ng-if="endpointsDashboardCtrl.initialised && !endpointsDashboardCtrl.listError">
-
-    <!--welcome-message-->
-
-
     <div ng-if="endpointsDashboardCtrl.showWelcomeMessage"
          class="endpoint-notification panel panel-default alert"
           ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
@@ -90,22 +86,12 @@
           <td ng-switch="endpoint.connected">
             <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                   ng-switch-when="connected"></span>
-            <!--class="helion-icon helion-icon-lg helion-icon-Connect"-->
-            <!--mouseenter hpe-popover-->
-            <img class="" ng-src="/svg/NoConnection_Info.svg" style="width: 24px;"
-                  ng-switch-when="unconnected"
+            <img ng-switch-when="unconnected"
+                 ng-src="/svg/NoConnection_Info.svg"
                  uib-popover="{{ 'Disconnected' | translate}}"
                  popover-trigger="'mouseenter'"
                  popover-placement="top-left"
-                 popover-class=""
-                 popover-popup-delay="1000"
-                 data-placement='left' />
-            <!--<div class="popover bottom fade in" style="position: relative; display: inline-block">-->
-              <!--<div class="arrow"></div>-->
-              <!--<div class="popover-inner">-->
-                <!--<div class="popover-content">The application needs to be restarted for highlighted variables to be added to the runtime.</div>-->
-              <!--</div>-->
-            <!--</div>-->
+                 popover-popup-delay="1000"/>
             <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
                   ng-switch-when="expired"></span>
             <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"

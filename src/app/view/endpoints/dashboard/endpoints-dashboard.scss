@@ -19,22 +19,11 @@
 }
 
 .endpoints {
-
-
-
   &.endpoints-dashboard {
-    //.action-header {
-    //  position: relative;
-    //  padding-top: $hpe-unit-space;
-    //  button {
-    //    position: absolute;
-    //    top: $hpe-unit-space;
-    //    right: $hpe-unit-space;
-    //  }
-    //}
-
-    .empty-view-message {
-      //padding-top: $hpe-unit-space;
+    .endpoints-table {
+      img {
+        width: 24px;
+      }
     }
   }
 }
