@@ -31,7 +31,12 @@
       tokens: []
     };
 
+    context.triggerWatch = function () {
+      context.tokens = _.clone(context.tokens);
+    };
+
     context.refreshTokens = function (fetchFresh) {
+      // context.tokens.length = 0;
       var promise;
       if (fetchFresh) {
         promise = vcsModel.listVcsTokens();
@@ -57,6 +62,7 @@
             newName: newName
           });
         // After a successful rename, no need to do anything as entry is updated in place
+        context.triggerWatch();
       });
     }
 
@@ -70,6 +76,7 @@
           no: gettext('Cancel')
         },
         errorMessage: gettext('Failed to delete Personal Access Token'),
+        submitCommit: true,
         callback: function () {
           return vcsModel.deleteVcsToken(token.token.guid)
             .then(function () {

@@ -56,11 +56,11 @@
             class: 'detail-view',
             buttonTitles: {
               submit: gettext('Register Token')
-            }
+            },
+            submitCommit: true
           },
           context,
           function (data) {
-            console.log('Create with data', data);
             return vcsModel.registerVcsToken(vcs.guid, data.name, data.value)
               .then(function () {
                 notificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully registered'),

@@ -51,7 +51,8 @@
             class: 'detail-view',
             buttonTitles: {
               submit: gettext('Save')
-            }
+            },
+            submitCommit: true
           },
           context,
           function () {

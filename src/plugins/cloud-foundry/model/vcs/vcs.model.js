@@ -2,16 +2,16 @@
   'use strict';
 
   // Supported VCS Types
-  var VCS_TYPES = {
+  var SUPPORTED_VCS_TYPES = {
     GITHUB: {
       description: gettext('Connect to a repository hosted on GitHub.com that you own or have admin rights to.'),
       img: 'github_octocat.png',
-      supported: true
+      label: 'GitHub'
     },
     GITHUB_ENTERPRISE: {
       description: gettext('Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.'),
       img: 'GitHub-Mark-120px-plus.png',
-      supported: true
+      label: 'GitHub Enterprise'
     }
   };
 
@@ -73,7 +73,7 @@
 
           // Filter out unsupported clients
           var supported = _.filter(res.data, function (vcs) {
-            return VCS_TYPES[that._expandVcsType(vcs)];
+            return SUPPORTED_VCS_TYPES[that.expandVcsType(vcs)];
           });
 
           that.vcsClients = supported;
@@ -163,7 +163,7 @@
         .listVcsTokens().then(function (res) {
           that.vcsTokens = res.data;
           that.vcsTokensFetched = true;
-          return res.data;
+          return that.vcsTokens;
         });
     },
 
@@ -185,14 +185,15 @@
       var that = this;
       return this.listVcsTokens().then(function () {
         var supported = _.filter(that.vcsTokens, function (vcsToken) {
-          var vcsInfo = VCS_TYPES[that._expandVcsType(vcsToken.vcs)];
-          return vcsInfo && vcsInfo.supported && _.find(hceVcsInstances, function (hceVcs) {
+          var vcsInfo = SUPPORTED_VCS_TYPES[that.expandVcsType(vcsToken.vcs)];
+          // Make sure the VCS is a supported type and is registered in Code Engine
+          return vcsInfo && _.find(hceVcsInstances, function (hceVcs) {
             return hceVcs.browse_url === vcsToken.vcs.browse_url;
           });
         });
 
         that.supportedVcsInstances = _.map(supported, function (supportedVcs) {
-          var vcs = _.clone(VCS_TYPES[that._expandVcsType(supportedVcs.vcs)]);
+          var vcs = _.clone(SUPPORTED_VCS_TYPES[that.expandVcsType(supportedVcs.vcs)]);
 
           var hceVcs = _.find(hceVcsInstances, function (hceVcs) {
             return hceVcs.browse_url === supportedVcs.vcs.browse_url;
@@ -222,7 +223,7 @@
      * @returns {string} VCS type - expanded to split types like GitHub to GitHub and GitHub Enterprise
      * @private
      */
-    _expandVcsType: function (vcs) {
+    expandVcsType: function (vcs) {
       var expType = vcs.vcs_type;
       if (expType === 'github') {
         if (vcs.browse_url && vcs.browse_url.indexOf('https://github.com') === -1) {
@@ -232,6 +233,14 @@
         }
       }
       return expType;
+    },
+
+    getTypeLabel: function (vcs) {
+      var vcsTypeDef = SUPPORTED_VCS_TYPES[this.expandVcsType(vcs)];
+      if (!vcsTypeDef) {
+        return 'Unknown Type';
+      }
+      return vcsTypeDef.label;
     }
   });
 

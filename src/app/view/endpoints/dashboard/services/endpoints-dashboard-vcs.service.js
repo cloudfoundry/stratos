@@ -133,7 +133,7 @@
         activeEndpoints.push(endpoint.key);
 
         endpoint.name = vcs.label;
-        endpoint.type = gettext(vcs.vcs_type);
+        endpoint.type = gettext(vcsModel.getTypeLabel(vcs));
         endpoint.url = vcs.browse_url;
         endpoint.actionsTarget = vcs;
         endpoint.actions = _createInstanceActions(endpoints);

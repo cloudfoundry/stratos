@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  var LEGACY_TOKEN = 'legacy token';
+  var DELETED_TOKEN = 'token deleted';
+
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline', [])
     .config(registerRoute);
@@ -264,16 +267,24 @@
       return projectName.slice(delimIndex + this.PAT_DELIMITER.length);
     },
 
+    isLegacyToken: function () {
+      return this.getTokenName() === LEGACY_TOKEN;
+    },
+
+    isTokenDeleted: function () {
+      return this.getTokenName() === DELETED_TOKEN;
+    },
+
     getTokenName: function () {
       var patGuid = this._getPatGuid();
       if (!patGuid) {
         // the project uses a legacy OAuth token
-        return 'legacy';
+        return LEGACY_TOKEN;
       }
       var tokenInUse = this.vcsModel.getToken(patGuid);
       if (!tokenInUse) {
         // The user deleted the token from the Console...
-        return 'token deleted';
+        return DELETED_TOKEN;
       }
       return tokenInUse.token.name;
     },

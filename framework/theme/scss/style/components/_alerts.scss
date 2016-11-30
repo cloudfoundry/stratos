@@ -45,3 +45,14 @@
 .alert-danger {
   @include hpe-alert($state-danger-bg, $helion-icon-Critical_L, $alert-danger-bg, $helion-icon-Critical_L);
 }
+
+.alert-card {
+  @include hpe-box-shadow-small();
+  margin-bottom: 22px;
+  &.alert-warning {
+    @include hpe-alert($white, $helion-icon-Alert, $white, $helion-icon-Alert_pressed, $dove-gray);
+    &:before {
+      color: $state-warning-bg;
+    }
+  }
+}

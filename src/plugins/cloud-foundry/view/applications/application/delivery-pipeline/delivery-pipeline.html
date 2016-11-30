@@ -6,6 +6,11 @@
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 <div ng-if="!applicationDeliveryPipelineCtrl.isDeleting && applicationDeliveryPipelineCtrl.project">
+  <div ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()" class="alert alert-warning alert-card">
+    <p translate>
+      Your Helion Code Engine pipeline is using a legacy OAuth token. While your pipeline should continue to function normally, we suggest that you update it to use a Personal Access Token.
+    </p>
+  </div>
   <div class="card panel panel-default">
     <div class="panel-heading action-header">
       <span translate>Summary</span>
@@ -34,6 +39,8 @@
           <dd>
             <a href="{{ applicationDeliveryPipelineCtrl.project.repo.http_url }}" rel="noopener noreferrer" target="_blank">{{ applicationDeliveryPipelineCtrl.project.repo.full_name }}</a>
           </dd>
+        </dl>
+        <dl class="dl-horizontal col-md-6">
           <dt translate>branch</dt>
           <dd>
             {{ applicationDeliveryPipelineCtrl.project.repo.branch }}
@@ -42,8 +49,6 @@
           <dd>
             {{ applicationDeliveryPipelineCtrl.project.buildContainer.build_container_label }}
           </dd>
-        </dl>
-        <dl class="dl-horizontal col-md-6">
           <dt translate>hce endpoint url</dt>
           <dd>
             {{ applicationDeliveryPipelineCtrl.hceCnsi.api_endpoint.Scheme }}://{{ applicationDeliveryPipelineCtrl.hceCnsi.api_endpoint.Host }}{{ applicationDeliveryPipelineCtrl.hceCnsi.api_endpoint.Path }}
