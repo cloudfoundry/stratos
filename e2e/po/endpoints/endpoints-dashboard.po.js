@@ -113,7 +113,7 @@
   }
 
   function endpointIsDisconnected(row) {
-    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css("svg[src='/svg/NoConnection_White.svg']")).isPresent();
+    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css("svg[src='/svg/NoConnection_Black.svg']")).isPresent();
   }
 
   function endpointIsConnected(row) {
