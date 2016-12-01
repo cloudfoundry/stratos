@@ -266,15 +266,15 @@
     // TODO: refactor common code used in trigger-build.service
     _getPatGuid: function () {
       if (!this.project) {
-        return null;
+        return undefined;
       }
       var projectName = this.project.name;
       if (!projectName) {
-        return null;
+        return undefined;
       }
       var delimIndex = projectName.indexOf(this.PAT_DELIMITER);
       if (delimIndex < 0) {
-        return null;
+        return undefined;
       }
       return projectName.slice(delimIndex + this.PAT_DELIMITER.length);
     },
@@ -289,12 +289,12 @@
 
     getTokenName: function () {
       var patGuid = this._getPatGuid();
-      if (!patGuid) {
+      if (_.isUndefined(patGuid)) {
         // the project uses a legacy OAuth token
         return LEGACY_TOKEN;
       }
       var tokenInUse = this.vcsModel.getToken(patGuid);
-      if (!tokenInUse) {
+      if (_.isUndefined(tokenInUse)) {
         // The user deleted the token from the Console...
         return DELETED_TOKEN;
       }
@@ -302,6 +302,7 @@
     },
 
     manageVcsTokens: function () {
+      var that = this;
       var vi = this.hceModel.data.vcsInstance;
       var vcs = _.find(this.vcsModel.vcsClients, function (vc) {
         return vc.browse_url === vi.browse_url && vc.api_url === vi.api_url && vc.label === vi.label;
@@ -309,10 +310,17 @@
       if (vcs) {
         var patGuid = this._getPatGuid();
         return this.vcsTokenManager.manage(vcs, true, patGuid).then(function (newTokenGuid) {
+          // If the token was changed. update the HCE project
           if (newTokenGuid !== patGuid) {
-            console.log('User picked a new token: ' + newTokenGuid + ' !== ' + patGuid);
-          } else {
-            console.log('User token unchanged: ' + newTokenGuid);
+            var delimIndex = that.project.name.indexOf(that.PAT_DELIMITER);
+            if (delimIndex < 0) {
+              that.project.name += that.PAT_DELIMITER + newTokenGuid;
+            } else {
+              that.project.name = that.project.name.slice(0, delimIndex) + that.PAT_DELIMITER + newTokenGuid;
+            }
+            return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
+              that.model.application.project = res.data;
+            });
           }
         });
       } else {

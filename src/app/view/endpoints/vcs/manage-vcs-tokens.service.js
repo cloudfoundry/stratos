@@ -130,20 +130,13 @@
         context.registerNewToken = function () {
           return registerVcsToken.registerToken(vcs).then(function () {
             // Update tokens (need to fetch)
-            return context.refreshTokens(true).then(function () {
-              // Keep the dialog open
-              return $q.reject('Keep this dialog open!');
-            });
+            return context.refreshTokens(true);
           });
         };
 
-        var title, cancelText;
-        cancelText = 'Done';
+        var title;
         if (chooserMode) {
           title = 'Choose a GitHub Personal Access Token';
-          context.invalidityCheck = function () {
-            return !context.chosenToken;
-          };
         } else {
           title = 'Manage GitHub Personal Access Tokens';
         }
@@ -157,11 +150,17 @@
               templateUrl: 'app/view/endpoints/vcs/manage-vcs-tokens.html',
               class: 'detail-view',
               buttonTitles: {
-                cancel: gettext(cancelText)
+                submit: gettext('Done')
               },
-              noSubmit: true
+              noCancel: true
             },
-            context
+            context,
+            function (val) {
+              if (chooserMode) {
+                return $q.resolve(context.chosenToken);
+              }
+              return $q.resolve(val);
+            }
           ).result;
         });
       }
