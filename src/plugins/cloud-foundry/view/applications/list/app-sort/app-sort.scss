@@ -1,0 +1,24 @@
+.applications-sorting {
+
+  button {
+    text-transform: none;
+    margin-left: 4px;
+    font-size: 16px;
+    .adjust-icon{
+      padding-left: 8px;
+      padding-top: 4px;
+    }
+  }
+
+  .btn-disabled {
+    background: none;
+    color: $gray-light;
+    border-color: $gray-light;
+  }
+
+  .btn-enabled{
+    color: $white;
+    background-color: $gray-dark;
+  }
+
+}

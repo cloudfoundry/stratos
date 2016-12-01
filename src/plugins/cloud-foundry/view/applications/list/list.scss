@@ -1,4 +1,5 @@
 @import "gallery-view/gallery-view";
+@import "app-sort/app-sort";
 
 $applications-msg-height: 50px;
 
@@ -18,6 +19,11 @@ $applications-msg-height: 50px;
 }
 
 .application-actions {
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+
+
   .view-buttons {
 
     margin-right: 8px;
@@ -38,6 +44,16 @@ $applications-msg-height: 50px;
       color: $actions-menu-item-disabled-fg;
     }
   }
+}
+
+.app-sorting {
+  width: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+  padding-right: $hpe-unit-space;
+  padding-bottom: $hpe-unit-space;
+
+
 }
 
 .applications-filter {

@@ -1,20 +1,19 @@
 <div ng-if="applicationsTableCtrl.apps.length"
      class="apps-table">
   <table class="table"
-         st-table="applicationsTableCtrl.stApps"
-         st-safe-src="applicationsTableCtrl.apps">
+        st-table="applicationsTableCtrl.stApps"
+        st-safe-src="applicationsTableCtrl.apps"
+        st-pipe="applicationsTableCtrl.stMiddleware"
+  >
     <thead>
-      <tr>
-        <th translate>Application Name</th>
-        <th translate>Status</th>
-        <th translate>Instances</th>
-        <th translate >Disk Quota</th>
-        <th translate>Memory Utilization</th>
+      <tr >
+        <!-- TODO ng-class -->
+        <th ng-repeat="column in applicationsTableCtrl.tableColumns" translate st-sort="{{column.value}}" ng-class="{{ classapplicationsTableCtrl.setSortclass(column) }}">{{column.name}}</th>
       </tr>
     </thead>
     <tbody>
     <tr ng-repeat="app in applicationsTableCtrl.stApps">
-      <td class="text-uppercase">
+      <td>
         <a ng-href="{{applicationsTableCtrl.getAppSummaryLink(app)}}">{{app.entity.name}}</a>
       </td>
       <td>

@@ -88,6 +88,10 @@
     this.unfilteredApplicationCount = undefined;
     // Page number (not zero based, used in UX)
     this.appPage = 1;
+
+    // Sorting options
+    this.currentSortOption = undefined;
+    this.sortAscending = true;
   }
 
   angular.extend(Application.prototype, {

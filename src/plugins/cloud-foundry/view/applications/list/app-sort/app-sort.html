@@ -1,0 +1,12 @@
+<div class="applications-sorting">
+  <span translate>Sort by</span>
+  <!--<div class="sorting-form">-->
+    <button class="btn" ng-repeat="sortOption in applicationsSortingCtrl.sortOptions"
+            ng-class="applicationsSortingCtrl.isCurrentSort(sortOption) ? 'btn-enabled' : 'btn-disabled'"
+            ng-click="applicationsSortingCtrl.sort(sortOption)">
+      <span ng-if="applicationsSortingCtrl.isCurrentSort(sortOption)" class="helion-icon adjust-icon pull-right"
+            ng-class="applicationsSortingCtrl.showAscending(sortOption) ? 'helion-icon-Up_caret' : 'helion-icon-Drop_caret'"></span>
+      {{ sortOption.label }}
+    </button>
+    <!--</div>-->
+</div>

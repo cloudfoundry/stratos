@@ -2,10 +2,12 @@
   <div class="applications-header font-semi-bold pull-left" translate>
     Applications
     <div class="applications-count" ng-if="applicationsListCtrl.ready">
-      <span ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
+      <span
+        ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
         ( {{ applicationsListCtrl.model.unfilteredApplicationCount }} )
       </span>
-      <span ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount">
+      <span
+        ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount">
         ( {{ applicationsListCtrl.model.filteredApplications.length }} / {{ applicationsListCtrl.model.unfilteredApplicationCount }} )
       </span>
     </div>
@@ -75,6 +77,10 @@
     </div>
   </div>
 
+  <div class="app-sorting" ng-hide="!applicationsListCtrl.model.showCardLayout">
+    <applications-sorting></applications-sorting>
+  </div>
+
   <div class="applications-empty" ng-if="!applicationsListCtrl.model.hasApps">
     <div ng-if="applicationsListCtrl.model.clusterCount === 0">
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
@@ -91,7 +97,8 @@
           <div class="applications-msg" translate>You have no applications and</div>
           <div class="applications-msg" translate>there are no spaces where you can add any.</div>
           <div class="applications-cta">
-            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints Dashboard</a>
+            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints
+              Dashboard</a>
             <span translate>to manage spaces.</span>
           </div>
         </div>
@@ -105,7 +112,8 @@
         <div class="helion-icon helion-icon-3x helion-icon-Application"></div>
         <div class="applications-msg" ng-bind="applicationsListCtrl.getNoAppsMessage()"></div>
         <div class="applications-cta">
-          <a class="btn btn-link" ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')"  translate>
+          <a class="btn btn-link" ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')"
+             translate>
             Add an application
           </a>
         </div>
