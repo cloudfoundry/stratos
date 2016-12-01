@@ -17,9 +17,14 @@ $border: 1px solid $gray-light;
     &:hover {
       cursor: pointer;
       color: #01765b;
+      .add-new-token-icon {
+        .st0 {
+          fill: #01765b;
+        }
+      }
     }
     .add-new-token-icon {
-      font-size: 30px;
+      width: 28px;
       margin-right: 10px;
     }
     .add-new-token-icon-chooser {

@@ -57,7 +57,10 @@
         <td colspan="{{ asyncTaskDialogCtrl.context.chooserMode ? 5 : 4 }}" style="text-align: left">
           <div class="add-new-token"
              ng-click="asyncTaskDialogCtrl.context.registerNewToken()">
-            <span class="add-new-token-icon" ng-class="{'add-new-token-icon-chooser': asyncTaskDialogCtrl.context.chooserMode}">⊕</span>
+            <img
+              class="add-new-token-icon"
+              ng-class="{'add-new-token-icon-chooser': asyncTaskDialogCtrl.context.chooserMode}"
+              svg-image src="/svg/Add_Green.svg"/>
           <span translate>Add New Token</span>
         </div></td>
       </tr>
@@ -66,7 +69,9 @@
   </div>
   <div ng-if="!asyncTaskDialogCtrl.context.tokens.length" class="add-new-token"
     ng-click="asyncTaskDialogCtrl.context.registerNewToken()">
-    <span class="add-new-token-icon" ng-class="{'add-new-token-icon-chooser': asyncTaskDialogCtrl.context.chooserMode}">⊕</span>
+    <img
+      class="add-new-token-icon"
+      svg-image src="/svg/Add_Green.svg"/>
     <span translate>Add New Token</span>
   </div>
 
