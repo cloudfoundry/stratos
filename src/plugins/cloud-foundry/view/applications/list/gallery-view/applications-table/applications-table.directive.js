@@ -37,12 +37,36 @@
       {name: gettext('Memory Utilization'), value: 'entity.memory'}
     ];
 
+    function updateStTableState() {
+      // St-table internally maintains its own copy of rows
+      // When using a custom pipe function we need to do ourselves
+      that.stApps = [].concat(that.apps);
+    }
+
     $scope.$watch(
       function () {
         return model.currentSortOption + '_' + model.sortAscending;
       },
       function () {
-        that.stApps = [].concat(that.apps);
+        updateStTableState();
+      }
+    );
+
+    $scope.$watch(
+      function () {
+        return model.currentSortOption + '_' + model.sortAscending;
+      },
+      function () {
+        updateStTableState();
+      }
+    );
+
+    $scope.$watchCollection(
+      function () {
+        return that.apps;
+      },
+      function () {
+        updateStTableState();
       }
     );
     this.getAppSummaryLink = getAppSummaryLink;
@@ -76,7 +100,7 @@
         model.currentSortOption = tableState.sort.predicate;
         model.sortAscending = !tableState.sort.reverse;
       }
-      that.stApps = [].concat(that.apps);
+      updateStTableState();
       tableState.pagination.numberOfPages = 1;
     }
   }
