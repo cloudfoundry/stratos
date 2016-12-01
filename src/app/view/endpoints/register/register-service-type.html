@@ -8,20 +8,24 @@
     <h4 translate>Select an Endpoint Type</h4>
     <ul class="media-list hpe-add-option-list">
       <li class="media">
-        <div class="media-left media-middle">
-          <img class="media-object" ng-src="/images/cloudfoundry_small.png"/>
+        <div>
+          <div class="media-left media-middle">
+            <img class="media-object" ng-src="/images/cloudfoundry_small.png"/>
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading" translate>Helion Cloud Foundry</h4>
+            <p>Helion Cloud Foundry supports the full lifecycle, from initial development, through all testing stages to
+              deployment</p>
+            <div class="media-right pull-right">
+              <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hcf';wizardCtrl.next()" translate>
+                Register
+                <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="media-body">
-          <h4 class="media-heading" translate>Helion Cloud Foundry</h4>
-          <p>Helion Cloud Foundry supports the full lifecycle, from initial development, through all testing stages to
-            deployment</p>
-        </div>
-        <div class="media-right">
-          <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hcf';wizardCtrl.next()" translate>
-            Register
-            <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
-          </button>
-        </div>
+
+
       </li>
       <li class="media register-type-hce">
         <div class="media-left media-middle">
@@ -33,12 +37,12 @@
           <h4 class="media-heading" translate>Helion Code Engine</h4>
           <p>Code Engine gives teams the ability to set up their own automated ci/cd routines, allowing the
             build/test/deploy cycle to be triggered by checkins into VCS repositories</p>
-        </div>
-        <div class="media-right">
-          <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hce';wizardCtrl.next()" translate>
-            Register
-            <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
-          </button>
+          <div class="media-right pull-right">
+            <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hce';wizardCtrl.next()" translate>
+              Register
+              <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+            </button>
+          </div>
         </div>
       </li>
     </ul>
