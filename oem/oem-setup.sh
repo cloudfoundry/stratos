@@ -103,6 +103,13 @@ else
     echo "${orange}No imaegs supplied${reset}"
 fi
 
+if [ -d ${BRAND_FOLDER}/html ]; then
+    echo "Copying html templates"
+    mkdir -p ${DEST_FOLDER}/html
+  cp -rf ${BRAND_FOLDER}/html/*.* ${DEST_FOLDER}/html
+else
+    echo "No html templates supplied"
+fi
 
 rm -rf ./tmp
 mkdir ./tmp
@@ -127,6 +134,7 @@ if [ ! -z ${GENERATE_PATCH_SCRIPT} ]; then
 FROM ${BASE_CONSOLE_IMAGE}
 ADD index.css /usr/share/nginx/html/index.css
 ADD images /usr/share/nginx/html/images
+ADD html /usr/share/nginx/html/html
 ADD oem_config /tmp
 ADD product_name /tmp
 RUN OEM_CONFIG=\$(cat /tmp/oem_config) && \
