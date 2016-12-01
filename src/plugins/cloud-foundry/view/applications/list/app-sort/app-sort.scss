@@ -41,6 +41,10 @@
       }
     }
 
+    button:hover, button:active{
+      outline: $button-focus-outline-width solid $gray-light;
+     }
+
     .btn-disabled {
       background: none;
       color: $gray-light;
