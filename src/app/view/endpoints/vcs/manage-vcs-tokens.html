@@ -61,10 +61,9 @@
         <td colspan="{{ asyncTaskDialogCtrl.context.chooserMode ? 5 : 4 }}" style="text-align: left">
           <div class="add-new-token"
              ng-click="asyncTaskDialogCtrl.context.registerNewToken()">
-            <img
-              class="add-new-token-icon"
-              ng-class="{'add-new-token-icon-chooser': asyncTaskDialogCtrl.context.chooserMode}"
-              svg-image src="/svg/Add_Green.svg"/>
+            <svg-image class="add-new-token-icon"
+                       ng-class="{'add-new-token-icon-chooser': asyncTaskDialogCtrl.context.chooserMode}"
+                       src="/svg/Add_Green.svg"></svg-image>
           <span translate>Add New Token</span>
         </div></td>
       </tr>
