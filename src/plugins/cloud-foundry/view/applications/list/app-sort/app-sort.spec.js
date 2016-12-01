@@ -49,9 +49,6 @@
       it('should be defined', function () {
         expect(appSortCtrl).toBeDefined();
       });
-
     });
-
   });
-
 })();
