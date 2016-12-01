@@ -11,12 +11,15 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/satori/go.uuid"
+	"strings"
 )
 
 const (
 
 	TOKEN_GUID_HEADER string = "x-cnap-vcs-token-guid"
 )
+
+var GITHUB_REQUIRED_SCOPES = [...]string{"admin:repo_hook", "repo"}
 
 func (p *portalProxy) listVCSClients(c echo.Context) error {
 	logger.Info("listVCSClients")
@@ -164,9 +167,10 @@ func (p *portalProxy) deleteVcsToken(c echo.Context) error {
 
 // Used in the list call
 type VcsTokenValid struct {
-	Guid string `json:"guid"`
-	Name string `json:"name"`
-	Valid bool `json:"valid"`
+	Guid          string `json:"guid"`
+	Name          string `json:"name"`
+	Valid         bool `json:"valid"`
+	InvalidReason string `json:"invalid_reason,omitempty"`
 }
 
 func (p *portalProxy) checkVcsToken(c echo.Context) error {
@@ -193,7 +197,7 @@ func (p *portalProxy) checkVcsToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Cannot find VCS associated with token: %+v", tr))
 	}
 
-	valid, err := _checkVcsToken(vr, tr)
+	valid, reason, err := _checkVcsToken(vr, tr)
 	if err != nil {
 		msg := "Error checking VCS token"
 		return newHTTPShadowError(http.StatusInternalServerError, msg, msg + ": %v", err)
@@ -202,6 +206,7 @@ func (p *portalProxy) checkVcsToken(c echo.Context) error {
 		Guid: tr.Guid,
 		Name: tr.Name,
 		Valid: valid,
+		InvalidReason: reason,
 	}
 
 	return c.JSON(http.StatusOK, tokenValid)
@@ -255,8 +260,8 @@ func (p *portalProxy) autoRegisterCodeEngineVcs(c echo.Context, hceGuid string) 
 	return nil
 }
 
-// _checkVcsToken - make an authenticated request against the Vcs to check if the Token is working
-func _checkVcsToken(vr *vcs.VcsRecord, tr *vcstokens.VcsTokenRecord) (bool, error) {
+// _checkVcsToken - make an authenticated request against the Vcs to check if the Token is working and has the required scopes
+func _checkVcsToken(vr *vcs.VcsRecord, tr *vcstokens.VcsTokenRecord) (bool, string, error) {
 	var client http.Client
 	if vr.SkipSslValidation {
 		client = httpClientSkipSSL
@@ -269,7 +274,7 @@ func _checkVcsToken(vr *vcs.VcsRecord, tr *vcstokens.VcsTokenRecord) (bool, erro
 
 	req, err := http.NewRequest(http.MethodGet, checkUrl, nil)
 	if err != nil {
-		return false, err
+		return false, "Failed to create the check request", err
 	}
 
 	// Add the appropriate Authorization header
@@ -284,8 +289,46 @@ func _checkVcsToken(vr *vcs.VcsRecord, tr *vcstokens.VcsTokenRecord) (bool, erro
 	// Do the request
 	res, err := client.Do(req)
 	if err != nil {
-		return false, err
+		return false, "Failed to contact the VCS to make verify the token", err
 	}
 
-	return res.StatusCode == http.StatusOK, nil
+	valid := res.StatusCode == http.StatusOK
+
+	if !valid {
+		if res.StatusCode == 401 {
+			return valid, "This token is not valid", nil
+		}
+		return valid, fmt.Sprintf("VCS responded with non-OK status code: %d", res.StatusCode), nil
+	}
+
+	// Get a map of all the scopes for the token
+	// Ensure we check individual scopes for an exact match to avoid substring matches such as:
+	// "admin:repo_hook" would also substring match "repo"
+	scopesMap := make(map[string]bool)
+	for _, v := range strings.Split(res.Header.Get("X-Oauth-Scopes"), ", ") {
+		scopesMap[v] = true
+	}
+
+	var missingScopes []string
+	for _, requiredScope := range GITHUB_REQUIRED_SCOPES {
+		if !scopesMap[requiredScope] {
+			valid = false
+			missingScopes = append(missingScopes, "'" + requiredScope + "'")
+		}
+	}
+
+	if valid {
+		return valid, "", nil
+	}
+
+	var missingScopesString string
+	if len(missingScopes) == 1 {
+		missingScopesString = "This token lacks the required scope " + missingScopes[0]
+	} else {
+		missingScopesString = "This token lacks the following required scopes: ["
+		missingScopesString += strings.Join(missingScopes, ", ")
+		missingScopesString += "]"
+	}
+
+	return valid, missingScopesString, nil
 }
