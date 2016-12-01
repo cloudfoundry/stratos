@@ -112,30 +112,22 @@
     }
   }
 
-  /**
-   * @namespace helion.framework.widgets.detailView
-   * @memberof helion.framework.widgets
-   * @name DetailViewController
-   * @constructor
-   * @param {object} context - the context for the detail view
-   * @property {object} context - the context for the detail view
-   * @param {object} content - the configuration for the content to place inside the detail view
-   * @property {object} content - the configuration for the content to place inside the detail view
-   */
   DetailViewController.$inject = [
     '$scope',
-    '$sce',
     'context',
     'content'
   ];
 
-  function DetailViewController($scope, $sce, context, content) {
+  /**
+   * @name DetailViewController
+   * @param {object} $scope - the $scope service
+   * @param {object} context - the context for the detail view
+   * @param {object} content - the configuration for the content to place inside the detail view
+   */
+  function DetailViewController($scope, context, content) {
     this.context = context;
     this.content = content;
-
-    this.getTemplateHtml = function () {
-      return $sce.trustAsHtml(content.template);
-    };
+    this.$scope = $scope;
   }
 
   detailViewTemplate.$inject = [
@@ -153,12 +145,16 @@
   function detailViewTemplate($compile) {
     return {
       scope: {
+        detailViewCtrl: '=',
         template: '@'
       },
       link: function (scope, element) {
         scope.$watch('template', function (value) {
+          // Forward context into the compile scope to simplify templates
+          scope.detailViewCtrl.$scope.context = scope.detailViewCtrl.context;
+
           element.html(value);
-          $compile(element.contents())(scope);
+          $compile(element.contents())(scope.detailViewCtrl.$scope);
         });
       }
     };
