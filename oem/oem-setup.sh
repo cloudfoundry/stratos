@@ -16,7 +16,7 @@ reset=`tput sgr0`
 #  exit 1
 #fi
 
-BRAND_FOLDER=examples/suse
+BRAND_FOLDER=brands/suse
 DEST_FOLDER=../dist
 BASE_CONSOLE_IMAGE=stackato/hsc-console:latest
 
@@ -114,7 +114,7 @@ else
   echo "${orange}No stylesheet supplied${reset}"
 fi
 
-echo "@import \"../scss/index.scss\";" >> ./tmp/index.scss
+echo "@import \"../dist/scss/index.scss\";" >> ./tmp/index.scss
 
 gulp oem
 cp ./tmp/index.css ${DEST_FOLDER}

@@ -23,17 +23,17 @@
   var importRegEx = /^@import ["'](.*)["']/i;
   var importSplitRegEx = /["'](.*)["']/i;
 
-  function findFile(base, importFile) {
-    var outName = index + '_' + path.basename(importFile);
+  function findFile(seen, base, importFile) {
     var file = path.resolve(base, importFile);
-    index = index + 1;
+    var partial = false;
+    var outName = path.basename(importFile);
     if (path.extname(file) !== '.scss') {
       file = file + '.scss';
       outName = outName + '.scss';
     }
     if (!fs.existsSync(file)) {
       file = path.join(path.dirname(file), '_' + path.basename(file));
-      outName = '_' + outName;
+      partial = true; 
       if (!fs.existsSync(file)) {
         throw new gutil.PluginError({
           plugin: 'oem',
@@ -41,13 +41,30 @@
         });
       }
     }
-    return {
-      file: file,
-      outName: outName
-    };
+
+    if (seen[file]) {
+      return {
+        outName: seen[file],
+        done: true
+      };
+    } else {
+      if (partial) {
+        outName = '_' + index + '_' + outName;
+      } else {
+        outName = index + '_' + outName;
+      }
+      index = index + 1;
+      seen[file] = outName;
+      return {
+        file: file,
+        outName: outName,
+        partial: partial,
+        done: false
+      };
+    }
   }
 
-  function processFile(scssFile, outputFile) {
+  function processFile(seen, scssFile, outputFile) {
     var outputFolder = path.dirname(outputFile);
     fs.writeFileSync(outputFile, '', 'utf8');
     var splitImport = false;
@@ -64,9 +81,11 @@
       if (found && found.length > 1) {
         splitImport = tline.indexOf(';') === -1;
         var importFile = found[1];
-        var meta = findFile(base, importFile);
+        var meta = findFile(seen, base, importFile);
         fs.appendFileSync(outputFile, '@import \"' + meta.outName + '\";' + endOfLine);
-        processFile(meta.file, path.join(outputFolder, meta.outName));
+        if (!meta.done) {
+          processFile(seen, meta.file, path.join(outputFolder, meta.outName));
+        }
       } else {
         if (!(i === lines.length - 1 && tline.length === 0)) {
           fs.appendFileSync(outputFile, line.toString() + endOfLine);
@@ -79,13 +98,21 @@
     del(paths.oem + 'scss/*', {force: true}, next);
   });
 
-  gulp.task('oem', ['oem:clean'], function (done) {
-    var file = paths.src + 'index.scss';
-    var outputFile = paths.oem + 'scss/index.scss';
+  // Copy files that will be needed at OEM time
+  gulp.task('oem:files', function () {
+    return gulp
+      .src([
+        paths.src + 'index.html',
+        paths.dist + 'stackato-config.js'
+      ])
+      .pipe(gulp.dest(paths.oem + 'dist'));
+  });
+
+  gulp.task('oem', ['oem:clean', 'oem:files'], function (done) {
+    var file = paths.src + 'index_oem.scss';
+    var outputFile = paths.oem + 'dist/scss/index.scss';
     fsx.ensureDirSync(path.dirname(outputFile));
-    // Start with an empty output file
-    fs.writeFileSync(outputFile, '', 'utf8');
-    processFile(file, outputFile);
+    processFile({}, file, outputFile);
     done();
   });
 

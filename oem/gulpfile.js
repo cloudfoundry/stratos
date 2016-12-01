@@ -6,6 +6,7 @@
   var gulpif = require('gulp-if');
   var plumber = require('gulp-plumber');
   var sass = require('gulp-sass');
+  var autoprefixer = require('gulp-autoprefixer');
   var usePlumber = true;
   var paths = {
     scss: './tmp/',
@@ -22,7 +23,7 @@
         }
       })))
       .pipe(sass())
-      //.pipe(autoprefixer({browsers: ['last 2 versions'], cascade: false}))
+      .pipe(autoprefixer({browsers: ['last 2 versions'], cascade: false}))
       //.pipe(rename(config.projectName + '.css'))
       .pipe(gulp.dest(paths.dist));
   });

@@ -10,6 +10,7 @@
   var gulp = require('gulp');
   var gulpif = require('gulp-if');
   var gulpinject = require('gulp-inject');
+  var gulpreplace = require('gulp-replace');
   var plumber = require('gulp-plumber');
   var rename = require('gulp-rename');
   var runSequence = require('run-sequence');
@@ -39,6 +40,9 @@
   var scssFiles = config.scssFiles;
   var cssFiles = config.cssFiles;
   var partials = config.partials;
+
+  // Default OEM Config
+  var oemConfig = require('../oem/brands/hpe/oem_config.json');
 
   var usePlumber = true;
 
@@ -207,6 +211,7 @@
       .src(paths.dist + 'index.html')
       .pipe(wiredep(config.bower))
       .pipe(gulpinject(sources, {relative: true}))
+      .pipe(gulpreplace('@@PRODUCT_NAME@@', oemConfig.PRODUCT_NAME))
       .pipe(concat.header())
       .pipe(gulp.dest(paths.dist));
   });
