@@ -3,30 +3,31 @@
 
 $applications-msg-height: 50px;
 
-.applications-header {
-  font-size: $hpe-unit-space;
-
-  .applications-count {
-    word-spacing: -2px;
-    font-size: $hpe-unit-space - $hpe-unit-space / 4;
-    padding-left: $hpe-unit-space / 4;
-    display: inline;
-  }
-
-  .bounce-spinner-sm {
-    margin-left: $hpe-unit-space;
-  }
+.application-wall-header {
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.application-actions {
-  display:flex;
-  flex-direction: row;
+.application-header-centre {
+  flex-grow: 1;
+
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
 
-
+  .form-group.search-field {
+    height: 40px;
+    display: flex;
+    margin-top: -1px;
+    align-items: center;
+    input {
+      margin-bottom: 0;
+    }
+  }
   .view-buttons {
 
     margin-right: 8px;
+    margin-left: 8px;
     button:focus {
       outline: none;
     }
@@ -46,8 +47,19 @@ $applications-msg-height: 50px;
   }
 }
 
-.app-sorting {
-  width: 100%;
+.applications-header {
+  font-size: $hpe-unit-space;
+
+  .applications-count {
+    word-spacing: -2px;
+    font-size: $hpe-unit-space - $hpe-unit-space / 4;
+    padding-left: $hpe-unit-space / 4;
+    display: inline;
+  }
+
+  .bounce-spinner-sm {
+    margin-left: $hpe-unit-space;
+  }
 }
 
 .applications-filter {
@@ -78,8 +90,7 @@ $applications-msg-height: 50px;
 .applications-empty, .console-error-block {
   clear: both;
   text-align: center;
-  padding: $hpe-unit-space*2 0;
-  width: 70%;
+  padding: $hpe-unit-space*2 16px;
   margin: auto;
 
   .applications-msg, .applications-cta {

@@ -203,24 +203,32 @@
     /**
      * @function resetPagination
      * @description reset application wall pagination plan
+     * @param {boolean=} fromCache - reset apps + pagination using cached applications instead of reaching out to portal
      * @returns {object} promise object
      * @public
      */
-    resetPagination: function () {
-      return this._listAllApps();
+    resetPagination: function (fromCache) {
+      return this._listAllApps(fromCache);
     },
 
     /**
      * @function _listAllApps
      * @description list all applications
+     * @param {boolean=} fromCache - reset apps + pagination using cached applications instead of reaching out to portal
      * @returns {object} promise object
      * @private
      */
-    _listAllApps: function () {
+    _listAllApps: function (fromCache) {
       var that = this;
-      this.bufferedApplications = [];
 
-      return this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis())
+      var loadPromise;
+      if (fromCache) {
+        loadPromise = that.$q.resolve();
+      } else {
+        this.bufferedApplications = [];
+        loadPromise = this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis());
+      }
+      return loadPromise
         .then(_.bind(this._onListAllAppsSuccess, this))
         .then(function () {
           if (_.isMatch(that.filterParams, {orgGuid: 'all', spaceGuid: 'all'})) {
@@ -245,6 +253,9 @@
         .then(function () {
           if (that.filterParams.cnsiGuid !== 'all') {
             that.filterByCluster(that.filterParams.cnsiGuid);
+          }
+          if (that.filterParams.text) {
+            that.filterByText(that.filterParams.text);
           }
         })
         .catch(_.bind(this._onListAllAppsFailure, this));
@@ -351,7 +362,7 @@
      * @param {number} page The loading page number against API. This is not the displaying page number.
      * @param {number} pageSize The loading page size against API. This is not the displaying page side number.
      * @param {Array} cnsis An array of cluster IDs to load applications.
-     * @returns {object} promise object
+     * @returns {object} promise object - contains array containing ALL applications
      * @private
      */
     _listAllAppsWithPage: function (page, pageSize, cnsis) {
@@ -464,8 +475,17 @@
      * @public
      */
     filterByCluster: function (clusterId) {
-      var apps = _.clone(this.cachedApplications);
-      this.filteredApplications = _.filter(apps, ['clusterId', clusterId]);
+      this.filteredApplications = _.filter(this.cachedApplications, ['clusterId', clusterId]);
+      this.hasApps = this.filteredApplications.length > 0;
+    },
+
+    filterByText: function (text) {
+      text = text.toLowerCase();
+      this.filteredApplications = _.filter(this.cachedApplications, function (app) {
+        if (app.entity.name.toLowerCase().indexOf(text) > -1) {
+          return app;
+        }
+      });
       this.hasApps = this.filteredApplications.length > 0;
     },
 
