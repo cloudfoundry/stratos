@@ -8,7 +8,7 @@
 <div ng-if="!applicationDeliveryPipelineCtrl.isDeleting && applicationDeliveryPipelineCtrl.project">
   <div ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()" class="alert alert-warning alert-card">
     <p translate>
-      Your Helion Code Engine pipeline is using a legacy OAuth token. While your pipeline should continue to function normally, we suggest that you update it to use a Personal Access Token.
+      Your Helion Code Engine pipeline is using a legacy OAuth token. While your pipeline should continue to function normally, we suggest that you <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a Personal Access Token</a>.
     </p>
   </div>
   <div class="card panel panel-default">
@@ -33,7 +33,8 @@
           </dd>
           <dt translate>token</dt>
           <dd>
-            {{ applicationDeliveryPipelineCtrl.getTokenName() | uppercase}}
+            <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">{{ applicationDeliveryPipelineCtrl.getTokenName() | uppercase}} </a>
+            <span class="legacy-token helion-icon helion-icon-Alert_pressed" ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()"></span>
           </dd>
           <dt translate>repo</dt>
           <dd>

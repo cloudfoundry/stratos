@@ -6,20 +6,22 @@
       and providing the given token string here.
     </p>
     <p translate>
-      Personal access tokens work like traditional OAuth tokens but do not expire (unless you manually revoke them).
+      Personal access tokens work like traditional OAuth tokens. They are valid until you manually revoke or regenerate them.
       These tokens allow Stackato to access GitHub on your behalf.
     </p>
     <p class="italic" translate>
       Note: if you have revoked or regenerated a token, you should delete it and register a new token.
     </p>
   </div>
+
   <div ng-show="asyncTaskDialogCtrl.context.tokens.length"
        class="endpoints-table">
-    <table class="table table-actionable"
+    <table class="tokens-list-table table table-actionable"
            st-table="asyncTaskDialogCtrl.context.stTableTokens"
            st-safe-src="asyncTaskDialogCtrl.context.tokens">
       <thead>
       <tr>
+        <th class="chooser-radio" ng-if="asyncTaskDialogCtrl.context.chooserMode"></th>
         <th translate st-sort="token.name" st-sort-default="true">Name</th>
         <th translate st-sort="valid">Connection</th>
         <th translate>Token</th>
@@ -27,16 +29,18 @@
       </tr>
       </thead>
       <tbody>
-      <tr ng-repeat="vcsToken in asyncTaskDialogCtrl.context.stTableTokens track by vcsToken.token.guid"
-          show-table-inline-message="{{ vcsToken.error ? vcsToken.error.message : '' }}"
-          table-inline-status="{{vcsToken.error.status}}">
-        <td>{{ vcsToken.token.name }}</td>
-        <td ng-switch="asyncTaskDialogCtrl.context.isTokenValid(vcsToken)">
-            <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
-                  ng-switch-when="true"></span>
-          <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
-                ng-switch-when="false"></span>
+      <tr class="vertical-centered" ng-repeat-start="vcsToken in asyncTaskDialogCtrl.context.stTableTokens track by vcsToken.token.guid"
+          >
+        <td class="chooser-radio"  ng-if="asyncTaskDialogCtrl.context.chooserMode">
+          <radio-input ng-model="asyncTaskDialogCtrl.context.chosenToken"
+                       input-value="vcsToken.token.guid"
+                       input-disabled="!asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"
+                       ng-required="true"
+          ></radio-input>
         </td>
+        <td>{{ vcsToken.token.name }}</td>
+        <td class="helion-icon helion-icon-lg helion-icon-Active_L text-primary" ng-if="asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
+        <td class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger" ng-if="!asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
         <td class="token-value">{{ vcsToken.token.token }}</td>
         <td>
           <actions-menu actions="asyncTaskDialogCtrl.context.actions"
@@ -44,7 +48,26 @@
                         menu-position="actions-menu-right" enable-button-mode="true"></actions-menu>
         </td>
       </tr>
+      <tr ng-repeat-end table-inline-message
+          ng-if="!asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"
+          status="error"
+          col-span="{{ asyncTaskDialogCtrl.context.chooserMode ? 5 : 4 }}"
+          message="{{ asyncTaskDialogCtrl.context.invalidReason(vcsToken) }}"></tr>
+      <tr class="vertical-centered add-new-token-tr">
+        <td colspan="{{ asyncTaskDialogCtrl.context.chooserMode ? 5 : 4 }}" style="text-align: left">
+          <div class="add-new-token"
+             ng-click="asyncTaskDialogCtrl.context.registerNewToken()">
+            <span class="add-new-token-icon" ng-class="{'add-new-token-icon-chooser': asyncTaskDialogCtrl.context.chooserMode}">⊕</span>
+          <span translate>Add New Token</span>
+        </div></td>
+      </tr>
       </tbody>
     </table>
   </div>
+  <div ng-if="!asyncTaskDialogCtrl.context.tokens.length" class="add-new-token"
+    ng-click="asyncTaskDialogCtrl.context.registerNewToken()">
+    <span class="add-new-token-icon" ng-class="{'add-new-token-icon-chooser': asyncTaskDialogCtrl.context.chooserMode}">⊕</span>
+    <span translate>Add New Token</span>
+  </div>
+
 </div>

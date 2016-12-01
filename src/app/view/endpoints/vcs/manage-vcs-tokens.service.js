@@ -12,7 +12,8 @@
     'helion.framework.widgets.dialog.confirm',
     'app.view.notificationsService',
     'app.view.vcs.registerVcsToken',
-    'app.view.vcs.editVcsToken'
+    'app.view.vcs.editVcsToken',
+    '$timeout'
   ];
 
   /**
@@ -24,19 +25,19 @@
    * @property {function} add Opens slide out containing registration form
    * @constructor
    */
-  function ManageVcsTokensService($q, modelManager, asyncTaskDialog, confirmDialog, notificationsService, registerVcsToken, editVcsToken) {
+  function ManageVcsTokensService($q, modelManager, asyncTaskDialog, confirmDialog, notificationsService, registerVcsToken, editVcsToken, $timeout) {
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     var tokenActions = [];
     var context = {
       tokens: []
     };
 
+    // Force Smart Table watch to trigger by updating the context.tokens reference
     context.triggerWatch = function () {
       context.tokens = _.clone(context.tokens);
     };
 
     context.refreshTokens = function (fetchFresh) {
-      // context.tokens.length = 0;
       var promise;
       if (fetchFresh) {
         promise = vcsModel.listVcsTokens();
@@ -89,10 +90,15 @@
       });
     }
 
-    context.isTokenValid = function isTokenValid(token) {
-      token.valid = vcsModel.validTokens[token.token.guid];
-      return token.valid;
+    context.isTokenValid = function (token) {
+      token.valid = vcsModel.invalidTokens[token.token.guid];
+      return !vcsModel.invalidTokens[token.token.guid];
     };
+
+    context.invalidReason = function (token) {
+      return vcsModel.invalidTokens[token.token.guid] || '';
+    };
+
     context.actions = tokenActions;
     context.disableAsyncIndicator = true;
 
@@ -113,34 +119,49 @@
        * @name manage
        * @description Opens a slide-out to manage VCS tokens
        * @param {object} vcs - the vcs for which to manage tokens
+       * @param {boolean} chooserMode - whether the manager is in chooser mode (with radio buttons to select a token)
        * @returns {promise}
        */
-      manage: function (vcs) {
+      manage: function (vcs, chooserMode, tokenGuid) {
         context.vcs = vcs;
+        context.chooserMode = chooserMode;
+        context.chosenToken = tokenGuid;
+
+        context.registerNewToken = function () {
+          return registerVcsToken.registerToken(vcs).then(function () {
+            // Update tokens (need to fetch)
+            return context.refreshTokens(true).then(function () {
+              // Keep the dialog open
+              return $q.reject('Keep this dialog open!');
+            });
+          });
+        };
+
+        var title, cancelText;
+        cancelText = 'Done';
+        if (chooserMode) {
+          title = 'Choose a GitHub Personal Access Token';
+          context.invalidityCheck = function () {
+            return !context.chosenToken;
+          };
+        } else {
+          title = 'Manage GitHub Personal Access Tokens';
+        }
 
         // Refresh before fetching
         return context.refreshTokens(true).then(function () {
 
           return asyncTaskDialog(
             {
-              title: gettext('Manage GitHub Personal Access Tokens'),
+              title: gettext(title),
               templateUrl: 'app/view/endpoints/vcs/manage-vcs-tokens.html',
               class: 'detail-view',
               buttonTitles: {
-                submit: gettext('Register New Token'),
-                cancel: gettext('Done')
-              }
+                cancel: gettext(cancelText)
+              },
+              noSubmit: true
             },
-            context,
-            function () {
-              return registerVcsToken.registerToken(vcs).then(function () {
-                // Update tokens (need to fetch)
-                return context.refreshTokens(true).then(function () {
-                  // Keep the dialog open
-                  return $q.reject('Keep this dialog open!');
-                });
-              });
-            }
+            context
           ).result;
         });
       }

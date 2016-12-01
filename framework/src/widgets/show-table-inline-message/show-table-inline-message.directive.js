@@ -23,27 +23,52 @@
     };
 
     function link(scope, element, attrs) {
-      var status = attrs.tableInlineStatus ? attrs.tableInlineStatus : 'warning';
-      var elem = angular.element('<tr table-inline-message status="' + status + '" message="' + attrs.showTableInlineMessage + '"></tr>');
+
+      var elem = angular.element('<tr table-inline-message></tr>');
+      setMessage(attrs.showTableInlineMessage, true);
+      setStatus(attrs.tableInlineStatus, true);
+      setColSpan(attrs.inlineMessageColspan, true);
       element.after(elem);
+
       $compile(elem)(scope);
 
-      showHide(attrs.showTableInlineMessage);
+      // This is the proper way of observing attributes from a link function
+      attrs.$observe('showTableInlineMessage', setMessage);
+      attrs.$observe('tableInlineStatus', setStatus);
+      attrs.$observe('inlineMessageColspan', setColSpan);
 
-      scope.$watch(
-        function () {
-          return attrs.showTableInlineMessage;
-        },
-        showHide, true
-      );
-
-      function showHide(message) {
-        if (message) {
-          elem.removeClass('hide-message');
-        } else {
-          elem.addClass('hide-message');
+      function setMessage(message, skipCompile) {
+        if (message === elem.attr('message')) {
+          return;
+        }
+        elem[message ? 'removeClass' : 'addClass']('hide-message');
+        elem.attr('message', message);
+        if (!skipCompile) {
+          $compile(elem)(scope);
         }
       }
+
+      function setStatus(newStatus, skipCompile) {
+        if (newStatus === elem.attr('status')) {
+          return;
+        }
+        elem.attr('status', newStatus || 'warning');
+        if (!skipCompile) {
+          $compile(elem)(scope);
+        }
+      }
+
+      function setColSpan(newColSpan, skipCompile) {
+        var colSpan = newColSpan || '100';
+        if (colSpan === elem.attr('colSpan')) {
+          return;
+        }
+        elem.attr('colSpan', colSpan);
+        if (!skipCompile) {
+          $compile(elem)(scope);
+        }
+      }
+
     }
   }
 

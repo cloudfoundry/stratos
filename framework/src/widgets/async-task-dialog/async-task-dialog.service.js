@@ -60,6 +60,8 @@
       };
 
       context.submitCommit = !!config.submitCommit;
+      context.noCancel = !!config.noCancel;
+      context.noSubmit = !!config.noSubmit;
 
       if (angular.isFunction(invalidityCheck)) {
         context.invalidityCheck = invalidityCheck;

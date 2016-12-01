@@ -51,9 +51,10 @@
     this.apiManager = apiManager;
     this.vcsClients = null;
     this.supportedVcsInstances = [];
-    this.validTokens = {};
+    this.invalidTokens = {};
     this.vcsTokens = [];
     this.vcsTokensFetched = false;
+    this.vcsClientsFetched = false;
   }
 
   angular.extend(VcsModel.prototype, {
@@ -70,13 +71,13 @@
       return this.apiManager.retrieve('cloud-foundry.api.Vcs')
         .listVcsClients()
         .then(function (res) {
-
           // Filter out unsupported clients
           var supported = _.filter(res.data, function (vcs) {
             return SUPPORTED_VCS_TYPES[that.expandVcsType(vcs)];
           });
 
           that.vcsClients = supported;
+          that.vcsClientsFetched = true;
           return supported;
         });
     },
@@ -92,13 +93,13 @@
       var that = this;
       return this.apiManager.retrieve('cloud-foundry.api.Vcs')
         .checkVcsToken(tokenGuid).then(function (res) {
-          that._cacheValid(tokenGuid, res.data.valid === true);
+          that._cacheInvalid(tokenGuid, res.data.valid === false && res.data.invalid_reason);
           return res.data;
         });
     },
 
-    _cacheValid: function (tokenGuid, valid) {
-      this.validTokens[tokenGuid] = valid;
+    _cacheInvalid: function (tokenGuid, valid) {
+      this.invalidTokens[tokenGuid] = valid;
     },
 
     _tokenFinder: function (tokenGuid) {
@@ -113,13 +114,13 @@
 
     checkTokensValidity: function () {
 
-      // Cleanup cached validity of stale tokens
-      for (var tokenGuid in this.validTokens) {
-        if (!this.validTokens.hasOwnProperty(tokenGuid)) {
+      // Cleanup cached invalidity of stale tokens
+      for (var tokenGuid in this.invalidTokens) {
+        if (!this.invalidTokens.hasOwnProperty(tokenGuid)) {
           continue;
         }
         if (!this.getToken(tokenGuid)) {
-          delete this.validTokens[tokenGuid];
+          delete this.invalidTokens[tokenGuid];
         }
       }
 

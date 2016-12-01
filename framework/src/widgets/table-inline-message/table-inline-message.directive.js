@@ -21,7 +21,8 @@
     return {
       bindToController: {
         message: '@',
-        status: '@'
+        status: '@',
+        colSpan: '@?'
       },
       controller: function () {
         this.statusClass = 'hpe-popover-alert-' + (this.status ? this.status : 'warning');

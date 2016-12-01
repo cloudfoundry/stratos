@@ -1,21 +1,30 @@
 table {
   color: $gray-darker;
   letter-spacing: $hpe-letter-spacing;
+  tbody > tr.vertical-centered > td {
+    vertical-align: middle;
+  }
 
   thead > tr {
+    th {
+      font-weight: $hpe-font-weight-semibold;
+      text-transform: uppercase;
+    }
+    th:hover {
+      cursor: default;
+    }
+    th[st-sort]:hover {
+      cursor: pointer;
+    }
     th.st-sort-ascent, th.st-sort-descent {
-      border-bottom: 2px solid $hpe-primary;
+      border-bottom: 2px solid $gray-light;
+      span {
+        padding-bottom: 9px;
+        border-bottom: 3px solid $brand-primary;
+      }
     }
   }
 
-  th {
-    font-weight: $hpe-font-weight-semibold;
-    text-transform: uppercase;
-  }
-
-  tr.vertical-centered > td {
-    vertical-align: middle;
-  }
 }
 
 table.table {

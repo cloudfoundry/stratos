@@ -15,6 +15,10 @@
 
       dd {
         text-transform: none;
+        .legacy-token {
+          color: $status-warning;
+          margin-left: $padding-xs-horizontal;
+        }
       }
     }
   }

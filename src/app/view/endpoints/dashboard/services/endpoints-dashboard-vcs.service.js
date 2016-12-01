@@ -88,9 +88,9 @@
         var anyUnknown = false;
         for (var i = 0; i < filtered.length; i++) {
           var tokenGuid = filtered[i].token.guid;
-          allValid = allValid && !!vcsModel.validTokens[tokenGuid];
-          allInvalid = allInvalid && !vcsModel.validTokens[tokenGuid];
-          anyUnknown = anyUnknown || angular.isUndefined(vcsModel.validTokens[tokenGuid]);
+          allValid = allValid && !vcsModel.invalidTokens[tokenGuid];
+          allInvalid = allInvalid && !!vcsModel.invalidTokens[tokenGuid];
+          anyUnknown = anyUnknown || angular.isUndefined(vcsModel.invalidTokens[tokenGuid]);
         }
 
         if (allValid) {

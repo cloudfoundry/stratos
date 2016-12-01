@@ -24,6 +24,7 @@
   ApplicationDeliveryPipelineController.$inject = [
     'app.event.eventService',
     'app.model.modelManager',
+    'app.view.vcs.manageVcsTokens',
     'helion.framework.widgets.dialog.confirm',
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
@@ -33,7 +34,8 @@
     '$stateParams',
     '$scope',
     '$q',
-    '$state'
+    '$state',
+    '$log'
   ];
 
   /**
@@ -41,6 +43,7 @@
    * @constructor
    * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
@@ -50,11 +53,13 @@
    * @param {object} $scope  - the Angular $scope
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
+   * @param {object} $log - the Angular $log service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, PAT_DELIMITER,
-                                                 $interpolate, $stateParams, $scope, $q, $state) {
+  function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog,
+                                                 addNotificationService, postDeployActionService, utils, PAT_DELIMITER,
+                                                 $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
     this.model = modelManager.retrieve('cloud-foundry.model.application');
@@ -69,8 +74,10 @@
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
     this.eventService = eventService;
+    this.vcsTokenManager = vcsTokenManager;
     this.$interpolate = $interpolate;
     this.$scope = $scope;
+    this.$log = $log;
     this.confirmDialog = confirmDialog;
     this.addNotificationService = addNotificationService;
     this.postDeployActionService = postDeployActionService;
@@ -100,12 +107,17 @@
       that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
       that.hceServices.fetching = false;
 
-      // List tokens if needed
+      var promises = [];
+      // List VCS tokens if needed
       if (!that.vcsModel.vcsTokensFetched) {
-        return that.vcsModel.listVcsTokens();
+        promises.push(that.vcsModel.listVcsTokens());
+      }
+      // List VCS clients if needed
+      if (!that.vcsModel.vcsClientsFetched) {
+        promises.push(that.vcsModel.listVcsClients());
       }
 
-      return $q.resolve();
+      return $q.all(promises);
     }
 
     utils.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
@@ -287,6 +299,25 @@
         return DELETED_TOKEN;
       }
       return tokenInUse.token.name;
+    },
+
+    manageVcsTokens: function () {
+      var vi = this.hceModel.data.vcsInstance;
+      var vcs = _.find(this.vcsModel.vcsClients, function (vc) {
+        return vc.browse_url === vi.browse_url && vc.api_url === vi.api_url && vc.label === vi.label;
+      });
+      if (vcs) {
+        var patGuid = this._getPatGuid();
+        return this.vcsTokenManager.manage(vcs, true, patGuid).then(function (newTokenGuid) {
+          if (newTokenGuid !== patGuid) {
+            console.log('User picked a new token: ' + newTokenGuid + ' !== ' + patGuid);
+          } else {
+            console.log('User token unchanged: ' + newTokenGuid);
+          }
+        });
+      } else {
+        this.$log.error('Cannot find vcs to manage tokens', this.hceModel.data.vcsInstance);
+      }
     },
 
     addNotificationTarget: function () {

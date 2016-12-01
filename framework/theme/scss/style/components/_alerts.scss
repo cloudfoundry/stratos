@@ -50,7 +50,7 @@
   @include hpe-box-shadow-small();
   margin-bottom: 22px;
   &.alert-warning {
-    @include hpe-alert($white, $helion-icon-Alert, $white, $helion-icon-Alert_pressed, $dove-gray);
+    @include hpe-alert($white, $helion-icon-Alert_pressed, $white, $helion-icon-Alert_pressed, $dove-gray);
     &:before {
       color: $state-warning-bg;
     }

@@ -1,3 +1,4 @@
+$border: 1px solid $gray-light;
 .manage-tokens {
   .italic {
     font-style: italic;
@@ -6,6 +7,47 @@
   .token-value {
     letter-spacing: 0.05em;
   }
+
+  .add-new-token {
+    color: $brand-primary;
+    display: flex;
+    align-items: center;
+    text-align: start;
+    font-weight: 600;
+    &:hover {
+      cursor: pointer;
+      color: #01765b;
+    }
+    .add-new-token-icon {
+      font-size: 30px;
+      margin-right: 10px;
+    }
+    .add-new-token-icon-chooser {
+      margin-right: 28px;
+    }
+  }
+
+  .tokens-list-table {
+    .chooser-radio {
+      width: 70px;
+    }
+
+    &.table {
+      tr {
+        border: $border;
+      }
+      tr[table-inline-message] {
+        border-top-style: none;
+        border-bottom-style: none;
+      }
+      tr.add-new-token-tr {
+        border: 1px dashed $gray-light;
+        border-top-style: none;
+      }
+    }
+
+  }
+
 }
 
 .register-token {
