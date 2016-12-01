@@ -7,8 +7,19 @@
 </div>
 <div ng-if="!applicationDeliveryPipelineCtrl.isDeleting && applicationDeliveryPipelineCtrl.project">
   <div ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()" class="alert alert-warning alert-card">
+    <h4>Legacy Token Detected</h4>
     <p translate>
-      Your Helion Code Engine pipeline is using a legacy OAuth token. While your pipeline should continue to function normally, we suggest that you <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a Personal Access Token</a>.
+      Your Helion Code Engine pipeline is using a legacy OAuth token.
+      While your pipeline should continue to function normally, we suggest that you
+      <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a Personal Access Token</a>.
+    </p>
+  </div>
+  <div ng-if="applicationDeliveryPipelineCtrl.isTokenDeleted()" class="alert alert-warning alert-card">
+    <h4>Token Deleted</h4>
+    <p translate>
+      Your Helion Code Engine pipeline is using a token that is longer available in the Stackato Console.
+      While your pipeline should continue to function normally, we suggest that you
+      <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a current Personal Access Token</a>.
     </p>
   </div>
   <div class="card panel panel-default">
@@ -34,7 +45,7 @@
           <dt translate>token</dt>
           <dd>
             <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">{{ applicationDeliveryPipelineCtrl.getTokenName() | uppercase}} </a>
-            <span class="legacy-token helion-icon helion-icon-Alert_pressed" ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()"></span>
+            <span class="legacy-token helion-icon helion-icon-Alert_pressed" ng-if="applicationDeliveryPipelineCtrl.isLegacyToken() || applicationDeliveryPipelineCtrl.isTokenDeleted()"></span>
           </dd>
           <dt translate>repo</dt>
           <dd>

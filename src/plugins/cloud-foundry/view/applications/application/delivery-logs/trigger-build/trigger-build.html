@@ -21,7 +21,7 @@
   </div>
 
   <!-- User has a github token -->
-  <div ng-if="detailViewCtrl.isAuthenticated" class="delivery-log-flex">
+  <div ng-if="!detailViewCtrl.tokenInvalid" class="delivery-log-flex">
 
     <!-- Commits are being fetched -->
     <div ng-if="detailViewCtrl.fetching || detailViewCtrl.triggering" class="message-box message-box-no-bg">

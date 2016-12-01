@@ -2,15 +2,19 @@
   <div class="manage-tokens-description">
     <p translate>
       You can connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}' by creating a GitHub
-      <a ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>
+      <a class="bold" ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>
       and providing the given token string here.
+    </p>
+    <p>
+      Make sure your token has following scopes:
+      <ul>
+        <li class="required-scope">repo</li>
+        <li class="required-scope">admin:repo_hook</li>
+      </ul>
     </p>
     <p translate>
       Personal access tokens work like traditional OAuth tokens. They are valid until you manually revoke or regenerate them.
       These tokens allow Stackato to access GitHub on your behalf.
-    </p>
-    <p class="italic" translate>
-      Note: if you have revoked or regenerated a token, you should delete it and register a new token.
     </p>
   </div>
 

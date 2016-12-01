@@ -1,7 +1,13 @@
 $border: 1px solid $gray-light;
 .manage-tokens {
-  .italic {
-    font-style: italic;
+
+  .bold {
+    font-weight: 600;
+  }
+
+  .required-scope {
+    font-family: "Source Code Pro", monospace;
+    font-size: 14px;
   }
 
   .token-value {

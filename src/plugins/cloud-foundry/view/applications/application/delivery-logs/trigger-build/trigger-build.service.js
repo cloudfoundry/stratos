@@ -89,7 +89,7 @@
           if (skipUpdate) {
             that.triggerError = true;
           } else {
-            that._updateAndBuild()
+            that._checkPatAndBuild()
               .catch(function () {
                 that.triggerError = true;
               })
@@ -113,7 +113,7 @@
 
     },
 
-    _updateAndBuild: function () {
+    _checkPatAndBuild: function () {
       var that = this;
 
       var patGuid = this._getPatGuid();
@@ -121,10 +121,7 @@
         return this.$q.reject('You must associate a valid PAT before triggering a build');
       }
 
-      return this.hceModel.updateProject(this.context.guid, patGuid, this.context.project.id, this.context.project)
-        .then(function () {
-          return that.build(true);
-        });
+      return that.build(true);
     },
 
     fetchCommits: function () {
