@@ -23,24 +23,6 @@ $applications-msg-height: 50px;
       margin-bottom: 0;
     }
   }
-}
-
-.applications-header {
-  font-size: $hpe-unit-space;
-
-  .applications-count {
-    word-spacing: -2px;
-    font-size: $hpe-unit-space - $hpe-unit-space / 4;
-    padding-left: $hpe-unit-space / 4;
-    display: inline;
-  }
-
-  .bounce-spinner-sm {
-    margin-left: $hpe-unit-space;
-  }
-}
-
-.application-header-centre {
   .view-buttons {
 
     margin-right: 8px;
@@ -61,6 +43,21 @@ $applications-msg-height: 50px;
     .btn-disabled {
       color: $actions-menu-item-disabled-fg;
     }
+  }
+}
+
+.applications-header {
+  font-size: $hpe-unit-space;
+
+  .applications-count {
+    word-spacing: -2px;
+    font-size: $hpe-unit-space - $hpe-unit-space / 4;
+    padding-left: $hpe-unit-space / 4;
+    display: inline;
+  }
+
+  .bounce-spinner-sm {
+    margin-left: $hpe-unit-space;
   }
 }
 
