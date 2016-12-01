@@ -32,8 +32,8 @@
     <button ng-if="!asyncTaskDialogCtrl.context.noSubmit"
             class="btn"
             ng-class="{
-                        'btn-primary': !asyncTaskDialogCtrl.context.submitCommit,
-                        'btn-commit': asyncTaskDialogCtrl.context.submitCommit
+                        'btn-primary': !asyncTaskDialogCtrl.context.submitCommit(),
+                        'btn-commit': asyncTaskDialogCtrl.context.submitCommit()
                       }"
             ng-click="asyncTaskDialogCtrl.invokeAction()"
             ng-disabled="asyncTaskDialogCtrl.disableSubmit()">

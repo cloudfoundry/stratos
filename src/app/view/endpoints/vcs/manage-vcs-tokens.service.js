@@ -134,11 +134,15 @@
           });
         };
 
-        var title;
+        var title, submitCommit;
         if (chooserMode) {
           title = 'Choose a GitHub Personal Access Token';
+          submitCommit = function () {
+            return context.chosenToken !== tokenGuid;
+          }
         } else {
           title = 'Manage GitHub Personal Access Tokens';
+          submitCommit = false;
         }
 
         // Refresh before fetching
@@ -152,7 +156,8 @@
               buttonTitles: {
                 submit: gettext('Done')
               },
-              noCancel: true
+              noCancel: true,
+              submitCommit: submitCommit
             },
             context,
             function (val) {

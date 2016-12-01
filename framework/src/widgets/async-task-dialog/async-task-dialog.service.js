@@ -59,7 +59,13 @@
         cancel: gettext(config.buttonTitles && config.buttonTitles.cancel) || gettext('Cancel')
       };
 
-      context.submitCommit = !!config.submitCommit;
+      if (_.isFunction(config.submitCommit)) {
+        context.submitCommit = config.submitCommit;
+      } else {
+        context.submitCommit = function() {
+          return !!config.submitCommit;
+        }
+      }
       context.noCancel = !!config.noCancel;
       context.noSubmit = !!config.noSubmit;
 
