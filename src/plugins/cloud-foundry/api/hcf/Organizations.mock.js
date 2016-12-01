@@ -2245,7 +2245,7 @@
                   },
                   'entity': {
                     'name': 'name-2294',
-                    'organization_guid': '5d99d1f5-daab-418d-9ef4-e2f7aa825a61',
+                    'organization_guid': guid,
                     'space_quota_definition_guid': null,
                     'allow_ssh': true,
                     'organization_url': '/v2/organizations/5d99d1f5-daab-418d-9ef4-e2f7aa825a61',
