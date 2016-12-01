@@ -1,5 +1,5 @@
-<div class="app-top-bar action-bar app-actions-bar panel-less">
-  <div class="applications-header font-semi-bold pull-left" translate>
+<div class="app-top-bar action-bar app-actions-bar panel-less application-wall-header">
+  <div class="applications-header font-semi-bold" translate>
     Applications
     <div class="applications-count" ng-if="applicationsListCtrl.ready">
       <span ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
@@ -12,8 +12,17 @@
 
     <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
   </div>
-  <div class="pull-right application-actions">
-    <div class="pull-left view-buttons">
+  <div class="application-header-centre">
+    <form>
+      <div class="form-group search-field" focusable-input>
+        <input type="text" class="form-control" id="applications-text" name="applications-text"
+               ng-model="applicationsListCtrl.filter.text"
+               ng-model-options='{ debounce: 100 }'
+               ng-change="applicationsListCtrl.setText()"
+               placeholder="{{'Type to search by name' | translate}}"/>
+      </div>
+    </form>
+    <div class="view-buttons">
       <button class="btn btn-link btn-border-less"
               ng-class="applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
               type="button" ng-click="applicationsListCtrl.goToGalleryView(true)">
@@ -25,6 +34,8 @@
         <div class="helion-icon helion-icon-lg helion-icon-r90 helion-icon-Divide_to_four"></div>
       </button>
     </div>
+  </div>
+  <div>
     <button class="btn btn-primary"
             ng-if="applicationsListCtrl.showAddApplicationButton()"
             ng-disabled="applicationsListCtrl.disableAddApplicationButton()"
@@ -67,7 +78,7 @@
           <div class="reset-link">
             <a class="btn-link"
                ng-click="applicationsListCtrl.resetFilter()"
-               ng-if="applicationsListCtrl.filter.cnsiGuid !== 'all'"
+               ng-if="applicationsListCtrl.filter.cnsiGuid !== 'all' || applicationsListCtrl.filter.text.length"
                translate>Reset</a>
           </div>
         </form>

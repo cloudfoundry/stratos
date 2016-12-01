@@ -431,7 +431,7 @@
     complexDeleteAppDialog: function (guids) {
       this.detailView(
         {
-          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/delete-app-workflow/delete-app-workflow-dialog.html',
+          template: '<delete-app-workflow guids="context.guids" close-dialog="$close" dismiss-dialog="$dismiss"></delete-app-workflow>',
           title: gettext('Delete App, Pipeline, and Selected Items')
         },
         {

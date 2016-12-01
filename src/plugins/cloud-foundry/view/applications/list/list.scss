@@ -2,6 +2,29 @@
 
 $applications-msg-height: 50px;
 
+.application-wall-header {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.application-header-centre {
+  flex-grow: 1;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  .form-group.search-field {
+    height: 40px;
+    display: flex;
+    margin-top: -1px;
+    align-items: center;
+    input {
+      margin-bottom: 0;
+    }
+  }
+}
+
 .applications-header {
   font-size: $hpe-unit-space;
 
@@ -17,10 +40,11 @@ $applications-msg-height: 50px;
   }
 }
 
-.application-actions {
+.application-header-centre {
   .view-buttons {
 
     margin-right: 8px;
+    margin-left: 8px;
     button:focus {
       outline: none;
     }
@@ -68,8 +92,7 @@ $applications-msg-height: 50px;
 .applications-empty, .console-error-block {
   clear: both;
   text-align: center;
-  padding: $hpe-unit-space*2 0;
-  width: 70%;
+  padding: $hpe-unit-space*2 16px;
   margin: auto;
 
   .applications-msg, .applications-cta {

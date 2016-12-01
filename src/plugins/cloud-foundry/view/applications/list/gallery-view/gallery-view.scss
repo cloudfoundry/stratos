@@ -31,6 +31,9 @@ $gallery-card-layout-steps: 4;
 }
 
 .app-gallery-card {
+  // Set a min-height to we don't see the pagination directive while the page loads
+  min-height: 190px;
+
   // Gives a heading of 60px with minimal changes
   .card.panel .panel-heading {
     color: $dove-gray2;
