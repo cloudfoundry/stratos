@@ -9,9 +9,9 @@
 
   function svgImage($http) {
     return {
-      restrict: 'A',
+      restrict: 'E',
       link: function (scope, element, attrs) {
-        $http.get(attrs.src).success(function (data) {
+        $http.get(attrs.src, {cache: true}).success(function (data) {
           var svg = angular.element(data);
           for (var i = svg.length - 1; i >= 0; i--) {
             if (svg[i].constructor.name === 'SVGSVGElement') {
