@@ -1,16 +1,15 @@
 {
   "PRODUCT_VERSION": "4.0",
-  "TERMS_OF_USE_HREF": "http://www.suse.com",
-  "PRIVACY_HREF": "http://www.suse.com",
+  "TERMS_OF_USE_HREF": "https://www.suse.com/company/legal/",
+  "PRIVACY_HREF": "",
   "PRODUCT_FAMILY_HREF": "http://www.suse.com",
   "COMPANY_HREF": "http://www.suse.com",
   "PRODUCT_CONSOLE": "SUSE Cloud Foundry Console",
   "CONSOLE": "Console",
   "PRODUCT_NAME": "SUSE Cloud Foundry",
   "COMPANY_NAME": "SUSE (a Micro Focus Company)",
-  "TERMS_OF_USE": "Terms of Use",
+  "TERMS_OF_USE": "Legal",
   "PRIVACY": "Privacy",
   "CODE_ENGINE": "SUSE Code Engine",
-  "CLOUD_FOUNDRY": "SUSE Cloud Foundry",
-  "ABOUT_PRODUCT_FAMILY_LOGO_HREF": ""
+  "CLOUD_FOUNDRY": "SUSE Cloud Foundry"
 }

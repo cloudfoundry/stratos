@@ -1,7 +1,8 @@
-/* eslint-disable angular/log,no-console,no-process-env */
+/* eslint-disable angular/log,no-console,no-process-env,angular/json-functions */
 (function () {
   'use strict';
 
+  var _ = require('lodash');
   var concat = require('gulp-concat-util');
   var del = require('delete');
   var eslint = require('gulp-eslint');
@@ -43,6 +44,9 @@
 
   // Default OEM Config
   var oemConfig = require('../oem/brands/hpe/oem_config.json');
+  var defaultConfig = require('../oem/config-defaults.json');
+  oemConfig = _.defaults(oemConfig, defaultConfig);
+  var OEM_CONFIG = 'OEM_CONFIG:' + JSON.stringify(oemConfig);
 
   var usePlumber = true;
 
@@ -122,13 +126,23 @@
     done();
   });
 
-  // Copy JavaScript source files to 'dist'
-  gulp.task('copy:configjs', function () {
+  // Copy JavScript config file to 'dist'- patch in the default OEM configuration
+  gulp.task('copy:configjs', ['copy:configjs:oem'], function () {
     return gulp
       .src(paths.src + 'config.js')
       .pipe(gutil.env.devMode ? gutil.noop() : uglify())
+      .pipe(gulpreplace('OEM_CONFIG:{}', OEM_CONFIG))
       .pipe(rename('stackato-config.js'))
       .pipe(gulp.dest(paths.dist));
+  });
+
+  // Copy JavaScript config file to the OEM 'dist' folder so it can be patched during OEM process
+  gulp.task('copy:configjs:oem', function () {
+    return gulp
+      .src(paths.src + 'config.js')
+      .pipe(uglify())
+      .pipe(rename('stackato-config.js'))
+      .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
   gulp.task('copy:framework:js', function () {
@@ -199,7 +213,15 @@
   });
 
   // Inject JavaScript and SCSS source file references in index.html
-  gulp.task('inject:index', ['copy:index'], function () {
+  gulp.task('inject:index', ['inject:index:oem'], function () {
+    return gulp
+      .src(paths.oem + 'dist/index.html')
+      .pipe(gulpreplace('@@PRODUCT_NAME@@', oemConfig.PRODUCT_NAME))
+      .pipe(gulp.dest(paths.dist));
+  });
+
+  // Inject JavaScript and SCSS source file references in index.html
+  gulp.task('inject:index:oem', ['copy:index'], function () {
     var sources = gulp.src(
         plugins
         .concat(jsFiles)
@@ -211,9 +233,8 @@
       .src(paths.dist + 'index.html')
       .pipe(wiredep(config.bower))
       .pipe(gulpinject(sources, {relative: true}))
-      .pipe(gulpreplace('@@PRODUCT_NAME@@', oemConfig.PRODUCT_NAME))
       .pipe(concat.header())
-      .pipe(gulp.dest(paths.dist));
+      .pipe(gulp.dest(paths.oem + 'dist'));
   });
 
   // Automatically inject SCSS file imports from Bower packages

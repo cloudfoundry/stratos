@@ -2,6 +2,7 @@
 
 $login-page-text-panel-align: center !default;
 $login-page-text-panel-display: block !default;
+$login-page-text-fg: $white !default;
 
 .login-page {
 
@@ -12,7 +13,7 @@ $login-page-text-panel-display: block !default;
     flex: 8 1 0px;
     background: url('images/login_bg.jpg') no-repeat center center;
     background-size: cover;
-    color: white;
+    color: $login-page-text-fg;
     height: 100vh;
     display: flex;
     align-items: $login-page-text-panel-align;
@@ -86,7 +87,7 @@ $login-page-text-panel-display: block !default;
 
       .hpe-logo {
         flex: 0 0 auto;
-        padding: 0 0 3 * $hpe-unit-space $hpe-unit-space;
+        padding: 0 0 4 * $hpe-unit-space $hpe-unit-space;
       }
     }
   }

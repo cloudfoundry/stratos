@@ -98,17 +98,7 @@
     del(paths.oem + 'scss/*', {force: true}, next);
   });
 
-  // Copy files that will be needed at OEM time
-  gulp.task('oem:files', function () {
-    return gulp
-      .src([
-        paths.src + 'index.html',
-        paths.dist + 'stackato-config.js'
-      ])
-      .pipe(gulp.dest(paths.oem + 'dist'));
-  });
-
-  gulp.task('oem', ['oem:clean', 'oem:files'], function (done) {
+  gulp.task('oem', ['oem:clean'], function (done) {
     var file = paths.src + 'index_oem.scss';
     var outputFile = paths.oem + 'dist/scss/index.scss';
     fsx.ensureDirSync(path.dirname(outputFile));

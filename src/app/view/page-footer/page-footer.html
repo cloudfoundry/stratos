@@ -4,11 +4,11 @@
   <span ng-if="mode !== 'footer'" class="product-name font-semi-bold">
     {{ pageFooterCtrl.OEM_CONFIG.PRODUCT_NAME }} {{ pageFooterCtrl.OEM_CONFIG.PRODUCT_VERSION }}
   <span class="secondary">
-    <span ng-if="mode !== 'footer'"> | </span>&copy; 2016 {{ pageFooterCtrl.OEM_CONFIG.COMPANY }}
+    <span ng-if="mode !== 'footer'">&copy; 2016 {{ pageFooterCtrl.OEM_CONFIG.COMPANY_NAME }}
   </span>
 </div>
 
 <ul class="links">
-  <li><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE_HREF | translate }}" translate>{{ pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE }}</a></li>
-  <li><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.OEM_CONFIG.PRIVACY_HREF | translate }}" translate>{{ pageFooterCtrl.OEM_CONFIG.PRIVACY }}</a></li>
+  <li ng-if="pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE_HREF"><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE_HREF | translate }}" translate>{{ pageFooterCtrl.OEM_CONFIG.TERMS_OF_USE }}</a></li>
+  <li ng-if="pageFooterCtrl.OEM_CONFIG.PRIVACY_HREF" ><a rel="noopener noreferrer" target="_blank" href="{{ pageFooterCtrl.OEM_CONFIG.PRIVACY_HREF | translate }}" translate>{{ pageFooterCtrl.OEM_CONFIG.PRIVACY }}</a></li>
 </ul>

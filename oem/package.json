@@ -8,21 +8,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "del": "^2.2.0",
     "gulp": "^3.9.0",
     "gulp-autoprefixer": "^3.1.0",
-    "gulp-concat-util": "^0.5.4",
-    "gulp-file": "^0.2.0",
-    "gulp-inject": "^3.0.0",
     "gulp-sass": "^2.1.1",
-    "gulp-util": "^3.0.7",
     "gulp-if": "^2.0.0",
     "gulp-plumber": "^1.0.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-sort": "^2.0.0",
+    "gulp-replace": "^0.5.4",
     "gulp-uglify": "^2.0.0",
-    "run-sequence": "^1.1.5",
-    "wiredep": "^3.0.0",
-    "fs-extra": "^0.30.0"
+    "lodash": "^4.13.1"
   }
 }

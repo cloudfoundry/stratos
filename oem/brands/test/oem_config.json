@@ -1,0 +1,17 @@
+{
+  "PRODUCT_VERSION": "[Version]",
+  "TERMS_OF_USE_HREF": "html/terms.html",
+  "PRIVACY_HREF": "html/privacy.html",
+  "PRODUCT_FAMILY_HREF": "http://www.suse.com",
+  "COMPANY_HREF": "http://www.suse.com",
+  "PRODUCT_CONSOLE": "[Product Name for Console]",
+  "CONSOLE": "[Console]",
+  "PRODUCT_NAME": "[Product Name]",
+  "COMPANY_NAME": "[Company Name]",
+  "TERMS_OF_USE": "Link 1 (Terms)",
+  "PRIVACY": "Link 2 (Privacy)",
+  "CODE_ENGINE": "[Code Engine Label}",
+  "CLOUD_FOUNDRY": "[Cloud Foundry Label]",
+  "ABOUT_TEMPLATE": "html/about.html", 
+  "ABOUT_PRODUCT_FAMILY_LOGO_HREF": ""
+}

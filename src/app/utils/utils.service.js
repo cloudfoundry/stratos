@@ -251,7 +251,7 @@
     }
 
     function getOemConfiguration() {
-      return _.defaults($window.env.OEM_CONFIG, $window.env.DEFAULT_OEM_CONFIG);
+      return $window.env.OEM_CONFIG;
     }
   }
 

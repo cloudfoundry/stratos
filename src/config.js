@@ -11,28 +11,7 @@
 
     HELION_UI_FRAMEWORK_BASE_PATH: '',
 
-    DEFAULT_OEM_CONFIG: {
-      PRODUCT_VERSION: '4.0',
-      TERMS_OF_USE_HREF: 'http://docs.hpcloud.com/permalink/helion-openstack/3.0/eula',
-      PRIVACY_HREF: 'https://www.hpe.com/us/en/legal/privacy.html',
-      PRODUCT_FAMILY_HREF: 'http://www.hpe.com/us/en/solutions/cloud.html',
-      COMPANY_HREF: 'http://www.hpe.com',
-      PRODUCT_CONSOLE: 'Helion Stackato Web Console',
-      CONSOLE: 'Console',
-      PRODUCT_NAME: 'Helion Stackato',
-      COMPANY_NAME: 'Hewlett Packard Enterprise Company, L.P.',
-      TERMS_OF_USE: 'Terms of Use',
-      PRIVACY: 'Privacy',
-      CODE_ENGINE: 'Helion Code Engine',
-      CLOUD_FOUNDRY: 'Helion Cloud Foundry',
-      COMPANY_LOGO_HREF: 'images/brand_company_logo.png',
-      PRODUCT_FAMILY_LOGO_HREF: 'images/brand_product_family_logo.png',
-      ABOUT_COMPANY_LOGO_HREF: 'images/brand_company_logo.png',
-      ABOUT_PRODUCT_FAMILY_LOGO_HREF: 'images/brand_product_family_logo_rev.png'
-    },
-
-    OEM_CONFIG: {}
-
+    OEM_CONFIG:{}
   };
 
   expose({
