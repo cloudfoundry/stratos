@@ -30,6 +30,7 @@
         'src/plugins/*/plugin.config.js',
 
         'framework/**/*.html',
+        'framework/**/*.svg',
         {
           pattern: 'framework/theme/images/*.png',
           watched: false,
@@ -81,6 +82,8 @@
             return filePath.substr(4);
           } else if (filePath.indexOf('framework/src/') === 0) {
             return filePath.substr(14);
+          } else if (filePath.indexOf('framework/theme/') === 0) {
+            return filePath.substr(16);
           } else {
             return filePath;
           }
@@ -102,6 +105,7 @@
       ],
 
       preprocessors: {
+        'framework/theme/**/*.svg': ['ng-html2js'],
         'framework/src/**/*.html': ['ng-html2js'],
         'framework/src/**/!(*.mock|*.spec).js': ['coverage'],
         'src/app/**/*.html': ['ng-html2js'],
@@ -114,6 +118,7 @@
 
       proxies: {
         '/images/': '/base/framework/theme/images/',
+        '/svg/': '/base/framework/theme/svg/',
         '/plugins/cloud-foundry/view/assets/': '/base/src/plugins/cloud-foundry/view/assets/',
         '/app/view/assets/': '/base/app/view/assets/'
       },

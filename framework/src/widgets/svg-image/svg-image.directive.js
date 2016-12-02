@@ -5,13 +5,13 @@
     .module('helion.framework.widgets')
     .directive('svgImage', svgImage);
 
-  svgImage.$inject = [ '$http' ];
+  svgImage.$inject = [ '$templateRequest' ];
 
-  function svgImage($http) {
+  function svgImage($templateRequest) {
     return {
       restrict: 'E',
       link: function (scope, element, attrs) {
-        $http.get(attrs.src, {cache: true}).success(function (data) {
+        $templateRequest(attrs.src).then(function (data) {
           var svg = angular.element(data);
           for (var i = svg.length - 1; i >= 0; i--) {
             if (svg[i].constructor.name === 'SVGSVGElement') {
