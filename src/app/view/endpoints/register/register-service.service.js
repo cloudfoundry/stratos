@@ -110,10 +110,11 @@
           }
         };
         modal = detailView({
-          template: '<div class="detail-view-content">' +
-          '<wizard class="register-service-wizard" actions="context.wizardActions" options="context.wizardOptions">' +
-          '</wizard>' +
-          '</div>'
+          template: '<wizard ' +
+          'class="register-service-wizard" ' +
+          'actions="context.wizardActions" ' +
+          'options="context.wizardOptions">' +
+          '</wizard>'
         }, context);
 
         return modal.result;
