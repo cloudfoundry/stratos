@@ -34,7 +34,11 @@
 
     // Force Smart Table watch to trigger by updating the context.tokens reference
     context.triggerWatch = function () {
-      context.tokens = _.clone(context.tokens);
+      var savedTokens = _.clone(context.tokens);
+      context.tokens = [];
+      $timeout(function () {
+        context.tokens = savedTokens;
+      });
     };
 
     context.refreshTokens = function (fetchFresh) {
@@ -50,29 +54,25 @@
           return t.vcs.guid === context.vcs.guid;
         });
         if (context.tokens.length === oldLength) {
-          // Work around Smart-Table watch bug!
-          var savedTokens = _.clone(context.tokens);
-          context.tokens = [];
-          $timeout(function() {
-            context.tokens = savedTokens;
-          });
+          context.triggerWatch();
         }
         vcsModel.checkTokensValidity();
       });
     };
 
     function _edit(token) {
+      var oldName = token.token.name;
       return editVcsToken.editToken(token).then(function (newName) {
-        if (newName === token.token.name) {
+        if (newName === oldName) {
           return;
         }
         notificationsService.notify('success', gettext("Personal Access Token '{{ name }}' successfully renamed to '{{ newName }}'"),
           {
-            name: token.token.name,
+            name: oldName,
             newName: newName
           });
         // After a successful rename, no need to do anything as entry is updated in place
-        context.triggerWatch();
+        context.tokens = _.clone(context.tokens);
       });
     }
 

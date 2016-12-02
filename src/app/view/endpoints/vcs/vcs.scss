@@ -5,9 +5,13 @@ $border: 1px solid $gray-light;
     font-weight: 600;
   }
 
+  .italic {
+    font-style: italic;
+  }
+
   .required-scope {
     font-family: "Source Code Pro", monospace;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .token-value {
