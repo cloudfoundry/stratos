@@ -38,15 +38,13 @@
     this.sortOptions = [
       {label: 'Application Name', value: 'entity.name'},
       {label: 'Status', value: 'state.label'},
-      {label: 'Instances', value: 'instanceCount'},
+      {label: 'Instances Count', value: 'instanceCount'},
       {label: 'Disk Quota', value: 'entity.disk_quota'},
-      {label: 'Memory Utilization', value: 'entity.memory'}
-      // Currently disabled sorting by Creation Date,
-      // since this is not displayed in table-view
-      // {label: 'Creation Date', value: 'metadata.created_at'}
+      {label: 'Memory Utilization', value: 'entity.memory'},
+      {label: 'Creation Date', value: 'metadata.created_at'}
     ];
 
-    this.model.currentSortOption = this.sortOptions[0].value;
+    this.model.currentSortOption = this.model.currentSortOption || this.sortOptions[0].value;
     // Flag for signaling that an update to
     // filteredApplications is currently going on
     this.updatingFilteredApplications = false;

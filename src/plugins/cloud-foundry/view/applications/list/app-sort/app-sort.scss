@@ -9,8 +9,14 @@
       display: none !important;
     }
 
+    .app-sort-actions {
+      button{
+        margin-top: 4px;
+      }
+    }
 
-  }
+
+    }
 
   display: flex;
   flex-direction: column;
@@ -24,11 +30,11 @@
     flex-direction: row;
     justify-content: flex-end;
     flex-wrap: wrap;
-    padding-right: 16px;
     padding-bottom: $hpe-unit-space;
 
     span {
       padding-top: 8px;
+      padding-right: 4px;
       font-weight: $hpe-font-weight-semibold;
     }
 

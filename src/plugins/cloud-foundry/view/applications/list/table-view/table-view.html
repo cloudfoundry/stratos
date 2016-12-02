@@ -1,5 +1,34 @@
-<h1>Applications Table View (<a ui-sref="cf.applications.list.gallery-view">Gallery View</a>)</h1>
-
-<div ng-repeat="app in applicationsListCtrl.model.data.applications.resources track by app.metadata.guid">
-  <a ui-sref="cf.applications.application.summary({guid: app.metadata.guid})">{{ app.metadata.guid }}</a>
+<div ng-if="tableViewCtrl.apps.length"
+     class="apps-table">
+  <table class="table"
+        st-table="tableViewCtrl.stApps"
+        st-safe-src="tableViewCtrl.apps"
+        st-pipe="tableViewCtrl.stMiddleware"
+  >
+    <thead>
+      <tr >
+        <th class="column"
+            ng-repeat="column in tableViewCtrl.tableColumns" translate
+            st-skip-natural="true"
+            st-sort="{{column.value}}">{{column.name}}</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="app in tableViewCtrl.stApps">
+      <td>
+        <a ng-href="{{tableViewCtrl.getAppSummaryLink(app)}}">{{app.entity.name}}</a>
+      </td>
+      <td>
+        <app-state-icon state="app.state.indicator"></app-state-icon>
+        {{ app.state.label }}
+        <span
+          ng-if="app.state.subLabel">&nbsp;- {{ app.state.subLabel }}
+        </span>
+      </td>
+      <td class="text-uppercase">{{app.instanceCount || 0}}/{{app.entity.instances}}</td>
+      <td>{{ app.entity.disk_quota | mbToHumanSize }}</td>
+      <td>{{ app.entity.memory | mbToHumanSize }}</td>
+    </tr>
+    </tbody>
+  </table>
 </div>

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('applications-table directive', function () {
+  describe('table-view directive', function () {
     var $element, applicationsTableDirectiveCtrl;
 
     var apps = [
@@ -20,7 +20,7 @@
       var $compile = $injector.get('$compile');
       var $scope = $injector.get('$rootScope').$new();
       $scope.apps = apps;
-      var markup = '<applications-table apps="apps"></applications-table>';
+      var markup = '<table-view apps="apps"></table-view>';
 
       $element = angular.element(markup);
       $compile($element)($scope);

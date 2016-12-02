@@ -3,28 +3,28 @@
 
   angular
     .module('cloud-foundry.view.applications.list')
-    .directive('applicationsTable', applicationsTable);
+    .directive('tableView', tableView);
 
-  applicationsTable.$inject = [];
+  tableView.$inject = [];
 
-  function applicationsTable() {
+  function tableView() {
     return {
       bindToController: {
         apps: '='
       },
-      controller: ApplicationsTableController,
-      controllerAs: 'applicationsTableCtrl',
+      controller: TableViewController,
+      controllerAs: 'tableViewCtrl',
       templateUrl: 'plugins/cloud-foundry/view/applications/list/' +
-      'gallery-view/applications-table/applications-table.html'
+      'table-view/table-view.html'
     };
   }
 
-  ApplicationsTableController.$inject = [
+  TableViewController.$inject = [
     '$scope',
     'app.model.modelManager'
   ];
 
-  function ApplicationsTableController($scope, modelManager) {
+  function TableViewController($scope, modelManager) {
 
     var that = this;
     var model = modelManager.retrieve('cloud-foundry.model.application');
