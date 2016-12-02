@@ -14,24 +14,24 @@ DEST_FOLDER=../dist
 BASE_CONSOLE_IMAGE=stackato/hsc-console:latest
 
 while getopts ":b:d:pst:c:" opt ; do
-    case $opt in
-        b)
-            BRAND_FOLDER=${OPTARG}
-            ;;
-        d)
-            DEST_FOLDER=${OPTARG}
-            ;;
-        s)
-            GENERATE_PATCH_SCRIPT=true
-            ;;
-        c)
-            BASE_CONSOLE_IMAGE=${OPTARG}
-            ;;
-        \?)
-            echo "Invalid option -$OPTARG" >&2
-            usage
-            ;;
-    esac
+  case $opt in
+    b)
+      BRAND_FOLDER=${OPTARG}
+      ;;
+    d)
+      DEST_FOLDER=${OPTARG}
+      ;;
+    s)
+      GENERATE_PATCH_SCRIPT=true
+      ;;
+    c)
+      BASE_CONSOLE_IMAGE=${OPTARG}
+      ;;
+   \?)
+      echo "Invalid option -$OPTARG" >&2
+      usage
+      ;;
+  esac
 done
 
 echo "${cyan}Stackato Console Branding Setup${reset}"
@@ -47,30 +47,31 @@ mkdir ./tmp
 
 # Process OEM Configuraion file if present
 if [ -f ${BRAND_FOLDER}/oem_config.json ]; then
-    echo "Copying OEM Configuration File"
-    cp ${BRAND_FOLDER}/oem_config.json ./tmp
+  echo "Copying OEM Configuration File"
+  cp ${BRAND_FOLDER}/oem_config.json ./tmp
 else
-    echo "${orange}No OEM Configuration File detected${reset}"
-    echo "{}" > ./tmp/oem_config.json
+  echo "${orange}No OEM Configuration File detected${reset}"
+  echo "{}" > ./tmp/oem_config.json
 fi
 
+mkdir -p ${DEST_FOLDER}/images
 if [ -f ${BRAND_FOLDER}/${FAVICON} ]; then
   echo "Copying favicon"
   cp -f ${BRAND_FOLDER}/${FAVICON} ${DEST_FOLDER}/images
 else
-    echo "${orange}No favicon supplied${reset}"
+  echo "${orange}No favicon supplied${reset}"
 fi
 
 if [ -d ${BRAND_FOLDER}/images ]; then
-    echo "Copying images"
+  echo "Copying images"
   cp -rf ${BRAND_FOLDER}/images/*.* ${DEST_FOLDER}/images 2>/dev/null
 else
-    echo "${orange}No imaegs supplied${reset}"
+    echo "${orange}No images supplied${reset}"
 fi
 
+mkdir -p ${DEST_FOLDER}/html
 if [ -d ${BRAND_FOLDER}/html ]; then
-    echo "Copying html templates"
-    mkdir -p ${DEST_FOLDER}/html
+  echo "Copying html templates"
   cp -rf ${BRAND_FOLDER}/html/*.* ${DEST_FOLDER}/html 2>/dev/null
 else
     echo "No html templates supplied"
