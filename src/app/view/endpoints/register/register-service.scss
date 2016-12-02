@@ -1,7 +1,11 @@
-.register-service-wizard {
+.modal.detail-view .register-service-wizard {
   .wizard {
-    h4 {
-      margin-top: 0;
+    height: initial;
+
+    .register-content-right {
+      h4 {
+        margin-top: 0;
+      }
     }
 
     .register-service-type {
@@ -82,6 +86,9 @@
 
       .register-content-right {
         flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
       }
 
       .register-service-details-buttons {

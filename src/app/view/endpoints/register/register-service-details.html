@@ -14,11 +14,12 @@
   </div>
   <div translate class="register-content-right">
     <h4>{{step.title}}</h4>
-    <form name="form.regForm">
-      <div class="form-group" focusable-input
-           ng-class="{'has-error': form.regForm[step.nameOfUrlInput].$invalid && form.regForm[step.nameOfUrlInput].$dirty}">
-        <label class="control-label" translate>Endpoint Address</label>
-      <span class="control-message">
+    <div>
+      <form name="form.regForm">
+        <div class="form-group" focusable-input
+             ng-class="{'has-error': form.regForm[step.nameOfUrlInput].$invalid && form.regForm[step.nameOfUrlInput].$dirty}">
+          <label class="control-label" translate>Endpoint Address</label>
+        <span class="control-message">
         <span translate
               ng-if="form.regForm[step.nameOfUrlInput].$error.required && form.regForm[step.nameOfUrlInput].$dirty">
           Url is required
@@ -32,34 +33,36 @@
           Url is not unique
         </span>
       </span>
-        <input type="text" name="{{step.nameOfUrlInput}}" class="form-control" ng-model="wizardCtrl.options.userInput.url"
-               required
-               placeholder="{{ step.urlHint }}"
-               ng-pattern="step.urlValidationExpr"
-               helion-unique items="step.instances"
-               ignore-case
-               auto-focus/>
-      </div>
-      <div class="form-group" focusable-input
-           ng-class="{'has-error': form.regForm[step.nameOfNameInput].$invalid && form.regForm[step.nameOfNameInput].$dirty}">
-        <label class="control-label" translate>Name</label>
+          <input type="text" name="{{step.nameOfUrlInput}}" class="form-control" ng-model="wizardCtrl.options.userInput.url"
+                 required
+                 placeholder="{{ step.urlHint }}"
+                 ng-pattern="step.urlValidationExpr"
+                 helion-unique items="step.instances"
+                 ignore-case
+                 auto-focus/>
+        </div>
+        <div class="form-group" focusable-input
+             ng-class="{'has-error': form.regForm[step.nameOfNameInput].$invalid && form.regForm[step.nameOfNameInput].$dirty}">
+          <label class="control-label" translate>Name</label>
       <span class="control-message">
         <span translate ng-if="form.regForm[step.nameOfNameInput].$error.required">Name is required</span>
       </span>
-        <input type="text" name="{{step.nameOfNameInput}}" class="form-control" ng-model="wizardCtrl.options.userInput.name" required/>
+          <input type="text" name="{{step.nameOfNameInput}}" class="form-control" ng-model="wizardCtrl.options.userInput.name" required/>
+        </div>
+        <div class="form-group skip-ssl-validation-checkbox" focusable-input>
+          <checkbox-input ng-model="wizardCtrl.options.userInput.skipSslValidation"
+                          input-label="{{'Skip SSL validation for the endpoint' | translate}}">
+          </checkbox-input>
+        </div>
+      </form>
+      <div class="register-service-details-buttons">
+        <button class="btn btn-default" translate
+                ng-click="wizardCtrl.hasMessage = false;wizardCtrl.back()">Back</button>
+        <button class="btn btn-commit" translate
+                ng-click="wizardCtrl.resetMessage();wizardCtrl.next()"
+                ng-disabled="form.regForm.$invalid">Register</button>
       </div>
-      <div class="form-group skip-ssl-validation-checkbox" focusable-input>
-        <checkbox-input ng-model="wizardCtrl.options.userInput.skipSslValidation"
-                        input-label="{{'Skip SSL validation for the endpoint' | translate}}">
-        </checkbox-input>
-      </div>
-    </form>
-    <div class="register-service-details-buttons">
-      <button class="btn btn-default" translate
-              ng-click="wizardCtrl.back()">Back</button>
-      <button class="btn btn-commit" translate
-              ng-click="wizardCtrl.resetMessage();wizardCtrl.next()"
-              ng-disabled="form.regForm.$invalid">Register</button>
     </div>
+
   </div>
 </div>
