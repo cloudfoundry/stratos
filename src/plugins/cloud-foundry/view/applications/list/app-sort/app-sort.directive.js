@@ -107,6 +107,11 @@
             return 0;
           }
         }
+        try {
+          value = value && value.toLowerCase();
+        } catch (ignored) {
+          // ignored
+        }
         return value;
       }, sortOrder);
 

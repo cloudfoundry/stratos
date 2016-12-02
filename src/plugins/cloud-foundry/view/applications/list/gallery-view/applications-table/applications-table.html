@@ -7,8 +7,11 @@
   >
     <thead>
       <tr >
-        <!-- TODO ng-class -->
-        <th ng-repeat="column in applicationsTableCtrl.tableColumns" translate st-sort="{{column.value}}" ng-class="{{ classapplicationsTableCtrl.setSortclass(column) }}">{{column.name}}</th>
+        <th class="column"
+            ng-repeat="column in applicationsTableCtrl.tableColumns" translate
+            st-skip-natural="true"
+            st-sort="{{column.value}}"
+            ng-class="{{ classapplicationsTableCtrl.setSortclass(column) }}">{{column.name}}</th>
       </tr>
     </thead>
     <tbody>

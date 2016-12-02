@@ -3,13 +3,14 @@
   padding-left: 16px;
 
   .table{
+    table-layout: fixed;
     @include hpe-box-shadow-small();
     .st-sort-ascent:after{
-      content: '\25B2';
+      content: ' \25B2';
     }
 
     .st-sort-descent:after{
-      content: '\25BC';
+      content: ' \25BC';
     }
 
   }
