@@ -22,6 +22,18 @@
                placeholder="{{'Type to search by name' | translate}}"/>
       </div>
     </form>
+    <div class="view-buttons">
+      <button class="btn btn-link btn-border-less"
+              ng-class="applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
+              type="button" ng-click="applicationsListCtrl.goToGalleryView(true)">
+        <div class="helion-icon helion-icon-lg helion-icon-Card_Sort"></div>
+      </button>
+      <button class="btn btn-link btn-border-less"
+              ng-class="!applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
+              type="button" ng-click="applicationsListCtrl.goToGalleryView(false)">
+        <div class="helion-icon helion-icon-lg helion-icon-r90 helion-icon-Divide_to_four"></div>
+      </button>
+    </div>
   </div>
   <div>
     <button class="btn btn-primary"
