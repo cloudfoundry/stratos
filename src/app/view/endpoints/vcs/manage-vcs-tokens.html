@@ -33,9 +33,8 @@
       </tr>
       </thead>
       <tbody>
-      <tr class="vertical-centered" ng-repeat-start="vcsToken in asyncTaskDialogCtrl.context.stTableTokens track by vcsToken.token.guid"
-          >
-        <td class="chooser-radio"  ng-if="asyncTaskDialogCtrl.context.chooserMode">
+      <tr class="vertical-centered" ng-repeat-start="vcsToken in asyncTaskDialogCtrl.context.stTableTokens track by vcsToken.token.guid">
+        <td class="chooser-radio" ng-if="asyncTaskDialogCtrl.context.chooserMode">
           <radio-input ng-model="asyncTaskDialogCtrl.context.chosenToken"
                        input-value="vcsToken.token.guid"
                        input-disabled="!asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"

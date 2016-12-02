@@ -38,6 +38,7 @@
     };
 
     context.refreshTokens = function (fetchFresh) {
+      var oldLength = context.tokens.length;
       var promise;
       if (fetchFresh) {
         promise = vcsModel.listVcsTokens();
@@ -48,6 +49,14 @@
         context.tokens = _.filter(tokens, function (t) {
           return t.vcs.guid === context.vcs.guid;
         });
+        if (context.tokens.length === oldLength) {
+          // Work around Smart-Table watch bug!
+          var savedTokens = _.clone(context.tokens);
+          context.tokens = [];
+          $timeout(function() {
+            context.tokens = savedTokens;
+          });
+        }
         vcsModel.checkTokensValidity();
       });
     };
