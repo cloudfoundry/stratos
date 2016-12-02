@@ -31,7 +31,9 @@
         userCnsiModel.serviceInstances = {
           cnsiGuid: {
             cnsi_type: 'hcf',
-            guid: cnsiGuid
+            guid: cnsiGuid,
+            valid: true,
+            error: false
           }
         };
       }
@@ -56,8 +58,17 @@
       var listAllSpacesForOrg = mock.cloudFoundryAPI.Organizations.ListAllSpacesForOrganization(orgGuid);
       $httpBackend.whenGET(listAllSpacesForOrg.url).respond(200, listAllSpacesForOrg.response[200].body);
 
-      var ListAllApps = mock.cloudFoundryAPI.Apps.ListAllApps();
+      var ListAllApps = mock.cloudFoundryAPI.Apps.ListAllApps(cnsiGuid, 1, spaceGuid);
       $httpBackend.whenGET(ListAllApps.url).respond(200, ListAllApps.response[200].body);
+
+      var ListAllAppsOneResult = mock.cloudFoundryAPI.Apps.ListAllAppsOneResult(cnsiGuid);
+      $httpBackend.whenGET(ListAllAppsOneResult.url).respond(200, ListAllAppsOneResult.response[200].body);
+
+      _.forEach(ListAllApps.response[200].body[cnsiGuid].resources, function (app) {
+        var GetDetailedStatsForStartedApp = mock.cloudFoundryAPI.Apps.GetDetailedStatsForStartedApp(app.metadata.guid);
+        $httpBackend.whenGET(GetDetailedStatsForStartedApp.url).respond(200, GetDetailedStatsForStartedApp.response[200].body);
+      });
+
     }
 
     afterEach(function () {
@@ -93,6 +104,9 @@
       });
 
       it('should return the correct message when a space filter has been set', function () {
+        var ListAllApps = mock.cloudFoundryAPI.Apps.ListAllApps(cnsiGuid, 1, 'test');
+        $httpBackend.whenGET(ListAllApps.url).respond(200, ListAllApps.response[200].body);
+
         $controller.model.filterParams.cnsiGuid = 'test';
         $controller.model.filterParams.orgGuid = orgGuid;
         $controller.model.filterParams.spaceGuid = 'test';
@@ -297,6 +311,159 @@
           expect($controller.filter.spaceGuid).toBe(spaceGuid);
           // The count will be spaces + 1 (for the 'all' options)
           expect($controller.spaces.length).toBe(3);
+        });
+
+      });
+
+      describe('Application name filter', function () {
+        beforeEach(function () {
+          createController(injector);
+
+          $httpBackend.flush();
+        });
+
+        it('apps matching filter', function () {
+
+          var filterAppCount = $controller.model.filteredApplications.length;
+          var unfilteredApplicationCount = $controller.model.unfilteredApplicationCount;
+
+          var appNameSearchTerm = 'rc-test';
+          $controller.filter.text = appNameSearchTerm;
+          $controller.setText();
+
+          $httpBackend.flush();
+
+          expect($controller.model.filterParams.text).toBe(appNameSearchTerm);
+          expect($controller.filter.text).toBe(appNameSearchTerm);
+
+          expect($controller.model.filteredApplications.length).toBeLessThan(filterAppCount);
+          expect($controller.model.unfilteredApplicationCount).toBe(unfilteredApplicationCount);
+        });
+
+        it('no apps matching filter', function () {
+          var unfilteredApplicationCount = $controller.model.unfilteredApplicationCount;
+
+          var appNameSearchTerm = 'therearenoappswiththisname';
+          $controller.filter.text = appNameSearchTerm;
+          $controller.setText();
+
+          $httpBackend.flush();
+
+          expect($controller.model.filterParams.text).toBe(appNameSearchTerm);
+          expect($controller.filter.text).toBe(appNameSearchTerm);
+
+          expect($controller.model.filteredApplications.length).toBe(0);
+          expect($controller.model.unfilteredApplicationCount).toBe(unfilteredApplicationCount);
+
+          expect($controller.getNoAppsMessage()).toBe('This space has no applications matching the search term.');
+        });
+      });
+
+      describe('Repopulate filters with previously selected cluster/org/space', function () {
+        var filteredCnsiGuid = 'cnsiGuid2';
+        var filteredOrgGuid = 'orgGuid2';
+        var filteredSpaceGuid = 'spaceGuid2';
+
+        function setUp() {
+
+          // Return multiple entries
+          userCnsiModel.serviceInstances = {
+            cnsiGuid1: {
+              cnsi_type: 'hcf',
+              guid: cnsiGuid
+            },
+            cnsiGuid2: {
+              cnsi_type: 'hcf',
+              guid: filteredCnsiGuid
+            }
+          };
+          spyOn(orgModel, 'listAllOrganizations').and.returnValue($q.resolve([
+            createOrgOrSpace(orgGuid),
+            createOrgOrSpace(filteredOrgGuid)
+          ]));
+          spyOn(orgModel, 'listAllSpacesForOrganization').and.returnValue($q.resolve([
+            createOrgOrSpace(spaceGuid),
+            createOrgOrSpace(filteredSpaceGuid)
+          ]));
+
+          createController(injector);
+        }
+
+        function check(expectedCnsiGuid, cnsiCount, expectedOrgGuid, orgCount, expectedSpaceGuid, spaceCount) {
+          if (expectedCnsiGuid) {
+            expect($controller.filter.cnsiGuid).toBe(expectedCnsiGuid);
+            // The count will be clusters + 1 (for the 'all' options)
+            expect($controller.clusters.length).toBe(cnsiCount);
+          }
+
+          if (expectedOrgGuid) {
+            expect($controller.filter.orgGuid).toBe(expectedOrgGuid);
+            // The count will be orgs + 1 (for the 'all' options)
+            expect($controller.organizations.length).toBe(orgCount);
+          }
+
+          if (expectedSpaceGuid) {
+            expect($controller.filter.spaceGuid).toBe(expectedSpaceGuid);
+            // The count will be spaces + 1 (for the 'all' options)
+            expect($controller.spaces.length).toBe(spaceCount);
+          }
+        }
+
+        it('successfully sets all', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = filteredCnsiGuid;
+          appModel.filterParams.orgGuid = filteredOrgGuid;
+          appModel.filterParams.spaceGuid = filteredSpaceGuid;
+
+          setUp();
+          $httpBackend.flush();
+
+          check(filteredCnsiGuid, 3, filteredOrgGuid, 3, filteredSpaceGuid, 3);
+        });
+
+        it('avoids bad values - all', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = 'junk1';
+          appModel.filterParams.orgGuid = 'junk2';
+          appModel.filterParams.spaceGuid = 'junk3';
+
+          setUp();
+          $httpBackend.flush();
+
+          check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
+        });
+
+        it('avoids bad value - cluster', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = 'junk1';
+
+          setUp();
+          $scope.$digest();
+
+          check(allFilterValue, 3, allFilterValue, 1, allFilterValue, 1);
+        });
+
+        it('avoids bad value - org', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = cnsiGuid;
+          appModel.filterParams.orgGuid = 'junk2';
+
+          setUp();
+          $scope.$digest();
+
+          check(cnsiGuid, 3, allFilterValue, 3, allFilterValue, 1);
+        });
+
+        it('avoids bad value - space', function () {
+          var appModel = modelManager.retrieve('cloud-foundry.model.application');
+          appModel.filterParams.cnsiGuid = cnsiGuid;
+          appModel.filterParams.orgGuid = orgGuid;
+          appModel.filterParams.spaceGuid = 'junk3';
+
+          setUp();
+          $httpBackend.flush();
+
+          check(cnsiGuid, 3, orgGuid, 3, allFilterValue, 3);
         });
 
       });

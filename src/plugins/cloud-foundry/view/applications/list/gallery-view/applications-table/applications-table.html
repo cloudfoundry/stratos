@@ -1,0 +1,33 @@
+<div ng-if="applicationsTableCtrl.apps.length"
+     class="apps-table">
+  <table class="table"
+         st-table="applicationsTableCtrl.stApps"
+         st-safe-src="applicationsTableCtrl.apps">
+    <thead>
+      <tr>
+        <th translate>Application Name</th>
+        <th translate>Status</th>
+        <th translate>Instances</th>
+        <th translate >Disk Quota</th>
+        <th translate>Memory Utilization</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="app in applicationsTableCtrl.stApps">
+      <td class="text-uppercase">
+        <a ng-href="{{applicationsTableCtrl.getAppSummaryLink(app)}}">{{app.entity.name}}</a>
+      </td>
+      <td>
+        <app-state-icon state="app.state.indicator"></app-state-icon>
+        {{ app.state.label }}
+        <span
+          ng-if="app.state.subLabel">&nbsp;- {{ app.state.subLabel }}
+        </span>
+      </td>
+      <td class="text-uppercase">{{app.instanceCount || 0}}/{{app.entity.instances}}</td>
+      <td>{{ app.entity.disk_quota | mbToHumanSize }}</td>
+      <td>{{ app.entity.memory | mbToHumanSize }}</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
