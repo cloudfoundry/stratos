@@ -987,6 +987,8 @@
         metadata.hce_api_url = undefined;
         metadata.hceServiceGuid = undefined;
         metadata.projectId = undefined;
+        // Ensure all traces of the project are removed
+        that.application.project = null;
       }
 
       if (hceServiceData) {
