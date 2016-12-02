@@ -21,7 +21,7 @@
     <div ng-if="endpointsDashboardCtrl.showWelcomeMessage"
          class="endpoint-notification panel panel-default alert"
           ng-class="{'endpoint-notification-slim': endpointsDashboardCtrl.endpoints.length === 0}">
-      <img class="endpoint-notification-icon" svg-image src="/svg/Info_Black.svg"/>
+      <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
       <div class="" ng-show="endpointsDashboardCtrl.isUserAdmin()">
           <span translate>
             To enable developers to use this Web console to interact with Helion Stackato, please register
@@ -91,7 +91,7 @@
                  popover-trigger="'mouseenter'"
                  popover-placement="top-left"
                  popover-popup-delay="1000">
-              <img svg-image src="/svg/NoConnection_Black.svg"/>
+              <svg-image src="/svg/NoConnection_Black.svg"></svg-image>
             </div>
             <span class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger"
                   ng-switch-when="expired"></span>
