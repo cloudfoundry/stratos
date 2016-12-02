@@ -506,6 +506,18 @@
      */
     disableAddApplicationButton: function () {
       return !this.ready || this.model.clusterCount <= 0 || !this.isSpaceDeveloper;
+    },
+
+    /**
+     * @function goToGalleryView
+     * @description Sets a specific layout and loads Gallery View state
+     * @param {boolean} showCardLayout - True if view should card layout, false for list view
+     * @returns {*|void}
+     */
+    goToGalleryView: function (showCardLayout) {
+      this.model.showCardLayout = showCardLayout;
+      return this.$state.go('cf.applications.list.gallery-view');
     }
+
   });
 })();

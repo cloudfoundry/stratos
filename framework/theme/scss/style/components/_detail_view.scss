@@ -1,3 +1,5 @@
+$detail-view-margin: $hpe-unit-space * 4;
+
 .modal.detail-view {
 
   & > .modal-dialog {
@@ -27,8 +29,8 @@
 
     height: 100%;
 
-    margin-left: $hpe-unit-space * 2.5;
-    margin-right: $hpe-unit-space * 2.5;
+    margin-left: $detail-view-margin;
+    margin-right: $detail-view-margin;
 
     &.detail-view-with-title {
       .wizard {
@@ -134,7 +136,7 @@
         width: 25%;
       }
     }
-    
+
     .wizard-foot {
       @include flex-align(flex-end);
       height: $hpe-unit-space * 4.5;

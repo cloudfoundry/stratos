@@ -70,6 +70,9 @@
       spaceGuid: 'all'
     };
 
+    // Controls view of App Wall (Card layout or List layout)
+    this.showCardLayout = true;
+
     // This state should be in the model
     this.clusterCount = 0;
     this.hasApps = false;
