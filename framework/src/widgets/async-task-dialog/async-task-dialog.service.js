@@ -62,9 +62,9 @@
       if (_.isFunction(config.submitCommit)) {
         context.submitCommit = config.submitCommit;
       } else {
-        context.submitCommit = function() {
+        context.submitCommit = function () {
           return !!config.submitCommit;
-        }
+        };
       }
       context.noCancel = !!config.noCancel;
       context.noSubmit = !!config.noSubmit;

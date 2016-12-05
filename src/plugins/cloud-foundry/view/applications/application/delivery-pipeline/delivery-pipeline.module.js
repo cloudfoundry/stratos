@@ -48,6 +48,7 @@
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
    * @param {app.utils.utilsService} utils - the console utils service
+   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
@@ -62,6 +63,7 @@
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
+    this.vcsTokenManager = vcsTokenManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.userProvidedInstanceModel = modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
@@ -263,20 +265,11 @@
       }
     },
 
-    // TODO: refactor common code used in trigger-build.service
     _getPatGuid: function () {
       if (!this.project) {
         return undefined;
       }
-      var projectName = this.project.name;
-      if (!projectName) {
-        return undefined;
-      }
-      var delimIndex = projectName.indexOf(this.PAT_DELIMITER);
-      if (delimIndex < 0) {
-        return undefined;
-      }
-      return projectName.slice(delimIndex + this.PAT_DELIMITER.length);
+      return this.vcsTokenManager.getPatGuid(this.project.name);
     },
 
     isLegacyToken: function () {
@@ -312,12 +305,7 @@
         return this.vcsTokenManager.manage(vcs, true, patGuid).then(function (newTokenGuid) {
           // If the token was changed. update the HCE project
           if (newTokenGuid !== patGuid) {
-            var delimIndex = that.project.name.indexOf(that.PAT_DELIMITER);
-            if (delimIndex < 0) {
-              that.project.name += that.PAT_DELIMITER + newTokenGuid;
-            } else {
-              that.project.name = that.project.name.slice(0, delimIndex) + that.PAT_DELIMITER + newTokenGuid;
-            }
+            that.project.name = that.vcsTokenManager.updateProjectName(that.project.name, newTokenGuid);
             return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
               that.model.application.project = res.data;
             });

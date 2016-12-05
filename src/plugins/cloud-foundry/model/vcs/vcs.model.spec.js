@@ -20,9 +20,10 @@
 
     describe('listVcsClients', function () {
 
-      var vcsClients = {
-        clientA: true
-      };
+      var vcsClients = [{
+        browse_url: 'https://github.com',
+        vcs_type: 'github'
+      }];
 
       it('Nothing cached', function () {
         $httpBackend.expect('GET', '/pp/v1/vcs/clients').respond(200, vcsClients);
@@ -58,14 +59,6 @@
         expect(vcsModel.vcsClients).toEqual('should not change');
       });
 
-      it('fetched cached', function () {
-        vcsModel.vcsClients = vcsClients;
-
-        vcsModel.listVcsClients().then(function (response) {
-          expect(response).toEqual(vcsClients);
-          expect(vcsModel.vcsClients).toEqual(vcsClients);
-        });
-      });
     });
 
     describe('getSupportedVcsInstances', function () {
@@ -87,7 +80,8 @@
       });
 
       it('listVcsClients fails', function () {
-        spyOn(vcsModel, 'listVcsClients').and.returnValue($q.reject());
+        spyOn(vcsModel, 'listVcsTokens').and.returnValue($q.reject());
+        $httpBackend.when('GET', '/pp/v1/vcs/pat').respond(200, []);
 
         var supportedInstaces = 'original supportedVcsInstances';
 
@@ -103,22 +97,51 @@
       });
 
       it('listVcsClients succeeds', function () {
-        var vcsClients = ['https://github.com/something', 'www.fisherpricesgithubenterprise.com'];
+        var vcsTokens = [
+          {
+            token: {
+              token: '•••••••••••••••••••••••••••••••••••••452',
+              guid: '574719d8-7ffe-48c2-a348-360ee1bd7307',
+              vcs_guid: '73039be8-b0fc-42be-acf2-fdf72fb46aa2',
+              name: 'Token A'
+            },
+            vcs: {
+              guid: '73039be8-b0fc-42be-acf2-fdf72fb46aa2',
+              label: 'Valid - Github',
+              vcs_type: 'github',
+              browse_url: 'https://github.com/something',
+              api_url: 'https://api.github.com/something'
+            }
+          }, {
+            token: {
+              token: '•••••••••••••••••••••••••••••••••••••56e',
+              guid: '70ad7106-5225-4983-8139-4b0c813e252c',
+              vcs_guid: '73039be8-b0fc-42be-acf2-fdf72fb46aa2',
+              name: 'Token B'
+            },
+            vcs: {
+              guid: '73039be8-b0fc-42be-acf2-fdf72fb46aa2',
+              label: 'Valid - Github enterprise',
+              vcs_type: 'github',
+              browse_url: 'https://www.fisherpricesgithubenterprise.com',
+              api_url: 'https://www.fisherpricesgithubenterprise.com/api'
+            }
+          }];
         var input = [
           {
             label: 'Valid - Github',
-            vcs_type: 'GITHUB',
+            vcs_type: 'github',
             browse_url: 'https://github.com/something'
           },
           {
             label: 'Invalid - browse_url not in vcsClients',
-            vcs_type: 'GITHUB',
+            vcs_type: 'github',
             browse_url: 'https://github.com/something/else/but/not/in/vcsClients'
           },
           {
             label: 'Valid - Github enterprise',
-            vcs_type: 'GITHUB',
-            browse_url: 'www.fisherpricesgithubenterprise.com'
+            vcs_type: 'github',
+            browse_url: 'https://www.fisherpricesgithubenterprise.com'
           },
           {
             label: 'Invalid - unrecognised vcs_type',
@@ -129,32 +152,24 @@
         var expectedOutput = [{
           description: 'Connect to a repository hosted on GitHub.com that you own or have admin rights to.',
           img: 'github_octocat.png',
-          supported: true,
           label: 'Valid - Github',
           browse_url: 'https://github.com/something',
-          value: {
-            label: 'Valid - Github',
-            vcs_type: 'GITHUB',
-            browse_url: 'https://github.com/something'
-          }
+          value: vcsTokens[0],
+          token_name: 'Token A'
         },
           {
             description: 'Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.',
             img: 'GitHub-Mark-120px-plus.png',
-            supported: true,
             label: 'Valid - Github enterprise',
-            browse_url: 'www.fisherpricesgithubenterprise.com',
-            value: {
-              label: 'Valid - Github enterprise',
-              vcs_type: 'GITHUB',
-              browse_url: 'www.fisherpricesgithubenterprise.com'
-            }
+            browse_url: 'https://www.fisherpricesgithubenterprise.com',
+            value: vcsTokens[1],
+            token_name: 'Token B'
           }
         ];
-
-        spyOn(vcsModel, 'listVcsClients').and.callFake(function () {
-          vcsModel.vcsClients = vcsClients;
-          return $q.resolve(vcsClients);
+        $httpBackend.when('GET', '/pp/v1/vcs/pat').respond(200, []);
+        spyOn(vcsModel, 'listVcsTokens').and.callFake(function () {
+          vcsModel.vcsTokens = vcsTokens;
+          return $q.resolve(vcsTokens);
         });
 
         vcsModel.supportedVcsInstances = 'original supportedVcsInstances';

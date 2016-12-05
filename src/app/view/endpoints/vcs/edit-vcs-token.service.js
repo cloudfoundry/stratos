@@ -14,10 +14,10 @@
   /**
    * @name EditVcsTokenService
    * @description Edit a VCS token (for now only rename)
-   * @param {app.model.modelManager} modelManager The console model manager service
+   * @param {object} $q The Angular $q service
    * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
-   * @property {function} add Opens slide out containing the edit form
-   * @constructor
+   * @param {app.model.modelManager} modelManager The console model manager service
+   * @returns {object} The EditVcsTokenService with an editToken method that opens slide out containing the edit form
    */
   function EditVcsTokenService($q, asyncTaskDialog, modelManager) {
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');

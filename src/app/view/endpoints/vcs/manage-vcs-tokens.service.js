@@ -7,25 +7,31 @@
 
   ManageVcsTokensService.$inject = [
     '$q',
+    '$timeout',
+    'PAT_DELIMITER',
     'app.model.modelManager',
     'helion.framework.widgets.asyncTaskDialog',
     'helion.framework.widgets.dialog.confirm',
     'app.view.notificationsService',
     'app.view.vcs.registerVcsToken',
-    'app.view.vcs.editVcsToken',
-    '$timeout'
+    'app.view.vcs.editVcsToken'
   ];
 
   /**
    * @name ManageVcsTokensService
    * @description Manage tokens for a VCS
    * @param {object} $q - the Angular $q service
+   * @param {object} $timeout - the Angular $timeout service
+   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {app.model.modelManager} modelManager The console model manager service
    * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
-   * @property {function} add Opens slide out containing registration form
-   * @constructor
+   * @param {helion.framework.widgets.dialog.confirm} confirmDialog The framework confirmation dialog
+   * @param {app.view.notificationsService} notificationsService The toasts notifications service
+   * @param {app.view.registerVcsToken} registerVcsToken Service to register new VCS tokens
+   * @param {app.view.editVcsToken} editVcsToken Service to rename VCS tokens
+   * @returns {object} The ManageVcsTokensService with a manage method that opens slide out containing the manage tokens UI
    */
-  function ManageVcsTokensService($q, modelManager, asyncTaskDialog, confirmDialog, notificationsService, registerVcsToken, editVcsToken, $timeout) {
+  function ManageVcsTokensService($q, $timeout, PAT_DELIMITER, modelManager, asyncTaskDialog, confirmDialog, notificationsService, registerVcsToken, editVcsToken) {
     var vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     var tokenActions = [];
     var context = {
@@ -129,6 +135,7 @@
        * @description Opens a slide-out to manage VCS tokens
        * @param {object} vcs - the vcs for which to manage tokens
        * @param {boolean} chooserMode - whether the manager is in chooser mode (with radio buttons to select a token)
+       * @param {string} tokenGuid - if in chooserMode, this is the currently selected token ID
        * @returns {promise}
        */
       manage: function (vcs, chooserMode, tokenGuid) {
@@ -148,7 +155,7 @@
           title = 'Choose a GitHub Personal Access Token';
           submitCommit = function () {
             return context.chosenToken !== tokenGuid;
-          }
+          };
         } else {
           title = 'Manage GitHub Personal Access Tokens';
           submitCommit = false;
@@ -177,7 +184,28 @@
             }
           ).result;
         });
+      },
+
+      getPatGuid: function (projectName) {
+        if (!projectName) {
+          return undefined;
+        }
+        var delimIndex = projectName.indexOf(PAT_DELIMITER);
+        if (delimIndex < 0) {
+          return undefined;
+        }
+        return projectName.slice(delimIndex + PAT_DELIMITER.length);
+      },
+
+      updateProjectName: function (oldProjectName, patGuid) {
+        var delimIndex = oldProjectName.indexOf(PAT_DELIMITER);
+        if (delimIndex < 0) {
+          return oldProjectName + PAT_DELIMITER + patGuid;
+        } else {
+          return oldProjectName.slice(0, delimIndex) + PAT_DELIMITER + patGuid;
+        }
       }
+
     };
   }
 

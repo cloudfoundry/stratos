@@ -535,7 +535,7 @@
         var githubOptions = {};
         if (this.userInput.source) {
           githubOptions.headers = {
-            'x-cnap-vcs-token-guid': this.userInput.source.token.guid
+            'x-cnap-vcs-token-guid': _.get(this.userInput, 'source.token.guid')
           };
         }
 

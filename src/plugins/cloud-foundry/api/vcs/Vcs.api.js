@@ -19,6 +19,7 @@
    * @memberof cloud-foundry.api.Vcs
    * @name VcsApi
    * @param {object} $http - the Angular $http service
+   * @param {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @property {object} $http - the Angular $http service
    * @property {string} vcsApiUrl - the VCS API endpoint
    * @class

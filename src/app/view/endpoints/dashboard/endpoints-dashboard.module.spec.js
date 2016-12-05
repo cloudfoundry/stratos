@@ -18,7 +18,6 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      connected: 'connected',
       type: 'Helion Cloud Foundry'
     };
 
@@ -59,7 +58,8 @@
       modelManager = $injector.get('app.model.modelManager');
       var registerService = $injector.get('app.view.registerService');
       var utils = $injector.get('app.utils.utilsService');
-      var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.serviceInstanceService');
+      var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
+      var vcsService = $injector.get('app.view.endpoints.dashboard.vcsService');
 
       // Patch user account model
       var userModel = modelManager.retrieve('app.model.account');
@@ -72,10 +72,12 @@
       modelManager.register('app.model.account', userModel);
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, serviceInstanceService);
+      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, serviceInstanceService, vcsService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
+      $httpBackend.when('GET', '/pp/v1/vcs/pat').respond(200, []);
+      $httpBackend.when('GET', '/pp/v1/vcs/clients').respond(200, []);
       $httpBackend.whenGET('/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, {});
       $httpBackend.whenGET('/pp/v1/stackato/info').respond(200, {});
@@ -112,7 +114,7 @@
       });
 
       it('should be uninitialised', function () {
-        expect(controller.endpoints).toBeUndefined();
+        expect(controller.endpoints).toEqual([]);
         expect(controller.initialised).toBe(false);
         $httpBackend.flush();
       });
@@ -125,6 +127,7 @@
         if (!_.some(controller.endpoints, validServicesEndpoint)) {
           fail('Could not find endpoint with values: ' + JSON.stringify(validServicesEndpoint));
         }
+        expect(controller.endpoints[0].getStatus()).toEqual('connected');
       });
 
       it('initialisation fails', function () {

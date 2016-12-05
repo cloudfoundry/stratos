@@ -2,7 +2,7 @@
   'use strict';
 
   describe('trigger build service', function () {
-    var promise, dialogContext, $controller, $q, modelManager, hceModel, $httpBackend, $uibModalInstance, $timeout;
+    var promise, dialogContext, $controller, $q, modelManager, vcsTokenManager, hceModel, $httpBackend, $uibModalInstance, $timeout;
 
     var cnsi = 1234;
     var project = {
@@ -50,6 +50,7 @@
       $timeout = _$timeout_;
 
       modelManager = $injector.get('app.model.modelManager');
+      vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
       hceModel = modelManager.retrieve('cloud-foundry.model.hce');
       hceModel.data.vcsInstance = vcsInstance;
 
@@ -70,7 +71,7 @@
       describe('open', function () {
         it('Plumbing / Initial state', function () {
           /* eslint-disable no-new */
-          new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager);
+          new $controller($timeout, $uibModalInstance, $q, vcsTokenManager, dialogContext, undefined, modelManager);
           /* eslint-enable no-new */
           expect(dialogContext.project).toEqual(project);
           expect(dialogContext.guid).toEqual(cnsi);
@@ -82,8 +83,8 @@
       var controller;
 
       beforeEach(function () {
-        // FIXME: this needs to be updated
-        controller = new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager);
+        // $timeout, $uibModalInstance, $q, vcsTokenManager, context, content, modelManager
+        controller = new $controller($timeout, $uibModalInstance, $q, vcsTokenManager, dialogContext, undefined, modelManager);
         expect(controller).toBeDefined();
         expect(controller.selectedCommit).not.toBeDefined();
         expect(controller.fetchError).not.toBeDefined();
@@ -154,7 +155,6 @@
         it('Basic failed trigger', function () {
           dialogContext.project.id = 1234;
           $httpBackend.expectPOST(defaultTriggerRequest, {project_id: 1234, commit_ref: defaultCommit.sha}).respond(500);
-          $httpBackend.expectPUT(defaultUpdateProjectRequest, project).respond(500);
 
           controller.build().then(function () {
             $httpBackend.flush();

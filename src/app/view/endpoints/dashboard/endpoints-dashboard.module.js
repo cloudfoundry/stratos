@@ -178,7 +178,6 @@
       for (var i = that.endpoints.length - 1; i >= 0; i--) {
         var endpoint = that.endpoints[i];
         if (activeEndpoints.indexOf(endpoint.key) < 0) {
-          console.log('Deleting stale endpoint: ' + endpoint.name);
           that.endpoints.splice(i, 1);
         }
       }

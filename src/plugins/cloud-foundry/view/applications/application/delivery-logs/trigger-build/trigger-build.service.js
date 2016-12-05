@@ -40,7 +40,7 @@
     '$timeout',
     '$uibModalInstance',
     '$q',
-    'PAT_DELIMITER',
+    'app.view.vcs.manageVcsTokens',
     'context',
     'content',
     'app.model.modelManager'
@@ -52,12 +52,12 @@
    * @param {object} $timeout - the angular timeout service
    * @param {object} $uibModalInstance - the modal object which is associated with this controller
    * @param {object} $q - the angular $q service
-   * @param {string} PAT_DELIMITER - the PAT guid delimiter in project names
+   * @param {object} vcsTokenManager - the VCS token manager
    * @param {object} context - parameter object passed in to DetailView
    * @param {object} content - configuration object passed in to DetailView
    * @param {app.model.modelManager} modelManager - the Model management service
    */
-  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, PAT_DELIMITER, context, content, modelManager) {
+  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, vcsTokenManager, context, content, modelManager) {
     var that = this;
     that.context = context;
     that.content = content;
@@ -66,7 +66,7 @@
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
     that.$q = $q;
-    that.PAT_DELIMITER = PAT_DELIMITER;
+    that.vcsTokenManager = vcsTokenManager;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -101,16 +101,7 @@
     },
 
     _getPatGuid: function () {
-      var projectName = this.context.project.name;
-      if (!projectName) {
-        return null;
-      }
-      var delimIndex = projectName.indexOf(this.PAT_DELIMITER);
-      if (delimIndex < 0) {
-        return null;
-      }
-      return projectName.slice(delimIndex + this.PAT_DELIMITER.length);
-
+      return this.vcsTokenManager.getPatGuid(this.context.project.name);
     },
 
     _checkPatAndBuild: function () {

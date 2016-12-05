@@ -35,7 +35,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description are there any cached service instances?
      * @returns {boolean}
      * @public
@@ -46,7 +46,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description Refresh the cnsi service instances within the model
      * @returns {object} a promise
      * @public
@@ -59,7 +59,7 @@
 
     /**
      * @function updateInstancesCache
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description repopulate the endpoints list with the latest data from cache
      * @param {Array} endpoints - collection of existing endpoints
      * @public
@@ -109,7 +109,7 @@
 
     /**
      * @function createEndpointEntries
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description convert the model service instances into endpoints entries
      * @param {Array} endpoints - collection of existing endpoints
      * @returns {Array} latest set of service instance endpoint entries
@@ -143,7 +143,7 @@
 
     /**
      * @function clear
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description clear any local data before leaving the dashboard
      * @public
      */

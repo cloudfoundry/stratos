@@ -5,6 +5,7 @@
 
   describe('add-pipeline-workflow prototype', function () {
     var $httpBackend;
+    var tokenGuid = '01234';
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -46,7 +47,11 @@
           },
           repoFilterTerm: null,
           source: {
-            browse_url: 'browse_url'
+            browse_url: 'browse_url',
+            token: {
+              guid: tokenGuid
+            },
+            token_name: 'Token A'
           },
           buildContainer: {
             build_container_id: 'uild_container_id'
@@ -502,7 +507,7 @@
           }
         };
         var name = this.instance._createProjectName();
-        expect(name).toBe('foo-bar');
+        expect(name).toBe('foo-bar;PAT:' + tokenGuid);
       });
 
       it('#_getVcsHeaders', function () {

@@ -27,6 +27,7 @@
    * @param {object} $state - the UI router $state service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
    * @param {app.utils.utilsService} utilsService - the utils service
    * @param {app.error.errorService} errorService - service to show custom errors below title bar
    * @param {app.view.notificationsService} notificationsService - the toast notification service
@@ -56,7 +57,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description are there any cached service instances?
      * @returns {boolean}
      * @public
@@ -67,7 +68,7 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description Refresh the cnsi service instances within the model
      * @returns {object} a promise
      * @public
@@ -98,9 +99,10 @@
 
     /**
      * @function updateInstancesCache
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description repopulate the endpoints list with the latest data from cache
      * @param {Array} endpoints - collection of existing endpoints
+     * @returns {Array} the list of endpoints that still exist (not deleted in the backend)
      * @public
      */
     function updateInstancesCache(endpoints) {
@@ -109,7 +111,7 @@
 
     /**
      * @function createEndpointEntries
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description convert the model service instances into endpoints entries
      * @param {Array} endpoints - collection of existing endpoints
      * @returns {Array} latest set of service instance endpoint entries
@@ -134,10 +136,7 @@
         if (!reuse) {
           endpoint = {
             key: eKey,
-            name: serviceInstance.name,
-            type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine'),
-            url: utilsService.getClusterEndpoint(serviceInstance),
-            actionsTarget: serviceInstance
+            type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine')
           };
           endpoints.push(endpoint);
         }
@@ -147,28 +146,33 @@
         endpoint.visit = isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
           return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
         } : undefined;
+        endpoint.url = utilsService.getClusterEndpoint(serviceInstance);
+        endpoint.actionsTarget = serviceInstance;
+        endpoint.name = serviceInstance.name;
 
-        endpoint.getStatus = isValid ? function () {
-          return 'connected';
-        } : function () {
-          return 'unconnected';
+        endpoint.getStatus = function () {
+          if (serviceInstance.error) {
+            return 'error';
+          }
+          if (hasExpired) {
+            return 'expired';
+          }
+          return isValid ? 'connected' : 'unconnected';
         };
 
-        //Error states
+        // Error states
         if (serviceInstance.error) {
           // Service could not be contacted
           endpoint.error = {
             message: gettext('The Console could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'),
             status: 'error'
           };
-          endpoint.connected = 'error';
         } else if (hasExpired) {
           // Service token has expired
           endpoint.error = {
             message: gettext('Token has expired. Try reconnecting to this endpoint to resolve this problem.'),
             status: 'warning'
           };
-          endpoint.connected = 'expired';
         } else if (endpoint.connected === 'unconnected') {
           // Service token has expired
           endpoint.error = {
@@ -182,7 +186,7 @@
 
     /**
      * @function clear
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description clear any local data before leaving the dashboard
      * @public
      */

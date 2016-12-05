@@ -16,11 +16,10 @@
    * @name RegisterVcsTokenService
    * @description Register token for a VCS
    * @param {object} $q - the Angular $q service
-   * @param {app.model.modelManager} modelManager The console model manager service
    * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
    * @param {app.view.notificationsService} notificationsService - the Console toast notification service
-   * @property {function} add Opens slide out containing registration form
-   * @constructor
+   * @param {app.model.modelManager} modelManager The console model manager service
+   * @returns {object} The RegisterVcsTokenService with an registerToken method that opens slide out containing the register form
    */
   function RegisterVcsTokenService($q, asyncTaskDialog, notificationsService, modelManager) {
 
