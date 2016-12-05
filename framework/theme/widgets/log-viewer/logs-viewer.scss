@@ -1,0 +1,16 @@
+@import 'ansi-colours';
+
+.log-container {
+    color: #DCDCCC;
+    background-color: #2C2C2C;
+    line-height: 20px;
+    font-size: 11.25pt;
+    font-family: "Source Code Pro", monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 10px 10px 20px 10px;
+    transform: translateZ(0);
+}
+

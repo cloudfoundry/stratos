@@ -30,7 +30,7 @@
   }
 
   function showApplications() {
-    return navbar.goToView('Applications');
+    return navbar.goToView('cf.applications');
   }
 
   function showApplicationDetails(idx) {

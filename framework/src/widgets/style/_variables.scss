@@ -1,0 +1,74 @@
+// Z-indexes
+$flyout-z-index:              1050 !default;
+$global-spinner-z-index:      1060 !default;
+
+// Flyout
+$flyout-bg-color:             #ffffff !default;
+$flyout-transition-duration:  0.5s !default;
+$flyout-width:                75% !default;
+
+// Spinner
+$spinner-size:                30px !default;
+$spinner-off-color:           #dddddd !default;
+$spinner-on-color:            #333333 !default;
+
+// Bounce Spinner
+$bounce-spinner-size:         24px !default;
+$bounce-spinner-color:        #333333 !default;
+
+// Global Spinner
+$global-spinner-bg-color:     rgba(0, 0, 0, 0.5);
+$global-spinner-height:       50px !default;
+$global-spinner-width:        50px !default;
+
+// Gallery Card
+$gallery-card-status-padding:     24px !default;
+$gallery-card-status-danger:      #ff454f !default;
+$gallery-card-status-success:     #01a982 !default;
+$gallery-card-status-warning:     #ffd042 !default;
+
+// Actions Menu
+$actions-menu-border:             1px solid #ddd !default;
+$actions-menu-border-radius:      0 !default;
+$actions-menu-bg:                 #ffffff !default;
+$actions-menu-fg:                 #333333 !default;
+$actions-menu-hover-bg:           #01a982 !default;
+$actions-menu-hover-fg:           #ffffff !default;
+$actions-menu-label-fg:           #767676 !default;
+$actions-menu-item-disabled-fg:   #cccccc !default;
+$actions-menu-item-padding:       10px 15px !default;
+$actions-menu-box-shadow:         2px 2px 0 rgba(0,0,0,.05) !default;
+
+// Tabbed Nav
+$tabbed-nav-min-width:            300px !default;
+$tabbed-nav-padding:              0 24px !default;
+
+// Select Input
+$select-input-selected-bg:        #01a982 !default;
+$select-input-selected-fg:        #ffffff !default;
+
+// Radio Input
+$radio-input-size:                24px !default;
+$radio-input-color:               #666666 !default;
+$radio-input-checked-color:       #01a982 !default;
+$radio-input-hover-color:         #333333 !default;
+$radio-input-disabled-opacity:    0.65 !default;
+$radio-button-font-family:        'Glyphicons Halflings' !default;
+$radio-button-unchecked-icon:     '\e157' !default;
+$radio-button-checked-icon:       '\e067' !default;
+
+// Checkbox Input
+$checkbox-input-size:                24px !default;
+$checkbox-input-color:               #666666 !default;
+$checkbox-input-checked-color:       #01a982 !default;
+$checkbox-input-hover-color:         #333333 !default;
+$checkbox-input-disabled-opacity:    0.65 !default;
+$checkbox-button-font-family:        'Glyphicons Halflings' !default;
+$checkbox-button-unchecked-icon:     '\e157' !default;
+$checkbox-button-checked-icon:       '\e067' !default;
+
+// Detail View
+$detail-view-transition-duration:         0.5s !default;
+$detail-view-shrink-transition-duration:  0.25s !default;
+$detail-view-width:                       75% !default;
+$detail-view-inset:                       24px !default;

@@ -1,0 +1,35 @@
+$panel-bg:                    $white !default;
+$panel-fg:                    $gray-darker !default;
+$panel-body-padding:          $hpe-unit-space !default;
+$panel-heading-padding:       $hpe-unit-space/2 $hpe-unit-space !default;
+$panel-footer-padding:        $panel-heading-padding !default;
+$panel-border-radius:         $border-radius-base !default;
+$panel-heading-height:        60px !default;
+
+//** Border color for elements within panels
+$panel-inner-border:          $gray-light !default;
+$panel-footer-bg:             $white !default;
+
+$panel-default-text:          $gray-darker !default;
+$panel-default-border:        $gray-light !default;
+$panel-default-heading-bg:    $panel-bg !default;
+
+$panel-primary-text:          $white !default;
+$panel-primary-border:        $body-bg !default;
+$panel-primary-heading-bg:    $brand-primary !default;
+
+$panel-success-text:          $white !default;
+$panel-success-border:        $body-bg !default;
+$panel-success-heading-bg:    $brand-success !default;
+
+$panel-info-text:             $white !default;
+$panel-info-border:           $body-bg !default;
+$panel-info-heading-bg:       $brand-info !default;
+
+$panel-warning-text:          $white !default;
+$panel-warning-border:        $body-bg !default;
+$panel-warning-heading-bg:    $brand-warning !default;
+
+$panel-danger-text:           $white !default;
+$panel-danger-border:         $body-bg !default;
+$panel-danger-heading-bg:     $brand-danger !default;

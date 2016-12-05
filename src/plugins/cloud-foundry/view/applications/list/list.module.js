@@ -106,6 +106,9 @@
       }
 
       return $q.resolve()
+        .then(function () {
+          that.filter.text = that.model.filterParams.text;
+        })
         .then(_.bind(that._setClusters, that))
         .then(_.bind(that._setOrgs, that))
         .then(_.bind(that._setSpaces, that))
@@ -133,18 +136,20 @@
      * @public
      */
     getNoAppsMessage: function () {
+      var text = gettext('You have no applications');
       if (this.model.filterParams.cnsiGuid !== 'all') {
         if (this.model.filterParams.orgGuid !== 'all') {
           if (this.model.filterParams.spaceGuid !== 'all') {
-            return gettext('This space has no applications.');
+            text = gettext('This space has no applications');
           } else {
-            return gettext('This organization has no applications.');
+            text = gettext('This organization has no applications');
           }
         } else {
-          return gettext('This endpoint has no applications.');
+          text = gettext('This endpoint has no applications');
         }
       }
-      return gettext('You have no applications.');
+      return text +
+        (this.model.filterParams.text && this.model.filterParams.text.length ? ' matching the search term.' : '.');
     },
 
     getEndpointsLink: function () {
@@ -177,6 +182,12 @@
       [].push.apply(this.clusters, clusters);
       this.model.clusterCount = clusters.length;
 
+      // Reset filtered cluster if it's no longer valid
+      if (!_.find(this.clusters, { value: this.model.filterParams.cnsiGuid})) {
+        this.model.filterParams.cnsiGuid = 'all';
+      }
+
+      // Select the previous filter value or first cluster in list
       if (this.model.filterParams.cnsiGuid !== 'all') {
         this.filter.cnsiGuid = this.model.filterParams.cnsiGuid;
       } else if (this.model.clusterCount === 1) {
@@ -203,6 +214,12 @@
             var orgs = _.map(newOrgs, that._selectMapping);
             [].push.apply(that.organizations, orgs);
 
+            // Reset filtered organization if it's no longer valid
+            if (!_.find(that.organizations, { value: that.model.filterParams.orgGuid})) {
+              that.model.filterParams.orgGuid = 'all';
+            }
+
+            // Select the previous filter value or first organization in list
             if (that.model.filterParams.orgGuid !== 'all') {
               that.filter.orgGuid = that.model.filterParams.orgGuid;
             } else if (orgs.length === 1) {
@@ -235,6 +252,12 @@
             var spaces = _.map(newSpaces, that._selectMapping);
             [].push.apply(that.spaces, spaces);
 
+            // Reset filtered space if it's no longer valid
+            if (!_.find(that.spaces, { value: that.model.filterParams.spaceGuid})) {
+              that.model.filterParams.spaceGuid = 'all';
+            }
+
+            // Select the previous filter value or first space in list
             if (that.model.filterParams.spaceGuid !== 'all') {
               that.filter.spaceGuid = that.model.filterParams.spaceGuid;
             } else if (spaces.length === 1) {
@@ -281,15 +304,16 @@
      * @function _reload
      * @description Reload the application wall
      * @param {boolean=} retainPage Attempt to retain the current page after pagination has reloaded
+     * @param {boolean=} fromCache Reset pagination (and apps) from cache instead of service
      * @returns {promise} A promise
      * @private
      */
-    _reload: function (retainPage) {
+    _reload: function (retainPage, fromCache) {
       var that = this;
       var reloadPage = retainPage ? that.model.appPage : 1;
       this.loading = true;
 
-      return this.model.resetPagination()
+      return this.model.resetPagination(fromCache)
         .then(function () {
           that.paginationProperties.total = _.ceil(that.model.filteredApplications.length / that.model.pageSize);
 
@@ -394,6 +418,11 @@
       this._reload();
     },
 
+    setText: function () {
+      this.model.filterParams.text = this.filter.text;
+      this._reload(true, true);
+    },
+
     /**
      * @function resetFilter
      * @description Reset the filter to all
@@ -407,7 +436,7 @@
       this.clusters = [];
       this.$timeout(function () {
         that.clusters = clusters;
-        that._setFilter({cnsiGuid: 'all'});
+        that._setFilter({cnsiGuid: 'all', text: ''});
         that.setCluster();
       }, 100);
     },
@@ -479,6 +508,18 @@
      */
     disableAddApplicationButton: function () {
       return !this.ready || this.model.clusterCount <= 0 || !this.isSpaceDeveloper;
+    },
+
+    /**
+     * @function goToGalleryView
+     * @description Sets a specific layout and loads Gallery View state
+     * @param {boolean} showCardLayout - True if view should card layout, false for list view
+     * @returns {*|void}
+     */
+    goToGalleryView: function (showCardLayout) {
+      this.model.showCardLayout = showCardLayout;
+      return this.$state.go('cf.applications.list.gallery-view');
     }
+
   });
 })();

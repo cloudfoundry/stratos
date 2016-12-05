@@ -1,0 +1,153 @@
+$detail-view-margin: $hpe-unit-space * 4;
+
+.modal.detail-view {
+
+  & > .modal-dialog {
+    & > .modal-content {
+      overflow-y: auto;
+    }
+  }
+
+  &.detail-view-thin {
+
+    > .modal-dialog {
+      width: $detail_view_thin_width;
+      left: 100%;
+    }
+
+    &.fade.in {
+      .modal-dialog {
+        left: calc(100% - #{$detail_view_thin_width});
+        transition: left 0.25s ease-out;
+      }
+    }
+  }
+
+
+  .detail-view-content {
+    @include flex-align(flex-start, stretch, column);
+
+    height: 100%;
+
+    margin-left: $detail-view-margin;
+    margin-right: $detail-view-margin;
+
+    &.detail-view-with-title {
+      .wizard {
+        .wizard-head {
+          margin: $hpe-unit-space * 0.5 0;
+          height: auto;
+          min-height: auto;
+        }
+      }
+    }
+
+    .detail-view-header {
+      flex: 0 1 $hpe-unit-space * 4;
+      height: $hpe-unit-space * 4;
+      padding: $hpe-unit-space * 1.5 0;
+      border: none;
+      h4 {
+        font-size: $hpe-unit-space;
+        font-weight: 600;
+      }
+    }
+
+    .detail-view-close {
+      position: absolute;
+      top: $hpe-unit-space * 2;
+      right: $hpe-unit-space * 2.5;
+      font-family: 'helion-icons' !important;
+      speak: none;
+      font-style: normal;
+      font-weight: normal;
+      font-variant: normal;
+      text-transform: none;
+      line-height: 1;
+      &:before {
+        content: "";
+      }
+    }
+
+    > ng-include, > detail-view-template {
+      @include flex-align(flex-start, stretch, column);
+      flex: 1 1 auto;
+      height: 100%;
+
+      > :first-child {
+        height: 100%;
+      }
+    }
+  }
+
+  wizard {
+    width: 100%;
+  }
+
+  .wizard {
+    @include flex-align(flex-start, stretch, column);
+    height: 100%;
+
+    .wizard-head {
+      height: $hpe-unit-space * 4;
+      min-height: $hpe-unit-space * 4;
+      padding: 0;
+      border: none;
+      display: flex;
+      margin-top: $hpe-unit-space * 0.5;
+
+      h4 {
+        font-size: $hpe-unit-space;
+        font-weight: 600;
+        margin: auto 0;
+      }
+    }
+
+    .wizard-body {
+      @include flex-align();
+      flex-grow: 1;
+      margin: 0;
+      padding: 0;
+
+      .wizard-nav {
+        margin: 0;
+        padding: 0;
+        align-self: flex-start;
+        z-index: 1;
+      }
+
+      .wizard-step {
+        overflow-y: auto;
+        padding-right: 0;
+        padding-left: $hpe-unit-space;
+
+        &.wizard-step-nonav {
+          padding-left: 0;
+          width: 100%;
+        }
+
+        .step-title {
+          margin-top: 0;
+          font-size: $hpe-unit-space * 7 / 8;
+        }
+      }
+
+      .col-sm-3 {
+        width: 25%;
+      }
+    }
+
+    .wizard-foot {
+      @include flex-align(flex-end);
+      height: $hpe-unit-space * 4.5;
+      min-height: $hpe-unit-space * 4.5;
+      border-top: 1px solid $gray-light;
+      padding-top: $hpe-unit-space * 3 / 4;
+      background: $white;
+
+      .btn:not(:last-child) {
+        margin-right: $hpe-unit-space / 2;
+      }
+    }
+  }
+}

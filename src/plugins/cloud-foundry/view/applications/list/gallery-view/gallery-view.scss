@@ -1,11 +1,27 @@
+@import "applications-table/applications-table";
+
 $gallery-card-side-margins: 30px;
 $gallery-card-max-width: 400px;
 $gallery-card-layout-steps: 4;
 
 @for $i from 1 through $gallery-card-layout-steps {
   @media (min-width: $gallery-card-side-margins + $i * $gallery-card-max-width) {
+    .navbar-hidden {
+      .app-gallery-card.col-md-4.col-sm-1 {
+        width: percentage(1/$i);
+      }
+    }
+  }
+  @media (min-width: $main-nav-width + $gallery-card-side-margins + $i * $gallery-card-max-width) {
     .app-gallery-card.col-md-4.col-sm-1 {
       width: percentage(1/$i);
+    }
+  }
+  @media (min-width: $main-nav-icons-width + $gallery-card-side-margins + $i * $gallery-card-max-width) {
+    .navbar-icons-only {
+      .app-gallery-card.col-md-4.col-sm-1 {
+        width: percentage(1/$i);
+      }
     }
   }
 }
@@ -16,6 +32,9 @@ $gallery-card-layout-steps: 4;
 }
 
 .app-gallery-card {
+  // Set a min-height to we don't see the pagination directive while the page loads
+  min-height: 190px;
+
   // Gives a heading of 60px with minimal changes
   .card.panel .panel-heading {
     color: $dove-gray2;

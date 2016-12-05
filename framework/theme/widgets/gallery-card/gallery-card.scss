@@ -1,0 +1,64 @@
+gallery-card {
+  .gallery-card-actions {
+    line-height: inherit;
+    margin-left: auto;
+  }
+
+  // In this context a library is superseding the actions-menu styles. So ensure we have something that supersedes it
+  // here.
+  .card.panel .panel-heading {
+    .actions-menu {
+      position: relative;
+    }
+    .actions-menu-list {
+      border: $actions-menu-border;
+      top: 100%;
+      margin-left: 2px;
+    }
+  }
+
+  .gallery-card-status {
+    display: inline-block;
+    height: 100%;
+    line-height: normal;
+    padding: $gallery-card-status-padding;
+
+    &.danger {
+      background-color: $gallery-card-status-danger;
+      color: #fff;
+    }
+
+    &.success {
+      background-color: $gallery-card-status-success;
+      color: #fff;
+    }
+
+    &.warning {
+      background-color: $gallery-card-status-warning;
+      color: #fff;
+    }
+  }
+
+  .gallery-card-status-text {
+    display: inline-block;
+    line-height: normal;
+    padding: $gallery-card-status-padding;
+  }
+
+  .linked {
+    cursor: pointer;
+  }
+
+  .panel {
+    border-radius: 0;
+  }
+
+  .panel-heading {
+    @include helion-flex-align(flex-start, center);
+  }
+
+  .panel-footer {
+    @include helion-flex-align(flex-start, center);
+    padding: 0;
+  }
+}

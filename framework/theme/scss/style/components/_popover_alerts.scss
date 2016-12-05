@@ -1,0 +1,90 @@
+$hpe-popover-alert-top            : $hpe-unit-space !default;
+$hpe-popover-alert-arrow-left     : $hpe-unit-space * 1.5 !default;
+$hpe-popover-alert-arrow-width    : $hpe-unit-space !default;
+$hpe-popover-alert-arrow-height   : $hpe-unit-space * .5 !default;
+
+.popover.hpe-popover-alert {
+  display: block;
+  box-sizing: border-box;
+  top: $hpe-popover-alert-top;
+  left: 0;
+  right: 0;
+  border: none;
+  max-width: none;
+  box-shadow: none;
+  padding: 0;
+  z-index: auto;
+
+  &.bottom > .arrow {
+    border-width: $hpe-popover-alert-arrow-height;
+    border-top-width: 0;
+    border-bottom-color: $white;
+    left: $hpe-popover-alert-arrow-left;
+    top: -$hpe-popover-alert-arrow-height + 1px;
+    right: auto;
+    margin-left: -$hpe-unit-space * .5;
+
+    &:after {
+      display: none;
+    }
+  }
+
+  .popover-content {
+    padding: $hpe-unit-space * .2 $hpe-unit-space;
+    font-size: $font-size-base;
+    line-height: $hpe-unit-space;
+  }
+}
+
+.popover.hpe-popover-alert-success {
+  @include hpe-popover-alert($white, $state-success-bg);
+}
+
+.popover.hpe-popover-alert-info {
+  @include hpe-popover-alert($white, $state-info-bg);
+}
+
+.popover.hpe-popover-alert-warning {
+  @include hpe-popover-alert($white, $state-warning-bg);
+}
+
+.popover.hpe-popover-alert-danger {
+  @include hpe-popover-alert($white, $state-danger-bg);
+}
+
+.popover.hpe-popover-alert-error {
+  @include hpe-popover-alert($white, $state-danger-bg);
+}
+
+table tr td.table-inline-message {
+  padding: 0;
+  border: none;
+
+  .popover.hpe-popover-alert {
+    position: relative;
+    top: 0;
+    margin: 0;
+    border: none;
+
+    .popover-content {
+      padding: $hpe-unit-space * .3 $hpe-unit-space $hpe-unit-space * .4;
+      line-height: normal;
+    }
+  }
+
+ .popover.hpe-popover-alert-success {
+    @include hpe-popover-alert($white, $state-success-bg);
+  }
+
+  .popover.hpe-popover-alert-info {
+    @include hpe-popover-alert($white, $brand-info);
+  }
+
+  .popover.hpe-popover-alert-warning {
+    @include hpe-popover-alert($white, $state-warning-bg);
+  }
+
+  .popover.hpe-popover-alert-danger {
+    @include hpe-popover-alert($white, $state-danger-bg);
+  }
+}

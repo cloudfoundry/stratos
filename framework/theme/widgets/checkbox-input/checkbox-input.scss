@@ -1,0 +1,52 @@
+.checkbox-input {
+  display: flex;
+  align-items: center;
+  color: $checkbox-input-color;
+  outline: none;
+
+  &:not(.checked) {
+    &:focus,
+    &:hover {
+      color: $checkbox-input-hover-color;
+    }
+  }
+
+  &.checked {
+    .checkbox-input-button {
+      color: $checkbox-input-checked-color;
+
+      &:before {
+        content: $checkbox-button-checked-icon;
+      }
+    }
+
+    .checkbox-input-label {
+      color: $checkbox-input-hover-color;
+    }
+  }
+
+  &.disabled {
+    opacity: $checkbox-input-disabled-opacity;
+
+    &:focus,
+    &:hover {
+      color: $checkbox-input-color;
+    }
+
+    .checkbox-input-button:before, .checkbox-input-label {
+      cursor: not-allowed;
+    }
+  }
+
+  .checkbox-input-button:before {
+    content: $checkbox-button-unchecked-icon;
+    font-family: $checkbox-button-font-family;
+    font-size: $checkbox-input-size;
+    cursor: pointer;
+  }
+
+  .checkbox-input-label {
+    cursor: pointer;
+    margin-left: 5px;
+  }
+}

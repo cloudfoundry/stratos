@@ -1,0 +1,27 @@
+pre {
+  position: relative;
+  font-size: $hpe-pre-font-size;
+
+  &.hpe-pre-dark {
+    background-color: $hpe-pre-dark-bg;
+    color: $hpe-pre-dark-color;
+  }
+}
+
+.hpe-copy {
+  color: $pre-color;
+  position: relative;
+
+  &.hpe-copy-dark {
+    color: $hpe-pre-dark-color;
+  }
+
+  &:after {
+    content: '\e948';
+    font-family: 'helion-icons';
+    position: absolute;
+    right: $hpe-unit-space / 2;
+    top: $hpe-unit-space / 2;
+    font-size: $font-size-base * 1.5;
+  }
+}

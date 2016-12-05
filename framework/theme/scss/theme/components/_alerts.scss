@@ -1,0 +1,22 @@
+// Alerts
+// ======
+
+// HPE semantic names
+// ------------------
+$hpe-alert-width:             74px !default;
+$hpe-alert-icon-size:         $hpe-alert-width/3 !default;
+$hpe-alert-border-width:      2px !default;
+$hpe-alert-border:            $hpe-alert-border-width solid $gray-light !default;
+
+//== Alerts
+//
+//## Define alert colors, border radius, and padding.
+
+$alert-padding:               19px !default;
+$alert-link-color:            $white !default;
+$alert-link-font-weight:      bold !default;
+
+$alert-success-text:          $white !default;
+$alert-info-text:             $hpe-primary-fg !default;
+$alert-warning-text:          $white !default;
+$alert-danger-text:           $white !default;
