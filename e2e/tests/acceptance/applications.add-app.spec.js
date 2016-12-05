@@ -15,7 +15,7 @@
   var proxyModel = require('../../po/models/proxy-model.po');
   var searchBox = require('../../po/widgets/input-search-box.po');
 
-  fdescribe('Applications - Add application', function () {
+  describe('Applications - Add application', function () {
 
     /**
      * This spec will ..
@@ -200,10 +200,12 @@
           expect(enabled).toBe(false);
         });
 
+        // Need to close the wizard
+        addAppWizard.getWizard().cancel();
       });
     });
 
-    fit('Create hcf app - test', function () {
+    it('Create hcf app - test', function () {
 
       var appName = 'acceptance.e2e.' + testTime;
       var hostName = appName.replace(/\./g, '_');
@@ -212,7 +214,7 @@
 
       //browser.driver.wait(protractor.until.elementIsVisible(galleryWall.getAddApplicationButton(), 5000));
       //browser.driver.wait(protractor.until.elementIsEnabled(galleryWall.getAddApplicationButton(), 5000));
-      browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 5000);
+      browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
       galleryWall.addApplication();
 
       expect(addAppWizard.isDisplayed()).toBeTruthy();
@@ -220,6 +222,9 @@
 
       //browser.wait(until.visibilityOf(addAppHcfApp.name()), 5000);
       browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
+
+      // Wait until form control is available
+      browser.wait(until.presenceOf(addAppWizard.getElement()), 15000);
 
       addAppHcfApp.name().addText(appName);
       expect(addAppHcfApp.host().getValue()).toBe(appName);
