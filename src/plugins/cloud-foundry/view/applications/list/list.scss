@@ -30,7 +30,7 @@ $applications-msg-height: 50px;
 
     margin-right: 8px;
     margin-left: 8px;
-    button:focus, button:hover {
+    button:not([disabled]):focus, button:not([disabled]):hover {
       outline: none;
       color: $hpe-primary;
     }
@@ -71,7 +71,6 @@ $applications-msg-height: 50px;
       }
     }
   }
-
 }
 
 .applications-header {
