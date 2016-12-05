@@ -26,7 +26,7 @@
       $compile($element)($scope);
       $scope.$apply();
 
-      applicationsTableDirectiveCtrl = $element.controller('applicationsTable');
+      applicationsTableDirectiveCtrl = $element.controller('tableView');
     }));
 
     it('should be defined', function () {

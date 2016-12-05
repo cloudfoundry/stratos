@@ -1076,7 +1076,7 @@
      */
     onGetAppOrgAndSpace: function (application) {
       this.application.organization = application.entity.space.entity.organization;
-      this.application.space = application.space;
+      this.application.space = application.entity.space;
       this.application.metadata = application.metadata;
     },
 
