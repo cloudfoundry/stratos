@@ -15,9 +15,14 @@
 
       dd {
         text-transform: none;
+        .problematic-token-indicator {
+          margin-left: $padding-xs-horizontal;
+        }
         .legacy-token {
           color: $status-warning;
-          margin-left: $padding-xs-horizontal;
+        }
+        .invalid-token {
+          color: $status-critical;
         }
       }
     }

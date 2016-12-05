@@ -6,7 +6,7 @@
   <bounce-spinner classes="bounce-spinner-sm"></bounce-spinner>
 </div>
 <div ng-if="!applicationDeliveryPipelineCtrl.isDeleting && applicationDeliveryPipelineCtrl.project">
-  <div ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()" class="alert alert-warning alert-card">
+  <div ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()" class="alert alert-card-warning">
     <h4>Legacy Token Detected</h4>
     <p translate>
       Your Helion Code Engine pipeline is using a legacy OAuth token.
@@ -14,13 +14,27 @@
       <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a Personal Access Token</a>.
     </p>
   </div>
-  <div ng-if="applicationDeliveryPipelineCtrl.isTokenDeleted()" class="alert alert-warning alert-card">
+  <div ng-if="applicationDeliveryPipelineCtrl.isTokenDeleted()" class="alert alert-card-warning">
     <h4>Token Deleted</h4>
     <p translate>
       Your Helion Code Engine pipeline is using a token that is longer available in the Stackato Console.
       While your pipeline should continue to function normally, we suggest that you
       <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a current Personal Access Token</a>.
     </p>
+  </div>
+  <div ng-if="applicationDeliveryPipelineCtrl.isInvalidToken()" class="alert alert-card-danger">
+    <h4>Invalid Token Detected</h4>
+    <p>
+      <span translate>
+        Your Helion Code Engine pipeline is using an invalid OAuth token
+      </span>
+    <span>
+      {{ applicationDeliveryPipelineCtrl.isInvalidToken() }}.
+      </span>
+    <span translate>
+      Your pipeline will no longer function until you
+      <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a valid Personal Access Token</a>.
+    </span>
   </div>
   <div class="card panel panel-default">
     <div class="panel-heading action-header">
@@ -44,8 +58,11 @@
           </dd>
           <dt translate>token</dt>
           <dd>
+            <div style="display: flex; flex-flow: row nowrap; align-items: center; justify-content: flex-end">
             <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">{{ applicationDeliveryPipelineCtrl.getTokenName() | uppercase}} </a>
-            <span class="legacy-token helion-icon helion-icon-Alert_pressed" ng-if="applicationDeliveryPipelineCtrl.isLegacyToken() || applicationDeliveryPipelineCtrl.isTokenDeleted()"></span>
+            <span class="problematic-token-indicator legacy-token helion-icon helion-icon-Warning_S" ng-if="applicationDeliveryPipelineCtrl.isLegacyToken() || applicationDeliveryPipelineCtrl.isTokenDeleted()"></span>
+            <span class="problematic-token-indicator invalid-token helion-icon helion-icon-Critical_S" ng-if="applicationDeliveryPipelineCtrl.isInvalidToken()"></span>
+            </div>
           </dd>
           <dt translate>repo</dt>
           <dd>

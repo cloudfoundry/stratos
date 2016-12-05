@@ -112,8 +112,11 @@
       var promises = [];
       // List VCS tokens if needed
       if (!that.vcsModel.vcsTokensFetched) {
-        promises.push(that.vcsModel.listVcsTokens());
+        promises.push(that.vcsModel.listVcsTokens().then(function () {
+          that.vcsModel.checkTokensValidity();
+        }));
       }
+
       // List VCS clients if needed
       if (!that.vcsModel.vcsClientsFetched) {
         promises.push(that.vcsModel.listVcsClients());
@@ -292,6 +295,20 @@
         return DELETED_TOKEN;
       }
       return tokenInUse.token.name;
+    },
+
+    isInvalidToken: function () {
+      var patGuid = this._getPatGuid();
+      if (_.isUndefined(patGuid)) {
+        // the project uses a legacy OAuth token
+        return false;
+      }
+      var tokenInUse = this.vcsModel.getToken(patGuid);
+      if (_.isUndefined(tokenInUse)) {
+        // The user deleted the token from the Console...
+        return false;
+      }
+      return this.vcsModel.invalidTokens[tokenInUse.token.guid];
     },
 
     manageVcsTokens: function () {
