@@ -37,7 +37,7 @@
       </button>
     </div>
   </div>
-  <div>
+  <div class="application-header-right">
     <button class="btn btn-primary"
             ng-if="applicationsListCtrl.showAddApplicationButton()"
             ng-disabled="applicationsListCtrl.disableAddApplicationButton()"
@@ -88,7 +88,7 @@
     </div>
   </div>
 
-  <div class="app-sorting" ng-hide="!applicationsListCtrl.model.showCardLayout">
+  <div class="apps-sorting" ng-hide="!applicationsListCtrl.model.showCardLayout">
     <applications-sorting></applications-sorting>
   </div>
 

@@ -28,6 +28,7 @@
       <td class="text-uppercase">{{app.instanceCount || 0}}/{{app.entity.instances}}</td>
       <td>{{ app.entity.disk_quota | mbToHumanSize }}</td>
       <td>{{ app.entity.memory | mbToHumanSize }}</td>
+      <td>{{ app.metadata.created_at | amDateFormat:'L - LTS' }}</td>
     </tr>
     </tbody>
   </table>

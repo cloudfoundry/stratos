@@ -5,7 +5,7 @@
   </div>
   <div class="app-sort-actions" ng-class="{ 'show-sort-actions': applicationsSortingCtrl.showSortActions }">
     <span translate>Sort by</span>
-    <button class="btn" ng-repeat="sortOption in applicationsSortingCtrl.sortOptions"
+    <button class="btn btn-default" ng-repeat="sortOption in applicationsSortingCtrl.sortOptions"
             ng-class="applicationsSortingCtrl.isCurrentSort(sortOption) ? 'btn-enabled' : 'btn-disabled'"
             ng-click="applicationsSortingCtrl.sort(sortOption)">
       <span ng-if="applicationsSortingCtrl.isCurrentSort(sortOption)" class="helion-icon adjust-icon pull-right"

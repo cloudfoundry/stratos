@@ -34,7 +34,8 @@
       {name: gettext('Status'), value: 'state.label'},
       {name: gettext('Instances'), value: 'instanceCount'},
       {name: gettext('Disk Quota'), value: 'entity.disk_quota'},
-      {name: gettext('Memory Utilization'), value: 'entity.memory'}
+      {name: gettext('Memory Utilization'), value: 'entity.memory'},
+      {name: gettext('Creation Date'), value: 'metadata.created_at'}
     ];
 
     function updateStTableState() {
@@ -42,15 +43,6 @@
       // When using a custom pipe function we need to do ourselves
       that.stApps = [].concat(that.apps);
     }
-
-    $scope.$watch(
-      function () {
-        return model.currentSortOption + '_' + model.sortAscending;
-      },
-      function () {
-        updateStTableState();
-      }
-    );
 
     $scope.$watch(
       function () {

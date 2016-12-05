@@ -38,17 +38,17 @@
     this.sortOptions = [
       {label: 'Application Name', value: 'entity.name'},
       {label: 'Status', value: 'state.label'},
-      {label: 'Instances Count', value: 'instanceCount'},
+      {label: 'Instance Count', value: 'instanceCount'},
       {label: 'Disk Quota', value: 'entity.disk_quota'},
       {label: 'Memory Utilization', value: 'entity.memory'},
       {label: 'Creation Date', value: 'metadata.created_at'}
     ];
 
-    this.model.currentSortOption = this.model.currentSortOption || this.sortOptions[0].value;
+    this.model.currentSortOption = this.model.currentSortOption || this.sortOptions[5].value;
     // Flag for signaling that an update to
     // filteredApplications is currently going on
     this.updatingFilteredApplications = false;
-    this.model.sortAscending = true;
+    this.model.sortAscending = angular.isDefined(this.model.sortAscending) ? this.model.sortAscending : false;
     // Used to toggle display of sort action buttons when screen width is too small
     this.showSortActions = true;
 

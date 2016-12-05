@@ -1,4 +1,7 @@
 .applications-sorting {
+
+  padding-bottom: $hpe-unit-space;
+
   @media (min-width: $main-nav-width + $gallery-card-side-margins + 2 * $gallery-card-max-width) {
     .show-message {
       display: none;
@@ -10,19 +13,15 @@
     }
 
     .app-sort-actions {
-      button{
+      button {
         margin-top: 4px;
       }
     }
-
-
-    }
+  }
 
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-right: 16px;
-  padding-bottom: $hpe-unit-space;
 
   .app-sort-actions {
 
@@ -30,7 +29,6 @@
     flex-direction: row;
     justify-content: flex-end;
     flex-wrap: wrap;
-    padding-bottom: $hpe-unit-space;
 
     span {
       padding-top: 8px;
@@ -40,7 +38,7 @@
 
     button {
       text-transform: none;
-      margin-left: 4px;
+      margin-left: 6px;
       font-size: 16px;
       .adjust-icon {
         padding-left: 8px;
@@ -48,19 +46,13 @@
       }
     }
 
-    button:hover, button:active{
-      outline: $button-focus-outline-width solid $gray-light;
-     }
-
-    .btn-disabled {
-      background: none;
-      color: $gray-light;
-      border-color: $gray-light;
-    }
-
     .btn-enabled {
       color: $white;
       background-color: $gray-dark;
+
+      &:focus:not(:hover) {
+        outline: none;
+      }
     }
 
   }
