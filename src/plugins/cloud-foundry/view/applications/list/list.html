@@ -2,40 +2,45 @@
   <div class="applications-header font-semi-bold" translate>
     Applications
     <div class="applications-count" ng-if="applicationsListCtrl.ready">
-      <span ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
+      <span
+        ng-if="applicationsListCtrl.model.filteredApplications.length === applicationsListCtrl.model.unfilteredApplicationCount">
         ( {{ applicationsListCtrl.model.unfilteredApplicationCount }} )
       </span>
-      <span ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount">
+      <span
+        ng-if="applicationsListCtrl.model.filteredApplications.length !== applicationsListCtrl.model.unfilteredApplicationCount">
         ( {{ applicationsListCtrl.model.filteredApplications.length }} / {{ applicationsListCtrl.model.unfilteredApplicationCount }} )
       </span>
     </div>
 
     <bounce-spinner classes="bounce-spinner-sm" ng-if="applicationsListCtrl.loading"></bounce-spinner>
   </div>
-  <div class="application-header-centre">
+  <div class="application-header-centre" ng-if="applicationsListCtrl.model.clusterCount > 0">
     <form>
       <div class="form-group search-field" focusable-input>
         <input type="text" class="form-control" id="applications-text" name="applications-text"
                ng-model="applicationsListCtrl.filter.text"
                ng-model-options='{ debounce: 100 }'
                ng-change="applicationsListCtrl.setText()"
+               ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps"
                placeholder="{{'Type to search by name' | translate}}"/>
       </div>
     </form>
     <div class="view-buttons">
       <button class="btn btn-link btn-border-less"
               ng-class="applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
-              type="button" ng-click="applicationsListCtrl.goToGalleryView(true)">
+              type="button" ng-click="applicationsListCtrl.goToGalleryView(true)"
+              ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps">
         <div class="helion-icon helion-icon-lg helion-icon-Card_Sort"></div>
       </button>
       <button class="btn btn-link btn-border-less"
               ng-class="!applicationsListCtrl.model.showCardLayout ? 'btn-active': 'btn-disabled'"
-              type="button" ng-click="applicationsListCtrl.goToGalleryView(false)">
+              type="button" ng-click="applicationsListCtrl.goToGalleryView(false)"
+              ng-disabled="!applicationsListCtrl.filter.text && !applicationsListCtrl.model.hasApps">
         <div class="helion-icon helion-icon-lg helion-icon-r90 helion-icon-Divide_to_four"></div>
       </button>
     </div>
   </div>
-  <div>
+  <div class="application-header-right">
     <button class="btn btn-primary"
             ng-if="applicationsListCtrl.showAddApplicationButton()"
             ng-disabled="applicationsListCtrl.disableAddApplicationButton()"
@@ -86,6 +91,10 @@
     </div>
   </div>
 
+  <div class="apps-sorting" ng-hide="!applicationsListCtrl.model.hasApps || !applicationsListCtrl.model.showCardLayout">
+    <applications-sorting></applications-sorting>
+  </div>
+
   <div class="applications-empty" ng-if="!applicationsListCtrl.model.hasApps">
     <div ng-if="applicationsListCtrl.model.clusterCount === 0">
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>
@@ -102,7 +111,8 @@
           <div class="applications-msg" translate>You have no applications and</div>
           <div class="applications-msg" translate>there are no spaces where you can add any.</div>
           <div class="applications-cta">
-            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints Dashboard</a>
+            <a class="btn-link" ng-click="applicationsListCtrl.getEndpointsLink()" translate>Use the Endpoints
+              Dashboard</a>
             <span translate>to manage spaces.</span>
           </div>
         </div>
@@ -116,7 +126,8 @@
         <div class="helion-icon helion-icon-3x helion-icon-Application"></div>
         <div class="applications-msg" ng-bind="applicationsListCtrl.getNoAppsMessage()"></div>
         <div class="applications-cta">
-          <a class="btn btn-link" ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')"  translate>
+          <a class="btn btn-link" ng-click="applicationsListCtrl.eventService.$emit('cf.events.START_ADD_APP_WORKFLOW')"
+             translate>
             Add an application
           </a>
         </div>

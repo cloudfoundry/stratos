@@ -88,6 +88,10 @@
     this.unfilteredApplicationCount = undefined;
     // Page number (not zero based, used in UX)
     this.appPage = 1;
+
+    // Sorting options
+    this.currentSortOption = undefined;
+    this.sortAscending = undefined;
   }
 
   angular.extend(Application.prototype, {
@@ -611,7 +615,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .RetrieveApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.onGetAppOrgAndSpace(response.data.entity);
+          that.onGetAppOrgAndSpace(response.data);
         });
     },
 
@@ -1067,12 +1071,13 @@
      * @function onGetAppOrgAndSpace
      * @memberof  cloud-foundry.model.application
      * @description onGetAppOrgAndSpace handler at model layer
-     * @param {object} entity - response entity
+     * @param {object} application - response
      * @private
      */
-    onGetAppOrgAndSpace: function (entity) {
-      this.application.organization = entity.space.entity.organization;
-      this.application.space = entity.space;
+    onGetAppOrgAndSpace: function (application) {
+      this.application.organization = application.entity.space.entity.organization;
+      this.application.space = application.entity.space;
+      this.application.metadata = application.metadata;
     },
 
     /**
