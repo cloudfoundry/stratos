@@ -69,7 +69,8 @@
       templatePaths: [
         paths.src + '**/app/**/*.html',
         paths.src + '**/plugins/**/*.html',
-        paths.src + '../framework/src/**/*.html'
+        paths.src + '../framework/src/**/*.html',
+        paths.src + '../framework/theme/**/*.svg'
       ],
 
       jsFiles: [
