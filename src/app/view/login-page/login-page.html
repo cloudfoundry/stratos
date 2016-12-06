@@ -15,7 +15,7 @@
   <div id="section-login-panel" class="login-panel">
     <login-form></login-form>
     <div class="login-panel-helion-logo">
-      <img class="hpe-logo" ng-src="images/brand_product_family_logo.png"/>
+    <img ng-if="!!OEM_CONFIG.PRODUCT_FAMILY_LOGO_HREF" class="hpe-logo" ng-src="images/brand_product_family_logo.png"/>
     </div>
     <page-footer mode="footer" class="position-bottom login-footer brand-footer"></page-footer>
   </div>
