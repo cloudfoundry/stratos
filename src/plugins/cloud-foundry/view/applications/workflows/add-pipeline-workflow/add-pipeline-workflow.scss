@@ -2,7 +2,7 @@ add-app-workflow,
 add-pipeline-workflow {
   table.table {
     border: 1px solid transparent;
-    
+
     tbody, tr:nth-child(2) {
       border: 1px solid $table-border-color;
     }
@@ -42,5 +42,13 @@ add-pipeline-workflow {
 
   .step-spinner {
     padding: $hpe-unit-space 0;
+  }
+
+  .manage-tokens-link {
+    color: $hpe-primary;
+    &:hover {
+      color: #01765b;
+      cursor: pointer;
+    }
   }
 }

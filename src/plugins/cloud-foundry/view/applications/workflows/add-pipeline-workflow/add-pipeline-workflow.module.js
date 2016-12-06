@@ -285,15 +285,14 @@
                 return that.$q.reject(msg);
               }
             });
-        }, function (error) {
-          // Some other exception occurred
-          var message = gettext('There was a problem retrieving VCS instances.');
+        }).catch(function (error) {
+          var message = gettext('There was a problem retrieving Code Engine VCS instances.');
 
           var codeEngineErrorDetails = that.utils.extractCodeEngineError(error);
           if (codeEngineErrorDetails || _.isString(error)) {
-            message = gettext('Failed to retrieve VCS instances due to following exception: ') + (codeEngineErrorDetails || error);
+            message = gettext('Failed to retrieve Code Engine VCS instances due to following error: ') + (codeEngineErrorDetails || error);
           }
-          message = message + gettext(' Please try again. If problem persists, please contact your administrator. ');
+          message = message + gettext(' Please try again. If the problem persists, please contact your administrator.');
 
           return that.$q.reject(message);
         });

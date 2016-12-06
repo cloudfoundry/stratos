@@ -98,6 +98,14 @@
     this.btnText = this.workflow.btnText;
     this.steps = this.workflow.steps || [];
 
+    // allowJump can be a value or function
+    if (!_.isFunction(this.workflow.allowJump)) {
+      var allowJump = this.workflow.allowJump;
+      this.workflow.allowJump = function () {
+        return allowJump;
+      };
+    }
+
     this.initPromise.then(function () {
       that.onInitSuccess();
       that.postInitTask.resolve();

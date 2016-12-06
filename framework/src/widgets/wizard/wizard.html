@@ -7,8 +7,8 @@
     <ul class="wizard-nav tabbed-nav nav nav-pills nav-stacked col-xs-12 col-sm-3"
       ng-if="!wizardCtrl.workflow.hideStepNavStack">
       <li class="wizard-nav-item nav-item"
-        ng-class="{ 'complete': wizardCtrl.currentIndex > $index, 'active': wizardCtrl.currentIndex === $index, 'disabled': !wizardCtrl.workflow.allowJump && wizardCtrl.currentIndex !== $index }"
-        ng-click="wizardCtrl.workflow.allowJump && wizardCtrl.switchTo($index)"
+        ng-class="{ 'complete': wizardCtrl.currentIndex > $index, 'active': wizardCtrl.currentIndex === $index, 'disabled': !wizardCtrl.workflow.allowJump() && wizardCtrl.currentIndex !== $index }"
+        ng-click="wizardCtrl.workflow.allowJump() && wizardCtrl.switchTo($index)"
         ng-repeat="step in wizardCtrl.steps"
         ng-if="step.ready">
         <a>{{ ::step.title }}</a>

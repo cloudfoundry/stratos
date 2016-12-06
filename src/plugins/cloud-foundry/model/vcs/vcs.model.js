@@ -184,36 +184,48 @@
       }
 
       var that = this;
-      return this.listVcsTokens().then(function () {
-        var supported = _.filter(that.vcsTokens, function (vcsToken) {
-          var vcsInfo = SUPPORTED_VCS_TYPES[that.expandVcsType(vcsToken.vcs)];
-          // Make sure the VCS is a supported type and is registered in Code Engine
-          return vcsInfo && _.find(hceVcsInstances, function (hceVcs) {
-            return hceVcs.browse_url === vcsToken.vcs.browse_url;
+      var clientsP = this.listVcsClients();
+
+      // List all tokens and check their validity
+      var tokensP = this.listVcsTokens().then(function (vcsTokens) {
+        return that.checkTokensValidity().then(function () {
+          return vcsTokens;
+        });
+      });
+
+      return this.$q.all([clientsP, tokensP]).then(function (vals) {
+        var clients = vals[0];
+        var tokens = vals[1];
+
+        var clientsInCodeEngine = _.filter(clients, function (vcsClient) {
+          // Make sure the VCS is registered in Code Engine
+          return _.find(hceVcsInstances, function (hceVcs) {
+            return vcsClient.browse_url === hceVcs.browse_url;
           });
         });
 
-        that.supportedVcsInstances = _.map(supported, function (supportedVcs) {
-          var vcs = _.clone(SUPPORTED_VCS_TYPES[that.expandVcsType(supportedVcs.vcs)]);
+        that.supportedVcsInstances = _.map(clientsInCodeEngine, function (supportedVcs) {
+          var vcs = _.clone(SUPPORTED_VCS_TYPES[that.expandVcsType(supportedVcs)]);
 
           var hceVcs = _.find(hceVcsInstances, function (hceVcs) {
-            return hceVcs.browse_url === supportedVcs.vcs.browse_url;
+            return supportedVcs.browse_url === hceVcs.browse_url;
           });
 
-          vcs.label = supportedVcs.vcs.label;
-          vcs.browse_url = supportedVcs.vcs.browse_url;
-          vcs.token_name = supportedVcs.token.name;
+          supportedVcs.tokens = _.filter(tokens, function (vcsToken) {
+            return vcsToken.vcs.guid === supportedVcs.guid;
+          });
+
+          vcs.label = supportedVcs.label;
+          vcs.browse_url = supportedVcs.browse_url;
           vcs.value = supportedVcs;
           vcs.value.vcs_id = hceVcs.vcs_id;
           return vcs;
         });
-
         return that.supportedVcsInstances;
       }, function () {
         var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
         return that.$q.reject(msg);
       });
-
     },
 
     /**
