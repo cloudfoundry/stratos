@@ -173,7 +173,8 @@
             return {
               opened: $q.defer().promise,
               closed: $q.defer().promise,
-              rendered: $q.defer().promise
+              rendered: $q.defer().promise,
+              result: $q.defer().promise
             };
           });
 
@@ -188,7 +189,8 @@
             return {
               opened: $q.defer().promise,
               closed: $q.defer().promise,
-              rendered: $q.defer().promise
+              rendered: $q.defer().promise,
+              result: $q.defer().promise
             };
           });
 
@@ -205,7 +207,8 @@
             return {
               opened: $q.defer().promise,
               closed: $q.defer().promise,
-              rendered: $q.defer().promise
+              rendered: $q.defer().promise,
+              result: $q.defer().promise
             };
           });
 

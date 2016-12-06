@@ -1,6 +1,6 @@
 // Generate styles for the stacked detail views
 @for $i from 1 through 10 {
-  .modal.detail-view.fade.in:nth-child(#{$i + 1}) {
+  .detail-view.detail-view-stack-#{$i} {
       left: $i * -$detail-view-inset;
       top: $i * $detail-view-inset;
       bottom: $i * $detail-view-inset;
