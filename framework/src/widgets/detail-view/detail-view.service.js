@@ -60,8 +60,10 @@
       }
 
       // Go through all opened detail views and updated their stacking styles
-      angular.forEach(angular.element(".modal.detail-view"), function (value, key) {
+      angular.forEach(angular.element('.modal.detail-view'), function (value, key) {
+        /* eslint-disable angular/angularelement */
         var v = $(value);
+        /* eslint-enable angular/angularelement */
         v.removeClass('detail-view-stack-' + key);
         v.addClass('detail-view-stack-' + (key + 1));
       });
@@ -116,9 +118,11 @@
 
       modal.result.finally(function () {
         // Go through all opened detail views and updated their stacking styles
-        angular.forEach(angular.element(".modal.detail-view"), function (value, key) {
+        angular.forEach(angular.element('.modal.detail-view'), function (value, key) {
           if (key > 0) {
+            /* eslint-disable angular/angularelement */
             var v = $(value);
+            /* eslint-enable angular/angularelement */
             v.removeClass('detail-view-stack-' + key);
             v.addClass('detail-view-stack-' + (key - 1));
           }
