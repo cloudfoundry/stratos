@@ -116,7 +116,7 @@
      * @public
      */
     function createEndpointEntries(endpoints) {
-      var activeEndpoints = [];
+      var activeEndpointsKeys = [];
       // Create or update the generic 'endpoint' object used to populate the dashboard table
       _.forEach(vcsModel.vcsClients, function (vcs) {
         var endpoint = _.find(endpoints, function (e) { return e.guid === vcs.guid; });
@@ -130,7 +130,7 @@
           };
           endpoints.push(endpoint);
         }
-        activeEndpoints.push(endpoint.key);
+        activeEndpointsKeys.push(endpoint.key);
 
         endpoint.name = vcs.label;
         endpoint.type = gettext(vcsModel.getTypeLabel(vcs));
@@ -138,7 +138,28 @@
         endpoint.actionsTarget = vcs;
         endpoint.actions = _createInstanceActions(endpoints);
       });
-      return activeEndpoints;
+
+      _cleanupStaleEndpoints(endpoints, activeEndpointsKeys);
+    }
+
+    function _cleanupStaleEndpoints(allEndpoints, activeEndpointsKeys) {
+
+      var myEndpoints = _.filter(allEndpoints, function (anEndpoint) {
+        return anEndpoint.key.indexOf(endpointPrefix) === 0;
+      });
+
+      var staleEndpointsKeys = _.differenceWith(myEndpoints, activeEndpointsKeys, function (anEndpoint, aKey) {
+        return anEndpoint.key === aKey;
+      }).map(function (anEndpoint) {
+        return anEndpoint.key;
+      });
+
+      for (var i = allEndpoints.length - 1; i >= 0; i--) {
+        var endpoint = allEndpoints[i];
+        if (staleEndpointsKeys.indexOf(endpoint.key) > -1) {
+          allEndpoints.splice(i, 1);
+        }
+      }
     }
 
     /**

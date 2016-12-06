@@ -115,7 +115,7 @@
      * @public
      */
     function createEndpointEntries(endpoints) {
-      var activeEndpoints = [];
+      var activeEndpointsKeys = [];
       var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       // Create the generic 'endpoint' object used to populate the dashboard table
@@ -139,7 +139,7 @@
           };
           endpoints.push(endpoint);
         }
-        activeEndpoints.push(endpoint.key);
+        activeEndpointsKeys.push(endpoint.key);
 
         endpoint.actions = _createInstanceActions(endpoints, isValid, hasExpired);
         endpoint.visit = isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
@@ -174,7 +174,29 @@
           };
         }
       });
-      return activeEndpoints;
+
+      _cleanupStaleEndpoints(endpoints, activeEndpointsKeys);
+
+    }
+
+    function _cleanupStaleEndpoints(allEndpoints, activeEndpointsKeys) {
+
+      var myEndpoints = _.filter(allEndpoints, function (anEndpoint) {
+        return anEndpoint.key.indexOf(endpointPrefix) === 0;
+      });
+
+      var staleEndpointsKeys = _.differenceWith(myEndpoints, activeEndpointsKeys, function (anEndpoint, aKey) {
+        return anEndpoint.key === aKey;
+      }).map(function (anEndpoint) {
+        return anEndpoint.key;
+      });
+
+      for (var i = allEndpoints.length - 1; i >= 0; i--) {
+        var endpoint = allEndpoints[i];
+        if (staleEndpointsKeys.indexOf(endpoint.key) > -1) {
+          allEndpoints.splice(i, 1);
+        }
+      }
     }
 
     /**

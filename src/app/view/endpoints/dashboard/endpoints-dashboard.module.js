@@ -173,20 +173,9 @@
       return false;
     }
 
-    function _cleanupStaleEndpoints(activeEndpoints) {
-      for (var i = that.endpoints.length - 1; i >= 0; i--) {
-        var endpoint = that.endpoints[i];
-        if (activeEndpoints.indexOf(endpoint.key) < 0) {
-          that.endpoints.splice(i, 1);
-        }
-      }
-    }
-
     function _updateEndpointsFromCache() {
-      var activeEndpoints = _.flatten(callForAllProviders('createEndpointEntries', that.endpoints));
-      _cleanupStaleEndpoints(activeEndpoints);
-
-        _updateWelcomeMessage();
+      callForAllProviders('createEndpointEntries', that.endpoints);
+      _updateWelcomeMessage();
       that.initialised = true;
     }
 
