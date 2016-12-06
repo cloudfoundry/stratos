@@ -54,7 +54,7 @@ navbar > nav.main-nav-header {
       top: 0;
       left: 0;
       width: $main-nav-icons-width;
-      text-align: center; 
+      text-align: center;
 
       > i {
         line-height: $page-header-height;
@@ -263,7 +263,7 @@ navbar > .main-nav-menu {
   .navbar-nav {
     float: left;
     margin: 0;
-    
+
     > li {
       float: left;
     }
@@ -304,7 +304,7 @@ navbar > .main-nav-menu {
       .navitem-label {
         display: inline-block;
       }
-      
+
 
       li.navitem-bottom {
         position: relative;
@@ -384,14 +384,13 @@ div.user-avatar {
       height: $user-avatar-image-size;
       width: $user-avatar-image-size;
       border-radius: 50%;
-      border: 0;
       opacity: 0;
       transition: opacity .25s ease-in-out;
       background-color: $hpe-primary;
       display: flex;
       position: absolute;
       top: 0;
-      
+
       &:after {
         height: $user-avatar-image-size;
         width: $user-avatar-image-size;
@@ -400,17 +399,17 @@ div.user-avatar {
         content: "\e980";
         text-align: center;
         line-height: 36px;
-        margin-right: 1px;        
+        margin-right: 1px;
       }
 
       &:hover {
         opacity: 1;
-        transition: opacity .25s ease-in-out;
+        transition: opacity .1s linear;
       }
     }
 
     &:hover {
       border-color: $hpe-primary;
-    } 
+    }
   }
 }
