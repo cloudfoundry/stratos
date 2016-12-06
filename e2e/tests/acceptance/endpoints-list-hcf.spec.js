@@ -38,8 +38,8 @@
       });
 
       it('should show the `no registered endpoints` message', function () {
-        element(by.css('.view-msg')).getText().then(function (text) {
-          expect(text).toEqual('There are no registered Helion Cloud Foundry endpoints.');
+        element(by.css('.applications-msg')).getText().then(function (text) {
+          expect(text).toEqual('No connected Helion Cloud Foundry endpoints.');
         });
       });
     });

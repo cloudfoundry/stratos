@@ -3,6 +3,9 @@ table {
   letter-spacing: $hpe-letter-spacing;
   tbody > tr.vertical-centered > td {
     vertical-align: middle;
+    th[st-sort] {
+      cursor: pointer;
+    }
   }
 
   thead > tr {

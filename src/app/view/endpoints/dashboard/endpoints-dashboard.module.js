@@ -107,10 +107,9 @@
      * @memberof app.view.endpoints.dashboard
      * @name register
      * @description Register a service endpoint
-     * @param {string} type - type of endpoint being registered. selects the initial 'type' drop down value
      */
-    this.register = function (type) {
-      registerService.add($scope, type).then(function () {
+    this.register = function () {
+      registerService.show($scope).then(function () {
         _updateEndpoints();
       });
     };
@@ -187,10 +186,7 @@
       var activeEndpoints = _.flatten(callForAllProviders('createEndpointEntries', that.endpoints));
       _cleanupStaleEndpoints(activeEndpoints);
 
-      if (!that.initialised) {
-        // Show welcome message only if this is the first time around and there no endpoints
         _updateWelcomeMessage();
-      }
       that.initialised = true;
     }
 

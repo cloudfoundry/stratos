@@ -135,6 +135,10 @@
         paths.framework + 'src/**/*.html'
       ],
 
+      frameworkScssFiles: [
+        paths.framework + '**/*.scss'
+      ],
+
       scssFiles: [
         paths.src + '*.scss',
         paths.src + 'app/**/*.scss',

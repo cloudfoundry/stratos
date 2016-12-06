@@ -38,13 +38,6 @@
   function cnsiServiceFactory($q, $state, $interpolate, modelManager, vcsService, utilsService, errorService,
                                          notificationsService, credentialsDialog, confirmDialog) {
     var that = this;
-
-    var currentUserAccount = modelManager.retrieve('app.model.account');
-    var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-
     var endpointPrefix = 'cnsi_';
 
     return {
@@ -63,6 +56,7 @@
      * @public
      */
     function haveInstances() {
+      var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       return serviceInstanceModel.serviceInstances && serviceInstanceModel.serviceInstances.length > 0;
     }
 
@@ -74,6 +68,9 @@
      * @public
      */
     function updateInstances() {
+      var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list(), stackatoInfo.getStackatoInfo()])
         .then(function () {
 
@@ -119,6 +116,8 @@
      */
     function createEndpointEntries(endpoints) {
       var activeEndpoints = [];
+      var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
 
@@ -171,13 +170,7 @@
           // Service token has expired
           endpoint.error = {
             message: gettext('Token has expired. Try reconnecting to this endpoint to resolve this problem.'),
-            status: 'warning'
-          };
-        } else if (endpoint.connected === 'unconnected') {
-          // Service token has expired
-          endpoint.error = {
-            message: gettext('The Console has no credentials for this endpoint. Connect to resolve this problem.'),
-            status: 'info'
+            status: 'error'
           };
         }
       });
@@ -215,6 +208,7 @@
         });
       }
 
+      var currentUserAccount = modelManager.retrieve('app.model.account');
       if (currentUserAccount.isAdmin()) {
         actions.push({
           name: gettext('Unregister'),
@@ -227,6 +221,7 @@
     }
 
     function _unregister(endpoints, serviceInstance) {
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       confirmDialog({
         title: gettext('Unregister Endpoint'),
         description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\''))({name: serviceInstance.name}),
@@ -236,6 +231,7 @@
           no: gettext('Cancel')
         },
         callback: function () {
+          var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
           serviceInstanceModel.remove(serviceInstance).then(function () {
             notificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
               name: serviceInstance.name
@@ -252,6 +248,7 @@
     }
 
     function _connect(endpoints, serviceInstance) {
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       that.dialog = credentialsDialog.show({
         activeServiceInstance: serviceInstance,
         onConnectCancel: function () {
@@ -284,6 +281,8 @@
     }
 
     function _disconnect(endpoints, serviceInstance) {
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       userServiceInstanceModel.disconnect(serviceInstance.guid)
         .catch(function (error) {
           notificationsService.notify('error', gettext('Failed to disconnect endpoint \'{{name}}\''), {

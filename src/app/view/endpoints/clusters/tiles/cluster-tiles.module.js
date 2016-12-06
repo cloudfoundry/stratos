@@ -60,6 +60,7 @@
     this.userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.currentUserAccount = modelManager.retrieve('app.model.account');
     this.serviceInstances = {};
     this.state = '';
 

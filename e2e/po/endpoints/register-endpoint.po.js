@@ -3,10 +3,12 @@
 
   var _ = require('../../../tools/node_modules/lodash');
   var Q = require('../../../tools/node_modules/q');
-  var inputSelectInput = require('../widgets/input-select-input.po');
 
   module.exports = {
     isVisible: isVisible,
+    getStep: getStep,
+    getStepTwoType: getStepTwoType,
+    selectType: selectType,
     close: close,
     safeClose: safeClose,
     populateAndRegister: populateAndRegister,
@@ -20,53 +22,61 @@
     enterName: enterName,
     isNameValid: isNameValid,
     clearName: clearName,
-    enterType: enterType,
-    getType: getType,
     setSkipSllValidation: setSkipSllValidation,
     checkError: checkError
   };
 
+  function _getWizard() {
+    return element(by.css('.register-service-wizard'));
+  }
+
   function isVisible() {
-    return element(by.css('.registration-form')).isDisplayed();
+    return _getWizard().isDisplayed();
   }
 
-  function _getTypeElement() {
-    return element.all(by.css('.registration-form .form-group')).get(0);
+  function _getStepTitle() {
+    return _getWizard().element(by.css('.register-content-right > h4'));
   }
 
-  function enterType(type) {
-    var label = _typeValueToLabel(type);
-    return inputSelectInput.selectOptionByLabel(_getTypeElement(), label);
-  }
-
-  function getType() {
-    return inputSelectInput.getValue(_getTypeElement()).then(function (label) {
-      return _typeLabelToValue(label);
+  function getStep() {
+    return _getStepTitle().getText().then(function (text) {
+      text = text.trim();
+      if (text.indexOf('Select an Endpoint Type') === 0) {
+        return 1;
+      } else if (text.indexOf('Register a') === 0) {
+        return 2;
+      }
+      return -1;
     });
   }
 
-  function _typeValueToLabel(type) {
+  function selectType(type) {
+    var registerButtons = _getWizard().all(by.css('.btn.btn-sm.btn-link'));
     switch (type) {
       case 'hcf':
-        return 'Helion Cloud Foundry';
+        return registerButtons.get(0).click();
       case 'hce':
-        return 'Helion Code Engine';
+        return registerButtons.get(1).click();
       default:
-        fail('Unrecognised endpoint type: ' + type);
+        fail('Cannot select known type: ', type);
         break;
     }
   }
 
-  function _typeLabelToValue(label) {
-    switch (label) {
-      case 'Helion Cloud Foundry':
-        return 'hcf';
-      case 'Helion Code Engine':
-        return 'hce';
-      default:
-        fail('Unrecognised endpoint label: ' + label);
-        break;
-    }
+  function getStepTwoType() {
+    return _getStepTitle().getText().then(function (text) {
+      text = text.trim();
+
+      switch (text) {
+        case 'Register a Helion Cloud Foundry Endpoint':
+          return 'hcf';
+        case 'Register a Helion Code Engine Endpoint':
+          return 'hce';
+        default:
+          fail('Unknown endpoint type: ', text);
+          break;
+      }
+    });
   }
 
   function close() {
@@ -84,11 +94,11 @@
   }
 
   function getClose() {
-    return element.all(by.css('.modal-footer > button')).get(0);
+    return _getWizard().element(by.css('.register-content-right > .btn.btn-default'));
   }
 
   function safeGetClose() {
-    var modalButtons = element.all(by.css('.modal-footer > button'));
+    var modalButtons = element.all(by.css('.detail-view-close'));
     return modalButtons.count().then(function (count) {
       return count > 0 ? modalButtons.get(0) : null;
     });
@@ -106,18 +116,15 @@
   }
 
   function getRegister() {
-    return element.all(by.css('.modal-footer > button')).get(1);
+    return element.all(by.css('.register-service-details-buttons button')).get(1);
   }
 
   function registerEnabled(shouldBeEnabled) {
     expect(getRegister().isEnabled()).toBe(shouldBeEnabled);
   }
 
-  function populateAndRegister(type, address, name, skipValidation) {
-    return enterType(type)
-      .then(function () {
-        return enterAddress(address);
-      })
+  function populateAndRegister(address, name, skipValidation) {
+    return enterAddress(address)
       .then(function () {
         return enterName(name);
       })
@@ -128,7 +135,7 @@
   }
 
   function _getInputAddress() {
-    return element(by.model('asyncTaskDialogCtrl.context.data.url'));
+    return _getWizard().element(by.model('wizardCtrl.options.userInput.url'));
   }
 
   function enterAddress(address) {
@@ -151,7 +158,7 @@
   }
 
   function _getInputName() {
-    return element(by.model('asyncTaskDialogCtrl.context.data.name'));
+    return element(by.model('wizardCtrl.options.userInput.name'));
   }
 
   function enterName(name) {
@@ -181,6 +188,10 @@
     });
   }
 
+  function _getSkipSllValidation() {
+    return element(by.model('wizardCtrl.options.userInput.skipSslValidation'));
+  }
+
   /**
    * @description Look for an error matching the passed RegExp or string
    * @param {Object} matchStringOrRegex a string or RegExp that will be compared against
@@ -201,18 +212,13 @@
       };
     }
 
-    var error = element(by.css('.alert.alert-danger'));
-    return error.element(by.css('p')).getText().then(function (errorText) {
+    return element(by.css('.alert.alert-danger')).getText().then(function (errorText) {
       if (testMatch(errorText)) {
         return;
       }
       return Q.reject('Error with message matching ' + matchStringOrRegex + ' not found.' +
         ' We found the following errors instead: ' + errorText);
     });
-  }
-
-  function _getSkipSllValidation() {
-    return element(by.model('asyncTaskDialogCtrl.context.data.skipSslValidation'));
   }
 
 })();
