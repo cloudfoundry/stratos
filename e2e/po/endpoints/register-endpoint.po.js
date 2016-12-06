@@ -3,6 +3,7 @@
 
   var _ = require('../../../tools/node_modules/lodash');
   var Q = require('../../../tools/node_modules/q');
+  var wizard = require('../widgets/wizard.po');
 
   module.exports = {
     isVisible: isVisible,
@@ -94,7 +95,7 @@
   }
 
   function getClose() {
-    return _getWizard().element(by.css('.register-content-right > .btn.btn-default'));
+    return wizard.getCancel(_getWizard());
   }
 
   function safeGetClose() {
@@ -116,7 +117,7 @@
   }
 
   function getRegister() {
-    return element.all(by.css('.register-service-details-buttons button')).get(1);
+    return wizard.getNext(_getWizard());
   }
 
   function registerEnabled(shouldBeEnabled) {
