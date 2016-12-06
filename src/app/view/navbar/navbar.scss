@@ -371,26 +371,21 @@ div.user-avatar {
     position: absolute;
     right: ($user-avatar-size - $user-avatar-image-size) / 2;
     top: ($user-avatar-size - $user-avatar-image-size) / 2;;
-    //border-radius: $user-avatar-image-size / 2;
-    //border: 1px solid #777;
+    border-radius: $user-avatar-image-size / 2;
+    border: 1px solid #777;
     height: $user-avatar-image-size;
     width: $user-avatar-image-size;
-
-    > svg > path {
-      fill: $page-header-fg;
-    }
+    background-image: url(app/view/assets/user-icon.png);
 
     .press-to-open {
       height: $user-avatar-image-size;
       width: $user-avatar-image-size;
-      border-radius: 50%;
-      border: 0;
+      border-radius: $user-avatar-image-size / 2;
+      border: 1px solid $hpe-primary;
       opacity: 0;
       transition: opacity .25s ease-in-out;
       background-color: $hpe-primary;
       display: flex;
-      position: absolute;
-      top: 0;
       
       &:after {
         height: $user-avatar-image-size;
