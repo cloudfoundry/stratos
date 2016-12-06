@@ -1,4 +1,5 @@
 @import "gallery-view/gallery-view";
+@import "app-sort/app-sort";
 
 $applications-msg-height: 50px;
 
@@ -13,6 +14,8 @@ $applications-msg-height: 50px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  flex-wrap: wrap;
+  margin-left: $hpe-unit-space;
 
   .form-group.search-field {
     height: 40px;
@@ -27,7 +30,7 @@ $applications-msg-height: 50px;
 
     margin-right: 8px;
     margin-left: 8px;
-    button:focus, button:hover {
+    button:not([disabled]):focus, button:not([disabled]):hover {
       outline: none;
       color: $hpe-primary;
     }
@@ -43,6 +46,29 @@ $applications-msg-height: 50px;
     }
     .btn-disabled {
       color: $actions-menu-item-disabled-fg;
+    }
+  }
+}
+
+@media (max-width: 745px) {
+  .application-header-centre {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+  .application-header-right {
+    & > button.btn {
+      margin-left: 0;
+    }
+  }
+}
+
+@media (max-width: 549px) {
+  .application-header-centre {
+    .view-buttons {
+      margin-left: 0;
+      button {
+        border: none;
+      }
     }
   }
 }
@@ -85,6 +111,11 @@ $applications-msg-height: 50px;
       text-align: right;
     }
   }
+}
+
+.apps-sorting {
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .applications-empty, .console-error-block {
