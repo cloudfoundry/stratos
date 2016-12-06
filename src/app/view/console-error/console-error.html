@@ -1,18 +1,14 @@
 <div class="container-fluid">
   <div class="content clearfix">
     <div class="container-fluid">
-      <div ng-if="errPageCtrl.error === 'notSetup'" class="panel panel-default console-welcome-message">
-        <div class="action-header">
-          <span translate>Welcome to Helion Stackato</span>
-        </div>
-        <div class="panel-body">
+      <div ng-if="errPageCtrl.error === 'notSetup'"
+           class="endpoint-notification endpoint-notification-slim endpoint-notification-error panel panel-default alert">
+          <svg-image class="endpoint-notification-icon" src="/svg/Info_Black.svg"></svg-image>
           <span translate>
-            Rapidly develop, deploy, and scale cloud applications across clouds. Connect to registered system services
-            that you need to create and deploy a pipeline, view and access clusters where your cloud native workloads
-            exist, and connect to your preferred version control system. Registered systems service are provided by your
-            systems administrator
+            In order to use the Stackato console you must connect to a registered service endpoint. Registered service
+            endpoints are provided by your system administrator. Please contact your administrator about registering
+            endpoints.
           </span>
-        </div>
       </div>
       <div class="console-error-block console-error">
         <div ng-if="errPageCtrl.error === 'notSetup'">

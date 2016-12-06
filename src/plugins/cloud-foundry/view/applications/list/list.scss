@@ -90,7 +90,8 @@ $applications-msg-height: 50px;
 .applications-empty, .console-error-block {
   clear: both;
   text-align: center;
-  padding: $hpe-unit-space*2 16px;
+  padding: $hpe-unit-space*2 0;
+  width: 80%;
   margin: auto;
 
   .applications-msg, .applications-cta {
