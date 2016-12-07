@@ -159,7 +159,7 @@
     this.$scope.$watch(function () {
       return that.model.application.project;
     }, function (newProject, oldProject) {
-      if (!_.isNil(oldProject) && newProject.id === oldProject.id) {
+      if (_.get(newProject, 'id') === _.get(oldProject, 'id')) {
         that.getPipelineData();
       }
     });
