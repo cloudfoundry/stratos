@@ -26,24 +26,27 @@
     describe('Workflow on log in (admin/non-admin + no endpoints/some endpoints)', function () {
       describe('As Admin', function () {
 
-        describe('No registered endpoints', function () {
-          beforeAll(function () {
-            resetToLoggedIn(resetTo.removeAllCnsi, true);
-          });
-
-          it('Should reach endpoints dashboard after log in', function () {
-            endpointsPage.isEndpoints().then(function (isEndpoints) {
-              expect(isEndpoints).toBe(true);
-            });
-            expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
-            expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
-          });
-
-          it('should show register button', function () {
-            expect(endpointsPage.headerRegisterVisible()).toBeTruthy();
-          });
-
-        });
+        /* eslint-disable no-warning-comments */
+        // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
+        // describe('No registered endpoints', function () {
+        //   beforeAll(function () {
+        //     resetToLoggedIn(resetTo.removeAllCnsi, true);
+        //   });
+        //
+        //   it('Should reach endpoints dashboard after log in', function () {
+        //     endpointsPage.isEndpoints().then(function (isEndpoints) {
+        //       expect(isEndpoints).toBe(true);
+        //     });
+        //     expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
+        //     expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+        //   });
+        //
+        //   it('should show register button', function () {
+        //     expect(endpointsPage.headerRegisterVisible()).toBeTruthy();
+        //   });
+        //
+        // });
+        /* eslint-enable no-warning-comments */
 
         describe('Some registered endpoints', function () {
           beforeAll(function () {
@@ -112,7 +115,7 @@
             });
 
             it('should show correct table content', function () {
-              // For each endpoint
+              // For each cnsi endpoint
               // 1) we show the correct type
               // 2) the icon is the correct 'disconnected' one
               // 3) the address is correct
@@ -125,6 +128,7 @@
                   var service;
                   // Find the name and run type dependent tests
                   endpointsPage.endpointName(index).then(function (name) {
+                    name = name.toLowerCase();
                     service = _.find(helpers.getHcfs(), function (hcf) {
                       if (hcf.register.cnsi_name === name) {
                         return hcf;
@@ -146,13 +150,18 @@
                       }
                       // 3) the address is correct
                       expect(endpointsPage.endpointUrl(index)).toBe(service.register.api_endpoint);
+                      // 2) the icon is the correct 'disconnected' one
+                      expect(endpointsPage.endpointIsDisconnected(index)).toBeTruthy();
+                      // 4) the 'connect' button is available
+                      endpointsPage.endpointConnectLink(index).then(function (button) {
+                        expect(button.isDisplayed()).toBeTruthy();
+                      });
+                    } else {
+                      /* eslint-disable no-warning-comments,angular/log,no-console */
+                      // TODO: We should beef up these tests to cover the other type of endpoint
+                      console.log('Skipping tests for service with name: ', name);
+                      /* eslint-disable no-warning-comments,angular/log,no-console */
                     }
-                  });
-                  // 2) the icon is the correct 'disconnected' one
-                  expect(endpointsPage.endpointIsDisconnected(index)).toBeTruthy();
-                  // 4) the 'connect' button is available
-                  endpointsPage.endpointConnectLink(index).then(function (button) {
-                    expect(button.isDisplayed()).toBeTruthy();
                   });
                 }
               });
@@ -180,8 +189,11 @@
               .then(function (isEndpoints) {
                 expect(isEndpoints).toBe(true);
 
+                /* eslint-disable no-warning-comments */
+                // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
                 // No endpoints ... no table
-                expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+                // expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+                /* eslint-enable no-warning-comments */
               });
           });
 
@@ -189,11 +201,14 @@
             registerEndpoint.safeClose();
           });
 
-          it('should show add form detail view when btn in welcome is pressed', function () {
-            endpointsPage.clickAddClusterInWelcomeMessage().then(function () {
-              expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-            });
-          });
+          /* eslint-disable no-warning-comments */
+          // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
+          // it('should show add form detail view when btn in welcome is pressed', function () {
+          //   endpointsPage.clickAddClusterInWelcomeMessage().then(function () {
+          //     expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
+          //   });
+          // });
+          /* eslint-enable no-warning-comments */
 
           it('should show add form detail view when btn in tile is pressed', function () {
             endpointsPage.headerRegister().then(function () {
@@ -449,7 +464,7 @@
               });
           });
 
-          it('Option is not visible', function () {
+          it('unregister is not visible', function () {
             endpointsPage.getRowWithEndpointName(helpers.getHcfs().hcf1.register.cnsi_name)
               .then(function (hcfRowIndex) {
                 expect(hcfRowIndex).toBeDefined();
@@ -463,37 +478,31 @@
       });
 
       describe('Connect/Disconnect endpoints', function () {
-
-        beforeAll(function (done) {
-          resetToLoggedIn(resetTo.resetAllCnsi, false).then(function () {
-            // endpointsPage.showEndpoints();
-            endpointsPage.isEndpoints().then(function (isEndpoints) {
-              expect(isEndpoints).toBe(true);
-            });
-            var endpointsTable = endpointsPage.getEndpointTable();
-            // Four rows, two endpoints + two endpoint not connected rows
-            expect(helpers.getTableRows(endpointsTable).count()).toBe(4);
-            done();
-          });
-        });
-
         var hcf = helpers.getHcfs().hcf1;
-        // Each cnsi has two rows (one normally hidden). So actual row is index * 2
-        var hcfRow = 2;
-
-        function ConfirmFirstService(service) {
-          // Confirm the first row is the required one (to match creds later)
-          var endpointsTable = endpointsPage.getEndpointTable();
-          helpers.getTableCellAt(endpointsTable, hcfRow, 0).getText().then(function (endpointName) {
-            expect(service.register.cnsi_name).toEqual(endpointName.toLowerCase());
-          });
-        }
+        var hcfRowIndex;
+        beforeAll(function (done) {
+          resetToLoggedIn(resetTo.resetAllCnsi, false)
+            .then(function () {
+              endpointsPage.isEndpoints().then(function (isEndpoints) {
+                expect(isEndpoints).toBe(true);
+              });
+            })
+            .then(function () {
+              // Find the HCF row to test on
+              return endpointsPage.getRowWithEndpointName(helpers.getHcfs().hcf1.register.cnsi_name);
+            })
+            .then(function (index) {
+              expect(index).toBeDefined();
+              hcfRowIndex = index;
+              done();
+            });
+        });
 
         describe('endpoint `Connect` clicked', function () {
 
           beforeAll(function (done) {
-            ConfirmFirstService(hcf);
-            endpointsPage.endpointConnectLink(hcfRow).then(function (button) {
+            // ConfirmFirstService(hcf);
+            endpointsPage.endpointConnectLink(hcfRowIndex).then(function (button) {
               button.click().then(done);
             });
           });
@@ -504,10 +513,10 @@
 
           it('should show the cluster name and URL as readonly in the credentials form', function () {
             var endpointsTable = endpointsPage.getEndpointTable();
-            var name = helpers.getTableCellAt(endpointsTable, hcfRow, 0).getText().then(function (text) {
+            var name = helpers.getTableCellAt(endpointsTable, hcfRowIndex, 0).getText().then(function (text) {
               return text.toLowerCase();
             });
-            var url = helpers.getTableCellAt(endpointsTable, hcfRow, 3).getText().then(function (text) {
+            var url = helpers.getTableCellAt(endpointsTable, hcfRowIndex, 3).getText().then(function (text) {
               return text.replace('https://', '');
             });
 
@@ -531,8 +540,8 @@
             endpointsPage.credentialsFormEndpointConnect().then(function () {
               helpers.checkAndCloseToast(/Successfully connected to '(?:hcf|hce)'/);
               var endpointsTable = endpointsPage.getEndpointTable();
-              expect(helpers.getTableCellAt(endpointsTable, hcfRow, 4).getText()).toBe('DISCONNECT');
-              expect(endpointsPage.endpointIsConnected(hcfRow)).toBeTruthy();
+              expect(helpers.getTableCellAt(endpointsTable, hcfRowIndex, 4).getText()).toBe('DISCONNECT');
+              expect(endpointsPage.endpointIsConnected(hcfRowIndex)).toBeTruthy();
             });
           });
 
@@ -557,14 +566,14 @@
         describe('endpoint `Disconnect`', function () {
           it('should update row in table when disconnected', function () {
             endpointsPage.goToEndpoints();
-            endpointsPage.endpointDisconnectLink(hcfRow)
+            endpointsPage.endpointDisconnectLink(hcfRowIndex)
               .then(function (button) {
                 return button.click();
               })
               .then(function () {
                 helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:hcf|hce)'/);
                 var endpointsTable = endpointsPage.getEndpointTable();
-                expect(helpers.getTableCellAt(endpointsTable, hcfRow, 4).getText()).toBe('CONNECT');
+                expect(helpers.getTableCellAt(endpointsTable, hcfRowIndex, 4).getText()).toBe('CONNECT');
               });
           });
 
