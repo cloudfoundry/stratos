@@ -60,10 +60,10 @@
 
       function setColSpan(newColSpan, skipCompile) {
         var colSpan = newColSpan || '100';
-        if (colSpan === elem.attr('colSpan')) {
+        if (colSpan === elem.attr('col-span')) {
           return;
         }
-        elem.attr('colSpan', colSpan);
+        elem.attr('col-span', colSpan);
         if (!skipCompile) {
           $compile(elem)(scope);
         }

@@ -78,6 +78,7 @@
         <tbody>
         <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints track by endpoint.key"
             show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
+            inline-message-colspan="5"
             table-inline-status="{{endpoint.error.status}}">
           <td ng-if="endpoint.visit" class="text-uppercase">
             <a ng-href="{{endpoint.visit()}}">{{endpoint.name}}</a>

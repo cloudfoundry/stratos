@@ -18,6 +18,7 @@
    * @returns {object} The table-inline-message directive definition object
    */
   function tableInlineMessage(path) {
+
     return {
       bindToController: {
         message: '@',
@@ -28,7 +29,6 @@
         this.statusClass = 'hpe-popover-alert-' + (this.status ? this.status : 'warning');
       },
       controllerAs: 'tableInlineMessageCtrl',
-      scope: {},
       templateUrl: path + 'widgets/table-inline-message/table-inline-message.html'
     };
   }

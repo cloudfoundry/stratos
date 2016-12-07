@@ -10,15 +10,15 @@
     <h4>Legacy Token Detected</h4>
     <p translate>
       Your Helion Code Engine pipeline is using a legacy OAuth token.
-      While your pipeline should continue to function normally, we suggest that you
+      While your pipeline may continue to function normally, we have no way of verifying this until you
       <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a Personal Access Token</a>.
     </p>
   </div>
   <div ng-if="applicationDeliveryPipelineCtrl.isTokenDeleted()" class="alert alert-card-warning">
     <h4>Token Deleted</h4>
     <p translate>
-      Your Helion Code Engine pipeline is using a token that is longer available in the Stackato Console.
-      While your pipeline should continue to function normally, we suggest that you
+      Your Helion Code Engine pipeline is using a token that is no longer available in the Stackato Console.
+      While your pipeline may continue to function normally, we have no way of verifying this until you
       <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a current Personal Access Token</a>.
     </p>
   </div>
