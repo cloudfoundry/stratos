@@ -24,6 +24,11 @@ $border: 1px solid $gray-light;
     align-items: center;
     text-align: start;
     font-weight: 600;
+    .add-new-token-icon {
+      .st0 {
+        fill: $brand-primary;
+      }
+    }
     &:hover {
       cursor: pointer;
       color: #01765b;
