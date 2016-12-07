@@ -176,7 +176,7 @@
 
       // Allow a step to support an onEnter property which can return a promise (use resolved promise if not)
       var step = this.steps[index];
-      var readyToGo = step.onEnter ? step.onEnter(this) : this.$q.when(true);
+      var readyToGo = step.onEnter ? step.onEnter(this) || this.$q.resolve() : this.$q.resolve();
 
       // Show a busy indicator if desired
       if (step.onEnter && step.showBusyOnEnter) {

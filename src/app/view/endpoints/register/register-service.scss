@@ -2,7 +2,21 @@
   .wizard {
     height: initial;
 
+    .register-content-left {
+      padding-bottom: $hpe-unit-space;
+      padding-right: $hpe-unit-space;
+
+      p:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+
     .register-content-right {
+      display: flex;
+      flex-direction: column;
+
+      padding-bottom: $hpe-unit-space;
+
       h4 {
         margin-top: 0;
       }
@@ -14,13 +28,10 @@
 
       .register-content-left {
         flex: 3 1 0;
-        padding-right: 40px
       }
 
       .register-content-right {
         flex: 5 1 0;
-        display: flex;
-        flex-direction: column;
 
         .media-list .media {
           .media-object {
@@ -81,23 +92,10 @@
 
       .register-content-left {
         flex-grow: 1;
-        padding-right: 40px
       }
 
       .register-content-right {
         flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-      }
-
-      .register-service-details-buttons {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        button {
-          margin: $hpe-unit-space 0 $hpe-unit-space/2 $hpe-unit-space/2;
-        }
       }
     }
   }
@@ -109,7 +107,6 @@
         flex-direction: column;
         .register-content-left {
           padding-right: 0;
-          padding-bottom: 40px;
         }
         .register-content-right {
           flex-basis: auto;
@@ -117,10 +114,8 @@
       }
       .register-service-details {
         flex-direction: column;
-        align-items: flex-start;
         .register-content-left {
           padding-right: 0;
-          padding-bottom: 40px;
         }
       }
     }
