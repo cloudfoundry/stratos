@@ -323,6 +323,7 @@
       },
       ghostMode: false,
       open: false,
+      notify: false,
       port: 3100,
       https: https
     }, function () {
