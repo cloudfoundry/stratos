@@ -60,8 +60,9 @@
           return t.vcs.guid === context.vcs.guid;
         });
         if (context.tokens.length === oldLength) {
-          context.triggerWatch();
+          context.triggerWatch(); // work-around weird smart table bug
         }
+        // Note: for speediness this doesn't block - if interested in results chain on vcsModel.lastValidityCheck
         vcsModel.checkTokensValidity();
       });
     };
@@ -77,7 +78,7 @@
             name: oldName,
             newName: newName
           });
-        // After a successful rename, no need to do anything as entry is updated in place
+        // After a successful rename, need a fresh clone to trigger the watch
         context.tokens = _.clone(context.tokens);
       });
     }
@@ -98,7 +99,7 @@
             .then(function () {
               notificationsService.notify('success', gettext('Personal Access Token \'{{ name }}\' successfully deleted'),
                 {name: token.token.name});
-              // After a successful delete, no need to fetch as the cache is updated
+              // After a successful delete, no need to fetch as the cache is already up to date
               return context.refreshTokens(false);
             });
         }
@@ -145,7 +146,7 @@
 
         context.registerNewToken = function () {
           return registerVcsToken.registerToken(vcs).then(function () {
-            // Update tokens (need to fetch)
+            // Update tokens (need to fetch the new token)
             return context.refreshTokens(true);
           });
         };
@@ -161,7 +162,7 @@
           submitCommit = false;
         }
 
-        // Refresh before fetching
+        // Refresh before managing
         return context.refreshTokens(true).then(function () {
 
           return asyncTaskDialog(

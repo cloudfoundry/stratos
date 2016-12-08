@@ -55,6 +55,7 @@
     this.vcsTokens = [];
     this.vcsTokensFetched = false;
     this.vcsClientsFetched = false;
+    this.lastValidityCheck = $q.resolve();
   }
 
   angular.extend(VcsModel.prototype, {
@@ -129,7 +130,8 @@
         promises.push(this.checkVcsToken(this.vcsTokens[i].token.guid));
       }
 
-      return this.$q.all(promises);
+      this.lastValidityCheck = this.$q.all(promises);
+      return this.lastValidityCheck;
     },
 
     renameVcsToken: function (tokenGuid, tokenName) {
@@ -211,14 +213,26 @@
             return supportedVcs.browse_url === hceVcs.browse_url;
           });
 
-          supportedVcs.tokens = _.filter(tokens, function (vcsToken) {
-            return vcsToken.vcs.guid === supportedVcs.guid;
-          });
-
           vcs.label = supportedVcs.label;
           vcs.browse_url = supportedVcs.browse_url;
           vcs.value = supportedVcs;
           vcs.value.vcs_id = hceVcs.vcs_id;
+
+          // Build valid token options for the selector
+          var validTokens = _.filter(tokens, function (vcsToken) {
+            return vcsToken.vcs.guid === supportedVcs.guid && !that.invalidTokens[vcsToken.token.guid];
+          });
+          vcs.value.tokenOptions = [];
+          _.forEach(validTokens, function (vcsToken) {
+            vcs.value.tokenOptions.push({
+              value: vcsToken,
+              label: vcsToken.token.name
+            });
+          });
+          if (validTokens.length > 0) {
+            vcs.value.selectedToken = validTokens[0];
+          }
+
           return vcs;
         });
         return that.supportedVcsInstances;

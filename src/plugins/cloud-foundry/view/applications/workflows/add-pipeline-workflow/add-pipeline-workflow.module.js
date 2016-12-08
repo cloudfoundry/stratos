@@ -48,6 +48,7 @@
       },
 
       setOptions: function () {
+        var that = this;
         this.options = this.options || {};
 
         angular.extend(this.options, {
@@ -68,7 +69,92 @@
           branches: [],
           buildContainers: [],
           notificationFormAppMode: true,
-          imageRegistries: []
+          imageRegistries: [],
+          manageTokens: function (vcs, $event) {
+            $event.stopPropagation();
+            that.manageVcsTokens.manage(vcs).then(function () {
+              // Avoid potential race condition when the last validity check is still in flight
+              that.vcsModel.lastValidityCheck.then(function () {
+
+                // Rebuild valid token options
+                var validTokens = _.filter(that.vcsModel.vcsTokens, function (vcsToken) {
+                  return vcsToken.vcs.guid === vcs.guid && !that.vcsModel.invalidTokens[vcsToken.token.guid];
+                });
+                vcs.tokenOptions.length = 0;
+                _.forEach(validTokens, function (vcsToken) {
+                  vcs.tokenOptions.push({
+                    value: vcsToken,
+                    label: vcsToken.token.name
+                  });
+                });
+
+                // Check that the selected token is still current - Auto-select if needed
+                if (vcs.selectedToken) {
+                  if (validTokens.length < 1) {
+                    // Unset selected token
+                    delete vcs.selectedToken;
+                  } else {
+                    var selectedToken = _.find(validTokens, function (vcsToken) {
+                      return vcsToken.token.guid === vcs.selectedToken.token.guid;
+                    });
+                    if (!selectedToken) {
+                      // Unset stale selected token
+                      delete vcs.selectedToken;
+                    } else {
+                      vcs.selectedToken = selectedToken;
+                    }
+                  }
+                } else {
+                  if (validTokens.length > 0) {
+                    // Pre-selecting first token
+                    vcs.selectedToken = validTokens[0];
+                  }
+                }
+
+                // Check that the selected source is still ok
+                if (that.userInput.source) {
+                  if (that.userInput.source.guid === vcs.guid) {
+                    // Check that we're still selectable
+                    if (validTokens.length < 1) {
+                      that.options.autoSelectSource();
+                    }
+                  }
+                } else {
+                  // Try auto-select a source after manage tokens
+                  that.options.autoSelectSource();
+                }
+              });
+
+            });
+            return true;
+          },
+          autoSelectSource: function () {
+            // Auto select the first source with valid tokens
+            for (var i = 0; i < that.options.sources.length; i++) {
+              var source = that.options.sources[i];
+              if (source.value.tokenOptions.length > 0) {
+                that.userInput.source = source.value;
+                return;
+              }
+            }
+            // Couldn't find suitable source, deselect
+            delete that.userInput.source;
+          },
+          singleToken: function (vcs) {
+            return vcs.tokenOptions.length === 1;
+          },
+          noToken: function (vcs) {
+            return vcs.tokenOptions.length < 1;
+          },
+          manyTokens: function (vcs) {
+            return vcs.tokenOptions.length > 1;
+          },
+          selectSource: function (vcs) {
+            if (that.options.noToken(vcs)) {
+              return;
+            }
+            that.userInput.source = vcs;
+          }
         });
       },
 
@@ -279,7 +365,7 @@
             .then(function (sources) {
               if (sources.length > 0) {
                 [].push.apply(that.options.sources, sources);
-                that.userInput.source = sources[0].value;
+                that.options.autoSelectSource();
               } else {
                 var msg = gettext('No VCS instances were available for the selected delivery pipeline instance.');
                 return that.$q.reject(msg);
@@ -488,7 +574,7 @@
             this.userInput.buildContainer.build_container_id,
             this.userInput.repo,
             this.userInput.branch,
-            this.userInput.source.token.guid
+            this.userInput.source.selectedToken.token.guid
           ).then(function (response) {
             that.userInput.projectId = response.data.id;
           });
@@ -525,7 +611,7 @@
           this.userInput.application.summary.guid
         ].join('-');
 
-        name += PAT_DELIMITER + this.userInput.source.token.guid;
+        name += PAT_DELIMITER + this.userInput.source.selectedToken.token.guid;
 
         return name;
       },
@@ -534,7 +620,7 @@
         var githubOptions = {};
         if (this.userInput.source) {
           githubOptions.headers = {
-            'x-cnap-vcs-token-guid': _.get(this.userInput, 'source.token.guid')
+            'x-cnap-vcs-token-guid': _.get(this.userInput, 'source.selectedToken.token.guid')
           };
         }
 

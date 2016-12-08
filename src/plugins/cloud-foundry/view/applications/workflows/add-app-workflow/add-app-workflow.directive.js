@@ -31,6 +31,7 @@
     'app.model.modelManager',
     'app.event.eventService',
     'app.utils.utilsService',
+    'app.view.vcs.manageVcsTokens',
     '$interpolate',
     '$scope',
     '$q',
@@ -43,6 +44,8 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
+   * @param {app.utils.utilsService} utils - the utils service
+   * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} utils - Utils service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
@@ -68,7 +71,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, utils, $interpolate, $scope, $q, $timeout) {
+  function AddAppWorkflowController(modelManager, eventService, utils, manageVcsTokens, $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$q = $q;
@@ -77,6 +80,7 @@
     this.modelManager = modelManager;
     this.eventService = eventService;
     this.utils = utils;
+    this.manageVcsTokens = manageVcsTokens;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -87,6 +91,7 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     this.userInput = {};
     this.options = {};
 

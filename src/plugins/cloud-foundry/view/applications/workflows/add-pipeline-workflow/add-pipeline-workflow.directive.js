@@ -31,6 +31,7 @@
     'app.model.modelManager',
     'app.event.eventService',
     'app.utils.utilsService',
+    'app.view.vcs.manageVcsTokens',
     '$scope',
     '$q',
     '$timeout',
@@ -44,6 +45,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
    * @param {app.utils.utilsService} utils - the utils service
+   * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
@@ -57,10 +59,11 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, eventService, utils, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, eventService, utils, manageVcsTokens, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
     this.eventService = eventService;
     this.utils = utils;
+    this.manageVcsTokens = manageVcsTokens;
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -68,6 +71,7 @@
     this.options = {};
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     this.init();
     this.startWorkflow();
