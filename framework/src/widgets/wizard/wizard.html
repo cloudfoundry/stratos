@@ -58,6 +58,15 @@
   </div>
 
   <div class="wizard-foot" ng-if="!wizardCtrl.workflow.hideFooter">
+
+    <button type="button"
+            class="btn btn-default cancel"
+            ng-click="wizardCtrl.cancel()"
+            ng-disabled="wizardCtrl.cancelBtnDisabled"
+            ng-show="!wizardCtrl.steps[wizardCtrl.currentIndex].isLastStep || wizardCtrl.workflow.allowCancelAtLastStep">
+      {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'Cancel' }}
+    </button>
+
     <button type="button"
       class="btn btn-default back"
       ng-click="wizardCtrl.back()"
@@ -67,17 +76,9 @@
     </button>
 
     <button type="button"
-      class="btn btn-default cancel"
-      ng-click="wizardCtrl.cancel()"
-      ng-disabled="wizardCtrl.cancelBtnDisabled"
-      ng-show="!wizardCtrl.steps[wizardCtrl.currentIndex].isLastStep || wizardCtrl.workflow.allowCancelAtLastStep">
-      {{ wizardCtrl.steps[wizardCtrl.currentIndex].cancelBtnText || wizardCtrl.btnText.cancel || 'Cancel' }}
-    </button>
-
-    <button type="button"
       class="btn btn-primary next"
       ng-click="wizardCtrl.next()"
-      ng-show="wizardCtrl.currentIndex !== -1"
+      ng-show="wizardCtrl.currentIndex !== -1 && !wizardCtrl.steps[wizardCtrl.currentIndex].hideNext"
       ng-disabled="wizardCtrl.disableNext()">
       {{ wizardCtrl.steps[wizardCtrl.currentIndex].nextBtnText || wizardCtrl.btnText.next || 'Next' }}
     </button>

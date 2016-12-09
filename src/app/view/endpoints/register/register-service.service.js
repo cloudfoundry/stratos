@@ -38,13 +38,13 @@
         var context = {
           wizardOptions: {
             workflow: {
+              allowCancelAtLastStep: true,
               hideStepNavStack: true,
-              hideFooter: true,
               title: gettext('Register an endpoint'),
               steps: [
                 {
+                  hideNext: true,
                   templateUrl: 'app/view/endpoints/register/register-service-type.html',
-                  showBusyOnNext: false,
                   onNext: function () {
                     var step = context.wizardOptions.workflow.steps[1];
                     switch (context.wizardOptions.userInput.type) {
@@ -71,12 +71,17 @@
                     }
                     step.urlValidationExpr = utilsService.urlValidationExpression;
                     step.instances = createInstances(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+                  },
+                  onEnter: function () {
+                    context.wizardOptions.workflow.allowBack = false;
                   }
                 },
                 {
+                  formName: 'regServiceDetails',
                   templateUrl: 'app/view/endpoints/register/register-service-details.html',
                   showBusyOnNext: true,
                   isLastStep: true,
+                  nextBtnText: gettext('Register'),
                   onNext: function () {
                     var userInput = context.wizardOptions.userInput;
                     var stepTwo = context.wizardOptions.workflow.steps[1];
@@ -93,6 +98,12 @@
                       return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
                         'is correct and try again. If this error persists, please contact the administrator.'));
                     });
+                  },
+                  onEnter: function () {
+                    delete context.wizardOptions.userInput.url;
+                    delete context.wizardOptions.userInput.name;
+                    delete context.wizardOptions.userInput.skipSslValidation;
+                    context.wizardOptions.workflow.allowBack = true;
                   }
                 }
               ]

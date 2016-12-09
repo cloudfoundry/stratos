@@ -52,29 +52,28 @@
     // Used to toggle display of sort action buttons when screen width is too small
     this.showSortActions = true;
 
-    // If currentSortOption is updated update filteredApplications
+    // If currentSortOption and sort order change update filteredApplications
     $scope.$watch(function () {
-      return that.model.currentSortOption;
-    }, function () {
-      that.sortFilteredApplications();
-    });
-
-    // If sort order is updated, update filteredApplications
-    $scope.$watch(function () {
-      return that.model.sortAscending;
-    }, function () {
-      that.sortFilteredApplications();
-    });
-
-    // In case user applied a filter, resort filteredApplications
-    $scope.$watchCollection(function () {
-      return that.model.filteredApplications;
-    }, function () {
-      if (that.updatingFilteredApplications) {
+      // Combine this into one watch so changes in the same digest only kick off one update
+      return that.model.currentSortOption + that.model.sortAscending;
+    }, function (newVal, oldVal) {
+      if (newVal === oldVal) {
         return;
       }
       that.sortFilteredApplications();
     });
+
+    // In case user applied a filter update filteredApplications
+    $scope.$watch(function () {
+      return that.model.filteredApplications.length;
+    }, function (newVal, oldVal) {
+      if (newVal === oldVal || that.updatingFilteredApplications) {
+        return;
+      }
+      that.sortFilteredApplications();
+    });
+
+    that.sortFilteredApplications();
   }
 
   angular.extend(ApplicationsSortingController.prototype, {
