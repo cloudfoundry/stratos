@@ -112,7 +112,6 @@
      * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description convert the model service instances into endpoints entries
      * @param {Array} endpoints - collection of existing endpoints
-     * @returns {Array} latest set of service instance endpoint entries
      * @public
      */
     function createEndpointEntries(endpoints) {

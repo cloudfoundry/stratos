@@ -20,7 +20,6 @@
     var defaultCommitsRequest = '/pp/v1/vcs/repos/' + project.repo.full_name + '/commits?per_page=' +
       defaultCommitCount;
     var defaultTriggerRequest = '/pp/v1/proxy/v2/pipelines/triggers';
-    var defaultUpdateProjectRequest = '/pp/v1/proxy/v2/projects/1234';
     var defaultCommit = {
       sha: '1234'
     };

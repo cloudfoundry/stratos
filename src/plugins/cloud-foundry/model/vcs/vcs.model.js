@@ -50,7 +50,6 @@
     this.$q = $q;
     this.apiManager = apiManager;
     this.vcsClients = null;
-    this.supportedVcsInstances = [];
     this.invalidTokens = {};
     this.vcsTokens = [];
     this.vcsTokensFetched = false;
@@ -170,76 +169,8 @@
         });
     },
 
-    /**
-     * @function getSupportedVcsInstances
-     * @memberof cloud-foundry.model.vcs.VcsModel
-     * @description Returns metadata about the supported VCS Instances, given a list of all of the available instances
-     * @param {object} hceVcsInstances - HCE VCS instance metadata from HCE
-     * @returns {object} Metadata array with details of the set of supported VCS instances that can be presented to the user
-     * @public
-     */
-    getSupportedVcsInstances: function (hceVcsInstances) {
-
-      if (!hceVcsInstances || angular.isArray(hceVcsInstances) && _.isEmpty(hceVcsInstances)) {
-        this.supportedVcsInstances = [];
-        return this.$q.resolve(this.supportedVcsInstances);
-      }
-
-      var that = this;
-      var clientsP = this.listVcsClients();
-
-      // List all tokens and check their validity
-      var tokensP = this.listVcsTokens().then(function (vcsTokens) {
-        return that.checkTokensValidity().then(function () {
-          return vcsTokens;
-        });
-      });
-
-      return this.$q.all([clientsP, tokensP]).then(function (vals) {
-        var clients = vals[0];
-        var tokens = vals[1];
-
-        var clientsInCodeEngine = _.filter(clients, function (vcsClient) {
-          // Make sure the VCS is registered in Code Engine
-          return _.find(hceVcsInstances, function (hceVcs) {
-            return vcsClient.browse_url === hceVcs.browse_url;
-          });
-        });
-
-        that.supportedVcsInstances = _.map(clientsInCodeEngine, function (supportedVcs) {
-          var vcs = _.clone(SUPPORTED_VCS_TYPES[that.expandVcsType(supportedVcs)]);
-
-          var hceVcs = _.find(hceVcsInstances, function (hceVcs) {
-            return supportedVcs.browse_url === hceVcs.browse_url;
-          });
-
-          vcs.label = supportedVcs.label;
-          vcs.browse_url = supportedVcs.browse_url;
-          vcs.value = supportedVcs;
-          vcs.value.vcs_id = hceVcs.vcs_id;
-
-          // Build valid token options for the selector
-          var validTokens = _.filter(tokens, function (vcsToken) {
-            return vcsToken.vcs.guid === supportedVcs.guid && !that.invalidTokens[vcsToken.token.guid];
-          });
-          vcs.value.tokenOptions = [];
-          _.forEach(validTokens, function (vcsToken) {
-            vcs.value.tokenOptions.push({
-              value: vcsToken,
-              label: vcsToken.token.name
-            });
-          });
-          if (validTokens.length > 0) {
-            vcs.value.selectedToken = validTokens[0];
-          }
-
-          return vcs;
-        });
-        return that.supportedVcsInstances;
-      }, function () {
-        var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
-        return that.$q.reject(msg);
-      });
+    getSupportedType: function (vcs) {
+      return _.clone(SUPPORTED_VCS_TYPES[this.expandVcsType(vcs)]);
     },
 
     /**

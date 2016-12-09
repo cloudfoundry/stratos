@@ -46,12 +46,10 @@
    * @param {app.event.eventService} eventService - the Event management service
    * @param {app.utils.utilsService} utils - the utils service
    * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
-   * @param {object} utils - Utils service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service

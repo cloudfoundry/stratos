@@ -70,6 +70,7 @@
           buildContainers: [],
           notificationFormAppMode: true,
           imageRegistries: [],
+
           manageTokens: function (vcs, $event) {
             $event.stopPropagation();
             that.manageVcsTokens.manage(vcs).then(function () {
@@ -77,39 +78,7 @@
               that.vcsModel.lastValidityCheck.then(function () {
 
                 // Rebuild valid token options
-                var validTokens = _.filter(that.vcsModel.vcsTokens, function (vcsToken) {
-                  return vcsToken.vcs.guid === vcs.guid && !that.vcsModel.invalidTokens[vcsToken.token.guid];
-                });
-                vcs.tokenOptions.length = 0;
-                _.forEach(validTokens, function (vcsToken) {
-                  vcs.tokenOptions.push({
-                    value: vcsToken,
-                    label: vcsToken.token.name
-                  });
-                });
-
-                // Check that the selected token is still current - Auto-select if needed
-                if (vcs.selectedToken) {
-                  if (validTokens.length < 1) {
-                    // Unset selected token
-                    delete vcs.selectedToken;
-                  } else {
-                    var selectedToken = _.find(validTokens, function (vcsToken) {
-                      return vcsToken.token.guid === vcs.selectedToken.token.guid;
-                    });
-                    if (!selectedToken) {
-                      // Unset stale selected token
-                      delete vcs.selectedToken;
-                    } else {
-                      vcs.selectedToken = selectedToken;
-                    }
-                  }
-                } else {
-                  if (validTokens.length > 0) {
-                    // Pre-selecting first token
-                    vcs.selectedToken = validTokens[0];
-                  }
-                }
+                var validTokens = that.rebuildTokenOptions(vcs);
 
                 // Check that the selected source is still ok
                 if (that.userInput.source) {
@@ -128,6 +97,7 @@
             });
             return true;
           },
+
           autoSelectSource: function () {
             // Auto select the first source with valid tokens
             for (var i = 0; i < that.options.sources.length; i++) {
@@ -140,15 +110,19 @@
             // Couldn't find suitable source, deselect
             delete that.userInput.source;
           },
+
           singleToken: function (vcs) {
             return vcs.tokenOptions.length === 1;
           },
+
           noToken: function (vcs) {
             return vcs.tokenOptions.length < 1;
           },
+
           manyTokens: function (vcs) {
             return vcs.tokenOptions.length > 1;
           },
+
           selectSource: function (vcs) {
             if (that.options.noToken(vcs)) {
               return;
@@ -355,13 +329,102 @@
 
       reset: function () {},
 
+      rebuildTokenOptions: function (vcs) {
+        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+        var validTokens = _.filter(vcsModel.vcsTokens, function (vcsToken) {
+          return vcsToken.vcs.guid === vcs.guid && !vcsModel.invalidTokens[vcsToken.token.guid];
+        });
+
+        vcs.tokenOptions = _.map(validTokens, function (vcsToken) {
+          return {
+            value: vcsToken.token.guid,
+            label: vcsToken.token.name
+          };
+        });
+
+        // Make sure the selected Token is current
+        if (vcs.selectedToken) {
+          var matchingToken = _.find(validTokens, function (vcsToken) {
+            return vcsToken.token.guid === vcs.selectedToken;
+          });
+          if (!matchingToken) {
+            // select another if possible
+            if (validTokens.length > 0) {
+              vcs.selectedToken = validTokens[0].token.guid;
+            } else {
+              delete vcs.selectedToken;
+            }
+          }
+        } else {
+          if (validTokens.length > 0) {
+            vcs.selectedToken = validTokens[0].token.guid;
+          }
+        }
+
+        return validTokens;
+      },
+
+      /**
+       * @function getSupportedVcsInstances
+       * @memberof cloud-foundry.model.vcs.VcsModel
+       * @description Returns metadata about the supported VCS Instances, given a list of all of the available instances
+       * @param {object} hceVcsInstances - HCE VCS instance metadata from HCE
+       * @returns {object} Metadata array with details of the set of supported VCS instances that can be presented to the user
+       * @public
+       */
+      getSupportedVcsInstances: function (hceVcsInstances) {
+        var that = this;
+        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+
+        if (!hceVcsInstances || angular.isArray(hceVcsInstances) && _.isEmpty(hceVcsInstances)) {
+          return this.$q.resolve([]);
+        }
+
+        var clientsP = vcsModel.listVcsClients();
+
+        // List all tokens and check their validity
+        var tokensP = vcsModel.listVcsTokens().then(function () {
+          return vcsModel.checkTokensValidity();
+        });
+
+        return this.$q.all([clientsP, tokensP]).then(function () {
+          // Filter clients that are not registered with this Code Engine
+          var clientsInCodeEngine = _.filter(vcsModel.vcsClients, function (vcsClient) {
+            return _.find(hceVcsInstances, function (hceVcs) {
+              return vcsClient.browse_url === hceVcs.browse_url;
+            });
+          });
+
+          var sources = _.map(clientsInCodeEngine, function (vcs) {
+            var source = vcsModel.getSupportedType(vcs);
+
+            var hceVcs = _.find(hceVcsInstances, function (hceVcs) {
+              return vcs.browse_url === hceVcs.browse_url;
+            });
+
+            source.label = vcs.label;
+            source.browse_url = vcs.browse_url;
+            source.value = vcs;
+            source.value.vcs_id = hceVcs.vcs_id;
+
+            // Build valid token options for the selector
+            that.rebuildTokenOptions(vcs);
+
+            return source;
+          });
+          return sources;
+        }, function () {
+          var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
+          return that.$q.reject(msg);
+        });
+      },
+
       getVcsInstances: function () {
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
 
         return hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
-          return vcsModel.getSupportedVcsInstances(hceModel.data.vcsInstances)
+          return that.getSupportedVcsInstances(hceModel.data.vcsInstances)
             .then(function (sources) {
               if (sources.length > 0) {
                 [].push.apply(that.options.sources, sources);
@@ -574,7 +637,7 @@
             this.userInput.buildContainer.build_container_id,
             this.userInput.repo,
             this.userInput.branch,
-            this.userInput.source.selectedToken.token.guid
+            this.userInput.source.selectedToken
           ).then(function (response) {
             that.userInput.projectId = response.data.id;
           });
@@ -611,7 +674,7 @@
           this.userInput.application.summary.guid
         ].join('-');
 
-        name += PAT_DELIMITER + this.userInput.source.selectedToken.token.guid;
+        name += PAT_DELIMITER + this.userInput.source.selectedToken;
 
         return name;
       },
@@ -620,7 +683,7 @@
         var githubOptions = {};
         if (this.userInput.source) {
           githubOptions.headers = {
-            'x-cnap-vcs-token-guid': _.get(this.userInput, 'source.selectedToken.token.guid')
+            'x-cnap-vcs-token-guid': _.get(this.userInput, 'source.selectedToken')
           };
         }
 

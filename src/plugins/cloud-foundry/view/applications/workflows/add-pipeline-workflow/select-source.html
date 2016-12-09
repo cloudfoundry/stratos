@@ -16,6 +16,8 @@
       <h5 style="margin-top: 0; margin-bottom: 15px;" ng-if="source.browse_url"><a target="_blank" href="{{ ::source.browse_url }}">{{ ::source.browse_url }}</a></h5>
       <div style="display: flex; flex-flow: row nowrap; margin-top: 0; margin-bottom: 5px;">
         <div style="flex: 1 1 0px; margin-right: 24px">{{ ::source.description }}</div>
+
+        <!--Single or no valid token - show label-->
         <div ng-if="wizardCtrl.options.noToken(source.value) || wizardCtrl.options.singleToken(source.value)" style="flex: 1 1 0px; display: flex; flex-flow: column nowrap; color: #555555; font-size: 18px">
           <div translate style="font-weight: 600">TOKEN</div>
           <div ng-if="wizardCtrl.options.noToken(source.value)" style="">
@@ -23,9 +25,11 @@
             <span translate>No valid token registered</span>
           </div>
           <div ng-if="wizardCtrl.options.singleToken(source.value)">
-            {{ source.value.selectedToken.token.name }}
+            {{ source.value.tokenOptions[0].label }}
           </div>
         </div>
+
+        <!--Many valid tokens - show a drop-down-->
         <div ng-if="wizardCtrl.options.manyTokens(source.value)" style="flex: 1 1 0px; display: flex; flex-flow: column nowrap">
           <div class="form-group" focusable-input>
             <label class="control-label" translate>Token</label>
