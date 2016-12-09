@@ -5,13 +5,14 @@
   </div>
   <div class="app-sort-actions" ng-class="{ 'show-sort-actions': applicationsSortingCtrl.showSortActions }">
     <span translate>Sort by</span>
-    <button class="btn btn-default" ng-repeat="sortOption in applicationsSortingCtrl.sortOptions"
-            ng-class="applicationsSortingCtrl.isCurrentSort(sortOption) ? 'btn-enabled' : 'btn-disabled'"
-            ng-click="applicationsSortingCtrl.sort(sortOption)">
-      <span ng-if="applicationsSortingCtrl.isCurrentSort(sortOption)" class="helion-icon adjust-icon pull-right"
-            ng-class="applicationsSortingCtrl.showAscending(sortOption) ? 'helion-icon-Up_caret' : 'helion-icon-Drop_caret'"></span>
-      {{ sortOption.label }}
-    </button>
+    <div class="form-group sort-dropdown" focusable-input>
+      <select-input
+        arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+        ng-model="applicationsSortingCtrl.selectedOption"
+        input-options="applicationsSortingCtrl.sortOptions"
+        ng-change="applicationsSortingCtrl.setSort()"
+        >
+      </select-input>
+    </div>
   </div>
-
 </div>
