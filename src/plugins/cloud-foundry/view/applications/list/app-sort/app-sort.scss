@@ -54,7 +54,28 @@
         outline: none;
       }
     }
-
   }
 
+  .sort-dropdown {
+    position: relative;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    padding: 0 20px;
+    min-width: 240px;
+    height: 40px;
+    line-height: 40px;
+
+    .select-input-value {
+      padding: 0;
+    }
+
+    .dropdown-menu {
+      right: -1px;
+      max-height: initial;
+      width: initial;
+      li {
+        padding: 0 20px;
+      }
+    }
+  }
 }
