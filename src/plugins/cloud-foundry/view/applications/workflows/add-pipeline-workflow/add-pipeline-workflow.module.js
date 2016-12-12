@@ -100,12 +100,15 @@
 
           autoSelectSource: function () {
 
-            // Preserve any existing selection
+            // Preserve any existing selection if still valid
             if (that.userInput.source) {
               var reselect = _.find(that.options.sources, function (aSource) {
                 return aSource.value.guid === that.userInput.source.guid;
               });
-              if (reselect) {
+
+              // Check that the source still has valid tokens
+              if (reselect && reselect.value.tokenOptions.length > 0) {
+                // Try and preserve the selected token
                 var selectedToken = that.userInput.source.selectedToken;
                 that.userInput.source = reselect.value;
                 var foundToken = _.find(reselect.value.tokenOptions, function (tokenOpt) {
@@ -113,9 +116,12 @@
                 });
                 if (foundToken) {
                   reselect.value.selectedToken = foundToken.value;
+                } else {
+                  reselect.value.selectedToken = reselect.value.tokenOptions[0].value;
                 }
                 return;
               }
+
               // If the existing selection is stale, run the normal auto-selection logic
             }
 
