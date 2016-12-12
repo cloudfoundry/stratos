@@ -321,6 +321,7 @@
         baseDir: '../dist',
         middleware: middleware
       },
+      notify: false,
       ghostMode: false,
       open: false,
       port: 3100,

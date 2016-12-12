@@ -280,7 +280,7 @@
 
       // Add the first service in the list
       var serviceWizard = addAppService.getServiceWizard();
-      var promise = addAppService.addService(0)
+      var promise = addAppService.addService('app-autoscaler')
         .then(function () {
           // Are we on the correct service tab?
           expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
