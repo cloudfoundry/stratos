@@ -124,22 +124,15 @@
           }
         };
 
-        this.data.workflow = {
-          allowJump: false,
-          allowBack: false,
-          title: gettext('Add Pipeline'),
-          steps: [
-            {
-              ready: true,
-              title: gettext('Select Endpoint'),
-              templateUrl: path + 'select-endpoint.html',
-              formName: 'application-endpoint-form',
-              onNext: function () {
-                return that.getVcsInstances();
-              }
-            }
-          ].concat(this.getWorkflowDefinition().steps)
-        };
+        this.data.workflow = this.getWorkflowDefinition();
+        this.data.workflow.steps.unshift({
+          ready: true,
+          title: gettext('Select Endpoint'),
+          templateUrl: path + 'select-endpoint.html',
+          formName: 'application-endpoint-form',
+          onNext: function () {
+          }
+        });
 
         this.setOptions();
 

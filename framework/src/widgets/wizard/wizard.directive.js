@@ -98,6 +98,14 @@
     this.btnText = this.workflow.btnText;
     this.steps = this.workflow.steps || [];
 
+    // allowBack can be a value or function
+    if (!_.isFunction(this.workflow.allowBack)) {
+      var allowBack = this.workflow.allowBack;
+      this.workflow.allowBack = function () {
+        return allowBack;
+      };
+    }
+
     // allowJump can be a value or function
     if (!_.isFunction(this.workflow.allowJump)) {
       var allowJump = this.workflow.allowJump;
@@ -105,6 +113,16 @@
         return allowJump;
       };
     }
+
+    this.isNavEntryDisabled = function ($index) {
+      if (this.workflow.allowJump()) {
+        return true;
+      }
+      if (this.workflow.allowBack() && $index < this.currentIndex) {
+        return false;
+      }
+      return this.currentIndex !== $index;
+    };
 
     this.initPromise.then(function () {
       that.onInitSuccess();

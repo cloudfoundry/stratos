@@ -99,6 +99,26 @@
           },
 
           autoSelectSource: function () {
+
+            // Preserve any existing selection
+            if (that.userInput.source) {
+              var reselect = _.find(that.options.sources, function (aSource) {
+                return aSource.value.guid === that.userInput.source.guid;
+              });
+              if (reselect) {
+                var selectedToken = that.userInput.source.selectedToken;
+                that.userInput.source = reselect.value;
+                var foundToken = _.find(reselect.value.tokenOptions, function (tokenOpt) {
+                  return tokenOpt.value === selectedToken;
+                });
+                if (foundToken) {
+                  reselect.value.selectedToken = foundToken.value;
+                }
+                return;
+              }
+              // If the existing selection is stale, run the normal auto-selection logic
+            }
+
             // Auto select the first source with valid tokens
             for (var i = 0; i < that.options.sources.length; i++) {
               var source = that.options.sources[i];
@@ -136,9 +156,13 @@
         var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
         var that = this;
 
+        that.pipelineCreated = false;
+
         return {
           allowJump: false,
-          allowBack: false,
+          allowBack: function () {
+            return !that.pipelineCreated;
+          },
           title: gettext('Add Pipeline'),
           btnText: {
             cancel: gettext('Cancel')
@@ -150,14 +174,10 @@
               templateUrl: path + 'select-source.html',
               formName: 'application-source-form',
               nextBtnText: gettext('Next'),
-              showBusyOnNext: true,
               onNextCancellable: true,
-              onNextCancel: function () {},
-              onNext: function () {
-                return that.getRepos().catch(function () {
-                  var msg = gettext('There was a problem retrieving your repositories. Please try again.');
-                  return that.$q.reject(msg);
-                });
+              showBusyOnEnter: gettext('Retrieving your VCS information'),
+              onEnter: function () {
+                return that.getVcsInstances();
               }
             },
             {
@@ -166,8 +186,23 @@
               templateUrl: path + 'select-repository.html',
               formName: 'application-repo-form',
               nextBtnText: gettext('Next'),
-              showBusyOnNext: true,
-              onNext: function () {
+              showBusyOnEnter: gettext('Retrieving your repositories'),
+              onEnter: function () {
+                return that.getRepos().catch(function () {
+                  var msg = gettext('There was a problem retrieving your repositories. Please try again.');
+                  return that.$q.reject(msg);
+                });
+              }
+            },
+            {
+              ready: true,
+              title: gettext('Pipeline Details'),
+              templateUrl: path + 'pipeline-details.html',
+              formName: 'application-pipeline-details-form',
+              nextBtnText: gettext('Create pipeline'),
+              showBusyOnNext: gettext('Creating pipeline'),
+              showBusyOnEnter: gettext("Retrieving the repository's branches"),
+              onEnter: function () {
                 that.options.repoStSearch = '';
                 that.getPipelineDetailsData();
                 var githubModel = that.modelManager.retrieve('github.model');
@@ -177,23 +212,23 @@
                   return hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
                     var githubOptions = that._getVcsHeaders();
                     var usedBranches = _.chain(projects)
-                                        .filter(function (p) {
-                                          return p.repo.full_name === that.userInput.repo.full_name;
-                                        })
-                                        .map(function (p) { return p.repo.branch; })
-                                        .value();
+                      .filter(function (p) {
+                        return p.repo.full_name === that.userInput.repo.full_name;
+                      })
+                      .map(function (p) { return p.repo.branch; })
+                      .value();
 
                     return githubModel.branches(that.userInput.repo.full_name, githubOptions)
                       .then(function () {
                         var branches = _.map(githubModel.data.branches,
-                                            function (o) {
-                                              var used = _.indexOf(usedBranches, o.name) >= 0;
-                                              return {
-                                                disabled: used,
-                                                label: o.name + (used ? gettext(' (used by other project)') : ''),
-                                                value: o.name
-                                              };
-                                            });
+                          function (o) {
+                            var used = _.indexOf(usedBranches, o.name) >= 0;
+                            return {
+                              disabled: used,
+                              label: o.name + (used ? gettext(' (used by another project)') : ''),
+                              value: o.name
+                            };
+                          });
                         [].push.apply(that.options.branches, branches);
                       })
                       .catch(function () {
@@ -205,15 +240,7 @@
                     return that.$q.reject(msg);
                   });
                 }
-              }
-            },
-            {
-              ready: true,
-              title: gettext('Pipeline Details'),
-              templateUrl: path + 'pipeline-details.html',
-              formName: 'application-pipeline-details-form',
-              nextBtnText: gettext('Create pipeline'),
-              showBusyOnNext: true,
+              },
               onNext: function () {
                 var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
                 // First verify if provided credentials are correct
@@ -238,6 +265,11 @@
                     // Failed to validate credentials
                     var msg = gettext('The username and password combination provided is invalid.');
                     return that.$q.reject(msg);
+                  })
+                  .then(function () {
+                    // No longer allow going back after this point
+                    console.log('No longer allow going back after this point');
+                    that.pipelineCreated = true;
                   })
                   .catch(function (error) {
                     // Some other exception occurred
@@ -427,6 +459,7 @@
           return that.getSupportedVcsInstances(hceModel.data.vcsInstances)
             .then(function (sources) {
               if (sources.length > 0) {
+                that.options.sources.length = 0;
                 [].push.apply(that.options.sources, sources);
                 that.options.autoSelectSource();
               } else {
