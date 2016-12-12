@@ -43,8 +43,7 @@
       expect(config.params).toEqual(params);
       expect(config.headers).toEqual({
         Accept: 'application/vnd.github.v3+json',
-        'x-cnap-vcs-url': that.GITHUB_ENDPOINTS.URL,
-        'x-cnap-vcs-api-url': that.GITHUB_ENDPOINTS.API_URL
+        'Cache-Control': 'no-cache'
       });
 
       params = null;
@@ -62,8 +61,7 @@
         params: {},
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          'x-cnap-vcs-url': that.GITHUB_ENDPOINTS.URL,
-          'x-cnap-vcs-api-url': that.GITHUB_ENDPOINTS.API_URL
+          'Cache-Control': 'no-cache'
         }
       });
     });

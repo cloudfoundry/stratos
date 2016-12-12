@@ -195,19 +195,19 @@
           expect(this.instance.data.workflow).toBeDefined();
         });
 
-        it('step 1 - onNext:GITHUB -> success -> failed', function () {
+        it('step 2 - onEnter: getRepos -> failed', function () {
           var that = this.instance;
-          var step = that.data.workflow.steps[0];
+          var step = that.data.workflow.steps[1];
           that.userInput.source.vcs_type = 'GITHUB';
           that.getRepos = function () {
             return that.$q.reject();
           };
-          var p = step.onNext();
+          var p = step.onEnter();
           that.$scope.$apply();
           expect(p.$$state.status).toBe(2);
         });
 
-        it('step 2 - onNext', function () {
+        it('step 3 - onEnter', function () {
           $httpBackend.whenGET('/pp/v1/proxy/v2/containers/build_containers').respond({ });
           $httpBackend.expectGET('/pp/v1/proxy/v2/containers/build_containers');
           $httpBackend.whenGET('/pp/v1/proxy/v2/containers/images/registries').respond({ });
@@ -229,9 +229,9 @@
           spyOn(that.hceModel, 'getProjects').and.callThrough();
           spyOn(githubModel, 'branches').and.callThrough();
           that.userInput.repo = {};
-          var step = that.data.workflow.steps[1];
+          var step = that.data.workflow.steps[2];
           that.options.branches = [{}];
-          step.onNext();
+          step.onEnter();
           that.$scope.$apply();
           expect(that.hceModel.getProjects).toHaveBeenCalled();
           expect(githubModel.branches).toHaveBeenCalled();

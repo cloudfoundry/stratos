@@ -2,13 +2,12 @@
   'use strict';
 
   describe('cloud-foundry vcs model', function () {
-    var $httpBackend, $q, vcsModel, modelManager;
+    var $httpBackend, vcsModel, modelManager;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
     beforeEach(inject(function ($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      $q = $injector.get('$q');
       modelManager = $injector.get('app.model.modelManager');
       vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     }));

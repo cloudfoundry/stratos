@@ -268,7 +268,6 @@
                   })
                   .then(function () {
                     // No longer allow going back after this point
-                    console.log('No longer allow going back after this point');
                     that.pipelineCreated = true;
                   })
                   .catch(function (error) {
