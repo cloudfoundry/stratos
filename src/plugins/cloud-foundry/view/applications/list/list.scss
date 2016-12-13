@@ -3,9 +3,24 @@
 
 $applications-msg-height: 50px;
 
-.application-wall-header {
+.application-wall-header.action-bar {
   display: flex;
   flex-wrap: wrap;
+  height: $main-nav-item-height;
+  line-height: $main-nav-item-height;
+
+  .application-header-right {
+    flex-grow: 1;
+    justify-content: flex-end;
+    align-items: center;
+    display: flex;
+    
+    .btn-primary {
+      font-size: 16px;
+      height: auto;
+      padding: 4px $hpe-unit-space;
+    }
+  }
 }
 
 .application-header-centre {
@@ -24,28 +39,6 @@ $applications-msg-height: 50px;
     align-items: center;
     input {
       margin-bottom: 0;
-    }
-  }
-  .view-buttons {
-
-    margin-right: 8px;
-    margin-left: 8px;
-    button:not([disabled]):focus, button:not([disabled]):hover {
-      outline: none;
-      color: $hpe-primary;
-    }
-
-    .btn {
-      padding-left: 0;
-      padding-right: 0;
-      margin-right: 0;
-      margin-left: 0;
-    }
-    .btn-active {
-      color: $hpe-primary;
-    }
-    .btn-disabled {
-      color: $actions-menu-item-disabled-fg;
     }
   }
 }
@@ -95,7 +88,7 @@ $applications-msg-height: 50px;
   .form-horizontal {
     flex-wrap: wrap;
 
-    .form-group:not(:last-child) {
+    .form-group {
       margin-right: $hpe-unit-space / 2;
     }
 
@@ -109,6 +102,7 @@ $applications-msg-height: 50px;
       align-self: center;
       flex-grow: 1;
       text-align: right;
+      user-select: none;
     }
   }
 }
@@ -156,4 +150,157 @@ $applications-msg-height: 50px;
     text-transform: none;
     font-size: $font-size-h1;
   }
+}
+
+
+// Filter Bar
+
+.application-control-bar {
+
+  .panel {
+    margin: 0 16px 16px 16px
+  }
+
+  .panel-body {
+    padding: $hpe-unit-space * 0.5;
+  }
+
+  .panel-body:not(:first-child) {
+    padding-top: 0;
+  }
+
+  .control-label-outside {
+    height: $hpe-input-height;
+    margin-bottom: 0;
+    line-height: $hpe-input-height;
+    margin-right: 12px;
+  }
+
+  .applications-filter {
+    display: flex;
+    flex-wrap: wrap;
+
+    .application-cf-filters {
+      display: flex;
+      flex: 3 3 auto;
+
+      .form-group {
+        width: initial;
+        flex: 1 1 0;
+      }
+    }
+
+    .apps-sorting {
+      flex: 1 1 auto;
+      max-width: $hpe-input-width;
+      min-width: $hpe-unit-space *6;
+      margin: 0;
+      padding: 0;
+
+      .applications-sorting {
+        .form-group {
+          width: initial;
+        }
+      }
+    }
+  }
+
+  .application-main-controls {
+    display: flex;
+    flex-wrap: wrap;
+
+    .application-options-control {
+      flex: 0 1 auto;
+      align-self: center;
+      text-align: center;
+      min-width: $hpe-unit-space * 4;
+
+      .reset-link {
+        user-select: none;
+      }
+    }
+
+    .app-total-control {
+      .form-group {
+        width: auto;
+        min-width: $hpe-unit-space * 6;
+      }
+    }
+
+    .app-count {
+      display: flex;
+
+      .app-count-number {
+        flex: 1 1 auto;
+      }
+
+      .app-count-reset {
+        flex: 0 1 auto;
+      }
+    }
+
+    .view-buttons {
+      flex: 0 1 auto;
+      align-self: center;
+      margin: 0 $hpe-unit-space * 0.5;
+      display: flex;
+      height: $hpe-input-height;
+      flex-direction: column;
+
+      button:not([disabled]):focus, button:not([disabled]):hover {
+        outline: none;
+        color: $hpe-primary;
+      }
+
+      .btn {
+        padding: 0;
+        margin: 0;
+        height: $hpe-input-height/2;
+      }
+      .btn-active {
+        color: $hpe-primary;
+      }
+      .btn-disabled {
+        color: $actions-menu-item-disabled-fg;
+      }
+    }
+  }
+
+  .application-search-box {
+    flex: 1 1 auto;
+
+    .search-field {
+      width: auto;
+      margin-right: 12px;
+    }
+
+    form #applications-text {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      margin-left: $hpe-unit-space;
+    }
+
+    .application-search-box-icon {
+      position: absolute;
+      margin-left: -12px;
+      height: $hpe-input-height;
+      vertical-align: middle;
+      line-height: $hpe-input-height;
+    }
+  }
+}
+
+.form-group.form-group-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.app-count {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 6px;
+  height: 22px;
+  line-height: 22px;
 }

@@ -1,18 +1,11 @@
-<div class="applications-sorting">
-  <div class="show-message">
-    <a class="pull-right" ng-click="applicationsSortingCtrl.toggleSortActions()" >{{
-      applicationsSortingCtrl.getMessage()}}</a>
+<form class="applications-sorting">
+  <div class="form-group" focusable-input>
+    <label class="control-label" translate>Sort by</label>
+    <select-input
+      arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
+      ng-model="applicationsSortingCtrl.selectedOption"
+      input-options="applicationsSortingCtrl.sortOptions"
+      ng-change="applicationsSortingCtrl.setSort()">
+    </select-input>
   </div>
-  <div class="app-sort-actions" ng-class="{ 'show-sort-actions': applicationsSortingCtrl.showSortActions }">
-    <span translate>Sort by</span>
-    <div class="form-group sort-dropdown" focusable-input>
-      <select-input
-        arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-        ng-model="applicationsSortingCtrl.selectedOption"
-        input-options="applicationsSortingCtrl.sortOptions"
-        ng-change="applicationsSortingCtrl.setSort()"
-        >
-      </select-input>
-    </div>
-  </div>
-</div>
+</form>        

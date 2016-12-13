@@ -55,12 +55,7 @@
     this.model.currentSortOption = this.model.currentSortOption || 'metadata.created_at';
     this.model.sortAscending = angular.isDefined(this.model.sortAscending) ? this.model.sortAscending : false;
 
-    // Used to toggle display of sort action buttons when screen width is too small
-    this.showSortActions = true;
-
-    // Find the menu item that matches the current sort order
-    var selectedSortItem = _.find(this.sortOptions, {sort: this.model.currentSortOption, ascending: this.model.sortAscending});
-    this.selectedOption = selectedSortItem.value;
+    this.ensureOptionSelected();
 
     // If currentSortOption and sort order change update filteredApplications
     $scope.$watch(function () {
@@ -70,11 +65,25 @@
       if (newVal === oldVal) {
         return;
       }
+      that.ensureOptionSelected();
       that.model.reSort();
     });
   }
 
   angular.extend(ApplicationsSortingController.prototype, {
+
+    /**
+     * @name ensureOptionSelected
+     * @description Ensure that the correct sort option is selected in the drop down
+     */
+    ensureOptionSelected: function () {
+      // Find the menu item that matches the current sort order
+      var selectedSortItem = _.find(this.sortOptions, {sort: this.model.currentSortOption, ascending: this.model.sortAscending});
+      var option = selectedSortItem.value;
+      if (option !== this.selectedOption) {
+        this.selectedOption = option;
+      }
+    },
 
     /**
      * @name setSort
@@ -142,26 +151,6 @@
         // Current sort option is already the same, toggle order
         this.model.sortAscending = !this.model.sortAscending;
       }
-
-    },
-
-    /**
-     * @name toggleSortActions
-     * @description Helper to toggle
-     * @param {boolean} option - sort option
-     */
-    toggleSortActions: function () {
-      this.showSortActions = !this.showSortActions;
-    },
-
-    getMessage: function () {
-      if (this.showSortActions) {
-        return gettext('Show Sort');
-      } else {
-        return gettext('Hide Sort');
-      }
     }
-
   });
-
 })();
