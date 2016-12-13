@@ -199,7 +199,23 @@
         return 'Unknown Type';
       }
       return vcsTypeDef.label;
+    },
+
+    buildTokenOptions: function (vcs) {
+      var that = this;
+      var validTokens = _.filter(this.vcsTokens, function (vcsToken) {
+        return vcsToken.vcs.guid === vcs.guid && !that.invalidTokens[vcsToken.token.guid];
+      });
+
+      vcs.tokenOptions = _.map(validTokens, function (vcsToken) {
+        return {
+          value: vcsToken.token.guid,
+          label: vcsToken.token.name
+        };
+      });
+      return validTokens;
     }
+
   });
 
 })();

@@ -14,6 +14,7 @@
       },
       controller: TableViewController,
       controllerAs: 'tableViewCtrl',
+      scope: {},
       templateUrl: 'plugins/cloud-foundry/view/applications/list/' +
       'table-view/table-view.html'
     };

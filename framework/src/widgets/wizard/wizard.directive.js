@@ -181,6 +181,10 @@
     disableNext: function () {
       var step = this.steps[this.currentIndex] || {};
       var form = this.$scope.wizardForm[step.formName];
+
+      if (_.isFunction(step.allowNext) && !step.allowNext()) {
+        return true;
+      }
       return this.nextBtnDisabled || form && form.$invalid;
     },
 

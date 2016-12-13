@@ -1,47 +1,9 @@
 <h4 translate>Select Source</h4>
 <div class="media-list hpe-add-option-list">
-  <div style="display: flex; flex-flow: row nowrap; align-items: center; overflow: visible;" class="media" ng-repeat="source in wizardCtrl.options.sources"
-    ng-click="wizardCtrl.options.selectSource(source.value)">
-    <radio-input style="margin-right: 12px"
-                 ng-model="wizardCtrl.options.userInput.source"
-                 input-value="source.value"
-                 input-disabled="wizardCtrl.options.noToken(source.value)">
-    </radio-input>
-    <img style="cursor: pointer; margin-right: 24px; width: 96px" class="" ng-src="/plugins/cloud-foundry/view/assets/hce/{{source.img}}"/>
-    <div style="display: flex; flex-flow: column nowrap; flex: 1 1 0px" class="">
-      <div style="display: flex; flex-flow: row nowrap; justify-content: space-between; align-self: stretch; align-items: baseline;">
-        <h4 style="margin-top: 0; margin-bottom: 5px;" class="">{{ ::source.label }}</h4>
-        <h5 style="margin-top: 0; margin-bottom: 5px; margin-left: 10px" class="manage-tokens-link" ng-click="wizardCtrl.options.manageTokens(source.value, $event)">Manage VCS Tokens</h5>
-      </div>
-      <h5 style="margin-top: 0; margin-bottom: 15px;" ng-if="source.browse_url"><a target="_blank" href="{{ ::source.browse_url }}">{{ ::source.browse_url }}</a></h5>
-      <div style="display: flex; flex-flow: row nowrap; margin-top: 0; margin-bottom: 5px;">
-        <div style="flex: 4 1 0px; margin-right: 24px">{{ ::source.description }}</div>
-
-        <!--Single or no valid token - show label-->
-        <div ng-if="wizardCtrl.options.noToken(source.value) || wizardCtrl.options.singleToken(source.value)" style="flex: 5 1 0px; display: flex; flex-flow: column nowrap; color: #555555; font-size: 18px">
-          <div translate style="font-weight: 600">TOKEN</div>
-          <div ng-if="wizardCtrl.options.noToken(source.value)" style="">
-            <span style="color: #F4B51E; margin-right: 5px" class="helion-icon helion-icon-Warning_S"></span>
-            <span translate>No valid token registered</span>
-          </div>
-          <div ng-if="wizardCtrl.options.singleToken(source.value)">
-            {{ source.value.tokenOptions[0].label }}
-          </div>
-        </div>
-
-        <!--Many valid tokens - show a drop-down-->
-        <div ng-if="wizardCtrl.options.manyTokens(source.value)" style="flex: 5 1 0px; display: flex; flex-flow: column nowrap">
-          <div class="form-group" focusable-input style="width: auto">
-            <label class="control-label" translate>Token</label>
-            <select-input
-              arrow-icon="helion-icon helion-icon-Up_tab helion-icon-r180"
-              ng-model="source.value.selectedToken"
-              input-options="source.value.tokenOptions">
-            </select-input>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+  <select-vcs-token ng-repeat="source in wizardCtrl.options.sources"
+                    ng-click="wizardCtrl.options.selectSource(source.value)"
+                    source="source"
+                    selected-source="wizardCtrl.options.userInput.source"
+                    on-manage-tokens="wizardCtrl.options.onManageTokens(vcs)"
+  ></select-vcs-token>
 </div>

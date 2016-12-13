@@ -71,31 +71,19 @@
           notificationFormAppMode: true,
           imageRegistries: [],
 
-          manageTokens: function (vcs, $event) {
-            $event.stopPropagation();
-            that.manageVcsTokens.manage(vcs).then(function () {
-              // Avoid potential race condition when the last validity check is still in flight
-              that.vcsModel.lastValidityCheck.then(function () {
-
-                // Rebuild valid token options
-                var validTokens = that.rebuildTokenOptions(vcs);
-
-                // Check that the selected source is still ok
-                if (that.userInput.source) {
-                  if (that.userInput.source.guid === vcs.guid) {
-                    // Check that we're still selectable
-                    if (validTokens.length < 1) {
-                      that.options.autoSelectSource();
-                    }
-                  }
-                } else {
-                  // Try auto-select a source after manage tokens
+          onManageTokens: function (vcs) {
+            // Check that the selected source is still ok
+            if (that.userInput.source) {
+              if (that.userInput.source.guid === vcs.guid) {
+                // Check that we're still selectable
+                if (vcs.tokenOptions.length < 1) {
                   that.options.autoSelectSource();
                 }
-              });
-
-            });
-            return true;
+              }
+            } else {
+              // Try auto-select a source after manage tokens
+              that.options.autoSelectSource();
+            }
           },
 
           autoSelectSource: function () {
@@ -108,21 +96,10 @@
 
               // Check that the source still has valid tokens
               if (reselect && reselect.value.tokenOptions.length > 0) {
-                // Try and preserve the selected token
-                var selectedToken = that.userInput.source.selectedToken;
                 that.userInput.source = reselect.value;
-                var foundToken = _.find(reselect.value.tokenOptions, function (tokenOpt) {
-                  return tokenOpt.value === selectedToken;
-                });
-                if (foundToken) {
-                  reselect.value.selectedToken = foundToken.value;
-                } else {
-                  reselect.value.selectedToken = reselect.value.tokenOptions[0].value;
-                }
                 return;
               }
-
-              // If the existing selection is stale, run the normal auto-selection logic
+              // If the existing selection is stale, carry on with the normal auto-selection logic
             }
 
             // Auto select the first source with valid tokens
@@ -133,24 +110,13 @@
                 return;
               }
             }
+
             // Couldn't find suitable source, deselect
             delete that.userInput.source;
           },
 
-          singleToken: function (vcs) {
-            return vcs.tokenOptions.length === 1;
-          },
-
-          noToken: function (vcs) {
-            return vcs.tokenOptions.length < 1;
-          },
-
-          manyTokens: function (vcs) {
-            return vcs.tokenOptions.length > 1;
-          },
-
           selectSource: function (vcs) {
-            if (that.options.noToken(vcs)) {
+            if (vcs.tokenOptions.length < 1) {
               return;
             }
             that.userInput.source = vcs;
@@ -179,6 +145,9 @@
               title: gettext('Select Source'),
               templateUrl: path + 'select-source.html',
               formName: 'application-source-form',
+              allowNext: function () {
+                return !!that.options.userInput.source;
+              },
               nextBtnText: gettext('Next'),
               onNextCancellable: true,
               showBusyOnEnter: gettext('Retrieving your VCS information'),
@@ -366,41 +335,6 @@
 
       reset: function () {},
 
-      rebuildTokenOptions: function (vcs) {
-        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
-        var validTokens = _.filter(vcsModel.vcsTokens, function (vcsToken) {
-          return vcsToken.vcs.guid === vcs.guid && !vcsModel.invalidTokens[vcsToken.token.guid];
-        });
-
-        vcs.tokenOptions = _.map(validTokens, function (vcsToken) {
-          return {
-            value: vcsToken.token.guid,
-            label: vcsToken.token.name
-          };
-        });
-
-        // Make sure the selected Token is current
-        if (vcs.selectedToken) {
-          var matchingToken = _.find(validTokens, function (vcsToken) {
-            return vcsToken.token.guid === vcs.selectedToken;
-          });
-          if (!matchingToken) {
-            // select another if possible
-            if (validTokens.length > 0) {
-              vcs.selectedToken = validTokens[0].token.guid;
-            } else {
-              delete vcs.selectedToken;
-            }
-          }
-        } else {
-          if (validTokens.length > 0) {
-            vcs.selectedToken = validTokens[0].token.guid;
-          }
-        }
-
-        return validTokens;
-      },
-
       /**
        * @function getSupportedVcsInstances
        * @memberof cloud-foundry.model.vcs.VcsModel
@@ -439,13 +373,11 @@
               return vcs.browse_url === hceVcs.browse_url;
             });
 
+            vcsModel.buildTokenOptions(vcs);
             source.label = vcs.label;
             source.browse_url = vcs.browse_url;
             source.value = vcs;
             source.value.vcs_id = hceVcs.vcs_id;
-
-            // Build valid token options for the selector
-            that.rebuildTokenOptions(vcs);
 
             return source;
           });
@@ -456,6 +388,25 @@
         });
       },
 
+      transferTokenSelections: function (newSources) {
+
+        function getSourceFinder(oldSource) {
+          return function (newSource) {
+            return oldSource.value.guid === newSource.value.guid;
+          };
+        }
+
+        for (var i = 0; i < this.options.sources.length; i++) {
+          var oldSource = this.options.sources[i];
+          if (oldSource.value.selectedToken) {
+            var newSource = _.find(newSources, getSourceFinder(oldSource));
+            if (newSource) {
+              newSource.value.selectedToken = oldSource.value.selectedToken;
+            }
+          }
+        }
+      },
+
       getVcsInstances: function () {
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
@@ -464,6 +415,10 @@
           return that.getSupportedVcsInstances(hceModel.data.vcsInstances)
             .then(function (sources) {
               if (sources.length > 0) {
+
+                // Need to preserve any Token selections
+                that.transferTokenSelections(sources);
+
                 that.options.sources.length = 0;
                 [].push.apply(that.options.sources, sources);
                 that.options.autoSelectSource();

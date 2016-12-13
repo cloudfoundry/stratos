@@ -29,6 +29,7 @@
         this.statusClass = 'hpe-popover-alert-' + (this.status ? this.status : 'warning');
       },
       controllerAs: 'tableInlineMessageCtrl',
+      scope: {},
       templateUrl: path + 'widgets/table-inline-message/table-inline-message.html'
     };
   }
