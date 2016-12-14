@@ -36,8 +36,8 @@ func TestPgsqlVCSTokens(t *testing.T) {
 		defer db.Close()
 
 		Convey("A valid VCS Token Repository should be returned without error.", func() {
-			repository, err := NewPgsqlVCSTokenRepository(db)
-			So(repository, ShouldHaveSameTypeAs, &PgsqlVCSTokenRepository{})
+			repository, err := NewPgsqlVcsTokenRepository(db)
+			So(repository, ShouldHaveSameTypeAs, &PgsqlVcsTokenRepository{})
 			So(err, ShouldBeNil)
 		})
 	})
@@ -53,7 +53,7 @@ func TestPgsqlVCSTokens(t *testing.T) {
 		SkipConvey("if successful", func() {
 
 			// General setup
-			mockTokenRecord := VCSTokenRecord{UserGUID: mockUserGUID, Endpoint: mockAPIEndpoint, AccessToken: mockToken}
+			mockTokenRecord := VcsTokenRecord{UserGUID: mockUserGUID, Endpoint: mockAPIEndpoint, AccessToken: mockToken}
 
 			// Database Expectations
 			mock.ExpectExec(insertVCSTokens).
@@ -61,7 +61,7 @@ func TestPgsqlVCSTokens(t *testing.T) {
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
 			Convey("there should be no error returned", func() {
-				repository, _ := NewPgsqlVCSTokenRepository(db)
+				repository, _ := NewPgsqlVcsTokenRepository(db)
 				err := repository.SaveVCSToken(mockTokenRecord, mockEncryptionKey)
 				So(err, ShouldBeNil)
 

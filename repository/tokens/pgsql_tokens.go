@@ -2,6 +2,7 @@ package tokens
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -10,12 +11,12 @@ import (
 
 const (
 	findUAAToken = `SELECT auth_token, refresh_token, token_expiry
-                  FROM tokens
-                  WHERE token_type = 'uaa' AND user_guid = $1`
-
-	countUAATokens = `SELECT COUNT(*)
                     FROM tokens
                     WHERE token_type = 'uaa' AND user_guid = $1`
+
+	countUAATokens = `SELECT COUNT(*)
+                      FROM tokens
+                      WHERE token_type = 'uaa' AND user_guid = $1`
 
 	insertUAAToken = `INSERT INTO tokens (user_guid, token_type, auth_token, refresh_token, token_expiry)
 	                  VALUES ($1, $2, $3, $4, $5)`
@@ -25,16 +26,16 @@ const (
 	                  WHERE user_guid = $1 AND token_type = $2`
 
 	findCNSIToken = `SELECT auth_token, refresh_token, token_expiry
-                   FROM tokens
-                   WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
+                     FROM tokens
+                     WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry
-                           FROM tokens
-                           WHERE token_type = 'cnsi' AND user_guid = $1`
+                             FROM tokens
+                             WHERE token_type = 'cnsi' AND user_guid = $1`
 
 	countCNSITokens = `SELECT COUNT(*)
-                     FROM tokens
-                     WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
+                       FROM tokens
+                       WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
 
 	insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, auth_token, refresh_token, token_expiry)
 	                   VALUES ($1, $2, $3, $4, $5, $6)`
@@ -44,7 +45,7 @@ const (
 	                   WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = $3`
 
 	deleteCNSIToken = `DELETE FROM tokens
-                     WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
+                       WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
 )
 
 // TODO (wchrisjohnson) We need to adjust several calls ^ to accept a list of items (guids) as input
@@ -66,19 +67,19 @@ func (p *PgsqlTokenRepository) SaveUAAToken(userGUID string, tr TokenRecord, enc
 	if userGUID == "" {
 		msg := "Unable to save UAA Token without a valid User GUID."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	if tr.AuthToken == "" {
 		msg := "Unable to save UAA Token without a valid Auth Token."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	if tr.RefreshToken == "" {
 		msg := "Unable to save UAA Token without a valid Refresh Token."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	log.Println("Encrypting Auth Token")
@@ -135,8 +136,8 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 	log.Println("FindUAAToken")
 	if userGUID == "" {
 		msg := "Unable to find UAA Token without a valid User GUID."
-		log.Printf(msg)
-		return TokenRecord{}, fmt.Errorf(msg)
+		log.Println(msg)
+		return TokenRecord{}, errors.New(msg)
 	}
 
 	// temp vars to retrieve db data
@@ -181,25 +182,25 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	if cnsiGUID == "" {
 		msg := "Unable to save CNSI Token without a valid CNSI GUID."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	if userGUID == "" {
 		msg := "Unable to save CNSI Token without a valid User GUID."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	if tr.AuthToken == "" {
 		msg := "Unable to save CNSI Token without a valid Auth Token."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	if tr.RefreshToken == "" {
 		msg := "Unable to save CNSI Token without a valid Refresh Token."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	log.Println("Encrypting Auth Token")
@@ -256,13 +257,13 @@ func (p *PgsqlTokenRepository) FindCNSIToken(cnsiGUID string, userGUID string, e
 	if cnsiGUID == "" {
 		msg := "Unable to find CNSI Token without a valid CNSI GUID."
 		log.Println(msg)
-		return TokenRecord{}, fmt.Errorf(msg)
+		return TokenRecord{}, errors.New(msg)
 	}
 
 	if userGUID == "" {
 		msg := "Unable to find CNSI Token without a valid User GUID."
 		log.Println(msg)
-		return TokenRecord{}, fmt.Errorf(msg)
+		return TokenRecord{}, errors.New(msg)
 	}
 
 	// temp vars to retrieve db data
@@ -307,7 +308,7 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 	if userGUID == "" {
 		msg := "Unable to list CNSI Tokens without a valid User GUID."
 		log.Println(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	rows, err := p.db.Query(listCNSITokensForUser, userGUID)
@@ -373,13 +374,13 @@ func (p *PgsqlTokenRepository) DeleteCNSIToken(cnsiGUID string, userGUID string)
 	if cnsiGUID == "" {
 		msg := "Unable to delete CNSI Token without a valid CNSI GUID."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	if userGUID == "" {
 		msg := "Unable to delete CNSI Token without a valid User GUID."
 		log.Println(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	_, err := p.db.Exec(deleteCNSIToken, cnsiGUID, userGUID)

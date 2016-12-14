@@ -2,151 +2,333 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
+
+	"github.com/hpcloud/portal-proxy/repository/vcs"
+	"github.com/hpcloud/portal-proxy/repository/vcstokens"
 
 	"github.com/labstack/echo"
-
-	"golang.org/x/oauth2"
+	"github.com/satori/go.uuid"
+	"strings"
 )
 
-// VCSType - VCS type (i.e. github, bitbucket)
-type VCSType string
-
-// VCSAuthPathPrefix - VCS auth path prefix (i.e. /login (Github), /site (Bitbucket))
-type VCSAuthPathPrefix string
-
-// VCSGITHUB - Github
-// VCSBITBUCKET - BitBucket
 const (
-	VCSGITHUB    VCSType = "github"
-	VCSBITBUCKET VCSType = "bitbucket"
 
-	VCSGITHUBAUTHPATHPREFIX    VCSAuthPathPrefix = "/login"
-	VCSBITBUCKETAUTHPATHPREFIX VCSAuthPathPrefix = "/site"
+	TOKEN_GUID_HEADER string = "x-cnap-vcs-token-guid"
 )
 
-// Define the necessary OAuth scopes needed by the application
-// For now, Github only. Using default for BitBucket.
-var githubScopes = []string{"admin:repo_hook", "repo", "user"}
-
-// VCSAuthCheckResp - Response used to tell caller whether the user has gone thru
-// the GitHub OAuth2 flow
-type VCSAuthCheckResp struct {
-	Authorized bool `json:"authorized"`
-}
-
-// VCSClientMapKey - key for VCSClientMap in portal config
-type VCSClientMapKey struct {
-	Endpoint string
-}
-
-func getVCSClients(pc portalConfig) (map[VCSClientMapKey]oauth2.Config, map[VCSClientMapKey]bool, error) {
-	logger.Info("getVCSClients")
-	vcsClientMap := make(map[VCSClientMapKey]oauth2.Config)
-	vcsSkipSSLMap := make(map[VCSClientMapKey]bool)
-
-	if pc.VCSClients != "" {
-		for _, client := range strings.Split(pc.VCSClients, ";") {
-			clientData := strings.Split(client, ",")
-
-			clientDataLen := len(clientData)
-			if clientDataLen < 4 || clientDataLen > 5 {
-				logger.Errorf("Expected to have 4 or 5 elements for VCS entry: %s", clientData)
-				continue
-			}
-
-			vcsType := strings.ToLower(strings.TrimSpace(clientData[0]))
-			vcsClientType, err := getVCSType(vcsType)
-			if err != nil {
-				logger.Errorf("Unable to get VCS type %s: %v", vcsType, err)
-				continue
-			}
-
-			pathPrefix := getAuthPathPrefix(vcsType)
-			baseEndpoint := strings.TrimSpace(clientData[1])
-			baseEndpointURL, err := url.Parse(baseEndpoint)
-			if err != nil {
-				logger.Errorf("Unable to parse VCS endpoint URL: %s", baseEndpoint)
-				continue
-			}
-
-			authEndpoint := fmt.Sprintf("%s://%s%s/oauth/authorize", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-			tokenEndpoint := fmt.Sprintf("%s://%s%s/oauth/access_token", baseEndpointURL.Scheme, baseEndpointURL.Host, pathPrefix)
-
-			vcsConfig := oauth2.Config{
-				Endpoint: oauth2.Endpoint{
-					AuthURL:  authEndpoint,
-					TokenURL: tokenEndpoint,
-				},
-				ClientID:     strings.TrimSpace(clientData[2]),
-				ClientSecret: strings.TrimSpace(clientData[3]),
-			}
-
-			vcsSkipSSLMap[VCSClientMapKey{baseEndpoint}] = false
-			if clientDataLen == 5 && clientData[4] != "" && strings.ToLower(strings.TrimSpace(clientData[4])) == "true" {
-				vcsSkipSSLMap[VCSClientMapKey{baseEndpoint}] = true
-			}
-
-			if vcsClientType == VCSGITHUB {
-				vcsConfig.Scopes = githubScopes
-			}
-
-			vcsClientMap[VCSClientMapKey{baseEndpoint}] = vcsConfig
-		}
-	}
-
-	return vcsClientMap, vcsSkipSSLMap, nil
-}
-
-func getVCSType(vcs string) (VCSType, error) {
-	logger.Info("getVCSType")
-
-	var newType VCSType
-
-	switch vcs {
-	case
-		"github",
-		"bitbucket":
-		return VCSType(vcs), nil
-	}
-	return newType, errors.New("Invalid string passed to getVCSType.")
-}
-
-func getAuthPathPrefix(vcs string) VCSAuthPathPrefix {
-	logger.Info("getAuthPathPrefix")
-
-	switch vcs {
-	case "bitbucket":
-		return VCSBITBUCKETAUTHPATHPREFIX
-	default:
-		return VCSGITHUBAUTHPATHPREFIX
-	}
-}
+var GITHUB_REQUIRED_SCOPES = [...]string{"admin:repo_hook", "repo"}
 
 func (p *portalProxy) listVCSClients(c echo.Context) error {
 	logger.Info("listVCSClients")
-	keys := make([]string, len(p.Config.VCSClientMap))
 
-	i := 0
-	for k := range p.Config.VCSClientMap {
-		keys[i] = k.Endpoint
-		i++
-	}
-
-	jsonString, err := json.Marshal(keys)
+	vcsRepository, _ := vcs.NewPostgresVcsRepository(p.DatabaseConnectionPool)
+	vrs, err := vcsRepository.List()
 	if err != nil {
 		return newHTTPShadowError(
-			http.StatusUnauthorized,
+			http.StatusInternalServerError,
 			"Listing VCS clients failed",
 			"Listing VCS clients failed: %v", err)
 	}
 
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-
+	c.JSON(http.StatusOK, vrs)
 	return nil
+}
+
+func (p *portalProxy) listVcsTokens(c echo.Context) error {
+	logger.Info("listVcsTokens")
+	userGuid, err := getPortalUserGUID(c)
+	if err != nil {
+		// Shouldn't happen as caught by our session middleware
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
+	if list, err := vcsTokensRepository.ListVcsTokenByUser(userGuid, p.Config.EncryptionKeyInBytes); err != nil {
+		return newHTTPShadowError(
+			http.StatusInternalServerError,
+			"Listing VCS tokens failed",
+			"Listing VCS tokens failed: %v", err)
+	} else {
+		c.JSON(http.StatusOK, list)
+		return nil
+	}
+}
+
+func (p *portalProxy) getVcsToken(c echo.Context) (*vcstokens.VcsTokenRecord, error) {
+	logger.Info("getVcsToken")
+	userGuid, err := getPortalUserGUID(c)
+	if err != nil {
+		/// Shouldn't happen as caught by our session middleware
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	vcsTokenGuid := c.Request().Header().Get(TOKEN_GUID_HEADER)
+	if (vcsTokenGuid == "") {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "Header '" + TOKEN_GUID_HEADER + "' is required")
+	}
+
+	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
+	return vcsTokensRepository.FindVcsToken(userGuid, vcsTokenGuid, p.Config.EncryptionKeyInBytes)
+}
+
+func (p *portalProxy) getVcs(vcsGuid string) (*vcs.VcsRecord, error) {
+	logger.Info("getVcs")
+	vcsRepository, _ := vcs.NewPostgresVcsRepository(p.DatabaseConnectionPool)
+	return vcsRepository.Find(vcsGuid)
+}
+
+func (p *portalProxy) registerVcsToken(c echo.Context) error {
+	logger.Info("registerVcsToken")
+	userGuid, err := getPortalUserGUID(c)
+	if err != nil {
+		// Shouldn't happen as caught by our session middleware
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	required := []string{"name", "vcs_guid", "token"}
+	inputParams := make(map[string]string)
+	for _, key := range required {
+		paramValue := c.FormValue(key)
+		if (paramValue == "") {
+			return echo.NewHTTPError(http.StatusBadRequest, "Parameter '" + key + "' is required")
+		}
+		inputParams[key] = paramValue
+	}
+
+	tr := &vcstokens.VcsTokenRecord{
+		Guid: uuid.NewV4().String(),
+		UserGuid: userGuid,
+		VcsGuid: inputParams["vcs_guid"],
+		Name: inputParams["name"],
+		Token: inputParams["token"],
+	}
+
+	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
+	if err := vcsTokensRepository.SaveVcsToken(tr, p.Config.EncryptionKeyInBytes); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	logger.Infof("registerVcsToken: successfully saved VCS Token: %s", tr.Name)
+	return c.JSON(http.StatusCreated, tr)
+}
+
+func (p *portalProxy) renameVcsToken(c echo.Context) error {
+	logger.Info("renameVcsToken")
+	userGuid, err := getPortalUserGUID(c)
+	if err != nil {
+		// Shouldn't happen as caught by our session middleware
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	tokenGuid := c.Param("tokenGuid")
+	newTokenName := c.FormValue("name")
+
+	// Find the token by guid
+	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
+	if err := vcsTokensRepository.RenameVcsToken(userGuid, tokenGuid, newTokenName); err != nil {
+		logger.Errorf("Failed to rename VCS token with id %s - %s", tokenGuid, err)
+		if _, ok := err.(*vcstokens.TokenNotFound); ok {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		// Shouldn't happen
+		return echo.NewHTTPError(http.StatusInternalServerError, "We found your token but failed to rename it")
+	}
+
+	logger.Infof("renameVcsToken: successfully renamed VCS Token: %s to %s", tokenGuid, newTokenName)
+	return c.NoContent(http.StatusNoContent)
+}
+
+func (p *portalProxy) deleteVcsToken(c echo.Context) error {
+	logger.Info("deleteVcsToken")
+	userGuid, err := getPortalUserGUID(c)
+	if err != nil {
+		// Shouldn't happen as caught by our session middleware
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	tokenGuid := c.Param("tokenGuid")
+
+	// Find the token by guid
+	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
+	if err := vcsTokensRepository.DeleteVcsToken(userGuid, tokenGuid); err != nil {
+		logger.Errorf("Failed to delete VCS token with id %s - %s", tokenGuid, err)
+		if _, ok := err.(*vcstokens.TokenNotFound); ok {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		// Shouldn't happen
+		return echo.NewHTTPError(http.StatusInternalServerError, "We found your token but failed to delete it")
+	}
+
+	logger.Infof("deleteVcsToken: successfully deleted VCS Token: %s", tokenGuid)
+	return c.NoContent(http.StatusNoContent)
+}
+
+// Used in the list call
+type VcsTokenValid struct {
+	Guid          string `json:"guid"`
+	Name          string `json:"name"`
+	Valid         bool `json:"valid"`
+	InvalidReason string `json:"invalid_reason,omitempty"`
+}
+
+func (p *portalProxy) checkVcsToken(c echo.Context) error {
+	logger.Info("checkVcsToken")
+	userGuid, err := getPortalUserGUID(c)
+	if err != nil {
+		// Shouldn't happen as caught by our session middleware
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	tokenGuid := c.Param("tokenGuid")
+
+	// Find the token by guid
+	vcsTokensRepository, err := vcstokens.NewPgsqlVcsTokenRepository(p.DatabaseConnectionPool)
+	tr, err := vcsTokensRepository.FindVcsToken(userGuid, tokenGuid, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	}
+
+	// Find the VCS
+	vcsRepository, err := vcs.NewPostgresVcsRepository(p.DatabaseConnectionPool)
+	vr, err := vcsRepository.Find(tr.VcsGuid)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Cannot find VCS associated with token: %+v", tr))
+	}
+
+	valid, reason, err := _checkVcsToken(vr, tr)
+	if err != nil {
+		msg := "Error checking VCS token"
+		return newHTTPShadowError(http.StatusInternalServerError, msg, msg + ": %v", err)
+	}
+	tokenValid := VcsTokenValid{
+		Guid: tr.Guid,
+		Name: tr.Name,
+		Valid: valid,
+		InvalidReason: reason,
+	}
+
+	return c.JSON(http.StatusOK, tokenValid)
+}
+
+func (p *portalProxy) autoRegisterCodeEngineVcs(c echo.Context, hceGuid string) error {
+
+	userID, err := p.getSessionStringValue(c, "user_id")
+	if err != nil {
+		// Should not happen as we are protected by the session middleware
+		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
+	}
+
+	// Ask Code Engine for the list of VCS it knows about
+	listVcsPath := &url.URL{Path: "v2/vcs"}
+	var nilBody []byte
+	cnsiRequest, buildErr := p.buildCNSIRequest(hceGuid, userID, "GET", listVcsPath, nilBody, make(http.Header))
+	if buildErr != nil {
+		return buildErr
+	}
+	p.doRequest(&cnsiRequest, nil /* Synchronous request */)
+
+	if cnsiRequest.Error != nil {
+		return cnsiRequest.Error
+	}
+
+	hceVcses := make([]vcs.VcsRecord, 0)
+	if err = json.Unmarshal(cnsiRequest.Response, &hceVcses); err != nil {
+		return fmt.Errorf("Failed to parse VCS from Code Engine! %#v", err)
+	}
+	// Ensure each VCS is of a supported type before registering
+	vcsRepository, _ := vcs.NewPostgresVcsRepository(p.DatabaseConnectionPool)
+	for _, aVcs := range hceVcses {
+		checkedType, err := vcs.CheckVcsType(aVcs.VcsType)
+		if err != nil {
+			logger.Warnf("autoRegisterCodeEngineVcs: skipping VCS with unsupported type %#v", aVcs.VcsType)
+			continue
+		}
+		aVcs.VcsType = checkedType
+		if _, err = vcsRepository.FindMatching(aVcs); err != nil {
+			aVcs.Guid = uuid.NewV4().String()
+			if err = vcsRepository.Save(aVcs); err != nil {
+				logger.Warnf("autoRegisterCodeEngineVcs: Failed to auto register new VCS from Code Engine! %#v - %#v", aVcs, err)
+			} else {
+				logger.Infof("autoRegisterCodeEngineVcs: New VCS from Code Engine registered! : %s", aVcs.BrowseUrl)
+			}
+		} else {
+			logger.Infof("autoRegisterCodeEngineVcs: VCS from Code Engine was already registered: %s", aVcs.BrowseUrl)
+		}
+	}
+	return nil
+}
+
+// _checkVcsToken - make an authenticated request against the Vcs to check if the Token is working and has the required scopes
+func _checkVcsToken(vr *vcs.VcsRecord, tr *vcstokens.VcsTokenRecord) (bool, string, error) {
+	var client http.Client
+	if vr.SkipSslValidation {
+		client = httpClientSkipSSL
+	} else {
+		client = httpClient
+	}
+
+	// Note: this URL is appropriate for both GitHub and BitBucket
+	checkUrl := vr.ApiUrl + "/user"
+
+	req, err := http.NewRequest(http.MethodGet, checkUrl, nil)
+	if err != nil {
+		return false, "Failed to create the check request", err
+	}
+
+	// Add the appropriate Authorization header
+	var authorizationPrefix string
+	if vr.VcsType == vcs.VCS_GITHUB {
+		authorizationPrefix = "token "
+	} else {
+		authorizationPrefix = "bearer "
+	}
+	req.Header.Add("Authorization", authorizationPrefix + tr.Token)
+
+	// Do the request
+	res, err := client.Do(req)
+	if err != nil {
+		return false, "Failed to contact the VCS to make verify the token", err
+	}
+
+	valid := res.StatusCode == http.StatusOK
+
+	if !valid {
+		if res.StatusCode == 401 {
+			return valid, "This token is not valid", nil
+		}
+		return valid, fmt.Sprintf("VCS responded with non-OK status code: %d", res.StatusCode), nil
+	}
+
+	// Get a map of all the scopes for the token
+	// Ensure we check individual scopes for an exact match to avoid substring matches such as:
+	// "admin:repo_hook" would also substring match "repo"
+	scopesMap := make(map[string]bool)
+	for _, v := range strings.Split(res.Header.Get("X-Oauth-Scopes"), ", ") {
+		scopesMap[v] = true
+	}
+
+	var missingScopes []string
+	for _, requiredScope := range GITHUB_REQUIRED_SCOPES {
+		if !scopesMap[requiredScope] {
+			valid = false
+			missingScopes = append(missingScopes, "'" + requiredScope + "'")
+		}
+	}
+
+	if valid {
+		return valid, "", nil
+	}
+
+	var missingScopesString string
+	if len(missingScopes) == 1 {
+		missingScopesString = "This token lacks the required scope " + missingScopes[0]
+	} else {
+		missingScopesString = "This token lacks the following required scopes: ["
+		missingScopesString += strings.Join(missingScopes, ", ")
+		missingScopesString += "]"
+	}
+
+	return valid, missingScopesString, nil
 }

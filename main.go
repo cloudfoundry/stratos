@@ -101,13 +101,6 @@ func main() {
 		logger.Info("Flight recorder endpoint not set.")
 	}
 
-	portalConfig.VCSClientMap, portalConfig.VCSClientSkipSSLMap, err = getVCSClients(portalConfig)
-	if err != nil {
-		logger.Error("Error parsing VCS clients")
-	} else {
-		logger.Info("VCS Clients loaded.")
-	}
-
 	// Establish a Postgresql connection pool
 	var databaseConnectionPool *sql.DB
 	databaseConnectionPool, err = initConnPool()
@@ -397,17 +390,23 @@ func (p *portalProxy) registerRoutes(e *echo.Echo) {
 	// VCS Requests
 	vcsGroup := sessionGroup.Group("/vcs")
 
-	// Initiate OAuth flow against VCS on behalf of a user
-	vcsGroup.GET("/oauth/auth", p.handleVCSAuth)
-
-	// VCS OAuth callback/response
-	vcsGroup.GET("/oauth/callback", p.handleVCSAuthCallback)
-
 	// List VCS clients
 	vcsGroup.GET("/clients", p.listVCSClients)
 
-	// Verify existence of VCS token in Session
-	vcsGroup.GET("/oauth/verify", p.verifyVCSOAuthToken)
+	// Register a new personal access token
+	vcsGroup.POST("/pat", p.registerVcsToken)
+
+	// Rename a personal access token
+	vcsGroup.PUT("/pat/:tokenGuid", p.renameVcsToken)
+
+	// Delete a personal access token
+	vcsGroup.DELETE("/pat/:tokenGuid", p.deleteVcsToken)
+
+	// List all personal access tokens registered by the user
+	vcsGroup.GET("/pat", p.listVcsTokens)
+
+	// Check if a VCS token is working
+	vcsGroup.GET("/pat/:tokenGuid/check", p.checkVcsToken)
 
 	// Proxy the rest to VCS API
 	vcsGroup.Any("/*", p.vcsProxy)

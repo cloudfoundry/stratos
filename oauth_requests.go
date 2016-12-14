@@ -10,7 +10,7 @@ import (
 	"github.com/hpcloud/portal-proxy/repository/tokens"
 )
 
-func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Request) (*http.Response, error) {
+func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error) {
 	logger.Debug("doOauthFlowRequest")
 
 	// get a cnsi token record and a cnsi record
@@ -59,7 +59,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest CNSIRequest, req *http.Requ
 	}
 }
 
-func (p *portalProxy) getCNSIRequestRecords(r CNSIRequest) (t tokens.TokenRecord, c cnsis.CNSIRecord, err error) {
+func (p *portalProxy) getCNSIRequestRecords(r *CNSIRequest) (t tokens.TokenRecord, c cnsis.CNSIRecord, err error) {
 	logger.Debug("getCNSIRequestRecords")
 	// look up token
 	t, ok := p.getCNSITokenRecord(r.GUID, r.UserGUID)
