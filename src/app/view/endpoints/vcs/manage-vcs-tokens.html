@@ -1,0 +1,76 @@
+<div class="manage-tokens">
+  <div class="manage-tokens-description">
+    <p translate>
+      You can connect to the '{{ asyncTaskDialogCtrl.context.vcs.label }}' by creating a GitHub
+      <a class="bold" ng-href="{{ asyncTaskDialogCtrl.context.vcs.browse_url }}/settings/tokens" target="_blank">Personal Access Token</a>
+      and providing the given token string here.
+    </p>
+    <p translate>
+      Personal access tokens work like traditional OAuth tokens. They are valid until you manually revoke or regenerate them.
+      These tokens allow Stackato to access GitHub on your behalf.
+    </p>
+    <p>
+      <span class="italic">Note:</span> Make sure your tokens have the
+      "<span class="bold required-scope">repo</span>" and "<span class="bold required-scope">admin:repo_hook</span>"
+      scopes.
+    </p>
+  </div>
+
+  <div ng-show="asyncTaskDialogCtrl.context.tokens.length"
+       class="endpoints-table">
+    <table class="tokens-list-table table table-actionable"
+           st-table="asyncTaskDialogCtrl.context.stTableTokens"
+           st-safe-src="asyncTaskDialogCtrl.context.tokens">
+      <thead>
+      <tr>
+        <th class="chooser-radio" ng-if="asyncTaskDialogCtrl.context.chooserMode"></th>
+        <th translate st-sort="token.name" st-sort-default="true">Name</th>
+        <th translate st-sort="valid">Connection</th>
+        <th translate>Token</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="vertical-centered" ng-repeat-start="vcsToken in asyncTaskDialogCtrl.context.stTableTokens track by vcsToken.token.guid">
+        <td class="chooser-radio" ng-if="asyncTaskDialogCtrl.context.chooserMode">
+          <radio-input ng-model="asyncTaskDialogCtrl.context.chosenToken"
+                       input-value="vcsToken.token.guid"
+                       input-disabled="!asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"
+                       ng-required="true"
+          ></radio-input>
+        </td>
+        <td>{{ vcsToken.token.name }}</td>
+        <td class="helion-icon helion-icon-lg helion-icon-Active_L text-primary" ng-if="asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
+        <td class="helion-icon helion-icon-lg helion-icon-Critical_L text-danger" ng-if="!asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"></td>
+        <td class="token-value">{{ vcsToken.token.token }}</td>
+        <td>
+          <actions-menu actions="asyncTaskDialogCtrl.context.actions"
+                        action-target="vcsToken" menu-icon="helion-icon helion-icon-More"
+                        menu-position="actions-menu-right" enable-button-mode="true"></actions-menu>
+        </td>
+      </tr>
+      <tr ng-repeat-end table-inline-message
+          ng-if="!asyncTaskDialogCtrl.context.isTokenValid(vcsToken)"
+          status="error"
+          col-span="{{ asyncTaskDialogCtrl.context.chooserMode ? 5 : 4 }}"
+          message="{{ asyncTaskDialogCtrl.context.invalidReason(vcsToken) }}"></tr>
+      <tr class="vertical-centered add-new-token-tr">
+        <td colspan="{{ asyncTaskDialogCtrl.context.chooserMode ? 5 : 4 }}" style="text-align: left">
+          <div class="add-new-token"
+             ng-click="asyncTaskDialogCtrl.context.registerNewToken()">
+            <svg-image class="add-new-token-icon"
+                       ng-class="{'add-new-token-icon-chooser': asyncTaskDialogCtrl.context.chooserMode}"
+                       src="/svg/Add_Green.svg"></svg-image>
+          <span translate>Add New Token</span>
+        </div></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div ng-if="!asyncTaskDialogCtrl.context.tokens.length" class="add-new-token"
+    ng-click="asyncTaskDialogCtrl.context.registerNewToken()">
+    <svg-image class="add-new-token-icon" src="/svg/Add_Green.svg"></svg-image>
+    <span translate>Add New Token</span>
+  </div>
+
+</div>

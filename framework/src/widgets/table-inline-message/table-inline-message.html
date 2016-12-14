@@ -1,8 +1,8 @@
-<td colspan="100" class="table-inline-message">
+<td colspan="{{ tableInlineMessageCtrl.colSpan }}" class="table-inline-message">
   <div ng-class="tableInlineMessageCtrl.statusClass" class="hpe-popover-alert popover bottom in">
     <div class="arrow"></div>
     <div class="popover-content">
-      {{ ::tableInlineMessageCtrl.message }}
+      {{ tableInlineMessageCtrl.message }}
     </div>
   </div>
 </td>

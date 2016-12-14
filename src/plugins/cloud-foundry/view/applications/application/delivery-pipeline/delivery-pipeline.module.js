@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  var LEGACY_TOKEN = 'legacy token';
+  var DELETED_TOKEN = 'token deleted';
+
   angular
     .module('cloud-foundry.view.applications.application.delivery-pipeline', [])
     .config(registerRoute);
@@ -21,15 +24,19 @@
   ApplicationDeliveryPipelineController.$inject = [
     'app.event.eventService',
     'app.model.modelManager',
+    'app.view.vcs.manageVcsTokens',
     'helion.framework.widgets.dialog.confirm',
+    'app.view.notificationsService',
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
     'app.utils.utilsService',
+    'PAT_DELIMITER',
     '$interpolate',
     '$stateParams',
     '$scope',
     '$q',
-    '$state'
+    '$state',
+    '$log'
   ];
 
   /**
@@ -37,21 +44,28 @@
    * @constructor
    * @param {app.event.eventService} eventService - the application event bus
    * @param {app.model.modelManager} modelManager - the Model management service
+   * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {app.view.notificationsService} notificationsService The toasts notifications service
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
    * @param {app.utils.utilsService} utils - the console utils service
+   * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
    * @param {object} $scope  - the Angular $scope
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
+   * @param {object} $log - the Angular $log service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, $interpolate, $stateParams, $scope, $q, $state) {
+  function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog, notificationsService,
+                                                 addNotificationService, postDeployActionService, utils, PAT_DELIMITER,
+                                                 $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
+    this.vcsTokenManager = vcsTokenManager;
     this.model = modelManager.retrieve('cloud-foundry.model.application');
     this.bindingModel = modelManager.retrieve('cloud-foundry.model.service-binding');
     this.userProvidedInstanceModel = modelManager.retrieve('cloud-foundry.model.user-provided-service-instance');
@@ -59,15 +73,21 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.id = $stateParams.guid;
     this.eventService = eventService;
+    this.vcsTokenManager = vcsTokenManager;
     this.$interpolate = $interpolate;
     this.$scope = $scope;
+    this.$log = $log;
     this.confirmDialog = confirmDialog;
+    this.notificationsService = notificationsService;
     this.addNotificationService = addNotificationService;
     this.postDeployActionService = postDeployActionService;
+    this.PAT_DELIMITER = PAT_DELIMITER;
+
     this.hceCnsi = null;
 
     this.project = null;
@@ -91,7 +111,21 @@
       that.hceServices.available = _.filter(that.cnsiModel.serviceInstances, {cnsi_type: 'hce'}).length;
       that.hceServices.valid = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
       that.hceServices.fetching = false;
-      return $q.resolve();
+
+      var promises = [];
+      // List VCS tokens if needed
+      if (!that.vcsModel.vcsTokensFetched) {
+        promises.push(that.vcsModel.listVcsTokens().then(function () {
+          that.vcsModel.checkTokensValidity();
+        }));
+      }
+
+      // List VCS clients if needed
+      if (!that.vcsModel.vcsClientsFetched) {
+        promises.push(that.vcsModel.listVcsClients());
+      }
+
+      return $q.all(promises);
     }
 
     utils.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
@@ -184,7 +218,7 @@
           })
           .then(function () {
             // show notification for successful binding
-            var successMsg = gettext('The pipeline for "{{appName}}" has been deleted.');
+            var successMsg = gettext('The pipeline for "{{ appName }}" has been deleted.');
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
             that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
 
@@ -233,6 +267,75 @@
             that.postDeployActions.length = 0;
             [].push.apply(that.postDeployActions, response.data);
           });
+
+      }
+    },
+
+    _getPatGuid: function () {
+      if (!this.project) {
+        return undefined;
+      }
+      return this.vcsTokenManager.getPatGuid(this.project.name);
+    },
+
+    isLegacyToken: function () {
+      return this.getTokenName() === LEGACY_TOKEN;
+    },
+
+    isTokenDeleted: function () {
+      return this.getTokenName() === DELETED_TOKEN;
+    },
+
+    getTokenName: function () {
+      var patGuid = this._getPatGuid();
+      if (_.isUndefined(patGuid)) {
+        // the project uses a legacy OAuth token
+        return LEGACY_TOKEN;
+      }
+      var tokenInUse = this.vcsModel.getToken(patGuid);
+      if (_.isUndefined(tokenInUse)) {
+        // The user deleted the token from the Console...
+        return DELETED_TOKEN;
+      }
+      return tokenInUse.token.name;
+    },
+
+    isInvalidToken: function () {
+      var patGuid = this._getPatGuid();
+      if (_.isUndefined(patGuid)) {
+        // the project uses a legacy OAuth token
+        return false;
+      }
+      var tokenInUse = this.vcsModel.getToken(patGuid);
+      if (_.isUndefined(tokenInUse)) {
+        // The user deleted the token from the Console...
+        return false;
+      }
+      return this.vcsModel.invalidTokens[tokenInUse.token.guid];
+    },
+
+    manageVcsTokens: function () {
+      var that = this;
+      var vi = this.hceModel.data.vcsInstance;
+      var vcs = _.find(this.vcsModel.vcsClients, function (vc) {
+        return vc.browse_url === vi.browse_url && vc.api_url === vi.api_url && vc.label === vi.label;
+      });
+      if (vcs) {
+        var patGuid = this._getPatGuid();
+        return this.vcsTokenManager.manage(vcs, true, patGuid).then(function (newTokenGuid) {
+          // If the token was changed. update the HCE project
+          if (newTokenGuid !== patGuid) {
+            that.project.name = that.vcsTokenManager.updateProjectName(that.project.name, newTokenGuid);
+            return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
+              that.model.application.project = res.data;
+              var newTokenName = that.vcsModel.getToken(newTokenGuid).token.name;
+              that.notificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
+                {name: newTokenName});
+            });
+          }
+        });
+      } else {
+        this.$log.error('Cannot find vcs to manage tokens', this.hceModel.data.vcsInstance);
       }
     },
 

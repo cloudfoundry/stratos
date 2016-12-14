@@ -15,6 +15,7 @@
       },
       controller: CodeEngineInfoController,
       controllerAs: 'codeEngineInfoCtrl',
+      scope: {},
       templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/pipeline-subflow/code-engine-info/code-engine-info.html'
     };
   }

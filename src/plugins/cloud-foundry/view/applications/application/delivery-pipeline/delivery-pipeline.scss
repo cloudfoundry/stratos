@@ -15,6 +15,15 @@
 
       dd {
         text-transform: none;
+        .problematic-token-indicator {
+          margin-left: $padding-xs-horizontal;
+        }
+        .legacy-token {
+          color: $status-warning;
+        }
+        .invalid-token {
+          color: $status-critical;
+        }
       }
     }
   }

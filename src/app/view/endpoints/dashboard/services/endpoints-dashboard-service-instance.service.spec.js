@@ -28,7 +28,6 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      connected: 'connected',
       type: 'Helion Cloud Foundry'
     };
     var invalidService = {
@@ -45,7 +44,6 @@
     var invalidServicesEndpoint = {
       key: 'cnsi_2',
       name: 'c2',
-      connected: 'error',
       type: 'Helion Cloud Foundry'
     };
     var expiredService = {
@@ -61,7 +59,6 @@
     var expiredServicesEndpoint = {
       key: 'cnsi_3',
       name: 'c3',
-      connected: 'expired',
       type: 'Helion Cloud Foundry'
     };
     var hceService = {
@@ -78,13 +75,12 @@
     var hceServicesEndpoint = {
       key: 'cnsi_4',
       name: 'c4',
-      connected: 'connected',
       type: 'Helion Code Engine'
     };
 
     function createController($injector) {
       $httpBackend = $injector.get('$httpBackend');
-      service = $injector.get('app.view.endpoints.dashboard.serviceInstanceService');
+      service = $injector.get('app.view.endpoints.dashboard.cnsiService');
       modelManager = $injector.get('app.model.modelManager');
     }
 
@@ -167,16 +163,19 @@
             key: 'cnsi_1',
             guid: '1',
             valid: true,
+            type: 'Helion Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }, {
             key: 'cnsi_2',
             guid: '2',
             valid: true,
+            type: 'Helion Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }, {
             key: 'somethingElse-guid',
             guid: 'guid',
             valid: true,
+            type: 'Helion Cloud Foundry',
             token_expiry: Number.MAX_VALUE
           }];
           service.updateInstancesCache(result);
