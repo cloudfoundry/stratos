@@ -40,7 +40,7 @@
       {label: 'Status', value: 'state.label'},
       {label: 'Instance Count', value: 'instanceCount'},
       {label: 'Disk Quota', value: 'entity.disk_quota'},
-      {label: 'Memory Utilization', value: 'entity.memory'},
+      {label: 'Memory', value: 'entity.memory'},
       {label: 'Creation Date', value: 'metadata.created_at'}
     ];
 
