@@ -184,7 +184,7 @@
           })
           .then(function () {
             // show notification for successful binding
-            var successMsg = gettext('The pipeline for "{{appName}}" has been deleted.');
+            var successMsg = gettext("The pipeline for '{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: that.model.application.summary.name});
             that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
 
