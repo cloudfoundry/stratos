@@ -26,6 +26,7 @@
     'app.model.modelManager',
     'app.view.vcs.manageVcsTokens',
     'helion.framework.widgets.dialog.confirm',
+    'app.view.notificationsService',
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
     'app.utils.utilsService',
@@ -45,6 +46,7 @@
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.view.vcs.manageVcsTokens} vcsTokenManager - the VCS token manager
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
+   * @param {app.view.notificationsService} notificationsService The toasts notifications service
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
    * @param {app.utils.utilsService} utils - the console utils service
@@ -58,7 +60,7 @@
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
    */
-  function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog,
+  function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog, notificationsService,
                                                  addNotificationService, postDeployActionService, utils, PAT_DELIMITER,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
@@ -81,6 +83,7 @@
     this.$scope = $scope;
     this.$log = $log;
     this.confirmDialog = confirmDialog;
+    this.notificationsService = notificationsService;
     this.addNotificationService = addNotificationService;
     this.postDeployActionService = postDeployActionService;
     this.PAT_DELIMITER = PAT_DELIMITER;
@@ -325,6 +328,9 @@
             that.project.name = that.vcsTokenManager.updateProjectName(that.project.name, newTokenGuid);
             return that.hceModel.updateProject(that.hceCnsi.guid, newTokenGuid, that.project.id, that.project).then(function (res) {
               that.model.application.project = res.data;
+              var newTokenName = that.vcsModel.getToken(newTokenGuid).token.name;
+              that.notificationsService.notify('success', gettext('Delivery pipeline updated to use Personal Access Token \'{{ name }}\''),
+                {name: newTokenName});
             });
           }
         });
