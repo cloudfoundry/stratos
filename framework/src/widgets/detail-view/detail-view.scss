@@ -16,6 +16,10 @@
     > .modal-content {
       box-shadow: none;
       height: 100%;
+
+      .wizard-step-full {
+        width: 100%;
+      }
     }
   }
 
