@@ -36,19 +36,13 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
     this.sortOptions = [
-      {label: 'App Name (a-z)', value: 'entity.name.asc', sort: 'entity.name', ascending: true},
-      {label: 'App Name (z-a)', value: 'entity.name.desc', sort: 'entity.name', ascending: false},
-      // These rely on app state, which we don't have yet
+      {label: 'App Name', value: 'entity.name'},
+      // This one relies on app state, which we don't have yet
       //{label: 'Status (a-z)', value: 'state.label.asc', sort: 'state.label', ascending: true},
-      //{label: 'Status (z-a)', value: 'state.label.desc', sort: 'state.label', ascending: false},
-      {label: 'Instances (Low-High)', value: 'instanceCount.asc', sort: 'entity.instances', ascending: true},
-      {label: 'Instances (High-Low)', value: 'instanceCount.desc', sort: 'entity.instances', ascending: false},
-      {label: 'Disk Quota (Low-High)', value: 'entity.disk_quota.asc', sort: 'entity.disk_quota', ascending: true},
-      {label: 'Disk Quota (High-Low)', value: 'entity.disk_quota.desc', sort: 'entity.disk_quota', ascending: false},
-      {label: 'Memory (Low-High)', value: 'entity.memory.asc', sort: 'entity.memory', ascending: true},
-      {label: 'Memory (High-Low)', value: 'entity.memory.desc', sort: 'entity.memory', ascending: false},
-      {label: 'Newest', value: 'metadata.created_at.asc', sort: 'metadata.created_at', ascending: false},
-      {label: 'Oldest', value: 'metadata.created_at.desc', sort: 'metadata.created_at', ascending: true}
+      {label: 'Instances', value: 'entity.instances'},
+      {label: 'Disk Quota', value: 'entity.disk_quota'},
+      {label: 'Memory', value: 'entity.memory'},
+      {label: 'Creation Date', value: 'metadata.created_at'}
     ];
 
     // Default to sorting with the newest applications first
@@ -78,7 +72,7 @@
      */
     ensureOptionSelected: function () {
       // Find the menu item that matches the current sort order
-      var selectedSortItem = _.find(this.sortOptions, {sort: this.model.currentSortOption, ascending: this.model.sortAscending});
+      var selectedSortItem = _.find(this.sortOptions, {value: this.model.currentSortOption});
       var option = selectedSortItem.value;
       if (option !== this.selectedOption) {
         this.selectedOption = option;
@@ -92,7 +86,7 @@
     setSort: function () {
       var item = _.find(this.sortOptions, {value: this.selectedOption});
       if (item) {
-        this.sort({value: item.sort || item.value});
+        this.sort({value: item.value});
         this.setSortOrder(item.ascending);
       }
     },
@@ -104,6 +98,14 @@
      */
     setSortOrder: function (isAscending) {
       this.model.sortAscending = isAscending;
+    },
+
+    /**
+     * @name setSortOrder
+     * @description Toggle the sort order (asc/desc)
+     */
+    toggleSortOrder: function () {
+      this.model.sortAscending = !this.model.sortAscending;
     },
 
     /**
