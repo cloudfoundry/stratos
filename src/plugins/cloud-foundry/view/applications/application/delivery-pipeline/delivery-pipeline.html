@@ -7,7 +7,7 @@
 </div>
 <div ng-if="!applicationDeliveryPipelineCtrl.isDeleting && applicationDeliveryPipelineCtrl.project">
   <div ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()" class="alert alert-card-warning">
-    <h4>Legacy Token Detected</h4>
+    <h4 translate>Legacy Token Detected</h4>
     <p translate>
       Your Helion Code Engine pipeline is using a legacy OAuth token.
       While your pipeline may continue to function normally, we have no way of verifying this until you
@@ -15,7 +15,7 @@
     </p>
   </div>
   <div ng-if="applicationDeliveryPipelineCtrl.isTokenDeleted()" class="alert alert-card-warning">
-    <h4>Token Deleted</h4>
+    <h4 translate>Token Deleted</h4>
     <p translate>
       Your Helion Code Engine pipeline is using a token that is no longer available in the Stackato Console.
       While your pipeline may continue to function normally, we have no way of verifying this until you
@@ -23,7 +23,7 @@
     </p>
   </div>
   <div ng-if="applicationDeliveryPipelineCtrl.isInvalidToken()" class="alert alert-card-danger">
-    <h4>Invalid Token Detected</h4>
+    <h4 translate>Invalid Token Detected</h4>
     <p>
       <span translate>
         Your Helion Code Engine pipeline is using an invalid OAuth token
