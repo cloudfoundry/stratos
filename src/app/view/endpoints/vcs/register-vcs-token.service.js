@@ -35,7 +35,7 @@
       registerToken: function (vcs) {
         var tokenPattern;
         if (vcs.vcs_type === 'github') {
-          tokenPattern = /[0-9a-f]{40}/;
+          tokenPattern = /^[0-9a-f]{40}$/;
         }
         var tokenNames = _.map(_.filter(vcsModel.vcsTokens, function (t) {
           return t.vcs.guid === vcs.guid;
