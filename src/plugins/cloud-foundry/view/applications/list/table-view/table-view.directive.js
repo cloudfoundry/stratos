@@ -78,6 +78,14 @@
       }
     );
 
+    //Ensure that if the user searches are filters that the list view updates
+    $scope.$watchCollection(
+      function () {
+        return that.apps;
+      }, function () {
+      updateStTableState();
+    });
+
     $scope.$watch(
       function () {
         return that.table;
