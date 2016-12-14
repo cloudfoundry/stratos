@@ -1,0 +1,22 @@
+.apps-table{
+  padding-right: 16px;
+  padding-left: 16px;
+
+  .table{
+    table-layout: fixed;
+    @include hpe-box-shadow-small();
+    .st-sort-ascent:after{
+      content: ' \25B2';
+    }
+
+    .st-sort-descent:after{
+      content: ' \25BC';
+    }
+
+    td.table-view-app-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+  }
+}

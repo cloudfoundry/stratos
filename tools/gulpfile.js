@@ -266,7 +266,7 @@
     };
 
     gulp.watch(jsSourceFiles, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
-    gulp.watch(scssFiles, ['css', callback]);
+    gulp.watch([scssFiles, config.frameworkScssFiles], ['css', callback]);
     gulp.watch(partials, ['copy:html', callback]);
     gulp.watch(config.frameworkTemplates, ['copy:framework:templates', callback]);
     gulp.watch(paths.src + 'index.html', ['inject:index', callback]);
@@ -321,6 +321,7 @@
         baseDir: '../dist',
         middleware: middleware
       },
+      notify: false,
       ghostMode: false,
       open: false,
       port: 3100,

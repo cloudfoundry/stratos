@@ -3,7 +3,7 @@
   'use strict';
 
   describe('endpoint dashboard tests', function () {
-    var $httpBackend, $q, controller, modelManager, registerServiceCalled, registerServiceType, $scope;
+    var $httpBackend, $q, controller, modelManager, registerServiceCalled, $scope;
 
     var validService = {
       api_endpoint: {
@@ -36,9 +36,9 @@
     }));
     beforeEach(module('app.view.endpoints.dashboard'));
     beforeEach(module(function ($provide) {
-      var mock = function (config, context) {
+      var mock = function () {
+        // Params are config, context
         registerServiceCalled = true;
-        expect(context.data.type).toBe(registerServiceType);
         return {rendered: $q.resolve(), result: $q.reject()};
       };
       $provide.value('helion.framework.widgets.detailView', mock);
@@ -95,16 +95,7 @@
         $httpBackend.flush();
       });
 
-      it('should show cluster registration detail view when showClusterAddForm is invoked for hce', function () {
-        registerServiceType = 'hce';
-        controller.register(registerServiceType);
-        $scope.$digest();
-        expect(registerServiceCalled).toBe(true);
-        $httpBackend.flush();
-      });
-
-      it('should show cluster registration detail view when showClusterAddForm is invoked for hcf', function () {
-        registerServiceType = 'hcf';
+      it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
         controller.register();
         $scope.$digest();
         expect(registerServiceCalled).toBe(true);

@@ -1,6 +1,7 @@
 @import "credentials/credentials-form";
 @import "dashboard/endpoints-dashboard";
 @import "clusters/clusters";
+@import "register/register-service";
 
 .endpoints {
 
@@ -33,47 +34,10 @@
     }
   }
 
-  $msg-height: 50px;
-  .empty-view-message {
-    clear: both;
-    text-align: center;
-    @include flex-align(center, center, column);
-    margin: auto;
-    padding-top: $hpe-unit-space*2;
-
-    .helion-icon{
-      color: $dove-gray;
-    }
-
-    .view-msg {
-      font-size: $font-size-h1;
-      height: $msg-height;
-      line-height: $font-size-h1;
-      font-weight: $hpe-font-weight-semibold;
-      color: $dove-gray;
-      margin-top: $hpe-unit-space*2;
-
-    }
-    .view-cta {
-      font-size: 24px;
-      vertical-align: bottom;
-      font-weight: 600;
-      color: $dove-gray;
-    }
-
-    .btn{
-      padding: 0 1px;
-      vertical-align: baseline;
-    }
-    .btn span {
-      text-transform: none;
-      font-size: $hpe-unit-space;
-    }
-    .btn-link {
-      font-weight: 600;
-    }
+  .applications-empty {
+    padding-top: 73px;
   }
-
+  $msg-height: 50px;
 }
 
 .form-group.skip-ssl-validation-checkbox {

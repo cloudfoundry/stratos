@@ -1,0 +1,123 @@
+.modal.detail-view .register-service-wizard {
+  .wizard {
+    height: initial;
+
+    .register-content-left {
+      padding-bottom: $hpe-unit-space;
+      padding-right: $hpe-unit-space;
+
+      p:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+
+    .register-content-right {
+      display: flex;
+      flex-direction: column;
+
+      padding-bottom: $hpe-unit-space;
+
+      h4 {
+        margin-top: 0;
+      }
+    }
+
+    .register-service-type {
+      display: flex;
+      flex-direction: row;
+
+      .register-content-left {
+        flex: 3 1 0;
+      }
+
+      .register-content-right {
+        flex: 5 1 0;
+
+        .media-list .media {
+          .media-object {
+            width: 77px;
+          }
+          &.register-type-hce {
+            .media-left {
+              .media-object {
+                text-align: center;
+                img {
+                  width: 68px;
+                  padding-left: 3px;
+                }
+              }
+            }
+          }
+
+          .media-body {
+            width: 0;
+          }
+
+          .media-right {
+            .btn-link {
+              padding-right: 0;
+
+              &:hover,
+              &:focus,
+              &:active {
+                text-decoration: none;
+                outline: 0;
+
+                .add-icon {
+                  border-color: $link-hover-color;
+                }
+              }
+
+              .add-icon {
+                border: 2px solid $brand-primary;
+                font-size: $hpe-unit-space / 2;
+                border-radius: 50%;
+                padding: $hpe-unit-space / 6;
+                margin-left: $hpe-unit-space / 4;
+              }
+            }
+          }
+        }
+
+        .btn-default {
+          align-self: flex-end;
+          margin: $hpe-unit-space 2px;
+        }
+      }
+    }
+
+    .register-service-details {
+      display: flex;
+      flex-direction: row;
+
+      .register-content-left {
+        flex-grow: 1;
+      }
+
+      .register-content-right {
+        flex-grow: 1;
+      }
+    }
+  }
+
+  @media (max-width: $screen-lg) {
+    height: 100%;
+    .wizard {
+      .register-service-type {
+        flex-direction: column;
+        .register-content-left {
+          padding-right: 0;
+        }
+        .register-content-right {
+          flex-basis: auto;
+        }
+      }
+      .register-service-details {
+        flex-direction: column;
+        .register-content-left {
+          padding-right: 0;
+        }
+      }
+    }
+  }
+}
