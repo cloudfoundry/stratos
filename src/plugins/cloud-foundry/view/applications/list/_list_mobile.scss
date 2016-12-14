@@ -1,0 +1,56 @@
+.application-control-bar {
+  .application-main-controls {
+    .application-search-box {
+      flex: 0 1 auto;
+      width: calc(100% - 36px);
+    }
+
+    .app-total-control {
+      margin-top: 4px;
+      .form-group {
+        border-color: transparent;
+        padding: 0;
+        height: auto;
+
+        label {
+          font-size: 14px;
+          font-weight: 600;
+          margin-right: 4px;
+        }
+        .app-count {
+          display: inline-block;
+          .app-count-number, .app-count-reset {
+            display: inline-block;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    .view-buttons {
+      position: absolute;
+      margin: 0;
+      right: $hpe-unit-space * 3;
+      margin-top: -15px;
+    }
+
+    .application-options-control {
+      flex: 1 1 auto;
+      text-align: right;
+      font-size: 14px;
+    }
+  }
+  .applications-filter {
+    flex-direction: column;
+    
+    .application-cf-filters {
+      .form-group {
+        margin-right: 0;
+        max-width: 100%;
+      }
+    }
+    .apps-sorting {
+      max-width: 100%;
+    }
+  }
+}

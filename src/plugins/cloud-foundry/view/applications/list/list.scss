@@ -304,3 +304,15 @@ $applications-msg-height: 50px;
   height: 22px;
   line-height: 22px;
 }
+
+@include responsive-mobile() {
+  @import "list_mobile.scss";
+}
+
+@include responsive-tablet-portrait() {
+  @import "list_tablet.scss";
+}
+
+@include responsive-tablet-landscape() {
+  @import "list_tablet.scss";
+}

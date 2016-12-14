@@ -1,0 +1,22 @@
+.application-control-bar {
+  .application-main-controls {
+    .application-search-box {
+      flex: 1 1 0;
+    }
+    .application-options-control {
+      min-width: $hpe-unit-space * 2;
+      width: $hpe-unit-space * 2;
+      font-size: 14px;
+    }
+    .app-total-control {
+      .app-count-reset {
+        font-size: 14px;
+      }
+    }
+  }
+  .applications-filter {
+    .application-cf-filters {
+      flex-direction: column;
+    }
+  }
+}
