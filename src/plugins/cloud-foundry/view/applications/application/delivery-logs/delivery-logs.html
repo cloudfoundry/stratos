@@ -36,6 +36,7 @@
        st-table="appDelLogsCtrl.displayedExecutions"
        st-safe-src="appDelLogsCtrl.parsedHceModel.pipelineExecutions"
        st-set-filter="deliveryLogsBuildFilter"
+       st-filtered-collection
        >
     <div id="delivery-logs-search" class="panel panel-default delivery-logs-search"
          ng-if="appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
@@ -76,7 +77,7 @@
           <thead>
           <tr>
             <th st-sort="message" translate>MESSAGE</th>
-            <th translate>STATUS</th>
+            <th st-sort="result.label" translate>STATUS</th>
             <th st-sort="reason.mCreatedDate" st-sort-default="reverse" translate>TIME</th>
             <th st-sort="reason.author" translate>COMMIT AUTHOR</th>
             <th st-sort="reason.type" translate>REASON</th>
@@ -101,11 +102,11 @@
           </tr>
           </tbody>
           <tfoot ng-init="appDelLogsCtrl.showExecutions = 5"
-                 ng-show="appDelLogsCtrl.showExecutions < appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
+                 ng-show="appDelLogsCtrl.showExecutions < filteredCollection.length">
           <tr>
             <td colspan="5" class="text-center">
               <a ng-click="appDelLogsCtrl.showExecutions = appDelLogsCtrl.parsedHceModel.pipelineExecutions.length">
-                <span translate>Show All</span> ({{appDelLogsCtrl.parsedHceModel.pipelineExecutions.length}})
+                <span translate>Show All</span> ({{ filteredCollection.length }})
               </a>
               <div ng-show="false" st-pagination="" st-items-by-page="appDelLogsCtrl.showExecutions"></div>
             </td>

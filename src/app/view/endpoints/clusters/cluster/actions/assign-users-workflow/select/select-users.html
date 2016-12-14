@@ -1,6 +1,7 @@
 <div class="select-user"
      st-table="step.ctrl.displayedUsers"
-     st-safe-src="step.data.users">
+     st-safe-src="step.data.users"
+     st-filtered-collection>
   <input ng-model="step.userInput.selectedUsersByGuid" type="hidden"
          selected-users-validator="{{step.userInput.selectedUsersByGuid}}" >
   <div class="select-users-filter">
@@ -26,7 +27,12 @@
     </div>
   </div>
   <div class="select-users-table">
-    <table class="table table-outlined table-selectable">
+    <div ng-if="!filteredCollection.length" class="panel">
+      <div class="panel-body" translate>
+        There are no users matching this search term
+      </div>
+    </div>
+    <table ng-if="filteredCollection.length" class="table table-outlined table-selectable">
       <thead>
       <tr>
         <th></th>
@@ -41,11 +47,11 @@
       </tr>
       </tbody>
       <tfoot ng-init="step.ctrl.pagedUserCount = 6"
-             ng-show="step.ctrl.pagedUserCount < step.data.users.length">
+             ng-show="step.ctrl.pagedUserCount < filteredCollection.length">
       <tr>
         <td colspan="5" class="text-center">
           <a ng-click="step.ctrl.pagedUserCount = step.data.users.length">
-            <span translate>Show All</span> ({{step.data.users.length}})
+            <span translate>Show All</span> ({{ filteredCollection.length }})
           </a>
           <div ng-show="false" st-pagination="" st-items-by-page="step.ctrl.pagedUserCount"></div>
         </td>

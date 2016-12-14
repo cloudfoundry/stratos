@@ -272,9 +272,12 @@
           // Don't create timer when scope has been destroyed
           if (!that.scopeDestroyed) {
             return that.$q.all(blockUpdate).finally(function () {
-              that.pipelineReady = true;
-              that.onAppStateChange();
-              that.startUpdate();
+              // HSC-1410: Need to check again that the scope has not been destroyed
+              if (!that.scopeDestroyed) {
+                that.pipelineReady = true;
+                that.onAppStateChange();
+                that.startUpdate();
+              }
             });
           }
 

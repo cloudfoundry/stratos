@@ -65,6 +65,9 @@
   }
 
   .select-users-table {
+    .panel {
+      border: 2px solid $gray-light;
+    }
     table {
       // Remove default border-collapse due to odd clipping of right side border when 'show all' is visible
       border-spacing: 0;

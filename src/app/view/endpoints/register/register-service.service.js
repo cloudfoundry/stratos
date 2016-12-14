@@ -3,30 +3,28 @@
 
   angular
     .module('app.view')
-    .factory('app.view.registerService', ServiceRegistrationService);
+    .factory('app.view.registerService', ServiceRegistrationFactory);
 
-  ServiceRegistrationService.$inject = [
+  ServiceRegistrationFactory.$inject = [
     '$q',
     'app.model.modelManager',
+    'app.utils.utilsService',
     'app.view.notificationsService',
-    'helion.framework.widgets.asyncTaskDialog',
-    'app.utils.utilsService'
+    'helion.framework.widgets.detailView'
   ];
 
   /**
-   * @name ServiceRegistrationService
+   * @name ServiceRegistrationFactory
    * @description Register a service via a slide out
    * @namespace app.view.registerService.ServiceRegistrationService
    * @param {object} $q - the Angular $q service
    * @param {app.model.modelManager} modelManager The console model manager service
-   * @param {app.view.notificationsService} notificationsService The console notification service
-   * @param {helion.framework.widgets.asyncTaskDialog} asyncTaskDialog The framework async detail view
    * @param {app.utils.utilsService} utilsService - the console utils service
-   * @property {function} add Opens slide out containing registration form
-   * @constructor
+   * @param {app.view.notificationsService} notificationsService The console notification service
+   * @param {helion.framework.widgets.detailView} detailView The framework async detail view
+   * @returns {object} Object containing 'show' function
    */
-  function ServiceRegistrationService($q, modelManager, notificationsService, asyncTaskDialog, utilsService) {
-    var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+  function ServiceRegistrationFactory($q, modelManager, utilsService, notificationsService, detailView) {
 
     function createInstances(serviceInstances, filter) {
       var filteredInstances = _.filter(serviceInstances, {cnsi_type: filter});
@@ -34,88 +32,103 @@
     }
 
     return {
-      /**
-       * @name add
-       * @description Opens slide out containing registration form
-       * @namespace app.view.registerService.ServiceRegistrationService
-       * @param {object} $scope - the angular scope object
-       * @param {string} type - the default starting endpoint type
-       * @returns {promise}
-       */
-      add: function ($scope, type) {
-        var serviceTypes = [{
-          label: gettext('Helion Cloud Foundry'),
-          value: 'hcf'
-        },{
-          label: gettext('Helion Code Engine'),
-          value: 'hce'
-        }];
-        var startingType = _.find(serviceTypes, { value: type });
-        startingType = startingType ? startingType : serviceTypes[0];
-        var data = {
-          name: '',
-          type: startingType.value,
-          url: '',
-          skipSslValidation: false
-        };
+      show: function () {
+        var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+        var modal;
         var context = {
-          data: data,
-          types: serviceTypes,
-          description: gettext('Select an endpoint type, then enter it\'s URL and a name to use for this endpoint in the Console.'),
-          urlFormName: startingType.value + 'Url',
-          nameFormName: startingType.value + 'Name',
-          urlValidationExpr: utilsService.urlValidationExpression
-        };
-        $scope.$watch(function () { return data.type; }, function (type) {
-          context.instances = createInstances(serviceInstanceModel.serviceInstances, type);
-          switch (data.type) {
-            case 'hcf':
-              context.typeLabel = gettext('Helion Cloud Foundry');
-              context.urlHint = gettext('Helion Cloud Foundry API endpoint');
-              break;
-            case 'hce':
-              context.typeLabel = gettext('Helion Code Engine');
-              context.urlHint = gettext('Helion Code Engine endpoint');
-              break;
-            default:
-              context.typeLabel = gettext('Service Endpoint');
-              context.urlHint = gettext('');
-              break;
-          }
-        });
-
-        return asyncTaskDialog(
-          {
-            title: gettext('Register Service Endpoint'),
-            templateUrl: 'app/view/endpoints/register/register-service.html',
-            class: 'detail-view-thin',
-            buttonTitles: {
-              submit: gettext('Register')
-            }
+          wizardOptions: {
+            workflow: {
+              allowCancelAtLastStep: true,
+              hideStepNavStack: true,
+              title: gettext('Register an endpoint'),
+              steps: [
+                {
+                  hideNext: true,
+                  templateUrl: 'app/view/endpoints/register/register-service-type.html',
+                  onNext: function () {
+                    var step = context.wizardOptions.workflow.steps[1];
+                    switch (context.wizardOptions.userInput.type) {
+                      case 'hcf':
+                        step.product = gettext('Helion Cloud Foundry');
+                        step.title = gettext('Register a Helion Cloud Foundry Endpoint');
+                        step.nameOfNameInput = 'hcfName';
+                        step.nameOfUrlInput = 'hcfUrl';
+                        step.urlHint = gettext('Helion Cloud Foundry API endpoint');
+                        break;
+                      case 'hce':
+                        step.product = gettext('Helion Code Engine');
+                        step.title = gettext('Register a Helion Code Engine Endpoint');
+                        step.nameOfNameInput = 'hceName';
+                        step.nameOfUrlInput = 'hceUrl';
+                        step.urlHint = gettext('Helion Code Engine endpoint');
+                        break;
+                      default:
+                        step.product = gettext('Endpoint');
+                        step.title = gettext('Register Endpoint');
+                        step.typeLabel = gettext('Service Endpoint');
+                        step.urlHint = gettext('');
+                        break;
+                    }
+                    step.urlValidationExpr = utilsService.urlValidationExpression;
+                    step.instances = createInstances(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
+                  },
+                  onEnter: function () {
+                    context.wizardOptions.workflow.allowBack = false;
+                  }
+                },
+                {
+                  formName: 'regServiceDetails',
+                  templateUrl: 'app/view/endpoints/register/register-service-details.html',
+                  showBusyOnNext: true,
+                  isLastStep: true,
+                  nextBtnText: gettext('Register'),
+                  onNext: function () {
+                    var userInput = context.wizardOptions.userInput;
+                    var stepTwo = context.wizardOptions.workflow.steps[1];
+                    return serviceInstanceModel.create(userInput.type, userInput.url, userInput.name, userInput.skipSslValidation).then(function (serviceInstance) {
+                      notificationsService.notify('success',
+                        gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
+                        {endpointType: stepTwo.product, name: userInput.name});
+                      return serviceInstance;
+                    }).catch(function (response) {
+                      if (response.status === 403) {
+                        return $q.reject(gettext('Endpoint uses a certificate signed by an unknown authority.' +
+                          ' Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.'));
+                      }
+                      return $q.reject(gettext('There was a problem creating the endpoint. Please ensure the endpoint address ' +
+                        'is correct and try again. If this error persists, please contact the administrator.'));
+                    });
+                  },
+                  onEnter: function () {
+                    delete context.wizardOptions.userInput.url;
+                    delete context.wizardOptions.userInput.name;
+                    delete context.wizardOptions.userInput.skipSslValidation;
+                    context.wizardOptions.workflow.allowBack = true;
+                  }
+                }
+              ]
+            },
+            userInput: {}
           },
-          context,
-          function () {
+          wizardActions: {
+            stop: function () {
+              modal.close();
+            },
 
-            if (context.customErrorMsg) {
-              delete context.errorMsg;
-              delete context.customErrorMsg;
+            finish: function () {
+              modal.close();
             }
-            return serviceInstanceModel.create(data.type, data.url, data.name, data.skipSslValidation).then(function (serviceInstance) {
-              notificationsService.notify('success',
-                gettext('{{endpointType}} endpoint \'{{name}}\' successfully registered'),
-                {endpointType: context.typeLabel, name: data.name});
-              return serviceInstance;
-            }).catch(function (response) {
-              if (response.status === 403) {
-                context.errorMsg = gettext('Endpoint uses a certificate signed by an unknown authority.' +
-                  ' Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted.');
-                // Set flag to indicate that we are setting an error message in code, should be unset upon next retry
-                context.customErrorMsg = true;
-              }
-              return $q.reject(response);
-            });
           }
-        ).result;
+        };
+        modal = detailView({
+          template: '<wizard ' +
+          'class="register-service-wizard" ' +
+          'actions="context.wizardActions" ' +
+          'options="context.wizardOptions">' +
+          '</wizard>'
+        }, context);
+
+        return modal.result;
       }
     };
   }
