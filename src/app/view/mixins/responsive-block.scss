@@ -1,0 +1,62 @@
+// Helper mixin for responsive layouts that take the menu bar into account
+
+$responsive-mobile-cutoff: 479px;
+$responsive-tablet-portrait-cutoff: 767px;
+$responsive-tablet-landscape-cutoff: 1023px;
+
+@mixin responsive-mobile() {
+  // Mobile - no menu bar
+  @media (max-width: $responsive-mobile-cutoff) {
+    @content;
+  }
+  // Mobile with icons only
+  @media (max-width: $responsive-mobile-cutoff + $main-nav-icons-width) {
+    .navbar-icons-only {
+      @content;
+    }
+  }
+  // Mobile with wide menu bar 
+  @media (max-width: $responsive-mobile-cutoff + $main-nav-width) {
+    .navbar-normal {
+      @content;
+    }
+  }
+}
+
+@mixin responsive-tablet-portrait() {
+  // Mobile - no menu bar
+  @media (max-width: $responsive-tablet-portrait-cutoff) and (min-width: $responsive-mobile-cutoff + 1) {
+    @content;
+  }
+  // Mobile with icons only
+  @media (max-width: $responsive-tablet-portrait-cutoff + $main-nav-icons-width) and (min-width: $responsive-mobile-cutoff + 1 + $main-nav-icons-width) {
+    .navbar-icons-only {
+      @content;
+    }
+  }
+  // Mobile with wide menu bar 
+  @media (max-width: $responsive-tablet-portrait-cutoff + $main-nav-width) and (min-width: $responsive-mobile-cutoff + 1 + $main-nav-width) {
+    .navbar-normal {
+      @content;
+    }
+  }
+}
+
+@mixin responsive-tablet-landscape() {
+  // Mobile - no menu bar
+  @media (max-width: $responsive-tablet-landscape-cutoff) and (min-width: $responsive-tablet-portrait-cutoff + 1) {
+    @content;
+  }
+  // Mobile with icons only
+  @media (max-width: $responsive-tablet-landscape-cutoff + $main-nav-icons-width) and (min-width: $responsive-tablet-portrait-cutoff + 1 + $main-nav-icons-width) {
+    .navbar-icons-only {
+      @content;
+    }
+  }
+  // Mobile with wide menu bar 
+  @media (max-width: $responsive-tablet-landscape-cutoff + $main-nav-width) and (min-width: $responsive-tablet-portrait-cutoff + 1 + $main-nav-width) {
+    .navbar-normal {
+      @content;
+    }
+  }
+}

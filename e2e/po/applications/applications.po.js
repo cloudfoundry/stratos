@@ -50,7 +50,7 @@
   }
 
   function getAddApplicationButton() {
-    return element(by.css('.action-bar .btn.btn-primary'));
+    return element(by.id('app-wall-add-application-btn'));
   }
 
   function addApplication() {

@@ -1,60 +1,31 @@
-.applications-sorting {
+$bootstrap-dropdown-width: 160px;
 
-  padding-bottom: $hpe-unit-space;
+applications-sorting {
+  ul.dropdown-menu {
+    max-height: initial;
+    width: $bootstrap-dropdown-width - $hpe-unit-space * 2;
+    overflow-x: hidden;
 
-  @media (min-width: $main-nav-width + $gallery-card-side-margins + 2 * $gallery-card-max-width) {
-    .show-message {
-      display: none;
-    }
-  }
-  @media (max-width: $main-nav-width + $gallery-card-side-margins + 2 * $gallery-card-max-width) {
-    .show-sort-actions {
-      display: none !important;
-    }
-
-    .app-sort-actions {
-      button {
-        margin-top: 4px;
-      }
+    li {
+      min-width: $bootstrap-dropdown-width - $hpe-unit-space * 2;
+      padding-right: $hpe-unit-space * 0.5;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
     }
   }
 
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-
-  .app-sort-actions {
-
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-
-    span {
-      padding-top: 8px;
-      padding-right: 4px;
-      font-weight: $hpe-font-weight-semibold;
-    }
-
-    button {
-      text-transform: none;
-      margin-left: 6px;
-      font-size: 16px;
-      .adjust-icon {
-        padding-left: 8px;
-        padding-top: 4px;
-      }
-    }
-
-    .btn-enabled {
-      color: $white;
-      background-color: $gray-dark;
-
-      &:focus:not(:hover) {
-        outline: none;
-      }
-    }
-
+  .sort-asc-desc-btn {
+    width: $hpe-unit-space;
+    height: $hpe-unit-space;
+    cursor: pointer;
   }
 
+  select-input {
+    margin-left: 2 * $hpe-unit-space;
+    
+    .select-input-field {
+      margin-left: 4px;
+      user-select: none;
+    }
+  }
 }
