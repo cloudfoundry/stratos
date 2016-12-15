@@ -64,7 +64,9 @@
         /* eslint-disable angular/angularelement */
         var v = $(value);
         /* eslint-enable angular/angularelement */
-        v.removeClass('detail-view-stack-' + key);
+        v.removeClass (function (index, css) {
+          return (css.match(/(?:^|\s)detail-view-stack-\S+/g) || []).join(' ');
+        });
         v.addClass('detail-view-stack-' + (key + 1));
       });
 
@@ -123,7 +125,9 @@
             /* eslint-disable angular/angularelement */
             var v = $(value);
             /* eslint-enable angular/angularelement */
-            v.removeClass('detail-view-stack-' + key);
+            v.removeClass (function (index, css) {
+              return (css.match(/(?:^|\s)detail-view-stack-\S+/g) || []).join(' ');
+            });
             v.addClass('detail-view-stack-' + (key - 1));
           }
         });
