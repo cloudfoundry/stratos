@@ -27,7 +27,7 @@ service-card {
         display: flex;
         .service-text {
           display: flex;
-          flex: 1 1 0;
+          flex: 1 1 0px;
 
           h4 {
             margin-top: 0;
@@ -98,7 +98,7 @@ service-card {
         display: flex;
 
         .service-attached-msg {
-          flex: 1 1 0;
+          flex: 1 1 0px;
           margin: auto 0;
         }
 
