@@ -13,6 +13,11 @@
       content: ' \25BC';
     }
 
+    td.table-view-app-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
   }
 
   .column.column-no-sort {

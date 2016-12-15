@@ -456,7 +456,7 @@
           var appName = that.model.application.summary.name;
           that.model.deleteApp(that.cnsiGuid, that.id).then(function () {
             // show notification for successful binding
-            var successMsg = gettext('"{{appName}}" has been deleted.');
+            var successMsg = gettext("'{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: appName});
             that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
             that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');

@@ -14,6 +14,7 @@
       },
       controller: OrganizationSpaceTileController,
       controllerAs: 'orgSpaceTileCtrl',
+      scope: {},
       templateUrl: 'app/view/endpoints/clusters/cluster/organization/detail/spaces/space-tile/organization-space-tile.html'
     };
   }

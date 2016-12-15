@@ -1,8 +1,11 @@
 (function () {
   'use strict';
 
+  var PAT_DELIMITER = ';PAT:';
+
   angular
     .module('cloud-foundry.view.applications.workflows.add-pipeline-workflow', [])
+    .constant('PAT_DELIMITER', PAT_DELIMITER)
     .constant('cloud-foundry.view.applications.workflows.add-pipeline-workflow.prototype', {
 
       init: function () {
@@ -45,6 +48,7 @@
       },
 
       setOptions: function () {
+        var that = this;
         this.options = this.options || {};
 
         angular.extend(this.options, {
@@ -65,7 +69,58 @@
           branches: [],
           buildContainers: [],
           notificationFormAppMode: true,
-          imageRegistries: []
+          imageRegistries: [],
+
+          onManageTokens: function (vcs) {
+            // Check that the selected source is still ok
+            if (that.userInput.source) {
+              if (that.userInput.source.guid === vcs.guid) {
+                // Check that we're still selectable
+                if (vcs.tokenOptions.length < 1) {
+                  that.options.autoSelectSource();
+                }
+              }
+            } else {
+              // Try auto-select a source after manage tokens
+              that.options.autoSelectSource();
+            }
+          },
+
+          autoSelectSource: function () {
+
+            // Preserve any existing selection if still valid
+            if (that.userInput.source) {
+              var reselect = _.find(that.options.sources, function (aSource) {
+                return aSource.value.guid === that.userInput.source.guid;
+              });
+
+              // Check that the source still has valid tokens
+              if (reselect && reselect.value.tokenOptions.length > 0) {
+                that.userInput.source = reselect.value;
+                return;
+              }
+              // If the existing selection is stale, carry on with the normal auto-selection logic
+            }
+
+            // Auto select the first source with valid tokens
+            for (var i = 0; i < that.options.sources.length; i++) {
+              var source = that.options.sources[i];
+              if (source.value.tokenOptions.length > 0) {
+                that.userInput.source = source.value;
+                return;
+              }
+            }
+
+            // Couldn't find suitable source, deselect
+            delete that.userInput.source;
+          },
+
+          selectSource: function (vcs) {
+            if (vcs.tokenOptions.length < 1) {
+              return;
+            }
+            that.userInput.source = vcs;
+          }
         });
       },
 
@@ -73,9 +128,13 @@
         var path = 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/';
         var that = this;
 
+        that.pipelineCreated = false;
+
         return {
           allowJump: false,
-          allowBack: false,
+          allowBack: function () {
+            return !that.pipelineCreated;
+          },
           title: gettext('Add Pipeline'),
           btnText: {
             cancel: gettext('Cancel')
@@ -86,30 +145,14 @@
               title: gettext('Select Source'),
               templateUrl: path + 'select-source.html',
               formName: 'application-source-form',
-              nextBtnText: gettext('Next'),
-              showBusyOnNext: true,
-              onNextCancellable: true,
-              onNextCancel: function () {
-                that.githubOauthService.cancel();
+              allowNext: function () {
+                return !!that.options.userInput.source;
               },
-              onNext: function () {
-                var oauth;
-                if (that.userInput.source.vcs_type === 'GITHUB') {
-                  oauth = that.githubOauthService.start(that.userInput.source.browse_url, that.userInput.source.api_url);
-                } else {
-                  oauth = that.$q.resolve();
-                }
-
-                return oauth
-                  .then(function () {
-                    return that.getRepos().catch(function () {
-                      var msg = gettext('There was a problem retrieving your repositories. Please try again.');
-                      return that.$q.reject(msg);
-                    });
-                  }, function () {
-                    var msg = gettext('There was a problem authorizing with the selected source. Please try again.');
-                    return that.$q.reject(msg);
-                  });
+              nextBtnText: gettext('Next'),
+              onNextCancellable: true,
+              showBusyOnEnter: gettext('Retrieving your VCS information'),
+              onEnter: function () {
+                return that.getVcsInstances();
               }
             },
             {
@@ -118,8 +161,23 @@
               templateUrl: path + 'select-repository.html',
               formName: 'application-repo-form',
               nextBtnText: gettext('Next'),
-              showBusyOnNext: true,
-              onNext: function () {
+              showBusyOnEnter: gettext('Retrieving your repositories'),
+              onEnter: function () {
+                return that.getRepos().catch(function () {
+                  var msg = gettext('There was a problem retrieving your repositories. Please try again.');
+                  return that.$q.reject(msg);
+                });
+              }
+            },
+            {
+              ready: true,
+              title: gettext('Pipeline Details'),
+              templateUrl: path + 'pipeline-details.html',
+              formName: 'application-pipeline-details-form',
+              nextBtnText: gettext('Create pipeline'),
+              showBusyOnNext: gettext('Creating pipeline'),
+              showBusyOnEnter: gettext("Retrieving the repository's branches"),
+              onEnter: function () {
                 that.options.repoStSearch = '';
                 that.getPipelineDetailsData();
                 var githubModel = that.modelManager.retrieve('github.model');
@@ -129,23 +187,23 @@
                   return hceModel.getProjects(that.userInput.hceCnsi.guid).then(function (projects) {
                     var githubOptions = that._getVcsHeaders();
                     var usedBranches = _.chain(projects)
-                                        .filter(function (p) {
-                                          return p.repo.full_name === that.userInput.repo.full_name;
-                                        })
-                                        .map(function (p) { return p.repo.branch; })
-                                        .value();
+                      .filter(function (p) {
+                        return p.repo.full_name === that.userInput.repo.full_name;
+                      })
+                      .map(function (p) { return p.repo.branch; })
+                      .value();
 
                     return githubModel.branches(that.userInput.repo.full_name, githubOptions)
                       .then(function () {
                         var branches = _.map(githubModel.data.branches,
-                                            function (o) {
-                                              var used = _.indexOf(usedBranches, o.name) >= 0;
-                                              return {
-                                                disabled: used,
-                                                label: o.name + (used ? gettext(' (used by other project)') : ''),
-                                                value: o.name
-                                              };
-                                            });
+                          function (o) {
+                            var used = _.indexOf(usedBranches, o.name) >= 0;
+                            return {
+                              disabled: used,
+                              label: o.name + (used ? gettext(' (used by another project)') : ''),
+                              value: o.name
+                            };
+                          });
                         [].push.apply(that.options.branches, branches);
                       })
                       .catch(function () {
@@ -157,15 +215,7 @@
                     return that.$q.reject(msg);
                   });
                 }
-              }
-            },
-            {
-              ready: true,
-              title: gettext('Pipeline Details'),
-              templateUrl: path + 'pipeline-details.html',
-              formName: 'application-pipeline-details-form',
-              nextBtnText: gettext('Create pipeline'),
-              showBusyOnNext: true,
+              },
               onNext: function () {
                 var userServiceInstanceModel = that.modelManager.retrieve('app.model.serviceInstance.user');
                 // First verify if provided credentials are correct
@@ -190,6 +240,10 @@
                     // Failed to validate credentials
                     var msg = gettext('The username and password combination provided is invalid.');
                     return that.$q.reject(msg);
+                  })
+                  .then(function () {
+                    // No longer allow going back after this point
+                    that.pipelineCreated = true;
                   })
                   .catch(function (error) {
                     // Some other exception occurred
@@ -281,40 +335,110 @@
 
       reset: function () {},
 
+      /**
+       * @function getSupportedVcsInstances
+       * @memberof cloud-foundry.model.vcs.VcsModel
+       * @description Returns metadata about the supported VCS Instances, given a list of all of the available instances
+       * @param {object} hceVcsInstances - HCE VCS instance metadata from HCE
+       * @returns {object} Metadata array with details of the set of supported VCS instances that can be presented to the user
+       * @public
+       */
+      getSupportedVcsInstances: function (hceVcsInstances) {
+        var that = this;
+        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
+
+        if (!hceVcsInstances || angular.isArray(hceVcsInstances) && _.isEmpty(hceVcsInstances)) {
+          return this.$q.resolve([]);
+        }
+
+        var clientsP = vcsModel.listVcsClients();
+
+        // List all tokens and check their validity
+        var tokensP = vcsModel.listVcsTokens().then(function () {
+          return vcsModel.checkTokensValidity();
+        });
+
+        return this.$q.all([clientsP, tokensP]).then(function () {
+          // Filter clients that are not registered with this Code Engine
+          var clientsInCodeEngine = _.filter(vcsModel.vcsClients, function (vcsClient) {
+            return _.find(hceVcsInstances, function (hceVcs) {
+              return vcsClient.browse_url === hceVcs.browse_url;
+            });
+          });
+
+          var sources = _.map(clientsInCodeEngine, function (vcs) {
+            var source = vcsModel.getSupportedType(vcs);
+
+            var hceVcs = _.find(hceVcsInstances, function (hceVcs) {
+              return vcs.browse_url === hceVcs.browse_url;
+            });
+
+            vcsModel.buildTokenOptions(vcs);
+            source.label = vcs.label;
+            source.browse_url = vcs.browse_url;
+            source.value = vcs;
+            source.value.vcs_id = hceVcs.vcs_id;
+
+            return source;
+          });
+          return sources;
+        }, function () {
+          var msg = gettext('There was a problem retrieving VCS instances. Please try again.');
+          return that.$q.reject(msg);
+        });
+      },
+
+      transferTokenSelections: function (newSources) {
+
+        function getSourceFinder(oldSource) {
+          return function (newSource) {
+            return oldSource.value.guid === newSource.value.guid;
+          };
+        }
+
+        for (var i = 0; i < this.options.sources.length; i++) {
+          var oldSource = this.options.sources[i];
+          if (oldSource.value.selectedToken) {
+            var newSource = _.find(newSources, getSourceFinder(oldSource));
+            if (newSource) {
+              newSource.value.selectedToken = oldSource.value.selectedToken;
+            }
+          }
+        }
+      },
+
       getVcsInstances: function () {
         var that = this;
         var hceModel = this.modelManager.retrieve('cloud-foundry.model.hce');
-        var vcsModel = this.modelManager.retrieve('cloud-foundry.model.vcs');
-        var deferred = this.$q.defer();
 
-        hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
-          vcsModel.getSupportedVcsInstances(hceModel.data.vcsInstances)
+        return hceModel.getVcses(that.userInput.hceCnsi.guid).then(function () {
+          return that.getSupportedVcsInstances(hceModel.data.vcsInstances)
             .then(function (sources) {
               if (sources.length > 0) {
+
+                // Need to preserve any Token selections
+                that.transferTokenSelections(sources);
+
+                that.options.sources.length = 0;
                 [].push.apply(that.options.sources, sources);
-                that.userInput.source = sources[0].value;
-                deferred.resolve();
+                that.options.autoSelectSource();
               } else {
                 var msg = gettext('No VCS instances were available for the selected delivery pipeline instance.');
-                deferred.reject(msg);
+                return that.$q.reject(msg);
               }
-            }, function (reason) {
-              deferred.reject(reason);
             });
-        }, function (error) {
-          // Some other exception occurred
-          var message = gettext('There was a problem retrieving VCS instances.');
+        }).catch(function (error) {
+          var message = gettext('There was a problem retrieving Code Engine VCS instances.');
 
           var codeEngineErrorDetails = that.utils.extractCodeEngineError(error);
           if (codeEngineErrorDetails || _.isString(error)) {
-            message = gettext('Failed to retrieve VCS instances due to following exception: ') + (codeEngineErrorDetails || error);
+            message = gettext('Failed to retrieve Code Engine VCS instances due to following error: ') + (codeEngineErrorDetails || error);
           }
-          message = message + gettext(' Please try again. If problem persists, please contact your administrator. ');
+          message = message + gettext(' Please try again. If the problem persists, please contact your administrator.');
 
-          deferred.reject(message);
+          return that.$q.reject(message);
         });
 
-        return deferred.promise;
       },
 
       getRepos: function () {
@@ -498,7 +622,6 @@
         } else {
           var that = this;
           this.userInput.projectName = this._createProjectName();
-          var githubUrl = this.userInput.source.browse_url;
           return this.hceModel.createProject(
             this.userInput.hceCnsi.guid,
             this.userInput.projectName,
@@ -507,7 +630,7 @@
             this.userInput.buildContainer.build_container_id,
             this.userInput.repo,
             this.userInput.branch,
-            githubUrl
+            this.userInput.source.selectedToken
           ).then(function (response) {
             that.userInput.projectId = response.data.id;
           });
@@ -544,6 +667,8 @@
           this.userInput.application.summary.guid
         ].join('-');
 
+        name += PAT_DELIMITER + this.userInput.source.selectedToken;
+
         return name;
       },
 
@@ -551,8 +676,7 @@
         var githubOptions = {};
         if (this.userInput.source) {
           githubOptions.headers = {
-            'x-cnap-vcs-url': this.userInput.source.browse_url,
-            'x-cnap-vcs-api-url': this.userInput.source.api_url
+            'x-cnap-vcs-token-guid': _.get(this.userInput, 'source.selectedToken')
           };
         }
 

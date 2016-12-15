@@ -17,26 +17,23 @@
     return {
       scope: {
         pipeline: '=',
-        hce: '='
+        hce: '=',
+        setup: '='
       },
       templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-pipeline/delivery-pipeline-status/delivery-pipeline-status.html',
       controller: ApplicationSetupPipelineController,
-      controllerAs: 'applicationSetupPipelineCtrl'
+      controllerAs: 'applicationSetupPipelineCtrl',
+      bindToController: true
     };
   }
 
-  ApplicationSetupPipelineController.$inject = [
-    'helion.framework.widgets.detailView'
-  ];
+  ApplicationSetupPipelineController.$inject = [];
 
   /**
    * @name ApplicationSetupPipelineController
    * @constructor
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
-   * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
    */
-  function ApplicationSetupPipelineController(detailView) {
-    this.detailView = detailView;
+  function ApplicationSetupPipelineController() {
   }
 
   angular.extend(ApplicationSetupPipelineController.prototype, {
@@ -46,11 +43,7 @@
      * @description trigger add pipeline workflow
      */
     setupPipeline: function () {
-      this.detailView(
-        {
-          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
-        }
-      );
+      this.setup();
     }
   });
 

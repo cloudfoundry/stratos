@@ -35,6 +35,7 @@
       },
       controller: TableViewController,
       controllerAs: 'tableViewCtrl',
+      scope: {},
       templateUrl: 'plugins/cloud-foundry/view/applications/list/' +
       'table-view/table-view.html'
     };
@@ -55,7 +56,7 @@
       {name: gettext('Status'), value: 'state.label', noSort: true},
       {name: gettext('Instances'), value: 'entity.instances'},
       {name: gettext('Disk Quota'), value: 'entity.disk_quota'},
-      {name: gettext('Memory Utilization'), value: 'entity.memory'},
+      {name: gettext('Memory'), value: 'entity.memory'},
       {name: gettext('Creation Date'), value: 'metadata.created_at'}
     ];
     this.init = false;

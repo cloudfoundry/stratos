@@ -80,6 +80,36 @@
     }
 
   }
+
+  .new-app-panel {
+    background-color: $white;
+    margin-bottom: $hpe-unit-space;
+    padding: $hpe-unit-space * 0.5 $hpe-unit-space;
+
+    .new-app-title-box {
+      height: $hpe-unit-space * 2;
+      line-height: $hpe-unit-space * 2;
+      display: flex;
+
+      > .new-app-okay {
+        margin: auto 0;
+      }
+
+      > .new-app-headline {
+        margin-left: $hpe-unit-space * .5;
+        font-size: $hpe-unit-space;
+        flex: 1 1 0px;
+      }
+    }
+
+    .new-app-nextsteps {
+      margin-left: $hpe-unit-space * 1.5;
+
+      > ul {
+        margin: $hpe-unit-space * 0.25 0;
+      }
+    }
+  }  
 }
 
 .add-route-form-section {

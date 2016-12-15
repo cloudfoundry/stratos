@@ -98,7 +98,7 @@
 		.toast-body {
 			vertical-align: middle;
 			display: flex;
-			margin: auto ($hpe-unit-space * 2) auto $toast-icon-space;
+			margin: auto $toast-icon-space auto $toast-icon-space;
 			height: $toast-height-inside;
 
 			.toast-message {
