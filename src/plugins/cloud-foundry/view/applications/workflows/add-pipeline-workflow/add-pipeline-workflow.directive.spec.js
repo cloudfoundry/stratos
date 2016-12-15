@@ -56,7 +56,7 @@
         addPipelineWorkflowCtrl.reset();
       });
 
-      it('should have been rest properly', function () {
+      it('should have been reset properly', function () {
         expect(addPipelineWorkflowCtrl.userInput.name).toBe(application.summary.name);
         expect(addPipelineWorkflowCtrl.userInput.serviceInstance).toBe(application.cluster);
         expect(addPipelineWorkflowCtrl.userInput.clusterUsername).toBe(null);
@@ -77,15 +77,15 @@
         expect(addPipelineWorkflowCtrl.userInput.searchCategory).toBe('all');
         expect(addPipelineWorkflowCtrl.userInput.search.entity.extra).toBe(undefined);
         expect(addPipelineWorkflowCtrl.data.workflow.allowJump).toBe(false);
-        expect(addPipelineWorkflowCtrl.data.workflow.allowBack).toBe(false);
+        expect(addPipelineWorkflowCtrl.data.workflow.allowBack()).toBe(true);
         expect(addPipelineWorkflowCtrl.data.workflow.title).toBe('Add Pipeline');
         expect(addPipelineWorkflowCtrl.data.workflow.steps.length).toBe(6);
       });
 
-      it('step 1 - onNext', function () {
+      it('step 2 - onEnter', function () {
         spyOn(addPipelineWorkflowCtrl, 'getVcsInstances');
-        var step = addPipelineWorkflowCtrl.data.workflow.steps[0];
-        step.onNext();
+        var step = addPipelineWorkflowCtrl.data.workflow.steps[1];
+        step.onEnter();
         expect(addPipelineWorkflowCtrl.getVcsInstances).toHaveBeenCalled();
       });
 

@@ -30,8 +30,8 @@
   AddAppWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
-    'github.view.githubOauthService',
     'app.utils.utilsService',
+    'app.view.vcs.manageVcsTokens',
     '$interpolate',
     '$scope',
     '$q',
@@ -44,13 +44,12 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
-   * @param {object} githubOauthService - github oauth service
-   * @param {object} utils - Utils service
+   * @param {app.utils.utilsService} utils - the utils service
+   * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -58,7 +57,6 @@
    * @property {boolean} addingApplication - flag for adding app
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
-   * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model
@@ -71,7 +69,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, utils, $interpolate, $scope, $q, $timeout) {
+  function AddAppWorkflowController(modelManager, eventService, utils, manageVcsTokens, $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$q = $q;
@@ -79,8 +77,8 @@
     this.addingApplication = false;
     this.modelManager = modelManager;
     this.eventService = eventService;
-    this.githubOauthService = githubOauthService;
     this.utils = utils;
+    this.manageVcsTokens = manageVcsTokens;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -91,6 +89,7 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     this.userInput = {};
     this.options = {};
 

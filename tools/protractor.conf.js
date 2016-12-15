@@ -70,6 +70,23 @@
             },
             testOrgName: 'e2e',
             testSpaceName: 'e2e'
+          },
+          hcf2: {
+            register: {
+              api_endpoint: 'https://api.hcf.hscdemo.stacktest.io',
+              cnsi_name: 'hcf demo',
+              skip_ssl_validation: 'true'
+            },
+            admin: {
+              username: 'admin',
+              password: 'hscadmin'
+            },
+            user: {
+              username: 'e2e',
+              password: 'changeme'
+            },
+            testOrgName: 'e2e',
+            testSpaceName: 'e2e'
           }
         },
         hce: {

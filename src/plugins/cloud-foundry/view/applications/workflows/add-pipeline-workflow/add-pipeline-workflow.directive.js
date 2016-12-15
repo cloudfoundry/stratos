@@ -30,8 +30,8 @@
   AddPipelineWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
-    'github.view.githubOauthService',
     'app.utils.utilsService',
+    'app.view.vcs.manageVcsTokens',
     '$scope',
     '$q',
     '$timeout',
@@ -44,15 +44,14 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
-   * @param {object} githubOauthService - github oauth service
    * @param {app.utils.utilsService} utils - the utils service
+   * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
    * @param {object} $stateParams - the UI router $stateParams service
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
-   * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {app.utils.utilsService} utils - the utils service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -60,11 +59,11 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddPipelineWorkflowController(modelManager, eventService, githubOauthService, utils, $scope, $q, $timeout, $stateParams) {
+  function AddPipelineWorkflowController(modelManager, eventService, utils, manageVcsTokens, $scope, $q, $timeout, $stateParams) {
     this.modelManager = modelManager;
     this.eventService = eventService;
-    this.githubOauthService = githubOauthService;
     this.utils = utils;
+    this.manageVcsTokens = manageVcsTokens;
     this.$scope = $scope;
     this.$q = $q;
     this.$timeout = $timeout;
@@ -72,6 +71,7 @@
     this.options = {};
     this.cnsiGuid = $stateParams.cnsiGuid;
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     this.init();
     this.startWorkflow();
@@ -124,22 +124,15 @@
           }
         };
 
-        this.data.workflow = {
-          allowJump: false,
-          allowBack: false,
-          title: gettext('Add Pipeline'),
-          steps: [
-            {
-              ready: true,
-              title: gettext('Select Endpoint'),
-              templateUrl: path + 'select-endpoint.html',
-              formName: 'application-endpoint-form',
-              onNext: function () {
-                return that.getVcsInstances();
-              }
-            }
-          ].concat(this.getWorkflowDefinition().steps)
-        };
+        this.data.workflow = this.getWorkflowDefinition();
+        this.data.workflow.steps.unshift({
+          ready: true,
+          title: gettext('Select Endpoint'),
+          templateUrl: path + 'select-endpoint.html',
+          formName: 'application-endpoint-form',
+          onNext: function () {
+          }
+        });
 
         this.setOptions();
 

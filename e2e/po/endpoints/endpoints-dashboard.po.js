@@ -164,8 +164,8 @@
     return helpers.getTableCellAt(getEndpointTable(), row, 4).element(by.css('actions-menu'));
   }
 
-  function endpointUrl(rowIndex) {
-    return helpers.getTableCellAt(getEndpointTable(), rowIndex, 1).getText();
+  function endpointUrl(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 3).getText();
   }
 
   function endpointError(rowIndex) {

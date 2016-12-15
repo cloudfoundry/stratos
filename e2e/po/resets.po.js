@@ -147,9 +147,17 @@
 
         var hcfs = helpers.getHcfs();
         if (registerMultipleHcf) {
-          // duplicates the current definition
-          var key = _.keys(hcfs)[0];
-          hcfs[key + '_test'] = hcfs[key];
+          if (_.keys(hcfs).length === 1) {
+            // duplicates the current definition
+            var key = _.keys(hcfs)[0];
+            hcfs[key + '_test'] = _.clone(hcfs[key]);
+            hcfs[key + '_test'].name += ' Copy';
+          }
+        } else {
+          var firstKey = Object.keys(hcfs)[0];
+          var firstHcf = hcfs[firstKey];
+          hcfs = {};
+          hcfs[firstKey] = firstHcf;
         }
         var promises = [];
         var c;
