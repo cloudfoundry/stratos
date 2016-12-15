@@ -85,7 +85,7 @@
           </div>
         </div>
       </div>
-      <div class="panel-body applications-filter" ng-if="!applicationsListCtrl.model.hideFilterPanel">
+      <div class="panel-body applications-filter" ng-show="!applicationsListCtrl.model.hideFilterPanel">
         <form class="form-horizontal application-cf-filters">
           <div class="form-group">
             <label class="control-label" translate>Endpoint</label>
@@ -119,7 +119,7 @@
     </div>
   </div>
 
-  
+
   <div class="applications-empty" ng-if="!applicationsListCtrl.model.hasApps">
     <div ng-if="applicationsListCtrl.model.clusterCount === 0">
       <div class="helion-icon helion-icon-3x helion-icon-Cluster"></div>

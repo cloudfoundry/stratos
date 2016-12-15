@@ -45,9 +45,6 @@
       {label: 'Creation Date', value: 'metadata.created_at'}
     ];
 
-    //this.ensureOptionSelected();
-    //that.model.reSort();
-
     // If currentSortOption and sort order change update filteredApplications
     $scope.$watch(function () {
       // Combine this into one watch so changes in the same digest only kick off one update
@@ -62,7 +59,11 @@
 
     // Default to sorting with the newest applications first
     this.model.currentSortOption = this.model.currentSortOption || 'metadata.created_at';
+
     this.model.sortAscending = angular.isDefined(this.model.sortAscending) ? this.model.sortAscending : true;
+
+    this.ensureOptionSelected();
+    that.model.reSort();
   }
 
   angular.extend(ApplicationsSortingController.prototype, {
