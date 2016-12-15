@@ -45,11 +45,8 @@
       {label: 'Creation Date', value: 'metadata.created_at'}
     ];
 
-    // Default to sorting with the newest applications first
-    this.model.currentSortOption = this.model.currentSortOption || 'metadata.created_at';
-    this.model.sortAscending = angular.isDefined(this.model.sortAscending) ? this.model.sortAscending : false;
-
-    this.ensureOptionSelected();
+    //this.ensureOptionSelected();
+    //that.model.reSort();
 
     // If currentSortOption and sort order change update filteredApplications
     $scope.$watch(function () {
@@ -62,6 +59,10 @@
       that.ensureOptionSelected();
       that.model.reSort();
     });
+
+    // Default to sorting with the newest applications first
+    this.model.currentSortOption = this.model.currentSortOption || 'metadata.created_at';
+    this.model.sortAscending = angular.isDefined(this.model.sortAscending) ? this.model.sortAscending : true;
   }
 
   angular.extend(ApplicationsSortingController.prototype, {
@@ -87,7 +88,8 @@
       var item = _.find(this.sortOptions, {value: this.selectedOption});
       if (item) {
         this.sort({value: item.value});
-        this.setSortOrder(item.ascending);
+        // Default to sortascending when the menu item changes
+        this.setSortOrder(true);
       }
     },
 
