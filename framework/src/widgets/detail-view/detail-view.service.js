@@ -59,6 +59,17 @@
         windowClass += ' ' + config.class;
       }
 
+      // Go through all opened detail views and updated their stacking styles
+      angular.forEach(angular.element('.modal.detail-view'), function (value, key) {
+        /* eslint-disable angular/angularelement */
+        var v = $(value);
+        /* eslint-enable angular/angularelement */
+        v.removeClass (function (index, css) {
+          return (css.match(/(?:^|\s)detail-view-stack-\S+/g) || []).join(' ');
+        });
+        v.addClass('detail-view-stack-' + (key + 1));
+      });
+
       var modal = $uibModal.open({
         backdrop: needGlass,
         backdropClass: 'detail-view-backdrop',
@@ -103,6 +114,21 @@
             var dialog = angular.element('.detail-view-dialog .modal-dialog');
             var width = dialog.width();
             dialog.width(width);
+          }
+        });
+      });
+
+      modal.result.finally(function () {
+        // Go through all opened detail views and updated their stacking styles
+        angular.forEach(angular.element('.modal.detail-view'), function (value, key) {
+          if (key > 0) {
+            /* eslint-disable angular/angularelement */
+            var v = $(value);
+            /* eslint-enable angular/angularelement */
+            v.removeClass (function (index, css) {
+              return (css.match(/(?:^|\s)detail-view-stack-\S+/g) || []).join(' ');
+            });
+            v.addClass('detail-view-stack-' + (key - 1));
           }
         });
       });
