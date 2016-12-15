@@ -623,14 +623,15 @@
             browse_url: 'https://github.com/something'
           }
         ];
-        var expectedOutput = [{
-          description: 'Connect to a repository hosted on GitHub.com that you own or have admin rights to.',
-          img: 'github_octocat.png',
-          label: 'Valid - Github',
-          browse_url: 'https://github.com/something',
-          value: vcsTokens[0],
-          token_name: 'Token A'
-        },
+        var expectedOutput = [
+          {
+            description: 'Connect to a repository hosted on GitHub.com that you own or have admin rights to.',
+            img: 'github_octocat.png',
+            label: 'Valid - Github',
+            browse_url: 'https://github.com/something',
+            value: vcsTokens[0],
+            token_name: 'Token A'
+          },
           {
             description: 'Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.',
             img: 'GitHub-Mark-120px-plus.png',

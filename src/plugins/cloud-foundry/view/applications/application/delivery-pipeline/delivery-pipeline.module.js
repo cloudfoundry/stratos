@@ -15,6 +15,9 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.delivery-pipeline', {
       url: '/delivery-pipeline',
+      params: {
+        showSetup: false
+      },
       templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-pipeline/delivery-pipeline.html',
       controller: ApplicationDeliveryPipelineController,
       controllerAs: 'applicationDeliveryPipelineCtrl'
@@ -30,6 +33,7 @@
     'cloud-foundry.view.applications.application.delivery-pipeline.addNotificationService',
     'cloud-foundry.view.applications.application.delivery-pipeline.postDeployActionService',
     'app.utils.utilsService',
+    'helion.framework.widgets.detailView',
     'PAT_DELIMITER',
     '$interpolate',
     '$stateParams',
@@ -50,6 +54,7 @@
    * @param {object} addNotificationService - Service for adding new notifications
    * @param {object} postDeployActionService - Service for adding a new post-deploy action
    * @param {app.utils.utilsService} utils - the console utils service
+   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
    * @param {string} PAT_DELIMITER - the delimiter constant used to separate the PAT guid in the project name
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $stateParams - the UI router $stateParams service
@@ -59,9 +64,10 @@
    * @param {object} $log - the Angular $log service
    * @property {object} model - the Cloud Foundry Applications Model
    * @property {string} id - the application GUID
+   * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
    */
   function ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog, notificationsService,
-                                                 addNotificationService, postDeployActionService, utils, PAT_DELIMITER,
+                                                 addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER,
                                                  $interpolate, $stateParams, $scope, $q, $state, $log) {
     var that = this;
 
@@ -73,6 +79,7 @@
     this.userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.account = modelManager.retrieve('app.model.account');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
+    this.detailView = detailView;
     this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
 
     this.cnsiGuid = $stateParams.cnsiGuid;
@@ -197,6 +204,22 @@
         that.getPipelineData();
       }
     });
+
+    /**
+     * @name setupPipeline
+     * @description Show the delivvery pipeline workflow in a slide-in
+     **/
+    this.setupPipeline = function () {
+      that.detailView(
+        {
+          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
+        }
+      );
+    };
+
+    if ($stateParams.showSetup) {
+      this.setupPipeline();
+    }
   }
 
   angular.extend(ApplicationDeliveryPipelineController.prototype, {

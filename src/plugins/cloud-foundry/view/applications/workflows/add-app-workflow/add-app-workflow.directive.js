@@ -194,20 +194,23 @@
         };
 
         this.data.workflow = {
+          hideStepNavStack: true,
           allowJump: false,
           allowBack: false,
+          allowCancelAtLastStep: true,
           title: gettext('Add Application'),
           btnText: {
-            cancel: gettext('Save and Close')
+            cancel: gettext('Cancel')
           },
           steps: [
             {
               title: gettext('Name'),
               templateUrl: path + 'name.html',
               formName: 'application-name-form',
-              nextBtnText: gettext('Create and continue'),
+              nextBtnText: gettext('Add'),
               cancelBtnText: gettext('Cancel'),
               showBusyOnNext: true,
+              isLastStep: true,
               onEnter: function () {
                 return that.serviceInstanceModel.list()
                   .then(function (serviceInstances) {
@@ -229,7 +232,6 @@
                       var preSelectedService = _.find(that.options.serviceInstances, { value: { guid: that.appModel.filterParams.cnsiGuid}}) || {};
                       that.options.userInput.serviceInstance = preSelectedService.value;
                     }
-
                   });
               },
               onNext: function () {
@@ -239,38 +241,6 @@
                     that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
                       message: that.$interpolate(msg)({appName: that.userInput.name})
                     });
-
-                    that.spaceModel.listAllServicesForSpace(
-                      that.userInput.serviceInstance.guid,
-                      that.userInput.space.metadata.guid
-                    )
-                    .then(function (services) {
-                      that.options.services.length = 0;
-                      [].push.apply(that.options.services, services);
-
-                      // retrieve categories that user can filter services by
-                      var categories = [];
-                      angular.forEach(services, function (service) {
-                        // Parse service entity extra data JSON string
-                        if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
-                          service.entity.extra = angular.fromJson(service.entity.extra);
-
-                          if (angular.isDefined(service.entity.extra.categories)) {
-                            var serviceCategories = _.map(service.entity.extra.categories,
-                                                          function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
-                            categories = _.unionBy(categories, serviceCategories, 'lower');
-                          }
-                        }
-                      });
-                      categories = _.sortBy(categories, 'lower');
-                      that.options.serviceCategories.length = 1;
-                      [].push.apply(that.options.serviceCategories, categories);
-                    }, function () {
-                      that.options.servicesError = true;
-                    })
-                    .finally(function () {
-                      that.options.servicesReady = true;
-                    });
                   }, function (error) {
                     var msg = gettext('There was a problem creating your application. ');
                     var cloudFoundryException = that.utils.extractCloudFoundryError(error);
@@ -279,12 +249,12 @@
                     }
 
                     msg = msg + gettext('Please try again or contact your administrator if the problem persists.');
-
                     return that.$q.reject(msg);
                   });
                 });
               }
-            },
+            }
+            /*,
             {
               title: gettext('Services'),
               formName: 'application-services-form',
@@ -309,6 +279,7 @@
                 }
               }
             }
+            */
           ]
         };
 
@@ -599,13 +570,11 @@
 
         var params = {
           cnsiGuid: this.userInput.serviceInstance.guid,
-          guid: this.userInput.application.summary.guid
+          guid: this.userInput.application.summary.guid,
+          newlyCreated: true
         };
-        if (this.userInput.projectId) {
-          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.delivery-logs', params);
-        } else {
-          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.summary', params);
-        }
+
+        this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.summary', params);
       },
 
       startWorkflow: function () {

@@ -4,7 +4,13 @@
   module.exports = {
 
     showServices: showServices,
-    showDeliveryLogs: showDeliveryLogs
+    showDeliveryLogs: showDeliveryLogs,
+
+    isNewlyCreated: isNewlyCreated,
+    isIncomplete: isIncomplete,
+
+    getHeader: getHeader,
+    getActiveTab: getActiveTab
 
     // applicationServiceFlyout: applicationServiceFlyout,
     // showServiceDetails: showServiceDetails,
@@ -28,6 +34,23 @@
   function applicationAction(idx) {
     return applicationActionsBar().get(idx);
   }
+
+  function isNewlyCreated() {
+    return element(by.id('new-app-panel')).isDisplayed();
+  }
+
+  function getHeader() {
+    return element(by.css('.application-header'));
+  }
+
+  function isIncomplete() {
+    return element(by.css('app-state-icon .app-status.helion-icon-Warning_S')).isDisplayed();
+  }
+
+  function getActiveTab() {
+    return element(by.css('ul.application-nav.nav > li.nav-item.active > a'));
+  }
+
 })();
 
 // function servicePanelsAddServiceButtons() {

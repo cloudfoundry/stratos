@@ -12,6 +12,9 @@
   function registerRoute($stateProvider) {
     $stateProvider.state('cf.applications.application.summary', {
       url: '/summary',
+      params: {
+        newlyCreated: false
+      },
       templateUrl: 'plugins/cloud-foundry/view/applications/application/summary/summary.html',
       controller: ApplicationSummaryController,
       controllerAs: 'applicationSummaryCtrl'
@@ -82,6 +85,9 @@
       return this.appCtrl.update();
     };
 
+    // Show a "suggested next steps" if this app is newly created (transitionned from add app flow)
+    this.newlyCreated = $stateParams.newlyCreated;
+
     // Hide these options by default until we can ascertain that user can perform them
     this.hideAddRoutes = true;
     this.hideEditApp = true;
@@ -137,6 +143,8 @@
     function init() {
       // Filter out the stackato hce service
       that.serviceInstances = $filter('removeHceServiceInstance')(that.model.application.summary.services, that.id);
+
+      that.canSetupPipeline = _.filter(that.userCnsiModel.serviceInstances, {cnsi_type: 'hce', valid: true}).length;
 
       // Unmap from app
       that.routesActionMenu[0].hidden = !that.authModel.isAllowed(that.cnsiGuid,

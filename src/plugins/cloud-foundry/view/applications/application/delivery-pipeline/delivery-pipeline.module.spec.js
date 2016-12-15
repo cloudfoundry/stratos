@@ -3,7 +3,7 @@
 
   describe('Delivery Pipeline', function () {
 
-    var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel,
+    var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel, notificationsService,
       modelManager, vcsTokenManager, PAT_DELIMITER, $httpBackend, account, utils, $q;
 
     beforeEach(module('green-box-console'));
@@ -61,11 +61,16 @@
       cnsiModel = modelManager.retrieve('app.model.serviceInstance');
       userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       account = modelManager.retrieve('app.model.account');
+      notificationsService = $injector.get('app.view.notificationsService');
       utils = $injector.get('app.utils.utilsService');
     }));
 
     function createController() {
       var ApplicationDeliveryPipelineController = $state.get('cf.applications.application.delivery-pipeline').controller;
+
+      var detailView = function () {
+        return {};
+      };
 
       var confirmDialog = function () {
         return {
@@ -109,7 +114,7 @@
       $httpBackend.whenGET('/pp/v1/vcs/clients').respond(200, []);
 
       // eventService, modelManager, vcsTokenManager, confirmDialog, addNotificationService, postDeployActionService, utils, PAT_DELIMITER, $interpolate, $stateParams, $scope, $q, $state, $log
-      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog, addNotificationService, postDeployActionService, utils, PAT_DELIMITER, $interpolate, $stateParams, $rootScope.$new(), $q, $state);
+      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog, notificationsService, addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER, $interpolate, $stateParams, $rootScope.$new(), $q, $state);
 
       $httpBackend.flush();
 
