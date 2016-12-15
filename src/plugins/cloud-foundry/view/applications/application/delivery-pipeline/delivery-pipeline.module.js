@@ -137,10 +137,6 @@
 
     utils.chainStateResolve('cf.applications.application.delivery-pipeline', $state, init);
 
-    if ($stateParams.showSetup) {
-      this.setupPipeline();
-    }
-
     this.notificationTargetActions = [
       {
         name: gettext('Delete'),
@@ -220,6 +216,10 @@
         }
       );
     };
+
+    if ($stateParams.showSetup) {
+      this.setupPipeline();
+    }
   }
 
   angular.extend(ApplicationDeliveryPipelineController.prototype, {
