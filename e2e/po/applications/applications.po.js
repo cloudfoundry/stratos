@@ -66,11 +66,11 @@
   }
 
   function appNameSearch() {
-    return element(by.css('.app-actions-bar .form-group.search-field'));
+    return element(by.css('.application-search-box .form-group.search-field'));
   }
 
   function resetFilters() {
-    return element(by.css('.reset-link .btn-link')).click();
+    return element(by.css('.app-count .reset-link .btn-link')).click();
   }
 
   function getAddAppWhenNoApps() {

@@ -36,21 +36,14 @@
     this.model = modelManager.retrieve('cloud-foundry.model.application');
 
     this.sortOptions = [
-      {label: 'Application Name', value: 'entity.name'},
-      {label: 'Status', value: 'state.label'},
-      {label: 'Instance Count', value: 'instanceCount'},
+      {label: 'App Name', value: 'entity.name'},
+      // This one relies on app state, which we don't have yet
+      //{label: 'Status (a-z)', value: 'state.label.asc', sort: 'state.label', ascending: true},
+      {label: 'Instances', value: 'entity.instances'},
       {label: 'Disk Quota', value: 'entity.disk_quota'},
       {label: 'Memory', value: 'entity.memory'},
       {label: 'Creation Date', value: 'metadata.created_at'}
     ];
-
-    this.model.currentSortOption = this.model.currentSortOption || this.sortOptions[5].value;
-    // Flag for signaling that an update to
-    // filteredApplications is currently going on
-    this.updatingFilteredApplications = false;
-    this.model.sortAscending = angular.isDefined(this.model.sortAscending) ? this.model.sortAscending : false;
-    // Used to toggle display of sort action buttons when screen width is too small
-    this.showSortActions = true;
 
     // If currentSortOption and sort order change update filteredApplications
     $scope.$watch(function () {
@@ -60,23 +53,46 @@
       if (newVal === oldVal) {
         return;
       }
-      that.sortFilteredApplications();
+      that.ensureOptionSelected();
+      that.model.reSort();
     });
 
-    // In case user applied a filter update filteredApplications
-    $scope.$watch(function () {
-      return that.model.filteredApplications.length;
-    }, function (newVal, oldVal) {
-      if (newVal === oldVal || that.updatingFilteredApplications) {
-        return;
-      }
-      that.sortFilteredApplications();
-    });
+    // Default to sorting with the newest applications first
+    this.model.currentSortOption = this.model.currentSortOption || 'metadata.created_at';
 
-    that.sortFilteredApplications();
+    this.model.sortAscending = angular.isDefined(this.model.sortAscending) ? this.model.sortAscending : true;
+
+    this.ensureOptionSelected();
+    that.model.reSort();
   }
 
   angular.extend(ApplicationsSortingController.prototype, {
+
+    /**
+     * @name ensureOptionSelected
+     * @description Ensure that the correct sort option is selected in the drop down
+     */
+    ensureOptionSelected: function () {
+      // Find the menu item that matches the current sort order
+      var selectedSortItem = _.find(this.sortOptions, {value: this.model.currentSortOption});
+      var option = selectedSortItem.value;
+      if (option !== this.selectedOption) {
+        this.selectedOption = option;
+      }
+    },
+
+    /**
+     * @name setSort
+     * @description Set the sort option
+     */
+    setSort: function () {
+      var item = _.find(this.sortOptions, {value: this.selectedOption});
+      if (item) {
+        this.sort({value: item.value});
+        // Default to sortascending when the menu item changes
+        this.setSortOrder(true);
+      }
+    },
 
     /**
      * @name setSortOrder
@@ -88,33 +104,11 @@
     },
 
     /**
-     * @name sortFilteredApplications
-     * @description Sort model.filteredApplications based on the required sort parameters
-     *
+     * @name setSortOrder
+     * @description Toggle the sort order (asc/desc)
      */
-    sortFilteredApplications: function () {
-
-      this.updatingFilteredApplications = true;
-      var path = this.model.currentSortOption;
-      var sortOrder = this.model.sortAscending ? 'asc' : 'desc';
-      this.model.filteredApplications = _.orderBy(this.model.filteredApplications, function (app) {
-        var value = _.get(app, path);
-        if (_.isUndefined(value)) {
-          if (path === 'instanceCount') {
-            return 0;
-          }
-        }
-        try {
-          value = value && value.toLowerCase();
-        } catch (ignored) {
-          // ignored
-        }
-        return value;
-      }, sortOrder);
-
-      var currentPageNumber = this.model.appPage;
-      this.model.loadPage(currentPageNumber);
-      this.updatingFilteredApplications = false;
+    toggleSortOrder: function () {
+      this.model.sortAscending = !this.model.sortAscending;
     },
 
     /**
@@ -162,26 +156,6 @@
         // Current sort option is already the same, toggle order
         this.model.sortAscending = !this.model.sortAscending;
       }
-
-    },
-
-    /**
-     * @name toggleSortActions
-     * @description Helper to toggle
-     * @param {boolean} option - sort option
-     */
-    toggleSortActions: function () {
-      this.showSortActions = !this.showSortActions;
-    },
-
-    getMessage: function () {
-      if (this.showSortActions) {
-        return gettext('Show Sort');
-      } else {
-        return gettext('Hide Sort');
-      }
     }
-
   });
-
 })();

@@ -422,6 +422,10 @@
       this._reload(true, true);
     },
 
+    toggleFilterPanel: function () {
+      this.model.hideFilterPanel = !this.model.hideFilterPanel;
+    },
+
     /**
      * @function resetFilter
      * @description Reset the filter to all

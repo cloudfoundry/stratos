@@ -34,7 +34,7 @@
     var hcfFromConfig = helpers.getHcfs().hcf1;
 
     function getSearchBoxes() {
-      return element.all(by.css('.panel-body form .form-group'));
+      return element.all(by.css('.application-cf-filters .form-group'));
     }
 
     beforeAll(function () {
@@ -292,6 +292,7 @@
             });
         });
       });
+      galleryWall.showApplications();
     });
 
     it('Should show add application button when no applications shown on app wall', function () {

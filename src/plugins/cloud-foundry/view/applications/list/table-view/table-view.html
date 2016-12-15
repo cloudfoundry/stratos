@@ -4,13 +4,15 @@
         st-table="tableViewCtrl.stApps"
         st-safe-src="tableViewCtrl.apps"
         st-pipe="tableViewCtrl.stMiddleware"
+        st-binding="tableViewCtrl.table"
   >
     <thead>
       <tr >
         <th class="column"
             ng-repeat="column in tableViewCtrl.tableColumns" translate
             st-skip-natural="true"
-            st-sort="{{column.value}}">{{column.name}}</th>
+            ng-class="{'column-no-sort': column.noSort}"
+            st-sort="{{column.noSort ? '' : column.value}}">{{column.name}}</th>
       </tr>
     </thead>
     <tbody>
