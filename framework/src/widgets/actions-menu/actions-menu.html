@@ -1,9 +1,8 @@
 <div class="action-menu-wrapper">
   <div ng-show="actionsMenuCtrl.buttonMode"
-       class="action-button"
-       ng-init="action = actionsMenuCtrl.actions[0]">
-    <a class="btn btn-link" ng-click="actionsMenuCtrl.executeAction($event, action)">
-      <span>{{ action.name }}</span>
+       class="action-button">
+    <a class="btn btn-link" ng-click="actionsMenuCtrl.executeAction($event, actionsMenuCtrl.actions[0])">
+      <span>{{ actionsMenuCtrl.actions[0].name }}</span>
     </a>
   </div>
   <div ng-show="!actionsMenuCtrl.buttonMode"

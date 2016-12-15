@@ -26,24 +26,27 @@
     describe('Workflow on log in (admin/non-admin + no endpoints/some endpoints)', function () {
       describe('As Admin', function () {
 
-        describe('No registered endpoints', function () {
-          beforeAll(function () {
-            resetToLoggedIn(resetTo.removeAllCnsi, true);
-          });
-
-          it('Should reach endpoints dashboard after log in', function () {
-            endpointsPage.isEndpoints().then(function (isEndpoints) {
-              expect(isEndpoints).toBe(true);
-            });
-            expect(endpointsPage.welcomeMessageAdmin().isDisplayed()).toBeTruthy();
-            expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
-          });
-
-          it('should show register button', function () {
-            expect(endpointsPage.headerRegisterVisible()).toBeTruthy();
-          });
-
-        });
+        /* eslint-disable no-warning-comments */
+        // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
+        // describe('No registered endpoints', function () {
+        //   beforeAll(function () {
+        //     resetToLoggedIn(resetTo.removeAllCnsi, true);
+        //   });
+        //
+        //   it('Should reach endpoints dashboard after log in', function () {
+        //     endpointsPage.isEndpoints().then(function (isEndpoints) {
+        //       expect(isEndpoints).toBe(true);
+        //     });
+        //     expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
+        //     expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+        //   });
+        //
+        //   it('should show register button', function () {
+        //     expect(endpointsPage.headerRegisterVisible()).toBeTruthy();
+        //   });
+        //
+        // });
+        /* eslint-enable no-warning-comments */
 
         describe('Some registered endpoints', function () {
           beforeAll(function () {
@@ -99,6 +102,7 @@
               endpointsPage.isEndpoints().then(function (isEndpoints) {
                 expect(isEndpoints).toBe(true);
               });
+              expect(endpointsPage.isWelcomeMessageNonAdmin()).toBeTruthy();
             });
 
             it('should not show register button', function () {
@@ -111,12 +115,11 @@
             });
 
             it('should show correct table content', function () {
-              // For each endpoint
+              // For each cnsi endpoint
               // 1) we show the correct type
               // 2) the icon is the correct 'disconnected' one
               // 3) the address is correct
               // 4) the 'connect' button is available
-              // 5) the row as a 'disconnected' error row below it
               var endpointsTable = endpointsPage.getEndpointTable();
               var endpointsRows = helpers.getTableRows(endpointsTable);
               endpointsRows.each(function (element, index) {
@@ -125,6 +128,7 @@
                   var service;
                   // Find the name and run type dependent tests
                   endpointsPage.endpointName(index).then(function (name) {
+                    name = name.toLowerCase();
                     service = _.find(helpers.getHcfs(), function (hcf) {
                       if (hcf.register.cnsi_name === name) {
                         return hcf;
@@ -146,22 +150,18 @@
                       }
                       // 3) the address is correct
                       expect(endpointsPage.endpointUrl(index)).toBe(service.register.api_endpoint);
+                      // 2) the icon is the correct 'disconnected' one
+                      expect(endpointsPage.endpointIsDisconnected(index)).toBeTruthy();
+                      // 4) the 'connect' button is available
+                      endpointsPage.endpointConnectLink(index).then(function (button) {
+                        expect(button.isDisplayed()).toBeTruthy();
+                      });
+                    } else {
+                      /* eslint-disable no-warning-comments,angular/log,no-console */
+                      // TODO: We should beef up these tests to cover the other type of endpoint
+                      console.log('Skipping tests for service with name: ', name);
+                      /* eslint-disable no-warning-comments,angular/log,no-console */
                     }
-                  });
-                  // 2) the icon is the correct 'disconnected' one
-                  expect(endpointsPage.endpointIsDisconnected(index)).toBeTruthy();
-                  // 4) the 'connect' button is available
-                  endpointsPage.endpointConnectLink(index).then(function (button) {
-                    expect(button.isDisplayed()).toBeTruthy();
-                  });
-                } else {
-                  // Row should be a 'disconnected' error
-                  // 5) the row as a 'disconnected' error row below it
-                  var div = element.element(by.css('.hpe-popover-alert'));
-                  expect(div.isPresent()).toBeTruthy();
-                  expect(helpers.hasClass(div, 'hpe-popover-alert-info')).toBeTruthy();
-                  div.element(by.css('.popover-content')).getText().then(function (text) {
-                    expect(text.indexOf('The Console has no credentials for this endpoint')).toBe(0);
                   });
                 }
               });
@@ -184,14 +184,16 @@
           beforeAll(function () {
             resetToLoggedIn(resetTo.removeAllCnsi, true)
               .then(function () {
-                // endpointsPage.showEndpoints();
                 return endpointsPage.isEndpoints();
               })
               .then(function (isEndpoints) {
                 expect(isEndpoints).toBe(true);
 
+                /* eslint-disable no-warning-comments */
+                // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
                 // No endpoints ... no table
-                expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+                // expect(endpointsPage.getEndpointTable().isPresent()).toBeFalsy();
+                /* eslint-enable no-warning-comments */
               });
           });
 
@@ -199,17 +201,18 @@
             registerEndpoint.safeClose();
           });
 
-          it('should show add form detail view when btn in welcome is pressed', function () {
-            endpointsPage.clickAddClusterInWelcomeMessage().then(function () {
-              expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-              expect(registerEndpoint.getType()).toBe('hcf');
-            });
-          });
+          /* eslint-disable no-warning-comments */
+          // TODO: This will not work while there are initial VCS's in list. If there are no VCS's we should uncomment
+          // it('should show add form detail view when btn in welcome is pressed', function () {
+          //   endpointsPage.clickAddClusterInWelcomeMessage().then(function () {
+          //     expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
+          //   });
+          // });
+          /* eslint-enable no-warning-comments */
 
           it('should show add form detail view when btn in tile is pressed', function () {
             endpointsPage.headerRegister().then(function () {
               expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-              expect(registerEndpoint.getType()).toBe('hcf');
             });
           });
 
@@ -220,164 +223,161 @@
               endpointsPage.headerRegister()
                 .then(function () {
                   expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-                  expect(registerEndpoint.getType()).toBe('hcf');
-                });
-            });
-
-            if (type === 'hcf') {
-              describe('Initial button state', function () {
-
-                it('Cancel is enabled', function () {
+                  expect(registerEndpoint.getStep()).toBe(1);
                   registerEndpoint.closeEnabled(true);
-                });
-
-                it('Register is initially disabled', function () {
-                  registerEndpoint.registerEnabled(false);
-                });
-              });
-
-              describe('Invalid address', function () {
-
-                var invalidUrl = 'This is an invalid URL';
-
-                beforeEach(function () {
-                  // Enter a name so the form will become valid on valid address
-                  registerEndpoint.enterName('abc').then(function () {
-                    return registerEndpoint.registerEnabled(false);
-                  });
-                });
-
-                it('Incorrect format', function () {
-                  registerEndpoint.enterAddress(invalidUrl)
-                    .then(function () {
-                      return registerEndpoint.isAddressValid(false);
-                    })
-                    .then(function () {
-                      registerEndpoint.registerEnabled(false);
-                    });
-                });
-
-                it('Valid format', function () {
-                  registerEndpoint.enterAddress(service.register.api_endpoint)
-                    .then(function () {
-                      return registerEndpoint.isAddressValid(true);
-                    })
-                    .then(function () {
-                      registerEndpoint.registerEnabled(true);
-                    });
-                });
-
-                it('Invalid to valid to invalid', function () {
-                  registerEndpoint.enterAddress(invalidUrl)
-                    .then(function () {
-                      return registerEndpoint.isAddressValid(false);
-                    })
-                    .then(function () {
-                      return registerEndpoint.registerEnabled(false);
-                    })
-                    .then(function () {
-                      return registerEndpoint.clearAddress();
-                    })
-                    .then(function () {
-                      return registerEndpoint.enterAddress(service.register.api_endpoint);
-                    })
-                    .then(function () {
-                      return registerEndpoint.isAddressValid(true);
-                    })
-                    .then(function () {
-                      return registerEndpoint.registerEnabled(true);
-                    })
-                    .then(function () {
-                      return registerEndpoint.clearAddress();
-                    })
-                    .then(function () {
-                      return registerEndpoint.enterAddress(invalidUrl);
-                    })
-                    .then(function () {
-                      return registerEndpoint.isAddressValid(false);
-                    })
-                    .then(function () {
-                      return registerEndpoint.registerEnabled(false);
-                    });
-                });
-              });
-
-              describe('Invalid name', function () {
-
-                beforeEach(function () {
-                  // Enter a url so the form will become valid on valid Name
-                  registerEndpoint.enterAddress(service.register.api_endpoint).then(function () {
-                    return registerEndpoint.registerEnabled(false);
-                  });
-                });
-
-                it('Valid', function () {
-                  registerEndpoint.enterName(service.register.cnsi_name)
-                    .then(function () {
-                      registerEndpoint.isNameValid(true);
-                      registerEndpoint.registerEnabled(true);
-                    });
-                });
-
-                it('Invalid to valid to invalid', function () {
-                  registerEndpoint.enterName(service.register.cnsi_name)
-                    .then(function () {
-                      registerEndpoint.isNameValid(true);
-                      registerEndpoint.registerEnabled(true);
-                    })
-                    .then(function () {
-                      return registerEndpoint.clearName();
-                    })
-                    .then(function () {
-                      registerEndpoint.isNameValid(false);
-                      registerEndpoint.registerEnabled(false);
-                    })
-                    .then(function () {
-                      return registerEndpoint.enterName(service.register.cnsi_name);
-                    })
-                    .then(function () {
-                      registerEndpoint.isNameValid(true);
-                      registerEndpoint.registerEnabled(true);
-                    });
-                });
-              });
-            }
-
-            it('Should hint at SSL errors', function () {
-              registerEndpoint.populateAndRegister(type, service.register.api_endpoint, service.register.cnsi_name, false)
-                .then(function () {
-                  return registerEndpoint.checkError(/SSL/);
+                  registerEndpoint.selectType(type);
                 });
             });
 
-            it('Successful register', function () {
-              var endpointIndex;
-              registerEndpoint.populateAndRegister(type, service.register.api_endpoint, service.register.cnsi_name,
-                service.register.skip_ssl_validation)
-                .then(function () {
-                  var toastText = new RegExp("Helion (?:Code Engine|Cloud Foundry) endpoint '" +
-                    service.register.cnsi_name + "' successfully registered");
-                  return helpers.checkAndCloseToast(toastText);
-                })
-                .then(function () {
+            describe('endpoint details step', function () {
+              it('is endpoint details step', function () {
+                expect(registerEndpoint.getStep()).toBe(2);
+                expect(registerEndpoint.getStepTwoType()).toBe(type);
+              });
 
-                  var endpointsTable = endpointsPage.getEndpointTable();
-                  var endpointsRows = helpers.getTableRows(endpointsTable);
+              if (type === 'hcf') {
+                describe('Invalid address', function () {
 
-                  return endpointsRows.each(function (element, index) {
-                    return element.all(by.css('td')).first().getText().then(function (name) {
-                      if (name.toLowerCase() === service.register.cnsi_name.toLowerCase()) {
-                        endpointIndex = index;
-                      }
+                  var invalidUrl = 'This is an invalid URL';
+
+                  beforeEach(function () {
+                    // Enter a name so the form will become valid on valid address
+                    registerEndpoint.enterName('abc').then(function () {
+                      return registerEndpoint.registerEnabled(false);
                     });
                   });
-                })
-                .then(function () {
-                  expect(endpointIndex).toBeDefined();
-                  expect(endpointsPage.endpointIsDisconnected(endpointIndex)).toBeTruthy();
-                });
-            });
 
+                  it('Incorrect format', function () {
+                    registerEndpoint.enterAddress(invalidUrl)
+                      .then(function () {
+                        return registerEndpoint.isAddressValid(false);
+                      })
+                      .then(function () {
+                        registerEndpoint.registerEnabled(false);
+                      });
+                  });
+
+                  it('Valid format', function () {
+                    registerEndpoint.enterAddress(service.register.api_endpoint)
+                      .then(function () {
+                        return registerEndpoint.isAddressValid(true);
+                      })
+                      .then(function () {
+                        registerEndpoint.registerEnabled(true);
+                      });
+                  });
+
+                  it('Invalid to valid to invalid', function () {
+                    registerEndpoint.enterAddress(invalidUrl)
+                      .then(function () {
+                        return registerEndpoint.isAddressValid(false);
+                      })
+                      .then(function () {
+                        return registerEndpoint.registerEnabled(false);
+                      })
+                      .then(function () {
+                        return registerEndpoint.clearAddress();
+                      })
+                      .then(function () {
+                        return registerEndpoint.enterAddress(service.register.api_endpoint);
+                      })
+                      .then(function () {
+                        return registerEndpoint.isAddressValid(true);
+                      })
+                      .then(function () {
+                        return registerEndpoint.registerEnabled(true);
+                      })
+                      .then(function () {
+                        return registerEndpoint.clearAddress();
+                      })
+                      .then(function () {
+                        return registerEndpoint.enterAddress(invalidUrl);
+                      })
+                      .then(function () {
+                        return registerEndpoint.isAddressValid(false);
+                      })
+                      .then(function () {
+                        return registerEndpoint.registerEnabled(false);
+                      });
+                  });
+                });
+
+                describe('Invalid name', function () {
+
+                  beforeEach(function () {
+                    // Enter a url so the form will become valid on valid Name
+                    registerEndpoint.enterAddress(service.register.api_endpoint).then(function () {
+                      return registerEndpoint.registerEnabled(false);
+                    });
+                  });
+
+                  it('Valid', function () {
+                    registerEndpoint.enterName(service.register.cnsi_name)
+                      .then(function () {
+                        registerEndpoint.isNameValid(true);
+                        registerEndpoint.registerEnabled(true);
+                      });
+                  });
+
+                  it('Invalid to valid to invalid', function () {
+                    registerEndpoint.enterName(service.register.cnsi_name)
+                      .then(function () {
+                        registerEndpoint.isNameValid(true);
+                        registerEndpoint.registerEnabled(true);
+                      })
+                      .then(function () {
+                        return registerEndpoint.clearName();
+                      })
+                      .then(function () {
+                        registerEndpoint.isNameValid(false);
+                        registerEndpoint.registerEnabled(false);
+                      })
+                      .then(function () {
+                        return registerEndpoint.enterName(service.register.cnsi_name);
+                      })
+                      .then(function () {
+                        registerEndpoint.isNameValid(true);
+                        registerEndpoint.registerEnabled(true);
+                      });
+                  });
+                });
+              }
+
+              it('Should hint at SSL errors', function () {
+                registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name, false)
+                  .then(function () {
+                    return registerEndpoint.checkError(/SSL/);
+                  });
+              });
+
+              it('Successful register', function () {
+                var endpointIndex;
+                registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
+                  service.register.skip_ssl_validation)
+                  .then(function () {
+                    var toastText = new RegExp("Helion (?:Code Engine|Cloud Foundry) endpoint '" +
+                      service.register.cnsi_name + "' successfully registered");
+                    return helpers.checkAndCloseToast(toastText);
+                  })
+                  .then(function () {
+
+                    var endpointsTable = endpointsPage.getEndpointTable();
+                    var endpointsRows = helpers.getTableRows(endpointsTable);
+
+                    return endpointsRows.each(function (element, index) {
+                      return element.all(by.css('td')).first().getText().then(function (name) {
+                        if (name.toLowerCase() === service.register.cnsi_name.toLowerCase()) {
+                          endpointIndex = index;
+                        }
+                      });
+                    });
+                  })
+                  .then(function () {
+                    expect(endpointIndex).toBeDefined();
+                    expect(endpointsPage.endpointIsDisconnected(endpointIndex)).toBeTruthy();
+                  });
+              });
+            });
           });
         }
 
@@ -464,7 +464,7 @@
               });
           });
 
-          it('Option is not visible', function () {
+          it('unregister is not visible', function () {
             endpointsPage.getRowWithEndpointName(helpers.getHcfs().hcf1.register.cnsi_name)
               .then(function (hcfRowIndex) {
                 expect(hcfRowIndex).toBeDefined();
@@ -478,37 +478,31 @@
       });
 
       describe('Connect/Disconnect endpoints', function () {
-
-        beforeAll(function (done) {
-          resetToLoggedIn(resetTo.resetAllCnsi, false).then(function () {
-            // endpointsPage.showEndpoints();
-            endpointsPage.isEndpoints().then(function (isEndpoints) {
-              expect(isEndpoints).toBe(true);
-            });
-            var endpointsTable = endpointsPage.getEndpointTable();
-            // Four rows, two endpoints + two endpoint not connected rows
-            expect(helpers.getTableRows(endpointsTable).count()).toBe(4);
-            done();
-          });
-        });
-
         var hcf = helpers.getHcfs().hcf1;
-        // Each cnsi has two rows (one normally hidden). So actual row is index * 2
-        var hcfRow = 2;
-
-        function ConfirmFirstService(service) {
-          // Confirm the first row is the required one (to match creds later)
-          var endpointsTable = endpointsPage.getEndpointTable();
-          helpers.getTableCellAt(endpointsTable, hcfRow, 0).getText().then(function (endpointName) {
-            expect(service.register.cnsi_name).toEqual(endpointName.toLowerCase());
-          });
-        }
+        var hcfRowIndex;
+        beforeAll(function (done) {
+          resetToLoggedIn(resetTo.resetAllCnsi, false)
+            .then(function () {
+              endpointsPage.isEndpoints().then(function (isEndpoints) {
+                expect(isEndpoints).toBe(true);
+              });
+            })
+            .then(function () {
+              // Find the HCF row to test on
+              return endpointsPage.getRowWithEndpointName(helpers.getHcfs().hcf1.register.cnsi_name);
+            })
+            .then(function (index) {
+              expect(index).toBeDefined();
+              hcfRowIndex = index;
+              done();
+            });
+        });
 
         describe('endpoint `Connect` clicked', function () {
 
           beforeAll(function (done) {
-            ConfirmFirstService(hcf);
-            endpointsPage.endpointConnectLink(hcfRow).then(function (button) {
+            // ConfirmFirstService(hcf);
+            endpointsPage.endpointConnectLink(hcfRowIndex).then(function (button) {
               button.click().then(done);
             });
           });
@@ -519,10 +513,10 @@
 
           it('should show the cluster name and URL as readonly in the credentials form', function () {
             var endpointsTable = endpointsPage.getEndpointTable();
-            var name = helpers.getTableCellAt(endpointsTable, hcfRow, 0).getText().then(function (text) {
+            var name = helpers.getTableCellAt(endpointsTable, hcfRowIndex, 0).getText().then(function (text) {
               return text.toLowerCase();
             });
-            var url = helpers.getTableCellAt(endpointsTable, hcfRow, 3).getText().then(function (text) {
+            var url = helpers.getTableCellAt(endpointsTable, hcfRowIndex, 3).getText().then(function (text) {
               return text.replace('https://', '');
             });
 
@@ -546,8 +540,8 @@
             endpointsPage.credentialsFormEndpointConnect().then(function () {
               helpers.checkAndCloseToast(/Successfully connected to '(?:hcf|hce)'/);
               var endpointsTable = endpointsPage.getEndpointTable();
-              expect(helpers.getTableCellAt(endpointsTable, hcfRow, 4).getText()).toBe('DISCONNECT');
-              expect(endpointsPage.endpointIsConnected(hcfRow)).toBeTruthy();
+              expect(helpers.getTableCellAt(endpointsTable, hcfRowIndex, 4).getText()).toBe('DISCONNECT');
+              expect(endpointsPage.endpointIsConnected(hcfRowIndex)).toBeTruthy();
             });
           });
 
@@ -572,14 +566,14 @@
         describe('endpoint `Disconnect`', function () {
           it('should update row in table when disconnected', function () {
             endpointsPage.goToEndpoints();
-            endpointsPage.endpointDisconnectLink(hcfRow)
+            endpointsPage.endpointDisconnectLink(hcfRowIndex)
               .then(function (button) {
                 return button.click();
               })
               .then(function () {
                 helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:hcf|hce)'/);
                 var endpointsTable = endpointsPage.getEndpointTable();
-                expect(helpers.getTableCellAt(endpointsTable, hcfRow, 4).getText()).toBe('CONNECT');
+                expect(helpers.getTableCellAt(endpointsTable, hcfRowIndex, 4).getText()).toBe('CONNECT');
               });
           });
 
@@ -617,7 +611,7 @@
               expect(errorRow.isPresent()).toBeTruthy();
               var div = errorRow.element(by.css('.hpe-popover-alert'));
               expect(div.isPresent()).toBeTruthy();
-              expect(helpers.hasClass(div, 'hpe-popover-alert-warning')).toBeTruthy();
+              expect(helpers.hasClass(div, 'hpe-popover-alert-error')).toBeTruthy();
               div.element(by.css('.popover-content')).getText().then(function (text) {
                 expect(text.indexOf('Token has expired')).toBe(0);
               });

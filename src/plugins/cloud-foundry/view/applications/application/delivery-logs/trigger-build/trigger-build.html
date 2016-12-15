@@ -1,13 +1,9 @@
 <div class="delivery-log-trigger-build delivery-log-flex">
-  <!-- User has no github token -->
-  <div ng-if="!detailViewCtrl.isAuthenticated">
-    <button translate class="btn btn-primary" type="button" ng-click="detailViewCtrl.githubAuth()">
-      Authenticate with Github</button>
+  <div ng-if="detailViewCtrl.tokenInvalid">
+    <button translate class="btn btn-primary" type="button" ng-click="detailViewCtrl.updateToken()">
+      Update Token</button>
     <div class="alert alert-warning" ng-if="!detailViewCtrl.githubAuthFailed">
-      <p translate >Please authenticate with github before continuing</p>
-    </div>
-    <div class="alert alert-danger" ng-if="detailViewCtrl.githubAuthFailed">
-      <p translate >Github authentication failed</p>
+      <p translate >The token is invalid</p>
     </div>
   </div>
 
@@ -25,7 +21,7 @@
   </div>
 
   <!-- User has a github token -->
-  <div ng-if="detailViewCtrl.isAuthenticated" class="delivery-log-flex">
+  <div ng-if="!detailViewCtrl.tokenInvalid" class="delivery-log-flex">
 
     <!-- Commits are being fetched -->
     <div ng-if="detailViewCtrl.fetching || detailViewCtrl.triggering" class="message-box message-box-no-bg">

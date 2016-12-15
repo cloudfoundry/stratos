@@ -5,6 +5,7 @@
 
   describe('add-pipeline-workflow prototype', function () {
     var $httpBackend;
+    var tokenGuid = '01234';
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -18,7 +19,6 @@
         this.modelManager = $injector.get('app.model.modelManager');
         this.eventService = $injector.get('app.event.eventService');
         this.$q = $injector.get('$q');
-        this.githubOauthService = $injector.get('github.view.githubOauthService');
         this.utils = $injector.get('app.utils.utilsService');
         this.$scope = $injector.get('$rootScope').$new();
         this.$timeout = $injector.get('$timeout');
@@ -47,7 +47,8 @@
           },
           repoFilterTerm: null,
           source: {
-            browse_url: 'browse_url'
+            browse_url: 'browse_url',
+            selectedToken: tokenGuid
           },
           buildContainer: {
             build_container_id: 'uild_container_id'
@@ -194,58 +195,19 @@
           expect(this.instance.data.workflow).toBeDefined();
         });
 
-        it('step 1 - onNextCancel', function () {
-          var step = this.instance.data.workflow.steps[0];
-          expect(step).toBeDefined();
-          spyOn(this.instance.githubOauthService, 'cancel');
-          step.onNextCancel();
-          expect(this.instance.githubOauthService.cancel).toHaveBeenCalled();
-        });
-
-        it('step 1 - onNext:GITHUB -> success -> failed', function () {
+        it('step 2 - onEnter: getRepos -> failed', function () {
           var that = this.instance;
-          var step = that.data.workflow.steps[0];
+          var step = that.data.workflow.steps[1];
           that.userInput.source.vcs_type = 'GITHUB';
-          that.githubOauthService.start = function () {
-            return that.$q.resolve();
-          };
           that.getRepos = function () {
             return that.$q.reject();
           };
-          spyOn(that.githubOauthService, 'start').and.callThrough();
-          var p = step.onNext();
+          var p = step.onEnter();
           that.$scope.$apply();
-          expect(that.githubOauthService.start).toHaveBeenCalled();
           expect(p.$$state.status).toBe(2);
         });
 
-        it('step 1 - onNext -> success -> failed', function () {
-          var that = this.instance;
-          var step = that.data.workflow.steps[0];
-          that.githubOauthService.start = function () {
-            return that.$q.resolve();
-          };
-          spyOn(that.githubOauthService, 'start').and.callThrough();
-          step.onNext();
-          that.$scope.$apply();
-          expect(that.githubOauthService.start).not.toHaveBeenCalled();
-        });
-
-        it('step 1 - onNext -> failed', function () {
-          var that = this.instance;
-          var step = that.data.workflow.steps[0];
-          that.userInput.source.vcs_type = 'GITHUB';
-          that.githubOauthService.start = function () {
-            return that.$q.reject();
-          };
-          spyOn(that.githubOauthService, 'start').and.callThrough();
-          var p = step.onNext();
-          that.$scope.$apply();
-          expect(that.githubOauthService.start).toHaveBeenCalled();
-          expect(p.$$state.status).toBe(2);
-        });
-
-        it('step 2 - onNext', function () {
+        it('step 3 - onEnter', function () {
           $httpBackend.whenGET('/pp/v1/proxy/v2/containers/build_containers').respond({ });
           $httpBackend.expectGET('/pp/v1/proxy/v2/containers/build_containers');
           $httpBackend.whenGET('/pp/v1/proxy/v2/containers/images/registries').respond({ });
@@ -267,9 +229,9 @@
           spyOn(that.hceModel, 'getProjects').and.callThrough();
           spyOn(githubModel, 'branches').and.callThrough();
           that.userInput.repo = {};
-          var step = that.data.workflow.steps[1];
+          var step = that.data.workflow.steps[2];
           that.options.branches = [{}];
-          step.onNext();
+          step.onEnter();
           that.$scope.$apply();
           expect(that.hceModel.getProjects).toHaveBeenCalled();
           expect(githubModel.branches).toHaveBeenCalled();
@@ -542,7 +504,7 @@
           }
         };
         var name = this.instance._createProjectName();
-        expect(name).toBe('foo-bar');
+        expect(name).toBe('foo-bar;PAT:' + tokenGuid);
       });
 
       it('#_getVcsHeaders', function () {
@@ -573,6 +535,130 @@
         expect(this.instance.dismissDialog).toHaveBeenCalled();
       });
     });
+
+    describe('getSupportedVcsInstances', function () {
+
+      var $q, vcsModel, modelManager;
+
+      beforeEach(inject(function ($injector) {
+        modelManager = $injector.get('app.model.modelManager');
+        vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
+        $q = $injector.get('$q');
+      }));
+
+      it('no hceVcsInstances', function () {
+        this.instance.getSupportedVcsInstances().then(function (output) {
+          expect(output).toEqual([]);
+        });
+      });
+
+      it('empty hceVcsInstances', function () {
+        this.instance.getSupportedVcsInstances([]).then(function (output) {
+          expect(output).toEqual([]);
+        });
+      });
+
+      it('listVcsClients fails', function () {
+        spyOn(vcsModel, 'listVcsTokens').and.returnValue($q.reject());
+        $httpBackend.when('GET', '/pp/v1/vcs/pat').respond(200, []);
+
+        this.instance.getSupportedVcsInstances(['something'])
+          .then(function () {
+            fail('Failed call to listVcsClients should result in rejected promise');
+          })
+          ;
+
+      });
+
+      it('listVcsClients succeeds', function () {
+        var vcsTokens = [
+          {
+            token: {
+              token: '•••••••••••••••••••••••••••••••••••••452',
+              guid: '574719d8-7ffe-48c2-a348-360ee1bd7307',
+              vcs_guid: '73039be8-b0fc-42be-acf2-fdf72fb46aa2',
+              name: 'Token A'
+            },
+            vcs: {
+              guid: '73039be8-b0fc-42be-acf2-fdf72fb46aa2',
+              label: 'Valid - Github',
+              vcs_type: 'github',
+              browse_url: 'https://github.com/something',
+              api_url: 'https://api.github.com/something'
+            }
+          }, {
+            token: {
+              token: '•••••••••••••••••••••••••••••••••••••56e',
+              guid: '70ad7106-5225-4983-8139-4b0c813e252c',
+              vcs_guid: '73039be8-b0fc-42be-acf2-fdf72fb46aa2',
+              name: 'Token B'
+            },
+            vcs: {
+              guid: '73039be8-b0fc-42be-acf2-fdf72fb46aa2',
+              label: 'Valid - Github enterprise',
+              vcs_type: 'github',
+              browse_url: 'https://www.fisherpricesgithubenterprise.com',
+              api_url: 'https://www.fisherpricesgithubenterprise.com/api'
+            }
+          }];
+        var input = [
+          {
+            label: 'Valid - Github',
+            vcs_type: 'github',
+            browse_url: 'https://github.com/something'
+          },
+          {
+            label: 'Invalid - browse_url not in vcsClients',
+            vcs_type: 'github',
+            browse_url: 'https://github.com/something/else/but/not/in/vcsClients'
+          },
+          {
+            label: 'Valid - Github enterprise',
+            vcs_type: 'github',
+            browse_url: 'https://www.fisherpricesgithubenterprise.com'
+          },
+          {
+            label: 'Invalid - unrecognised vcs_type',
+            vcs_type: 'JUNK',
+            browse_url: 'https://github.com/something'
+          }
+        ];
+        var expectedOutput = [
+          {
+            description: 'Connect to a repository hosted on GitHub.com that you own or have admin rights to.',
+            img: 'github_octocat.png',
+            label: 'Valid - Github',
+            browse_url: 'https://github.com/something',
+            value: vcsTokens[0],
+            token_name: 'Token A'
+          },
+          {
+            description: 'Connect to a repository hosted on your on-premise Github Enterprise instance that you own or have admin rights to.',
+            img: 'GitHub-Mark-120px-plus.png',
+            label: 'Valid - Github enterprise',
+            browse_url: 'https://www.fisherpricesgithubenterprise.com',
+            value: vcsTokens[1],
+            token_name: 'Token B'
+          }
+        ];
+        $httpBackend.when('GET', '/pp/v1/vcs/pat').respond(200, []);
+        spyOn(vcsModel, 'listVcsTokens').and.callFake(function () {
+          vcsModel.vcsTokens = vcsTokens;
+          return $q.resolve(vcsTokens);
+        });
+
+        this.instance.getSupportedVcsInstances(input)
+          .then(function (output) {
+            expect(output).toEqual(expectedOutput);
+          })
+          .catch(function () {
+            fail('Successful call to listVcsClients should not result in rejected promise');
+          });
+
+      });
+
+    });
+
   });
 
   /* eslint-enable angular/no-private-call */

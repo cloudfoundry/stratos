@@ -17,7 +17,11 @@
 
     getAddApplicationButton: getAddApplicationButton,
     addApplication: addApplication,
-    clickEndpointsDashboard: clickEndpointsDashboard
+    clickEndpointsDashboard: clickEndpointsDashboard,
+
+    appNameSearch: appNameSearch,
+    resetFilters: resetFilters,
+    getAddAppWhenNoApps: getAddAppWhenNoApps
   };
 
   function applicationGalleryCard(idx) {
@@ -59,5 +63,17 @@
 
   function clickEndpointsDashboard() {
     return element(by.css('.applications-cta a')).click();
+  }
+
+  function appNameSearch() {
+    return element(by.css('.app-actions-bar .form-group.search-field'));
+  }
+
+  function resetFilters() {
+    return element(by.css('.reset-link .btn-link')).click();
+  }
+
+  function getAddAppWhenNoApps() {
+    return element(by.css('.applications-cta .btn.btn-link'));
   }
 })();

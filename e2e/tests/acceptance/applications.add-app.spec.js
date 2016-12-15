@@ -14,6 +14,7 @@
   var cfModel = require('../../po/models/cf-model.po');
   var proxyModel = require('../../po/models/proxy-model.po');
   var searchBox = require('../../po/widgets/input-search-box.po');
+  var inputText = require('../../po/widgets/input-text.po');
 
   describe('Applications - Add application', function () {
 
@@ -291,6 +292,23 @@
             });
         });
       });
+    });
+
+    it('Should show add application button when no applications shown on app wall', function () {
+      galleryWall.showApplications();
+      galleryWall.resetFilters();
+      galleryWall.getAddAppWhenNoApps().isPresent().then(function (present) {
+        if (!present) {
+          // Type some stuff in the search box that will result in no matching applications
+          var appNameSearchBox = inputText.wrap(galleryWall.appNameSearch());
+          appNameSearchBox.clear();
+          return appNameSearchBox.addText('zzz_not_expecting_any_apps');
+        }
+      });
+      galleryWall.getAddAppWhenNoApps().click();
+      expect(addAppWizard.isDisplayed()).toBeTruthy();
+      expect(addAppWizard.getTitle()).toBe('Add Application');
+      addAppWizard.getWizard().cancel();
     });
   });
 })();

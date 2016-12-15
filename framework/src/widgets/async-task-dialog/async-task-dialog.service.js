@@ -59,6 +59,16 @@
         cancel: gettext(config.buttonTitles && config.buttonTitles.cancel) || gettext('Cancel')
       };
 
+      if (_.isFunction(config.submitCommit)) {
+        context.submitCommit = config.submitCommit;
+      } else {
+        context.submitCommit = function () {
+          return !!config.submitCommit;
+        };
+      }
+      context.noCancel = !!config.noCancel;
+      context.noSubmit = !!config.noSubmit;
+
       if (angular.isFunction(invalidityCheck)) {
         context.invalidityCheck = invalidityCheck;
       }

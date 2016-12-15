@@ -110,7 +110,7 @@
   }
 
   function setBrowserNormal() {
-    browser.manage().window().setSize(1024, 768);
+    browser.manage().window().setSize(1366, 768);
   }
 
   function setBrowserSmall() {

@@ -25,9 +25,14 @@
       }
     }
 
-    .desc {
-      padding-bottom: $hpe-unit-space * 2;
+    .wizard-step {
+      padding-bottom: $hpe-unit-space;
+
+      .desc {
+        padding-bottom: $hpe-unit-space;
+      }
     }
+
     h4 {
       margin-top: 0;
     }

@@ -3,8 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.list', [
-      'cloud-foundry.view.applications.list.gallery-view',
-      'cloud-foundry.view.applications.list.table-view'
+      'cloud-foundry.view.applications.list.gallery-view'
     ])
     .config(registerRoute);
 

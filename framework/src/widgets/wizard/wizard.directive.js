@@ -98,6 +98,32 @@
     this.btnText = this.workflow.btnText;
     this.steps = this.workflow.steps || [];
 
+    // allowBack can be a value or function
+    if (!_.isFunction(this.workflow.allowBack)) {
+      var allowBack = this.workflow.allowBack;
+      this.workflow.allowBack = function () {
+        return allowBack;
+      };
+    }
+
+    // allowJump can be a value or function
+    if (!_.isFunction(this.workflow.allowJump)) {
+      var allowJump = this.workflow.allowJump;
+      this.workflow.allowJump = function () {
+        return allowJump;
+      };
+    }
+
+    this.isNavEntryDisabled = function ($index) {
+      if (this.workflow.allowJump()) {
+        return true;
+      }
+      if (this.workflow.allowBack() && $index < this.currentIndex) {
+        return false;
+      }
+      return this.currentIndex !== $index;
+    };
+
     this.initPromise.then(function () {
       that.onInitSuccess();
       that.postInitTask.resolve();
@@ -155,6 +181,10 @@
     disableNext: function () {
       var step = this.steps[this.currentIndex] || {};
       var form = this.$scope.wizardForm[step.formName];
+
+      if (_.isFunction(step.allowNext) && !step.allowNext()) {
+        return true;
+      }
       return this.nextBtnDisabled || form && form.$invalid;
     },
 
@@ -176,7 +206,7 @@
 
       // Allow a step to support an onEnter property which can return a promise (use resolved promise if not)
       var step = this.steps[index];
-      var readyToGo = step.onEnter ? step.onEnter(this) : this.$q.when(true);
+      var readyToGo = step.onEnter ? step.onEnter(this) || this.$q.resolve() : this.$q.resolve();
 
       // Show a busy indicator if desired
       if (step.onEnter && step.showBusyOnEnter) {

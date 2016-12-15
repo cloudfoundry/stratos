@@ -3,13 +3,14 @@
 
   angular
     .module('app.view.endpoints.dashboard')
-    .factory('app.view.endpoints.dashboard.serviceInstanceService', serviceInstanceServiceFactory);
+    .factory('app.view.endpoints.dashboard.cnsiService', cnsiServiceFactory);
 
-  serviceInstanceServiceFactory.$inject = [
+  cnsiServiceFactory.$inject = [
     '$q',
     '$state',
     '$interpolate',
     'app.model.modelManager',
+    'app.view.endpoints.dashboard.vcsService',
     'app.utils.utilsService',
     'app.error.errorService',
     'app.view.notificationsService',
@@ -20,12 +21,13 @@
   /**
    * @namespace app.view.endpoints.dashboard
    * @memberOf app.view.endpoints.dashboard
-   * @name serviceInstanceService
+   * @name cnsiService
    * @description provide functionality to support cnsi service instances (cnsisi..) in the endpoints dashboard
    * @param {object} $q - the Angular $q service
    * @param {object} $state - the UI router $state service
    * @param {object} $interpolate - the angular $interpolate service
    * @param {app.model.modelManager} modelManager - the application model manager
+   * @param {app.model.modelManager} vcsService - service to view and manage VCS endpoints in the endpoints dashboard
    * @param {app.utils.utilsService} utilsService - the utils service
    * @param {app.error.errorService} errorService - service to show custom errors below title bar
    * @param {app.view.notificationsService} notificationsService - the toast notification service
@@ -33,16 +35,9 @@
    * @param {helion.framework.widgets.dialog.confirm} confirmDialog - the confirmation dialog service
    * @returns {object} the service instance service
    */
-  function serviceInstanceServiceFactory($q, $state, $interpolate, modelManager, utilsService, errorService,
+  function cnsiServiceFactory($q, $state, $interpolate, modelManager, vcsService, utilsService, errorService,
                                          notificationsService, credentialsDialog, confirmDialog) {
     var that = this;
-
-    var currentUserAccount = modelManager.retrieve('app.model.account');
-    var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
-    var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
-    var authModel = modelManager.retrieve('cloud-foundry.model.auth');
-    var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
-
     var endpointPrefix = 'cnsi_';
 
     return {
@@ -55,23 +50,27 @@
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description are there any cached service instances?
      * @returns {boolean}
      * @public
      */
     function haveInstances() {
+      var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
       return serviceInstanceModel.serviceInstances && serviceInstanceModel.serviceInstances.length > 0;
     }
 
     /**
      * @function _updateEndpoints
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description Refresh the cnsi service instances within the model
      * @returns {object} a promise
      * @public
      */
     function updateInstances() {
+      var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
       return $q.all([serviceInstanceModel.list(), userServiceInstanceModel.list(), stackatoInfo.getStackatoInfo()])
         .then(function () {
 
@@ -97,30 +96,27 @@
 
     /**
      * @function updateInstancesCache
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description repopulate the endpoints list with the latest data from cache
      * @param {Array} endpoints - collection of existing endpoints
+     * @returns {Array} the list of endpoints that still exist (not deleted in the backend)
      * @public
      */
     function updateInstancesCache(endpoints) {
-      // First remove any stale data. Any digests should be unaffected by flip-flopping as this is all sync
-      _.remove(endpoints, function (endpoint) {
-        return endpoint.key.indexOf(endpointPrefix) === 0;
-      });
-
-      Array.prototype.push.apply(endpoints, createEndpointEntries(endpoints));
+      return createEndpointEntries(endpoints);
     }
 
     /**
      * @function createEndpointEntries
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description convert the model service instances into endpoints entries
      * @param {Array} endpoints - collection of existing endpoints
-     * @returns {Array} latest set of service instance endpoint entries
      * @public
      */
     function createEndpointEntries(endpoints) {
-      var serviceEndpoints = [];
+      var activeEndpointsKeys = [];
+      var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
       // Create the generic 'endpoint' object used to populate the dashboard table
       _.forEach(serviceInstanceModel.serviceInstances, function (serviceInstance) {
 
@@ -132,49 +128,79 @@
           hasExpired = _.get(userServiceInstanceModel.serviceInstances[serviceInstance.guid], 'token_expiry');
         }
 
-        var endpoint = {
-          key: endpointPrefix + serviceInstance.guid,
-          name: serviceInstance.name,
-          connected: isValid ? 'connected' : 'unconnected',
-          type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine'),
-          visit: isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
-            return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
-          } : undefined,
-          url: utilsService.getClusterEndpoint(serviceInstance),
-          actions: _createInstanceActions(endpoints, isValid, hasExpired),
-          actionsTarget: serviceInstance
+        var eKey = endpointPrefix + serviceInstance.guid;
+        var endpoint = _.find(endpoints, function (e) { return e.key === eKey; });
+        var reuse = !!endpoint;
+        if (!reuse) {
+          endpoint = {
+            key: eKey,
+            type: serviceInstance.cnsi_type === 'hcf' ? gettext('Helion Cloud Foundry') : gettext('Helion Code Engine')
+          };
+          endpoints.push(endpoint);
+        }
+        activeEndpointsKeys.push(endpoint.key);
+
+        endpoint.actions = _createInstanceActions(endpoints, isValid, hasExpired);
+        endpoint.visit = isValid && serviceInstance.cnsi_type === 'hcf' ? function () {
+          return $state.href('endpoint.clusters.cluster.detail.organizations', {guid: serviceInstance.guid});
+        } : undefined;
+        endpoint.url = utilsService.getClusterEndpoint(serviceInstance);
+        endpoint.actionsTarget = serviceInstance;
+        endpoint.name = serviceInstance.name;
+
+        endpoint.getStatus = function () {
+          if (serviceInstance.error) {
+            return 'error';
+          }
+          if (hasExpired) {
+            return 'expired';
+          }
+          return isValid ? 'connected' : 'unconnected';
         };
 
-        //Error states
+        // Error states
         if (serviceInstance.error) {
           // Service could not be contacted
           endpoint.error = {
             message: gettext('The Console could not contact this endpoint. Try reconnecting to this endpoint to resolve this problem.'),
             status: 'error'
           };
-          endpoint.connected = 'error';
         } else if (hasExpired) {
           // Service token has expired
           endpoint.error = {
             message: gettext('Token has expired. Try reconnecting to this endpoint to resolve this problem.'),
-            status: 'warning'
-          };
-          endpoint.connected = 'expired';
-        } else if (endpoint.connected === 'unconnected') {
-          // Service token has expired
-          endpoint.error = {
-            message: gettext('The Console has no credentials for this endpoint. Connect to resolve this problem.'),
-            status: 'info'
+            status: 'error'
           };
         }
-        serviceEndpoints.push(endpoint);
       });
-      return serviceEndpoints;
+
+      _cleanupStaleEndpoints(endpoints, activeEndpointsKeys);
+
+    }
+
+    function _cleanupStaleEndpoints(allEndpoints, activeEndpointsKeys) {
+
+      var myEndpoints = _.filter(allEndpoints, function (anEndpoint) {
+        return anEndpoint.key.indexOf(endpointPrefix) === 0;
+      });
+
+      var staleEndpointsKeys = _.differenceWith(myEndpoints, activeEndpointsKeys, function (anEndpoint, aKey) {
+        return anEndpoint.key === aKey;
+      }).map(function (anEndpoint) {
+        return anEndpoint.key;
+      });
+
+      for (var i = allEndpoints.length - 1; i >= 0; i--) {
+        var endpoint = allEndpoints[i];
+        if (staleEndpointsKeys.indexOf(endpoint.key) > -1) {
+          allEndpoints.splice(i, 1);
+        }
+      }
     }
 
     /**
      * @function clear
-     * @memberOf app.view.endpoints.dashboard.serviceInstanceService
+     * @memberOf app.view.endpoints.dashboard.cnsiService
      * @description clear any local data before leaving the dashboard
      * @public
      */
@@ -203,6 +229,7 @@
         });
       }
 
+      var currentUserAccount = modelManager.retrieve('app.model.account');
       if (currentUserAccount.isAdmin()) {
         actions.push({
           name: gettext('Unregister'),
@@ -215,6 +242,7 @@
     }
 
     function _unregister(endpoints, serviceInstance) {
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       confirmDialog({
         title: gettext('Unregister Endpoint'),
         description: $interpolate(gettext('Are you sure you want to unregister endpoint \'{{name}}\''))({name: serviceInstance.name}),
@@ -224,6 +252,7 @@
           no: gettext('Cancel')
         },
         callback: function () {
+          var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
           serviceInstanceModel.remove(serviceInstance).then(function () {
             notificationsService.notify('success', gettext('Successfully unregistered endpoint \'{{name}}\''), {
               name: serviceInstance.name
@@ -240,6 +269,7 @@
     }
 
     function _connect(endpoints, serviceInstance) {
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       that.dialog = credentialsDialog.show({
         activeServiceInstance: serviceInstance,
         onConnectCancel: function () {
@@ -255,9 +285,16 @@
           }
           updateInstances().then(function () {
             updateInstancesCache(endpoints);
-            if (serviceInstance.cnsi_type === 'hcf') {
-              // Initialise AuthModel for service
-              authModel.initializeForEndpoint(serviceInstance.guid);
+            switch (serviceInstance.cnsi_type) {
+              case 'hcf':
+                // Initialise AuthModel for service
+                authModel.initializeForEndpoint(serviceInstance.guid);
+                break;
+              case 'hce':
+                vcsService.updateInstances().then(function () {
+                  vcsService.updateInstancesCache(endpoints);
+                });
+                break;
             }
           });
         }
@@ -265,6 +302,8 @@
     }
 
     function _disconnect(endpoints, serviceInstance) {
+      var userServiceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
+      var authModel = modelManager.retrieve('cloud-foundry.model.auth');
       userServiceInstanceModel.disconnect(serviceInstance.guid)
         .catch(function (error) {
           notificationsService.notify('error', gettext('Failed to disconnect endpoint \'{{name}}\''), {

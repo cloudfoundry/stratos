@@ -1,0 +1,17 @@
+<div class="applications-sorting">
+  <div class="show-message">
+    <a class="pull-right" ng-click="applicationsSortingCtrl.toggleSortActions()" >{{
+      applicationsSortingCtrl.getMessage()}}</a>
+  </div>
+  <div class="app-sort-actions" ng-class="{ 'show-sort-actions': applicationsSortingCtrl.showSortActions }">
+    <span translate>Sort by</span>
+    <button class="btn btn-default" ng-repeat="sortOption in applicationsSortingCtrl.sortOptions"
+            ng-class="applicationsSortingCtrl.isCurrentSort(sortOption) ? 'btn-enabled' : 'btn-disabled'"
+            ng-click="applicationsSortingCtrl.sort(sortOption)">
+      <span ng-if="applicationsSortingCtrl.isCurrentSort(sortOption)" class="helion-icon adjust-icon pull-right"
+            ng-class="applicationsSortingCtrl.showAscending(sortOption) ? 'helion-icon-Up_caret' : 'helion-icon-Drop_caret'"></span>
+      {{ sortOption.label }}
+    </button>
+  </div>
+
+</div>

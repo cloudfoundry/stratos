@@ -28,7 +28,8 @@
     'app.model.modelManager',
     'app.utils.utilsService',
     'app.view.registerService',
-    'app.view.endpoints.dashboard.serviceInstanceService'
+    'app.view.endpoints.dashboard.cnsiService',
+    'app.view.endpoints.dashboard.vcsService'
   ];
 
   /**
@@ -41,27 +42,64 @@
    * @param {app.model.modelManager} modelManager - the application model manager
    * @param {app.utils.utilsService} utilsService - the utils service
    * @param {app.view.registerService} registerService register service to display the core slide out
-   * @param {app.view.endpoints.dashboard.serviceInstanceService} serviceInstanceService - service to support dashboard with cnsi type endpoints
+   * @param {app.view.endpoints.dashboard.cnsiService} cnsiService - service to support dashboard with cnsi type endpoints
+   * @param {app.view.endpoints.dashboard.vcsService} vcsService - service to support dashboard with vcs type endpoints
    * @constructor
    */
   function EndpointsDashboardController($q, $scope, $state, modelManager, utilsService, registerService,
-                                        serviceInstanceService) {
+                                        cnsiService, vcsService) {
     var that = this;
+
     var currentUserAccount = modelManager.retrieve('app.model.account');
+
+    var endpointsProviders = [cnsiService, vcsService];
+
+    this.endpoints = [];
+
+    /*
+     * Call method on all service providers, forwarding the passed arguments
+     * If the called method returns a promise, we return a $q.all() on all the returned promises,
+     * otherwise we return an array of the returned values
+     * */
+    function callForAllProviders(method) {
+      Array.prototype.shift.apply(arguments);
+
+      var values = [];
+      var isPromise = null;
+
+      for (var i = 0; i < endpointsProviders.length; i++) {
+        if (!angular.isFunction(endpointsProviders[i][method])) {
+          throw new Error('callForAllProviders: service provider does not implement method: ' + method);
+        }
+        var ret = endpointsProviders[i][method].apply(this, arguments);
+        if (ret && angular.isFunction(ret.then)) {
+          if (isPromise === null) {
+            isPromise = true;
+          } else if (!isPromise) {
+            throw new Error('callForAllProviders: Cannot mix promise and value returning functions');
+          }
+          values.push(ret);
+        } else {
+          if (isPromise === null) {
+            isPromise = false;
+          } else if (isPromise) {
+            throw new Error('callForAllProviders: Cannot mix promise and value returning functions');
+          }
+          values.push(ret);
+        }
+      }
+      if (isPromise) {
+        return $q.all(values);
+      }
+      return values;
+    }
 
     this.initialised = false;
     this.listError = false;
 
-    if (_haveCachedEndpoints()) {
-      // serviceInstanceModel has previously been updated
-      // to decrease load time, we will use that data.
-      // we will still refresh the data asynchronously and the UI will update to reflect changes
-      _updateEndpointsFromCache();
-    }
-
     // Ensure any app errors we have set are cleared when the scope is destroyed
     $scope.$on('$destroy', function () {
-      serviceInstanceService.clear();
+      callForAllProviders('clear');
     });
 
     /**
@@ -69,10 +107,9 @@
      * @memberof app.view.endpoints.dashboard
      * @name register
      * @description Register a service endpoint
-     * @param {string} type - type of endpoint being registered. selects the initial 'type' drop down value
      */
-    this.register = function (type) {
-      registerService.add($scope, type).then(function () {
+    this.register = function () {
+      registerService.show($scope).then(function () {
         _updateEndpoints();
       });
     };
@@ -127,28 +164,19 @@
     }
 
     function _haveCachedEndpoints() {
-      return serviceInstanceService.haveInstances();
+      var ret = callForAllProviders('haveInstances');
+      for (var i = 0; i < ret.length; i++) {
+        if (ret[i]) {
+          return true;
+        }
+      }
+      return false;
     }
 
     function _updateEndpointsFromCache() {
-      if (that.endpoints) {
-        that.endpoints.length = 0;
-      } else {
-        that.endpoints = [];
-      }
-      return $q.all([serviceInstanceService.createEndpointEntries(that.endpoints)]).then(function (results) {
-
-        _.forEach(results, function (result) {
-          Array.prototype.push.apply(that.endpoints, result);
-        });
-
-        if (!that.initialised) {
-          // Show welcome message only if this is the first time around and there no endpoints
-          _updateWelcomeMessage();
-        }
-
-        that.initialised = true;
-      });
+      callForAllProviders('createEndpointEntries', that.endpoints);
+      _updateWelcomeMessage();
+      that.initialised = true;
     }
 
     /**
@@ -159,7 +187,7 @@
      * @private
      */
     function _updateEndpoints() {
-      return $q.all([serviceInstanceService.updateInstances()])
+      return callForAllProviders('updateInstances')
         .then(function () {
           that.listError = false;
         })
@@ -172,6 +200,13 @@
         .finally(function () {
           that.intialised = true;
         });
+    }
+
+    if (_haveCachedEndpoints()) {
+      // serviceInstanceModel has previously been updated
+      // to decrease load time, we will use that data.
+      // we will still refresh the data asynchronously and the UI will update to reflect changes
+      _updateEndpointsFromCache();
     }
   }
 

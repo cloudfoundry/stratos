@@ -1,19 +1,9 @@
 <h4 translate>Select Source</h4>
-<ul class="media-list hpe-add-option-list">
-  <li class="media" ng-repeat="source in wizardCtrl.options.sources"
-    ng-click="wizardCtrl.options.userInput.source = source.value">
-    <div class="hpe-media-select-col">
-      <radio-input ng-model="wizardCtrl.options.userInput.source"
-        input-value="source.value">
-      </radio-input>
-    </div>
-    <div class="media-left media-middle">
-      <img class="media-object" ng-src="/plugins/cloud-foundry/view/assets/hce/{{source.img}}"/>
-    </div>
-    <div class="media-body">
-      <h4 class="media-heading">{{ ::source.label }}</h4>
-      <h5 ng-if="source.browse_url"><a target="_blank" href="{{ ::source.browse_url }}">{{ ::source.browse_url }}</a></h5>
-      <p>{{ ::source.description }}</p>
-    </div>
-  </li>
-</ul>
+<div class="media-list hpe-add-option-list">
+  <select-vcs-token ng-repeat="source in wizardCtrl.options.sources"
+                    ng-click="wizardCtrl.options.selectSource(source.value)"
+                    source="source"
+                    selected-source="wizardCtrl.options.userInput.source"
+                    on-manage-tokens="wizardCtrl.options.onManageTokens(vcs)"
+  ></select-vcs-token>
+</div>

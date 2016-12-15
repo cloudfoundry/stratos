@@ -50,13 +50,19 @@
                          value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}" />
         </dd>
 
+        <dt translate>CREATED</dt>
+        <dd class="pull-right" ng-if="appCtrl.model.application.metadata.created_at">
+          {{ appCtrl.model.application.metadata.created_at | amDateFormat: 'L - LTS' }}
+        </dd>
+        <dd class="pull-right" ng-if="!appCtrl.model.application.metadata.created_at">-</dd>
+
         <dt translate>MODIFIED</dt>
         <dd class="pull-right" ng-if="appCtrl.model.application.summary.package_updated_at">
           {{ appCtrl.model.application.summary.package_updated_at | amDateFormat: 'L - LTS' }}
         </dd>
         <dd class="pull-right" ng-if="!appCtrl.model.application.summary.package_updated_at">-</dd>
 
-        <dt translate>MEMORY QUOTA</dt>
+        <dt translate>MEMORY</dt>
         <dd class="pull-right">
           {{ applicationSummaryCtrl.utils.mbToHumanSize(appCtrl.model.application.summary.memory)}}
         </dd>
