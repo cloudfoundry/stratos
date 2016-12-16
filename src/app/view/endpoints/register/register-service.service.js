@@ -52,13 +52,15 @@
                     var scope = {};
                     switch (context.wizardOptions.userInput.type) {
                       case 'hcf':
+                        scope.endpoint = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
                         step.product = utilsService.getOemConfiguration().CLOUD_FOUNDRY;
-                        gettext('Register a Helion Cloud Foundry Endpoint');
+                        step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
                         step.nameOfNameInput = 'hcfName';
                         step.nameOfUrlInput = 'hcfUrl';
                         step.urlHint = $interpolate(gettext('{{ endpoint }} API endpoint'))(scope);
                         break;
                       case 'hce':
+                        scope.endpoint = utilsService.getOemConfiguration().CODE_ENGINE;
                         step.product = utilsService.getOemConfiguration().CODE_ENGINE;
                         step.title = $interpolate(gettext('Register a {{ endpoint }} Endpoint'))(scope);
                         step.nameOfNameInput = 'hceName';

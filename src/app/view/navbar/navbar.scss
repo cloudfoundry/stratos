@@ -360,8 +360,25 @@ div.user-avatar {
     height: $user-avatar-image-size;
     width: $user-avatar-image-size;
 
+    > svg {
+      transition: opacity .25s ease-in-out;
+    }
+
     > svg > path {
       fill: $page-header-fg;
+    }
+
+    &:hover {
+      .press-to-open {
+        opacity: 1;
+        transition: opacity .1s linear;
+      }
+
+      > svg {
+        opacity: 0;
+        transition: opacity .1s linear;
+      }
+      
     }
 
     .press-to-open {
@@ -370,11 +387,11 @@ div.user-avatar {
       border-radius: 50%;
       opacity: 0;
       transition: opacity .25s ease-in-out;
-      background-color: $page-header-bg;
       display: flex;
       position: absolute;
-      color: $page-header-active-fg;
       top: 0;
+      background-color: $page-header-active-fg;
+      color: $page-header-bg;
 
       &:after {
         height: $user-avatar-image-size;
@@ -385,15 +402,6 @@ div.user-avatar {
         line-height: $user-avatar-image-size;
         margin-right: 1px;
       }
-
-      &:hover {
-        opacity: 1;
-        transition: opacity .1s linear;
-      }
-    }
-
-    &:hover {
-      border-color: $hpe-primary;
     }
   }
 }

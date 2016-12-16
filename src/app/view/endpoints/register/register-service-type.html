@@ -13,8 +13,8 @@
             <img class="media-object" ng-src="/images/cloudfoundry_small.png"/>
           </div>
           <div class="media-body">
-            <h4 class="media-heading" translate>Helion Cloud Foundry</h4>
-            <p translate>Helion Cloud Foundry supports the full lifecycle, from initial development, through all testing stages to
+            <h4 class="media-heading" translate>{{ OEM_CONFIG.CLOUD_FOUNDRY }}</h4>
+            <p translate>{{ OEM_CONFIG.CLOUD_FOUNDRY }} supports the full lifecycle, from initial development, through all testing stages to
               deployment</p>
             <div class="media-right pull-right">
               <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hcf';wizardCtrl.next()" translate>
@@ -32,8 +32,8 @@
           </div>
         </div>
         <div class="media-body">
-          <h4 class="media-heading" translate>Helion Code Engine</h4>
-          <p translate>Code Engine gives teams the ability to set up their own automated ci/cd routines, allowing the
+          <h4 class="media-heading" translate>{{ OEM_CONFIG.CODE_ENGINE }}</h4>
+          <p translate>{{ OEM_CONFIG.CODE_ENGINE }} gives teams the ability to set up their own automated ci/cd routines, allowing the
             build/test/deploy cycle to be triggered by checkins into VCS repositories</p>
           <div class="media-right pull-right">
             <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hce';wizardCtrl.next()" translate>
