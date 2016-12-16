@@ -75,7 +75,7 @@
       class="btn btn-default back"
       ng-click="wizardCtrl.back()"
       ng-disabled="wizardCtrl.backBtnDisabled"
-      ng-if="wizardCtrl.allowBack()">
+      ng-if="wizardCtrl.workflow.allowBack()">
       {{ wizardCtrl.steps[wizardCtrl.currentIndex].backBtnText || wizardCtrl.btnText.back || 'Back' }}
     </button>
 

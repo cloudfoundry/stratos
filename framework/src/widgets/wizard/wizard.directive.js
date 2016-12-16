@@ -98,9 +98,12 @@
     this.btnText = this.workflow.btnText;
     this.steps = this.workflow.steps || [];
 
-    // Added to allow us to add the OEM_CONFIG into the scope
-    if (this.options.scope) {
-      _.assign($scope, this.options.scope);
+    // allowBack can be a value or function
+    if (!_.isFunction(this.workflow.allowBack)) {
+      var allowBack = this.workflow.allowBack;
+      this.workflow.allowBack = function () {
+        return allowBack;
+      };
     }
 
     // allowJump can be a value or function
@@ -115,7 +118,7 @@
       if (this.workflow.allowJump()) {
         return true;
       }
-      if (this.allowBack() && $index < this.currentIndex) {
+      if (this.workflow.allowBack() && $index < this.currentIndex) {
         return false;
       }
       return this.currentIndex !== $index;
@@ -143,22 +146,6 @@
   }
 
   angular.extend(WizardController.prototype, {
-
-    /**
-     * @function allowBack
-     * @memberof helion.framework.widgets.wizard.WizardController
-     * @description determines if the user is allowed to go back in the wizard
-     * @returns {bool} whether going back is allows
-     */
-    allowBack: function () {
-      // allowBack can be a value or function
-      if (_.isFunction(this.workflow.allowBack)) {
-        return this.workflow.allowBack();
-      } else {
-        return this.workflow.allowBack || false;
-      }
-    },
-
     /**
      * @function disableButtons
      * @memberof helion.framework.widgets.wizard.WizardController
