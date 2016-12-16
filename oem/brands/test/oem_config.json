@@ -10,7 +10,7 @@
   "COMPANY_NAME": "[Company Name]",
   "TERMS_OF_USE": "Link 1 (Terms)",
   "PRIVACY": "Link 2 (Privacy)",
-  "CODE_ENGINE": "[Code Engine Label}",
+  "CODE_ENGINE": "[Code Engine Label]",
   "CLOUD_FOUNDRY": "[Cloud Foundry Label]",
   "ABOUT_TEMPLATE": "html/about.html", 
   "ABOUT_PRODUCT_FAMILY_LOGO_HREF": "",

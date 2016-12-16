@@ -39,6 +39,9 @@
         var modal;
         var context = {
           wizardOptions: {
+            scope: {
+              OEM_CONFIG: utilsService.getOemConfiguration()
+            },
             workflow: {
               allowCancelAtLastStep: true,
               hideStepNavStack: true,
