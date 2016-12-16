@@ -141,6 +141,16 @@
           that.setValue(that.inputOptions[0]);
         }
       });
+
+      // If input options is rebuilt, we may show an outdated label (viewValue)
+      this.$scope.$watch(function () {
+        return that.inputOptions;
+      }, function (newVal, oldVal) {
+        if (newVal === oldVal) {
+          return;
+        }
+        that.ngModelCtrl.$render();
+      });
     },
 
     /**

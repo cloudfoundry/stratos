@@ -1,0 +1,48 @@
+<div class="register-service-type">
+  <div class="register-content-left">
+    <p translate>To enable developers to use this web console you must register endpoints. The process of registering an endpoint
+    will make them discoverable for anyone who logs into the console. Once you register an endpoint we recommend
+    connecting to it so you can manage it.</p>
+  </div>
+  <div class="register-content-right">
+    <h4 translate>Select an Endpoint Type</h4>
+    <ul class="media-list hpe-add-option-list">
+      <li class="media">
+        <div>
+          <div class="media-left media-middle">
+            <img class="media-object" ng-src="/images/cloudfoundry_small.png"/>
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading" translate>Helion Cloud Foundry</h4>
+            <p translate>Helion Cloud Foundry supports the full lifecycle, from initial development, through all testing stages to
+              deployment</p>
+            <div class="media-right pull-right">
+              <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hcf';wizardCtrl.next()" translate>
+                Register
+                <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="media register-type-hce">
+        <div class="media-left media-middle">
+          <div class="media-object">
+            <img ng-src="/svg/CodeEngine_Black.svg"/>
+          </div>
+        </div>
+        <div class="media-body">
+          <h4 class="media-heading" translate>Helion Code Engine</h4>
+          <p translate>Code Engine gives teams the ability to set up their own automated ci/cd routines, allowing the
+            build/test/deploy cycle to be triggered by checkins into VCS repositories</p>
+          <div class="media-right pull-right">
+            <button class="btn btn-sm btn-link" ng-click="wizardCtrl.options.userInput.type='hce';wizardCtrl.next()" translate>
+              Register
+              <i class="helion-icon helion-icon-sm helion-icon-Plus add-icon"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

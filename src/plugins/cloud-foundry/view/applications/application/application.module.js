@@ -272,9 +272,12 @@
           // Don't create timer when scope has been destroyed
           if (!that.scopeDestroyed) {
             return that.$q.all(blockUpdate).finally(function () {
-              that.pipelineReady = true;
-              that.onAppStateChange();
-              that.startUpdate();
+              // HSC-1410: Need to check again that the scope has not been destroyed
+              if (!that.scopeDestroyed) {
+                that.pipelineReady = true;
+                that.onAppStateChange();
+                that.startUpdate();
+              }
             });
           }
 
@@ -453,7 +456,7 @@
           var appName = that.model.application.summary.name;
           that.model.deleteApp(that.cnsiGuid, that.id).then(function () {
             // show notification for successful binding
-            var successMsg = gettext('"{{appName}}" has been deleted.');
+            var successMsg = gettext("'{{appName}}' has been deleted");
             var message = that.$interpolate(successMsg)({appName: appName});
             that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {message: message});
             that.eventService.$emit(that.eventService.events.REDIRECT, 'cf.applications.list.gallery-view');

@@ -2,7 +2,7 @@
   'use strict';
 
   describe('delivery-pipeline-status directive', function () {
-    var element, $httpBackend, controller, detailViewSpy;
+    var element, $httpBackend, controller, setupPipelineSpy;
 
     beforeEach(module('templates'));
     beforeEach(module('green-box-console'));
@@ -18,19 +18,18 @@
     }));
 
     beforeEach(function () {
-      module(function ($provide) {
-        detailViewSpy = jasmine.createSpy();
-        $provide.constant('helion.framework.widgets.detailView', detailViewSpy);
-      });
-
       inject(function ($injector) {
         var $compile = $injector.get('$compile');
         var contextScope = $injector.get('$rootScope').$new();
+        setupPipelineSpy = jasmine.createSpy();
+
         contextScope.pipeline = {};
         contextScope.hce = {};
+        contextScope.setup = setupPipelineSpy;
+
         $httpBackend = $injector.get('$httpBackend');
 
-        var markup = '<delivery-pipeline-status>' +
+        var markup = '<delivery-pipeline-status hce="hce" pipeline="pipeline" setup="setup">' +
           '</delivery-pipeline-status>';
 
         element = angular.element(markup);
@@ -53,7 +52,7 @@
 
     it('should emit event when setting up pipeline', function () {
       controller.setupPipeline();
-      expect(detailViewSpy).toHaveBeenCalled();
+      expect(setupPipelineSpy).toHaveBeenCalled();
     });
 
   });

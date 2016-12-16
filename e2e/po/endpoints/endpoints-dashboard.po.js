@@ -14,8 +14,8 @@
 
     clickAddClusterInWelcomeMessage: clickAddClusterInWelcomeMessage,
     welcomeMessage: welcomeMessage,
-    welcomeMessageAdmin: welcomeMessageAdmin,
-    welcomeMessageNonAdmin: welcomeMessageNonAdmin,
+    isWelcomeMessageAdmin: isWelcomeMessageAdmin,
+    isWelcomeMessageNonAdmin: isWelcomeMessageNonAdmin,
 
     getEndpointTable: getEndpointTable,
     getRowWithEndpointName: getRowWithEndpointName,
@@ -60,23 +60,25 @@
   }
 
   function welcomeMessage() {
-    return element(by.css('#welcome-message'));
+    return element(by.css('.endpoint-notification'));
   }
 
-  function welcomeMessageAdmin() {
-    var panels = welcomeMessage().all(by.css('.panel-body'));
-    // First message should be visible
-    return panels.get(0).isDisplayed();
+  function isWelcomeMessageAdmin() {
+    var text = welcomeMessage().element(by.css('div:first-of-type'));
+    return text.getText().then(function (text) {
+      return text.trim().indexOf('To enable developers to use this') === 0;
+    });
   }
 
-  function welcomeMessageNonAdmin() {
-    var panels = welcomeMessage().all(by.css('.panel-body'));
-    // Second message should be visible
-    return panels.get(1).isDisplayed();
+  function isWelcomeMessageNonAdmin() {
+    var text = welcomeMessage().element(by.css('div:nth-of-type(2)'));
+    return text.getText().then(function (text) {
+      return text.trim().indexOf('To access your cloud native workloads') === 0;
+    });
   }
 
   function clickAddClusterInWelcomeMessage() {
-    return element.all(by.css('#welcome-message span.tile-btn')).first().click();
+    return welcomeMessage().all(by.css('.btn-link.tile-btn')).first().click();
   }
 
   function getEndpointTable() {
@@ -111,15 +113,11 @@
   }
 
   function endpointIsDisconnected(row) {
-    return endpointGetStatus(row, 'helion-icon-Connect').isPresent();
+    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css("svg[src='/svg/NoConnection_Black.svg']")).isPresent();
   }
 
   function endpointIsConnected(row) {
-    return endpointGetStatus(row, 'helion-icon-Active_L').isPresent();
-  }
-
-  function endpointGetStatus(rowIndex, statusClass) {
-    return helpers.getTableCellAt(getEndpointTable(), rowIndex, 1).element(by.css('.' + statusClass));
+    return helpers.getTableCellAt(getEndpointTable(), row, 1).element(by.css('.helion-icon-Active_L')).isPresent();
   }
 
   function endpointType(row) {
@@ -166,8 +164,8 @@
     return helpers.getTableCellAt(getEndpointTable(), row, 4).element(by.css('actions-menu'));
   }
 
-  function endpointUrl(rowIndex) {
-    return helpers.getTableCellAt(getEndpointTable(), rowIndex, 1).getText();
+  function endpointUrl(row) {
+    return helpers.getTableCellAt(getEndpointTable(), row, 3).getText();
   }
 
   function endpointError(rowIndex) {

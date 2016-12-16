@@ -1,0 +1,22 @@
+<div class="edit-token">
+  <div class="edit-token-description" translate>
+    <p translate>Rename the '{{ asyncTaskDialogCtrl.context.token.token.name }}' GitHub Personal Access Token.</p>
+    <p class="italic" translate>Note: Token names must be unique within each VCS</p>
+  </div>
+  <div class="separator"></div>
+  <form name="form.editVcsToken" class="edit-form">
+    <div class="form-group" focusable-input
+         ng-class="{'has-error': form.editVcsToken.tokenName.$dirty && form.editVcsToken.tokenName.$invalid}">
+      <label class="control-label" translate>New Token Name</label>
+      <span class="control-message">
+      <span translate ng-if="form.editVcsToken.tokenName.$error.required">New Token Name is required</span>
+      <span translate ng-if="form.editVcsToken.tokenName.$error.helionUnique">Token Name must be unique within a VCS</span>
+    </span>
+      <input type="text" name="tokenName" auto-focus="300" class="form-control"
+             helion-unique items="asyncTaskDialogCtrl.context.tokenNames"
+             ng-model="asyncTaskDialogCtrl.context.data.name" required/>
+      <br><br>
+    </div>
+  </form>
+
+</div>

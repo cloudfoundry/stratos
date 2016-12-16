@@ -3,8 +3,8 @@
 
   describe('Delivery Pipeline', function () {
 
-    var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel,
-      modelManager, $httpBackend, account, utils, $q;
+    var controller, $interpolate, $state, $stateParams, $rootScope, cnsiModel, userCnsiModel, notificationsService,
+      modelManager, vcsTokenManager, PAT_DELIMITER, $httpBackend, account, utils, $q;
 
     beforeEach(module('green-box-console'));
     beforeEach(module({
@@ -47,6 +47,8 @@
       $state = $injector.get('$state');
       $stateParams = $injector.get('$stateParams');
       modelManager = $injector.get('app.model.modelManager');
+      vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
+      PAT_DELIMITER = $injector.get('PAT_DELIMITER');
 
       // Some generic vars needed in tests
       $rootScope = $injector.get('$rootScope');
@@ -59,11 +61,16 @@
       cnsiModel = modelManager.retrieve('app.model.serviceInstance');
       userCnsiModel = modelManager.retrieve('app.model.serviceInstance.user');
       account = modelManager.retrieve('app.model.account');
+      notificationsService = $injector.get('app.view.notificationsService');
       utils = $injector.get('app.utils.utilsService');
     }));
 
     function createController() {
       var ApplicationDeliveryPipelineController = $state.get('cf.applications.application.delivery-pipeline').controller;
+
+      var detailView = function () {
+        return {};
+      };
 
       var confirmDialog = function () {
         return {
@@ -103,7 +110,14 @@
         $emit: angular.noop
       };
 
-      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, confirmDialog, addNotificationService, postDeployActionService, utils, $interpolate, $stateParams, $rootScope.$new(), $q, $state);
+      $httpBackend.whenGET('/pp/v1/vcs/pat').respond(200, []);
+      $httpBackend.whenGET('/pp/v1/vcs/clients').respond(200, []);
+
+      // eventService, modelManager, vcsTokenManager, confirmDialog, addNotificationService, postDeployActionService, utils, PAT_DELIMITER, $interpolate, $stateParams, $scope, $q, $state, $log
+      controller = new ApplicationDeliveryPipelineController(eventService, modelManager, vcsTokenManager, confirmDialog, notificationsService, addNotificationService, postDeployActionService, utils, detailView, PAT_DELIMITER, $interpolate, $stateParams, $rootScope.$new(), $q, $state);
+
+      $httpBackend.flush();
+
       expect(controller).toBeDefined();
     }
 
@@ -142,7 +156,6 @@
       $httpBackend.whenGET(pipelineTasks.url).respond(200, pipelineTasks.response['200']);
 
       createController();
-      $httpBackend.flush();
     }
 
     afterEach(function () {

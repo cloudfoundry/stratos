@@ -2,8 +2,7 @@
   'use strict';
 
   describe('trigger build service', function () {
-    var promise, dialogContext, $controller, $q, modelManager, hceModel, $httpBackend, $uibModalInstance,
-      githubOauthService, $timeout;
+    var promise, dialogContext, $controller, $q, modelManager, vcsTokenManager, hceModel, $httpBackend, $uibModalInstance, $timeout;
 
     var cnsi = 1234;
     var project = {
@@ -21,7 +20,6 @@
     var defaultCommitsRequest = '/pp/v1/vcs/repos/' + project.repo.full_name + '/commits?per_page=' +
       defaultCommitCount;
     var defaultTriggerRequest = '/pp/v1/proxy/v2/pipelines/triggers';
-    var defaultUpdateProjectRequest = '/pp/v1/proxy/v2/projects/1234';
     var defaultCommit = {
       sha: '1234'
     };
@@ -51,11 +49,11 @@
       $timeout = _$timeout_;
 
       modelManager = $injector.get('app.model.modelManager');
+      vcsTokenManager = $injector.get('app.view.vcs.manageVcsTokens');
       hceModel = modelManager.retrieve('cloud-foundry.model.hce');
       hceModel.data.vcsInstance = vcsInstance;
 
       $uibModalInstance = jasmine.createSpyObj('$uibModalInstance', ['close', 'dismiss']);
-      githubOauthService = $injector.get('github.view.githubOauthService');
 
       var triggerBuild = $injector.get('triggerBuildDetailView');
       promise = triggerBuild.open(project, cnsi);
@@ -72,8 +70,7 @@
       describe('open', function () {
         it('Plumbing / Initial state', function () {
           /* eslint-disable no-new */
-          new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
-            githubOauthService);
+          new $controller($timeout, $uibModalInstance, $q, vcsTokenManager, dialogContext, undefined, modelManager);
           /* eslint-enable no-new */
           expect(dialogContext.project).toEqual(project);
           expect(dialogContext.guid).toEqual(cnsi);
@@ -85,8 +82,8 @@
       var controller;
 
       beforeEach(function () {
-        controller = new $controller($timeout, $uibModalInstance, dialogContext, undefined, modelManager,
-          githubOauthService);
+        // $timeout, $uibModalInstance, $q, vcsTokenManager, context, content, modelManager
+        controller = new $controller($timeout, $uibModalInstance, $q, vcsTokenManager, dialogContext, undefined, modelManager);
         expect(controller).toBeDefined();
         expect(controller.selectedCommit).not.toBeDefined();
         expect(controller.fetchError).not.toBeDefined();
@@ -157,7 +154,6 @@
         it('Basic failed trigger', function () {
           dialogContext.project.id = 1234;
           $httpBackend.expectPOST(defaultTriggerRequest, {project_id: 1234, commit_ref: defaultCommit.sha}).respond(500);
-          $httpBackend.expectPUT(defaultUpdateProjectRequest, project).respond(500);
 
           controller.build().then(function () {
             $httpBackend.flush();

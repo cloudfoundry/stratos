@@ -3,8 +3,7 @@
 
   angular
     .module('cloud-foundry.view.applications.list', [
-      'cloud-foundry.view.applications.list.gallery-view',
-      'cloud-foundry.view.applications.list.table-view'
+      'cloud-foundry.view.applications.list.gallery-view'
     ])
     .config(registerRoute);
 
@@ -423,6 +422,10 @@
       this._reload(true, true);
     },
 
+    toggleFilterPanel: function () {
+      this.model.hideFilterPanel = !this.model.hideFilterPanel;
+    },
+
     /**
      * @function resetFilter
      * @description Reset the filter to all
@@ -493,7 +496,9 @@
     addApplication: function () {
       this.detailView(
         {
-          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html'
+          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-app-workflow/add-app-dialog.html',
+          dialog: true,
+          class: 'dialog-form-large'
         }
       );
     },

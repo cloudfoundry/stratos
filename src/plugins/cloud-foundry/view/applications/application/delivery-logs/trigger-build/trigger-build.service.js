@@ -39,10 +39,11 @@
   TriggerBuildsDetailViewController.$inject = [
     '$timeout',
     '$uibModalInstance',
+    '$q',
+    'app.view.vcs.manageVcsTokens',
     'context',
     'content',
-    'app.model.modelManager',
-    'github.view.githubOauthService'
+    'app.model.modelManager'
   ];
 
   /**
@@ -50,13 +51,13 @@
    * @constructor
    * @param {object} $timeout - the angular timeout service
    * @param {object} $uibModalInstance - the modal object which is associated with this controller
+   * @param {object} $q - the angular $q service
+   * @param {object} vcsTokenManager - the VCS token manager
    * @param {object} context - parameter object passed in to DetailView
    * @param {object} content - configuration object passed in to DetailView
    * @param {app.model.modelManager} modelManager - the Model management service
-   * @param {object} githubOauthService - Service to obtain github auth creds
    */
-  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, context, content, modelManager,
-                                             githubOauthService) {
+  function TriggerBuildsDetailViewController($timeout, $uibModalInstance, $q, vcsTokenManager, context, content, modelManager) {
     var that = this;
     that.context = context;
     that.content = content;
@@ -64,8 +65,8 @@
     that.githubModel = modelManager.retrieve('github.model');
     that.$uibModalInstance = $uibModalInstance;
     that.$timeout = $timeout;
-    that.githubOauthService = githubOauthService;
-    that.isAuthenticated = true;
+    that.$q = $q;
+    that.vcsTokenManager = vcsTokenManager;
 
     // Always initially attempt to fetch commits associated with this projects repo/branch
     that.fetchCommits();
@@ -88,7 +89,7 @@
           if (skipUpdate) {
             that.triggerError = true;
           } else {
-            that._updateAndBuild()
+            that._checkPatAndBuild()
               .catch(function () {
                 that.triggerError = true;
               })
@@ -99,12 +100,19 @@
         });
     },
 
-    _updateAndBuild: function () {
+    _getPatGuid: function () {
+      return this.vcsTokenManager.getPatGuid(this.context.project.name);
+    },
+
+    _checkPatAndBuild: function () {
       var that = this;
-      return this.hceModel.updateProject(this.context.guid, this.hceModel.data.vcsInstance.browse_url, this.context.project.id, this.context.project)
-        .then(function () {
-          return that.build(true);
-        });
+
+      var patGuid = this._getPatGuid();
+      if (!patGuid) {
+        return this.$q.reject('You must associate a valid PAT before triggering a build');
+      }
+
+      return that.build(true);
     },
 
     fetchCommits: function () {
@@ -113,8 +121,7 @@
 
       var githubOptions = {
         headers: {
-          'x-cnap-vcs-url': this.hceModel.data.vcsInstance.browse_url,
-          'x-cnap-vcs-api-url': this.hceModel.data.vcsInstance.api_url
+          'x-cnap-vcs-token-guid': this._getPatGuid()
         }
       };
       that.githubModel.commits(that.context.project.repo.full_name, that.context.project.repo.branch, 20, githubOptions)
@@ -127,7 +134,7 @@
         })
         .catch(function (response) {
           if (response.status === 401) {
-            that.isAuthenticated = false;
+            that.tokenInvalid = true;
           } else if (response.status === 404) {
             that.permissionError = true;
           } else {
@@ -136,19 +143,8 @@
 
           that.fetching = false;
         });
-    },
-
-    githubAuth: function () {
-      var that = this;
-      this.githubOauthService.start(this.hceModel.data.vcsInstance.browse_url, this.hceModel.data.vcsInstance.api_url)
-        .then(function () {
-          that.isAuthenticated = true;
-          that.fetchCommits();
-        })
-        .catch(function () {
-          that.githubAuthFailed = true;
-        });
     }
+
   });
 
 })();

@@ -142,7 +142,7 @@
           });
           expect(that.data.workflow).toBeDefined();
           expect(that.data.workflow.title).toBe('Add Application');
-          expect(that.data.workflow.steps.length).toBe(3);
+          expect(that.data.workflow.steps.length).toBe(1);
           expect(that.options.serviceCategories).toEqual([{ label: gettext('All Services'), value: 'all' }]);
           expect(that.options.services).toEqual([]);
           expect(that.options.organizations).toEqual([]);
@@ -192,7 +192,7 @@
 
           it('should have right title and button labels', function () {
             expect(step.title).toBe(gettext('Name'));
-            expect(step.nextBtnText).toBe(gettext('Create and continue'));
+            expect(step.nextBtnText).toBe(gettext('Add'));
             expect(step.cancelBtnText).toBe(gettext('Cancel'));
             expect(step.showBusyOnNext).toBe(true);
           });
@@ -206,6 +206,7 @@
             that.getDomains = getResolved;
             spyOn(that, 'getDomains').and.callThrough();
             spyOn(that.serviceInstanceModel, 'list').and.callThrough();
+            that.userInput.serviceInstance = {};
             step.onEnter();
             $scope.$apply();
 
@@ -253,7 +254,7 @@
             expect(p.$$state.value).toBe(gettext('There was a problem creating your application. Please try again or contact your administrator if the problem persists.'));
           });
 
-          it('onNext - valid route - without service extra property', function () {
+          it('onNext - valid route', function () {
             var services = mock.cloudFoundryAPI.Spaces.ListAllServiceInstancesForSpace(123).response[200].body.resources;
             stopWatch();
             simulateUserInput();
@@ -266,161 +267,10 @@
             expect(p.$$state.status).toBe(1);
             expect(that.validateNewRoute).toHaveBeenCalled();
             expect(that.createApp).toHaveBeenCalled();
-            expect(that.spaceModel.listAllServicesForSpace).toHaveBeenCalled();
-            expect(that.options.services.length).toBe(1);
-            expect(that.options.servicesError).not.toBe(true);
-          });
-
-          it('onNext - valid route - with service `extra` property', function () {
-            var services = mock.cloudFoundryAPI.Spaces.ListAllServiceInstancesForSpace(123).response[200].body.resources;
-            _(services).each(function (service) { service.entity.extra = '{}'; });
-            stopWatch();
-            simulateUserInput();
-            spyOn(that, 'validateNewRoute').and.returnValue(that.$q.resolve());
-            spyOn(that, 'createApp').and.returnValue(that.$q.resolve());
-            spyOn(that.spaceModel, 'listAllServicesForSpace').and.returnValue(that.$q.resolve(services));
-            expect(that.options.services.length).toBe(0);
-            var p = step.onNext();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.validateNewRoute).toHaveBeenCalled();
-            expect(that.createApp).toHaveBeenCalled();
-            expect(that.spaceModel.listAllServicesForSpace).toHaveBeenCalled();
-            expect(that.options.services.length).toBe(1);
-            expect(that.options.servicesError).not.toBe(true);
-          });
-
-          it('onNext - valid route - with service `extra` property - with `categories` property ', function () {
-            var services = mock.cloudFoundryAPI.Spaces.ListAllServiceInstancesForSpace(123).response[200].body.resources;
-            _(services).each(function (service) { service.entity.extra = '{"categories": ["foo", "bar"]}'; });
-            stopWatch();
-            simulateUserInput();
-            spyOn(that, 'validateNewRoute').and.returnValue(that.$q.resolve());
-            spyOn(that, 'createApp').and.returnValue(that.$q.resolve());
-            spyOn(that.spaceModel, 'listAllServicesForSpace').and.returnValue(that.$q.resolve(services));
-            expect(that.options.services.length).toBe(0);
-            var p = step.onNext();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.validateNewRoute).toHaveBeenCalled();
-            expect(that.createApp).toHaveBeenCalled();
-            expect(that.spaceModel.listAllServicesForSpace).toHaveBeenCalled();
-            expect(that.options.services.length).toBe(1);
-            expect(that.options.servicesError).not.toBe(true);
-          });
-
-          it('onNext - valid route - retrieving services failed', function () {
-            stopWatch();
-            simulateUserInput();
-            spyOn(that, 'validateNewRoute').and.returnValue(that.$q.resolve());
-            spyOn(that, 'createApp').and.returnValue(that.$q.resolve());
-            spyOn(that.spaceModel, 'listAllServicesForSpace').and.returnValue(that.$q.reject()); // <===
-            expect(that.options.services.length).toBe(0);
-            expect(that.options.servicesError).not.toBe(true);
-            var p = step.onNext();
-            $scope.$apply();
-            expect(p.$$state.status).toBe(1);
-            expect(that.validateNewRoute).toHaveBeenCalled();
-            expect(that.createApp).toHaveBeenCalled();
-            expect(that.spaceModel.listAllServicesForSpace).toHaveBeenCalled();
-            expect(that.options.services.length).toBe(0);
-            expect(that.options.servicesError).toBe(true);
           });
         });
 
-        describe('step 2 - Services', function () {
-          var step;
-
-          beforeEach(function () {
-            step = that.data.workflow.steps[1];
-          });
-
-          it('should have right title and button labels', function () {
-            expect(step.title).toBe(gettext('Services'));
-            expect(step.nextBtnText).toBe(gettext('Next'));
-            expect(step.showBusyOnNext).toBe(true);
-          });
-
-          it('onNext', function () {
-            step.onNext();
-            expect(that.userInput.services).toBe(that.appModel.application.summary.services);
-            expect(that.options.subflow).toBe('pipeline');
-          });
-        });
-
-        describe('step 3 - Delivery', function () {
-          var step;
-
-          beforeEach(function () {
-            step = that.data.workflow.steps[2];
-          });
-
-          it('should have right title and button labels', function () {
-            expect(step.title).toBe(gettext('Delivery'));
-            expect(step.nextBtnText).toBe(gettext('Next'));
-            expect(step.showBusyOnNext).toBe(true);
-          });
-
-          it('onNext - with null sub workflow', function () {
-            spyOn(that, 'getVcsInstances');
-            that.options.subflow = null;
-            step.onNext();
-            expect(that.getVcsInstances).not.toHaveBeenCalled();
-          });
-
-          it('onNext - with `pipeline` sub workflow', function () {
-            spyOn(that, 'getVcsInstances');
-            that.options.subflow = 'pipeline';
-            step.onNext();
-            expect(that.options.sources.length).toBe(0);
-            expect(that.getVcsInstances).toHaveBeenCalled();
-          });
-        });
-
-        describe('`cli` sub workflow step 1 - Deploy App', function () {
-          var step;
-
-          beforeEach(function () {
-            step = that.data.subflows.cli[0];
-          });
-
-          it('should have right title and button labels', function () {
-            expect(step.title).toBe(gettext('Deploy App'));
-            expect(step.nextBtnText).toBe(gettext('Finished'));
-            expect(step.isLastStep).toBe(true);
-          });
-
-          it('onEnter - without `stackatoInfo.info`', function () {
-            that.stackatoInfo.info = null;
-            var p = step.onEnter();
-            expect(p.$$state.status).toBe(1);
-          });
-
-          it('onEnter - with `stackatoInfo.info - with a user`', function () {
-            stopWatch();
-            simulateUserInput();
-            that.stackatoInfo.info = {
-              endpoints: { hcf: { cnsiGuid_123: { user: { name: 'a user name' }}}}
-            };
-            var p = step.onEnter();
-            expect(p.$$state.status).toBe(1);
-            expect(that.userInput.hcfUserName).toBe('a user name');
-          });
-
-          it('onEnter - with `stackatoInfo.info - with a user`', function () {
-            stopWatch();
-            simulateUserInput();
-            that.stackatoInfo.info = {
-              endpoints: { hcf: { cnsiGuid_123: { }}}
-            };
-            var p = step.onEnter();
-            expect(p.$$state.status).toBe(1);
-            expect(that.userInput.hcfUserName).toBe(null);
-          });
-
-        });
-
-        it('#createApp', function () {
+        it('createApp', function () {
           simulateWatch();
 
           var newAppSpec = {
@@ -643,12 +493,6 @@
           expect(that.options.domains.length).toBe(2);
         });
 
-        it('#redefineWorkflowWithoutHce', function () {
-          that.redefineWorkflowWithoutHce();
-          expect(that.options.subflow).toBe('cli');
-          expect(that.data.workflow.steps.length).toBe(3);
-        });
-
         it('#notify - has application created', function () {
           stopWatch();
           simulateUserInput();
@@ -678,7 +522,7 @@
           that.startWorkflow();
           expect(that.addingApplication).toBe(true);
           expect(that.reset).toHaveBeenCalled();
-          expect(that.getHceInstances).toHaveBeenCalled();
+          expect(that.getHceInstances).not.toHaveBeenCalled();
           that.addingApplication = false;
         });
 

@@ -17,32 +17,23 @@
     return {
       scope: {
         pipeline: '=',
-        hce: '='
+        hce: '=',
+        setup: '='
       },
       templateUrl: 'plugins/cloud-foundry/view/applications/application/delivery-pipeline/delivery-pipeline-status/delivery-pipeline-status.html',
       controller: ApplicationSetupPipelineController,
-      controllerAs: 'applicationSetupPipelineCtrl'
+      controllerAs: 'applicationSetupPipelineCtrl',
+      bindToController: true
     };
   }
 
-  ApplicationSetupPipelineController.$inject = [
-    '$scope',
-    'helion.framework.widgets.detailView',
-    'app.utils.utilsService'
-  ];
+  ApplicationSetupPipelineController.$inject = [];
 
   /**
    * @name ApplicationSetupPipelineController
    * @constructor
-   * @param {object} $scope - Angular $scope
-   * @param {helion.framework.widgets.detailView} detailView - The console's detailView service
-   * @param {app.utils.utilsService} utilsService - the console utils service
-   * @property {helion.framework.widgets.detailView} detailView - The console's detailView service
-   * @property {app.utils.utilsService} utilsService - the console utils service
    */
-  function ApplicationSetupPipelineController($scope, detailView, utilsService) {
-    this.detailView = detailView;
-    $scope.OEM_CONFIG = utilsService.getOemConfiguration();
+  function ApplicationSetupPipelineController() {
   }
 
   angular.extend(ApplicationSetupPipelineController.prototype, {
@@ -52,11 +43,7 @@
      * @description trigger add pipeline workflow
      */
     setupPipeline: function () {
-      this.detailView(
-        {
-          templateUrl: 'plugins/cloud-foundry/view/applications/workflows/add-pipeline-workflow/add-pipeline-dialog.html'
-        }
-      );
+      this.setup();
     }
   });
 

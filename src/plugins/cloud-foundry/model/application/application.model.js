@@ -88,6 +88,10 @@
     this.unfilteredApplicationCount = undefined;
     // Page number (not zero based, used in UX)
     this.appPage = 1;
+
+    // Sorting options
+    this.currentSortOption = undefined;
+    this.sortAscending = undefined;
   }
 
   angular.extend(Application.prototype, {
@@ -163,6 +167,17 @@
     },
 
     /**
+     * @function reloadPage
+     * @description reload the current page of applications, re-applying the sort order
+     * @returns {object} promise object
+     * @public
+     */
+    reSort: function () {
+      this._sortFilteredApplications();
+      return this.loadPage(this.appPage);
+    },
+
+    /**
      * @function loadPage
      * @description make applications data set ready for the current displaying page
      * @param {number} pageNumber The display page number
@@ -225,7 +240,7 @@
         loadPromise = this._listAllAppsWithPage(1, that.loadingLimit, that._getCurrentCnsis());
       }
       return loadPromise
-        .then(_.bind(this._onListAllAppsSuccess, this))
+        .then(_.bind(this._onListAllAppsSuccess, this, true))
         .then(function () {
           if (_.isMatch(that.filterParams, {orgGuid: 'all', spaceGuid: 'all'})) {
             // No org/space filter applied, the app count can be found in the cached applications
@@ -247,26 +262,51 @@
           }
         })
         .then(function () {
+          var didFilter = false;
           if (that.filterParams.cnsiGuid !== 'all') {
             that.filterByCluster(that.filterParams.cnsiGuid);
+            didFilter = true;
           }
           if (that.filterParams.text) {
             that.filterByText(that.filterParams.text);
+            didFilter = true;
+          }
+          if (!didFilter) {
+            that.resetFilter();
           }
         })
         .catch(_.bind(this._onListAllAppsFailure, this));
     },
 
     /**
+     * @name sortFilteredApplications
+     * @description Sort model.filteredApplications based on the required sort parameters
+     *
+     */
+    _sortFilteredApplications: function () {
+      var path = this.currentSortOption;
+      var sortOrder = this.sortAscending ? 'asc' : 'desc';
+      this.filteredApplications = _.orderBy(this.filteredApplications, function (app) {
+        var value = _.get(app, path);
+        if (_.isString(value)) {
+          return value.toLowerCase();
+        }
+        return value;
+      }, sortOrder);
+    },
+
+    /**
      * @function _onListAllAppsSuccess
      * @description success handler for listAllApps promise.
+     * @param {boolean} skipReset do not reset the filter
      * @private
      */
-    _onListAllAppsSuccess: function () {
+    _onListAllAppsSuccess: function (skipReset) {
       this.hasApps = this.bufferedApplications.length > 0;
-      this._sortApps();
       this._updateCache();
-      this.resetFilter();
+      if (!skipReset) {
+        this.resetFilter();
+      }
     },
 
     /**
@@ -276,41 +316,6 @@
      */
     _updateCache: function () {
       this.cachedApplications = _.clone(this.bufferedApplications);
-    },
-
-    /**
-     * @function _sortApps
-     * @description sort all applications by name.
-     * @private
-     */
-    _sortApps: function () {
-      this._injectSortingKey(this.bufferedApplications);
-      this.bufferedApplications = _.orderBy(this.bufferedApplications, ['__sortingKey__'], ['asc']);
-      this._removeSortingKey(this.bufferedApplications);
-    },
-
-    /**
-     * @function _injectSortingKey
-     * @description inject a temporary sorting key for sorting.
-     * @param {Array} apps A list applications.
-     * @private
-     */
-    _injectSortingKey: function (apps) {
-      _.each(apps, function (app) {
-        app.__sortingKey__ = _.get(app, 'entity.name', '_').toLowerCase();
-      });
-    },
-
-    /**
-     * @function _removeSortingKey
-     * @description remove the temporary sorting key.
-     * @param {Array} apps A list applications.
-     * @private
-     */
-    _removeSortingKey: function (apps) {
-      _.each(apps, function (app) {
-        delete app.__sortingKey__;
-      });
     },
 
     /**
@@ -472,6 +477,7 @@
      */
     filterByCluster: function (clusterId) {
       this.filteredApplications = _.filter(this.cachedApplications, ['clusterId', clusterId]);
+      this._sortFilteredApplications();
       this.hasApps = this.filteredApplications.length > 0;
     },
 
@@ -482,6 +488,7 @@
           return app;
         }
       });
+      this._sortFilteredApplications();
       this.hasApps = this.filteredApplications.length > 0;
     },
 
@@ -492,6 +499,7 @@
      */
     resetFilter: function () {
       this.filteredApplications = _.clone(this.cachedApplications);
+      this._sortFilteredApplications();
       this.hasApps = this.filteredApplications.length > 0;
     },
 
@@ -611,7 +619,7 @@
       return this.apiManager.retrieve('cloud-foundry.api.Apps')
         .RetrieveApp(guid, params, this.modelUtils.makeHttpConfig(cnsiGuid))
         .then(function (response) {
-          that.onGetAppOrgAndSpace(response.data.entity);
+          that.onGetAppOrgAndSpace(response.data);
         });
     },
 
@@ -987,6 +995,8 @@
         metadata.hce_api_url = undefined;
         metadata.hceServiceGuid = undefined;
         metadata.projectId = undefined;
+        // Ensure all traces of the project are removed
+        that.application.project = null;
       }
 
       if (hceServiceData) {
@@ -1067,12 +1077,13 @@
      * @function onGetAppOrgAndSpace
      * @memberof  cloud-foundry.model.application
      * @description onGetAppOrgAndSpace handler at model layer
-     * @param {object} entity - response entity
+     * @param {object} application - response
      * @private
      */
-    onGetAppOrgAndSpace: function (entity) {
-      this.application.organization = entity.space.entity.organization;
-      this.application.space = entity.space;
+    onGetAppOrgAndSpace: function (application) {
+      this.application.organization = application.entity.space.entity.organization;
+      this.application.space = application.entity.space;
+      this.application.metadata = application.metadata;
     },
 
     /**

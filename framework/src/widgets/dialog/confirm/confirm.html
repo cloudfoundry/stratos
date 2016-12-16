@@ -22,7 +22,10 @@
     ng-show="!confirmCtrl.confirmDialogContext.hideNo">
     {{ ::confirmCtrl.confirmDialogContext.buttonText.no || 'No' }}
   </button>
-  <button class="btn btn-primary"
+  <button class="btn" ng-class="{
+                                    'btn-primary': !confirmCtrl.confirmDialogContext.submitCommit,
+                                    'btn-commit': confirmCtrl.confirmDialogContext.submitCommit
+                                  }"
     ng-click="confirmCtrl.confirmed()"
     ng-disabled="confirmCtrl.isBusy">
     {{ ::confirmCtrl.confirmDialogContext.buttonText.yes || 'Yes' }}

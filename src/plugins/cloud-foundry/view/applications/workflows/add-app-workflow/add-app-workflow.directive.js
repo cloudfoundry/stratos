@@ -30,8 +30,8 @@
   AddAppWorkflowController.$inject = [
     'app.model.modelManager',
     'app.event.eventService',
-    'github.view.githubOauthService',
     'app.utils.utilsService',
+    'app.view.vcs.manageVcsTokens',
     '$interpolate',
     '$scope',
     '$q',
@@ -44,13 +44,12 @@
    * @constructor
    * @param {app.model.modelManager} modelManager - the Model management service
    * @param {app.event.eventService} eventService - the Event management service
-   * @param {object} githubOauthService - github oauth service
-   * @param {object} utils - Utils service
+   * @param {app.utils.utilsService} utils - the utils service
+   * @param {app.view.vcs.manageVcsTokens} manageVcsTokens - the VCS Token management service
    * @param {object} $interpolate - the Angular $interpolate service
    * @param {object} $scope - Angular $scope
    * @param {object} $q - Angular $q service
    * @param {object} $timeout - the Angular $timeout service
-   * @param {object} $uibModalInstance - the angular $uibModalInstance service used to close/dismiss a modal
    * @property {object} $interpolate - the Angular $interpolate service
    * @property {object} $scope - angular $scope
    * @property {object} $q - angular $q service
@@ -58,7 +57,6 @@
    * @property {boolean} addingApplication - flag for adding app
    * @property {app.model.modelManager} modelManager - the Model management service
    * @property {app.event.eventService} eventService - the Event management service
-   * @property {github.view.githubOauthService} githubOauthService - github oauth service
    * @property {object} appModel - the Cloud Foundry applications model
    * @property {object} serviceInstanceModel - the application service instance model
    * @property {object} spaceModel - the Cloud Foundry space model
@@ -71,7 +69,7 @@
    * @property {object} userInput - user's input about new application
    * @property {object} options - workflow options
    */
-  function AddAppWorkflowController(modelManager, eventService, githubOauthService, utils, $interpolate, $scope, $q, $timeout) {
+  function AddAppWorkflowController(modelManager, eventService, utils, manageVcsTokens, $interpolate, $scope, $q, $timeout) {
     this.$interpolate = $interpolate;
     this.$scope = $scope;
     this.$q = $q;
@@ -79,8 +77,8 @@
     this.addingApplication = false;
     this.modelManager = modelManager;
     this.eventService = eventService;
-    this.githubOauthService = githubOauthService;
     this.utils = utils;
+    this.manageVcsTokens = manageVcsTokens;
     this.appModel = modelManager.retrieve('cloud-foundry.model.application');
     this.serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance.user');
     this.spaceModel = modelManager.retrieve('cloud-foundry.model.space');
@@ -91,6 +89,7 @@
     this.stackatoInfo = modelManager.retrieve('app.model.stackatoInfo');
     this.hceModel = modelManager.retrieve('cloud-foundry.model.hce');
     this.authModel = modelManager.retrieve('cloud-foundry.model.auth');
+    this.vcsModel = modelManager.retrieve('cloud-foundry.model.vcs');
     this.userInput = {};
     this.options = {};
 
@@ -195,20 +194,23 @@
         };
 
         this.data.workflow = {
+          hideStepNavStack: true,
           allowJump: false,
           allowBack: false,
+          allowCancelAtLastStep: true,
           title: gettext('Add Application'),
           btnText: {
-            cancel: gettext('Save and Close')
+            cancel: gettext('Cancel')
           },
           steps: [
             {
               title: gettext('Name'),
               templateUrl: path + 'name.html',
               formName: 'application-name-form',
-              nextBtnText: gettext('Create and continue'),
+              nextBtnText: gettext('Add'),
               cancelBtnText: gettext('Cancel'),
               showBusyOnNext: true,
+              isLastStep: true,
               onEnter: function () {
                 return that.serviceInstanceModel.list()
                   .then(function (serviceInstances) {
@@ -230,7 +232,6 @@
                       var preSelectedService = _.find(that.options.serviceInstances, { value: { guid: that.appModel.filterParams.cnsiGuid}}) || {};
                       that.options.userInput.serviceInstance = preSelectedService.value;
                     }
-
                   });
               },
               onNext: function () {
@@ -240,38 +241,6 @@
                     that.eventService.$emit('cf.events.NOTIFY_SUCCESS', {
                       message: that.$interpolate(msg)({appName: that.userInput.name})
                     });
-
-                    that.spaceModel.listAllServicesForSpace(
-                      that.userInput.serviceInstance.guid,
-                      that.userInput.space.metadata.guid
-                    )
-                    .then(function (services) {
-                      that.options.services.length = 0;
-                      [].push.apply(that.options.services, services);
-
-                      // retrieve categories that user can filter services by
-                      var categories = [];
-                      angular.forEach(services, function (service) {
-                        // Parse service entity extra data JSON string
-                        if (!_.isNil(service.entity.extra) && angular.isString(service.entity.extra)) {
-                          service.entity.extra = angular.fromJson(service.entity.extra);
-
-                          if (angular.isDefined(service.entity.extra.categories)) {
-                            var serviceCategories = _.map(service.entity.extra.categories,
-                                                          function (o) {return { label: o, value: { categories: o }, lower: o.toLowerCase() }; });
-                            categories = _.unionBy(categories, serviceCategories, 'lower');
-                          }
-                        }
-                      });
-                      categories = _.sortBy(categories, 'lower');
-                      that.options.serviceCategories.length = 1;
-                      [].push.apply(that.options.serviceCategories, categories);
-                    }, function () {
-                      that.options.servicesError = true;
-                    })
-                    .finally(function () {
-                      that.options.servicesReady = true;
-                    });
                   }, function (error) {
                     var msg = gettext('There was a problem creating your application. ');
                     var cloudFoundryException = that.utils.extractCloudFoundryError(error);
@@ -280,12 +249,12 @@
                     }
 
                     msg = msg + gettext('Please try again or contact your administrator if the problem persists.');
-
                     return that.$q.reject(msg);
                   });
                 });
               }
-            },
+            }
+            /*,
             {
               title: gettext('Services'),
               formName: 'application-services-form',
@@ -310,36 +279,11 @@
                 }
               }
             }
+            */
           ]
         };
 
         this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
-
-        this.data.subflows = {
-          pipeline: addPipelineWorkflowPrototype.getWorkflowDefinition.apply(this).steps,
-          cli: [
-            {
-              ready: true,
-              title: gettext('Deploy App'),
-              templateUrl: path + 'cli-subflow/deploy.html',
-              formName: 'application-cli-deploy-form',
-              nextBtnText: gettext('Finished'),
-              isLastStep: true,
-              onEnter: function () {
-                that.userInput.hcfApiEndpoint = that.utils.getClusterEndpoint(that.userInput.serviceInstance);
-
-                // Get user name from StackatoInfo
-                if (that.stackatoInfo.info) {
-                  var endpointUser = that.stackatoInfo.info.endpoints.hcf[that.userInput.serviceInstance.guid].user;
-                  if (endpointUser) {
-                    that.userInput.hcfUserName = endpointUser.name;
-                  }
-                }
-                return that.$q.resolve();
-              }
-            }
-          ]
-        };
 
         this.options = {
           eventService: this.eventService,
@@ -585,7 +529,7 @@
         this.options.subflow = 'cli';
         this.data.countMainWorkflowSteps -= 1;
         this.data.workflow.steps.pop();
-        [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
+        //[].push.apply(this.data.workflow.steps, this.data.subflows.cli);
       },
 
       /**
@@ -600,19 +544,16 @@
 
         var params = {
           cnsiGuid: this.userInput.serviceInstance.guid,
-          guid: this.userInput.application.summary.guid
+          guid: this.userInput.application.summary.guid,
+          newlyCreated: true
         };
-        if (this.userInput.projectId) {
-          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.delivery-logs', params);
-        } else {
-          this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.summary', params);
-        }
+
+        this.eventService.$emit(this.eventService.events.REDIRECT, 'cf.applications.application.summary', params);
       },
 
       startWorkflow: function () {
         this.addingApplication = true;
         this.reset();
-        this.getHceInstances();
       },
 
       stopWorkflow: function () {

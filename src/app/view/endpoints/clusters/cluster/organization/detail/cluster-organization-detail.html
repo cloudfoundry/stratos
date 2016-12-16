@@ -8,7 +8,7 @@
      class="cluster-detail endpoints"
      ng-class="{'col-md-9 col-sm-11 col-xs-11':clusterOrgDetailController.hasActions !== false}"
     >
-  <h3>Organization : {{ clusterOrgDetailController.organization().details.org.entity.name }}</h3>
+  <h3 translate>Organization : {{ clusterOrgDetailController.organization().details.org.entity.name }}</h3>
   <organization-summary-tile
     cluster-guid="clusterOrgDetailController.clusterGuid"
     organization="clusterOrgDetailController.organization()"

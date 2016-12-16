@@ -43,7 +43,7 @@ navbar > nav.main-nav-header {
       top: 0;
       left: 0;
       width: $main-nav-icons-width;
-      text-align: center; 
+      text-align: center;
 
       > i {
         line-height: $page-header-height;
@@ -248,7 +248,7 @@ navbar > .main-nav-menu {
   .navbar-nav {
     float: left;
     margin: 0;
-    
+
     > li {
       float: left;
     }
@@ -289,7 +289,7 @@ navbar > .main-nav-menu {
       .navitem-label {
         display: inline-block;
       }
-      
+
 
       li.navitem-bottom {
         position: relative;
@@ -357,21 +357,25 @@ div.user-avatar {
     position: absolute;
     right: ($user-avatar-size - $user-avatar-image-size) / 2;
     top: ($user-avatar-size - $user-avatar-image-size) / 2;;
-    border-radius: $user-avatar-image-size / 2;
     height: $user-avatar-image-size;
     width: $user-avatar-image-size;
-    background-image: url(app/view/assets/user-icon.png);
+
+    > svg > path {
+      fill: $page-header-fg;
+    }
 
     .press-to-open {
       height: $user-avatar-image-size;
       width: $user-avatar-image-size;
-      border-radius: $user-avatar-image-size / 2;
+      border-radius: 50%;
       opacity: 0;
       transition: opacity .25s ease-in-out;
       background-color: $page-header-bg;
       display: flex;
+      position: absolute;
       color: $page-header-active-fg;
-      
+      top: 0;
+
       &:after {
         height: $user-avatar-image-size;
         width: $user-avatar-image-size;
@@ -379,13 +383,17 @@ div.user-avatar {
         content: "\e980";
         text-align: center;
         line-height: $user-avatar-image-size;
+        margin-right: 1px;
       }
 
       &:hover {
         opacity: 1;
-        transition: opacity .25s ease-in-out;
-        border: 1px solid $page-header-active-fg;
+        transition: opacity .1s linear;
       }
+    }
+
+    &:hover {
+      border-color: $hpe-primary;
     }
   }
 }

@@ -9,10 +9,12 @@
   var addAppWizard = require('../../po/applications/add-application-wizard.po');
   var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
   var addAppService = require('../../po/applications/add-application-services.po');
+  var application = require('../../po/applications/application.po');
   var _ = require('../../../tools/node_modules/lodash');
   var cfModel = require('../../po/models/cf-model.po');
   var proxyModel = require('../../po/models/proxy-model.po');
   var searchBox = require('../../po/widgets/input-search-box.po');
+  var inputText = require('../../po/widgets/input-text.po');
 
   describe('Applications - Add application', function () {
 
@@ -32,7 +34,7 @@
     var hcfFromConfig = helpers.getHcfs().hcf1;
 
     function getSearchBoxes() {
-      return element.all(by.css('.panel-body form .form-group'));
+      return element.all(by.css('.application-cf-filters .form-group'));
     }
 
     beforeAll(function () {
@@ -170,16 +172,6 @@
 
         expect(addAppWizard.getTitle()).toBe('Add Application');
 
-        addAppWizard.getWizard().getStepNames().then(function (names) {
-          expect(names.length).toBe(3);
-        });
-
-        addAppWizard.getWizard().getStepNames().then(function (steps) {
-          expect(steps[0]).toBe('Name');
-          expect(steps[1]).toBe('Services');
-          expect(steps[2]).toBe('Delivery');
-        });
-
         addAppHcfApp.name().getValue().then(function (text) {
           expect(text).toBe('');
         });
@@ -209,123 +201,89 @@
           expect(enabled).toBe(false);
         });
 
+        // Need to close the wizard
+        addAppWizard.getWizard().cancel();
       });
     });
 
-    it('Create hcf app', function () {
-      // Should be on the add hcf app step
-      expect(addAppWizard.getWizard().getCurrentStep().getText()).toBe('Name');
+    it('Create hcf app - test', function () {
 
       var appName = 'acceptance.e2e.' + testTime;
       var hostName = appName.replace(/\./g, '_');
-
-      var promise = addAppHcfApp.name().addText(appName)
-        .then(function () {
-          return addAppHcfApp.host().getValue().then(function (text) {
-            expect(text).toBe(appName);
-          });
-        }).then(function () {
-          return addAppWizard.getWizard().isNextEnabled().then(function (enabled) {
-            expect(enabled).toBe(false);
-          });
-        })
-        .then(function () {
-          return addAppHcfApp.host().clear();
-        })
-        .then(function () {
-          return addAppHcfApp.host().addText(hostName);
-        })
-        .then(function () {
-          return addAppWizard.getWizard().isNextEnabled().then(function (enabled) {
-            expect(enabled).toBe(true);
-          });
-        })
-        .then(function () {
-          return addAppWizard.getWizard().next();
-        })
-        .then(function () {
-          helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/);
-        })
-        .then(function () {
-          return cfModel.fetchApp(testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
-            .then(function (app) {
-              testApp = app;
-              expect(app).toBeTruthy();
-            })
-            .catch(function () {
-              fail('Failed to determine if app exists');
-            });
-        });
-
-      browser.driver.wait(promise);
-    });
-
-    it('Add basic service', function () {
       var serviceName = 'acceptance.e2e.service.' + testTime;
-      // Should be on the services section of the wizard now
-      expect(addAppWizard.getWizard().getCurrentStep().getText()).toBe('Services');
+      var until = protractor.ExpectedConditions;
 
-      // Should be able to cancel still
-      addAppWizard.getWizard().isCancelEnabled().then(function (enabled) {
-        expect(enabled).toBe(true);
+      //browser.driver.wait(protractor.until.elementIsVisible(galleryWall.getAddApplicationButton(), 5000));
+      //browser.driver.wait(protractor.until.elementIsEnabled(galleryWall.getAddApplicationButton(), 5000));
+      browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
+      galleryWall.addApplication();
+
+      expect(addAppWizard.isDisplayed()).toBeTruthy();
+      expect(addAppWizard.getTitle()).toBe('Add Application');
+
+      //browser.wait(until.visibilityOf(addAppHcfApp.name()), 5000);
+      browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
+
+      // Wait until form control is available
+      browser.wait(until.presenceOf(addAppWizard.getElement()), 15000);
+
+      addAppHcfApp.name().addText(appName);
+      expect(addAppHcfApp.host().getValue()).toBe(appName);
+
+      expect(addAppWizard.getWizard().isNextEnabled()).toBe(false);
+      addAppHcfApp.host().clear();
+      addAppHcfApp.host().addText(hostName);
+      expect(addAppWizard.getWizard().isNextEnabled()).toBe(true);
+
+      addAppWizard.getWizard().next();
+      helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/).then(function () {
+        return cfModel.fetchApp(testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
+          .then(function (app) {
+            testApp = app;
+            expect(app).toBeTruthy();
+          })
+          .catch(function () {
+            fail('Failed to determine if app exists');
+          });
       });
 
-      // Should be able to skip services, so next should be enabled
-      addAppWizard.getWizard().isNextEnabled().then(function (enabled) {
-        expect(enabled).toBe(true);
-      });
+      // Wait for dialog to close
+      browser.wait(until.not(until.presenceOf(addAppWizard.getElement())), 10000);
 
-      // Ensure we have more than one service
-      expect(addAppService.getServices().count()).toBeGreaterThan(0);
+      // Should now have reached the application page
+      expect(application.getHeader().isDisplayed()).toBe(true);
+      expect(application.getHeader().getText()).toBe(appName.toUpperCase());
+      expect(application.getActiveTab().getText()).toBe('Summary');
+      expect(application.isIncomplete()).toBe(true);
+      expect(application.isNewlyCreated()).toBe(true);
 
-      // Add the first service in the list
-      var serviceWizard = addAppService.getServiceWizard();
-      var promise = addAppService.addService(0)
-        .then(function () {
-          // Are we on the correct service tab?
-          expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
-          // Initial save should be disabled
-          return serviceWizard.getWizard().isNextEnabled().then(function (enabled) {
-            expect(enabled).toBe(false);
-          });
-        })
-        .then(function () {
-          // Entering junk should keep the save button disabled
-          return serviceWizard.getCreateNewName().addText(serviceName)
-            .then(function () {
-              return serviceWizard.getWizard().isNextEnabled().then(function (enabled) {
-                expect(enabled).toBe(false);
-              });
-            });
-        })
-        .then(function () {
-          // Fix the service name
-          serviceName = serviceName.replace(/\./g, '_');
-        })
-        .then(function () {
-          // Enter a valid service name should enable save
-          return serviceWizard.getCreateNewName().clear()
-            .then(function () {
-              return serviceWizard.getCreateNewName().addText(serviceName);
-            })
-            .then(function () {
-              return serviceWizard.getWizard().isNextEnabled().then(function (enabled) {
-                expect(enabled).toBe(true);
-              });
-            });
-        })
-        .then(function () {
-          // Save the new service
-          return serviceWizard.getWizard().next().then(function () {
-            helpers.checkAndCloseToast(/The '[^']+' service has been successfully attached to application '[^']+'/);
-          });
-        })
-        .then(function () {
-          // Move passed service screen
-          return addAppWizard.getWizard().next();
-        })
-        .then(function () {
-          return cfModel.fetchServiceExist(testCluster.guid, serviceName, helpers.getUser(), helpers.getPassword())
+      expect(element(by.id('new-app-add-services')).isDisplayed()).toBe(true);
+      element(by.id('new-app-add-services')).click();
+      expect(application.getActiveTab().getText()).toBe('Services');
+
+      browser.wait(until.presenceOf(element(by.css('service-card'))), 10000);
+
+      element.all(by.css('service-card .service-actions button.btn.btn-link')).then(function (addServiceButtons) {
+        expect(addServiceButtons.length).toBeGreaterThan(0);
+        addServiceButtons[0].click();
+
+        var serviceWizard = addAppService.getServiceWizard();
+        expect(serviceWizard.getWizard().isCancelEnabled()).toBe(true);
+        expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+
+        expect(serviceWizard.getSelectedAddServiceTab()).toBe('Create New Instance');
+        serviceWizard.getCreateNewName().addText(serviceName);
+        expect(serviceWizard.getWizard().isNextEnabled()).toBe(false);
+
+        serviceName = serviceName.replace(/\./g, '_');
+        serviceWizard.getCreateNewName().clear();
+        serviceWizard.getCreateNewName().addText(serviceName);
+        expect(serviceWizard.getWizard().isNextEnabled()).toBe(true);
+
+        serviceWizard.getWizard().next();
+        expect(serviceWizard.getWizard().getNext().getText()).toBe('DONE');
+        serviceWizard.getWizard().next().then(function () {
+          cfModel.fetchServiceExist(testCluster.guid, serviceName, helpers.getUser(), helpers.getPassword())
             .then(function (service) {
               expect(service).toBeTruthy();
             })
@@ -333,13 +291,25 @@
               fail('Failed to determine if service exists');
             });
         });
-
-      browser.driver.wait(promise);
+      });
+      galleryWall.showApplications();
     });
 
-    it('Arrive at pipeline section of wizard', function () {
-      expect(addAppWizard.getWizard().getCurrentStep().getText()).toBe('Delivery');
+    it('Should show add application button when no applications shown on app wall', function () {
+      galleryWall.showApplications();
+      galleryWall.resetFilters();
+      galleryWall.getAddAppWhenNoApps().isPresent().then(function (present) {
+        if (!present) {
+          // Type some stuff in the search box that will result in no matching applications
+          var appNameSearchBox = inputText.wrap(galleryWall.appNameSearch());
+          appNameSearchBox.clear();
+          return appNameSearchBox.addText('zzz_not_expecting_any_apps');
+        }
+      });
+      galleryWall.getAddAppWhenNoApps().click();
+      expect(addAppWizard.isDisplayed()).toBeTruthy();
+      expect(addAppWizard.getTitle()).toBe('Add Application');
+      addAppWizard.getWizard().cancel();
     });
-
   });
 })();

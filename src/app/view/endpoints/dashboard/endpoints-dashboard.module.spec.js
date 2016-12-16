@@ -3,7 +3,7 @@
   'use strict';
 
   describe('endpoint dashboard tests', function () {
-    var $httpBackend, $q, controller, modelManager, registerServiceCalled, registerServiceType, $scope;
+    var $httpBackend, $q, controller, modelManager, registerServiceCalled, $scope;
 
     var validService = {
       api_endpoint: {
@@ -18,7 +18,6 @@
     var validServicesEndpoint = {
       key: 'cnsi_1',
       name: 'c1',
-      connected: 'connected',
       type: 'Helion Cloud Foundry'
     };
 
@@ -51,9 +50,9 @@
     }));
     beforeEach(module('app.view.endpoints.dashboard'));
     beforeEach(module(function ($provide) {
-      var mock = function (config, context) {
+      var mock = function () {
+        // Params are config, context
         registerServiceCalled = true;
-        expect(context.data.type).toBe(registerServiceType);
         return {rendered: $q.resolve(), result: $q.reject()};
       };
       $provide.value('helion.framework.widgets.detailView', mock);
@@ -74,7 +73,8 @@
       modelManager = $injector.get('app.model.modelManager');
       var registerService = $injector.get('app.view.registerService');
       var utils = $injector.get('app.utils.utilsService');
-      var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.serviceInstanceService');
+      var serviceInstanceService = $injector.get('app.view.endpoints.dashboard.cnsiService');
+      var vcsService = $injector.get('app.view.endpoints.dashboard.vcsService');
 
       // Patch user account model
       var userModel = modelManager.retrieve('app.model.account');
@@ -87,10 +87,12 @@
       modelManager.register('app.model.account', userModel);
 
       var EndpointsDashboardController = $state.get('endpoint.dashboard').controller;
-      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, serviceInstanceService);
+      controller = new EndpointsDashboardController($q, $scope, $state, modelManager, utils, registerService, serviceInstanceService, vcsService);
 
       $httpBackend.when('GET', '/pp/v1/cnsis').respond(200, items);
       $httpBackend.when('GET', '/pp/v1/cnsis/registered').respond(200, items);
+      $httpBackend.when('GET', '/pp/v1/vcs/pat').respond(200, []);
+      $httpBackend.when('GET', '/pp/v1/vcs/clients').respond(200, []);
       $httpBackend.whenGET('/pp/v1/proxy/v2/info').respond(200, {});
       $httpBackend.whenGET('/pp/v1/proxy/info').respond(200, {});
       $httpBackend.whenGET('/pp/v1/stackato/info').respond(200, {});
@@ -110,16 +112,7 @@
         $httpBackend.flush();
       });
 
-      it('should show cluster registration detail view when showClusterAddForm is invoked for hce', function () {
-        registerServiceType = 'hce';
-        controller.register(registerServiceType);
-        $scope.$digest();
-        expect(registerServiceCalled).toBe(true);
-        $httpBackend.flush();
-      });
-
-      it('should show cluster registration detail view when showClusterAddForm is invoked for hcf', function () {
-        registerServiceType = 'hcf';
+      it('should show cluster registration detail view when showClusterAddForm is invoked', function () {
         controller.register();
         $scope.$digest();
         expect(registerServiceCalled).toBe(true);
@@ -127,7 +120,7 @@
       });
 
       it('should be uninitialised', function () {
-        expect(controller.endpoints).toBeUndefined();
+        expect(controller.endpoints).toEqual([]);
         expect(controller.initialised).toBe(false);
         $httpBackend.flush();
       });
@@ -140,6 +133,7 @@
         if (!_.some(controller.endpoints, validServicesEndpoint)) {
           fail('Could not find endpoint with values: ' + JSON.stringify(validServicesEndpoint));
         }
+        expect(controller.endpoints[0].getStatus()).toEqual('connected');
       });
 
       it('initialisation fails', function () {

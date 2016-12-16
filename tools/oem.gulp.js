@@ -33,7 +33,7 @@
     }
     if (!fs.existsSync(file)) {
       file = path.join(path.dirname(file), '_' + path.basename(file));
-      partial = true; 
+      partial = true;
       if (!fs.existsSync(file)) {
         throw new gutil.PluginError({
           plugin: 'oem',
