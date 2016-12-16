@@ -35,12 +35,16 @@
       show: function () {
         var serviceInstanceModel = modelManager.retrieve('app.model.serviceInstance');
         var modal;
+        var allowBack = false;
         var context = {
           wizardOptions: {
             workflow: {
               allowCancelAtLastStep: true,
               hideStepNavStack: true,
               title: gettext('Register an endpoint'),
+              allowBack: function () {
+                return allowBack;
+              },
               steps: [
                 {
                   hideNext: true,
@@ -73,7 +77,7 @@
                     step.instances = createInstances(serviceInstanceModel.serviceInstances, context.wizardOptions.userInput.type);
                   },
                   onEnter: function () {
-                    context.wizardOptions.workflow.allowBack = false;
+                    allowBack = false;
                   }
                 },
                 {
@@ -103,7 +107,7 @@
                     delete context.wizardOptions.userInput.url;
                     delete context.wizardOptions.userInput.name;
                     delete context.wizardOptions.userInput.skipSslValidation;
-                    context.wizardOptions.workflow.allowBack = true;
+                    allowBack = true;
                   }
                 }
               ]

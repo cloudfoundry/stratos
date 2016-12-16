@@ -11,7 +11,7 @@
       <h3 translate>You have not set up a delivery pipeline</h3>
     </p>
     <div ng-if="applicationSetupPipelineCtrl.hce && !applicationSetupPipelineCtrl.hce.fetching">
-      <button ng-if="applicationSetupPipelineCtrl.hce.valid > 0" ng-click="applicationSetupPipelineCtrl.setupPipeline()" class="btn btn-primary" translate>set up delivery pipeline</button>
+      <button id="pipeline-setup-button" ng-if="applicationSetupPipelineCtrl.hce.valid > 0" ng-click="applicationSetupPipelineCtrl.setupPipeline()" class="btn btn-primary" translate>set up delivery pipeline</button>
       <h4 ng-if="applicationSetupPipelineCtrl.hce.available > 0 && applicationSetupPipelineCtrl.hce.valid === 0" translate>Connect one or more Helion Code Engine Endpoints in order to set up a delivery pipeline.</h4>
       <div ng-if="applicationSetupPipelineCtrl.hce.available === 0 && applicationSetupPipelineCtrl.hce.valid === 0">
         <h4 ng-if="applicationSetupPipelineCtrl.hce.isAdmin" translate>Register and connect one or more Helion Code Engine Endpoints in order to set up a delivery pipeline.</h4>
