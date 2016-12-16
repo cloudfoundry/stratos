@@ -5,15 +5,6 @@
 # Note: stand-up-dev-env.sh will try to use it if it's present.
 
 
-#############
-# VCS OAuth #
-#############
-
-# List VCS clients separated by semicolon. Individual client data is comma separated.
-# Example: "<vcs1_type>,<vcs1_url>,<vcs1_client-id>,<vcs1_client-secret>;<vcs2_type>,<vcs2_url>,<vcs2_client-id>,<vcs2_client-secret>"
-export VCS_CLIENTS=github,https://github.com,client-id,client-secret
-
-
 ######################################
 # Local HCP Identity for development #
 ######################################

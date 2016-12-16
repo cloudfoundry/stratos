@@ -50,10 +50,9 @@ services:
       - "3003:3003"
     env_file:
       ./proxy.env
-    environment:
-      - VCS_CLIENTS=${VCS_CLIENTS}
     volumes:
       - $GOPATH/src/github.com/hpcloud/portal-proxy:/srv
+      - ./hsc-migration-volume:/hsc-migration-volume
 
 
   nginx:

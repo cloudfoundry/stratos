@@ -39,11 +39,7 @@ jobs:
       file: stratos-deploy/ci/tasks/stratos-ui/run-unit-tests.yml
     - task: build-proxy-image
       file: stratos-deploy/ci/tasks/stratos-ui/prep-proxy-image.yml
-      params:
-        VCS_CLIENTS: {{vcs-clients}}
     - task: run-e2e-tests
       privileged: true
       timeout: 10m
       file: stratos-deploy/ci/tasks/stratos-ui/run-tests.yml
-      params:
-        VCS_CLIENTS: {{vcs-clients}}

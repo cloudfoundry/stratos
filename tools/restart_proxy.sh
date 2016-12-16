@@ -20,7 +20,7 @@ env_vars
 
 docker-compose -f docker-compose.development.yml stop nginx
 docker-compose -f docker-compose.development.yml stop proxy
-docker-compose -f docker-compose.development.yml rm -fa proxy
+docker-compose -f docker-compose.development.yml rm -f proxy
 
 pushd $GOPATH/src/github.com/hpcloud/portal-proxy
 ./tools/build_portal_proxy.sh

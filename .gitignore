@@ -6,6 +6,7 @@ ci/local-creds.yml
 
 data/
 output/
+hsc-migration-volume/
 development.rc
 ci/secrets.yml
 ci/images/
