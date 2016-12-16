@@ -318,7 +318,7 @@ $applications-msg-height: 50px;
   @import "list_tablet.scss";
 }
 
-@include responsive($responsive-tablet-landscape-cutoff, $responsive-tablet-portrait-cutoff) {
+@include responsive-block($responsive-tablet-landscape-cutoff, $responsive-tablet-portrait-cutoff) {
   .application-cf-filters {
     .form-group {
       max-width: 100%;
