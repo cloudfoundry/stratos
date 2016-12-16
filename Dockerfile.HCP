@@ -1,9 +1,9 @@
-FROM ubuntu:14.04
+FROM debian:jessie
 
-RUN apt-get update && \
-    apt-get install -y --reinstall ca-certificates ca-certificates-java && \
-    mkdir -p /srv && \
-    mkdir -p /usr/share/doc/stackato
+RUN export DEBIAN_FRONTEND=noninteractive &&\
+ apt-get update &&\
+ apt-get install -y --reinstall ca-certificates &&\
+ mkdir -p /srv && mkdir -p /usr/share/doc/stackato
 
 WORKDIR /srv
 
