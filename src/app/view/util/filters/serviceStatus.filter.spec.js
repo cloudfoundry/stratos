@@ -10,7 +10,7 @@
     }));
 
     it('should return HTML markup for OK icon when status === `OK`', function () {
-      var html = '<span class="helion-icon helion-icon-lg helion-icon-Active_L text-success"></span>';
+      var html = '<span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"></span>';
       expect(serviceStatusFilter('OK')).toBe(html);
     });
 

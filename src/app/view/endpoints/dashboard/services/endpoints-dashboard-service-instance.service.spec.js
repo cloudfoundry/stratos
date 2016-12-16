@@ -9,6 +9,16 @@
     beforeEach(module('green-box-console'));
     beforeEach(module('app.view.endpoints.dashboard'));
 
+    beforeEach(inject(function ($injector) {
+      var utils = $injector.get('app.utils.utilsService');
+      utils.getOemConfiguration = function () {
+        return {
+          CLOUD_FOUNDRY: 'Helion Cloud Foundry',
+          CODE_ENGINE: 'Helion Code Engine'
+        };
+      };
+    }));
+
     afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
