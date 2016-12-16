@@ -1,17 +1,14 @@
-FROM ubuntu:14.04
+FROM debian:jessie
 
 ENV GOPATH=$HOME/go PATH=$PATH:/usr/local/go/bin
 
-RUN apt-get update && \
-  apt-get -y upgrade && \
-  apt-get install -y wget && \
-  echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
-  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && \
-  apt-get update && \
-  apt-get -y upgrade && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y --reinstall ca-certificates gcc git curl postgresql-9.4 && \
-  curl -O https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz && \
-  tar -xvf go1.6.linux-amd64.tar.gz && mv go /usr/local
+RUN export DEBIAN_FRONTEND=noninteractive &&\
+ apt-get update && apt-get install -y curl &&\
+ echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list &&\
+ curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - &&\
+ apt-get update && apt-get install -y --reinstall ca-certificates gcc git postgresql-9.4 &&\
+ curl -O https://storage.googleapis.com/golang/go1.7.linux-amd64.tar.gz &&\
+ tar -xf go1.7.linux-amd64.tar.gz && mv go /usr/local
 RUN go get 'bitbucket.org/liamstask/goose/cmd/goose'
 RUN mkdir -p /usr/share/doc/stackato
 

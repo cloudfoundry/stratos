@@ -1,6 +1,7 @@
 FROM debian:jessie
 
-RUN apt-get update &&\
+RUN export DEBIAN_FRONTEND=noninteractive &&\
+ apt-get update &&\
  apt-get install -y --reinstall ca-certificates &&\
  mkdir -p /srv
 
