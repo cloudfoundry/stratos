@@ -1,4 +1,4 @@
-.apps-table{
+.apps-table {
   padding-right: 16px;
   padding-left: 16px;
 
@@ -18,9 +18,27 @@
       text-overflow: ellipsis;
     }
 
+    .app-state-column {
+      display: flex;
+      flex-direction: row;
+
+      .list-view-app-state-label {
+        margin-left: 12px;
+        line-height: 20px;
+      }
+    }
   }
 
   .column.column-no-sort {
     cursor: default;
+  }
+}
+
+// Hide app state label and sub-label when the screen width gets small
+@include responsive-tablet-portrait() {
+  .apps-table {
+    .list-view-app-state-label {
+      display: none;
+    }
   }
 }
