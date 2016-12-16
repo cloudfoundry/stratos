@@ -98,6 +98,11 @@
     this.btnText = this.workflow.btnText;
     this.steps = this.workflow.steps || [];
 
+    // Added to allow us to add the OEM_CONFIG into the scope
+    if (this.options.scope) {
+      _.assign($scope, this.options.scope);
+    }
+
     // allowBack can be a value or function
     if (!_.isFunction(this.workflow.allowBack)) {
       var allowBack = this.workflow.allowBack;
