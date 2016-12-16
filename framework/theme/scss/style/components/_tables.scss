@@ -21,7 +21,7 @@ table {
     }
     th.st-sort-ascent, th.st-sort-descent {
       border-bottom: 2px solid $gray-light;
-      span {
+      > span, > div {
         padding-bottom: 9px;
         border-bottom: 3px solid $brand-primary;
       }

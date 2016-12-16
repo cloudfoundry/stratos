@@ -2,22 +2,100 @@
   padding-right: 16px;
   padding-left: 16px;
 
-  .table{
+  .table {
     table-layout: fixed;
     @include hpe-box-shadow-small();
-    .st-sort-ascent:after{
-      content: ' \25B2';
+    border-collapse: separate;
+
+    > thead > tr > th {
+      border-width: 1px;
     }
 
-    .st-sort-descent:after{
-      content: ' \25BC';
+    .column-div {
+      display: flex;
+      flex-flow: row nowrap;
+      padding-bottom: 12px;
+      padding-bottom: 12px;
+      margin-bottom: -1px;
+      z-index: 1000;
+      border-bottom: 3px solid transparent;
+
+      .column-text {
+        flex: 1 1 auto;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .column-no-sort, .column-sorter-asc, .column-sorter-desc {
+        flex: none;
+      }
     }
 
-    td.table-view-app-name {
+    }
+
+    thead tr:first-child th {
+      padding-bottom: 0;
+    }
+
+    th {
+      padding-bottom: 0;
+
+      .column-no-sort {
+        opacity: 0;
+      }
+      .column-sorter-asc, .column-sorter-desc {
+        font-family: "helion-icons";
+        display: none;
+      }
+    }
+
+    th.st-sort-ascent {
+      .column-div {
+        border-color: $hpe-primary;
+      }
+      .column-sorter-asc {
+        display: inherit;
+      }
+      .column-no-sort, .column-sorter-desc {
+        display: none;
+      }
+    }
+
+    th.st-sort-descent {
+      .column-div {
+        border-color: $hpe-primary;
+      }
+      .column-sorter-desc {
+        display: inherit;
+      }
+      .column-no-sort, .column-sorter-asc {
+        display: none;
+      }
+    }
+
+    // Column widths
+
+    // App Name
+    th:nth-child(1) {
+      width: 25%;
+    }
+    // App State
+    th:nth-child(2) {
+      width: 20%;
+    }
+    // Instances, Disk, Memory
+    th:nth-child(3), th:nth-child(4), th:nth-child(5) {
+      width: 10%;
+    }
+    // Created Date
+    th:nth-child(6) {
+      width: 25%;
+    }
+
+    th > span {
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
   }
 
   .column.column-no-sort {

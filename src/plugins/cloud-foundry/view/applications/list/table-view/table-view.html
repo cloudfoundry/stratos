@@ -9,10 +9,17 @@
     <thead>
       <tr >
         <th class="column"
-            ng-repeat="column in tableViewCtrl.tableColumns" translate
+            ng-repeat="column in tableViewCtrl.tableColumns"
             st-skip-natural="true"
             ng-class="{'column-no-sort': column.noSort}"
-            st-sort="{{column.noSort ? '' : column.value}}">{{column.name}}</th>
+            st-sort="{{column.noSort ? '' : column.value}}">
+            <div class="column-div">
+              <div class="column-text" translate>{{column.name}}</div>
+              <div class="column-no-sort"></div>
+              <div class="column-sorter-asc"></div>
+              <div class="column-sorter-desc"></div>
+            </div>
+        </th>
       </tr>
     </thead>
     <tbody>
