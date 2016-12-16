@@ -63,7 +63,7 @@ func main() {
 	logger.Out = os.Stdout
 	logger.Info("Proxy initialization started.")
 
-	// Register time.Time  in gob
+	// Register time.Time in gob
 	gob.Register(time.Time{})
 
 	// Load the portal configuration from env vars via ucpconfig
@@ -148,6 +148,12 @@ func main() {
 		cleanup(databaseConnectionPool, sessionStore)
 		os.Exit(1)
 	}()
+
+	// If needed, migrate VCSes from connected Code Engines
+	err = migrateVcsFromCodeEngine(portalProxy)
+	if err != nil {
+		logger.Warnf("Problem while migrating VCSes from connected Code Engines %+v", err)
+	}
 
 	// Start the proxy
 	if err := start(portalProxy); err != nil {
