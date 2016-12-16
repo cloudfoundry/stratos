@@ -1,14 +1,15 @@
-.apps-table{
+.apps-table {
   padding-right: 16px;
   padding-left: 16px;
 
-  .table {
+  > table.table {
     table-layout: fixed;
     @include hpe-box-shadow-small();
     border-collapse: separate;
 
     > thead > tr > th {
       border-width: 1px;
+      padding-bottom: 0;
     }
 
     .column-div {
@@ -32,15 +33,7 @@
       }
     }
 
-    }
-
-    thead tr:first-child th {
-      padding-bottom: 0;
-    }
-
     th {
-      padding-bottom: 0;
-
       .column-no-sort {
         opacity: 0;
       }
@@ -93,9 +86,10 @@
       width: 25%;
     }
 
-    th > span {
+    th > span, td {
       overflow: hidden;
       text-overflow: ellipsis;
+    }
   }
 
   .column.column-no-sort {
