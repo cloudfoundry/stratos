@@ -9,7 +9,7 @@
   <div ng-if="applicationDeliveryPipelineCtrl.isLegacyToken()" class="alert alert-card-warning">
     <h4 translate>Legacy Token Detected</h4>
     <p translate>
-      Your Helion Code Engine pipeline is using a legacy OAuth token.
+      Your {{ OEM_CONFIG.CODE_ENGINE }} pipeline is using a legacy OAuth token.
       While your pipeline may continue to function normally, we have no way of verifying this until you
       <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a Personal Access Token</a>.
     </p>
@@ -17,7 +17,7 @@
   <div ng-if="applicationDeliveryPipelineCtrl.isTokenDeleted()" class="alert alert-card-warning">
     <h4 translate>Token Deleted</h4>
     <p translate>
-      Your Helion Code Engine pipeline is using a Personal Access Token that is no longer available in the Stackato Console.
+      Your {{ OEM_CONFIG.CODE_ENGINE }} pipeline is using a Personal Access Token that is no longer available in the {{ OEM_CONFIG.CONSOLE }}.
       While your pipeline may continue to function normally, we have no way of verifying this until you
       <a ng-click="applicationDeliveryPipelineCtrl.manageVcsTokens()">update it to use a current Personal Access Token</a>.
     </p>
@@ -26,7 +26,7 @@
     <h4 translate>Invalid Token Detected</h4>
     <p>
       <span translate>
-        Your Helion Code Engine pipeline is using an invalid Personal Access Token
+        Your {{ OEM_CONFIG.CODE_ENGINE }} pipeline is using an invalid Personal Access Token
       </span>
     <span>
       {{ applicationDeliveryPipelineCtrl.isInvalidToken() }}.
