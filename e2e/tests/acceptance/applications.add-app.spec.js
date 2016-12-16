@@ -10,6 +10,7 @@
   var addAppHcfApp = require('../../po/applications/add-application-hcf-app.po');
   var addAppService = require('../../po/applications/add-application-services.po');
   var application = require('../../po/applications/application.po');
+  var deliveryPipeline = require('../../po/applications/application-delivery-pipeline.po');
   var _ = require('../../../tools/node_modules/lodash');
   var cfModel = require('../../po/models/cf-model.po');
   var proxyModel = require('../../po/models/proxy-model.po');
@@ -292,6 +293,60 @@
             });
         });
       });
+
+      // Go to the delivery pipeline tab
+      application.showDeliveryPipeline();
+      expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
+      expect(deliveryPipeline.setupPipelineButton().isPresent()).toBe(true);
+      deliveryPipeline.setupPipelineButton().click();
+      expect(deliveryPipeline.getSetupElement().isPresent()).toBe(true);
+      expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
+      deliveryPipeline.getSetupWizard().cancel();
+
+      galleryWall.showApplications();
+    });
+
+    it('Create an application and allow user to choose to setup a pipeline', function () {
+      var appName = 'acceptance.e2e.' + testTime + '_2';
+      var hostName = appName.replace(/\./g, '_');
+      var until = protractor.ExpectedConditions;
+      browser.wait(until.presenceOf(galleryWall.getAddApplicationButton()), 15000);
+      galleryWall.addApplication();
+
+      expect(addAppWizard.isDisplayed()).toBeTruthy();
+      browser.wait(until.presenceOf(addAppWizard.getWizard().getNext()), 5000);
+      // Wait until form control is available
+      browser.wait(until.presenceOf(addAppWizard.getElement()), 15000);
+      addAppHcfApp.name().addText(appName);
+      addAppHcfApp.host().clear();
+      addAppHcfApp.host().addText(hostName);
+      addAppWizard.getWizard().next();
+      helpers.checkAndCloseToast(/A new application and route have been created for '[^']+'/).then(function () {
+        return cfModel.fetchApp(testCluster.guid, appName, helpers.getUser(), helpers.getPassword())
+          .then(function (app) {
+            testApp = app;
+            expect(app).toBeTruthy();
+          })
+          .catch(function () {
+            fail('Failed to determine if app exists');
+          });
+      });
+
+      // Wait for dialog to close
+      browser.wait(until.not(until.presenceOf(addAppWizard.getElement())), 10000);
+      // Should now have reached the application page
+      expect(application.getHeader().isDisplayed()).toBe(true);
+      expect(application.isNewlyCreated()).toBe(true);
+
+      // Pipeline
+      expect(element(by.id('new-app-setup-pipeline')).isDisplayed()).toBe(true);
+      element(by.id('new-app-setup-pipeline')).click();
+      expect(application.getActiveTab().getText()).toBe('Delivery Pipeline');
+      expect(deliveryPipeline.getSetupElement().isPresent()).toBe(true);
+      expect(deliveryPipeline.getSetupWizard().getTitle()).toBe('Add Pipeline');
+      deliveryPipeline.getSetupWizard().cancel();
+
+      // Back to app wall when we are done
       galleryWall.showApplications();
     });
 
