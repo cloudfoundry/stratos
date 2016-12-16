@@ -153,7 +153,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	if cnsiRecord.CNSIType == cnsis.CNSIHCE {
 		// Get the list VCS clients supported by this Code Engine instance
 		logger.Debug("loginToCNSI (Code Engine), getting list of VCS...")
-		err := p.autoRegisterCodeEngineVcs(c, cnsiGUID)
+		err := p.autoRegisterCodeEngineVcs(userID, cnsiGUID)
 		if err != nil {
 			logger.Warnf("loginToCNSI Failed to auto register Code Engine VCS! %#v", err)
 		}

@@ -475,6 +475,7 @@ func (p *portalProxy) getCNSITokenRecord(cnsiGUID string, userGUID string) (toke
 	return tr, true
 }
 
+//TODO: remove this? It is unusable in this form as we won't know for which CNSI each token is
 func (p *portalProxy) listCNSITokenRecordsForUser(userGUID string) ([]*tokens.TokenRecord, error) {
 	logger.Debug("listCNSITokenRecordsForUser")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)

@@ -35,7 +35,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 			}
 			tokenRec = refreshedTokenRec
 		}
-		req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
+		req.Header.Set("Authorization", "bearer " + tokenRec.AuthToken)
 
 		var client http.Client
 		if cnsi.SkipSSLValidation {

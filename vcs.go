@@ -212,13 +212,7 @@ func (p *portalProxy) checkVcsToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, tokenValid)
 }
 
-func (p *portalProxy) autoRegisterCodeEngineVcs(c echo.Context, hceGuid string) error {
-
-	userID, err := p.getSessionStringValue(c, "user_id")
-	if err != nil {
-		// Should not happen as we are protected by the session middleware
-		return echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
-	}
+func (p *portalProxy) autoRegisterCodeEngineVcs(userID string, hceGuid string) error {
 
 	// Ask Code Engine for the list of VCS it knows about
 	listVcsPath := &url.URL{Path: "v2/vcs"}
@@ -234,7 +228,7 @@ func (p *portalProxy) autoRegisterCodeEngineVcs(c echo.Context, hceGuid string) 
 	}
 
 	hceVcses := make([]vcs.VcsRecord, 0)
-	if err = json.Unmarshal(cnsiRequest.Response, &hceVcses); err != nil {
+	if err := json.Unmarshal(cnsiRequest.Response, &hceVcses); err != nil {
 		return fmt.Errorf("Failed to parse VCS from Code Engine! %#v", err)
 	}
 	// Ensure each VCS is of a supported type before registering
