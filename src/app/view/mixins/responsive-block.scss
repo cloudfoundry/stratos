@@ -4,6 +4,26 @@ $responsive-mobile-cutoff: 479px;
 $responsive-tablet-portrait-cutoff: 767px;
 $responsive-tablet-landscape-cutoff: 1023px;
 
+@mixin responsive-block($min, $max) {
+  // No menu bar
+  @media (max-width: $max) and (min-width: $min + 1) {
+    @content;
+  }
+  // With icons only
+  @media (max-width: $max + $main-nav-icons-width) and (min-width: $min + 1 + $main-nav-icons-width) {
+    .navbar-icons-only {
+      @content;
+    }
+  }
+  // With wide menu bar 
+  @media (max-width: $max + $main-nav-width) and (min-width: $min + 1 + $main-nav-width) {
+    .navbar-normal {
+      @content;
+    }
+  }
+}
+
+
 @mixin responsive-mobile() {
   // Mobile - no menu bar
   @media (max-width: $responsive-mobile-cutoff) {

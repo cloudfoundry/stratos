@@ -214,6 +214,7 @@ $applications-msg-height: 50px;
       align-self: center;
       text-align: center;
       min-width: $hpe-unit-space * 4;
+      margin-left: $hpe-unit-space * 0.5;
 
       .reset-link {
         user-select: none;
@@ -242,7 +243,7 @@ $applications-msg-height: 50px;
     .view-buttons {
       flex: 0 1 auto;
       align-self: center;
-      margin: 0 $hpe-unit-space * 0.5;
+      margin: 0 0 0 $hpe-unit-space * 0.5;
       display: flex;
       height: $hpe-input-height;
       flex-direction: column;
@@ -315,4 +316,12 @@ $applications-msg-height: 50px;
 
 @include responsive-tablet-landscape() {
   @import "list_tablet.scss";
+}
+
+@include responsive($responsive-tablet-landscape-cutoff, $responsive-tablet-portrait-cutoff) {
+  .application-cf-filters {
+    .form-group {
+      max-width: 100%;
+    }
+  }
 }
