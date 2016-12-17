@@ -4,6 +4,7 @@
   module.exports = {
 
     showServices: showServices,
+    showDeliveryPipeline: showDeliveryPipeline,
     showDeliveryLogs: showDeliveryLogs,
 
     isNewlyCreated: isNewlyCreated,
@@ -23,8 +24,12 @@
     applicationAction(2).click();
   }
 
-  function showDeliveryLogs() {
+  function showDeliveryPipeline() {
     applicationAction(3).click();
+  }
+
+  function showDeliveryLogs() {
+    applicationAction(4).click();
   }
 
   function applicationActionsBar() {
