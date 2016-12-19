@@ -68,10 +68,10 @@
              st-safe-src="endpointsDashboardCtrl.endpoints">
         <thead>
         <tr>
-          <th translate st-sort="entity.name">Name</th>
-          <th translate st-sort="entity.connected">Connection</th>
-          <th translate st-sort="entity.type" st-sort-default="true">Type</th>
-          <th translate st-sort="entity.url">Address</th>
+          <th translate st-sort="name" st-skip-natural="true">Name</th>
+          <th translate st-sort="connected" st-skip-natural="true">Connection</th>
+          <th translate st-sort="type" st-sort-default="reverse" st-skip-natural="true">Type</th>
+          <th translate st-sort="url" st-skip-natural="true">Address</th>
           <th></th>
         </tr>
         </thead>
@@ -79,16 +79,16 @@
         <tr ng-repeat="endpoint in endpointsDashboardCtrl.stTableEndpoints track by endpoint.key"
             show-table-inline-message="{{endpoint.error ? endpoint.error.message : ''}}"
             inline-message-colspan="5"
-            table-inline-status="{{endpoint.error.status}}">
-          <td ng-if="endpoint.visit" class="text-uppercase">
-            <a ng-href="{{endpoint.visit()}}">{{endpoint.name}}</a>
+            table-inline-status="{{ endpoint.error.status }}">
+          <td ng-if="endpoint.visit">
+            <a ng-href="{{endpoint.visit()}}">{{ endpoint.name }}</a>
           </td>
-          <td ng-if="!endpoint.visit" class="text-uppercase">{{endpoint.name}}</td>
+          <td ng-if="!endpoint.visit">{{ endpoint.name }}</td>
           <td ng-switch="endpoint.getStatus()" class="endpoint-table-connected">
             <span class="helion-icon helion-icon-lg helion-icon-Active_L text-primary"
                   ng-switch-when="connected"></span>
             <div ng-switch-when="unconnected"
-                 uib-popover="{{ 'Disconnected' | translate}}"
+                 uib-popover="{{ 'Disconnected' | translate }}"
                  popover-trigger="'mouseenter'"
                  popover-placement="top-left"
                  popover-popup-delay="1000">
@@ -101,8 +101,8 @@
             <span class="helion-icon helion-icon-lg helion-icon-Warning_L text-warning"
                   ng-switch-when="complicated"></span>
           </td>
-          <td class="text-uppercase">{{endpoint.type}}</td>
-          <td>{{endpoint.url}}</td>
+          <td>{{ endpoint.type }}</td>
+          <td>{{ endpoint.url }}</td>
           <td>
             <actions-menu actions="endpoint.actions"
                           action-target="endpoint.actionsTarget"
