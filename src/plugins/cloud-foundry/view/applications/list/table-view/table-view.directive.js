@@ -54,10 +54,10 @@
     this.tableColumns = [
       {name: gettext('Application Name'), value: 'entity.name'},
       {name: gettext('Status'), value: 'state.label', noSort: true},
-      {name: gettext('Instances'), value: 'entity.instances'},
-      {name: gettext('Disk Quota'), value: 'entity.disk_quota'},
-      {name: gettext('Memory'), value: 'entity.memory'},
-      {name: gettext('Creation Date'), value: 'metadata.created_at'}
+      {name: gettext('Instances'), value: 'entity.instances', descendingFirst: true},
+      {name: gettext('Disk Quota'), value: 'entity.disk_quota', descendingFirst: true},
+      {name: gettext('Memory'), value: 'entity.memory', descendingFirst: true},
+      {name: gettext('Creation Date'), value: 'metadata.created_at', descendingFirst: true}
     ];
     this.init = false;
 
@@ -73,7 +73,7 @@
       },
       function (nv, ov) {
         if (nv !== ov && that.table) {
-          that.table.sortBy(model.currentSortOption, model.sortAscending);
+          that.table.sortBy(model.currentSortOption, !model.sortAscending);
         }
         updateStTableState();
       }
@@ -92,12 +92,11 @@
         return that.table;
       }, function () {
       if (that.table) {
-        that.table.sortBy(model.currentSortOption, model.sortAscending);
+        that.table.sortBy(model.currentSortOption, !model.sortAscending);
       }
     });
 
     this.getAppSummaryLink = getAppSummaryLink;
-    this.setSortClass = setSortClass;
     this.stMiddleware = stMiddleware;
 
     /**
@@ -110,19 +109,12 @@
       return '#/cf/applications/' + app.clusterId + '/app/' + app.metadata.guid + '/summary';
     }
 
-    function setSortClass(column) {
-      if (column.value === model.currentSortOption) {
-        return model.sortAscending ? 'true' : 'reverse';
-      }
-      return undefined;
-    }
-
     function stMiddleware(tableState) {
-      var stSort = tableState.sort.predicate + '_' + tableState.sort.reverse;
+      var stSort = tableState.sort.predicate + '_' + !tableState.sort.reverse;
       var sort = model.currentSortOption + '_' + model.sortAscending;
       if (stSort !== sort) {
+        model.sortAscending = !tableState.sort.reverse;
         model.currentSortOption = tableState.sort.predicate;
-        model.sortAscending = tableState.sort.reverse;
       }
       tableState.pagination.numberOfPages = 1;
     }
