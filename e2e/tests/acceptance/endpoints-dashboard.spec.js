@@ -144,9 +144,9 @@
                     if (service) {
                       // 1) we show the correct type
                       if (name === 'hce') {
-                        expect(endpointsPage.endpointType(index)).toBe('HELION CODE ENGINE');
+                        expect(endpointsPage.endpointType(index)).toBe('Helion Code Engine');
                       } else if (name === 'hcf') {
-                        expect(endpointsPage.endpointType(index)).toBe('HELION CLOUD FOUNDRY');
+                        expect(endpointsPage.endpointType(index)).toBe('Helion Cloud Foundry');
                       }
                       // 3) the address is correct
                       expect(endpointsPage.endpointUrl(index)).toBe(service.register.api_endpoint);
