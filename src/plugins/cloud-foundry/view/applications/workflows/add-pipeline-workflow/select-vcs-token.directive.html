@@ -4,7 +4,7 @@
                input-value="selectVcsAndTokenCtrl.source.value"
                input-disabled="selectVcsAndTokenCtrl.noToken()">
   </radio-input>
-  <img class="vcs-icon" ng-src="/plugins/cloud-foundry/view/assets/hce/{{ selectVcsAndTokenCtrl.source.img }}"/>
+  <img class="vcs-icon" ng-class="{disabled: selectVcsAndTokenCtrl.noToken()}" ng-src="/plugins/cloud-foundry/view/assets/hce/{{ selectVcsAndTokenCtrl.source.img }}"/>
   <div class="vcs-vertical-panel">
     <div class="vcs-title">
       <h4 class="vcs-label">{{ ::selectVcsAndTokenCtrl.source.label }}</h4>

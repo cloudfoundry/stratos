@@ -12,6 +12,11 @@
     cursor: pointer;
     margin-right: $hpe-unit-space;
     width: 96px;
+    &.disabled {
+      filter: grayscale(100%);
+      opacity: $radio-input-disabled-opacity;
+      cursor: not-allowed;
+    }
   }
 
   .vcs-vertical-panel {

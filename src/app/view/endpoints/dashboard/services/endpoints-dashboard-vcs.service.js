@@ -169,16 +169,16 @@
      */
     function clear() {}
 
-    function _createInstanceActions(endpoints) {
+    function _createInstanceActions() {
       return [{
         name: gettext('Manage Tokens'),
         execute: function (vcs) {
-          _manage(endpoints, vcs);
+          _manage(vcs);
         }
       }];
     }
 
-    function _manage(endpoints, vcs) {
+    function _manage(vcs) {
       return manageVcsTokens.manage(vcs);
     }
 
