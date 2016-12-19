@@ -58,9 +58,10 @@
     });
 
     // Default to sorting with the newest applications first
-    this.model.currentSortOption = this.model.currentSortOption || 'metadata.created_at';
-
-    this.model.sortAscending = angular.isDefined(this.model.sortAscending) ? this.model.sortAscending : true;
+    if (_.isUndefined(this.model.currentSortOption)) {
+      this.model.currentSortOption = 'metadata.created_at';
+      this.model.sortAscending = false;
+    }
 
     this.ensureOptionSelected();
     that.model.reSort();

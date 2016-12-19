@@ -10,60 +10,66 @@
     > thead > tr > th {
       border-width: 1px;
       padding-bottom: 0;
-    }
-
-    .column-div {
-      display: flex;
-      flex-flow: row nowrap;
-      padding-bottom: 12px;
-      padding-bottom: 12px;
-      margin-bottom: -1px;
-      z-index: 1000;
-      border-bottom: 3px solid transparent;
-
-      .column-text {
-        flex: 1 1 auto;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .column-no-sort, .column-sorter-asc, .column-sorter-desc {
-        flex: none;
-      }
+      vertical-align: top;
     }
 
     th {
-      .column-no-sort {
-        opacity: 0;
-      }
-      .column-sorter-asc, .column-sorter-desc {
-        font-family: "helion-icons";
-        display: none;
-      }
-    }
-
-    th.st-sort-ascent {
       .column-div {
-        border-color: $hpe-primary;
-      }
-      .column-sorter-asc {
-        display: inherit;
-      }
-      .column-no-sort, .column-sorter-desc {
-        display: none;
-      }
-    }
+        user-select: none;
+        display: flex;
+        flex-flow: row nowrap;
+        border: 0;
 
-    th.st-sort-descent {
-      .column-div {
-        border-color: $hpe-primary;
+        .column-text {
+          padding-bottom: 10px;
+          margin-bottom: -10px;
+          flex: 0 1 auto;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          border-bottom: 3px solid transparent;
+        }
+
+        .smart-separator {
+          flex: 0 5 6px;
+        }
+
+        .column-no-sort, .column-sorter-asc, .column-sorter-desc {
+          font-family: "helion-icons";
+          flex: none;
+        }
+        .column-no-sort {
+          opacity: 0;
+        }
+        .column-sorter-asc, .column-sorter-desc {
+          display: none;
+        }
       }
-      .column-sorter-desc {
-        display: inherit;
+
+      &.st-sort-ascent, &.st-sort-descent {
+        .column-div {
+          .column-text {
+            border-color: $hpe-primary;
+          }
+        }
       }
-      .column-no-sort, .column-sorter-asc {
-        display: none;
+
+      &.st-sort-ascent {
+        .column-sorter-asc {
+          display: inherit;
+        }
+        .column-no-sort, .column-sorter-desc {
+          display: none;
+        }
+      }
+
+      &.st-sort-descent {
+        .column-sorter-desc {
+          display: inherit;
+        }
+        .column-no-sort, .column-sorter-asc {
+          display: none;
+        }
       }
     }
 

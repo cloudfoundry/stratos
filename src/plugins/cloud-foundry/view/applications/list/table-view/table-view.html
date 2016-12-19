@@ -4,17 +4,18 @@
         st-table="tableViewCtrl.stApps"
         st-safe-src="tableViewCtrl.apps"
         st-pipe="tableViewCtrl.stMiddleware"
-        st-binding="tableViewCtrl.table"
-  >
+        st-binding="tableViewCtrl.table">
     <thead>
       <tr >
         <th class="column"
             ng-repeat="column in tableViewCtrl.tableColumns"
             st-skip-natural="true"
             ng-class="{'column-no-sort': column.noSort}"
-            st-sort="{{column.noSort ? '' : column.value}}">
+            st-sort="{{ column.noSort ? '' : column.value }}"
+            st-descending-first="{{ column.descendingFirst ? 'true' : '' }}">
             <div class="column-div">
-              <div class="column-text" translate>{{column.name}}</div>
+              <div class="column-text" translate>{{ column.name }}</div>
+              <div class="smart-separator"></div>
               <div class="column-no-sort"></div>
               <div class="column-sorter-asc"></div>
               <div class="column-sorter-desc"></div>
@@ -25,7 +26,7 @@
     <tbody>
     <tr ng-repeat="app in tableViewCtrl.stApps">
       <td class="table-view-app-name">
-        <a ng-href="{{tableViewCtrl.getAppSummaryLink(app)}}">{{app.entity.name}}</a>
+        <a ng-href="{{ tableViewCtrl.getAppSummaryLink(app) }}">{{ app.entity.name }}</a>
       </td>
       <td>
         <app-state-icon state="app.state.indicator"></app-state-icon>
@@ -34,7 +35,7 @@
           ng-if="app.state.subLabel">&nbsp;- {{ app.state.subLabel }}
         </span>
       </td>
-      <td class="text-uppercase">{{app.instanceCount || 0}}/{{app.entity.instances}}</td>
+      <td class="text-uppercase">{{ app.instanceCount || 0 }}/{{ app.entity.instances }}</td>
       <td>{{ app.entity.disk_quota | mbToHumanSize }}</td>
       <td>{{ app.entity.memory | mbToHumanSize }}</td>
       <td>{{ app.metadata.created_at | amDateFormat:'L - LTS' }}</td>
