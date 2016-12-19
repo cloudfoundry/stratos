@@ -34,10 +34,17 @@
           flex: 0 5 6px;
         }
 
-        .column-no-sort, .column-sorter-asc, .column-sorter-desc {
+        .column-sorter-asc, .column-sorter-desc {
           font-family: "helion-icons";
           flex: none;
         }
+
+        .column-no-sort {
+          font-family: "helion-icons";
+          flex: 0 5 auto;
+          overflow: hidden;
+        }
+
         .column-no-sort {
           opacity: 0;
         }
@@ -73,6 +80,15 @@
       }
     }
 
+    .app-state-column {
+      display: flex;
+      flex-direction: row;
+
+      .list-view-app-state-label {
+        margin-left: 12px;
+        line-height: 20px;
+      }
+    }
     // Column widths
 
     // App Name
@@ -100,5 +116,14 @@
 
   .column.column-no-sort {
     cursor: default;
+  }
+}
+
+// Hide app state label and sub-label when the screen width gets small
+@include responsive-tablet-portrait() {
+  .apps-table {
+    .list-view-app-state-label {
+      display: none;
+    }
   }
 }
