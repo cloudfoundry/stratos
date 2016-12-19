@@ -34,10 +34,17 @@
           flex: 0 5 6px;
         }
 
-        .column-no-sort, .column-sorter-asc, .column-sorter-desc {
+        .column-sorter-asc, .column-sorter-desc {
           font-family: "helion-icons";
           flex: none;
         }
+
+        .column-no-sort {
+          font-family: "helion-icons";
+          flex: 0 5 auto;
+          overflow: hidden;
+        }
+
         .column-no-sort {
           opacity: 0;
         }
