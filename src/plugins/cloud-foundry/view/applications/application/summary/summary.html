@@ -45,9 +45,14 @@
 
         <dt class="app-instance-title" translate>INSTANCES</dt>
         <dd>
-          <percent-gauge mode="instance"
+          <percent-gauge ng-if="appCtrl.model.application.summary.package_updated_at" mode="instance"
                          value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
-                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}" />
+                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}">
+          </percent-gauge>
+          <percent-gauge ng-if="!appCtrl.model.application.summary.package_updated_at" mode="quota"
+                         value="{{ appCtrl.model.application.summary.running_instances / appCtrl.model.application.summary.instances }}"
+                         value-text="{{ appCtrl.model.application.summary.running_instances }} / {{ appCtrl.model.application.summary.instances }}">
+          </percent-gauge>
         </dd>
 
         <dt translate>CREATED</dt>
