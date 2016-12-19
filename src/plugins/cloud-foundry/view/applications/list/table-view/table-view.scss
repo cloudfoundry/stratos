@@ -2,20 +2,75 @@
   padding-right: 16px;
   padding-left: 16px;
 
-  .table{
+  > table.table {
     table-layout: fixed;
     @include hpe-box-shadow-small();
-    .st-sort-ascent:after{
-      content: ' \25B2';
+    border-collapse: separate;
+
+    > thead > tr > th {
+      border-width: 1px;
+      padding-bottom: 0;
+      vertical-align: top;
     }
 
-    .st-sort-descent:after{
-      content: ' \25BC';
-    }
+    th {
+      .column-div {
+        user-select: none;
+        display: flex;
+        flex-flow: row nowrap;
+        border: 0;
 
-    td.table-view-app-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
+        .column-text {
+          padding-bottom: 10px;
+          margin-bottom: -10px;
+          flex: 0 1 auto;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          border-bottom: 3px solid transparent;
+        }
+
+        .smart-separator {
+          flex: 0 5 6px;
+        }
+
+        .column-no-sort, .column-sorter-asc, .column-sorter-desc {
+          font-family: "helion-icons";
+          flex: none;
+        }
+        .column-no-sort {
+          opacity: 0;
+        }
+        .column-sorter-asc, .column-sorter-desc {
+          display: none;
+        }
+      }
+
+      &.st-sort-ascent, &.st-sort-descent {
+        .column-div {
+          .column-text {
+            border-color: $hpe-primary;
+          }
+        }
+      }
+
+      &.st-sort-ascent {
+        .column-sorter-asc {
+          display: inherit;
+        }
+        .column-no-sort, .column-sorter-desc {
+          display: none;
+        }
+      }
+
+      &.st-sort-descent {
+        .column-sorter-desc {
+          display: inherit;
+        }
+        .column-no-sort, .column-sorter-asc {
+          display: none;
+        }
+      }
     }
 
     .app-state-column {
@@ -26,6 +81,29 @@
         margin-left: 12px;
         line-height: 20px;
       }
+    }
+    // Column widths
+
+    // App Name
+    th:nth-child(1) {
+      width: 25%;
+    }
+    // App State
+    th:nth-child(2) {
+      width: 20%;
+    }
+    // Instances, Disk, Memory
+    th:nth-child(3), th:nth-child(4), th:nth-child(5) {
+      width: 10%;
+    }
+    // Created Date
+    th:nth-child(6) {
+      width: 25%;
+    }
+
+    th > span, td {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 

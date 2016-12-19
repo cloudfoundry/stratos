@@ -145,16 +145,6 @@
           }
         });
 
-        this.stopWatchSubflow = $scope.$watch(function () {
-          return that.options.subflow;
-        }, function (subflow) {
-          if (subflow) {
-            that.appendSubflow(that.data.subflows[subflow]);
-          }
-        });
-
-        addPipelineWorkflowPrototype.setWatchers.apply(this);
-
         // Start the workflow
         this.startWorkflow();
       },
@@ -254,62 +244,10 @@
                 });
               }
             }
-            /*,
-            {
-              title: gettext('Services'),
-              formName: 'application-services-form',
-              templateUrl: path + 'services.html',
-              nextBtnText: gettext('Next'),
-              showBusyOnNext: true,
-              onNext: function () {
-                that.userInput.services = that.appModel.application.summary.services;
-                that.options.subflow = that.options.subflow || 'pipeline';
-              }
-            },
-            {
-              title: gettext('Delivery'),
-              formName: 'application-delivery-form',
-              templateUrl: path + 'delivery.html',
-              nextBtnText: gettext('Next'),
-              showBusyOnNext: true,
-              onNext: function () {
-                if (that.options.subflow === 'pipeline') {
-                  that.options.sources.length = 0;
-                  return that.getVcsInstances();
-                }
-              }
-            }
-            */
           ]
         };
 
         this.data.countMainWorkflowSteps = this.data.workflow.steps.length;
-
-        this.data.subflows = {
-          pipeline: addPipelineWorkflowPrototype.getWorkflowDefinition.apply(this).steps,
-          cli: [
-            {
-              ready: true,
-              title: gettext('Deploy App'),
-              templateUrl: path + 'cli-subflow/deploy.html',
-              formName: 'application-cli-deploy-form',
-              nextBtnText: gettext('Finished'),
-              isLastStep: true,
-              onEnter: function () {
-                that.userInput.hcfApiEndpoint = that.utils.getClusterEndpoint(that.userInput.serviceInstance);
-
-                // Get user name from StackatoInfo
-                if (that.stackatoInfo.info) {
-                  var endpointUser = that.stackatoInfo.info.endpoints.hcf[that.userInput.serviceInstance.guid].user;
-                  if (endpointUser) {
-                    that.userInput.hcfUserName = endpointUser.name;
-                  }
-                }
-                return that.$q.resolve();
-              }
-            }
-          ]
-        };
 
         this.options = {
           eventService: this.eventService,
@@ -547,18 +485,6 @@
       },
 
       /**
-       * @function redefineWorkflowWithoutHce
-       * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
-       * @description redefine the workflow if there is no HCE service instances registered
-       */
-      redefineWorkflowWithoutHce: function () {
-        this.options.subflow = 'cli';
-        this.data.countMainWorkflowSteps -= 1;
-        this.data.workflow.steps.pop();
-        [].push.apply(this.data.workflow.steps, this.data.subflows.cli);
-      },
-
-      /**
        * @function notify
        * @memberOf cloud-foundry.view.applications.AddAppWorkflowController
        * @description notify success
@@ -580,7 +506,6 @@
       startWorkflow: function () {
         this.addingApplication = true;
         this.reset();
-        this.getHceInstances();
       },
 
       stopWorkflow: function () {
